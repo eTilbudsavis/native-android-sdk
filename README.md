@@ -29,7 +29,9 @@ location object inside the newly created eta class:
 
 	eta.location.setLocation(latitude, longitude, geocoded, accuracy, locationDetermined, distance)
 
-As you will find you have several options in the location class.
+As you will find you have several options in the location class. It's also
+possible to set bounds on the search results in the api requests, wich is likewise
+done via the location object.
 
 ### Api
 The api makes callback's via the RequestListener interface, which means you 
@@ -80,8 +82,6 @@ You can include various options into the api.request() call, just create a Bundl
 with key/value pairs, and send it as a parameter. See more about REST API options 
 at [eTilbudsavisen.dk](https://etilbudsavis.dk/developers/docs/).
 
-API Specific options...
-
 
 ### Pageflip
 
@@ -92,7 +92,7 @@ Create a new WebView in the layout, then set the view in your code:
 
 Create an Pageflip object:
 
-	Pageflip pageflip = new Pageflip(webView, eta, api);
+	Pageflip pageflip = new Pageflip(webView, eta);
 
 As with the API, the pageflip also makes callbacks via an interface:
 
@@ -120,12 +120,12 @@ an event and an JSON object. The object returned on an pagechange event is:
 The type of events and JSON response currently implemented are:
 
 _pagechange_ - When a page changes
-* init: Indicates the very first pagechange (finished initialization)
-* page: The current page (normalized to the verso)
-* pageLabel: The entire page spread (1-2, 2-3, ..., n or 1, 2, 3, ..., n)
-* pages: Pages currently visible
-* pageCount: The total amount of single page pages
-* id: Catalog identifier
+* init - Indicates the very first pagechange (finished initialization)
+* page - The current page (normalized to the verso)
+* pageLabel - The entire page spread (1-2, 2-3, ..., n or 1, 2, 3, ..., n)
+* pages - Pages currently visible
+* pageCount - The total amount of single page pages
+* id - Catalog identifier
 
 _outofbounds_ - When desired page is out of bounds 	
 * page - Failed page tried to be reached
@@ -148,6 +148,14 @@ _close_ - Pageflip closed
 
 ### Utilities
 
+* createUUID - Used to generate the UUID for each unique device
+* logd - Used for logging purposes. Logging can easily be disabled when compiling
+for production via the "ENABLE_LOG" boolean.
+* buildChecksum - Creates a checksum of a given set of parameters. Note that
+the order of gives parameters matters, therefore we use a LinkedHashMap.
+* buildParams - Builds GET/POST parameters from a given LinkedHashMap.
+* buildJSString - Builds a JavaScript string e.g. { key : value }
+* getTime - Gets the current UTC time in seconds
 
 ## Feedback
-
+If you have any feedback or comments please write to: morten@etilbudsavis.dk
