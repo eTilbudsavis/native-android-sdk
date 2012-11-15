@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp" >
+
+    <TableRow
+        android:id="@+id/tableRow1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="3dp" >
+
+        <TextView
+            android:id="@+id/textViewDealer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="dealer_name"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    </TableRow>
+    
+	<View
+	    android:layout_width="match_parent"
+	    android:layout_height="2dip"
+	    android:background="#FF0000" />
+	
+    <TableRow
+        android:id="@+id/tableRow2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp" >
+
+        <TextView
+            android:id="@+id/textViewCatalog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Catalog ID:" />
+
+        <TextView
+            android:id="@+id/textViewCatalogEdit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Null" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/tableRow3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:layout_marginLeft="5dp" >
+        
+        <TextView
+            android:id="@+id/textViewPages"
+            android:layout_width="15dip"
+            android:layout_height="wrap_content"
+            android:text="Pages: " />
+
+        <TextView
+            android:id="@+id/textViewPagesEdit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Null" />
+
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/tableRow4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp" >
+        
+        <TextView
+            android:id="@+id/textViewAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Address: " />
+
+        <TextView
+            android:id="@+id/textViewAddressEdit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Null" />
+
+    </TableRow>
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="40dp"
+        android:text="Show catalog online" />
+
+</TableLayout>
