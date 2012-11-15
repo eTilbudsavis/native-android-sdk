@@ -40,11 +40,15 @@ public class CatalogWebView extends Activity {
 		Pageflip pageflip = new Pageflip(mWebView, eta);
 		
 		mWebView = pageflip.getWebView(Pageflip.ContentType.CATALOG, content, pageflipListener);
-		
+	}
+
+	// Remember to close pageflip when the activity is destroyed.
+	@Override
+	public void onDestroy() {
+		pageflip.close();
 	}
 	
 	PageflipListener pageflipListener = new PageflipListener() {
-		
 		@Override
 		public void onPageflipEvent(String event, JSONObject object) {
 			if (event.matches("pagechange")) {
@@ -53,8 +57,7 @@ public class CatalogWebView extends Activity {
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-			}
-				
+			}	
 		}
 	};
 	

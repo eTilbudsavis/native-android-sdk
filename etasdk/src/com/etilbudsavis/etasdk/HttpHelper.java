@@ -20,31 +20,39 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	private RequestListener mRequestListener;
 	private String mResult = "";
 	private int mResponseCode = 0;
-	
+
+	// Constructor for HttpHelper.
+	public HttpHelper(String url, String query,
+			API.RequestType requestType, API.AcceptType acceptType,
+			RequestListener requestListener) {
+		mUrl = (requestType == API.RequestType.GET) ? url + "?"+ query : url;
+		mQuery = query;
+		mRequestType = requestType;
+		mAcceptType = acceptType;
+		mRequestListener = requestListener;
+	}
+
 	@Override
 	protected Void doInBackground(Void... params) {
 		StringBuilder sb = new StringBuilder();
-		try {
-			
-			// create new url
+
+		try {	
+			// Create new URL.
 			URL serverUrl = new URL(mUrl);
 			
-			// open new http connection and setup headers
-			HttpsURLConnection connection = (HttpsURLConnection) serverUrl
-					.openConnection();
+			// Open new http connection and setup headers.
+			HttpsURLConnection connection = (HttpsURLConnection) serverUrl.openConnection();
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
 			connection.setInstanceFollowRedirects(true);
 			connection.setRequestMethod(mRequestType.toString());
 			connection.setRequestProperty("Accept", mAcceptType.toString());
-			connection.setRequestProperty("Content-Type",
-					"application/x-www-form-urlencoded");
+			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			connection.setUseCaches(false);
 
-			// If POST request, do output stream
+			// If POST request, do output stream.
 			if (mRequestType == API.RequestType.POST) {
-				connection.setRequestProperty("Content-Length",
-						"" + Integer.toString(mQuery.getBytes().length));
+				connection.setRequestProperty("Content-Length", "" + Integer.toString(mQuery.getBytes().length));
 				DataOutputStream wr;
 				wr = new DataOutputStream(connection.getOutputStream());
 				wr.writeBytes(mQuery);
@@ -53,27 +61,26 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 			}
 			
 			// Read the input stream (HTML or data)
-			BufferedReader rd = new BufferedReader(new InputStreamReader(
-					connection.getInputStream()));
+			BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String line;
+
 			while ((line = rd.readLine()) != null) {
 				sb.append(line);
 			}
+
 			rd.close();
 						
-			// Store results, so they can be used by onPostExecute in UI thread
+			// Store results, so they can be used by onPostExecute in UI thread.
 			mResult = sb.toString();
 			mResponseCode = connection.getResponseCode();
 
 			connection.disconnect();
-			
 		} catch (IOException e) {
 			mRequestListener.onError("IO Error", sb.toString());
 			e.printStackTrace();
 		}
 		
 		return null;
-
 	}
 	
 	// Do callback in the UI thread
@@ -82,17 +89,5 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		if (mResponseCode == 200) mRequestListener.onSuccess("Success", mResult);
 		else mRequestListener.onError("Error", mResult);
     }
-	
-	// Constructor for HttpHelper
-	public HttpHelper(String url, String query,
-			API.RequestType requestType, API.AcceptType acceptType,
-			RequestListener requestListener) {
-		mUrl = (requestType == API.RequestType.GET) ? 
-				url + "?"+ query : url;
-		mQuery = query;
-		mRequestType = requestType;
-		mAcceptType = acceptType;
-		mRequestListener = requestListener;
-	}
 	
 }

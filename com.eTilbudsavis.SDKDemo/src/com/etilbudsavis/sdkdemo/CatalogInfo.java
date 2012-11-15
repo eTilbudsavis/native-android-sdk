@@ -28,8 +28,7 @@ public class CatalogInfo extends Activity {
 		Button btn = (Button)findViewById(R.id.button1);
 		
 		try {
-			extras = new JSONObject(getIntent().getExtras()
-					.getString("JSONObject"));
+			extras = new JSONObject(getIntent().getExtras().getString("JSONObject"));
 			dealerName.setText(extras.getJSONObject("dealer").getString("name"));
 			catID.setText(extras.getString("id"));
 			pages.setText(extras.getString("pages"));
@@ -41,7 +40,6 @@ public class CatalogInfo extends Activity {
 		}
 		
 		btn.setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
 				try {
@@ -52,9 +50,6 @@ public class CatalogInfo extends Activity {
 				}
 			}
 		});
-		
-		
-		
-
 	}
+
 }

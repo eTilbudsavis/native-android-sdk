@@ -1,5 +1,5 @@
 /**
- * @fileoverview	Pageflip.
+ * @fileoverview	API.
  * @author			Morten Bo <morten@etilbudsavis.dk>
  * 					Danny Hvam <danny@etilbudsavid.dk>
  * @version			0.3.0
@@ -17,13 +17,13 @@ public class API implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private ETA mEta;
+	private ETA mETA;
 	
 	public enum AcceptType {
-		XML{ public String toString() { return "application/xml, text/xml"; } },
-		HTML{ public String toString() { return "text/html"; } },
-		TEXT{ public String toString() { return "text/plain"; } },
-		JSON{ public String toString() { return "application/json"; } }
+		XML { public String toString() { return "application/xml, text/xml"; } },
+		HTML { public String toString() { return "text/html"; } },
+		TEXT { public String toString() { return "text/plain"; } },
+		JSON { public String toString() { return "application/json"; } }
 	}
 	
 	public enum RequestType {
@@ -36,12 +36,13 @@ public class API implements Serializable {
 	 * @param ETA object with relevant information e.g. location
 	 */
 	public API(ETA eta) {
-		mEta = eta;
+		mETA = eta;
 	}
 	
 	/**
-	 * Make a request to the server, with the given parameters.
+	 * Makes a request to the server, with the given parameters.
 	 * The result will return via the RequestListener.
+	 *
 	 * @param url
 	 * @param requestListener
 	 */
@@ -50,8 +51,9 @@ public class API implements Serializable {
 	}
 
 	/**
-	 * Make a request to the server, with the given parameters.
+	 * Makes a request to the server, with the given parameters.
 	 * The result will return via the RequestListener.
+	 *
 	 * @param url
 	 * @param requestListener
 	 * @param optionalKeys
@@ -63,6 +65,7 @@ public class API implements Serializable {
 	/**
 	 * Make a request to the server, with the given parameters.
 	 * The result will return via the RequestListener.
+	 *
 	 * @param url
 	 * @param requestListener
 	 * @param optionalKeys
@@ -78,64 +81,66 @@ public class API implements Serializable {
 
 		// API request?
 		if (url.matches("^\\/api\\/.*")) {
-			
 			// Required API pairs.
-			mData.put("api_key", mEta.getApiKey());
-			mData.put("api_uuid", mEta.getUuid());
+			mData.put("api_key", mETA.getApiKey());
+			mData.put("api_uuid", mETA.getUUID());
 			mData.put("api_timestamp", Utilities.getTime());
 
 			// Determine whether to include location info.
-			if (mEta.location.useLocation() && mEta.location.isLocationSet()) {
-				Bundle loc = mEta.location.getLocation();
+			if (mETA.location.useLocation() && mETA.location.isLocationSet()) {
+				Bundle loc = mETA.location.getLocation();
+
 				mData.put("api_latitude", loc.getDouble("api_latitude"));
 				mData.put("api_longitude", loc.getDouble("api_longitude"));
 				
-				if (mEta.location.useDistance()) mData.put("api_distance", loc.getInt("api_distance"));
+				// Use distance?
+				if (mETA.location.useDistance()) mData.put("api_distance", loc.getInt("api_distance"));
 				
 				mData.put("api_locationDetermined", loc.getInt("api_locationDetermined"));
 				mData.put("api_geocoded", loc.getInt("api_geocoded"));
 				
+				// Accuracy is only to be included if the location was found using a sensor (geocoded == 0).
 				if (loc.getInt("api_geocoded") == 0) mData.put("api_accuracy", loc.getInt("api_accuracy"));
 			}
 
-			// Determine whether to include bounds info.
-			if (mEta.location.isBoundsSet()) {
-				Bundle bounds = mEta.location.getBounds();
+			// Determine whether to include bounds.
+			if (mETA.location.isBoundsSet()) {
+				Bundle bounds = mETA.location.getBounds();
+
 				mData.put("api_boundsNorth", bounds.getDouble("api_boundsNorth"));
 				mData.put("api_boundsEast", bounds.getDouble("api_boundsNorth"));
 				mData.put("api_boundsSouth", bounds.getDouble("api_boundsNorth"));
 				mData.put("api_boundsWest", bounds.getDouble("api_boundsNorth"));
 			}
 			
-			// Add optional data
+			// Add optional data.
 			Set<String> ks = optionalKeys.keySet();
 			Iterator<String> iterator = ks.iterator();
+
 			while (iterator.hasNext()) {
 				String s = iterator.next();
 				mData.put(s, optionalKeys.get(s));
 			}
 			
 			// Build checksum.
-			mData.put("api_checksum", Utilities.buildChecksum(mData, mEta.getApiSecret()));
+			mData.put("api_checksum", Utilities.buildChecksum(mData, mETA.getApiSecret()));
 		}
 		
 		// Prefix URL?
-		if (!url.matches("^http.*")) url = mEta.getMainUrl() + url;
+		if (!url.matches("^http.*")) url = mETA.getMainUrl() + url;
 		
 		// Build query string.
 		String query = mData.isEmpty() ? "" : Utilities.buildParams(mData);
 
-		// create a new HttpHelper
+		// Create a new HttpHelper.
 		HttpHelper httpHelper = new HttpHelper(url, query, requestType, dataType, r);
 		
-		// Execute the AsyncTask in HttpHelper
-		// This makes connection in a new thread
+		// Execute the AsyncTask in HttpHelper to ensure a new thread.
 		httpHelper.execute();
 	}
 
     /**
-     * Callback interface for API requests.
-     * Allows for callback's from asynchronous tasks, 
+     * Callback interface for API requests, which allows for callbacks from asynchronous tasks
      * back to the UI thread.
      */
     public static interface RequestListener {

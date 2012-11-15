@@ -22,14 +22,14 @@ import android.widget.Spinner;
 
 public class Main extends Activity {
 
-	// Create ETA and API objects
+	// Create ETA and API objects.
 	public ETA eta;
 
-	// Set API key and secret
+	// Set API key and secret.
 	private String mApiKey = "";
 	private String mApiSecret = "";
 	
-	// Set the url i want info from
+	// Specify endpoint.
 	private String mUrl = "/api/v1/catalog/list/";
 	private JSONArray catalogArray;
 	
@@ -55,24 +55,22 @@ public class Main extends Activity {
         
         spinner = (Spinner)findViewById(R.id.spinnerCatalogList);
         
-        // A new onClick listener for the get catalogs button
-        btnGetCatalog.setOnClickListener(new OnClickListener() {
-			
-        	// OnClick we will make the API request, and send along a new RequestListener
+        // A new onClick listener for the get catalogs button.
+        btnGetCatalog.setOnClickListener(new OnClickListener() {		
+        	// OnClick we will make the API request, and send along a new RequestListener.
 			@Override
 			public void onClick(View v) {
-				
 				progressDialog = ProgressDialog.show(Main.this, "Getting catalogs", "Downloading...");
 
 				eta.api.request(mUrl, new RequestListener() {
-					
-					// onSuccess we will add items to the spinner, and make it visible
+					// onSuccess we will add items to the spinner, and make it visible.
 					@Override
 					public void onSuccess(String response, Object object) {
 						try {
-							// First cast "object" to a JSONObject->JSONArray
+							// First cast "object" to a JSONObject->JSONArray.
 							catalogArray = new JSONObject(object.toString()).getJSONArray("data");
-							// Then setup the spinner
+
+							// Then setup the spinner.
 							setupSpinner();
 							btnCatalogInfo.setEnabled(true);
 							btnWebView.setEnabled(true);
@@ -92,7 +90,6 @@ public class Main extends Activity {
 		});
         
         btnCatalogInfo.setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent(Main.this, CatalogInfo.class);
@@ -102,7 +99,6 @@ public class Main extends Activity {
 		});
         
         btnWebView.setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent(Main.this, CatalogWebView.class);
@@ -111,7 +107,6 @@ public class Main extends Activity {
 		        startActivity(intent);
 			}
 		});
-        
     }
 
     private void setupSpinner() throws JSONException {
@@ -119,7 +114,7 @@ public class Main extends Activity {
         	ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, spinnerList);
             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         	
-            // Iterate over the JSONArray to get elements
+            // Iterate over the JSONArray to get elements.
         	for (int i = 0; i < catalogArray.length(); i++) {
     			spinnerList.add(catalogArray.getJSONObject(i).getJSONObject("dealer").getString("name"));
     		}
