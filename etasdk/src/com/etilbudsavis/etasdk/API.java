@@ -39,16 +39,36 @@ public class API implements Serializable {
 		mEta = eta;
 	}
 	
-	// Method overloading see request() below
+	/**
+	 * Make a request to the server, with the given parameters.
+	 * The result will return via the RequestListener.
+	 * @param url
+	 * @param requestListener
+	 */
 	public void request(String url, RequestListener requestListener) {
 		request(url, requestListener, new Bundle());
 	}
 
-	// Method overloading see request() below	
+	/**
+	 * Make a request to the server, with the given parameters.
+	 * The result will return via the RequestListener.
+	 * @param url
+	 * @param requestListener
+	 * @param optionalKeys
+	 */
 	public void request(String url, RequestListener requestListener, Bundle optionalKeys) {
 		request(url, requestListener, optionalKeys, API.RequestType.POST, API.AcceptType.JSON);
 	}
 
+	/**
+	 * Make a request to the server, with the given parameters.
+	 * The result will return via the RequestListener.
+	 * @param url
+	 * @param requestListener
+	 * @param optionalKeys
+	 * @param requestType
+	 * @param dataType
+	 */
 	public void request(String url, RequestListener requestListener, Bundle optionalKeys, RequestType requestType, AcceptType dataType) {
 		// Needs to be final in order to complete callbacks.
 		final RequestListener r = requestListener;

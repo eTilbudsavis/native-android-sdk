@@ -18,8 +18,8 @@ object of ETA (eclipse will kindly ask you to import packages as you go):
 
 	ETA eta = new ETA(mApiKey, mApiSecret, this);
 
-The ETA generates and holds various information, like UUID for the device, 
-and the optional location.
+The ETA generates and holds various information, like UUID for the device, the 
+location (which is optional) and the api object.
 
 ### Location
 In order to utilize the location awareness 
@@ -32,10 +32,6 @@ location object inside the newly created eta class:
 As you will find you have several options in the location class.
 
 ### Api
-First initialize a new API object:
-
-	API api = new API(eta);
-
 The api makes callback's via the RequestListener interface, which means you 
 need to implement it somehow. We'll just make a new listener:
 
@@ -50,10 +46,10 @@ need to implement it somehow. We'll just make a new listener:
 			}
 		};
 
-You are now ready to get some information from eTilbudsavisen.dk, lets try 
-getting a catalog list:
+You are now ready to get some information from eTilbudsavisen.dk, the api request
+goes via the eta object. Lets try getting a catalog list:
 
-	api.request("/api/v1/catalog/list/", requestListener);
+	eta.api.request("/api/v1/catalog/list/", requestListener);
 
 Wow, that was easy, less that 15 lines of code and you got a catalog list ;-)
 
