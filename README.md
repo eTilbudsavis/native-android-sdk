@@ -1,9 +1,12 @@
 # ETA Android SDK
 
 ## Introduction
-This is a short guide, in the use of this android ETA SDK. We will assume you are using [eclipse](http://www.eclipse.org/), 
-and are using the [Android Development Tools](http://developer.android.com/tools/sdk/eclipse-adt.html) plugin. 
+This is a short guide, in the use of this android ETA SDK. We will assume you 
+are using [eclipse](http://www.eclipse.org/), and are using the 
+[Android Development Tools](http://developer.android.com/tools/sdk/eclipse-adt.html) plugin. 
 Further more you are goint to need an API key and secret from [eTilbudsavis.dk](https://etilbudsavis.dk/developers/api/).
+Lastly we have included a ETA SDK Demo app in the repository. It demostrates 
+some basic features, some of which are also described in this readme.
 
 ## Download
 If you want to get started quickly, just clone the [native-android-sdk](https://github.com/eTilbudsavis/native-android-sdk.git) repository.
