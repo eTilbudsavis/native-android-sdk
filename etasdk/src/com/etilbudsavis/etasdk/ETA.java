@@ -42,7 +42,7 @@ public class ETA implements Serializable {
 	public API api = new API(this);
 	
 	private String mHtmlCached = "";
-	private int mHtmlAquired = 0;
+	private int mHtmlAcquired = 0;
 	private int mHtmlExpire = 15 * 60;
 	
 	public ArrayList<Pageflip> pageflipList = new ArrayList<Pageflip>();
@@ -122,25 +122,46 @@ public class ETA implements Serializable {
 		return mUUID;
 	}
 	
+	/**
+	 * Gets the cached html for the pageflip. This eliminates
+	 * overhead in downloading new content for different pageflips.
+	 * @return String of html
+	 */
 	public String getHtmlCached() {
 		return mHtmlCached;
 	}
 
+	/**
+	 * Update the cached html content.
+	 * @param html
+	 */
 	public void setHtmlCached(String html) {
 		if (html.matches(".*\\<[^>]+>.*")) {
 			mHtmlCached = html;
-			mHtmlAquired = Utilities.getTime();
+			mHtmlAcquired = Utilities.getTime();
 		}
 	}
 
-	public int getHtmlAquired() {
-		return mHtmlAquired;
+	/**
+	 * Returns the time at which the html was cached.
+	 * @return
+	 */
+	public int getHtmlAcquired() {
+		return mHtmlAcquired;
 	}
 
+	/**
+	 * The time-to-live for the html cache.
+	 * @return
+	 */
 	public int getHtmlExpire() {
 		return mHtmlExpire;
 	}
 
+	/**
+	 * Set the time-to-live. The default TTL is 15 minutes.
+	 * @param seconds
+	 */
 	public void setHtmlExpire(int seconds) {
 		mHtmlExpire = seconds;
 	}

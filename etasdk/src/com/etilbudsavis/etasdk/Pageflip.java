@@ -124,7 +124,7 @@ public final class Pageflip implements Serializable {
 		}); // End WebViewClient
 		
 		// Check if it's necessary to update the html (it's time consuming to download html)
-		if ( mEta.getHtmlCached().length() == 0 || (Utilities.getTime() - mEta.getHtmlAquired()) >= mEta.getHtmlExpire() ) {
+		if ( mEta.getHtmlCached().length() == 0 || (Utilities.getTime() - mEta.getHtmlAcquired()) >= mEta.getHtmlExpire() ) {
 			mEta.api.request(mEta.getProviderUrl(), new RequestListener() {
 				public void onSuccess(String response, Object object) {
 					mEta.setHtmlCached( object.toString() );
