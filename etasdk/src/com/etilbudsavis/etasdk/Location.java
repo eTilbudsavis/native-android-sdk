@@ -13,7 +13,7 @@ public class Location implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private ETA mETA;
+	private ETA mEat;
 	
 	// Settings.
 	private Boolean mUseLocation = true;

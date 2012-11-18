@@ -18,6 +18,7 @@ public class CatalogWebView extends Activity {
 	private WebView mWebView;
 	private JSONObject mJObject;
 	private ETA eta;
+	private Pageflip pageflip;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -37,15 +38,15 @@ public class CatalogWebView extends Activity {
 			e.printStackTrace();
 		}
 		
-		Pageflip pageflip = new Pageflip(mWebView, eta);
+		pageflip = new Pageflip(mWebView, eta);
 		
 		mWebView = pageflip.getWebView(Pageflip.ContentType.CATALOG, content, pageflipListener);
 	}
 
 	// Remember to close pageflip when the activity is destroyed.
 	@Override
-	public void onDestroy() {
-		pageflip.close();
+	public void onStop() {
+		pageflip.injectJS("pageflip.close();");
 	}
 	
 	PageflipListener pageflipListener = new PageflipListener() {
