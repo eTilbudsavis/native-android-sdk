@@ -12,7 +12,9 @@ import com.etilbudsavis.etasdk.ETA;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -39,6 +41,7 @@ public class Main extends Activity {
 	private ProgressDialog progressDialog;
 	private Spinner spinner;
 	private List<String> spinnerList = new ArrayList<String>();
+	private Context context;
 	
 	
     @Override
@@ -48,7 +51,7 @@ public class Main extends Activity {
         
         eta = new ETA(mApiKey, mApiSecret, getApplicationContext());
         
-        
+        context = getApplicationContext();
         btnGetCatalog = (Button)findViewById(R.id.btnGetCatalog);
         btnCatalogInfo = (Button)findViewById(R.id.btnCatalogInfo);
         btnWebView = (Button)findViewById(R.id.btnWebView);
@@ -82,7 +85,8 @@ public class Main extends Activity {
 					
 					@Override
 					public void onError(String response, Object object) {
-						
+						progressDialog.dismiss();
+						displayAlert(response);
 					}
 				});
 				
@@ -108,7 +112,15 @@ public class Main extends Activity {
 			}
 		});
     }
-
+    
+    private void displayAlert(String response) {
+    	AlertDialog.Builder adb = new AlertDialog.Builder(this);
+		adb.setTitle(response);
+		adb.setMessage("Did you remember to add API key and secret?");
+		adb.setNeutralButton("Ok", null);
+		adb.show();
+    }
+    
     private void setupSpinner() throws JSONException {
     	if (catalogArray.length() > 0) {
         	ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, spinnerList);

@@ -76,7 +76,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 
 			connection.disconnect();
 		} catch (IOException e) {
-			mRequestListener.onError("IO Error", sb.toString());
+			
 			e.printStackTrace();
 		}
 		
