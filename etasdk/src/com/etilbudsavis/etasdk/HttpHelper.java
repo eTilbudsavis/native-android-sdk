@@ -19,7 +19,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	private API.AcceptType mAcceptType;
 	private RequestListener mRequestListener;
 	private String mResult = "";
-	private int mResponseCode = 0;
+	private String mResponseCode = "";
 
 	// Constructor for HttpHelper.
 	public HttpHelper(String url, String query,
@@ -72,11 +72,11 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 						
 			// Store results, so they can be used by onPostExecute in UI thread.
 			mResult = sb.toString();
-			mResponseCode = connection.getResponseCode();
+			mResponseCode = connection.getResponseCode() == 200 ? "Success" : "Error";
 
 			connection.disconnect();
 		} catch (IOException e) {
-			
+			mResponseCode = "IO Error";
 			e.printStackTrace();
 		}
 		
@@ -86,8 +86,8 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	// Do callback in the UI thread
 	@Override
 	protected void onPostExecute(Void result) {
-		if (mResponseCode == 200) mRequestListener.onSuccess("Success", mResult);
-		else mRequestListener.onError("Error", mResult);
+		if (mResponseCode.matches("Success")) mRequestListener.onSuccess(mResponseCode, mResult);
+		else mRequestListener.onError(mResponseCode, mResult);
     }
 	
 }
