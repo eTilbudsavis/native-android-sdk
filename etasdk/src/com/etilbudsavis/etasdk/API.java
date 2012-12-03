@@ -88,8 +88,8 @@ public class API implements Serializable {
 
 			// Determine whether to include location info.
 			if (mETA.location.useLocation() && mETA.location.isLocationSet()) {
+				
 				Bundle loc = mETA.location.getLocation();
-
 				mData.put("api_latitude", loc.getDouble("api_latitude"));
 				mData.put("api_longitude", loc.getDouble("api_longitude"));
 				

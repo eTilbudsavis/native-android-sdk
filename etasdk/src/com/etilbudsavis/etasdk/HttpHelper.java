@@ -72,7 +72,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 						
 			// Store results, so they can be used by onPostExecute in UI thread.
 			mResult = sb.toString();
-			mResponseCode = connection.getResponseCode() == 200 ? "Success" : "Error";
+			mResponseCode = connection.getResponseCode() == 200 ? "200" : String.valueOf(connection.getResponseCode());
 
 			connection.disconnect();
 		} catch (IOException e) {
@@ -86,7 +86,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	// Do callback in the UI thread
 	@Override
 	protected void onPostExecute(Void result) {
-		if (mResponseCode.matches("Success")) mRequestListener.onSuccess(mResponseCode, mResult);
+		if (mResponseCode.matches("200")) mRequestListener.onSuccess(mResponseCode, mResult);
 		else mRequestListener.onError(mResponseCode, mResult);
     }
 	
