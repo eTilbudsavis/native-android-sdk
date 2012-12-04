@@ -33,7 +33,7 @@ public class ETA implements Serializable {
 	// Authorization.
 	private final String mApiKey;
 	private final String mApiSecret;
-	private final String mUUID;
+	private String mUUID;
 	
 	// Location.
 	public Location location = new Location(this);
@@ -68,7 +68,8 @@ public class ETA implements Serializable {
 
 		// Create UUID if it doesn't already exist.
 		if (mUUID == null) {
-			prefs.edit().putString(PREFS_UUID_NAME, Utilities.createUUID()).commit();
+			mUUID = Utilities.createUUID();
+			prefs.edit().putString(PREFS_UUID_NAME, mUUID).commit();
 		}
 	}
 	
