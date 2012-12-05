@@ -161,7 +161,7 @@ public final class Pageflip implements Serializable {
 				etaloc.put("locationDetermined", loc.getInt("api_locationDetermined"));
 				etaloc.put("geocoded", loc.getInt("api_geocoded"));
 				if (loc.getInt("api_geocoded") == 0) 
-					etaloc.put("accuracy", loc.getInt("api_latitude"));
+					etaloc.put("accuracy", loc.getInt("api_accuracy"));
 			s += "eta.Location.save(" + Utilities.buildJSString(etaloc) + ");";			
 		}
 		
@@ -203,7 +203,7 @@ public final class Pageflip implements Serializable {
 				etaloc.put("locationDetermined", loc.getInt("api_locationDetermined"));
 				etaloc.put("geocoded", loc.getInt("api_geocoded"));
 				if (loc.getInt("api_geocoded") == 0) 
-					etaloc.put("accuracy", loc.getInt("api_latitude"));
+					etaloc.put("accuracy", loc.getInt("api_accuracy"));
 			return injectJS("eta.Location.save(" + Utilities.buildJSString(etaloc) + ");");
 		}
 

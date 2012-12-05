@@ -77,7 +77,7 @@ public class Location implements Serializable {
 	 * @param distance
 	 */
 	public void setLocation(double latitude, double longitude, int geocoded,
-			int accuracy, int locationDetermined, int distance) {
+			int accuracy, int locationDetermined) {
 		mLatitude = latitude;
 		mLongitude = longitude;
 		mLocationDetermined = locationDetermined;
@@ -86,13 +86,23 @@ public class Location implements Serializable {
 		if (geocoded == 0)
 			mAccuracy = accuracy;
 		
+		updatePageflipLocation();
+		
+	}
+	
+	public void setDistance(int distance) {
+		
 		if (distance >= 0 && distance <= 700000)
 			mDistance = distance;
 		
+	}
+	
+	private void updatePageflipLocation() {
 		for (Pageflip p : mEat.pageflipList) {
 			p.updateLocation();
 		}
 	}
+	
 
 	public Bundle getLocation() {
 		Bundle object = new Bundle();
