@@ -70,14 +70,15 @@ public final class Pageflip implements Serializable {
 	 * @param pageflipListener The listener where callback's will be executed
 	 * @return The ready-to-go WebView with pageflip enabled
 	 */
-	public WebView getWebView(ContentType type, String content, PageflipListener pageflipListener) {
+	public WebView getWebView(ContentType type, String content,
+			PageflipListener pageflipListener) {
 		final PageflipListener mPageflipListener = pageflipListener;
 		final String mType = type.toString().toLowerCase();
 		final String mContent = content;
-		
+
 		WebSettings mWebSetting = mWebView.getSettings();
 		mWebSetting.setJavaScriptEnabled(true);
-		mWebView.setWebViewClient(new WebViewClient(){
+		mWebView.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
 				String[] request = url.split(":", 3);
@@ -90,20 +91,32 @@ public final class Pageflip implements Serializable {
 							if (request[2] == "") {
 								object = new JSONObject();
 							} else {
+								
+								/*
+								 * This can break since we get some data which should have break characters
+								 * but they have been flipped e.g.:
+								 * 		"heading":"/"universal/" værk- tøjskuffert 127 dele",
+								 * Make RegEx to find /" and replace it with \" but not every time...
+								 * Url's might have the same structure e.g.:
+								 * 		"url":"https://etilbudsavis.dk/offers/bauhaus/cfccJGBL/universal-vaerk-toejskuffert-127-dele/",
+								 */
 								object = new JSONObject(URLDecoder.decode(request[2].toString(), "utf-8"));
 
-								// is pageflip properly initialized? if true execute the queue.
+								// On first pagechange, execute the JavaScriptQueue.
 								if (request[1].toString().matches("pagechange") && object.has("init")) {
-									// Must be a two-part if statement or we risk a JSONException on "init"
+									// two-part if statement to prevent JSONException on "init"
 									if (object.getString("init") == "true") {
 										initQueue();
 									}
 								}
 							}
-							mPageflipListener.onPageflipEvent(request[1], object);
-							
+							mPageflipListener.onPageflipEvent(request[1],
+									object);
+
 						} catch (JSONException e) {
-							mPageflipListener.onPageflipEvent("JSONObject parsing error", new JSONObject());
+							mPageflipListener.onPageflipEvent(
+									"JSONObject parsing error",
+									new JSONObject());
 							e.printStackTrace();
 						} catch (UnsupportedEncodingException e) {
 							e.printStackTrace();
@@ -113,24 +126,30 @@ public final class Pageflip implements Serializable {
 					return true;
 				}
 
-				Utilities.logd("shouldOverrideUrlLoading", "Unknown URL schematic");
+				Utilities.logd("shouldOverrideUrlLoading",
+						"Unknown URL schematic");
 				return false;
 			}
 
-			// Notify when loading of WebView is done, now insert JavaScript init.
+			// Notify when loading of WebView is done, now insert JavaScript
+			// init.
 			public void onPageFinished(WebView view, String url) {
 				initJS(mType, mContent);
 			}
 		});
-		
-		// Check if it's necessary to update the HTML (it's time consuming to download HTML).
-		if ( mETA.getHtmlCached().length() == 0 || (Utilities.getTime() - mETA.getHtmlAcquired()) >= mETA.getHtmlExpire() ) {
+
+		// Check if it's necessary to update the HTML (it's time consuming to
+		// download HTML).
+		if (mETA.getHtmlCached().length() == 0
+				|| (Utilities.getTime() - mETA.getHtmlAcquired()) >= mETA
+						.getHtmlExpire()) {
 			mETA.api.request(mETA.getProviderUrl(), new RequestListener() {
 				public void onSuccess(String response, Object object) {
-					mETA.setHtmlCached( object.toString() );
-					mWebView.loadData(mETA.getHtmlCached(), "text/html", "UTF-8");
+					mETA.setHtmlCached(object.toString());
+					mWebView.loadData(mETA.getHtmlCached(), "text/html",
+							"UTF-8");
 				}
-				
+
 				public void onError(String response, Object object) {
 					Utilities.logd(response, object.toString());
 				}
@@ -138,7 +157,7 @@ public final class Pageflip implements Serializable {
 		} else {
 			mWebView.loadData(mETA.getHtmlCached(), "text/html", "UTF-8");
 		}
-		
+
 		return mWebView;
 	}
 	
@@ -167,6 +186,7 @@ public final class Pageflip implements Serializable {
 		
 		LinkedHashMap<String, Object> pfinit = new LinkedHashMap<String, Object>();
 			pfinit.put(type, content);
+			pfinit.put("hotspotsOfferBoundingBox", true);
 			pfinit.putAll(mOptions);
 		s += "eta.pageflip.init(" + Utilities.buildJSString(pfinit) + ");";
 		s += "eta.pageflip.open()";

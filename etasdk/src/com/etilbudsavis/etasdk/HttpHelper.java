@@ -71,8 +71,8 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 			rd.close();
 						
 			// Store results, so they can be used by onPostExecute in UI thread.
-			mResult = sb.toString();
-			mResponseCode = connection.getResponseCode() == 200 ? "200" : String.valueOf(connection.getResponseCode());
+			mResult = sb.toString().length() == 0 ? "" : sb.toString();
+			mResponseCode = String.valueOf(connection.getResponseCode());
 
 			connection.disconnect();
 		} catch (IOException e) {
