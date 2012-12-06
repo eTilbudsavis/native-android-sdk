@@ -1,9 +1,13 @@
 package com.etilbudsavis.etasdk;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 import com.etilbudsavis.etasdk.API.RequestListener;
@@ -47,28 +51,23 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 			connection.setInstanceFollowRedirects(true);
 			connection.setRequestMethod(mRequestType.toString());
 			connection.setRequestProperty("Accept", mAcceptType.toString());
-			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			connection.setRequestProperty("Content-Length", "" + String.valueOf(mQuery.getBytes().length));
 			connection.setUseCaches(false);
 
 			// If POST request, do output stream.
 			if (mRequestType == API.RequestType.POST) {
-				connection.setRequestProperty("Content-Length", "" + Integer.toString(mQuery.getBytes().length));
-				DataOutputStream wr;
-				wr = new DataOutputStream(connection.getOutputStream());
-				wr.writeBytes(mQuery);
-				wr.flush();
-				wr.close();
+				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream(), "UTF-8"));
+				writer.write(mQuery);
+				writer.close();
 			}
 			
 			// Read the input stream (HTML or data)
-			BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String line;
-
-			while ((line = rd.readLine()) != null) {
+			while ((line = reader.readLine()) != null) {
 				sb.append(line);
 			}
-
-			rd.close();
+			reader.close();
 						
 			// Store results, so they can be used by onPostExecute in UI thread.
 			mResult = sb.toString().length() == 0 ? "" : sb.toString();
