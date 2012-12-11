@@ -98,7 +98,7 @@ public final class Pageflip {
 								} catch (UnsupportedEncodingException e) {
 									e.printStackTrace();
 								}
-								object = (resp == "Bad Encoding" ? new JSONObject() : new JSONObject(resp) );
+								object = (resp.equals("Bad Encoding") ? new JSONObject() : new JSONObject(resp) );
 								
 								// On first pagechange, execute the JavaScriptQueue.
 								if (request[1].toString().matches("pagechange") && object.has("init")) {
