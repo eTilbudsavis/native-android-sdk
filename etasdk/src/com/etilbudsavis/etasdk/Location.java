@@ -38,20 +38,35 @@ public class Location implements Serializable {
 		mEat = eta;
 	}
 
-	// Exclude location in request?
-	public void excludeLocation() {
-		mUseLocation = false;
+	
+	/**
+	 * Set whether or not to use location in ETA API calls
+	 * @param value a boolean value
+	 */
+	public void useLocation(boolean value) {
+		mUseLocation = value;
 	}
 	
+	/**
+	 * Returns the current setting for usage of location
+	 * @return a boolean value
+	 */
 	public boolean useLocation() {
 		return mUseLocation;
 	}
 	
-	// Exclude distance in request?
-	public void excludeDistance() {
-		mUseDistance = false;
+	/**
+	 * Set whether or not to use distance in ETA API calls
+	 * @param value a boolean value
+	 */
+	public void useDistance(boolean value) {
+		mUseDistance = value;
 	}
 	
+	/**
+	 * Returns the current setting for usage of distance
+	 * @return a boolean value
+	 */
 	public boolean useDistance() {
 		return mUseDistance;
 	}

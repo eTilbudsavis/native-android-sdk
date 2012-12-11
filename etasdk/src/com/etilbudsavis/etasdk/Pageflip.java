@@ -6,9 +6,9 @@
  */
 package com.etilbudsavis.etasdk;
 
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -24,9 +24,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 @SuppressLint("SetJavaScriptEnabled")
-public final class Pageflip implements Serializable {
-
-	private static final long serialVersionUID = 1L;
+// Pageflip cannot implement serializable since it has a ref to WebView, which isn't serializable.
+public final class Pageflip {
 
 	private ETA mETA;
 
@@ -78,6 +77,7 @@ public final class Pageflip implements Serializable {
 
 		WebSettings mWebSetting = mWebView.getSettings();
 		mWebSetting.setJavaScriptEnabled(true);
+		mWebSetting.setDefaultTextEncodingName("UTF-8");
 		mWebView.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -92,16 +92,14 @@ public final class Pageflip implements Serializable {
 								object = new JSONObject();
 							} else {
 								
-								/*
-								 * This can break since we get some data which should have break characters
-								 * but they have been flipped e.g.:
-								 * 		"heading":"/"universal/" værk- tøjskuffert 127 dele",
-								 * Make RegEx to find /" and replace it with \" but not every time...
-								 * Url's might have the same structure e.g.:
-								 * 		"url":"https://etilbudsavis.dk/offers/bauhaus/cfccJGBL/universal-vaerk-toejskuffert-127-dele/",
-								 */
-								object = new JSONObject(URLDecoder.decode(request[2].toString(), "utf-8"));
-
+								String resp = "Bad Encoding";
+								try {
+									resp = URLDecoder.decode(request[2].toString(), "UTF-8");
+								} catch (UnsupportedEncodingException e) {
+									e.printStackTrace();
+								}
+								object = (resp == "Bad Encoding" ? new JSONObject() : new JSONObject(resp) );
+								
 								// On first pagechange, execute the JavaScriptQueue.
 								if (request[1].toString().matches("pagechange") && object.has("init")) {
 									// two-part if statement to prevent JSONException on "init"
@@ -110,24 +108,20 @@ public final class Pageflip implements Serializable {
 									}
 								}
 							}
-							mPageflipListener.onPageflipEvent(request[1],
-									object);
+							mPageflipListener.onPageflipEvent(request[1], object);
 
 						} catch (JSONException e) {
 							mPageflipListener.onPageflipEvent(
 									"JSONObject parsing error",
 									new JSONObject());
 							e.printStackTrace();
-						} catch (UnsupportedEncodingException e) {
-							e.printStackTrace();
-						}
+						} 
 					}
 
 					return true;
 				}
 
-				Utilities.logd("shouldOverrideUrlLoading",
-						"Unknown URL schematic");
+				Utilities.logd("shouldOverrideUrlLoading", "Unknown URL schematic");
 				return false;
 			}
 
@@ -146,8 +140,7 @@ public final class Pageflip implements Serializable {
 			mETA.api.request(mETA.getProviderUrl(), new RequestListener() {
 				public void onSuccess(String response, Object object) {
 					mETA.setHtmlCached(object.toString());
-					mWebView.loadData(mETA.getHtmlCached(), "text/html",
-							"UTF-8");
+					mWebView.loadData(mETA.getHtmlCached(), "text/html", "UTF-8");
 				}
 
 				public void onError(String response, Object object) {
@@ -155,10 +148,17 @@ public final class Pageflip implements Serializable {
 				}
 			});
 		} else {
-			mWebView.loadData(mETA.getHtmlCached(), "text/html", "UTF-8");
+//			mWebView.loadData(mETA.getHtmlCached(), "text/html", "UTF-8");
+			mWebView.loadDataWithBaseURL(null, mETA.getHtmlCached(), "text/html", "UTF-8", null);
 		}
 
 		return mWebView;
+	}
+	
+	public WebView getRestoredWebView() {
+
+			return mWebView;
+
 	}
 	
 	// Execute initial options for pageflip
