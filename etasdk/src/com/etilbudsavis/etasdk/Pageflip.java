@@ -8,7 +8,6 @@ package com.etilbudsavis.etasdk;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 

@@ -2,23 +2,15 @@ package com.etilbudsavis.etasdk;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import com.etilbudsavis.etasdk.API.RequestListener;
 import android.annotation.TargetApi;
 import android.os.AsyncTask;
-import android.webkit.WebView;
 
 @TargetApi(3)
 public class HttpHelper extends AsyncTask<Void, Void, Void> {
