@@ -59,7 +59,7 @@ public class API implements Serializable {
 	 * @param optionalKeys
 	 */
 	public void request(String url, RequestListener requestListener, Bundle optionalKeys) {
-		request(url, requestListener, optionalKeys, API.RequestType.POST, API.AcceptType.JSON);
+		request(url, requestListener, optionalKeys, API.RequestType.GET, API.AcceptType.JSON);
 	}
 
 	/**

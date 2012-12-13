@@ -23,7 +23,7 @@ public class ETA implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	// Endpoints.
-	private static final String MAIN_URL = "https://etilbudsavis.dk";
+	private static final String MAIN_URL = "https://etilbudsavis.dk/";
 	private static final String PROVIDER_URL = MAIN_URL + "/connect/";
 
 	// Preferences.

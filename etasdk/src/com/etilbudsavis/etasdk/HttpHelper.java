@@ -8,11 +8,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import com.etilbudsavis.etasdk.API.RequestListener;
 import android.annotation.TargetApi;
 import android.os.AsyncTask;
+import android.webkit.WebView;
 
 @TargetApi(3)
 public class HttpHelper extends AsyncTask<Void, Void, Void> {
@@ -40,35 +46,40 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	protected Void doInBackground(Void... params) {
 		StringBuilder sb = new StringBuilder();
 
-		try {	
+		try {
 			// Create new URL.
 			URL serverUrl = new URL(mUrl);
-			
+
 			// Open new http connection and setup headers.
-			HttpsURLConnection connection = (HttpsURLConnection) serverUrl.openConnection();
+			HttpURLConnection connection = (HttpURLConnection) serverUrl.openConnection();
 			connection.setDoInput(true);
-			connection.setDoOutput(true);
+			connection.setDoOutput(false);
 			connection.setInstanceFollowRedirects(true);
 			connection.setRequestMethod(mRequestType.toString());
+			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			connection.setRequestProperty("Accept", mAcceptType.toString());
-			connection.setRequestProperty("Content-Length", "" + String.valueOf(mQuery.getBytes().length));
 			connection.setUseCaches(false);
 
 			// If POST request, do output stream.
 			if (mRequestType == API.RequestType.POST) {
-				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream(), "UTF-8"));
+				connection.setDoOutput(true);
+				connection.setRequestProperty("Content-Length", "" + String.valueOf(mQuery.getBytes().length));
+				BufferedWriter writer = new BufferedWriter(
+						new OutputStreamWriter(connection.getOutputStream(),
+								"UTF-8"));
 				writer.write(mQuery);
 				writer.close();
 			}
-			
+
 			// Read the input stream (HTML or data)
-			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			BufferedReader reader = new BufferedReader(new InputStreamReader( 
+					connection.getInputStream()));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				sb.append(line);
 			}
 			reader.close();
-						
+
 			// Store results, so they can be used by onPostExecute in UI thread.
 			mResult = sb.toString().length() == 0 ? "" : sb.toString();
 			mResponseCode = String.valueOf(connection.getResponseCode());
@@ -78,7 +89,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 			mResponseCode = "IO Error";
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
 	
