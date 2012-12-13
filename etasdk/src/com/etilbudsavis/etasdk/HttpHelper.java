@@ -49,9 +49,9 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		try {
 			// Create new URL.
 			URL serverUrl = new URL(mUrl);
-
+			
 			// Open new http connection and setup headers.
-			HttpURLConnection connection = (HttpURLConnection) serverUrl.openConnection();
+			HttpsURLConnection connection = (HttpsURLConnection) serverUrl.openConnection();
 			connection.setDoInput(true);
 			connection.setDoOutput(false);
 			connection.setInstanceFollowRedirects(true);
