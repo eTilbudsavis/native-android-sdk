@@ -73,7 +73,7 @@ public final class Pageflip {
 		final PageflipListener mPageflipListener = pageflipListener;
 		final String mType = type.toString().toLowerCase();
 		final String mContent = content;
-
+		
 		WebSettings mWebSetting = mWebView.getSettings();
 		mWebSetting.setJavaScriptEnabled(true);
 		mWebSetting.setDefaultTextEncodingName("UTF-8");
@@ -87,22 +87,22 @@ public final class Pageflip {
 					if (request.length > 2) {
 						try {
 							final JSONObject object;
-							if (request[2] == "") {
+							if (request[2].length() == 0) {
 								object = new JSONObject();
 							} else {
 								
 								String resp = "Bad Encoding";
 								try {
-									resp = URLDecoder.decode(request[2].toString(), "UTF-8");
+									resp = URLDecoder.decode(request[2].toString(), "utf-8");
 								} catch (UnsupportedEncodingException e) {
 									e.printStackTrace();
 								}
 								object = (resp.equals("Bad Encoding") ? new JSONObject() : new JSONObject(resp) );
 								
 								// On first pagechange, execute the JavaScriptQueue.
-								if (request[1].toString().matches("pagechange") && object.has("init")) {
+								if (request[1].toString().equals("pagechange") && object.has("init")) {
 									// two-part if statement to prevent JSONException on "init"
-									if (object.getString("init") == "true") {
+									if (object.getString("init").equals("true")) {
 										initQueue();
 									}
 								}
@@ -133,9 +133,7 @@ public final class Pageflip {
 
 		// Check if it's necessary to update the HTML (it's time consuming to
 		// download HTML).
-		if (mETA.getHtmlCached().length() == 0
-				|| (Utilities.getTime() - mETA.getHtmlAcquired()) >= mETA
-						.getHtmlExpire()) {
+		if (mETA.getHtmlCached().length() == 0 || (Utilities.getTime() - mETA.getHtmlAcquired()) >= mETA.getHtmlExpire()) {
 			mETA.api.request(mETA.getProviderUrl(), new RequestListener() {
 				public void onSuccess(String response, Object object) {
 					mETA.setHtmlCached(object.toString());
@@ -143,14 +141,14 @@ public final class Pageflip {
 				}
 
 				public void onError(String response, Object object) {
+					Utilities.logd("Pageflip", "HTML error");
 					Utilities.logd(response, object.toString());
 				}
 			});
 		} else {
-//			mWebView.loadData(mETA.getHtmlCached(), "text/html", "UTF-8");
 			mWebView.loadDataWithBaseURL(null, mETA.getHtmlCached(), "text/html", "UTF-8", null);
 		}
-
+		
 		return mWebView;
 	}
 	

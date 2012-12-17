@@ -5,6 +5,8 @@
  */
 package com.etilbudsavis.etasdk;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -92,12 +94,16 @@ public final class Utilities {
 		Iterator<String> iterator = ks.iterator();
 
 		while (iterator.hasNext()) {
+			try {
 			String s = iterator.next();
 			if (!first) sb.append("&");
-			sb.append(s);
+			sb.append(URLEncoder.encode(s, "utf-8"));
 			sb.append("=");
-			sb.append(data.get(s).toString());
+			sb.append(URLEncoder.encode(data.get(s).toString(), "utf-8"));
 			first = false;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
 		}
 
 		return sb.toString();

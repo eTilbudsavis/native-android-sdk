@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
+
 import javax.net.ssl.HttpsURLConnection;
 
 import com.etilbudsavis.etasdk.API.RequestListener;
@@ -19,76 +20,80 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	private String mQuery;
 	private API.RequestType mRequestType;
 	private API.AcceptType mAcceptType;
+	private API.ContentType mContentType;
 	private RequestListener mRequestListener;
 	private String mResult = "";
 	private String mResponseCode = "";
 
 	// Constructor for HttpHelper.
 	public HttpHelper(String url, String query,
-			API.RequestType requestType, API.AcceptType acceptType,
+			API.RequestType requestType, API.AcceptType acceptType, API.ContentType contentType,
 			RequestListener requestListener) {
-		mUrl = (requestType == API.RequestType.GET) ? url + "?"+ query : url;
 		mQuery = query;
+		mUrl = (requestType == API.RequestType.GET) ? url + "?"+ mQuery : url;
 		mRequestType = requestType;
 		mAcceptType = acceptType;
+		mContentType = contentType;
 		mRequestListener = requestListener;
 	}
 
 	@Override
 	protected Void doInBackground(Void... params) {
-		StringBuilder sb = new StringBuilder();
-
+		
 		try {
+			
 			// Create new URL.
 			URL serverUrl = new URL(mUrl);
-			
+
 			// Open new http connection and setup headers.
 			HttpsURLConnection connection = (HttpsURLConnection) serverUrl.openConnection();
 			connection.setDoInput(true);
-			connection.setDoOutput(false);
 			connection.setInstanceFollowRedirects(true);
 			connection.setRequestMethod(mRequestType.toString());
-			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			connection.setRequestProperty("Content-Type", mContentType.toString());
 			connection.setRequestProperty("Accept", mAcceptType.toString());
-			connection.setUseCaches(false);
-
-			// If POST request, do output stream.
-			if (mRequestType == API.RequestType.POST) {
+			
+			if (mRequestType == API.RequestType.GET) {
+				
+				connection.setDoOutput(false);
+				
+			} else if (mRequestType == API.RequestType.POST) {
+				
 				connection.setDoOutput(true);
 				connection.setRequestProperty("Content-Length", "" + String.valueOf(mQuery.getBytes().length));
 				BufferedWriter writer = new BufferedWriter(
-						new OutputStreamWriter(connection.getOutputStream(),
-								"UTF-8"));
+						new OutputStreamWriter(connection.getOutputStream(),"utf-8"));
 				writer.write(mQuery);
 				writer.close();
 			}
-
-			// Read the input stream (HTML or data)
-			BufferedReader reader = new BufferedReader(new InputStreamReader( 
-					connection.getInputStream()));
-			String line;
+			
+			StringBuilder sb = new StringBuilder();
+			BufferedReader reader = new BufferedReader(new InputStreamReader( connection.getInputStream()));
+			String line ="";
 			while ((line = reader.readLine()) != null) {
 				sb.append(line);
 			}
 			reader.close();
-
-			// Store results, so they can be used by onPostExecute in UI thread.
+			
 			mResult = sb.toString().length() == 0 ? "" : sb.toString();
 			mResponseCode = String.valueOf(connection.getResponseCode());
 
 			connection.disconnect();
+			
 		} catch (IOException e) {
 			mResponseCode = "IO Error";
 			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
 		}
-
+		
 		return null;
 	}
 	
 	// Do callback in the UI thread
 	@Override
 	protected void onPostExecute(Void result) {
-		if (mResponseCode.matches("200")) mRequestListener.onSuccess(mResponseCode, mResult);
+		if (mResponseCode.equals("200")) mRequestListener.onSuccess(mResponseCode, mResult);
 		else mRequestListener.onError(mResponseCode, mResult);
     }
 	

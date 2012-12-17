@@ -19,6 +19,11 @@ public class API implements Serializable {
 	
 	private ETA mETA;
 	
+	/***
+	 * The type expected to return;
+	 * Default (and only type so far) is JSON
+	 * 
+	 */
 	public enum AcceptType {
 		XML { public String toString() { return "application/xml, text/xml"; } },
 		HTML { public String toString() { return "text/html"; } },
@@ -28,6 +33,18 @@ public class API implements Serializable {
 	
 	public enum RequestType {
 		GET, POST
+	}
+	
+	/**
+	 * The content type to use in requests.
+	 * Default for GET is TEXT
+	 * Default for post is 
+	 * 
+	 */
+	public enum ContentType {
+		PLAIN { public String toString() { return "text/plain; charset=utf-8"; } },
+		URLENCODED { public String toString() { return "application/x-www-form-urlencoded; charset=utf-8"; } },
+		FORMDATA { public String toString() { return "multipart/form-data; charset=utf-8"; } }
 	}
 	
 	/**
@@ -59,7 +76,7 @@ public class API implements Serializable {
 	 * @param optionalKeys
 	 */
 	public void request(String url, RequestListener requestListener, Bundle optionalKeys) {
-		request(url, requestListener, optionalKeys, API.RequestType.GET, API.AcceptType.JSON);
+		request(url, requestListener, optionalKeys, API.RequestType.GET, API.AcceptType.JSON, API.ContentType.PLAIN);
 	}
 
 	/**
@@ -72,9 +89,9 @@ public class API implements Serializable {
 	 * @param requestType
 	 * @param dataType
 	 */
-	public void request(String url, RequestListener requestListener, Bundle optionalKeys, RequestType requestType, AcceptType dataType) {
+	public void request(String url, RequestListener requestListener, Bundle optionalKeys, RequestType requestType, AcceptType acceptType, ContentType contentType) {
 		// Needs to be final in order to complete callbacks.
-		final RequestListener r = requestListener;
+		final RequestListener reqListener = requestListener;
 
 		// Prepare data.
 		LinkedHashMap<String, Object> mData = new LinkedHashMap<String, Object>();
@@ -134,7 +151,7 @@ public class API implements Serializable {
 		String query = mData.isEmpty() ? "" : Utilities.buildParams(mData);
 
 		// Create a new HttpHelper.
-		HttpHelper httpHelper = new HttpHelper(url, query, requestType, dataType, r);
+		HttpHelper httpHelper = new HttpHelper(url, query, requestType, acceptType, contentType, reqListener);
 		
 		// Execute the AsyncTask in HttpHelper to ensure a new thread.
 		httpHelper.execute();
