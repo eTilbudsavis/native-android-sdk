@@ -1,100 +1,127 @@
 package com.etilbudsavis.etasdk;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.URL;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
 
-import javax.net.ssl.HttpsURLConnection;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 
 import com.etilbudsavis.etasdk.API.RequestListener;
-import android.annotation.TargetApi;
-import android.os.AsyncTask;
+import com.etilbudsavis.etasdk.API.RequestType;
 
-@TargetApi(3)
+import android.content.Context;
+import android.os.AsyncTask;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
+
 public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	
+	private String ETA_DOMAIN = "etilbudsavis.dk";
 	private String mUrl;
-	private String mQuery;
+	private List<NameValuePair> mQuery;
 	private API.RequestType mRequestType;
-	private API.AcceptType mAcceptType;
-	private API.ContentType mContentType;
 	private RequestListener mRequestListener;
+	private Context mContext;
+	
 	private String mResult = "";
-	private String mResponseCode = "";
+	private Integer mResponseCode;
 
 	// Constructor for HttpHelper.
-	public HttpHelper(String url, String query,
-			API.RequestType requestType, API.AcceptType acceptType, API.ContentType contentType,
-			RequestListener requestListener) {
+	public HttpHelper(String url, List<NameValuePair> query, 
+			API.RequestType requestType, RequestListener requestListener, Context context) {
+		
+		mUrl = url;
 		mQuery = query;
-		mUrl = (requestType == API.RequestType.GET) ? url + "?"+ mQuery : url;
 		mRequestType = requestType;
-		mAcceptType = acceptType;
-		mContentType = contentType;
 		mRequestListener = requestListener;
+		mContext = context;
 	}
-
+		
 	@Override
 	protected Void doInBackground(Void... params) {
+
+		DefaultHttpClient httpClient = new DefaultHttpClient();
 		
-		try {
+		CookieSyncManager.createInstance(mContext);
+		String[] keyValueSets = CookieManager.getInstance().getCookie("etilbudsavis.dk").split(";");
+		for(String cookie : keyValueSets) {
 			
-			// Create new URL.
-			URL serverUrl = new URL(mUrl);
-
-			// Open new http connection and setup headers.
-			HttpsURLConnection connection = (HttpsURLConnection) serverUrl.openConnection();
-			connection.setDoInput(true);
-			connection.setInstanceFollowRedirects(true);
-			connection.setRequestMethod(mRequestType.toString());
-			connection.setRequestProperty("Content-Type", mContentType.toString());
-			connection.setRequestProperty("Accept", mAcceptType.toString());
-			
-			if (mRequestType == API.RequestType.GET) {
-				
-				connection.setDoOutput(false);
-				
-			} else if (mRequestType == API.RequestType.POST) {
-				
-				connection.setDoOutput(true);
-				connection.setRequestProperty("Content-Length", "" + String.valueOf(mQuery.getBytes().length));
-				BufferedWriter writer = new BufferedWriter(
-						new OutputStreamWriter(connection.getOutputStream(),"utf-8"));
-				writer.write(mQuery);
-				writer.close();
-			}
-			
-			StringBuilder sb = new StringBuilder();
-			BufferedReader reader = new BufferedReader(new InputStreamReader( connection.getInputStream()));
-			String line ="";
-			while ((line = reader.readLine()) != null) {
-				sb.append(line);
-			}
-			reader.close();
-			
-			mResult = sb.toString().length() == 0 ? "" : sb.toString();
-			mResponseCode = String.valueOf(connection.getResponseCode());
-
-			connection.disconnect();
-			
-		} catch (IOException e) {
-			mResponseCode = "IO Error";
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
+		    String[] keyValue = cookie.split("=");
+		    String value = ( keyValue.length > 1 ) ? keyValue[1] : "";
+		    BasicClientCookie c = new BasicClientCookie(keyValue[0], value);
+		    c.setDomain(ETA_DOMAIN);
+		    httpClient.getCookieStore().addCookie(c);
 		}
 		
+		HttpResponse response;
+		try {
+			if (mRequestType == RequestType.POST) {
+
+				HttpPost post = new HttpPost(mUrl);
+				if (mQuery.size() > 0)
+					post.setEntity(new UrlEncodedFormEntity(mQuery, HTTP.UTF_8));
+				
+				response = httpClient.execute(post);
+				
+			} else {
+				
+				if (mQuery.size() > 0)
+					mUrl = mUrl + "?" + URLEncodedUtils.format(mQuery, HTTP.UTF_8);
+				
+				HttpGet get = new HttpGet(mUrl);
+				response = httpClient.execute(get);
+			}
+
+			mResponseCode = response.getStatusLine().getStatusCode();
+			if (mResponseCode == HttpStatus.SC_OK)
+				mResult = EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
+			else
+				mResult = response.getStatusLine().getReasonPhrase();
+
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		// Add all cookies to global cookie store
+		List<Cookie> cookies = httpClient.getCookieStore().getCookies();
+		if(cookies != null) {
+            for(Cookie cookie : cookies) {
+                String cookieString = cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain();                        
+                CookieManager.getInstance().setCookie(cookie.getDomain(), cookieString);	                	
+            }
+        }
+        CookieSyncManager.getInstance().sync();
+
+        // Close connection, to deallocate resources
+		httpClient.getConnectionManager().shutdown();
+
 		return null;
 	}
 	
 	// Do callback in the UI thread
 	@Override
 	protected void onPostExecute(Void result) {
-		if (mResponseCode.equals("200")) mRequestListener.onSuccess(mResponseCode, mResult);
-		else mRequestListener.onError(mResponseCode, mResult);
+		if (mResponseCode == HttpStatus.SC_OK) 
+			mRequestListener.onSuccess(mResponseCode, mResult);
+		else 
+			mRequestListener.onError(mResponseCode, mResult);
     }
 	
 }

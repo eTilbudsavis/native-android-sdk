@@ -120,7 +120,6 @@ public final class Pageflip {
 					return true;
 				}
 
-				Utilities.logd("shouldOverrideUrlLoading", "Unknown URL schematic");
 				return false;
 			}
 
@@ -135,14 +134,12 @@ public final class Pageflip {
 		// download HTML).
 		if (mETA.getHtmlCached().length() == 0 || (Utilities.getTime() - mETA.getHtmlAcquired()) >= mETA.getHtmlExpire()) {
 			mETA.api.request(mETA.getProviderUrl(), new RequestListener() {
-				public void onSuccess(String response, Object object) {
+				public void onSuccess(Integer response, Object object) {
 					mETA.setHtmlCached(object.toString());
 					mWebView.loadData(mETA.getHtmlCached(), "text/html", "UTF-8");
 				}
 
-				public void onError(String response, Object object) {
-					Utilities.logd("Pageflip", "HTML error");
-					Utilities.logd(response, object.toString());
+				public void onError(Integer response, Object object) {
 				}
 			});
 		} else {

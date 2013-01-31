@@ -7,10 +7,16 @@ package com.etilbudsavis.etasdk;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
 import android.util.Log;
 
 public final class Utilities {
@@ -42,30 +48,24 @@ public final class Utilities {
 	}
 	
 	/**
-	 * Builds a MD5 checksum of an ordered LinkedHashMap 
+	 * Builds a MD5 checksum of a NameValuePair
 	 * of parameters to be included in an API call. 
 	 *
-	 * @param data LinkedHashMap containing the key/value pairs
+	 * @param nameValuePair NameValuePair containing the name/value pairs
 	 * @param api_secret The SDK apiSecret
 	 * @return
 	 */
-	public static String buildChecksum(LinkedHashMap<String, Object> data, String api_secret) {
-		String input = "";
-		Set<String> ks = data.keySet();
-		Iterator<String> iterator = ks.iterator();
-		StringBuilder sbInput = new StringBuilder();
+	public static String buildChecksum(List<NameValuePair> nameValuePair, String api_secret) {
 
-		while (iterator.hasNext()) {
-			String s = iterator.next();
-			sbInput.append(data.get(s).toString());
+		StringBuilder sb = new StringBuilder();
+		for (NameValuePair nvp : nameValuePair) {
+			sb.append(nvp.getValue());
 		}
-
-		sbInput.append(api_secret);
-		input = sbInput.toString();
+		sb.append(api_secret);
 		
 		try {
 			java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
-			byte[] array = md.digest(input.getBytes());
+			byte[] array = md.digest(sb.toString().getBytes());
 			StringBuffer sbMD5 = new StringBuffer();
 
 			for (int i = 0; i < array.length; ++i) {
@@ -81,32 +81,15 @@ public final class Utilities {
 	}
 	
 	/**
-	 * Builds an ordered string of parameters for API calls.
-	 * API secret should NOT be included.
-	 *
-	 * @param data The LinkedHashMap for processing
-	 * @return A string of parameters
+	 * Add any object to a NameValuePair.
+	 * The Object will be cast to string and URLEncoded.
+	 * @param nameValuePair NameValuePair to add data to
+	 * @param name
+	 * @param value
+	 * @return
 	 */
-	public static String buildParams(LinkedHashMap<String, Object> data) {
-		StringBuilder sb = new StringBuilder();
-		boolean first = true;
-		Set<String> ks = data.keySet();
-		Iterator<String> iterator = ks.iterator();
-
-		while (iterator.hasNext()) {
-			try {
-			String s = iterator.next();
-			if (!first) sb.append("&");
-			sb.append(URLEncoder.encode(s, "utf-8"));
-			sb.append("=");
-			sb.append(URLEncoder.encode(data.get(s).toString(), "utf-8"));
-			first = false;
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return sb.toString();
+	public static void putNameValuePair(List<NameValuePair> nameValuePair, String name, Object value) {
+		nameValuePair.add(new BasicNameValuePair(name, value.toString()));
 	}
 	
 	/**

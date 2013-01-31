@@ -22,12 +22,14 @@ public class ETA implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
+	private static Context mContext;
+	
 	// Endpoints.
 	private static final String MAIN_URL = "https://etilbudsavis.dk";
 	private static final String PROVIDER_URL = MAIN_URL + "/connect/";
 
 	// Preferences.
-	protected static final String PREFS_NAME = "eta";
+	protected static final String PREFS_NAME = "eta_sdk";
 	protected static final String PREFS_UUID_NAME = "uuid";
 	
 	// Authorization.
@@ -61,6 +63,7 @@ public class ETA implements Serializable {
 	public ETA(String apiKey, String apiSecret, Context context) {
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
+		mContext = context;
 
 		// Persist UUID throughout app life span.
 		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -89,6 +92,15 @@ public class ETA implements Serializable {
 	 */
 	public String getProviderUrl() {
 		return PROVIDER_URL;
+	}
+
+	/**
+	 * Returns the provider URL needed for Pageflip.
+	 *
+	 * @return Provider URL as String
+	 */
+	public Context getContext() {
+		return mContext;
 	}
 	
 	/**

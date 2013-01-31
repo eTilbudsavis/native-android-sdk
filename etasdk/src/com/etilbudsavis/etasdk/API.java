@@ -1,15 +1,16 @@
 /**
  * @fileoverview	API.
- * @author			Morten Bo <morten@etilbudsavis.dk>
- * 					Danny Hvam <danny@etilbudsavid.dk>
- * @version			0.3.0
+ * @author			Danny Hvam <danny@etilbudsavid.dk>
+ * @version		0.3.1
  */
 package com.etilbudsavis.etasdk;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Set;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
 
 import android.os.Bundle;
 
@@ -21,8 +22,7 @@ public class API implements Serializable {
 	
 	/***
 	 * The type expected to return;
-	 * Default (and only type so far) is JSON
-	 * 
+	 * Default is JSON, other types are not implemented yet
 	 */
 	public enum AcceptType {
 		XML { public String toString() { return "application/xml, text/xml"; } },
@@ -37,9 +37,7 @@ public class API implements Serializable {
 	
 	/**
 	 * The content type to use in requests.
-	 * Default for GET is TEXT
-	 * Default for post is 
-	 * 
+	 * This feature is not implemented yet.
 	 */
 	public enum ContentType {
 		PLAIN { public String toString() { return "text/plain; charset=utf-8"; } },
@@ -60,8 +58,8 @@ public class API implements Serializable {
 	 * Makes a request to the server, with the given parameters.
 	 * The result will return via the RequestListener.
 	 *
-	 * @param url
-	 * @param requestListener
+	 * @param url - This can be any URL, but optionalKeys are only sent if the URL points to the ETA API
+	 * @param requestListener - API.RequestListener
 	 */
 	public void request(String url, RequestListener requestListener) {
 		request(url, requestListener, new Bundle());
@@ -71,87 +69,84 @@ public class API implements Serializable {
 	 * Makes a request to the server, with the given parameters.
 	 * The result will return via the RequestListener.
 	 *
-	 * @param url
-	 * @param requestListener
-	 * @param optionalKeys
+	 * @param url - This can be any URL, but optionalKeys are only sent if the URL points to the ETA API
+	 * @param requestListener - API.RequestListener
+	 * @param optionalKeys - Bundle containing parameters specified on https://etilbudsavis.dk/developers/docs/
 	 */
 	public void request(String url, RequestListener requestListener, Bundle optionalKeys) {
-		request(url, requestListener, optionalKeys, API.RequestType.GET, API.AcceptType.JSON, API.ContentType.PLAIN);
+		request(url, requestListener, optionalKeys, API.RequestType.GET);
 	}
 
 	/**
 	 * Make a request to the server, with the given parameters.
 	 * The result will return via the RequestListener.
 	 *
-	 * @param url
-	 * @param requestListener
-	 * @param optionalKeys
-	 * @param requestType
-	 * @param dataType
+	 * @param url - This can be any URL, but optionalKeys are only sent if the URL points to the ETA API
+	 * @param requestListener - API.RequestListener
+	 * @param optionalKeys - Bundle containing parameters specified on https://etilbudsavis.dk/developers/docs/
+	 * @param requestType - API.RequestType
 	 */
-	public void request(String url, RequestListener requestListener, Bundle optionalKeys, RequestType requestType, AcceptType acceptType, ContentType contentType) {
-		// Needs to be final in order to complete callbacks.
-		final RequestListener reqListener = requestListener;
-
+	public void request(String url, final RequestListener requestListener, Bundle optionalKeys, RequestType requestType) {
+		
 		// Prepare data.
-		LinkedHashMap<String, Object> mData = new LinkedHashMap<String, Object>();
-
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		
 		// API request?
 		if (url.matches("^\\/api\\/.*")) {
+			
 			// Required API pairs.
-			mData.put("api_key", mETA.getApiKey());
-			mData.put("api_uuid", mETA.getUUID());
-			mData.put("api_timestamp", Utilities.getTime());
-
+			Utilities.putNameValuePair(params, "api_key", mETA.getApiKey());
+			Utilities.putNameValuePair(params, "api_uuid", mETA.getUUID());
+			Utilities.putNameValuePair(params, "api_timestamp", Utilities.getTime());
+			
+			
 			// Determine whether to include location info.
 			if (mETA.location.useLocation() && mETA.location.isLocationSet()) {
 				
 				Bundle loc = mETA.location.getLocation();
-				mData.put("api_latitude", loc.getDouble("api_latitude"));
-				mData.put("api_longitude", loc.getDouble("api_longitude"));
+				Utilities.putNameValuePair(params, "api_latitude", loc.getDouble("api_latitude"));
+				Utilities.putNameValuePair(params, "api_longitude", loc.getDouble("api_longitude"));
 				
 				// Use distance?
-				if (mETA.location.useDistance()) mData.put("api_distance", loc.getInt("api_distance"));
+				if (mETA.location.useDistance()) 
+					Utilities.putNameValuePair(params, "api_distance", loc.getInt("api_distance"));
 				
-				mData.put("api_locationDetermined", loc.getInt("api_locationDetermined"));
-				mData.put("api_geocoded", loc.getInt("api_geocoded"));
+				Utilities.putNameValuePair(params, "api_locationDetermined", loc.getInt("api_locationDetermined"));
+				Utilities.putNameValuePair(params, "api_geocoded", loc.getInt("api_geocoded"));
 				
 				// Accuracy is only to be included if the location was found using a sensor (geocoded == 0).
-				if (loc.getInt("api_geocoded") == 0) mData.put("api_accuracy", loc.getInt("api_accuracy"));
+				if (loc.getInt("api_geocoded") == 0) 
+					Utilities.putNameValuePair(params, "api_accuracy", loc.getInt("api_accuracy"));
+				
 			}
 
 			// Determine whether to include bounds.
 			if (mETA.location.isBoundsSet()) {
 				Bundle bounds = mETA.location.getBounds();
-
-				mData.put("api_boundsNorth", bounds.getDouble("api_boundsNorth"));
-				mData.put("api_boundsEast", bounds.getDouble("api_boundsNorth"));
-				mData.put("api_boundsSouth", bounds.getDouble("api_boundsNorth"));
-				mData.put("api_boundsWest", bounds.getDouble("api_boundsNorth"));
+				Utilities.putNameValuePair(params, "api_boundsNorth", bounds.getDouble("api_boundsNorth"));
+				Utilities.putNameValuePair(params, "api_boundsEast", bounds.getDouble("api_boundsNorth"));
+				Utilities.putNameValuePair(params, "api_boundsSouth", bounds.getDouble("api_boundsNorth"));
+				Utilities.putNameValuePair(params, "api_boundsWest", bounds.getDouble("api_boundsNorth"));
+				
 			}
 			
 			// Add optional data.
-			Set<String> ks = optionalKeys.keySet();
-			Iterator<String> iterator = ks.iterator();
-
+			Iterator<String> iterator = optionalKeys.keySet().iterator();
 			while (iterator.hasNext()) {
 				String s = iterator.next();
-				mData.put(s, optionalKeys.get(s));
+				Utilities.putNameValuePair(params, s, optionalKeys.get(s));
 			}
 			
 			// Build checksum.
-			mData.put("api_checksum", Utilities.buildChecksum(mData, mETA.getApiSecret()));
+			Utilities.putNameValuePair(params, "api_checksum", Utilities.buildChecksum(params, mETA.getApiSecret()));
+			
 		}
-		
 		
 		// Prefix URL?
 		if (!url.matches("^http.*")) url = mETA.getMainUrl() + url;
 		
-		// Build query string.
-		String query = mData.isEmpty() ? "" : Utilities.buildParams(mData);
-
 		// Create a new HttpHelper.
-		HttpHelper httpHelper = new HttpHelper(url, query, requestType, acceptType, contentType, reqListener);
+		HttpHelper httpHelper = new HttpHelper(url, params, requestType, requestListener, mETA.getContext());
 		
 		// Execute the AsyncTask in HttpHelper to ensure a new thread.
 		httpHelper.execute();
@@ -162,7 +157,7 @@ public class API implements Serializable {
      * back to the UI thread.
      */
     public static interface RequestListener {
-        public void onSuccess(String response, Object object);
-        public void onError(String response, Object object);
+        public void onSuccess(Integer response, Object object);
+        public void onError(Integer response, Object object);
     }
 }
