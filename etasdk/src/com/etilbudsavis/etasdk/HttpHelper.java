@@ -1,6 +1,9 @@
 package com.etilbudsavis.etasdk;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
@@ -56,14 +59,18 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		
 		CookieSyncManager.createInstance(mContext);
-		String[] keyValueSets = CookieManager.getInstance().getCookie("etilbudsavis.dk").split(";");
-		for(String cookie : keyValueSets) {
-			
-		    String[] keyValue = cookie.split("=");
-		    String value = ( keyValue.length > 1 ) ? keyValue[1] : "";
-		    BasicClientCookie c = new BasicClientCookie(keyValue[0], value);
-		    c.setDomain(ETA_DOMAIN);
-		    httpClient.getCookieStore().addCookie(c);
+		String cString = CookieManager.getInstance().getCookie("etilbudsavis.dk");
+		if (cString != null) {
+			String[] keyValueSets = cString.split(";");
+			for(String cookie : keyValueSets) {
+				
+			    String[] keyValue = cookie.split("=");
+			    String value = ( keyValue.length > 1 ) ? keyValue[1] : "";
+			    BasicClientCookie c = new BasicClientCookie(keyValue[0], value);
+			    c.setDomain(ETA_DOMAIN);
+			    httpClient.getCookieStore().addCookie(c);
+			}
+
 		}
 		
 		HttpResponse response;
@@ -84,11 +91,27 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 				HttpGet get = new HttpGet(mUrl);
 				response = httpClient.execute(get);
 			}
-
+			
+			
+			/**
+			 * Do not get content with this:
+			 * EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
+			 * As this will make some very unfortunate line breaks in e.g. eta.dk/connect/ 
+			 */
 			mResponseCode = response.getStatusLine().getStatusCode();
-			if (mResponseCode == HttpStatus.SC_OK)
-				mResult = EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
-			else
+			if (mResponseCode == HttpStatus.SC_OK) {
+				BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			    StringBuilder sb = new StringBuilder();
+			    String line = null;
+			    try {
+			        while ((line = reader.readLine()) != null)
+			            sb.append(line);
+			        
+			    } catch (IOException e) {
+			        e.printStackTrace();
+			    } 
+			    mResult = sb.toString();
+			} else
 				mResult = response.getStatusLine().getReasonPhrase();
 
 		} catch (UnsupportedEncodingException e) {
@@ -112,6 +135,9 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
         // Close connection, to deallocate resources
 		httpClient.getConnectionManager().shutdown();
 
+		Utilities.logd("HttpHelper", String.valueOf(mResponseCode));
+		Utilities.logd("HttpHelper", mResult);
+		
 		return null;
 	}
 	

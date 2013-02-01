@@ -74,13 +74,21 @@ public final class Pageflip {
 		final String mType = type.toString().toLowerCase();
 		final String mContent = content;
 		
+		Utilities.logd("Pageflip", "Test1");
+
 		WebSettings mWebSetting = mWebView.getSettings();
 		mWebSetting.setJavaScriptEnabled(true);
 		mWebSetting.setDefaultTextEncodingName("UTF-8");
+		
+		Utilities.logd("Pageflip", "Test1,1");
+
 		mWebView.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
 				String[] request = url.split(":", 3);
+
+				
+				Utilities.logd("Pageflip", "Test2");
 
 				// Does the prefix match a pageflip event?
 				if (request[0].equals(EVENT_PREFIX)) {
@@ -90,7 +98,10 @@ public final class Pageflip {
 							if (request[2].length() == 0) {
 								object = new JSONObject();
 							} else {
+
 								
+								Utilities.logd("Pageflip", "Test3");
+
 								String resp = "Bad Encoding";
 								try {
 									resp = URLDecoder.decode(request[2].toString(), "utf-8");
@@ -98,7 +109,10 @@ public final class Pageflip {
 									e.printStackTrace();
 								}
 								object = (resp.equals("Bad Encoding") ? new JSONObject() : new JSONObject(resp) );
+
 								
+								Utilities.logd("Pageflip", "Test4");
+
 								// On first pagechange, execute the JavaScriptQueue.
 								if (request[1].toString().equals("pagechange") && object.has("init")) {
 									// two-part if statement to prevent JSONException on "init"
@@ -107,6 +121,9 @@ public final class Pageflip {
 									}
 								}
 							}
+							
+							Utilities.logd("Pageflip", "Test5");
+
 							mPageflipListener.onPageflipEvent(request[1], object);
 
 						} catch (JSONException e) {
@@ -145,7 +162,10 @@ public final class Pageflip {
 		} else {
 			mWebView.loadDataWithBaseURL(null, mETA.getHtmlCached(), "text/html", "UTF-8", null);
 		}
+
 		
+		Utilities.logd("Pageflip", "Test1,3");
+
 		return mWebView;
 	}
 	
