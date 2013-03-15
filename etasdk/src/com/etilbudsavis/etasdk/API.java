@@ -101,14 +101,14 @@ public class API implements Serializable {
 			
 			
 			// Determine whether to include location info.
-			if (mETA.location.useLocation() && mETA.location.isLocationSet()) {
+			if (mETA.getLocation().useLocation() && mETA.getLocation().isLocationSet()) {
 				
-				Bundle loc = mETA.location.getLocation();
+				Bundle loc = mETA.getLocation().getLocation();
 				Utilities.putNameValuePair(params, "api_latitude", loc.getDouble("api_latitude"));
 				Utilities.putNameValuePair(params, "api_longitude", loc.getDouble("api_longitude"));
 				
 				// Use distance?
-				if (mETA.location.useDistance()) 
+				if (mETA.getLocation().useDistance()) 
 					Utilities.putNameValuePair(params, "api_distance", loc.getInt("api_distance"));
 				
 				Utilities.putNameValuePair(params, "api_locationDetermined", loc.getInt("api_locationDetermined"));
@@ -121,8 +121,8 @@ public class API implements Serializable {
 			}
 
 			// Determine whether to include bounds.
-			if (mETA.location.isBoundsSet()) {
-				Bundle bounds = mETA.location.getBounds();
+			if (mETA.getLocation().isBoundsSet()) {
+				Bundle bounds = mETA.getLocation().getBounds();
 				Utilities.putNameValuePair(params, "api_boundsNorth", bounds.getDouble("api_boundsNorth"));
 				Utilities.putNameValuePair(params, "api_boundsEast", bounds.getDouble("api_boundsNorth"));
 				Utilities.putNameValuePair(params, "api_boundsSouth", bounds.getDouble("api_boundsNorth"));
@@ -139,6 +139,15 @@ public class API implements Serializable {
 			
 			// Build checksum.
 			Utilities.putNameValuePair(params, "api_checksum", Utilities.buildChecksum(params, mETA.getApiSecret()));
+			
+		} else {
+
+			// Add data to non-eta-api site.
+			Iterator<String> iterator = optionalKeys.keySet().iterator();
+			while (iterator.hasNext()) {
+				String s = iterator.next();
+				Utilities.putNameValuePair(params, s, optionalKeys.get(s));
+			}
 			
 		}
 		

@@ -5,9 +5,6 @@
  */
 package com.etilbudsavis.etasdk;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -100,13 +97,11 @@ public final class Utilities {
 	 */
 	@SuppressWarnings("unchecked")
 	public static String buildJSString(LinkedHashMap<String, Object> data) {
-		StringBuilder sb = new StringBuilder();
 		boolean first = true;
-		Set<String> ks = data.keySet();
-		Iterator<String> iterator = ks.iterator();
+		Iterator<String> iterator = data.keySet().iterator();
 
+		StringBuilder sb = new StringBuilder();
 		sb.append("{ ");
-
 		while (iterator.hasNext()) {
 			String s = iterator.next();
 
@@ -125,9 +120,7 @@ public final class Utilities {
 
 			first = false;				
 		}
-
 		sb.append(" }");
-		
 		return sb.toString();
 	}
 	

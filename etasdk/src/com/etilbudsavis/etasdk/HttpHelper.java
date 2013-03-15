@@ -2,11 +2,9 @@ package com.etilbudsavis.etasdk;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -20,15 +18,14 @@ import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-
-import com.etilbudsavis.etasdk.API.RequestListener;
-import com.etilbudsavis.etasdk.API.RequestType;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
+
+import com.etilbudsavis.etasdk.API.RequestListener;
+import com.etilbudsavis.etasdk.API.RequestType;
 
 public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	
@@ -58,23 +55,31 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		
-		CookieSyncManager.createInstance(mContext);
-		String cString = CookieManager.getInstance().getCookie("etilbudsavis.dk");
-		if (cString != null) {
-			String[] keyValueSets = cString.split(";");
-			for(String cookie : keyValueSets) {
-				
-			    String[] keyValue = cookie.split("=");
-			    String value = ( keyValue.length > 1 ) ? keyValue[1] : "";
-			    BasicClientCookie c = new BasicClientCookie(keyValue[0], value);
-			    c.setDomain(ETA_DOMAIN);
-			    httpClient.getCookieStore().addCookie(c);
+		// An cookie exception... of course
+		if (!mUrl.equals("https://etilbudsavis.dk/ajax/user/reset/")) {
+			CookieSyncManager.createInstance(mContext);
+			String cString = CookieManager.getInstance().getCookie("etilbudsavis.dk");
+			if (cString != null) {
+				String[] keyValueSets = cString.split(";");
+				for(String cookie : keyValueSets) {
+				    String[] keyValue = cookie.split("=");
+				    String value = ( keyValue.length > 1 ) ? keyValue[1] : "";
+				    BasicClientCookie c = new BasicClientCookie(keyValue[0], value);
+				    c.setDomain(ETA_DOMAIN);
+				    httpClient.getCookieStore().addCookie(c);
+				}
 			}
-
 		}
 		
 		HttpResponse response;
 		try {
+			
+//			if (!mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/sync/")
+//					&& !mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/list/")) {
+//				Utilities.logd("HttpHelper", "URL: " + mUrl);
+//				Utilities.logd("HttpHelper", "Query: " + URLEncodedUtils.format(mQuery, HTTP.UTF_8));
+//			}
+			
 			if (mRequestType == RequestType.POST) {
 
 				HttpPost post = new HttpPost(mUrl);
@@ -125,18 +130,32 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		// Add all cookies to global cookie store
 		List<Cookie> cookies = httpClient.getCookieStore().getCookies();
 		if(cookies != null) {
-            for(Cookie cookie : cookies) {
-                String cookieString = cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain();                        
-                CookieManager.getInstance().setCookie(cookie.getDomain(), cookieString);	                	
+			// If it's a sign out request, we must discard all AUTH cookies
+			if (mUrl.equals("https://etilbudsavis.dk/api/v1/user/signout/")) {
+	            for(Cookie cookie : cookies) {
+	            	if (!cookie.getName().contains("auth[")) {
+		                String cookieString = cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain();
+		                CookieManager.getInstance().setCookie(cookie.getDomain(), cookieString);
+	            	}
+	            }
+            } else {
+            	for(Cookie cookie : cookies) {
+	                String cookieString = cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain();
+	                CookieManager.getInstance().setCookie(cookie.getDomain(), cookieString);
+	            }
             }
+            
         }
         CookieSyncManager.getInstance().sync();
 
         // Close connection, to deallocate resources
 		httpClient.getConnectionManager().shutdown();
 
-		Utilities.logd("HttpHelper", String.valueOf(mResponseCode));
-		Utilities.logd("HttpHelper", mResult);
+//		if (!mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/sync/")
+//				&& !mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/list/")) {
+//			Utilities.logd("HttpHelper", String.valueOf(mResponseCode));
+//				Utilities.logd("HttpHelper", mResult);
+//		}
 		
 		return null;
 	}
@@ -144,10 +163,14 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	// Do callback in the UI thread
 	@Override
 	protected void onPostExecute(Void result) {
-		if (mResponseCode == HttpStatus.SC_OK) 
-			mRequestListener.onSuccess(mResponseCode, mResult);
-		else 
-			mRequestListener.onError(mResponseCode, mResult);
+		if (mResponseCode != null) {
+			if (mResponseCode == HttpStatus.SC_OK) 
+				mRequestListener.onSuccess(mResponseCode, mResult);
+			else 
+				mRequestListener.onError(mResponseCode, mResult);
+		} else {
+			mRequestListener.onError(0, "No Internet");
+		}
     }
 	
 }

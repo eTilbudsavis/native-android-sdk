@@ -187,4 +187,13 @@ public class ETA implements Serializable {
 	public void setHtmlExpire(int seconds) {
 		mHtmlExpire = seconds;
 	}
+	
+	/**
+	 * A location object used by ETA, when making API requests.
+	 * This object should be edited when ever you want to change location.
+	 * @return <li> A location object
+	 */
+	public Location getLocation() {
+		return location;
+	}
 }

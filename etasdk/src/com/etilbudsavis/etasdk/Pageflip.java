@@ -74,21 +74,14 @@ public final class Pageflip {
 		final String mType = type.toString().toLowerCase();
 		final String mContent = content;
 		
-		Utilities.logd("Pageflip", "Test1");
-
 		WebSettings mWebSetting = mWebView.getSettings();
 		mWebSetting.setJavaScriptEnabled(true);
 		mWebSetting.setDefaultTextEncodingName("UTF-8");
 		
-		Utilities.logd("Pageflip", "Test1,1");
-
 		mWebView.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
 				String[] request = url.split(":", 3);
-
-				
-				Utilities.logd("Pageflip", "Test2");
 
 				// Does the prefix match a pageflip event?
 				if (request[0].equals(EVENT_PREFIX)) {
@@ -99,9 +92,6 @@ public final class Pageflip {
 								object = new JSONObject();
 							} else {
 
-								
-								Utilities.logd("Pageflip", "Test3");
-
 								String resp = "Bad Encoding";
 								try {
 									resp = URLDecoder.decode(request[2].toString(), "utf-8");
@@ -109,9 +99,6 @@ public final class Pageflip {
 									e.printStackTrace();
 								}
 								object = (resp.equals("Bad Encoding") ? new JSONObject() : new JSONObject(resp) );
-
-								
-								Utilities.logd("Pageflip", "Test4");
 
 								// On first pagechange, execute the JavaScriptQueue.
 								if (request[1].toString().equals("pagechange") && object.has("init")) {
@@ -121,9 +108,6 @@ public final class Pageflip {
 									}
 								}
 							}
-							
-							Utilities.logd("Pageflip", "Test5");
-
 							mPageflipListener.onPageflipEvent(request[1], object);
 
 						} catch (JSONException e) {
@@ -157,6 +141,7 @@ public final class Pageflip {
 				}
 
 				public void onError(Integer response, Object object) {
+					mWebView.loadDataWithBaseURL(null, "<html><body>No internet</body></html>", "text/html", "UTF-8", null);
 				}
 			});
 		} else {
@@ -185,12 +170,12 @@ public final class Pageflip {
 			etaInit.put("uuid", mETA.getUUID());
 		s += "eta.init(" + Utilities.buildJSString(etaInit) + ");";
 		
-		if (mETA.location.useLocation()) {
-			Bundle loc = mETA.location.getLocation();
+		if (mETA.getLocation().useLocation()) {
+			Bundle loc = mETA.getLocation().getLocation();
 			LinkedHashMap<String, Object> etaloc = new LinkedHashMap<String, Object>();
 				etaloc.put("latitude", loc.getDouble("api_latitude"));
 				etaloc.put("longitude", loc.getDouble("api_longitude"));
-				etaloc.put("distance", mETA.location.useDistance() ? loc.getInt("api_distance") : "0" );
+				etaloc.put("distance", mETA.getLocation().useDistance() ? loc.getInt("api_distance") : "0" );
 				etaloc.put("locationDetermined", loc.getInt("api_locationDetermined"));
 				etaloc.put("geocoded", loc.getInt("api_geocoded"));
 				if (loc.getInt("api_geocoded") == 0) 
@@ -228,19 +213,9 @@ public final class Pageflip {
 	 * This will automatically be called on ETA.location.setLocation()
 	 */
 	public boolean updateLocation() {
-		if (mETA.location.useLocation()) {
-			Bundle loc = mETA.location.getLocation();
-			LinkedHashMap<String, Object> etaloc = new LinkedHashMap<String, Object>();
-				etaloc.put("latitude", loc.getDouble("api_latitude"));
-				etaloc.put("longitude", loc.getDouble("api_longitude"));
-				etaloc.put("distance", mETA.location.useDistance() ? loc.getInt("api_distance") : "0" );
-				etaloc.put("locationDetermined", loc.getInt("api_locationDetermined"));
-				etaloc.put("geocoded", loc.getInt("api_geocoded"));
-				if (loc.getInt("api_geocoded") == 0) 
-					etaloc.put("accuracy", loc.getInt("api_accuracy"));
-			return injectJS("eta.Location.save(" + Utilities.buildJSString(etaloc) + ");");
+		if (mETA.getLocation().useLocation()) {
+			return injectJS("eta.Location.save(" + Utilities.buildJSString(mETA.getLocation().getPageflipLocation()) + ");");
 		}
-
 		return false;
 	}
 	
