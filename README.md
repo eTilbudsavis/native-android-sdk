@@ -23,11 +23,11 @@ The ETA generates and holds various information, like UUID for the device (not t
 location (which is optional) and the API object.
 
 ### Location
-In order to utilize the location awareness, you need 
-to set the location. Luckily this is real easy too, you just need to inform the 
-location object inside the newly created eta class:
+In order to utilize the location awareness, you need  to set the location. 
+Luckily this is real easy too, you just need to get the location object, 
+and use the setLocation() method:
 
-	eta.location.setLocation(latitude, longitude, geocoded, accuracy, locationDetermined, distance)
+	eta.getLocation().setLocation(latitude, longitude, geocoded, accuracy, locationDetermined, distance)
 
 As you will find you have several options in the location class. It's also
 possible to set bounds on the search results in the API requests, wich is also
@@ -39,12 +39,13 @@ need to implement it somehow. We'll just make a new listener:
 
 	RequestListener requestListener = new RequestListener() {
 		@Override
-		public void onSuccess(String response, Object state) {
-			JSONObject catalogList = (JSONObject)state;
+		public void onSuccess(Integer response, Object object) {
+			JSONObject jObject = new JSONObject(object.toString());
+			// Add your code here
 		}
 
 		@Override
-		public void onError(String response, Object state) {
+		public void onError(Integer response, Object object) {
 			// Add your code here
 		}
 	};
@@ -56,7 +57,7 @@ You are now ready to get some information from the backend. For example, here's 
 Really easy, huh?
 
 The request listener implements two methods: `onSuccess` and `onError`. Both takes 
-a response (some status code), and an object, typically in JSON or String format, 
+a response (some HTTP status code), and an object, typically in JSON or String format, 
 containing the requested data. The `onSuccess` callback is only fired on HTTP 
 status code 200, all others go to `onError`. The syntax of a response is like this:
 
@@ -146,7 +147,7 @@ _close_ - Pageflip closed
 - `createUUID` Used to generate the UUID for each unique device.
 - `logd` Used for logging purposes. Logging can easily be disabled when compiling for production via the "ENABLE_LOG" boolean.
 - `buildChecksum` Creates a checksum of a given set of parameters. Note that the order of gives parameters matters, therefore we use a LinkedHashMap.
-- `buildParams` Builds GET/POST parameters from a given LinkedHashMap.
+- `putNameValuePair` Cast and add any object to a list of BasicNameValuePair
 - `buildJSString` Builds a JavaScript string e.g. { key : value }.
 - `getTime` Gets the current UTC time in seconds.
 
