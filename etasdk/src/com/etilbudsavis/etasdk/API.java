@@ -61,8 +61,8 @@ public class API implements Serializable {
 	 * @param url - This can be any URL, but optionalKeys are only sent if the URL points to the ETA API
 	 * @param requestListener - API.RequestListener
 	 */
-	public void request(String url, RequestListener requestListener) {
-		request(url, requestListener, new Bundle());
+	public HttpHelper request(String url, RequestListener requestListener) {
+		return request(url, requestListener, new Bundle());
 	}
 
 	/**
@@ -73,8 +73,8 @@ public class API implements Serializable {
 	 * @param requestListener - API.RequestListener
 	 * @param optionalKeys - Bundle containing parameters specified on https://etilbudsavis.dk/developers/docs/
 	 */
-	public void request(String url, RequestListener requestListener, Bundle optionalKeys) {
-		request(url, requestListener, optionalKeys, API.RequestType.GET);
+	public HttpHelper request(String url, RequestListener requestListener, Bundle optionalKeys) {
+		return request(url, requestListener, optionalKeys, API.RequestType.GET);
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class API implements Serializable {
 	 * @param optionalKeys - Bundle containing parameters specified on https://etilbudsavis.dk/developers/docs/
 	 * @param requestType - API.RequestType
 	 */
-	public void request(String url, final RequestListener requestListener, Bundle optionalKeys, RequestType requestType) {
+	public HttpHelper request(String url, final RequestListener requestListener, Bundle optionalKeys, RequestType requestType) {
 		
 		// Prepare data.
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -103,7 +103,7 @@ public class API implements Serializable {
 			// Determine whether to include location info.
 			if (mETA.getLocation().useLocation() && mETA.getLocation().isLocationSet()) {
 				
-				Bundle loc = mETA.getLocation().getLocation();
+				Bundle loc = mETA.getLocation().getLocationAsApiParams();
 				Utilities.putNameValuePair(params, "api_latitude", loc.getDouble("api_latitude"));
 				Utilities.putNameValuePair(params, "api_longitude", loc.getDouble("api_longitude"));
 				
@@ -159,6 +159,8 @@ public class API implements Serializable {
 		
 		// Execute the AsyncTask in HttpHelper to ensure a new thread.
 		httpHelper.execute();
+		
+		return httpHelper;
 	}
 
     /**

@@ -17,6 +17,8 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 
 import android.content.Context;
@@ -30,6 +32,7 @@ import com.etilbudsavis.etasdk.API.RequestType;
 public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	
 	private String ETA_DOMAIN = "etilbudsavis.dk";
+	private int CONNECTION_TIME_OUT = 15 * 1000;
 	private String mUrl;
 	private List<NameValuePair> mQuery;
 	private API.RequestType mRequestType;
@@ -54,6 +57,10 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	protected Void doInBackground(Void... params) {
 
 		DefaultHttpClient httpClient = new DefaultHttpClient();
+		
+		HttpParams httpParams = httpClient.getParams();
+		HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIME_OUT);
+		HttpConnectionParams.setSoTimeout(httpParams, CONNECTION_TIME_OUT);
 		
 		// An cookie exception... of course
 		if (!mUrl.equals("https://etilbudsavis.dk/ajax/user/reset/")) {
@@ -154,7 +161,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 //		if (!mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/sync/")
 //				&& !mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/list/")) {
 //			Utilities.logd("HttpHelper", String.valueOf(mResponseCode));
-//				Utilities.logd("HttpHelper", mResult);
+//			Utilities.logd("HttpHelper", mResult);
 //		}
 		
 		return null;
