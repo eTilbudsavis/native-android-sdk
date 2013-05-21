@@ -5,32 +5,29 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.API.RequestListener;
-import com.eTilbudsavis.etasdk.ETA;
-import com.etilbudsavis.sdkdemo.R;
-
-import android.os.Bundle;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Utilities;
+import com.etilbudsavis.sdkdemo.R;
+
 public class Main extends Activity {
 
+	public static final String TAG = "SDKDEMO";
 	// Create ETA and API objects.
-	public ETA eta;
+	private Eta mEta;
 
 	// Set API key and secret.
 	private String mApiKey = "";
-	private String mApiSecret = "";
 	
 	// Specify endpoint.
 	private String mUrl = "/api/v1/catalog/list/";
@@ -48,7 +45,9 @@ public class Main extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        eta = new ETA(mApiKey, mApiSecret, getApplicationContext());
+        mEta = new Eta(mApiKey, this);
+        
+        Utilities.logd(TAG, mEta.getSession().getJson());
         
         btnGetCatalog = (Button)findViewById(R.id.btnGetCatalog);
         btnCatalogInfo = (Button)findViewById(R.id.btnCatalogInfo);
@@ -63,56 +62,9 @@ public class Main extends Activity {
 			public void onClick(View v) {
 				progressDialog = ProgressDialog.show(Main.this, "Getting catalogs", "Downloading...");
 
-				eta.api.request(mUrl, new RequestListener() {
-					// onSuccess we will add items to the spinner, and make it visible.
-					@Override
-					public void onSuccess(Integer response, Object object) {
-						try {
-							// First cast "object" to a JSONObject->JSONArray.
-							catalogArray = new JSONObject(object.toString()).getJSONArray("data");
-
-							// Then setup the spinner.
-							setupSpinner();
-							btnCatalogInfo.setEnabled(true);
-							btnWebView.setEnabled(true);
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
-						progressDialog.dismiss();
-					}
-
-					@Override
-					public void onError(Integer response, Object object) {
-						progressDialog.dismiss();
-						new AlertDialog.Builder(Main.this)
-						.setTitle("Error")
-						.setMessage("Did you remember to add API key and secret?")
-						.setNeutralButton("Ok", null)
-						.show();
-					}
-				});
-				
 			}
 		});
         
-        btnCatalogInfo.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(Main.this, CatalogInfo.class);
-				intent.putExtra("JSONObject", catalogArray.optJSONObject(spinner.getSelectedItemPosition()).toString());
-		        startActivity(intent);
-			}
-		});
-        
-        btnWebView.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(Main.this, CatalogWebView.class);
-				intent.putExtra("JSONObject", catalogArray.optJSONObject(spinner.getSelectedItemPosition()).toString());
-				intent.putExtra("eta", eta);
-		        startActivity(intent);
-			}
-		});
     }
     
     private void setupSpinner() throws JSONException {

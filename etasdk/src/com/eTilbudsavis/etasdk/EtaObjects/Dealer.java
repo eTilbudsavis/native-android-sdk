@@ -8,7 +8,22 @@ import org.json.JSONObject;
 public class Dealer implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	
+
+	/** Sort a list by name in ascending order. (smallest to largest) */
+	public static final String SORT_NAME = "name";
+
+	/** Sort a list by name in descending order. (largest to smallest)*/
+	public static final String SORT_NAME_DESC = "-" + SORT_NAME;
+
+	/** Sort a list by created in ascending order. (smallest to largest) */
+	public static final String SORT_CREATED = "created";
+
+	/** Sort a list by created in ascending order. (smallest to largest) */
+	public static final String SORT_CREATED_DESC = "-" + SORT_CREATED;
+
+	/** Parameter for getting a list of specific dealer id's */
+	public static final String DEALER_IDS = "dealer_ids";
+
 	private String mId;
 	private String mName;
 	private String mUrl;

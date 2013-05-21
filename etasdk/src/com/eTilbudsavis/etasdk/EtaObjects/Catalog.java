@@ -8,39 +8,52 @@ import org.json.JSONObject;
 public class Catalog implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	
-	/**
-	 * Sort catalog list by popularity.
-	 */
+
+	/** Sort a list by popularity in ascending order. (smallest to largest) */
 	public static final String SORT_POPULARITY = "popularity";
-	
-	/**
-	 * Sort catalog list by distance.
-	 */
+
+	/** Sort a list by popularity in descending order. (largest to smallest)*/
+	public static final String SORT_POPULARITY_DESC = "-" + SORT_POPULARITY;
+
+	/** Sort a list by distance in ascending order. (smallest to largest) */
 	public static final String SORT_DISTANCE = "distance";
-	
-	/**
-	 * Sort catalog list by name.
-	 */
+
+	/** Sort a list by distance in descending order. (largest to smallest)*/
+	public static final String SORT_DISTANCE_DESC = "-" + SORT_DISTANCE;
+
+	/** Sort a list by name in ascending order. (smallest to largest) */
 	public static final String SORT_NAME = "name";
-	
-	/**
-	 * Sort catalog list by published.
-	 */
+
+	/** Sort a list by name in descending order. (largest to smallest)*/
+	public static final String SORT_NAME_DESC = "-" + SORT_NAME;
+
+	/** Sort a list by published in ascending order. (smallest to largest) */
 	public static final String SORT_PUBLISHED = "published";
 
-	/**
-	 * Sort catalog list by expired.
-	 */
+	/** Sort a list by published in descending order. (largest to smallest)*/
+	public static final String SORT_PUBLISHED_DESC = "-" + SORT_PUBLISHED;
+
+	/** Sort a list by expired in ascending order. (smallest to largest) */
 	public static final String SORT_EXPIRED = "expired";
 
-	/**
-	 * Sort catalog list by expired.
-	 * TODO: Remember to check this against the online API v2 docs to confirm.
-	 */
+	/** Sort a list by expired in descending order. (largest to smallest)*/
+	public static final String SORT_EXPIRED_DESC = "-" + SORT_EXPIRED;
+
+	/** Sort a list by created in ascending order. (smallest to largest) */
 	public static final String SORT_CREATED = "created";
+
+	/** Sort a list by created in ascending order. (smallest to largest) */
+	public static final String SORT_CREATED_DESC = "-" + SORT_CREATED;
+
+	/** Parameter for getting a list of specific catalog id's */
+	public static final String CATALOG_IDS = "catalog_ids";
 	
+	/** API v2 Catalog endpoint */
+	public static final String ENDPOINT = "/v2/catalogs";
 	
+	/** API v2 Catalog search endpoint */
+	public static final String ENDPOINT_SEARCH = ENDPOINT + "/search";
+
 	private int mPageCount;
 	private Store mStore;
 	private int mOfferCount;

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -14,45 +15,39 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 
-import android.content.Context;
 import android.os.AsyncTask;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
+import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Api.RequestListener;
-import com.eTilbudsavis.etasdk.Api.RequestType;
 
 public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	
-	private String ETA_DOMAIN = "etilbudsavis.dk";
 	private int CONNECTION_TIME_OUT = 15 * 1000;
 	private String mUrl;
 	private List<NameValuePair> mQuery;
+	private Bundle mHeaders;
 	private Api.RequestType mRequestType;
 	private RequestListener mRequestListener;
-	private Context mContext;
 	
 	private String mResult = "";
-	private Integer mResponseCode;
+	private int mResponseCode;
 
 	// Constructor for HttpHelper.
-	public HttpHelper(String url, List<NameValuePair> query, 
-			Api.RequestType requestType, RequestListener requestListener, Context context) {
-		
+	public HttpHelper(String url, List<NameValuePair> query, Bundle headers, Api.RequestType requestType, RequestListener requestListener) {
+
 		mUrl = url;
 		mQuery = query;
+		mHeaders = headers;
 		mRequestType = requestType;
 		mRequestListener = requestListener;
-		mContext = context;
-	}
 		
+	}
+	
 	@Override
 	protected Void doInBackground(Void... params) {
 
@@ -62,48 +57,56 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIME_OUT);
 		HttpConnectionParams.setSoTimeout(httpParams, CONNECTION_TIME_OUT);
 		
-		// An cookie exception... of course
-		if (!mUrl.equals("https://etilbudsavis.dk/ajax/user/reset/")) {
-			CookieSyncManager.createInstance(mContext);
-			String cString = CookieManager.getInstance().getCookie("etilbudsavis.dk");
-			if (cString != null) {
-				String[] keyValueSets = cString.split(";");
-				for(String cookie : keyValueSets) {
-				    String[] keyValue = cookie.split("=");
-				    String value = ( keyValue.length > 1 ) ? keyValue[1] : "";
-				    BasicClientCookie c = new BasicClientCookie(keyValue[0], value);
-				    c.setDomain(ETA_DOMAIN);
-				    httpClient.getCookieStore().addCookie(c);
-				}
-			}
-		}
-		
-		HttpResponse response;
+		Iterator<String> headerIterator = mHeaders.keySet().iterator();
+		HttpResponse response = null;
 		try {
 			
-//			if (!mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/sync/")
-//					&& !mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/list/")) {
-//				Utilities.logd("HttpHelper", "URL: " + mUrl);
-//				Utilities.logd("HttpHelper", "Query: " + URLEncodedUtils.format(mQuery, HTTP.UTF_8));
-//			}
-			
-			if (mRequestType == RequestType.POST) {
-
+			switch (mRequestType) {
+			case POST:
+				
 				HttpPost post = new HttpPost(mUrl);
 				if (mQuery.size() > 0)
 					post.setEntity(new UrlEncodedFormEntity(mQuery, HTTP.UTF_8));
 				
+				while (headerIterator.hasNext()) {
+					String s = headerIterator.next();
+					post.setHeader(s, mHeaders.getString(s));
+				}
+				
 				response = httpClient.execute(post);
 				
-			} else {
-				
+				break;
+
+			case GET:
+
 				if (mQuery.size() > 0)
 					mUrl = mUrl + "?" + URLEncodedUtils.format(mQuery, HTTP.UTF_8);
-				
+
 				HttpGet get = new HttpGet(mUrl);
+
+				while (headerIterator.hasNext()) {
+					String s = headerIterator.next();
+					get.setHeader(s, mHeaders.getString(s));
+				}
+				
 				response = httpClient.execute(get);
+				break;
+				
+			case DELETE:
+				break;
+				
+			case PUT:
+				break;
+				
+			case HEAD:
+				break;
+				
+			case OPTIONS:
+				break;
+				
+			default:
+				break;
 			}
-			
 			
 			/**
 			 * Do not get content with this:
@@ -134,50 +137,16 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 			e.printStackTrace();
 		}
 
-		// Add all cookies to global cookie store
-		List<Cookie> cookies = httpClient.getCookieStore().getCookies();
-		if(cookies != null) {
-			// If it's a sign out request, we must discard all AUTH cookies
-			if (mUrl.equals("https://etilbudsavis.dk/api/v1/user/signout/")) {
-	            for(Cookie cookie : cookies) {
-	            	if (!cookie.getName().contains("auth[")) {
-		                String cookieString = cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain();
-		                CookieManager.getInstance().setCookie(cookie.getDomain(), cookieString);
-	            	}
-	            }
-            } else {
-            	for(Cookie cookie : cookies) {
-	                String cookieString = cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain();
-	                CookieManager.getInstance().setCookie(cookie.getDomain(), cookieString);
-	            }
-            }
-            
-        }
-        CookieSyncManager.getInstance().sync();
-
         // Close connection, to deallocate resources
 		httpClient.getConnectionManager().shutdown();
 
-//		if (!mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/sync/")
-//				&& !mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/list/")) {
-//			Utilities.logd("HttpHelper", String.valueOf(mResponseCode));
-//			Utilities.logd("HttpHelper", mResult);
-//		}
-		
 		return null;
 	}
 	
 	// Do callback in the UI thread
 	@Override
 	protected void onPostExecute(Void result) {
-		if (mResponseCode != null) {
-			if (mResponseCode == HttpStatus.SC_OK) 
-				mRequestListener.onSuccess(mResponseCode, mResult);
-			else 
-				mRequestListener.onError(mResponseCode, mResult);
-		} else {
-			mRequestListener.onError(0, "No Internet");
-		}
+		mRequestListener.onComplete(mResponseCode, mResult);
     }
 	
 }

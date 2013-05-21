@@ -5,6 +5,8 @@
  */
 package com.eTilbudsavis.etasdk;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -76,6 +78,37 @@ public final class Utilities {
 		return null;
 	}
 	
+    /**
+     * Generate a SHA256 checksum of a string.
+     * 
+     * @param string to SHA256
+     * @return A SHA256 string
+     */
+	public static String generateSHA256(String string) {
+		
+	    MessageDigest digest=null;
+	    String hash = "";
+	    try {
+	        digest = MessageDigest.getInstance("SHA-256");
+	        digest.update(string.getBytes());
+	        byte[] bytes = digest.digest();
+	        
+	        StringBuffer sb = new StringBuffer();
+	        for (int i = 0; i < bytes.length; i++) {
+	            String hex = Integer.toHexString(0xFF & bytes[i]);
+	            if (hex.length() == 1) {
+	                sb.append('0');
+	            }
+	            sb.append(hex);
+	        }
+	        hash = sb.toString();
+
+	    } catch (NoSuchAlgorithmException e1) {
+	        e1.printStackTrace();
+	    }
+	    return hash;
+	}
+	
 	/**
 	 * Add any object to a NameValuePair.
 	 * The Object will be cast to string and URLEncoded.
@@ -104,7 +137,8 @@ public final class Utilities {
 		while (iterator.hasNext()) {
 			String s = iterator.next();
 
-			if (!first) sb.append(", ");
+			if (!first)
+				sb.append(", ");
 
 			if (data.get(s).getClass() == data.getClass()) {
 				sb.append(s);
@@ -117,7 +151,7 @@ public final class Utilities {
 				sb.append("'");
 			}
 
-			first = false;				
+			first = false;
 		}
 		sb.append(" }");
 		return sb.toString();

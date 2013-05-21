@@ -8,7 +8,34 @@ import org.json.JSONObject;
 public class Offer implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	
+
+	/** Sort a list by popularity in ascending order. (smallest to largest) */
+	public static final String SORT_POPULARITY = "popularity";
+
+	/** Sort a list by popularity in descending order. (largest to smallest)*/
+	public static final String SORT_POPULARITY_DESC = "-" + SORT_POPULARITY;
+
+	/** Sort a list by distance in ascending order. (smallest to largest) */
+	public static final String SORT_DISTANCE = "distance";
+
+	/** Sort a list by distance in descending order. (largest to smallest)*/
+	public static final String SORT_DISTANCE_DESC = "-" + SORT_DISTANCE;
+
+	/** Sort a list by page (in catalog) in ascending order. (smallest to largest) */
+	public static final String SORT_PAGE = "page";
+
+	/** Sort a list by page (in catalog) in descending order. (largest to smallest)*/
+	public static final String SORT_PAGE_DESC = "-" + SORT_PAGE;
+
+	/** Sort a list by created in ascending order. (smallest to largest) */
+	public static final String SORT_CREATED = "created";
+
+	/** Sort a list by created in ascending order. (smallest to largest) */
+	public static final String SORT_CREATED_DESC = "-" + SORT_CREATED;
+
+	/** Parameter for getting a list of specific offer id's */
+	public static final String OFFER_IDS = "offer_ids";
+
 	private String mId;
 	private boolean mSelectStores;
 	private boolean mPromoted;

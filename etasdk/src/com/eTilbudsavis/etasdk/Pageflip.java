@@ -14,26 +14,30 @@ import java.util.LinkedHashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Api.RequestListener;
-
 import android.annotation.SuppressLint;
-import android.os.Bundle;
-import android.webkit.WebSettings;
+import android.content.Context;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 @SuppressLint("SetJavaScriptEnabled")
-// Pageflip cannot implement serializable since it has a ref to WebView, which isn't serializable.
-public final class Pageflip {
+public final class Pageflip extends WebView {
 
-	private ETA mETA;
+	private Eta mETA;
 
 	private static final String EVENT_PREFIX = "eta-pageflip";
-	private WebView mWebView;
+	private static final String PF_API_KEY = "apiKey";
+	private static final String PF_LAT = "latitude";
+	private static final String PF_LNG = "longitude";
+	private static final String PF_DISTANCE = "distance";
+	private static final String PF_SENSOR = "sensor";
+	
 	private boolean mIsPageflipInitialized = false;
+	private String mType = "";
+	private String mContent = "";
+	private PageflipListener mListener;
+	
 	private ArrayList<String> mJSQueue = new ArrayList<String>();
 	
-	// Setup on getWebView() used in initJS().
 	private LinkedHashMap<String, Object> mOptions = new LinkedHashMap<String, Object>();
 
 	/**
@@ -44,41 +48,29 @@ public final class Pageflip {
 		CATALOG, DEALER
 	}
 
-	/**
-	 * Constructor for Pageflip.
-	 *
-	 * @param eta An ETA object containing API key and secret.
-	 * @param api If you have created an API object for other purposes
-	 * 				 you can include it here to avoid multiple API objects.
-	 */
-	public Pageflip(WebView webView, ETA eta) {
-		mETA = eta;
-		mWebView = webView;
-
-		if (!eta.pageflipList.contains(this)) eta.pageflipList.add(this);
+	public Pageflip(Context context) {
+		super(context);
 	}
 
 	/**
-	 * Returns WebView with the desired content, dealer or catalog. The ID of either
-	 * catalog or dealer can be found via API calls, see more at
-	 * https://etilbudsavis.dk/developers/docs/
-	 *
+	 * 
+	 * @param eta
 	 * @param type Whether to show a specific catalog or a list of a dealers catalogs
 	 * @param content The ID of the catalog/dealer
-	 * @param pageflipListener The listener where callback's will be executed
-	 * @return The ready-to-go WebView with pageflip enabled
+	 * @param Listener The listener where callback's will be executed
 	 */
-	public WebView getWebView(ContentType type, String content,
-			PageflipListener pageflipListener) {
-		final PageflipListener mPageflipListener = pageflipListener;
-		final String mType = type.toString().toLowerCase();
-		final String mContent = content;
+	@SuppressLint("DefaultLocale")
+	public void execute(Eta eta, ContentType type, String content, PageflipListener Listener) {
+
+		mETA = eta;
+		mListener = Listener;
+		mType = type.toString().toLowerCase();
+		mContent = content;
 		
-		WebSettings mWebSetting = mWebView.getSettings();
-		mWebSetting.setJavaScriptEnabled(true);
-		mWebSetting.setDefaultTextEncodingName("UTF-8");
+		getSettings().setJavaScriptEnabled(true);
+		getSettings().setDefaultTextEncodingName("utf-8");
 		
-		mWebView.setWebViewClient(new WebViewClient() {
+		this.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
 				String[] request = url.split(":", 3);
@@ -101,19 +93,13 @@ public final class Pageflip {
 								object = (resp.equals("Bad Encoding") ? new JSONObject() : new JSONObject(resp) );
 
 								// On first pagechange, execute the JavaScriptQueue.
-								if (request[1].toString().equals("pagechange") && object.has("init")) {
-									// two-part if statement to prevent JSONException on "init"
-									if (object.getString("init").equals("true")) {
-										initQueue();
-									}
+								if (request[1].toString().equals("pagechange") && object.has("init") && object.getString("init").equals("true")) {
+									initializePageflipJS();
 								}
 							}
-							mPageflipListener.onPageflipEvent(request[1], object);
+							mListener.onPageflipEvent(request[1], object);
 
 						} catch (JSONException e) {
-							mPageflipListener.onPageflipEvent(
-									"JSONObject parsing error",
-									new JSONObject());
 							e.printStackTrace();
 						} 
 					}
@@ -124,76 +110,57 @@ public final class Pageflip {
 				return false;
 			}
 
-			// Notify when loading of WebView is done, now insert JavaScript
-			// init.
+			// Notify when loading of WebView is done, now insert JavaScript init.
 			public void onPageFinished(WebView view, String url) {
-				initJS(mType, mContent);
+				finalizePageflipJS();
 			}
 		});
 
-		// Check if it's necessary to update the HTML (it's time consuming to
-		// download HTML).
-		if (mETA.getHtmlCached().length() == 0 || (Utilities.getTime() - mETA.getHtmlAcquired()) >= mETA.getHtmlExpire()) {
+		// Check if it's necessary to update the HTML (it's time consuming to download HTML).
+		if (mETA.getCache().getHtmlCached().length() == 0 || (Utilities.getTime() - mETA.getCache().getHtmlAcquired()) >= mETA.getCache().getHtmlExpire()) {
 //			mETA.api.request(mETA.getProviderUrl(), new RequestListener() {
 //				public void onSuccess(Integer response, Object object) {
 //					mETA.setHtmlCached(object.toString());
-//					mWebView.loadData(mETA.getHtmlCached(), "text/html", "UTF-8");
+//					loadData(mETA.getHtmlCached(), "text/html", "UTF-8");
 //				}
 //
 //				public void onError(Integer response, Object object) {
-//					mWebView.loadDataWithBaseURL(null, "<html><body>No internet</body></html>", "text/html", "UTF-8", null);
+//					loadDataWithBaseURL(null, "<html><body>No internet</body></html>", "text/html", "UTF-8", null);
 //				}
 //			});
 		} else {
-			mWebView.loadDataWithBaseURL(null, mETA.getHtmlCached(), "text/html", "UTF-8", null);
+			this.loadDataWithBaseURL(null, mETA.getCache().getHtmlCached(), "text/html", "utf-8", null);
 		}
-
-		
-		Utilities.logd("Pageflip", "Test1,3");
-
-		return mWebView;
-	}
-	
-	public WebView getRestoredWebView() {
-
-			return mWebView;
 
 	}
 	
 	// Execute initial options for pageflip
-	private void initJS(String type, String content) {
+	private void finalizePageflipJS() {
 		String s = "";
-		
+
 		LinkedHashMap<String, Object> etaInit = new LinkedHashMap<String, Object>();
-			etaInit.put("apiKey", mETA.getApiKey());
-			etaInit.put("apiSecret", mETA.getApiSecret());
-			etaInit.put("uuid", mETA.getUUID());
+		etaInit.put(PF_API_KEY, mETA.getApiKey());
 		s += "eta.init(" + Utilities.buildJSString(etaInit) + ");";
-		
-//		if (mETA.getLocation().useLocation()) {
-			Bundle loc = mETA.getLocation().getApiParams();
-			LinkedHashMap<String, Object> etaloc = new LinkedHashMap<String, Object>();
-				etaloc.put("latitude", loc.getDouble("api_latitude"));
-				etaloc.put("longitude", loc.getDouble("api_longitude"));
-				etaloc.put("distance", mETA.getLocation().useDistance() ? loc.getInt("api_distance") : "0" );
-				etaloc.put("locationDetermined", loc.getInt("api_locationDetermined"));
-				etaloc.put("geocoded", loc.getInt("api_geocoded"));
-				if (loc.getInt("api_geocoded") == 0) 
-					etaloc.put("accuracy", loc.getInt("api_accuracy"));
-			s += "eta.Location.save(" + Utilities.buildJSString(etaloc) + ");";			
-//		}
-		
+
+		EtaLocation el = mETA.getLocation();
+		LinkedHashMap<String, Object> etaloc = new LinkedHashMap<String, Object>();
+		etaloc.put(PF_LAT, el.getLatitude());
+		etaloc.put(PF_LNG, el.getLongitude());
+		etaloc.put(PF_DISTANCE, "0" );
+		etaloc.put(PF_SENSOR, "0");
+		s += "eta.Location.save(" + Utilities.buildJSString(etaloc) + ");";			
+
 		LinkedHashMap<String, Object> pfinit = new LinkedHashMap<String, Object>();
-			pfinit.put(type, content);
-			pfinit.put("hotspotsOfferBoundingBox", true);
-			pfinit.putAll(mOptions);
+		pfinit.put(mType, mContent);
+		pfinit.put("hotspotsOfferBoundingBox", true);
+		pfinit.putAll(mOptions);
 		s += "eta.pageflip.init(" + Utilities.buildJSString(pfinit) + ");";
 		s += "eta.pageflip.open()";
 		execJS(s);
 	}
 	
-	// Execute initial queue
-	private void initQueue() {
+	// Execute initial options queue
+	private void initializePageflipJS() {
 		if (!mJSQueue.isEmpty()) {
 			for (String s : mJSQueue) {
 				execJS(s);
@@ -205,25 +172,21 @@ public final class Pageflip {
 
 	// Actual injection of JS into the WebView
 	private void execJS(String option) {
-		mWebView.loadUrl("javascript:(function() {" + option + "})()");
+		this.loadUrl("javascript:(function() {" + option + "})()");
 	}
 	
 	/**
 	 * Method for updating pageflip location
-	 * This will automatically be called on ETA.location.setLocation()
+	 * This will automatically be called when the global ETA location changes
 	 */
-	public boolean updateLocation() {
-//		if (mETA.getLocation().useLocation()) {
-			return injectJS("eta.Location.save(" + Utilities.buildJSString(mETA.getLocation().getPageflipLocation()) + ");");
-//		}
-//		return false;
+	public void updateLocation() {
+		injectJS("eta.Location.save(" + Utilities.buildJSString(mETA.getLocation().getPageflipLocation()) + ");");
 	}
 	
 	/**
 	 * Generic method for setting pageflip options.
-	 * If an option isn't available through any other
-	 * pageflip methods, you can use this method for setting
-	 * options in the pageflip.
+	 * If an option isn't available through any other pageflip methods, you can
+	 * use this method for setting options in the pageflip.
 	 * This method must be called before getWebView-method.
 	 *
 	 * @param key the option to set
@@ -235,7 +198,7 @@ public final class Pageflip {
 	
 	/**
 	 * Set the start page of the pageflip.
-	 * This method must be called before getWebView-method.
+	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
 	 *
 	 * @param page number
 	 */
@@ -245,7 +208,7 @@ public final class Pageflip {
 	
 	/**
 	 * Set hotspots enabled in the pageflip.
-	 * This method must be called before getWebView-method.
+	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
 	 *
 	 * @param enabled or not
 	 */
@@ -255,7 +218,7 @@ public final class Pageflip {
 	
 	/**
 	 * Set header delay for pageflip.
-	 * This method must be called before getWebView-method.
+	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
 	 *
 	 * @param milliseconds of delay
 	 */
@@ -265,7 +228,7 @@ public final class Pageflip {
 	
 	/**
 	 * Set swipe threshold for the pageflip.
-	 * This method must be called before getWebView-method.
+	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
 	 *
 	 * @param pixels of threshold
 	 */
@@ -275,7 +238,7 @@ public final class Pageflip {
 	
 	/**
 	 * Set the swipe time for the pageflip.
-	 * This method must be called before getWebView-method.
+	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
 	 *
 	 * @param seconds of swipe time
 	 */
@@ -285,7 +248,7 @@ public final class Pageflip {
 
 	/**
 	 * Set the page change animation duration curve for the pageflip.
-	 * This method must be called before getWebView-method.
+	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
 	 *
 	 * @param center
 	 * @param spread
@@ -304,7 +267,7 @@ public final class Pageflip {
 	
 	/**
 	 * Allow us to pick an orientation that works best
-	 * This method must be called before getWebView-method.
+	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
 	 *
 	 * @param value, true or false
 	 */
@@ -314,7 +277,7 @@ public final class Pageflip {
 	
 	/**
 	 * whether or not the pageflip is closable.
-	 * This method must be called before getWebView-method.
+	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
 	 *
 	 * @param value, true or false
 	 */
@@ -330,14 +293,9 @@ public final class Pageflip {
 	 * @param String[] with options to inject
 	 * @return True if injected. False if added to queue.
 	 */
-	public boolean injectJS(String[] options) {
-		boolean injected = false;
-
-		for (String string : options) {
-			injected = injectJS(string);
-		}
-
-		return injected;
+	public void injectJS(String[] options) {
+		for (String string : options)
+			injectJS(string);
 	}
 
 	/**
@@ -348,15 +306,11 @@ public final class Pageflip {
 	 * @param String with an option to inject
 	 * @return True if injected. False if added to queue.
 	 */
-	public boolean injectJS(String option) {
+	public void injectJS(String option) {
 		if (!mIsPageflipInitialized) {
 			mJSQueue.add(option);
-			return false;
-		} 
-
+		}
 		execJS(option);
-
-		return true;
 	}
 	
 	/**

@@ -8,7 +8,22 @@ import org.json.JSONObject;
 public class Store implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	
+
+	/** Sort a list by distance in ascending order. (smallest to largest) */
+	public static final String SORT_DISTANCE = "distance";
+
+	/** Sort a list by distance in descending order. (largest to smallest)*/
+	public static final String SORT_DISTANCE_DESC = "-" + SORT_DISTANCE;
+
+	/** Sort a list by created in ascending order. (smallest to largest) */
+	public static final String SORT_CREATED = "created";
+
+	/** Sort a list by created in ascending order. (smallest to largest) */
+	public static final String SORT_CREATED_DESC = "-" + SORT_CREATED;
+
+	/** Parameter for getting a list of specific store id's */
+	public static final String STORE_IDS = "store_ids";
+
 	public String mId;
 	public String mStreet;
 	public String mCity;
