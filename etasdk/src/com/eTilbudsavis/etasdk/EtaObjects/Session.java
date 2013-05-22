@@ -1,9 +1,11 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
+import Utils.Endpoint;
 import android.annotation.SuppressLint;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,7 +15,7 @@ public class Session implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	/** API v2 Session endpoint */
-	public static final String ENDPOINT = "/v2/sessions";
+	public static final String ENDPOINT = Endpoint.SESSION;
 	
 	@SuppressLint("SimpleDateFormat")
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ss+SSSS");
@@ -23,9 +25,23 @@ public class Session implements Serializable {
 	private long mExpires = 0L;
 	private String mUser = null;
 	private Permission mPermission = null;
+	private ArrayList<SessionListener> mSubscribers = new ArrayList<Session.SessionListener>();
 	
-	public Session(JSONObject session) {
-		update(session);
+	public void subscribe(SessionListener listener) {
+		mSubscribers.add(listener);
+	}
+	
+	public void unSubscribe(SessionListener listener) {
+		mSubscribers.remove(listener);
+	}
+	
+	public void notifySubscribers() {
+		for (SessionListener sl : mSubscribers)
+			sl.onUpdate();
+	}
+	
+	public Session() {
+		
 	}
 	
 	public void update(JSONObject newSession) {
@@ -35,6 +51,7 @@ public class Session implements Serializable {
 		    setExpires(newSession.getString("expires"));
 		    mUser = newSession.getString("user");
 		    mPermission = new Permission(newSession.getJSONObject("permissions"));
+		    notifySubscribers();
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -74,7 +91,7 @@ public class Session implements Serializable {
 	public Permission getPermission() {
 		return mPermission;
 	}
-	
+
 	public Session setExpires(String time) {
 	    try {
 			mExpires = sdf.parse(time).getTime();
@@ -95,6 +112,10 @@ public class Session implements Serializable {
 
 	public String getExpireString() {
 		return sdf.format(mExpires);
+	}
+	
+	public interface SessionListener {
+		public void onUpdate();
 	}
 
 }

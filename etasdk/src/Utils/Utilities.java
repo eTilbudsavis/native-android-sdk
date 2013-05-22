@@ -3,7 +3,7 @@
  * @author			Morten Bo <morten@etilbudsavis.dk>
  * @version			0.0.1
  */
-package com.eTilbudsavis.etasdk;
+package Utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

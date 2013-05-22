@@ -5,24 +5,39 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import Utils.Endpoint;
+import Utils.Sort;
+
 public class Store implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = "distance";
+	public static final String SORT_DISTANCE = Sort.DISTANCE;
 
 	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = "-" + SORT_DISTANCE;
+	public static final String SORT_DISTANCE_DESC = Sort.DISTANCE_DESC;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = "created";
+	public static final String SORT_CREATED = Sort.CREATED;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = "-" + SORT_CREATED;
+	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific store id's */
-	public static final String STORE_IDS = "store_ids";
+	public static final String PARAM_IDS = "store_ids";
+
+	/** Endpoint for store list resource */
+	public static final String ENDPOINT_LIST = Endpoint.STORE_LIST;
+
+	/** Endpoint for a single store resource */
+	public static final String ENDPOINT_ID = Endpoint.STORE_ID;
+
+	/** Endpoint for getting multiple store resources */
+	public static final String ENDPOINT_IDS = Endpoint.STORE_IDS;
+	
+	/** Endpoint for searching stores */
+	public static final String ENDPOINT_SEARCH = Endpoint.STORE_SEARCH;
 
 	public String mId;
 	public String mStreet;

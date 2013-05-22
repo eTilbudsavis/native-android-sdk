@@ -5,54 +5,63 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import Utils.Endpoint;
+import Utils.Sort;
+
 public class Catalog implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	/** Sort a list by popularity in ascending order. (smallest to largest) */
-	public static final String SORT_POPULARITY = "popularity";
+	public static final String SORT_POPULARITY = Sort.POPULARITY;
 
 	/** Sort a list by popularity in descending order. (largest to smallest)*/
-	public static final String SORT_POPULARITY_DESC = "-" + SORT_POPULARITY;
+	public static final String SORT_POPULARITY_DESC = Sort.POPULARITY_DESC;
 
 	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = "distance";
+	public static final String SORT_DISTANCE = Sort.DISTANCE;
 
 	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = "-" + SORT_DISTANCE;
+	public static final String SORT_DISTANCE_DESC = Sort.DISTANCE_DESC;
 
 	/** Sort a list by name in ascending order. (smallest to largest) */
-	public static final String SORT_NAME = "name";
+	public static final String SORT_NAME = Sort.NAME;
 
 	/** Sort a list by name in descending order. (largest to smallest)*/
-	public static final String SORT_NAME_DESC = "-" + SORT_NAME;
+	public static final String SORT_NAME_DESC = Sort.NAME_DESC;
 
 	/** Sort a list by published in ascending order. (smallest to largest) */
-	public static final String SORT_PUBLISHED = "published";
+	public static final String SORT_PUBLISHED = Sort.PUBLISHED;
 
 	/** Sort a list by published in descending order. (largest to smallest)*/
-	public static final String SORT_PUBLISHED_DESC = "-" + SORT_PUBLISHED;
+	public static final String SORT_PUBLISHED_DESC = Sort.PUBLISHED_DESC;
 
 	/** Sort a list by expired in ascending order. (smallest to largest) */
-	public static final String SORT_EXPIRED = "expired";
+	public static final String SORT_EXPIRED = Sort.EXPIRED;
 
 	/** Sort a list by expired in descending order. (largest to smallest)*/
-	public static final String SORT_EXPIRED_DESC = "-" + SORT_EXPIRED;
+	public static final String SORT_EXPIRED_DESC = Sort.EXPIRED_DESC;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = "created";
+	public static final String SORT_CREATED = Sort.CREATED;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = "-" + SORT_CREATED;
+	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific catalog id's */
 	public static final String CATALOG_IDS = "catalog_ids";
+
+	/** Endpoint for catalog list resource */
+	public static final String ENDPOINT_LIST = Endpoint.CATALOG_LIST;
+
+	/** Endpoint for a single catalog resource */
+	public static final String ENDPOINT_ID = Endpoint.CATALOG_ID;
+
+	/** Endpoint for getting multiple catalog resources */
+	public static final String ENDPOINT_IDS = Endpoint.CATALOG_IDS;
 	
-	/** API v2 Catalog endpoint */
-	public static final String ENDPOINT = "/v2/catalogs";
-	
-	/** API v2 Catalog search endpoint */
-	public static final String ENDPOINT_SEARCH = ENDPOINT + "/search";
+	/** Endpoint for searching catalogs */
+	public static final String ENDPOINT_SEARCH = Endpoint.CATALOG_SEARCH;
 
 	private int mPageCount;
 	private Store mStore;

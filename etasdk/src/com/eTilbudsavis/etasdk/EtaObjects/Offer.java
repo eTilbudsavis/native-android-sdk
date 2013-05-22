@@ -5,36 +5,51 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import Utils.Endpoint;
+import Utils.Sort;
+
 public class Offer implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	/** Sort a list by popularity in ascending order. (smallest to largest) */
-	public static final String SORT_POPULARITY = "popularity";
+	public static final String SORT_POPULARITY = Sort.POPULARITY;
 
 	/** Sort a list by popularity in descending order. (largest to smallest)*/
-	public static final String SORT_POPULARITY_DESC = "-" + SORT_POPULARITY;
+	public static final String SORT_POPULARITY_DESC = Sort.POPULARITY_DESC;
 
 	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = "distance";
+	public static final String SORT_DISTANCE = Sort.DISTANCE;
 
 	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = "-" + SORT_DISTANCE;
+	public static final String SORT_DISTANCE_DESC = Sort.DISTANCE_DESC;
 
 	/** Sort a list by page (in catalog) in ascending order. (smallest to largest) */
-	public static final String SORT_PAGE = "page";
+	public static final String SORT_PAGE = Sort.PAGE;
 
 	/** Sort a list by page (in catalog) in descending order. (largest to smallest)*/
-	public static final String SORT_PAGE_DESC = "-" + SORT_PAGE;
+	public static final String SORT_PAGE_DESC = Sort.PAGE_DESC;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = "created";
+	public static final String SORT_CREATED = Sort.CREATED;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = "-" + SORT_CREATED;
+	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific offer id's */
-	public static final String OFFER_IDS = "offer_ids";
+	public static final String PARAM_IDS = "offer_ids";
+
+	/** Endpoint for offer list resource */
+	public static final String ENDPOINT_LIST = Endpoint.OFFER_LIST;
+
+	/** Endpoint for a single offer resource */
+	public static final String ENDPOINT_ID = Endpoint.OFFER_ID;
+
+	/** Endpoint for getting multiple offer resources */
+	public static final String ENDPOINT_IDS = Endpoint.OFFER_IDS;
+	
+	/** Endpoint for searching offers */
+	public static final String ENDPOINT_SEARCH = Endpoint.OFFER_SEARCH;
 
 	private String mId;
 	private boolean mSelectStores;

@@ -12,10 +12,12 @@
 package com.eTilbudsavis.etasdk;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import Utils.Utilities;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -23,6 +25,7 @@ import android.os.Bundle;
 import com.eTilbudsavis.etasdk.Api.RequestListener;
 import com.eTilbudsavis.etasdk.Api.RequestType;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
 
 // Main object for interacting with the SDK.
@@ -40,10 +43,11 @@ public class Eta implements Serializable {
 	
 	// Authorization.
 	private final String mApiKey;
-	private Session mSession;
+	private Session mSession = new Session();
 	
 	private EtaLocation mLocation;
 	private EtaCache mCache;
+	private ArrayList<EtaError> mErrors = new ArrayList<EtaError>();
 	
 	// TODO: Write a long story about usage, this will basically be the documentation
 	/**
@@ -66,10 +70,12 @@ public class Eta implements Serializable {
 		mCache = new EtaCache();
 
 		prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-		String session = prefs.getString(PREFS_SESSION, null);
-		if (session == null) {
+		String sessionJson = prefs.getString(PREFS_SESSION, null);
+		if (sessionJson != null) {
 			try {
-				mSession = new Session(new JSONObject(session));
+				mSession.update(new JSONObject(sessionJson));
+				if (mSession.getExpire() < System.currentTimeMillis())
+					updateSession();
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -88,7 +94,7 @@ public class Eta implements Serializable {
 				
 				if (responseCode == 201) {
 					try {
-						mSession = new Session(new JSONObject(object.toString()));
+						mSession.update(new JSONObject(object.toString()));
 						prefs.edit().putString(PREFS_SESSION, mSession.getJson()).commit();
 					} catch (JSONException e) {
 						e.printStackTrace();
@@ -127,16 +133,30 @@ public class Eta implements Serializable {
 	}
 
 	/**
-	 * A location object used by ETA, when making API requests.
-	 * This object should be edited when ever you want to change location.
-	 * @return <li> A location object
+	 * TODO: Write JavaDoc
+	 * @return 
 	 */
 	public EtaCache getCache() {
 		return mCache;
 	}
-
-	// TODO: Need a lot of wrapper methods here, they all must call API
 	
+	/**
+	 * TODO: Write JavaDoc
+	 * @return
+	 */
+	public ArrayList<EtaError> getErrors(){
+		return mErrors;
+	}
+	
+	/**
+	 * TODO: Write JavaDoc
+	 * @param error
+	 */
+	public void addError(EtaError error) {
+		mErrors.add(error);
+	}
+	
+	// TODO: Need a lot of wrapper methods here, they all must call API
 	public HttpHelper requestCatalogs(Api.CatalogsListener listener, int offset) {
 		return requestCatalogs(listener, offset, Api.LIMIT_DEFAULT);
 	}
@@ -150,9 +170,8 @@ public class Eta implements Serializable {
 	}
 
 	public HttpHelper requestCatalogs(Api.CatalogsListener listener, int offset, int limit, String[] order) {
-		Bundle apiParams = new Bundle();
 		Api a = new Api(this);
-		return null;//a.(Catalog.ENDPOINT, listener, apiParams, RequestType.GET);
+		return a.execute();
 	}
 	
 	public HttpHelper requestOffer(Api.CatalogsListener listener, int offset) {
@@ -164,8 +183,7 @@ public class Eta implements Serializable {
 	}
 	
 	public HttpHelper requestOffers(Api.CatalogsListener listener, int offset, int limit) {
-		HttpHelper httpHelper = new HttpHelper(null, null, null, null, null);
-		return httpHelper;
+		return null;
 	}
 
 	

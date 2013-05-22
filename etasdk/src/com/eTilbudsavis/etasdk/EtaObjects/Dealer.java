@@ -5,24 +5,39 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import Utils.Endpoint;
+import Utils.Sort;
+
 public class Dealer implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	/** Sort a list by name in ascending order. (smallest to largest) */
-	public static final String SORT_NAME = "name";
+	public static final String SORT_NAME = Sort.NAME;
 
 	/** Sort a list by name in descending order. (largest to smallest)*/
-	public static final String SORT_NAME_DESC = "-" + SORT_NAME;
+	public static final String SORT_NAME_DESC = Sort.NAME_DESC;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = "created";
+	public static final String SORT_CREATED = Sort.CREATED;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = "-" + SORT_CREATED;
+	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific dealer id's */
-	public static final String DEALER_IDS = "dealer_ids";
+	public static final String PARAM_IDS = "dealer_ids";
+
+	/** Endpoint for dealer list resource */
+	public static final String ENDPOINT_LIST = Endpoint.DEALER_LIST;
+
+	/** Endpoint for a single dealer resource */
+	public static final String ENDPOINT_ID = Endpoint.DEALER_ID;
+
+	/** Endpoint for getting multiple dealer resources */
+	public static final String ENDPOINT_IDS = Endpoint.DEALER_IDS;
+	
+	/** Endpoint for searching dealers */
+	public static final String ENDPOINT_SEARCH = Endpoint.DEALER_SEARCH;
 
 	private String mId;
 	private String mName;
