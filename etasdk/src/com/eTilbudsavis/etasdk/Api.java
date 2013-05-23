@@ -6,10 +6,13 @@ package com.eTilbudsavis.etasdk;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.http.Header;
 import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicHeader;
 
 import Utils.Endpoint;
 import Utils.Sort;
@@ -49,12 +52,13 @@ public class Api implements Serializable {
 	private Eta mEta;
 	private String mUrl = null;
 	private RequestListener mListener = null;
-	private HttpHelper httpHelper;
-	private Bundle mOptionalKeys = null;
+	private Bundle mParams = null;
 	private RequestType mRequestType = null;
-	private Bundle mHeaders = new Bundle();
+	private HashMap<String, String> mHeaders;
+	
+	private HttpHelper httpHelper;
+
 	private boolean useLocation = true;
-	private String[] mOrderBy = null;
 	private boolean mUseCache = true;
 	
 	
@@ -62,23 +66,37 @@ public class Api implements Serializable {
 	 * TODO: Write proper JavaDoc<br>
 	 * <code>new String[] {Api.SORT_DISTANCE, Api.SORT_PUBLISHED}</code>
 	 * @param order
-	 * @return
+	 * @return This {@link com.eTilbudsavis.etasdk.Api Api} object to allow for chaining of calls to set methods
 	 */
 	public Api setOrderBy(String[] order) {
-		mOrderBy = order;
+		mParams.putString(Sort.ORDER_BY, TextUtils.join(",", order));
 		return this;
 	}
 	
 	public String[] getOrderBy() {
-		return mOrderBy;
+		String s = mParams.getString(Sort.ORDER_BY);
+		s = s == null ? "" : s;
+		return TextUtils.split(s, ",");
 	}
 	
+	/**
+	 * Set any headers that you want in this API call. This should not generally
+	 * be used, as the SDK handles all headers.
+	 * @param name the name of the header.
+	 * @param value the value of the header.
+	 * @return This {@link com.eTilbudsavis.etasdk.Api Api} object to allow for chaining of calls to set methods
+	 */
 	public Api setHeader(String name, String value) {
-		mHeaders.putString(name, value);
+		mHeaders.put(name, value);
 		return this;
 	}
 	
-	public Bundle getHeaders() {
+	/**
+	 * Get a list of the headers that this API call will send to server.<br>
+	 * <b>Note</b> that X-Token a X-Signature is not included in this bundle.
+	 * @return List of headers.
+	 */
+	public HashMap<String, String> getHeaders() {
 		return mHeaders;
 	}
 	
@@ -140,88 +158,101 @@ public class Api implements Serializable {
 		mEta = eta;
 	}
 	
-	/**
-	 * Makes a request to the server, with the given parameters.
-	 * The result will return via the RequestListener.
-	 *
-	 * @param url - This can be any URL, but optionalKeys are only sent if the URL points to the ETA API
-	 * @param requestListener - API.RequestListener
-	 */
-	public Api request(String url, RequestListener requestListener) {
-		return request(url, requestListener, new Bundle());
+	public Api build(String url, RequestListener requestListener) {
+		return build(url, requestListener, new Bundle());
+	}
+
+	public Api build(String url, RequestListener requestListener, Bundle apiParams) {
+		return build(url, requestListener, apiParams, Api.RequestType.GET);
+	}
+
+	public Api build(String url, RequestListener requestListener, RequestType requestType) {
+		return build(url, requestListener, new Bundle(), requestType, new HashMap<String, String>(2));
+	}
+
+	public Api build(String url, RequestListener requestListener, Bundle apiParams, RequestType requestType) {
+		return build(url, requestListener, apiParams, requestType, new HashMap<String, String>(2));
 	}
 
 	/**
-	 * Makes a request to the server, with the given parameters.
-	 * The result will return via the RequestListener.
+	 * 
 	 *
 	 * @param url - This can be any URL, but optionalKeys are only sent if the URL points to the ETA API
 	 * @param requestListener - API.RequestListener
-	 * @param optionalKeys - Bundle containing parameters specified on https://etilbudsavis.dk/developers/docs/
-	 */
-	public Api request(String url, RequestListener requestListener, Bundle optionalKeys) {
-		return request(url, requestListener, optionalKeys, Api.RequestType.GET);
-	}
-
-	/**
-	 * Make a request to the server, with the given parameters.
-	 * The result will return via the RequestListener.
-	 *
-	 * @param url - This can be any URL, but optionalKeys are only sent if the URL points to the ETA API
-	 * @param requestListener - API.RequestListener
-	 * @param optionalKeys - Bundle containing parameters specified on https://etilbudsavis.dk/developers/docs/
+	 * @param apiParams - Bundle containing parameters specified on https://etilbudsavis.dk/developers/docs/
 	 * @param requestType - API.RequestType
 	 */
-	public Api request(String url, RequestListener requestListener, Bundle optionalKeys, RequestType requestType) {
-		return request(url, requestListener, optionalKeys, requestType, new Bundle());
-	}
-
-	/**
-	 * Make a request to the server, with the given parameters.
-	 * The result will return via the RequestListener.
-	 *
-	 * @param url - This can be any URL, but optionalKeys are only sent if the URL points to the ETA API
-	 * @param requestListener - API.RequestListener
-	 * @param optionalKeys - Bundle containing parameters specified on https://etilbudsavis.dk/developers/docs/
-	 * @param requestType - API.RequestType
-	 */
-	public Api request(String url, RequestListener requestListener, Bundle optionalKeys, RequestType requestType, Bundle headers) {
-		if (url == null || requestListener == null || optionalKeys == null || requestType == null || headers == null) {
-			Utilities.logd(TAG, "Api parameters cannot be null");
+	public Api build(String url, RequestListener requestListener, Bundle apiParams, RequestType requestType, HashMap<String, String> headers) {
+		if (url == null || requestListener == null || requestType == null ) {
+			Utilities.logd(TAG, "Api parameters error: url, requestListener and requestType cannot be null");
 			return null;
 		} 
 		mUrl = url;
 		mListener = requestListener;
-		mOptionalKeys = optionalKeys;
+		mParams = apiParams == null ? new Bundle() : apiParams;
 		mRequestType = requestType;
-		mHeaders = headers;
+		mHeaders = headers == null ? new HashMap<String, String>(2) : headers;
 		return this;
 	}
 
 	/**
 	 * This will start executing the request.
-	 * Note that if the <b>optionalKeys</b> bundle contains options that have also been set by
+	 * Note that if the {@link #build(String, RequestListener, Bundle, RequestType, Bundle) request()}'s 
+	 * optionalKeys bundle contains options that have also been set by
 	 * any of the Api-setters, then the setters will be used.
-	 * @return HttpHelper, så execution of background task can be cancelled.
+	 * @return HttpHelper, so execution of background task can be cancelled. <br>
+	 * <b>Note</b> HttpHelper is <code>null</code> if there is no valid session. In this case
+	 * {@link #execute() execute()} will try to get a valid session and then instantiate HttpHelper, here after the previous call is continued.
 	 */
 	public HttpHelper execute() {
 
-		if (mUrl == null || mListener == null || mOptionalKeys == null || mRequestType == null || mHeaders == null) {
+		// Check if all variables needed are okay
+		if (mUrl == null || mListener == null || mParams == null || mRequestType == null || mHeaders == null) {
 			Utilities.logd(TAG, "A request() must be made before execute()");
 			return null;
 		}
 		
-		// TODO: Check if listener and endpoint matches
+		// Check if RequestListener matches the URL (return values are parsed according to RequestListener)
+		if (!listenerMatchesUrl()) {
+			Utilities.logd(TAG, "Choosen listener - " + mListener.getClass().getName() + " - does not match endpoint - " + mUrl);
+			return null;
+		}
+		
+		// Is Session okay? If not, check if it's a session call? If not try to make a session before continuing
+		if (mEta.getSession().getToken() == null || mEta.getSession().getExpire() < System.currentTimeMillis()) {
+			if (!mUrl.matches(Endpoint.SESSION)) {
+				mEta.updateSession(new RequestListener() {
+					
+					public void onComplete(int responseCode, Object object) {
+						if (responseCode == 201)
+							completeExecute();
+					}
+				});
+			} else {
+				completeExecute();
+			}
+		} else {
+			completeExecute();
+		}
+		
+		return httpHelper;
+	}
+	
+	private void completeExecute() {
+
+		// Prefix URL?
+		if (!mUrl.matches("^http.*"))
+			mUrl = Endpoint.API + mUrl;
 		
 		// Prepare data.
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 
 		// Add optional data.
-		if (!mOptionalKeys.isEmpty()) {
-			Iterator<String> iterator = mOptionalKeys.keySet().iterator();
+		if (!mParams.isEmpty()) {
+			Iterator<String> iterator = mParams.keySet().iterator();
 			while (iterator.hasNext()) {
 				String s = iterator.next();
-				Utilities.putNameValuePair(params, s, mOptionalKeys.get(s));
+				Utilities.putNameValuePair(params, s, mParams.get(s));
 			}
 		}
 
@@ -230,6 +261,10 @@ public class Api implements Serializable {
 
 		if (useLocation) {
 
+			if (!mEta.getLocation().isLocationSet()) {
+				Utilities.logd(TAG, "Location has not been set() yet... Aborting...");
+				return;
+			}
 			EtaLocation l = mEta.getLocation();
 			Utilities.putNameValuePair(params, EtaLocation.LATITUDE, l.getLatitude());
 			Utilities.putNameValuePair(params, EtaLocation.LONGITUDE, l.getLongitude());
@@ -245,20 +280,19 @@ public class Api implements Serializable {
 			}
 
 		}
-
-		if (mOrderBy != null) {
-			Utilities.putNameValuePair(params, Sort.ORDER_BY, TextUtils.join(",", mOrderBy));
-		}
-
-		// Prefix URL?
-		if (!mUrl.matches("^http.*"))
-			mUrl = Endpoint.MAIN_URL + mUrl;
 		
 		// Set headers if session is OK
 		if (mEta.getSession().getToken() != null) {
-			mHeaders.putString(HEADER_X_TOKEN, mEta.getSession().getToken());
-			String sha256 = Utilities.generateSHA256(mEta.getApiKey() + mEta.getSession().getToken());
-			mHeaders.putString(HEADER_X_SIGNATURE, sha256);
+			setHeader(HEADER_X_TOKEN, mEta.getSession().getToken());
+			String sha256 = Utilities.generateSHA256(mEta.getApiSecret() + mEta.getSession().getToken());
+			setHeader(HEADER_X_SIGNATURE, sha256);
+		}
+		
+		List<Header> headers = new ArrayList<Header>();
+		Iterator<String> it = mHeaders.keySet().iterator();
+		while (it.hasNext()) {
+			String string = (String) it.next();
+			headers.add(new BasicHeader(string, mHeaders.get(string)));
 		}
 		
 		// TODO: Check cache before executing the httpHepler
@@ -269,12 +303,41 @@ public class Api implements Serializable {
 		}
 		
 		// Create a new HttpHelper and run it
-		httpHelper = new HttpHelper(mEta, mUrl, params, mHeaders, mRequestType, mListener);
+		httpHelper = new HttpHelper(mEta, mUrl, params, headers, mRequestType, mListener);
 		httpHelper.execute();
-		
-		return httpHelper;
 	}
 	
+	public boolean listenerMatchesUrl() {
+		if (mListener instanceof CatalogListener) {
+			return mUrl.matches(Endpoint.CATALOG_ID) ? true : false;
+		} else if (mListener instanceof CatalogsListener) {
+			return ( mUrl.matches(Endpoint.CATALOG_IDS) ||
+					 mUrl.matches(Endpoint.CATALOG_LIST) ||
+					 mUrl.matches(Endpoint.CATALOG_SEARCH)) ? true : false;
+		} else if (mListener instanceof OfferListener) {
+			return mUrl.matches(Endpoint.OFFER_ID) ? true : false;
+		} else if (mListener instanceof OffersListener) {
+			return ( mUrl.matches(Endpoint.OFFER_IDS) ||
+					 mUrl.matches(Endpoint.OFFER_LIST) ||
+					 mUrl.matches(Endpoint.OFFER_SEARCH)) ? true : false;
+		} else if (mListener instanceof DealerListener) {
+			return mUrl.matches(Endpoint.DEALER_ID) ? true : false;
+		} else if (mListener instanceof DealersListener) {
+			return ( mUrl.matches(Endpoint.DEALER_IDS) ||
+					 mUrl.matches(Endpoint.DEALER_LIST) ||
+					 mUrl.matches(Endpoint.DEALER_SEARCH)) ? true : false;
+		} else if (mListener instanceof StoreListener) {
+			return mUrl.matches(Endpoint.STORE_ID) ? true : false;
+		} else if (mListener instanceof StoresListener) {
+			return ( mUrl.matches(Endpoint.STORE_IDS) ||
+					 mUrl.matches(Endpoint.STORE_LIST) ||
+					 mUrl.matches(Endpoint.STORE_SEARCH)) ? true : false;
+		} else if (mListener instanceof RequestListener) {
+			return true;
+		}
+		return false;
+	}
+
     /** Callback interface for API requests */
     public static interface RequestListener {
         public void onComplete(int responseCode, Object object);

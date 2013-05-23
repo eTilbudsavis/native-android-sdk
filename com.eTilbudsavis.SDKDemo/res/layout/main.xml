@@ -11,14 +11,27 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textStyle="bold"
             android:text="@string/session_info" />
 
         <TextView
-            android:id="@+id/tvTitle"
+            android:id="@+id/tvSession"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="place holder" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="@string/catalog_info" />
+
+        <TextView
+            android:id="@+id/tvCatalogs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="place holder" />
+        
     </LinearLayout>
 
 </ScrollView>

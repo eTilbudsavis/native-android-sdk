@@ -47,6 +47,7 @@ public class Store implements Serializable {
 	public String mUrl;
 	public double mLatitude;
 	public double mLongitude;
+	public String mDealerId;
 	public Dealer mDealer;
 	public int mDistance;
 	public String mContact;
@@ -67,7 +68,7 @@ public class Store implements Serializable {
 			mUrl = store.getString("url");
 			mLatitude = store.getDouble("latitude");
 			mLongitude = store.getDouble("longitude");
-			mDealer = new Dealer(store.getJSONObject("dealer"));
+			mDealerId = store.getString("dealer_id");
 			mDistance = store.getInt("distance");
 			mContact = store.getString("contact");
 		} catch (JSONException e) {
@@ -154,6 +155,15 @@ public class Store implements Serializable {
 
 	public Dealer getDealer() {
 		return mDealer;
+	}
+
+	public Store setDealerId(String dealer) {
+		mDealerId = dealer;
+		return this;
+	}
+
+	public String getDealerId() {
+		return mDealerId;
 	}
 
 	public Store setDistance(int distance) {

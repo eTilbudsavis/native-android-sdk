@@ -1,7 +1,7 @@
 package Utils;
 
 /**
- * Sort holds all variables describing sorting methods that the server allows.<br><br>
+ * {@link com.eTilbudsavis.etasdk.Util.Sort Sort} holds all variables describing sorting methods that the server allows.<br><br>
  * 
  * This class should be referenced, when using the 
  * {@link com.eTilbudsavis.etasdk.Api #setOrderBy(String[]) Api.setOrderBy()}
@@ -11,6 +11,9 @@ package Utils;
  * This minimizes confusion about what sort typen may be used for which lists.
  * For example a catalog list may be sorted by distance, so {@link com.eTilbudsavis.etasdk.EtaObjects.Catalog Catalog}
  * has a {@link com.eTilbudsavis.etasdk.EtaObjects.Catalog #SORT_DISTANCE Catalog.SORT_DISTANCE}
+ * <br><br>
+ * 
+ * NOT ALL sort options is defined in the SDK, please reference the online documentation for more options.
  * 
  * @author Danny Hvam - danny@etilbudsavis.dk
  *

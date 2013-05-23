@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import Utils.Endpoint;
+import Utils.Sort;
 import Utils.Utilities;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -24,7 +26,6 @@ import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Api.RequestListener;
 import com.eTilbudsavis.etasdk.Api.RequestType;
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
 
@@ -35,6 +36,12 @@ public class Eta implements Serializable {
 	
 	public static final String TAG = "ETA";
 	
+	/** Debug log messages only while developing */
+	public static final boolean DEBUG = true;
+	
+	/** Info log messages may be used in release */
+	public static final boolean DEBUG_I = true;
+	
 	private static Context mContext;
 	private SharedPreferences prefs;
 	
@@ -43,52 +50,53 @@ public class Eta implements Serializable {
 	
 	// Authorization.
 	private final String mApiKey;
+	private final String mApiSecret;
 	private Session mSession = new Session();
 	
 	private EtaLocation mLocation;
 	private EtaCache mCache;
 	private ArrayList<EtaError> mErrors = new ArrayList<EtaError>();
 	
-	// TODO: Write a long story about usage, this will basically be the documentation
 	/**
-	 * Constructor for the SDK.
-	 *
-	 *
+	 * TODO: Write a long story about usage, this will basically be the documentation
 	 * @param apiKey
 	 *			The API key found at http://etilbudsavis.dk/api/
-	 * @param apiSecret
-	 *			The API secret found at http://etilbudsavis.dk/api/
 	 * @Param Context
 	 * 			The context of the activity instantiating this class.
 	 */
-	public Eta(String apiKey, Context context) {
+	public Eta(String apiKey, String apiSecret, Context context) {
 		
 		mApiKey = apiKey;
+		mApiSecret = apiSecret;
 		mContext = context;
 		
 		mLocation = new EtaLocation();
 		mCache = new EtaCache();
 
 		prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+
+		prefs.edit().clear().commit();
+		
 		String sessionJson = prefs.getString(PREFS_SESSION, null);
 		if (sessionJson != null) {
 			try {
 				mSession.update(new JSONObject(sessionJson));
 				if (mSession.getExpire() < System.currentTimeMillis())
-					updateSession();
+					updateSession(null);
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
 		} else {
-			updateSession();
+			updateSession(null);
 		}
 	}
 	
-	public void updateSession() {
-
+	public void updateSession(final RequestListener listener) {
+		
+		Utilities.logi(TAG, "Session not established. Trying to establish, please wait...");
 		Api a = new Api(this);
 		a.setUseLocation(false);
-		a.request(Session.ENDPOINT, new RequestListener() {
+		a.build(Session.ENDPOINT, new RequestListener() {
 			
 			public void onComplete(int responseCode, Object object) {
 				
@@ -100,19 +108,33 @@ public class Eta implements Serializable {
 						e.printStackTrace();
 					}
 				} else {
-					Utilities.logd(TAG, "Error: " + String.valueOf(responseCode) + " - " + object.toString());
+					Utilities.logd(TAG, "Session error: " + String.valueOf(responseCode) + " - " + object.toString());
 				}
+				
+				if (listener != null) {
+					listener.onComplete(responseCode, object);
+				}
+				mSession.notifySubscribers();
 			}
-		});
+		}, Api.RequestType.POST);
+		a.execute();
 		
 	}
-	
+
 	/**
 	 * Returns the API key found at http://etilbudsavis.dk/api/.
 	 * @return API key as String
 	 */
 	public String getApiKey() {
 		return mApiKey;
+	}
+
+	/**
+	 * Returns the API secret found at http://etilbudsavis.dk/api/.
+	 * @return API secret as String
+	 */
+	public String getApiSecret() {
+		return mApiSecret;
 	}
 	
 	/**
@@ -142,6 +164,8 @@ public class Eta implements Serializable {
 	
 	/**
 	 * TODO: Write JavaDoc
+	 * Useful when multiple consecutive calls, that contains errors.
+	 * Then a Log.d() on each call will flood LogCat.
 	 * @return
 	 */
 	public ArrayList<EtaError> getErrors(){
@@ -157,34 +181,27 @@ public class Eta implements Serializable {
 	}
 	
 	// TODO: Need a lot of wrapper methods here, they all must call API
-	public HttpHelper requestCatalogs(Api.CatalogsListener listener, int offset) {
-		return requestCatalogs(listener, offset, Api.LIMIT_DEFAULT);
+	public HttpHelper getCatalogs(Api.CatalogsListener listener, int offset) {
+		return getCatalogs(listener, offset, Api.LIMIT_DEFAULT);
 	}
 
-	public HttpHelper requestCatalogs(Api.CatalogsListener listener, int offset, String[] order) {
-		return requestCatalogs(listener, offset, Api.LIMIT_DEFAULT, order);
+	public HttpHelper getCatalogs(Api.CatalogsListener listener, int offset, String[] order) {
+		return getCatalogs(listener, offset, Api.LIMIT_DEFAULT, order);
 	}
 
-	public HttpHelper requestCatalogs(Api.CatalogsListener listener, int offset, int limit) {
-		return requestCatalogs(listener, offset, limit, null);
+	public HttpHelper getCatalogs(Api.CatalogsListener listener, int offset, int limit) {
+		return getCatalogs(listener, offset, limit, null);
 	}
 
-	public HttpHelper requestCatalogs(Api.CatalogsListener listener, int offset, int limit, String[] order) {
+	public HttpHelper getCatalogs(Api.CatalogsListener listener, int offset, int limit, String[] order) {
+		Bundle apiParams = new Bundle();
+		apiParams.putInt(Api.OFFSET, offset);
+		apiParams.putInt(Api.LIMIT, limit);
+		if (order != null)
+			apiParams.putStringArray(Sort.ORDER_BY, order);
 		Api a = new Api(this);
+		a.build(Endpoint.CATALOG_LIST, listener, apiParams, Api.RequestType.GET);
 		return a.execute();
 	}
-	
-	public HttpHelper requestOffer(Api.CatalogsListener listener, int offset) {
-		return requestCatalogs(listener, 1, Api.LIMIT_DEFAULT);
-	}
-	
-	public HttpHelper requestOffers(Api.CatalogsListener listener, int offset) {
-		return requestCatalogs(listener, 1, Api.LIMIT_DEFAULT);
-	}
-	
-	public HttpHelper requestOffers(Api.CatalogsListener listener, int offset, int limit) {
-		return null;
-	}
-
 	
 }

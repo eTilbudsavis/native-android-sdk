@@ -3,5 +3,6 @@
     <string name="app_name">eTilbudsavis SDK Demo</string>
     <string name="title_activity_main">eTilbudsavis SDK Demo</string>
     <string name="session_info">Session info:</string>
+    <string name="catalog_info">Catalog info:</string>
     
 </resources>

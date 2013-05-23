@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -25,7 +25,6 @@ import org.json.JSONObject;
 
 import Utils.Utilities;
 import android.os.AsyncTask;
-import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Api.RequestListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
@@ -41,7 +40,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	private Eta mEta;
 	private String mUrl;
 	private List<NameValuePair> mQuery;
-	private Bundle mHeaders;
+	private List<Header> mHeaders;
 	private Api.RequestType mRequestType;
 	private RequestListener mRequestListener;
 	
@@ -50,14 +49,13 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	private int mResponseCode;
 
 	// Constructor for HttpHelper.
-	public HttpHelper(Eta eta, String url, List<NameValuePair> query, Bundle headers, Api.RequestType requestType, RequestListener requestListener) {
+	public HttpHelper(Eta eta, String url, List<NameValuePair> query, List<Header> headers, Api.RequestType requestType, RequestListener requestListener) {
 		mEta = eta;
 		mUrl = url;
 		mQuery = query;
 		mHeaders = headers;
 		mRequestType = requestType;
 		mRequestListener = requestListener;
-		
 	}
 	
 	@Override
@@ -65,12 +63,24 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		
+		// Print debug information
+		if (Eta.DEBUG) {
+			Utilities.logd(TAG, "Url: " + mUrl);
+			Utilities.logd(TAG, "Headers: " + mHeaders.toString());
+			StringBuilder sb = new StringBuilder();
+			for (NameValuePair nvp : mQuery) {
+				sb.append(nvp.getName()).append(": ").append(nvp.getValue()).append(", ");
+			}
+			Utilities.logd(TAG, "Query: " + sb.toString());
+		}
+		
 		HttpParams httpParams = httpClient.getParams();
 		HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIME_OUT);
 		HttpConnectionParams.setSoTimeout(httpParams, CONNECTION_TIME_OUT);
 		
-		Iterator<String> headerIterator = mHeaders.keySet().iterator();
+		
 		HttpResponse response = null;
+		Header[] responseHeaders;
 		try {
 			
 			switch (mRequestType) {
@@ -79,14 +89,12 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 				HttpPost post = new HttpPost(mUrl);
 				if (mQuery.size() > 0)
 					post.setEntity(new UrlEncodedFormEntity(mQuery, HTTP.UTF_8));
-				
-				while (headerIterator.hasNext()) {
-					String s = headerIterator.next();
-					post.setHeader(s, mHeaders.getString(s));
-				}
+
+				for (Header h : mHeaders)
+					post.setHeader(h);
 				
 				response = httpClient.execute(post);
-				
+				responseHeaders = response.getAllHeaders();
 				break;
 
 			case GET:
@@ -96,12 +104,11 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 
 				HttpGet get = new HttpGet(mUrl);
 
-				while (headerIterator.hasNext()) {
-					String s = headerIterator.next();
-					get.setHeader(s, mHeaders.getString(s));
-				}
+				for (Header h : mHeaders)
+					get.setHeader(h);
 				
 				response = httpClient.execute(get);
+				responseHeaders = response.getAllHeaders();
 				break;
 				
 			case DELETE:
@@ -147,7 +154,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 				
 				mReturn = convertResponse(mResponse);
 				
-			} else if (400 <= mResponseCode && mResponseCode < 500) {
+			} else if (400 <= mResponseCode ) {
 				
 				try {
 					JSONObject jObject = new JSONObject(mResponse);
@@ -155,6 +162,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
+				
 				mReturn = mResponse;
 				
 			} else {

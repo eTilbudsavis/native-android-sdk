@@ -7,9 +7,11 @@ package com.eTilbudsavis.etasdk;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import Utils.Utilities;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 
 public class EtaLocation extends Location {
@@ -57,24 +59,33 @@ public class EtaLocation extends Location {
 	}
 
 	public Boolean isLocationSet() {
-		return mRadius != Integer.MAX_VALUE;
+		return (mRadius != Integer.MAX_VALUE && getLatitude() != 0.0 && getLongitude() != 0.0);
 	}
 
 	public Boolean isBoundsSet() {
-		return mBoundNorth != Integer.MAX_VALUE && mBoundSouth != Integer.MAX_VALUE && 
-				mBoundEast != Integer.MAX_VALUE && mBoundWest != Integer.MAX_VALUE;
+		return (mBoundNorth != Integer.MAX_VALUE && mBoundSouth != Integer.MAX_VALUE && 
+				mBoundEast != Integer.MAX_VALUE && mBoundWest != Integer.MAX_VALUE);
+	}
+
+	@Override
+	public void set(Location l) {
+		super.set(l);
+		mSensor = (getProvider().equals(LocationManager.GPS_PROVIDER) || getProvider().equals(LocationManager.NETWORK_PROVIDER) );
 	}
 	
-	/**
-	 * @param latitude
-	 * @param longitude
-	 */
-	public void setLocation(double latitude, double longitude, int radius, boolean sensor) {
+	public void set(Location l, int radius, boolean sensor) {
+		super.set(l);
+		mRadius = radius;
+		mSensor = sensor;
+	}
+	
+	public void set(double latitude, double longitude, int radius, boolean sensor) {
 		mRadius = radius;
 		mSensor = sensor;
 		setLatitude(latitude);
 		setLongitude(longitude);
 		setTime(System.currentTimeMillis());
+		setProvider(ETA_PROVIDER);
 	}
 
 	/**
@@ -83,7 +94,11 @@ public class EtaLocation extends Location {
 	 * @return this Object, for easy chaining of set methods.
 	 */
 	public EtaLocation setRadius(int radius) {
-		if (radius >= 0 && radius <= 700000)
+		if (radius < 0)
+			mRadius = 0;
+		else if (radius > 700000)
+			mRadius = 700000;
+		else
 			mRadius = radius;
 		return this;
 	}
@@ -105,41 +120,12 @@ public class EtaLocation extends Location {
 		return mSensor;
 	}
 
-	/**
-	 * A bundle ready for use in the API-calls
-	 * 
-	 * <p>This is a method for ease of use in the
-	 * API calls to the ETA server.</p>
-	 * @return Bundle with API parameters
-	 */
-	public Bundle getApiParams() {
-		Bundle apiParams = new Bundle();
-		apiParams.putDouble(LATITUDE, getLatitude());
-		apiParams.putDouble(LONGITUDE, getLongitude());
-		apiParams.putInt(RADIUS, mRadius);
-		
-		if (isBoundsSet()) {
-			apiParams.putAll(getApiBounds());
-		}
-		
-		return apiParams;
-	}
-	
 	public LinkedHashMap<String, Object> getPageflipLocation() {
 		LinkedHashMap<String, Object> etaloc = new LinkedHashMap<String, Object>();
 		etaloc.put(LATITUDE, getLatitude());
 		etaloc.put(LONGITUDE, getLongitude());
 		etaloc.put(RADIUS, mRadius);
 		return etaloc;
-	}
-
-	public Bundle getApiBounds() {
-		Bundle object = new Bundle();
-		object.putDouble(BOUND_NORTH, mBoundNorth);
-		object.putDouble(BOUND_EAST, mBoundEast);
-		object.putDouble(BOUND_SOUTH, mBoundSouth);
-		object.putDouble(BOUND_WEST, mBoundWest);
-		return object;
 	}
 
 	/**
@@ -163,7 +149,7 @@ public class EtaLocation extends Location {
 	 * @param boundsNorth
 	 */
 	public EtaLocation setBoundNorth(double boundNorth) {
-		this.mBoundNorth = boundNorth;
+		mBoundNorth = boundNorth;
 		return this;
 	}
 
@@ -172,7 +158,7 @@ public class EtaLocation extends Location {
 	 * @param boundEast
 	 */
 	public EtaLocation setBoundEast(double boundEast) {
-		this.mBoundEast = boundEast;
+		mBoundEast = boundEast;
 		return this;
 	}
 
@@ -181,7 +167,7 @@ public class EtaLocation extends Location {
 	 * @param boundSouth
 	 */
 	public EtaLocation setBoundSouth(double boundSouth) {
-		this.mBoundSouth = boundSouth;
+		mBoundSouth = boundSouth;
 		return this;
 	}
 
@@ -190,7 +176,7 @@ public class EtaLocation extends Location {
 	 * @param boundWest
 	 */
 	public EtaLocation setBoundWest(double boundWest) {
-		this.mBoundWest = boundWest;
+		mBoundWest = boundWest;
 		return this;
 	}
 	
@@ -297,6 +283,16 @@ public class EtaLocation extends Location {
 	 */
 	public boolean unSubscribe(LocationListener listener) {
 		return mSubscribers.remove(listener);
+	}
+	
+	@Override 
+	public String toString() {
+        return "Location[mProvider=" + getProvider() +
+                ",mTime=" + getTime() +
+                ",mLatitude=" + getLatitude() +
+                ",mLongitude=" + getLongitude() +
+                ",mRadius=" + mRadius +
+                ",mSensor=" + mSensor + "]";
 	}
 	
 	public interface LocationListener {

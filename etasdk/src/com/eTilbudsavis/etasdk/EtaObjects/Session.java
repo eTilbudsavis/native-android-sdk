@@ -18,7 +18,7 @@ public class Session implements Serializable {
 	public static final String ENDPOINT = Endpoint.SESSION;
 	
 	@SuppressLint("SimpleDateFormat")
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ss+SSSS");
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSSS");
 	
 	private String mJson = null;
 	private String mToken = null;
@@ -26,6 +26,21 @@ public class Session implements Serializable {
 	private String mUser = null;
 	private Permission mPermission = null;
 	private ArrayList<SessionListener> mSubscribers = new ArrayList<Session.SessionListener>();
+	
+	/**
+	 * Prints this object
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{ ")
+		.append("Token: ").append(mToken)
+		.append(", Expires: ").append(mExpires)
+		.append(", User: ").append(mUser)
+		.append(", Permissions: ").append(mPermission.toString())
+		.append(" }");
+		return sb.toString();
+	}
 	
 	public void subscribe(SessionListener listener) {
 		mSubscribers.add(listener);
@@ -45,16 +60,16 @@ public class Session implements Serializable {
 	}
 	
 	public void update(JSONObject newSession) {
-			mJson = newSession.toString();
+		mJson = newSession.toString();
 		try {
 			mToken = newSession.getString("token");
 		    setExpires(newSession.getString("expires"));
 		    mUser = newSession.getString("user");
 		    mPermission = new Permission(newSession.getJSONObject("permissions"));
-		    notifySubscribers();
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		
 	}
 	
 	public String getJson() {

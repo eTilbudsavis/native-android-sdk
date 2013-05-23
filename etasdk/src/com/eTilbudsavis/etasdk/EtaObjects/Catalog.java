@@ -62,24 +62,33 @@ public class Catalog implements Serializable {
 	
 	/** Endpoint for searching catalogs */
 	public static final String ENDPOINT_SEARCH = Endpoint.CATALOG_SEARCH;
-
-	private int mPageCount;
-	private Store mStore;
-	private int mOfferCount;
-	private int mWeeksTo;
-	private int mWeeksFrom;
-	private String mUrl;
-	private Dealer mDealer;
+	
+	// From JSON blob
 	private String mId;
-	private long mExpires;
+	private String mErn;
+	private String mLabel;
+	private String mBackground;
+	private boolean mSelectStores;
 	private long mRunFrom;
 	private long mRunTill;
-	private String mPromoted;
+	private int mPageCount;
+	private int mOfferCount;
 	private Branding mBranding;
+	private String mDealerId;
+	private String mDealerUrl;
+	private String mStoreId;
+	private String mStoreUrl;
+	private double mDimenWidth;
+	private double mDimenHeight;
 	private String mImageView;
 	private String mImageZoom;
 	private String mImageThumb;
-	private boolean mSelectStores;
+	private Pages mPages;
+	
+	// From seperate queries
+	private Dealer mDealer;
+	private Store mStore;
+	private String mPromoted;
 	private int mOfferOnPage;
 
 	public Catalog(JSONObject catalog) {
@@ -98,31 +107,34 @@ public class Catalog implements Serializable {
 		}
 
 	}
-	
+
 	private void setCatalog(JSONObject catalog) {
 		try {
-			mPageCount = catalog.getInt("pageCount");
-			mStore = new Store(catalog.getJSONObject("store"));
-			mOfferCount = catalog.getInt("offerCount");
-			mWeeksTo = catalog.getJSONObject("weeks").getInt("to");
-			mWeeksFrom = catalog.getJSONObject("weeks").getInt("from");
-			mUrl = catalog.getString("url");
-			mDealer = new Dealer(catalog.getJSONObject("dealer"));
 			mId = catalog.getString("id");
-			mExpires = (catalog.getLong("expires")*1000);
+			mErn = catalog.getString("ern");
+			mLabel = catalog.getString("label");
+			mBackground = catalog.getString("background");
+			mSelectStores = catalog.getBoolean("selectStores");
 			mRunFrom = (catalog.getLong("runFrom")*1000);
 			mRunTill = (catalog.getLong("runTill")*1000);
-			mPromoted = catalog.getString("promoted");
+			mPageCount = catalog.getInt("pageCount");
+			mOfferCount = catalog.getInt("offerCount");
 			mBranding = new Branding(catalog.getJSONObject("branding"));
+			mDealerId = catalog.getString("dealer_id");
+			mDealerUrl = catalog.getString("dealer_url");
+			mStoreId = catalog.getString("store_id");
+			mStoreUrl = catalog.getString("store_url");
+			mDimenWidth = catalog.getJSONObject("dimensions").getDouble("width");
+			mDimenHeight = catalog.getJSONObject("dimensions").getDouble("height");
 			mImageView = catalog.getJSONObject("images").getString("view");
 			mImageZoom = catalog.getJSONObject("images").getString("zoom");
 			mImageThumb = catalog.getJSONObject("images").getString("thumb");
-			mSelectStores = catalog.getBoolean("selectStores");
+			mPages = new Pages(catalog.getJSONObject("pages"));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public Catalog setPageCount(Integer mPageCount) {
 		this.mPageCount = mPageCount;
 		return this;
@@ -141,13 +153,22 @@ public class Catalog implements Serializable {
 		return mOfferOnPage;
 	}
 
-	public Catalog setStore(Store mStore) {
-		this.mStore = mStore;
+	public Catalog setStore(Store store) {
+		mStore = store;
 		return this;
 	}
 
 	public Store getStore() {
 		return mStore;
+	}
+
+	public Catalog setStoreId(String storeId) {
+		mStoreId = storeId;
+		return this;
+	}
+
+	public String getStoreId() {
+		return mStoreId;
 	}
 
 	public Catalog setOfferCount(Integer mOfferCount) {
@@ -159,31 +180,13 @@ public class Catalog implements Serializable {
 		return mOfferCount;
 	}
 
-	public Catalog setWeeksTo(Integer mWeeksTo) {
-		this.mWeeksTo = mWeeksTo;
+	public Catalog setDealerId(String dealer) {
+		this.mDealerId = dealer;
 		return this;
 	}
 
-	public int getWeeksTo() {
-		return mWeeksTo;
-	}
-
-	public Catalog setWeeksFrom(Integer mWeeksFrom) {
-		this.mWeeksFrom = mWeeksFrom;
-		return this;
-	}
-
-	public int getWeeksFrom() {
-		return mWeeksFrom;
-	}
-
-	public Catalog setUrl(String url) {
-		this.mUrl = url;
-		return this;
-	}
-
-	public String getUrl() {
-		return mUrl;
+	public String getDealerId() {
+		return mDealerId;
 	}
 
 	public Catalog setDealer(Dealer dealer) {
@@ -202,15 +205,6 @@ public class Catalog implements Serializable {
 
 	public String getId() {
 		return mId;
-	}
-
-	public Catalog setExpires(Long expires) {
-		this.mExpires = expires;
-		return this;
-	}
-
-	public Long getExpires() {
-		return mExpires;
 	}
 
 	/**
@@ -305,14 +299,12 @@ public class Catalog implements Serializable {
 
 		Catalog c = (Catalog)o;
 		return mPageCount == c.getPageCount() &&
-				mStore == null ? c.getStore() == null : mStore.equals(c.getStore()) &&
+				mStoreId.equals(c.getStoreId()) &&
+				mStore == null ? c.getStore() == null : (c.getStore() == null ? false : mStore.equals(c.getStore())) &&
 				mOfferCount == c.getOfferCount() &&
-				mWeeksTo == c.getWeeksTo() &&
-				mWeeksFrom == c.getWeeksFrom() &&
-				mUrl.equals(c.getUrl()) &&
-				mDealer.equals(c.getDealer()) &&
+				mDealerId.equals(c.getDealerId()) &&
+				mDealer == null ? c.getDealer() == null : (c.getDealer() == null ? false : mDealer.equals(c.getDealer())) &&
 				mId.equals(c.getId()) &&
-				mExpires == c.getExpires() &&
 				mRunFrom == c.getRunFrom() &&
 				mRunTill == c.getRunTill() &&
 				mPromoted.equals(c.isPromoted()) &&
@@ -328,10 +320,9 @@ public class Catalog implements Serializable {
 	public String toString() {
 		return new StringBuilder()
 		.append("Catalog { ")
-		.append("Dealer: ").append(mDealer.getName())
+		.append("DealerId: ").append(mDealerId)
 		.append(", Id: ").append(mId)
-		.append(", City: ").append(mStore.getCity())
-		.append(", Street: ").append(mStore.getStreet())
+		.append(", StoreId: ").append(mStoreId)
 		.append(" }").toString();
 	}
 

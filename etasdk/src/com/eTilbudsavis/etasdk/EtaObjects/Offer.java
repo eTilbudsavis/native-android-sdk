@@ -63,6 +63,7 @@ public class Offer implements Serializable {
 	private String mImageThumb;
 	private String mUrl;
 	private String mBuyUrl;
+	private String mDealerId;
 	private Dealer mDealer;
 	private long mRunFrom;
 	private long mRunTill;
@@ -148,6 +149,10 @@ public class Offer implements Serializable {
 		return mDealer;
 	}
 
+	public String getDealerId() {
+		return mDealerId;
+	}
+
 	public Long getRunFrom() {
 		return mRunFrom;
 	}
@@ -213,7 +218,7 @@ public class Offer implements Serializable {
 		.append("Offer: { ")
 		.append("Heading: ").append(mHeading)
 		.append(", Id: ").append(mId)
-		.append(", Dealer: ").append(mDealer.getName())
+		.append(", DealerId: ").append(mDealerId)
 		.append("}").toString();
 		
 	}

@@ -3,6 +3,7 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,6 +39,23 @@ public class Permission implements Serializable {
 		}
 		
 	}
-	
+
+	/**
+	 * Prints this object
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		Iterator<String> it = perm.keySet().iterator();
+		while (it.hasNext()) {
+			String group = (String) it.next();
+			sb.append("{ ").append(group).append(": ");
+			for (String permission : perm.get(group)) {
+				sb.append(permission).append(", ");
+			}
+			sb.append(" }");
+		}
+		return sb.toString();
+	}
 	
 }

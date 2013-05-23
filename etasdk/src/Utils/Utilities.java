@@ -15,6 +15,8 @@ import java.util.UUID;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 import android.util.Log;
 
 public final class Utilities {
@@ -32,7 +34,7 @@ public final class Utilities {
 	public static String createUUID() {
 		return UUID.randomUUID().toString().replace("-", "");
 	}
-	
+
 	/**
 	 * A proxy for Log.d API that silences log messages in release.
 	 *
@@ -41,8 +43,20 @@ public final class Utilities {
 	 * @param msg The message you would like logged.
 	 */
 	public static void logd(String tag, String msg) {
-		if (ENABLE_LOG)
+		if (Eta.DEBUG)
 			Log.d(tag, msg);
+	}
+
+	/**
+	 * A proxy for Log.i API that silences log messages in release.
+	 *
+	 * @param tag Used to identify the source of a log message. It usually
+	 *			identifies the class or activity where the log call occurs.
+	 * @param msg The message you would like logged.
+	 */
+	public static void logi(String tag, String msg) {
+		if (Eta.DEBUG_I)
+			Log.i(tag, msg);
 	}
 	
 	/**
