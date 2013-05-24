@@ -181,19 +181,19 @@ public class Eta implements Serializable {
 	}
 	
 	// TODO: Need a lot of wrapper methods here, they all must call API
-	public HttpHelper getCatalogs(Api.CatalogsListener listener, int offset) {
+	public HttpHelper getCatalogs(Api.CatalogListListener listener, int offset) {
 		return getCatalogs(listener, offset, Api.LIMIT_DEFAULT);
 	}
 
-	public HttpHelper getCatalogs(Api.CatalogsListener listener, int offset, String[] order) {
+	public HttpHelper getCatalogs(Api.CatalogListListener listener, int offset, String[] order) {
 		return getCatalogs(listener, offset, Api.LIMIT_DEFAULT, order);
 	}
 
-	public HttpHelper getCatalogs(Api.CatalogsListener listener, int offset, int limit) {
+	public HttpHelper getCatalogs(Api.CatalogListListener listener, int offset, int limit) {
 		return getCatalogs(listener, offset, limit, null);
 	}
 
-	public HttpHelper getCatalogs(Api.CatalogsListener listener, int offset, int limit, String[] order) {
+	public HttpHelper getCatalogs(Api.CatalogListListener listener, int offset, int limit, String[] order) {
 		Bundle apiParams = new Bundle();
 		apiParams.putInt(Api.OFFSET, offset);
 		apiParams.putInt(Api.LIMIT, limit);

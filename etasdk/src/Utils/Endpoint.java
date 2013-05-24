@@ -35,8 +35,7 @@ public class Endpoint {
 	public static final String STORE = "/stores";
 
 	// SUB-RESOURCES
-	public static final String ID = "/id";
-	public static final String IDS = "/ids";
+	public static final String ITEM = "/";
 	public static final String SEARCH = "/search";
 
 	// LISTS
@@ -46,16 +45,10 @@ public class Endpoint {
 	public static final String STORE_LIST = V2 + STORE;
 	
 	// SINGLE ID
-	public static final String CATALOG_ID = CATALOG_LIST + ID;
-	public static final String DEALER_ID = DEALER_LIST + ID;
-	public static final String OFFER_ID = OFFER_LIST + ID;
-	public static final String STORE_ID = STORE_LIST + ID;
-	
-	// MULTIPLE IDS
-	public static final String CATALOG_IDS = CATALOG_LIST + IDS;
-	public static final String DEALER_IDS = DEALER_LIST + IDS;
-	public static final String OFFER_IDS = OFFER_LIST + IDS;
-	public static final String STORE_IDS = STORE_LIST + IDS;
+	public static final String CATALOG_ID = CATALOG_LIST + ITEM;
+	public static final String DEALER_ID = DEALER_LIST + ITEM;
+	public static final String OFFER_ID = OFFER_LIST + ITEM;
+	public static final String STORE_ID = STORE_LIST + ITEM;
 	
 	// SEARCH
 	public static final String CATALOG_SEARCH = CATALOG_LIST + SEARCH;

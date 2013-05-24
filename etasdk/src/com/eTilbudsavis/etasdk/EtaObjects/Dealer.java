@@ -33,12 +33,9 @@ public class Dealer implements Serializable {
 	/** Endpoint for a single dealer resource */
 	public static final String ENDPOINT_ID = Endpoint.DEALER_ID;
 
-	/** Endpoint for getting multiple dealer resources */
-	public static final String ENDPOINT_IDS = Endpoint.DEALER_IDS;
-	
 	/** Endpoint for searching dealers */
 	public static final String ENDPOINT_SEARCH = Endpoint.DEALER_SEARCH;
-
+	
 	private String mId;
 	private String mErn;
 	private String mName;

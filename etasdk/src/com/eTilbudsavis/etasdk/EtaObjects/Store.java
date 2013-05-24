@@ -33,25 +33,21 @@ public class Store implements Serializable {
 	/** Endpoint for a single store resource */
 	public static final String ENDPOINT_ID = Endpoint.STORE_ID;
 
-	/** Endpoint for getting multiple store resources */
-	public static final String ENDPOINT_IDS = Endpoint.STORE_IDS;
-	
 	/** Endpoint for searching stores */
 	public static final String ENDPOINT_SEARCH = Endpoint.STORE_SEARCH;
 
-	public String mId;
-	public String mStreet;
-	public String mCity;
-	public String mZipcode;
-	public Country mCountry;
-	public String mUrl;
-	public double mLatitude;
-	public double mLongitude;
-	public String mDealerId;
-	public Dealer mDealer;
-	public int mDistance;
-	public String mContact;
-
+	private String mId;
+	private String mErn;
+	private String mStreet;
+	private String mCity;
+	private String mZipcode;
+	private Country mCountry;
+	private double mLatitude;
+	private double mLongitude;
+	private String mDealerUrl;
+	private String mDealerId;
+	private Branding mBranding;
+	private String mContact;
 
 	public Store(JSONObject store) {
 		update(store);
@@ -61,15 +57,16 @@ public class Store implements Serializable {
 
 		try {
 			mId = store.getString("id");
+			mErn = store.getString("ern");
 			mStreet = store.getString("street");
 			mCity = store.getString("city");
-			mZipcode = store.getString("zipcode");
+			mZipcode = store.getString("zip_code");
 			mCountry = new Country(store.getJSONObject("country"));
-			mUrl = store.getString("url");
 			mLatitude = store.getDouble("latitude");
 			mLongitude = store.getDouble("longitude");
+			mDealerUrl = store.getString("dealer_url");
 			mDealerId = store.getString("dealer_id");
-			mDistance = store.getInt("distance");
+			mBranding = new Branding(store.getJSONObject("branding"));
 			mContact = store.getString("contact");
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -83,6 +80,15 @@ public class Store implements Serializable {
 
 	public String getId() {
 		return mId;
+	}
+
+	public String getErn() {
+		return mErn;
+	}
+
+	public Store setErn(String ern) {
+		mErn = ern;
+		return this;
 	}
 
 	public Store setStreet(String street) {
@@ -121,15 +127,6 @@ public class Store implements Serializable {
 		return mCountry;
 	}
 
-	public Store setUrl(String url) {
-		mUrl = url;
-		return this;
-	}
-
-	public String getUrl() {
-		return mUrl;
-	}
-
 	public Store setLatitude(Double latitude) {
 		mLatitude = latitude;
 		return this;
@@ -148,13 +145,13 @@ public class Store implements Serializable {
 		return mLongitude;
 	}
 
-	public Store setDealer(Dealer dealer) {
-		mDealer = dealer;
-		return this;
+	public String getDealerUrl() {
+		return mDealerUrl;
 	}
 
-	public Dealer getDealer() {
-		return mDealer;
+	public Store setDealerUrl(String url) {
+		mDealerUrl = url;
+		return this;
 	}
 
 	public Store setDealerId(String dealer) {
@@ -166,13 +163,13 @@ public class Store implements Serializable {
 		return mDealerId;
 	}
 
-	public Store setDistance(int distance) {
-		mDistance = distance;
-		return this;
+	public Branding getBranding() {
+		return mBranding;
 	}
 
-	public int getDistance() {
-		return mDistance;
+	public Store setBranding(Branding branding) {
+		mBranding = branding;
+		return this;
 	}
 
 	public Store setContact(String contact) {
@@ -194,15 +191,17 @@ public class Store implements Serializable {
 
 		Store s = (Store)o;
 		return mId.equals(s.getId()) &&
+				mErn.equals(s.getErn()) &&
 				mStreet.equals(s.getStreet()) &&
 				mCity.equals(s.getCity()) &&
 				mZipcode.equals(s.getZipcode()) &&
-				mCountry.equals(s.getCountry()) &&
-				mUrl.equals(s.getUrl()) &&
+				mCountry == null ? s.getCountry() == null : mCountry.equals(s.getCountry()) &&
 				mLatitude == s.getLatitude() &&
 				mLongitude == s.getLongitude() &&
-				mDealer.equals(s.getDealer()) &&
-				mDistance == s.getDistance() &&
+				mDealerUrl.equals(s.getDealerUrl()) &&
+				mDealerId.equals(s.getDealerId()) &&
+				mBranding == null ? s.getBranding() == null : mBranding.equals(s.getBranding()) &&
 				mContact.equals(s.getContact());
 	}
+	
 }

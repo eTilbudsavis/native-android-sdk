@@ -191,28 +191,28 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	
 	private Object convertResponse(String resp) {
 		try {
-			if (mRequestListener instanceof Api.CatalogsListener) {
+			if (mRequestListener instanceof Api.CatalogListListener) {
 				ArrayList<Catalog> c = new ArrayList<Catalog>();
 				JSONArray jArray = new JSONArray(resp);
 				for (int i = 0 ; i < jArray.length() ; i++ ) {
 					c.add(new Catalog((JSONObject)jArray.get(i)));
 				}
 				return c;
-			} else if  (mRequestListener instanceof Api.DealersListener) {
+			} else if  (mRequestListener instanceof Api.DealerListListener) {
 				ArrayList<Dealer> d = new ArrayList<Dealer>();
 				JSONArray jArray = new JSONArray(resp);
 				for (int i = 0 ; i < jArray.length() ; i++ ) {
 					d.add(new Dealer((JSONObject)jArray.get(i)));
 				}
 				return d;
-			} else if  (mRequestListener instanceof Api.OffersListener) {
+			} else if  (mRequestListener instanceof Api.OfferListListener) {
 				ArrayList<Offer> o = new ArrayList<Offer>();
 				JSONArray jArray = new JSONArray(resp);
 				for (int i = 0 ; i < jArray.length() ; i++ ) {
 					o.add(new Offer((JSONObject)jArray.get(i)));
 				}
 				return o;
-			} else if  (mRequestListener instanceof Api.StoresListener) {
+			} else if  (mRequestListener instanceof Api.StoreListListener) {
 				ArrayList<Offer> o = new ArrayList<Offer>();
 				JSONArray jArray = new JSONArray(resp);
 				for (int i = 0 ; i < jArray.length() ; i++ ) {

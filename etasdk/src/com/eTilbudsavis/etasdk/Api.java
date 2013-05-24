@@ -310,27 +310,23 @@ public class Api implements Serializable {
 	public boolean listenerMatchesUrl() {
 		if (mListener instanceof CatalogListener) {
 			return mUrl.matches(Endpoint.CATALOG_ID) ? true : false;
-		} else if (mListener instanceof CatalogsListener) {
-			return ( mUrl.matches(Endpoint.CATALOG_IDS) ||
-					 mUrl.matches(Endpoint.CATALOG_LIST) ||
+		} else if (mListener instanceof CatalogListListener) {
+			return ( mUrl.matches(Endpoint.CATALOG_LIST) ||
 					 mUrl.matches(Endpoint.CATALOG_SEARCH)) ? true : false;
 		} else if (mListener instanceof OfferListener) {
 			return mUrl.matches(Endpoint.OFFER_ID) ? true : false;
-		} else if (mListener instanceof OffersListener) {
-			return ( mUrl.matches(Endpoint.OFFER_IDS) ||
-					 mUrl.matches(Endpoint.OFFER_LIST) ||
+		} else if (mListener instanceof OfferListListener) {
+			return ( mUrl.matches(Endpoint.OFFER_LIST) ||
 					 mUrl.matches(Endpoint.OFFER_SEARCH)) ? true : false;
 		} else if (mListener instanceof DealerListener) {
 			return mUrl.matches(Endpoint.DEALER_ID) ? true : false;
-		} else if (mListener instanceof DealersListener) {
-			return ( mUrl.matches(Endpoint.DEALER_IDS) ||
-					 mUrl.matches(Endpoint.DEALER_LIST) ||
+		} else if (mListener instanceof DealerListListener) {
+			return ( mUrl.matches(Endpoint.DEALER_LIST) ||
 					 mUrl.matches(Endpoint.DEALER_SEARCH)) ? true : false;
 		} else if (mListener instanceof StoreListener) {
 			return mUrl.matches(Endpoint.STORE_ID) ? true : false;
-		} else if (mListener instanceof StoresListener) {
-			return ( mUrl.matches(Endpoint.STORE_IDS) ||
-					 mUrl.matches(Endpoint.STORE_LIST) ||
+		} else if (mListener instanceof StoreListListener) {
+			return ( mUrl.matches(Endpoint.STORE_LIST) ||
 					 mUrl.matches(Endpoint.STORE_SEARCH)) ? true : false;
 		} else if (mListener instanceof RequestListener) {
 			return true;
@@ -344,22 +340,22 @@ public class Api implements Serializable {
     }
 
     /** Callback interface for a list of catalogs */
-    public static interface CatalogsListener extends RequestListener {
+    public static interface CatalogListListener extends RequestListener {
         public void onComplete(int responseCode, ArrayList<Catalog> catalogs);
     }
 
     /** Callback interface for a list of offers */
-    public static interface OffersListener extends RequestListener {
+    public static interface OfferListListener extends RequestListener {
         public void onComplete(int responseCode, ArrayList<Offer> offers);
     }
 
     /** Callback interface for a list of dealers */
-    public static interface DealersListener extends RequestListener {
+    public static interface DealerListListener extends RequestListener {
         public void onComplete(int responseCode, ArrayList<Dealer> dealers);
     }
 
     /** Callback interface for a list of stores */
-    public static interface StoresListener extends RequestListener {
+    public static interface StoreListListener extends RequestListener {
         public void onComplete(int responseCode, ArrayList<Store> stores);
     }
 
