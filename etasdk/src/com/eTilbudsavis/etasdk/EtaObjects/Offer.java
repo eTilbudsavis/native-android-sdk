@@ -54,7 +54,7 @@ public class Offer implements Serializable {
 	public static final String ENDPOINT_SEARCH = Endpoint.OFFER_SEARCH;
 	
 	@SuppressLint("SimpleDateFormat")
-	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSSS");
+	private SimpleDateFormat sdf;
 	
 	// From JSON blob
 	private String mId;
@@ -83,6 +83,9 @@ public class Offer implements Serializable {
 	private Store mStore;
 
 	public Offer(JSONObject offer) {
+
+		sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSSS");
+		
 		try {
 			mId = offer.getString("id");
 			mErn = offer.getString("ern");
@@ -93,7 +96,7 @@ public class Offer implements Serializable {
 			mPricing = new Pricing(offer.getJSONObject("pricing"));
 			mQuantity = new Quantity(offer.getJSONObject("quantity"));
 			mImages = new Images(offer.getJSONObject("images"));
-			mLinks = new Links();
+			mLinks = new Links(offer.getJSONObject("links"));
 			setRunFrom(offer.getString("run_from"));
 			setRunTill(offer.getString("run_till"));
 			setPublish(offer.getString("publish"));

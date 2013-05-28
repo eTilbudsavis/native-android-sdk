@@ -7,6 +7,7 @@ package com.eTilbudsavis.etasdk;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import Utils.Params;
 import Utils.Utilities;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -18,29 +19,29 @@ public class EtaLocation extends Location {
 
 	private static final String ETA_PROVIDER	= "etasdk";
 	
-	/** API v2 parameter name for latitude. */
-	public static final String SENSOR = "r_sensor";
+	/** API v2 parameter name for sensor. */
+	public static final String SENSOR = Params.SENSOR;
 	
 	/** API v2 parameter name for latitude. */
-	public static final String LATITUDE = "r_lat";
+	public static final String LATITUDE = Params.LATITUDE;
 	
 	/** API v2 parameter name for longitude. */
-	public static final String LONGITUDE = "r_lng";
+	public static final String LONGITUDE = Params.LONGITUDE;
 	
 	/** API v2 parameter name for radius. */
-	public static final String RADIUS = "r_radius";
+	public static final String RADIUS = Params.RADIUS;
 	
 	/** API v2 parameter name for bounds east. */
-	public static final String BOUND_EAST = "b_east";
+	public static final String BOUND_EAST = Params.BOUND_EAST;
 	
 	/** API v2 parameter name for bounds north. */
-	public static final String BOUND_NORTH = "b_north";
+	public static final String BOUND_NORTH = Params.BOUND_NORTH;
 	
 	/** API v2 parameter name for bounds south. */
-	public static final String BOUND_SOUTH = "b_south";
+	public static final String BOUND_SOUTH = Params.BOUND_SOUTH;
 	
 	/** API v2 parameter name for bounds west. */
-	public static final String BOUND_WEST = "b_west";
+	public static final String BOUND_WEST = Params.BOUND_WEST;
 	
 	private static final String TIME = "etasdk_loc_time";
 	

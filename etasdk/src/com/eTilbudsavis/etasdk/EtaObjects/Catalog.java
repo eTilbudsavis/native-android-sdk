@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 
 import Utils.Endpoint;
+import Utils.Params;
 import Utils.Sort;
 
 public class Catalog implements Serializable {
@@ -54,7 +55,16 @@ public class Catalog implements Serializable {
 	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific catalog id's */
-	public static final String CATALOG_IDS = "catalog_ids";
+	public static final String PARAM_IDS = Params.CATALOG_IDS;
+
+	/** Parameter for posting a list of store id's to publish the catalog in */
+	public static final String PARAM_STORE_IDS = Params.STORE_IDS;
+
+	/** Parameter for posting a list of area id's to publish the catalog in */
+	public static final String PARAM_AREA_IDS = Params.AREA_IDS;
+
+	/** Parameter for the location of the PDF to post */
+	public static final String PARAM_PDF = Params.PDF;
 
 	/** Endpoint for catalog list resource */
 	public static final String ENDPOINT_LIST = Endpoint.CATALOG_LIST;

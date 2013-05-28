@@ -45,6 +45,12 @@ public class Dealer implements Serializable {
 	private Integer mColor;
 	private Pageflip mPageflip;
 
+	public Dealer(String name, int color, int pageflipColor) {
+		mName = name;
+		mColor = color;
+		mPageflip = new Pageflip(pageflipColor);
+	}
+	
 	public Dealer(JSONObject dealer) {
 		try {
 			mId = dealer.getString("id");

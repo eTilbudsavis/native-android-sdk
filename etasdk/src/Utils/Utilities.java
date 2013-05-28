@@ -11,6 +11,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -32,7 +34,7 @@ public final class Utilities {
 	 * @return Universally unique identifer (UUID).
 	 */
 	public static String createUUID() {
-		return UUID.randomUUID().toString().replace("-", "");
+		return UUID.randomUUID().toString();
 	}
 
 	/**
@@ -179,5 +181,78 @@ public final class Utilities {
 	public static int getTime() {
 		return Integer.valueOf(String.valueOf(System.currentTimeMillis()/1000));
 	}
+	
+
+	/**
+	 * Method checks is a given e-mail is of a valid format.<br>
+	 * e.g.: danny@etilbudsavis.dk
+	 * 
+	 * @param email to check
+	 * @return boolean true for valid, false for invalid
+	 */
+	public static boolean isEmailValid(String email) {
+
+		if (email.length() == 0)
+			return false;
+
+	    boolean isValid = false;
+
+	    String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
+	    CharSequence inputStr = email;
+
+	    Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+	    Matcher matcher = pattern.matcher(inputStr);
+	    if (matcher.matches()) {
+	        isValid = true;
+	    }
+	    return isValid;
+	}
+
+	/**
+	 * Checks if the name is a valid user name for eta.dk <br><br>
+	 * 
+	 * Requirements: length > 2 chars.
+	 * @param name to check
+	 * @return boolean, true if name if valid
+	 */
+	public static Boolean isNameValid(String name) {
+		return name.length() > 1 ? (name.length() < 81 ? true : false ) : false;
+	}
+
+	/**
+	 * Checks if a given password fits the requirements of etilbudsavis.dk.<br><br>
+	 * 
+	 * Requirements: password length from 6 through 39 chars.
+	 * @param password
+	 * @return
+	 */
+	public static Boolean isPasswordValid(String password) {
+		return 5 < password.length() && password.length() < 40;
+	}
+
+	/**
+	 * Checks if a given integer is a valid birth year.<br>
+	 * 
+	 * Requirements: birth year from 1901 through 2011.
+	 * @param birthyear
+	 * @return
+	 */
+	public static Boolean isBirthyearValid(Integer birthyear) {
+		return birthyear > 1900 ? (birthyear < 2012 ? true : false ) : false ;
+	}
+
+	/**
+	 * Checks if a given integer is a valid birth year.<br>
+	 * 
+	 * Requirements: birth year from 1901 through 2011.
+	 * @param birthyear
+	 * @return
+	 */
+	public static Boolean isGenderValid(String gender) {
+		gender = gender.toLowerCase();
+		return (gender.equals("male") || gender.equals("female") );
+	}
+
+	
 	
 }

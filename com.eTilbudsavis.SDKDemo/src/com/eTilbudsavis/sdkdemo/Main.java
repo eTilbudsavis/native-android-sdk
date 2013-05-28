@@ -2,15 +2,12 @@ package com.eTilbudsavis.sdkdemo;
 
 import java.util.ArrayList;
 
-import Utils.Endpoint;
 import Utils.Utilities;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.eTilbudsavis.etasdk.Api;
-import com.eTilbudsavis.etasdk.Api.CatalogsListener;
-import com.eTilbudsavis.etasdk.Api.RequestListener;
+import com.eTilbudsavis.etasdk.Api.CatalogListListener;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Session.SessionListener;
@@ -23,8 +20,8 @@ public class Main extends Activity {
 	// Create ETA and API objects.
 	private Eta mEta;
 	// Set API key and secret.
-	private String mApiKey = "590990e7ad62f206512ce390939ea3d3";
-	private String mApiSecret = "braTh_chEs_etrA*e-aJAg&6axUg=zE*eza";
+	private String mApiKey = "";
+	private String mApiSecret = "";
 	
 	TextView tvSession;
 	
@@ -57,28 +54,16 @@ public class Main extends Activity {
     
     public void cat() {
     	
-    	mEta.getCatalogs(new CatalogsListener() {
+    	mEta.getCatalogs(new CatalogListListener() {
 			
 			@Override
-			public void onComplete(int responseCode, Object object) {
-				Utilities.logd(TAG, "Code: " + String.valueOf(responseCode) + ", Data: " + object.toString());
-			}
-			
-			@Override
-			public void onComplete(int responseCode, ArrayList<Catalog> catalogs) {
-				
+			public void onComplete(int statusCode, Object object) {
+				ArrayList<Catalog> cs = (ArrayList<Catalog>)object;
+				for (Catalog c : cs)
+					Utilities.logd(TAG, c.toString());
 			}
 		}, 0);
     	
-//    	Api a = new Api(mEta);
-//    	a.build(Endpoint.CATALOG_LIST, new RequestListener() {
-//			
-//			@Override
-//			public void onComplete(int responseCode, Object object) {
-//				Utilities.logd(TAG, "Code: " + String.valueOf(responseCode) + ", Data: " + object.toString());
-//			}
-//		});
-//    	a.execute();
     }
     
 }

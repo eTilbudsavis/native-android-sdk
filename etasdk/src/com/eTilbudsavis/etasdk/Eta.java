@@ -25,7 +25,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Api.RequestListener;
-import com.eTilbudsavis.etasdk.Api.RequestType;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
 
@@ -42,16 +41,17 @@ public class Eta implements Serializable {
 	/** Info log messages may be used in release */
 	public static final boolean DEBUG_I = true;
 	
+	public static final String ETA_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss+SSSS";
+	
 	private static Context mContext;
-	private SharedPreferences prefs;
+	private SharedPreferences mPrefs;
 	
 	public static final String PREFS_NAME = "eta_sdk";
-	public static final String PREFS_SESSION = "session";
 	
 	// Authorization.
 	private final String mApiKey;
 	private final String mApiSecret;
-	private Session mSession = new Session();
+	private Session mSession;
 	
 	private EtaLocation mLocation;
 	private EtaCache mCache;
@@ -73,54 +73,14 @@ public class Eta implements Serializable {
 		mLocation = new EtaLocation();
 		mCache = new EtaCache();
 
-		prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-
-		prefs.edit().clear().commit();
+		mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 		
-		String sessionJson = prefs.getString(PREFS_SESSION, null);
-		if (sessionJson != null) {
-			try {
-				mSession.update(new JSONObject(sessionJson));
-				if (mSession.getExpire() < System.currentTimeMillis())
-					updateSession(null);
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-		} else {
-			updateSession(null);
-		}
+		mPrefs.edit().clear().commit();
+		
+		mSession = new Session(this);
+		
 	}
 	
-	public void updateSession(final RequestListener listener) {
-		
-		Utilities.logi(TAG, "Session not established. Trying to establish, please wait...");
-		Api a = new Api(this);
-		a.setUseLocation(false);
-		a.build(Session.ENDPOINT, new RequestListener() {
-			
-			public void onComplete(int responseCode, Object object) {
-				
-				if (responseCode == 201) {
-					try {
-						mSession.update(new JSONObject(object.toString()));
-						prefs.edit().putString(PREFS_SESSION, mSession.getJson()).commit();
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-				} else {
-					Utilities.logd(TAG, "Session error: " + String.valueOf(responseCode) + " - " + object.toString());
-				}
-				
-				if (listener != null) {
-					listener.onComplete(responseCode, object);
-				}
-				mSession.notifySubscribers();
-			}
-		}, Api.RequestType.POST);
-		a.execute();
-		
-	}
-
 	/**
 	 * Returns the API key found at http://etilbudsavis.dk/api/.
 	 * @return API key as String
@@ -136,13 +96,21 @@ public class Eta implements Serializable {
 	public String getApiSecret() {
 		return mApiSecret;
 	}
-	
+
 	/**
 	 * 
 	 * @return Returns the last known session
 	 */
 	public Session getSession() {
 		return mSession;
+	}
+
+	/**
+	 * 
+	 * @return Returns the last known session
+	 */
+	public SharedPreferences getPrefs() {
+		return mPrefs;
 	}
 
 	/**
@@ -180,6 +148,14 @@ public class Eta implements Serializable {
 		mErrors.add(error);
 	}
 	
+	/**
+	 * Method returns a new Api object.
+	 * @return new Api
+	 */
+	public Api api() {
+		return new Api(this);
+	}
+	
 	// TODO: Need a lot of wrapper methods here, they all must call API
 	public HttpHelper getCatalogs(Api.CatalogListListener listener, int offset) {
 		return getCatalogs(listener, offset, Api.LIMIT_DEFAULT);
@@ -200,7 +176,7 @@ public class Eta implements Serializable {
 		if (order != null)
 			apiParams.putStringArray(Sort.ORDER_BY, order);
 		Api a = new Api(this);
-		a.build(Endpoint.CATALOG_LIST, listener, apiParams, Api.RequestType.GET);
+		a.get(Endpoint.CATALOG_LIST, listener, apiParams);
 		return a.execute();
 	}
 	

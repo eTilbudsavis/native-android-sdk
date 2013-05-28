@@ -10,24 +10,38 @@ public class Pageflip implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private String mLogo;
-	private String mColor;
+	private int mColor;
+	
+	public Pageflip(int color) {
+		mColor = color;
+	}
 	
 	public Pageflip(JSONObject pageflip) {
 		try {
 			mLogo = pageflip.getString("logo");
-			mColor = pageflip.getString("color");
+			mColor = pageflip.getInt("color");
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 		
 	}
-	
+
 	public String getLogo() {
 		return mLogo;
 	}
 	
-	public String getColor() {
+	public Pageflip setLogo(String url) {
+		mLogo = url;
+		return this;
+	}
+	
+	public int getColor() {
 		return mColor;
+	}
+	
+	public Pageflip setColor(int color) {
+		mColor = color;
+		return this;
 	}
 	
 	@Override
@@ -40,7 +54,7 @@ public class Pageflip implements Serializable {
 
 		Pageflip p = (Pageflip)o;
 		return mLogo.equals(p.getLogo()) &&
-				mColor.equals(p.getColor());
+				mColor == p.getColor();
 	}
 	
 }

@@ -18,10 +18,10 @@ package Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Sort {
+public final class Sort {
 
 	/** String identifying the order by parameter for all list calls to the API */
-	public static final String ORDER_BY = "order_by";
+	public static final String ORDER_BY = Params.ORDER_BY;
 
 	/** String identifying the descending variable */
 	public static final String DESC = "-";
@@ -32,7 +32,7 @@ public class Sort {
 	/** Sort a list by distance in ascending order. (smallest to largest) */
 	public static final String DISTANCE = "distance";
 
-	/** Sort a list by name in ascending order. (smallest to largest) */
+	/** Sort a list by name in ascending order. (a-z) */
 	public static final String NAME = "name";
 
 	/** Sort a list by published in ascending order. (smallest to largest) */
@@ -53,7 +53,7 @@ public class Sort {
 	/** Sort a list by distance in descending order. (largest to smallest)*/
 	public static final String DISTANCE_DESC = DESC + DISTANCE;
 
-	/** Sort a list by name in descending order. (largest to smallest)*/
+	/** Sort a list by name in descending order. (z-a)*/
 	public static final String NAME_DESC = DESC + NAME;
 
 	/** Sort a list by published in descending order. (largest to smallest)*/

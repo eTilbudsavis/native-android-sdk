@@ -2,18 +2,22 @@ package com.eTilbudsavis.etasdk;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
@@ -23,6 +27,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import Utils.Endpoint;
 import Utils.Utilities;
 import android.os.AsyncTask;
 
@@ -42,27 +47,25 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	private List<NameValuePair> mQuery;
 	private List<Header> mHeaders;
 	private Api.RequestType mRequestType;
-	private RequestListener mRequestListener;
+	private RequestListener mListener;
 	
 	private String mResponse = "";
 	private Object mReturn = null;
 	private int mResponseCode;
 
 	// Constructor for HttpHelper.
-	public HttpHelper(Eta eta, String url, List<NameValuePair> query, List<Header> headers, Api.RequestType requestType, RequestListener requestListener) {
+	public HttpHelper(Eta eta, String url, List<Header> headers, List<NameValuePair> query , Api.RequestType requestType, RequestListener listener) {
 		mEta = eta;
 		mUrl = url;
 		mQuery = query;
 		mHeaders = headers;
 		mRequestType = requestType;
-		mRequestListener = requestListener;
+		mListener = listener;
 	}
 	
 	@Override
 	protected Void doInBackground(Void... params) {
 
-		DefaultHttpClient httpClient = new DefaultHttpClient();
-		
 		// Print debug information
 		if (Eta.DEBUG) {
 			Utilities.logd(TAG, "Url: " + mUrl);
@@ -73,11 +76,13 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 			}
 			Utilities.logd(TAG, "Query: " + sb.toString());
 		}
+
+		DefaultHttpClient httpClient = new DefaultHttpClient();
 		
+		// Set the connection timeout
 		HttpParams httpParams = httpClient.getParams();
 		HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIME_OUT);
 		HttpConnectionParams.setSoTimeout(httpParams, CONNECTION_TIME_OUT);
-		
 		
 		HttpResponse response = null;
 		Header[] responseHeaders;
@@ -98,12 +103,12 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 				break;
 
 			case GET:
-
+				
 				if (mQuery.size() > 0)
 					mUrl = mUrl + "?" + URLEncodedUtils.format(mQuery, HTTP.UTF_8);
 
 				HttpGet get = new HttpGet(mUrl);
-
+				
 				for (Header h : mHeaders)
 					get.setHeader(h);
 				
@@ -112,11 +117,20 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 				break;
 				
 			case DELETE:
-				Utilities.logd(TAG, "RequestType DELETE is not implemented yet");
+				
 				break;
 				
 			case PUT:
-				Utilities.logd(TAG, "RequestType PUT is not implemented yet");
+				
+				HttpPut put = new HttpPut(mUrl);
+				if (mQuery.size() > 0)
+					put.setEntity(new UrlEncodedFormEntity(mQuery, HTTP.UTF_8));
+				
+				for (Header h : mHeaders)
+					put.setHeader(h);
+				
+				response = httpClient.execute(put);
+				responseHeaders = response.getAllHeaders();
 				break;
 				
 			case HEAD:
@@ -131,41 +145,36 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 				break;
 			}
 			
-			/**
-			 * Do not get content with: EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
-			 * As this will make some very unfortunate line breaks in e.g. eta.dk/connect/ 
-			 */
 			mResponseCode = response.getStatusLine().getStatusCode();
 			
-			BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-		    StringBuilder sb = new StringBuilder();
-		    String line = null;
-		    try {
-		        while ((line = reader.readLine()) != null)
-		            sb.append(line);
-		        
-		    } catch (IOException e) {
-		        e.printStackTrace();
-		    } 
-		    mResponse = sb.toString();
+		    mResponse = getText(response.getEntity().getContent());
 		    
+		    if (Eta.DEBUG) {
+		    	for (Header h : response.getAllHeaders())
+		    		Utilities.logd(TAG, "name: " + h.getName() + ", value: " + h.getValue());
+		    	
+		    	Utilities.logd(TAG, "Code: " + String.valueOf(mResponseCode) + ", Data: " + mResponse);
+		    }
 		    
+		    checkSession(response.getAllHeaders());
+		    
+		    // If server returns OK
 			if (200 <= mResponseCode && mResponseCode < 300) {
-				
+				// Try to cast object to match listener
 				mReturn = convertResponse(mResponse);
-				
-			} else if (400 <= mResponseCode ) {
+			
+			// If server returns ERROR
+			} else if (400 <= mResponseCode && mResponseCode < 500) {
 				
 				try {
-					JSONObject jObject = new JSONObject(mResponse);
-					mEta.addError(new EtaError(jObject));
+					mReturn = new EtaError(new JSONObject(mResponse));
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				
-				mReturn = mResponse;
-				
+			
+			// If server is retarded
 			} else {
+				// Just return the standard response
 				mReturn = response.getStatusLine().getReasonPhrase();
 			}
 
@@ -175,57 +184,91 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			// Close connection, to deallocate resources
+			httpClient.getConnectionManager().shutdown();
 		}
-
-        // Close connection, to deallocate resources
-		httpClient.getConnectionManager().shutdown();
 
 		return null;
 	}
 	
-	// Do callback in the UI thread
 	@Override
 	protected void onPostExecute(Void result) {
-		mRequestListener.onComplete(mResponseCode, mReturn);
+		mListener.onComplete(mResponseCode, mReturn);
     }
+	
+	private static String getText(InputStream in) {
+		
+		// Do not get content with: EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
+		// As this will make some very unfortunate line breaks in e.g. eta.dk/connect/ 
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		StringBuilder sb = new StringBuilder();
+		String line = "";
+		try {
+			while ((line = reader.readLine()) != null)
+				sb.append(line);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}  finally {
+			try {
+				in.close();
+			} catch (Exception ex) {
+			}
+		}
+		return sb.toString();
+	}
+
+	private void checkSession(Header[] headers) {
+		String token = "";
+	    String tokenExp = "";
+	    for (Header h : headers) {
+	    	if (h.getName().equals("X-Token")) {
+	    		token = h.getValue();
+	    	} else if (h.getName().equals("X-Token-Expires")) {
+	    		tokenExp = h.getValue();
+	    	}
+	    }
+	    mEta.getSession().updateOnInvalidToken(token, tokenExp);
+	}
 	
 	private Object convertResponse(String resp) {
 		try {
-			if (mRequestListener instanceof Api.CatalogListListener) {
+			if (mListener instanceof Api.CatalogListListener) {
 				ArrayList<Catalog> c = new ArrayList<Catalog>();
 				JSONArray jArray = new JSONArray(resp);
 				for (int i = 0 ; i < jArray.length() ; i++ ) {
 					c.add(new Catalog((JSONObject)jArray.get(i)));
 				}
 				return c;
-			} else if  (mRequestListener instanceof Api.DealerListListener) {
+			} else if  (mListener instanceof Api.DealerListListener) {
 				ArrayList<Dealer> d = new ArrayList<Dealer>();
 				JSONArray jArray = new JSONArray(resp);
 				for (int i = 0 ; i < jArray.length() ; i++ ) {
 					d.add(new Dealer((JSONObject)jArray.get(i)));
 				}
 				return d;
-			} else if  (mRequestListener instanceof Api.OfferListListener) {
+			} else if  (mListener instanceof Api.OfferListListener) {
 				ArrayList<Offer> o = new ArrayList<Offer>();
 				JSONArray jArray = new JSONArray(resp);
 				for (int i = 0 ; i < jArray.length() ; i++ ) {
 					o.add(new Offer((JSONObject)jArray.get(i)));
 				}
 				return o;
-			} else if  (mRequestListener instanceof Api.StoreListListener) {
+			} else if  (mListener instanceof Api.StoreListListener) {
 				ArrayList<Offer> o = new ArrayList<Offer>();
 				JSONArray jArray = new JSONArray(resp);
 				for (int i = 0 ; i < jArray.length() ; i++ ) {
 					o.add(new Offer((JSONObject)jArray.get(i)));
 				}
 				return o;
-			} else if  (mRequestListener instanceof Api.CatalogListener) {
+			} else if  (mListener instanceof Api.CatalogListener) {
 				return new Catalog(new JSONObject(resp));
-			} else if  (mRequestListener instanceof Api.DealerListener) {
+			} else if  (mListener instanceof Api.DealerListener) {
 				return new Dealer(new JSONObject(resp));
-			} else if  (mRequestListener instanceof Api.OfferListener) {
+			} else if  (mListener instanceof Api.OfferListener) {
 				return new Offer(new JSONObject(resp));
-			} else if  (mRequestListener instanceof Api.StoreListener) {
+			} else if  (mListener instanceof Api.StoreListener) {
 				return new Store(new JSONObject(resp));
 			} 
 		} catch (JSONException e) {
