@@ -20,8 +20,8 @@ public class Main extends Activity {
 	// Create ETA and API objects.
 	private Eta mEta;
 	// Set API key and secret.
-	private String mApiKey = "";
-	private String mApiSecret = "";
+	private String mApiKey = Keys.API_KEY;
+	private String mApiSecret = Keys.API_SECRET;
 	
 	TextView tvSession;
 	
