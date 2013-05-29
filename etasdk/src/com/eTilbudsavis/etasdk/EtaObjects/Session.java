@@ -1,12 +1,5 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import Utils.Endpoint;
-import Utils.Params;
-import Utils.Utilities;
-import android.annotation.SuppressLint;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,9 +8,15 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import Utils.Endpoint;
+import Utils.Params;
+import Utils.Utilities;
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+
 import com.eTilbudsavis.etasdk.Api;
-import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Api.RequestListener;
+import com.eTilbudsavis.etasdk.Eta;
 
 public class Session implements Serializable {
 
@@ -37,7 +36,7 @@ public class Session implements Serializable {
 	public static final String ENDPOINT = Endpoint.SESSION;
 	
 	@SuppressLint("SimpleDateFormat")
-	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.ETA_DATE_FORMAT);
+	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
 	
 	private JSONObject mJson = null;
 	private String mToken = null;
@@ -47,8 +46,6 @@ public class Session implements Serializable {
 	private String mProvider;
 	
 	private Eta mEta;
-	private String mUsername = null;
-	private String mPassword = null;
 	private boolean mIsUpdatingSession = false;
 	private ArrayList<SessionListener> mSubscribers = new ArrayList<Session.SessionListener>();
 
@@ -58,7 +55,6 @@ public class Session implements Serializable {
 			try {
 				if (200 <= statusCode || statusCode < 300 ) {
 					set(new JSONObject(object.toString()));
-					Utilities.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + object.toString());
 				} else {
 					mEta.addError(new EtaError(new JSONObject(object.toString())));
 					Utilities.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + object.toString());
@@ -125,6 +121,8 @@ public class Session implements Serializable {
 				set(new JSONObject(sessionJson));
 				if (isSessionGood()) {
 					update();
+				} else {
+					notifySubscribers();
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -140,24 +138,22 @@ public class Session implements Serializable {
 		
 		mIsUpdatingSession = true;
 		Bundle b = new Bundle();
-		mUsername = mEta.getPrefs().getString(PREFS_SESSION_USER, null);
-		mPassword = mEta.getPrefs().getString(PREFS_SESSION_PASS, null);
-		if (mUsername != null && mPassword != null) {
-			b.putString(Params.EMAIL, mUsername);
-			b.putString(Params.PASSWORD, mPassword);
+		String u = mEta.getPrefs().getString(PREFS_SESSION_USER, null);
+		String p = mEta.getPrefs().getString(PREFS_SESSION_PASS, null);
+		if (u != null && p != null) {
+			b.putString(Params.EMAIL, u);
+			b.putString(Params.PASSWORD, p);
 		}
-		new Api(mEta).setUseLocation(false).post(Session.ENDPOINT, session, b).execute();
+		mEta.api().setUseLocation(false).post(Session.ENDPOINT, session, b).execute();
 	}
 	
 	public void login(String user, String password) {
-		mUsername = user;
-		mPassword = password;
-		mEta.getPrefs().edit().putString(PREFS_SESSION_USER, mUsername).putString(PREFS_SESSION_PASS, mPassword).commit();
+		mEta.getPrefs().edit().putString(PREFS_SESSION_USER, user).putString(PREFS_SESSION_PASS, password).commit();
 		if (isSessionGood()) {
 			Bundle b = new Bundle();
-			b.putString(Params.EMAIL, mUsername);
-			b.putString(Params.PASSWORD, mPassword);
-			new Api(mEta).put(Session.ENDPOINT, session , b).execute();
+			b.putString(Params.EMAIL, user);
+			b.putString(Params.PASSWORD, password);
+			mEta.api().put(Session.ENDPOINT, session , b).execute();
 		} else {
 			update();
 		}
@@ -190,7 +186,7 @@ public class Session implements Serializable {
 		b.putString(Params.GENDER, gender);
 		b.putString(Params.SUCCESS_REDIRECT, successRedirect);
 		b.putString(Params.ERROR_REDIRECT, errorRedirect);
-		new Api(mEta).post(Session.ENDPOINT, userCreate, b).execute();
+		mEta.api().post(Session.ENDPOINT, userCreate, b).execute();
 		return true;
 	}
 	
@@ -228,15 +224,19 @@ public class Session implements Serializable {
 		return false;
 	}
 	
+	/**
+	 * TODO: Implement this...
+	 */
 	public void signout() {
-		mUsername = null;
-		mPassword = null;
 		mEta.getPrefs().edit()
 		.putString(PREFS_SESSION_USER, null)
 		.putString(PREFS_SESSION_PASS, null).commit();
 	}
 	
-	public void invalidate() {
+	/**
+	 * TODO: Implement this...
+	 */
+	public Session invalidate() {
 		mJson = null;
 		mToken = null;
 		mExpires = 0L;
@@ -246,7 +246,7 @@ public class Session implements Serializable {
 		mSubscribers = new ArrayList<Session.SessionListener>();
 		mEta.getPrefs().edit()
 		.putString(PREFS_SESSION, null).commit();
-
+		return this;
 	}
 	
 	public JSONObject getJson() {
@@ -315,17 +315,20 @@ public class Session implements Serializable {
 		return sdf.format(mExpires);
 	}
 
-	public void subscribe(SessionListener listener) {
+	public Session subscribe(SessionListener listener) {
 		mSubscribers.add(listener);
+		return this;
 	}
 	
 	public void unSubscribe(SessionListener listener) {
 		mSubscribers.remove(listener);
 	}
 	
-	public void notifySubscribers() {
+	public Session notifySubscribers() {
 		for (SessionListener sl : mSubscribers)
 			sl.onUpdate();
+
+		return this;
 	}
 	
 	/**

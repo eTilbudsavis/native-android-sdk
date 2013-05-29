@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.graphics.Color;
+
 public class Pageflip implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -19,7 +21,7 @@ public class Pageflip implements Serializable {
 	public Pageflip(JSONObject pageflip) {
 		try {
 			mLogo = pageflip.getString("logo");
-			mColor = pageflip.getInt("color");
+			mColor = Color.parseColor("#"+pageflip.getString("color"));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

@@ -8,6 +8,8 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 import android.annotation.SuppressLint;
 
 import Utils.Endpoint;
@@ -54,7 +56,7 @@ public class Offer implements Serializable {
 	public static final String ENDPOINT_SEARCH = Endpoint.OFFER_SEARCH;
 	
 	@SuppressLint("SimpleDateFormat")
-	private SimpleDateFormat sdf;
+	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
 	
 	// From JSON blob
 	private String mId;
@@ -84,8 +86,6 @@ public class Offer implements Serializable {
 
 	public Offer(JSONObject offer) {
 
-		sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSSS");
-		
 		try {
 			mId = offer.getString("id");
 			mErn = offer.getString("ern");

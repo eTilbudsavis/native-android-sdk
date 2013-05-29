@@ -4,13 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -23,24 +20,20 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import Utils.Endpoint;
 import Utils.Utilities;
 import android.os.AsyncTask;
 
 import com.eTilbudsavis.etasdk.Api.RequestListener;
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
-import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.EtaObjects.Store;
 
 public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	
 	public static final String TAG = "HttpHelper";
+	public static final boolean DEBUG = false;
+	
 	private int CONNECTION_TIME_OUT = 15 * 1000;
 	private Eta mEta;
 	private String mUrl;
@@ -67,7 +60,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	protected Void doInBackground(Void... params) {
 
 		// Print debug information
-		if (Eta.DEBUG) {
+		if (DEBUG) {
 			Utilities.logd(TAG, "Url: " + mUrl);
 			Utilities.logd(TAG, "Headers: " + mHeaders.toString());
 			StringBuilder sb = new StringBuilder();
@@ -85,7 +78,6 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		HttpConnectionParams.setSoTimeout(httpParams, CONNECTION_TIME_OUT);
 		
 		HttpResponse response = null;
-		Header[] responseHeaders;
 		try {
 			
 			switch (mRequestType) {
@@ -99,7 +91,6 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 					post.setHeader(h);
 				
 				response = httpClient.execute(post);
-				responseHeaders = response.getAllHeaders();
 				break;
 
 			case GET:
@@ -113,11 +104,6 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 					get.setHeader(h);
 				
 				response = httpClient.execute(get);
-				responseHeaders = response.getAllHeaders();
-				break;
-				
-			case DELETE:
-				
 				break;
 				
 			case PUT:
@@ -130,38 +116,21 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 					put.setHeader(h);
 				
 				response = httpClient.execute(put);
-				responseHeaders = response.getAllHeaders();
-				break;
-				
-			case HEAD:
-				Utilities.logd(TAG, "RequestType HEAD is not implemented yet");
-				break;
-				
-			case OPTIONS:
-				Utilities.logd(TAG, "RequestType OPTIONS is not implemented yet");
 				break;
 				
 			default:
-				break;
+				Utilities.logd(TAG, "RequestType " + mRequestType.toString() + " is not implemented yet, execution stopped!");
+				return null;
 			}
 			
 			mResponseCode = response.getStatusLine().getStatusCode();
 			
 		    mResponse = getText(response.getEntity().getContent());
 		    
-		    if (Eta.DEBUG) {
-		    	for (Header h : response.getAllHeaders())
-		    		Utilities.logd(TAG, "name: " + h.getName() + ", value: " + h.getValue());
-		    	
-		    	Utilities.logd(TAG, "Code: " + String.valueOf(mResponseCode) + ", Data: " + mResponse);
-		    }
-		    
-		    checkSession(response.getAllHeaders());
-		    
 		    // If server returns OK
 			if (200 <= mResponseCode && mResponseCode < 300) {
 				// Try to cast object to match listener
-				mReturn = convertResponse(mResponse);
+				mReturn = mResponse;
 			
 			// If server returns ERROR
 			} else if (400 <= mResponseCode && mResponseCode < 500) {
@@ -177,7 +146,19 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 				// Just return the standard response
 				mReturn = response.getStatusLine().getReasonPhrase();
 			}
+			
+			updateSessionInfo(response.getAllHeaders());
 
+		    if (DEBUG) {
+		    	StringBuilder headers = new StringBuilder();
+		    	headers.append("Return Headers: ");
+		    	for (Header h : response.getAllHeaders())
+		    		headers.append("name: ").append(h.getName()).append(", value: ").append(h.getValue());
+		    	
+		    	Utilities.logd(TAG, headers.toString());
+		    	Utilities.logd(TAG, "Code: " + String.valueOf(mResponseCode) + ", Data: " + mResponse);
+		    }
+		    
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (ClientProtocolException e) {
@@ -219,7 +200,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		return sb.toString();
 	}
 
-	private void checkSession(Header[] headers) {
+	private void updateSessionInfo(Header[] headers) {
 		String token = "";
 	    String tokenExp = "";
 	    for (Header h : headers) {
@@ -230,51 +211,6 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	    	}
 	    }
 	    mEta.getSession().updateOnInvalidToken(token, tokenExp);
-	}
-	
-	private Object convertResponse(String resp) {
-		try {
-			if (mListener instanceof Api.CatalogListListener) {
-				ArrayList<Catalog> c = new ArrayList<Catalog>();
-				JSONArray jArray = new JSONArray(resp);
-				for (int i = 0 ; i < jArray.length() ; i++ ) {
-					c.add(new Catalog((JSONObject)jArray.get(i)));
-				}
-				return c;
-			} else if  (mListener instanceof Api.DealerListListener) {
-				ArrayList<Dealer> d = new ArrayList<Dealer>();
-				JSONArray jArray = new JSONArray(resp);
-				for (int i = 0 ; i < jArray.length() ; i++ ) {
-					d.add(new Dealer((JSONObject)jArray.get(i)));
-				}
-				return d;
-			} else if  (mListener instanceof Api.OfferListListener) {
-				ArrayList<Offer> o = new ArrayList<Offer>();
-				JSONArray jArray = new JSONArray(resp);
-				for (int i = 0 ; i < jArray.length() ; i++ ) {
-					o.add(new Offer((JSONObject)jArray.get(i)));
-				}
-				return o;
-			} else if  (mListener instanceof Api.StoreListListener) {
-				ArrayList<Offer> o = new ArrayList<Offer>();
-				JSONArray jArray = new JSONArray(resp);
-				for (int i = 0 ; i < jArray.length() ; i++ ) {
-					o.add(new Offer((JSONObject)jArray.get(i)));
-				}
-				return o;
-			} else if  (mListener instanceof Api.CatalogListener) {
-				return new Catalog(new JSONObject(resp));
-			} else if  (mListener instanceof Api.DealerListener) {
-				return new Dealer(new JSONObject(resp));
-			} else if  (mListener instanceof Api.OfferListener) {
-				return new Offer(new JSONObject(resp));
-			} else if  (mListener instanceof Api.StoreListener) {
-				return new Store(new JSONObject(resp));
-			} 
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return resp;
 	}
 	
 }

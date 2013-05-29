@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicHeader;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,8 +28,8 @@ import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.EtaObjects.Session.SessionListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
+import com.eTilbudsavis.etasdk.EtaObjects.Session.SessionListener;
 
 public class Api implements Serializable {
 	
@@ -53,32 +54,40 @@ public class Api implements Serializable {
 	public static final String LIMIT = Params.LIMIT;
 	
 	/** The default page limit for API calls */
-	public static final int OFFSET_DEFAULT = 0;
+	public static final int DEFAULT_OFFSET = Params.DEFAULT_OFFSET;
 
 	/** The default page limit for API calls */
-	public static final int LIMIT_DEFAULT = 25;
+	public static final int DEFAULT_LIMIT = Params.DEFAULT_LIMIT;
 	
 	/**
-	 * The type expected to return;
-	 * Default is JSON, other types are not implemented yet
+	 * Expected return type. Default is JSON.<br><br>
+	 * <i>Other types are not implemented yet.</i><br>
+	 * TODO: Complete implementation
 	 */
 	public enum AcceptType {
-		XML { public String toString() { return "application/xml, text/xml"; } },
-		CSV { public String toString() { return "application/csv"; } },
-		JSON { public String toString() { return "application/json"; } }
+		XML		{ public String toString() { return "application/xml, text/xml"; } },
+		CSV		{ public String toString() { return "application/csv"; } },
+		JSON	{ public String toString() { return "application/json"; } }
 	}
 	
+	/**
+	 * Type of HTTP request.<br><br>
+	 * <i>OPTIONS and HEAD are not implemented yet.</i><br>
+	 * TODO: Complete implementation
+	 */
 	public enum RequestType {
 		POST, GET, PUT, DELETE, OPTIONS, HEAD
 	}
 	
 	/**
-	 * The content type to use in requests. This feature is not implemented yet.
+	 * Content-Type used in request. Default is URLENCODED<br><br>
+	 * <i>Other types are not implemented yet.</i><br>
+	 * TODO: Complete implementation
 	 */
 	public enum ContentType {
-		JSON { public String toString() { return "application/json; charset=utf-8"; } },
-		URLENCODED { public String toString() { return "application/x-www-form-urlencoded; charset=utf-8"; } },
-		FORMDATA { public String toString() { return "multipart/form-data; charset=utf-8"; } }
+		JSON			{ public String toString() { return "application/json; charset=utf-8"; } },
+		URLENCODED	{ public String toString() { return "application/x-www-form-urlencoded; charset=utf-8"; } },
+		FORMDATA		{ public String toString() { return "multipart/form-data; charset=utf-8"; } }
 	}
 
 	private Eta mEta;
@@ -93,52 +102,59 @@ public class Api implements Serializable {
 
 	private boolean useLocation = true;
 	private boolean mUseCache = true;
-
+	
 	private RequestListener mListenerApi = new RequestListener() {
-		
+
 		public void onComplete(int statusCode, Object object) {
-			
-			if (200 <= statusCode || statusCode <= 300) {
+
+			// Success
+			if (200 <= statusCode && statusCode < 300) {
+				doCallback(statusCode, object);
 				
-				mListenerUser.onComplete(statusCode, object);
-				
+			// Error
 			} else if (400 <= statusCode && statusCode < 500) {
 				
-				// If it's a session error, then refresh session and retry completeExecution()
-				try {
-					EtaError e = new EtaError(new JSONObject(object.toString()));
-					if ( (e.getCode() == 1108 || e.getCode() == 1101) ) {
-						mEta.getSession().update();
-					} else {
-						mListenerUser.onComplete(statusCode, object);
-					}
-				} catch (JSONException e1) {
-					e1.printStackTrace();
+				// If it's a Session problem, refresh Session and retry
+				EtaError e = (EtaError)object;
+				if ( (e.getCode() == 1108 || e.getCode() == 1101) ) {
+					mEta.getSession().subscribe(new SessionListener() {
+						
+						public void onUpdate() {
+							mEta.getSession().unSubscribe(this);
+							completeExecute();
+						}
+					}).update();
+				} else {
+					mListenerUser.onComplete(statusCode, object);
 				}
-				
-				
-				
+			
+			// Random
 			} else {
 				mListenerUser.onComplete(statusCode, object);
 			}
 		}
 	};
-	
+
 	/**
 	 * TODO: Write proper JavaDoc<br>
 	 * <code>new String[] {Api.SORT_DISTANCE, Api.SORT_PUBLISHED}</code>
 	 * @param order
 	 * @return This {@link com.eTilbudsavis.etasdk.Api Api} object to allow for chaining of calls to set methods
 	 */
+	public Api setOrderBy(String order) {
+		mParams.putString(Sort.ORDER_BY, order);
+		return this;
+	}
+
 	public Api setOrderBy(String[] order) {
-		mParams.putString(Sort.ORDER_BY, TextUtils.join(",", order));
+		mParams.putString(Sort.ORDER_BY, TextUtils.join(",",order));
 		return this;
 	}
 	
-	public String[] getOrderBy() {
+	public String getOrderBy() {
 		String s = mParams.getString(Sort.ORDER_BY);
 		s = s == null ? "" : s;
-		return TextUtils.split(s, ",");
+		return s;
 	}
 
 	public Api setContentType(ContentType type) {
@@ -339,7 +355,7 @@ public class Api implements Serializable {
 				Utilities.putNameValuePair(params, s, mParams.get(s));
 			}
 		}
-
+		
 		// Required API key.
 		Utilities.putNameValuePair(params, API_KEY, mEta.getApiKey());
 
@@ -372,7 +388,7 @@ public class Api implements Serializable {
 			setHeader(HEADER_X_SIGNATURE, sha256);
 		}
 		
-//		setHeader(HEADER_CONTENT_TYPE, mContentType.toString());
+		setHeader(HEADER_CONTENT_TYPE, mContentType.toString());
 		
 		List<Header> headers = new ArrayList<Header>();
 		Iterator<String> it = mHeaders.keySet().iterator();
@@ -392,6 +408,59 @@ public class Api implements Serializable {
 		httpHelper = new HttpHelper(mEta, mUrl, headers, params, mRequestType, mListenerApi);
 		httpHelper.execute();
 		
+	}
+
+	private void doCallback(int statusCode, Object object) {
+		try {
+			if (mListenerUser instanceof Api.CatalogListListener) {
+				ArrayList<Catalog> c = new ArrayList<Catalog>();
+				JSONArray jArray = new JSONArray(object.toString());
+				for (int i = 0 ; i < jArray.length() ; i++ ) {
+					c.add(new Catalog((JSONObject)jArray.get(i)));
+				}
+				object = c;
+				
+			} else if  (mListenerUser instanceof Api.OfferListListener) {
+				ArrayList<Offer> o = new ArrayList<Offer>();
+				JSONArray jArray = new JSONArray(object.toString());
+				for (int i = 0 ; i < jArray.length() ; i++ ) {
+					o.add(new Offer((JSONObject)jArray.get(i)));
+				}
+				object = o;
+				
+			} else if  (mListenerUser instanceof Api.OfferListener) {
+				object =  new Offer(new JSONObject(object.toString()));
+				
+			} else if  (mListenerUser instanceof Api.CatalogListener) {
+				object = new Catalog(new JSONObject(object.toString()));
+				
+			} else if  (mListenerUser instanceof Api.DealerListListener) {
+				ArrayList<Dealer> d = new ArrayList<Dealer>();
+				JSONArray jArray = new JSONArray(object.toString());
+				for (int i = 0 ; i < jArray.length() ; i++ ) {
+					d.add(new Dealer((JSONObject)jArray.get(i)));
+				}
+				object = d;
+				
+			} else if  (mListenerUser instanceof Api.StoreListListener) {
+				ArrayList<Offer> o = new ArrayList<Offer>();
+				JSONArray jArray = new JSONArray(object.toString());
+				for (int i = 0 ; i < jArray.length() ; i++ ) {
+					o.add(new Offer((JSONObject)jArray.get(i)));
+				}
+				object = o;
+
+			} else if  (mListenerUser instanceof Api.DealerListener) {
+				object =  new Dealer(new JSONObject(object.toString()));
+				
+			} else if  (mListenerUser instanceof Api.StoreListener) {
+				object =  new Store(new JSONObject(object.toString()));
+				
+			} 
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		mListenerUser.onComplete(statusCode, object);
 	}
 	
     /** Standard callback interface for API requests */

@@ -8,6 +8,8 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 import android.annotation.SuppressLint;
 
 import Utils.Endpoint;
@@ -76,7 +78,7 @@ public class Catalog implements Serializable {
 	public static final String ENDPOINT_SEARCH = Endpoint.CATALOG_SEARCH;
 
 	@SuppressLint("SimpleDateFormat")
-	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSSS");
+	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
 	
 	// From JSON blob
 	private String mId;
@@ -104,8 +106,8 @@ public class Catalog implements Serializable {
 
 	public Catalog(JSONObject catalog) {
 		// if we have a full catalog
-		if (catalog.has("store") && catalog.has("offerCount")) {
-			setCatalog(catalog);
+		if (catalog.has("store_id") && catalog.has("offer_count")) {
+			set(catalog);
 		}
 		// If it is a partial catalog
 		else if (catalog.has("id") && catalog.has("page")) {
@@ -119,7 +121,7 @@ public class Catalog implements Serializable {
 
 	}
 
-	private void setCatalog(JSONObject catalog) {
+	private void set(JSONObject catalog) {
 		try {
 			mId = catalog.getString("id");
 			mErn = catalog.getString("ern");
@@ -383,9 +385,8 @@ public class Catalog implements Serializable {
 	public String toString() {
 		return new StringBuilder()
 		.append("Catalog { ")
-		.append("DealerId: ").append(mDealerId)
-		.append(", Id: ").append(mId)
-		.append(", StoreId: ").append(mStoreId)
+		.append("Dealer: ").append(mBranding.getName())
+		.append(", Catalog id: ").append(mId)
 		.append(" }").toString();
 	}
 	

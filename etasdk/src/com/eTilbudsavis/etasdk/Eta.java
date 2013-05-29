@@ -14,17 +14,13 @@ package com.eTilbudsavis.etasdk;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import Utils.Endpoint;
 import Utils.Sort;
-import Utils.Utilities;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 
-import com.eTilbudsavis.etasdk.Api.RequestListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
 
@@ -33,26 +29,29 @@ public class Eta implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
+	/** Debug tag */
 	public static final String TAG = "ETA";
 	
-	/** Debug log messages only while developing */
+	/** 
+	 * Variable to decide whether to show debug log messages.<br><br>
+	 * Please only set to <code>true</code> while developing to avoid leaking sensitive information */
 	public static final boolean DEBUG = true;
 	
-	/** Info log messages may be used in release */
+	/** 
+	 * Variable to decide whether to show info log messages.<br><br>
+	 * Can be true in a release version without further implications */
 	public static final boolean DEBUG_I = true;
 	
-	public static final String ETA_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss+SSSS";
+	/** The date format as returned from the server */
+	public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss+SSSS";
 	
-	private static Context mContext;
-	private SharedPreferences mPrefs;
-	
+	/** Name for the SDK SharedPreferences file */
 	public static final String PREFS_NAME = "eta_sdk";
 	
-	// Authorization.
 	private final String mApiKey;
 	private final String mApiSecret;
 	private Session mSession;
-	
+	private SharedPreferences mPrefs;
 	private EtaLocation mLocation;
 	private EtaCache mCache;
 	private ArrayList<EtaError> mErrors = new ArrayList<EtaError>();
@@ -65,20 +64,12 @@ public class Eta implements Serializable {
 	 * 			The context of the activity instantiating this class.
 	 */
 	public Eta(String apiKey, String apiSecret, Context context) {
-		
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
-		mContext = context;
-		
 		mLocation = new EtaLocation();
 		mCache = new EtaCache();
-
 		mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-		
-		mPrefs.edit().clear().commit();
-		
 		mSession = new Session(this);
-		
 	}
 	
 	/**
@@ -131,38 +122,56 @@ public class Eta implements Serializable {
 	}
 	
 	/**
-	 * TODO: Write JavaDoc
-	 * Useful when multiple consecutive calls, that contains errors.
-	 * Then a Log.d() on each call will flood LogCat.
-	 * @return
+	 * Gets a complete list of errors that have occurred<br><br>
+	 * 
+	 * 
+	 * The error log is useful in development for multiple consecutive calls,<br>
+	 * that contains errors, where a Log.d() on each error would would flood LogCat.
+	 * @return an ArrayList of EtaErrors
 	 */
 	public ArrayList<EtaError> getErrors(){
 		return mErrors;
 	}
 	
 	/**
-	 * TODO: Write JavaDoc
-	 * @param error
+	 * Add an EtaError to the error log.<br><br>
+	 * 
+	 * The error log is useful in development for multiple consecutive calls,<br>
+	 * that contains errors, where a Log.d() on each error would would flood LogCat.
+	 * @param error to add to error list
 	 */
-	public void addError(EtaError error) {
+	public Eta addError(EtaError error) {
 		mErrors.add(error);
+		return this;
 	}
 	
 	/**
-	 * Method returns a new Api object.
-	 * @return new Api
+	 * Simply instantiates and returns a new Api object.
+	 * @return a new Api object
 	 */
 	public Api api() {
 		return new Api(this);
 	}
 	
+	/**
+	 * Clears ALL preferences that the SDK has created.<br><br>
+	 * 
+	 * This includes Session, User, Api and other data.
+	 * @return Returns true if the new values were successfully written to persistent storage.
+	 */
+	public boolean clearPreferences() {
+		boolean status = mPrefs.edit().clear().commit();
+		mSession = new Session(this);
+		return status;
+	}
+	
 	// TODO: Need a lot of wrapper methods here, they all must call API
 	public HttpHelper getCatalogs(Api.CatalogListListener listener, int offset) {
-		return getCatalogs(listener, offset, Api.LIMIT_DEFAULT);
+		return getCatalogs(listener, offset, Api.DEFAULT_LIMIT);
 	}
 
 	public HttpHelper getCatalogs(Api.CatalogListListener listener, int offset, String[] order) {
-		return getCatalogs(listener, offset, Api.LIMIT_DEFAULT, order);
+		return getCatalogs(listener, offset, Api.DEFAULT_LIMIT, order);
 	}
 
 	public HttpHelper getCatalogs(Api.CatalogListListener listener, int offset, int limit) {
@@ -174,10 +183,8 @@ public class Eta implements Serializable {
 		apiParams.putInt(Api.OFFSET, offset);
 		apiParams.putInt(Api.LIMIT, limit);
 		if (order != null)
-			apiParams.putStringArray(Sort.ORDER_BY, order);
-		Api a = new Api(this);
-		a.get(Endpoint.CATALOG_LIST, listener, apiParams);
-		return a.execute();
+			apiParams.putString(Sort.ORDER_BY, TextUtils.join(",", order));
+		return api().get(Endpoint.CATALOG_LIST, listener, apiParams).execute();
 	}
 	
 }

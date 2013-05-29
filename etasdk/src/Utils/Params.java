@@ -114,6 +114,11 @@ public final class Params {
 	/** Parameter for a facebook token */
 	public static final String FACEBOOK_TOKEN = "facebook_token";
 
+	/** The default offset for API calls */
+	public static final int DEFAULT_OFFSET = 0;
+
+	/** The default item limit for API calls */
+	public static final int DEFAULT_LIMIT = 25;
 	
 	
 }

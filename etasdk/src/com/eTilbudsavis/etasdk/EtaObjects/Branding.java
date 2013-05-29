@@ -22,9 +22,9 @@ public class Branding implements Serializable {
 	public Branding(JSONObject branding) {
 		try {
 			mName = branding.getString("name");
-			mUrlName = branding.getString("urlname");
+			mUrlName = branding.getString("url_name");
 			mWebsite = branding.getString("website");
-			mUrl = branding.getString("url");
+			mUrl = branding.getString("website");
 			mLogo = branding.getString("logo");
 			mColor = Color.parseColor("#"+branding.getString("color"));
 			mPageflip = new Pageflip(branding.getJSONObject("pageflip"));
