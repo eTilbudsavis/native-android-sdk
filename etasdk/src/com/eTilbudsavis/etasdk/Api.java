@@ -379,7 +379,16 @@ public class Api implements Serializable {
 	public Api(Eta eta) {
 		mEta = eta;
 	}
-	
+
+	public Api search(String url, RequestListener listener, String query) {
+		if (!url.matches(Endpoint.SEARCH))
+			Utilities.logd(TAG, "url does not match a search endpoint, don't expect anything good...");
+		
+		Bundle apiParams = new Bundle();
+		apiParams.putString(Params.QUERY, query);
+		return request(url, listener, apiParams, RequestType.GET, ContentType.URLENCODED, null);
+	}
+
 	public Api get(String url, RequestListener listener) {
 		return request(url, listener, null, RequestType.GET, ContentType.URLENCODED, null);
 	}

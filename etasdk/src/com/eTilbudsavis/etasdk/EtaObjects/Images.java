@@ -61,8 +61,8 @@ public class Images implements Serializable {
 		return new StringBuilder()
 		.append(getClass().getSimpleName()).append("[")
 		.append("view=").append(mView)
-		.append("zoom=").append(mZoom)
-		.append("thumb=").append(mThumb)
+		.append(", zoom=").append(mZoom)
+		.append(", thumb=").append(mThumb)
 		.append("]").toString();
 	}
 	

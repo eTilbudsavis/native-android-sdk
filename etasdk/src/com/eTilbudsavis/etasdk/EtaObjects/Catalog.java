@@ -73,6 +73,9 @@ public class Catalog implements Serializable {
 
 	/** String identifying the offset parameter for all list calls to the API */
 	public static final String PARAM_LIMIT = Params.LIMIT;
+
+	/** String identifying the query parameter */
+	public static final String PARAM_QUERY = Params.QUERY;
 	
 	/** Endpoint for catalog list resource */
 	public static final String ENDPOINT_LIST = Endpoint.CATALOG_LIST;

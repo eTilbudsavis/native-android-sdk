@@ -28,6 +28,9 @@ public class Dealer implements Serializable {
 	/** Parameter for getting a list of specific dealer id's */
 	public static final String FILTER_DEALER_IDS = Params.FILTER_DEALER_IDS;
 
+	/** String identifying the query parameter */
+	public static final String PARAM_QUERY = Params.QUERY;
+	
 	/** Endpoint for dealer list resource */
 	public static final String ENDPOINT_LIST = Endpoint.DEALER_LIST;
 

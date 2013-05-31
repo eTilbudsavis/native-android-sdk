@@ -168,14 +168,22 @@ public class Eta implements Serializable {
 		mSession = new Session(this);
 		return status;
 	}
+
+	private Bundle getApiParams(int offset, int limit, String[] orderBy) {
+		Bundle apiParams = new Bundle();
+		apiParams.putInt(Catalog.PARAM_OFFSET, offset);
+		apiParams.putInt(Catalog.PARAM_LIMIT, limit);
+		if (orderBy != null)
+			apiParams.putString(Sort.ORDER_BY, TextUtils.join(",", orderBy));
+		return apiParams;
+	}
 	
-	// TODO: Need a lot of wrapper methods here, they all must call API
-	/**
-	 * @param listener
-	 * @param offset
-	 * @return
-	 * @see com.eTilbudsavis.etasdk.Api.CatalogListListener #onComplete(int, Object)
-	 */
+	private Bundle getSearchApiParams(int offset, int limit, String[] orderBy, String query) {
+		Bundle apiParams = getApiParams(offset, limit, orderBy);
+		apiParams.putString(Catalog.PARAM_QUERY, query);
+		return apiParams;
+	}
+	
 	public HttpHelper getCatalogList(Api.CatalogListListener listener, int offset) {
 		return getCatalogList(listener, offset, Api.DEFAULT_LIMIT, null);
 	}
@@ -183,26 +191,40 @@ public class Eta implements Serializable {
 	public HttpHelper getCatalogList(Api.CatalogListListener listener, int offset, String[] orderBy) {
 		return getCatalogList(listener, offset, Api.DEFAULT_LIMIT, orderBy);
 	}
-
+	
 	public HttpHelper getCatalogList(Api.CatalogListListener listener, int offset, int limit) {
 		return getCatalogList(listener, offset, limit, null);
 	}
-
+	
 	public HttpHelper getCatalogList(Api.CatalogListListener listener, int offset, int limit, String[] orderBy) {
-		Bundle apiParams = new Bundle();
-		apiParams.putInt(Catalog.PARAM_OFFSET, offset);
-		apiParams.putInt(Catalog.PARAM_LIMIT, limit);
-		if (orderBy != null)
-			apiParams.putString(Sort.ORDER_BY, TextUtils.join(",", orderBy));
-		return api().get(Catalog.ENDPOINT_LIST, listener, apiParams).execute();
+		return api().get(Catalog.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy)).execute();
 	}
-
+	
 	public HttpHelper getCatalogId(Api.CatalogListener listener, String id) {
 		return api().get(Catalog.ENDPOINT_ID, listener, new Bundle()).setId(id).execute();
 	}
-
+	
 	public HttpHelper getCatalogIds(Api.CatalogListListener listener, String[] ids) {
 		return api().get(Catalog.ENDPOINT_LIST, listener, new Bundle()).setCatalogIds(ids).execute();
+	}
+	
+
+	public HttpHelper searchCatalogs(Api.CatalogListListener listener, String query) {
+		return searchCatalogs(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
+	}
+
+	public HttpHelper searchCatalogs(Api.CatalogListListener listener, String query, int offset) {
+		return searchCatalogs(listener, query, offset, Api.DEFAULT_LIMIT, null);
+	}
+	
+	
+	
+	
+	
+	
+	
+	public HttpHelper searchCatalogs(Api.CatalogListListener listener, String query, int offset, int limit, String[] orderBy) {
+		return api().get(Catalog.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query)).execute();
 	}
 	
 	public HttpHelper getStoreList(Api.StoreListListener listener) {
@@ -222,6 +244,25 @@ public class Eta implements Serializable {
 
 	public HttpHelper getStoreIds(Api.StoreListListener listener, String[] ids) {
 		return api().get(Store.ENDPOINT_LIST, listener, new Bundle()).setStoreIds(ids).execute();
+	}
+
+	public HttpHelper getDealerList(Api.DealerListListener listener) {
+		return getDealerList(listener, null);
+	}
+	
+	public HttpHelper getDealerList(Api.DealerListListener listener, String[] orderBy) {
+		Bundle apiParams = new Bundle();
+		if (orderBy != null)
+			apiParams.putString(Sort.ORDER_BY, TextUtils.join(",", orderBy));
+		return api().get(Dealer.ENDPOINT_LIST, listener, apiParams).execute();
+	}
+
+	public HttpHelper getDealerId(Api.DealerListener listener, String id) {
+		return api().get(Dealer.ENDPOINT_ID, listener, new Bundle()).setId(id).execute();
+	}
+
+	public HttpHelper getDealerIds(Api.DealerListListener listener, String[] ids) {
+		return api().get(Dealer.ENDPOINT_LIST, listener, new Bundle()).setDealerIds(ids).execute();
 	}
 	
 	

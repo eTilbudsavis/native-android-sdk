@@ -3,8 +3,10 @@
     <string name="app_name">eTilbudsavis SDK Demo</string>
     <string name="title_activity_main">eTilbudsavis SDK Demo</string>
     <string name="session_header">Session:</string>
+    <string name="times_header">Tider:</string>
     <string name="catalog_list_header">Catalog liste:</string>
     <string name="catalog_header">Catalog:</string>
     <string name="store_header">Store:</string>
+    <string name="search_header">Search:</string>
     
 </resources>

@@ -13,6 +13,7 @@ import com.eTilbudsavis.etasdk.Eta;
 import android.annotation.SuppressLint;
 
 import Utils.Endpoint;
+import Utils.Params;
 import Utils.Sort;
 
 public class Offer implements Serializable {
@@ -43,9 +44,15 @@ public class Offer implements Serializable {
 	/** Sort a list by created in ascending order. (smallest to largest) */
 	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
 
-	/** Parameter for getting a list of specific offer id's */
-	public static final String PARAM_IDS = "offer_ids";
+	/** Parameter for getting a list of specific catalog id's */
+	public static final String FILTER_CATALOG_IDS = Params.FILTER_CATALOG_IDS;
 
+	/** Parameter for posting a list of store id's to publish the catalog in */
+	public static final String FILTER_STORE_IDS = Params.FILTER_STORE_IDS;
+
+	/** String identifying the query parameter */
+	public static final String PARAM_QUERY = Params.QUERY;
+	
 	/** Endpoint for offer list resource */
 	public static final String ENDPOINT_LIST = Endpoint.OFFER_LIST;
 

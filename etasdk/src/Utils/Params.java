@@ -75,6 +75,9 @@ public final class Params {
 	/** Parameter for a resource logo */
 	public static final String LOGO = "logo";
 
+	/** Parameter for search */
+	public static final String QUERY = "query";
+
 	/** Parameter for pageflip logo location */
 	public static final String PAGEFLIP_LOGO = "pageflip_Logo";
 
