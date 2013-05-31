@@ -79,17 +79,20 @@ public final class Params {
 	public static final String PAGEFLIP_LOGO = "pageflip_Logo";
 
 	/** Parameter for catalog id's */
-	public static final String CATALOG_IDS = "catalog_ids";
+	public static final String FILTER_CATALOG_IDS = "catalog_ids";
 
 	/** Parameter for store id's */
-	public static final String STORE_IDS = "store_ids";
+	public static final String FILTER_STORE_IDS = "store_ids";
 
 	/** Parameter for area id's */
-	public static final String AREA_IDS = "area_ids";
+	public static final String FILTER_AREA_IDS = "area_ids";
 
 	/** Parameter for store id's */
-	public static final String OFFER_IDS = "offer_ids";
-	
+	public static final String FILTER_OFFER_IDS = "offer_ids";
+
+	/** Parameter for getting a list of specific dealer id's */
+	public static final String FILTER_DEALER_IDS = "dealer_ids";
+
 	/** Parameter for a resource e-mail */
 	public static final String EMAIL = "email";
 

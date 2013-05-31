@@ -47,9 +47,9 @@ public class Unit implements Serializable {
 	@Override
 	public String toString() {
 		return new StringBuilder()
-		.append("Unit: { ")
-		.append("Symbol: ").append(mSymbol)
-		.append("}").toString();
+		.append(getClass().getSimpleName()).append("[")
+		.append("Symbol=").append(mSymbol)
+		.append("]").toString();
 		
 	}
 }

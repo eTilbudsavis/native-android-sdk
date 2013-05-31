@@ -47,12 +47,6 @@ public class Api implements Serializable {
 	
 	public static final String HEADER_CONTENT_TYPE = Params.HEADER_CONTENT_TYPE;
 	
-	/** String identifying the offset parameter for all list calls to the API */
-	public static final String OFFSET = Params.OFFSET;
-	
-	/** String identifying the offset parameter for all list calls to the API */
-	public static final String LIMIT = Params.LIMIT;
-	
 	/** The default page limit for API calls */
 	public static final int DEFAULT_OFFSET = Params.DEFAULT_OFFSET;
 
@@ -93,16 +87,15 @@ public class Api implements Serializable {
 	private Eta mEta;
 	private String mUrl = null;
 	private RequestListener mListenerUser = null;
-	private Bundle mParams = null;
+	private Bundle mApiParams = null;
 	private RequestType mRequestType = null;
 	private ContentType mContentType = null;
 	private HashMap<String, String> mHeaders;
-	
-	private HttpHelper httpHelper;
+	private String mId = null;
 
+	private HttpHelper httpHelper;
 	private boolean useLocation = true;
 	private boolean mUseCache = true;
-	
 	private RequestListener mListenerApi = new RequestListener() {
 
 		public void onComplete(int statusCode, Object object) {
@@ -142,21 +135,150 @@ public class Api implements Serializable {
 	 * @return This {@link com.eTilbudsavis.etasdk.Api Api} object to allow for chaining of calls to set methods
 	 */
 	public Api setOrderBy(String order) {
-		mParams.putString(Sort.ORDER_BY, order);
+		mApiParams.putString(Sort.ORDER_BY, order);
 		return this;
 	}
 
 	public Api setOrderBy(String[] order) {
-		mParams.putString(Sort.ORDER_BY, TextUtils.join(",",order));
+		String tmp = TextUtils.join(",",order);
+		mApiParams.putString(Sort.ORDER_BY, tmp);
 		return this;
 	}
 	
 	public String getOrderBy() {
-		String s = mParams.getString(Sort.ORDER_BY);
-		s = s == null ? "" : s;
-		return s;
+		return mApiParams.getString(Sort.ORDER_BY);
 	}
 
+	/**
+	 * Sets a list of id's to filter result by.
+	 * @param id's to filter by
+	 * @return this object
+	 */
+	public Api setCatalogIds(String[] ids) {
+		setIds(Params.FILTER_CATALOG_IDS, ids);
+		return this;
+	}
+
+	/**
+	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
+	 * @return a list if id's
+	 */
+	public String[] getCatalogIds() {
+		return getIds(Params.FILTER_CATALOG_IDS);
+	}
+
+	/**
+	 * Sets a list of id's to filter result by.
+	 * @param id's to filter by
+	 * @return this object
+	 */
+	public Api setDealerIds(String[] ids) {
+		setIds(Params.FILTER_DEALER_IDS, ids);
+		return this;
+	}
+
+	/**
+	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
+	 * @return a list if id's
+	 */
+	public String[] getDealerIds() {
+		return getIds(Params.FILTER_DEALER_IDS);
+	}
+
+	/**
+	 * Sets a list of id's to filter result by.
+	 * @param id's to filter by
+	 * @return this object
+	 */
+	public Api setStoreIds(String[] ids) {
+		setIds(Params.FILTER_STORE_IDS, ids);
+		return this;
+	}
+
+	/**
+	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
+	 * @return a list if id's
+	 */
+	public String[] getStoreIds() {
+		return getIds(Params.FILTER_STORE_IDS);
+	}
+
+	/**
+	 * Sets a list of id's to filter result by.
+	 * @param id's to filter by
+	 * @return this object
+	 */
+	public Api setOfferIds(String[] ids) {
+		setIds(Params.FILTER_OFFER_IDS, ids);
+		return this;
+	}
+
+	/**
+	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
+	 * @return a list if id's
+	 */
+	public String[] getOfferIds() {
+		return getIds(Params.FILTER_OFFER_IDS);
+	}
+
+	/**
+	 * Sets a list of id's to filter result by.
+	 * @param ids to filter by
+	 * @return this object
+	 */
+	public Api setAreaIds(String[] ids) {
+		setIds(Params.FILTER_AREA_IDS, ids);
+		return this;
+	}
+
+	/**
+	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
+	 * @return a list if id's
+	 */
+	public String[] getAreaIds() {
+		return getIds(Params.FILTER_AREA_IDS);
+	}
+	
+	/**
+	 * Set a parameter for what specific id's to get from a given endpoint.<br><br>
+	 * 
+	 * E.g.: setIds(Catalog.PARAM_IDS, new String[]{"eecdA5g","b4Aea5h"});
+	 * @param	filterName of the endpoint parameter e.g. Catalog.PARAM_IDS
+	 * @param	ids to filter by
+	 * @return	this object
+	 */
+	public Api setIds(String filterName, String[] ids) {
+		String tmp = TextUtils.join(",",ids);
+		mApiParams.putString(filterName, tmp);
+		return this;
+	}
+
+	/**
+	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
+	 * @param	filterName 
+	 * @return	a list if id's
+	 */
+	public String[] getIds(String filterName) {
+		String tmp = mApiParams.getString(filterName);
+		return TextUtils.split(tmp, ",");
+	}
+	
+	/**
+	 * Set a parameter for what specific id to get from a given endpoint.<br><br>
+	 * 
+	 * E.g.: setIds(Catalog.PARAM_IDS, "b4Aea5h");
+	 * @param id to filter by
+	 * @return this object
+	 */
+	public Api setId(String id) {
+		mId = id;
+		return this;
+	}
+	
+	public String getId() {
+		return mId;
+	}
+	
 	public Api setContentType(ContentType type) {
 		mContentType = type;
 		return this;
@@ -176,11 +298,11 @@ public class Api implements Serializable {
 	}
 
 	public Bundle getApiParameters() {
-		return mParams;
+		return mApiParams;
 	}
 
 	public Api setApiParameters(Bundle params) {
-		mParams = params;
+		mApiParams = params;
 		return this;
 	}
 
@@ -284,11 +406,11 @@ public class Api implements Serializable {
 			return null;
 		}
 		
-		// Check if RequestListener matches the URL (return values are parsed according to RequestListener)
+		// TODO: Check if RequestListener matches the URL (return values are parsed according to RequestListener)
 		
 		mUrl = url;
 		mListenerUser = listener;
-		mParams = apiParams == null ? new Bundle() : apiParams;
+		mApiParams = apiParams == null ? new Bundle() : apiParams;
 		mRequestType = requestType;
 		mContentType = contentType;
 		mHeaders = headers == null ? new HashMap<String, String>(3) : headers;
@@ -307,9 +429,18 @@ public class Api implements Serializable {
 	public HttpHelper execute() {
 
 		// Check if all variables needed are okay
-		if (mUrl == null || mListenerUser == null || mParams == null || mRequestType == null || mHeaders == null) {
+		if (mUrl == null || mListenerUser == null || mApiParams == null || mRequestType == null || mHeaders == null) {
 			Utilities.logd(TAG, "A request() must be made before execute()");
 			return null;
+		}
+
+		if (mId != null) {
+			if (mUrl.matches(Endpoint.CATALOG_ID) || mUrl.matches(Endpoint.OFFER_ID) ||
+					mUrl.matches(Endpoint.DEALER_ID) || mUrl.matches(Endpoint.STORE_ID)) {
+				mUrl = mUrl + mId;
+			} else {
+				Utilities.logd(TAG, "Id does not match a single id endpoint, continuing without id");
+			}
 		}
 		
 		// Is Session okay? If not, check if it's a session call? If not try to make a session before continuing
@@ -318,11 +449,10 @@ public class Api implements Serializable {
 				mEta.getSession().subscribe(new SessionListener() {
 					
 					public void onUpdate() {
-						if (mEta.getSession().getToken() != null) {
+						if (mEta.getSession().isReady()) {
 							mEta.getSession().unSubscribe(this);
-							completeExecute();							
-						}
-						else {
+							completeExecute();
+						} else {
 							mEta.getSession().update();
 						}
 					}
@@ -348,11 +478,11 @@ public class Api implements Serializable {
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 
 		// Add optional data.
-		if (!mParams.isEmpty()) {
-			Iterator<String> iterator = mParams.keySet().iterator();
+		if (!mApiParams.isEmpty()) {
+			Iterator<String> iterator = mApiParams.keySet().iterator();
 			while (iterator.hasNext()) {
 				String s = iterator.next();
-				Utilities.putNameValuePair(params, s, mParams.get(s));
+				Utilities.putNameValuePair(params, s, mApiParams.get(s));
 			}
 		}
 		
@@ -362,7 +492,7 @@ public class Api implements Serializable {
 		if (useLocation) {
 
 			if (!mEta.getLocation().isLocationSet()) {
-				Utilities.logd(TAG, "Location has not been set() yet... Aborting...");
+				Utilities.logd(TAG, "Location is required, but has not been set yet. Aborting...");
 				return;
 			}
 			EtaLocation l = mEta.getLocation();
@@ -488,7 +618,7 @@ public class Api implements Serializable {
     	 * <tr><td>400-499 (client error)</td>	<td><code>EtaError</code></td></tr>
     	 * <tr><td>All others</td>				<td><code>String</code></td></tr>
     	 * </table><br><br>
-    	 * So if you make a call to {@link com.eTilbudsavis.etasdk.Eta #getCatalogs(CatalogListListener, int) Eta.getCatalogs()} 
+    	 * So if you make a call to {@link com.eTilbudsavis.etasdk.Eta #getCatalogList(CatalogListListener, int) Eta.getCatalogs()} 
     	 * and the callback has statusCode == 200,<br>
     	 * you want to cast your callback object like this:<br>
     	 * <code>ArrayList&lt;Catalog&gt; c = (ArrayList&lt;Catalog&gt;)object;</code>

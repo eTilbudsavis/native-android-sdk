@@ -73,11 +73,11 @@ public class Quantity implements Serializable {
 	@Override
 	public String toString() {
 		return new StringBuilder()
-		.append("Quantity: { ")
-		.append(mUnit.toString()).append(", ")
-		.append(mSize.toString()).append(", ")
-		.append(mPieces.toString())
-		.append("}").toString();
+		.append(getClass().getSimpleName()).append("[")
+		.append("unit=").append(mUnit.toString())
+		.append("size=").append(mSize.toString())
+		.append("pieces=").append(mPieces.toString())
+		.append("]").toString();
 		
 	}
 }

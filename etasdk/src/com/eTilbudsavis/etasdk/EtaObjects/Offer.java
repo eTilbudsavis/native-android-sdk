@@ -384,18 +384,37 @@ public class Offer implements Serializable {
 	}
 	
 	/**
-	 * Returns a human readable string containing id, heading, dealer of the offer. 
-	 * E.g. <pre>Offer { Heading: Beer, Id: 1x2y3z, Dealer: SaveALot}</pre>
+	 * Returns a human readable string containing id, heading, dealer of the offer. <br>
+	 * SimpleClassName[prop1=value, prop2=NestedObject[prop3=value]]
 	 * @return <li> Offer digest as a string 
 	 */
 	@Override
 	public String toString() {
-		return new StringBuilder()
-		.append("Offer { ")
-		.append("Heading: ").append(mHeading)
-		.append(", Id: ").append(mId)
-		.append(", DealerId: ").append(mDealerId)
-		.append(" }").toString();
-		
+		return toString(false);
 	}
+	
+	public String toString(boolean everything) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName()).append("[")
+		.append("heading=").append(mHeading)
+		.append(", description=").append(mDescription)
+		.append(", dealer=").append(mDealer == null ? mDealerId : mDealer.toString(everything))
+		.append(", pricing=").append(mPricing.toString())
+		.append(", runFrom=").append(getRunFromString())
+		.append(", runTill=").append(getRunTillString());
+		
+		if (everything) {
+			sb.append(", ern=").append(mErn)
+			.append(", selectStores=").append(mSelectStores)
+			.append(", catalogPage=").append(mCatalogPage)
+			.append(", quantity=").append(mQuantity.toString())
+			.append(", images=").append(mImages.toString())
+			.append(", links=").append(mLinks.toString())
+			.append(", publish=").append(mPublish)
+			.append(", store=").append(mStore == null ? mStoreId : mStore.toString())
+			.append(", catalog=").append(mCatalog == null ? mCatalogId : mCatalog.toString(everything));
+		}
+		return sb.append("]").toString();
+	}
+	
 }

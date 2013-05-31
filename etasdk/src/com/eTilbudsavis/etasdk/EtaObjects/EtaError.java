@@ -57,12 +57,12 @@ public class EtaError implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		return sb.append("{ ")
-				.append("id: ").append(mId)
-				.append(", code: ").append(mCode)
-				.append(", message: ").append(mMessage)
-				.append(", details: ").append(mDetails)
-				.append(", time: ").append(mTime)
-				.append(" }").toString();
+		return sb.append(getClass().getSimpleName()).append("[")
+				.append("id=").append(mId)
+				.append(", code=").append(mCode)
+				.append(", message=").append(mMessage)
+				.append(", details=").append(mDetails)
+				.append(", time=").append(mTime)
+				.append("]").toString();
 	}
 }

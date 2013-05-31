@@ -12,7 +12,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/session_info" />
+            android:text="@string/session_header" />
 
         <TextView
             android:id="@+id/tvSession"
@@ -24,10 +24,34 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/catalog_info" />
+            android:text="@string/catalog_list_header" />
 
         <TextView
-            android:id="@+id/tvCatalogs"
+            android:id="@+id/tvCatalogList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="" />
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="@string/catalog_header" />
+
+        <TextView
+            android:id="@+id/tvCatalog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="" />
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="@string/store_header" />
+
+        <TextView
+            android:id="@+id/tvStore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="" />

@@ -63,10 +63,10 @@ public class Size implements Serializable {
 	@Override
 	public String toString() {
 		return new StringBuilder()
-		.append("Size: { ")
-		.append("From: ").append(mFrom)
-		.append(", To: ").append(mTo)
-		.append("}").toString();
+		.append(getClass().getSimpleName()).append("[")
+		.append("from=").append(mFrom)
+		.append(", to=").append(mTo)
+		.append("]").toString();
 		
 	}
 	

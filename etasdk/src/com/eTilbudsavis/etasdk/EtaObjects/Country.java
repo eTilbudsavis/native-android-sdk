@@ -9,68 +9,70 @@ public class Country implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private String mId;
-	private String mAlpha2;
-	private String mCode;
-	private String mName;
-	private String mUnsubscribePrintUrl;
+	private int mId;
+	private int mAreaId;
+	private String mCountry;
+	private String mLanguage;
 	
 	public Country(JSONObject country) {
 		try {
-			mId = country.getString("id");
-			mAlpha2 = country.getString("alpha2");
-			mCode = country.getString("code");
-			mName = country.getString("name");
-			mUnsubscribePrintUrl = country.getString("unsubscribePrintUrl");
+			mId = country.getInt("id");
+			mAreaId = country.getInt("area_id");
+			mCountry = country.getString("country");
+			mLanguage = country.getString("language");
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
-	}
-
-	public Country setId(String id) {
-		this.mId = id;
-		return this;
-	}
-
-	public String getId() {
-		return mId;
-	}
-
-	public Country setAlpha2(String alpha2) {
-		this.mAlpha2 = alpha2;
-		return this;
-	}
-
-	public String getAlpha2() {
-		return mAlpha2;
-	}
-
-	public Country setCode(String code) {
-		this.mCode = code;
-		return this;
-	}
-
-	public String getCode() {
-		return mCode;
-	}
-
-	public Country setName(String name) {
-		this.mName = name;
-		return this;
-	}
-
-	public String getName() {
-		return mName;
-	}
-
-	public Country setUnsubscribePrintUrl(String mUnsubscribePrintUrl) {
-		this.mUnsubscribePrintUrl = mUnsubscribePrintUrl;
-		return this;
 	}
 	
-	public String getUnsubscribePrintUrl() {
-		return mUnsubscribePrintUrl;
+	
+	
+	public int getId() {
+		return mId;
+	}
+	
+	public void setId(int id) {
+		this.mId = id;
+	}
+	
+	/**
+	 * Ern is not implemented for Country yet.<br>
+	 * until it is implemented it will return {@link #getId() getId()}
+	 * @return id of this Country
+	 */
+	public String getErn() {
+		return String.valueOf(mId);
+	}
+	
+	/**
+	 * Due to lacking implementation server-side, this does nothing.
+	 * @param ern
+	 */
+	public void setErn(String ern) {
+	}
+	
+	public int getAreaId() {
+		return mAreaId;
+	}
+	
+	public void setAreaId(int areaId) {
+		this.mAreaId = areaId;
+	}
+	
+	public String getCountry() {
+		return mCountry;
+	}
+	
+	public void setCountry(String country) {
+		this.mCountry = country;
+	}
+	
+	public String getLanguage() {
+		return mLanguage;
+	}
+	
+	public void setLanguage(String language) {
+		this.mLanguage = language;
 	}
 	
 	@Override
@@ -82,12 +84,26 @@ public class Country implements Serializable {
 			return false;
 
 		Country c = (Country)o;
-		return mId.equals(c.getId()) &&
-				mAlpha2.equals(c.getAlpha2()) &&
-				mCode.equals(c.getCode()) &&
-				mName.equals(c.getName()) &&
-				mUnsubscribePrintUrl.equals(c.getUnsubscribePrintUrl());
+		return mId == c.getId() &&
+				mAreaId == c.getAreaId() &&
+				mCountry.equals(c.getCountry()) &&
+				mLanguage.equals(c.getLanguage());
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return toString(false);
+	}
+
+	public String toString(boolean everything) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName()).append("[")
+		.append(", country=").append(mCountry)
+		.append(", language=").append(mLanguage);
+		if (everything) {
+			sb.append("id=").append(mId)
+			.append(", areaId=").append(mAreaId);
+		}
+		return sb.append("]").toString();
+	}
 }

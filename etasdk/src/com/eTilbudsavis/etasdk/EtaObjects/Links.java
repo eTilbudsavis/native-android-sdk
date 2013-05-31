@@ -30,4 +30,13 @@ public class Links implements Serializable {
 	public String getWebshop() {
 		return mWebshop;
 	}
+	
+	@Override
+	public String toString() {
+		return new StringBuilder()
+		.append(getClass().getSimpleName()).append("[")
+		.append("webshop=").append(mWebshop)
+		.append("]").toString();
+	}
+	
 }

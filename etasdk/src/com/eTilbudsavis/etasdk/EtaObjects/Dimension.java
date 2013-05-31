@@ -64,10 +64,10 @@ public class Dimension implements Serializable {
 	@Override
 	public String toString() {
 		return new StringBuilder()
-		.append("Dimension { ")
-		.append("Width: ").append(mWidth)
-		.append(", Height: ").append(mHeight)
-		.append(" }").toString();
+		.append(getClass().getSimpleName()).append("[")
+		.append("width=").append(mWidth)
+		.append(", height=").append(mHeight)
+		.append("]").toString();
 	}
 
 }

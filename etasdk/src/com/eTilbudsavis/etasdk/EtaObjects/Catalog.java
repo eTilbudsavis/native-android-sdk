@@ -57,17 +57,23 @@ public class Catalog implements Serializable {
 	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific catalog id's */
-	public static final String PARAM_IDS = Params.CATALOG_IDS;
+	public static final String FILTER_CATALOG_IDS = Params.FILTER_CATALOG_IDS;
 
 	/** Parameter for posting a list of store id's to publish the catalog in */
-	public static final String PARAM_STORE_IDS = Params.STORE_IDS;
+	public static final String FILTER_STORE_IDS = Params.FILTER_STORE_IDS;
 
 	/** Parameter for posting a list of area id's to publish the catalog in */
-	public static final String PARAM_AREA_IDS = Params.AREA_IDS;
+	public static final String FILTER_AREA_IDS = Params.FILTER_AREA_IDS;
 
 	/** Parameter for the location of the PDF to post */
 	public static final String PARAM_PDF = Params.PDF;
 
+	/** String identifying the offset parameter for all list calls to the API */
+	public static final String PARAM_OFFSET = Params.OFFSET;
+
+	/** String identifying the offset parameter for all list calls to the API */
+	public static final String PARAM_LIMIT = Params.LIMIT;
+	
 	/** Endpoint for catalog list resource */
 	public static final String ENDPOINT_LIST = Endpoint.CATALOG_LIST;
 
@@ -143,6 +149,26 @@ public class Catalog implements Serializable {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void set(Catalog c) {
+		mId = c.getId();
+		mErn = c.getErn();
+		mLabel = c.getLabel();
+		mBackground = c.getBackground();
+		mSelectStores = c.getSelectStores();
+		mRunFrom = c.getRunFrom();
+		mRunTill = c.getRunTill();
+		mPageCount = c.getPageCount();
+		mOfferCount = c.getOfferCount();
+		mBranding = c.getBranding();
+		mDealerId = c.getDealerId();
+		mDealerUrl = c.getDealerUrl();
+		mStoreId = c.getStoreId();
+		mStoreUrl = c.getStoreUrl();
+		mDimension = c.getDimension();
+		mImages = c.getImages();
+		mPages = c.getPages();
 	}
 
 	public Catalog setId(String id) {
@@ -383,11 +409,29 @@ public class Catalog implements Serializable {
 	
 	@Override
 	public String toString() {
-		return new StringBuilder()
-		.append("Catalog { ")
-		.append("Dealer: ").append(mBranding.getName())
-		.append(", Catalog id: ").append(mId)
-		.append(" }").toString();
+		return toString(false);
+	}
+	
+	public String toString(boolean everything) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName()).append("[")
+		.append("branding=").append(mBranding.toString(everything))
+		.append(", id=").append(mId)
+		.append(", from=").append(getRunFromString())
+		.append(", till=").append(getRunTillString());
+		if(everything) {
+			sb.append(", ern=").append(mErn)
+			.append(", background=").append(mBackground)
+			.append(", selectStores=").append(mSelectStores)
+			.append(", pageCount=").append(mPageCount)
+			.append(", offerCount=").append(mOfferCount)
+			.append(", dealer=").append(mDealer == null ? mDealerId : mDealer.toString())
+			.append(", store=").append(mStore == null ? mStoreId : mStore.toString())
+			.append(", dimension=").append(mDimension.toString())
+			.append(", images=").append(mImages.toString())
+			.append(", pages=").append(mPages.toString());
+		}
+		return sb.append("]").toString();
 	}
 	
 }

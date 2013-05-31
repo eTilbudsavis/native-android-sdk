@@ -15,14 +15,18 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import Utils.Endpoint;
+import Utils.Params;
 import Utils.Sort;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
+import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
+import com.eTilbudsavis.etasdk.EtaObjects.Store;
 
 // Main object for interacting with the SDK.
 public class Eta implements Serializable {
@@ -66,9 +70,9 @@ public class Eta implements Serializable {
 	public Eta(String apiKey, String apiSecret, Context context) {
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
+		mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 		mLocation = new EtaLocation();
 		mCache = new EtaCache();
-		mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 		mSession = new Session(this);
 	}
 	
@@ -166,25 +170,60 @@ public class Eta implements Serializable {
 	}
 	
 	// TODO: Need a lot of wrapper methods here, they all must call API
-	public HttpHelper getCatalogs(Api.CatalogListListener listener, int offset) {
-		return getCatalogs(listener, offset, Api.DEFAULT_LIMIT);
+	/**
+	 * @param listener
+	 * @param offset
+	 * @return
+	 * @see com.eTilbudsavis.etasdk.Api.CatalogListListener #onComplete(int, Object)
+	 */
+	public HttpHelper getCatalogList(Api.CatalogListListener listener, int offset) {
+		return getCatalogList(listener, offset, Api.DEFAULT_LIMIT, null);
+	}
+	
+	public HttpHelper getCatalogList(Api.CatalogListListener listener, int offset, String[] orderBy) {
+		return getCatalogList(listener, offset, Api.DEFAULT_LIMIT, orderBy);
 	}
 
-	public HttpHelper getCatalogs(Api.CatalogListListener listener, int offset, String[] order) {
-		return getCatalogs(listener, offset, Api.DEFAULT_LIMIT, order);
+	public HttpHelper getCatalogList(Api.CatalogListListener listener, int offset, int limit) {
+		return getCatalogList(listener, offset, limit, null);
 	}
 
-	public HttpHelper getCatalogs(Api.CatalogListListener listener, int offset, int limit) {
-		return getCatalogs(listener, offset, limit, null);
-	}
-
-	public HttpHelper getCatalogs(Api.CatalogListListener listener, int offset, int limit, String[] order) {
+	public HttpHelper getCatalogList(Api.CatalogListListener listener, int offset, int limit, String[] orderBy) {
 		Bundle apiParams = new Bundle();
-		apiParams.putInt(Api.OFFSET, offset);
-		apiParams.putInt(Api.LIMIT, limit);
-		if (order != null)
-			apiParams.putString(Sort.ORDER_BY, TextUtils.join(",", order));
-		return api().get(Endpoint.CATALOG_LIST, listener, apiParams).execute();
+		apiParams.putInt(Catalog.PARAM_OFFSET, offset);
+		apiParams.putInt(Catalog.PARAM_LIMIT, limit);
+		if (orderBy != null)
+			apiParams.putString(Sort.ORDER_BY, TextUtils.join(",", orderBy));
+		return api().get(Catalog.ENDPOINT_LIST, listener, apiParams).execute();
 	}
+
+	public HttpHelper getCatalogId(Api.CatalogListener listener, String id) {
+		return api().get(Catalog.ENDPOINT_ID, listener, new Bundle()).setId(id).execute();
+	}
+
+	public HttpHelper getCatalogIds(Api.CatalogListListener listener, String[] ids) {
+		return api().get(Catalog.ENDPOINT_LIST, listener, new Bundle()).setCatalogIds(ids).execute();
+	}
+	
+	public HttpHelper getStoreList(Api.StoreListListener listener) {
+		return getStoreList(listener, null);
+	}
+	
+	public HttpHelper getStoreList(Api.StoreListListener listener, String[] orderBy) {
+		Bundle apiParams = new Bundle();
+		if (orderBy != null)
+			apiParams.putString(Sort.ORDER_BY, TextUtils.join(",", orderBy));
+		return api().get(Store.ENDPOINT_LIST, listener, apiParams).execute();
+	}
+
+	public HttpHelper getStoreId(Api.StoreListener listener, String id) {
+		return api().get(Store.ENDPOINT_ID, listener, new Bundle()).setId(id).execute();
+	}
+
+	public HttpHelper getStoreIds(Api.StoreListListener listener, String[] ids) {
+		return api().get(Store.ENDPOINT_LIST, listener, new Bundle()).setStoreIds(ids).execute();
+	}
+	
+	
 	
 }

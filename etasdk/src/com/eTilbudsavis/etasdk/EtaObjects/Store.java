@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import Utils.Endpoint;
+import Utils.Params;
 import Utils.Sort;
 
 public class Store implements Serializable {
@@ -25,7 +26,7 @@ public class Store implements Serializable {
 	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific store id's */
-	public static final String PARAM_IDS = "store_ids";
+	public static final String FILTER_STORE_IDS = Params.FILTER_STORE_IDS;
 
 	/** Endpoint for store list resource */
 	public static final String ENDPOINT_LIST = Endpoint.STORE_LIST;
@@ -48,6 +49,8 @@ public class Store implements Serializable {
 	private String mDealerId;
 	private Branding mBranding;
 	private String mContact;
+	
+	private Dealer mDealer;
 
 	public Store(JSONObject store) {
 		update(store);
@@ -181,6 +184,15 @@ public class Store implements Serializable {
 		return mContact;
 	}
 
+	public Store setDealer(Dealer d) {
+		mDealer = d;
+		return this;
+	}
+	
+	public Dealer getDealer() {
+		return mDealer;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -202,6 +214,30 @@ public class Store implements Serializable {
 				mDealerId.equals(s.getDealerId()) &&
 				mBranding == null ? s.getBranding() == null : mBranding.equals(s.getBranding()) &&
 				mContact.equals(s.getContact());
+	}
+	
+	@Override
+	public String toString() {
+		return toString(false);
+	}
+	
+	public String toString(boolean everything) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName()).append("[")
+		.append("branding=").append(mBranding.toString(everything))
+		.append(", id=").append(mId)
+		.append(", street=").append(mStreet)
+		.append(", city=").append(mCity);
+		
+		if (everything) {
+			sb.append(", zipcode=").append(mZipcode)
+			.append(", country=").append(mCountry.toString(everything))
+			.append(", latitude=").append(mLatitude)
+			.append(", longitude=").append(mLongitude)
+			.append(", dealer=").append(mDealer == null ? mDealerId : mDealer.toString(everything))
+			.append(", contact=").append(mContact);
+		}
+		return sb.append("]").toString();
 	}
 	
 }

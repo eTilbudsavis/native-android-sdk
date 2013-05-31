@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import Utils.Endpoint;
+import Utils.Params;
 import Utils.Sort;
 
 public class Dealer implements Serializable {
@@ -25,7 +26,7 @@ public class Dealer implements Serializable {
 	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific dealer id's */
-	public static final String PARAM_IDS = "dealer_ids";
+	public static final String FILTER_DEALER_IDS = Params.FILTER_DEALER_IDS;
 
 	/** Endpoint for dealer list resource */
 	public static final String ENDPOINT_LIST = Endpoint.DEALER_LIST;
@@ -157,19 +158,25 @@ public class Dealer implements Serializable {
 				mPageflip == null ? dealer.getPageflip() == null : mPageflip.equals(dealer.getPageflip());
 	}
 
-	/**
-	 * Returns a human readable string containing id, heading, dealer of the offer. 
-	 * E.g. <pre>Dealer { Name: Beer, Id: 1x2y3z, Url: http://www.beer.com}</pre>
-	 * @return <li> Dealer digest as a string 
-	 */
 	@Override
 	public String toString() {
-		return new StringBuilder()
-		.append("Dealer: { ")
-		.append("Name: ").append(mName)
-		.append(", Id: ").append(mId)
-		.append(", Url: ").append(mUrlName)
-		.append("}").toString();
+		return toString(false);
+	}
+	
+	public String toString(boolean everything) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName()).append("[")
+		.append("name=").append(mName)
+		.append(", id=").append(mId);
 		
+		if (everything) {
+			sb.append(", ern=").append(mErn)
+			.append(", urlName=").append(mUrlName)
+			.append(", website=").append(mWebsite)
+			.append(", logo=").append(mLogo)
+			.append(", color=").append(mColor)
+			.append(", pageflip=").append(mPageflip.toString());
+		}
+		return sb.append("]").toString();
 	}
 }

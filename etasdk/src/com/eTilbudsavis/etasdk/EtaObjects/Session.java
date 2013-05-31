@@ -119,7 +119,7 @@ public class Session implements Serializable {
 		if (sessionJson != null) {
 			try {
 				set(new JSONObject(sessionJson));
-				if (isSessionGood()) {
+				if (isReady()) {
 					update();
 				} else {
 					notifySubscribers();
@@ -149,7 +149,7 @@ public class Session implements Serializable {
 	
 	public void login(String user, String password) {
 		mEta.getPrefs().edit().putString(PREFS_SESSION_USER, user).putString(PREFS_SESSION_PASS, password).commit();
-		if (isSessionGood()) {
+		if (isReady()) {
 			Bundle b = new Bundle();
 			b.putString(Params.EMAIL, user);
 			b.putString(Params.PASSWORD, password);
@@ -190,7 +190,7 @@ public class Session implements Serializable {
 		return true;
 	}
 	
-	public boolean isSessionGood() {
+	public boolean isReady() {
 		return mExpires < (System.currentTimeMillis() + EXPIRE_MINUTE);
 	}
 	
@@ -330,20 +330,24 @@ public class Session implements Serializable {
 
 		return this;
 	}
-	
-	/**
-	 * Prints this object
-	 */
+
 	@Override
 	public String toString() {
+		return toString(false);
+	}
+	
+	public String toString(boolean everything) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("{ ")
-		.append("Token: ").append(mToken)
-		.append(", Expires: ").append(mExpires)
-		.append(", User: ").append(mUser)
-//		.append(", Permissions: ").append(mPermission.toString())
-		.append(" }");
-		return sb.toString();
+		sb.append(getClass().getSimpleName()).append("[")
+		.append("token=").append(mToken)
+		.append(", expires=").append(getExpireString());
+		
+		if (everything) {
+			sb.append(", user=").append(mUser == null ? "null" : mUser.toString(everything))
+			.append(", permission=").append(mPermission.toString())
+			.append(", provider=").append(mProvider);
+		}
+		return sb.append("]").toString();
 	}
 	
 	public interface SessionListener {

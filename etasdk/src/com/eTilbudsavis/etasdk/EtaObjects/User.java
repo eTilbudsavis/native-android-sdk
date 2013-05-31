@@ -163,15 +163,26 @@ public class User implements Serializable {
 	public interface UserStatusListener {
 		public void onStatusChange(Integer response, Object object);
 	}
-	
+
 	@Override
 	public String toString() {
-		return new StringBuilder()
-		.append("User { ")
-		.append("Id: ").append(mName)
-		.append(", Name: ").append(mName)
-		.append(", E-mail: ").append(mEmail)
-		.append(" }").toString();
+		return toString(false);
 	}
-
+	
+	public String toString(boolean everything) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName()).append("[")
+		.append("id=").append(mId)
+		.append(", email=").append(mEmail);
+		
+		if (everything) {
+			sb.append(", name=").append(mName)
+			.append(", gender=").append(mGender)
+			.append(", birthyear=").append(mBirthYear)
+			.append(", ern=").append(mErn)
+			.append(", permission=").append(mPermissions.toString());
+		}
+		return sb.append("]").toString();
+	}
+	
 }

@@ -59,4 +59,13 @@ public class Pageflip implements Serializable {
 				mColor == p.getColor();
 	}
 	
+	@Override
+	public String toString() {
+		return new StringBuilder()
+		.append(getClass().getSimpleName()).append("[")
+		.append("logo=").append(mLogo)
+		.append(", color=").append(mColor)
+		.append("]").toString();
+	}
+	
 }

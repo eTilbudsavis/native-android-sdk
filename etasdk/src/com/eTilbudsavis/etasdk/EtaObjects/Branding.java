@@ -114,5 +114,26 @@ public class Branding implements Serializable {
 				mPageflip.equals(b.getPageflip());
 	}
 	
+	@Override
+	public String toString() {
+		return toString(false);
+	}
+	
+	public String toString(boolean everything) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName()).append("[")
+		.append("name=").append(mName)
+		.append(", urlName=").append(mUrlName)
+		.append(", website=").append(mWebsite);
+				
+		if (everything) {
+			sb.append(", url=").append(mUrl)
+			.append(", logo=").append(mLogo)
+			.append(", color=").append(mColor)
+			.append(", pageflip=").append(mPageflip.toString());
+		}
+		
+		return sb.append("]").toString();
+	}
 
 }

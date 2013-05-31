@@ -56,4 +56,14 @@ public class Images implements Serializable {
 		this.mThumb = thumbUrl;
 	}
 
+	@Override
+	public String toString() {
+		return new StringBuilder()
+		.append(getClass().getSimpleName()).append("[")
+		.append("view=").append(mView)
+		.append("zoom=").append(mZoom)
+		.append("thumb=").append(mThumb)
+		.append("]").toString();
+	}
+	
 }

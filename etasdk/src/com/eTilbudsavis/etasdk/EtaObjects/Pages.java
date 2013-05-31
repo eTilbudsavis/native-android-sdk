@@ -6,26 +6,29 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import Utils.Utilities;
+
 public class Pages {
 	
-	private ArrayList<String> mThumb;
-	private ArrayList<String> mView;
-	private ArrayList<String> mZoom;
+	private ArrayList<String> mThumb = new ArrayList<String>();
+	private ArrayList<String> mView = new ArrayList<String>();
+	private ArrayList<String> mZoom = new ArrayList<String>();
 	
 	public Pages(JSONObject pages) {
 		
 		try {
 			JSONArray jArray = pages.getJSONArray("thumb");
-			for (int i = 0 ; i < jArray.length() ; i++ ) {
-				mThumb.add((String)jArray.get(i));
+			int i;
+			for (i = 0 ; i < jArray.length() ; i++ ) {
+				mThumb.add(jArray.getString(i));
 			}
 			jArray = pages.getJSONArray("view");
-			for (int i = 0 ; i < jArray.length() ; i++ ) {
-				mView.add((String)jArray.get(i));
+			for (i = 0 ; i < jArray.length() ; i++ ) {
+				mView.add(jArray.getString(i));
 			}
 			jArray = pages.getJSONArray("zoom");
-			for (int i = 0 ; i < jArray.length() ; i++ ) {
-				mZoom.add((String)jArray.get(i));
+			for (i = 0 ; i < jArray.length() ; i++ ) {
+				mZoom.add(jArray.getString(i));
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -71,6 +74,26 @@ public class Pages {
 		return mThumb == null ? p.getThumb() == null : mThumb.equals(p.getThumb()) &&
 				mView == null ? p.getView() == null : mView.equals(p.getView()) &&
 				mZoom == null ? p.getZoom() == null : mZoom.equals(p.getZoom());
+	}
+	
+	@Override
+	public String toString() {
+		return toString(false);
+	}
+	
+	public String toString(boolean everything) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName()).append("[");
+		if (everything) {
+			sb.append("view=").append(mView.toString())
+			.append(", zoom=").append(mZoom.toString())
+			.append(", thumb=").append(mThumb.toString());
+		} else {
+			sb.append("viewCount=").append(mView.size())
+			.append(", zoomCount=").append(mZoom.size())
+			.append(", thumbCount=").append(mThumb.size());
+		}
+		return sb.append("]").toString();
 	}
 	
 }

@@ -6,6 +6,7 @@
  */
 package com.eTilbudsavis.etasdk;
 
+import java.io.Closeable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 @SuppressLint("SetJavaScriptEnabled")
-public final class Pageflip extends WebView {
+public final class Pageflip extends WebView implements Closeable {
 
 	private Eta mETA;
 

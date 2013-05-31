@@ -73,11 +73,11 @@ public class Pricing implements Serializable {
 	@Override
 	public String toString() {
 		return new StringBuilder()
-		.append("Pricing: { ")
-		.append("Price: ").append(mPrice)
-		.append(", Preprice: ").append(mPrePrice)
-		.append(", Currency: ").append(mCurrency)
-		.append("}").toString();
+		.append(getClass().getSimpleName()).append("[")
+		.append("Price=").append(mPrice)
+		.append(", preprice=").append(mPrePrice)
+		.append(", currency=").append(mCurrency)
+		.append("]").toString();
 		
 	}
 }

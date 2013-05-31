@@ -46,16 +46,18 @@ public class Permission implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName()).append("[");
+		
 		Iterator<String> it = perm.keySet().iterator();
 		while (it.hasNext()) {
 			String group = (String) it.next();
-			sb.append("{ ").append(group).append(": ");
+			sb.append(group).append("[");
 			for (String permission : perm.get(group)) {
 				sb.append(permission).append(", ");
 			}
-			sb.append(" }");
+			sb.append("]");
 		}
-		return sb.toString();
+		return sb.append("]").toString();
 	}
 	
 }

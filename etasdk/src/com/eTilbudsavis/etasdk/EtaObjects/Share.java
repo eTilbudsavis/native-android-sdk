@@ -80,11 +80,11 @@ public class Share implements Comparable<Share>, Serializable {
 	@Override
 	public String toString() {
 		return new StringBuilder()
-		.append("Share { ")
-		.append("User: ").append(mUser)
-		.append(", Access: ").append(mAccess.toString())
-		.append(", Accepted: ").append(mAccepted)
-		.append(" }").toString();
+		.append(getClass().getSimpleName()).append("[")
+		.append("user=").append(mUser)
+		.append(", access=").append(mAccess.toString())
+		.append(", accepted=").append(mAccepted)
+		.append("]").toString();
 	}
 
 	public int compareTo(Share another) {
