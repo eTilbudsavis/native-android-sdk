@@ -1,15 +1,24 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
+
+import com.eTilbudsavis.etasdk.Eta;
 
 public class EtaError implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "EtaError";
+
+	@SuppressLint("SimpleDateFormat")
+	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
 	
 	private String mId;
 	private int mCode;
@@ -48,7 +57,11 @@ public class EtaError implements Serializable {
 	public long getTime() {
 		return mTime;
 	}
-	
+
+	public String getTimeString() {
+		return sdf.format(new Date(mTime));
+	}
+
 	/**
 	 * Gives a detailed description of this object.<br>
 	 * E.g.: <code>{ id: 123xyz, code: 123xyz, message: the message, details: the details, time: 1369211987830 }</code> 
@@ -62,7 +75,7 @@ public class EtaError implements Serializable {
 				.append(", code=").append(mCode)
 				.append(", message=").append(mMessage)
 				.append(", details=").append(mDetails)
-				.append(", time=").append(mTime)
+				.append(", time=").append(getTimeString())
 				.append("]").toString();
 	}
 }

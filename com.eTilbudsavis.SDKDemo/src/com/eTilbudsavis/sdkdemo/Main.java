@@ -5,6 +5,7 @@ import java.util.Random;
 
 import Utils.Utilities;
 import android.app.Activity;
+import android.app.backup.RestoreObserver;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -55,8 +56,12 @@ public class Main extends Activity {
 	int offerTestIteration;
 	int storeTestIteration;
 	int locationTestIteration = -1;
+
+	String[] queryOffer = new String[]{"cola", "øl", "kød", "DetVirkerIkke", "sovs"};
+	String[] queryDealer = new String[]{"seeland", "ilka","bilka",  "netto", "DetVirkerIkke", "Industrivej Syd 1, Birk"};
+	String[] queryStore = queryDealer;
+	String[] queryStoreQuick = queryDealer;
 	
-	String[] query = new String[]{"cola", "øl", "kød", "DetVirkerIkke", "sovs"};
 	String tmpIds = "";
 	
 	long mStart = 0L;
@@ -75,7 +80,7 @@ public class Main extends Activity {
         mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         
         mEta = new Eta(mApiKey, mApiSecret, this);
-        mEta.clearPreferences();
+//        mEta.clearPreferences();
         
         addHeader("TESTING SESSTION - not really, not done yet");
         start();
@@ -103,7 +108,7 @@ public class Main extends Activity {
     
     private void resetIterations() {
     	int i = -1;
-    	String s = "";
+    	
     	catalogTestIteration = i;
     	dealerTestIteration = i;
     	offerTestIteration = i;
@@ -114,11 +119,7 @@ public class Main extends Activity {
     	storeList = new ArrayList<Store>();
     	offerList = new ArrayList<Offer>();
     	
-    	random = 0;
-    	rCatalogId = s;
-    	rDealerId = s;
-    	rStoreId = s;
-    	rOfferId = s;
+    	setNoIds();
     	
     }
     
@@ -158,6 +159,12 @@ public class Main extends Activity {
 				resetIterations();
 				catalogs.next();
 				break;
+			case 4:
+				mEta.getLocation().set(55.63105, 12.5766, 700000, false);	// Fields
+				addHeader("SEARCH TEST");
+				resetIterations();
+				searchOffers.next();
+				break;
 			
 			default: 
 				locationTestIteration = -1; 
@@ -166,10 +173,56 @@ public class Main extends Activity {
 				addHeader("TESTING DONE! time: " + timeTotal + "(ms)" + " http: " + timeHttp + "(ms)"); 
 				break;
 			}
-
 		}
 	};
-    
+
+	int searchOffersIT = 0;
+	
+	Test searchOffers = new Test() {
+		
+		@Override
+		public void next() {
+			
+			if (searchOffersIT < queryOffer.length) {
+				getOfferSearch(searchOffers, searchOffersIT);
+				searchOffersIT++;
+			} else {
+				searchDealer.next();
+			}
+			
+		}
+	};
+
+	int searchDealerIT = 0;
+	Test searchDealer = new Test() {
+		
+		@Override
+		public void next() {
+			
+			if (searchDealerIT < queryDealer.length) {
+				getDealerSearch(searchDealer, searchDealerIT);
+				searchDealerIT++;
+			} else {
+				searchStore.next();
+			}
+		}
+	};
+
+	int searchStoreIT = 0;
+	Test searchStore = new Test() {
+		
+		@Override
+		public void next() {
+			
+			if (searchStoreIT < queryStore.length) {
+				getStoreSearch(searchStore, searchStoreIT);
+				searchStoreIT++;
+			} else {
+				location.next();
+			}
+		}
+	};
+	
     Test catalogs = new Test() {
 		
 		@Override
@@ -650,10 +703,8 @@ public class Main extends Activity {
 			}
 		}, ids).execute();
     }
-    
-    
-    
-    private void getOfferSearch(final Test t) {
+
+    private void getOfferSearch(final Test t, final int i) {
     	start();
     	mEta.getOfferSearch(new OfferListListener() {
 			
@@ -664,16 +715,58 @@ public class Main extends Activity {
 					stop();
 					@SuppressWarnings("unchecked")
 					ArrayList<Offer> o = (ArrayList<Offer>)object;
-					addPositive("Offer Search " + query + ": ", mStop, printCount(o));
+					addPositive("Offer Search", queryOffer[i], mStop, printCount(o));
 					t.next();
 				} else {
-					addNegative("Offer Search", statusCode, object);
+					addNegative("Offer Search", queryOffer[i], statusCode, object);
 					t.next();
 				}
 			}
-		}, query[0]).execute();
+		}, queryOffer[i]).execute();
     }
-    
+
+    private void getDealerSearch(final Test t, final int i) {
+    	start();
+    	mEta.getDealerSearch(new DealerListListener() {
+			
+			@Override
+			public void onComplete(int statusCode, Object object) {
+
+				if (statusCode == 200) {
+					stop();
+					@SuppressWarnings("unchecked")
+					ArrayList<Dealer> o = (ArrayList<Dealer>)object;
+					addPositive("Dealer Search", queryDealer[i], mStop, printCount(o));
+					t.next();
+				} else {
+					addNegative("Dealer Search", queryDealer[i], statusCode, object);
+					t.next();
+				}
+			}
+		}, queryDealer[i]).execute();
+    }
+
+    private void getStoreSearch(final Test t, final int i) {
+    	start();
+    	mEta.getStoreSearch(new StoreListListener() {
+			
+			@Override
+			public void onComplete(int statusCode, Object object) {
+
+				if (statusCode == 200) {
+					stop();
+					@SuppressWarnings("unchecked")
+					ArrayList<Store> o = (ArrayList<Store>)object;
+					addPositive("Store Search", queryStore[i], mStop, printCount(o));
+					t.next();
+				} else {
+					addNegative("Store Search", queryStore[i], statusCode, object);
+					t.next();
+				}
+			}
+		}, queryStore[i]).execute();
+    }
+
     public interface Test {
     	public void next();
     }
