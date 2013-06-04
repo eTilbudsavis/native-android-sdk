@@ -15,11 +15,14 @@ import android.annotation.SuppressLint;
 import Utils.Endpoint;
 import Utils.Params;
 import Utils.Sort;
+import Utils.Utilities;
 
 public class Offer implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
+	public static final String TAG = "Offer";
+	
 	/** Sort a list by popularity in ascending order. (smallest to largest) */
 	public static final String SORT_POPULARITY = Sort.POPULARITY;
 
@@ -49,6 +52,9 @@ public class Offer implements Serializable {
 
 	/** Parameter for posting a list of store id's to publish the catalog in */
 	public static final String FILTER_STORE_IDS = Params.FILTER_STORE_IDS;
+
+	/** Parameter for posting a list of store id's to publish the catalog in */
+	public static final String FILTER_DEALER_IDS = Params.FILTER_DEALER_IDS;
 
 	/** String identifying the query parameter */
 	public static final String PARAM_QUERY = Params.QUERY;
@@ -92,7 +98,6 @@ public class Offer implements Serializable {
 	private Store mStore;
 
 	public Offer(JSONObject offer) {
-
 		try {
 			mId = offer.getString("id");
 			mErn = offer.getString("ern");

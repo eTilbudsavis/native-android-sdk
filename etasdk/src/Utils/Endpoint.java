@@ -1,5 +1,6 @@
 package Utils;
 
+
 /**
  * {@link com.eTilbudsavis.etasdk.Utils.Endpoint Endpoint} holds most endpoint-links for API v2.<br><br>
  * 
@@ -24,7 +25,7 @@ public final class Endpoint {
 	// GLOBALS
 	public static final String MAIN_URL = "https://etilbudsavis.dk";
 	public static final String PROVIDER_URL = MAIN_URL + "/connect/";
-	public static final String API = "http://api.etilbudsavis.dk";
+	public static final String API = "http://edge.etilbudsavis.dk";
 	private static final String V2 = "/v2";
 	
 	// RESOURCES AND SUB RESOURCES
@@ -36,6 +37,7 @@ public final class Endpoint {
 	private static final String ITEM = "/";
 	private static final String USER = V2 + "/users";
 	public static final String SEARCH = "/search";
+	public static final String QUICK_SEARCH = "/quicksearch";
 	public static final String FACEBOOK = "/facebook";
 	public static final String MODIFIED = "/modified";
 	public static final String SHARES = "/shares";
@@ -61,6 +63,9 @@ public final class Endpoint {
 	public static final String DEALER_SEARCH = DEALER_LIST + SEARCH;
 	public static final String OFFER_SEARCH = OFFER_LIST + SEARCH;
 	public static final String STORE_SEARCH = STORE_LIST + SEARCH;
+	
+	// QUICK SEARCH
+	public static final String STORE_QUICK_SEARCH = STORE_LIST + QUICK_SEARCH;
 
 	public static String getFacebookEndpoint(int userId) {
 		return USER_ID + String.valueOf(userId) + FACEBOOK;

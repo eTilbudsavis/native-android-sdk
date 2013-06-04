@@ -8,10 +8,13 @@ import org.json.JSONObject;
 import Utils.Endpoint;
 import Utils.Params;
 import Utils.Sort;
+import android.graphics.Color;
 
 public class Dealer implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
+	
+	public static final String TAG = "Dealer";
 
 	/** Sort a list by name in ascending order. (smallest to largest) */
 	public static final String SORT_NAME = Sort.NAME;
@@ -63,7 +66,7 @@ public class Dealer implements Serializable {
 			mUrlName = dealer.getString("url_name");
 			mWebsite = dealer.getString("website");
 			mLogo = dealer.getString("logo");
-			mColor = dealer.getInt("color");
+			mColor = Color.parseColor("#"+dealer.getString("color"));
 			mPageflip = new Pageflip(dealer.getJSONObject("pageflip"));
 		} catch (JSONException e) {
 			e.printStackTrace();

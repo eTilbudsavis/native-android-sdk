@@ -13,6 +13,8 @@ public class Store implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
+	public static final String TAG = "Store";
+	
 	/** Sort a list by distance in ascending order. (smallest to largest) */
 	public static final String SORT_DISTANCE = Sort.DISTANCE;
 
@@ -36,6 +38,9 @@ public class Store implements Serializable {
 
 	/** Endpoint for searching stores */
 	public static final String ENDPOINT_SEARCH = Endpoint.STORE_SEARCH;
+
+	/** Endpoint for fast searching stores */
+	public static final String ENDPOINT_QUICK_SEARCH = Endpoint.STORE_QUICK_SEARCH;
 
 	private String mId;
 	private String mErn;

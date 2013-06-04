@@ -94,8 +94,9 @@ public class Api implements Serializable {
 	private String mId = null;
 
 	private HttpHelper httpHelper;
-	private boolean useLocation = true;
+	private boolean mUseLocation = true;
 	private boolean mUseCache = true;
+	private boolean mUseDebug = false;
 	private RequestListener mListenerApi = new RequestListener() {
 
 		public void onComplete(int statusCode, Object object) {
@@ -155,7 +156,7 @@ public class Api implements Serializable {
 	 * @return this object
 	 */
 	public Api setCatalogIds(String[] ids) {
-		setIds(Params.FILTER_CATALOG_IDS, ids);
+		applyFilter(Params.FILTER_CATALOG_IDS, ids);
 		return this;
 	}
 
@@ -164,7 +165,7 @@ public class Api implements Serializable {
 	 * @return a list if id's
 	 */
 	public String[] getCatalogIds() {
-		return getIds(Params.FILTER_CATALOG_IDS);
+		return getFilter(Params.FILTER_CATALOG_IDS);
 	}
 
 	/**
@@ -173,7 +174,7 @@ public class Api implements Serializable {
 	 * @return this object
 	 */
 	public Api setDealerIds(String[] ids) {
-		setIds(Params.FILTER_DEALER_IDS, ids);
+		applyFilter(Params.FILTER_DEALER_IDS, ids);
 		return this;
 	}
 
@@ -182,7 +183,7 @@ public class Api implements Serializable {
 	 * @return a list if id's
 	 */
 	public String[] getDealerIds() {
-		return getIds(Params.FILTER_DEALER_IDS);
+		return getFilter(Params.FILTER_DEALER_IDS);
 	}
 
 	/**
@@ -191,7 +192,7 @@ public class Api implements Serializable {
 	 * @return this object
 	 */
 	public Api setStoreIds(String[] ids) {
-		setIds(Params.FILTER_STORE_IDS, ids);
+		applyFilter(Params.FILTER_STORE_IDS, ids);
 		return this;
 	}
 
@@ -200,7 +201,7 @@ public class Api implements Serializable {
 	 * @return a list if id's
 	 */
 	public String[] getStoreIds() {
-		return getIds(Params.FILTER_STORE_IDS);
+		return getFilter(Params.FILTER_STORE_IDS);
 	}
 
 	/**
@@ -209,7 +210,7 @@ public class Api implements Serializable {
 	 * @return this object
 	 */
 	public Api setOfferIds(String[] ids) {
-		setIds(Params.FILTER_OFFER_IDS, ids);
+		applyFilter(Params.FILTER_OFFER_IDS, ids);
 		return this;
 	}
 
@@ -218,7 +219,7 @@ public class Api implements Serializable {
 	 * @return a list if id's
 	 */
 	public String[] getOfferIds() {
-		return getIds(Params.FILTER_OFFER_IDS);
+		return getFilter(Params.FILTER_OFFER_IDS);
 	}
 
 	/**
@@ -227,7 +228,7 @@ public class Api implements Serializable {
 	 * @return this object
 	 */
 	public Api setAreaIds(String[] ids) {
-		setIds(Params.FILTER_AREA_IDS, ids);
+		applyFilter(Params.FILTER_AREA_IDS, ids);
 		return this;
 	}
 
@@ -236,7 +237,7 @@ public class Api implements Serializable {
 	 * @return a list if id's
 	 */
 	public String[] getAreaIds() {
-		return getIds(Params.FILTER_AREA_IDS);
+		return getFilter(Params.FILTER_AREA_IDS);
 	}
 	
 	/**
@@ -247,18 +248,23 @@ public class Api implements Serializable {
 	 * @param	ids to filter by
 	 * @return	this object
 	 */
-	public Api setIds(String filterName, String[] ids) {
+	public Api applyFilter(String filterName, String[] ids) {
 		String tmp = TextUtils.join(",",ids);
 		mApiParams.putString(filterName, tmp);
 		return this;
 	}
-
+	
+	public Api removeFilter(String filterName) {
+		mApiParams.remove(filterName);
+		return this;
+	}
+	
 	/**
 	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
 	 * @param	filterName 
 	 * @return	a list if id's
 	 */
-	public String[] getIds(String filterName) {
+	public String[] getFilter(String filterName) {
 		String tmp = mApiParams.getString(filterName);
 		return TextUtils.split(tmp, ",");
 	}
@@ -353,14 +359,14 @@ public class Api implements Serializable {
 	public boolean useCache() {
 		return mUseCache;
 	}
-	
+
 	/**
-	 * Tell, whether to use location for this API call
+	 * Whether to use location for this API call
 	 * @param useLocation
 	 * @return
 	 */
 	public Api setUseLocation(boolean useLocation) {
-		this.useLocation = useLocation;
+		this.mUseLocation = useLocation;
 		return this;
 	}
 
@@ -369,7 +375,26 @@ public class Api implements Serializable {
 	 * @return True if location is being used, false otherwise.
 	 */
 	public boolean useLocation() {
-		return useLocation;
+		return mUseLocation;
+	}
+
+	/**
+	 * Whether to print debug information to LogCat.<br><br>
+	 * Prints URL, query and headers before execute. <br>
+	 * And prints return headers, and the raw date of the reply.
+	 * @param useDebug
+	 * @return this object
+	 */
+	public Api useDebug(boolean useDebug) {
+		this.mUseDebug = useDebug;
+		return this;
+	}
+
+	/**
+	 * TODO: DOC
+	 */
+	public boolean useDebug() {
+		return mUseDebug;
 	}
 	
 	/**
@@ -498,7 +523,7 @@ public class Api implements Serializable {
 		// Required API key.
 		Utilities.putNameValuePair(params, API_KEY, mEta.getApiKey());
 
-		if (useLocation) {
+		if (mUseLocation) {
 
 			if (!mEta.getLocation().isLocationSet()) {
 				Utilities.logd(TAG, "Location is required, but has not been set yet. Aborting...");
@@ -545,7 +570,7 @@ public class Api implements Serializable {
 		
 		// Create a new HttpHelper and run it
 		httpHelper = new HttpHelper(mEta, mUrl, headers, params, mRequestType, mListenerApi);
-		httpHelper.execute();
+		httpHelper.debug(mUseDebug).execute();
 		
 	}
 
@@ -582,12 +607,12 @@ public class Api implements Serializable {
 				object = d;
 				
 			} else if  (mListenerUser instanceof Api.StoreListListener) {
-				ArrayList<Offer> o = new ArrayList<Offer>();
+				ArrayList<Store> s = new ArrayList<Store>();
 				JSONArray jArray = new JSONArray(object.toString());
 				for (int i = 0 ; i < jArray.length() ; i++ ) {
-					o.add(new Offer((JSONObject)jArray.get(i)));
+					s.add(new Store((JSONObject)jArray.get(i)));
 				}
-				object = o;
+				object = s;
 
 			} else if  (mListenerUser instanceof Api.DealerListener) {
 				object =  new Dealer(new JSONObject(object.toString()));

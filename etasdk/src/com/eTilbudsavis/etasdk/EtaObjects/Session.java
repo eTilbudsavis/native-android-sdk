@@ -14,7 +14,6 @@ import Utils.Utilities;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 
-import com.eTilbudsavis.etasdk.Api;
 import com.eTilbudsavis.etasdk.Api.RequestListener;
 import com.eTilbudsavis.etasdk.Eta;
 

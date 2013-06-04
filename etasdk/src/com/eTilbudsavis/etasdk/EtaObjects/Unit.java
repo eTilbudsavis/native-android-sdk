@@ -9,6 +9,8 @@ public class Unit implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String TAG = "Unit";
+	
 	private String mSymbol;
 	
 	public Unit() {

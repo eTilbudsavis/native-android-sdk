@@ -74,19 +74,21 @@ public class EtaLocation extends Location {
 		mSensor = (getProvider().equals(LocationManager.GPS_PROVIDER) || getProvider().equals(LocationManager.NETWORK_PROVIDER) );
 	}
 	
-	public void set(Location l, int radius, boolean sensor) {
+	public EtaLocation set(Location l, int radius, boolean sensor) {
 		super.set(l);
 		mRadius = radius;
 		mSensor = sensor;
+		return this;
 	}
 	
-	public void set(double latitude, double longitude, int radius, boolean sensor) {
+	public EtaLocation set(double latitude, double longitude, int radius, boolean sensor) {
 		mRadius = radius;
 		mSensor = sensor;
 		setLatitude(latitude);
 		setLongitude(longitude);
 		setTime(System.currentTimeMillis());
 		setProvider(ETA_PROVIDER);
+		return this;
 	}
 
 	/**

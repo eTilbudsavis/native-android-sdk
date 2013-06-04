@@ -9,6 +9,8 @@ public class Images implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
+	public static final String TAG = "Images";
+	
 	private String mView;
 	private String mZoom;
 	private String mThumb;

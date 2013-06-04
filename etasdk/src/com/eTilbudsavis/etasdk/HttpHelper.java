@@ -32,9 +32,9 @@ import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	
 	public static final String TAG = "HttpHelper";
-	public static final boolean DEBUG = false;
 	
 	private int CONNECTION_TIME_OUT = 15 * 1000;
+	private boolean mDebug = false;
 	private Eta mEta;
 	private String mUrl;
 	private List<NameValuePair> mQuery;
@@ -60,7 +60,8 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	protected Void doInBackground(Void... params) {
 
 		// Print debug information
-		if (DEBUG) {
+		if (mDebug) {
+			Utilities.logd(TAG, "Pre Execute - " + getClass().getSimpleName() + '@' + Integer.toHexString(hashCode()));
 			Utilities.logd(TAG, "Url: " + mUrl);
 			Utilities.logd(TAG, "Headers: " + mHeaders.toString());
 			StringBuilder sb = new StringBuilder();
@@ -144,19 +145,21 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 			// If server is retarded
 			} else {
 				// Just return the standard response
-				mReturn = response.getStatusLine().getReasonPhrase();
+				mReturn = mResponse;
 			}
 			
 			updateSessionInfo(response.getAllHeaders());
 
-		    if (DEBUG) {
+		    if (mDebug) {
+				Utilities.logd(TAG, "Post Execute - " + getClass().getSimpleName() + '@' + Integer.toHexString(hashCode()));
 		    	StringBuilder headers = new StringBuilder();
-		    	headers.append("Return Headers: ");
+		    	headers.append("Headers: [");
 		    	for (Header h : response.getAllHeaders())
-		    		headers.append("name: ").append(h.getName()).append(", value: ").append(h.getValue());
+		    		headers.append(h.getName()).append(": ").append(h.getValue()).append(", ");
 		    	
-		    	Utilities.logd(TAG, headers.toString());
-		    	Utilities.logd(TAG, "Code: " + String.valueOf(mResponseCode) + ", Data: " + mResponse);
+		    	Utilities.logd(TAG, headers.append("]").toString());
+		    	Utilities.logd(TAG, "StatusCode: " + String.valueOf(mResponseCode));
+		    	Utilities.logd(TAG, "Object: " + mResponse);
 		    }
 		    
 		} catch (UnsupportedEncodingException e) {
@@ -211,6 +214,11 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	    	}
 	    }
 	    mEta.getSession().updateOnInvalidToken(token, tokenExp);
+	}
+	
+	public HttpHelper debug(boolean useDebug) {
+		mDebug = useDebug;
+		return this;
 	}
 	
 }

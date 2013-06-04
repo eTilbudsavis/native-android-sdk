@@ -124,7 +124,7 @@ public final class Params {
 	public static final int DEFAULT_OFFSET = 0;
 
 	/** The default item limit for API calls */
-	public static final int DEFAULT_LIMIT = 25;
+	public static final int DEFAULT_LIMIT = 10;
 	
 	
 }

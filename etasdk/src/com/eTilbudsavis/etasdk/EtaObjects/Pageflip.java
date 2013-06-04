@@ -10,7 +10,9 @@ import android.graphics.Color;
 public class Pageflip implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	
+
+	public static final String TAG = "Pageflip";
+
 	private String mLogo;
 	private int mColor;
 	

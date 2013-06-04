@@ -9,6 +9,8 @@ public class Links implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String TAG = "Links";
+	
 	private String mWebshop;
 	
 	public Links() {

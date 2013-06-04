@@ -47,6 +47,10 @@ public final class Utilities {
 	public static void logd(String tag, String msg) {
 		if (Eta.DEBUG)
 			Log.d(tag, msg);
+	}	
+	public static void logd(String tag, int statusCode, Object object) {
+		if (Eta.DEBUG)
+			Log.d(tag, "Status: " + String.valueOf(statusCode) + ", Data: " + object.toString());
 	}
 
 	/**

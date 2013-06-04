@@ -8,6 +8,8 @@ import org.json.JSONObject;
 public class Size implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	public static final String TAG = "Size";
 	
 	private double mFrom;
 	private double mTo;

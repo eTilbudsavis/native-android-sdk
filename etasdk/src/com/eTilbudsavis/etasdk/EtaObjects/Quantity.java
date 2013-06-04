@@ -8,6 +8,8 @@ import org.json.JSONObject;
 public class Quantity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	public static final String TAG = "Quantity";
 	
 	private Unit mUnit;
 	private Size mSize;
@@ -21,9 +23,9 @@ public class Quantity implements Serializable {
 	
 	public Quantity(JSONObject quantity) {
 		try {
-			mUnit = new Unit(quantity.getJSONObject("unit"));
-			mSize = new Size(quantity.getJSONObject("size"));
-			mPieces = new Pieces(quantity.getJSONObject("pieces"));
+			mUnit = quantity.getString("unit").equals("null") ? null : new Unit(quantity.getJSONObject("unit"));
+			mSize = quantity.getString("size").equals("null") ? null : new Size(quantity.getJSONObject("size"));
+			mPieces = quantity.getString("pieces").equals("null") ? null : new Pieces(quantity.getJSONObject("pieces"));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -74,9 +76,9 @@ public class Quantity implements Serializable {
 	public String toString() {
 		return new StringBuilder()
 		.append(getClass().getSimpleName()).append("[")
-		.append("unit=").append(mUnit.toString())
-		.append("size=").append(mSize.toString())
-		.append("pieces=").append(mPieces.toString())
+		.append("unit=").append(mUnit == null ? "null" : mUnit.toString())
+		.append("size=").append(mSize == null ? "null" : mSize.toString())
+		.append("pieces=").append(mPieces == null ? "null" : mPieces.toString())
 		.append("]").toString();
 		
 	}

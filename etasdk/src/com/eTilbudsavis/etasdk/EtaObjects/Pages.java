@@ -1,14 +1,17 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import Utils.Utilities;
+public class Pages implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
-public class Pages {
+	public static final String TAG = "Pages";
 	
 	private ArrayList<String> mThumb = new ArrayList<String>();
 	private ArrayList<String> mView = new ArrayList<String>();

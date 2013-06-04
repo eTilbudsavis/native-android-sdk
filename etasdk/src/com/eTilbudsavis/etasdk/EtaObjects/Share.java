@@ -9,6 +9,8 @@ import org.json.JSONObject;
 public class Share implements Comparable<Share>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
+
+	public static final String TAG = "Share";
 	
 	private String mUser;
 	private SharePermission mAccess;

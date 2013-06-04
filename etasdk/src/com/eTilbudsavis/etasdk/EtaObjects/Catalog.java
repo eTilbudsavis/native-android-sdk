@@ -20,6 +20,8 @@ public class Catalog implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
+	public static final String TAG = "Catalog";
+	
 	/** Sort a list by popularity in ascending order. (smallest to largest) */
 	public static final String SORT_POPULARITY = Sort.POPULARITY;
 

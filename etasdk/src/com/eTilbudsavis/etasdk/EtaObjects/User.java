@@ -2,7 +2,6 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -5,12 +5,12 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.Bundle;
-
 public class EtaError implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String TAG = "EtaError";
+	
 	private String mId;
 	private int mCode;
 	private String mMessage;

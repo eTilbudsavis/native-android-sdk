@@ -12,6 +12,8 @@ import org.json.JSONObject;
 public class Permission implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
+
+	public static final String TAG = "Permission";
 	
 	private HashMap<String, ArrayList<String>> perm = new HashMap<String, ArrayList<String>>();
 	

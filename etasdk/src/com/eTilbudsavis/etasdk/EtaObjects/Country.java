@@ -8,6 +8,8 @@ import org.json.JSONObject;
 public class Country implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
+
+	public static final String TAG = "Country";
 	
 	private int mId;
 	private int mAreaId;

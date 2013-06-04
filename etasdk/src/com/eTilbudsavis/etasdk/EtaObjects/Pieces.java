@@ -8,6 +8,8 @@ import org.json.JSONObject;
 public class Pieces implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	public static final String TAG = "Pieces";
 	
 	private int mFrom;
 	private int mTo;

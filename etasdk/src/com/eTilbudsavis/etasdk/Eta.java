@@ -25,6 +25,7 @@ import android.text.TextUtils;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
+import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 
@@ -183,88 +184,187 @@ public class Eta implements Serializable {
 		apiParams.putString(Catalog.PARAM_QUERY, query);
 		return apiParams;
 	}
+
 	
-	public HttpHelper getCatalogList(Api.CatalogListListener listener, int offset) {
+	// ######################## CATALOGS ########################
+	
+	public Api getCatalogList(Api.CatalogListListener listener) {
+		return getCatalogList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
+	}
+	
+	public Api getCatalogList(Api.CatalogListListener listener, int offset) {
 		return getCatalogList(listener, offset, Api.DEFAULT_LIMIT, null);
 	}
-	
-	public HttpHelper getCatalogList(Api.CatalogListListener listener, int offset, String[] orderBy) {
-		return getCatalogList(listener, offset, Api.DEFAULT_LIMIT, orderBy);
-	}
-	
-	public HttpHelper getCatalogList(Api.CatalogListListener listener, int offset, int limit) {
+
+	public Api getCatalogList(Api.CatalogListListener listener, int offset, int limit) {
 		return getCatalogList(listener, offset, limit, null);
 	}
 	
-	public HttpHelper getCatalogList(Api.CatalogListListener listener, int offset, int limit, String[] orderBy) {
-		return api().get(Catalog.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy)).execute();
+	public Api getCatalogList(Api.CatalogListListener listener, int offset, String[] orderBy) {
+		return getCatalogList(listener, offset, Api.DEFAULT_LIMIT, orderBy);
 	}
 	
-	public HttpHelper getCatalogId(Api.CatalogListener listener, String id) {
-		return api().get(Catalog.ENDPOINT_ID, listener, new Bundle()).setId(id).execute();
+	public Api getCatalogList(Api.CatalogListListener listener, int offset, int limit, String[] orderBy) {
+		return api().get(Catalog.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
 	}
 	
-	public HttpHelper getCatalogIds(Api.CatalogListListener listener, String[] ids) {
-		return api().get(Catalog.ENDPOINT_LIST, listener, new Bundle()).setCatalogIds(ids).execute();
+	public Api getCatalogId(Api.CatalogListener listener, String id) {
+		return api().get(Catalog.ENDPOINT_ID, listener, new Bundle()).setId(id);
 	}
 	
-
-	public HttpHelper searchCatalogs(Api.CatalogListListener listener, String query) {
-		return searchCatalogs(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public HttpHelper searchCatalogs(Api.CatalogListListener listener, String query, int offset) {
-		return searchCatalogs(listener, query, offset, Api.DEFAULT_LIMIT, null);
-	}
-	
-	
-	
-	
-	
-	
-	
-	public HttpHelper searchCatalogs(Api.CatalogListListener listener, String query, int offset, int limit, String[] orderBy) {
-		return api().get(Catalog.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query)).execute();
-	}
-	
-	public HttpHelper getStoreList(Api.StoreListListener listener) {
-		return getStoreList(listener, null);
-	}
-	
-	public HttpHelper getStoreList(Api.StoreListListener listener, String[] orderBy) {
-		Bundle apiParams = new Bundle();
-		if (orderBy != null)
-			apiParams.putString(Sort.ORDER_BY, TextUtils.join(",", orderBy));
-		return api().get(Store.ENDPOINT_LIST, listener, apiParams).execute();
+	public Api getCatalogIds(Api.CatalogListListener listener, String[] ids) {
+		return api().get(Catalog.ENDPOINT_LIST, listener, new Bundle()).setCatalogIds(ids);
 	}
 
-	public HttpHelper getStoreId(Api.StoreListener listener, String id) {
-		return api().get(Store.ENDPOINT_ID, listener, new Bundle()).setId(id).execute();
-	}
-
-	public HttpHelper getStoreIds(Api.StoreListListener listener, String[] ids) {
-		return api().get(Store.ENDPOINT_LIST, listener, new Bundle()).setStoreIds(ids).execute();
-	}
-
-	public HttpHelper getDealerList(Api.DealerListListener listener) {
-		return getDealerList(listener, null);
+	// ######################## OFFERS ########################
+	
+	public Api getOfferList(Api.OfferListListener listener) {
+		return getOfferList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
 	}
 	
-	public HttpHelper getDealerList(Api.DealerListListener listener, String[] orderBy) {
-		Bundle apiParams = new Bundle();
-		if (orderBy != null)
-			apiParams.putString(Sort.ORDER_BY, TextUtils.join(",", orderBy));
-		return api().get(Dealer.ENDPOINT_LIST, listener, apiParams).execute();
+	public Api getOfferList(Api.OfferListListener listener, int offset) {
+		return getOfferList(listener, offset, Api.DEFAULT_LIMIT, null);
 	}
 
-	public HttpHelper getDealerId(Api.DealerListener listener, String id) {
-		return api().get(Dealer.ENDPOINT_ID, listener, new Bundle()).setId(id).execute();
+	public Api getOfferList(Api.OfferListListener listener, int offset, int limit) {
+		return getOfferList(listener, offset, limit, null);
 	}
 
-	public HttpHelper getDealerIds(Api.DealerListListener listener, String[] ids) {
-		return api().get(Dealer.ENDPOINT_LIST, listener, new Bundle()).setDealerIds(ids).execute();
+	public Api getOfferList(Api.OfferListListener listener, int offset, String[] orderBy) {
+		return getOfferList(listener, offset, Api.DEFAULT_LIMIT, orderBy);
+	}
+
+	public Api getOfferList(Api.OfferListListener listener, int offset, int limit, String[] orderBy) {
+		return api().get(Offer.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
 	}
 	
+	public Api getOfferId(Api.OfferListener listener, String id) {
+		return api().get(Offer.ENDPOINT_ID, listener, new Bundle()).setId(id);
+	}
 	
+	public Api getOfferIds(Api.OfferListListener listener, String[] ids) {
+		return api().get(Offer.ENDPOINT_LIST, listener, new Bundle()).setOfferIds(ids);
+	}
 	
+	public Api getOfferSearch(Api.OfferListListener listener, String query) {
+		return getOfferSearch(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
+	}
+
+	public Api getOfferSearch(Api.OfferListListener listener, String query, int offset) {
+		return getOfferSearch(listener, query, offset, Api.DEFAULT_LIMIT, null);
+	}
+
+	public Api getOfferSearch(Api.OfferListListener listener, String query, String[] orderBy) {
+		return getOfferSearch(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, orderBy);
+	}
+
+	public Api getOfferSearch(Api.OfferListListener listener, String query, int offset, int limit) {
+		return getOfferSearch(listener, query, offset, limit, null);
+	}
+
+	public Api getOfferSearch(Api.OfferListListener listener, String query, int offset, int limit, String[] orderBy) {
+		return api().get(Offer.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
+	}
+	
+	// ######################## DEALERS ########################
+
+	public Api getDealerList(Api.DealerListListener listener) {
+		return getDealerList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
+	}
+	
+	public Api getDealerList(Api.DealerListListener listener, int offset) {
+		return getDealerList(listener, offset, Api.DEFAULT_LIMIT, null);
+	}
+
+	public Api getDealerList(Api.DealerListListener listener, int offset, int limit) {
+		return getDealerList(listener, offset, limit, null);
+	}
+	
+	public Api getDealerList(Api.DealerListListener listener, int offset, String[] orderBy) {
+		return getDealerList(listener, offset, Api.DEFAULT_LIMIT, orderBy);
+	}
+	
+	public Api getDealerList(Api.DealerListListener listener, int offset, int limit, String[] orderBy) {
+		return api().get(Dealer.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
+	}
+	
+	public Api getDealerId(Api.DealerListener listener, String id) {
+		return api().get(Dealer.ENDPOINT_ID, listener, new Bundle()).setId(id);
+	}
+	
+	public Api getDealerIds(Api.DealerListListener listener, String[] ids) {
+		return api().get(Dealer.ENDPOINT_LIST, listener, new Bundle()).setDealerIds(ids);
+	}
+
+	public Api getDealerSearch(Api.DealerListListener listener, String query) {
+		return getDealerSearch(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
+	}
+
+	public Api getDealerSearch(Api.DealerListListener listener, String query, int offset) {
+		return getDealerSearch(listener, query, offset, Api.DEFAULT_LIMIT, null);
+	}
+
+	public Api getDealerSearch(Api.DealerListListener listener, String query, int offset, int limit) {
+		return getDealerSearch(listener, query, offset, limit, null);
+	}
+
+	public Api getDealerSearch(Api.DealerListListener listener, String query, int offset, String[] orderBy) {
+		return getDealerSearch(listener, query, offset, Api.DEFAULT_LIMIT, orderBy);
+	}
+
+	public Api getDealerSearch(Api.DealerListListener listener, String query, int offset, int limit, String[] orderBy) {
+		return api().get(Dealer.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
+	}
+
+
+	// ######################## STORES ########################
+
+	public Api getStoreList(Api.StoreListListener listener) {
+		return getStoreList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
+	}
+	
+	public Api getStoreList(Api.StoreListListener listener, int offset) {
+		return getStoreList(listener, offset, Api.DEFAULT_LIMIT, null);
+	}
+
+	public Api getStoreList(Api.StoreListListener listener, int offset, int limit) {
+		return getStoreList(listener, offset, limit, null);
+	}
+	
+	public Api getStoreList(Api.StoreListListener listener, int offset, String[] orderBy) {
+		return getStoreList(listener, offset, Api.DEFAULT_LIMIT, orderBy);
+	}
+	
+	public Api getStoreList(Api.StoreListListener listener, int offset, int limit, String[] orderBy) {
+		return api().get(Store.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
+	}
+	
+	public Api getStoreId(Api.StoreListener listener, String id) {
+		return api().get(Store.ENDPOINT_ID, listener, new Bundle()).setId(id);
+	}
+	
+	public Api getStoreIds(Api.StoreListListener listener, String[] ids) {
+		return api().get(Store.ENDPOINT_LIST, listener, new Bundle()).setStoreIds(ids);
+	}
+
+	public Api getStoreSearch(Api.StoreListListener listener, String query) {
+		return getStoreSearch(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
+	}
+
+	public Api getStoreSearch(Api.StoreListListener listener, String query, int offset) {
+		return getStoreSearch(listener, query, offset, Api.DEFAULT_LIMIT, null);
+	}
+
+	public Api getStoreSearch(Api.StoreListListener listener, String query, int offset, int limit) {
+		return getStoreSearch(listener, query, offset, limit, null);
+	}
+
+	public Api getStoreSearch(Api.StoreListListener listener, String query, int offset, String[] orderBy) {
+		return getStoreSearch(listener, query, offset, Api.DEFAULT_LIMIT, orderBy);
+	}
+
+	public Api getStoreSearch(Api.StoreListListener listener, String query, int offset, int limit, String[] orderBy) {
+		return api().get(Store.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
+	}
+
 }

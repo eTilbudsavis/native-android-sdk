@@ -9,8 +9,10 @@ public class Pricing implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
+	public static final String TAG = "Pricing";
+	
 	private double mPrice;
-	private double mPrePrice;
+	private Double mPrePrice;
 	private String mCurrency;
 	
 	public Pricing() {
@@ -22,7 +24,7 @@ public class Pricing implements Serializable {
 	public Pricing(JSONObject pricing) {
 		try {
 			mPrice = pricing.getDouble("price");
-			mPrePrice = pricing.getDouble("preprice");
+			mPrePrice = pricing.getString("preprice").equals("null") == true ? null : pricing.getDouble("preprice");
 			mCurrency = pricing.getString("currency");
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -38,7 +40,7 @@ public class Pricing implements Serializable {
 		return this;
 	}
 
-	public double getPrePrice() {
+	public Double getPrePrice() {
 		return mPrePrice;
 	}
 
@@ -66,7 +68,7 @@ public class Pricing implements Serializable {
 
 		Pricing p = (Pricing)o;
 		return mPrice == p.getPrice() &&
-				mPrePrice == p.getPrePrice() &&
+				mPrePrice == null ? p.getPrePrice() == null : mPrePrice == p.getPrePrice() &&
 				mCurrency.equals(p.getCurrency());
 	}
 	
@@ -75,7 +77,7 @@ public class Pricing implements Serializable {
 		return new StringBuilder()
 		.append(getClass().getSimpleName()).append("[")
 		.append("Price=").append(mPrice)
-		.append(", preprice=").append(mPrePrice)
+		.append(", preprice=").append(mPrePrice == null ? "null" : mPrePrice)
 		.append(", currency=").append(mCurrency)
 		.append("]").toString();
 		
