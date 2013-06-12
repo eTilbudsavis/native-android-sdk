@@ -11,26 +11,57 @@ public class Dimension implements Serializable {
 
 	public static final String TAG = "Dimension";
 	
-	private double mWidth;
-	private double mHeight;
+	private static final String S_WIDTH = "width";
+	private static final String S_HEIGHT = "height";
+	
+	private double mWidth = 0.0;
+	private double mHeight = 0.0;
 	
 	public Dimension() {
-		mWidth = 0.0;
-		mHeight = 0.0;
 	}
 	
-	public Dimension(JSONObject dimension) {
-    	
-    	try {
-			mWidth = dimension.getDouble("width");
-			mHeight = dimension.getDouble("height");
+	public static Dimension fromJSON(String dimension) {
+		try {
+			return fromJSON(new Dimension(), new JSONObject(dimension));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-    	
-		
+		return null;
 	}
 
+	public static Dimension fromJSON(JSONObject dimension) {
+		return fromJSON(new Dimension(), dimension);
+	}
+	
+	public static Dimension fromJSON(Dimension d, JSONObject dimension) {
+		if (d == null) d = new Dimension();
+		if (dimension == null) return d;
+		
+		try {
+			d.setWidth(dimension.getDouble(S_WIDTH));
+			d.setHeight(dimension.getDouble(S_HEIGHT));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return d;
+	}
+	
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Dimension d) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(S_HEIGHT, d.getHeight());
+			o.put(S_WIDTH, d.getWidth());
+		} catch (JSONException e) {
+			o = null;
+			e.printStackTrace();
+		}
+		return o;
+	}
+	
 	public double getWidth() {
 		return mWidth;
 	}

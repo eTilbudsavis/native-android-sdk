@@ -35,7 +35,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 
 			String offer = shoppinglistItem.getString("offer");
 			if (!offer.equals("null"))
-				mOffer = new Offer(new JSONObject(offer));
+				mOffer = Offer.fromJSON(offer);
 
 			setCount(shoppinglistItem.getInt("count"));
 			mTick = shoppinglistItem.getBoolean("tick");

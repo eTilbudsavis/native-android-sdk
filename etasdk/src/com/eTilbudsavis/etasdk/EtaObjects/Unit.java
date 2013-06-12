@@ -9,22 +9,55 @@ public class Unit implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private static final String S_SYMBOL = "symbol";
+	
 	public static final String TAG = "Unit";
 	
 	private String mSymbol;
 	
-	public Unit() {
-		mSymbol = "Symbol";
+	public Unit() {;
 	}
 	
-	public Unit(JSONObject unit) {
+	public static Unit fromJSON(String unit) {
 		try {
-			mSymbol = unit.getString("symbol");
+			return fromJSON(new Unit(), new JSONObject(unit));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
-
+	
+	public static Unit fromJSON(JSONObject unit) {
+		return fromJSON(new Unit(), unit);
+	}
+	
+	public static Unit fromJSON(Unit u, JSONObject unit) {
+		if (u == null) u = new Unit();
+		if (unit == null) return u;
+		
+		try {
+			u.setSymbol(unit.getString(S_SYMBOL));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return u;
+	}
+	
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Unit u) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(S_SYMBOL, u.getSymbol());
+		} catch (JSONException e) {
+			o = null;
+			e.printStackTrace();
+		}
+		return o;
+	}
+	
 	public String getSymbol() {
 		return mSymbol;
 	}

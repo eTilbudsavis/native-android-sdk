@@ -35,26 +35,28 @@ public final class Endpoint {
 	private static final String STORE = "/stores";
 	private static final String SHOPPINGLIST = "/shoppinglists";
 	private static final String ITEM = "/";
-	private static final String USER = V2 + "/users";
+	private static final String USER = API + V2 + "/users";
 	public static final String SEARCH = "/search";
 	public static final String QUICK_SEARCH = "/quicksearch";
 	public static final String FACEBOOK = "/facebook";
+	
+	// Shoppinglist
 	public static final String MODIFIED = "/modified";
 	public static final String SHARES = "/shares";
 	public static final String ITEMS = "/items";
 	
 	// LISTS
-	public static final String CATALOG_LIST = V2 + CATALOG;
-	public static final String DEALER_LIST = V2 + DEALER;
-	public static final String OFFER_LIST = V2 + OFFER;
-	public static final String STORE_LIST = V2 + STORE;
+	public static final String CATALOG_LIST = API + V2 + CATALOG;
+	public static final String DEALER_LIST = API + V2 + DEALER;
+	public static final String OFFER_LIST = API + V2 + OFFER;
+	public static final String STORE_LIST =API +  V2 + STORE;
 	
 	// SINGLE ID
 	public static final String CATALOG_ID = CATALOG_LIST + ITEM;
 	public static final String DEALER_ID = DEALER_LIST + ITEM;
 	public static final String OFFER_ID = OFFER_LIST + ITEM;
 	public static final String STORE_ID = STORE_LIST + ITEM;
-	public static final String SESSION = V2 + "/sessions";
+	public static final String SESSION = API + V2 + "/sessions";
 	public static final String USER_RESET = USER + "/reset";
 	public static final String USER_ID = USER + ITEM;
 	
@@ -102,5 +104,19 @@ public final class Endpoint {
 	public static String getShoppinglistItemModified(int userId, String listUuid, String itemUuid) {
 		return getShoppinglistItemID(userId, listUuid, itemUuid) + MODIFIED;
 	}
+
+	public static boolean isItemEndpoint(String url) {
+		return url.contains(CATALOG_ID) || 
+				url.contains(OFFER_ID) ||
+				url.contains(DEALER_ID) || 
+				url.contains(STORE_ID);
+	}
 	
+	public static boolean isListEndpoint(String url) {
+		return !isItemEndpoint(url) &&
+				(url.matches(CATALOG_LIST) || 
+				url.matches(OFFER_LIST) || 
+				url.matches(DEALER_LIST) || 
+				url.matches(STORE_LIST));
+	}
 }

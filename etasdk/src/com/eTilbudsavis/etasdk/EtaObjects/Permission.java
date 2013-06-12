@@ -17,7 +17,25 @@ public class Permission implements Serializable {
 	
 	private HashMap<String, ArrayList<String>> perm = new HashMap<String, ArrayList<String>>();
 	
-	public Permission(JSONObject permission) {
+	public Permission() {
+	}
+
+	public static Permission fromJSON(String permission) {
+		try {
+			return fromJSON(new Permission(), new JSONObject(permission));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static Permission fromJSON(JSONObject permission) {
+		return fromJSON(new Permission(), permission);
+	}
+	
+	public static Permission fromJSON(Permission p, JSONObject permission) {
+		if (p == null) p = new Permission();
+		if (permission == null) return p;
 		
 		try {
 			
@@ -32,7 +50,7 @@ public class Permission implements Serializable {
 					permissions.add(jArray.get(j).toString());
 				}
 				
-				perm.put(group, permissions);
+				p.getAll().put(group, permissions);
 				
 			}
 			
@@ -40,8 +58,52 @@ public class Permission implements Serializable {
 			e.printStackTrace();
 		}
 		
+		return p;
+	}
+	
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Permission p) {
+		JSONObject o = new JSONObject();
+		try {
+			Iterator<String> it = p.getAll().keySet().iterator();
+			while (it.hasNext()) {
+				JSONArray jArray = new JSONArray();
+				String name = (String) it.next();
+				for (String value : p.getAll().get(name))
+					jArray.put(value);
+				
+				o.put(name, jArray);
+			}
+		} catch (JSONException e) {
+			o = null;
+			e.printStackTrace();
+		}
+		return o;
 	}
 
+	public ArrayList<String> get(String key) {
+		return perm.get(key);
+	}
+
+	public Permission put(String key, ArrayList<String> permission) {
+		perm.put(key, permission);
+		return this;
+	}
+	
+	public HashMap<String, ArrayList<String>> getAll() {
+		return perm;
+	}
+	
+	public Permission putAll(HashMap<String, ArrayList<String>> permissions) {
+		perm.putAll(permissions);
+		return this;
+	}
+	
+	
+	
 	/**
 	 * Prints this object
 	 */

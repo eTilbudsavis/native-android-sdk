@@ -24,12 +24,15 @@ import Utils.Utilities;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.eTilbudsavis.etasdk.EtaCache.CacheItem;
+import com.eTilbudsavis.etasdk.HttpHelper.HttpListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.EtaObjects.Session.SessionListener;
+import com.eTilbudsavis.etasdk.EtaObjects.Store;
 
 public class Api implements Serializable {
 	
@@ -86,31 +89,35 @@ public class Api implements Serializable {
 
 	private Eta mEta;
 	private String mUrl = null;
-	private RequestListener mListenerUser = null;
+	// Due to cache, this has to be a raw type for now
+	private Callback mListener = null;
 	private Bundle mApiParams = null;
 	private RequestType mRequestType = null;
 	private ContentType mContentType = null;
 	private HashMap<String, String> mHeaders;
 	private String mId = null;
-
+	private boolean mSessionRefreshCall = false;
+	private boolean mCacheHit = false;
+	private boolean mMultipleCallbacks = false;
+	
 	private HttpHelper httpHelper;
 	private boolean mUseLocation = true;
 	private boolean mUseCache = true;
 	private boolean mUseDebug = false;
-	private RequestListener mListenerApi = new RequestListener() {
+	private HttpListener mHttpListener = new HttpListener() {
 
-		public void onComplete(int statusCode, Object object) {
+		public void onComplete(int statusCode, String data) {
 
 			// Success
 			if (200 <= statusCode && statusCode < 300) {
-				doCallback(statusCode, object);
-				
-			// Error
-			} else if (400 <= statusCode && statusCode < 500) {
-				
-				// If it's a Session problem, refresh Session and retry
-				EtaError e = (EtaError)object;
-				if ( (e.getCode() == 1108 || e.getCode() == 1101) ) {
+				if (!mCacheHit || mMultipleCallbacks)
+				convertCacheReturn(statusCode,data);
+			
+			// Error, try to get new session token, then do request again.
+			} else {
+				EtaError error = EtaError.fromJSON(data);
+				if ( !mSessionRefreshCall && ( (error.getCode() == 1108 || error.getCode() == 1101) ) ) {
+					mSessionRefreshCall = true;
 					mEta.getSession().subscribe(new SessionListener() {
 						
 						public void onUpdate() {
@@ -119,16 +126,67 @@ public class Api implements Serializable {
 						}
 					}).update();
 				} else {
-					mListenerUser.onComplete(statusCode, object);
+					mListener.onComplete(statusCode, null, error);
 				}
-			
-			// Random
-			} else {
-				mListenerUser.onComplete(statusCode, object);
-			}
+				
+			} 
 		}
+
 	};
 
+	private void convertCacheReturn(int statusCode, String data) {
+		
+		if (mListener instanceof Api.CallbackCatalogList) {
+			ArrayList<Catalog> cs = Catalog.fromJSONArray(data);
+			((CallbackCatalogList)mListener).onComplete(statusCode, cs, null);
+			return;
+			
+		} else if  (mListener instanceof Api.CallbackOfferList) {
+			ArrayList<Offer> os = Offer.fromJSONArray(data);
+			((CallbackOfferList)mListener).onComplete(statusCode, os, null);
+			return;
+			
+		} else if  (mListener instanceof Api.CallbackOffer) {
+			Offer o = Offer.fromJSON(data);
+			mEta.getCache().put(o.getErn(), o, statusCode);
+			((CallbackOffer)mListener).onComplete(statusCode, o, null);
+			return;
+			
+		} else if  (mListener instanceof Api.CallbackCatalog) {
+			Catalog c = Catalog.fromJSON(data.toString());
+			mEta.getCache().put(c.getErn(), c, statusCode);
+			((CallbackCatalog)mListener).onComplete(statusCode, c, null);
+			return;
+			
+		} else if  (mListener instanceof Api.CallbackDealerList) {
+			ArrayList<Dealer> ds = Dealer.fromJSONArray(data);
+			((CallbackDealerList)mListener).onComplete(statusCode, ds, null);
+			return;
+			
+		} else if  (mListener instanceof Api.CallbackStoreList) {
+			ArrayList<Store> ss = Store.fromJSONArray(data);
+			((CallbackStoreList)mListener).onComplete(statusCode, ss, null);
+			return;
+
+		} else if  (mListener instanceof Api.CallbackDealer) {
+			Dealer d = Dealer.fromJSON(data);
+			mEta.getCache().put(d.getErn(), d, statusCode);
+			((CallbackDealer)mListener).onComplete(statusCode, d, null);
+			return;
+			
+		} else if  (mListener instanceof Api.CallbackStore) {
+			Store s = Store.fromJSON(data);
+			mEta.getCache().put(s.getErn(), s, statusCode);
+			((CallbackStore)mListener).onComplete(statusCode, s, null);
+			return;
+			
+		} else if (mListener instanceof Api.CallbackString) {
+			((CallbackString)mListener).onComplete(statusCode, data, null);		
+			return;	
+		}
+		
+	}
+	
 	/**
 	 * TODO: Write proper JavaDoc<br>
 	 * <code>new String[] {Api.SORT_DISTANCE, Api.SORT_PUBLISHED}</code>
@@ -321,12 +379,12 @@ public class Api implements Serializable {
 		return this;
 	}
 
-	public RequestListener getListener() {
-		return mListenerUser;
+	public Callback<?> getListener() {
+		return mListener;
 	}
 
-	public Api setListener(RequestListener listener) {
-		mListenerUser = listener;
+	public Api setListener(CallbackString listener) {
+		mListener = listener;
 		return this;
 	}
 	
@@ -350,7 +408,7 @@ public class Api implements Serializable {
 	public HashMap<String, String> getHeaders() {
 		return mHeaders;
 	}
-	
+
 	public Api setUseCache(boolean useCache) {
 		mUseCache = useCache;
 		return this;
@@ -358,6 +416,20 @@ public class Api implements Serializable {
 	
 	public boolean useCache() {
 		return mUseCache;
+	}
+	
+	/**
+	 * 
+	 * @param multipleCallbacks
+	 * @return
+	 */
+	public Api setMultipleCallbacks(boolean multipleCallbacks) {
+		mMultipleCallbacks = multipleCallbacks;
+		return this;
+	}
+	
+	public boolean useMultipleCallbacks() {
+		return mMultipleCallbacks = false;
 	}
 
 	/**
@@ -385,13 +457,13 @@ public class Api implements Serializable {
 	 * @param useDebug
 	 * @return this object
 	 */
-	public Api useDebug(boolean useDebug) {
+	public Api setDebug(boolean useDebug) {
 		this.mUseDebug = useDebug;
 		return this;
 	}
 
 	/**
-	 * TODO: DOC
+	 * Tells whether the current {@link com.etilbudsavis.etasdk.API Api()} is printing debug information
 	 */
 	public boolean useDebug() {
 		return mUseDebug;
@@ -405,7 +477,7 @@ public class Api implements Serializable {
 		mEta = eta;
 	}
 
-	public Api search(String url, RequestListener listener, String query) {
+	public Api search(String url, Callback<?> listener, String query) {
 		if (!url.matches(Endpoint.SEARCH))
 			Utilities.logd(TAG, "url does not match a search endpoint, don't expect anything good...");
 		
@@ -414,46 +486,44 @@ public class Api implements Serializable {
 		return request(url, listener, apiParams, RequestType.GET, ContentType.URLENCODED, null);
 	}
 
-	public Api get(String url, RequestListener listener) {
+	public Api get(String url, Callback<?> listener) {
 		return request(url, listener, null, RequestType.GET, ContentType.URLENCODED, null);
 	}
 
-	public Api get(String url, RequestListener listener, Bundle apiParams) {
+	public Api get(String url, Callback<?> listener, Bundle apiParams) {
 		return request(url, listener, apiParams, RequestType.GET, ContentType.URLENCODED, null);
 	}
 
-	public Api post(String url, RequestListener listener, Bundle apiParams) {
+	public Api post(String url, Callback<?> listener, Bundle apiParams) {
 		return request(url, listener, apiParams, RequestType.POST, ContentType.URLENCODED, null);
 	}
 
-	public Api delete(String url, RequestListener listener, Bundle apiParams) {
+	public Api delete(String url, Callback<?> listener, Bundle apiParams) {
 		return request(url, listener, apiParams, RequestType.DELETE, ContentType.URLENCODED, null);
 	}
 
-	public Api put(String url, RequestListener listener, Bundle apiParams) {
+	public Api put(String url, Callback<?> listener, Bundle apiParams) {
 		return request(url, listener, apiParams, RequestType.PUT, ContentType.URLENCODED, null);
 	}
 	
-	public Api request(String url, RequestListener listener, Bundle apiParams, RequestType requestType, ContentType contentType, HashMap<String, String> headers) {
-		if (url == null || listener == null || requestType == null || contentType == null) {
-			Utilities.logd(TAG, "Api parameters error: url, requestListener, requestType and contentType cannot be null");
+	public Api request(String url, Callback<?> listener, Bundle apiParams, RequestType requestType, ContentType contentType, HashMap<String, String> headers) {
+		if (url == null || listener == null || requestType == null ) {
+			Utilities.logd(TAG, "Api parameters error: url, callback interface and requestType must not be null");
 			return null;
 		}
 		
-		// TODO: Check if RequestListener matches the URL (return values are parsed according to RequestListener)
-		
 		mUrl = url;
-		mListenerUser = listener;
+		mListener = listener;
 		mApiParams = apiParams == null ? new Bundle() : apiParams;
 		mRequestType = requestType;
-		mContentType = contentType;
+		mContentType = contentType == null ? ContentType.URLENCODED : contentType;
 		mHeaders = headers == null ? new HashMap<String, String>(3) : headers;
 		return this;
 	}
 
 	/**
 	 * This will start executing the request.
-	 * Note that if the {@link #request(String, RequestListener, Bundle, RequestType, Bundle) request()}'s 
+	 * Note that if the {@link #request(String, CallbackString, Bundle, RequestType, Bundle) request()}'s 
 	 * optionalKeys bundle contains options that have also been set by
 	 * any of the Api-setters, then the setters will be used.
 	 * @return HttpHelper, so execution of background task can be cancelled. <br>
@@ -463,14 +533,13 @@ public class Api implements Serializable {
 	public HttpHelper execute() {
 
 		// Check if all variables needed are okay
-		if (mUrl == null || mListenerUser == null || mApiParams == null || mRequestType == null || mHeaders == null) {
+		if (mUrl == null || mListener == null || mApiParams == null || mRequestType == null || mHeaders == null) {
 			Utilities.logd(TAG, "A request() must be made before execute()");
 			return null;
 		}
 
 		if (mId != null) {
-			if (mUrl.matches(Endpoint.CATALOG_ID) || mUrl.matches(Endpoint.OFFER_ID) ||
-					mUrl.matches(Endpoint.DEALER_ID) || mUrl.matches(Endpoint.STORE_ID)) {
+			if (Endpoint.isItemEndpoint(mUrl)) {
 				mUrl = mUrl + mId;
 			} else {
 				Utilities.logd(TAG, "Id does not match a single id endpoint, continuing without id");
@@ -478,12 +547,12 @@ public class Api implements Serializable {
 		}
 		
 		// Is Session okay? If not, check if it's a session call? If not try to make a session before continuing
-		if (mEta.getSession().getToken() == null || mEta.getSession().getExpire() < System.currentTimeMillis()) {
+		if (mEta.getSession().getToken() == null || mEta.getSession().isExpired()) {
 			if (!mUrl.matches(Endpoint.SESSION)) {
 				mEta.getSession().subscribe(new SessionListener() {
 					
 					public void onUpdate() {
-						if (mEta.getSession().isReady()) {
+						if (mEta.getSession().isExpired()) {
 							mEta.getSession().unSubscribe(this);
 							completeExecute();
 						} else {
@@ -504,10 +573,6 @@ public class Api implements Serializable {
 	
 	private void completeExecute() {
 
-		// Prefix URL?
-		if (!mUrl.matches("^http.*"))
-			mUrl = Endpoint.API + mUrl;
-		
 		// Prepare data.
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 
@@ -562,140 +627,73 @@ public class Api implements Serializable {
 		}
 		
 		// TODO: Check cache before executing the httpHepler
-		if (mUseCache) {
+		if (mUseCache && mRequestType == RequestType.GET && mId != null) {
+			String prefix = mUrl.contains(Endpoint.CATALOG_ID) ? "ern:catalog:" :
+				mUrl.contains(Endpoint.DEALER_ID) ? "ern:dealer:" :
+					mUrl.contains(Endpoint.STORE_ID) ? "ern:store:" : 
+						mUrl.contains(Endpoint.OFFER_ID) ? "ern:offer:" : "";
 			
-		} else {
-
+			CacheItem c = mEta.getCache().get(prefix + mId);
+			if (c != null) {
+				mCacheHit = true;
+				mListener.onComplete(c.statuscode, c.item, null);
+			}
+			
 		}
 		
 		// Create a new HttpHelper and run it
-		httpHelper = new HttpHelper(mEta, mUrl, headers, params, mRequestType, mListenerApi);
+		httpHelper = new HttpHelper(mEta, mUrl, headers, params, mRequestType, mHttpListener);
 		httpHelper.debug(mUseDebug).execute();
 		
 	}
 
-	private void doCallback(int statusCode, Object object) {
-		try {
-			if (mListenerUser instanceof Api.CatalogListListener) {
-				ArrayList<Catalog> c = new ArrayList<Catalog>();
-				JSONArray jArray = new JSONArray(object.toString());
-				for (int i = 0 ; i < jArray.length() ; i++ ) {
-					c.add(new Catalog((JSONObject)jArray.get(i)));
-				}
-				object = c;
-				
-			} else if  (mListenerUser instanceof Api.OfferListListener) {
-				ArrayList<Offer> o = new ArrayList<Offer>();
-				JSONArray jArray = new JSONArray(object.toString());
-				for (int i = 0 ; i < jArray.length() ; i++ ) {
-					o.add(new Offer((JSONObject)jArray.get(i)));
-				}
-				object = o;
-				
-			} else if  (mListenerUser instanceof Api.OfferListener) {
-				object =  new Offer(new JSONObject(object.toString()));
-				
-			} else if  (mListenerUser instanceof Api.CatalogListener) {
-				object = new Catalog(new JSONObject(object.toString()));
-				
-			} else if  (mListenerUser instanceof Api.DealerListListener) {
-				ArrayList<Dealer> d = new ArrayList<Dealer>();
-				JSONArray jArray = new JSONArray(object.toString());
-				for (int i = 0 ; i < jArray.length() ; i++ ) {
-					d.add(new Dealer((JSONObject)jArray.get(i)));
-				}
-				object = d;
-				
-			} else if  (mListenerUser instanceof Api.StoreListListener) {
-				ArrayList<Store> s = new ArrayList<Store>();
-				JSONArray jArray = new JSONArray(object.toString());
-				for (int i = 0 ; i < jArray.length() ; i++ ) {
-					s.add(new Store((JSONObject)jArray.get(i)));
-				}
-				object = s;
-
-			} else if  (mListenerUser instanceof Api.DealerListener) {
-				object =  new Dealer(new JSONObject(object.toString()));
-				
-			} else if  (mListenerUser instanceof Api.StoreListener) {
-				object =  new Store(new JSONObject(object.toString()));
-				
-			} 
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		mListenerUser.onComplete(statusCode, object);
+	public static interface Callback<T> {
+		public void onComplete(int statusCode, T data, EtaError error);
 	}
 	
     /** Standard callback interface for API requests */
-    public static interface RequestListener {
-    	/**
-    	 * Method called on completion of a request.<br><br>
-    	 * 
-    	 * Instantiate the JSON object as follows:<br>
-    	 * <code>JSONObject jObject = new JSONObject(object.toString());</code>
-    	 * 
-    	 * @param statusCode is a standard HTTP status code
-    	 * @param object is a JSON object represented as a string
-    	 */
-        public void onComplete(int statusCode, Object object);
+    public static interface CallbackString extends Callback<String>{
+		public void onComplete(int statusCode, String data, EtaError error);
     }
 
     /** Callback interface for a list of catalogs*/
-    public static interface CatalogListListener extends RequestListener {
-    	/**
-    	 * Method called on completion of a request to any Catalog endpoint that returns a <i>list</i> of catalogs.<br><br>
-    	 * The object returned can be one of 3 types dependent on the which range the <i>statusCode</i> is in and the <i>object</i> must be cast accordingly. <br><br>
-    	 * <table border=1><thead>
-    	 * <th>statusCode</th>					<th>object type</th></thead>
-    	 * <tr><td>200-299 (success)</td>		<td><code>ArrayList&lt;Catalog&gt;</code></td></tr>
-    	 * <tr><td>400-499 (client error)</td>	<td><code>EtaError</code></td></tr>
-    	 * <tr><td>All others</td>				<td><code>String</code></td></tr>
-    	 * </table><br><br>
-    	 * So if you make a call to {@link com.eTilbudsavis.etasdk.Eta #getCatalogList(CatalogListListener, int) Eta.getCatalogs()} 
-    	 * and the callback has statusCode == 200,<br>
-    	 * you want to cast your callback object like this:<br>
-    	 * <code>ArrayList&lt;Catalog&gt; c = (ArrayList&lt;Catalog&gt;)object;</code>
-    	 * <br><br>
-    	 * @param statusCode is a standard HTTP status code
-    	 * @param object of any type above
-    	 */
-    	public void onComplete(int statusCode, Object object);
+    public static interface CallbackCatalogList extends Callback<ArrayList<Catalog>> {
+    	public void onComplete(int statusCode, ArrayList<Catalog> catalogs, EtaError error);
     }
 
     /** Callback interface for a list of offers */
-    public static interface OfferListListener extends RequestListener {
-        public void onComplete(int statusCode, Object object);
+    public static interface CallbackOfferList extends Callback<ArrayList<Offer>> {
+        public void onComplete(int statusCode, ArrayList<Offer> offers, EtaError error);
     }
 
     /** Callback interface for a list of dealers */
-    public static interface DealerListListener extends RequestListener {
-        public void onComplete(int statusCode, Object object);
+    public static interface CallbackDealerList extends Callback<ArrayList<Dealer>> {
+        public void onComplete(int statusCode, ArrayList<Dealer> dealers, EtaError error);
     }
 
     /** Callback interface for a list of stores */
-    public static interface StoreListListener extends RequestListener {
-        public void onComplete(int statusCode, Object object);
+    public static interface CallbackStoreList extends Callback<ArrayList<Store>> {
+        public void onComplete(int statusCode, ArrayList<Store> stores, EtaError error);
     }
 
     /** Callback interface for a single catalog */
-    public static interface CatalogListener extends RequestListener {
-        public void onComplete(int statusCode, Object object);
+    public static interface CallbackCatalog extends Callback<Catalog> {
+        public void onComplete(int statusCode, Catalog catalog, EtaError error);
     }
 
     /** Callback interface for a single offer */
-    public static interface OfferListener extends RequestListener {
-        public void onComplete(int statusCode, Object object);
+    public static interface CallbackOffer extends Callback<Offer> {
+        public void onComplete(int statusCode, Offer offer, EtaError error);
     }
 
     /** Callback interface for a single dealer */
-    public static interface DealerListener extends RequestListener {
-        public void onComplete(int statusCode, Object object);
+    public static interface CallbackDealer extends Callback<Dealer> {
+        public void onComplete(int statusCode, Dealer dealer, EtaError error);
     }
 
     /** Callback interface for a single store */
-    public static interface StoreListener extends RequestListener {
-        public void onComplete(int statusCode, Object object);
+    public static interface CallbackStore extends Callback<Store> {
+        public void onComplete(int statusCode, Store store, EtaError error);
     }
     
 }

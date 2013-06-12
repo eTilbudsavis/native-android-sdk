@@ -119,7 +119,7 @@ public final class Pageflip extends WebView implements Closeable {
 		});
 
 		// Check if it's necessary to update the HTML (it's time consuming to download HTML).
-		if (mETA.getCache().getHtmlCached().length() == 0 || (Utilities.getTime() - mETA.getCache().getHtmlAcquired()) >= mETA.getCache().getHtmlExpire()) {
+		if (mETA.getCache().getHtmlCache() == null ) {
 //			mETA.api.request(mETA.getProviderUrl(), new RequestListener() {
 //				public void onSuccess(Integer response, Object object) {
 //					mETA.setHtmlCached(object.toString());

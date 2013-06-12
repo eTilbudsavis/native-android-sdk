@@ -11,16 +11,28 @@
  */
 package com.eTilbudsavis.etasdk;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import Utils.Endpoint;
 import Utils.Params;
 import Utils.Sort;
+import Utils.Utilities;
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
@@ -186,184 +198,203 @@ public class Eta implements Serializable {
 	}
 
 	
-	// ######################## CATALOGS ########################
+// ######################## CATALOGS ########################
 	
-	public Api getCatalogList(Api.CatalogListListener listener) {
+	public Api getCatalogList(Api.CallbackCatalogList listener) {
 		return getCatalogList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
 	}
 	
-	public Api getCatalogList(Api.CatalogListListener listener, int offset) {
+	public Api getCatalogList(Api.CallbackCatalogList listener, int offset) {
 		return getCatalogList(listener, offset, Api.DEFAULT_LIMIT, null);
 	}
 
-	public Api getCatalogList(Api.CatalogListListener listener, int offset, int limit) {
+	public Api getCatalogList(Api.CallbackCatalogList listener, int offset, int limit) {
 		return getCatalogList(listener, offset, limit, null);
 	}
 	
-	public Api getCatalogList(Api.CatalogListListener listener, int offset, String[] orderBy) {
+	public Api getCatalogList(Api.CallbackCatalogList listener, int offset, String[] orderBy) {
 		return getCatalogList(listener, offset, Api.DEFAULT_LIMIT, orderBy);
 	}
 	
-	public Api getCatalogList(Api.CatalogListListener listener, int offset, int limit, String[] orderBy) {
+	public Api getCatalogList(Api.CallbackCatalogList listener, int offset, int limit, String[] orderBy) {
 		return api().get(Catalog.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
 	}
-	
-	public Api getCatalogId(Api.CatalogListener listener, String id) {
+
+	public Api getCatalogId(Api.CallbackCatalog listener, String id) {
 		return api().get(Catalog.ENDPOINT_ID, listener, new Bundle()).setId(id);
 	}
-	
-	public Api getCatalogIds(Api.CatalogListListener listener, String[] ids) {
+
+	public Api getCatalogId(Api.CallbackCatalog listener, Catalog c) {
+		if (c != null) {
+			return api().get(Catalog.ENDPOINT_ID, listener, new Bundle()).setId(c.getId());			
+		} else {
+			return null;
+		}
+	}
+
+	public Api getCatalogIds(Api.CallbackCatalogList listener, String[] ids) {
 		return api().get(Catalog.ENDPOINT_LIST, listener, new Bundle()).setCatalogIds(ids);
 	}
 
-	// ######################## OFFERS ########################
+	public Api getCatalogIds(Api.CallbackCatalogList listener, List<Catalog> catalogs) {
+		if (catalogs != null) {
+			String[] ids = new String[catalogs.size()];
+			for (int i = 0; i < catalogs.size(); i++) {
+				ids[i] = catalogs.get(i).getId();
+			}
+			return api().get(Catalog.ENDPOINT_LIST, listener, new Bundle()).setCatalogIds(ids);
+		} else {
+			return null;
+		}
+	}
+
+// ######################## OFFERS ########################
 	
-	public Api getOfferList(Api.OfferListListener listener) {
+	public Api getOfferList(Api.CallbackOfferList listener) {
 		return getOfferList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
 	}
 	
-	public Api getOfferList(Api.OfferListListener listener, int offset) {
+	public Api getOfferList(Api.CallbackOfferList listener, int offset) {
 		return getOfferList(listener, offset, Api.DEFAULT_LIMIT, null);
 	}
 
-	public Api getOfferList(Api.OfferListListener listener, int offset, int limit) {
+	public Api getOfferList(Api.CallbackOfferList listener, int offset, int limit) {
 		return getOfferList(listener, offset, limit, null);
 	}
 
-	public Api getOfferList(Api.OfferListListener listener, int offset, String[] orderBy) {
+	public Api getOfferList(Api.CallbackOfferList listener, int offset, String[] orderBy) {
 		return getOfferList(listener, offset, Api.DEFAULT_LIMIT, orderBy);
 	}
 
-	public Api getOfferList(Api.OfferListListener listener, int offset, int limit, String[] orderBy) {
+	public Api getOfferList(Api.CallbackOfferList listener, int offset, int limit, String[] orderBy) {
 		return api().get(Offer.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
 	}
 	
-	public Api getOfferId(Api.OfferListener listener, String id) {
+	public Api getOfferId(Api.CallbackOffer listener, String id) {
 		return api().get(Offer.ENDPOINT_ID, listener, new Bundle()).setId(id);
 	}
 	
-	public Api getOfferIds(Api.OfferListListener listener, String[] ids) {
+	public Api getOfferIds(Api.CallbackOfferList listener, String[] ids) {
 		return api().get(Offer.ENDPOINT_LIST, listener, new Bundle()).setOfferIds(ids);
 	}
 	
-	public Api getOfferSearch(Api.OfferListListener listener, String query) {
+	public Api getOfferSearch(Api.CallbackOfferList listener, String query) {
 		return getOfferSearch(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
 	}
 
-	public Api getOfferSearch(Api.OfferListListener listener, String query, int offset) {
+	public Api getOfferSearch(Api.CallbackOfferList listener, String query, int offset) {
 		return getOfferSearch(listener, query, offset, Api.DEFAULT_LIMIT, null);
 	}
 
-	public Api getOfferSearch(Api.OfferListListener listener, String query, String[] orderBy) {
+	public Api getOfferSearch(Api.CallbackOfferList listener, String query, String[] orderBy) {
 		return getOfferSearch(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, orderBy);
 	}
 
-	public Api getOfferSearch(Api.OfferListListener listener, String query, int offset, int limit) {
+	public Api getOfferSearch(Api.CallbackOfferList listener, String query, int offset, int limit) {
 		return getOfferSearch(listener, query, offset, limit, null);
 	}
 
-	public Api getOfferSearch(Api.OfferListListener listener, String query, int offset, int limit, String[] orderBy) {
+	public Api getOfferSearch(Api.CallbackOfferList listener, String query, int offset, int limit, String[] orderBy) {
 		return api().get(Offer.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
 	}
 	
-	// ######################## DEALERS ########################
+// ######################## DEALERS ########################
 
-	public Api getDealerList(Api.DealerListListener listener) {
+	public Api getDealerList(Api.CallbackDealerList listener) {
 		return getDealerList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
 	}
 	
-	public Api getDealerList(Api.DealerListListener listener, int offset) {
+	public Api getDealerList(Api.CallbackDealerList listener, int offset) {
 		return getDealerList(listener, offset, Api.DEFAULT_LIMIT, null);
 	}
 
-	public Api getDealerList(Api.DealerListListener listener, int offset, int limit) {
+	public Api getDealerList(Api.CallbackDealerList listener, int offset, int limit) {
 		return getDealerList(listener, offset, limit, null);
 	}
 	
-	public Api getDealerList(Api.DealerListListener listener, int offset, String[] orderBy) {
+	public Api getDealerList(Api.CallbackDealerList listener, int offset, String[] orderBy) {
 		return getDealerList(listener, offset, Api.DEFAULT_LIMIT, orderBy);
 	}
 	
-	public Api getDealerList(Api.DealerListListener listener, int offset, int limit, String[] orderBy) {
+	public Api getDealerList(Api.CallbackDealerList listener, int offset, int limit, String[] orderBy) {
 		return api().get(Dealer.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
 	}
 	
-	public Api getDealerId(Api.DealerListener listener, String id) {
+	public Api getDealerId(Api.CallbackDealer listener, String id) {
 		return api().get(Dealer.ENDPOINT_ID, listener, new Bundle()).setId(id);
 	}
 	
-	public Api getDealerIds(Api.DealerListListener listener, String[] ids) {
+	public Api getDealerIds(Api.CallbackDealerList listener, String[] ids) {
 		return api().get(Dealer.ENDPOINT_LIST, listener, new Bundle()).setDealerIds(ids);
 	}
 
-	public Api getDealerSearch(Api.DealerListListener listener, String query) {
+	public Api getDealerSearch(Api.CallbackDealerList listener, String query) {
 		return getDealerSearch(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
 	}
 
-	public Api getDealerSearch(Api.DealerListListener listener, String query, int offset) {
+	public Api getDealerSearch(Api.CallbackDealerList listener, String query, int offset) {
 		return getDealerSearch(listener, query, offset, Api.DEFAULT_LIMIT, null);
 	}
 
-	public Api getDealerSearch(Api.DealerListListener listener, String query, int offset, int limit) {
+	public Api getDealerSearch(Api.CallbackDealerList listener, String query, int offset, int limit) {
 		return getDealerSearch(listener, query, offset, limit, null);
 	}
 
-	public Api getDealerSearch(Api.DealerListListener listener, String query, int offset, String[] orderBy) {
+	public Api getDealerSearch(Api.CallbackDealerList listener, String query, int offset, String[] orderBy) {
 		return getDealerSearch(listener, query, offset, Api.DEFAULT_LIMIT, orderBy);
 	}
 
-	public Api getDealerSearch(Api.DealerListListener listener, String query, int offset, int limit, String[] orderBy) {
+	public Api getDealerSearch(Api.CallbackDealerList listener, String query, int offset, int limit, String[] orderBy) {
 		return api().get(Dealer.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
 	}
 
+// ######################## STORES ########################
 
-	// ######################## STORES ########################
-
-	public Api getStoreList(Api.StoreListListener listener) {
+	public Api getStoreList(Api.CallbackStoreList listener) {
 		return getStoreList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
 	}
 	
-	public Api getStoreList(Api.StoreListListener listener, int offset) {
+	public Api getStoreList(Api.CallbackStoreList listener, int offset) {
 		return getStoreList(listener, offset, Api.DEFAULT_LIMIT, null);
 	}
 
-	public Api getStoreList(Api.StoreListListener listener, int offset, int limit) {
+	public Api getStoreList(Api.CallbackStoreList listener, int offset, int limit) {
 		return getStoreList(listener, offset, limit, null);
 	}
 	
-	public Api getStoreList(Api.StoreListListener listener, int offset, String[] orderBy) {
+	public Api getStoreList(Api.CallbackStoreList listener, int offset, String[] orderBy) {
 		return getStoreList(listener, offset, Api.DEFAULT_LIMIT, orderBy);
 	}
 	
-	public Api getStoreList(Api.StoreListListener listener, int offset, int limit, String[] orderBy) {
+	public Api getStoreList(Api.CallbackStoreList listener, int offset, int limit, String[] orderBy) {
 		return api().get(Store.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
 	}
 	
-	public Api getStoreId(Api.StoreListener listener, String id) {
+	public Api getStoreId(Api.CallbackStore listener, String id) {
 		return api().get(Store.ENDPOINT_ID, listener, new Bundle()).setId(id);
 	}
 	
-	public Api getStoreIds(Api.StoreListListener listener, String[] ids) {
+	public Api getStoreIds(Api.CallbackStoreList listener, String[] ids) {
 		return api().get(Store.ENDPOINT_LIST, listener, new Bundle()).setStoreIds(ids);
 	}
 
-	public Api getStoreSearch(Api.StoreListListener listener, String query) {
+	public Api getStoreSearch(Api.CallbackStoreList listener, String query) {
 		return getStoreSearch(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
 	}
 
-	public Api getStoreSearch(Api.StoreListListener listener, String query, int offset) {
+	public Api getStoreSearch(Api.CallbackStoreList listener, String query, int offset) {
 		return getStoreSearch(listener, query, offset, Api.DEFAULT_LIMIT, null);
 	}
 
-	public Api getStoreSearch(Api.StoreListListener listener, String query, int offset, int limit) {
+	public Api getStoreSearch(Api.CallbackStoreList listener, String query, int offset, int limit) {
 		return getStoreSearch(listener, query, offset, limit, null);
 	}
 
-	public Api getStoreSearch(Api.StoreListListener listener, String query, int offset, String[] orderBy) {
+	public Api getStoreSearch(Api.CallbackStoreList listener, String query, int offset, String[] orderBy) {
 		return getStoreSearch(listener, query, offset, Api.DEFAULT_LIMIT, orderBy);
 	}
 
-	public Api getStoreSearch(Api.StoreListListener listener, String query, int offset, int limit, String[] orderBy) {
+	public Api getStoreSearch(Api.CallbackStoreList listener, String query, int offset, int limit, String[] orderBy) {
 		return api().get(Store.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
 	}
 

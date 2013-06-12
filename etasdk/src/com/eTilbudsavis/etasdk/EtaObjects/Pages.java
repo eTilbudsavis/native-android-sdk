@@ -12,30 +12,82 @@ public class Pages implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Pages";
+
+	public static final String S_THUMB = "thumb";
+	public static final String S_VIEW = "view";
+	public static final String S_ZOOM = "zoom";
 	
 	private ArrayList<String> mThumb = new ArrayList<String>();
 	private ArrayList<String> mView = new ArrayList<String>();
 	private ArrayList<String> mZoom = new ArrayList<String>();
 	
-	public Pages(JSONObject pages) {
+	public Pages() {
+	}
+	
+	public static Pages fromJSON(String pages) {
+		try {
+			return fromJSON(new Pages(), new JSONObject(pages));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static Pages fromJSON(JSONObject pages) {
+		return fromJSON(new Pages(), pages);
+	}
+	
+	public static Pages fromJSON(Pages p, JSONObject pages) {
+		if (p == null) p = new Pages();
+		if (pages == null) return p;
 		
 		try {
-			JSONArray jArray = pages.getJSONArray("thumb");
+			JSONArray jArray = pages.getJSONArray(S_THUMB);
 			int i;
 			for (i = 0 ; i < jArray.length() ; i++ ) {
-				mThumb.add(jArray.getString(i));
+				p.getThumb().add(jArray.getString(i));
 			}
-			jArray = pages.getJSONArray("view");
+			jArray = pages.getJSONArray(S_VIEW);
 			for (i = 0 ; i < jArray.length() ; i++ ) {
-				mView.add(jArray.getString(i));
+				p.getView().add(jArray.getString(i));
 			}
-			jArray = pages.getJSONArray("zoom");
+			jArray = pages.getJSONArray(S_ZOOM);
 			for (i = 0 ; i < jArray.length() ; i++ ) {
-				mZoom.add(jArray.getString(i));
+				p.getZoom().add(jArray.getString(i));
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		return p;
+	}
+	
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Pages p) {
+		JSONObject o = new JSONObject();
+		try {
+			JSONArray aThumb = new JSONArray();
+			JSONArray aView = new JSONArray();
+			JSONArray aZoom = new JSONArray();
+			for (String s : p.getThumb())
+				aThumb.put(s);
+			
+			for (String s : p.getView())
+				aView.put(s);
+			
+			for (String s : p.getZoom())
+				aZoom.put(s);
+
+			o.put(S_THUMB, aThumb);
+			o.put(S_VIEW, aView);
+			o.put(S_ZOOM, aZoom);
+		} catch (JSONException e) {
+			o = null;
+			e.printStackTrace();
+		}
+		return o;
 	}
 	
 	public ArrayList<String> getThumb() {

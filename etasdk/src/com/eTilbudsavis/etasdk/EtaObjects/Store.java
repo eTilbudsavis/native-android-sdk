@@ -1,7 +1,9 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,14 +44,27 @@ public class Store implements Serializable {
 	/** Endpoint for fast searching stores */
 	public static final String ENDPOINT_QUICK_SEARCH = Endpoint.STORE_QUICK_SEARCH;
 
+	private static final String S_ID = "id";
+	private static final String S_ERN = "ern";
+	private static final String S_STREET = "street";
+	private static final String S_CITY = "city";
+	private static final String S_ZIP_CODE = "zip_code";
+	private static final String S_COUNTRY = "country";
+	private static final String S_LATITUDE = "latitude";
+	private static final String S_LONGITUDE = "longitude";
+	private static final String S_DEALER_URL = "dealer_url";
+	private static final String S_DEALER_ID = "dealer_id";
+	private static final String S_BRANDING = "branding";
+	private static final String S_CONTACT = "contact";
+	
 	private String mId;
 	private String mErn;
 	private String mStreet;
 	private String mCity;
 	private String mZipcode;
 	private Country mCountry;
-	private double mLatitude;
-	private double mLongitude;
+	private double mLatitude = 0.0;
+	private double mLongitude = 0.0;
 	private String mDealerUrl;
 	private String mDealerId;
 	private Branding mBranding;
@@ -57,28 +72,65 @@ public class Store implements Serializable {
 	
 	private Dealer mDealer;
 
-	public Store(JSONObject store) {
-		update(store);
+	public Store() {
 	}
 
-	public void update(JSONObject store) {
-
+	public static ArrayList<Store> fromJSONArray(String stores) {
 		try {
-			mId = store.getString("id");
-			mErn = store.getString("ern");
-			mStreet = store.getString("street");
-			mCity = store.getString("city");
-			mZipcode = store.getString("zip_code");
-			mCountry = new Country(store.getJSONObject("country"));
-			mLatitude = store.getDouble("latitude");
-			mLongitude = store.getDouble("longitude");
-			mDealerUrl = store.getString("dealer_url");
-			mDealerId = store.getString("dealer_id");
-			mBranding = new Branding(store.getJSONObject("branding"));
-			mContact = store.getString("contact");
+			return fromJSONArray(new JSONArray(stores));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		return null;
+	}
+	
+	public static ArrayList<Store> fromJSONArray(JSONArray stores) {
+		ArrayList<Store> list = new ArrayList<Store>();
+		try {
+			for (int i = 0 ; i < stores.length() ; i++ )
+				list.add(Store.fromJSON((JSONObject)stores.get(i)));
+			
+		} catch (JSONException e) {
+			list = null;
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	public static Store fromJSON(String store) {
+		try {
+			return fromJSON(new Store(), new JSONObject(store));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static Store fromJSON(JSONObject store) {
+		return fromJSON(new Store(), store);
+	}
+	
+	public static Store fromJSON(Store s, JSONObject store) {
+		if (s == null) s = new Store();
+		if (store == null) return s;
+		
+		try {
+			s.setId(store.getString(S_ID));
+			s.setErn(store.getString(S_ERN));
+			s.setStreet(store.getString(S_STREET));
+			s.setCity(store.getString(S_CITY));
+			s.setZipcode(store.getString(S_ZIP_CODE));
+			s.setCountry(Country.fromJSON(store.getJSONObject(S_COUNTRY)));
+			s.setLatitude(store.getDouble(S_LATITUDE));
+			s.setLongitude(store.getDouble(S_LONGITUDE));
+			s.setDealerUrl(store.getString(S_DEALER_URL));
+			s.setDealerId(store.getString(S_DEALER_ID));
+			s.setBranding(Branding.fromJSON(store.getJSONObject(S_BRANDING)));
+			s.setContact(store.getString(S_CONTACT));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return s;
 	}
 
 	public Store setId(String id) {

@@ -14,12 +14,18 @@ import Utils.Utilities;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 
-import com.eTilbudsavis.etasdk.Api.RequestListener;
+import com.eTilbudsavis.etasdk.Api.CallbackString;
 import com.eTilbudsavis.etasdk.Eta;
 
 public class Session implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final String S_TOKEN = "token";
+	private static final String S_EXPIRES = "expires";
+	private static final String S_USER = "user";
+	private static final String S_PERMISSIONS = "permissions";
+	private static final String S_PROVIDER = "provider";
 	
 	public static final String TAG = "Session";
 
@@ -48,53 +54,57 @@ public class Session implements Serializable {
 	private boolean mIsUpdatingSession = false;
 	private ArrayList<SessionListener> mSubscribers = new ArrayList<Session.SessionListener>();
 
-	RequestListener session = new RequestListener() {
+	CallbackString session = new CallbackString() {
 
-		public void onComplete(int statusCode, Object object) {
-			try {
-				if (200 <= statusCode || statusCode < 300 ) {
-					set(new JSONObject(object.toString()));
-				} else {
-					mEta.addError(new EtaError(new JSONObject(object.toString())));
-					Utilities.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + object.toString());
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
+		public void onComplete(int statusCode, String data, EtaError error) {
+			
+			if (200 <= statusCode || statusCode < 300 ) {
+				set(data);
+			} else {
+				mEta.addError(error);
+				Utilities.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
 			}
 			mIsUpdatingSession = false;
 			notifySubscribers();
 		}
+
 	};
 
-	RequestListener userCreate = new RequestListener() {
+	CallbackString userCreate = new CallbackString() {
 
-		public void onComplete(int statusCode, Object object) {
-			try {
-				if (200 <= statusCode || statusCode < 300 ) {
-					Utilities.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + object.toString());
-				} else {
-					mEta.addError(new EtaError(new JSONObject(object.toString())));
-					Utilities.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + object.toString());
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
+		public void onComplete(int statusCode, String data, EtaError error) {
+			
+			if (200 <= statusCode || statusCode < 300 ) {
+				Utilities.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + data);
+			} else {
+				mEta.addError(error);
+				Utilities.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error);
 			}
 			notifySubscribers();
 		}
+
 	};
 	
 	public Session(Eta eta) {
 		mEta = eta;
 	}
 	
+	public void set(String session) {
+		try {
+			set(new JSONObject(session));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void set(JSONObject session) {
 		mJson = session;
 		try {
-			mToken = session.getString("token");
-		    setExpires(session.getString("expires"));
-		    mUser = session.getString("user").equals("null") ? null : new User(session.getJSONObject("user"));
-		    mPermission = new Permission(session.getJSONObject("permissions"));
-		    mProvider = session.getString("provider");
+			mToken = session.getString(S_TOKEN);
+		    setExpires(session.getString(S_EXPIRES));
+		    mUser = session.getString(S_USER).equals("null") ? null : User.fromJSON(session.getJSONObject(S_USER));
+		    mPermission = Permission.fromJSON(session.getJSONObject(S_PERMISSIONS));
+		    mProvider = session.getString(S_PROVIDER);
 			saveJSON();
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -116,16 +126,14 @@ public class Session implements Serializable {
 		// If it doesn't exist or is invalid then update it.
 		String sessionJson = mEta.getPrefs().getString(PREFS_SESSION, null);
 		if (sessionJson != null) {
-			try {
-				set(new JSONObject(sessionJson));
-				if (isReady()) {
-					update();
-				} else {
-					notifySubscribers();
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
+			
+			set(sessionJson);
+			if (isExpired()) {
+				update();
+			} else {
+				notifySubscribers();
 			}
+
 		} else {
 			update();
 		}
@@ -148,7 +156,7 @@ public class Session implements Serializable {
 	
 	public void login(String user, String password) {
 		mEta.getPrefs().edit().putString(PREFS_SESSION_USER, user).putString(PREFS_SESSION_PASS, password).commit();
-		if (isReady()) {
+		if (isExpired()) {
 			Bundle b = new Bundle();
 			b.putString(Params.EMAIL, user);
 			b.putString(Params.PASSWORD, password);
@@ -189,7 +197,7 @@ public class Session implements Serializable {
 		return true;
 	}
 	
-	public boolean isReady() {
+	public boolean isExpired() {
 		return mExpires < (System.currentTimeMillis() + EXPIRE_MINUTE);
 	}
 	
@@ -198,29 +206,34 @@ public class Session implements Serializable {
 	 * @param expires
 	 * @return
 	 */
-	public boolean updateOnInvalidToken(String headerToken, String headerExpires) {
+	public synchronized void update(String headerToken, String headerExpires) {
 		if (mIsUpdatingSession)
-			return false;
-
+			return;
+		
+		if (mJson == null) {
+			update();
+			return;
+		}
+		
 		try {
+			
 			if (!mToken.equals(headerToken) ) {
-				mJson.put("token", headerToken);
-				mJson.put("expires", headerExpires);
+				mJson.put(S_TOKEN, headerToken);
+				mJson.put(S_EXPIRES, headerExpires);
 				set(mJson);
-				return true;
+				return;
 			}
 			long exp = 0L;
 			exp = sdf.parse(headerExpires).getTime();
 			if (exp < (System.currentTimeMillis()+EXPIRE_DAY)) {
 				update();
-				return true;
+				return;
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		return false;
 	}
 	
 	/**

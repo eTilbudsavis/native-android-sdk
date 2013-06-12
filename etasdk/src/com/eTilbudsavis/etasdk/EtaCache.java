@@ -1,6 +1,12 @@
 package com.eTilbudsavis.etasdk;
 
 import java.io.Serializable;
+import java.util.HashMap;
+
+import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
+import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
+import com.eTilbudsavis.etasdk.EtaObjects.Offer;
+import com.eTilbudsavis.etasdk.EtaObjects.Store;
 
 import Utils.Utilities;
 
@@ -8,10 +14,15 @@ public class EtaCache implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	// HTML at `PROVIDER_URL` endpoint.
+	public static final String TAG = "EtaCache";
+	
+	private static final long ITEM_CACHE_TIME = 5*60*1000;
+	private static final long HTML_CACHE_TIME = 15*60*1000;
+	
 	private String mHtmlCached = "";
-	private int mHtmlAcquired = 0;
-	private int mHtmlExpire = 15 * 60;
+	private long mHtmlTime = 0L;
+	
+	HashMap<String, CacheItem> items = new HashMap<String, EtaCache.CacheItem>();
 
 	public EtaCache() {
 		
@@ -26,42 +37,43 @@ public class EtaCache implements Serializable {
 		return mHtmlCached;
 	}
 
-	/**
-	 * Sets the cached HTML content.
-	 *
-	 * @param HTML
-	 */
-	public void setHtmlCached(String html) {
+	public void setHtmlCache(String html) {
 		// Validate input.
 		if (html.matches(".*\\<[^>]+>.*")) {
 			mHtmlCached = html;
-			mHtmlAcquired = Utilities.getTime();
+			mHtmlTime = System.currentTimeMillis();
 		}
 	}
 
-	/**
-	 * Returns the time at which the HTML was cached.
-	 * @return HTML caching timestamp
-	 */
-	public int getHtmlAcquired() {
-		return mHtmlAcquired;
+	public String getHtmlCache() {
+		return mHtmlTime < System.currentTimeMillis() - HTML_CACHE_TIME ? mHtmlCached : null ;
 	}
 
-	/**public static final int API_PAGE_LIMIT = 25;
-	 * Returns the TTL for the HTML cache.
-	 * @return TTL for the HTML cache
-	 */
-	public int getHtmlExpire() {
-		return mHtmlExpire;
+	public void put(String key, Object value, int statusCode) {
+		items.put(key, new CacheItem(value, statusCode));
 	}
-
-	/**
-	 * Sets the TTL for the HTML cache.
-	 * @param TTL in seconds
-	 */
-	public void setHtmlExpire(int seconds) {
-		mHtmlExpire = seconds;
+	
+	public CacheItem get(String key) {
+		CacheItem c = items.get(key);
+		if (c != null) {
+			c = (c.time + ITEM_CACHE_TIME) > System.currentTimeMillis() ? c : null;
+		} else {
+			c = null;
+		}
+		return c;
 	}
-
-
+	
+	public class CacheItem {
+		
+		public long time;
+		public int statuscode;
+		public Object item;
+		
+		public CacheItem(Object o, int statusCode) {
+			time = System.currentTimeMillis();
+			this.statuscode = statusCode;
+			item = o;
+		}
+	}
+	
 }

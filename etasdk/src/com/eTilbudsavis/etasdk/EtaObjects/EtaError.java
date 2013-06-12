@@ -20,24 +20,65 @@ public class EtaError implements Serializable {
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
 	
-	private String mId;
-	private int mCode;
-	private String mMessage;
-	private String mDetails;
-	private long mTime;
+	private String mId = new String();
+	private int mCode = 0;
+	private String mMessage = new String();
+	private String mDetails = new String();
+	private long mTime = 0L;
 	
-	public EtaError(JSONObject error) {
+	public EtaError() {
+		
+	}
+	
+	public static EtaError fromJSON(String error) {
 		try {
-			mId = error.getString("id");
-			mCode = error.getInt("code");
-			mMessage = error.getString("message");
-			mDetails = error.getString("details");
-			mTime = System.currentTimeMillis();
+			return fromJSON(new EtaError(), new JSONObject(error));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
 	
+	public static EtaError fromJSON(JSONObject error) {
+		return fromJSON(new EtaError(), error);
+	}
+	
+	private static EtaError fromJSON(EtaError er, JSONObject error) {
+		if (er == null) er = new EtaError();
+		if (error == null) return er;
+		
+		try {
+			er.setId(error.getString("id"));
+			er.setCode(error.getInt("code"));
+			er.setMessage(error.getString("message"));
+			er.setDetails(error.getString("details"));
+			er.setTime(System.currentTimeMillis());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return er;
+	}
+	
+	public void setId(String id) {
+		mId = id;
+	}
+
+	public void setCode(int code) {
+		mCode = code;
+	}
+
+	public void setMessage(String message) {
+		mMessage = message;
+	}
+
+	public void setDetails(String details) {
+		mDetails = details;
+	}
+
+	public void setTime(long time) {
+		mTime = time;
+	}
+
 	public String getId() {
 		return mId;
 	}

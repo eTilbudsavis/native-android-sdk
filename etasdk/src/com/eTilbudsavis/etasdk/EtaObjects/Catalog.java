@@ -3,8 +3,10 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,7 +18,7 @@ import Utils.Endpoint;
 import Utils.Params;
 import Utils.Sort;
 
-public class Catalog implements Serializable {
+public class Catalog  implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -90,17 +92,34 @@ public class Catalog implements Serializable {
 
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
+
+	private static final String S_ID = "id";
+	private static final String S_ERN = "ern";
+	private static final String S_LABEL = "label";
+	private static final String S_BACKGROUND = "background";
+	private static final String S_RUN_FROM = "run_from";
+	private static final String S_RUN_TILL = "run_till";
+	private static final String S_PAGE_COUNT = "page_count";
+	private static final String S_OFFER_COUNT = "offer_count";
+	private static final String S_BRANDING = "branding";
+	private static final String S_DEALER_ID = "dealer_id";
+	private static final String S_DEALER_URL = "dealer_url";
+	private static final String S_STORE_ID = "store_id";
+	private static final String S_STORE_URL = "store_url";
+	private static final String S_DIMENSIONS = "dimensions";
+	private static final String S_IMAGES = "images";
+	private static final String S_PAGES = "pages";
+	private static final String P_PAGE = "page";
 	
 	// From JSON blob
 	private String mId;
 	private String mErn;
 	private String mLabel;
 	private String mBackground;
-	private boolean mSelectStores;
-	private long mRunFrom;
-	private long mRunTill;
-	private int mPageCount;
-	private int mOfferCount;
+	private long mRunFrom = 0L;
+	private long mRunTill = 0L;
+	private int mPageCount = 0;
+	private int mOfferCount = 0;
 	private Branding mBranding;
 	private String mDealerId;
 	private String mDealerUrl;
@@ -115,45 +134,117 @@ public class Catalog implements Serializable {
 	private Store mStore;
 	private int mOfferOnPage;
 
-	public Catalog(JSONObject catalog) {
-		// if we have a full catalog
-		if (catalog.has("store_id") && catalog.has("offer_count")) {
-			set(catalog);
+	public Catalog() {
+	}
+
+	public Catalog(Catalog c) {
+		set(c);
+	}
+
+	public static ArrayList<Catalog> fromJSONArray(String catalogs) {
+		try {
+			return fromJSONArray(new JSONArray(catalogs));
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
-		// If it is a partial catalog
-		else if (catalog.has("id") && catalog.has("page")) {
+		return null;
+	}
+	
+	public static ArrayList<Catalog> fromJSONArray(JSONArray catalogs) {
+		ArrayList<Catalog> list = new ArrayList<Catalog>();
+		try {
+			for (int i = 0 ; i < catalogs.length() ; i++ )
+				list.add(Catalog.fromJSON((JSONObject)catalogs.get(i)));
+			
+		} catch (JSONException e) {
+			list = null;
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	public static Catalog fromJSON(String catalog) {
+		try {
+			return fromJSON(new JSONObject(catalog));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static Catalog fromJSON(JSONObject catalog) {
+		return fromJSON(new Catalog(), catalog);
+	}
+	
+	private static Catalog fromJSON(Catalog c, JSONObject catalog) {
+		if(c == null)
+			c = new Catalog();
+		
+		if (catalog == null)
+			return c;
+		
+		if (catalog.has(S_STORE_ID) && catalog.has(S_OFFER_COUNT)) {
+			// if we have a full catalog
 			try {
-				mId = catalog.getString("id");
-				mOfferOnPage = catalog.getInt("page");
+				c.setId(catalog.getString(S_ID));
+				c.setErn(catalog.getString(S_ERN));
+				c.setLabel(catalog.getString(S_LABEL));
+				c.setBackground(catalog.getString(S_BACKGROUND));
+				c.setRunFrom(catalog.getString(S_RUN_FROM));
+				c.setRunTill(catalog.getString(S_RUN_TILL));
+				c.setPageCount(catalog.getInt(S_PAGE_COUNT));
+				c.setOfferCount(catalog.getInt(S_OFFER_COUNT));
+				c.setBranding(Branding.fromJSON(catalog.getJSONObject(S_BRANDING)));
+				c.setDealerId(catalog.getString(S_DEALER_ID));
+				c.setDealerUrl(catalog.getString(S_DEALER_URL));
+				c.setStoreId(catalog.getString(S_STORE_ID));
+				c.setStoreUrl(catalog.getString(S_STORE_URL));
+				c.setDimension(Dimension.fromJSON(catalog.getJSONObject(S_DIMENSIONS)));
+				c.setImages(Images.fromJSON(catalog.getJSONObject(S_IMAGES)));
+				c.setPages(Pages.fromJSON(catalog.getJSONObject(S_PAGES)));
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		} else if (catalog.has(S_ID) && catalog.has(P_PAGE)) {
+			// If it is a partial catalog
+			try {
+				c.setId(catalog.getString(S_ID));
+				c.setOfferOnPage(catalog.getInt(P_PAGE));
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
 		}
-
+		return c;
 	}
-
-	private void set(JSONObject catalog) {
+	
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Catalog c) {
+		JSONObject o = new JSONObject();
 		try {
-			mId = catalog.getString("id");
-			mErn = catalog.getString("ern");
-			mLabel = catalog.getString("label");
-			mBackground = catalog.getString("background");
-			mSelectStores = catalog.getBoolean("select_stores");
-			setRunFrom(catalog.getString("run_from"));
-			setRunTill(catalog.getString("run_till"));
-			mPageCount = catalog.getInt("page_count");
-			mOfferCount = catalog.getInt("offer_count");
-			mBranding = new Branding(catalog.getJSONObject("branding"));
-			mDealerId = catalog.getString("dealer_id");
-			mDealerUrl = catalog.getString("dealer_url");
-			mStoreId = catalog.getString("store_id");
-			mStoreUrl = catalog.getString("store_url");
-			mDimension = new Dimension(catalog.getJSONObject("dimensions"));
-			mImages = new Images(catalog.getJSONObject("images"));
-			mPages = new Pages(catalog.getJSONObject("pages"));
+			o.put(S_ID, c.getId());
+			o.put(S_ERN, c.getErn());
+			o.put(S_LABEL, c.getLabel());
+			o.put(S_BACKGROUND, c.getBackground());
+			o.put(S_RUN_FROM, c.getRunFromString());
+			o.put(S_RUN_TILL, c.getRunFromString());
+			o.put(S_PAGE_COUNT, c.getPageCount());
+			o.put(S_OFFER_COUNT, c.getOfferCount());
+			o.put(S_BRANDING, c.getBranding().toJSON());
+			o.put(S_DEALER_ID, c.getDealerId());
+			o.put(S_DEALER_URL, c.getDealerUrl());
+			o.put(S_STORE_ID, c.getStoreId());
+			o.put(S_STORE_URL, c.getStoreUrl());
+			o.put(S_DIMENSIONS, c.getDimension().toJSON());
+			o.put(S_IMAGES, c.getImages().toJSON());
+			o.put(S_PAGES, c.getPages().toJSON());
 		} catch (JSONException e) {
+			o = null;
 			e.printStackTrace();
 		}
+		return o;
 	}
 	
 	public void set(Catalog c) {
@@ -161,7 +252,6 @@ public class Catalog implements Serializable {
 		mErn = c.getErn();
 		mLabel = c.getLabel();
 		mBackground = c.getBackground();
-		mSelectStores = c.getSelectStores();
 		mRunFrom = c.getRunFrom();
 		mRunTill = c.getRunTill();
 		mPageCount = c.getPageCount();
@@ -210,15 +300,6 @@ public class Catalog implements Serializable {
 	public Catalog setBackground(String background) {
 		mBackground = background;
 		return this;
-	}
-
-	public Catalog setSelectStores(Boolean selectStores) {
-		this.mSelectStores = selectStores;
-		return this;
-	}
-
-	public Boolean getSelectStores() {
-		return mSelectStores;
 	}
 
 	public Catalog setRunFrom(Long time) {
@@ -394,7 +475,6 @@ public class Catalog implements Serializable {
 				mErn.equals(c.getErn()) &&
 				mLabel.equals(c.getLabel()) &&
 				mBackground.equals(c.getBackground()) &&
-				mSelectStores == c.getSelectStores() &&
 				mRunFrom == c.getRunFrom() &&
 				mRunTill == c.getRunTill() &&
 				mPageCount == c.getPageCount() &&
@@ -427,7 +507,6 @@ public class Catalog implements Serializable {
 		if(everything) {
 			sb.append(", ern=").append(mErn)
 			.append(", background=").append(mBackground)
-			.append(", selectStores=").append(mSelectStores)
 			.append(", pageCount=").append(mPageCount)
 			.append(", offerCount=").append(mOfferCount)
 			.append(", dealer=").append(mDealer == null ? mDealerId : mDealer.toString())

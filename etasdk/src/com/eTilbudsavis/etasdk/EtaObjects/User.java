@@ -12,64 +12,109 @@ import Utils.Params;
 public class User implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-
+	
 	public static final String TAG = "User";
 	
 	/** Parameter for a user e-mail */
 	public static final String PARAM_EMAIL = Params.EMAIL;
-
+	
 	/** Parameter for a user password */
 	public static final String PARAM_PASSWORD = Params.PASSWORD;
-
+	
 	/** Parameter for a user birth year */
 	public static final String PARAM_BIRTH_YEAR = Params.BIRTH_YEAR;
-
+	
 	/** Parameter for a user gender */
 	public static final String PARAM_GENDER = Params.GENDER;
-
+	
 	/** Parameter for a user success redirect */
 	public static final String PARAM_SUCCESS_REDIRECT = Params.SUCCESS_REDIRECT;
-
+	
 	/** Parameter for a user error redirect */
 	public static final String PARAM_ERROR_REDIRECT = Params.ERROR_REDIRECT;
-
+	
 	/** Parameter for a user old password */
 	public static final String PARAM_OLD_PASSWORD = Params.OLD_PASSWORD;
-
+	
 	/** Parameter for a facebook token */
 	public static final String PARAM_FACEBOOK_TOKEN = Params.FACEBOOK_TOKEN;
-
+	
 	/** Endpoint for a single user resource */
 	public static final String ENDPOINT_ID = Endpoint.USER_ID;
-
+	
 	/** Endpoint for a user resource */
 	public static final String ENDPOINT_RESET = Endpoint.USER_RESET;
+	
+	private static final String S_ID = "id";
+	private static final String S_ERN = "ern";
+	private static final String S_GENDER = "gender";
+	private static final String S_BIRTH_YEAR = "birth_year";
+	private static final String S_NAME = "name";
+	private static final String S_EMAIL = "email";
+	private static final String S_PERMISSIONS = "permissions";
 
-	private int mId;
+	private int mId = 0;
 	private String mErn;
 	private String mGender;
-	private int mBirthYear;
+	private int mBirthYear = 0;
 	private String mName;
 	private String mEmail;
 	private Permission mPermissions;
 	private ArrayList<User.UserStatusListener> mSubscribers = new ArrayList<User.UserStatusListener>();
 
 	public User() {
-		
 	}
-	
-	public User(JSONObject user) {
+
+	public static User fromJSON(String user) {	
 		try {
-			mId = user.getInt("id");
-			mErn = user.getString("ern");
-			mGender = user.getString("gender");
-			mBirthYear = user.getInt("birth_year");
-			mName = user.getString("name");
-			mEmail = user.getString("email");
-			mPermissions = new Permission(user.getJSONObject("permissions"));
+			return fromJSON(new User(), new JSONObject(user));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		return null;
+	}
+
+	public static User fromJSON(JSONObject user) {	
+		return fromJSON(new User(), user);
+	}
+	
+	private static User fromJSON(User u, JSONObject user) {
+		if (u == null) u = new User();
+		if (user == null) return u;
+		
+		try {
+			u.setId(user.getInt(S_ID));
+			u.setErn(user.getString(S_ERN));
+			u.setGender(user.getString(S_GENDER));
+			u.setBirthYear(user.getInt(S_BIRTH_YEAR));
+			u.setName(user.getString(S_NAME));
+			u.setEmail(user.getString(S_EMAIL));
+			u.setPermissions(Permission.fromJSON(user.getJSONObject(S_PERMISSIONS)));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return u;
+	}
+	
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(User u) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(S_ID, u.getId());
+			o.put(S_ERN, u.getErn());
+			o.put(S_GENDER, u.getGender());
+			o.put(S_BIRTH_YEAR, u.getBirthYear());
+			o.put(S_NAME, u.getName());
+			o.put(S_EMAIL, u.getEmail());
+			o.put(S_PERMISSIONS, u.getPermissions() == null ? null : u.getPermissions().toJSON());
+		} catch (JSONException e) {
+			o = null;
+			e.printStackTrace();
+		}
+		return o;
 	}
 	
 	public int getId() {

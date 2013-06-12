@@ -157,9 +157,12 @@ public final class Utilities {
 		while (iterator.hasNext()) {
 			String s = iterator.next();
 
-			if (!first)
+			if (!first) {
 				sb.append(", ");
-
+			} else {
+				first = false;
+			}
+			
 			if (data.get(s).getClass() == data.getClass()) {
 				sb.append(s);
 				sb.append(": ");
@@ -171,7 +174,7 @@ public final class Utilities {
 				sb.append("'");
 			}
 
-			first = false;
+			
 		}
 		sb.append(" }");
 		return sb.toString();

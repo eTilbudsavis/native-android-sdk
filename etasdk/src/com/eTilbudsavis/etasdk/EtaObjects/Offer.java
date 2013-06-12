@@ -3,8 +3,10 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -70,21 +72,39 @@ public class Offer implements Serializable {
 	
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
+
+	private static final String S_ID = "id";
+	private static final String S_ERN = "ern";
+	private static final String S_HEADING = "heading";
+	private static final String S_DESCRIPTION = "description";
+	private static final String S_CATALOG_PAGE = "catalog_page";
+	private static final String S_PRICING = "pricing";
+	private static final String S_QUANTITY = "quantity";
+	private static final String S_IMAGES = "images";
+	private static final String S_LINKS = "links";
+	private static final String S_RUN_FROM = "run_from";
+	private static final String S_RUN_TILL = "run_till";
+	private static final String S_PUBLISH = "publish";
+	private static final String S_DEALER_URL = "dealer_url";
+	private static final String S_DEALER_ID = "dealer_id";
+	private static final String S_STORE_URL = "store_url";
+	private static final String S_STORE_ID = "store_id";
+	private static final String S_CATALOG_URL = "catalog_url";
+	private static final String S_CATALOG_ID = "catalog_id";
 	
 	// From JSON blob
 	private String mId;
 	private String mErn;
-	private boolean mSelectStores;
 	private String mHeading;
 	private String mDescription;
-	private int mCatalogPage;
+	private int mCatalogPage = 0;
 	private Pricing mPricing;
 	private Quantity mQuantity;
 	private Images mImages;
 	private Links mLinks;
-	private long mRunFrom;
-	private long mRunTill;
-	private long mPublish;
+	private long mRunFrom = 0L;
+	private long mRunTill = 0L;
+	private long mPublish = 0L;
 	private String mDealerUrl;
 	private String mDealerId;
 	private String mStoreUrl;
@@ -97,34 +117,106 @@ public class Offer implements Serializable {
 	private Dealer mDealer;
 	private Store mStore;
 
-	public Offer(JSONObject offer) {
+	public Offer() {
+		
+	}
+	
+	public static Offer fromJSON(String offer) {
 		try {
-			mId = offer.getString("id");
-			mErn = offer.getString("ern");
-			mSelectStores = offer.getBoolean("select_stores");
-			mHeading = offer.getString("heading");
-			mDescription = offer.getString("description");
-			mCatalogPage = offer.getInt("catalog_page");
-			mPricing = new Pricing(offer.getJSONObject("pricing"));
-			mQuantity = new Quantity(offer.getJSONObject("quantity"));
-			mImages = new Images(offer.getJSONObject("images"));
-			mLinks = new Links(offer.getJSONObject("links"));
-			setRunFrom(offer.getString("run_from"));
-			setRunTill(offer.getString("run_till"));
-			setPublish(offer.getString("publish"));
-			mDealerUrl = offer.getString("dealer_url");
-			mDealerId = offer.getString("dealer_id");
-			mStoreUrl = offer.getString("store_url");
-			mStoreId = offer.getString("store_id");
-			mCatalogUrl = offer.getString("catalog_url");
-			mCatalogId = offer.getString("catalog_id");
-
+			return fromJSON(new Offer(), new JSONObject(offer));
 		} catch (JSONException e) {
 			e.printStackTrace();
-			
 		}
+		return null;
+	}
+	
+	public static Offer fromJSON(JSONObject offer) {
+		return fromJSON(new Offer(), offer);
 	}
 
+	public static ArrayList<Offer> fromJSONArray(String offers) {
+		try {
+			return fromJSONArray(new JSONArray(offers));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static ArrayList<Offer> fromJSONArray(JSONArray offers) {
+		ArrayList<Offer> list = new ArrayList<Offer>();
+		try {
+			for (int i = 0 ; i < offers.length() ; i++ )
+				list.add(Offer.fromJSON((JSONObject)offers.get(i)));
+			
+		} catch (JSONException e) {
+			list = null;
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	private static Offer fromJSON(Offer o, JSONObject offer) {
+		if (o == null) o = new Offer();
+		if (offer == null) return o;
+		
+		try {
+			o.setId(offer.getString(S_ID));
+			o.setErn(offer.getString(S_ERN));
+			o.setHeading(offer.getString(S_HEADING));
+			o.setDescription(offer.getString(S_DESCRIPTION));
+			o.setCatalogPage(offer.getInt(S_CATALOG_PAGE));
+			o.setPricing(Pricing.fromJSON(offer.getJSONObject(S_PRICING)));
+			o.setQuantity(Quantity.fromJSON(offer.getJSONObject(S_QUANTITY)));
+			o.setImages(Images.fromJSON(offer.getJSONObject(S_IMAGES)));
+			o.setLinks(Links.fromJSON(offer.getJSONObject(S_LINKS)));
+			o.setRunFrom(offer.getString(S_RUN_FROM));
+			o.setRunTill(offer.getString(S_RUN_TILL));
+			o.setPublish(offer.getString(S_PUBLISH));
+			o.setDealerUrl(offer.getString(S_DEALER_URL));
+			o.setDealerId(offer.getString(S_DEALER_ID));
+			o.setStoreUrl(offer.getString(S_STORE_URL));
+			o.setStoreId(offer.getString(S_STORE_ID));
+			o.setCatalogUrl(offer.getString(S_CATALOG_URL));
+			o.setCatalogId(offer.getString(S_CATALOG_ID));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return o;
+	}
+	
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+
+	public static JSONObject toJSON(Offer o) {
+		JSONObject ob = new JSONObject();
+		try {
+			ob.put(S_ID, o.getId());
+			ob.put(S_ERN, o.getErn());
+			ob.put(S_HEADING, o.getHeading());
+			ob.put(S_DESCRIPTION, o.getDescription());
+			ob.put(S_CATALOG_PAGE, o.getCatalogPage());
+			ob.put(S_PRICING, o.getPricing() == null ? null : o.getPricing().toJSON());
+			ob.put(S_QUANTITY, o.getQuantity() == null ? null : o.getQuantity().toJSON());
+			ob.put(S_IMAGES, o.getImages() == null ? null : o.getImages().toJSON());
+			ob.put(S_LINKS, o.getLinks() == null ? null : o.getLinks().toJSON());
+			ob.put(S_RUN_FROM, o.getRunFromString());
+			ob.put(S_RUN_TILL, o.getRunTillString());
+			ob.put(S_PUBLISH, o.getPublish());
+			ob.put(S_DEALER_URL, o.getDealerUrl());
+			ob.put(S_DEALER_ID, o.getDealerId());
+			ob.put(S_STORE_URL, o.getStoreUrl());
+			ob.put(S_STORE_ID, o.getStoreId());
+			ob.put(S_CATALOG_URL, o.getCatalogUrl());
+			ob.put(S_CATALOG_PAGE, o.getCatalogId());
+			
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return ob;
+	}
+	
 	public String getId() {
 		return mId;
 	}
@@ -140,15 +232,6 @@ public class Offer implements Serializable {
 
 	public Offer setErn(String ern) {
 		mErn = ern;
-		return this;
-	}
-
-	public boolean isSelectStores() {
-		return mSelectStores;
-	}
-
-	public Offer setSelectStores(boolean selectStores) {
-		mSelectStores = selectStores;
 		return this;
 	}
 
@@ -373,7 +456,6 @@ public class Offer implements Serializable {
 		Offer o = (Offer)obj;
 		return mId.equals(o.getId()) &&
 				mErn == o.getErn() &&
-				mSelectStores == o.isSelectStores() &&
 				mHeading.equals(o.getHeading()) &&
 				mDescription.equals(o.getDescription()) &&
 				mCatalogPage == o.getCatalogPage() &&
@@ -417,7 +499,6 @@ public class Offer implements Serializable {
 		
 		if (everything) {
 			sb.append(", ern=").append(mErn)
-			.append(", selectStores=").append(mSelectStores)
 			.append(", catalogPage=").append(mCatalogPage)
 			.append(", quantity=").append(mQuantity.toString())
 			.append(", images=").append(mImages.toString())

@@ -1,7 +1,9 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,6 +45,15 @@ public class Dealer implements Serializable {
 	/** Endpoint for searching dealers */
 	public static final String ENDPOINT_SEARCH = Endpoint.DEALER_SEARCH;
 	
+	private static final String S_ID = "id";
+	private static final String S_ERN = "ern";
+	private static final String S_NAME = "name";
+	private static final String S_URL_NAME = "url_name";
+	private static final String S_WEBSITE = "website";
+	private static final String S_LOGO = "logo";
+	private static final String S_COLOR = "color";
+	private static final String S_PAGEFLIP = "pageflip";
+	
 	private String mId;
 	private String mErn;
 	private String mName;
@@ -58,21 +69,84 @@ public class Dealer implements Serializable {
 		mPageflip = new Pageflip(pageflipColor);
 	}
 	
-	public Dealer(JSONObject dealer) {
+	public Dealer() {
+	}
+
+	public static ArrayList<Dealer> fromJSONArray(String dealers) {
 		try {
-			mId = dealer.getString("id");
-			mErn = dealer.getString("ern");
-			mName = dealer.getString("name");
-			mUrlName = dealer.getString("url_name");
-			mWebsite = dealer.getString("website");
-			mLogo = dealer.getString("logo");
-			mColor = Color.parseColor("#"+dealer.getString("color"));
-			mPageflip = new Pageflip(dealer.getJSONObject("pageflip"));
+			return fromJSONArray(new JSONArray(dealers));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		return null;
+	}
+	
+	public static ArrayList<Dealer> fromJSONArray(JSONArray dealers) {
+		ArrayList<Dealer> list = new ArrayList<Dealer>();
+		try {
+			for (int i = 0 ; i < dealers.length() ; i++ )
+				list.add(Dealer.fromJSON((JSONObject)dealers.get(i)));
+			
+		} catch (JSONException e) {
+			list = null;
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	public static Dealer fromJSON(String dealer) {
+		try {
+			return fromJSON(new Dealer(), new JSONObject(dealer));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
+	public static Dealer fromJSON(JSONObject dealer) {
+		return fromJSON(new Dealer(), dealer);
+	}
+	
+	private static Dealer fromJSON(Dealer d, JSONObject dealer) {
+		if (d == null) d = new Dealer();
+		if (dealer == null) return d;
+		
+		try {
+			d.setId(dealer.getString(S_ID));
+			d.setErn(dealer.getString(S_ERN));
+			d.setName(dealer.getString(S_NAME));
+			d.setUrlName(dealer.getString(S_URL_NAME));
+			d.setWebsite(dealer.getString(S_WEBSITE));
+			d.setLogo(dealer.getString(S_LOGO));
+			d.setColor(Color.parseColor("#"+dealer.getString(S_COLOR)));
+			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(S_PAGEFLIP)));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return d;
+	}
+	
+	public JSONObject toJSON(){
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Dealer d) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(S_ID, d.getId());
+			o.put(S_ERN, d.getErn());
+			o.put(S_NAME, d.getName());
+			o.put(S_URL_NAME, d.getUrlName());
+			o.put(S_WEBSITE, d.getWebsite());
+			o.put(S_LOGO, d.getLogo());
+			o.put(S_COLOR, d.getColorString());
+			o.put(S_PAGEFLIP, d.getPageflip().toJSON());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return o; 
+	}
+	
 	public Dealer setId(String id) {
 		mId = id;
 		return this;
@@ -127,13 +201,17 @@ public class Dealer implements Serializable {
 		return mLogo;
 	}
 
-	public Dealer setLogo(int color) {
+	public Dealer setColor(int color) {
 		mColor = color;
 		return this;
 	}
 
 	public int getColor() {
 		return mColor;
+	}
+	
+	public String getColorString() {
+		return String.format("%06X", 0xFFFFFF & mColor);
 	}
 
 	public Dealer setPageflip(Pageflip pageflip) {

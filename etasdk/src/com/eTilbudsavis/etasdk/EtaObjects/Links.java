@@ -11,18 +11,51 @@ public class Links implements Serializable {
 
 	public static final String TAG = "Links";
 	
+	public static final String S_WEBSHOP = "webshop";
+	
 	private String mWebshop;
 	
 	public Links() {
-		mWebshop = "";
 	}
 	
-	public Links(JSONObject links) {
+	public static Links fromJSON(String links) {
 		try {
-			mWebshop = links.getString("webshop");
+			return fromJSON(new Links(), new JSONObject(links));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		return null;
+	}
+	
+	public static Links fromJSON(JSONObject links) {
+		return fromJSON(new Links(), links);	
+	}
+	
+	public static Links fromJSON(Links l, JSONObject links) {
+		if (l == null) l = new Links();
+		if (links == null) return l;
+		
+		try {
+			l.setWebshop(links.getString(S_WEBSHOP));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return l;
+	}
+	
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Links l) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(S_WEBSHOP, l.getWebshop());
+		} catch (JSONException e) {
+			o = null;
+			e.printStackTrace();
+		}
+		return o;
 	}
 	
 	public void setWebshop(String url) {

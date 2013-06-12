@@ -9,23 +9,56 @@ public class Pieces implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private static final String S_FROM = "from";
+	private static final String S_TO = "to";
+	
 	public static final String TAG = "Pieces";
 	
-	private int mFrom;
-	private int mTo;
+	private int mFrom = 0;
+	private int mTo = 0;
 	
 	public Pieces() {
-		mFrom = 0;
-		mTo = 0;
 	}
 	
-	public Pieces(JSONObject pieces) {
+	public static Pieces fromJSON(String pieces) {
 		try {
-			mFrom = pieces.getInt("from");
-			mTo = pieces.getInt("to");
+			return fromJSON(new Pieces(), new JSONObject(pieces));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		return null;
+	}
+	
+	public static Pieces fromJSON(JSONObject pieces) {
+		return fromJSON(new Pieces(), pieces);
+	}
+	
+	public static Pieces fromJSON(Pieces p, JSONObject pieces) {
+		if (p == null) p = new Pieces();
+		if (pieces == null) return p;
+		
+		try {
+			p.setFrom(pieces.getInt(S_FROM));
+			p.setTo(pieces.getInt(S_TO));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return p;
+	}
+	
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Pieces p) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(S_FROM, p.getFrom());
+			o.put(S_TO, p.getTo());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return o;
 	}
 	
 	public int getFrom() {

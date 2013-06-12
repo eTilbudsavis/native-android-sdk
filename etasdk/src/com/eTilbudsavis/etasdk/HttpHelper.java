@@ -20,14 +20,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import Utils.Utilities;
 import android.os.AsyncTask;
-
-import com.eTilbudsavis.etasdk.Api.RequestListener;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 
 public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	
@@ -40,14 +35,13 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	private List<NameValuePair> mQuery;
 	private List<Header> mHeaders;
 	private Api.RequestType mRequestType;
-	private RequestListener mListener;
+	private HttpListener mListener;
 	
 	private String mResponse = "";
-	private Object mReturn = null;
 	private int mResponseCode;
 
 	// Constructor for HttpHelper.
-	public HttpHelper(Eta eta, String url, List<Header> headers, List<NameValuePair> query , Api.RequestType requestType, RequestListener listener) {
+	public HttpHelper(Eta eta, String url, List<Header> headers, List<NameValuePair> query , Api.RequestType requestType, HttpListener listener) {
 		mEta = eta;
 		mUrl = url;
 		mQuery = query;
@@ -128,26 +122,6 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 			
 		    mResponse = getText(response.getEntity().getContent());
 		    
-		    // If server returns OK
-			if (200 <= mResponseCode && mResponseCode < 300) {
-				// Try to cast object to match listener
-				mReturn = mResponse;
-			
-			// If server returns ERROR
-			} else if (400 <= mResponseCode && mResponseCode < 500) {
-				
-				try {
-					mReturn = new EtaError(new JSONObject(mResponse));
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-			
-			// If server is retarded
-			} else {
-				// Just return the standard response
-				mReturn = mResponse;
-			}
-			
 			updateSessionInfo(response.getAllHeaders());
 
 		    if (mDebug) {
@@ -178,7 +152,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	
 	@Override
 	protected void onPostExecute(Void result) {
-		mListener.onComplete(mResponseCode, mReturn);
+		mListener.onComplete(mResponseCode, mResponse);
     }
 	
 	private static String getText(InputStream in) {
@@ -203,22 +177,36 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		return sb.toString();
 	}
 
+	/**
+	 * Method checks headers to find X-Token and X-Token-Expires.<br>
+	 * If they do not exist, nothing happens as the call has a wrong endpoint, or other
+	 * non-API regarding error. If they do exist, then they are checked by the Session
+	 * to find out if there are any changes.
+	 * @param headers to check for new token.
+	 */
 	private void updateSessionInfo(Header[] headers) {
 		String token = "";
-	    String tokenExp = "";
+	    String expire = "";
 	    for (Header h : headers) {
 	    	if (h.getName().equals("X-Token")) {
 	    		token = h.getValue();
 	    	} else if (h.getName().equals("X-Token-Expires")) {
-	    		tokenExp = h.getValue();
+	    		expire = h.getValue();
 	    	}
 	    }
-	    mEta.getSession().updateOnInvalidToken(token, tokenExp);
+	    if (token.equals("") || expire.equals(""))
+	    	return;
+	    
+	    mEta.getSession().update(token, expire);
 	}
 	
 	public HttpHelper debug(boolean useDebug) {
 		mDebug = useDebug;
 		return this;
+	}
+	
+	public interface HttpListener {
+		public void onComplete(int statusCode, String data);
 	}
 	
 }

@@ -9,6 +9,10 @@ public class Quantity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private static final String S_UNIT = "unit";
+	private static final String S_SIZE = "size";
+	private static final String S_PIECES = "pieces";
+	
 	public static final String TAG = "Quantity";
 	
 	private Unit mUnit;
@@ -16,19 +20,50 @@ public class Quantity implements Serializable {
 	private Pieces mPieces;
 	
 	public Quantity() {
-		mUnit = new Unit();
-		mSize = new Size();
-		mPieces = new Pieces();
 	}
 	
-	public Quantity(JSONObject quantity) {
+	public static Quantity fromJSON(String quantity) {
 		try {
-			mUnit = quantity.getString("unit").equals("null") ? null : new Unit(quantity.getJSONObject("unit"));
-			mSize = quantity.getString("size").equals("null") ? null : new Size(quantity.getJSONObject("size"));
-			mPieces = quantity.getString("pieces").equals("null") ? null : new Pieces(quantity.getJSONObject("pieces"));
+			return fromJSON(new Quantity(), new JSONObject(quantity));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		return null;
+	}
+	
+	public static Quantity fromJSON(JSONObject quantity) {
+		return fromJSON(new Quantity(), quantity);
+	}
+	
+	public static Quantity fromJSON(Quantity q, JSONObject quantity) {
+		if (q == null) q = new Quantity();
+		if (quantity == null) return q;
+		
+		try {
+			q.setUnit(quantity.getString(S_UNIT).equals("null") ? null : Unit.fromJSON(quantity.getJSONObject(S_UNIT)));
+			q.setSize(quantity.getString(S_SIZE).equals("null") ? null : Size.fromJSON(quantity.getJSONObject(S_SIZE)));
+			q.setPieces(quantity.getString(S_PIECES).equals("null") ? null : Pieces.fromJSON(quantity.getJSONObject(S_PIECES)));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return q;
+	}
+	
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Quantity q) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(S_UNIT, q.getUnit() == null ? null : q.getUnit().toJSON());
+			o.put(S_SIZE, q.getSize() == null ? null : q.getSize().toJSON());
+			o.put(S_PIECES, q.getPieces() == null ? null : q.getPieces().toJSON());
+		} catch (JSONException e) {
+			o = null;
+			e.printStackTrace();
+		}
+		return o;
 	}
 	
 	public Unit getUnit() {

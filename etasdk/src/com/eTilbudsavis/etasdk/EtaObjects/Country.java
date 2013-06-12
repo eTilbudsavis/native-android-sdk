@@ -9,24 +9,66 @@ public class Country implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
+	private static final String S_ID = "id";
+	private static final String S_AREA_ID = "area_id";
+	private static final String S_COUNTRY = "country";
+	private static final String S_LANGUAGE = "language";
+
 	public static final String TAG = "Country";
 	
-	private int mId;
-	private int mAreaId;
+	private int mId = 0;
+	private int mAreaId = 0;
 	private String mCountry;
 	private String mLanguage;
 	
-	public Country(JSONObject country) {
+	public Country() {
+	}
+	
+	public static Country fromJSON(String country) {
 		try {
-			mId = country.getInt("id");
-			mAreaId = country.getInt("area_id");
-			mCountry = country.getString("country");
-			mLanguage = country.getString("language");
+			return fromJSON(new Country(), new JSONObject(country));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
 	
+	public static Country fromJSON(JSONObject country) {
+		return fromJSON(new Country(), country);
+	}
+	
+	private static Country fromJSON(Country c, JSONObject country) {
+		if (c == null) c = new Country();
+		if (country == null) return c;
+		
+		try {
+			c.setId(country.getInt(S_ID));
+			c.setAreaId(country.getInt(S_AREA_ID));
+			c.setCountry(country.getString(S_COUNTRY));
+			c.setLanguage(country.getString(S_LANGUAGE));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return c;
+	}
+	
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Country c) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(S_ID, c.getId());
+			o.put(S_AREA_ID, c.getAreaId());
+			o.put(S_COUNTRY, c.getCountry());
+			o.put(S_LANGUAGE, c.getLanguage());
+		} catch (JSONException e) {
+			o = null;
+			e.printStackTrace();
+		}
+		return o;
+	}
 	
 	
 	public int getId() {

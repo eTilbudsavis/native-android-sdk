@@ -11,24 +11,59 @@ public class Pricing implements Serializable {
 
 	public static final String TAG = "Pricing";
 	
-	private double mPrice;
+	private static final String S_PRICE = "price";
+	private static final String S_PREPRICE = "preprice";
+	private static final String S_CURRENCY = "currency";
+	
+	private double mPrice = 0.0;
 	private Double mPrePrice;
 	private String mCurrency;
 	
 	public Pricing() {
-		mPrice = 0.0;
-		mPrePrice = 0.0;
-		mCurrency = "Currency";
 	}
 	
-	public Pricing(JSONObject pricing) {
+	public static Pricing fromJSON(String pricing) {
 		try {
-			mPrice = pricing.getDouble("price");
-			mPrePrice = pricing.getString("preprice").equals("null") == true ? null : pricing.getDouble("preprice");
-			mCurrency = pricing.getString("currency");
+			return fromJSON(new Pricing(), new JSONObject(pricing));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		return null;
+	}
+	
+	public static Pricing fromJSON(JSONObject pricing) {
+		return fromJSON(new Pricing(), pricing);
+	}
+	
+	public static Pricing fromJSON(Pricing p, JSONObject pricing) {
+		if (p == null) p = new Pricing();
+		if (pricing == null) return p;
+		
+		try {
+			p.setPrice(pricing.getDouble(S_PRICE));
+			p.setPrePrice(pricing.getString(S_PREPRICE).equals("null") == true ? null : pricing.getDouble(S_PREPRICE));
+			p.setCurrency(pricing.getString(S_CURRENCY).equals("null") == true ? null : pricing.getString(S_CURRENCY));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return p;
+	}
+	
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Pricing p) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(S_PRICE, p.getPrice());
+			o.put(S_PREPRICE, p.getPrePrice());
+			o.put(S_CURRENCY, p.getCurrency());
+		} catch (JSONException e) {
+			o = null;
+			e.printStackTrace();
+		}
+		return o;
 	}
 	
 	public double getPrice() {
@@ -44,7 +79,7 @@ public class Pricing implements Serializable {
 		return mPrePrice;
 	}
 
-	public Pricing setPrePrice(double prePrice) {
+	public Pricing setPrePrice(Double prePrice) {
 		mPrePrice = prePrice;
 		return this;
 	}
@@ -76,10 +111,9 @@ public class Pricing implements Serializable {
 	public String toString() {
 		return new StringBuilder()
 		.append(getClass().getSimpleName()).append("[")
-		.append("Price=").append(mPrice)
+		.append("price=").append(mPrice)
 		.append(", preprice=").append(mPrePrice == null ? "null" : mPrePrice)
 		.append(", currency=").append(mCurrency)
 		.append("]").toString();
-		
 	}
 }

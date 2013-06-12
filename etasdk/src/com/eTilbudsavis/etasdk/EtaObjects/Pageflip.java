@@ -12,24 +12,62 @@ public class Pageflip implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Pageflip";
+	
+	public static final String S_LOGO = "logo";
+	public static final String S_COLOR = "color";
 
 	private String mLogo;
-	private int mColor;
-	
+	private int mColor = 0;
+
+	public Pageflip() {
+	}
+
 	public Pageflip(int color) {
 		mColor = color;
 	}
 	
-	public Pageflip(JSONObject pageflip) {
+	public static Pageflip fromJSON(String pageflip) {
 		try {
-			mLogo = pageflip.getString("logo");
-			mColor = Color.parseColor("#"+pageflip.getString("color"));
+			return fromJSON(new Pageflip(), new JSONObject(pageflip));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
+		return null;
 	}
 
+	public static Pageflip fromJSON(JSONObject pageflip) {
+		return fromJSON(new Pageflip(), pageflip);
+	}
+	
+	public static Pageflip fromJSON(Pageflip p, JSONObject pageflip) {
+		if (p == null) p = new Pageflip();
+		if (pageflip == null) return p;
+			
+		try {
+			p.setLogo(pageflip.getString(S_LOGO));
+			p.setColor(Color.parseColor("#"+pageflip.getString(S_COLOR)));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return p;
+	}
+
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Pageflip p) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(S_LOGO, p.getLogo());
+			o.put(S_COLOR, p.getColorString());
+		} catch (JSONException e) {
+			o = null;
+			e.printStackTrace();
+		}
+		return o;
+	}
+	
 	public String getLogo() {
 		return mLogo;
 	}
@@ -42,7 +80,11 @@ public class Pageflip implements Serializable {
 	public int getColor() {
 		return mColor;
 	}
-	
+
+	public String getColorString() {
+		return String.format("%06X", 0xFFFFFF & mColor);
+	}
+
 	public Pageflip setColor(int color) {
 		mColor = color;
 		return this;
