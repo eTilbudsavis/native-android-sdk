@@ -13,25 +13,22 @@ import java.util.List;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicHeader;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import Utils.Endpoint;
 import Utils.Params;
 import Utils.Sort;
 import Utils.Utilities;
 import android.os.Bundle;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.EtaCache.CacheItem;
 import com.eTilbudsavis.etasdk.HttpHelper.HttpListener;
+import com.eTilbudsavis.etasdk.Session.SessionListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.EtaObjects.Session.SessionListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 
 public class Api implements Serializable {
@@ -106,8 +103,8 @@ public class Api implements Serializable {
 	private boolean mUseDebug = false;
 	private HttpListener mHttpListener = new HttpListener() {
 
-		public void onComplete(int statusCode, String data) {
-
+		public void onComplete(int statusCode, String data, Header[] headers) {
+			
 			// Success
 			if (200 <= statusCode && statusCode < 300) {
 				if (!mCacheHit || mMultipleCallbacks)
@@ -128,65 +125,85 @@ public class Api implements Serializable {
 				} else {
 					mListener.onComplete(statusCode, null, error);
 				}
-				
-			} 
+			}
 		}
-
 	};
 
 	private void convertCacheReturn(int statusCode, String data) {
 		
+		EtaError er = null;
+		
 		if (mListener instanceof Api.CallbackCatalogList) {
 			ArrayList<Catalog> cs = Catalog.fromJSONArray(data);
-			((CallbackCatalogList)mListener).onComplete(statusCode, cs, null);
+			er = cs.size() > 0 ? null : (EtaError.fromJSON(data));
+			((CallbackCatalogList)mListener).onComplete(statusCode, cs, er);
 			return;
 			
 		} else if  (mListener instanceof Api.CallbackOfferList) {
 			ArrayList<Offer> os = Offer.fromJSONArray(data);
-			((CallbackOfferList)mListener).onComplete(statusCode, os, null);
+			er = os.size() > 0 ? null : (EtaError.fromJSON(data));
+			((CallbackOfferList)mListener).onComplete(statusCode, os, er);
 			return;
 			
 		} else if  (mListener instanceof Api.CallbackOffer) {
 			Offer o = Offer.fromJSON(data);
-			mEta.getCache().put(o.getErn(), o, statusCode);
-			((CallbackOffer)mListener).onComplete(statusCode, o, null);
+			if (o.getId() == null) {
+				er = EtaError.fromJSON(data);
+			} else {
+				mEta.getCache().put(o.getErn(), o, statusCode);
+			}
+			((CallbackOffer)mListener).onComplete(statusCode, o, er);
 			return;
 			
 		} else if  (mListener instanceof Api.CallbackCatalog) {
 			Catalog c = Catalog.fromJSON(data.toString());
-			mEta.getCache().put(c.getErn(), c, statusCode);
-			((CallbackCatalog)mListener).onComplete(statusCode, c, null);
+			if (c.getId() == null) {
+				er = EtaError.fromJSON(data);
+			} else {
+				mEta.getCache().put(c.getErn(), c, statusCode);
+			}
+			((CallbackCatalog)mListener).onComplete(statusCode, c, er);
 			return;
 			
 		} else if  (mListener instanceof Api.CallbackDealerList) {
 			ArrayList<Dealer> ds = Dealer.fromJSONArray(data);
-			((CallbackDealerList)mListener).onComplete(statusCode, ds, null);
+			er = ds.size() > 0 ? null : (EtaError.fromJSON(data));
+			((CallbackDealerList)mListener).onComplete(statusCode, ds, er);
 			return;
 			
 		} else if  (mListener instanceof Api.CallbackStoreList) {
 			ArrayList<Store> ss = Store.fromJSONArray(data);
-			((CallbackStoreList)mListener).onComplete(statusCode, ss, null);
+			er = ss.size() > 0 ? null : (EtaError.fromJSON(data));
+			((CallbackStoreList)mListener).onComplete(statusCode, ss, er);
 			return;
 
 		} else if  (mListener instanceof Api.CallbackDealer) {
 			Dealer d = Dealer.fromJSON(data);
-			mEta.getCache().put(d.getErn(), d, statusCode);
-			((CallbackDealer)mListener).onComplete(statusCode, d, null);
+			if (d.getId() == null) {
+				er = EtaError.fromJSON(data);
+			} else {
+				mEta.getCache().put(d.getErn(), d, statusCode);
+			}
+			((CallbackDealer)mListener).onComplete(statusCode, d, er);
 			return;
 			
 		} else if  (mListener instanceof Api.CallbackStore) {
 			Store s = Store.fromJSON(data);
-			mEta.getCache().put(s.getErn(), s, statusCode);
-			((CallbackStore)mListener).onComplete(statusCode, s, null);
+			if (s.getId() == null) {
+				er = EtaError.fromJSON(data);
+			} else {
+				mEta.getCache().put(s.getErn(), s, statusCode);
+			}
+			((CallbackStore)mListener).onComplete(statusCode, s, er);
 			return;
 			
 		} else if (mListener instanceof Api.CallbackString) {
-			((CallbackString)mListener).onComplete(statusCode, data, null);		
+			((CallbackString)mListener).onComplete(statusCode, data, er);		
 			return;	
 		}
 		
 	}
-	
+
 	/**
 	 * TODO: Write proper JavaDoc<br>
 	 * <code>new String[] {Api.SORT_DISTANCE, Api.SORT_PUBLISHED}</code>

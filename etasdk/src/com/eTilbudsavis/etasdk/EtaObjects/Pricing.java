@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 public class Pricing implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -23,12 +25,14 @@ public class Pricing implements Serializable {
 	}
 	
 	public static Pricing fromJSON(String pricing) {
+		Pricing p = new Pricing();
 		try {
-			return fromJSON(new Pricing(), new JSONObject(pricing));
+			p = fromJSON(p, new JSONObject(pricing));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return p;
 	}
 	
 	public static Pricing fromJSON(JSONObject pricing) {
@@ -44,7 +48,8 @@ public class Pricing implements Serializable {
 			p.setPrePrice(pricing.getString(S_PREPRICE).equals("null") == true ? null : pricing.getDouble(S_PREPRICE));
 			p.setCurrency(pricing.getString(S_CURRENCY).equals("null") == true ? null : pricing.getString(S_CURRENCY));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return p;
 	}
@@ -60,8 +65,8 @@ public class Pricing implements Serializable {
 			o.put(S_PREPRICE, p.getPrePrice());
 			o.put(S_CURRENCY, p.getCurrency());
 		} catch (JSONException e) {
-			o = null;
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return o;
 	}

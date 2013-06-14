@@ -7,6 +7,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 import Utils.Endpoint;
 import Utils.Params;
 import Utils.Sort;
@@ -63,22 +65,18 @@ public class Dealer implements Serializable {
 	private Integer mColor;
 	private Pageflip mPageflip;
 
-	public Dealer(String name, int color, int pageflipColor) {
-		mName = name;
-		mColor = color;
-		mPageflip = new Pageflip(pageflipColor);
-	}
-	
 	public Dealer() {
 	}
 
 	public static ArrayList<Dealer> fromJSONArray(String dealers) {
+		ArrayList<Dealer> list = new ArrayList<Dealer>();
 		try {
-			return fromJSONArray(new JSONArray(dealers));
+			list = fromJSONArray(new JSONArray(dealers));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return list;
 	}
 	
 	public static ArrayList<Dealer> fromJSONArray(JSONArray dealers) {
@@ -88,19 +86,21 @@ public class Dealer implements Serializable {
 				list.add(Dealer.fromJSON((JSONObject)dealers.get(i)));
 			
 		} catch (JSONException e) {
-			list = null;
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return list;
 	}
 	
 	public static Dealer fromJSON(String dealer) {
+		Dealer d = new Dealer();
 		try {
-			return fromJSON(new Dealer(), new JSONObject(dealer));
+			d = fromJSON(d, new JSONObject(dealer));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return d;
 	}
 
 	public static Dealer fromJSON(JSONObject dealer) {
@@ -121,7 +121,8 @@ public class Dealer implements Serializable {
 			d.setColor(Color.parseColor("#"+dealer.getString(S_COLOR)));
 			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(S_PAGEFLIP)));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return d;
 	}
@@ -142,7 +143,8 @@ public class Dealer implements Serializable {
 			o.put(S_COLOR, d.getColorString());
 			o.put(S_PAGEFLIP, d.getPageflip().toJSON());
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return o; 
 	}
@@ -259,7 +261,7 @@ public class Dealer implements Serializable {
 			.append(", website=").append(mWebsite)
 			.append(", logo=").append(mLogo)
 			.append(", color=").append(mColor)
-			.append(", pageflip=").append(mPageflip.toString());
+			.append(", pageflip=").append(mPageflip == null ? null : mPageflip.toString());
 		}
 		return sb.append("]").toString();
 	}

@@ -6,6 +6,8 @@ import java.util.Comparator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 public class Share implements Comparable<Share>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -28,7 +30,8 @@ public class Share implements Comparable<Share>, Serializable {
 			mAccess = SharePermission.valueOf(share.getString("access").toUpperCase());
 			mAccepted = share.getString("accepted").equals("true") ? true : false;
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 	}
 

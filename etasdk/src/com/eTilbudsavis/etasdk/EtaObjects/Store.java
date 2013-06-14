@@ -7,6 +7,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 import Utils.Endpoint;
 import Utils.Params;
 import Utils.Sort;
@@ -76,12 +78,14 @@ public class Store implements Serializable {
 	}
 
 	public static ArrayList<Store> fromJSONArray(String stores) {
+		ArrayList<Store> list = new ArrayList<Store>();
 		try {
-			return fromJSONArray(new JSONArray(stores));
+			list = fromJSONArray(new JSONArray(stores));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return list;
 	}
 	
 	public static ArrayList<Store> fromJSONArray(JSONArray stores) {
@@ -91,19 +95,21 @@ public class Store implements Serializable {
 				list.add(Store.fromJSON((JSONObject)stores.get(i)));
 			
 		} catch (JSONException e) {
-			list = null;
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return list;
 	}
 	
 	public static Store fromJSON(String store) {
+		Store s = new Store();
 		try {
-			return fromJSON(new Store(), new JSONObject(store));
+			s = fromJSON(s, new JSONObject(store));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return s;
 	}
 	
 	public static Store fromJSON(JSONObject store) {
@@ -128,11 +134,38 @@ public class Store implements Serializable {
 			s.setBranding(Branding.fromJSON(store.getJSONObject(S_BRANDING)));
 			s.setContact(store.getString(S_CONTACT));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return s;
 	}
 
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Store s) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(S_ID, s.getId());
+			o.put(S_ERN, s.getErn());
+			o.put(S_STREET, s.getStreet());
+			o.put(S_CITY, s.getCity());
+			o.put(S_ZIP_CODE, s.getZipcode());
+			o.put(S_COUNTRY, s.getCountry().toJSON());
+			o.put(S_LATITUDE, s.getLatitude());
+			o.put(S_LONGITUDE, s.getLongitude());
+			o.put(S_DEALER_URL, s.getDealerUrl());
+			o.put(S_DEALER_ID, s.getDealerId());
+			o.put(S_BRANDING, s.getBranding().toJSON());
+			o.put(S_CONTACT, s.getContact());
+		} catch (JSONException e) {
+			if (Eta.mDebug)
+				e.printStackTrace();
+		}
+		return o;
+	}
+	
 	public Store setId(String id) {
 		mId = id;
 		return this;

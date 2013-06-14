@@ -12,11 +12,14 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
@@ -39,6 +42,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	
 	private String mResponse = "";
 	private int mResponseCode;
+	private Header[] mResponsHeaders;
 
 	// Constructor for HttpHelper.
 	public HttpHelper(Eta eta, String url, List<Header> headers, List<NameValuePair> query , Api.RequestType requestType, HttpListener listener) {
@@ -55,7 +59,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 
 		// Print debug information
 		if (mDebug) {
-			Utilities.logd(TAG, "Pre Execute - " + getClass().getSimpleName() + '@' + Integer.toHexString(hashCode()));
+			Utilities.logd(TAG, "### Pre Execute - " + getClass().getSimpleName() + '@' + Integer.toHexString(hashCode()));
 			Utilities.logd(TAG, "Url: " + mUrl);
 			Utilities.logd(TAG, "Headers: " + mHeaders.toString());
 			StringBuilder sb = new StringBuilder();
@@ -100,7 +104,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 				
 				response = httpClient.execute(get);
 				break;
-				
+
 			case PUT:
 				
 				HttpPut put = new HttpPut(mUrl);
@@ -112,6 +116,19 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 				
 				response = httpClient.execute(put);
 				break;
+
+			case DELETE:
+				
+				if (mQuery.size() > 0)
+					mUrl = mUrl + "?" + URLEncodedUtils.format(mQuery, HTTP.UTF_8);
+
+				HttpDelete del = new HttpDelete(mUrl);
+				
+				for (Header h : mHeaders)
+					del.setHeader(h);
+				
+				response = httpClient.execute(del);
+				break;
 				
 			default:
 				Utilities.logd(TAG, "RequestType " + mRequestType.toString() + " is not implemented yet, execution stopped!");
@@ -122,10 +139,12 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 			
 		    mResponse = getText(response.getEntity().getContent());
 		    
-			updateSessionInfo(response.getAllHeaders());
+			mResponsHeaders = response.getAllHeaders();
 
+			updateSessionInfo(mResponsHeaders);
+			
 		    if (mDebug) {
-				Utilities.logd(TAG, "Post Execute - " + getClass().getSimpleName() + '@' + Integer.toHexString(hashCode()));
+				Utilities.logd(TAG, "### Post Execute - " + getClass().getSimpleName() + '@' + Integer.toHexString(hashCode()));
 		    	StringBuilder headers = new StringBuilder();
 		    	headers.append("Headers: [");
 		    	for (Header h : response.getAllHeaders())
@@ -152,30 +171,8 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	
 	@Override
 	protected void onPostExecute(Void result) {
-		mListener.onComplete(mResponseCode, mResponse);
+		mListener.onComplete(mResponseCode, mResponse, mResponsHeaders);
     }
-	
-	private static String getText(InputStream in) {
-		
-		// Do not get content with: EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
-		// As this will make some very unfortunate line breaks in e.g. eta.dk/connect/ 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		StringBuilder sb = new StringBuilder();
-		String line = "";
-		try {
-			while ((line = reader.readLine()) != null)
-				sb.append(line);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}  finally {
-			try {
-				in.close();
-			} catch (Exception ex) {
-			}
-		}
-		return sb.toString();
-	}
 
 	/**
 	 * Method checks headers to find X-Token and X-Token-Expires.<br>
@@ -200,13 +197,35 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	    mEta.getSession().update(token, expire);
 	}
 	
+	private static String getText(InputStream in) {
+		
+		// Do not get content with: EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
+		// As this will make some very unfortunate line breaks in e.g. eta.dk/connect/ 
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		StringBuilder sb = new StringBuilder();
+		String line = "";
+		try {
+			while ((line = reader.readLine()) != null)
+				sb.append(line);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}  finally {
+			try {
+				in.close();
+			} catch (Exception ex) {
+			}
+		}
+		return sb.toString();
+	}
+
 	public HttpHelper debug(boolean useDebug) {
 		mDebug = useDebug;
 		return this;
 	}
 	
 	public interface HttpListener {
-		public void onComplete(int statusCode, String data);
+		public void onComplete(int statusCode, String data, Header[] headers);
 	}
 	
 }

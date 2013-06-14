@@ -11,34 +11,21 @@
  */
 package com.eTilbudsavis.etasdk;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import Utils.Endpoint;
-import Utils.Params;
 import Utils.Sort;
-import Utils.Utilities;
-import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Environment;
+import android.os.Handler;
 import android.text.TextUtils;
-import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.EtaObjects.Session;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 
 // Main object for interacting with the SDK.
@@ -52,12 +39,7 @@ public class Eta implements Serializable {
 	/** 
 	 * Variable to decide whether to show debug log messages.<br><br>
 	 * Please only set to <code>true</code> while developing to avoid leaking sensitive information */
-	public static final boolean DEBUG = true;
-	
-	/** 
-	 * Variable to decide whether to show info log messages.<br><br>
-	 * Can be true in a release version without further implications */
-	public static final boolean DEBUG_I = true;
+	public static boolean mDebug = false;
 	
 	/** The date format as returned from the server */
 	public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss+SSSS";
@@ -71,6 +53,8 @@ public class Eta implements Serializable {
 	private SharedPreferences mPrefs;
 	private EtaLocation mLocation;
 	private EtaCache mCache;
+	private ShoppinglistManager mShoppinglistManager;
+	private static Handler mHandler = new Handler();
 	private ArrayList<EtaError> mErrors = new ArrayList<EtaError>();
 	
 	/**
@@ -87,6 +71,7 @@ public class Eta implements Serializable {
 		mLocation = new EtaLocation();
 		mCache = new EtaCache();
 		mSession = new Session(this);
+		mShoppinglistManager = new ShoppinglistManager(this);
 	}
 	
 	/**
@@ -96,7 +81,7 @@ public class Eta implements Serializable {
 	public String getApiKey() {
 		return mApiKey;
 	}
-
+	
 	/**
 	 * Returns the API secret found at http://etilbudsavis.dk/api/.
 	 * @return API secret as String
@@ -138,6 +123,10 @@ public class Eta implements Serializable {
 		return mCache;
 	}
 	
+	public ShoppinglistManager getShoppinglistManager() {
+		return mShoppinglistManager;
+	}
+	
 	/**
 	 * Gets a complete list of errors that have occurred<br><br>
 	 * 
@@ -162,6 +151,9 @@ public class Eta implements Serializable {
 		return this;
 	}
 	
+	public Handler getHandler() {
+		return mHandler;
+	}
 	/**
 	 * Simply instantiates and returns a new Api object.
 	 * @return a new Api object
@@ -173,15 +165,30 @@ public class Eta implements Serializable {
 	/**
 	 * Clears ALL preferences that the SDK has created.<br><br>
 	 * 
-	 * This includes Session, User, Api and other data.
+	 * This includes the session and user.
 	 * @return Returns true if the new values were successfully written to persistent storage.
 	 */
 	public boolean clearPreferences() {
-		boolean status = mPrefs.edit().clear().commit();
 		mSession = new Session(this);
-		return status;
+		return mPrefs.edit().clear().commit();
 	}
 
+	public boolean debug() {
+		return mDebug;
+	}
+
+	public Eta debug(boolean useDebug) {
+		mDebug = useDebug;
+		return this;
+	}
+	
+	public void onPause() {
+		
+	}
+	
+	public void onResume() {
+	}
+	
 	private Bundle getApiParams(int offset, int limit, String[] orderBy) {
 		Bundle apiParams = new Bundle();
 		apiParams.putInt(Catalog.PARAM_OFFSET, offset);

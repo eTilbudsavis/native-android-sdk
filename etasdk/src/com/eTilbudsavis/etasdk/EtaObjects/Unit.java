@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 public class Unit implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -19,12 +21,14 @@ public class Unit implements Serializable {
 	}
 	
 	public static Unit fromJSON(String unit) {
+		Unit u = new Unit();
 		try {
-			return fromJSON(new Unit(), new JSONObject(unit));
+			u = fromJSON(u, new JSONObject(unit));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return u;
 	}
 	
 	public static Unit fromJSON(JSONObject unit) {
@@ -38,7 +42,8 @@ public class Unit implements Serializable {
 		try {
 			u.setSymbol(unit.getString(S_SYMBOL));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return u;
 	}
@@ -52,8 +57,8 @@ public class Unit implements Serializable {
 		try {
 			o.put(S_SYMBOL, u.getSymbol());
 		} catch (JSONException e) {
-			o = null;
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return o;
 	}

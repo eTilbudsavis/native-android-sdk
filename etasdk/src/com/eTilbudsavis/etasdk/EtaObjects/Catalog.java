@@ -10,13 +10,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
-
-import android.annotation.SuppressLint;
-
 import Utils.Endpoint;
 import Utils.Params;
 import Utils.Sort;
+import android.annotation.SuppressLint;
+
+import com.eTilbudsavis.etasdk.Eta;
 
 public class Catalog  implements Serializable {
 	
@@ -142,12 +141,14 @@ public class Catalog  implements Serializable {
 	}
 
 	public static ArrayList<Catalog> fromJSONArray(String catalogs) {
+		ArrayList<Catalog> list = new ArrayList<Catalog>();
 		try {
-			return fromJSONArray(new JSONArray(catalogs));
+			list = fromJSONArray(new JSONArray(catalogs));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return list;
 	}
 	
 	public static ArrayList<Catalog> fromJSONArray(JSONArray catalogs) {
@@ -157,19 +158,21 @@ public class Catalog  implements Serializable {
 				list.add(Catalog.fromJSON((JSONObject)catalogs.get(i)));
 			
 		} catch (JSONException e) {
-			list = null;
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return list;
 	}
 	
 	public static Catalog fromJSON(String catalog) {
+		Catalog c = new Catalog();
 		try {
-			return fromJSON(new JSONObject(catalog));
+			c = fromJSON(c, new JSONObject(catalog));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return c;
 	}
 
 	public static Catalog fromJSON(JSONObject catalog) {
@@ -203,7 +206,8 @@ public class Catalog  implements Serializable {
 				c.setImages(Images.fromJSON(catalog.getJSONObject(S_IMAGES)));
 				c.setPages(Pages.fromJSON(catalog.getJSONObject(S_PAGES)));
 			} catch (JSONException e) {
-				e.printStackTrace();
+				if (Eta.mDebug)
+					e.printStackTrace();
 			}
 		} else if (catalog.has(S_ID) && catalog.has(P_PAGE)) {
 			// If it is a partial catalog
@@ -211,7 +215,8 @@ public class Catalog  implements Serializable {
 				c.setId(catalog.getString(S_ID));
 				c.setOfferOnPage(catalog.getInt(P_PAGE));
 			} catch (JSONException e) {
-				e.printStackTrace();
+				if (Eta.mDebug)
+					e.printStackTrace();
 			}
 		}
 		return c;
@@ -241,7 +246,6 @@ public class Catalog  implements Serializable {
 			o.put(S_IMAGES, c.getImages().toJSON());
 			o.put(S_PAGES, c.getPages().toJSON());
 		} catch (JSONException e) {
-			o = null;
 			e.printStackTrace();
 		}
 		return o;
@@ -500,7 +504,7 @@ public class Catalog  implements Serializable {
 	public String toString(boolean everything) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getClass().getSimpleName()).append("[")
-		.append("branding=").append(mBranding.toString(everything))
+		.append("branding=").append(mBranding == null ? null : mBranding.toString(everything))
 		.append(", id=").append(mId)
 		.append(", from=").append(getRunFromString())
 		.append(", till=").append(getRunTillString());
@@ -511,9 +515,9 @@ public class Catalog  implements Serializable {
 			.append(", offerCount=").append(mOfferCount)
 			.append(", dealer=").append(mDealer == null ? mDealerId : mDealer.toString())
 			.append(", store=").append(mStore == null ? mStoreId : mStore.toString())
-			.append(", dimension=").append(mDimension.toString())
-			.append(", images=").append(mImages.toString())
-			.append(", pages=").append(mPages.toString());
+			.append(", dimension=").append(mDimension == null ? null : mDimension.toString())
+			.append(", images=").append(mImages == null ? null : mImages.toString())
+			.append(", pages=").append(mPages == null ? null : mPages.toString());
 		}
 		return sb.append("]").toString();
 	}

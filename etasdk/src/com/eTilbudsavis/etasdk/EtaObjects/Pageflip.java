@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 import android.graphics.Color;
 
 public class Pageflip implements Serializable {
@@ -27,12 +29,14 @@ public class Pageflip implements Serializable {
 	}
 	
 	public static Pageflip fromJSON(String pageflip) {
+		Pageflip p = new Pageflip();
 		try {
-			return fromJSON(new Pageflip(), new JSONObject(pageflip));
+			p = fromJSON(p, new JSONObject(pageflip));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return p;
 	}
 
 	public static Pageflip fromJSON(JSONObject pageflip) {
@@ -47,7 +51,8 @@ public class Pageflip implements Serializable {
 			p.setLogo(pageflip.getString(S_LOGO));
 			p.setColor(Color.parseColor("#"+pageflip.getString(S_COLOR)));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return p;
 	}
@@ -62,8 +67,8 @@ public class Pageflip implements Serializable {
 			o.put(S_LOGO, p.getLogo());
 			o.put(S_COLOR, p.getColorString());
 		} catch (JSONException e) {
-			o = null;
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return o;
 	}

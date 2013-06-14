@@ -9,6 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 public class Permission implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -21,12 +23,14 @@ public class Permission implements Serializable {
 	}
 
 	public static Permission fromJSON(String permission) {
+		Permission p = new Permission();
 		try {
-			return fromJSON(new Permission(), new JSONObject(permission));
+			p = fromJSON(p, new JSONObject(permission));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return p;
 	}
 
 	public static Permission fromJSON(JSONObject permission) {
@@ -55,7 +59,8 @@ public class Permission implements Serializable {
 			}
 			
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		
 		return p;
@@ -78,8 +83,8 @@ public class Permission implements Serializable {
 				o.put(name, jArray);
 			}
 		} catch (JSONException e) {
-			o = null;
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return o;
 	}

@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 import android.graphics.Color;
 
 public class Branding implements Serializable {
@@ -31,12 +33,14 @@ public class Branding implements Serializable {
 	}
 	
 	public static Branding fromJSON(String branding) {
+		Branding b = new Branding();
 		try {
-			return fromJSON(new Branding(), new JSONObject(branding));
+			b = fromJSON(b, new JSONObject(branding));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return b;
 	}
 
 	public static Branding fromJSON(JSONObject branding) {
@@ -55,7 +59,8 @@ public class Branding implements Serializable {
 			b.setColor(Color.parseColor("#"+branding.getString(S_COLOR)));
 			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(S_PAGEFLIP)));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return b;
 	}
@@ -74,7 +79,6 @@ public class Branding implements Serializable {
 			o.put(S_COLOR, b.getColorString());
 			o.put(S_PAGEFLIP, b.getPageflip().toJSON());
 		} catch (JSONException e) {
-			o = null;
 			e.printStackTrace();
 		}
 		return o;
@@ -170,7 +174,7 @@ public class Branding implements Serializable {
 		if (everything) {
 			sb.append(", logo=").append(mLogo)
 			.append(", color=").append(mColor)
-			.append(", pageflip=").append(mPageflip.toString());
+			.append(", pageflip=").append(mPageflip == null ? null : mPageflip.toString());
 		}
 		
 		return sb.append("]").toString();

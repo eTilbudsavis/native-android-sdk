@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 public class Images implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -23,12 +25,14 @@ public class Images implements Serializable {
 	}
 	
 	public static Images fromJSON(String images) {
+		Images i = new Images();
 		try {
-			return fromJSON(new Images(), new JSONObject(images));
+			i = fromJSON(i, new JSONObject(images));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return i;
 	}
 
 	public static Images fromJSON(JSONObject images) {
@@ -44,7 +48,8 @@ public class Images implements Serializable {
 			i.setZoom(image.getString("zoom"));
 			i.setThumb(image.getString("thumb"));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
     	return i;
 	}
@@ -60,8 +65,8 @@ public class Images implements Serializable {
 			o.put(S_ZOOM, i.getZoom());
 			o.put(S_THUMB, i.getThumb());
 		} catch (JSONException e) {
-			o = null;
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return o;
 	}

@@ -1,56 +1,122 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
+
+import com.eTilbudsavis.etasdk.Eta;
+
 public class Shoppinglist implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
+	private static final String S_ID = "id";
+	private static final String S_ERN = "ern";
+	private static final String S_NAME = "name";
+	private static final String S_ACCESS = "access";
+	private static final String S_MODIFIED = "modified";
+
+	@SuppressLint("SimpleDateFormat")
+	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
+
 	private String mId;
+	private String mErn;
 	private String mName;
 	private String mAccess;
-	private HashMap<String, Share> mHashShares = new HashMap<String, Share>();
-	private double mModified = Double.valueOf(1);
-	private HashMap<String, ShoppinglistItem> mHashItems = new HashMap<String, ShoppinglistItem>();
-	private Boolean mWaitingForInitUpdate = true;
+	private long mModified = 0L;
+	
+	private HashMap<String, Share> mShares = new HashMap<String, Share>();
+	private HashMap<String, ShoppinglistItem> mItems = new HashMap<String, ShoppinglistItem>();
 
-	public Shoppinglist(JSONObject shoppinglist) {
-		try {
-			mId = shoppinglist.getString("id");
-			mName = shoppinglist.getString("name");
-			mAccess = shoppinglist.getString("access");
-			JSONArray jArray = shoppinglist.getJSONArray("shares");
-			for (int i = 0; i < jArray.length(); i++) {
-				Share s = new Share((JSONObject)jArray.get(i));
-				mHashShares.put(s.getUser(), s);
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+	public Shoppinglist() {
 	}
 
-	public void update(JSONObject shoppinglist) {
+	public static ArrayList<Shoppinglist> fromJSONArray(String shoppinglists) {
+		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
 		try {
-			mId = shoppinglist.getString("id");
-			mName = shoppinglist.getString("name");
-			mAccess = shoppinglist.getString("access");
-			JSONArray jArray = shoppinglist.getJSONArray("shares");
-			for (int i = 0; i < jArray.length(); i++) {
-				Share s = new Share((JSONObject)jArray.get(i));
-				mHashShares.put(s.getUser(), s);
-			}
+			list = fromJSONArray(new JSONArray(shoppinglists));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
+		return list;
+	}
+	
+	public static ArrayList<Shoppinglist> fromJSONArray(JSONArray shoppinglists) {
+		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
+		try {
+			for (int i = 0 ; i < shoppinglists.length() ; i++ )
+				list.add(Shoppinglist.fromJSON((JSONObject)shoppinglists.get(i)));
+			
+		} catch (JSONException e) {
+			if (Eta.mDebug)
+				e.printStackTrace();
+		}
+		return list;
+	}
+	
+	public static Shoppinglist fromJSON(String list) {
+		Shoppinglist sl = new Shoppinglist();
+		try {
+			sl = fromJSON(sl, new JSONObject(list));
+		} catch (JSONException e) {
+			if (Eta.mDebug)
+				e.printStackTrace();
+		}
+		return sl;
+	}
+
+	public static Shoppinglist fromJSON(JSONObject list) {
+		return fromJSON(new Shoppinglist(), list);
+	}
+
+	private static Shoppinglist fromJSON(Shoppinglist sl, JSONObject shoppinglist) {
+		if (sl == null) sl = new Shoppinglist();
+		if (shoppinglist == null ) return sl;
+		
+		try {
+			sl.setId(shoppinglist.getString(S_ID));
+			sl.setErn(shoppinglist.getString(S_ERN));
+			sl.setName(shoppinglist.getString(S_NAME));
+			sl.setAccess(shoppinglist.getString(S_ACCESS));
+			sl.setModified(shoppinglist.getString(S_MODIFIED));
+		} catch (JSONException e) {
+			if (Eta.mDebug)
+				e.printStackTrace();
+		}
+		
+		return sl;
+	}
+	
+	public void set(JSONObject shoppinglist) {
+		fromJSON(this, shoppinglist);
 	}
 
 	public String getId() {
 		return mId;
+	}
+
+	public Shoppinglist setId(String id) {
+		mId = id;
+		return this;
+	}
+
+	public String getErn() {
+		return mErn;
+	}
+
+	public Shoppinglist setErn(String ern) {
+		mErn = ern;
+		return this;
 	}
 
 	public String getName() {
@@ -58,7 +124,7 @@ public class Shoppinglist implements Serializable {
 	}
 
 	public Shoppinglist setName(String name) {
-		mName = name.trim();
+		mName = name;
 		return this;
 	}
 
@@ -66,17 +132,44 @@ public class Shoppinglist implements Serializable {
 		return mAccess;
 	}
 
+	public Shoppinglist setAccess(String access) {
+		mAccess = access;
+		return this;
+	}
+
+	public long getModified() {
+		return mModified;
+	}
+
+	public String getModifiedString() {
+		return sdf.format(new Date(mModified));
+	}
+
+	public Shoppinglist setModified(long time) {
+		mModified = time;
+		return this;
+	}
+
+	public Shoppinglist setModified(String time) {
+		try {
+			mModified = sdf.parse(time).getTime();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return this;
+	}
+
 	public Shoppinglist setShare(Share share) {
-		mHashShares.put(share.getUser(), share);
+		mShares.put(share.getUser(), share);
 		return this;
 	}
 
 	public HashMap<String, Share> getShares() {
-		return mHashShares;
+		return mShares;
 	}
 
 	public void putShare(Share share) {
-		mHashShares.put(share.getUser(), share);
+		mShares.put(share.getUser(), share);
 	}
 	
 	/**
@@ -85,50 +178,32 @@ public class Shoppinglist implements Serializable {
 	 * @param shares to put into shoppinglist
 	 */
 	public void putShares(HashMap<String, Share> shares) {
-		mHashShares.clear();
-		mHashShares.putAll(shares);
+		mShares.clear();
+		mShares.putAll(shares);
 	}
 	
-	public Shoppinglist setModified(Double modified) {
-		// Convert server time to milliseconds
-		mModified = modified*1000;
-		return this;
-	}
-	
-	public Double getModified() {
-		return mModified;
-	}
-
 	public void addItem(ShoppinglistItem shoppinglistItem) {
-		mHashItems.put(shoppinglistItem.getId(), shoppinglistItem);
+		mItems.put(shoppinglistItem.getId(), shoppinglistItem);
 	}
 
 	public Boolean removeItem(ShoppinglistItem shoppinglistItem) {
-		return  mHashItems.remove(shoppinglistItem.getId()) == null ? false : true;
+		return  mItems.remove(shoppinglistItem.getId()) == null ? false : true;
 	}
 
 	public Boolean removeShare(Share share) {
-		return  mHashShares.remove(share.getUser()) == null ? false : true;
+		return  mShares.remove(share.getUser()) == null ? false : true;
 	}
 	
 	public HashMap<String, ShoppinglistItem> getShoppinglistItems() {
-		return mHashItems;
+		return mItems;
 	}
 
-	public void waitingForInitUpdate(Boolean value) {
-		mWaitingForInitUpdate = value;
-	}
-
-	public Boolean waitingForInitUpdate() {
-		return mWaitingForInitUpdate;
-	}
-	
 	public Boolean compareShares(HashMap<String, Share> shares) {
-		if (!mHashShares.keySet().containsAll(shares.keySet()) && !shares.keySet().containsAll(mHashShares.keySet()))
+		if (!mShares.keySet().containsAll(shares.keySet()) && !shares.keySet().containsAll(mShares.keySet()))
 			return false;
 		
 		for(String key : shares.keySet())
-			if (!mHashShares.get(key).equals(shares.get(key)))
+			if (!mShares.get(key).equals(shares.get(key)))
 				return false;
 		
 		return true;

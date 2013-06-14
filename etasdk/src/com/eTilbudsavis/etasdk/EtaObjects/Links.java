@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 public class Links implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -19,16 +21,18 @@ public class Links implements Serializable {
 	}
 	
 	public static Links fromJSON(String links) {
+		Links l = new Links();
 		try {
-			return fromJSON(new Links(), new JSONObject(links));
+			l = fromJSON(l, new JSONObject(links));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return l;
 	}
 	
 	public static Links fromJSON(JSONObject links) {
-		return fromJSON(new Links(), links);	
+		return fromJSON(new Links(), links);
 	}
 	
 	public static Links fromJSON(Links l, JSONObject links) {
@@ -38,7 +42,8 @@ public class Links implements Serializable {
 		try {
 			l.setWebshop(links.getString(S_WEBSHOP));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return l;
 	}
@@ -52,8 +57,8 @@ public class Links implements Serializable {
 		try {
 			o.put(S_WEBSHOP, l.getWebshop());
 		} catch (JSONException e) {
-			o = null;
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return o;
 	}

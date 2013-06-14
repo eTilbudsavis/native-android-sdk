@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 public class Quantity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -23,12 +25,14 @@ public class Quantity implements Serializable {
 	}
 	
 	public static Quantity fromJSON(String quantity) {
+		Quantity q = new Quantity();
 		try {
-			return fromJSON(new Quantity(), new JSONObject(quantity));
+			q = fromJSON(q, new JSONObject(quantity));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return q;
 	}
 	
 	public static Quantity fromJSON(JSONObject quantity) {
@@ -44,7 +48,8 @@ public class Quantity implements Serializable {
 			q.setSize(quantity.getString(S_SIZE).equals("null") ? null : Size.fromJSON(quantity.getJSONObject(S_SIZE)));
 			q.setPieces(quantity.getString(S_PIECES).equals("null") ? null : Pieces.fromJSON(quantity.getJSONObject(S_PIECES)));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return q;
 	}
@@ -60,8 +65,8 @@ public class Quantity implements Serializable {
 			o.put(S_SIZE, q.getSize() == null ? null : q.getSize().toJSON());
 			o.put(S_PIECES, q.getPieces() == null ? null : q.getPieces().toJSON());
 		} catch (JSONException e) {
-			o = null;
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return o;
 	}

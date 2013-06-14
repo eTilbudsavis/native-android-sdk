@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk;
 
 import java.io.Serializable;
 import java.text.ParseException;
@@ -15,7 +15,9 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Api.CallbackString;
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
+import com.eTilbudsavis.etasdk.EtaObjects.Permission;
+import com.eTilbudsavis.etasdk.EtaObjects.User;
 
 public class Session implements Serializable {
 
@@ -33,10 +35,6 @@ public class Session implements Serializable {
 	public static final String PREFS_SESSION_USER = "session_user";
 	public static final String PREFS_SESSION_PASS = "session_pass";
 
-	private static final long EXPIRE_MINUTE = 60*1000;
-	
-	private static final long EXPIRE_DAY = 24*60*EXPIRE_MINUTE;
-
 	/** API v2 Session endpoint */
 	public static final String ENDPOINT = Endpoint.SESSION;
 	
@@ -49,16 +47,21 @@ public class Session implements Serializable {
 	private User mUser = null;
 	private Permission mPermission = null;
 	private String mProvider;
+	private String mUserStr = null;
+	private String mPassStr = null;
 	
 	private Eta mEta;
 	private boolean mIsUpdatingSession = false;
+	
 	private ArrayList<SessionListener> mSubscribers = new ArrayList<Session.SessionListener>();
 
 	CallbackString session = new CallbackString() {
 
 		public void onComplete(int statusCode, String data, EtaError error) {
 			
-			if (200 <= statusCode || statusCode < 300 ) {
+			Utilities.logd(TAG, statusCode, data, error);
+			
+			if (200 <= statusCode && statusCode < 300 ) {
 				set(data);
 			} else {
 				mEta.addError(error);
@@ -74,7 +77,7 @@ public class Session implements Serializable {
 
 		public void onComplete(int statusCode, String data, EtaError error) {
 			
-			if (200 <= statusCode || statusCode < 300 ) {
+			if (200 <= statusCode && statusCode < 300 ) {
 				Utilities.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + data);
 			} else {
 				mEta.addError(error);
@@ -87,9 +90,10 @@ public class Session implements Serializable {
 	
 	public Session(Eta eta) {
 		mEta = eta;
+		mUser = new User();
 	}
 	
-	public void set(String session) {
+	private void set(String session) {
 		try {
 			set(new JSONObject(session));
 		} catch (JSONException e) {
@@ -97,14 +101,15 @@ public class Session implements Serializable {
 		}
 	}
 	
-	public void set(JSONObject session) {
-		mJson = session;
+	private void set(JSONObject session) {
+		
 		try {
 			mToken = session.getString(S_TOKEN);
 		    setExpires(session.getString(S_EXPIRES));
-		    mUser = session.getString(S_USER).equals("null") ? null : User.fromJSON(session.getJSONObject(S_USER));
+		    mUser = User.fromJSON(session.getString(S_USER));
 		    mPermission = Permission.fromJSON(session.getJSONObject(S_PERMISSIONS));
 		    mProvider = session.getString(S_PROVIDER);
+		    mJson = session;
 			saveJSON();
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -125,8 +130,11 @@ public class Session implements Serializable {
 		// Try to get a session from SharedPreferences, and check if it's okay
 		// If it doesn't exist or is invalid then update it.
 		String sessionJson = mEta.getPrefs().getString(PREFS_SESSION, null);
-		if (sessionJson != null) {
-			
+		mUserStr = mEta.getPrefs().getString(PREFS_SESSION_USER, null);
+		mPassStr = mEta.getPrefs().getString(PREFS_SESSION_PASS, null);
+		if (sessionJson == null) {
+			update();
+		} else {
 			set(sessionJson);
 			if (isExpired()) {
 				update();
@@ -134,38 +142,30 @@ public class Session implements Serializable {
 				notifySubscribers();
 			}
 
-		} else {
-			update();
 		}
 	}
 
-	public void update() {
+	public void login(String user, String password) {
+		// Save user and pass to preferences
+		mEta.getPrefs().edit().putString(PREFS_SESSION_USER, user).putString(PREFS_SESSION_PASS, password).commit();
+		mUserStr = user;
+		mPassStr = password;
+		update();
+	}
+	
+	public synchronized void update() {
 		if (mIsUpdatingSession)
 			return;
 		
 		mIsUpdatingSession = true;
 		Bundle b = new Bundle();
-		String u = mEta.getPrefs().getString(PREFS_SESSION_USER, null);
-		String p = mEta.getPrefs().getString(PREFS_SESSION_PASS, null);
-		if (u != null && p != null) {
-			b.putString(Params.EMAIL, u);
-			b.putString(Params.PASSWORD, p);
+		if (mUserStr != null && mPassStr != null) {
+			b.putString(Params.EMAIL, mUserStr);
+			b.putString(Params.PASSWORD, mPassStr);
 		}
 		mEta.api().setUseLocation(false).post(Session.ENDPOINT, session, b).execute();
 	}
 	
-	public void login(String user, String password) {
-		mEta.getPrefs().edit().putString(PREFS_SESSION_USER, user).putString(PREFS_SESSION_PASS, password).commit();
-		if (isExpired()) {
-			Bundle b = new Bundle();
-			b.putString(Params.EMAIL, user);
-			b.putString(Params.PASSWORD, password);
-			mEta.api().put(Session.ENDPOINT, session , b).execute();
-		} else {
-			update();
-		}
-	}
-
 	/**
 	 * 
 	 * @param email
@@ -198,7 +198,7 @@ public class Session implements Serializable {
 	}
 	
 	public boolean isExpired() {
-		return mExpires < (System.currentTimeMillis() + EXPIRE_MINUTE);
+		return mExpires < (System.currentTimeMillis() + Utilities.MINUTE_IN_MILLIS);
 	}
 	
 	/**
@@ -211,23 +211,21 @@ public class Session implements Serializable {
 			return;
 		
 		if (mJson == null) {
+			Utilities.logd(TAG, "Damn JSON is null");
 			update();
 			return;
 		}
 		
 		try {
-			
 			if (!mToken.equals(headerToken) ) {
 				mJson.put(S_TOKEN, headerToken);
 				mJson.put(S_EXPIRES, headerExpires);
 				set(mJson);
 				return;
 			}
-			long exp = 0L;
-			exp = sdf.parse(headerExpires).getTime();
-			if (exp < (System.currentTimeMillis()+EXPIRE_DAY)) {
+			long expire = ( sdf.parse(headerExpires).getTime() - Utilities.DAY_IN_MILLIS );
+			if ( expire < System.currentTimeMillis()) {
 				update();
-				return;
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -237,50 +235,52 @@ public class Session implements Serializable {
 	}
 	
 	/**
-	 * TODO: Implement this...
+	 * Signs a user out, and cleans all references to the user.<br><br>
+	 * A new {@link #login(String, String) login} is needed to get access to user stuff again.
 	 */
-	public void signout() {
+	public synchronized void signout() {
+		mIsUpdatingSession = true;
+		clearUser();
+		Bundle b = new Bundle();
+		b.putString(Params.EMAIL, "");
+		mEta.api().put(ENDPOINT, session, b).execute();
+	}
+	
+	private void clearUser() {
 		mEta.getPrefs().edit()
 		.putString(PREFS_SESSION_USER, null)
 		.putString(PREFS_SESSION_PASS, null).commit();
+		mUserStr = null;
+		mPassStr = null;
+		mUser = new User();
 	}
 	
 	/**
-	 * TODO: Implement this...
+	 * Destroys this session.<br><br>
+	 * And returns a new session, completely clean session.
 	 */
-	public Session invalidate() {
+	public void invalidate() {
 		mJson = null;
 		mToken = null;
 		mExpires = 0L;
-		mUser = null;
 		mPermission = null;
 		mProvider = null;
 		mSubscribers = new ArrayList<Session.SessionListener>();
-		mEta.getPrefs().edit()
-		.putString(PREFS_SESSION, null).commit();
-		return this;
+		mEta.getPrefs().edit().putString(PREFS_SESSION, null).commit();
+		clearUser();
+		mEta.api().delete(ENDPOINT, session, new Bundle()).execute();
 	}
 	
 	public JSONObject getJson() {
 		return mJson;
 	}
 	
-	public Session setToken(String token) {
-		mToken = token;
-		return this;
-	}
-
 	/**
 	 * Get this Sessions token. Used for headers in API calls
 	 * @return token as String if session is active, otherwise null.
 	 */
 	public String getToken() {
 		return mToken;
-	}
-
-	public Session setUser(User user) {
-		mUser = user;
-		return this;
 	}
 
 	public User getUser() {
@@ -356,7 +356,7 @@ public class Session implements Serializable {
 		
 		if (everything) {
 			sb.append(", user=").append(mUser == null ? "null" : mUser.toString(everything))
-			.append(", permission=").append(mPermission.toString())
+			.append(", permission=").append(mPermission == null ? null : mPermission.toString())
 			.append(", provider=").append(mProvider);
 		}
 		return sb.append("]").toString();

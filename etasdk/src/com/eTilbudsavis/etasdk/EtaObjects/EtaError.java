@@ -17,6 +17,12 @@ public class EtaError implements Serializable {
 
 	public static final String TAG = "EtaError";
 
+	private static final String S_ID = "id";
+	private static final String S_CODE = "code";
+	private static final String S_MESSAGE = "message";
+	private static final String S_DETAILS = "details";
+	private static final String S_ORIG_DATA = "original_data";
+	
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
 	
@@ -24,6 +30,7 @@ public class EtaError implements Serializable {
 	private int mCode = 0;
 	private String mMessage = new String();
 	private String mDetails = new String();
+	private String mOrigData = new String();
 	private long mTime = 0L;
 	
 	public EtaError() {
@@ -31,12 +38,13 @@ public class EtaError implements Serializable {
 	}
 	
 	public static EtaError fromJSON(String error) {
+		EtaError er = new EtaError();
 		try {
-			return fromJSON(new EtaError(), new JSONObject(error));
+			er = fromJSON(er, new JSONObject(error));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			er.setOriginalData(error);
 		}
-		return null;
+		return er;
 	}
 	
 	public static EtaError fromJSON(JSONObject error) {
@@ -48,15 +56,34 @@ public class EtaError implements Serializable {
 		if (error == null) return er;
 		
 		try {
-			er.setId(error.getString("id"));
-			er.setCode(error.getInt("code"));
-			er.setMessage(error.getString("message"));
-			er.setDetails(error.getString("details"));
+			er.setId(error.getString(S_ID));
+			er.setCode(error.getInt(S_CODE));
+			er.setMessage(error.getString(S_MESSAGE));
+			er.setDetails(error.getString(S_DETAILS));
 			er.setTime(System.currentTimeMillis());
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return er;
+	}
+
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(EtaError er) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(S_ID, er.getId());
+			o.put(S_CODE, er.getCode());
+			o.put(S_MESSAGE, er.getMessage());
+			o.put(S_DETAILS, er.getDetails());
+		} catch (JSONException e) {
+			if (Eta.mDebug)
+				e.printStackTrace();
+		}
+		return o;
 	}
 	
 	public void setId(String id) {
@@ -95,6 +122,15 @@ public class EtaError implements Serializable {
 		return mDetails;
 	}
 
+	public String getOriginalData() {
+		return mOrigData;
+	}
+
+	public EtaError setOriginalData(String data) {
+		mOrigData = data;
+		return this;
+	}
+	
 	public long getTime() {
 		return mTime;
 	}
@@ -117,6 +153,7 @@ public class EtaError implements Serializable {
 				.append(", message=").append(mMessage)
 				.append(", details=").append(mDetails)
 				.append(", time=").append(getTimeString())
+				.append(", original_data=").append(mOrigData)
 				.append("]").toString();
 	}
 }

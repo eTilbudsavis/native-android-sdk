@@ -9,6 +9,8 @@ import org.json.JSONObject;
 import Utils.Endpoint;
 import Utils.Params;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 public class User implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -66,12 +68,14 @@ public class User implements Serializable {
 	}
 
 	public static User fromJSON(String user) {	
+		User u = new User();
 		try {
-			return fromJSON(new User(), new JSONObject(user));
+			u = fromJSON(u, new JSONObject(user));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return u;
 	}
 
 	public static User fromJSON(JSONObject user) {	
@@ -91,7 +95,8 @@ public class User implements Serializable {
 			u.setEmail(user.getString(S_EMAIL));
 			u.setPermissions(Permission.fromJSON(user.getJSONObject(S_PERMISSIONS)));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return u;
 	}
@@ -111,10 +116,14 @@ public class User implements Serializable {
 			o.put(S_EMAIL, u.getEmail());
 			o.put(S_PERMISSIONS, u.getPermissions() == null ? null : u.getPermissions().toJSON());
 		} catch (JSONException e) {
-			o = null;
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return o;
+	}
+	
+	public boolean isLoggedIn() {
+		return mEmail != null && mId != 0;
 	}
 	
 	public int getId() {
@@ -224,7 +233,7 @@ public class User implements Serializable {
 			.append(", gender=").append(mGender)
 			.append(", birthyear=").append(mBirthYear)
 			.append(", ern=").append(mErn)
-			.append(", permission=").append(mPermissions.toString());
+			.append(", permission=").append(mPermissions == null ? null : mPermissions.toString());
 		}
 		return sb.append("]").toString();
 	}

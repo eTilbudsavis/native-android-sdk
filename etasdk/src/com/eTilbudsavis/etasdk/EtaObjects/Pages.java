@@ -7,6 +7,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 public class Pages implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -25,12 +27,14 @@ public class Pages implements Serializable {
 	}
 	
 	public static Pages fromJSON(String pages) {
+		Pages p = new Pages();
 		try {
-			return fromJSON(new Pages(), new JSONObject(pages));
+			p = fromJSON(p, new JSONObject(pages));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return p;
 	}
 	
 	public static Pages fromJSON(JSONObject pages) {
@@ -56,7 +60,8 @@ public class Pages implements Serializable {
 				p.getZoom().add(jArray.getString(i));
 			}
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return p;
 	}
@@ -84,8 +89,8 @@ public class Pages implements Serializable {
 			o.put(S_VIEW, aView);
 			o.put(S_ZOOM, aZoom);
 		} catch (JSONException e) {
-			o = null;
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return o;
 	}

@@ -1,140 +1,248 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
+
+import Utils.Utilities;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private static final String TAG = "ShoppinglistItem";
+	
+	private static final String S_ID = "id";
+	private static final String S_TICK = "tick";
+	private static final String S_OFFER = "offer";
+	private static final String S_OFFER_ID = "offer_id";
+	private static final String S_COUNT = "count";
+	private static final String S_DESCRIPTION = "description";
+	private static final String S_SHOPPINGLIST_ID = "shopping_list_id";
+	private static final String S_ERN = "ern";
+	private static final String S_CREATOR = "creator";
+	private static final String S_MODIFIED = "modified";
+
+	@SuppressLint("SimpleDateFormat")
+	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
+
 	private String mId;
-	private String mDescription;
+	private boolean mTick;
+	private String mOfferId;
 	private int mCount;
-	private Boolean mTick;
-	private Offer mOffer = null;
+	private String mDescription;
+	private String mShoppinglistId;
+	private String mErn;
 	private String mCreator;
-	private String mShoppinglist;
+	private long mModified;
+	private Offer mOffer = null;
 
-	/**
-	 * Creates a new ShoppinglistItem.<br><br>
-	 * 
-	 * The constructor takes a JSONObject that is returned from the server
-	 * and creates a new Object from it.
-	 * 
-	 * @param shoppinglistItem
-	 */
-	public ShoppinglistItem(JSONObject shoppinglistItem) {
+	public static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem) {
+		if (sli == null) sli = new ShoppinglistItem();
+		if (shoppinglistItem == null) return sli;
+		
 		try {
-			mId = shoppinglistItem.getString("id");
-			mDescription = shoppinglistItem.getString("description");
-
-			String offer = shoppinglistItem.getString("offer");
-			if (!offer.equals("null"))
-				mOffer = Offer.fromJSON(offer);
-
-			setCount(shoppinglistItem.getInt("count"));
-			mTick = shoppinglistItem.getBoolean("tick");
-			mCreator = shoppinglistItem.getString("creator");
-			mShoppinglist = shoppinglistItem.getString("shoppinglist");
+			sli.setId(shoppinglistItem.getString(S_ID));
+			sli.setTick(shoppinglistItem.getBoolean(S_TICK));
+			sli.setOfferId(shoppinglistItem.getString(S_OFFER_ID));
+			sli.setCount(shoppinglistItem.getInt(S_COUNT));
+			sli.setDescription(shoppinglistItem.getString(S_DESCRIPTION));
+			sli.setShoppinglistId(shoppinglistItem.getString(S_SHOPPINGLIST_ID));
+			sli.setErn(shoppinglistItem.getString(S_ERN));
+			sli.setCreator(shoppinglistItem.getString(S_CREATOR));
+			sli.setModified(shoppinglistItem.getString(S_MODIFIED));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug) e.printStackTrace();
 		}
+		return sli;
+	}
+	
+	public ShoppinglistItem() {
 	}
 
-	/**
-	 * Creates a new ShoppinglistItem.<br><br>
-	 * 
-	 * <b>Notice:</b> this constructor sets description as ID
-	 * until a correct ID can be returned from server. <br>
-	 * You must change the ID of this object before sending any requests <br>
-	 * back to the server, or this ID will not match the server ID.
-	 * 
-	 * @param shoppinglist to add shoppinglistItem to.
-	 * @param description for the shoppinglistItem (where description is initial ID)
-	 */
+	public static ArrayList<ShoppinglistItem> fromJSONArray(String shoppinglistItems) {
+		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
+		try {
+			list = fromJSONArray(new JSONArray(shoppinglistItems));
+		} catch (JSONException e) {
+			if (Eta.mDebug)
+				e.printStackTrace();
+		}
+		return list;
+	}
+	
+	public static ArrayList<ShoppinglistItem> fromJSONArray(JSONArray shoppinglistItems) {
+		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
+		try {
+			for (int i = 0 ; i < shoppinglistItems.length() ; i++ )
+				list.add(ShoppinglistItem.fromJSON((JSONObject)shoppinglistItems.get(i)));
+			
+		} catch (JSONException e) {
+			if (Eta.mDebug)
+				e.printStackTrace();
+		}
+		return list;
+	}
+	
+	public static ShoppinglistItem fromJSON(String shoppinglistItem) {
+		ShoppinglistItem sli = new ShoppinglistItem();
+		try {
+			sli = fromJSON(sli, new JSONObject(shoppinglistItem));
+		} catch (JSONException e) {
+			if (Eta.mDebug) e.printStackTrace();
+		}
+		return sli;
+	}
+	
+	public static ShoppinglistItem fromJSON(JSONObject shoppinglistItem) {
+		return fromJSON(new ShoppinglistItem(), shoppinglistItem);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public ShoppinglistItem(Shoppinglist shoppinglist, String description) {
 		mDescription = description;
 		mCount = 1;
 		mTick = false;
 		mOffer = null;
-		mShoppinglist = shoppinglist.getId();
-	}
-
-	/**
-	 * Creates a new ShoppinglistItem.<br><br>
-	 * 
-	 * <b>Notice:</b> this constructor sets description as ID
-	 * until a correct ID can be returned from server. <br>
-	 * You must change the ID of this object before sending any requests <br>
-	 * back to the server, or this ID will not match the server ID.
-	 * @param shoppinglist to add shoppinglistItem to.
-	 * @param offer for the shoppinglistItem (where offer.getID() is initial ID)
-	 */
-	public ShoppinglistItem(Shoppinglist shoppinglist, Offer offer) {
-		mDescription = null;
-		mCount = 1;
-		mTick = false;
-		mOffer = offer;
-		mShoppinglist = shoppinglist.getId();
-	}
-
-	public void setId(String id) {
-		mId = id;
-	}
-
-	public String getId() {
-		return mId;
-	}
-
-	public String getDescription() {
-		return mDescription;
-	}
-
-	public int getCount() {
-		return mCount;
+		mShoppinglistId = shoppinglist.getId();
 	}
 
 	public String getTitle() {
 		return mOffer == null ? mDescription : mOffer.getHeading();
 	}
 
-	public void setCount(int count) {
+	
+	
+	public String getId() {
+		return mId;
+	}
+
+	public ShoppinglistItem setId(String id) {
+		mId = id;
+		return this;
+	}
+
+	public String getDescription() {
+		return mDescription;
+	}
+
+	public ShoppinglistItem setDescription(String description) {
+		mDescription = description;
+		return this;
+	}
+
+	public int getCount() {
+		return mCount;
+	}
+
+	public ShoppinglistItem setCount(int count) {
 		mCount = count;
+		return this;
 	}
 
 	public Boolean isTicked() {
 		return mTick;
 	}
 
-	public void setTick(Boolean tick) {
+	public ShoppinglistItem setTick(Boolean tick) {
 		mTick = tick;
+		return this;
 	}
 
 	public Offer getOffer() {
 		return mOffer;
 	}
 
-	public void setOffer(Offer offer) {
+	public ShoppinglistItem setOffer(Offer offer) {
 		mOffer = offer;
+		return this;
 	}
 
 	public String getCreator() {
 		return mCreator;
 	}
 
-	public String getShoppinglist() {
-		return mShoppinglist;
+	public ShoppinglistItem setCreator(String creator) {
+		mCreator = creator;
+		return this;
+	}
+
+	public String getShoppinglistId() {
+		return mShoppinglistId;
+	}
+
+	public ShoppinglistItem setShoppinglistId(String shoppinglist) {
+		mShoppinglistId = shoppinglist;
+		return this;
+	}
+
+	public String getOfferId() {
+		return mOfferId;
+	}
+
+	public ShoppinglistItem setOfferId(String offerId) {
+		mOfferId = offerId;
+		return this;
+	}
+
+	public String getErn() {
+		return mErn;
+	}
+
+	public ShoppinglistItem setErn(String ern) {
+		mErn = ern;
+		return this;
+	}
+
+	public long getModified() {
+		return mModified;
+	}
+
+	public String getModifiedString() {
+		return sdf.format(new Date(mModified));
+	}
+
+	public ShoppinglistItem setModified(long time) {
+		mModified = time;
+		return this;
+	}
+
+	public ShoppinglistItem setModified(String time) {
+		try {
+			mModified = sdf.parse(time).getTime();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return this;
 	}
 
 	public Bundle getApiParamsAddItem() {
 
 		Bundle apiParams = new Bundle();
-		apiParams.putString("shoppinglist", mShoppinglist);
+		apiParams.putString("shoppinglist", mShoppinglistId);
 		if (mOffer == null)
 			apiParams.putString("description", mDescription);
 		else
@@ -174,10 +282,10 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 		return mId.equals(sli.getId()) &&
 				( mDescription == null ? sli.getDescription() == null : mDescription.equals(sli.getDescription())) && 
 				mCount == sli.getCount() &&
-				mTick.equals(sli.isTicked()) &&
+				mTick == sli.isTicked() &&
 				( mOffer == null ? sli.getOffer() == null : mOffer.equals(sli.getOffer())) &&
 				mCreator.equals(sli.getCreator()) &&
-				mShoppinglist.equals(sli.getShoppinglist());
+				mShoppinglistId.equals(sli.getShoppinglistId());
 	}
 
 	public static Comparator<ShoppinglistItem> TitleComparator  = new Comparator<ShoppinglistItem>() {

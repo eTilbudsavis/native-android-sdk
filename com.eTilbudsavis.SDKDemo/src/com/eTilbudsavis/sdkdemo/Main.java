@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 import Utils.Endpoint;
@@ -11,6 +12,7 @@ import Utils.Utilities;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.location.Address;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
@@ -27,11 +29,13 @@ import com.eTilbudsavis.etasdk.Api.CallbackOfferList;
 import com.eTilbudsavis.etasdk.Api.CallbackStore;
 import com.eTilbudsavis.etasdk.Api.CallbackStoreList;
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Session.SessionListener;
+import com.eTilbudsavis.etasdk.ShoppinglistManager.ShoppinglistListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.EtaObjects.Session.SessionListener;
+import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.etilbudsavis.sdkdemo.R;
 
@@ -39,7 +43,8 @@ public class Main extends Activity {
 
 	public static final String TAG = "Main";
 
-	public static final boolean CONSOL_OUTPUT = false;
+	public static final boolean CONSOL_OUTPUT_BODY = false;
+	public static final boolean CONSOL_OUTPUT_HEADER = true;
 	public static final boolean DISPLAY_OUTPUT = true;
 	
 	private Eta mEta;
@@ -80,12 +85,17 @@ public class Main extends Activity {
         mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         
         mEta = new Eta(mApiKey, mApiSecret, this);
+        mEta.debug(true);
+//        mEta.clearPreferences();
         mEta.getLocation().set(55.63105, 12.5766, 700000, false);	// Fields
         
         // Session test should always be first (no session, no data)
         // unless for specific testing purposes
-        tests.add(tSession);
-        tests.add(tEndpoint);
+        
+//        tests.add(tSessionStart);
+        tests.add(tSessionLogin);
+        tests.add(tShoppinglist);
+//        tests.add(tEndpointAndListenerMismatch);
 //        tests.add(tCache);
 //        tests.add(tLocation);
         
@@ -101,7 +111,6 @@ public class Main extends Activity {
     	
 		@Override
 		public void run() {
-			
 			it ++;
 			if (it < tests.size()) {
 				tests.get(it).setNext(main).run();
@@ -111,11 +120,49 @@ public class Main extends Activity {
 				addHeader("TESTING DONE! time: " + timeTotal + "(ms)" + " http: " + timeHttp + "(ms)");
 //				printToFile("etaobj.txt");
 			}
-			
 		}
     };
     
-    Test tSession = new Test() {
+    /**
+     * Testing shoppinglist, and it's functionality
+     */
+    Test tShoppinglist = new Test() {
+
+    	ShoppinglistListener sll = new ShoppinglistListener() {
+			
+			@Override
+			public void onUpdate() {
+				HashMap<String, Shoppinglist> list = mEta.getShoppinglistManager().getShoppinglists();
+				Utilities.logd(TAG, "SL Count: " + String.valueOf(list.size()));
+				tShoppinglist.run();
+			}
+		};
+		@Override
+		public void run() {
+			
+			switch (iteration) {
+			case 0:
+				addHeader("TESTING SHOPPINGLIST");
+				iteration ++;
+				mEta.getShoppinglistManager().subscribe(sll).listSync();
+				break;
+
+			case 1:
+				iteration ++;
+				mEta.getShoppinglistManager().itemSync();
+				break;
+
+			default:
+				getNext().run();
+				break;
+			}
+		}
+    };
+    
+    /**
+     * Session testing, no user
+     */
+    Test tSessionStart = new Test() {
 
 		@Override
 		public void run() {
@@ -126,6 +173,7 @@ public class Main extends Activity {
 				@Override
 				public void onUpdate() {
 					stopTimer();
+					mEta.getSession().unSubscribe(this);
 					addPositive("Session: ", stop, mEta.getSession().toString(true));
 					getNext().run();
 				}
@@ -133,6 +181,28 @@ public class Main extends Activity {
 		}
     };
 
+    /**
+     * Session test with user login
+     */
+    Test tSessionLogin = new Test() {
+
+		@Override
+		public void run() {
+			addHeader("TESTING SESSTION LOGIN - not really, not done yet");
+			startTimer();
+			mEta.getSession().subscribe(new SessionListener() {
+				
+				@Override
+				public void onUpdate() {
+					stopTimer();
+					mEta.getSession().unSubscribe(this);
+					addPositive("Session Login: ", stop, mEta.getSession().toString(true));
+					getNext().run();
+				}
+			}).login(Keys.LOGIN_USER, Keys.LOGIN_PASS);
+		}
+    };
+    
     Test tCache = new Test() {
 
 		@Override
@@ -166,22 +236,26 @@ public class Main extends Activity {
 		}
     };
     
-    Test tEndpoint = new Test() {
+    Test tEndpointAndListenerMismatch = new Test() {
 
+    	String testName = "Endpoint";
+    	
 		@Override
 		public void run() {
-			Utilities.logd(TAG, "RUN");
+
+			addHeader("TESTING ENDPOINT");
+			
 			startTimer();
 			mEta.api().get(Endpoint.CATALOG_LIST, new Api.CallbackOffer() {
 				
 				@Override
 				public void onComplete(int statusCode, Offer offer, EtaError error) {
+
 					stopTimer();
-					Utilities.logd(TAG, "DONE");
 					if (statusCode == 200)
-						Utilities.logd(TAG, offer.toString());
+						addPositive(testName, stop, offer.toString());
 					else
-						Utilities.logd(TAG, error.toString());
+						addNegative(testName, stop, statusCode, error.toString());
 					
 					getNext().run();
 				}
@@ -487,7 +561,7 @@ public class Main extends Activity {
     }
 
     private void addPositive(String testName, long time, String body) {
-    	if (CONSOL_OUTPUT) {
+    	if (CONSOL_OUTPUT_BODY) {
     		StringBuilder sb = new StringBuilder();
     		sb.append("*********************************************\n");
     		sb.append(testName).append("\n");
@@ -513,7 +587,7 @@ public class Main extends Activity {
     }
 
     private void addNegative(String testName, long time, int code, Object object) {
-    	if (CONSOL_OUTPUT) {
+    	if (CONSOL_OUTPUT_BODY) {
     		StringBuilder sb = new StringBuilder();
     		sb.append("*********************************************\n");
     		sb.append(testName).append("\n");
@@ -535,8 +609,11 @@ public class Main extends Activity {
     }
 
     private void addHeader(String name) {
-    	if (CONSOL_OUTPUT) {
-    		Utilities.logd(TAG, name);
+    	if (CONSOL_OUTPUT_HEADER) {
+    		StringBuilder sb = new StringBuilder();
+    		sb.append("*********************************************\n");
+    		sb.append(name);
+    		Utilities.logd(TAG, sb.toString());
     	}
     	if (DISPLAY_OUTPUT) {
 	    	TextView t = new TextView(getApplicationContext());

@@ -10,14 +10,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
-
-import android.annotation.SuppressLint;
-
 import Utils.Endpoint;
 import Utils.Params;
 import Utils.Sort;
-import Utils.Utilities;
+import android.annotation.SuppressLint;
+
+import com.eTilbudsavis.etasdk.Eta;
 
 public class Offer implements Serializable {
 	
@@ -120,27 +118,16 @@ public class Offer implements Serializable {
 	public Offer() {
 		
 	}
-	
-	public static Offer fromJSON(String offer) {
-		try {
-			return fromJSON(new Offer(), new JSONObject(offer));
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	public static Offer fromJSON(JSONObject offer) {
-		return fromJSON(new Offer(), offer);
-	}
 
 	public static ArrayList<Offer> fromJSONArray(String offers) {
+		ArrayList<Offer> list = new ArrayList<Offer>();
 		try {
-			return fromJSONArray(new JSONArray(offers));
+			list = fromJSONArray(new JSONArray(offers));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
-		return null;
+		return list;
 	}
 	
 	public static ArrayList<Offer> fromJSONArray(JSONArray offers) {
@@ -150,12 +137,27 @@ public class Offer implements Serializable {
 				list.add(Offer.fromJSON((JSONObject)offers.get(i)));
 			
 		} catch (JSONException e) {
-			list = null;
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return list;
 	}
 	
+	public static Offer fromJSON(String offer) {
+		Offer o = new Offer();
+		try {
+			o = fromJSON(o, new JSONObject(offer));
+		} catch (JSONException e) {
+			if (Eta.mDebug)
+				e.printStackTrace();
+		}
+		return o;
+	}
+	
+	public static Offer fromJSON(JSONObject offer) {
+		return fromJSON(new Offer(), offer);
+	}
+
 	private static Offer fromJSON(Offer o, JSONObject offer) {
 		if (o == null) o = new Offer();
 		if (offer == null) return o;
@@ -180,7 +182,8 @@ public class Offer implements Serializable {
 			o.setCatalogUrl(offer.getString(S_CATALOG_URL));
 			o.setCatalogId(offer.getString(S_CATALOG_ID));
 		} catch (JSONException e) {
-			e.printStackTrace();
+			if (Eta.mDebug)
+				e.printStackTrace();
 		}
 		return o;
 	}
@@ -493,16 +496,16 @@ public class Offer implements Serializable {
 		.append("heading=").append(mHeading)
 		.append(", description=").append(mDescription)
 		.append(", dealer=").append(mDealer == null ? mDealerId : mDealer.toString(everything))
-		.append(", pricing=").append(mPricing.toString())
+		.append(", pricing=").append(mPricing == null ? null : mPricing.toString())
 		.append(", runFrom=").append(getRunFromString())
 		.append(", runTill=").append(getRunTillString());
 		
 		if (everything) {
 			sb.append(", ern=").append(mErn)
 			.append(", catalogPage=").append(mCatalogPage)
-			.append(", quantity=").append(mQuantity.toString())
-			.append(", images=").append(mImages.toString())
-			.append(", links=").append(mLinks.toString())
+			.append(", quantity=").append(mQuantity == null ? null : mQuantity.toString())
+			.append(", images=").append(mImages == null ? null : mImages.toString())
+			.append(", links=").append(mLinks == null ? null : mLinks.toString())
 			.append(", publish=").append(mPublish)
 			.append(", store=").append(mStore == null ? mStoreId : mStore.toString())
 			.append(", catalog=").append(mCatalog == null ? mCatalogId : mCatalog.toString(everything));

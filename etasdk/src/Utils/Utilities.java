@@ -18,20 +18,37 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 
 import android.util.Log;
 
 public final class Utilities {
-	/**
-	 * Set this to true to enable log output. Remember to turn this back off
-	 * before realeasing.
-	 */
-	private static boolean ENABLE_LOG = true;
 	
+	/** A second in milliseconds */
+	public static final long SECOND_IN_MILLIS = 1000;
+
+	/** A minute in milliseconds */
+	public static final long MINUTE_IN_MILLIS = SECOND_IN_MILLIS * 60;
+
+	/** A hour in milliseconds */
+	public static final long HOUR_IN_MILLIS = MINUTE_IN_MILLIS * 60;
+
+	/** A day in milliseconds */
+	public static final long DAY_IN_MILLIS = HOUR_IN_MILLIS * 24;
+
+	/** A week in milliseconds */
+	public static final long WEEK_IN_MILLIS = DAY_IN_MILLIS * 7;
+
+	/** A month in milliseconds */
+	public static final long MONTH_IN_MILLIS = DAY_IN_MILLIS * 30;
+
+	/** A year in milliseconds */
+	public static final long YEAR_IN_MILLIS = WEEK_IN_MILLIS * 52;
+
 	/**
 	 * Create universally unique identifier.
 	 *
-	 * @return Universally unique identifer (UUID).
+	 * @return Universally unique identifier (UUID).
 	 */
 	public static String createUUID() {
 		return UUID.randomUUID().toString();
@@ -45,59 +62,23 @@ public final class Utilities {
 	 * @param msg The message you would like logged.
 	 */
 	public static void logd(String tag, String msg) {
-		if (Eta.DEBUG)
+		if (Eta.mDebug)
 			Log.d(tag, msg);
 	}	
+
 	public static void logd(String tag, int statusCode, Object object) {
-		if (Eta.DEBUG)
+		if (Eta.mDebug)
 			Log.d(tag, "Status: " + String.valueOf(statusCode) + ", Data: " + object.toString());
 	}
 
-	/**
-	 * A proxy for Log.i API that silences log messages in release.
-	 *
-	 * @param tag Used to identify the source of a log message. It usually
-	 *			identifies the class or activity where the log call occurs.
-	 * @param msg The message you would like logged.
-	 */
-	public static void logi(String tag, String msg) {
-		if (Eta.DEBUG_I)
-			Log.i(tag, msg);
-	}
-	
-	/**
-	 * Builds a MD5 checksum of a NameValuePair
-	 * of parameters to be included in an API call. 
-	 *
-	 * @param nameValuePair NameValuePair containing the name/value pairs
-	 * @param api_secret The SDK apiSecret
-	 * @return
-	 */
-	public static String buildChecksum(List<NameValuePair> nameValuePair, String api_secret) {
-
-		StringBuilder sb = new StringBuilder();
-		for (NameValuePair nvp : nameValuePair) {
-			sb.append(nvp.getValue());
+	public static void logd(String tag, int statusCode, Object data, EtaError error) {
+		if (Eta.mDebug) {
+			Log.d(tag, "Status: " + String.valueOf(statusCode));
+			Log.d(tag, "Data: " + (data == null ? "null" : data.toString()));
+			Log.d(tag, "Error: " + (error == null ? "null" : error.toString()));
 		}
-		sb.append(api_secret);
-		
-		try {
-			java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
-			byte[] array = md.digest(sb.toString().getBytes());
-			StringBuffer sbMD5 = new StringBuffer();
-
-			for (int i = 0; i < array.length; ++i) {
-				sbMD5.append(Integer.toHexString((array[i] & 0xFF) | 0x100)
-						.substring(1, 3));
-			}
-
-			return sbMD5.toString();
-		} catch (java.security.NoSuchAlgorithmException e) {
-		}
-
-		return null;
 	}
-	
+
     /**
      * Generate a SHA256 checksum of a string.
      * 
@@ -180,16 +161,6 @@ public final class Utilities {
 		return sb.toString();
 	}
 	
-	/**
-	 * UTC time in seconds (time since 01.01.1970).
-	 *
-	 * @return int Time in seconds
-	 */
-	public static int getTime() {
-		return Integer.valueOf(String.valueOf(System.currentTimeMillis()/1000));
-	}
-	
-
 	/**
 	 * Method checks is a given e-mail is of a valid format.<br>
 	 * e.g.: danny@etilbudsavis.dk
