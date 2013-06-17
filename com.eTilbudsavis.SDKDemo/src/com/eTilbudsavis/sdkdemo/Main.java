@@ -132,24 +132,34 @@ public class Main extends Activity {
 			
 			@Override
 			public void onUpdate() {
-				HashMap<String, Shoppinglist> list = mEta.getShoppinglistManager().getShoppinglists();
-				Utilities.logd(TAG, "SL Count: " + String.valueOf(list.size()));
 				tShoppinglist.run();
 			}
 		};
+		
+		public void init() {
+			mEta.getShoppinglistManager().subscribe(sll);
+			mEta.getShoppinglistManager().openDB();
+		}
+		
 		@Override
 		public void run() {
 			
 			switch (iteration) {
 			case 0:
 				addHeader("TESTING SHOPPINGLIST");
+				init();
 				iteration ++;
-				mEta.getShoppinglistManager().subscribe(sll).listSync();
+				mEta.getShoppinglistManager().listSync();
 				break;
 
 			case 1:
 				iteration ++;
 				mEta.getShoppinglistManager().itemSync();
+				break;
+
+			case 2:
+				iteration ++;
+				mEta.getShoppinglistManager().addList("SomeRandomList");
 				break;
 
 			default:

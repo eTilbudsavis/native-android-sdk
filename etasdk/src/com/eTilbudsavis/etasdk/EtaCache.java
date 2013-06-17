@@ -3,13 +3,6 @@ package com.eTilbudsavis.etasdk;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
-import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.EtaObjects.Store;
-
-import Utils.Utilities;
-
 public class EtaCache implements Serializable {
 
 	private static final long serialVersionUID = 1L;

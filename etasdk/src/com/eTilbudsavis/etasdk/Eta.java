@@ -47,6 +47,7 @@ public class Eta implements Serializable {
 	/** Name for the SDK SharedPreferences file */
 	public static final String PREFS_NAME = "eta_sdk";
 	
+	private Context mContext;
 	private final String mApiKey;
 	private final String mApiSecret;
 	private Session mSession;
@@ -65,6 +66,7 @@ public class Eta implements Serializable {
 	 * 			The context of the activity instantiating this class.
 	 */
 	public Eta(String apiKey, String apiSecret, Context context) {
+		mContext = context;
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
 		mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -73,7 +75,15 @@ public class Eta implements Serializable {
 		mSession = new Session(this);
 		mShoppinglistManager = new ShoppinglistManager(this);
 	}
-	
+
+	/**
+	 * Returns the Context
+	 * @return API key as String
+	 */
+	public Context getContext() {
+		return mContext;
+	}
+
 	/**
 	 * Returns the API key found at http://etilbudsavis.dk/api/.
 	 * @return API key as String
@@ -183,10 +193,13 @@ public class Eta implements Serializable {
 	}
 	
 	public void onPause() {
-		
+		mShoppinglistManager.stopSync();
+		mShoppinglistManager.closeDB();
 	}
 	
 	public void onResume() {
+		mShoppinglistManager.openDB();
+		mShoppinglistManager.startSync();
 	}
 	
 	private Bundle getApiParams(int offset, int limit, String[] orderBy) {

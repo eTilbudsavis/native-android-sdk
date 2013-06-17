@@ -19,7 +19,6 @@ import Utils.Params;
 import Utils.Sort;
 import Utils.Utilities;
 import android.os.Bundle;
-import android.os.Looper;
 import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.EtaCache.CacheItem;

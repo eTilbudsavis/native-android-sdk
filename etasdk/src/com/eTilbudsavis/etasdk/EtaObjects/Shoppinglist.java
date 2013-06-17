@@ -11,7 +11,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import Utils.Utilities;
 import android.annotation.SuppressLint;
+import android.database.Cursor;
 
 import com.eTilbudsavis.etasdk.Eta;
 
@@ -19,11 +21,15 @@ public class Shoppinglist implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final String S_ID = "id";
-	private static final String S_ERN = "ern";
-	private static final String S_NAME = "name";
-	private static final String S_ACCESS = "access";
-	private static final String S_MODIFIED = "modified";
+	public static final String PARAM_ID = "id";
+	public static final String PARAM_ERN = "ern";
+	public static final String PARAM_NAME = "name";
+	public static final String PARAM_ACCESS = "access";
+	public static final String PARAM_MODIFIED = "modified";
+	
+	public static final String ACCESS_PRIVATE = "private";
+	public static final String ACCESS_SHARED = "shared";
+	public static final String ACCESS_PUBLIC = "public";
 
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
@@ -33,6 +39,7 @@ public class Shoppinglist implements Serializable {
 	private String mName;
 	private String mAccess;
 	private long mModified = 0L;
+	private boolean mSynced = false;
 	
 	private HashMap<String, Share> mShares = new HashMap<String, Share>();
 	private HashMap<String, ShoppinglistItem> mItems = new HashMap<String, ShoppinglistItem>();
@@ -40,6 +47,16 @@ public class Shoppinglist implements Serializable {
 	public Shoppinglist() {
 	}
 
+	public static Shoppinglist fromName(String name) {
+		Shoppinglist sl = new Shoppinglist();
+		sl.setId(Utilities.createUUID());
+		sl.setModified(System.currentTimeMillis());
+		sl.setErn("ern:shopping:list:" + sl.getId());
+		sl.setName(name);
+		sl.setAccess(ACCESS_PRIVATE);
+		return sl;
+	}
+	
 	public static ArrayList<Shoppinglist> fromJSONArray(String shoppinglists) {
 		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
 		try {
@@ -84,11 +101,11 @@ public class Shoppinglist implements Serializable {
 		if (shoppinglist == null ) return sl;
 		
 		try {
-			sl.setId(shoppinglist.getString(S_ID));
-			sl.setErn(shoppinglist.getString(S_ERN));
-			sl.setName(shoppinglist.getString(S_NAME));
-			sl.setAccess(shoppinglist.getString(S_ACCESS));
-			sl.setModified(shoppinglist.getString(S_MODIFIED));
+			sl.setId(shoppinglist.getString(PARAM_ID));
+			sl.setErn(shoppinglist.getString(PARAM_ERN));
+			sl.setName(shoppinglist.getString(PARAM_NAME));
+			sl.setAccess(shoppinglist.getString(PARAM_ACCESS));
+			sl.setModified(shoppinglist.getString(PARAM_MODIFIED));
 		} catch (JSONException e) {
 			if (Eta.mDebug)
 				e.printStackTrace();
@@ -147,6 +164,15 @@ public class Shoppinglist implements Serializable {
 
 	public Shoppinglist setModified(long time) {
 		mModified = time;
+		return this;
+	}
+
+	public boolean getSynced() {
+		return mSynced;
+	}
+
+	public Shoppinglist setSynced(boolean synced) {
+		mSynced = synced;
 		return this;
 	}
 
@@ -228,6 +254,21 @@ public class Shoppinglist implements Serializable {
 				this.compareShares(sl.getShares());
 	}
 
+	@Override
+	public String toString() {
+		return toString(false);
+	}
+	
+	public String toString(boolean everything) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName()).append("[")
+		.append("name=").append(mName)
+		.append(", id=").append(mId)
+		.append(", ern=").append(mErn)
+		.append(", access=").append(mAccess)
+		.append(", modified=").append(mModified);
+		return sb.append("]").toString();
+	}
 	
 }
 

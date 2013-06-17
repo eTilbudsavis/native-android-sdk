@@ -21,7 +21,6 @@ public class EtaError implements Serializable {
 	private static final String S_CODE = "code";
 	private static final String S_MESSAGE = "message";
 	private static final String S_DETAILS = "details";
-	private static final String S_ORIG_DATA = "original_data";
 	
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);

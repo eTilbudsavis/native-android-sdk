@@ -127,4 +127,16 @@ public final class Params {
 	public static final int DEFAULT_LIMIT = 10;
 	
 	
+	public static final String ID = "id";
+	public static final String MODIFIED = "modified";
+	public static final String ERN = "ern";
+	public static final String ACCESS = "access";
+
+	public static final String DESCRIPTION = "description";
+	public static final String COUNT = "count";
+	public static final String TICK = "tick";
+	public static final String OFFER_ID = "offer_id";
+	public static final String CREATOR = "creator";
+	public static final String SHOPPING_LIST_ID = "shopping_list_id";
+	    
 }

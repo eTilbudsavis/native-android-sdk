@@ -1,30 +1,28 @@
 package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import Utils.Endpoint;
 import Utils.Utilities;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
-import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 
 public class ShoppinglistManager {
 
 	public static final String TAG = "ShoppinglistManager";
-	
+
 	private Eta mEta;
-	private HashMap<String, Shoppinglist> mLists = new HashMap<String, Shoppinglist>();
-	private ArrayList<ShoppinglistListener> mSubscribers = new ArrayList<ShoppinglistManager.ShoppinglistListener>();
-
+	private DbHelper mDbHelper;
+	private SQLiteDatabase mDatabase;
 	private int mListSyncInterval = 20000;
-	private int mItemSyncInterval = 20000;
-
+	private int mItemSyncInterval = 6000;
+	private ArrayList<ShoppinglistListener> mSubscribers = new ArrayList<ShoppinglistManager.ShoppinglistListener>();
+	
 	private Runnable mListSync = new Runnable() {
 		
 		public void run() {
@@ -43,6 +41,71 @@ public class ShoppinglistManager {
 	
 	public ShoppinglistManager(Eta eta) {
 		mEta = eta;
+		mDbHelper = new DbHelper(mEta.getContext());
+	}
+
+	public Shoppinglist getList(String id) {
+		Cursor c = mDatabase.rawQuery("SELECT * FROM " + DbHelper.TABLE_SL + " WHERE " + DbHelper.SL_ID + "=" + id, null);
+		if (c.getCount() == 1) {
+			c.moveToFirst();
+			return DbHelper.curToSl(c);
+		}
+		return null;
+	}
+
+	public void addList(String name) {
+		addList(Shoppinglist.fromName(name));
+	}
+	
+	public void addList(Shoppinglist list) {
+		
+		// Make sure the UUID does not exist, before adding it
+		while (getList(list.getId()) != null) {
+			list.setId(Utilities.createUUID());
+		};
+		
+		// Insert the new list to DB
+		mDatabase.insert(DbHelper.TABLE_SL, null, DbHelper.slToCV(list));
+		
+		// Sync online if possible
+		if (maySync()) {
+			Bundle apiParams = new Bundle();
+			apiParams.putString(Shoppinglist.PARAM_MODIFIED, list.getModifiedString());
+			apiParams.putString(Shoppinglist.PARAM_NAME, list.getName());
+			apiParams.putString(Shoppinglist.PARAM_ACCESS, list.getAccess());
+			
+			mEta.api().put(Endpoint.getShoppinglistId(user().getId(), list.getId()), new Api.CallbackString() {
+				
+				public void onComplete(int statusCode, String data, EtaError error) {
+					
+					if (statusCode == 200) {
+						Utilities.logd(TAG, data);
+					} else {
+						Utilities.logd(TAG, error.toString());
+					}
+				}
+			}, apiParams).setDebug(true).execute();
+		}
+	}
+
+	public void editList() {
+		
+	}
+
+	public void deleteList() {
+		
+	}
+
+	public void addItem() {
+		
+	}
+
+	public void editItem() {
+		
+	}
+
+	public void deleteItem() {
+		
 	}
 	
 	private boolean maySync() {
@@ -62,11 +125,12 @@ public class ShoppinglistManager {
 		Api.CallbackString listener = new Api.CallbackString() {
 			
 			public void onComplete(int statusCode, String data, EtaError error) {
-				
+
 				if (statusCode == 200) {
-					for (Shoppinglist sl : Shoppinglist.fromJSONArray(data))
-						mLists.put(sl.getId(), sl);
-						
+					
+					ArrayList<Shoppinglist> sl = Shoppinglist.fromJSONArray(data);
+					listCheck(sl);
+					
 				} else {
 					mEta.addError(error);
 					Utilities.logd(TAG, error.toString());
@@ -78,20 +142,26 @@ public class ShoppinglistManager {
 		mEta.api().get(Endpoint.getShoppinglistList(user().getId()), listener).execute();
 	}
 	
+	private void listCheck(ArrayList<Shoppinglist> lists) {
+		
+		ArrayList<Shoppinglist> old = getAllLists();
+		
+		
+		
+	}
+	
 	public void itemSync() {
 
 		if (!maySync()) return;
 		
-		for (Shoppinglist sl : mLists.values()) {
+		for (Shoppinglist sl : getAllLists()) {
 
 			Api.CallbackString listener = new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
 					
 					if (statusCode == 200) {
-						for (ShoppinglistItem sli : ShoppinglistItem.fromJSONArray(data)) {
-							Utilities.logd(TAG, sli.getTitle());
-						}
+						
 					} else {
 						mEta.addError(error);
 						Utilities.logd(TAG, error.toString());
@@ -105,6 +175,9 @@ public class ShoppinglistManager {
 		
 	}
 	
+	/**
+	 * Start synchronization with server
+	 */
 	public void startSync() {
 		if (user().isLoggedIn()) {
 			mListSync.run();
@@ -112,9 +185,29 @@ public class ShoppinglistManager {
 		}
 	}
 	
+	/**
+	 * Stop synchronization to server
+	 */
 	public void stopSync() {
 		mEta.getHandler().removeCallbacks(mListSync);
 		mEta.getHandler().removeCallbacks(mItemSync);
+	}
+
+	/**
+	 * Open a connection to database
+	 */
+	public void openDB() {
+		mDatabase = mDbHelper.getWritableDatabase();
+		if (getAllLists().size() == 0) {
+			
+		}
+	}
+	
+	/**
+	 * Close the database connection
+	 */
+	public void closeDB() {
+		mDbHelper.close();
 	}
 	
 	/**
@@ -123,7 +216,11 @@ public class ShoppinglistManager {
 	 * @return <li>Shopping list or null if no shopping list exists
 	 */
 	public Shoppinglist getShoppinglist(String id) {
-		return mLists.get(id);
+		Cursor c = mDatabase.rawQuery("SELECT * FROM " + DbHelper.TABLE_SL + " WHERE " + DbHelper.SL_ID + "=" + id, null);
+		if (c.moveToFirst() ) {
+			return DbHelper.curToSl(c);
+		}
+		return null;
 	}
 
 	/**
@@ -132,10 +229,9 @@ public class ShoppinglistManager {
 	 * @return <li>Shopping list or null if no shopping list exists
 	 */
 	public Shoppinglist getShoppinglistFromName(String name) {
-		for (Shoppinglist sl : mLists.values()) {
-			if (sl.getName() != null)
-				if (sl.getName().equals(name))
-					return sl;
+		Cursor c = mDatabase.rawQuery("SELECT * FROM " + DbHelper.TABLE_SL + " WHERE " + DbHelper.SL_NAME + "=" + name, null);
+		if (c.moveToFirst() ) {
+			return DbHelper.curToSl(c);
 		}
 		return null;
 	}
@@ -143,12 +239,25 @@ public class ShoppinglistManager {
 	private User user() {
 		return mEta.getSession().getUser();
 	}
+	
 	/**
 	 * The complete set of shopping lists
 	 * @return <li>All shopping lists
 	 */
-	public HashMap<String, Shoppinglist> getShoppinglists() {
-		return mLists;
+	public ArrayList<Shoppinglist> getAllLists() {
+		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
+		Cursor c = mDatabase.rawQuery("SELECT * FROM " + DbHelper.TABLE_SL + " WHERE 1", null);
+		if (c.moveToFirst() ) {
+			do {
+				list.add(DbHelper.curToSl(c));
+			} while (c.moveToNext());
+		}
+		return list;
+	}
+	
+	public void clearDatabase() {
+		mDatabase.execSQL("DROP TABLE IF EXISTS " + DbHelper.TABLE_SL);
+		mDatabase.execSQL("DROP TABLE IF EXISTS " + DbHelper.TABLE_SLI);
 	}
 	
 	public ShoppinglistManager subscribe(ShoppinglistListener listener) {
@@ -170,4 +279,5 @@ public class ShoppinglistManager {
 	public interface ShoppinglistListener {
 		public void onUpdate();
 	}
+	
 }

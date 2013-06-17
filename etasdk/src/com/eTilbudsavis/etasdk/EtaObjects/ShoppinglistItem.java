@@ -21,11 +21,10 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String TAG = "ShoppinglistItem";
+	public static final String TAG = "ShoppinglistItem";
 	
 	private static final String S_ID = "id";
 	private static final String S_TICK = "tick";
-	private static final String S_OFFER = "offer";
 	private static final String S_OFFER_ID = "offer_id";
 	private static final String S_COUNT = "count";
 	private static final String S_DESCRIPTION = "description";

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import Utils.Params;
-import Utils.Utilities;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
