@@ -1,4 +1,4 @@
-package Utils;
+package com.eTilbudsavis.etasdk.Tools;
 
 /**
  * {@link com.eTilbudsavis.etasdk.Util.Sort Sort} holds all variables describing sorting methods that the server allows.<br><br>

@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import Utils.Endpoint;
-import Utils.Params;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Tools.Endpoint;
+import com.eTilbudsavis.etasdk.Tools.Params;
 
 public class User implements Serializable {
 	

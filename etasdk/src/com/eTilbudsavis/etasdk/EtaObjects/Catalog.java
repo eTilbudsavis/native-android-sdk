@@ -10,12 +10,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import Utils.Endpoint;
-import Utils.Params;
-import Utils.Sort;
 import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Tools.Endpoint;
+import com.eTilbudsavis.etasdk.Tools.Params;
+import com.eTilbudsavis.etasdk.Tools.Sort;
 
 public class Catalog  implements Serializable {
 	

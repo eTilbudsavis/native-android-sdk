@@ -11,11 +11,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import Utils.Utilities;
 import android.annotation.SuppressLint;
-import android.database.Cursor;
+import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Tools.Utilities;
 
 public class Shoppinglist implements Serializable {
 	
@@ -34,26 +34,29 @@ public class Shoppinglist implements Serializable {
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
 
+	// server vars
 	private String mId;
 	private String mErn;
 	private String mName;
 	private String mAccess;
 	private long mModified = 0L;
+	
+	// local vars
+	private boolean mOffline = false;
 	private boolean mSynced = false;
+	private boolean mCurrent = false;
 	
 	private HashMap<String, Share> mShares = new HashMap<String, Share>();
 	private HashMap<String, ShoppinglistItem> mItems = new HashMap<String, ShoppinglistItem>();
 
 	public Shoppinglist() {
+		setId(Utilities.createUUID());
+		setModified(System.currentTimeMillis());
 	}
 
 	public static Shoppinglist fromName(String name) {
 		Shoppinglist sl = new Shoppinglist();
-		sl.setId(Utilities.createUUID());
-		sl.setModified(System.currentTimeMillis());
-		sl.setErn("ern:shopping:list:" + sl.getId());
 		sl.setName(name);
-		sl.setAccess(ACCESS_PRIVATE);
 		return sl;
 	}
 	
@@ -114,6 +117,14 @@ public class Shoppinglist implements Serializable {
 		return sl;
 	}
 	
+	public Bundle getApiParams() {
+		Bundle apiParams = new Bundle();
+		apiParams.putString(PARAM_MODIFIED, getModifiedString());
+		apiParams.putString(PARAM_NAME, getName());
+		apiParams.putString(PARAM_ACCESS, getAccess());
+		return apiParams;
+	}
+	
 	public void set(JSONObject shoppinglist) {
 		fromJSON(this, shoppinglist);
 	}
@@ -167,12 +178,30 @@ public class Shoppinglist implements Serializable {
 		return this;
 	}
 
-	public boolean getSynced() {
+	public boolean isSynced() {
 		return mSynced;
 	}
 
 	public Shoppinglist setSynced(boolean synced) {
 		mSynced = synced;
+		return this;
+	}
+
+	public boolean isOffline() {
+		return mOffline;
+	}
+
+	public Shoppinglist setOffline(boolean offline) {
+		mOffline = offline;
+		return this;
+	}
+
+	public boolean isCurrent() {
+		return mCurrent;
+	}
+
+	public Shoppinglist setCurrent(boolean current) {
+		mCurrent = current;
 		return this;
 	}
 
@@ -266,7 +295,9 @@ public class Shoppinglist implements Serializable {
 		.append(", id=").append(mId)
 		.append(", ern=").append(mErn)
 		.append(", access=").append(mAccess)
-		.append(", modified=").append(mModified);
+		.append(", modified=").append(mModified)
+		.append(", synced=").append(mSynced)
+		.append(", offline=").append(mOffline);
 		return sb.append("]").toString();
 	}
 	

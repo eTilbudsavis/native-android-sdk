@@ -7,7 +7,8 @@ package com.eTilbudsavis.etasdk;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import Utils.Params;
+import com.eTilbudsavis.etasdk.Tools.Params;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;

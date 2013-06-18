@@ -14,16 +14,16 @@ import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicHeader;
 
-import Utils.Endpoint;
-import Utils.Params;
-import Utils.Sort;
-import Utils.Utilities;
 import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.EtaCache.CacheItem;
 import com.eTilbudsavis.etasdk.HttpHelper.HttpListener;
 import com.eTilbudsavis.etasdk.Session.SessionListener;
+import com.eTilbudsavis.etasdk.Tools.Endpoint;
+import com.eTilbudsavis.etasdk.Tools.Params;
+import com.eTilbudsavis.etasdk.Tools.Sort;
+import com.eTilbudsavis.etasdk.Tools.Utilities;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
@@ -105,7 +105,7 @@ public class Api implements Serializable {
 		public void onComplete(int statusCode, String data, Header[] headers) {
 			
 			// Success
-			if (200 <= statusCode && statusCode < 300) {
+			if (Utilities.isSuccess(statusCode)) {
 				if (!mCacheHit || mMultipleCallbacks)
 				convertCacheReturn(statusCode,data);
 			

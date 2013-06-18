@@ -22,7 +22,8 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 
-import Utils.Utilities;
+import com.eTilbudsavis.etasdk.Tools.Utilities;
+
 import android.os.AsyncTask;
 
 public class HttpHelper extends AsyncTask<Void, Void, Void> {

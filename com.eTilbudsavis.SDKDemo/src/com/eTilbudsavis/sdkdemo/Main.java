@@ -4,15 +4,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
-import Utils.Endpoint;
-import Utils.Utilities;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.location.Address;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
@@ -38,6 +35,8 @@ import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.etilbudsavis.sdkdemo.R;
+import com.eTilbudsavis.etasdk.Tools.Endpoint;
+import com.eTilbudsavis.etasdk.Tools.Utilities;
 
 public class Main extends Activity {
 
@@ -128,10 +127,18 @@ public class Main extends Activity {
      */
     Test tShoppinglist = new Test() {
 
+    	Shoppinglist sl;
+    	
     	ShoppinglistListener sll = new ShoppinglistListener() {
 			
 			@Override
-			public void onUpdate() {
+			public void onListUpdate(List<String> added, List<String> deleted,
+					List<String> edited) {
+				tShoppinglist.run();
+			}
+			
+			@Override
+			public void onItemUpdate(String shoppinglistId) {
 				tShoppinglist.run();
 			}
 		};
@@ -143,25 +150,38 @@ public class Main extends Activity {
 		
 		@Override
 		public void run() {
-			
+
+			Utilities.logd(TAG, "NEW RUN..." + String.valueOf(iteration));
 			switch (iteration) {
 			case 0:
 				addHeader("TESTING SHOPPINGLIST");
 				init();
 				iteration ++;
-				mEta.getShoppinglistManager().listSync();
+				mEta.getShoppinglistManager().syncLists();
 				break;
 
 			case 1:
 				iteration ++;
-				mEta.getShoppinglistManager().itemSync();
+				mEta.getShoppinglistManager().syncItems();
 				break;
 
 			case 2:
 				iteration ++;
-				mEta.getShoppinglistManager().addList("SomeRandomList");
+				sl = Shoppinglist.fromName("RandomTestList");
+				mEta.getShoppinglistManager().addList(sl);
 				break;
-
+				
+			case 3:
+				iteration++;
+				Utilities.logd(TAG, "RELOAD NOW! RELOAD NOW! RELOAD NOW! ");
+				mEta.getHandler().postDelayed(new Runnable() {
+					
+					@Override
+					public void run() {
+						mEta.getShoppinglistManager().deleteList(sl.getId());
+					}
+				}, 20000);
+				
 			default:
 				getNext().run();
 				break;

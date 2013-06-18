@@ -12,8 +12,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Tools.Utilities;
 
-import Utils.Utilities;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 
@@ -36,18 +36,70 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
 
-	private String mId;
-	private boolean mTick;
+	// Server vars
+	private String mId = "";
+	private boolean mTick = false;
 	private String mOfferId;
-	private int mCount;
+	private int mCount = 1;
 	private String mDescription;
-	private String mShoppinglistId;
+	private String mShoppinglistIdDepricated;
 	private String mErn;
 	private String mCreator;
-	private long mModified;
+	private long mModified = 0L;
+	
+	// local vars
 	private Offer mOffer = null;
+	private String mShoppinglistId;
 
-	public static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem) {
+	public ShoppinglistItem() {
+		
+	}
+
+	public ShoppinglistItem(Shoppinglist shoppinglist, String description) {
+		mDescription = description;
+	}
+
+	public static ArrayList<ShoppinglistItem> fromJSONArray(String shoppinglistItems, String shoppinglistId) {
+		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
+		try {
+			list = fromJSONArray(new JSONArray(shoppinglistItems), shoppinglistId);
+		} catch (JSONException e) {
+			if (Eta.mDebug)
+				e.printStackTrace();
+		}
+		return list;
+	}
+	
+	public static ArrayList<ShoppinglistItem> fromJSONArray(JSONArray shoppinglistItems, String shoppinglistId) {
+		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
+		try {
+			for (int i = 0 ; i < shoppinglistItems.length() ; i++ ) {
+				ShoppinglistItem sli = ShoppinglistItem.fromJSON((JSONObject)shoppinglistItems.get(i), shoppinglistId);
+				list.add(sli);
+			}
+			
+		} catch (JSONException e) {
+			if (Eta.mDebug)
+				e.printStackTrace();
+		}
+		return list;
+	}
+	
+	public static ShoppinglistItem fromJSON(String shoppinglistItem, String shoppinglistId) {
+		ShoppinglistItem sli = new ShoppinglistItem();
+		try {
+			sli = fromJSON(sli, new JSONObject(shoppinglistItem), shoppinglistId);
+		} catch (JSONException e) {
+			if (Eta.mDebug) e.printStackTrace();
+		}
+		return sli;
+	}
+	
+	public static ShoppinglistItem fromJSON(JSONObject shoppinglistItem, String shoppinglistId) {
+		return fromJSON(new ShoppinglistItem(), shoppinglistItem, shoppinglistId);
+	}
+
+	public static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem, String shoppinglistId) {
 		if (sli == null) sli = new ShoppinglistItem();
 		if (shoppinglistItem == null) return sli;
 		
@@ -61,74 +113,13 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 			sli.setErn(shoppinglistItem.getString(S_ERN));
 			sli.setCreator(shoppinglistItem.getString(S_CREATOR));
 			sli.setModified(shoppinglistItem.getString(S_MODIFIED));
+			sli.setShoppinglistId(shoppinglistId);
 		} catch (JSONException e) {
 			if (Eta.mDebug) e.printStackTrace();
 		}
 		return sli;
 	}
 	
-	public ShoppinglistItem() {
-	}
-
-	public static ArrayList<ShoppinglistItem> fromJSONArray(String shoppinglistItems) {
-		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
-		try {
-			list = fromJSONArray(new JSONArray(shoppinglistItems));
-		} catch (JSONException e) {
-			if (Eta.mDebug)
-				e.printStackTrace();
-		}
-		return list;
-	}
-	
-	public static ArrayList<ShoppinglistItem> fromJSONArray(JSONArray shoppinglistItems) {
-		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
-		try {
-			for (int i = 0 ; i < shoppinglistItems.length() ; i++ )
-				list.add(ShoppinglistItem.fromJSON((JSONObject)shoppinglistItems.get(i)));
-			
-		} catch (JSONException e) {
-			if (Eta.mDebug)
-				e.printStackTrace();
-		}
-		return list;
-	}
-	
-	public static ShoppinglistItem fromJSON(String shoppinglistItem) {
-		ShoppinglistItem sli = new ShoppinglistItem();
-		try {
-			sli = fromJSON(sli, new JSONObject(shoppinglistItem));
-		} catch (JSONException e) {
-			if (Eta.mDebug) e.printStackTrace();
-		}
-		return sli;
-	}
-	
-	public static ShoppinglistItem fromJSON(JSONObject shoppinglistItem) {
-		return fromJSON(new ShoppinglistItem(), shoppinglistItem);
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	public ShoppinglistItem(Shoppinglist shoppinglist, String description) {
-		mDescription = description;
-		mCount = 1;
-		mTick = false;
-		mOffer = null;
-		mShoppinglistId = shoppinglist.getId();
-	}
-
 	public String getTitle() {
 		return mOffer == null ? mDescription : mOffer.getHeading();
 	}
@@ -193,8 +184,17 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 		return mShoppinglistId;
 	}
 
-	public ShoppinglistItem setShoppinglistId(String shoppinglist) {
-		mShoppinglistId = shoppinglist;
+	public ShoppinglistItem setShoppinglistId(String id) {
+		mShoppinglistId = id;
+		return this;
+	}
+
+	public String getShoppinglistIdDepricated() {
+		return mShoppinglistIdDepricated;
+	}
+
+	public ShoppinglistItem setShoppinglistIdDepricated(String oldShoppinglistIdFormat) {
+		mShoppinglistIdDepricated = oldShoppinglistIdFormat;
 		return this;
 	}
 
@@ -241,7 +241,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 	public Bundle getApiParamsAddItem() {
 
 		Bundle apiParams = new Bundle();
-		apiParams.putString("shoppinglist", mShoppinglistId);
+		apiParams.putString("shoppinglist", mShoppinglistIdDepricated);
 		if (mOffer == null)
 			apiParams.putString("description", mDescription);
 		else
@@ -284,7 +284,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 				mTick == sli.isTicked() &&
 				( mOffer == null ? sli.getOffer() == null : mOffer.equals(sli.getOffer())) &&
 				mCreator.equals(sli.getCreator()) &&
-				mShoppinglistId.equals(sli.getShoppinglistId());
+				mShoppinglistIdDepricated.equals(sli.getShoppinglistId());
 	}
 
 	public static Comparator<ShoppinglistItem> TitleComparator  = new Comparator<ShoppinglistItem>() {

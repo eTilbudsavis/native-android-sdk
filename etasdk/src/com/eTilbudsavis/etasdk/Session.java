@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import Utils.Endpoint;
-import Utils.Params;
-import Utils.Utilities;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 
@@ -18,6 +15,9 @@ import com.eTilbudsavis.etasdk.Api.CallbackString;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Permission;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.Tools.Endpoint;
+import com.eTilbudsavis.etasdk.Tools.Params;
+import com.eTilbudsavis.etasdk.Tools.Utilities;
 
 public class Session implements Serializable {
 

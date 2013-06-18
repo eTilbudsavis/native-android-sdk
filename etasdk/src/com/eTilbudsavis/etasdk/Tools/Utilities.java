@@ -3,7 +3,7 @@
  * @author			Morten Bo <morten@etilbudsavis.dk>
  * @version			0.0.1
  */
-package Utils;
+package com.eTilbudsavis.etasdk.Tools;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -73,9 +73,7 @@ public final class Utilities {
 
 	public static void logd(String tag, int statusCode, Object data, EtaError error) {
 		if (Eta.mDebug) {
-			Log.d(tag, "Status: " + String.valueOf(statusCode));
-			Log.d(tag, "Data: " + (data == null ? "null" : data.toString()));
-			Log.d(tag, "Error: " + (error == null ? "null" : error.toString()));
+			Log.d(tag, isSuccess(statusCode) ? data.toString() : error.toString());
 		}
 	}
 
@@ -193,7 +191,7 @@ public final class Utilities {
 	 * @param name to check
 	 * @return boolean, true if name if valid
 	 */
-	public static Boolean isNameValid(String name) {
+	public static boolean isNameValid(String name) {
 		return name.length() > 1 ? (name.length() < 81 ? true : false ) : false;
 	}
 
@@ -204,7 +202,7 @@ public final class Utilities {
 	 * @param password
 	 * @return
 	 */
-	public static Boolean isPasswordValid(String password) {
+	public static boolean isPasswordValid(String password) {
 		return 5 < password.length() && password.length() < 40;
 	}
 
@@ -215,7 +213,7 @@ public final class Utilities {
 	 * @param birthyear
 	 * @return
 	 */
-	public static Boolean isBirthyearValid(Integer birthyear) {
+	public static boolean isBirthyearValid(Integer birthyear) {
 		return birthyear > 1900 ? (birthyear < 2012 ? true : false ) : false ;
 	}
 
@@ -226,11 +224,27 @@ public final class Utilities {
 	 * @param birthyear
 	 * @return
 	 */
-	public static Boolean isGenderValid(String gender) {
+	public static boolean isGenderValid(String gender) {
 		gender = gender.toLowerCase();
 		return (gender.equals("male") || gender.equals("female") );
 	}
 
+	public static boolean isSuccess(int statusCode) {
+		return 200 <= statusCode && statusCode < 300;
+	}
+
+	public static boolean isRedirection(int statusCode) {
+		return 300 <= statusCode && statusCode < 400;
+	}
+
+	public static boolean isClientError(int statusCode) {
+		return 400 <= statusCode && statusCode < 500;
+	}
+
+	public static boolean isServerError(int statusCode) {
+		return 500 <= statusCode && statusCode < 600;
+	}
+	
 	
 	
 }

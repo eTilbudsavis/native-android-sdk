@@ -8,10 +8,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Tools.Endpoint;
+import com.eTilbudsavis.etasdk.Tools.Params;
+import com.eTilbudsavis.etasdk.Tools.Sort;
 
-import Utils.Endpoint;
-import Utils.Params;
-import Utils.Sort;
 
 public class Store implements Serializable {
 	
