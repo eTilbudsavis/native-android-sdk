@@ -54,14 +54,14 @@ public class DbHelper extends SQLiteOpenHelper {
 	private static final String DB_CREATE_SLI = 
 		"create table if not exists " + SLI + "(" + 
 		ID + " text primary key, " + 
-		ERN + " text, " + 
+		ERN + " text not null, " + 
 		MODIFIED + " text not null, " + 
 		DESCRIPTION + " text, " + 
 		COUNT + " integer not null, " + 
 		TICK + " integer not null, " + 
 		OFFER_ID + " text, " + 
-		CREATOR + " text, " + 
-		SHOPPINGLIST_ID + " text );";
+		CREATOR + " text not null, " + 
+		SHOPPINGLIST_ID + " text not null );";
 
 	public DbHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
@@ -89,8 +89,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		sl.setErn(c.getString(3));
 		sl.setName(c.getString(4));
 		sl.setAccess(c.getString(5));
-		sl.setSynced(c.getInt(6) == 1);
-		c.close();
+		sl.setSynced(0 < c.getInt(6));
 		return sl;
 	}
 	
@@ -105,14 +104,36 @@ public class DbHelper extends SQLiteOpenHelper {
 		return c;
 	}
 
-	public static ShoppinglistItem curToSli(Cursor c) {
+	/**
+	 * Method does not close the Cursor.
+	 * @param cursor with data
+	 * @return A shoppinglistitem
+	 */
+	public static ShoppinglistItem curToSli(Cursor cursor) {
 		ShoppinglistItem sli = new ShoppinglistItem();
-		c.close();
+		sli.setId(cursor.getString(0));
+		sli.setErn(cursor.getString(1));
+		sli.setModified(cursor.getLong(2));
+		sli.setDescription(cursor.getString(3));
+		sli.setCount(cursor.getInt(4));
+		sli.setTick(0 < cursor.getInt(5));
+		sli.setOfferId(cursor.getString(6));
+		sli.setCreator(cursor.getString(7));
+		sli.setShoppinglistId(cursor.getString(8));
 		return sli;
 	}
-	
+
 	public static ContentValues sliToCV(ShoppinglistItem sli) {
 		ContentValues c = new ContentValues();
+		c.put(ID, sli.getId());
+		c.put(ERN, sli.getErn());
+		c.put(MODIFIED, sli.getModified());
+		c.put(DESCRIPTION, sli.getDescription());
+		c.put(COUNT, sli.getCount());
+		c.put(TICK, sli.isTicked());
+		c.put(OFFER_ID, sli.getOfferId());
+		c.put(CREATOR, sli.getCreator());
+		c.put(SHOPPINGLIST_ID, sli.getShoppinglistId());
 		return c;
 	}
 	

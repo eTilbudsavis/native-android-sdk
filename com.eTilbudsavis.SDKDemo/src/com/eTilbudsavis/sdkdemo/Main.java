@@ -33,6 +33,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
+import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.etilbudsavis.sdkdemo.R;
 import com.eTilbudsavis.etasdk.Tools.Endpoint;
@@ -128,17 +129,25 @@ public class Main extends Activity {
     Test tShoppinglist = new Test() {
 
     	Shoppinglist sl;
+    	boolean callback = true;
     	
     	ShoppinglistListener sll = new ShoppinglistListener() {
 			
 			@Override
 			public void onListUpdate(List<String> added, List<String> deleted,
 					List<String> edited) {
+				if (added != null)
+					Utilities.logd(TAG, "Added: " + String.valueOf(added.size()));
+				if (deleted != null)
+					Utilities.logd(TAG, "Deleted: " + String.valueOf(deleted.size()));
+				if (edited != null)
+					Utilities.logd(TAG, "Edited: " + String.valueOf(edited.size()));
 				tShoppinglist.run();
 			}
 			
 			@Override
 			public void onItemUpdate(String shoppinglistId) {
+				Utilities.logd(TAG, "ITEM UPDATE - Shoppinglist: " + shoppinglistId);
 				tShoppinglist.run();
 			}
 		};
@@ -151,10 +160,11 @@ public class Main extends Activity {
 		@Override
 		public void run() {
 
-			Utilities.logd(TAG, "NEW RUN..." + String.valueOf(iteration));
+			
 			switch (iteration) {
 			case 0:
 				addHeader("TESTING SHOPPINGLIST");
+				Utilities.logd(TAG, "--- Sync List ---");
 				init();
 				iteration ++;
 				mEta.getShoppinglistManager().syncLists();
@@ -162,17 +172,20 @@ public class Main extends Activity {
 
 			case 1:
 				iteration ++;
+				Utilities.logd(TAG, "--- Sync Items ---");
 				mEta.getShoppinglistManager().syncItems();
 				break;
 
 			case 2:
 				iteration ++;
+				Utilities.logd(TAG, "--- Add List ---");
 				sl = Shoppinglist.fromName("RandomTestList");
 				mEta.getShoppinglistManager().addList(sl);
 				break;
 				
 			case 3:
 				iteration++;
+				Utilities.logd(TAG, "--- Delete List ---");
 				Utilities.logd(TAG, "RELOAD NOW! RELOAD NOW! RELOAD NOW! ");
 				mEta.getHandler().postDelayed(new Runnable() {
 					
@@ -183,7 +196,10 @@ public class Main extends Activity {
 				}, 20000);
 				
 			default:
-				getNext().run();
+				if (callback) {
+					callback = false;
+					getNext().run();
+				}
 				break;
 			}
 		}

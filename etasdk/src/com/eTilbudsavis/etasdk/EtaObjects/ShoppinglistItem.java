@@ -11,11 +11,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Tools.Utilities;
-
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+
+import com.eTilbudsavis.etasdk.Eta;
 
 public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializable {
 
@@ -43,8 +42,8 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 	private int mCount = 1;
 	private String mDescription;
 	private String mShoppinglistIdDepricated;
-	private String mErn;
-	private String mCreator;
+	private String mErn = "";
+	private String mCreator = "";
 	private long mModified = 0L;
 	
 	// local vars

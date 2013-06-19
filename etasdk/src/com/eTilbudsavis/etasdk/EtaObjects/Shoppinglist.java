@@ -35,10 +35,10 @@ public class Shoppinglist implements Serializable {
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
 
 	// server vars
-	private String mId;
-	private String mErn;
-	private String mName;
-	private String mAccess;
+	private String mId = "";
+	private String mErn = "";
+	private String mName = "";
+	private String mAccess = ACCESS_PRIVATE;
 	private long mModified = 0L;
 	
 	// local vars

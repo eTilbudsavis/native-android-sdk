@@ -58,8 +58,9 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 
 		// Print debug information
 		if (mDebug) {
-			Utilities.logd(TAG, "### Pre Execute - " + getClass().getSimpleName() + '@' + Integer.toHexString(hashCode()));
+			Utilities.logd(TAG, "---- Pre Execute ---- " + getClass().getSimpleName() + '@' + Integer.toHexString(hashCode()));
 			Utilities.logd(TAG, "Url: " + mUrl);
+			Utilities.logd(TAG, "Type: " + mRequestType.toString());
 			Utilities.logd(TAG, "Headers: " + mHeaders.toString());
 			StringBuilder sb = new StringBuilder();
 			for (NameValuePair nvp : mQuery) {
@@ -143,7 +144,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 			updateSessionInfo(mResponsHeaders);
 			
 		    if (mDebug) {
-				Utilities.logd(TAG, "### Post Execute - " + getClass().getSimpleName() + '@' + Integer.toHexString(hashCode()));
+				Utilities.logd(TAG, "---- Post Execute ---- " + getClass().getSimpleName() + '@' + Integer.toHexString(hashCode()));
 		    	StringBuilder headers = new StringBuilder();
 		    	headers.append("Headers: [");
 		    	for (Header h : response.getAllHeaders())
