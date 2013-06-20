@@ -125,7 +125,10 @@ public final class Params {
 
 	/** The default item limit for API calls */
 	public static final int DEFAULT_LIMIT = 10;
-	
+
+	/** Parameter for a delete filter */
+	public static final String FILTER_DELETE = "filter";
+
 	
 	public static final String ID = "id";
 	public static final String MODIFIED = "modified";

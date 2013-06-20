@@ -30,6 +30,10 @@ public class Shoppinglist implements Serializable {
 	public static final String ACCESS_PRIVATE = "private";
 	public static final String ACCESS_SHARED = "shared";
 	public static final String ACCESS_PUBLIC = "public";
+	
+	public static final String EMPTY_ALL = "all";
+	public static final String EMPTY_TICKED = "ticked";
+	public static final String EMPTY_UNTICKED = "unticked";
 
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
@@ -45,6 +49,7 @@ public class Shoppinglist implements Serializable {
 	private boolean mOffline = false;
 	private boolean mSynced = false;
 	private boolean mCurrent = false;
+	private boolean mSyncing = false;
 	
 	private HashMap<String, Share> mShares = new HashMap<String, Share>();
 	private HashMap<String, ShoppinglistItem> mItems = new HashMap<String, ShoppinglistItem>();
@@ -184,6 +189,15 @@ public class Shoppinglist implements Serializable {
 
 	public Shoppinglist setSynced(boolean synced) {
 		mSynced = synced;
+		return this;
+	}
+
+	public boolean isSyncing() {
+		return mSyncing;
+	}
+
+	public Shoppinglist setSyncing(boolean syncing) {
+		mSyncing = syncing;
 		return this;
 	}
 

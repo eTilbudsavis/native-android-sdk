@@ -25,7 +25,7 @@ public final class Endpoint {
 	// GLOBALS
 	public static final String MAIN_URL = "https://etilbudsavis.dk";
 	public static final String PROVIDER_URL = MAIN_URL + "/connect/";
-	public static final String API = "http://edge.etilbudsavis.dk";
+	public static final String API = "http://api.etilbudsavis.dk";
 	private static final String V2 = "/v2";
 	
 	// RESOURCES AND SUB RESOURCES
@@ -44,6 +44,7 @@ public final class Endpoint {
 	public static final String MODIFIED = "/modified";
 	public static final String SHARES = "/shares";
 	public static final String ITEMS = "/items";
+	public static final String EMPTY = "/empty";
 	
 	// LISTS
 	public static final String CATALOG_LIST = API + V2 + CATALOG;
@@ -68,41 +69,106 @@ public final class Endpoint {
 	
 	// QUICK SEARCH
 	public static final String STORE_QUICK_SEARCH = STORE_LIST + QUICK_SEARCH;
-
+	
+	/**
+	 * /v2/users/{user_id}/facebook
+	 * @param userId
+	 * @return
+	 */
 	public static String getFacebookEndpoint(int userId) {
 		return USER_ID + String.valueOf(userId) + FACEBOOK;
 	}
 
-	public static String getShoppinglistList(int userId) {
+	/**
+	 * /v2/users/{user_id}/shoppinglists
+	 * @param userId
+	 * @return
+	 */
+	public static String getListList(int userId) {
 		return USER_ID + String.valueOf(userId) + SHOPPINGLIST;
 	}
 
-	public static String getShoppinglistId(int userId, String listUuid) {
-		return getShoppinglistList(userId) + ITEM + listUuid;
+	/**
+	 * /v2/users/{user_id}/shoppinglists/{list_uuid}
+	 * @param userId
+	 * @param listUuid
+	 * @return
+	 */
+	public static String getListFromId(int userId, String listUuid) {
+		return getListList(userId) + ITEM + listUuid;
 	}
 
-	public static String getShoppinglistModified(int userId, String listUuid) {
-		return getShoppinglistId(userId, listUuid) + MODIFIED;
+	/**
+	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/modified
+	 * @param userId
+	 * @param listUuid
+	 * @return
+	 */
+	public static String getListModified(int userId, String listUuid) {
+		return getListFromId(userId, listUuid) + MODIFIED;
 	}
 
-	public static String getShoppinglistShares(int userId, String listUuid) {
-		return getShoppinglistId(userId, listUuid) + SHARES;
+	/**
+	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/empty
+	 * @param userId
+	 * @param listUuid
+	 * @return
+	 */
+	public static String getListEmpty(int userId, String listUuid) {
+		return getListFromId(userId, listUuid) + EMPTY;
+	}
+	
+	/**
+	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares
+	 * @param userId
+	 * @param listUuid
+	 * @return
+	 */
+	public static String getListShares(int userId, String listUuid) {
+		return getListFromId(userId, listUuid) + SHARES;
 	}
 
-	public static String getShoppinglistSharesId(int userId, String listUuid, String shareEmail) {
-		return getShoppinglistShares(userId, listUuid) + ITEM + shareEmail;
+	/**
+	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email}
+	 * @param userId
+	 * @param listUuid
+	 * @param shareEmail
+	 * @return
+	 */
+	public static String getListSharesId(int userId, String listUuid, String shareEmail) {
+		return getListShares(userId, listUuid) + ITEM + shareEmail;
 	}
 
-	public static String getShoppinglistItemList(int userId, String listUuid) {
-		return getShoppinglistId(userId, listUuid) + ITEMS;
+	/**
+	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items
+	 * @param userId
+	 * @param listUuid
+	 * @return
+	 */
+	public static String getItemList(int userId, String listUuid) {
+		return getListFromId(userId, listUuid) + ITEMS;
 	}
 
-	public static String getShoppinglistItemID(int userId, String listUuid, String itemUuid) {
-		return getShoppinglistItemList(userId, listUuid) + ITEM + itemUuid;
+	/**
+	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}
+	 * @param userId
+	 * @param listUuid
+	 * @param itemUuid
+	 * @return
+	 */
+	public static String getItemID(int userId, String listUuid, String itemUuid) {
+		return getItemList(userId, listUuid) + ITEM + itemUuid;
 	}
 
-	public static String getShoppinglistItemModified(int userId, String listUuid, String itemUuid) {
-		return getShoppinglistItemID(userId, listUuid, itemUuid) + MODIFIED;
+	/**
+	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified
+	 * @param userId
+	 * @param listUuid
+	 * @param itemUuid
+	 * @return
+	 */
+	public static String getItemModified(int userId, String listUuid, String itemUuid) {
+		return getItemID(userId, listUuid, itemUuid) + MODIFIED;
 	}
 
 	public static boolean isItemEndpoint(String url) {

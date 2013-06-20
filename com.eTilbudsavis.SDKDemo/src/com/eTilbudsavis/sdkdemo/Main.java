@@ -33,11 +33,10 @@ import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
-import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
-import com.etilbudsavis.sdkdemo.R;
 import com.eTilbudsavis.etasdk.Tools.Endpoint;
 import com.eTilbudsavis.etasdk.Tools.Utilities;
+import com.etilbudsavis.sdkdemo.R;
 
 public class Main extends Activity {
 
@@ -92,6 +91,7 @@ public class Main extends Activity {
         // Session test should always be first (no session, no data)
         // unless for specific testing purposes
         
+        
 //        tests.add(tSessionStart);
         tests.add(tSessionLogin);
         tests.add(tShoppinglist);
@@ -113,11 +113,14 @@ public class Main extends Activity {
 		public void run() {
 			it ++;
 			if (it < tests.size()) {
-				tests.get(it).setNext(main).run();
+				Test t = tests.get(it);
+				t.setNext(main).init();
+				header(t.getName());
+				t.run();
 			} else {
 				String timeTotal = String.valueOf(System.currentTimeMillis() - mTestStart);
 				String timeHttp = String.valueOf(mHttpTime);
-				addHeader("TESTING DONE! time: " + timeTotal + "(ms)" + " http: " + timeHttp + "(ms)");
+				header("TESTING DONE! time: " + timeTotal + "(ms)" + " http: " + timeHttp + "(ms)");
 //				printToFile("etaobj.txt");
 			}
 		}
@@ -127,7 +130,7 @@ public class Main extends Activity {
      * Testing shoppinglist, and it's functionality
      */
     Test tShoppinglist = new Test() {
-
+    	
     	Shoppinglist sl;
     	boolean callback = true;
     	
@@ -136,35 +139,42 @@ public class Main extends Activity {
 			@Override
 			public void onListUpdate(List<String> added, List<String> deleted,
 					List<String> edited) {
+				
 				if (added != null)
 					Utilities.logd(TAG, "Added: " + String.valueOf(added.size()));
+				
 				if (deleted != null)
 					Utilities.logd(TAG, "Deleted: " + String.valueOf(deleted.size()));
+				
 				if (edited != null)
 					Utilities.logd(TAG, "Edited: " + String.valueOf(edited.size()));
-				tShoppinglist.run();
+				
+				if (added == null && deleted == null && edited == null) {
+					tShoppinglist.run();
+				}
+				
 			}
 			
 			@Override
 			public void onItemUpdate(String shoppinglistId) {
-				Utilities.logd(TAG, "ITEM UPDATE - Shoppinglist: " + shoppinglistId);
 				tShoppinglist.run();
 			}
 		};
 		
+		@Override
 		public void init() {
+			setName("Shoppinglist");
 			mEta.getShoppinglistManager().subscribe(sll);
 			mEta.getShoppinglistManager().openDB();
+//	        mEta.getShoppinglistManager().clearDatabase();
 		}
 		
 		@Override
 		public void run() {
 
-			
 			switch (iteration) {
 			case 0:
-				addHeader("TESTING SHOPPINGLIST");
-				Utilities.logd(TAG, "--- Sync List ---");
+				subHeader("List Sync");
 				init();
 				iteration ++;
 				mEta.getShoppinglistManager().syncLists();
@@ -172,30 +182,32 @@ public class Main extends Activity {
 
 			case 1:
 				iteration ++;
-				Utilities.logd(TAG, "--- Sync Items ---");
+				subHeader("Items Sync");
 				mEta.getShoppinglistManager().syncItems();
 				break;
 
 			case 2:
 				iteration ++;
-				Utilities.logd(TAG, "--- Add List ---");
+				subHeader("Add List");
 				sl = Shoppinglist.fromName("RandomTestList");
 				mEta.getShoppinglistManager().addList(sl);
 				break;
 				
 			case 3:
 				iteration++;
-				Utilities.logd(TAG, "--- Delete List ---");
-				Utilities.logd(TAG, "RELOAD NOW! RELOAD NOW! RELOAD NOW! ");
+				int t = 15000;
+				subHeader("Delete List - waiting " + String.valueOf(t) + "ms to delete");
 				mEta.getHandler().postDelayed(new Runnable() {
 					
 					@Override
 					public void run() {
-						mEta.getShoppinglistManager().deleteList(sl.getId());
+						mEta.getShoppinglistManager().deleteList(sl);
 					}
-				}, 20000);
+				}, t);
 				
 			default:
+				int c = mEta.getShoppinglistManager().getAllLists().size();
+				Utilities.logd(TAG, "List contains: " + String.valueOf(c));
 				if (callback) {
 					callback = false;
 					getNext().run();
@@ -211,8 +223,12 @@ public class Main extends Activity {
     Test tSessionStart = new Test() {
 
 		@Override
+		public void init() {
+			setName("Session Start");
+		}
+		
+		@Override
 		public void run() {
-			addHeader("TESTING SESSTION - not really, not done yet");
 			startTimer();
 	        mEta.getSession().subscribe(new SessionListener() {
 				
@@ -233,8 +249,12 @@ public class Main extends Activity {
     Test tSessionLogin = new Test() {
 
 		@Override
+		public void init() {
+			setName("Session Login");
+		}
+		
+		@Override
 		public void run() {
-			addHeader("TESTING SESSTION LOGIN - not really, not done yet");
 			startTimer();
 			mEta.getSession().subscribe(new SessionListener() {
 				
@@ -252,12 +272,16 @@ public class Main extends Activity {
     Test tCache = new Test() {
 
 		@Override
+		public void init() {
+			setName("Cache");
+		}
+		
+		@Override
 		public void run() {
 
 			switch (iteration) {
 			case 0:
 				iteration ++;
-				addHeader("TESTING CACHE");
 				resetTestVars(); 
 				tCatalogs.setNext(tCache).run();
 				break;
@@ -284,13 +308,14 @@ public class Main extends Activity {
     
     Test tEndpointAndListenerMismatch = new Test() {
 
-    	String testName = "Endpoint";
-    	
+		@Override
+		public void init() {
+			setName("Endpoint");
+		}
+		
 		@Override
 		public void run() {
 
-			addHeader("TESTING ENDPOINT");
-			
 			startTimer();
 			mEta.api().get(Endpoint.CATALOG_LIST, new Api.CallbackOffer() {
 				
@@ -299,9 +324,9 @@ public class Main extends Activity {
 
 					stopTimer();
 					if (statusCode == 200)
-						addPositive(testName, stop, offer.toString());
+						addPositive(getName(), stop, offer.toString());
 					else
-						addNegative(testName, stop, statusCode, error.toString());
+						addNegative(getName(), stop, statusCode, error.toString());
 					
 					getNext().run();
 				}
@@ -310,6 +335,11 @@ public class Main extends Activity {
     };
     
     Test tLocation = new Test() {
+
+		@Override
+		public void init() {
+			setName("Location");
+		}
 		
     	private void exec() {
 
@@ -334,41 +364,39 @@ public class Main extends Activity {
 			
 			switch (iteration) {
 			case 0:
-				addHeader("TESTING LOCATION");
-				
 		        // Herrup, 10km, should give 1 catalog, 4 stores
 		        mEta.getLocation().set(56.40875, 8.91922, 10000, false);
-				addHeader("HERRUP - 10KM - ~1 catalog, 4 stores, ~100 offers");
+				header("HERRUP - 10KM - ~1 catalog, 4 stores, ~100 offers");
 				exec();
 				break;
 				
 			case 1:
 				mEta.getLocation().set(55.63105, 12.5766, 700000, false);	// Fields
-				addHeader("FIELDS - 700KM - ~76 catalogs, ~110 stores, ~110 offers");
+				header("FIELDS - 700KM - ~76 catalogs, ~110 stores, ~110 offers");
 				exec();
 				break;
 				
 			case 2:
 				mEta.getLocation().set(57.057582, 9.934028, 5000, false);	// Nørresundby
-				addHeader("NØRRESUNDBY - 5KM - ~30 catalogs, ~104 stores, ~110 offers");
+				header("NØRRESUNDBY - 5KM - ~30 catalogs, ~104 stores, ~110 offers");
 				exec();
 				break;
 				
 			case 3:
 				// This location should fail on all tests, except dealers, dealer should work
 				mEta.getLocation().set(56.436, 11.707, 5, false);	// Kattegat
-				addHeader("KATTEGAT - 5M - 0 catalogs, 0 stores, 0 offers");
+				header("KATTEGAT - 5M - 0 catalogs, 0 stores, 0 offers");
 				exec();
 				break;
 				
 			case 4:
-				addHeader("SEARCH TEST - KATTEGAT");
+				header("SEARCH TEST - KATTEGAT");
 				execSearch();
 				break;
 			
 			case 5:
 				mEta.getLocation().set(55.63105, 12.5766, 700000, false);	// Fields
-				addHeader("SEARCH TEST - FIELDS");
+				header("SEARCH TEST - FIELDS");
 				execSearch();
 				break;
 			
@@ -384,6 +412,11 @@ public class Main extends Activity {
 	};
 	
 	Test tOfferSearch = new Test() {
+
+		@Override
+		public void init() {
+			setName("Offer Search");
+		}
 		
 		@Override
 		public void run() {
@@ -400,6 +433,11 @@ public class Main extends Activity {
 	};
 
 	Test tDealerSearch = new Test() {
+
+		@Override
+		public void init() {
+			setName("Dealer Search");
+		}
 		
 		@Override
 		public void run() {
@@ -415,6 +453,11 @@ public class Main extends Activity {
 	};
 
 	Test tStoreSearch = new Test() {
+
+		@Override
+		public void init() {
+			setName("Store Search");
+		}
 		
 		@Override
 		public void run() {
@@ -430,6 +473,11 @@ public class Main extends Activity {
 	};
 	
     Test tCatalogs = new Test() {
+
+		@Override
+		public void init() {
+			setName("Catalogs");
+		}
 		
 		@Override
 		public void run() {
@@ -437,7 +485,7 @@ public class Main extends Activity {
 			switch (iteration) {
 			case 0: 
 				iteration ++;
-				addHeader("TESTING CATALOGS");
+				header("TESTING CATALOGS");
 				getAllCatalogs(tCatalogs);
 				break;
 			case 1:
@@ -471,6 +519,11 @@ public class Main extends Activity {
 	};
 
     Test tDealers = new Test() {
+
+		@Override
+		public void init() {
+			setName("Dealers");
+		}
 		
 		@Override
 		public void run() {
@@ -478,7 +531,7 @@ public class Main extends Activity {
 			switch (iteration) {
 			case 0:
 				iteration ++;
-				addHeader("TESTING DEALERS");
+				header("TESTING DEALERS");
 				getAllDealers(tDealers);
 				break;
 				
@@ -502,6 +555,11 @@ public class Main extends Activity {
 	};
 
     Test tStores = new Test() {
+
+		@Override
+		public void init() {
+			setName("Stores");
+		}
 		
 		@Override
 		public void run() {
@@ -509,7 +567,7 @@ public class Main extends Activity {
 			switch (iteration) {
 			case 0:
 				iteration ++;
-				addHeader("TESTING STORES");
+				header("TESTING STORES");
 				getAllStores(tStores);
 				break;
 				
@@ -535,6 +593,11 @@ public class Main extends Activity {
 	};
 
     Test tOffers = new Test() {
+
+		@Override
+		public void init() {
+			setName("Offers");
+		}
 		
 		@Override
 		public void run() {
@@ -542,7 +605,7 @@ public class Main extends Activity {
 			switch (iteration) {
 			case 0: 
 				iteration ++;
-				addHeader("TESTING OFFERS"); 
+				header("TESTING OFFERS"); 
 				getAllOffers(tOffers);
 				break;
 			case 1: 
@@ -654,7 +717,7 @@ public class Main extends Activity {
     	httpOverhead(time);
     }
 
-    private void addHeader(String name) {
+    private void header(String name) {
     	if (CONSOL_OUTPUT_HEADER) {
     		StringBuilder sb = new StringBuilder();
     		sb.append("*********************************************\n");
@@ -665,6 +728,22 @@ public class Main extends Activity {
 	    	TextView t = new TextView(getApplicationContext());
 	    	t.setText(name);
 	    	t.setBackgroundColor(Color.parseColor("#0000FF"));
+	    	t.setTextAppearance(getApplicationContext(), android.R.style.TextAppearance_Medium);
+	    	llMain.addView(t);
+    	}
+    }
+
+    private void subHeader(String name) {
+    	if (CONSOL_OUTPUT_HEADER) {
+    		StringBuilder sb = new StringBuilder();
+    		sb.append("*********************************************\n");
+    		sb.append(name);
+    		Utilities.logd(TAG, sb.toString());
+    	}
+    	if (DISPLAY_OUTPUT) {
+	    	TextView t = new TextView(getApplicationContext());
+	    	t.setText(name);
+	    	t.setBackgroundColor(Color.parseColor("#0000aa"));
 	    	t.setTextAppearance(getApplicationContext(), android.R.style.TextAppearance_Medium);
 	    	llMain.addView(t);
     	}
@@ -995,7 +1074,6 @@ public class Main extends Activity {
 				}
 				t.run();
 			}
-
 		}, ids).execute();
     }
 

@@ -22,7 +22,9 @@ public class ShoppinglistManager {
 	public static final String TAG = "ShoppinglistManager";
 
 	private static final String SHOPPINGLIST = DbHelper.SL;
-	private static final String SHOPINGLISTITEM = DbHelper.SLI;
+	private static final String SHOPPINGLISTITEM = DbHelper.SLI;
+	
+	
 
 	private Eta mEta;
 	private DbHelper mDbHelper;
@@ -57,6 +59,23 @@ public class ShoppinglistManager {
 		return c.moveToFirst() == true ? DbHelper.curToSl(c) : null;
 	}
 
+	/**
+	 * Get a shopping list from it's human readable name
+	 * @param id of the shopping list to get
+	 * @return <li>Shopping list or null if no shopping list exists
+	 */
+	public ArrayList<Shoppinglist> getListFromName(String name) {
+		Cursor c = dbGetListFromName(name);
+		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
+		if (c.moveToFirst() ) {
+			do { 
+				list.add(DbHelper.curToSl(c));
+			} while (c.moveToNext());
+		}
+		c.close();
+		return list;
+	}
+
 	public boolean addList(Shoppinglist list) {
 		
 		if (!mustSync()) return false;
@@ -70,7 +89,7 @@ public class ShoppinglistManager {
 		dbInsertList(list);
 		
 		// Sync online if possible
-		mEta.api().put(Endpoint.getShoppinglistId(user().getId(), list.getId()), new Api.CallbackString() {
+		mEta.api().put(Endpoint.getListFromId(user().getId(), list.getId()), new Api.CallbackString() {
 			
 			public void onComplete(int statusCode, String data, EtaError error) {
 				
@@ -78,7 +97,7 @@ public class ShoppinglistManager {
 				notifyListUpdate(null, null, null);
 				
 			}
-		}, list.getApiParams()).setDebug(true).execute();
+		}, list.getApiParams()).execute();
 		
 		return true;
 	}
@@ -89,7 +108,7 @@ public class ShoppinglistManager {
 		
 		if (mustSync()) {
 			
-			mEta.api().put(Endpoint.getShoppinglistId(user().getId(), list.getId()), new Api.CallbackString() {
+			mEta.api().put(Endpoint.getListFromId(user().getId(), list.getId()), new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
 
@@ -104,7 +123,8 @@ public class ShoppinglistManager {
 	}
 
 	public int deleteList(String id) {
-		return deleteList(getList(id));
+		Shoppinglist sl = getList(id);
+		return sl == null ? 0 : deleteList(sl);
 	}
 
 	public int deleteList(Shoppinglist sl) {
@@ -112,28 +132,94 @@ public class ShoppinglistManager {
 		int count = dbDeleteList(sl.getId());
 		
 		if (mustSync()) {
-			mEta.api().delete(Endpoint.getShoppinglistId(user().getId(), sl.getId()), new Api.CallbackString() {
+			mEta.api().delete(Endpoint.getListFromId(user().getId(), sl.getId()), new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
 					
 					Utilities.logd(TAG, statusCode, data, error);
 					
 				}
-			}, sl.getApiParams()).setDebug(true).execute();
+			}, sl.getApiParams()).execute();
 		}
 		return count;
 	}
 
+	public ShoppinglistItem getItem(String id) {
+		Cursor c = dbGetItem(id);
+		boolean b = c.moveToFirst();
+		c.close();
+		return b ? DbHelper.curToSli(c) : null;
+	}
+	
 	public void addItem(Shoppinglist sl, ShoppinglistItem sli) {
 		
+		dbAddItem(sli.setShoppinglistId(sl.getId()));
+		
+		if (mustSync()) {
+			
+			Api.CallbackString cb = new Api.CallbackString() {
+				
+				public void onComplete(int statusCode, String data, EtaError error) {
+					Utilities.logd(TAG, statusCode, data, error);
+				}
+			};
+			
+			mEta.api().put(Endpoint.getItemID(user().getId(), sl.getId(), sli.getId()), cb, sli.getApiParams()).execute();
+		}
 	}
 
 	public void editItem(ShoppinglistItem sli) {
 		
+		dbEditItem(sli);
+		
+		if (mustSync()) {
+			
+			Api.CallbackString cb = new Api.CallbackString() {
+				
+				public void onComplete(int statusCode, String data, EtaError error) {
+					
+					Utilities.logd(TAG, statusCode, data, error);
+					
+				}
+			};
+			
+			mEta.api().put(Endpoint.getItemID(user().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams()).execute();
+			
+		}
+	}
+
+	public void deleteAllTickedItems(Shoppinglist sl) {
+		Bundle b = new Bundle();
+		b.putString(Params.FILTER_DELETE, Shoppinglist.EMPTY_TICKED);
+		deleteAllItems(sl, b);
+	}
+
+	public void deleteAllUntickedItems(Shoppinglist sl) {
+		Bundle b = new Bundle();
+		b.putString(Params.FILTER_DELETE, Shoppinglist.EMPTY_UNTICKED);
+		deleteAllItems(sl, b);
 	}
 
 	public void deleteAllItems(Shoppinglist sl) {
+		Bundle b = new Bundle();
+		b.putString(Params.FILTER_DELETE, Shoppinglist.EMPTY_ALL);
+		deleteAllItems(sl, b);
+	}
+	
+	private void deleteAllItems(Shoppinglist sl, Bundle apiParams) {
 		
+		dbDeleteItems(sl.getId());
+		
+		if (mustSync()) {
+			
+			Api.CallbackString cb = new Api.CallbackString() {
+				
+				public void onComplete(int statusCode, String data, EtaError error) {
+					Utilities.logd(TAG, statusCode, data, error);
+				}
+			};
+			mEta.api().delete(Endpoint.getListEmpty(user().getId(), sl.getId()), cb, apiParams).execute();
+		}
 	}
 	
 	public void deleteItem(ShoppinglistItem sli) {
@@ -162,7 +248,7 @@ public class ShoppinglistManager {
 				
 			}
 		};
-		mEta.api().get(Endpoint.getShoppinglistList(user().getId()), listener).execute();
+		mEta.api().get(Endpoint.getListList(user().getId()), listener).execute();
 	}
 	
 	private void mergeLists(ArrayList<Shoppinglist> lists) {
@@ -233,7 +319,7 @@ public class ShoppinglistManager {
 		if (!mustSync()) return;
 		
 		for (final Shoppinglist sl : getAllLists()) {
-			if (!sl.isSynced()) {
+			if (!sl.isSynced() || sl.isSyncing()) {
 				// If the list haven't synced yet, then don't ask, just do it
 				// this is the case for both new lists and modified lists
 				syncItems(sl);
@@ -258,7 +344,7 @@ public class ShoppinglistManager {
 					}
 				};
 				
-				mEta.api().get(Endpoint.getShoppinglistModified(user().getId(), sl.getId()), cb).execute();
+				mEta.api().get(Endpoint.getListModified(user().getId(), sl.getId()), cb).execute();
 			}
 			
 		}
@@ -267,6 +353,8 @@ public class ShoppinglistManager {
 	
 	private void syncItems(final Shoppinglist sl) {
 
+		sl.setSyncing(true);
+		
 		Api.CallbackString listener = new Api.CallbackString() {
 			
 			public void onComplete(int statusCode, String data, EtaError error) {
@@ -275,6 +363,8 @@ public class ShoppinglistManager {
 					dbDeleteItems(sl.getId());
 					dbAddItems(ShoppinglistItem.fromJSONArray(data, sl.getId()));
 					sl.setSynced(true);
+					sl.setSyncing(false);
+					dbEditList(sl);
 					notifyItemUpdate(sl.getId());
 				} else {
 					mEta.addError(error);
@@ -283,7 +373,7 @@ public class ShoppinglistManager {
 			}
 		};
 		
-		mEta.api().get(Endpoint.getShoppinglistItemList(user().getId(), sl.getId()), listener).execute();
+		mEta.api().get(Endpoint.getItemList(user().getId(), sl.getId()), listener).execute();
 		
 	}
 	
@@ -330,7 +420,6 @@ public class ShoppinglistManager {
 			sl.setOffline(true);
 			dbInsertList(sl);
 		}
-		syncLists();
 	}
 	
 	/**
@@ -339,44 +428,26 @@ public class ShoppinglistManager {
 	public void closeDB() {
 		mDbHelper.close();
 	}
+
+	public void clearDatabase() {
+		mDbHelper.onUpgrade(mDatabase, 0, 0);
+	}
 	
-	/**
-	 * Get a shopping list from it's ID
-	 * @param id of the shopping list to get
-	 * @return <li>Shopping list or null if no shopping list exists
-	 */
-	public Shoppinglist getShoppinglist(String id) {
-		Cursor c = dbGetList(id);
-		Shoppinglist sl = c.moveToFirst() == true ? DbHelper.curToSl(c) : null;
-		c.close();
-		return sl;
-	}
-
-	/**
-	 * Get a shopping list from it's human readable name
-	 * @param id of the shopping list to get
-	 * @return <li>Shopping list or null if no shopping list exists
-	 */
-	public ArrayList<Shoppinglist> getShoppinglistFromName(String name) {
-		Cursor c = dbGetListFromName(name);
-		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
-		if (c.moveToFirst() ) {
-			do { 
-				list.add(DbHelper.curToSl(c));
-			} while (c.moveToNext());
-		}
-		c.close();
-		return list;
-	}
-
 	private long dbInsertList(Shoppinglist list) {
 		return mDatabase.insert(SHOPPINGLIST, null, DbHelper.slToCV(list));
 	}
 
-	private Cursor dbGetList(String shoppinglistId) {
-		return mDatabase.query(SHOPPINGLIST, null, DbHelper.ID + "=?", new String[]{shoppinglistId}, null, null, null, null);
+	private Cursor dbGetList(String id) {
+		return mDatabase.query(SHOPPINGLIST, null, DbHelper.ID + "=?", new String[]{id}, null, null, null, null);
 	}
 
+	private boolean dbExistsList(String id) {
+		Cursor c = dbGetList(id);
+		boolean res = c.moveToFirst();
+		c.close();
+		return res;
+	}
+	
 	private Cursor dbGetListFromName(String name) {
 		return mDatabase.query(SHOPPINGLIST, null, DbHelper.NAME + "=?", new String[]{name}, null, null, null);
 	}
@@ -400,18 +471,33 @@ public class ShoppinglistManager {
 		return true;
 	}
 	
+	private Cursor dbGetItem(String id) {
+		return mDatabase.query(SHOPPINGLISTITEM, null, DbHelper.ID + "=?", new String[]{id}, null, null, null);
+	}
+
+	private boolean dbExistsItem(String id) {
+		Cursor c = dbGetItem(id);
+		boolean res = c.moveToFirst();
+		c.close();
+		return res;
+	}
+	
 	private long dbAddItem(ShoppinglistItem sli) {
-		return mDatabase.insert(SHOPINGLISTITEM, null, DbHelper.sliToCV(sli));
+		return dbExistsItem(sli.getId()) ? -1 : mDatabase.insert(SHOPPINGLISTITEM, null, DbHelper.sliToCV(sli));
 	}
 	
 	private int dbDeleteItems(String shoppinglistId) {
-		return mDatabase.delete(SHOPINGLISTITEM, DbHelper.ID + "=?", new String[]{shoppinglistId});
+		return mDatabase.delete(SHOPPINGLISTITEM, DbHelper.ID + "=?", new String[]{shoppinglistId});
 	}
 
 	private int dbDeleteItem(String id) {
-		return mDatabase.delete(SHOPINGLISTITEM, DbHelper.ID + "=?", new String[]{id});
+		return mDatabase.delete(SHOPPINGLISTITEM, DbHelper.ID + "=?", new String[]{id});
 	}
-	
+
+	private long dbEditItem(ShoppinglistItem sli) {
+		return mDatabase.replace(SHOPPINGLISTITEM, null, DbHelper.sliToCV(sli));
+	}
+
 	/**
 	 * The complete set of shopping lists
 	 * @return <li>All shopping lists
@@ -428,10 +514,6 @@ public class ShoppinglistManager {
 		return list;
 	}
 	
-	public void clearDatabase() {
-		mDbHelper.onUpgrade(mDatabase, 0, 0);
-	}
-	
 	public ShoppinglistManager subscribe(ShoppinglistListener listener) {
 		mSubscribers.add(listener);
 		return this;
@@ -442,7 +524,7 @@ public class ShoppinglistManager {
 	}
 
 	public ShoppinglistManager notifyListUpdate(List<String> added, List<String> deleted, List<String> edited) {
-		Utilities.logd(TAG, "Notifications Sent");
+		Utilities.logd(TAG, "List Notifications Sent");
 		for (ShoppinglistListener s : mSubscribers)
 			s.onListUpdate(added, deleted, edited);
 		
@@ -450,7 +532,7 @@ public class ShoppinglistManager {
 	}
 
 	public ShoppinglistManager notifyItemUpdate(String shoppinglistId) {
-		Utilities.logd(TAG, "Notifications Sent");
+		Utilities.logd(TAG, "Item Notifications Sent - " + shoppinglistId);
 		for (ShoppinglistListener s : mSubscribers)
 			s.onItemUpdate(shoppinglistId);
 		

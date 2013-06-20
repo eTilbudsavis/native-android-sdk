@@ -236,29 +236,15 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 		}
 		return this;
 	}
-
-	public Bundle getApiParamsAddItem() {
+	
+	public Bundle getApiParams() {
 
 		Bundle apiParams = new Bundle();
-		apiParams.putString("shoppinglist", mShoppinglistIdDepricated);
-		if (mOffer == null)
-			apiParams.putString("description", mDescription);
-		else
-			apiParams.putString("offer", mOffer.getId());
-
-		apiParams.putString("tick", String.valueOf(mTick));
-		apiParams.putString("count", String.valueOf(getCount()));
-
-		return apiParams;
-	}
-
-	public Bundle getApiParamsEditItem() {
-		Bundle apiParams = getApiParamsAddItem();
-		apiParams.putString("item", getId());
-		if (getOffer() == null)
-			apiParams.putString("removeOffer", String.valueOf(true));
-		else
-			apiParams.putString("removeOffer", String.valueOf(false));
+		apiParams.putString(S_DESCRIPTION, getDescription());
+		apiParams.putInt(S_COUNT, getCount());
+		apiParams.putBoolean(S_TICK, isTicked());
+		apiParams.putString(S_OFFER_ID, mOffer.getId());
+		apiParams.putString(S_MODIFIED, getModifiedString());
 
 		return apiParams;
 	}

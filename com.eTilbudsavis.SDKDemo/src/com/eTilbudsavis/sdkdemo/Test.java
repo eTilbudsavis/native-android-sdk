@@ -2,6 +2,7 @@ package com.eTilbudsavis.sdkdemo;
 
 public class Test {
 
+	public String name = "";
 	public int iteration = 0;
 	public long start = 0L;
 	public long stop = 0L;
@@ -19,6 +20,9 @@ public class Test {
 		accumilated += stop;
     }
 
+    public void init() {
+    }
+    
 	public void run() {
 	}
 	
@@ -26,9 +30,18 @@ public class Test {
 		this.next = next;
 		return this;
 	}
-	
+
 	public Test getNext() {
 		return next;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public Test setName(String name) {
+		this.name = name;
+		return this;
 	}
 
 }

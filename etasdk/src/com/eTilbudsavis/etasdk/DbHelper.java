@@ -18,7 +18,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	private static final int DB_VERSION = 1;
 	
 	public static final String SL = "shoppinglists";
-	public static final String SLI = "_shoppinglistitems";
+	public static final String SLI = "shoppinglistitems";
 	
 	public static final String ID = "id";
 	public static final String MODIFIED = "modified";
@@ -26,6 +26,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String NAME = "name";
 	public static final String ACCESS = "access";
 	public static final String SYNCED = "synced";
+	public static final String SYNCING = "syncing";
 	public static final String OFFLINE = "offline";
 	public static final String CURRENT = "current";
 	public static final String DESCRIPTION = "description";
@@ -41,12 +42,13 @@ public class DbHelper extends SQLiteOpenHelper {
 	private static final String DB_CREATE_SL = 
 		"create table if not exists " + SL + "(" + 
 		ID + " text primary key, " + 
-		MODIFIED + " integer not null, " + 
+		MODIFIED + " text not null, " + 
 		ERN + " text, " + 
 		NAME + " text not null, " + 
 		ACCESS + " text not null, " + 
-		SYNCED + " integer not null " + 
-		OFFLINE + " integer not null " + 
+		SYNCED + " integer not null, " + 
+		SYNCING + " integer not null, " + 
+		OFFLINE + " integer not null, " + 
 		CURRENT + " integer not null " + 
 		");";
 
@@ -61,7 +63,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		TICK + " integer not null, " + 
 		OFFER_ID + " text, " + 
 		CREATOR + " text not null, " + 
-		SHOPPINGLIST_ID + " text not null );";
+		SHOPPINGLIST_ID + " text not null " + 
+		");";
 
 	public DbHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
@@ -84,12 +87,15 @@ public class DbHelper extends SQLiteOpenHelper {
 
 	public static Shoppinglist curToSl(Cursor c) {
 		Shoppinglist sl = new Shoppinglist();
-		sl.setId(c.getString(1));
-		sl.setModified(c.getString(2));
-		sl.setErn(c.getString(3));
-		sl.setName(c.getString(4));
-		sl.setAccess(c.getString(5));
-		sl.setSynced(0 < c.getInt(6));
+		sl.setId(c.getString(0));
+		sl.setModified(c.getString(1));
+		sl.setErn(c.getString(2));
+		sl.setName(c.getString(3));
+		sl.setAccess(c.getString(4));
+		sl.setSynced(0 < c.getInt(5));
+		sl.setSyncing(0 < c.getInt(6));
+		sl.setOffline(0 < c.getInt(7));
+		sl.setCurrent(0 < c.getInt(8));
 		return sl;
 	}
 	
@@ -101,6 +107,9 @@ public class DbHelper extends SQLiteOpenHelper {
 		c.put(DbHelper.NAME, sl.getName());
 		c.put(DbHelper.ACCESS, sl.getAccess());
 		c.put(DbHelper.SYNCED, sl.isSynced());
+		c.put(DbHelper.SYNCING, sl.isSyncing());
+		c.put(DbHelper.OFFLINE, sl.isOffline());
+		c.put(DbHelper.CURRENT, sl.isCurrent());
 		return c;
 	}
 
