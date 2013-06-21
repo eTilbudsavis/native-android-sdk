@@ -59,7 +59,7 @@ public class Session implements Serializable {
 
 		public void onComplete(int statusCode, String data, EtaError error) {
 			
-			Utilities.logd(TAG, statusCode, data, error);
+			Utilities.logd(TAG, "Session",statusCode, data, error);
 			
 			if (200 <= statusCode && statusCode < 300 ) {
 				set(data);

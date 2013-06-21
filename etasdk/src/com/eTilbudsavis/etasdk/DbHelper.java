@@ -28,7 +28,6 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String SYNCED = "synced";
 	public static final String SYNCING = "syncing";
 	public static final String OFFLINE = "offline";
-	public static final String CURRENT = "current";
 	public static final String DESCRIPTION = "description";
 	public static final String COUNT = "count";
 	public static final String TICK = "tick";
@@ -49,7 +48,6 @@ public class DbHelper extends SQLiteOpenHelper {
 		SYNCED + " integer not null, " + 
 		SYNCING + " integer not null, " + 
 		OFFLINE + " integer not null, " + 
-		CURRENT + " integer not null " + 
 		");";
 
 	// Shoppinglist item table
@@ -95,7 +93,6 @@ public class DbHelper extends SQLiteOpenHelper {
 		sl.setSynced(0 < c.getInt(5));
 		sl.setSyncing(0 < c.getInt(6));
 		sl.setOffline(0 < c.getInt(7));
-		sl.setCurrent(0 < c.getInt(8));
 		return sl;
 	}
 	
@@ -109,7 +106,6 @@ public class DbHelper extends SQLiteOpenHelper {
 		c.put(DbHelper.SYNCED, sl.isSynced());
 		c.put(DbHelper.SYNCING, sl.isSyncing());
 		c.put(DbHelper.OFFLINE, sl.isOffline());
-		c.put(DbHelper.CURRENT, sl.isCurrent());
 		return c;
 	}
 

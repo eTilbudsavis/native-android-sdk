@@ -48,7 +48,6 @@ public class Shoppinglist implements Serializable {
 	// local vars
 	private boolean mOffline = false;
 	private boolean mSynced = false;
-	private boolean mCurrent = false;
 	private boolean mSyncing = false;
 	
 	private HashMap<String, Share> mShares = new HashMap<String, Share>();
@@ -210,15 +209,15 @@ public class Shoppinglist implements Serializable {
 		return this;
 	}
 
-	public boolean isCurrent() {
-		return mCurrent;
-	}
-
-	public Shoppinglist setCurrent(boolean current) {
-		mCurrent = current;
+	public Shoppinglist setModifiedFromJSON(String time) {
+		try {
+			setModified(new JSONObject(time).getString(PARAM_MODIFIED));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 		return this;
 	}
-
+	
 	public Shoppinglist setModified(String time) {
 		try {
 			mModified = sdf.parse(time).getTime();

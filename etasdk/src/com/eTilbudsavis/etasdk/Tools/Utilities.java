@@ -71,12 +71,19 @@ public final class Utilities {
 			Log.d(tag, "Status: " + String.valueOf(statusCode) + ", Data: " + object.toString());
 	}
 
-	public static void logd(String tag, int statusCode, Object data, EtaError error) {
+	public static void logd(String tag, String name, int statusCode, Object data, EtaError error) {
 		if (Eta.mDebug) {
-			Log.d(tag, isSuccess(statusCode) ? data.toString() : error.toString());
+			Log.d(tag, name + " - " + (isSuccess(statusCode) ? data.toString() : error.toString()));
 		}
 	}
 
+	public static void printStackTrace() {
+
+		for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+		    System.out.println(ste);
+		}
+		
+	}
     /**
      * Generate a SHA256 checksum of a string.
      * 

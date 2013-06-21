@@ -140,16 +140,12 @@ public class Main extends Activity {
 			public void onListUpdate(List<String> added, List<String> deleted,
 					List<String> edited) {
 				
-				if (added != null)
-					Utilities.logd(TAG, "Added: " + String.valueOf(added.size()));
+				Utilities.logd(TAG, 
+						"A:" + String.valueOf(added.size()) +
+						", D:" + String.valueOf(deleted.size()) +
+						", E:" + String.valueOf(edited.size()));
 				
-				if (deleted != null)
-					Utilities.logd(TAG, "Deleted: " + String.valueOf(deleted.size()));
-				
-				if (edited != null)
-					Utilities.logd(TAG, "Edited: " + String.valueOf(edited.size()));
-				
-				if (added == null && deleted == null && edited == null) {
+				if (added.isEmpty() && deleted.isEmpty() && edited.isEmpty()) {
 					tShoppinglist.run();
 				}
 				
@@ -166,7 +162,7 @@ public class Main extends Activity {
 			setName("Shoppinglist");
 			mEta.getShoppinglistManager().subscribe(sll);
 			mEta.getShoppinglistManager().openDB();
-//	        mEta.getShoppinglistManager().clearDatabase();
+	        mEta.getShoppinglistManager().clearDatabase();
 		}
 		
 		@Override
@@ -175,7 +171,6 @@ public class Main extends Activity {
 			switch (iteration) {
 			case 0:
 				subHeader("List Sync");
-				init();
 				iteration ++;
 				mEta.getShoppinglistManager().syncLists();
 				break;
@@ -205,9 +200,15 @@ public class Main extends Activity {
 					}
 				}, t);
 				
+			case 4:
+				iteration++;
+				subHeader("Add Item");
+				mEta.getShoppinglistManager();
+				break;
+				
 			default:
 				int c = mEta.getShoppinglistManager().getAllLists().size();
-				Utilities.logd(TAG, "List contains: " + String.valueOf(c));
+				Utilities.logd(TAG, "Shoppinglist switch hit default - Num of lists: " + String.valueOf(c));
 				if (callback) {
 					callback = false;
 					getNext().run();
