@@ -158,9 +158,7 @@ public class ShoppinglistManager {
 	 * @param sl - Shopping list to be replaced
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
-	public boolean editList(final Shoppinglist sl) {
-		
-		long l = dbEditList(sl);
+	public long editList(final Shoppinglist sl) {
 		
 		if (mustSync()) {
 			
@@ -180,7 +178,7 @@ public class ShoppinglistManager {
 			mEta.api().put(Endpoint.getListFromId(user().getId(), sl.getId()), editItem, sl.getApiParams()).execute();
 		}
 		
-		return l == -1 ? false : true;
+		return dbEditList(sl);
 		
 	}
 
@@ -198,10 +196,6 @@ public class ShoppinglistManager {
 	 */
 	public int deleteList(Shoppinglist sl) {
 		
-		int count = dbDeleteList(sl.getId());
-		
-		dbDeleteItems(sl.getId());
-		
 		if (mustSync()) {
 			mEta.api().delete(Endpoint.getListFromId(user().getId(), sl.getId()), new Api.CallbackString() {
 				
@@ -216,7 +210,10 @@ public class ShoppinglistManager {
 				}
 			}, sl.getApiParams()).execute();
 		}
-		return count;
+		
+		dbDeleteItems(sl.getId());
+		
+		return dbDeleteList(sl.getId());
 	}
 
 	/**
@@ -232,16 +229,15 @@ public class ShoppinglistManager {
 	}
 	
 	/**
+	 * TODO: Check if shopping list exists, and do stuff accordingly
 	 * Add an item to a shopping list.<br>
 	 * shopping list items is inserted into the database, and changes is synchronized to the server if possible.
 	 * If the shopping list does not exist in the database or the server, a new one is created and synchronized if possible
-	 * TODO: Check if shopping list exists, and do stuff accordingly
 	 * @param sl - shopping list where item should be added to
 	 * @param sli - shopping list item that should be added.
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
-	public void addItem(final Shoppinglist sl, ShoppinglistItem sli) {
-		
-		dbAddItem(sli.setShoppinglistId(sl.getId()));
+	public long addItem(final Shoppinglist sl, ShoppinglistItem sli) {
 		
 		if (mustSync()) {
 			
@@ -260,6 +256,9 @@ public class ShoppinglistManager {
 			
 			mEta.api().put(Endpoint.getItemID(user().getId(), sl.getId(), sli.getId()), cb, sli.getApiParams()).execute();
 		}
+		
+		return dbAddItem(sli.setShoppinglistId(sl.getId()));
+		
 	}
 
 	/**
@@ -267,9 +266,7 @@ public class ShoppinglistManager {
 	 * shopping list items is replaced in the database, and changes is synchronized to the server if possible.
 	 * @param sli - shopping list item to edit
 	 */
-	public void editItem(final ShoppinglistItem sli) {
-		
-		dbEditItem(sli);
+	public long editItem(final ShoppinglistItem sli) {
 		
 		if (mustSync()) {
 			
@@ -289,39 +286,45 @@ public class ShoppinglistManager {
 			mEta.api().put(Endpoint.getItemID(user().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams()).execute();
 			
 		}
+
+		return dbEditItem(sli);
+		
 	}
 
 	/**
 	 * Delete all items from a shoppinglist where <code>isTicked() == true.</code><br>
 	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
 	 * @param sl - shoppinglist to delete items from
+	 * @return number of affected rows
 	 */
-	public void deleteAllTickedItems(Shoppinglist sl) {
+	public int deleteAllTickedItems(Shoppinglist sl) {
 		Bundle b = new Bundle();
 		b.putString(Params.FILTER_DELETE, Shoppinglist.EMPTY_TICKED);
-		deleteAllItems(sl, b);
+		return deleteAllItems(sl, b);
 	}
 
 	/**
 	 * Delete all items from a shoppinglist where <code>isTicked() == false.</code><br>
 	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
 	 * @param sl - shoppinglist to delete items from
+	 * @return number of affected rows
 	 */
-	public void deleteAllUntickedItems(Shoppinglist sl) {
+	public int deleteAllUntickedItems(Shoppinglist sl) {
 		Bundle b = new Bundle();
 		b.putString(Params.FILTER_DELETE, Shoppinglist.EMPTY_UNTICKED);
-		deleteAllItems(sl, b);
+		return deleteAllItems(sl, b);
 	}
 
 	/**
 	 * Delete ALL items from a given shoppinglist.<br>
 	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
 	 * @param sl - shoppinglist to delete items from
+	 * @return number of affected rows
 	 */
-	public void deleteAllItems(Shoppinglist sl) {
+	public int deleteAllItems(Shoppinglist sl) {
 		Bundle b = new Bundle();
 		b.putString(Params.FILTER_DELETE, Shoppinglist.EMPTY_ALL);
-		deleteAllItems(sl, b);
+		return deleteAllItems(sl, b);
 	}
 	
 	/**
@@ -329,10 +332,9 @@ public class ShoppinglistManager {
 	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
 	 * @param sl to remove items from
 	 * @param apiParams that describe what needs to be deleted
+	 * @return number of affected rows
 	 */
-	private void deleteAllItems(Shoppinglist sl, Bundle apiParams) {
-		
-		dbDeleteItems(sl.getId());
+	private int deleteAllItems(Shoppinglist sl, Bundle apiParams) {
 		
 		if (mustSync()) {
 			
@@ -350,6 +352,9 @@ public class ShoppinglistManager {
 			};
 			mEta.api().delete(Endpoint.getListEmpty(user().getId(), sl.getId()), cb, apiParams).execute();
 		}
+
+		return dbDeleteItems(sl.getId());
+		
 	}
 	
 	/**
@@ -389,6 +394,7 @@ public class ShoppinglistManager {
 				
 			}
 		};
+		
 		mEta.api().get(Endpoint.getListList(user().getId()), listener).execute();
 	}
 	
