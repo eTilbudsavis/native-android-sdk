@@ -15,6 +15,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Tools.Utilities;
 
 public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializable {
 
@@ -32,30 +33,41 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 	private static final String S_CREATOR = "creator";
 	private static final String S_MODIFIED = "modified";
 
+	public static final int STATE_INIT = 0;
+	public static final int STATE_SYNCHRONIZING = 1;
+	public static final int STATE_SYNCHRONIZED = 2;
+	public static final int STATE_ERROR = 3;
+	public static final int STATE_DELETING = 4;
+	public static final int STATE_DELETED = 5;
+	
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
 
 	// Server vars
 	private String mId = "";
 	private boolean mTick = false;
-	private String mOfferId;
+	private String mOfferId = "";
 	private int mCount = 1;
-	private String mDescription;
-	private String mShoppinglistIdDepricated;
+	private String mDescription = "";
+	private String mShoppinglistIdDepricated = "";
 	private String mErn = "";
 	private String mCreator = "";
 	private long mModified = 0L;
+	private int mState = STATE_INIT;
 	
 	// local vars
 	private Offer mOffer = null;
-	private String mShoppinglistId;
+	private String mShoppinglistId = "";
 
 	public ShoppinglistItem() {
-		
+		setId(Utilities.createUUID());
+		setModified(System.currentTimeMillis());
 	}
 
 	public ShoppinglistItem(Shoppinglist shoppinglist, String description) {
-		mDescription = description;
+		setId(Utilities.createUUID());
+		setModified(System.currentTimeMillis());
+		setDescription(description);
 	}
 
 	public static ArrayList<ShoppinglistItem> fromJSONArray(String shoppinglistItems, String shoppinglistId) {
@@ -108,7 +120,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 			sli.setOfferId(shoppinglistItem.getString(S_OFFER_ID));
 			sli.setCount(shoppinglistItem.getInt(S_COUNT));
 			sli.setDescription(shoppinglistItem.getString(S_DESCRIPTION));
-			sli.setShoppinglistId(shoppinglistItem.getString(S_SHOPPINGLIST_ID));
+			sli.setShoppinglistIdDepricated(shoppinglistItem.getString(S_SHOPPINGLIST_ID));
 			sli.setErn(shoppinglistItem.getString(S_ERN));
 			sli.setCreator(shoppinglistItem.getString(S_CREATOR));
 			sli.setModified(shoppinglistItem.getString(S_MODIFIED));
@@ -236,6 +248,17 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 		}
 		return this;
 	}
+
+	public int getState() {
+		return mState;
+	}
+	
+	public ShoppinglistItem setState(int state) {
+		if (STATE_INIT <= state && state <= STATE_DELETED) {
+			mState = state;
+		}
+		return this;
+	}
 	
 	public Bundle getApiParams() {
 
@@ -243,7 +266,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 		apiParams.putString(S_DESCRIPTION, getDescription());
 		apiParams.putInt(S_COUNT, getCount());
 		apiParams.putBoolean(S_TICK, isTicked());
-		apiParams.putString(S_OFFER_ID, mOffer.getId());
+		apiParams.putString(S_OFFER_ID, getOfferId());
 		apiParams.putString(S_MODIFIED, getModifiedString());
 
 		return apiParams;

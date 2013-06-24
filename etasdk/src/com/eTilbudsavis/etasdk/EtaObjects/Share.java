@@ -12,35 +12,56 @@ public class Share implements Comparable<Share>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
+	private static final String S_USER = "user";
+	private static final String S_ACCESS = "access";
+	private static final String S_ACCEPTED = "accepted";
+	
+	public static final String ACCESS_OWNER = "owner";
+	public static final String ACCESS_RW = "rw";
+	public static final String ACCESS_W = "r";
+	
 	public static final String TAG = "Share";
 	
 	private String mUser;
-	private SharePermission mAccess;
-	private Boolean mAccepted;
+	private String mAccess;
+	private boolean mAccepted;
 
-	public enum SharePermission {
-		OWNER { public String toString() { return "owner"; }},
-		R { public String toString() { return "r"; }},
-		RW { public String toString() { return "rw"; }},
+	public Share() {
 	}
-	
-	public Share(JSONObject share) {
+
+	public static Share fromJSON(String share) {
+		Share s = new Share();
 		try {
-			mUser = share.getString("user");
-			mAccess = SharePermission.valueOf(share.getString("access").toUpperCase());
-			mAccepted = share.getString("accepted").equals("true") ? true : false;
+			s = fromJSON(s, new JSONObject(share));
 		} catch (JSONException e) {
 			if (Eta.mDebug)
 				e.printStackTrace();
 		}
+		return s;
 	}
-
+	
+	public static Share fromJSON(JSONObject share) {
+		return fromJSON(new Share(), share);
+	}
+	
+	public static Share fromJSON(Share s, JSONObject share) {
+		try {
+			s.setUser(share.getString(S_USER));
+			s.setAccess(share.getString(S_ACCESS));
+			s.setAccepted(share.getBoolean(S_ACCEPTED));
+		} catch (JSONException e) {
+			if (Eta.mDebug)
+				e.printStackTrace();
+		}
+		return s;
+	}
+	
 	/**
 	 * Create a new Share object
 	 * @param user the e-mail address of the share
 	 * @param readwrite true for 'read and write' access, false for 'read only'
 	 */
-	public Share(String user, SharePermission permission) {
+	public Share(String user, String permission) {
 		mUser = user;
 		mAccess = permission;
 		mAccepted = false;
@@ -49,8 +70,13 @@ public class Share implements Comparable<Share>, Serializable {
 	public String getUser() {
 		return mUser;
 	}
+	
+	public Share setUser(String user) {
+		mUser = user;
+		return this;
+	}
 
-	public SharePermission getAccess() {
+	public String getAccess() {
 		return mAccess;
 	}
 
@@ -59,13 +85,18 @@ public class Share implements Comparable<Share>, Serializable {
 	 * @param readwrite true for 'read and write' access, false for 'read only'
 	 * @return this share
 	 */
-	public Share setAccess(SharePermission permission) {
+	public Share setAccess(String permission) {
 		mAccess = permission;
 		return Share.this;
 	}
 
-	public Boolean getAccepted() {
+	public boolean getAccepted() {
 		return mAccepted;
+	}
+	
+	public Share setAccepted(boolean accepted) {
+		mAccepted = accepted;
+		return this;
 	}
 	
 	@Override
@@ -77,7 +108,7 @@ public class Share implements Comparable<Share>, Serializable {
 			return false;
 
 		Share share = (Share)o;
-		return share.getAccepted().equals(mAccepted) &&
+		return share.getAccepted() == mAccepted &&
 				share.getAccess().equals(mAccess) &&
 				share.getUser().equals(mUser);
 	}
@@ -87,7 +118,7 @@ public class Share implements Comparable<Share>, Serializable {
 		return new StringBuilder()
 		.append(getClass().getSimpleName()).append("[")
 		.append("user=").append(mUser)
-		.append(", access=").append(mAccess.toString())
+		.append(", access=").append(mAccess)
 		.append(", accepted=").append(mAccepted)
 		.append("]").toString();
 	}

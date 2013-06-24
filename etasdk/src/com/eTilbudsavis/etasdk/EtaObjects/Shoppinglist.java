@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +25,7 @@ public class Shoppinglist implements Serializable {
 	public static final String PARAM_NAME = "name";
 	public static final String PARAM_ACCESS = "access";
 	public static final String PARAM_MODIFIED = "modified";
+	public static final String PARAM_OWNER = "owner";
 	
 	public static final String ACCESS_PRIVATE = "private";
 	public static final String ACCESS_SHARED = "shared";
@@ -34,7 +34,15 @@ public class Shoppinglist implements Serializable {
 	public static final String EMPTY_ALL = "all";
 	public static final String EMPTY_TICKED = "ticked";
 	public static final String EMPTY_UNTICKED = "unticked";
-
+	
+	public static final int STATE_INIT = 0;
+	public static final int STATE_SYNCHRONIZING = 1;
+	public static final int STATE_SYNCHRONIZED = 2;
+	public static final int STATE_OFFLINE = 2;
+	public static final int STATE_ERROR = 3;
+	public static final int STATE_DELETING = 4;
+	public static final int STATE_DELETED = 5;
+	
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
 
@@ -44,15 +52,11 @@ public class Shoppinglist implements Serializable {
 	private String mName = "";
 	private String mAccess = ACCESS_PRIVATE;
 	private long mModified = 0L;
+	private Share mOwner = new Share();
 	
 	// local vars
-	private boolean mOffline = false;
-	private boolean mSynced = false;
-	private boolean mSyncing = false;
+	private int mState = STATE_INIT;
 	
-	private HashMap<String, Share> mShares = new HashMap<String, Share>();
-	private HashMap<String, ShoppinglistItem> mItems = new HashMap<String, ShoppinglistItem>();
-
 	public Shoppinglist() {
 		setId(Utilities.createUUID());
 		setModified(System.currentTimeMillis());
@@ -113,6 +117,7 @@ public class Shoppinglist implements Serializable {
 			sl.setName(shoppinglist.getString(PARAM_NAME));
 			sl.setAccess(shoppinglist.getString(PARAM_ACCESS));
 			sl.setModified(shoppinglist.getString(PARAM_MODIFIED));
+			sl.setOwner(Share.fromJSON(shoppinglist.getString(PARAM_OWNER)));
 		} catch (JSONException e) {
 			if (Eta.mDebug)
 				e.printStackTrace();
@@ -181,32 +186,40 @@ public class Shoppinglist implements Serializable {
 		mModified = time;
 		return this;
 	}
-
-	public boolean isSynced() {
-		return mSynced;
+	
+	public int getState() {
+		return mState;
 	}
-
-	public Shoppinglist setSynced(boolean synced) {
-		mSynced = synced;
+	
+	public Shoppinglist setState(int state) {
+		if (STATE_INIT <= state && state <= STATE_DELETED) {
+			mState = state;
+		}
 		return this;
 	}
-
-	public boolean isSyncing() {
-		return mSyncing;
+	
+	public boolean isStateSynchronized() {
+		return mState == STATE_SYNCHRONIZED;
 	}
 
-	public Shoppinglist setSyncing(boolean syncing) {
-		mSyncing = syncing;
-		return this;
+	public boolean isStateSynchronizing() {
+		return mState == STATE_SYNCHRONIZING;
 	}
 
-	public boolean isOffline() {
-		return mOffline;
+	public boolean isStateDeleted() {
+		return mState == STATE_DELETED;
 	}
 
-	public Shoppinglist setOffline(boolean offline) {
-		mOffline = offline;
-		return this;
+	public boolean isStateInitial() {
+		return mState == STATE_INIT;
+	}
+
+	public boolean isStateOffline() {
+		return mState == STATE_OFFLINE;
+	}
+
+	public boolean isStateError() {
+		return mState == STATE_ERROR;
 	}
 
 	public Shoppinglist setModifiedFromJSON(String time) {
@@ -226,57 +239,16 @@ public class Shoppinglist implements Serializable {
 		}
 		return this;
 	}
-
-	public Shoppinglist setShare(Share share) {
-		mShares.put(share.getUser(), share);
+	
+	public Share getOwner() {
+		return mOwner;
+	}
+	
+	public Shoppinglist setOwner(Share owner) {
+		mOwner = owner;
 		return this;
 	}
 
-	public HashMap<String, Share> getShares() {
-		return mShares;
-	}
-
-	public void putShare(Share share) {
-		mShares.put(share.getUser(), share);
-	}
-	
-	/**
-	 * Add a new list of shares to this shoppinglist.
-	 * Old list of shares will be removed.
-	 * @param shares to put into shoppinglist
-	 */
-	public void putShares(HashMap<String, Share> shares) {
-		mShares.clear();
-		mShares.putAll(shares);
-	}
-	
-	public void addItem(ShoppinglistItem shoppinglistItem) {
-		mItems.put(shoppinglistItem.getId(), shoppinglistItem);
-	}
-
-	public Boolean removeItem(ShoppinglistItem shoppinglistItem) {
-		return  mItems.remove(shoppinglistItem.getId()) == null ? false : true;
-	}
-
-	public Boolean removeShare(Share share) {
-		return  mShares.remove(share.getUser()) == null ? false : true;
-	}
-	
-	public HashMap<String, ShoppinglistItem> getShoppinglistItems() {
-		return mItems;
-	}
-
-	public Boolean compareShares(HashMap<String, Share> shares) {
-		if (!mShares.keySet().containsAll(shares.keySet()) && !shares.keySet().containsAll(mShares.keySet()))
-			return false;
-		
-		for(String key : shares.keySet())
-			if (!mShares.get(key).equals(shares.get(key)))
-				return false;
-		
-		return true;
-	}
-	
 	/**
 	 * We are not comparing the modified field, as this field does not
 	 * update the same as 
@@ -291,9 +263,12 @@ public class Shoppinglist implements Serializable {
 
 		Shoppinglist sl = (Shoppinglist)o;
 		return mId.equals(sl.getId()) &&
+				mErn.equals(sl.getErn()) &&
 				mAccess.equals(sl.getAccess()) &&
-				mName.equals(sl.getName()) &&
-				this.compareShares(sl.getShares());
+				mModified == sl.getModified() &&
+				mState == sl.getState() &&
+				mOwner.equals(sl.getOwner()) &&
+				mName.equals(sl.getName());
 	}
 
 	@Override
@@ -309,8 +284,8 @@ public class Shoppinglist implements Serializable {
 		.append(", ern=").append(mErn)
 		.append(", access=").append(mAccess)
 		.append(", modified=").append(mModified)
-		.append(", synced=").append(mSynced)
-		.append(", offline=").append(mOffline);
+		.append(", state=").append(mState)
+		.append(", owner=").append(mOwner.toString());
 		return sb.append("]").toString();
 	}
 	

@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
+import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
@@ -23,7 +24,7 @@ public class ShoppinglistManager {
 
 	private static final String SHOPPINGLIST = DbHelper.SL;
 	private static final String SHOPPINGLISTITEM = DbHelper.SLI;
-	public static final String PREFS_SHOPPINGLISTMANAGER_USER = "session_user";
+	public static final String PREFS_SHOPPINGLISTMANAGER_CURRENT = "shoppinglistmanager_current";
 	
 	private Eta mEta;
 	private DbHelper mDbHelper;
@@ -52,7 +53,7 @@ public class ShoppinglistManager {
 	public ShoppinglistManager(Eta eta) {
 		mEta = eta;
 		mDbHelper = new DbHelper(mEta.getContext());
-		mCurrentSlId = mEta.getPrefs().getString(PREFS_SHOPPINGLISTMANAGER_USER, null);
+		mCurrentSlId = mEta.getPrefs().getString(PREFS_SHOPPINGLISTMANAGER_CURRENT, null);
 	}
 
 	/**
@@ -85,7 +86,7 @@ public class ShoppinglistManager {
 	 */
 	public ShoppinglistManager setCurrentList(Shoppinglist sl) {
 		mCurrentSlId = sl.getId();
-		mEta.getPrefs().edit().putString(PREFS_SHOPPINGLISTMANAGER_USER, mCurrentSlId).commit();
+		mEta.getPrefs().edit().putString(PREFS_SHOPPINGLISTMANAGER_CURRENT, mCurrentSlId).commit();
 		return this;
 	}
 	
@@ -118,37 +119,57 @@ public class ShoppinglistManager {
 
 	/**
 	 * Add a new shopping list.<br>
+	 * If owner haven't been set, we will assume that it is the user who is currently logged in.
+	 * if no user is logged inn, then we assume it is a offline list.<br>
 	 * shopping list added to the database, and changes is synchronized to the server if possible.<br>
 	 * 
 	 * @param sl - the new shoppinglist to add to the database, and server
 	 */
-	public void addList(Shoppinglist sl) {
+	public void addList(final Shoppinglist sl) {
 		
 		// Make sure the UUID does not exist, before adding it
 		while (dbExistsList(sl.getId())) {
 			sl.setId(Utilities.createUUID());
 		};
 		
+		if (mustSync()) {
+
+			if (sl.getOwner().getUser() == null) {
+				sl.getOwner().setUser(user().getEmail());
+				sl.getOwner().setAccess(Share.ACCESS_OWNER);
+				sl.getOwner().setAccepted(true);
+			}
+			
+			sl.setState(Shoppinglist.STATE_SYNCHRONIZING);
+			
+			// Sync online if possible
+			Api.CallbackString cb = new Api.CallbackString() {
+				
+				public void onComplete(int statusCode, String data, EtaError error) {
+					Utilities.logd(TAG, "addList", statusCode, data, error);
+					if (Utilities.isSuccess(statusCode)) {
+						Shoppinglist newSl = Shoppinglist.fromJSON(data);
+						newSl.setState(Shoppinglist.STATE_SYNCHRONIZED);
+						dbEditList(newSl);
+						notifyListAdd(newSl.getId());
+					} else {
+						mEta.addError(error);
+						Utilities.logd(TAG, error.toString());
+						sl.setState(Shoppinglist.STATE_INIT);
+						dbEditList(sl);
+						notifyListAdd(sl.getId());
+					}
+				}
+			};
+			
+			mEta.api().put(Endpoint.getListFromId(user().getId(), sl.getId()), cb, sl.getApiParams()).execute();
+			
+		}
+
 		// Insert the new list to DB
 		dbInsertList(sl);
 
-		if (!mustSync()) return;
-		
-		// Sync online if possible
-		mEta.api().put(Endpoint.getListFromId(user().getId(), sl.getId()), new Api.CallbackString() {
-			
-			public void onComplete(int statusCode, String data, EtaError error) {
-				Utilities.logd(TAG, "addList", statusCode, data, error);
-				if (Utilities.isSuccess(statusCode)) {
-					
-				} else {
-					mEta.addError(error);
-					Utilities.logd(TAG, error.toString());
-				}
-				notifyListUpdate(null, null, null);
-				
-			}
-		}, sl.getApiParams()).execute();
+		notifyListAdd(sl.getId());
 		
 	}
 
@@ -158,33 +179,42 @@ public class ShoppinglistManager {
 	 * @param sl - Shopping list to be replaced
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
-	public long editList(final Shoppinglist sl) {
+	public void editList(final Shoppinglist sl) {
 		
 		if (mustSync()) {
+
+			sl.setState(Shoppinglist.STATE_SYNCHRONIZING);
+			dbEditList(sl);
 			
 			Api.CallbackString editItem = new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
 					Utilities.logd(TAG, "editList", statusCode, data, error);
+					Shoppinglist s = sl;
 					if (Utilities.isSuccess(statusCode)) {
-						dbEditList(Shoppinglist.fromJSON(data));
+						s = Shoppinglist.fromJSON(data);
+						s.setState(Shoppinglist.STATE_SYNCHRONIZED);
 					} else {
 						mEta.addError(error);
 						Utilities.logd(TAG, error.toString());
+						s.setState(Shoppinglist.STATE_ERROR);
 					}
+					dbEditList(s);
+					notifyListEdit(s.getId());
 				}
 			};
 			
 			mEta.api().put(Endpoint.getListFromId(user().getId(), sl.getId()), editItem, sl.getApiParams()).execute();
+		} else {
+			dbEditList(sl);
+			notifyListEdit(sl.getId());
 		}
-		
-		return dbEditList(sl);
-		
 	}
 
-	public int deleteList(String id) {
+	public void deleteList(String id) {
 		Shoppinglist sl = getList(id);
-		return sl == null ? 0 : deleteList(sl);
+		if (sl != null) 
+			deleteList(sl);
 	}
 
 	/**
@@ -194,26 +224,35 @@ public class ShoppinglistManager {
 	 * @param sl - Shopping list to delete
 	 * @return the number of rows affected.
 	 */
-	public int deleteList(Shoppinglist sl) {
+	public void deleteList(final Shoppinglist sl) {
 		
 		if (mustSync()) {
-			mEta.api().delete(Endpoint.getListFromId(user().getId(), sl.getId()), new Api.CallbackString() {
+			
+			sl.setState(Shoppinglist.STATE_DELETING);
+			dbEditList(sl);
+			
+			Api.CallbackString cb = new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
 					Utilities.logd(TAG, "deleteList", statusCode, data, error);
 					if (Utilities.isSuccess(statusCode)) {
-						
+						sl.setState(Shoppinglist.STATE_DELETED);
+						dbDeleteItems(sl.getId(), null);
 					} else {
 						mEta.addError(error);
 						Utilities.logd(TAG, error.toString());
+						sl.setState(Shoppinglist.STATE_ERROR);
 					}
+					notifyListDelete(sl.getId());
 				}
-			}, sl.getApiParams()).execute();
+			};
+			
+			mEta.api().delete(Endpoint.getListFromId(user().getId(), sl.getId()), cb, sl.getApiParams()).execute();
+		} else {
+			dbDeleteItems(sl.getId(), null);
+			notifyListDelete(sl.getId());
 		}
 		
-		dbDeleteItems(sl.getId());
-		
-		return dbDeleteList(sl.getId());
 	}
 
 	/**
@@ -237,7 +276,7 @@ public class ShoppinglistManager {
 	 * @param sli - shopping list item that should be added.
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
-	public long addItem(final Shoppinglist sl, ShoppinglistItem sli) {
+	public long addItem(final Shoppinglist sl, final ShoppinglistItem sli) {
 		
 		if (mustSync()) {
 			
@@ -246,15 +285,21 @@ public class ShoppinglistManager {
 				public void onComplete(int statusCode, String data, EtaError error) {
 					Utilities.logd(TAG, "addItem", statusCode, data, error);
 					if (Utilities.isSuccess(statusCode)) {
-						dbEditItem(ShoppinglistItem.fromJSON(data, sl.getId()));
+						ShoppinglistItem s = ShoppinglistItem.fromJSON(data, sl.getId());
+						s.setState(ShoppinglistItem.STATE_SYNCHRONIZED);
+						dbEditItem(s);
 					} else {
 						mEta.addError(error);
 						Utilities.logd(TAG, error.toString());
+						sli.setState(ShoppinglistItem.STATE_ERROR);
+						dbEditItem(sli);
 					}
 				}
 			};
 			
-			mEta.api().put(Endpoint.getItemID(user().getId(), sl.getId(), sli.getId()), cb, sli.getApiParams()).execute();
+			mEta.api().put(Endpoint.getItemID(user().getId(), sl.getId(), sli.getId()), cb, sli.getApiParams()).setDebug(true).execute();
+		} else {
+			
 		}
 		
 		return dbAddItem(sli.setShoppinglistId(sl.getId()));
@@ -266,29 +311,35 @@ public class ShoppinglistManager {
 	 * shopping list items is replaced in the database, and changes is synchronized to the server if possible.
 	 * @param sli - shopping list item to edit
 	 */
-	public long editItem(final ShoppinglistItem sli) {
+	public void editItem(final ShoppinglistItem sli) {
 		
 		if (mustSync()) {
+			
+			sli.setState(ShoppinglistItem.STATE_SYNCHRONIZING);
 			
 			Api.CallbackString cb = new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
 					Utilities.logd(TAG, "editItem", statusCode, data, error);
+					ShoppinglistItem s = sli;
 					if (Utilities.isSuccess(statusCode)) {
-						dbEditItem(ShoppinglistItem.fromJSON(data, sli.getId()));
+						s = ShoppinglistItem.fromJSON(data, sli.getId());
+						s.setState(ShoppinglistItem.STATE_SYNCHRONIZED);
 					} else {
 						mEta.addError(error);
 						Utilities.logd(TAG, error.toString());
+						s.setState(ShoppinglistItem.STATE_ERROR);
 					}
 				}
 			};
 			
 			mEta.api().put(Endpoint.getItemID(user().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams()).execute();
 			
+		} else {
+			
+			dbEditItem(sli);
 		}
 
-		return dbEditItem(sli);
-		
 	}
 
 	/**
@@ -297,10 +348,10 @@ public class ShoppinglistManager {
 	 * @param sl - shoppinglist to delete items from
 	 * @return number of affected rows
 	 */
-	public int deleteAllTickedItems(Shoppinglist sl) {
+	public void deleteAllTickedItems(Shoppinglist sl) {
 		Bundle b = new Bundle();
 		b.putString(Params.FILTER_DELETE, Shoppinglist.EMPTY_TICKED);
-		return deleteAllItems(sl, b);
+		deleteAllItems(sl, b);
 	}
 
 	/**
@@ -309,10 +360,10 @@ public class ShoppinglistManager {
 	 * @param sl - shoppinglist to delete items from
 	 * @return number of affected rows
 	 */
-	public int deleteAllUntickedItems(Shoppinglist sl) {
+	public void deleteAllUntickedItems(Shoppinglist sl) {
 		Bundle b = new Bundle();
 		b.putString(Params.FILTER_DELETE, Shoppinglist.EMPTY_UNTICKED);
-		return deleteAllItems(sl, b);
+		deleteAllItems(sl, b);
 	}
 
 	/**
@@ -321,10 +372,10 @@ public class ShoppinglistManager {
 	 * @param sl - shoppinglist to delete items from
 	 * @return number of affected rows
 	 */
-	public int deleteAllItems(Shoppinglist sl) {
+	public void deleteAllItems(Shoppinglist sl) {
 		Bundle b = new Bundle();
 		b.putString(Params.FILTER_DELETE, Shoppinglist.EMPTY_ALL);
-		return deleteAllItems(sl, b);
+		deleteAllItems(sl, b);
 	}
 	
 	/**
@@ -334,27 +385,30 @@ public class ShoppinglistManager {
 	 * @param apiParams that describe what needs to be deleted
 	 * @return number of affected rows
 	 */
-	private int deleteAllItems(Shoppinglist sl, Bundle apiParams) {
+	private void deleteAllItems(final Shoppinglist sl, Bundle apiParams) {
 		
 		if (mustSync()) {
-			
+			sl.setState(Shoppinglist.STATE_SYNCHRONIZING);
 			Api.CallbackString cb = new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
 					Utilities.logd(TAG, "deleteAllItems", statusCode, data, error);
 					if (Utilities.isSuccess(statusCode)) {
-						
+						dbDeleteItems(sl.getId(), null);
+						sl.setState(Shoppinglist.STATE_SYNCHRONIZED);
 					} else {
 						mEta.addError(error);
 						Utilities.logd(TAG, error.toString());
+						sl.setState(Shoppinglist.STATE_ERROR);
 					}
 				}
 			};
 			mEta.api().delete(Endpoint.getListEmpty(user().getId(), sl.getId()), cb, apiParams).execute();
+		} else {
+			dbDeleteItems(sl.getId(), null);
+			notifyItemUpdate(sl.getId());
 		}
 
-		return dbDeleteItems(sl.getId());
-		
 	}
 	
 	/**
@@ -446,7 +500,8 @@ public class ShoppinglistManager {
 		if (!added.isEmpty() || !deleted.isEmpty() || !edited.isEmpty()) {
 			syncItems();
 		}
-		notifyListUpdate(added, deleted, edited);
+		
+		notifyListUpdate(added.isEmpty() ? null : added, deleted.isEmpty() ? null : deleted, edited.isEmpty() ? null : edited);
 	}
 
 	/**
@@ -460,13 +515,12 @@ public class ShoppinglistManager {
 		if (!mustSync()) return;
 		
 		for (final Shoppinglist sl : getAllLists()) {
-			if (!sl.isSyncing()) {
-				if (!sl.isSynced()) {
+			if (!sl.isStateSynchronizing()) {
+				if (!sl.isStateSynchronized()) {
 					// If the list haven't synced yet, then don't ask, just do it
 					// this is the case for both new lists and modified lists
 					syncItems(sl);
 				} else {
-					
 					// Else make a call to check when it's been modified
 					Api.CallbackString cb = new Api.CallbackString() {
 						
@@ -501,11 +555,10 @@ public class ShoppinglistManager {
 	 * startSync() is called if Eta.onResume() is called.
 	 * @param shoppinglist update
 	 */
-	public void syncItems(Shoppinglist shoppinglist) {
+	public void syncItems(final Shoppinglist sl) {
 		
-		final Shoppinglist sl = shoppinglist;
-		
-		sl.setSyncing(true);
+		sl.setState(Shoppinglist.STATE_SYNCHRONIZING);
+		dbEditList(sl);
 		
 		Api.CallbackString listener = new Api.CallbackString() {
 			
@@ -514,16 +567,16 @@ public class ShoppinglistManager {
 				Utilities.logd(TAG, "syncItems(sl)", statusCode, data, error);
 				
 				if (Utilities.isSuccess(statusCode)) {
-					dbDeleteItems(sl.getId());
+					dbDeleteItems(sl.getId(), null);
 					dbAddItems(ShoppinglistItem.fromJSONArray(data, sl.getId()));
-					sl.setSynced(true);
-					sl.setSyncing(false);
-					dbEditList(sl);
-					notifyItemUpdate(sl.getId());
+					sl.setState(Shoppinglist.STATE_SYNCHRONIZED);
 				} else {
 					mEta.addError(error);
 					Utilities.logd(TAG, error.toString());
+					sl.setState(Shoppinglist.STATE_ERROR);
 				}
+				dbEditList(sl);
+				notifyItemUpdate(sl.getId());
 			}
 		};
 		
@@ -580,12 +633,6 @@ public class ShoppinglistManager {
 	 */
 	public void openDB() {
 		mDatabase = mDbHelper.getWritableDatabase();
-		if (getAllLists().size() == 0) {
-			//TODO: Get shopping list name from localized string instead of hardcoding
-			Shoppinglist sl = Shoppinglist.fromName("Shoppinglist");
-			sl.setOffline(true);
-			dbInsertList(sl);
-		}
 	}
 	
 	/**
@@ -716,12 +763,20 @@ public class ShoppinglistManager {
 	}
 	
 	/**
-	 * Deletes all items from a specific shopping list
+	 * Deletes all items from a specific shopping list<br>
+	 * true = Ticked<br>
+	 * false = Unticked<br>
+	 * null = All items<br>
 	 * @param shoppinglistId to remove items from
 	 * @return number of affected rows
 	 */
-	private int dbDeleteItems(String shoppinglistId) {
-		return mDatabase.delete(SHOPPINGLISTITEM, DbHelper.ID + "=?", new String[]{shoppinglistId});
+	private int dbDeleteItems(String shoppinglistId, Boolean state) {
+		
+		if (state == null) {
+			return mDatabase.delete(SHOPPINGLISTITEM, DbHelper.ID + "=?", new String[]{shoppinglistId});
+		} else {
+			return mDatabase.delete(SHOPPINGLISTITEM, DbHelper.ID + "=? AND " + DbHelper.TICK + "=?", new String[]{shoppinglistId, String.valueOf(state)});
+		}
 	}
 
 	/**
@@ -767,6 +822,33 @@ public class ShoppinglistManager {
 		return mSubscribers.remove(listener);
 	}
 
+	/**
+	 * Wrapper method to make notification when adding a new shoppinglist.<br>
+	 * This will call
+	 * @param id
+	 * @return
+	 */
+	public ShoppinglistManager notifyListAdd(String id) {
+		List<String> list = new ArrayList<String>();
+		list.add(id);
+		notifyListUpdate( list , null, null);
+		return this;
+	}
+
+	public ShoppinglistManager notifyListDelete(String id) {
+		List<String> list = new ArrayList<String>();
+		list.add(id);
+		notifyListUpdate(null, list, null);
+		return this;
+	}
+
+	public ShoppinglistManager notifyListEdit(String id) {
+		List<String> list = new ArrayList<String>();
+		list.add(id);
+		notifyListUpdate(null, null, list);
+		return this;
+	}
+	
 	public ShoppinglistManager notifyListUpdate(List<String> added, List<String> deleted, List<String> edited) {
 		Utilities.logd(TAG, "Sending LIST notifications - " + String.valueOf(mSubscribers.size()));
 		for (ShoppinglistListener s : mSubscribers)

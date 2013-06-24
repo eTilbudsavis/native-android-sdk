@@ -33,6 +33,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
+import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Tools.Endpoint;
 import com.eTilbudsavis.etasdk.Tools.Utilities;
@@ -100,7 +101,6 @@ public class Main extends Activity {
 //        tests.add(tLocation);
         
         resetTestVars();
-        
         main.run();
         
     }
@@ -131,7 +131,7 @@ public class Main extends Activity {
      */
     Test tShoppinglist = new Test() {
     	
-    	Shoppinglist sl;
+    	Shoppinglist sl, slCurrent;
     	boolean callback = true;
     	
     	ShoppinglistListener sll = new ShoppinglistListener() {
@@ -140,12 +140,16 @@ public class Main extends Activity {
 			public void onListUpdate(List<String> added, List<String> deleted,
 					List<String> edited) {
 				
-				Utilities.logd(TAG, 
-						"A:" + String.valueOf(added.size()) +
-						", D:" + String.valueOf(deleted.size()) +
-						", E:" + String.valueOf(edited.size()));
+				if (added != null)
+					Utilities.logd(TAG, "Added:" + String.valueOf(added.size()));
+
+				if (deleted != null)
+					Utilities.logd(TAG, "Deleted:" + String.valueOf(deleted.size()));
+					
+				if (edited != null)
+					Utilities.logd(TAG, "Edited:" + String.valueOf(edited.size()));
 				
-				if (added.isEmpty() && deleted.isEmpty() && edited.isEmpty()) {
+				if (added == null && deleted == null && edited == null) {
 					tShoppinglist.run();
 				}
 				
@@ -167,7 +171,8 @@ public class Main extends Activity {
 		
 		@Override
 		public void run() {
-
+			
+			
 			switch (iteration) {
 			case 0:
 				subHeader("List Sync");
@@ -181,29 +186,34 @@ public class Main extends Activity {
 				mEta.getShoppinglistManager().syncItems();
 				break;
 
+				
 			case 2:
+				iteration ++;
+				subHeader("Current list");
+				slCurrent = mEta.getShoppinglistManager().getCurrentList();
+				Utilities.logd(TAG, slCurrent.toString());
+				break;
+
+			case 3:
 				iteration ++;
 				subHeader("Add List");
 				sl = Shoppinglist.fromName("RandomTestList");
 				mEta.getShoppinglistManager().addList(sl);
 				break;
 				
-			case 3:
-				iteration++;
-				int t = 15000;
-				subHeader("Delete List - waiting " + String.valueOf(t) + "ms to delete");
-				mEta.getHandler().postDelayed(new Runnable() {
-					
-					@Override
-					public void run() {
-						mEta.getShoppinglistManager().deleteList(sl);
-					}
-				}, t);
+//			case 4:
+//				iteration++;
+//				subHeader("Delete List - waiting " + String.valueOf(30000) + "ms to delete");
+//				delDel(sl, 30000);
+//				break;
 				
 			case 4:
 				iteration++;
 				subHeader("Add Item");
-				mEta.getShoppinglistManager();
+				slCurrent = mEta.getShoppinglistManager().getCurrentList();
+				Utilities.logd(TAG, slCurrent.toString(true));
+				ShoppinglistItem sli = new ShoppinglistItem(slCurrent, "Remu Testen");
+				mEta.getShoppinglistManager().addItem(slCurrent, sli);
 				break;
 				
 			default:
@@ -217,6 +227,16 @@ public class Main extends Activity {
 			}
 		}
     };
+    
+    private void delDel(final Shoppinglist sl, int time) {
+		mEta.getHandler().postDelayed(new Runnable() {
+			
+			@Override
+			public void run() {
+				mEta.getShoppinglistManager().deleteList(sl);
+			}
+		}, time);
+    }
     
     /**
      * Session testing, no user

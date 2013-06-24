@@ -25,9 +25,10 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String ERN = "ern";
 	public static final String NAME = "name";
 	public static final String ACCESS = "access";
-	public static final String SYNCED = "synced";
-	public static final String SYNCING = "syncing";
-	public static final String OFFLINE = "offline";
+	public static final String STATE = "state";
+	public static final String OWNER_USER = "owner_user";
+	public static final String OWNER_ACCESS = "owner_access";
+	public static final String OWNER_ACCEPTED = "owner_accepted";
 	public static final String DESCRIPTION = "description";
 	public static final String COUNT = "count";
 	public static final String TICK = "tick";
@@ -45,9 +46,10 @@ public class DbHelper extends SQLiteOpenHelper {
 		ERN + " text, " + 
 		NAME + " text not null, " + 
 		ACCESS + " text not null, " + 
-		SYNCED + " integer not null, " + 
-		SYNCING + " integer not null, " + 
-		OFFLINE + " integer not null, " + 
+		STATE + " integer not null, " + 
+		OWNER_USER + " text, " + 
+		OWNER_ACCESS + " text, " + 
+		OWNER_ACCEPTED + " integer " + 
 		");";
 
 	// Shoppinglist item table
@@ -61,7 +63,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		TICK + " integer not null, " + 
 		OFFER_ID + " text, " + 
 		CREATOR + " text not null, " + 
-		SHOPPINGLIST_ID + " text not null " + 
+		SHOPPINGLIST_ID + " text not null, " + 
+		STATE + " integer not null " + 
 		");";
 
 	public DbHelper(Context context) {
@@ -90,22 +93,24 @@ public class DbHelper extends SQLiteOpenHelper {
 		sl.setErn(c.getString(2));
 		sl.setName(c.getString(3));
 		sl.setAccess(c.getString(4));
-		sl.setSynced(0 < c.getInt(5));
-		sl.setSyncing(0 < c.getInt(6));
-		sl.setOffline(0 < c.getInt(7));
+		sl.setState(c.getInt(5));
+		sl.getOwner().setUser(c.getString(6));
+		sl.getOwner().setAccess(c.getString(7));
+		sl.getOwner().setAccepted(0 < c.getInt(8));
 		return sl;
 	}
 	
 	public static ContentValues slToCV(Shoppinglist sl) {
 		ContentValues c = new ContentValues();
-		c.put(DbHelper.ID, sl.getId());
-		c.put(DbHelper.MODIFIED, sl.getModifiedString());
-		c.put(DbHelper.ERN, sl.getErn());
-		c.put(DbHelper.NAME, sl.getName());
-		c.put(DbHelper.ACCESS, sl.getAccess());
-		c.put(DbHelper.SYNCED, sl.isSynced());
-		c.put(DbHelper.SYNCING, sl.isSyncing());
-		c.put(DbHelper.OFFLINE, sl.isOffline());
+		c.put(ID, sl.getId());
+		c.put(MODIFIED, sl.getModifiedString());
+		c.put(ERN, sl.getErn());
+		c.put(NAME, sl.getName());
+		c.put(ACCESS, sl.getAccess());
+		c.put(STATE, sl.getState());
+		c.put(OWNER_USER, sl.getOwner().getUser());
+		c.put(OWNER_ACCESS, sl.getOwner().getAccess());
+		c.put(OWNER_ACCEPTED, sl.getOwner().getAccepted());
 		return c;
 	}
 
@@ -125,6 +130,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		sli.setOfferId(cursor.getString(6));
 		sli.setCreator(cursor.getString(7));
 		sli.setShoppinglistId(cursor.getString(8));
+		sli.setState(cursor.getInt(9));
 		return sli;
 	}
 
@@ -139,6 +145,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		c.put(OFFER_ID, sli.getOfferId());
 		c.put(CREATOR, sli.getCreator());
 		c.put(SHOPPINGLIST_ID, sli.getShoppinglistId());
+		c.put(STATE, sli.getState());
 		return c;
 	}
 	
