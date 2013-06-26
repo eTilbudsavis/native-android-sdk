@@ -14,16 +14,16 @@ import java.util.LinkedHashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.etilbudsavis.etasdk.API.RequestListener;
-
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.etilbudsavis.etasdk.API.RequestListener;
+
+
 @SuppressLint("SetJavaScriptEnabled")
-// Pageflip cannot implement serializable since it has a ref to WebView, which isn't serializable.
 public final class Pageflip {
 
 	private ETA mETA;
@@ -77,6 +77,8 @@ public final class Pageflip {
 		WebSettings mWebSetting = mWebView.getSettings();
 		mWebSetting.setJavaScriptEnabled(true);
 		mWebSetting.setDefaultTextEncodingName("UTF-8");
+		
+//		mWebSetting.setAppCacheMaxSize(10*1024*1024);
 		
 		mWebView.setWebViewClient(new WebViewClient() {
 			@Override
@@ -171,7 +173,7 @@ public final class Pageflip {
 		s += "eta.init(" + Utilities.buildJSString(etaInit) + ");";
 		
 		if (mETA.getLocation().useLocation()) {
-			Bundle loc = mETA.getLocation().getLocation();
+			Bundle loc = mETA.getLocation().getLocationAsApiParams();
 			LinkedHashMap<String, Object> etaloc = new LinkedHashMap<String, Object>();
 				etaloc.put("latitude", loc.getDouble("api_latitude"));
 				etaloc.put("longitude", loc.getDouble("api_longitude"));

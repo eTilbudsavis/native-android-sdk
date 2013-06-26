@@ -6,16 +6,24 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -55,9 +63,26 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		
 	@Override
 	protected Void doInBackground(Void... params) {
-
-		DefaultHttpClient httpClient = new DefaultHttpClient();
 		
+		// Hack to force acceptance of our SSL Certificates to *.etilbudsavis.dk
+		// It basically uses a different HostnameVerifier than the default
+		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+		DefaultHttpClient tmpClient = new DefaultHttpClient();
+		
+		SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
+		socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
+
+		SchemeRegistry registry = new SchemeRegistry();
+		registry.register(new Scheme("https", socketFactory, 443));
+		
+		SingleClientConnManager mgr = new SingleClientConnManager(tmpClient.getParams(), registry);
+		DefaultHttpClient httpClient = new DefaultHttpClient(mgr, tmpClient.getParams());
+
+		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
+		// End SSL Certificates hack
+		
+		
+		// Set connection timeouts
 		HttpParams httpParams = httpClient.getParams();
 		HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIME_OUT);
 		HttpConnectionParams.setSoTimeout(httpParams, CONNECTION_TIME_OUT);
@@ -79,13 +104,21 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		}
 		
 		HttpResponse response;
+		
+		boolean showDebug = false;
+		
+//		showDebug = mUrl.equals("https://etilbudsavis.dk/api/v1/offer/search/");
+//		
+//		showDebug = showDebug 
+//				|| (!mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/sync/")
+//				&& !mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/list/"));
+		
 		try {
 			
-//			if (!mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/sync/")
-//					&& !mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/list/")) {
-//				Utilities.logd("HttpHelper", "URL: " + mUrl);
-//				Utilities.logd("HttpHelper", "Query: " + URLEncodedUtils.format(mQuery, HTTP.UTF_8));
-//			}
+			if (showDebug) {
+				Utilities.logd("HttpHelper", "URL: " + mUrl);
+				Utilities.logd("HttpHelper", "Query: " + URLEncodedUtils.format(mQuery, HTTP.UTF_8));
+			}
 			
 			if (mRequestType == RequestType.POST) {
 
@@ -128,8 +161,6 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -158,11 +189,10 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
         // Close connection, to deallocate resources
 		httpClient.getConnectionManager().shutdown();
 
-//		if (!mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/sync/")
-//				&& !mUrl.equals("https://etilbudsavis.dk/api/v1/shoppinglist/list/")) {
-//			Utilities.logd("HttpHelper", String.valueOf(mResponseCode));
-//			Utilities.logd("HttpHelper", mResult);
-//		}
+		if (showDebug) {
+			Utilities.logd("HttpHelper", String.valueOf(mResponseCode));
+			Utilities.logd("HttpHelper", mResult);
+		}
 		
 		return null;
 	}
