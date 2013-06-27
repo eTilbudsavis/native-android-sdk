@@ -97,9 +97,9 @@ public class Api implements Serializable {
 	private boolean mMultipleCallbacks = false;
 	
 	private HttpHelper httpHelper;
-	private boolean mUseLocation = true;
-	private boolean mUseCache = true;
-	private boolean mUseDebug = false;
+	private boolean mLocation = true;
+	private boolean mCache = true;
+	private boolean mDebug = false;
 	private HttpListener mHttpListener = new HttpListener() {
 
 		public void onComplete(int statusCode, String data, Header[] headers) {
@@ -426,12 +426,12 @@ public class Api implements Serializable {
 	}
 
 	public Api setUseCache(boolean useCache) {
-		mUseCache = useCache;
+		mCache = useCache;
 		return this;
 	}
 	
 	public boolean useCache() {
-		return mUseCache;
+		return mCache;
 	}
 	
 	/**
@@ -454,7 +454,7 @@ public class Api implements Serializable {
 	 * @return
 	 */
 	public Api setUseLocation(boolean useLocation) {
-		this.mUseLocation = useLocation;
+		this.mLocation = useLocation;
 		return this;
 	}
 
@@ -463,7 +463,7 @@ public class Api implements Serializable {
 	 * @return True if location is being used, false otherwise.
 	 */
 	public boolean useLocation() {
-		return mUseLocation;
+		return mLocation;
 	}
 
 	/**
@@ -474,15 +474,15 @@ public class Api implements Serializable {
 	 * @return this object
 	 */
 	public Api setDebug(boolean useDebug) {
-		this.mUseDebug = useDebug;
+		this.mDebug = useDebug;
 		return this;
 	}
 
 	/**
 	 * Tells whether the current {@link com.etilbudsavis.etasdk.API Api()} is printing debug information
 	 */
-	public boolean useDebug() {
-		return mUseDebug;
+	public boolean isDebug() {
+		return mDebug;
 	}
 	
 	/**
@@ -604,7 +604,7 @@ public class Api implements Serializable {
 		// Required API key.
 		Utilities.putNameValuePair(params, API_KEY, mEta.getApiKey());
 
-		if (mUseLocation) {
+		if (mLocation) {
 
 			if (!mEta.getLocation().isLocationSet()) {
 				Utilities.logd(TAG, "Location is required, but has not been set yet. Aborting...");
@@ -643,7 +643,7 @@ public class Api implements Serializable {
 		}
 		
 		// TODO: Check cache before executing the httpHepler
-		if (mUseCache && mRequestType == RequestType.GET && mId != null) {
+		if (mCache && mRequestType == RequestType.GET && mId != null) {
 			String prefix = mUrl.contains(Endpoint.CATALOG_ID) ? "ern:catalog:" :
 				mUrl.contains(Endpoint.DEALER_ID) ? "ern:dealer:" :
 					mUrl.contains(Endpoint.STORE_ID) ? "ern:store:" : 
@@ -659,7 +659,7 @@ public class Api implements Serializable {
 		
 		// Create a new HttpHelper and run it
 		httpHelper = new HttpHelper(mEta, mUrl, headers, params, mRequestType, mHttpListener);
-		httpHelper.debug(mUseDebug).execute();
+		httpHelper.setDebug(mDebug).execute();
 		
 	}
 

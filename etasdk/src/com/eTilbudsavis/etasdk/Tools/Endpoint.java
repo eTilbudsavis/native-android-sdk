@@ -24,7 +24,6 @@ public final class Endpoint {
 
 	// GLOBALS
 	public static final String MAIN_URL = "https://etilbudsavis.dk";
-	public static final String PROVIDER_URL = MAIN_URL + "/connect/";
 	public static final String API = "http://api.etilbudsavis.dk";
 	private static final String V2 = "/v2";
 	
@@ -39,6 +38,7 @@ public final class Endpoint {
 	public static final String SEARCH = "/search";
 	public static final String QUICK_SEARCH = "/quicksearch";
 	public static final String FACEBOOK = "/facebook";
+	public static final String PROXY = MAIN_URL + "/proxy/";
 	
 	// Shoppinglist
 	public static final String MODIFIED = "/modified";
@@ -69,7 +69,16 @@ public final class Endpoint {
 	
 	// QUICK SEARCH
 	public static final String STORE_QUICK_SEARCH = STORE_LIST + QUICK_SEARCH;
-	
+
+	/**
+	 * https://etilbudsavis.dk/proxy/{id}/
+	 * @param id of pageflip proxy (can be random)
+	 * @return https://etilbudsavis.dk/proxy/{id}/
+	 */
+	public static String getPageflipProxy(String id) {
+		return PROXY + id + ITEM;
+	}
+
 	/**
 	 * /v2/users/{user_id}/facebook
 	 * @param userId

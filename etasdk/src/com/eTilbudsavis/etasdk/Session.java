@@ -93,7 +93,7 @@ public class Session implements Serializable {
 		mUser = new User();
 	}
 	
-	private void set(String session) {
+	public void set(String session) {
 		try {
 			set(new JSONObject(session));
 		} catch (JSONException e) {
@@ -101,12 +101,14 @@ public class Session implements Serializable {
 		}
 	}
 	
-	private void set(JSONObject session) {
+	public void set(JSONObject session) {
 		
 		try {
 			mToken = session.getString(S_TOKEN);
 		    setExpires(session.getString(S_EXPIRES));
-		    mUser = User.fromJSON(session.getString(S_USER));
+		    if (!session.getString(S_USER).equals("null")) {
+		    	mUser = User.fromJSON(session.getString(S_USER));
+		    }
 		    mPermission = Permission.fromJSON(session.getJSONObject(S_PERMISSIONS));
 		    mProvider = session.getString(S_PROVIDER);
 		    mJson = session;
@@ -271,7 +273,7 @@ public class Session implements Serializable {
 		mEta.api().delete(ENDPOINT, session, new Bundle()).execute();
 	}
 	
-	public JSONObject getJson() {
+	public JSONObject toJSON() {
 		return mJson;
 	}
 	

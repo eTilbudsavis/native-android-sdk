@@ -6,330 +6,457 @@
  */
 package com.eTilbudsavis.etasdk;
 
-import java.io.Closeable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Tools.Utilities;
-
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.util.AttributeSet;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
+import com.eTilbudsavis.etasdk.Tools.Endpoint;
+import com.eTilbudsavis.etasdk.Tools.Utilities;
+
 @SuppressLint("SetJavaScriptEnabled")
-public final class Pageflip extends WebView implements Closeable {
+public final class Pageflip extends WebView {
 
-	private Eta mETA;
+	private static final String TAG = "Pageflip";
 
-	private static final String EVENT_PREFIX = "eta-pageflip";
-	private static final String PF_API_KEY = "apiKey";
-	private static final String PF_LAT = "latitude";
-	private static final String PF_LNG = "longitude";
-	private static final String PF_DISTANCE = "distance";
-	private static final String PF_SENSOR = "sensor";
+	/** String identifying etaProxy events */
+	private static final String ETA_PROXY = "eta-proxy";
+	/** String identifying the ready pageflip event. See pageflip documentation for more details */
+	public static final String EVENT_READY = "ready";
+
+	/** String identifying session events */	
+	private static final String ETA_SESSION = "eta-session";
+	/** String identifying the change event, called when the session has changed. See pageflip documentation for more details */
+	public static final String EVENT_CHANGE = "change";
 	
-	private boolean mIsPageflipInitialized = false;
-	private String mType = "";
-	private String mContent = "";
+
+	
+	/** String identifying the initialize parameter, used when initializing pageflip */
+	private static final String PARAM_INITIALIZE = "initialize";
+	private static final String API_KEY = "apiKey";
+	private static final String API_SECRET = "apiSecret";
+	private static final String SESSION = "session";
+	private static final String LOCALE = "locale";
+	private static final String LOCATION = "geolocation";
+	private static final String LOCATION_LAT = "latitude";
+	private static final String LOCATION_LNG = "longitude";
+	private static final String LOCATION_SENSOR = "sensor";
+	private static final String LOCATION_RADIUS = "radius";
+
+
+
+	/** String identifying the catalog-view parameter, used when loading a catalog. All available options for this parameter is prefixed with "OPTION" as in {@link Pageflip#OPTION_CATALOG OPTION_CATALOG} */
+	private static final String PARAM_CATALOG_VIEW = "catalog-view";
+	/** String identifying the catalog option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+	public static final String OPTION_CATALOG = "catalog";
+	/** String identifying the page option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+	public static final String OPTION_PAGE = "page";
+	/** String identifying the hotspots option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+	public static final String OPTION_HOTSPOTS = "hotspots";
+	/** String identifying the hotspot overlay option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+	public static final String OPTION_HOTSPOT_OVERLAY = "hotspotOverlay";
+	/** String identifying the can close option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+	public static final String OPTION_CAN_CLOSE = "canClose";
+	/** String identifying the headless option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+	public static final String OPTION_HEADLESS = "headless";
+	/** String identifying the put of bounds option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+	public static final String OPTION_OUT_OF_BOUNDS = "outOfBounds";
+	/** String identifying the white lable option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details<br>
+	 * <b>NOTE</b> The usage of this option can violate the terms of use. */
+	private static final String OPTION_WHITE_LABLE = "whiteLabel";
+	
+
+	/** String identifying the prefix for a view event. All available events this that follow this event is prefixed with "EVENT" as in {@link Pageflip#EVENT_PAGECHANGE EVENT_PAGECHANGE} */
+	public static final String ETA_CATALOG_VIEW = "eta-catalog-view";
+	/** String identifying the pagechange pageflip event. See pageflip documentation for more details */
+	public static final String EVENT_PAGECHANGE = "pagechange";
+	/** String identifying the outofbounds pageflip event. See pageflip documentation for more details */
+	public static final String EVENT_OUTOFBOUNDS = "outofbounds";
+	/** String identifying the hotspot pageflip event. See pageflip documentation for more details */
+	public static final String EVENT_HOTSPOT = "hotspot";
+	/** String identifying the singletap pageflip event. See pageflip documentation for more details */
+	public static final String EVENT_SINGLETAP = "singletap";
+	/** String identifying the doubletap pageflip event. See pageflip documentation for more details */
+	public static final String EVENT_DOUBLETAP = "doubletap";
+	/** String identifying the dragstart pageflip event. See pageflip documentation for more details */
+	public static final String EVENT_DRAGSTART = "dragstart";
+	
+	private Eta mEta;
+	private String mUuid;
 	private PageflipListener mListener;
+	private String mCatalogId;
+	private JSONObject mCatalogView = new JSONObject();
 	
-	private ArrayList<String> mJSQueue = new ArrayList<String>();
-	
-	private LinkedHashMap<String, Object> mOptions = new LinkedHashMap<String, Object>();
-
 	/**
-	 * ContentType is a simple way of handling what content 
-	 * the pageflip should show. 
+	 * Used for manual inflation
+	 * @param context
 	 */
-	public enum ContentType {
-		CATALOG, DEALER
-	}
-
 	public Pageflip(Context context) {
 		super(context);
 	}
+	
+	/**
+	 * Constructor used when inflating Pageflip from XML.
+	 * @param context
+	 * @param attrs
+	 */
+	public Pageflip(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
 	/**
-	 * 
-	 * @param eta
-	 * @param type Whether to show a specific catalog or a list of a dealers catalogs
-	 * @param content The ID of the catalog/dealer
-	 * @param Listener The listener where callback's will be executed
+	 * The WebViewClient used in the WebView as a communication proxy.
 	 */
-	@SuppressLint("DefaultLocale")
-	public void execute(Eta eta, ContentType type, String content, PageflipListener Listener) {
+	WebViewClient wvc = new WebViewClient() {
+		
+		@Override
+		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+			
+			try {
+				Utilities.logd(TAG, URLDecoder.decode(url, "utf-8"));
+			} catch (UnsupportedEncodingException e1) {
+				e1.printStackTrace();
+			}
+			
+			String[] request = url.split(":", 3);
+			
+			if ( request.length < 2 )
+				return false;
+			
+			JSONObject o = decodeJSON(request[2]);
+			
+			if (request[0].equals(ETA_CATALOG_VIEW)) {
 
-		mETA = eta;
+				mListener.onPageflipEvent(request[1], o);
+				
+			} else if (request[0].equals(ETA_SESSION)) {
+				
+				try {
+					mEta.getSession().set(o.getJSONObject("data"));
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				
+			} else if (request[0].equals(ETA_PROXY)) {
+				
+				// On document ready, run catalog-view options
+				if (request[1].equals(EVENT_READY)) {
+					initPageflip();
+					initCatalog();
+				}
+				
+			} 
+			return true;
+			
+		}
+
+		// Notify when loading of WebView is done, now insert JavaScript init.
+		public void onPageFinished(WebView view, String url) {
+			
+		}
+	};
+	
+	private JSONObject decodeJSON(String data) {
+		
+		try {
+			JSONObject o;
+			
+			if (data.length() == 0) {
+				
+				o = new JSONObject();
+				
+			} else {
+
+				String resp = "{}";
+				try {
+					resp = URLDecoder.decode(data, "utf-8");
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+				o = new JSONObject(resp);
+				
+			}
+			return o;
+			
+		} catch (JSONException e) {
+			e.printStackTrace();
+		} 
+		
+		return new JSONObject();
+	}
+	
+	/**
+	 * WebChromeClient is mainly for debugging the WebView.
+	 */
+	WebChromeClient wcc = new WebChromeClient() {
+		
+		@Override
+		public boolean onJsAlert(WebView view, String url, String message, final android.webkit.JsResult result) {
+			Utilities.logd(TAG, "onJsAlert: " + message);
+			new AlertDialog.Builder(mEta.getContext())  
+            .setTitle("javaScript dialog")  
+            .setMessage(message)  
+            .setPositiveButton(android.R.string.ok,  
+                    new AlertDialog.OnClickListener()   
+                    {  
+                        public void onClick(DialogInterface dialog, int which)   
+                        {  
+                            result.confirm();  
+                        }  
+                    })  
+            .setCancelable(false)  
+            .create()  
+            .show();  
+          
+        return true;  
+		}
+		
+	};
+	
+	/**
+	 * Execute, will begin the initialization of the pageflip.
+	 * And load the specified catalog.
+	 * @param eta containing relevant API-key e.t.c.
+	 * @param Listener for pageflip events
+	 * @param CatalogId of the catalog to display
+	 */
+	public void execute(Eta eta, PageflipListener Listener, String CatalogId) {
+
+		mEta = eta;
 		mListener = Listener;
-		mType = type.toString().toLowerCase();
-		mContent = content;
+		mCatalogId = CatalogId;
+		mUuid = Utilities.createUUID();
 		
 		getSettings().setJavaScriptEnabled(true);
 		getSettings().setDefaultTextEncodingName("utf-8");
+		setWebViewClient(wvc);
+		setWebChromeClient(wcc);
+
 		
-		this.setWebViewClient(new WebViewClient() {
-			@Override
-			public boolean shouldOverrideUrlLoading(WebView view, String url) {
-				String[] request = url.split(":", 3);
-
-				// Does the prefix match a pageflip event?
-				if (request[0].equals(EVENT_PREFIX)) {
-					if (request.length > 2) {
-						try {
-							final JSONObject object;
-							if (request[2].length() == 0) {
-								object = new JSONObject();
-							} else {
-
-								String resp = "Bad Encoding";
-								try {
-									resp = URLDecoder.decode(request[2].toString(), "utf-8");
-								} catch (UnsupportedEncodingException e) {
-									e.printStackTrace();
-								}
-								object = (resp.equals("Bad Encoding") ? new JSONObject() : new JSONObject(resp) );
-
-								// On first pagechange, execute the JavaScriptQueue.
-								if (request[1].toString().equals("pagechange") && object.has("init") && object.getString("init").equals("true")) {
-									initializePageflipJS();
-								}
-							}
-							mListener.onPageflipEvent(request[1], object);
-
-						} catch (JSONException e) {
-							e.printStackTrace();
-						} 
-					}
-
-					return true;
-				}
-
-				return false;
-			}
-
-			// Notify when loading of WebView is done, now insert JavaScript init.
-			public void onPageFinished(WebView view, String url) {
-				finalizePageflipJS();
-			}
-		});
-
-		// Check if it's necessary to update the HTML (it's time consuming to download HTML).
-		if (mETA.getCache().getHtmlCache() == null ) {
-//			mETA.api.request(mETA.getProviderUrl(), new RequestListener() {
-//				public void onSuccess(Integer response, Object object) {
-//					mETA.setHtmlCached(object.toString());
-//					loadData(mETA.getHtmlCached(), "text/html", "UTF-8");
-//				}
-//
-//				public void onError(Integer response, Object object) {
-//					loadDataWithBaseURL(null, "<html><body>No internet</body></html>", "text/html", "UTF-8", null);
-//				}
-//			});
+		boolean debug = false;
+		
+		if (debug) {
+			loadUrl("http://lexandera.com/files/jsexamples/alert.html");
 		} else {
-			this.loadDataWithBaseURL(null, mETA.getCache().getHtmlCached(), "text/html", "utf-8", null);
+
+			// Check if it's necessary to update the HTML (it's time consuming to download HTML).
+//			if (mEta.getCache().getHtmlCache() == null ) {
+				Utilities.logd(TAG, "Html cache empty");
+				Api.CallbackString cb = new Api.CallbackString() {
+					
+					public void onComplete(int statusCode, String data, EtaError error) {
+						if (Utilities.isSuccess(statusCode)) {
+//							Utilities.logdMax(TAG, data);
+//							Utilities.logd(TAG, data.substring(data.length() - 400));
+							mEta.getCache().setHtmlCache(data);
+							loadDataWithBaseURL(null, data, "text/html", "utf-8", null);
+						} else {
+							loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
+						}
+					}
+				};
+				mEta.api().get(Endpoint.getPageflipProxy(mUuid), cb).execute();
+				
+//			} else {
+//				Utilities.logd(TAG, mEta.getCache().getHtmlCached());
+//				this.loadDataWithBaseURL(null, mEta.getCache().getHtmlCached(), "text/html", "utf-8", null);
+//			}
+			
 		}
-
-	}
-	
-	// Execute initial options for pageflip
-	private void finalizePageflipJS() {
-		String s = "";
-
-		LinkedHashMap<String, Object> etaInit = new LinkedHashMap<String, Object>();
-		etaInit.put(PF_API_KEY, mETA.getApiKey());
-		s += "eta.init(" + Utilities.buildJSString(etaInit) + ");";
-
-		EtaLocation el = mETA.getLocation();
-		LinkedHashMap<String, Object> etaloc = new LinkedHashMap<String, Object>();
-		etaloc.put(PF_LAT, el.getLatitude());
-		etaloc.put(PF_LNG, el.getLongitude());
-		etaloc.put(PF_DISTANCE, "0" );
-		etaloc.put(PF_SENSOR, "0");
-		s += "eta.Location.save(" + Utilities.buildJSString(etaloc) + ");";			
-
-		LinkedHashMap<String, Object> pfinit = new LinkedHashMap<String, Object>();
-		pfinit.put(mType, mContent);
-		pfinit.put("hotspotsOfferBoundingBox", true);
-		pfinit.putAll(mOptions);
-		s += "eta.pageflip.init(" + Utilities.buildJSString(pfinit) + ");";
-		s += "eta.pageflip.open()";
-		execJS(s);
-	}
-	
-	// Execute initial options queue
-	private void initializePageflipJS() {
-		if (!mJSQueue.isEmpty()) {
-			for (String s : mJSQueue) {
-				execJS(s);
-			}
-			mJSQueue.clear();
-		}
-		mIsPageflipInitialized = true;
-	}
-
-	// Actual injection of JS into the WebView
-	private void execJS(String option) {
-		this.loadUrl("javascript:(function() {" + option + "})()");
+		
 	}
 	
 	/**
-	 * Method for updating pageflip location
-	 * This will automatically be called when the global ETA location changes
+	 * Method to initialize the pageflip, with the use of etaProxy.<br>
+	 * This method should not be called, before eta-proxy:ready has been triggered.
 	 */
-	public void updateLocation() {
-		injectJS("eta.Location.save(" + Utilities.buildJSString(mETA.getLocation().getPageflipLocation()) + ");");
+	private void initPageflip() {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(API_KEY, mEta.getApiKey());
+			o.put(API_SECRET, mEta.getApiSecret());
+			o.put(SESSION, mEta.getSession().toJSON());
+			o.put("apiURL", "https://edge.etilbudsavis.dk");
+			if (mEta.getLocation().isLocationSet())
+				o.put(LOCATION, locationToJSON());
+			
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		etaProxy(PARAM_INITIALIZE, o);
 	}
 	
 	/**
-	 * Generic method for setting pageflip options.
-	 * If an option isn't available through any other pageflip methods, you can
-	 * use this method for setting options in the pageflip.
-	 * This method must be called before getWebView-method.
-	 *
+	 * Method for loading a catalog, into the initialized pageflip.<br>
+	 * This method should be called post {@link #initPageflip() initPageflip()}.
+	 */
+	private void initCatalog() {
+		try {
+			mCatalogView.put(OPTION_CATALOG, mCatalogId);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		etaProxy(PARAM_CATALOG_VIEW, mCatalogView);
+	}
+	
+	/**
+	 * Generates a JSON representation of the current {@link com.eTilbudsavis.etasdk.EtaLocation EtaLocation} for usage in pageflip.
+	 * @return
+	 */
+	private JSONObject locationToJSON() {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(LOCATION_LAT, mEta.getLocation().getLatitude());
+			o.put(LOCATION_LNG, mEta.getLocation().getLongitude());
+			o.put(LOCATION_SENSOR, mEta.getLocation().getSensor());
+			o.put(LOCATION_RADIUS, mEta.getLocation().getRadius());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return o;
+	}
+
+	/**
+	 * Wrapper for the "window.etaProxy.push" command.
+	 * @param parameter
+	 * @param data
+	 */
+	private void etaProxy(String parameter, JSONObject data) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("window.etaProxy.push(['")
+		.append(parameter)
+		.append("', '")
+		.append(data.toString())
+		.append("']);");
+		injectJS(sb.toString());
+	}
+	
+	/**
+	 * Wrapper for JavaScript commands to be injected into the pageflip.
+	 * @param option a snippet of JavaScript
+	 */
+	private void injectJS(String option) {
+		String s = "javascript:(function() { " + option + "})()";
+		Utilities.logd(TAG, s);
+		loadUrl(s);
+	}
+	
+	/**
+	 * Generic method for setting pageflip options.<br>
+	 * If an option isn't available through any other pageflip method,
+	 * you can use this method for setting options in the pageflip.<br>
+	 * Options must be set before {@link #execute() execute()}
 	 * @param key the option to set
 	 * @param value the value of the option
 	 */
-	public void option(String key, String value) {
-		mOptions.put(key, value);
+	public void setOption(String key, String value) {
+		try {
+			mCatalogView.put(key, value);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
-	 * Set the start page of the pageflip.
-	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
-	 *
+	 * The desired page to start on.<br>
+	 * Options must be set before {@link #execute() execute()}
 	 * @param page number
 	 */
 	public void setPage(int page) {
-		mOptions.put("page", page);
+		try {
+			mCatalogView.put(OPTION_PAGE, page);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
-	 * Set hotspots enabled in the pageflip.
-	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
-	 *
+	 * Whether to enable or disable hotspots.<br>
+	 * Options must be set before {@link #execute() execute()}
+	 * @param True to enable, else false
+	 */
+	public void setHotspotsEnabled(boolean enabled) {
+		try {
+			mCatalogView.put(OPTION_HOTSPOTS, enabled);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Whether to disable hotspot overlay or not.<br>
+	 * Options must be set before {@link #execute() execute()}
 	 * @param enabled or not
 	 */
-	public void setHotspotsEnabled(boolean value) {
-		mOptions.put("hotspotsEnabled", value);
-	}
-	
-	/**
-	 * Set header delay for pageflip.
-	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
-	 *
-	 * @param milliseconds of delay
-	 */
-	public void setHeaderDelay(int seconds) {
-		mOptions.put("headerDelay", seconds);
-	}
-	
-	/**
-	 * Set swipe threshold for the pageflip.
-	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
-	 *
-	 * @param pixels of threshold
-	 */
-	public void setSwipeThreshold(int pixels) {
-		mOptions.put("swipeThreshold", pixels);
-	}
-	
-	/**
-	 * Set the swipe time for the pageflip.
-	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
-	 *
-	 * @param seconds of swipe time
-	 */
-	public void setSwipeTime(int seconds) {
-		mOptions.put("swipeTime", seconds);
-	}
-
-	/**
-	 * Set the page change animation duration curve for the pageflip.
-	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
-	 *
-	 * @param center
-	 * @param spread
-	 * @param height
-	 * @param bottom
-	 */
-	public void setAnimation(int center, int spread, int height, int bottom) {
-		LinkedHashMap<String, Object> anim = new LinkedHashMap<String, Object>();
-
-		anim.put("center", center);
-		anim.put("spread", spread);
-		anim.put("height", height);
-		anim.put("bottom", bottom);
-		mOptions.put("animation", anim);
-	}
-	
-	/**
-	 * Allow us to pick an orientation that works best
-	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
-	 *
-	 * @param value, true or false
-	 */
-	public void setAdaptOrientation(boolean value) {
-		mOptions.put("adaptOrientation", value);
-	}
-	
-	/**
-	 * whether or not the pageflip is closable.
-	 * Options must be set before {@link #execute(ContentType, String, PageflipListener) execute()}
-	 *
-	 * @param value, true or false
-	 */
-	public void setClosable(boolean value) {
-		mOptions.put("closable", value);
-	}
-	
-	/**
-	 * Method for injecting JavaScript into the pageflip
-	 * Will first inject JS when WebView has completely loaded the code, 
-	 * until then strings will be added to a queue for later injection.
-	 *
-	 * @param String[] with options to inject
-	 * @return True if injected. False if added to queue.
-	 */
-	public void injectJS(String[] options) {
-		for (String string : options)
-			injectJS(string);
-	}
-
-	/**
-	 * Method for injecting JavaScript into the pageflip
-	 * Will first inject JS when WebView has completely loaded the code, 
-	 * until then strings will be added to a queue for later injection.
-	 *
-	 * @param String with an option to inject
-	 * @return True if injected. False if added to queue.
-	 */
-	public void injectJS(String option) {
-		if (!mIsPageflipInitialized) {
-			mJSQueue.add(option);
+	public void setHotspotOverlayVisible(boolean visible) {
+		try {
+			mCatalogView.put(OPTION_HOTSPOT_OVERLAY, visible);
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
-		execJS(option);
 	}
-	
+
 	/**
-	 * Toggle the thumbnails menu in the WebView.
+	 * Set whether the catalog view can close or not.
+	 * Options must be set before {@link #execute() execute()}
+	 * @param closable or not
 	 */
-	public void toggleThumbnails() {
-		injectJS("eta.pageflip.toggleThumbnails();");
+	public void setCanClose(boolean closeable) {
+		try {
+			mCatalogView.put(OPTION_CAN_CLOSE, closeable);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
-	
+
 	/**
-	 * Close the pageflip in the WebView.
-	 * This ought be called whenever the WebView/pageflip isn't used any more, 
-	 * including "onPause", "onStop", "onDestroy".
+	 * Whether the header should be disabled or not.
+	 * Options must be set before {@link #execute() execute()}
+	 * @param useHeader or not
 	 */
-	public void close() {
-		injectJS("eta.pageflip.close();");
+	public void setHeadless(boolean useHeader) {
+		try {
+			mCatalogView.put(OPTION_HEADLESS, useHeader);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Whether to show out of bounds dialog or not.
+	 * Options must be set before {@link #execute() execute()}
+	 * @param display or not
+	 */
+	public void setOutOfBounds(boolean display) {
+		try {
+			mCatalogView.put(OPTION_OUT_OF_BOUNDS, display);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Whether to disable branding or not.
+	 * Options must be set before {@link #execute() execute()}
+	 * @param display or not
+	 */
+	public void setWhiteLable(boolean displayBranding) {
+		try {
+			mCatalogView.put(OPTION_WHITE_LABLE, displayBranding);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	

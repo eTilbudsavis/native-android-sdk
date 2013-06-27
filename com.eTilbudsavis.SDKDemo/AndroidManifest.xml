@@ -24,8 +24,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.eTilbudsavis.sdkdemo.CatalogInfo" />
-        <activity android:name="com.eTilbudsavis.sdkdemo.CatalogWebView" />
+        <activity android:name="com.eTilbudsavis.sdkdemo.CatalogViewer"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" />
+        <activity android:name="com.eTilbudsavis.sdkdemo.Testing"
+            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" />
         </application>
 
 </manifest>

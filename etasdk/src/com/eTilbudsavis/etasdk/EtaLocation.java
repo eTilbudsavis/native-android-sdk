@@ -7,6 +7,9 @@ package com.eTilbudsavis.etasdk;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.eTilbudsavis.etasdk.Tools.Params;
 
 import android.content.Context;
@@ -123,12 +126,17 @@ public class EtaLocation extends Location {
 		return mSensor;
 	}
 
-	public LinkedHashMap<String, Object> getPageflipLocation() {
-		LinkedHashMap<String, Object> etaloc = new LinkedHashMap<String, Object>();
-		etaloc.put(LATITUDE, getLatitude());
-		etaloc.put(LONGITUDE, getLongitude());
-		etaloc.put(RADIUS, mRadius);
-		return etaloc;
+	public JSONObject toJSON() {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(LATITUDE, getLatitude());
+			o.put(LONGITUDE, getLongitude());
+			o.put(SENSOR, getSensor());
+			o.put(RADIUS, getRadius());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return o;
 	}
 
 	/**

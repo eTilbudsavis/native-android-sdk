@@ -153,8 +153,4 @@ public class DbHelper extends SQLiteOpenHelper {
 		mDatabase = getWritableDatabase();
 	}
 	
-	public Cursor getList(String id) {
-		return mDatabase.rawQuery("SELECT * FROM " + DbHelper.SL + " WHERE " + DbHelper.ID + "=" + id, null);
-	}
-	
 }

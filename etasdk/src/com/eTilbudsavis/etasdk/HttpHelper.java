@@ -21,6 +21,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 
 import com.eTilbudsavis.etasdk.Tools.Utilities;
 
@@ -137,7 +138,10 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 			
 			mResponseCode = response.getStatusLine().getStatusCode();
 			
-		    mResponse = getText(response.getEntity().getContent());
+			// Using getText() will skip line breaks, and make pageflip-html unusable.
+//		    mResponse = getText(response.getEntity().getContent());
+			
+		    mResponse = EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
 		    
 			mResponsHeaders = response.getAllHeaders();
 
@@ -201,12 +205,24 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		
 		// Do not get content with: EntityUtils.toString(response.getEntity(), HTTP.UTF_8);
 		// As this will make some very unfortunate line breaks in e.g. eta.dk/connect/ 
+		
+		// UPDATE: Soo apparently, this situation has changed with the new pageflip,
+		// now the above is gold, and below is not working
+		
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb;
+		try {
+			sb = new StringBuilder(in.available());
+		} catch (IOException e1) {
+			sb = new StringBuilder();
+			e1.printStackTrace();
+		}
 		String line = "";
 		try {
-			while ((line = reader.readLine()) != null)
+			while ((line = reader.readLine()) != null) {
+				Utilities.logd(TAG, line);
 				sb.append(line);
+			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -219,9 +235,13 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		return sb.toString();
 	}
 
-	public HttpHelper debug(boolean useDebug) {
+	public HttpHelper setDebug(boolean useDebug) {
 		mDebug = useDebug;
 		return this;
+	}
+	
+	public boolean isDebug() {
+		return mDebug;
 	}
 	
 	public interface HttpListener {

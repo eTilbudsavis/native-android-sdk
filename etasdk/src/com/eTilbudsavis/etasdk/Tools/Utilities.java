@@ -5,6 +5,9 @@
  */
 package com.eTilbudsavis.etasdk.Tools;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
@@ -20,6 +23,7 @@ import org.apache.http.message.BasicNameValuePair;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 
+import android.os.Environment;
 import android.util.Log;
 
 public final class Utilities {
@@ -76,7 +80,22 @@ public final class Utilities {
 			Log.d(tag, name + " - " + (isSuccess(statusCode) ? data.toString() : error.toString()));
 		}
 	}
-
+	
+	public static void logdMax(String tag, String sb) {
+		if (sb.length() > 4000) {
+		    Log.v(tag, "sb.length = " + sb.length());
+		    int chunkCount = sb.length() / 4000;     // integer division
+		    for (int i = 0; i <= chunkCount; i++) {
+		        int max = 4000 * (i + 1);
+		        if (max >= sb.length()) {
+		            Log.v(tag, "chunk " + i + " of " + chunkCount + ":" + sb.substring(4000 * i));
+		        } else {
+		            Log.v(tag, "chunk " + i + " of " + chunkCount + ":" + sb.substring(4000 * i, max));
+		        }
+		    }
+		}
+	}
+	
 	public static void printStackTrace() {
 
 		for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
@@ -252,6 +271,28 @@ public final class Utilities {
 		return 500 <= statusCode && statusCode < 600;
 	}
 	
+
+	public static void printToFile(String filename) {
+		
+		String directoryFile = Environment.getExternalStorageDirectory().getAbsolutePath();
+		
+		try{
+            File myFile = new File(directoryFile, filename);
+            myFile.createNewFile();
+            FileOutputStream fOut = new FileOutputStream(myFile);
+
+            OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+           
+            	myOutWriter.append("").append("\n\n");
+    		
+            myOutWriter.close();
+            fOut.close();
+            logd("Utilities", "Done writing SD " + myFile.getPath());
+        } catch (Exception e) {
+        	logd("Utilities", e.getMessage());
+        }
+		
+	}
 	
 	
 }
