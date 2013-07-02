@@ -54,10 +54,24 @@ public final class Pageflip {
 	public Pageflip(WebView webView, ETA eta) {
 		mETA = eta;
 		mWebView = webView;
-
-		if (!eta.pageflipList.contains(this)) eta.pageflipList.add(this);
 	}
 
+	/**
+	 * Subscribe this pageflip to location changes.<br>
+	 * <b>NOTE</b> you MUST remember to ubsubscribe the pageflip again.
+	 */
+	public void subscribe() {
+		if (!mETA.pageflipList.contains(this))
+			mETA.pageflipList.add(this);
+	}
+	
+	/**
+	 * Unsubscribe this pageflip from location changes
+	 */
+	public void unsubscribe() {
+		mETA.pageflipList.remove(this);
+	}
+	
 	/**
 	 * Returns WebView with the desired content, dealer or catalog. The ID of either
 	 * catalog or dealer can be found via API calls, see more at
@@ -173,16 +187,7 @@ public final class Pageflip {
 		s += "eta.init(" + Utilities.buildJSString(etaInit) + ");";
 		
 		if (mETA.getLocation().useLocation()) {
-			Bundle loc = mETA.getLocation().getLocationAsApiParams();
-			LinkedHashMap<String, Object> etaloc = new LinkedHashMap<String, Object>();
-				etaloc.put("latitude", loc.getDouble("api_latitude"));
-				etaloc.put("longitude", loc.getDouble("api_longitude"));
-				etaloc.put("distance", mETA.getLocation().useDistance() ? loc.getInt("api_distance") : "0" );
-				etaloc.put("locationDetermined", loc.getInt("api_locationDetermined"));
-				etaloc.put("geocoded", loc.getInt("api_geocoded"));
-				if (loc.getInt("api_geocoded") == 0) 
-					etaloc.put("accuracy", loc.getInt("api_accuracy"));
-			s += "eta.Location.save(" + Utilities.buildJSString(etaloc) + ");";			
+			s += "eta.Location.save(" + Utilities.buildJSString(mETA.getLocation().getPageflipLocation()) + ");";			
 		}
 		
 		LinkedHashMap<String, Object> pfinit = new LinkedHashMap<String, Object>();
@@ -207,6 +212,7 @@ public final class Pageflip {
 
 	// Actual injection of JS into the WebView
 	private void execJS(String option) {
+		Utilities.logd("pageflip", option);
 		mWebView.loadUrl("javascript:(function() {" + option + "})()");
 	}
 	
@@ -215,6 +221,7 @@ public final class Pageflip {
 	 * This will automatically be called on ETA.location.setLocation()
 	 */
 	public boolean updateLocation() {
+		// TODO: Fix location updates, so webview doesn't crash
 		if (mETA.getLocation().useLocation()) {
 			return injectJS("eta.Location.save(" + Utilities.buildJSString(mETA.getLocation().getPageflipLocation()) + ");");
 		}
@@ -376,7 +383,6 @@ public final class Pageflip {
 	public void close() {
 		injectJS("eta.pageflip.close();");
 	}
-	
 	
 	/**
 	 * Callback interface for Pageflip.

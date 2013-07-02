@@ -8,7 +8,9 @@ package com.etilbudsavis.etasdk;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 
+import android.hardware.Camera.Size;
 import android.os.Bundle;
+import android.util.Log;
 
 public class Location implements Serializable {
 
@@ -119,7 +121,11 @@ public class Location implements Serializable {
 	
 	private void updatePageflipLocation() {
 		for (Pageflip p : mEat.pageflipList) {
-			p.updateLocation();
+			try {
+				p.updateLocation();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
