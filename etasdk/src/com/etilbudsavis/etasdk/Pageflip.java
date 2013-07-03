@@ -164,9 +164,6 @@ public final class Pageflip {
 			mWebView.loadDataWithBaseURL(null, mETA.getHtmlCached(), "text/html", "UTF-8", null);
 		}
 
-		
-		Utilities.logd("Pageflip", "Test1,3");
-
 		return mWebView;
 	}
 	
@@ -212,7 +209,6 @@ public final class Pageflip {
 
 	// Actual injection of JS into the WebView
 	private void execJS(String option) {
-		Utilities.logd("pageflip", option);
 		mWebView.loadUrl("javascript:(function() {" + option + "})()");
 	}
 	
