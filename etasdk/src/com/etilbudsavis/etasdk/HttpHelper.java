@@ -3,6 +3,8 @@ package com.etilbudsavis.etasdk;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
@@ -10,6 +12,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -23,10 +26,13 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.DefaultHttpRoutePlanner;
 import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 
 import android.content.Context;
@@ -39,8 +45,8 @@ import com.etilbudsavis.etasdk.API.RequestType;
 
 public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	
-	private String ETA_DOMAIN = "etilbudsavis.dk";
-	private int CONNECTION_TIME_OUT = 15 * 1000;
+	private static final String ETA_DOMAIN = "etilbudsavis.dk";
+	private static final int CONNECTION_TIME_OUT = 15 * 1000;
 	private String mUrl;
 	private List<NameValuePair> mQuery;
 	private API.RequestType mRequestType;
@@ -48,24 +54,22 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 	private Context mContext;
 	
 	private String mResult = "";
-	private Integer mResponseCode;
+	private Integer mResponseCode = -1;
 
 	// Constructor for HttpHelper.
 	public HttpHelper(String url, List<NameValuePair> query, 
 			API.RequestType requestType, RequestListener requestListener, Context context) {
-		
 		mUrl = url;
 		mQuery = query;
 		mRequestType = requestType;
 		mRequestListener = requestListener;
 		mContext = context;
 	}
-		
+	
 	@Override
 	protected Void doInBackground(Void... params) {
 		
-		// Hack to force acceptance of our SSL Certificates to *.etilbudsavis.dk
-		// It basically uses a different HostnameVerifier than the default
+		// Use custom HostVerifier to accept our wildcard SSL Certificates: *.etilbudsavis.dk
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
 		DefaultHttpClient tmpClient = new DefaultHttpClient();
 		
@@ -77,7 +81,11 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		
 		SingleClientConnManager mgr = new SingleClientConnManager(tmpClient.getParams(), registry);
 		DefaultHttpClient httpClient = new DefaultHttpClient(mgr, tmpClient.getParams());
-
+		
+		// Change RoutePlanner to avoid SchemeRegistry causing IllegalStateException.
+		// Some devices with faults in their default route planner
+		httpClient.setRoutePlanner(new DefaultHttpRoutePlanner(registry));
+		
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 		// End SSL Certificates hack
 		
@@ -87,10 +95,13 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIME_OUT);
 		HttpConnectionParams.setSoTimeout(httpParams, CONNECTION_TIME_OUT);
 		
+		CookieSyncManager.createInstance(mContext);
+		CookieManager cm = CookieManager.getInstance();
+		
 		// An cookie exception... of course
 		if (!mUrl.equals("https://etilbudsavis.dk/ajax/user/reset/")) {
-			CookieSyncManager.createInstance(mContext);
-			String cString = CookieManager.getInstance().getCookie("etilbudsavis.dk");
+			
+			String cString = cm.getCookie(ETA_DOMAIN);
 			if (cString != null) {
 				String[] keyValueSets = cString.split(";");
 				for(String cookie : keyValueSets) {
@@ -125,7 +136,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 				HttpPost post = new HttpPost(mUrl);
 				if (mQuery.size() > 0)
 					post.setEntity(new UrlEncodedFormEntity(mQuery, HTTP.UTF_8));
-				
+
 				response = httpClient.execute(post);
 				
 			} else {
@@ -134,9 +145,9 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 					mUrl = mUrl + "?" + URLEncodedUtils.format(mQuery, HTTP.UTF_8);
 				
 				HttpGet get = new HttpGet(mUrl);
+				
 				response = httpClient.execute(get);
 			}
-			
 			
 			/**
 			 * Do not get content with this:
@@ -156,13 +167,18 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 			        e.printStackTrace();
 			    } 
 			    mResult = sb.toString();
-			} else
+			} else {
 				mResult = response.getStatusLine().getReasonPhrase();
-
+			}
+			
+			
+				
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
 		}
 
 		// Add all cookies to global cookie store
@@ -179,13 +195,14 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
             } else {
             	for(Cookie cookie : cookies) {
 	                String cookieString = cookie.getName() + "=" + cookie.getValue() + "; domain=" + cookie.getDomain();
-	                CookieManager.getInstance().setCookie(cookie.getDomain(), cookieString);
+	                cm.setCookie(cookie.getDomain(), cookieString);
 	            }
             }
-            
         }
         CookieSyncManager.getInstance().sync();
 
+		
+		
         // Close connection, to deallocate resources
 		httpClient.getConnectionManager().shutdown();
 
@@ -196,6 +213,7 @@ public class HttpHelper extends AsyncTask<Void, Void, Void> {
 		
 		return null;
 	}
+	
 	
 	// Do callback in the UI thread
 	@Override
