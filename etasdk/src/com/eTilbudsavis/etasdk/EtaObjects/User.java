@@ -72,7 +72,7 @@ public class User implements Serializable {
 		try {
 			u = fromJSON(u, new JSONObject(user));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return u;
@@ -95,7 +95,7 @@ public class User implements Serializable {
 			u.setEmail(user.getString(S_EMAIL));
 			u.setPermissions(Permission.fromJSON(user.getJSONObject(S_PERMISSIONS)));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return u;
@@ -116,7 +116,7 @@ public class User implements Serializable {
 			o.put(S_EMAIL, u.getEmail());
 			o.put(S_PERMISSIONS, u.getPermissions() == null ? null : u.getPermissions().toJSON());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

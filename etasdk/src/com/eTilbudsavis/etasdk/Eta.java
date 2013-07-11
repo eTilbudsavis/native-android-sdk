@@ -14,6 +14,9 @@ package com.eTilbudsavis.etasdk;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -21,9 +24,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 
+import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Tools.Sort;
@@ -39,7 +42,7 @@ public class Eta implements Serializable {
 	/** 
 	 * Variable to decide whether to show debug log messages.<br><br>
 	 * Please only set to <code>true</code> while developing to avoid leaking sensitive information */
-	public static boolean mDebug = false;
+	public static boolean DEBUG = false;
 	
 	/** The date format as returned from the server */
 	public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss+SSSS";
@@ -56,14 +59,14 @@ public class Eta implements Serializable {
 	private EtaCache mCache;
 	private ShoppinglistManager mShoppinglistManager;
 	private static Handler mHandler = new Handler();
-	private ArrayList<EtaError> mErrors = new ArrayList<EtaError>();
+	private ArrayList<Pageflip> mPageflips = new ArrayList<Pageflip>();
+	private ExecutorService mThreads = Executors.newFixedThreadPool(5);
 	
 	/**
 	 * TODO: Write a long story about usage, this will basically be the documentation
-	 * @param apiKey
-	 *			The API key found at http://etilbudsavis.dk/api/
-	 * @Param Context
-	 * 			The context of the activity instantiating this class.
+	 * @param apiKey The API key found at http://etilbudsavis.dk/api/
+	 * @param apiSecret The API secret found at http://etilbudsavis.dk/api/
+	 * @param context The context of the activity instantiating this class.
 	 */
 	public Eta(String apiKey, String apiSecret, Context context) {
 		mContext = context;
@@ -101,16 +104,15 @@ public class Eta implements Serializable {
 	}
 
 	/**
-	 * 
-	 * @return Returns the last known session
+	 * Get the currently active session.
+	 * @return a session
 	 */
 	public Session getSession() {
 		return mSession;
 	}
 
 	/**
-	 * 
-	 * @return Returns the last known session
+	 * Get the SharedPreferences, that ETA SDK is using.
 	 */
 	public SharedPreferences getPrefs() {
 		return mPrefs;
@@ -126,7 +128,7 @@ public class Eta implements Serializable {
 	}
 
 	/**
-	 * TODO: Write JavaDoc
+	 * Get the ETA SDK cache for various items and objects.
 	 * @return 
 	 */
 	public EtaCache getCache() {
@@ -137,32 +139,12 @@ public class Eta implements Serializable {
 		return mShoppinglistManager;
 	}
 	
-	/**
-	 * Gets a complete list of errors that have occurred<br><br>
-	 * 
-	 * 
-	 * The error log is useful in development for multiple consecutive calls,<br>
-	 * that contains errors, where a Log.d() on each error would would flood LogCat.
-	 * @return an ArrayList of EtaErrors
-	 */
-	public ArrayList<EtaError> getErrors(){
-		return mErrors;
-	}
-	
-	/**
-	 * Add an EtaError to the error log.<br><br>
-	 * 
-	 * The error log is useful in development for multiple consecutive calls,<br>
-	 * that contains errors, where a Log.d() on each error would would flood LogCat.
-	 * @param error to add to error list
-	 */
-	public Eta addError(EtaError error) {
-		mErrors.add(error);
-		return this;
-	}
-	
 	public Handler getHandler() {
 		return mHandler;
+	}
+	
+	public ExecutorService getThreadPool() {
+		return mThreads;
 	}
 	/**
 	 * Simply instantiates and returns a new Api object.
@@ -183,23 +165,50 @@ public class Eta implements Serializable {
 		return mPrefs.edit().clear().commit();
 	}
 
-	public boolean debug() {
-		return mDebug;
+	public boolean isDebug() {
+		return DEBUG;
 	}
 
 	public Eta debug(boolean useDebug) {
-		mDebug = useDebug;
+		DEBUG = useDebug;
+		return this;
+	}
+
+	public Eta addPageflip(Pageflip p) {
+		mPageflips.add(p);
+		return this;
+	}
+
+	public Eta removePageflip(Pageflip p) {
+		mPageflips.remove(p);
 		return this;
 	}
 	
 	public void onPause() {
 		mShoppinglistManager.stopSync();
 		mShoppinglistManager.closeDB();
+		pageflipPause();
 	}
 	
 	public void onResume() {
 		mShoppinglistManager.openDB();
 		mShoppinglistManager.startSync();
+		pageflipResume();
+	}
+
+	private void pageflipLocation() {
+		for (Pageflip p : mPageflips)
+			p.resume();
+	}
+	
+	private void pageflipResume() {
+		for (Pageflip p : mPageflips)
+			p.resume();
+	}
+	
+	private void pageflipPause() {
+		for (Pageflip p : mPageflips)
+			p.pause();
 	}
 	
 	private Bundle getApiParams(int offset, int limit, String[] orderBy) {

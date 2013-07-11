@@ -33,7 +33,7 @@ public class Pageflip implements Serializable {
 		try {
 			p = fromJSON(p, new JSONObject(pageflip));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return p;
@@ -51,7 +51,7 @@ public class Pageflip implements Serializable {
 			p.setLogo(pageflip.getString(S_LOGO));
 			p.setColor(Color.parseColor("#"+pageflip.getString(S_COLOR)));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return p;
@@ -67,7 +67,7 @@ public class Pageflip implements Serializable {
 			o.put(S_LOGO, p.getLogo());
 			o.put(S_COLOR, p.getColorString());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

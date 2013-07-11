@@ -73,7 +73,7 @@ public class Dealer implements Serializable {
 		try {
 			list = fromJSONArray(new JSONArray(dealers));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return list;
@@ -86,7 +86,7 @@ public class Dealer implements Serializable {
 				list.add(Dealer.fromJSON((JSONObject)dealers.get(i)));
 			
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return list;
@@ -97,7 +97,7 @@ public class Dealer implements Serializable {
 		try {
 			d = fromJSON(d, new JSONObject(dealer));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return d;
@@ -121,7 +121,7 @@ public class Dealer implements Serializable {
 			d.setColor(Color.parseColor("#"+dealer.getString(S_COLOR)));
 			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(S_PAGEFLIP)));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return d;
@@ -143,7 +143,7 @@ public class Dealer implements Serializable {
 			o.put(S_COLOR, d.getColorString());
 			o.put(S_PAGEFLIP, d.getPageflip().toJSON());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o; 

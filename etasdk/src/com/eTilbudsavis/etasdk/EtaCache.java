@@ -1,6 +1,7 @@
 package com.eTilbudsavis.etasdk;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class EtaCache implements Serializable {
@@ -12,42 +13,30 @@ public class EtaCache implements Serializable {
 	private static final long ITEM_CACHE_TIME = 5*60*1000;
 	private static final long HTML_CACHE_TIME = 15*60*1000;
 	
-	private String mHtmlCached = "";
-	private long mHtmlTime = 0L;
+	private HashMap<String, CachePageflip> mPageflip = new HashMap<String, CachePageflip>();
+	private HashMap<String, CacheItem> mItems = new HashMap<String, EtaCache.CacheItem>();
 	
-	HashMap<String, CacheItem> items = new HashMap<String, EtaCache.CacheItem>();
-
 	public EtaCache() {
-		
 	}
 
-	/**
-	 * Returns HTML cache.
-	 *
-	 * @return Cached HTML as String
-	 */
-	public String getHtmlCached() {
-		return mHtmlCached;
-	}
-
-	public void setHtmlCache(String html) {
+	public void setPageflipHtml(String html, String uuid) {
 		// Validate input.
 		if (html.matches(".*\\<[^>]+>.*")) {
-			mHtmlCached = html;
-			mHtmlTime = System.currentTimeMillis();
+			mPageflip.put(uuid, new CachePageflip(html));
 		}
 	}
 
-	public String getHtmlCache() {
-		return mHtmlTime < System.currentTimeMillis() - HTML_CACHE_TIME ? mHtmlCached : null ;
+	public String getPageflipHtml(String uuid) {
+		CachePageflip cp = mPageflip.get(uuid);
+		return cp == null ? null : cp.time < System.currentTimeMillis() - HTML_CACHE_TIME ? cp.html : null;
 	}
 
 	public void put(String key, Object value, int statusCode) {
-		items.put(key, new CacheItem(value, statusCode));
+		mItems.put(key, new CacheItem(value, statusCode));
 	}
 	
 	public CacheItem get(String key) {
-		CacheItem c = items.get(key);
+		CacheItem c = mItems.get(key);
 		if (c != null) {
 			c = (c.time + ITEM_CACHE_TIME) > System.currentTimeMillis() ? c : null;
 		} else {
@@ -67,6 +56,18 @@ public class EtaCache implements Serializable {
 			this.statuscode = statusCode;
 			item = o;
 		}
+	}
+	
+	private class CachePageflip {
+		 
+		public String html;
+		public long time;
+		
+		public CachePageflip(String html) {
+			this.html = html;
+			this.time = System.currentTimeMillis();
+		}
+		
 	}
 	
 }

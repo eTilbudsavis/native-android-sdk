@@ -27,7 +27,7 @@ public class Size implements Serializable {
 		try {
 			s = fromJSON(s, new JSONObject(size));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return s;
@@ -45,7 +45,7 @@ public class Size implements Serializable {
 			s.setFrom(size.getDouble(S_FROM));
 			s.setTo(size.getDouble(S_TO));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return s;
@@ -61,7 +61,7 @@ public class Size implements Serializable {
 			o.put(S_FROM, s.getFrom());
 			o.put(S_TO, s.getTo());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

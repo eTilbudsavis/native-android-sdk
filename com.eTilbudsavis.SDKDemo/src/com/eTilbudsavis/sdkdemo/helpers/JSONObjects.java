@@ -1,4 +1,4 @@
-package com.eTilbudsavis.sdkdemo;
+package com.eTilbudsavis.sdkdemo.helpers;
 
 public class JSONObjects {
 

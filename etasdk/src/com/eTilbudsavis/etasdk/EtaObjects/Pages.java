@@ -31,7 +31,7 @@ public class Pages implements Serializable {
 		try {
 			p = fromJSON(p, new JSONObject(pages));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return p;
@@ -60,7 +60,7 @@ public class Pages implements Serializable {
 				p.getZoom().add(jArray.getString(i));
 			}
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return p;
@@ -89,7 +89,7 @@ public class Pages implements Serializable {
 			o.put(S_VIEW, aView);
 			o.put(S_ZOOM, aZoom);
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

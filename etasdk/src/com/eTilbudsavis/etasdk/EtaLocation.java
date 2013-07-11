@@ -5,18 +5,17 @@
 package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.eTilbudsavis.etasdk.Tools.Params;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+
+import com.eTilbudsavis.etasdk.Tools.Params;
 
 public class EtaLocation extends Location {
 
@@ -67,8 +66,7 @@ public class EtaLocation extends Location {
 	}
 
 	public Boolean isBoundsSet() {
-		return (mBoundNorth != Integer.MAX_VALUE && mBoundSouth != Integer.MAX_VALUE && 
-				mBoundEast != Integer.MAX_VALUE && mBoundWest != Integer.MAX_VALUE);
+		return (mBoundNorth != 0f && mBoundSouth != 0f && mBoundEast != 0f && mBoundWest != 0f);
 	}
 
 	@Override
@@ -232,19 +230,23 @@ public class EtaLocation extends Location {
 		setTime(savedInstanceState.getLong(TIME));
 	}
 
-	public boolean saveToSharedPrefs(Context c) {
-		SharedPreferences sp = c.getSharedPreferences(Eta.PREFS_NAME, Context.MODE_PRIVATE);
-		return sp.edit()
-		.putBoolean(SENSOR, mSensor)
-		.putInt(RADIUS, mRadius)
-		.putFloat(LATITUDE, (float)getLatitude())
-		.putFloat(LONGITUDE, (float)getLongitude())
-		.putFloat(BOUND_EAST, (float)mBoundEast)
-		.putFloat(BOUND_WEST, (float)mBoundWest)
-		.putFloat(BOUND_NORTH, (float)mBoundNorth)
-		.putFloat(BOUND_SOUTH, (float)mBoundSouth)
-		.putLong(TIME, getTime())
-		.commit();
+	public void saveToSharedPrefs(final Context c) {
+		new Thread() {
+	        public void run() {
+	        	SharedPreferences sp = c.getSharedPreferences(Eta.PREFS_NAME, Context.MODE_PRIVATE);
+	    		sp.edit()
+	    		.putBoolean(SENSOR, mSensor)
+	    		.putInt(RADIUS, mRadius)
+	    		.putFloat(LATITUDE, (float)getLatitude())
+	    		.putFloat(LONGITUDE, (float)getLongitude())
+	    		.putFloat(BOUND_EAST, (float)mBoundEast)
+	    		.putFloat(BOUND_WEST, (float)mBoundWest)
+	    		.putFloat(BOUND_NORTH, (float)mBoundNorth)
+	    		.putFloat(BOUND_SOUTH, (float)mBoundSouth)
+	    		.putLong(TIME, getTime())
+	    		.commit();
+	        }
+		}.start();
 	}
 	
 	public boolean restoreFromSharedPrefs(Context c) {
@@ -275,7 +277,11 @@ public class EtaLocation extends Location {
 	 */
 	public void notifySubscribers() {
 		for (LocationListener l : mSubscribers) {
-			l.onLocationChange();
+			try {
+				l.onLocationChange();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -284,7 +290,8 @@ public class EtaLocation extends Location {
 	 * @param listener for callbacks
 	 */
 	public void subscribe(LocationListener listener) {
-		mSubscribers.add(listener);
+		if (!mSubscribers.contains(listener))
+			mSubscribers.add(listener);
 	}
 
 	/**

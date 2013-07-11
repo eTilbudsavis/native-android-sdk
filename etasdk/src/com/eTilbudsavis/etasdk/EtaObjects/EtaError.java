@@ -61,7 +61,7 @@ public class EtaError implements Serializable {
 			er.setDetails(error.getString(S_DETAILS));
 			er.setTime(System.currentTimeMillis());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return er;
@@ -79,7 +79,7 @@ public class EtaError implements Serializable {
 			o.put(S_MESSAGE, er.getMessage());
 			o.put(S_DETAILS, er.getDetails());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

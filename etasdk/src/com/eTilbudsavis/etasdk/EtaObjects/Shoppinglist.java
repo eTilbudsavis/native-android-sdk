@@ -73,7 +73,7 @@ public class Shoppinglist implements Serializable {
 		try {
 			list = fromJSONArray(new JSONArray(shoppinglists));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return list;
@@ -86,7 +86,7 @@ public class Shoppinglist implements Serializable {
 				list.add(Shoppinglist.fromJSON((JSONObject)shoppinglists.get(i)));
 			
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return list;
@@ -97,7 +97,7 @@ public class Shoppinglist implements Serializable {
 		try {
 			sl = fromJSON(sl, new JSONObject(list));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return sl;
@@ -119,7 +119,7 @@ public class Shoppinglist implements Serializable {
 			sl.setModified(shoppinglist.getString(PARAM_MODIFIED));
 			sl.setOwner(Share.fromJSON(shoppinglist.getString(PARAM_OWNER)));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		

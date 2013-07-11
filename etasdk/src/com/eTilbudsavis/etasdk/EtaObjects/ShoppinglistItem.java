@@ -75,7 +75,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 		try {
 			list = fromJSONArray(new JSONArray(shoppinglistItems), shoppinglistId);
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return list;
@@ -90,7 +90,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 			}
 			
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return list;
@@ -101,7 +101,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 		try {
 			sli = fromJSON(sli, new JSONObject(shoppinglistItem), shoppinglistId);
 		} catch (JSONException e) {
-			if (Eta.mDebug) e.printStackTrace();
+			if (Eta.DEBUG) e.printStackTrace();
 		}
 		return sli;
 	}
@@ -126,7 +126,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 			sli.setModified(shoppinglistItem.getString(S_MODIFIED));
 			sli.setShoppinglistId(shoppinglistId);
 		} catch (JSONException e) {
-			if (Eta.mDebug) e.printStackTrace();
+			if (Eta.DEBUG) e.printStackTrace();
 		}
 		return sli;
 	}

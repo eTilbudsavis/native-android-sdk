@@ -145,7 +145,7 @@ public class Catalog  implements Serializable {
 		try {
 			list = fromJSONArray(new JSONArray(catalogs));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return list;
@@ -158,7 +158,7 @@ public class Catalog  implements Serializable {
 				list.add(Catalog.fromJSON((JSONObject)catalogs.get(i)));
 			
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return list;
@@ -169,7 +169,7 @@ public class Catalog  implements Serializable {
 		try {
 			c = fromJSON(c, new JSONObject(catalog));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return c;
@@ -206,7 +206,7 @@ public class Catalog  implements Serializable {
 				c.setImages(Images.fromJSON(catalog.getJSONObject(S_IMAGES)));
 				c.setPages(Pages.fromJSON(catalog.getJSONObject(S_PAGES)));
 			} catch (JSONException e) {
-				if (Eta.mDebug)
+				if (Eta.DEBUG)
 					e.printStackTrace();
 			}
 		} else if (catalog.has(S_ID) && catalog.has(P_PAGE)) {
@@ -215,7 +215,7 @@ public class Catalog  implements Serializable {
 				c.setId(catalog.getString(S_ID));
 				c.setOfferOnPage(catalog.getInt(P_PAGE));
 			} catch (JSONException e) {
-				if (Eta.mDebug)
+				if (Eta.DEBUG)
 					e.printStackTrace();
 			}
 		}

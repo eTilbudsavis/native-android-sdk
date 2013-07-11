@@ -29,7 +29,7 @@ public class Pricing implements Serializable {
 		try {
 			p = fromJSON(p, new JSONObject(pricing));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return p;
@@ -48,7 +48,7 @@ public class Pricing implements Serializable {
 			p.setPrePrice(pricing.getString(S_PREPRICE).equals("null") == true ? null : pricing.getDouble(S_PREPRICE));
 			p.setCurrency(pricing.getString(S_CURRENCY).equals("null") == true ? null : pricing.getString(S_CURRENCY));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return p;
@@ -65,7 +65,7 @@ public class Pricing implements Serializable {
 			o.put(S_PREPRICE, p.getPrePrice());
 			o.put(S_CURRENCY, p.getCurrency());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

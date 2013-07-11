@@ -82,7 +82,7 @@ public class Store implements Serializable {
 		try {
 			list = fromJSONArray(new JSONArray(stores));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return list;
@@ -95,7 +95,7 @@ public class Store implements Serializable {
 				list.add(Store.fromJSON((JSONObject)stores.get(i)));
 			
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return list;
@@ -106,7 +106,7 @@ public class Store implements Serializable {
 		try {
 			s = fromJSON(s, new JSONObject(store));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return s;
@@ -134,7 +134,7 @@ public class Store implements Serializable {
 			s.setBranding(Branding.fromJSON(store.getJSONObject(S_BRANDING)));
 			s.setContact(store.getString(S_CONTACT));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return s;
@@ -160,7 +160,7 @@ public class Store implements Serializable {
 			o.put(S_BRANDING, s.getBranding().toJSON());
 			o.put(S_CONTACT, s.getContact());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

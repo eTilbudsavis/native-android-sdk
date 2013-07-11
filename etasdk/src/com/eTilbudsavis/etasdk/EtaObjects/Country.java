@@ -31,7 +31,7 @@ public class Country implements Serializable {
 		try {
 			c = fromJSON(c, new JSONObject(country));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return c;
@@ -51,7 +51,7 @@ public class Country implements Serializable {
 			c.setCountry(country.getString(S_COUNTRY));
 			c.setLanguage(country.getString(S_LANGUAGE));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return c;
@@ -69,7 +69,7 @@ public class Country implements Serializable {
 			o.put(S_COUNTRY, c.getCountry());
 			o.put(S_LANGUAGE, c.getLanguage());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

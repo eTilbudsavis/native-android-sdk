@@ -66,17 +66,17 @@ public final class Utilities {
 	 * @param msg The message you would like logged.
 	 */
 	public static void logd(String tag, String msg) {
-		if (Eta.mDebug)
+		if (Eta.DEBUG)
 			Log.d(tag, msg);
 	}	
 
 	public static void logd(String tag, int statusCode, Object object) {
-		if (Eta.mDebug)
+		if (Eta.DEBUG)
 			Log.d(tag, "Status: " + String.valueOf(statusCode) + ", Data: " + object.toString());
 	}
 
 	public static void logd(String tag, String name, int statusCode, Object data, EtaError error) {
-		if (Eta.mDebug) {
+		if (Eta.DEBUG) {
 			Log.d(tag, name + " - " + (isSuccess(statusCode) ? data.toString() : error.toString()));
 		}
 	}

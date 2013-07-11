@@ -8,6 +8,7 @@ package com.eTilbudsavis.etasdk;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Locale;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,6 +22,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.Tools.Endpoint;
 import com.eTilbudsavis.etasdk.Tools.Utilities;
@@ -40,7 +42,8 @@ public final class Pageflip extends WebView {
 	/** String identifying the change event, called when the session has changed. See pageflip documentation for more details */
 	public static final String EVENT_CHANGE = "change";
 	
-
+	/** String identifying session events */	
+	private static final String ETA_THUMB = "catalog-view-thumbnails";
 	
 	/** String identifying the initialize parameter, used when initializing pageflip */
 	private static final String PARAM_INITIALIZE = "initialize";
@@ -96,6 +99,7 @@ public final class Pageflip extends WebView {
 	private String mUuid;
 	private PageflipListener mListener;
 	private String mCatalogId;
+	private boolean mInitializing = true;
 	private JSONObject mCatalogView = new JSONObject();
 	
 	/**
@@ -104,6 +108,8 @@ public final class Pageflip extends WebView {
 	 */
 	public Pageflip(Context context) {
 		super(context);
+		setHeadless(true);
+        setOutOfBounds(false);
 	}
 	
 	/**
@@ -113,6 +119,8 @@ public final class Pageflip extends WebView {
 	 */
 	public Pageflip(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setHeadless(true);
+        setOutOfBounds(false);
     }
 
 	/**
@@ -123,30 +131,33 @@ public final class Pageflip extends WebView {
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			
-			try {
-				Utilities.logd(TAG, URLDecoder.decode(url, "utf-8"));
-			} catch (UnsupportedEncodingException e1) {
-				e1.printStackTrace();
-			}
-			
 			String[] request = url.split(":", 3);
 			
 			if ( request.length < 2 )
 				return false;
 			
-			JSONObject o = decodeJSON(request[2]);
+			JSONObject o = decodeData(request[2]);
 			
 			if (request[0].equals(ETA_CATALOG_VIEW)) {
 
-				mListener.onPageflipEvent(request[1], o);
+				// Send ready callback
+				if (mInitializing && request[1].equals(EVENT_PAGECHANGE) && o.has("init")) {
+					try {
+						if (o.getBoolean("init")) {
+							mInitializing = false;
+							mListener.onReady(mUuid);
+						}
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				// Send standart event
+				mListener.onEvent(request[1], mUuid, o);
 				
 			} else if (request[0].equals(ETA_SESSION)) {
 				
-				try {
-					mEta.getSession().set(o.getJSONObject("data"));
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
+				mEta.getSession().set(o);
 				
 			} else if (request[0].equals(ETA_PROXY)) {
 				
@@ -167,7 +178,7 @@ public final class Pageflip extends WebView {
 		}
 	};
 	
-	private JSONObject decodeJSON(String data) {
+	private JSONObject decodeData(String data) {
 		
 		try {
 			JSONObject o;
@@ -185,6 +196,9 @@ public final class Pageflip extends WebView {
 					e.printStackTrace();
 				}
 				o = new JSONObject(resp);
+
+				if (o.has("data"))
+					o = o.getJSONObject("data");
 				
 			}
 			return o;
@@ -203,25 +217,17 @@ public final class Pageflip extends WebView {
 		
 		@Override
 		public boolean onJsAlert(WebView view, String url, String message, final android.webkit.JsResult result) {
-			Utilities.logd(TAG, "onJsAlert: " + message);
+			Utilities.logd(TAG, "JsAlert: " + message);
 			new AlertDialog.Builder(mEta.getContext())  
-            .setTitle("javaScript dialog")  
+            .setTitle("JavaScript Alert")  
             .setMessage(message)  
-            .setPositiveButton(android.R.string.ok,  
-                    new AlertDialog.OnClickListener()   
-                    {  
-                        public void onClick(DialogInterface dialog, int which)   
-                        {  
-                            result.confirm();  
-                        }  
-                    })  
-            .setCancelable(false)  
-            .create()  
-            .show();  
-          
+            .setPositiveButton(android.R.string.ok, new AlertDialog.OnClickListener() { 
+            	public void onClick(DialogInterface dialog, int which) { result.confirm(); } })
+            .setCancelable(false)
+            .create()
+            .show();
         return true;  
 		}
-		
 	};
 	
 	/**
@@ -237,42 +243,37 @@ public final class Pageflip extends WebView {
 		mListener = Listener;
 		mCatalogId = CatalogId;
 		mUuid = Utilities.createUUID();
+
+		mEta.addPageflip(this);
 		
 		getSettings().setJavaScriptEnabled(true);
 		getSettings().setDefaultTextEncodingName("utf-8");
 		setWebViewClient(wvc);
-		setWebChromeClient(wcc);
-
 		
-		boolean debug = false;
+//		if (Eta.DEBUG) {
+//			setWebChromeClient(wcc);
+//		}
 		
-		if (debug) {
-			loadUrl("http://lexandera.com/files/jsexamples/alert.html");
-		} else {
-
-			// Check if it's necessary to update the HTML (it's time consuming to download HTML).
-//			if (mEta.getCache().getHtmlCache() == null ) {
-				Utilities.logd(TAG, "Html cache empty");
-				Api.CallbackString cb = new Api.CallbackString() {
-					
-					public void onComplete(int statusCode, String data, EtaError error) {
-						if (Utilities.isSuccess(statusCode)) {
-//							Utilities.logdMax(TAG, data);
-//							Utilities.logd(TAG, data.substring(data.length() - 400));
-							mEta.getCache().setHtmlCache(data);
-							loadDataWithBaseURL(null, data, "text/html", "utf-8", null);
-						} else {
-							loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
-						}
-					}
-				};
-				mEta.api().get(Endpoint.getPageflipProxy(mUuid), cb).execute();
-				
-//			} else {
-//				Utilities.logd(TAG, mEta.getCache().getHtmlCached());
-//				this.loadDataWithBaseURL(null, mEta.getCache().getHtmlCached(), "text/html", "utf-8", null);
-//			}
+		// Check if it's necessary to update the HTML (it's time consuming to download HTML).
+		String cache = mEta.getCache().getPageflipHtml(mUuid);
+		
+		if (cache == null ) {
 			
+			Api.CallbackString cb = new Api.CallbackString() {
+				
+				public void onComplete(int statusCode, String data, EtaError error) {
+					if (Utilities.isSuccess(statusCode)) {
+						mEta.getCache().setPageflipHtml(data, mUuid);
+						loadDataWithBaseURL(null, data, "text/html", "utf-8", null);
+					} else {
+						loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
+					}
+				}
+			};
+			mEta.api().get(Endpoint.getPageflipProxy(mUuid), cb).execute();
+			
+		} else {
+			this.loadDataWithBaseURL(null, cache, "text/html", "utf-8", null);
 		}
 		
 	}
@@ -287,7 +288,7 @@ public final class Pageflip extends WebView {
 			o.put(API_KEY, mEta.getApiKey());
 			o.put(API_SECRET, mEta.getApiSecret());
 			o.put(SESSION, mEta.getSession().toJSON());
-			o.put("apiURL", "https://edge.etilbudsavis.dk");
+			o.put(LOCALE, Locale.getDefault().toString());
 			if (mEta.getLocation().isLocationSet())
 				o.put(LOCATION, locationToJSON());
 			
@@ -341,6 +342,19 @@ public final class Pageflip extends WebView {
 		.append("']);");
 		injectJS(sb.toString());
 	}
+
+	/**
+	 * Wrapper for the "window.etaProxy.push" command.
+	 * @param parameter
+	 * @param data
+	 */
+	private void etaProxy(String parameter) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("window.etaProxy.push(['")
+		.append(parameter)
+		.append("']);");
+		injectJS(sb.toString());
+	}
 	
 	/**
 	 * Wrapper for JavaScript commands to be injected into the pageflip.
@@ -350,6 +364,29 @@ public final class Pageflip extends WebView {
 		String s = "javascript:(function() { " + option + "})()";
 		Utilities.logd(TAG, s);
 		loadUrl(s);
+	}
+	
+	LocationListener ll = new LocationListener() {
+		
+		public void onLocationChange() {
+			// TODO: Propagate change into pageflip
+		}
+	};
+
+	public void pause() {
+		mEta.getLocation().unSubscribe(ll);
+		// TODO: Call something to stop analytics
+	}
+	
+	public void resume() {
+		if (!mInitializing) {
+			mEta.getLocation().subscribe(ll);
+			//TODO: Call something to start analytics
+		}
+	}
+	
+	public void togglePagelist() {
+		etaProxy(ETA_THUMB);
 	}
 	
 	/**
@@ -425,9 +462,9 @@ public final class Pageflip extends WebView {
 	 * Options must be set before {@link #execute() execute()}
 	 * @param useHeader or not
 	 */
-	public void setHeadless(boolean useHeader) {
+	private void setHeadless(boolean headless) {
 		try {
-			mCatalogView.put(OPTION_HEADLESS, useHeader);
+			mCatalogView.put(OPTION_HEADLESS, headless);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -438,9 +475,9 @@ public final class Pageflip extends WebView {
 	 * Options must be set before {@link #execute() execute()}
 	 * @param display or not
 	 */
-	public void setOutOfBounds(boolean display) {
+	private void setOutOfBounds(boolean displayOutOfBounds) {
 		try {
-			mCatalogView.put(OPTION_OUT_OF_BOUNDS, display);
+			mCatalogView.put(OPTION_OUT_OF_BOUNDS, displayOutOfBounds);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -458,8 +495,7 @@ public final class Pageflip extends WebView {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	/**
 	 * Callback interface for Pageflip.
 	 * Used for callback's on events in the WebView
@@ -470,7 +506,8 @@ public final class Pageflip extends WebView {
 		 * @param event The type of event
 		 * @param data The data received from pageflip
 		 */
-		public void onPageflipEvent(String event, JSONObject object);
+		public void onEvent(String event, String uuid, JSONObject object);
+		public void onReady(String uuid);
 	}
 	
 }
