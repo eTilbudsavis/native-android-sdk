@@ -59,12 +59,9 @@ public class Session implements Serializable {
 
 		public void onComplete(int statusCode, String data, EtaError error) {
 			
-			Utilities.logd(TAG, "Session",statusCode, data, error);
-			
 			if (200 <= statusCode && statusCode < 300 ) {
 				set(data);
 			} else {
-				mEta.addError(error);
 				Utilities.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
 			}
 			mIsUpdatingSession = false;
@@ -80,7 +77,6 @@ public class Session implements Serializable {
 			if (200 <= statusCode && statusCode < 300 ) {
 				Utilities.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + data);
 			} else {
-				mEta.addError(error);
 				Utilities.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error);
 			}
 			notifySubscribers();
@@ -119,7 +115,11 @@ public class Session implements Serializable {
 	}
 	
 	private void saveJSON() {
-		mEta.getPrefs().edit().putString(PREFS_SESSION, mJson.toString()).commit();
+		new Thread() {
+	        public void run() {
+	        	mEta.getPrefs().edit().putString(PREFS_SESSION, mJson.toString()).commit();
+	        }
+		}.start();
 	}
 	
 	/**
@@ -209,11 +209,11 @@ public class Session implements Serializable {
 	 * @return
 	 */
 	public synchronized void update(String headerToken, String headerExpires) {
+		
 		if (mIsUpdatingSession)
 			return;
 		
 		if (mJson == null) {
-			Utilities.logd(TAG, "Damn JSON is null");
 			update();
 			return;
 		}
@@ -330,7 +330,9 @@ public class Session implements Serializable {
 	}
 
 	public Session subscribe(SessionListener listener) {
-		mSubscribers.add(listener);
+		if (!mSubscribers.contains(listener)) {
+			mSubscribers.add(listener);
+		}
 		return this;
 	}
 	
@@ -339,8 +341,14 @@ public class Session implements Serializable {
 	}
 	
 	public Session notifySubscribers() {
-		for (SessionListener sl : mSubscribers)
-			sl.onUpdate();
+		for (SessionListener sl : mSubscribers) {
+			try {
+				sl.onUpdate();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+			
 
 		return this;
 	}

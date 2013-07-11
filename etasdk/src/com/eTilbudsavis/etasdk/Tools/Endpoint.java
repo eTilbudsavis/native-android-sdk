@@ -24,7 +24,7 @@ public final class Endpoint {
 
 	// GLOBALS
 	public static final String MAIN_URL = "https://etilbudsavis.dk";
-	public static final String API = "http://api.etilbudsavis.dk";
+	public static final String API = "https://api.etilbudsavis.dk";
 	private static final String V2 = "/v2";
 	
 	// RESOURCES AND SUB RESOURCES

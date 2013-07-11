@@ -15,8 +15,6 @@ public final class Tools {
 
 	private static final String	TAG = "Tools";
 
-	private static final boolean mDebug = true;
-	
 	/**
 	 * A proxy for Log.d API that silences log messages in release.
 	 *
@@ -25,21 +23,15 @@ public final class Tools {
 	 * @param msg The message you would like logged.
 	 */
 	public static void logd(String tag, String msg) {
-		if (mDebug)
-			Log.d(tag, msg);
+		Log.d(tag, msg);
 	}	
-
+	
 	public static void logd(String tag, int statusCode, Object object) {
-		if (mDebug)
-			Log.d(tag, "Status: " + String.valueOf(statusCode) + ", Data: " + object.toString());
+		Log.d(tag, "Status: " + String.valueOf(statusCode) + ", Data: " + object.toString());
 	}
-
+	
 	public static void logd(String tag, String name, int statusCode, Object data, EtaError error) {
-		if (mDebug) {
-			Log.d(tag, name + " - " + (Utilities.isSuccess(statusCode) ? data.toString() : error.toString()));
-		}
+		Log.d(tag, name + " - " + (Utilities.isSuccess(statusCode) ? data.toString() : error.toString()));
 	}
-
-
 	
 }

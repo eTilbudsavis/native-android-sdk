@@ -37,7 +37,7 @@ public class Branding implements Serializable {
 		try {
 			b = fromJSON(b, new JSONObject(branding));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return b;
@@ -59,7 +59,7 @@ public class Branding implements Serializable {
 			b.setColor(Color.parseColor("#"+branding.getString(S_COLOR)));
 			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(S_PAGEFLIP)));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return b;

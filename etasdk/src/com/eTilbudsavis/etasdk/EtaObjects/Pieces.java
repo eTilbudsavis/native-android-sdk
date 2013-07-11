@@ -27,7 +27,7 @@ public class Pieces implements Serializable {
 		try {
 			p = fromJSON(p, new JSONObject(pieces));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return p;
@@ -45,7 +45,7 @@ public class Pieces implements Serializable {
 			p.setFrom(pieces.getInt(S_FROM));
 			p.setTo(pieces.getInt(S_TO));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return p;
@@ -61,7 +61,7 @@ public class Pieces implements Serializable {
 			o.put(S_FROM, p.getFrom());
 			o.put(S_TO, p.getTo());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

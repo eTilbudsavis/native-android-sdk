@@ -25,7 +25,7 @@ public class Unit implements Serializable {
 		try {
 			u = fromJSON(u, new JSONObject(unit));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return u;
@@ -42,7 +42,7 @@ public class Unit implements Serializable {
 		try {
 			u.setSymbol(unit.getString(S_SYMBOL));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return u;
@@ -57,7 +57,7 @@ public class Unit implements Serializable {
 		try {
 			o.put(S_SYMBOL, u.getSymbol());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

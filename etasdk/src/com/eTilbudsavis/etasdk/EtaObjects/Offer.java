@@ -124,7 +124,7 @@ public class Offer implements Serializable {
 		try {
 			list = fromJSONArray(new JSONArray(offers));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return list;
@@ -137,7 +137,7 @@ public class Offer implements Serializable {
 				list.add(Offer.fromJSON((JSONObject)offers.get(i)));
 			
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return list;
@@ -148,7 +148,7 @@ public class Offer implements Serializable {
 		try {
 			o = fromJSON(o, new JSONObject(offer));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;
@@ -182,7 +182,7 @@ public class Offer implements Serializable {
 			o.setCatalogUrl(offer.getString(S_CATALOG_URL));
 			o.setCatalogId(offer.getString(S_CATALOG_ID));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

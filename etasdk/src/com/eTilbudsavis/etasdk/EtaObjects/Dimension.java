@@ -27,7 +27,7 @@ public class Dimension implements Serializable {
 		try {
 			d = fromJSON(d, new JSONObject(dimension));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return d;
@@ -45,7 +45,7 @@ public class Dimension implements Serializable {
 			d.setWidth(dimension.getDouble(S_WIDTH));
 			d.setHeight(dimension.getDouble(S_HEIGHT));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return d;
@@ -61,7 +61,7 @@ public class Dimension implements Serializable {
 			o.put(S_HEIGHT, d.getHeight());
 			o.put(S_WIDTH, d.getWidth());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

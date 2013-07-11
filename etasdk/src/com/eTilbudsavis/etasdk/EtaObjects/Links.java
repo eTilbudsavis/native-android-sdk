@@ -25,7 +25,7 @@ public class Links implements Serializable {
 		try {
 			l = fromJSON(l, new JSONObject(links));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return l;
@@ -42,7 +42,7 @@ public class Links implements Serializable {
 		try {
 			l.setWebshop(links.getString(S_WEBSHOP));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return l;
@@ -57,7 +57,7 @@ public class Links implements Serializable {
 		try {
 			o.put(S_WEBSHOP, l.getWebshop());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

@@ -34,7 +34,7 @@ public class Share implements Comparable<Share>, Serializable {
 		try {
 			s = fromJSON(s, new JSONObject(share));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return s;
@@ -50,7 +50,7 @@ public class Share implements Comparable<Share>, Serializable {
 			s.setAccess(share.getString(S_ACCESS));
 			s.setAccepted(share.getBoolean(S_ACCEPTED));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return s;

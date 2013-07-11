@@ -65,15 +65,24 @@ public class ShoppinglistManager {
 	public Shoppinglist getCurrentList() {
 		Shoppinglist sl = null;
 		if (mCurrentSlId == null) {
-			Cursor c = dbGetAllLists();
-			if (c.moveToFirst()) {
-				sl = DbHelper.curToSl(c);
-				setCurrentList(sl);
-			}
-			c.close();
+			sl = setRandomCurrent();
 		} else {
 			sl = getList(mCurrentSlId);
+			if (sl == null) {
+				sl = setRandomCurrent();
+			}
 		}
+		return sl;
+	}
+	
+	private Shoppinglist setRandomCurrent() {
+		Shoppinglist sl = null;
+		Cursor c = dbGetAllLists();
+		if (c.moveToFirst()) {
+			sl = DbHelper.curToSl(c);
+			setCurrentList(sl);
+		} 
+		c.close();
 		return sl;
 	}
 	
@@ -146,15 +155,14 @@ public class ShoppinglistManager {
 			Api.CallbackString cb = new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
-					Utilities.logd(TAG, "addList", statusCode, data, error);
+//					Utilities.logd(TAG, "addList", statusCode, data, error);
 					if (Utilities.isSuccess(statusCode)) {
 						Shoppinglist newSl = Shoppinglist.fromJSON(data);
 						newSl.setState(Shoppinglist.STATE_SYNCHRONIZED);
 						dbEditList(newSl);
 						notifyListAdd(newSl.getId());
 					} else {
-						mEta.addError(error);
-						Utilities.logd(TAG, error.toString());
+//						Utilities.logd(TAG, error.toString());
 						sl.setState(Shoppinglist.STATE_INIT);
 						dbEditList(sl);
 						notifyListAdd(sl.getId());
@@ -189,13 +197,12 @@ public class ShoppinglistManager {
 			Api.CallbackString editItem = new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
-					Utilities.logd(TAG, "editList", statusCode, data, error);
+//					Utilities.logd(TAG, "editList", statusCode, data, error);
 					Shoppinglist s = sl;
 					if (Utilities.isSuccess(statusCode)) {
 						s = Shoppinglist.fromJSON(data);
 						s.setState(Shoppinglist.STATE_SYNCHRONIZED);
 					} else {
-						mEta.addError(error);
 						Utilities.logd(TAG, error.toString());
 						s.setState(Shoppinglist.STATE_ERROR);
 					}
@@ -234,12 +241,12 @@ public class ShoppinglistManager {
 			Api.CallbackString cb = new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
-					Utilities.logd(TAG, "deleteList", statusCode, data, error);
+//					Utilities.logd(TAG, "deleteList", statusCode, data, error);
 					if (Utilities.isSuccess(statusCode)) {
-						sl.setState(Shoppinglist.STATE_DELETED);
+						dbDeleteList(sl.getId());
 						dbDeleteItems(sl.getId(), null);
 					} else {
-						mEta.addError(error);
+						// TODO: What state are we in here? Server knows?
 						Utilities.logd(TAG, error.toString());
 						sl.setState(Shoppinglist.STATE_ERROR);
 					}
@@ -249,6 +256,7 @@ public class ShoppinglistManager {
 			
 			mEta.api().delete(Endpoint.getListFromId(user().getId(), sl.getId()), cb, sl.getApiParams()).execute();
 		} else {
+			dbDeleteList(sl.getId());
 			dbDeleteItems(sl.getId(), null);
 			notifyListDelete(sl.getId());
 		}
@@ -283,21 +291,22 @@ public class ShoppinglistManager {
 			Api.CallbackString cb = new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
-					Utilities.logd(TAG, "addItem", statusCode, data, error);
+//					Utilities.logd(TAG, "addItem", statusCode, data, error);
 					if (Utilities.isSuccess(statusCode)) {
 						ShoppinglistItem s = ShoppinglistItem.fromJSON(data, sl.getId());
 						s.setState(ShoppinglistItem.STATE_SYNCHRONIZED);
 						dbEditItem(s);
+						notifyItemUpdate(s.getId());
 					} else {
-						mEta.addError(error);
 						Utilities.logd(TAG, error.toString());
 						sli.setState(ShoppinglistItem.STATE_ERROR);
 						dbEditItem(sli);
+						notifyItemUpdate(sli.getId());
 					}
 				}
 			};
 			
-			mEta.api().put(Endpoint.getItemID(user().getId(), sl.getId(), sli.getId()), cb, sli.getApiParams()).setDebug(true).execute();
+			mEta.api().put(Endpoint.getItemID(user().getId(), sl.getId(), sli.getId()), cb, sli.getApiParams()).execute();
 		} else {
 			
 		}
@@ -320,13 +329,12 @@ public class ShoppinglistManager {
 			Api.CallbackString cb = new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
-					Utilities.logd(TAG, "editItem", statusCode, data, error);
+//					Utilities.logd(TAG, "editItem", statusCode, data, error);
 					ShoppinglistItem s = sli;
 					if (Utilities.isSuccess(statusCode)) {
 						s = ShoppinglistItem.fromJSON(data, sli.getId());
 						s.setState(ShoppinglistItem.STATE_SYNCHRONIZED);
 					} else {
-						mEta.addError(error);
 						Utilities.logd(TAG, error.toString());
 						s.setState(ShoppinglistItem.STATE_ERROR);
 					}
@@ -392,12 +400,11 @@ public class ShoppinglistManager {
 			Api.CallbackString cb = new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
-					Utilities.logd(TAG, "deleteAllItems", statusCode, data, error);
+//					Utilities.logd(TAG, "deleteAllItems", statusCode, data, error);
 					if (Utilities.isSuccess(statusCode)) {
 						dbDeleteItems(sl.getId(), null);
 						sl.setState(Shoppinglist.STATE_SYNCHRONIZED);
 					} else {
-						mEta.addError(error);
 						Utilities.logd(TAG, error.toString());
 						sl.setState(Shoppinglist.STATE_ERROR);
 					}
@@ -436,13 +443,12 @@ public class ShoppinglistManager {
 			
 			public void onComplete(int statusCode, String data, EtaError error) {
 
-				Utilities.logd(TAG, "syncLists", statusCode, data, error);
+//				Utilities.logd(TAG, "syncLists", statusCode, data, error);
 				
 				if (Utilities.isSuccess(statusCode)) {
 					ArrayList<Shoppinglist> sl = Shoppinglist.fromJSONArray(data);
 					mergeLists(sl, getAllLists());
 				} else {
-					mEta.addError(error);
 					Utilities.logd(TAG, error.toString());
 				}
 				
@@ -526,7 +532,7 @@ public class ShoppinglistManager {
 						
 						public void onComplete(int statusCode, String data, EtaError error) {
 
-							Utilities.logd(TAG, "syncItems()", statusCode, data, error);
+//							Utilities.logd(TAG, "syncItems()", statusCode, data, error);
 							
 							if (Utilities.isSuccess(statusCode)) {
 								// If callback says the list has been modified, then sync items
@@ -535,7 +541,6 @@ public class ShoppinglistManager {
 								if (oldModified < sl.getModified())
 									syncItems(sl);
 							} else {
-								mEta.addError(error);
 								Utilities.logd(TAG, error.toString());
 							}
 						}
@@ -564,14 +569,13 @@ public class ShoppinglistManager {
 			
 			public void onComplete(int statusCode, String data, EtaError error) {
 				
-				Utilities.logd(TAG, "syncItems(sl)", statusCode, data, error);
+//				Utilities.logd(TAG, "syncItems(sl)", statusCode, data, error);
 				
 				if (Utilities.isSuccess(statusCode)) {
 					dbDeleteItems(sl.getId(), null);
 					dbAddItems(ShoppinglistItem.fromJSONArray(data, sl.getId()));
 					sl.setState(Shoppinglist.STATE_SYNCHRONIZED);
 				} else {
-					mEta.addError(error);
 					Utilities.logd(TAG, error.toString());
 					sl.setState(Shoppinglist.STATE_ERROR);
 				}
@@ -814,7 +818,9 @@ public class ShoppinglistManager {
 	}
 	
 	public ShoppinglistManager subscribe(ShoppinglistListener listener) {
-		mSubscribers.add(listener);
+		if (!mSubscribers.contains(listener)) {
+			mSubscribers.add(listener);
+		}
 		return this;
 	}
 
@@ -850,18 +856,27 @@ public class ShoppinglistManager {
 	}
 	
 	public ShoppinglistManager notifyListUpdate(List<String> added, List<String> deleted, List<String> edited) {
-		Utilities.logd(TAG, "Sending LIST notifications - " + String.valueOf(mSubscribers.size()));
-		for (ShoppinglistListener s : mSubscribers)
-			s.onListUpdate(added, deleted, edited);
+//		Utilities.logd(TAG, "Sending LIST notifications - " + String.valueOf(mSubscribers.size()));
+		for (ShoppinglistListener s : mSubscribers) {
+			try {
+				s.onListUpdate(added, deleted, edited);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		
 		return this;
 	}
 
 	public ShoppinglistManager notifyItemUpdate(String shoppinglistId) {
-		Utilities.logd(TAG, "Sending ITEM notifications - " + String.valueOf(mSubscribers.size()));
-		for (ShoppinglistListener s : mSubscribers)
-			s.onItemUpdate(shoppinglistId);
-		
+//		Utilities.logd(TAG, "Sending ITEM notifications - " + String.valueOf(mSubscribers.size()));
+		for (ShoppinglistListener s : mSubscribers) {
+			try {
+				s.onItemUpdate(shoppinglistId);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		return this;
 	}
 	

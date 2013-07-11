@@ -27,7 +27,7 @@ public class Permission implements Serializable {
 		try {
 			p = fromJSON(p, new JSONObject(permission));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return p;
@@ -59,7 +59,7 @@ public class Permission implements Serializable {
 			}
 			
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		
@@ -83,7 +83,7 @@ public class Permission implements Serializable {
 				o.put(name, jArray);
 			}
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

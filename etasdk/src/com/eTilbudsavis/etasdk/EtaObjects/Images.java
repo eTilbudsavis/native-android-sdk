@@ -29,7 +29,7 @@ public class Images implements Serializable {
 		try {
 			i = fromJSON(i, new JSONObject(images));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return i;
@@ -48,7 +48,7 @@ public class Images implements Serializable {
 			i.setZoom(image.getString("zoom"));
 			i.setThumb(image.getString("thumb"));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
     	return i;
@@ -65,7 +65,7 @@ public class Images implements Serializable {
 			o.put(S_ZOOM, i.getZoom());
 			o.put(S_THUMB, i.getThumb());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;

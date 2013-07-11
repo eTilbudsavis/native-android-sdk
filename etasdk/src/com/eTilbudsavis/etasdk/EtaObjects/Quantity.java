@@ -29,7 +29,7 @@ public class Quantity implements Serializable {
 		try {
 			q = fromJSON(q, new JSONObject(quantity));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return q;
@@ -48,7 +48,7 @@ public class Quantity implements Serializable {
 			q.setSize(quantity.getString(S_SIZE).equals("null") ? null : Size.fromJSON(quantity.getJSONObject(S_SIZE)));
 			q.setPieces(quantity.getString(S_PIECES).equals("null") ? null : Pieces.fromJSON(quantity.getJSONObject(S_PIECES)));
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return q;
@@ -65,7 +65,7 @@ public class Quantity implements Serializable {
 			o.put(S_SIZE, q.getSize() == null ? null : q.getSize().toJSON());
 			o.put(S_PIECES, q.getPieces() == null ? null : q.getPieces().toJSON());
 		} catch (JSONException e) {
-			if (Eta.mDebug)
+			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;
