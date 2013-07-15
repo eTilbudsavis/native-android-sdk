@@ -17,8 +17,8 @@ public class Share implements Comparable<Share>, Serializable {
 	private static final String S_ACCEPTED = "accepted";
 	
 	public static final String ACCESS_OWNER = "owner";
-	public static final String ACCESS_RW = "rw";
-	public static final String ACCESS_W = "r";
+	public static final String ACCESS_READWRITE = "rw";
+	public static final String ACCESS_READONLY = "r";
 	
 	public static final String TAG = "Share";
 	
@@ -27,6 +27,7 @@ public class Share implements Comparable<Share>, Serializable {
 	private boolean mAccepted;
 
 	public Share() {
+		
 	}
 
 	public static Share fromJSON(String share) {

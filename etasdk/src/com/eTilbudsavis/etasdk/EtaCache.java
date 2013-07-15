@@ -1,7 +1,6 @@
 package com.eTilbudsavis.etasdk;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class EtaCache implements Serializable {
@@ -43,6 +42,11 @@ public class EtaCache implements Serializable {
 			c = null;
 		}
 		return c;
+	}
+	
+	public void clear() {
+		mPageflip = new HashMap<String, EtaCache.CachePageflip>();
+		mItems = new HashMap<String, EtaCache.CacheItem>();
 	}
 	
 	public class CacheItem {

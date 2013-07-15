@@ -385,7 +385,7 @@ public final class Pageflip extends WebView {
 		}
 	}
 	
-	public void togglePagelist() {
+	public void toggleThumbnails() {
 		etaProxy(ETA_THUMB);
 	}
 	

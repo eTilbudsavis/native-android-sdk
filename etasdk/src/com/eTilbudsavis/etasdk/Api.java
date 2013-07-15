@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,6 +38,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -146,7 +149,7 @@ public class Api implements Serializable {
 		return this;
 	}
 
-	public Api setOrderBy(String[] order) {
+	public Api setOrderBy(List<String> order) {
 		String tmp = TextUtils.join(",",order);
 		mApiParams.putString(Sort.ORDER_BY, tmp);
 		return this;
@@ -161,7 +164,7 @@ public class Api implements Serializable {
 	 * @param id's to filter by
 	 * @return this object
 	 */
-	public Api setCatalogIds(String[] ids) {
+	public Api setCatalogIds(List<String> ids) {
 		applyFilter(Params.FILTER_CATALOG_IDS, ids);
 		return this;
 	}
@@ -170,7 +173,7 @@ public class Api implements Serializable {
 	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
 	 * @return a list if id's
 	 */
-	public String[] getCatalogIds() {
+	public List<String> getCatalogIds() {
 		return getFilter(Params.FILTER_CATALOG_IDS);
 	}
 
@@ -179,7 +182,7 @@ public class Api implements Serializable {
 	 * @param id's to filter by
 	 * @return this object
 	 */
-	public Api setDealerIds(String[] ids) {
+	public Api setDealerIds(List<String> ids) {
 		applyFilter(Params.FILTER_DEALER_IDS, ids);
 		return this;
 	}
@@ -188,7 +191,7 @@ public class Api implements Serializable {
 	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
 	 * @return a list if id's
 	 */
-	public String[] getDealerIds() {
+	public List<String> getDealerIds() {
 		return getFilter(Params.FILTER_DEALER_IDS);
 	}
 
@@ -197,7 +200,7 @@ public class Api implements Serializable {
 	 * @param id's to filter by
 	 * @return this object
 	 */
-	public Api setStoreIds(String[] ids) {
+	public Api setStoreIds(List<String> ids) {
 		applyFilter(Params.FILTER_STORE_IDS, ids);
 		return this;
 	}
@@ -206,7 +209,7 @@ public class Api implements Serializable {
 	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
 	 * @return a list if id's
 	 */
-	public String[] getStoreIds() {
+	public List<String> getStoreIds() {
 		return getFilter(Params.FILTER_STORE_IDS);
 	}
 
@@ -215,7 +218,7 @@ public class Api implements Serializable {
 	 * @param id's to filter by
 	 * @return this object
 	 */
-	public Api setOfferIds(String[] ids) {
+	public Api setOfferIds(List<String> ids) {
 		applyFilter(Params.FILTER_OFFER_IDS, ids);
 		return this;
 	}
@@ -224,7 +227,7 @@ public class Api implements Serializable {
 	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
 	 * @return a list if id's
 	 */
-	public String[] getOfferIds() {
+	public List<String> getOfferIds() {
 		return getFilter(Params.FILTER_OFFER_IDS);
 	}
 
@@ -233,7 +236,7 @@ public class Api implements Serializable {
 	 * @param ids to filter by
 	 * @return this object
 	 */
-	public Api setAreaIds(String[] ids) {
+	public Api setAreaIds(List<String> ids) {
 		applyFilter(Params.FILTER_AREA_IDS, ids);
 		return this;
 	}
@@ -242,7 +245,7 @@ public class Api implements Serializable {
 	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
 	 * @return a list if id's
 	 */
-	public String[] getAreaIds() {
+	public List<String> getAreaIds() {
 		return getFilter(Params.FILTER_AREA_IDS);
 	}
 	
@@ -254,7 +257,7 @@ public class Api implements Serializable {
 	 * @param	ids to filter by
 	 * @return	this object
 	 */
-	public Api applyFilter(String filterName, String[] ids) {
+	public Api applyFilter(String filterName, List<String> ids) {
 		String tmp = TextUtils.join(",",ids);
 		mApiParams.putString(filterName, tmp);
 		return this;
@@ -270,9 +273,11 @@ public class Api implements Serializable {
 	 * @param	filterName 
 	 * @return	a list if id's
 	 */
-	public String[] getFilter(String filterName) {
+	public List<String> getFilter(String filterName) {
 		String tmp = mApiParams.getString(filterName);
-		return TextUtils.split(tmp, ",");
+		List<String> list = new ArrayList<String>();
+		Collections.addAll(list, TextUtils.split(tmp, ","));
+		return list;
 	}
 	
 	/**
@@ -312,7 +317,12 @@ public class Api implements Serializable {
 	public Bundle getApiParameters() {
 		return mApiParams;
 	}
-
+	
+	public Api addApiParameters(Bundle params) {
+		mApiParams.putAll(params);
+		return this;
+	}
+	
 	public Api setApiParameters(Bundle params) {
 		mApiParams = params;
 		return this;
@@ -491,7 +501,7 @@ public class Api implements Serializable {
 
 	/**
 	 * This will start executing the request.
-	 * Note that if the {@link #request(String, CallbackString, Bundle, RequestType, Bundle) request()}'s 
+	 * Note that if the {@link #request(String, CallbackJSON, Bundle, RequestType, Bundle) request()}'s 
 	 * optionalKeys bundle contains options that have also been set by
 	 * any of the Api-setters, then the setters will be used.
 	 * @return HttpHelper, so execution of background task can be cancelled. <br>
@@ -517,7 +527,7 @@ public class Api implements Serializable {
 		// Is Session okay? If not, check if it's a session call? If not try to make a session before continuing
 		if (mEta.getSession().getToken() == null || mEta.getSession().isExpired()) {
 			if (!mUrl.matches(Endpoint.SESSION)) {
-				mEta.getSession().subscribe(new SessionListener() {
+				SessionListener sl = new SessionListener() {
 					
 					public void onUpdate() {
 						if (mEta.getSession().isExpired()) {
@@ -527,8 +537,8 @@ public class Api implements Serializable {
 							mEta.getSession().update();
 						}
 					}
-				});
-				mEta.getSession().update();
+				};
+				mEta.getSession().subscribe(sl).update();
 			} else {
 				runThread();
 			}
@@ -540,31 +550,29 @@ public class Api implements Serializable {
 	}
 	
 	private void runThread() {
-//		new Thread(httpExecutor).start();
-		mEta.getThreadPool().execute(httpExecutor);
-	}
-	
-	Runnable httpExecutor = new Runnable() {
 		
-		public void run() {
-
-			if (terminate()) return; 
-			prepareQuery();
-
-			if (terminate()) return; 
-			printDebugPreExecute();
-
-			if (terminate()) return; 
-			performHttpCall();
-
-			if (terminate()) return; 
-			printDebugPreExecute();
-
-			if (terminate()) return; 
-			processResult();
+		mEta.getThreadPool().execute(new Runnable() {
 			
-		}
-	};
+			public void run() {
+
+				if (terminate()) return; 
+				prepareQuery();
+
+				if (terminate()) return; 
+				printDebugPreExecute();
+
+				if (terminate()) return; 
+				performHttpCall();
+
+				if (terminate()) return; 
+				printDebugPostExecute();
+
+				if (terminate()) return; 
+				processResult();
+				
+			}
+		});
+	}
 	
 	private boolean terminate() {
 		
@@ -730,8 +738,6 @@ public class Api implements Serializable {
 		    mData = EntityUtils.toString(mResponse.getEntity(), HTTP.UTF_8);
 			updateSessionInfo(mResponse.getAllHeaders());
 			
-			printDebugPostExecute();
-			
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (ClientProtocolException e) {
@@ -769,7 +775,13 @@ public class Api implements Serializable {
 	}
 
 	private void processResult() {
-
+		
+		// TODO: Check endpoint, and convert to JSONObject or JSONArray
+		
+		// Cache all cache able items
+		
+		// Further processing based on 
+		
 		// now process the result
 		if (Utilities.isSuccess(mStatusCode)) {
 			if (!mCacheHit || mMultipleCallbacks) {
@@ -874,7 +886,7 @@ public class Api implements Serializable {
 			
 			@SuppressWarnings("unchecked")
 			public void run() {
-				if (!mCanceled)
+				if (!isCanceled())
 					mListener.onComplete(statusCode, data, error);
 			}
 		});
@@ -928,23 +940,23 @@ public class Api implements Serializable {
     }
 
     /** Callback interface for a list of catalogs*/
-    public static interface CallbackCatalogList extends Callback<ArrayList<Catalog>> {
-    	public void onComplete(int statusCode, ArrayList<Catalog> catalogs, EtaError error);
+    public static interface CallbackCatalogList extends Callback<List<Catalog>> {
+    	public void onComplete(int statusCode, List<Catalog> catalogs, EtaError error);
     }
 
     /** Callback interface for a list of offers */
-    public static interface CallbackOfferList extends Callback<ArrayList<Offer>> {
-        public void onComplete(int statusCode, ArrayList<Offer> offers, EtaError error);
+    public static interface CallbackOfferList extends Callback<List<Offer>> {
+        public void onComplete(int statusCode, List<Offer> offers, EtaError error);
     }
 
     /** Callback interface for a list of dealers */
-    public static interface CallbackDealerList extends Callback<ArrayList<Dealer>> {
-        public void onComplete(int statusCode, ArrayList<Dealer> dealers, EtaError error);
+    public static interface CallbackDealerList extends Callback<List<Dealer>> {
+        public void onComplete(int statusCode, List<Dealer> dealers, EtaError error);
     }
 
     /** Callback interface for a list of stores */
-    public static interface CallbackStoreList extends Callback<ArrayList<Store>> {
-        public void onComplete(int statusCode, ArrayList<Store> stores, EtaError error);
+    public static interface CallbackStoreList extends Callback<List<Store>> {
+        public void onComplete(int statusCode, List<Store> stores, EtaError error);
     }
 
     /** Callback interface for a single catalog */

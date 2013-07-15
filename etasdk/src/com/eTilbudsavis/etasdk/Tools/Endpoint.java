@@ -37,6 +37,7 @@ public final class Endpoint {
 	private static final String USER = API + V2 + "/users";
 	public static final String SEARCH = "/search";
 	public static final String QUICK_SEARCH = "/quicksearch";
+	public static final String TYPEAHEAD = "/typeahead";
 	public static final String FACEBOOK = "/facebook";
 	public static final String PROXY = MAIN_URL + "/proxy/";
 	
@@ -66,6 +67,9 @@ public final class Endpoint {
 	public static final String DEALER_SEARCH = DEALER_LIST + SEARCH;
 	public static final String OFFER_SEARCH = OFFER_LIST + SEARCH;
 	public static final String STORE_SEARCH = STORE_LIST + SEARCH;
+	
+	// Typeahead
+	public static final String OFFER_TYPEAHEAD = OFFER_LIST + TYPEAHEAD;
 	
 	// QUICK SEARCH
 	public static final String STORE_QUICK_SEARCH = STORE_LIST + QUICK_SEARCH;

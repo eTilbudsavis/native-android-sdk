@@ -15,6 +15,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 
+import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Tools.Params;
 
 public class EtaLocation extends Location {
@@ -44,12 +45,15 @@ public class EtaLocation extends Location {
 	
 	/** API v2 parameter name for bounds west. */
 	public static final String BOUND_WEST = Params.BOUND_WEST;
-	
+
+	private static final String ADDRESS = "etasdk_loc_address";
+
 	private static final String TIME = "etasdk_loc_time";
 	
 	// Location.
-	private int mRadius = Integer.MAX_VALUE;
+	private int mRadius = 700000;
 	private boolean mSensor = false;
+	private String mAddress = "";
 	private double mBoundNorth = 0f;
 	private double mBoundEast = 0f;
 	private double mBoundSouth = 0f;
@@ -62,7 +66,7 @@ public class EtaLocation extends Location {
 	}
 
 	public Boolean isLocationSet() {
-		return (mRadius != Integer.MAX_VALUE && getLatitude() != 0.0 && getLongitude() != 0.0);
+		return (getLatitude() != 0.0 && getLongitude() != 0.0);
 	}
 
 	public Boolean isBoundsSet() {
@@ -72,18 +76,29 @@ public class EtaLocation extends Location {
 	@Override
 	public void set(Location l) {
 		super.set(l);
+		mAddress = "";
 		mSensor = (getProvider().equals(LocationManager.GPS_PROVIDER) || getProvider().equals(LocationManager.NETWORK_PROVIDER) );
 	}
 	
-	public EtaLocation set(Location l, int radius, boolean sensor) {
+	public EtaLocation set(Location l, boolean sensor) {
 		super.set(l);
-		mRadius = radius;
-		mSensor = sensor;
-		return this;
+		return set("", getLatitude(), getLongitude(), sensor);
+	}
+
+	public EtaLocation set(double latitude, double longitude) {
+		return set("", latitude, longitude, false);
+	}
+
+	public EtaLocation set(double latitude, double longitude, boolean sensor) {
+		return set("", latitude, longitude, sensor);
+	}
+
+	public EtaLocation set(String address, double latitude, double longitude) {
+		return set(address, latitude, longitude, false);
 	}
 	
-	public EtaLocation set(double latitude, double longitude, int radius, boolean sensor) {
-		mRadius = radius;
+	private EtaLocation set(String address, double latitude, double longitude, boolean sensor) {
+		mAddress = address;
 		mSensor = sensor;
 		setLatitude(latitude);
 		setLongitude(longitude);
@@ -91,7 +106,7 @@ public class EtaLocation extends Location {
 		setProvider(ETA_PROVIDER);
 		return this;
 	}
-
+	
 	/**
 	 * Set the current search radius.
 	 * @param radius in meters <li> Min value = 0 <li> Max value = 700000
@@ -124,6 +139,15 @@ public class EtaLocation extends Location {
 		return mSensor;
 	}
 
+	public EtaLocation setAddress(String address) {
+		mAddress = address;
+		return this;
+	}
+	
+	public String getAddress() {
+		return mAddress;
+	}
+
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
@@ -135,6 +159,12 @@ public class EtaLocation extends Location {
 			e.printStackTrace();
 		}
 		return o;
+	}
+
+	public int distance(Store store) {
+		float[] dist = new float[]{};
+		distanceBetween(getLatitude(), getLongitude(), store.getLatitude(), store.getLongitude(), dist);
+		return Math.round(dist[0]);
 	}
 
 	/**
@@ -214,6 +244,7 @@ public class EtaLocation extends Location {
 		savedInstanceState.putDouble(BOUND_WEST, mBoundWest);
 		savedInstanceState.putDouble(BOUND_NORTH, mBoundNorth);
 		savedInstanceState.putDouble(BOUND_SOUTH, mBoundSouth);
+		savedInstanceState.putString(ADDRESS, mAddress);
 		savedInstanceState.putLong(TIME, getTime());
 
 	}
@@ -227,6 +258,7 @@ public class EtaLocation extends Location {
 		setBoundWest(savedInstanceState.getDouble(BOUND_WEST));
 		setBoundNorth(savedInstanceState.getDouble(BOUND_NORTH));
 		setBoundSouth(savedInstanceState.getDouble(BOUND_SOUTH));
+		setAddress(savedInstanceState.getString(ADDRESS));
 		setTime(savedInstanceState.getLong(TIME));
 	}
 
@@ -243,6 +275,7 @@ public class EtaLocation extends Location {
 	    		.putFloat(BOUND_WEST, (float)mBoundWest)
 	    		.putFloat(BOUND_NORTH, (float)mBoundNorth)
 	    		.putFloat(BOUND_SOUTH, (float)mBoundSouth)
+	    		.putString(ADDRESS, mAddress)
 	    		.putLong(TIME, getTime())
 	    		.commit();
 	        }
@@ -263,6 +296,7 @@ public class EtaLocation extends Location {
 			setBoundWest(sp.getFloat(BOUND_WEST, 0f));
 			setBoundNorth(sp.getFloat(BOUND_NORTH, 0f));
 			setBoundSouth(sp.getFloat(BOUND_SOUTH, 0f));
+			setAddress(sp.getString(ADDRESS, null));
 			setTime(sp.getLong(TIME, System.currentTimeMillis()));
 			return true;
 		} else {

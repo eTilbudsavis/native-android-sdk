@@ -15,7 +15,6 @@ import com.eTilbudsavis.etasdk.Api;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Session.SessionListener;
 import com.eTilbudsavis.etasdk.ShoppinglistManager;
-import com.eTilbudsavis.etasdk.ShoppinglistManager.ShoppinglistListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
@@ -24,8 +23,8 @@ import com.eTilbudsavis.etasdk.Tools.Endpoint;
 import com.eTilbudsavis.etasdk.Tools.Utilities;
 import com.eTilbudsavis.sdkdemo.helpers.Keys;
 import com.eTilbudsavis.sdkdemo.helpers.Test;
-import com.eTilbudsavis.sdkdemo.helpers.TestVarDump;
 import com.eTilbudsavis.sdkdemo.helpers.Test.PrintListener;
+import com.eTilbudsavis.sdkdemo.helpers.TestVarDump;
 import com.etilbudsavis.sdkdemo.R;
 
 public class Testing extends Activity {
@@ -58,7 +57,7 @@ public class Testing extends Activity {
         mEta = new Eta(Keys.API_KEY, Keys.API_SECRET, this);
         mEta.debug(true);
 //        mEta.clearPreferences();
-        mEta.getLocation().set(55.63105, 12.5766, 700000, false);	// Fields
+        mEta.getLocation().set(55.63105, 12.5766, false).setRadius(700000);	// Fields
         
         
 //        tests.add(tSessionStart);

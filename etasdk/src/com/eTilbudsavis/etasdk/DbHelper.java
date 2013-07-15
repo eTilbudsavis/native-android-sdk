@@ -1,5 +1,7 @@
 package com.eTilbudsavis.etasdk;
 
+import java.util.ArrayList;
+
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.Tools.Utilities;
@@ -12,7 +14,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DbHelper extends SQLiteOpenHelper {
 
-	public static final String TAG = "DatabaseHelper";
+	public static final String TAG = "DbHelper";
 	
 	private static final String DB_NAME = "shoppinglist.db";
 	private static final int DB_VERSION = 1;
@@ -87,7 +89,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 
 	public static Shoppinglist curToSl(Cursor c) {
-		Shoppinglist sl = new Shoppinglist();
+		Shoppinglist sl = Shoppinglist.fromName("");
 		sl.setId(c.getString(0));
 		sl.setModified(c.getString(1));
 		sl.setErn(c.getString(2));
@@ -148,9 +150,185 @@ public class DbHelper extends SQLiteOpenHelper {
 		c.put(STATE, sli.getState());
 		return c;
 	}
-	
+
+	/**
+	 * Open a connection to database<br>
+	 * If Eta.onResume() is called, there should be no need to call this.
+	 */
 	public void openDB() {
 		mDatabase = getWritableDatabase();
 	}
+	
+	/**
+	 * Close the database connection<br>
+	 * If Eta.onPause() is called, there should be no need to call this.
+	 */
+	public void closeDB() {
+		close();
+	}
+
+	/**
+	 * Deletes all tables (<i>shoppinglists</i> and <i>shoppinglistitems</i>)
+	 * and creates two new tables<br>
+	 * This cannot be undone.
+	 */
+	public void clearDatabase() {
+		onUpgrade(mDatabase, 0, 0);
+	}
+	
+	/**
+	 * Insert new shoppinglist into db
+	 * @param list to insert
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred
+	 */
+	public long insertList(Shoppinglist list) {
+		return mDatabase.insert(SL, null, DbHelper.slToCV(list));
+	}
+
+	/**
+	 * Get a shopping list by it's id
+	 * @param id to get
+	 * @return A cursor with a shopping list that matches the id, or empty cursor 
+	 */
+	public Cursor getList(String id) {
+		return mDatabase.query(SL, null, DbHelper.ID + "=?", new String[]{id}, null, null, null, null);
+	}
+
+	/**
+	 * Check if a list by a given id exists in db.<br>
+	 * Good for checking if a UUID exists before inserting a new list.
+	 * @param id to check for
+	 * @return true if it exists, else false
+	 */
+	public boolean existsList(String id) {
+		Cursor c = getList(id);
+		boolean res = c.moveToFirst();
+		c.close();
+		return res;
+	}
+	
+	/**
+	 * Get a shopping list from it's readable name
+	 * @param name of the shopping list
+	 * @return Cursor with shopping lists that matches name
+	 */
+	public Cursor getListFromName(String name) {
+		return mDatabase.query(SL, null, DbHelper.NAME + "=?", new String[]{name}, null, null, null);
+	}
+	
+	/**
+	 * Get all shoppinglists
+	 * @return Cursor with shoppinglists from db
+	 */
+	public Cursor getLists() {
+		return mDatabase.query(SL, null, null, null, null, null, null);
+	}
+	
+	/**
+	 * Delete a list, from the db
+	 * @param shoppinglistId to delete
+	 * @return the number of rows affected.
+	 */
+	public int deleteList(String shoppinglistId) {
+		return mDatabase.delete(SL, DbHelper.ID + "=?", new String[]{shoppinglistId});
+	}
+	
+	/**
+	 * Replaces a shoppinglist, that have been updated in some way
+	 * @param list that have been edited
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred
+	 */
+	public long editList(Shoppinglist list) {
+		return mDatabase.replace(SL, null, DbHelper.slToCV(list));
+	}
+
+	/**
+	 * Adds a list of items to db, IF they do not yet exist, else nothing
+	 * @param items to insert
+	 * @return true if all items have successfully been inserted, else false
+	 */
+	public boolean addItems(ArrayList<ShoppinglistItem> items) {
+		boolean resp = true;
+		for (ShoppinglistItem sli : items)
+			if (addItem(sli) == -1)
+				resp = false;
+		
+		return resp;
+	}
+
+	/**
+	 * Get a shopping list item from the db
+	 * @param itemId to get from db
+	 * @return A Cursor object, which is positioned before the first entry
+	 */
+	public Cursor getItem(String itemId) {
+		return mDatabase.query(SLI, null, DbHelper.ID + "=?", new String[]{itemId}, null, null, null);
+	}
+
+	/**
+	 * Get a shopping lite item from the db
+	 * @param id to get from db
+	 * @return A Cursor object, which is positioned before the first entry
+	 */
+	public Cursor getItems(Shoppinglist sl) {
+		return mDatabase.query(SLI, null, DbHelper.SHOPPINGLIST_ID + "=?", new String[]{sl.getId()}, null, null, null);
+	}
+
+	/**
+	 * Check if a given item id exists in db
+	 * @param id to check for
+	 * @return true, if it exists, else false
+	 */
+	public boolean existsItem(String id) {
+		Cursor c = getItem(id);
+		boolean res = c.moveToFirst();
+		c.close();
+		return res;
+	}
+	
+	/**
+	 * Adds item to db, IF it does not yet exist, else nothing
+	 * @param sli to add to db
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred
+	 */
+	public long addItem(ShoppinglistItem sli) {
+		return existsItem(sli.getId()) ? -1 : mDatabase.insert(SLI, null, DbHelper.sliToCV(sli));
+	}
+	
+	/**
+	 * Deletes all items from a specific shopping list<br>
+	 * true = Ticked<br>
+	 * false = Unticked<br>
+	 * null = All items<br>
+	 * @param shoppinglistId to remove items from
+	 * @return number of affected rows
+	 */
+	public int deleteItems(String shoppinglistId, Boolean state) {
+		
+		if (state == null) {
+			return mDatabase.delete(SLI, DbHelper.ID + "=?", new String[]{shoppinglistId});
+		} else {
+			return mDatabase.delete(SLI, DbHelper.ID + "=? AND " + DbHelper.TICK + "=?", new String[]{shoppinglistId, String.valueOf(state)});
+		}
+	}
+
+	/**
+	 * Deletes an item from db
+	 * @param id of the item to delete
+	 * @return the number of rows affected
+	 */
+	public int deleteItem(String id) {
+		return mDatabase.delete(SLI, DbHelper.ID + "=?", new String[]{id});
+	}
+
+	/**
+	 * replaces an item in db
+	 * @param sli to insert
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred
+	 */
+	public long editItem(ShoppinglistItem sli) {
+		return mDatabase.replace(SLI, null, DbHelper.sliToCV(sli));
+	}
+
 	
 }

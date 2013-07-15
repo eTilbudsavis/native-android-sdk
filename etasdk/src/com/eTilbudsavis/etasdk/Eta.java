@@ -29,6 +29,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
+import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Tools.Sort;
 
 // Main object for interacting with the SDK.
@@ -112,6 +113,13 @@ public class Eta implements Serializable {
 	}
 
 	/**
+	 * Get the current user
+	 * @return a user
+	 */
+	public User getUser() {
+		return getSession().getUser();
+	}
+	/**
 	 * Get the SharedPreferences, that ETA SDK is using.
 	 */
 	public SharedPreferences getPrefs() {
@@ -185,14 +193,12 @@ public class Eta implements Serializable {
 	}
 	
 	public void onPause() {
-		mShoppinglistManager.stopSync();
-		mShoppinglistManager.closeDB();
+		mShoppinglistManager.onPause();
 		pageflipPause();
 	}
 	
 	public void onResume() {
-		mShoppinglistManager.openDB();
-		mShoppinglistManager.startSync();
+		mShoppinglistManager.onResume();
 		pageflipResume();
 	}
 
@@ -249,32 +255,12 @@ public class Eta implements Serializable {
 		return api().get(Catalog.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
 	}
 
-	public Api getCatalogId(Api.CallbackCatalog listener, String id) {
-		return api().get(Catalog.ENDPOINT_ID, listener, new Bundle()).setId(id);
+	public Api getCatalogId(Api.CallbackCatalog listener, String catalogId) {
+		return api().get(Catalog.ENDPOINT_ID, listener, new Bundle()).setId(catalogId);
 	}
 
-	public Api getCatalogId(Api.CallbackCatalog listener, Catalog c) {
-		if (c != null) {
-			return api().get(Catalog.ENDPOINT_ID, listener, new Bundle()).setId(c.getId());			
-		} else {
-			return null;
-		}
-	}
-
-	public Api getCatalogIds(Api.CallbackCatalogList listener, String[] ids) {
-		return api().get(Catalog.ENDPOINT_LIST, listener, new Bundle()).setCatalogIds(ids);
-	}
-
-	public Api getCatalogIds(Api.CallbackCatalogList listener, List<Catalog> catalogs) {
-		if (catalogs != null) {
-			String[] ids = new String[catalogs.size()];
-			for (int i = 0; i < catalogs.size(); i++) {
-				ids[i] = catalogs.get(i).getId();
-			}
-			return api().get(Catalog.ENDPOINT_LIST, listener, new Bundle()).setCatalogIds(ids);
-		} else {
-			return null;
-		}
+	public Api getCatalogIds(Api.CallbackCatalogList listener, List<String> catalogIds) {
+		return api().get(Catalog.ENDPOINT_LIST, listener, new Bundle()).setCatalogIds(catalogIds);
 	}
 
 // ######################## OFFERS ########################
@@ -303,8 +289,8 @@ public class Eta implements Serializable {
 		return api().get(Offer.ENDPOINT_ID, listener, new Bundle()).setId(id);
 	}
 	
-	public Api getOfferIds(Api.CallbackOfferList listener, String[] ids) {
-		return api().get(Offer.ENDPOINT_LIST, listener, new Bundle()).setOfferIds(ids);
+	public Api getOfferIds(Api.CallbackOfferList listener, List<String> offerIds) {
+		return api().get(Offer.ENDPOINT_LIST, listener, new Bundle()).setOfferIds(offerIds);
 	}
 	
 	public Api getOfferSearch(Api.CallbackOfferList listener, String query) {
@@ -353,8 +339,8 @@ public class Eta implements Serializable {
 		return api().get(Dealer.ENDPOINT_ID, listener, new Bundle()).setId(id);
 	}
 	
-	public Api getDealerIds(Api.CallbackDealerList listener, String[] ids) {
-		return api().get(Dealer.ENDPOINT_LIST, listener, new Bundle()).setDealerIds(ids);
+	public Api getDealerIds(Api.CallbackDealerList listener, List<String> dealerIds) {
+		return api().get(Dealer.ENDPOINT_LIST, listener, new Bundle()).setDealerIds(dealerIds);
 	}
 
 	public Api getDealerSearch(Api.CallbackDealerList listener, String query) {
@@ -399,12 +385,12 @@ public class Eta implements Serializable {
 		return api().get(Store.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
 	}
 	
-	public Api getStoreId(Api.CallbackStore listener, String id) {
+	public Api getStoreFromId(Api.CallbackStore listener, String id) {
 		return api().get(Store.ENDPOINT_ID, listener, new Bundle()).setId(id);
 	}
 	
-	public Api getStoreIds(Api.CallbackStoreList listener, String[] ids) {
-		return api().get(Store.ENDPOINT_LIST, listener, new Bundle()).setStoreIds(ids);
+	public Api getStoreFromIds(Api.CallbackStoreList listener, List<String> storeIds) {
+		return api().get(Store.ENDPOINT_LIST, listener, new Bundle()).setStoreIds(storeIds);
 	}
 
 	public Api getStoreSearch(Api.CallbackStoreList listener, String query) {

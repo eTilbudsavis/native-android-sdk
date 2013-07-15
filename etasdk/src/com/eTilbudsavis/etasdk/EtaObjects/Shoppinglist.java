@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,11 +54,12 @@ public class Shoppinglist implements Serializable {
 	private String mAccess = ACCESS_PRIVATE;
 	private long mModified = 0L;
 	private Share mOwner = new Share();
+	private List<Share> mShares = new ArrayList<Share>(1);
 	
 	// local vars
 	private int mState = STATE_INIT;
 	
-	public Shoppinglist() {
+	private Shoppinglist() {
 		setId(Utilities.createUUID());
 		setModified(System.currentTimeMillis());
 	}
@@ -248,7 +250,7 @@ public class Shoppinglist implements Serializable {
 		mOwner = owner;
 		return this;
 	}
-
+	
 	/**
 	 * We are not comparing the modified field, as this field does not
 	 * update the same as 

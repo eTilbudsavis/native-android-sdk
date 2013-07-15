@@ -443,7 +443,7 @@ public class Offer implements Serializable {
 		return mStore;
 	}
 
-	public Offer setmStore(Store store) {
+	public Offer setStore(Store store) {
 		mStore = store;
 		return this;
 	}

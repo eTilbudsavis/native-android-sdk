@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.location.GpsStatus.Listener;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Api.CallbackString;
@@ -54,36 +55,19 @@ public class Session implements Serializable {
 	private boolean mIsUpdatingSession = false;
 	
 	private ArrayList<SessionListener> mSubscribers = new ArrayList<Session.SessionListener>();
-
-	CallbackString session = new CallbackString() {
-
-		public void onComplete(int statusCode, String data, EtaError error) {
-			
-			if (200 <= statusCode && statusCode < 300 ) {
-				set(data);
-			} else {
-				Utilities.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
-			}
-			mIsUpdatingSession = false;
-			notifySubscribers();
-		}
-
-	};
-
-	CallbackString userCreate = new CallbackString() {
-
-		public void onComplete(int statusCode, String data, EtaError error) {
-			
-			if (200 <= statusCode && statusCode < 300 ) {
-				Utilities.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + data);
-			} else {
-				Utilities.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error);
-			}
-			notifySubscribers();
-		}
-
-	};
 	
+	private void sessionUpdate(int statusCode, String data, EtaError error) {
+
+		if (Utilities.isSuccess(statusCode)) {
+			set(data);
+		} else {
+			Utilities.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
+		}
+		mIsUpdatingSession = false;
+		notifySubscribers();
+	}
+	
+
 	public Session(Eta eta) {
 		mEta = eta;
 		mUser = new User();
@@ -147,15 +131,23 @@ public class Session implements Serializable {
 		}
 	}
 
-	public void login(String user, String password) {
+	public void login(String user, String password, final CallbackString listener) {
 		// Save user and pass to preferences
 		mEta.getPrefs().edit().putString(PREFS_SESSION_USER, user).putString(PREFS_SESSION_PASS, password).commit();
 		mUserStr = user;
 		mPassStr = password;
-		update();
+		update(listener);
+	}
+	
+	public void forgotPassword(String email, final CallbackString listener) {
+		// TODO: Forgot password implementation
 	}
 	
 	public synchronized void update() {
+		update(null);
+	}
+	
+	private synchronized void update(final CallbackString listener) {
 		if (mIsUpdatingSession)
 			return;
 		
@@ -165,6 +157,14 @@ public class Session implements Serializable {
 			b.putString(Params.EMAIL, mUserStr);
 			b.putString(Params.PASSWORD, mPassStr);
 		}
+		CallbackString session = new CallbackString() {
+
+			public void onComplete(int statusCode, String data, EtaError error) {
+				sessionUpdate(statusCode, data, error);
+				if (listener != null) listener.onComplete(statusCode, data, error);
+			}
+
+		};
 		mEta.api().setUseLocation(false).post(Session.ENDPOINT, session, b).execute();
 	}
 	
@@ -179,7 +179,7 @@ public class Session implements Serializable {
 	 * @param errorRedirect
 	 * @return true if all arguments are valid, false otherwise
 	 */
-	public boolean createUser(String email, String password, String name, int birthYear, String gender, String successRedirect, String errorRedirect) {
+	public boolean createUser(String email, String password, String name, int birthYear, String gender, String successRedirect, String errorRedirect, final CallbackString listener) {
 		if ( !Utilities.isEmailValid(email) || 
 				!Utilities.isPasswordValid(password) || 
 				!Utilities.isNameValid(name) || 
@@ -195,6 +195,21 @@ public class Session implements Serializable {
 		b.putString(Params.GENDER, gender);
 		b.putString(Params.SUCCESS_REDIRECT, successRedirect);
 		b.putString(Params.ERROR_REDIRECT, errorRedirect);
+		
+		CallbackString userCreate = new CallbackString() {
+
+			public void onComplete(int statusCode, String data, EtaError error) {
+				
+				if (Utilities.isSuccess(statusCode)) {
+					Utilities.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + data);
+				} else {
+					Utilities.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error);
+				}
+				if (listener != null) listener.onComplete(statusCode, data, error);
+			}
+
+		};
+		
 		mEta.api().post(Session.ENDPOINT, userCreate, b).execute();
 		return true;
 	}
@@ -240,11 +255,19 @@ public class Session implements Serializable {
 	 * Signs a user out, and cleans all references to the user.<br><br>
 	 * A new {@link #login(String, String) login} is needed to get access to user stuff again.
 	 */
-	public synchronized void signout() {
+	public synchronized void signout(final CallbackString listener) {
 		mIsUpdatingSession = true;
 		clearUser();
 		Bundle b = new Bundle();
 		b.putString(Params.EMAIL, "");
+		CallbackString session = new CallbackString() {
+
+			public void onComplete(int statusCode, String data, EtaError error) {
+				sessionUpdate(statusCode, data, error);
+				if (listener != null) listener.onComplete(statusCode, data, error);
+			}
+
+		};
 		mEta.api().put(ENDPOINT, session, b).execute();
 	}
 	
@@ -261,7 +284,7 @@ public class Session implements Serializable {
 	 * Destroys this session.<br><br>
 	 * And returns a new session, completely clean session.
 	 */
-	public void invalidate() {
+	public void invalidate(final CallbackString listener) {
 		mJson = null;
 		mToken = null;
 		mExpires = 0L;
@@ -270,6 +293,14 @@ public class Session implements Serializable {
 		mSubscribers = new ArrayList<Session.SessionListener>();
 		mEta.getPrefs().edit().putString(PREFS_SESSION, null).commit();
 		clearUser();
+		CallbackString session = new CallbackString() {
+
+			public void onComplete(int statusCode, String data, EtaError error) {
+				sessionUpdate(statusCode, data, error);
+				if (listener != null) listener.onComplete(statusCode, data, error);
+			}
+
+		};
 		mEta.api().delete(ENDPOINT, session, new Bundle()).execute();
 	}
 	

@@ -26,10 +26,10 @@ public final class Params {
 	
 	/** API v2 parameter name for bounds south. */
 	public static final String BOUND_SOUTH = "b_south";
-	
+
 	/** API v2 parameter name for bounds west. */
 	public static final String BOUND_WEST = "b_west";
-	
+
 	/** API v2 parameter name for API Key */
 	public static final String API_KEY = "api_key";
 	
