@@ -30,7 +30,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.Tools.Sort;
+import com.eTilbudsavis.etasdk.Utils.Sort;
 
 // Main object for interacting with the SDK.
 public class Eta implements Serializable {
@@ -74,7 +74,7 @@ public class Eta implements Serializable {
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
 		mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-		mLocation = new EtaLocation();
+		mLocation = new EtaLocation(mPrefs);
 		mCache = new EtaCache();
 		mSession = new Session(this);
 		mShoppinglistManager = new ShoppinglistManager(this);

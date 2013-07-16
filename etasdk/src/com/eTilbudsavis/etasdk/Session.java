@@ -16,9 +16,9 @@ import com.eTilbudsavis.etasdk.Api.CallbackString;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Permission;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.Tools.Endpoint;
-import com.eTilbudsavis.etasdk.Tools.Params;
-import com.eTilbudsavis.etasdk.Tools.Utilities;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Params;
+import com.eTilbudsavis.etasdk.Utils.Tools;
 
 public class Session implements Serializable {
 
@@ -58,10 +58,10 @@ public class Session implements Serializable {
 	
 	private void sessionUpdate(int statusCode, String data, EtaError error) {
 
-		if (Utilities.isSuccess(statusCode)) {
+		if (Tools.isSuccess(statusCode)) {
 			set(data);
 		} else {
-			Utilities.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
+			Tools.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
 		}
 		mIsUpdatingSession = false;
 		notifySubscribers();
@@ -180,11 +180,11 @@ public class Session implements Serializable {
 	 * @return true if all arguments are valid, false otherwise
 	 */
 	public boolean createUser(String email, String password, String name, int birthYear, String gender, String successRedirect, String errorRedirect, final CallbackString listener) {
-		if ( !Utilities.isEmailValid(email) || 
-				!Utilities.isPasswordValid(password) || 
-				!Utilities.isNameValid(name) || 
-				!Utilities.isBirthyearValid(birthYear) || 
-				!Utilities.isGenderValid(gender))
+		if ( !Tools.isEmailValid(email) || 
+				!Tools.isPasswordValid(password) || 
+				!Tools.isNameValid(name) || 
+				!Tools.isBirthyearValid(birthYear) || 
+				!Tools.isGenderValid(gender))
 			return false;
 		
 		Bundle b = new Bundle();
@@ -200,10 +200,10 @@ public class Session implements Serializable {
 
 			public void onComplete(int statusCode, String data, EtaError error) {
 				
-				if (Utilities.isSuccess(statusCode)) {
-					Utilities.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + data);
+				if (Tools.isSuccess(statusCode)) {
+					Tools.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + data);
 				} else {
-					Utilities.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error);
+					Tools.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error);
 				}
 				if (listener != null) listener.onComplete(statusCode, data, error);
 			}
@@ -215,7 +215,7 @@ public class Session implements Serializable {
 	}
 	
 	public boolean isExpired() {
-		return mExpires < (System.currentTimeMillis() + Utilities.MINUTE_IN_MILLIS);
+		return mExpires < (System.currentTimeMillis() + Tools.MINUTE_IN_MILLIS);
 	}
 	
 	/**
@@ -240,7 +240,7 @@ public class Session implements Serializable {
 				set(mJson);
 				return;
 			}
-			long expire = ( sdf.parse(headerExpires).getTime() - Utilities.DAY_IN_MILLIS );
+			long expire = ( sdf.parse(headerExpires).getTime() - Tools.DAY_IN_MILLIS );
 			if ( expire < System.currentTimeMillis()) {
 				update();
 			}

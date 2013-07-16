@@ -8,8 +8,8 @@ import org.json.JSONObject;
 
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Tools.Endpoint;
-import com.eTilbudsavis.etasdk.Tools.Params;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Params;
 
 public class User implements Serializable {
 	

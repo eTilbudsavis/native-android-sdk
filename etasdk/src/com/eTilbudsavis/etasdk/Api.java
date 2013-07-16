@@ -50,10 +50,10 @@ import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
-import com.eTilbudsavis.etasdk.Tools.Endpoint;
-import com.eTilbudsavis.etasdk.Tools.Params;
-import com.eTilbudsavis.etasdk.Tools.Sort;
-import com.eTilbudsavis.etasdk.Tools.Utilities;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Params;
+import com.eTilbudsavis.etasdk.Utils.Sort;
+import com.eTilbudsavis.etasdk.Utils.Tools;
 
 public class Api implements Serializable {
 	
@@ -457,7 +457,7 @@ public class Api implements Serializable {
 
 	public Api search(String url, Callback<?> listener, String query) {
 		if (!url.matches(Endpoint.SEARCH))
-			Utilities.logd(TAG, "url does not match a search endpoint, don't expect anything good...");
+			Tools.logd(TAG, "url does not match a search endpoint, don't expect anything good...");
 		
 		Bundle apiParams = new Bundle();
 		apiParams.putString(Params.QUERY, query);
@@ -486,7 +486,7 @@ public class Api implements Serializable {
 	
 	public Api request(String url, Callback<?> listener, Bundle apiParams, RequestType requestType, ContentType contentType, List<Header> headers) {
 		if (url == null || listener == null || requestType == null ) {
-			Utilities.logd(TAG, "Api parameters error: url, callback interface and requestType must not be null");
+			Tools.logd(TAG, "Api parameters error: url, callback interface and requestType must not be null");
 			return null;
 		}
 		
@@ -512,7 +512,7 @@ public class Api implements Serializable {
 
 		// Check if all variables needed are okay
 		if (mUrl == null || mListener == null || mApiParams == null || mRequestType == null || mHeaders == null) {
-			Utilities.logd(TAG, "A request() must be made before execute()");
+			Tools.logd(TAG, "A request() must be made before execute()");
 			return null;
 		}
 
@@ -520,7 +520,7 @@ public class Api implements Serializable {
 			if (Endpoint.isItemEndpoint(mUrl)) {
 				mUrl = mUrl + mId;
 			} else {
-				Utilities.logd(TAG, "Id does not match a single id endpoint, continuing without id");
+				Tools.logd(TAG, "Id does not match a single id endpoint, continuing without id");
 			}
 		}
 		
@@ -577,7 +577,7 @@ public class Api implements Serializable {
 	private boolean terminate() {
 		
 		if (isCanceled()) { 
-			Utilities.logd(TAG, "Task canceled, terminating execution"); 
+			Tools.logd(TAG, "Task canceled, terminating execution"); 
 			return true;
 		}
 		return false;
@@ -593,27 +593,27 @@ public class Api implements Serializable {
 			Iterator<String> iterator = mApiParams.keySet().iterator();
 			while (iterator.hasNext()) {
 				String s = iterator.next();
-				Utilities.putNameValuePair(mQuery, s, mApiParams.get(s));
+				Tools.putNameValuePair(mQuery, s, mApiParams.get(s));
 			}
 		}
 		
 		// Required API key.
-		Utilities.putNameValuePair(mQuery, API_KEY, mEta.getApiKey());
+		Tools.putNameValuePair(mQuery, API_KEY, mEta.getApiKey());
 
 		if (mUseLocation && mEta.getLocation().isLocationSet()) {
 
 			EtaLocation l = mEta.getLocation();
-			Utilities.putNameValuePair(mQuery, EtaLocation.LATITUDE, l.getLatitude());
-			Utilities.putNameValuePair(mQuery, EtaLocation.LONGITUDE, l.getLongitude());
-			Utilities.putNameValuePair(mQuery, EtaLocation.SENSOR, l.getSensor());
-			Utilities.putNameValuePair(mQuery, EtaLocation.RADIUS, l.getRadius());
+			Tools.putNameValuePair(mQuery, EtaLocation.LATITUDE, l.getLatitude());
+			Tools.putNameValuePair(mQuery, EtaLocation.LONGITUDE, l.getLongitude());
+			Tools.putNameValuePair(mQuery, EtaLocation.SENSOR, l.getSensor());
+			Tools.putNameValuePair(mQuery, EtaLocation.RADIUS, l.getRadius());
 
 			// Determine whether to include bounds.
 			if (mEta.getLocation().isBoundsSet()) {
-				Utilities.putNameValuePair(mQuery, EtaLocation.BOUND_EAST, l.getBoundEast());
-				Utilities.putNameValuePair(mQuery, EtaLocation.BOUND_NORTH, l.getBoundNorth());
-				Utilities.putNameValuePair(mQuery, EtaLocation.BOUND_SOUTH, l.getBoundSouth());
-				Utilities.putNameValuePair(mQuery, EtaLocation.BOUND_WEST, l.getBoundWest());
+				Tools.putNameValuePair(mQuery, EtaLocation.BOUND_EAST, l.getBoundEast());
+				Tools.putNameValuePair(mQuery, EtaLocation.BOUND_NORTH, l.getBoundNorth());
+				Tools.putNameValuePair(mQuery, EtaLocation.BOUND_SOUTH, l.getBoundSouth());
+				Tools.putNameValuePair(mQuery, EtaLocation.BOUND_WEST, l.getBoundWest());
 			}
 				
 		}
@@ -622,7 +622,7 @@ public class Api implements Serializable {
 		// Set headers if session is OK
 		if (mEta.getSession().getToken() != null) {
 			setHeader(HEADER_X_TOKEN, mEta.getSession().getToken());
-			String sha256 = Utilities.generateSHA256(mEta.getApiSecret() + mEta.getSession().getToken());
+			String sha256 = Tools.generateSHA256(mEta.getApiSecret() + mEta.getSession().getToken());
 			setHeader(HEADER_X_SIGNATURE, sha256);
 		}
 		
@@ -639,7 +639,7 @@ public class Api implements Serializable {
 			CacheItem c = mEta.getCache().get(prefix + mId);
 			if (c != null) {
 				mCacheHit = true;
-				runOnUiThread(c.statuscode, c.item, null);
+				runOnUiThread(c.statuscode, c.object, null);
 			}
 			
 		}
@@ -730,7 +730,7 @@ public class Api implements Serializable {
 				break;
 				
 			default:
-				Utilities.logd(TAG, "Unknown RequestType: " + mRequestType.toString() + " - execution terminated, with no callback!");
+				Tools.logd(TAG, "Unknown RequestType: " + mRequestType.toString() + " - execution terminated, with no callback!");
 				return;
 			}
 			
@@ -783,7 +783,7 @@ public class Api implements Serializable {
 		// Further processing based on 
 		
 		// now process the result
-		if (Utilities.isSuccess(mStatusCode)) {
+		if (Tools.isSuccess(mStatusCode)) {
 			if (!mCacheHit || mMultipleCallbacks) {
 				convertCacheReturn(mStatusCode,mData);
 			}
@@ -906,7 +906,7 @@ public class Api implements Serializable {
 			.append("Type[").append(mRequestType.toString()).append("], ")
 			.append("Headers[").append(mHeaders.toString()).append("], ");
 			
-			Utilities.logd(TAG, sb.toString());
+			Tools.logd(TAG, sb.toString());
 		}
 		
 	}
@@ -924,7 +924,7 @@ public class Api implements Serializable {
 				
 			sb.append("], ")
 			.append("Object[").append( mData.length() < 100 ? mData : mData.substring(0, 99) ).append("], ");
-			Utilities.logd(TAG, sb.toString());
+			Tools.logd(TAG, sb.toString());
 	    	
 	    }
 	    

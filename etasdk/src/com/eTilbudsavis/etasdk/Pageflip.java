@@ -24,8 +24,8 @@ import android.webkit.WebViewClient;
 
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
-import com.eTilbudsavis.etasdk.Tools.Endpoint;
-import com.eTilbudsavis.etasdk.Tools.Utilities;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Tools;
 
 @SuppressLint("SetJavaScriptEnabled")
 public final class Pageflip extends WebView {
@@ -217,7 +217,7 @@ public final class Pageflip extends WebView {
 		
 		@Override
 		public boolean onJsAlert(WebView view, String url, String message, final android.webkit.JsResult result) {
-			Utilities.logd(TAG, "JsAlert: " + message);
+			Tools.logd(TAG, "JsAlert: " + message);
 			new AlertDialog.Builder(mEta.getContext())  
             .setTitle("JavaScript Alert")  
             .setMessage(message)  
@@ -242,7 +242,7 @@ public final class Pageflip extends WebView {
 		mEta = eta;
 		mListener = Listener;
 		mCatalogId = CatalogId;
-		mUuid = Utilities.createUUID();
+		mUuid = Tools.createUUID();
 
 		mEta.addPageflip(this);
 		
@@ -255,15 +255,15 @@ public final class Pageflip extends WebView {
 //		}
 		
 		// Check if it's necessary to update the HTML (it's time consuming to download HTML).
-		String cache = mEta.getCache().getPageflipHtml(mUuid);
+		String cache = mEta.getCache().getHtml(mUuid);
 		
 		if (cache == null ) {
 			
 			Api.CallbackString cb = new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
-					if (Utilities.isSuccess(statusCode)) {
-						mEta.getCache().setPageflipHtml(data, mUuid);
+					if (Tools.isSuccess(statusCode)) {
+						mEta.getCache().putHtml(mUuid, data, statusCode);
 						loadDataWithBaseURL(null, data, "text/html", "utf-8", null);
 					} else {
 						loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
@@ -362,7 +362,7 @@ public final class Pageflip extends WebView {
 	 */
 	private void injectJS(String option) {
 		String s = "javascript:(function() { " + option + "})()";
-		Utilities.logd(TAG, s);
+		Tools.logd(TAG, s);
 		loadUrl(s);
 	}
 	

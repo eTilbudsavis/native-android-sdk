@@ -3,7 +3,7 @@
  * @author			Morten Bo <morten@etilbudsavis.dk>
  * @version			0.0.1
  */
-package com.eTilbudsavis.etasdk.Tools;
+package com.eTilbudsavis.etasdk.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,7 +26,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import android.os.Environment;
 import android.util.Log;
 
-public final class Utilities {
+public final class Tools {
 	
 	/** A second in milliseconds */
 	public static final long SECOND_IN_MILLIS = 1000;

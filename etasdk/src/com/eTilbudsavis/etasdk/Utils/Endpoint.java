@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.Tools;
+package com.eTilbudsavis.etasdk.Utils;
 
 
 /**

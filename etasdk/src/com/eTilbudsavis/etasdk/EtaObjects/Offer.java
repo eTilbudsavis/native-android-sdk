@@ -13,9 +13,9 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Tools.Endpoint;
-import com.eTilbudsavis.etasdk.Tools.Params;
-import com.eTilbudsavis.etasdk.Tools.Sort;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Params;
+import com.eTilbudsavis.etasdk.Utils.Sort;
 
 public class Offer implements Serializable {
 	

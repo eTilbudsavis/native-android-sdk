@@ -15,7 +15,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Tools.Utilities;
+import com.eTilbudsavis.etasdk.Utils.Tools;
 
 public class Shoppinglist implements Serializable {
 	
@@ -60,7 +60,7 @@ public class Shoppinglist implements Serializable {
 	private int mState = STATE_INIT;
 	
 	private Shoppinglist() {
-		setId(Utilities.createUUID());
+		setId(Tools.createUUID());
 		setModified(System.currentTimeMillis());
 	}
 

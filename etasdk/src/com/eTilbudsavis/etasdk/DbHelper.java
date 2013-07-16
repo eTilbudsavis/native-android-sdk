@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
-import com.eTilbudsavis.etasdk.Tools.Utilities;
+import com.eTilbudsavis.etasdk.Utils.Tools;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -81,7 +81,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		Utilities.logd(TAG, "Upgrading database from version " + oldVersion + " to "
+		Tools.logd(TAG, "Upgrading database from version " + oldVersion + " to "
 				+ newVersion + ", which will destroy all old data");
 		db.execSQL("DROP TABLE IF EXISTS " + SL);
 		db.execSQL("DROP TABLE IF EXISTS " + SLI);

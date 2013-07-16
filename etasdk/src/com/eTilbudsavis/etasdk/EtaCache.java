@@ -1,7 +1,13 @@
 package com.eTilbudsavis.etasdk;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.regex.Pattern;
+
+import com.eTilbudsavis.etasdk.Utils.Tools;
 
 public class EtaCache implements Serializable {
 
@@ -9,29 +15,36 @@ public class EtaCache implements Serializable {
 
 	public static final String TAG = "EtaCache";
 	
-	private static final long ITEM_CACHE_TIME = 5*60*1000;
-	private static final long HTML_CACHE_TIME = 15*60*1000;
+	private static final long ITEM_CACHE_TIME = 15 * Tools.MINUTE_IN_MILLIS;
+	private static final long HTML_CACHE_TIME = 15 * Tools.MINUTE_IN_MILLIS;
+	private static final String HTML_REGEX = ".*\\<[^>]+>.*";
 	
-	private HashMap<String, CachePageflip> mPageflip = new HashMap<String, CachePageflip>();
-	private HashMap<String, CacheItem> mItems = new HashMap<String, EtaCache.CacheItem>();
-	
+	private Map<String, CacheItem> mItems = Collections.synchronizedMap(new WeakHashMap<String, EtaCache.CacheItem>());
+
 	public EtaCache() {
 	}
 
-	public void setPageflipHtml(String html, String uuid) {
+	public void putHtml(String uuid, String html, int statusCode) {
 		// Validate input.
-		if (html.matches(".*\\<[^>]+>.*")) {
-			mPageflip.put(uuid, new CachePageflip(html));
+		if (html.matches(HTML_REGEX)) {
+			put(uuid, html, statusCode);
 		}
 	}
 
-	public String getPageflipHtml(String uuid) {
-		CachePageflip cp = mPageflip.get(uuid);
-		return cp == null ? null : cp.time < System.currentTimeMillis() - HTML_CACHE_TIME ? cp.html : null;
+	public String getHtml(String uuid) {
+		CacheItem c = mItems.get(uuid);
+		String html = null;
+		if (c != null && c.time > (System.currentTimeMillis() - HTML_CACHE_TIME) ) {
+			html =  c.object.toString();
+			html = html.matches(HTML_REGEX) ? html : null;
+		}
+		return html;
 	}
 
 	public void put(String key, Object value, int statusCode) {
-		mItems.put(key, new CacheItem(value, statusCode));
+		if (Tools.isSuccess(statusCode)) {
+			mItems.put(key, new CacheItem(value, statusCode));
+		}
 	}
 	
 	public CacheItem get(String key) {
@@ -45,7 +58,6 @@ public class EtaCache implements Serializable {
 	}
 	
 	public void clear() {
-		mPageflip = new HashMap<String, EtaCache.CachePageflip>();
 		mItems = new HashMap<String, EtaCache.CacheItem>();
 	}
 	
@@ -53,25 +65,13 @@ public class EtaCache implements Serializable {
 		
 		public long time;
 		public int statuscode;
-		public Object item;
+		public Object object;
 		
 		public CacheItem(Object o, int statusCode) {
 			time = System.currentTimeMillis();
 			this.statuscode = statusCode;
-			item = o;
+			object = o;
 		}
-	}
-	
-	private class CachePageflip {
-		 
-		public String html;
-		public long time;
-		
-		public CachePageflip(String html) {
-			this.html = html;
-			this.time = System.currentTimeMillis();
-		}
-		
 	}
 	
 }
