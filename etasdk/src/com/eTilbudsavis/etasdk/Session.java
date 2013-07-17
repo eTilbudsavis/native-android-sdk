@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,7 +22,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Permission;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Tools;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Session implements Serializable {
 
@@ -52,25 +56,28 @@ public class Session implements Serializable {
 	private String mPassStr = null;
 	
 	private Eta mEta;
-	private boolean mIsUpdatingSession = false;
-	
+	private boolean mIsUpdating = false;
 	private ArrayList<SessionListener> mSubscribers = new ArrayList<Session.SessionListener>();
+	private List<Api> mQueue = Collections.synchronizedList(new ArrayList<Api>());
 	
-	private void sessionUpdate(int statusCode, String data, EtaError error) {
-
-		if (Tools.isSuccess(statusCode)) {
-			set(data);
-		} else {
-			Tools.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
-		}
-		mIsUpdatingSession = false;
-		notifySubscribers();
-	}
-	
-
 	public Session(Eta eta) {
+		
 		mEta = eta;
 		mUser = new User();
+		
+		// Try to get a session from SharedPreferences, and check if it's okay
+		// If it doesn't exist or is invalid then update it.
+		String sessionJson = mEta.getPrefs().getString(PREFS_SESSION, null);
+		mUserStr = mEta.getPrefs().getString(PREFS_SESSION_USER, null);
+		mPassStr = mEta.getPrefs().getString(PREFS_SESSION_PASS, null);
+		if (sessionJson == null) {
+			update();
+		} else {
+			set(sessionJson);
+			if (isExpired()) {
+				update();
+			} 
+		}
 	}
 	
 	public void set(String session) {
@@ -93,9 +100,18 @@ public class Session implements Serializable {
 		    mProvider = session.getString(S_PROVIDER);
 		    mJson = session;
 			saveJSON();
+
+			if (!mQueue.isEmpty()) {
+				for (Api a : mQueue) {
+					mQueue.remove(a);
+					a.execute();
+				}
+			}
+			
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		
 	}
 	
 	private void saveJSON() {
@@ -106,31 +122,6 @@ public class Session implements Serializable {
 		}.start();
 	}
 	
-	/**
-	 * This method will instantiate a new session.<br>
-	 * 
-	 * By letting users choose when to start a session, the user has a chance to
-	 * set a SessionListener before executing() any calls, thereby avoiding errors.
-	 */
-	public void start() {
-		// Try to get a session from SharedPreferences, and check if it's okay
-		// If it doesn't exist or is invalid then update it.
-		String sessionJson = mEta.getPrefs().getString(PREFS_SESSION, null);
-		mUserStr = mEta.getPrefs().getString(PREFS_SESSION_USER, null);
-		mPassStr = mEta.getPrefs().getString(PREFS_SESSION_PASS, null);
-		if (sessionJson == null) {
-			update();
-		} else {
-			set(sessionJson);
-			if (isExpired()) {
-				update();
-			} else {
-				notifySubscribers();
-			}
-
-		}
-	}
-
 	public void login(String user, String password, final CallbackString listener) {
 		// Save user and pass to preferences
 		mEta.getPrefs().edit().putString(PREFS_SESSION_USER, user).putString(PREFS_SESSION_PASS, password).commit();
@@ -142,16 +133,27 @@ public class Session implements Serializable {
 	public void forgotPassword(String email, final CallbackString listener) {
 		// TODO: Forgot password implementation
 	}
+
+	private void sessionUpdate(int statusCode, String data, EtaError error) {
+
+		if (Utils.isSuccess(statusCode)) {
+			set(data);
+		} else {
+			Utils.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
+		}
+		mIsUpdating = false;
+		notifySubscribers();
+	}
 	
-	public synchronized void update() {
+	public void update() {
 		update(null);
 	}
 	
 	private synchronized void update(final CallbackString listener) {
-		if (mIsUpdatingSession)
+		if (mIsUpdating)
 			return;
 		
-		mIsUpdatingSession = true;
+		mIsUpdating = true;
 		Bundle b = new Bundle();
 		if (mUserStr != null && mPassStr != null) {
 			b.putString(Params.EMAIL, mUserStr);
@@ -180,11 +182,11 @@ public class Session implements Serializable {
 	 * @return true if all arguments are valid, false otherwise
 	 */
 	public boolean createUser(String email, String password, String name, int birthYear, String gender, String successRedirect, String errorRedirect, final CallbackString listener) {
-		if ( !Tools.isEmailValid(email) || 
-				!Tools.isPasswordValid(password) || 
-				!Tools.isNameValid(name) || 
-				!Tools.isBirthyearValid(birthYear) || 
-				!Tools.isGenderValid(gender))
+		if ( !Utils.isEmailValid(email) || 
+				!Utils.isPasswordValid(password) || 
+				!Utils.isNameValid(name) || 
+				!Utils.isBirthyearValid(birthYear) || 
+				!Utils.isGenderValid(gender))
 			return false;
 		
 		Bundle b = new Bundle();
@@ -200,10 +202,10 @@ public class Session implements Serializable {
 
 			public void onComplete(int statusCode, String data, EtaError error) {
 				
-				if (Tools.isSuccess(statusCode)) {
-					Tools.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + data);
+				if (Utils.isSuccess(statusCode)) {
+					Utils.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + data);
 				} else {
-					Tools.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error);
+					Utils.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error);
 				}
 				if (listener != null) listener.onComplete(statusCode, data, error);
 			}
@@ -215,7 +217,11 @@ public class Session implements Serializable {
 	}
 	
 	public boolean isExpired() {
-		return mExpires < (System.currentTimeMillis() + Tools.MINUTE_IN_MILLIS);
+		return mExpires < (System.currentTimeMillis() + Utils.MINUTE_IN_MILLIS);
+	}
+
+	public void addToQueue(Api api) {
+		mQueue.add(api);
 	}
 	
 	/**
@@ -225,7 +231,7 @@ public class Session implements Serializable {
 	 */
 	public synchronized void update(String headerToken, String headerExpires) {
 		
-		if (mIsUpdatingSession)
+		if (mIsUpdating)
 			return;
 		
 		if (mJson == null) {
@@ -240,7 +246,7 @@ public class Session implements Serializable {
 				set(mJson);
 				return;
 			}
-			long expire = ( sdf.parse(headerExpires).getTime() - Tools.DAY_IN_MILLIS );
+			long expire = ( sdf.parse(headerExpires).getTime() - Utils.DAY_IN_MILLIS );
 			if ( expire < System.currentTimeMillis()) {
 				update();
 			}
@@ -256,7 +262,7 @@ public class Session implements Serializable {
 	 * A new {@link #login(String, String) login} is needed to get access to user stuff again.
 	 */
 	public synchronized void signout(final CallbackString listener) {
-		mIsUpdatingSession = true;
+		mIsUpdating = true;
 		clearUser();
 		Bundle b = new Bundle();
 		b.putString(Params.EMAIL, "");
@@ -406,5 +412,6 @@ public class Session implements Serializable {
 	public interface SessionListener {
 		public void onUpdate();
 	}
-
+	
+	
 }

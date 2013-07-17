@@ -16,7 +16,7 @@ import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Tools;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class EtaLocation extends Location {
 
@@ -125,6 +125,7 @@ public class EtaLocation extends Location {
 			mRadius = 700000;
 		else
 			mRadius = radius;
+		saveToSharedPrefs();
 		return this;
 	}
 
@@ -142,7 +143,7 @@ public class EtaLocation extends Location {
 		return this;
 	}
 	
-	public boolean getSensor() {
+	public boolean isSensor() {
 		return mSensor;
 	}
 
@@ -161,7 +162,7 @@ public class EtaLocation extends Location {
 		try {
 			o.put(LATITUDE, getLatitude());
 			o.put(LONGITUDE, getLongitude());
-			o.put(SENSOR, getSensor());
+			o.put(SENSOR, isSensor());
 			o.put(RADIUS, getRadius());
 		} catch (JSONException e) {
 			e.printStackTrace();

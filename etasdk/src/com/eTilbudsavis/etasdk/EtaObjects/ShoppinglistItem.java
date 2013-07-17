@@ -15,7 +15,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Utils.Tools;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializable {
 
@@ -60,12 +60,12 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 	private String mShoppinglistId = "";
 
 	public ShoppinglistItem() {
-		setId(Tools.createUUID());
+		setId(Utils.createUUID());
 		setModified(System.currentTimeMillis());
 	}
 
 	public ShoppinglistItem(Shoppinglist shoppinglist, String description) {
-		setId(Tools.createUUID());
+		setId(Utils.createUUID());
 		setModified(System.currentTimeMillis());
 		setDescription(description);
 	}

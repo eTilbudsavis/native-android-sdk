@@ -14,7 +14,7 @@ public class Pricing implements Serializable {
 	public static final String TAG = "Pricing";
 	
 	private static final String S_PRICE = "price";
-	private static final String S_PREPRICE = "preprice";
+	private static final String S_PREPRICE = "pre_price";
 	private static final String S_CURRENCY = "currency";
 	
 	private double mPrice = 0.0;

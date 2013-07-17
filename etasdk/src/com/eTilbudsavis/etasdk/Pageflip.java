@@ -25,7 +25,7 @@ import android.webkit.WebViewClient;
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Tools;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressLint("SetJavaScriptEnabled")
 public final class Pageflip extends WebView {
@@ -217,7 +217,7 @@ public final class Pageflip extends WebView {
 		
 		@Override
 		public boolean onJsAlert(WebView view, String url, String message, final android.webkit.JsResult result) {
-			Tools.logd(TAG, "JsAlert: " + message);
+			Utils.logd(TAG, "JsAlert: " + message);
 			new AlertDialog.Builder(mEta.getContext())  
             .setTitle("JavaScript Alert")  
             .setMessage(message)  
@@ -242,7 +242,7 @@ public final class Pageflip extends WebView {
 		mEta = eta;
 		mListener = Listener;
 		mCatalogId = CatalogId;
-		mUuid = Tools.createUUID();
+		mUuid = Utils.createUUID();
 
 		mEta.addPageflip(this);
 		
@@ -262,7 +262,7 @@ public final class Pageflip extends WebView {
 			Api.CallbackString cb = new Api.CallbackString() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
-					if (Tools.isSuccess(statusCode)) {
+					if (Utils.isSuccess(statusCode)) {
 						mEta.getCache().putHtml(mUuid, data, statusCode);
 						loadDataWithBaseURL(null, data, "text/html", "utf-8", null);
 					} else {
@@ -320,7 +320,7 @@ public final class Pageflip extends WebView {
 		try {
 			o.put(LOCATION_LAT, mEta.getLocation().getLatitude());
 			o.put(LOCATION_LNG, mEta.getLocation().getLongitude());
-			o.put(LOCATION_SENSOR, mEta.getLocation().getSensor());
+			o.put(LOCATION_SENSOR, mEta.getLocation().isSensor());
 			o.put(LOCATION_RADIUS, mEta.getLocation().getRadius());
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -362,7 +362,7 @@ public final class Pageflip extends WebView {
 	 */
 	private void injectJS(String option) {
 		String s = "javascript:(function() { " + option + "})()";
-		Tools.logd(TAG, s);
+		Utils.logd(TAG, s);
 		loadUrl(s);
 	}
 	

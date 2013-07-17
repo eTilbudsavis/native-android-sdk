@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 
-import com.eTilbudsavis.etasdk.Utils.Tools;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class EtaCache implements Serializable {
 
@@ -15,8 +15,8 @@ public class EtaCache implements Serializable {
 
 	public static final String TAG = "EtaCache";
 	
-	private static final long ITEM_CACHE_TIME = 15 * Tools.MINUTE_IN_MILLIS;
-	private static final long HTML_CACHE_TIME = 15 * Tools.MINUTE_IN_MILLIS;
+	private static final long ITEM_CACHE_TIME = 15 * Utils.MINUTE_IN_MILLIS;
+	private static final long HTML_CACHE_TIME = 15 * Utils.MINUTE_IN_MILLIS;
 	private static final String HTML_REGEX = ".*\\<[^>]+>.*";
 	
 	private Map<String, CacheItem> mItems = Collections.synchronizedMap(new WeakHashMap<String, EtaCache.CacheItem>());
@@ -42,7 +42,7 @@ public class EtaCache implements Serializable {
 	}
 
 	public void put(String key, Object value, int statusCode) {
-		if (Tools.isSuccess(statusCode)) {
+		if (Utils.isSuccess(statusCode)) {
 			mItems.put(key, new CacheItem(value, statusCode));
 		}
 	}

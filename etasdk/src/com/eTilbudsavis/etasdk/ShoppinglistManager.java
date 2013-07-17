@@ -16,7 +16,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Tools;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ShoppinglistManager {
 
@@ -157,7 +157,7 @@ public class ShoppinglistManager {
 		
 		// Make sure the UUID does not exist, before adding it
 		while (mDatabase.existsList(sl.getId())) {
-			sl.setId(Tools.createUUID());
+			sl.setId(Utils.createUUID());
 		};
 		
 		if (mustSync()) {
@@ -175,7 +175,7 @@ public class ShoppinglistManager {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
 //					Utilities.logd(TAG, "addList", statusCode, data, error);
-					if (Tools.isSuccess(statusCode)) {
+					if (Utils.isSuccess(statusCode)) {
 						Shoppinglist newSl = Shoppinglist.fromJSON(data);
 						newSl.setState(Shoppinglist.STATE_SYNCHRONIZED);
 						mDatabase.editList(newSl);
@@ -218,11 +218,11 @@ public class ShoppinglistManager {
 				public void onComplete(int statusCode, String data, EtaError error) {
 //					Utilities.logd(TAG, "editList", statusCode, data, error);
 					Shoppinglist s = sl;
-					if (Tools.isSuccess(statusCode)) {
+					if (Utils.isSuccess(statusCode)) {
 						s = Shoppinglist.fromJSON(data);
 						s.setState(Shoppinglist.STATE_SYNCHRONIZED);
 					} else {
-						Tools.logd(TAG, error.toString());
+						Utils.logd(TAG, error.toString());
 						s.setState(Shoppinglist.STATE_ERROR);
 					}
 					mDatabase.editList(s);
@@ -261,12 +261,12 @@ public class ShoppinglistManager {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
 //					Utilities.logd(TAG, "deleteList", statusCode, data, error);
-					if (Tools.isSuccess(statusCode)) {
+					if (Utils.isSuccess(statusCode)) {
 						mDatabase.deleteList(sl.getId());
 						mDatabase.deleteItems(sl.getId(), null);
 					} else {
 						// TODO: What state are we in here? Server knows?
-						Tools.logd(TAG, error.toString());
+						Utils.logd(TAG, error.toString());
 						sl.setState(Shoppinglist.STATE_ERROR);
 					}
 				}
@@ -334,13 +334,13 @@ public class ShoppinglistManager {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
 //					Utilities.logd(TAG, "addItem", statusCode, data, error);
-					if (Tools.isSuccess(statusCode)) {
+					if (Utils.isSuccess(statusCode)) {
 						ShoppinglistItem s = ShoppinglistItem.fromJSON(data, sl.getId());
 						s.setState(ShoppinglistItem.STATE_SYNCHRONIZED);
 						mDatabase.editItem(s);
 						notifyItemUpdate(s.getId());
 					} else {
-						Tools.logd(TAG, error.toString());
+						Utils.logd(TAG, error.toString());
 						sli.setState(ShoppinglistItem.STATE_ERROR);
 						mDatabase.editItem(sli);
 						notifyItemUpdate(sli.getId());
@@ -373,11 +373,11 @@ public class ShoppinglistManager {
 				public void onComplete(int statusCode, String data, EtaError error) {
 //					Utilities.logd(TAG, "editItem", statusCode, data, error);
 					ShoppinglistItem s = sli;
-					if (Tools.isSuccess(statusCode)) {
+					if (Utils.isSuccess(statusCode)) {
 						s = ShoppinglistItem.fromJSON(data, sli.getId());
 						s.setState(ShoppinglistItem.STATE_SYNCHRONIZED);
 					} else {
-						Tools.logd(TAG, error.toString());
+						Utils.logd(TAG, error.toString());
 						s.setState(ShoppinglistItem.STATE_ERROR);
 					}
 				}
@@ -443,11 +443,11 @@ public class ShoppinglistManager {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
 //					Utilities.logd(TAG, "deleteAllItems", statusCode, data, error);
-					if (Tools.isSuccess(statusCode)) {
+					if (Utils.isSuccess(statusCode)) {
 						mDatabase.deleteItems(sl.getId(), null);
 						sl.setState(Shoppinglist.STATE_SYNCHRONIZED);
 					} else {
-						Tools.logd(TAG, error.toString());
+						Utils.logd(TAG, error.toString());
 						sl.setState(Shoppinglist.STATE_ERROR);
 					}
 				}
@@ -504,11 +504,11 @@ public class ShoppinglistManager {
 
 //				Utilities.logd(TAG, "syncLists", statusCode, data, error);
 				
-				if (Tools.isSuccess(statusCode)) {
+				if (Utils.isSuccess(statusCode)) {
 					ArrayList<Shoppinglist> sl = Shoppinglist.fromJSONArray(data);
 					mergeLists(sl, getLists());
 				} else {
-					Tools.logd(TAG, error.toString());
+					Utils.logd(TAG, error.toString());
 				}
 				
 			}
@@ -593,14 +593,14 @@ public class ShoppinglistManager {
 
 //							Utilities.logd(TAG, "syncItems()", statusCode, data, error);
 							
-							if (Tools.isSuccess(statusCode)) {
+							if (Utils.isSuccess(statusCode)) {
 								// If callback says the list has been modified, then sync items
 								long oldModified = sl.getModified();
 								sl.setModifiedFromJSON(data);
 								if (oldModified < sl.getModified())
 									syncItems(sl);
 							} else {
-								Tools.logd(TAG, error.toString());
+								Utils.logd(TAG, error.toString());
 							}
 						}
 					};
@@ -630,12 +630,12 @@ public class ShoppinglistManager {
 				
 //				Utilities.logd(TAG, "syncItems(sl)", statusCode, data, error);
 				
-				if (Tools.isSuccess(statusCode)) {
+				if (Utils.isSuccess(statusCode)) {
 					mDatabase.deleteItems(sl.getId(), null);
 					mDatabase.addItems(ShoppinglistItem.fromJSONArray(data, sl.getId()));
 					sl.setState(Shoppinglist.STATE_SYNCHRONIZED);
 				} else {
-					Tools.logd(TAG, error.toString());
+					Utils.logd(TAG, error.toString());
 					sl.setState(Shoppinglist.STATE_ERROR);
 				}
 				mDatabase.editList(sl);
@@ -700,7 +700,7 @@ public class ShoppinglistManager {
 	private boolean mustSync() {
 
 		if (!mEta.getUser().isLoggedIn()) {
-			Tools.logd(TAG, "No user loggedin, cannot sync shoppinglists");
+			Utils.logd(TAG, "No user loggedin, cannot sync shoppinglists");
 			stopSync();
 			return false;
 		}

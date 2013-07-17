@@ -61,7 +61,7 @@ public class Eta implements Serializable {
 	private ShoppinglistManager mShoppinglistManager;
 	private static Handler mHandler = new Handler();
 	private ArrayList<Pageflip> mPageflips = new ArrayList<Pageflip>();
-	private ExecutorService mThreads = Executors.newFixedThreadPool(5);
+	private ExecutorService mThreads = Executors.newFixedThreadPool(10);
 	
 	/**
 	 * TODO: Write a long story about usage, this will basically be the documentation
