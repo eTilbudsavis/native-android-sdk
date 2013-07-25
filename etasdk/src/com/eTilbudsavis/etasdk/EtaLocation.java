@@ -5,14 +5,16 @@
 package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.http.NameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Utils.Params;
@@ -49,67 +51,51 @@ public class EtaLocation extends Location {
 	public static final String BOUND_WEST = Params.BOUND_WEST;
 
 	private static final String ADDRESS = "etasdk_loc_address";
-
 	private static final String TIME = "etasdk_loc_time";
+	private static final int RADIUS_MIN = 0;
+	private static final int RADIUS_MAX = 700000;
+	private static final double BOUND_DEFAULT = 0.0;
 	
 	// Location.
-	private int mRadius = 700000;
+	private int mRadius = RADIUS_MAX;
 	private boolean mSensor = false;
 	private String mAddress = "";
-	private double mBoundNorth = 0f;
-	private double mBoundEast = 0f;
-	private double mBoundSouth = 0f;
-	private double mBoundWest = 0f;
+	private double mBoundNorth = BOUND_DEFAULT;
+	private double mBoundEast = BOUND_DEFAULT;
+	private double mBoundSouth = BOUND_DEFAULT;
+	private double mBoundWest = BOUND_DEFAULT;
 	private SharedPreferences mSharedPrefs;
-	private ArrayList<LocationListener> mSubscribers = new ArrayList<EtaLocation.LocationListener>();
+	private ArrayList<LocationListener> mSubscribers;
 
 	public EtaLocation(SharedPreferences prefs) {
 		super(ETA_PROVIDER);
 		mSharedPrefs = prefs;
-		restoreFromSharedPrefs();
-	}
-
-	public Boolean isLocationSet() {
-		return (getLatitude() != 0.0 && getLongitude() != 0.0);
-	}
-
-	public Boolean isBoundsSet() {
-		return (mBoundNorth != 0f && mBoundSouth != 0f && mBoundEast != 0f && mBoundWest != 0f);
+		mSubscribers = new ArrayList<LocationListener>();
+		fromSharedPrefs();
 	}
 
 	@Override
 	public void set(Location l) {
 		super.set(l);
-		mAddress = "";
 		mSensor = (getProvider().equals(LocationManager.GPS_PROVIDER) || getProvider().equals(LocationManager.NETWORK_PROVIDER) );
-		saveToSharedPrefs();
+		toSharedPrefs();
 	}
 	
-	public EtaLocation set(Location l, boolean sensor) {
-		super.set(l);
-		return set("", getLatitude(), getLongitude(), sensor);
-	}
-
-	public EtaLocation set(double latitude, double longitude) {
-		return set("", latitude, longitude, false);
-	}
-
-	public EtaLocation set(double latitude, double longitude, boolean sensor) {
-		return set("", latitude, longitude, sensor);
-	}
-
+	/**
+	 * Set location for an address that has been geocoded to a latitude, longitude format<br /><br />
+	 * NOTE: This implicitly implies that, no {@link #setSensor(boolean) sensor} has been used.
+	 * @see https://developers.google.com/maps/documentation/geocoding/ for more info
+	 * 
+	 * @param address that has been geocoded
+	 * @param latitude of the address
+	 * @param longitude of the address
+	 * @return
+	 */
 	public EtaLocation set(String address, double latitude, double longitude) {
-		return set(address, latitude, longitude, false);
-	}
-	
-	private EtaLocation set(String address, double latitude, double longitude, boolean sensor) {
 		mAddress = address;
-		mSensor = sensor;
 		setLatitude(latitude);
 		setLongitude(longitude);
-		setTime(System.currentTimeMillis());
-		setProvider(ETA_PROVIDER);
-		saveToSharedPrefs();
+		toSharedPrefs();
 		return this;
 	}
 	
@@ -119,13 +105,8 @@ public class EtaLocation extends Location {
 	 * @return this Object, for easy chaining of set methods.
 	 */
 	public EtaLocation setRadius(int radius) {
-		if (radius < 0)
-			mRadius = 0;
-		else if (radius > 700000)
-			mRadius = 700000;
-		else
-			mRadius = radius;
-		saveToSharedPrefs();
+		mRadius =  radius < RADIUS_MIN ? RADIUS_MIN : ( radius > RADIUS_MAX ? RADIUS_MAX : radius );
+		toSharedPrefs();
 		return this;
 	}
 
@@ -139,7 +120,7 @@ public class EtaLocation extends Location {
 
 	public EtaLocation setSensor(boolean sensor) {
 		mSensor = sensor;
-		saveToSharedPrefs();
+		toSharedPrefs();
 		return this;
 	}
 	
@@ -147,16 +128,43 @@ public class EtaLocation extends Location {
 		return mSensor;
 	}
 
+	/**
+	 * Set an postal address of a location.<br /><br />
+	 * <b>NOTICE</b> The address is purely a convenience for the developers.<br />
+	 * The SDK does NOT USE the data for anything, only latitude, longitude, radius and sensor are used, and hence they must be set.
+	 * @param address
+	 * @return This EtaLocation object
+	 */
 	public EtaLocation setAddress(String address) {
 		mAddress = address;
-		saveToSharedPrefs();
+		toSharedPrefs();
 		return this;
 	}
+	
 	
 	public String getAddress() {
 		return mAddress;
 	}
 
+	public Boolean isSet() {
+		return (getLatitude() != 0.0 && getLongitude() != 0.0);
+	}
+
+	public Boolean isBoundsSet() {
+		return (mBoundNorth != BOUND_DEFAULT && 
+				mBoundSouth != BOUND_DEFAULT && 
+				mBoundEast != BOUND_DEFAULT && 
+				mBoundWest != BOUND_DEFAULT);
+	}
+
+	/**
+	 * Returns a JSONObject, with mapped values for, what is needed for an API request:
+	 * <li>Latitude
+	 * <li>Longitude
+	 * <li>Sensor
+	 * <li>Radius
+	 * @return The mapped JSONObject
+	 */
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
@@ -170,7 +178,7 @@ public class EtaLocation extends Location {
 		return o;
 	}
 
-	public int distance(Store store) {
+	public int distanceToStore(Store store) {
 		Location tmp = new Location(EtaLocation.ETA_PROVIDER);
 		tmp.setLatitude(store.getLatitude());
 		tmp.setLongitude(store.getLongitude());
@@ -188,20 +196,20 @@ public class EtaLocation extends Location {
 	 */
 	public void setBounds(double boundNorth, double boundEast,
 			double boundSouth, double boundWest) {
-		setBoundEast(boundEast);
-		setBoundNorth(boundNorth);
-		setBoundSouth(boundSouth);
-		setBoundWest(boundWest);
-		saveToSharedPrefs();
+		mBoundEast = boundEast;
+		mBoundNorth = boundNorth;
+		mBoundSouth = boundSouth;
+		mBoundWest = boundWest;
+		toSharedPrefs();
 	}
-	
+
 	/**
 	 * GPS coordinate for the northern bound of a search.
 	 * @param boundsNorth
 	 */
 	public EtaLocation setBoundNorth(double boundNorth) {
 		mBoundNorth = boundNorth;
-		saveToSharedPrefs();
+		toSharedPrefs();
 		return this;
 	}
 
@@ -211,7 +219,7 @@ public class EtaLocation extends Location {
 	 */
 	public EtaLocation setBoundEast(double boundEast) {
 		mBoundEast = boundEast;
-		saveToSharedPrefs();
+		toSharedPrefs();
 		return this;
 	}
 
@@ -221,7 +229,7 @@ public class EtaLocation extends Location {
 	 */
 	public EtaLocation setBoundSouth(double boundSouth) {
 		mBoundSouth = boundSouth;
-		saveToSharedPrefs();
+		toSharedPrefs();
 		return this;
 	}
 
@@ -231,7 +239,7 @@ public class EtaLocation extends Location {
 	 */
 	public EtaLocation setBoundWest(double boundWest) {
 		mBoundWest = boundWest;
-		saveToSharedPrefs();
+		toSharedPrefs();
 		return this;
 	}
 	
@@ -250,35 +258,55 @@ public class EtaLocation extends Location {
 	public double getBoundWest() {
 		return mBoundWest;
 	}
-
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		savedInstanceState.putBoolean(SENSOR, mSensor);
-		savedInstanceState.putInt(RADIUS, mRadius);
-		savedInstanceState.putDouble(LATITUDE, getLatitude());
-		savedInstanceState.putDouble(LONGITUDE, getLongitude());
-		savedInstanceState.putDouble(BOUND_EAST, mBoundEast);
-		savedInstanceState.putDouble(BOUND_WEST, mBoundWest);
-		savedInstanceState.putDouble(BOUND_NORTH, mBoundNorth);
-		savedInstanceState.putDouble(BOUND_SOUTH, mBoundSouth);
-		savedInstanceState.putString(ADDRESS, mAddress);
-		savedInstanceState.putLong(TIME, getTime());
-
-	}
 	
-	public void onRestoreInstanceState(Bundle savedInstanceState) {
-		setSensor(savedInstanceState.getBoolean(SENSOR));
-		setRadius(savedInstanceState.getInt(RADIUS));
-		setLatitude(savedInstanceState.getDouble(LATITUDE));
-		setLongitude(savedInstanceState.getDouble(LONGITUDE));
-		setBoundEast(savedInstanceState.getDouble(BOUND_EAST));
-		setBoundWest(savedInstanceState.getDouble(BOUND_WEST));
-		setBoundNorth(savedInstanceState.getDouble(BOUND_NORTH));
-		setBoundSouth(savedInstanceState.getDouble(BOUND_SOUTH));
-		setAddress(savedInstanceState.getString(ADDRESS));
-		setTime(savedInstanceState.getLong(TIME));
+	public List<NameValuePair> getQuery() {
+		
+		List<NameValuePair> query = new ArrayList<NameValuePair>();
+		
+		query.add(Utils.getNameValuePair(LATITUDE, getLatitude()));
+		query.add(Utils.getNameValuePair(LONGITUDE, getLongitude()));
+		query.add(Utils.getNameValuePair(SENSOR, isSensor()));
+		query.add(Utils.getNameValuePair(RADIUS, getRadius()));
+
+		// Determine whether to include bounds.
+		if (isBoundsSet()) {
+			query.add(Utils.getNameValuePair(BOUND_EAST, getBoundEast()));
+			query.add(Utils.getNameValuePair(BOUND_NORTH, getBoundNorth()));
+			query.add(Utils.getNameValuePair(BOUND_SOUTH, getBoundSouth()));
+			query.add(Utils.getNameValuePair(BOUND_WEST, getBoundWest()));
+		}
+		return query;
 	}
 
-	private void saveToSharedPrefs() {
+//	public void onSaveInstanceState(Bundle savedInstanceState) {
+//		savedInstanceState.putBoolean(SENSOR, mSensor);
+//		savedInstanceState.putInt(RADIUS, mRadius);
+//		savedInstanceState.putDouble(LATITUDE, getLatitude());
+//		savedInstanceState.putDouble(LONGITUDE, getLongitude());
+//		savedInstanceState.putDouble(BOUND_EAST, mBoundEast);
+//		savedInstanceState.putDouble(BOUND_WEST, mBoundWest);
+//		savedInstanceState.putDouble(BOUND_NORTH, mBoundNorth);
+//		savedInstanceState.putDouble(BOUND_SOUTH, mBoundSouth);
+//		savedInstanceState.putString(ADDRESS, mAddress);
+//		savedInstanceState.putLong(TIME, getTime());
+//
+//	}
+//	
+//	public void onRestoreInstanceState(Bundle savedInstanceState) {
+//		mSensor = savedInstanceState.getBoolean(SENSOR);
+//		mRadius = savedInstanceState.getInt(RADIUS);
+//		setLatitude(savedInstanceState.getDouble(LATITUDE));
+//		setLongitude(savedInstanceState.getDouble(LONGITUDE));
+//		mBoundEast = savedInstanceState.getDouble(BOUND_EAST);
+//		mBoundWest = savedInstanceState.getDouble(BOUND_WEST);
+//		mBoundNorth = savedInstanceState.getDouble(BOUND_NORTH);
+//		mBoundSouth = savedInstanceState.getDouble(BOUND_SOUTH);
+//		mAddress = savedInstanceState.getString(ADDRESS);
+//		setTime(savedInstanceState.getLong(TIME));
+//	}
+	
+	private void toSharedPrefs() {
+		setTime(System.currentTimeMillis());
 		new Thread() {
 	        public void run() {
 	        	mSharedPrefs.edit()
@@ -295,30 +323,30 @@ public class EtaLocation extends Location {
 	    		.commit();
 	        }
 		}.start();
+		
 	}
 	
-	private boolean restoreFromSharedPrefs() {
+	private boolean fromSharedPrefs() {
 		if (mSharedPrefs.contains(SENSOR) && mSharedPrefs.contains(RADIUS) && mSharedPrefs.contains(LATITUDE) && 
 				mSharedPrefs.contains(LONGITUDE) && mSharedPrefs.contains(BOUND_EAST) && mSharedPrefs.contains(BOUND_WEST) && 
 				mSharedPrefs.contains(BOUND_NORTH) && mSharedPrefs.contains(BOUND_SOUTH) && mSharedPrefs.contains(TIME) ) {
 			
-			setSensor(mSharedPrefs.getBoolean(SENSOR, false));
-			setRadius(mSharedPrefs.getInt(RADIUS, Integer.MAX_VALUE));
+			mSensor = mSharedPrefs.getBoolean(SENSOR, false);
+			mRadius = mSharedPrefs.getInt(RADIUS, Integer.MAX_VALUE);
 			setLatitude(mSharedPrefs.getFloat(LATITUDE, 0f));
 			setLongitude(mSharedPrefs.getFloat(LONGITUDE, 0f));
-			setBoundEast(mSharedPrefs.getFloat(BOUND_EAST, 0f));
-			setBoundWest(mSharedPrefs.getFloat(BOUND_WEST, 0f));
-			setBoundNorth(mSharedPrefs.getFloat(BOUND_NORTH, 0f));
-			setBoundSouth(mSharedPrefs.getFloat(BOUND_SOUTH, 0f));
-			setAddress(mSharedPrefs.getString(ADDRESS, null));
+			mBoundEast = mSharedPrefs.getFloat(BOUND_EAST, 0f);
+			mBoundWest = mSharedPrefs.getFloat(BOUND_WEST, 0f);
+			mBoundNorth = mSharedPrefs.getFloat(BOUND_NORTH, 0f);
+			mBoundSouth = mSharedPrefs.getFloat(BOUND_SOUTH, 0f);
+			mAddress = mSharedPrefs.getString(ADDRESS, null);
 			setTime(mSharedPrefs.getLong(TIME, System.currentTimeMillis()));
 			return true;
-		} else {
-			return false;
-		}
+		} 
+		return false;
 		
 	}
-
+	
 	/**
 	 * Invoke notifications to subscribers of this location object.<br><br>
 	 * This object automatically notifies all subscribers on changes.

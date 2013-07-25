@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.Helpers;
 
 import java.io.Serializable;
 import java.util.ArrayList;

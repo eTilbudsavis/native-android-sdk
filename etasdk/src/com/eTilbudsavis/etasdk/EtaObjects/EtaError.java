@@ -11,12 +11,15 @@ import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class EtaError implements Serializable {
+public class EtaError  implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "EtaError";
 
+	public static final int SDK_ERROR_UNKNOWN = 0;
+	public static final int SDK_ERROR_MISMATCH = 1;
+	
 	private static final String S_ID = "id";
 	private static final String S_CODE = "code";
 	private static final String S_MESSAGE = "message";
@@ -33,17 +36,7 @@ public class EtaError implements Serializable {
 	private long mTime = 0L;
 	
 	public EtaError() {
-		
-	}
-	
-	public static EtaError fromJSON(String error) {
-		EtaError er = new EtaError();
-		try {
-			er = fromJSON(er, new JSONObject(error));
-		} catch (JSONException e) {
-			er.setOriginalData(error);
-		}
-		return er;
+		mTime = System.currentTimeMillis();
 	}
 	
 	public static EtaError fromJSON(JSONObject error) {
@@ -59,7 +52,6 @@ public class EtaError implements Serializable {
 			er.setCode(error.getInt(S_CODE));
 			er.setMessage(error.getString(S_MESSAGE));
 			er.setDetails(error.getString(S_DETAILS));
-			er.setTime(System.currentTimeMillis());
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();
@@ -85,24 +77,29 @@ public class EtaError implements Serializable {
 		return o;
 	}
 	
-	public void setId(String id) {
+	public EtaError setId(String id) {
 		mId = id;
+		return this;
 	}
 
-	public void setCode(int code) {
+	public EtaError setCode(int code) {
 		mCode = code;
+		return this;
 	}
 
-	public void setMessage(String message) {
+	public EtaError setMessage(String message) {
 		mMessage = message;
+		return this;
 	}
 
-	public void setDetails(String details) {
+	public EtaError setDetails(String details) {
 		mDetails = details;
+		return this;
 	}
 
-	public void setTime(long time) {
+	public EtaError setTime(long time) {
 		mTime = time;
+		return this;
 	}
 
 	public String getId() {
@@ -137,7 +134,7 @@ public class EtaError implements Serializable {
 	public String getTimeString() {
 		return sdf.format(new Date(mTime));
 	}
-
+	
 	/**
 	 * Gives a detailed description of this object.<br>
 	 * E.g.: <code>{ id: 123xyz, code: 123xyz, message: the message, details: the details, time: 1369211987830 }</code> 

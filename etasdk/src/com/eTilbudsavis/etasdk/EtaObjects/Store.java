@@ -8,12 +8,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Branding;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Country;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 
 
-public class Store implements Serializable {
+public class Store extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -77,18 +79,8 @@ public class Store implements Serializable {
 	public Store() {
 	}
 
-	public static ArrayList<Store> fromJSONArray(String stores) {
-		ArrayList<Store> list = new ArrayList<Store>();
-		try {
-			list = fromJSONArray(new JSONArray(stores));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-		return list;
-	}
-	
-	public static ArrayList<Store> fromJSONArray(JSONArray stores) {
+	@SuppressWarnings("unchecked")
+	public static ArrayList<Store> fromJSON(JSONArray stores) {
 		ArrayList<Store> list = new ArrayList<Store>();
 		try {
 			for (int i = 0 ; i < stores.length() ; i++ )
@@ -101,22 +93,12 @@ public class Store implements Serializable {
 		return list;
 	}
 	
-	public static Store fromJSON(String store) {
-		Store s = new Store();
-		try {
-			s = fromJSON(s, new JSONObject(store));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-		return s;
-	}
-	
+	@SuppressWarnings("unchecked")
 	public static Store fromJSON(JSONObject store) {
 		return fromJSON(new Store(), store);
 	}
 	
-	public static Store fromJSON(Store s, JSONObject store) {
+	private static Store fromJSON(Store s, JSONObject store) {
 		if (s == null) s = new Store();
 		if (store == null) return s;
 		

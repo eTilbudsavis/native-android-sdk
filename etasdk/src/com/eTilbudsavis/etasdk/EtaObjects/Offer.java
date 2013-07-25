@@ -13,11 +13,15 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Images;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Links;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Pricing;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Quantity;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 
-public class Offer implements Serializable {
+public class Offer extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -119,22 +123,38 @@ public class Offer implements Serializable {
 		
 	}
 
-	public static ArrayList<Offer> fromJSONArray(String offers) {
-		ArrayList<Offer> list = new ArrayList<Offer>();
+	public Offer(JSONObject offer) {
 		try {
-			list = fromJSONArray(new JSONArray(offers));
+			setId(offer.getString(S_ID));
+			setErn(offer.getString(S_ERN));
+			setHeading(offer.getString(S_HEADING));
+			setDescription(offer.getString(S_DESCRIPTION));
+			setCatalogPage(offer.getInt(S_CATALOG_PAGE));
+			setPricing(Pricing.fromJSON(offer.getJSONObject(S_PRICING)));
+			setQuantity(Quantity.fromJSON(offer.getJSONObject(S_QUANTITY)));
+			setImages(Images.fromJSON(offer.getJSONObject(S_IMAGES)));
+			setLinks(Links.fromJSON(offer.getJSONObject(S_LINKS)));
+			setRunFrom(offer.getString(S_RUN_FROM));
+			setRunTill(offer.getString(S_RUN_TILL));
+			setPublish(offer.getString(S_PUBLISH));
+			setDealerUrl(offer.getString(S_DEALER_URL));
+			setDealerId(offer.getString(S_DEALER_ID));
+			setStoreUrl(offer.getString(S_STORE_URL));
+			setStoreId(offer.getString(S_STORE_ID));
+			setCatalogUrl(offer.getString(S_CATALOG_URL));
+			setCatalogId(offer.getString(S_CATALOG_ID));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
-		return list;
 	}
 	
-	public static ArrayList<Offer> fromJSONArray(JSONArray offers) {
+	@SuppressWarnings("unchecked")
+	public static ArrayList<Offer> fromJSON(JSONArray offers) {
 		ArrayList<Offer> list = new ArrayList<Offer>();
 		try {
 			for (int i = 0 ; i < offers.length() ; i++ )
-				list.add(Offer.fromJSON((JSONObject)offers.get(i)));
+				list.add(new Offer((JSONObject)offers.get(i)));
 			
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
@@ -143,17 +163,7 @@ public class Offer implements Serializable {
 		return list;
 	}
 	
-	public static Offer fromJSON(String offer) {
-		Offer o = new Offer();
-		try {
-			o = fromJSON(o, new JSONObject(offer));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-		return o;
-	}
-	
+	@SuppressWarnings("unchecked")
 	public static Offer fromJSON(JSONObject offer) {
 		return fromJSON(new Offer(), offer);
 	}
@@ -161,7 +171,7 @@ public class Offer implements Serializable {
 	private static Offer fromJSON(Offer o, JSONObject offer) {
 		if (o == null) o = new Offer();
 		if (offer == null) return o;
-		
+
 		try {
 			o.setId(offer.getString(S_ID));
 			o.setErn(offer.getString(S_ERN));
@@ -188,36 +198,37 @@ public class Offer implements Serializable {
 		return o;
 	}
 	
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
 
-	public static JSONObject toJSON(Offer o) {
-		JSONObject ob = new JSONObject();
+	public static JSONObject toJSON(Offer offer) {
+		JSONObject o = new JSONObject();
 		try {
-			ob.put(S_ID, o.getId());
-			ob.put(S_ERN, o.getErn());
-			ob.put(S_HEADING, o.getHeading());
-			ob.put(S_DESCRIPTION, o.getDescription());
-			ob.put(S_CATALOG_PAGE, o.getCatalogPage());
-			ob.put(S_PRICING, o.getPricing() == null ? null : o.getPricing().toJSON());
-			ob.put(S_QUANTITY, o.getQuantity() == null ? null : o.getQuantity().toJSON());
-			ob.put(S_IMAGES, o.getImages() == null ? null : o.getImages().toJSON());
-			ob.put(S_LINKS, o.getLinks() == null ? null : o.getLinks().toJSON());
-			ob.put(S_RUN_FROM, o.getRunFromString());
-			ob.put(S_RUN_TILL, o.getRunTillString());
-			ob.put(S_PUBLISH, o.getPublish());
-			ob.put(S_DEALER_URL, o.getDealerUrl());
-			ob.put(S_DEALER_ID, o.getDealerId());
-			ob.put(S_STORE_URL, o.getStoreUrl());
-			ob.put(S_STORE_ID, o.getStoreId());
-			ob.put(S_CATALOG_URL, o.getCatalogUrl());
-			ob.put(S_CATALOG_PAGE, o.getCatalogId());
+			o.put(S_ID, offer.getId());
+			o.put(S_ERN, offer.getErn());
+			o.put(S_HEADING, offer.getHeading());
+			o.put(S_DESCRIPTION, offer.getDescription());
+			o.put(S_CATALOG_PAGE, offer.getCatalogPage());
+			o.put(S_PRICING, offer.getPricing() == null ? null : offer.getPricing().toJSON());
+			o.put(S_QUANTITY, offer.getQuantity() == null ? null : offer.getQuantity().toJSON());
+			o.put(S_IMAGES, offer.getImages() == null ? null : offer.getImages().toJSON());
+			o.put(S_LINKS, offer.getLinks() == null ? null : offer.getLinks().toJSON());
+			o.put(S_RUN_FROM, offer.getRunFromString());
+			o.put(S_RUN_TILL, offer.getRunTillString());
+			o.put(S_PUBLISH, offer.getPublish());
+			o.put(S_DEALER_URL, offer.getDealerUrl());
+			o.put(S_DEALER_ID, offer.getDealerId());
+			o.put(S_STORE_URL, offer.getStoreUrl());
+			o.put(S_STORE_ID, offer.getStoreId());
+			o.put(S_CATALOG_URL, offer.getCatalogUrl());
+			o.put(S_CATALOG_PAGE, offer.getCatalogId());
 			
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		return ob;
+		return o;
 	}
 	
 	public String getId() {

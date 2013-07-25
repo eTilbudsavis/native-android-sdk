@@ -1,17 +1,24 @@
 /**
- * @fileoverview	API.
+ * <p>
+ * This class represents the base for building requests to the API.
+ * The class has the 4 basic methods for initializing requests in an convenient
+ * way, these corresponds to the HTTP request types:</p>
+ * <ul>
+ * 	<li> {@link #get get} for getting information to server
+ * </ul>
+ * 
  * @author			Danny Hvam <danny@etilbudsavis.dk>
  */
 package com.eTilbudsavis.etasdk;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -19,13 +26,11 @@ import javax.net.ssl.HttpsURLConnection;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -38,25 +43,23 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.os.Bundle;
 import android.text.TextUtils;
 
-import com.eTilbudsavis.etasdk.EtaCache.CacheItem;
+import com.eTilbudsavis.etasdk.Api.RequestType;
 import com.eTilbudsavis.etasdk.Session.SessionListener;
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
-import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.EtaObjects.Store;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.ResponseWrapper;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Api implements Serializable {
-	
 	private static final long serialVersionUID = 1L;
 	
 	public static final String TAG = "Api";
@@ -81,51 +84,53 @@ public class Api implements Serializable {
 	public static final int DEFAULT_LIMIT = Params.DEFAULT_LIMIT;
 	
 	/**
-	 * Expected return type. Default is JSON.<br><br>
-	 * <i>Other types are not implemented yet.</i><br>
-	 * TODO: Complete implementation
+	 * Expected return type.<br />
+	 * <i>API v2 currently only serves JSON</i><br>
 	 */
 	public enum AcceptType {
-		XML		{ public String toString() { return "application/xml, text/xml"; } },
-		CSV		{ public String toString() { return "application/csv"; } },
+//		XML		{ public String toString() { return "application/xml, text/xml"; } },
+//		CSV		{ public String toString() { return "application/csv"; } },
 		JSON	{ public String toString() { return "application/json"; } }
 	}
 	
-	/**
-	 * Type of HTTP request.<br><br>
-	 * <i>OPTIONS and HEAD are not implemented yet.</i><br>
+	/** Type of HTTP request.<br />
+	 * <i>OPTIONS and HEAD are not implemented yet.</i>
 	 */
 	public enum RequestType {
-		POST, GET, PUT, DELETE, OPTIONS, HEAD
+		POST, 
+		GET, 
+		PUT, 
+		DELETE, 
+		OPTIONS, 
+		HEAD
 	}
 	
 	/**
-	 * Content-Type used in request. Default is URLENCODED<br><br>
-	 * <i>Other types are not implemented yet.</i><br>
-	 * TODO: Complete implementation
+	 * Content-Type used in request.<br/>
+	 * <i>Other types are not implemented yet.</i>
 	 */
 	public enum ContentType {
-		JSON			{ public String toString() { return "application/json; charset=utf-8"; } },
-		URLENCODED	{ public String toString() { return "application/x-www-form-urlencoded; charset=utf-8"; } },
-		FORMDATA		{ public String toString() { return "multipart/form-data; charset=utf-8"; } }
+//		JSON			{ public String toString() { return "application/json; charset=utf-8"; } },
+		URLENCODED		{ public String toString() { return "application/x-www-form-urlencoded; charset=utf-8"; } },
+//		FORMDATA		{ public String toString() { return "multipart/form-data; charset=utf-8"; } }
 	}
 
+	private enum ListenerType { ITEM, LIST, OBJECT, ARRAY, STRING }
+	
 	private Eta mEta;
 	
 	private static final int CONNECTION_TIME_OUT = 10000;
 	
-	private Callback mListener = null;
+	private ApiListener<?> mListener = null;
 	
-	private String mUrl = null;
+	private String mPath = null;
+	private URI mUri = null;
 	private Bundle mApiParams = null;
 	private RequestType mRequestType = null;
 	private ContentType mContentType = null;
 	private List<NameValuePair> mQuery;
 	private List<Header> mHeaders;
 
-	private HttpResponse mResponse = null;
-	private int mStatusCode = -1;
-	private String mData = "";
 	
 	private String mId = null;
 	private boolean mSessionRefreshCall = false;
@@ -159,12 +164,30 @@ public class Api implements Serializable {
 		return mApiParams.getString(Sort.ORDER_BY);
 	}
 
+	public Api setOffset(int offset) {
+		mApiParams.putInt(Params.OFFSET, offset);
+		return this;
+	}
+	
+	public int getOffset() {
+		return mApiParams.getInt(Params.OFFSET);
+	}
+
+	public Api setLimit(int limit) {
+		mApiParams.putInt(Params.LIMIT, limit);
+		return this;
+	}
+	
+	public int getLimit() {
+		return mApiParams.getInt(Params.LIMIT);
+	}
+	
 	/**
 	 * Sets a list of id's to filter result by.
 	 * @param id's to filter by
 	 * @return this object
 	 */
-	public Api setCatalogIds(List<String> ids) {
+	public Api setCatalogIds(Set<String> ids) {
 		applyFilter(Params.FILTER_CATALOG_IDS, ids);
 		return this;
 	}
@@ -173,7 +196,7 @@ public class Api implements Serializable {
 	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
 	 * @return a list if id's
 	 */
-	public List<String> getCatalogIds() {
+	public Set<String> getCatalogIds() {
 		return getFilter(Params.FILTER_CATALOG_IDS);
 	}
 
@@ -182,7 +205,7 @@ public class Api implements Serializable {
 	 * @param id's to filter by
 	 * @return this object
 	 */
-	public Api setDealerIds(List<String> ids) {
+	public Api setDealerIds(Set<String> ids) {
 		applyFilter(Params.FILTER_DEALER_IDS, ids);
 		return this;
 	}
@@ -191,7 +214,7 @@ public class Api implements Serializable {
 	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
 	 * @return a list if id's
 	 */
-	public List<String> getDealerIds() {
+	public Set<String> getDealerIds() {
 		return getFilter(Params.FILTER_DEALER_IDS);
 	}
 
@@ -200,7 +223,7 @@ public class Api implements Serializable {
 	 * @param id's to filter by
 	 * @return this object
 	 */
-	public Api setStoreIds(List<String> ids) {
+	public Api setStoreIds(Set<String> ids) {
 		applyFilter(Params.FILTER_STORE_IDS, ids);
 		return this;
 	}
@@ -209,7 +232,7 @@ public class Api implements Serializable {
 	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
 	 * @return a list if id's
 	 */
-	public List<String> getStoreIds() {
+	public Set<String> getStoreIds() {
 		return getFilter(Params.FILTER_STORE_IDS);
 	}
 
@@ -218,7 +241,7 @@ public class Api implements Serializable {
 	 * @param id's to filter by
 	 * @return this object
 	 */
-	public Api setOfferIds(List<String> ids) {
+	public Api setOfferIds(Set<String> ids) {
 		applyFilter(Params.FILTER_OFFER_IDS, ids);
 		return this;
 	}
@@ -227,7 +250,7 @@ public class Api implements Serializable {
 	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
 	 * @return a list if id's
 	 */
-	public List<String> getOfferIds() {
+	public Set<String> getOfferIds() {
 		return getFilter(Params.FILTER_OFFER_IDS);
 	}
 
@@ -236,7 +259,7 @@ public class Api implements Serializable {
 	 * @param ids to filter by
 	 * @return this object
 	 */
-	public Api setAreaIds(List<String> ids) {
+	public Api setAreaIds(Set<String> ids) {
 		applyFilter(Params.FILTER_AREA_IDS, ids);
 		return this;
 	}
@@ -245,7 +268,7 @@ public class Api implements Serializable {
 	 * Returns a list of id's that this {@link com.eTilbudsavis.etasdk.Api Api} will filter results by.
 	 * @return a list if id's
 	 */
-	public List<String> getAreaIds() {
+	public Set<String> getAreaIds() {
 		return getFilter(Params.FILTER_AREA_IDS);
 	}
 	
@@ -257,9 +280,9 @@ public class Api implements Serializable {
 	 * @param	ids to filter by
 	 * @return	this object
 	 */
-	public Api applyFilter(String filterName, List<String> ids) {
-		String tmp = TextUtils.join(",",ids);
-		mApiParams.putString(filterName, tmp);
+	public Api applyFilter(String filterName, Set<String> ids) {
+		String idList = TextUtils.join(",",ids);
+		mApiParams.putString(filterName, idList);
 		return this;
 	}
 	
@@ -273,9 +296,9 @@ public class Api implements Serializable {
 	 * @param	filterName 
 	 * @return	a list if id's
 	 */
-	public List<String> getFilter(String filterName) {
+	public Set<String> getFilter(String filterName) {
 		String tmp = mApiParams.getString(filterName);
-		List<String> list = new ArrayList<String>();
+		Set<String> list = new HashSet<String>();
 		Collections.addAll(list, TextUtils.split(tmp, ","));
 		return list;
 	}
@@ -329,19 +352,14 @@ public class Api implements Serializable {
 	}
 
 	public String getUrl() {
-		return mUrl;
+		return mPath;
 	}
 
-	public Api setUrl(String url) {
-		mUrl = url;
-		return this;
-	}
-
-	public Callback<?> getListener() {
+	public ApiListener<?> getListener() {
 		return mListener;
 	}
 
-	public Api setListener(CallbackString listener) {
+	public Api setListener(ApiListener<?> listener) {
 		mListener = listener;
 		return this;
 	}
@@ -439,7 +457,7 @@ public class Api implements Serializable {
 	}
 
 	/**
-	 * Tells whether the current {@link com.etilbudsavis.etasdk.API Api()} is printing debug information
+	 * Has this {@link com.etilbudsavis.etasdk.API Api()} been cancelled
 	 */
 	public synchronized boolean isCanceled() {
 		return mCanceled;
@@ -455,42 +473,43 @@ public class Api implements Serializable {
 		mEta = eta;
 	}
 
-	public Api search(String url, Callback<?> listener, String query) {
-		if (!url.matches(Endpoint.SEARCH))
+	public Api search(String url, ListListener<?> listener, String query) {
+		if (!url.contains(Endpoint.Path.SEARCH))
 			Utils.logd(TAG, "url does not match a search endpoint, don't expect anything good...");
 		
 		Bundle apiParams = new Bundle();
 		apiParams.putString(Params.QUERY, query);
 		return request(url, listener, apiParams, RequestType.GET, ContentType.URLENCODED, null);
 	}
-
-	public Api get(String url, Callback<?> listener) {
+	
+	public Api get(String url, ApiListener<?> listener) {
 		return request(url, listener, null, RequestType.GET, ContentType.URLENCODED, null);
 	}
 
-	public Api get(String url, Callback<?> listener, Bundle apiParams) {
+	public Api get(String url, ApiListener<?> listener, Bundle apiParams) {
 		return request(url, listener, apiParams, RequestType.GET, ContentType.URLENCODED, null);
 	}
 
-	public Api post(String url, Callback<?> listener, Bundle apiParams) {
+	public Api post(String url, ApiListener<?> listener, Bundle apiParams) {
 		return request(url, listener, apiParams, RequestType.POST, ContentType.URLENCODED, null);
 	}
 
-	public Api delete(String url, Callback<?> listener, Bundle apiParams) {
+	public Api delete(String url, ApiListener<?> listener, Bundle apiParams) {
 		return request(url, listener, apiParams, RequestType.DELETE, ContentType.URLENCODED, null);
 	}
 
-	public Api put(String url, Callback<?> listener, Bundle apiParams) {
+	public Api put(String url, ApiListener<?> listener, Bundle apiParams) {
 		return request(url, listener, apiParams, RequestType.PUT, ContentType.URLENCODED, null);
 	}
 	
-	public Api request(String url, Callback<?> listener, Bundle apiParams, RequestType requestType, ContentType contentType, List<Header> headers) {
-		if (url == null || listener == null || requestType == null ) {
+	public Api request(String url, ApiListener<?> listener, Bundle apiParams, RequestType requestType, ContentType contentType, List<Header> headers) {
+		if (url == null || 
+			listener == null || 
+			requestType == null ) {
 			Utils.logd(TAG, "Api parameters error: url, callback interface and requestType must not be null");
 			return null;
 		}
-		
-		mUrl = url;
+		mPath = url;
 		mListener = listener;
 		mApiParams = apiParams == null ? new Bundle() : apiParams;
 		mRequestType = requestType;
@@ -509,30 +528,45 @@ public class Api implements Serializable {
 	 * {@link #execute() execute()} will try to get a valid session and then instantiate HttpHelper, here after the previous call is continued.
 	 */
 	public Api execute() {
-
+		
 		// Check if all variables needed are okay
-		if (mUrl == null || mListener == null || mApiParams == null || mRequestType == null || mHeaders == null) {
+		if (
+				mPath == null ||
+				mListener == null || 
+				mApiParams == null || 
+				mRequestType == null || 
+				mHeaders == null) {
+			
 			Utils.logd(TAG, "A request() must be made before execute()");
 			return null;
 		}
+		
+		// Append HOST if needed
+		if (!mPath.matches("^http.*")) {
+			mPath = Endpoint.HOST + mPath;
+		}
+		
+		mUri = URI.create(mPath);
 
 		if (mId != null) {
-			if (Endpoint.isItemEndpoint(mUrl)) {
-				mUrl = mUrl + mId;
+			if (Endpoint.isItemEndpoint(mUri.getPath())) {
+				mUri = URI.create(mPath + mId);
 			} else {
 				Utils.logd(TAG, "Id does not match a single id endpoint, continuing without id");
 			}
 		}
 		
+		// TODO Check endpoint against listener, and
+
 		// Is Session okay? If not, check if it's a session call? If not try to make a session before continuing
-		if (mEta.getSession().isExpired() && !mUrl.matches(Endpoint.SESSION)) {
+		if (mEta.getSession().isExpired() && !mUri.getPath().matches(Endpoint.SESSIONS)) {
 				mEta.getSession().addToQueue(Api.this);
 				mEta.getSession().update();
 		} else {
 			runThread();
 		}
-		
-		return Api.this;
+
+		return this;
 	}
 	
 	private void runThread() {
@@ -541,69 +575,35 @@ public class Api implements Serializable {
 			
 			public void run() {
 
-				if (terminate()) return; 
-				prepareQuery();
+				prepQuery();
+				checkCache();
+				execHttp();
 
-				if (terminate()) return; 
-				printDebugPreExecute();
-
-				if (terminate()) return; 
-				performHttpCall();
-
-				if (terminate()) return; 
-				printDebugPostExecute();
-
-				if (terminate()) return; 
-				processResult();
-				
 			}
 		});
 	}
 	
-	private boolean terminate() {
-		
-		if (isCanceled()) { 
-			Utils.logd(TAG, "Task canceled, terminating execution"); 
-			return true;
-		}
-		return false;
-	}
-
-	private void prepareQuery() {
+	private void prepQuery() {
 
 		// Prepare data.
 		mQuery = new ArrayList<NameValuePair>();
-
-		// Add optional data.
-		if (!mApiParams.isEmpty()) {
-			Iterator<String> iterator = mApiParams.keySet().iterator();
-			while (iterator.hasNext()) {
-				String s = iterator.next();
-				Utils.putNameValuePair(mQuery, s, mApiParams.get(s));
-			}
-		}
 		
 		// Required API key.
-		Utils.putNameValuePair(mQuery, API_KEY, mEta.getApiKey());
+		mQuery.add(Utils.getNameValuePair(API_KEY, mEta.getApiKey()));
 
-		if (mUseLocation && mEta.getLocation().isLocationSet()) {
-
-			EtaLocation l = mEta.getLocation();
-			Utils.putNameValuePair(mQuery, EtaLocation.LATITUDE, l.getLatitude());
-			Utils.putNameValuePair(mQuery, EtaLocation.LONGITUDE, l.getLongitude());
-			Utils.putNameValuePair(mQuery, EtaLocation.SENSOR, l.isSensor());
-			Utils.putNameValuePair(mQuery, EtaLocation.RADIUS, l.getRadius());
-
-			// Determine whether to include bounds.
-			if (mEta.getLocation().isBoundsSet()) {
-				Utils.putNameValuePair(mQuery, EtaLocation.BOUND_EAST, l.getBoundEast());
-				Utils.putNameValuePair(mQuery, EtaLocation.BOUND_NORTH, l.getBoundNorth());
-				Utils.putNameValuePair(mQuery, EtaLocation.BOUND_SOUTH, l.getBoundSouth());
-				Utils.putNameValuePair(mQuery, EtaLocation.BOUND_WEST, l.getBoundWest());
-			}
-				
+		// Add location
+		if (mUseLocation && mEta.getLocation().isSet()) {
+			mQuery.addAll(mEta.getLocation().getQuery());
 		}
+
+		// Add optional data.
+		mQuery.addAll(Utils.bundleToNVP(mApiParams));
 		
+		try {
+			mUri = new URI(mUri.getScheme(), mUri.getAuthority(), mUri.getPath(), Utils.formatQuery(mQuery, HTTP.UTF_8), mUri.getFragment());
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
 
 		// Set headers if session is OK
 		if (mEta.getSession().getToken() != null) {
@@ -614,26 +614,43 @@ public class Api implements Serializable {
 		
 		setHeader(HEADER_CONTENT_TYPE, mContentType.toString());
 		
-
-		// TODO: Check cache before executing the httpHepler
-		if (mUseCache && mRequestType == RequestType.GET && mId != null) {
-			String prefix = mUrl.contains(Endpoint.CATALOG_ID) ? "ern:catalog:" :
-				mUrl.contains(Endpoint.DEALER_ID) ? "ern:dealer:" :
-					mUrl.contains(Endpoint.STORE_ID) ? "ern:store:" : 
-						mUrl.contains(Endpoint.OFFER_ID) ? "ern:offer:" : "";
-			
-			CacheItem c = mEta.getCache().get(prefix + mId);
-			if (c != null) {
-				mCacheHit = true;
-				runOnUiThread(c.statuscode, c.object, null);
-			}
-			
-		}
+	}
+	
+	private void checkCache() {
+		
+		if (!mUseCache && mRequestType != RequestType.GET)
+			return;
+		
+		/**
+		 * TODO: Better implementation of cache check:
+		 * 
+		 * - Split on "/"
+		 * - check if last element is in Endpoint.ItemName.CATALOG (+others)
+		 * - if not check if second last is in it. 
+		 * - if one of the above is true, then 
+		 * 
+		 * If it's a list endpoint , then check if it has any _ids e.g.: Params.FILTER_CATALOG_IDS
+		 * 
+		 */
+		
+//		String prefix = mPath.contains(Endpoint.CATALOG_ID) ? "ern:catalog:" :
+//			mPath.contains(Endpoint.DEALER_ID) ? "ern:dealer:" :
+//				mPath.contains(Endpoint.STORE_ID) ? "ern:store:" : 
+//					mPath.contains(Endpoint.OFFER_ID) ? "ern:offer:" : "";
+//		
+//		CacheItem c = mEta.getCache().get(prefix + mId);
+//		if (c != null) {
+//			mCacheHit = true;
+//			runOnUiThread(c.statuscode, c.object, null);
+//		}
 		
 	}
 	
-	private void performHttpCall() {
-
+	private void execHttp() {
+		
+		printDebugPreExecute();
+		Utils.logd(TAG, mUri.toString());
+		
 		// Start the interwebs work stuff
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		
@@ -657,83 +674,75 @@ public class Api implements Serializable {
 		
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 		// End SSL Certificates hack
-
-		String tmpUrl;
+		
+		HttpRequestBase request;
+		HttpResponse httpResponse = null;
+		ResponseWrapper respWrapper = null;
 		try {
 			
 			// Execute the correct request type
 			switch (mRequestType) {
-			case POST:
-				
-				HttpPost post = new HttpPost(mUrl);
-				if (mQuery.size() > 0)
-					post.setEntity(new UrlEncodedFormEntity(mQuery, HTTP.UTF_8));
-
-				for (Header h : mHeaders)
-					post.setHeader(h);
-				
-				mResponse = httpClient.execute(post);
-				break;
-
-			case GET:
-				
-				tmpUrl = mUrl;
-				if (mQuery.size() > 0)
-					tmpUrl += "?" + URLEncodedUtils.format(mQuery, HTTP.UTF_8);
-
-				HttpGet get = new HttpGet(tmpUrl);
-				
-				for (Header h : mHeaders)
-					get.setHeader(h);
-				
-				mResponse = httpClient.execute(get);
-				break;
-
-			case PUT:
-				
-				HttpPut put = new HttpPut(mUrl);
-				if (mQuery.size() > 0)
-					put.setEntity(new UrlEncodedFormEntity(mQuery, HTTP.UTF_8));
-				
-				for (Header h : mHeaders)
-					put.setHeader(h);
-				
-				mResponse = httpClient.execute(put);
-				break;
-
-			case DELETE:
-
-				tmpUrl = mUrl;
-				if (mQuery.size() > 0)
-					tmpUrl += "?" + URLEncodedUtils.format(mQuery, HTTP.UTF_8);
-
-				HttpDelete del = new HttpDelete(tmpUrl);
-				
-				for (Header h : mHeaders)
-					del.setHeader(h);
-				
-				mResponse = httpClient.execute(del);
-				break;
+			case POST: request = new HttpPost(mUri); break;
+			case GET: request = new HttpGet(mUri); break;
+			case PUT: request = new HttpPut(mUri); break;
+			case DELETE: request = new HttpDelete(mUri); break;
 				
 			default:
-				Utils.logd(TAG, "Unknown RequestType: " + mRequestType.toString() + " - execution terminated, with no callback!");
+				Utils.logd(TAG, "Unknown RequestType: " + mRequestType.toString() + " - Aborting!");
 				return;
 			}
+
+			for (Header h : mHeaders)
+				request.setHeader(h);
+
+			httpResponse = httpClient.execute(request);
+			int statusCode = httpResponse.getStatusLine().getStatusCode();
+			String data = EntityUtils.toString(httpResponse.getEntity(), HTTP.UTF_8);
+			respWrapper = new ResponseWrapper(statusCode, data);
 			
-			mStatusCode = mResponse.getStatusLine().getStatusCode();
-		    mData = EntityUtils.toString(mResponse.getEntity(), HTTP.UTF_8);
-			updateSessionInfo(mResponse.getAllHeaders());
+			updateSessionInfo(httpResponse.getAllHeaders());
 			
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			// Close connection, to deallocate resources
 			httpClient.getConnectionManager().shutdown();
 		}
+		
+		
+		if (respWrapper == null) {
+			
+		}
+		
+		printDebugPostExecute(httpResponse, respWrapper.getString());
+		
+		if (Utils.isSuccess(respWrapper.getStatusCode())) {
+			
+			mEta.getCache().put(respWrapper);
+			
+			if (!mCacheHit || mMultipleCallbacks)
+				convert(respWrapper);
+		
+		// Error, try to get new session token, then do request again.
+		} else {
+			
+			EtaError error = EtaError.fromJSON(respWrapper.getJSONObject());
+			
+			if ( !mSessionRefreshCall && ( (error.getCode() == 1108 || error.getCode() == 1101) ) ) {
+				mSessionRefreshCall = true;
+				mEta.getSession().subscribe(new SessionListener() {
+					
+					public void onUpdate() {
+						mEta.getSession().unSubscribe(this);
+						runThread();
+					}
+				}).update();
+			} else {
+				error.setOriginalData(respWrapper.getString());
+				runOnUiThread(respWrapper.getStatusCode(), null, error);
+			}
+		}
+		
 		
 	}
 
@@ -760,209 +769,158 @@ public class Api implements Serializable {
 	    mEta.getSession().update(token, expire);
 	}
 
-	private void processResult() {
-		
-		// TODO: Check endpoint, and convert to JSONObject or JSONArray
-		
-		// Cache all cache able items
-		
-		// Further processing based on 
-		
-		// now process the result
-		if (Utils.isSuccess(mStatusCode)) {
-			if (!mCacheHit || mMultipleCallbacks) {
-				convertCacheReturn(mStatusCode,mData);
-			}
-		
-		// Error, try to get new session token, then do request again.
-		} else {
-			EtaError error = EtaError.fromJSON(mData);
-			if ( !mSessionRefreshCall && ( (error.getCode() == 1108 || error.getCode() == 1101) ) ) {
-				mSessionRefreshCall = true;
-				mEta.getSession().subscribe(new SessionListener() {
-					
-					public void onUpdate() {
-						mEta.getSession().unSubscribe(this);
-						runThread();
-					}
-				}).update();
-			} else {
-				runOnUiThread(mStatusCode, null, error);
-			}
-		}
-		
-	}
-	
-	private void convertCacheReturn(int statusCode, String data) {
-		
-		EtaError er = null;
-		if (mListener instanceof Api.CallbackCatalogList) {
-			ArrayList<Catalog> cs = Catalog.fromJSONArray(data);
-			er = cs.size() > 0 ? null : (EtaError.fromJSON(data));
-			runOnUiThread(statusCode, cs, er);
-			return;
-			
-		} else if  (mListener instanceof Api.CallbackOfferList) {
-			ArrayList<Offer> os = Offer.fromJSONArray(data);
-			er = os.size() > 0 ? null : (EtaError.fromJSON(data));
-			runOnUiThread(statusCode, os, er);
-			return;
-			
-		} else if  (mListener instanceof Api.CallbackOffer) {
-			Offer o = Offer.fromJSON(data);
-			if (o.getId() == null) {
-				er = EtaError.fromJSON(data);
-			} else {
-				mEta.getCache().put(o.getErn(), o, statusCode);
-			}
-			runOnUiThread(statusCode, o, er);
-			return;
-			
-		} else if  (mListener instanceof Api.CallbackCatalog) {
-			Catalog c = Catalog.fromJSON(data.toString());
-			if (c.getId() == null) {
-				er = EtaError.fromJSON(data);
-			} else {
-				mEta.getCache().put(c.getErn(), c, statusCode);
-			}
-			runOnUiThread(statusCode, c, er);
-			return;
-			
-		} else if  (mListener instanceof Api.CallbackDealerList) {
-			ArrayList<Dealer> ds = Dealer.fromJSONArray(data);
-			er = ds.size() > 0 ? null : (EtaError.fromJSON(data));
-			runOnUiThread(statusCode, ds, er);
-			return;
-			
-		} else if  (mListener instanceof Api.CallbackStoreList) {
-			ArrayList<Store> ss = Store.fromJSONArray(data);
-			er = ss.size() > 0 ? null : (EtaError.fromJSON(data));
-			runOnUiThread(statusCode, ss, er);
-			return;
-
-		} else if  (mListener instanceof Api.CallbackDealer) {
-			Dealer d = Dealer.fromJSON(data);
-			if (d.getId() == null) {
-				er = EtaError.fromJSON(data);
-			} else {
-				mEta.getCache().put(d.getErn(), d, statusCode);
-			}
-			runOnUiThread(statusCode, d, er);
-			return;
-			
-		} else if  (mListener instanceof Api.CallbackStore) {
-			Store s = Store.fromJSON(data);
-			if (s.getId() == null) {
-				er = EtaError.fromJSON(data);
-			} else {
-				mEta.getCache().put(s.getErn(), s, statusCode);
-			}
-			runOnUiThread(statusCode, s, er);
-			return;
-			
-		} else if (mListener instanceof Api.CallbackString) {
-			runOnUiThread(mStatusCode, data, er);
-			return;	
-		}
-		
-	}
-	
-	private void runOnUiThread(final int statusCode,final Object data,final EtaError error) {
-		mEta.getHandler().post(new Runnable() {
-			
-			@SuppressWarnings("unchecked")
-			public void run() {
-				if (!isCanceled())
-					mListener.onComplete(statusCode, data, error);
-			}
-		});
-	}
-
 	private void printDebugPreExecute() {
 
 		if (mPrintDebug) {
-			StringBuilder sb = new StringBuilder();
-			sb.append("*** Pre Execute: ").append(getClass().getSimpleName()).append("@").append(Integer.toHexString(hashCode())).append(" : ")
-			.append("Url[").append(mUrl).append("], ")
-			.append("Query[");
-			for (NameValuePair nvp : mQuery)
-				sb.append(nvp.getName()).append(": ").append(nvp.getValue()).append(", ");
-				
-			sb.append("], ")
-			.append("Type[").append(mRequestType.toString()).append("], ")
-			.append("Headers[").append(mHeaders.toString()).append("], ");
-			
-			Utils.logd(TAG, sb.toString());
+			Utils.logd(TAG, "*** Pre Execute - " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
+			Utils.logd(TAG, "Url: " + mUri.toString());
+			Utils.logd(TAG, "Type: " + mRequestType.toString());
+			Utils.logd(TAG, "Headers: " + mHeaders.toString());
 		}
 		
 	}
 	
-	private void printDebugPostExecute() {
+	private void printDebugPostExecute(HttpResponse httpResponse, String resp) {
 
 	    if (mPrintDebug) {
+			Utils.logd(TAG, "*** Post Execute - " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
+			Utils.logd(TAG, "StatusCode: " + httpResponse.getStatusLine().getStatusCode());
+			Utils.logd(TAG, "Type: " + mRequestType.toString());
 
-			StringBuilder sb = new StringBuilder();
-			sb.append("*** Post Execute: ").append(getClass().getSimpleName()).append("@").append(Integer.toHexString(hashCode())).append(" : ")
-			.append("StatusCode[").append(mStatusCode).append("], ")
-			.append("Headers[");
-			for (Header h : mResponse.getAllHeaders())
-				sb.append(h.getName()).append(": ").append(h.getValue()).append(", ");
-				
-			sb.append("], ")
-			.append("Object[").append( mData.length() < 100 ? mData : mData.substring(0, 99) ).append("], ");
-			Utils.logd(TAG, sb.toString());
-	    	
+			StringBuilder headers = new StringBuilder();
+			for (Header h : httpResponse.getAllHeaders())
+				headers.append(h.getName()).append(": ").append(h.getValue()).append(", ");
+			Utils.logd(TAG, "Headers: " + headers.toString());
+
+			Utils.logd(TAG, "Object: " + (resp.length() < 200 ? resp : resp.substring(0, 199)));
 	    }
 	    
 	}
 	
-	public static interface Callback<T> {
-		public void onComplete(int statusCode, T data, EtaError error);
+	private void convert(ResponseWrapper resp) {
+
+		EtaError er = null;
+		
+		switch (getListenerType(mListener)) {
+		
+		case ITEM: 
+			EtaObject object = EtaObject.fromJSON(resp.getJSONObject());
+			if (object == null) {
+				er = new EtaError();
+				er.setCode(EtaError.SDK_ERROR_MISMATCH).setMessage("").setOriginalData(resp.getString());
+			}
+			runOnUiThread(resp.getStatusCode(), object, er);
+			break;
+			
+		case LIST:
+			ArrayList<EtaObject> objects = EtaObject.fromJSON(resp.getJSONArray());
+			if (objects.size() == 0) {
+				er = new EtaError();
+				er.setOriginalData(resp.getString());
+			}
+			runOnUiThread(resp.getStatusCode(), objects, er);
+			break;
+
+		case OBJECT:
+			runOnUiThread(resp.getStatusCode(), resp.getJSONObject(), er);
+			break;
+
+		case ARRAY:
+			runOnUiThread(resp.getStatusCode(), resp.getJSONArray(), er);
+			break;
+
+		case STRING:
+			runOnUiThread(resp.getStatusCode(), resp.getString(), er);
+			break;
+			
+		default:
+			
+			break;
+		}
 	}
 	
-    /** Standard callback interface for API requests */
-    public static interface CallbackString extends Callback<String>{
-		public void onComplete(int statusCode, String data, EtaError error);
+	private void runOnUiThread(final int statusCode,final Object data,final EtaError error) {
+		
+		Runnable r = new Runnable() {
+			
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			public void run() {
+
+				if (!isCanceled()) {
+
+					switch (getListenerType(mListener)) {
+					case ITEM:
+						((ItemListener)mListener).onComplete(statusCode, (EtaObject)data, error);
+						break;
+
+					case LIST: 
+						((ListListener)mListener).onComplete(statusCode, (ArrayList<EtaObject>)data, error); 
+						break;
+
+					case OBJECT:
+						((JsonArrayListener)mListener).onComplete(statusCode, (JSONArray)data, error);
+						break;
+
+					case ARRAY:
+						((JsonObjectListener)mListener).onComplete(statusCode, (JSONObject)data, error);
+						break;
+
+					case STRING:
+						((StringListener)mListener).onComplete(statusCode, (String)data, error);
+						break;
+
+					default:
+						throw new IllegalArgumentException("Invalid interface: " + mListener.getClass().getName());
+					}
+					
+				}
+			}
+		};
+		
+		mEta.getHandler().post(r);
+	}
+
+	private ListenerType getListenerType(ApiListener<?> listener) {
+
+		if (mListener instanceof ItemListener<?>)
+			return ListenerType.ITEM;
+
+		if (mListener instanceof ListListener<?>)
+			return ListenerType.LIST;
+
+		if (mListener instanceof JsonObjectListener)
+			return ListenerType.OBJECT;
+
+		if (mListener instanceof JsonArrayListener)
+			return ListenerType.ARRAY;
+
+		if (mListener instanceof StringListener)
+			return ListenerType.STRING;
+		
+		return null;
+		
+	}
+	
+	public interface ApiListener<T> { }
+
+	public interface ItemListener<T extends EtaObject> extends ApiListener<T> {
+		public void onComplete(int statusCode, T item, EtaError error);
+	}
+
+	public interface ListListener<T extends EtaObject> extends ApiListener<List<T>> {
+		public void onComplete(int statusCode, List<T> list, EtaError error);
+	}
+
+    public interface JsonObjectListener extends ApiListener<JSONObject> {
+		public void onComplete(int statusCode, JSONObject item, EtaError error);
     }
 
-    /** Callback interface for a list of catalogs*/
-    public static interface CallbackCatalogList extends Callback<List<Catalog>> {
-    	public void onComplete(int statusCode, List<Catalog> catalogs, EtaError error);
+    public interface JsonArrayListener extends ApiListener<JSONArray> {
+		public void onComplete(int statusCode, JSONArray list, EtaError error);
     }
 
-    /** Callback interface for a list of offers */
-    public static interface CallbackOfferList extends Callback<List<Offer>> {
-        public void onComplete(int statusCode, List<Offer> offers, EtaError error);
+    public interface StringListener extends ApiListener<String> {
+		public void onComplete(int statusCode, String string, EtaError error);
     }
 
-    /** Callback interface for a list of dealers */
-    public static interface CallbackDealerList extends Callback<List<Dealer>> {
-        public void onComplete(int statusCode, List<Dealer> dealers, EtaError error);
-    }
-
-    /** Callback interface for a list of stores */
-    public static interface CallbackStoreList extends Callback<List<Store>> {
-        public void onComplete(int statusCode, List<Store> stores, EtaError error);
-    }
-
-    /** Callback interface for a single catalog */
-    public static interface CallbackCatalog extends Callback<Catalog> {
-        public void onComplete(int statusCode, Catalog catalog, EtaError error);
-    }
-
-    /** Callback interface for a single offer */
-    public static interface CallbackOffer extends Callback<Offer> {
-        public void onComplete(int statusCode, Offer offer, EtaError error);
-    }
-
-    /** Callback interface for a single dealer */
-    public static interface CallbackDealer extends Callback<Dealer> {
-        public void onComplete(int statusCode, Dealer dealer, EtaError error);
-    }
-
-    /** Callback interface for a single store */
-    public static interface CallbackStore extends Callback<Store> {
-        public void onComplete(int statusCode, Store store, EtaError error);
-    }
-    
 }

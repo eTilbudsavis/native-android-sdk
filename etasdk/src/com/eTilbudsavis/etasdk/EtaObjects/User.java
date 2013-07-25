@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Permission;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 
@@ -196,7 +197,7 @@ public class User implements Serializable {
 	}
 
 	public String getFacebookEndpoint() {
-		return Endpoint.getFacebookEndpoint(mId);
+		return Endpoint.getFacebookByUserId(mId);
 	}
 	
 	public void subscribe(UserStatusListener statusListener) {

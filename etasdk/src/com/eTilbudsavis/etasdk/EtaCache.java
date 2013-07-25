@@ -7,6 +7,13 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.ResponseWrapper;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class EtaCache implements Serializable {
@@ -27,7 +34,7 @@ public class EtaCache implements Serializable {
 	public void putHtml(String uuid, String html, int statusCode) {
 		// Validate input.
 		if (html.matches(HTML_REGEX)) {
-			put(uuid, html, statusCode);
+			mItems.put(uuid, new CacheItem(html, statusCode));
 		}
 	}
 
@@ -41,9 +48,40 @@ public class EtaCache implements Serializable {
 		return html;
 	}
 
-	public void put(String key, Object value, int statusCode) {
-		if (Utils.isSuccess(statusCode)) {
-			mItems.put(key, new CacheItem(value, statusCode));
+	public void put(ResponseWrapper response) {
+		if (Utils.isSuccess(response.getStatusCode())) {
+			if (response.isJSONArray()) {
+				put(response.getStatusCode(), response.getJSONArray());
+			} else if (response.isJSONObject()) {
+				put(response.getStatusCode(), response.getJSONObject());
+			}
+		}
+	}
+	
+	public void put(int statusCode, JSONArray objects) {
+
+		try {
+		if (objects != null && objects.length()>0) {
+				JSONObject o = objects.getJSONObject(0);
+				if (o.has("ern")) {
+					for (int i = 0; i < objects.length() ; i++) {
+						put(statusCode, objects.getJSONObject(i));
+					}
+				}
+			} 
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public void put(int statucCode, JSONObject object) {
+		if (object != null && object.has("ern")) {
+			try {
+				mItems.put(object.getString("ern"), new CacheItem(object, statucCode));
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

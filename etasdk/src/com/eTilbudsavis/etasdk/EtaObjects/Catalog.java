@@ -13,11 +13,16 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Branding;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Dimension;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Images;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Pages;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Catalog  implements Serializable {
+public class Catalog extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -92,24 +97,6 @@ public class Catalog  implements Serializable {
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
 
-	private static final String S_ID = "id";
-	private static final String S_ERN = "ern";
-	private static final String S_LABEL = "label";
-	private static final String S_BACKGROUND = "background";
-	private static final String S_RUN_FROM = "run_from";
-	private static final String S_RUN_TILL = "run_till";
-	private static final String S_PAGE_COUNT = "page_count";
-	private static final String S_OFFER_COUNT = "offer_count";
-	private static final String S_BRANDING = "branding";
-	private static final String S_DEALER_ID = "dealer_id";
-	private static final String S_DEALER_URL = "dealer_url";
-	private static final String S_STORE_ID = "store_id";
-	private static final String S_STORE_URL = "store_url";
-	private static final String S_DIMENSIONS = "dimensions";
-	private static final String S_IMAGES = "images";
-	private static final String S_PAGES = "pages";
-	private static final String P_PAGE = "page";
-	
 	// From JSON blob
 	private String mId;
 	private String mErn;
@@ -139,19 +126,9 @@ public class Catalog  implements Serializable {
 	public Catalog(Catalog c) {
 		set(c);
 	}
-
-	public static ArrayList<Catalog> fromJSONArray(String catalogs) {
-		ArrayList<Catalog> list = new ArrayList<Catalog>();
-		try {
-			list = fromJSONArray(new JSONArray(catalogs));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-		return list;
-	}
 	
-	public static ArrayList<Catalog> fromJSONArray(JSONArray catalogs) {
+	@SuppressWarnings("unchecked")
+	public static ArrayList<Catalog> fromJSON(JSONArray catalogs) {
 		ArrayList<Catalog> list = new ArrayList<Catalog>();
 		try {
 			for (int i = 0 ; i < catalogs.length() ; i++ )
@@ -164,28 +141,18 @@ public class Catalog  implements Serializable {
 		return list;
 	}
 	
-	public static Catalog fromJSON(String catalog) {
-		Catalog c = new Catalog();
-		try {
-			c = fromJSON(c, new JSONObject(catalog));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-		return c;
-	}
-
+	@SuppressWarnings("unchecked")
 	public static Catalog fromJSON(JSONObject catalog) {
 		return fromJSON(new Catalog(), catalog);
 	}
-	
+
 	private static Catalog fromJSON(Catalog c, JSONObject catalog) {
 		if(c == null)
 			c = new Catalog();
-		
+
 		if (catalog == null)
 			return c;
-		
+
 		if (catalog.has(S_STORE_ID) && catalog.has(S_OFFER_COUNT)) {
 			// if we have a full catalog
 			try {
@@ -221,7 +188,6 @@ public class Catalog  implements Serializable {
 		}
 		return c;
 	}
-	
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}

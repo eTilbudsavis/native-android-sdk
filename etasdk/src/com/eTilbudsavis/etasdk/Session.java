@@ -5,21 +5,18 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
-import android.location.GpsStatus.Listener;
 import android.os.Bundle;
 
-import com.eTilbudsavis.etasdk.Api.CallbackString;
+import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
-import com.eTilbudsavis.etasdk.EtaObjects.Permission;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Permission;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -41,7 +38,7 @@ public class Session implements Serializable {
 	public static final String PREFS_SESSION_PASS = "session_pass";
 
 	/** API v2 Session endpoint */
-	public static final String ENDPOINT = Endpoint.SESSION;
+	public static final String ENDPOINT = Endpoint.SESSIONS;
 	
 	@SuppressLint("SimpleDateFormat")
 	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
@@ -61,10 +58,12 @@ public class Session implements Serializable {
 	private List<Api> mQueue = Collections.synchronizedList(new ArrayList<Api>());
 	
 	public Session(Eta eta) {
-		
 		mEta = eta;
 		mUser = new User();
-		
+	}
+	
+	public void start() {
+
 		// Try to get a session from SharedPreferences, and check if it's okay
 		// If it doesn't exist or is invalid then update it.
 		String sessionJson = mEta.getPrefs().getString(PREFS_SESSION, null);
@@ -73,19 +72,17 @@ public class Session implements Serializable {
 		if (sessionJson == null) {
 			update();
 		} else {
-			set(sessionJson);
+			try {
+				set(new JSONObject(sessionJson));
+			} catch (JSONException e) {
+				if (Eta.DEBUG)
+					e.printStackTrace();
+			}
 			if (isExpired()) {
 				update();
 			} 
 		}
-	}
-	
-	public void set(String session) {
-		try {
-			set(new JSONObject(session));
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+
 	}
 	
 	public void set(JSONObject session) {
@@ -122,7 +119,7 @@ public class Session implements Serializable {
 		}.start();
 	}
 	
-	public void login(String user, String password, final CallbackString listener) {
+	public void login(String user, String password, final JsonObjectListener listener) {
 		// Save user and pass to preferences
 		mEta.getPrefs().edit().putString(PREFS_SESSION_USER, user).putString(PREFS_SESSION_PASS, password).commit();
 		mUserStr = user;
@@ -130,11 +127,11 @@ public class Session implements Serializable {
 		update(listener);
 	}
 	
-	public void forgotPassword(String email, final CallbackString listener) {
+	public void forgotPassword(String email, final JsonObjectListener listener) {
 		// TODO: Forgot password implementation
 	}
 
-	private void sessionUpdate(int statusCode, String data, EtaError error) {
+	private void sessionUpdate(int statusCode, JSONObject data, EtaError error) {
 
 		if (Utils.isSuccess(statusCode)) {
 			set(data);
@@ -149,7 +146,7 @@ public class Session implements Serializable {
 		update(null);
 	}
 	
-	private synchronized void update(final CallbackString listener) {
+	private synchronized void update(final JsonObjectListener listener) {
 		if (mIsUpdating)
 			return;
 		
@@ -159,13 +156,12 @@ public class Session implements Serializable {
 			b.putString(Params.EMAIL, mUserStr);
 			b.putString(Params.PASSWORD, mPassStr);
 		}
-		CallbackString session = new CallbackString() {
-
-			public void onComplete(int statusCode, String data, EtaError error) {
+		JsonObjectListener session = new JsonObjectListener() {
+			
+			public void onComplete(int statusCode, JSONObject data, EtaError error) {
 				sessionUpdate(statusCode, data, error);
 				if (listener != null) listener.onComplete(statusCode, data, error);
 			}
-
 		};
 		mEta.api().setUseLocation(false).post(Session.ENDPOINT, session, b).execute();
 	}
@@ -181,7 +177,7 @@ public class Session implements Serializable {
 	 * @param errorRedirect
 	 * @return true if all arguments are valid, false otherwise
 	 */
-	public boolean createUser(String email, String password, String name, int birthYear, String gender, String successRedirect, String errorRedirect, final CallbackString listener) {
+	public boolean createUser(String email, String password, String name, int birthYear, String gender, String successRedirect, String errorRedirect, final JsonObjectListener listener) {
 		if ( !Utils.isEmailValid(email) || 
 				!Utils.isPasswordValid(password) || 
 				!Utils.isNameValid(name) || 
@@ -198,20 +194,19 @@ public class Session implements Serializable {
 		b.putString(Params.SUCCESS_REDIRECT, successRedirect);
 		b.putString(Params.ERROR_REDIRECT, errorRedirect);
 		
-		CallbackString userCreate = new CallbackString() {
+		JsonObjectListener userCreate = new JsonObjectListener() {
+			
+			public void onComplete(int statusCode, JSONObject data, EtaError error) {
 
-			public void onComplete(int statusCode, String data, EtaError error) {
-				
 				if (Utils.isSuccess(statusCode)) {
-					Utils.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + data);
+					Utils.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + data.toString());
 				} else {
-					Utils.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error);
+					Utils.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
 				}
 				if (listener != null) listener.onComplete(statusCode, data, error);
 			}
-
 		};
-		
+
 		mEta.api().post(Session.ENDPOINT, userCreate, b).execute();
 		return true;
 	}
@@ -261,19 +256,19 @@ public class Session implements Serializable {
 	 * Signs a user out, and cleans all references to the user.<br><br>
 	 * A new {@link #login(String, String) login} is needed to get access to user stuff again.
 	 */
-	public synchronized void signout(final CallbackString listener) {
+	public synchronized void signout(final JsonObjectListener listener) {
 		mIsUpdating = true;
 		clearUser();
 		Bundle b = new Bundle();
 		b.putString(Params.EMAIL, "");
-		CallbackString session = new CallbackString() {
-
-			public void onComplete(int statusCode, String data, EtaError error) {
+		JsonObjectListener session = new JsonObjectListener() {
+			
+			public void onComplete(int statusCode, JSONObject data, EtaError error) {
 				sessionUpdate(statusCode, data, error);
 				if (listener != null) listener.onComplete(statusCode, data, error);
 			}
-
 		};
+
 		mEta.api().put(ENDPOINT, session, b).execute();
 	}
 	
@@ -290,7 +285,7 @@ public class Session implements Serializable {
 	 * Destroys this session.<br><br>
 	 * And returns a new session, completely clean session.
 	 */
-	public void invalidate(final CallbackString listener) {
+	public void invalidate(final JsonObjectListener listener) {
 		mJson = null;
 		mToken = null;
 		mExpires = 0L;
@@ -299,14 +294,14 @@ public class Session implements Serializable {
 		mSubscribers = new ArrayList<Session.SessionListener>();
 		mEta.getPrefs().edit().putString(PREFS_SESSION, null).commit();
 		clearUser();
-		CallbackString session = new CallbackString() {
-
-			public void onComplete(int statusCode, String data, EtaError error) {
+		JsonObjectListener session = new JsonObjectListener() {
+			
+			public void onComplete(int statusCode, JSONObject data, EtaError error) {
 				sessionUpdate(statusCode, data, error);
 				if (listener != null) listener.onComplete(statusCode, data, error);
 			}
-
 		};
+
 		mEta.api().delete(ENDPOINT, session, new Bundle()).execute();
 	}
 	

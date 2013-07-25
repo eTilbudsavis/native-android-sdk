@@ -15,18 +15,12 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Share;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Shoppinglist implements Serializable {
+public class Shoppinglist extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	
-	public static final String PARAM_ID = "id";
-	public static final String PARAM_ERN = "ern";
-	public static final String PARAM_NAME = "name";
-	public static final String PARAM_ACCESS = "access";
-	public static final String PARAM_MODIFIED = "modified";
-	public static final String PARAM_OWNER = "owner";
 	
 	public static final String ACCESS_PRIVATE = "private";
 	public static final String ACCESS_SHARED = "shared";
@@ -54,7 +48,6 @@ public class Shoppinglist implements Serializable {
 	private String mAccess = ACCESS_PRIVATE;
 	private long mModified = 0L;
 	private Share mOwner = new Share();
-	private List<Share> mShares = new ArrayList<Share>(1);
 	
 	// local vars
 	private int mState = STATE_INIT;
@@ -70,22 +63,20 @@ public class Shoppinglist implements Serializable {
 		return sl;
 	}
 	
-	public static ArrayList<Shoppinglist> fromJSONArray(String shoppinglists) {
-		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
-		try {
-			list = fromJSONArray(new JSONArray(shoppinglists));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-		return list;
+	public Shoppinglist(JSONObject shoppinglist) {
+		set(shoppinglist);
 	}
-	
-	public static ArrayList<Shoppinglist> fromJSONArray(JSONArray shoppinglists) {
+
+	public void set(JSONObject shoppinglist) {
+		fromJSON(this, shoppinglist);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static ArrayList<Shoppinglist> fromJSON(JSONArray shoppinglists) {
 		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
 		try {
 			for (int i = 0 ; i < shoppinglists.length() ; i++ )
-				list.add(Shoppinglist.fromJSON((JSONObject)shoppinglists.get(i)));
+				list.add(Shoppinglist.fromJSON(new Shoppinglist(), (JSONObject)shoppinglists.get(i)));
 			
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
@@ -94,52 +85,36 @@ public class Shoppinglist implements Serializable {
 		return list;
 	}
 	
-	public static Shoppinglist fromJSON(String list) {
-		Shoppinglist sl = new Shoppinglist();
-		try {
-			sl = fromJSON(sl, new JSONObject(list));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-		return sl;
+	@SuppressWarnings("unchecked")
+	public static Shoppinglist fromJSON(JSONObject shoppinglist) {
+		return fromJSON(new Shoppinglist(), shoppinglist);
 	}
-
-	public static Shoppinglist fromJSON(JSONObject list) {
-		return fromJSON(new Shoppinglist(), list);
-	}
-
+	
 	private static Shoppinglist fromJSON(Shoppinglist sl, JSONObject shoppinglist) {
-		if (sl == null) sl = new Shoppinglist();
-		if (shoppinglist == null ) return sl;
 		
 		try {
-			sl.setId(shoppinglist.getString(PARAM_ID));
-			sl.setErn(shoppinglist.getString(PARAM_ERN));
-			sl.setName(shoppinglist.getString(PARAM_NAME));
-			sl.setAccess(shoppinglist.getString(PARAM_ACCESS));
-			sl.setModified(shoppinglist.getString(PARAM_MODIFIED));
-			sl.setOwner(Share.fromJSON(shoppinglist.getString(PARAM_OWNER)));
+			sl.setId(shoppinglist.getString(S_ID));
+			sl.setErn(shoppinglist.getString(S_ERN));
+			sl.setName(shoppinglist.getString(S_NAME));
+			sl.setAccess(shoppinglist.getString(S_ACCESS));
+			sl.setModified(shoppinglist.getString(S_MODIFIED));
+			sl.setOwner(Share.fromJSON(shoppinglist.getString(S_OWNER)));
+			
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
-		
 		return sl;
 	}
 	
 	public Bundle getApiParams() {
 		Bundle apiParams = new Bundle();
-		apiParams.putString(PARAM_MODIFIED, getModifiedString());
-		apiParams.putString(PARAM_NAME, getName());
-		apiParams.putString(PARAM_ACCESS, getAccess());
+		apiParams.putString(S_MODIFIED, getModifiedString());
+		apiParams.putString(S_NAME, getName());
+		apiParams.putString(S_ACCESS, getAccess());
 		return apiParams;
 	}
 	
-	public void set(JSONObject shoppinglist) {
-		fromJSON(this, shoppinglist);
-	}
-
 	public String getId() {
 		return mId;
 	}
@@ -224,9 +199,9 @@ public class Shoppinglist implements Serializable {
 		return mState == STATE_ERROR;
 	}
 
-	public Shoppinglist setModifiedFromJSON(String time) {
+	public Shoppinglist setModifiedFromJSON(JSONObject time) {
 		try {
-			setModified(new JSONObject(time).getString(PARAM_MODIFIED));
+			setModified(time.getString(S_MODIFIED));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

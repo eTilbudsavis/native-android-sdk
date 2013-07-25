@@ -17,7 +17,7 @@ import android.os.Bundle;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializable {
+public class ShoppinglistItem extends EtaObject implements Comparable<ShoppinglistItem>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -49,7 +49,10 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 	private String mOfferId = "";
 	private int mCount = 1;
 	private String mDescription = "";
+
+	/** @deprecated */
 	private String mShoppinglistIdDepricated = "";
+	
 	private String mErn = "";
 	private String mCreator = "";
 	private long mModified = 0L;
@@ -63,25 +66,20 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 		setId(Utils.createUUID());
 		setModified(System.currentTimeMillis());
 	}
-
+	
 	public ShoppinglistItem(Shoppinglist shoppinglist, String description) {
 		setId(Utils.createUUID());
 		setModified(System.currentTimeMillis());
 		setDescription(description);
+		setShoppinglistId(shoppinglist.getId());
 	}
 
-	public static ArrayList<ShoppinglistItem> fromJSONArray(String shoppinglistItems, String shoppinglistId) {
-		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
-		try {
-			list = fromJSONArray(new JSONArray(shoppinglistItems), shoppinglistId);
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-		return list;
+	@SuppressWarnings("unchecked")
+	public static ArrayList<ShoppinglistItem> fromJSON(JSONArray shoppinglistItems) {
+		return fromJSON(shoppinglistItems, null);
 	}
 	
-	public static ArrayList<ShoppinglistItem> fromJSONArray(JSONArray shoppinglistItems, String shoppinglistId) {
+	public static ArrayList<ShoppinglistItem> fromJSON(JSONArray shoppinglistItems, String shoppinglistId) {
 		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
 		try {
 			for (int i = 0 ; i < shoppinglistItems.length() ; i++ ) {
@@ -96,21 +94,11 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 		return list;
 	}
 	
-	public static ShoppinglistItem fromJSON(String shoppinglistItem, String shoppinglistId) {
-		ShoppinglistItem sli = new ShoppinglistItem();
-		try {
-			sli = fromJSON(sli, new JSONObject(shoppinglistItem), shoppinglistId);
-		} catch (JSONException e) {
-			if (Eta.DEBUG) e.printStackTrace();
-		}
-		return sli;
-	}
-	
 	public static ShoppinglistItem fromJSON(JSONObject shoppinglistItem, String shoppinglistId) {
 		return fromJSON(new ShoppinglistItem(), shoppinglistItem, shoppinglistId);
 	}
 
-	public static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem, String shoppinglistId) {
+	private static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem, String shoppinglistId) {
 		if (sli == null) sli = new ShoppinglistItem();
 		if (shoppinglistItem == null) return sli;
 		
@@ -200,10 +188,12 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, Serializa
 		return this;
 	}
 
+	/** @deprecated */
 	public String getShoppinglistIdDepricated() {
 		return mShoppinglistIdDepricated;
 	}
 
+	/** @deprecated */
 	public ShoppinglistItem setShoppinglistIdDepricated(String oldShoppinglistIdFormat) {
 		mShoppinglistIdDepricated = oldShoppinglistIdFormat;
 		return this;

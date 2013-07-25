@@ -22,6 +22,8 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.eTilbudsavis.etasdk.Api.ApiListener;
+import com.eTilbudsavis.etasdk.Api.StringListener;
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
@@ -259,7 +261,7 @@ public final class Pageflip extends WebView {
 		
 		if (cache == null ) {
 			
-			Api.CallbackString cb = new Api.CallbackString() {
+			StringListener cb = new StringListener() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
 					if (Utils.isSuccess(statusCode)) {
@@ -269,7 +271,7 @@ public final class Pageflip extends WebView {
 						loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
 					}
 				}
-			};
+			};	
 			mEta.api().get(Endpoint.getPageflipProxy(mUuid), cb).execute();
 			
 		} else {
@@ -289,7 +291,7 @@ public final class Pageflip extends WebView {
 			o.put(API_SECRET, mEta.getApiSecret());
 			o.put(SESSION, mEta.getSession().toJSON());
 			o.put(LOCALE, Locale.getDefault().toString());
-			if (mEta.getLocation().isLocationSet())
+			if (mEta.getLocation().isSet())
 				o.put(LOCATION, locationToJSON());
 			
 		} catch (JSONException e) {
@@ -372,7 +374,7 @@ public final class Pageflip extends WebView {
 			// TODO: Propagate change into pageflip
 		}
 	};
-
+	
 	public void pause() {
 		mEta.getLocation().unSubscribe(ll);
 		// TODO: Call something to stop analytics

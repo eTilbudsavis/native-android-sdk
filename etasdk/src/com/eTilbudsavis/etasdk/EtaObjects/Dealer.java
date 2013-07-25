@@ -8,13 +8,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Pageflip;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 
 import android.graphics.Color;
 
-public class Dealer implements Serializable {
+public class Dealer extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -47,15 +48,6 @@ public class Dealer implements Serializable {
 	/** Endpoint for searching dealers */
 	public static final String ENDPOINT_SEARCH = Endpoint.DEALER_SEARCH;
 	
-	private static final String S_ID = "id";
-	private static final String S_ERN = "ern";
-	private static final String S_NAME = "name";
-	private static final String S_URL_NAME = "url_name";
-	private static final String S_WEBSITE = "website";
-	private static final String S_LOGO = "logo";
-	private static final String S_COLOR = "color";
-	private static final String S_PAGEFLIP = "pageflip";
-	
 	private String mId;
 	private String mErn;
 	private String mName;
@@ -65,21 +57,10 @@ public class Dealer implements Serializable {
 	private Integer mColor;
 	private Pageflip mPageflip;
 
-	public Dealer() {
-	}
-
-	public static ArrayList<Dealer> fromJSONArray(String dealers) {
-		ArrayList<Dealer> list = new ArrayList<Dealer>();
-		try {
-			list = fromJSONArray(new JSONArray(dealers));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-		return list;
-	}
+	public Dealer() { }
 	
-	public static ArrayList<Dealer> fromJSONArray(JSONArray dealers) {
+	@SuppressWarnings("unchecked")
+	public static ArrayList<Dealer> fromJSON(JSONArray dealers) {
 		ArrayList<Dealer> list = new ArrayList<Dealer>();
 		try {
 			for (int i = 0 ; i < dealers.length() ; i++ )
@@ -92,17 +73,7 @@ public class Dealer implements Serializable {
 		return list;
 	}
 	
-	public static Dealer fromJSON(String dealer) {
-		Dealer d = new Dealer();
-		try {
-			d = fromJSON(d, new JSONObject(dealer));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-		return d;
-	}
-
+	@SuppressWarnings("unchecked")
 	public static Dealer fromJSON(JSONObject dealer) {
 		return fromJSON(new Dealer(), dealer);
 	}
@@ -110,7 +81,7 @@ public class Dealer implements Serializable {
 	private static Dealer fromJSON(Dealer d, JSONObject dealer) {
 		if (d == null) d = new Dealer();
 		if (dealer == null) return d;
-		
+
 		try {
 			d.setId(dealer.getString(S_ID));
 			d.setErn(dealer.getString(S_ERN));

@@ -1,5 +1,12 @@
 package com.eTilbudsavis.etasdk.Utils;
 
+import java.net.URI;
+
+import com.eTilbudsavis.etasdk.Api;
+import com.eTilbudsavis.etasdk.Api.ApiListener;
+
+import android.net.Uri;
+
 
 /**
  * {@link com.eTilbudsavis.etasdk.Utils.Endpoint Endpoint} holds most endpoint-links for API v2.<br><br>
@@ -22,57 +29,65 @@ package com.eTilbudsavis.etasdk.Utils;
  */
 public final class Endpoint {
 
-	// GLOBALS
-	public static final String MAIN_URL = "https://etilbudsavis.dk";
-	public static final String API = "https://api.etilbudsavis.dk";
-	private static final String V2 = "/v2";
-	
-	// RESOURCES AND SUB RESOURCES
-	private static final String CATALOG = "/catalogs";
-	private static final String DEALER = "/dealers";
-	private static final String OFFER = "/offers";
-	private static final String STORE = "/stores";
-	private static final String SHOPPINGLIST = "/shoppinglists";
 	private static final String ITEM = "/";
-	private static final String USER = API + V2 + "/users";
-	public static final String SEARCH = "/search";
-	public static final String QUICK_SEARCH = "/quicksearch";
-	public static final String TYPEAHEAD = "/typeahead";
-	public static final String FACEBOOK = "/facebook";
-	public static final String PROXY = MAIN_URL + "/proxy/";
+	private static final String CAT = "catalogs";
 	
-	// Shoppinglist
-	public static final String MODIFIED = "/modified";
-	public static final String SHARES = "/shares";
-	public static final String ITEMS = "/items";
-	public static final String EMPTY = "/empty";
+	public class Path {
+		
+		public static final String CATALOGS		= "/v2/" + CAT;
+		public static final String DEALERS		= "/v2/dealers";
+		public static final String OFFERS		= "/v2/offers";
+		public static final String STORES		= "/v2/stores";
+		public static final String SESSIONS		= "/v2/sessions";
+		public static final String USERS		= "/v2/users";
+		public static final String CATEGORIES	= "/v2/categories";
+
+		public static final String ENDPOINTS	= "/v2/endpoints";
+		
+		public static final String SHOPPINGLIST	= "/shoppinglists";
+		public static final String SEARCH = "/search";
+		public static final String QUICK_SEARCH = "/quicksearch";
+		public static final String TYPEAHEAD = "/typeahead";
+		public static final String FACEBOOK = "/facebook";
+		public static final String MODIFIED = "/modified";
+		public static final String SHARES = "/shares";
+		public static final String ITEMS = "/items";
+		public static final String EMPTY = "/empty";
+		public static final String RESET = "/reset";
+		public static final String PAGEFLIP_PROXY = "https://etilbudsavis.dk/proxy/";
+	}
+	
+	// GLOBALS
+	public static final String HOST = "https://edge.etilbudsavis.dk";
 	
 	// LISTS
-	public static final String CATALOG_LIST = API + V2 + CATALOG;
-	public static final String DEALER_LIST = API + V2 + DEALER;
-	public static final String OFFER_LIST = API + V2 + OFFER;
-	public static final String STORE_LIST =API +  V2 + STORE;
+	public static final String CATALOG_LIST = Path.CATALOGS;
+	public static final String DEALER_LIST = Path.DEALERS;
+	public static final String OFFER_LIST = Path.OFFERS;
+	public static final String STORE_LIST = Path.STORES;
 	
 	// SINGLE ID
-	public static final String CATALOG_ID = CATALOG_LIST + ITEM;
-	public static final String DEALER_ID = DEALER_LIST + ITEM;
-	public static final String OFFER_ID = OFFER_LIST + ITEM;
-	public static final String STORE_ID = STORE_LIST + ITEM;
-	public static final String SESSION = API + V2 + "/sessions";
-	public static final String USER_RESET = USER + "/reset";
-	public static final String USER_ID = USER + ITEM;
+	public static final String CATALOG_ID = Path.CATALOGS + ITEM;
+	public static final String DEALER_ID = Path.DEALERS + ITEM;
+	public static final String OFFER_ID = Path.OFFERS + ITEM;
+	public static final String STORE_ID = Path.STORES + ITEM;
+	
+	public static final String SESSIONS = Path.SESSIONS;
+	
+	public static final String USER_ID = Path.USERS + ITEM;
+	public static final String USER_RESET = Path.USERS + Path.RESET;
 	
 	// SEARCH
-	public static final String CATALOG_SEARCH = CATALOG_LIST + SEARCH;
-	public static final String DEALER_SEARCH = DEALER_LIST + SEARCH;
-	public static final String OFFER_SEARCH = OFFER_LIST + SEARCH;
-	public static final String STORE_SEARCH = STORE_LIST + SEARCH;
+	public static final String CATALOG_SEARCH = Path.CATALOGS + Path.SEARCH;
+	public static final String DEALER_SEARCH = Path.DEALERS + Path.SEARCH;
+	public static final String OFFER_SEARCH = Path.OFFERS + Path.SEARCH;
+	public static final String STORE_SEARCH = Path.STORES + Path.SEARCH;
 	
 	// Typeahead
-	public static final String OFFER_TYPEAHEAD = OFFER_LIST + TYPEAHEAD;
+	public static final String OFFER_TYPEAHEAD = Path.OFFERS + Path.TYPEAHEAD;
 	
 	// QUICK SEARCH
-	public static final String STORE_QUICK_SEARCH = STORE_LIST + QUICK_SEARCH;
+	public static final String STORE_QUICK_SEARCH = Path.STORES + Path.QUICK_SEARCH;
 
 	/**
 	 * https://etilbudsavis.dk/proxy/{id}/
@@ -80,7 +95,7 @@ public final class Endpoint {
 	 * @return https://etilbudsavis.dk/proxy/{id}/
 	 */
 	public static String getPageflipProxy(String id) {
-		return PROXY + id + ITEM;
+		return Path.PAGEFLIP_PROXY + id + ITEM;
 	}
 
 	/**
@@ -88,8 +103,8 @@ public final class Endpoint {
 	 * @param userId
 	 * @return
 	 */
-	public static String getFacebookEndpoint(int userId) {
-		return USER_ID + String.valueOf(userId) + FACEBOOK;
+	public static String getFacebookByUserId(int userId) {
+		return USER_ID + String.valueOf(userId) + Path.FACEBOOK;
 	}
 
 	/**
@@ -97,48 +112,48 @@ public final class Endpoint {
 	 * @param userId
 	 * @return
 	 */
-	public static String getListList(int userId) {
-		return USER_ID + String.valueOf(userId) + SHOPPINGLIST;
+	public static String getListsByUserId(int userId) {
+		return USER_ID + String.valueOf(userId) + Path.SHOPPINGLIST;
 	}
 
 	/**
 	 * /v2/users/{user_id}/shoppinglists/{list_uuid}
 	 * @param userId
-	 * @param listUuid
+	 * @param listId
 	 * @return
 	 */
-	public static String getListFromId(int userId, String listUuid) {
-		return getListList(userId) + ITEM + listUuid;
+	public static String getListById(int userId, String listId) {
+		return getListsByUserId(userId) + ITEM + listId;
 	}
 
 	/**
 	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/modified
 	 * @param userId
-	 * @param listUuid
+	 * @param listId
 	 * @return
 	 */
-	public static String getListModified(int userId, String listUuid) {
-		return getListFromId(userId, listUuid) + MODIFIED;
+	public static String getListModifiedById(int userId, String listId) {
+		return getListById(userId, listId) + Path.MODIFIED;
 	}
 
 	/**
 	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/empty
 	 * @param userId
-	 * @param listUuid
+	 * @param listId
 	 * @return
 	 */
-	public static String getListEmpty(int userId, String listUuid) {
-		return getListFromId(userId, listUuid) + EMPTY;
+	public static String getListEmpty(int userId, String listId) {
+		return getListById(userId, listId) + Path.EMPTY;
 	}
 	
 	/**
 	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares
 	 * @param userId
-	 * @param listUuid
+	 * @param listId
 	 * @return
 	 */
-	public static String getListShares(int userId, String listUuid) {
-		return getListFromId(userId, listUuid) + SHARES;
+	public static String getSharesByListId(int userId, String listId) {
+		return getListById(userId, listId) + Path.SHARES;
 	}
 
 	/**
@@ -148,54 +163,63 @@ public final class Endpoint {
 	 * @param shareEmail
 	 * @return
 	 */
-	public static String getListSharesId(int userId, String listUuid, String shareEmail) {
-		return getListShares(userId, listUuid) + ITEM + shareEmail;
+	public static String getShoppinglistShareById(int userId, String listUuid, String shareEmail) {
+		return getSharesByListId(userId, listUuid) + ITEM + shareEmail;
 	}
 
 	/**
 	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items
 	 * @param userId
-	 * @param listUuid
+	 * @param listId
 	 * @return
 	 */
-	public static String getItemList(int userId, String listUuid) {
-		return getListFromId(userId, listUuid) + ITEMS;
+	public static String getItemByListId(int userId, String listId) {
+		return getListById(userId, listId) + Path.ITEMS;
 	}
 
 	/**
 	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}
 	 * @param userId
-	 * @param listUuid
-	 * @param itemUuid
+	 * @param listId
+	 * @param itemId
 	 * @return
 	 */
-	public static String getItemID(int userId, String listUuid, String itemUuid) {
-		return getItemList(userId, listUuid) + ITEM + itemUuid;
+	public static String getItemById(int userId, String listId, String itemId) {
+		return getItemByListId(userId, listId) + ITEM + itemId;
 	}
 
 	/**
 	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified
 	 * @param userId
-	 * @param listUuid
-	 * @param itemUuid
+	 * @param listId
+	 * @param itemId
 	 * @return
 	 */
-	public static String getItemModified(int userId, String listUuid, String itemUuid) {
-		return getItemID(userId, listUuid, itemUuid) + MODIFIED;
+	public static String getItemModifiedById(int userId, String listId, String itemId) {
+		return getItemById(userId, listId, itemId) + Path.MODIFIED;
 	}
 
-	public static boolean isItemEndpoint(String url) {
-		return url.contains(CATALOG_ID) || 
-				url.contains(OFFER_ID) ||
-				url.contains(DEALER_ID) || 
-				url.contains(STORE_ID);
+	public static boolean isItemEndpoint(String path) {
+		return path.contains(CATALOG_ID) || 
+				path.contains(OFFER_ID) ||
+				path.contains(DEALER_ID) || 
+				path.contains(STORE_ID);
 	}
 	
-	public static boolean isListEndpoint(String url) {
-		return !isItemEndpoint(url) &&
-				(url.matches(CATALOG_LIST) || 
-				url.matches(OFFER_LIST) || 
-				url.matches(DEALER_LIST) || 
-				url.matches(STORE_LIST));
+	public static boolean isListEndpoint(String path) {
+		return !isItemEndpoint(path) &&
+				(path.matches(CATALOG_LIST) || 
+				path.matches(OFFER_LIST) || 
+				path.matches(DEALER_LIST) || 
+				path.matches(STORE_LIST));
+	}
+	
+	public static boolean isMatch(ApiListener<?> listener) {
+		
+		return false;
+	}
+	
+	public static boolean s(String path) {
+		return false;
 	}
 }
