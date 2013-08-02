@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects.Helpers;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -9,16 +9,12 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class Pages implements Serializable {
+public class Pages extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Pages";
 
-	public static final String S_THUMB = "thumb";
-	public static final String S_VIEW = "view";
-	public static final String S_ZOOM = "zoom";
-	
 	private ArrayList<String> mThumb = new ArrayList<String>();
 	private ArrayList<String> mView = new ArrayList<String>();
 	private ArrayList<String> mZoom = new ArrayList<String>();
@@ -37,6 +33,7 @@ public class Pages implements Serializable {
 		return p;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static Pages fromJSON(JSONObject pages) {
 		return fromJSON(new Pages(), pages);
 	}

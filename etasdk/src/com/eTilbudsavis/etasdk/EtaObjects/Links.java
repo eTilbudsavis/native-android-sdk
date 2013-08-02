@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects.Helpers;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
@@ -7,18 +7,15 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class Links implements Serializable {
+public class Links extends EtaObject implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Links";
-	
-	public static final String S_WEBSHOP = "webshop";
-	
+
 	private String mWebshop;
 	
-	public Links() {
-	}
+	public Links() { }
 	
 	public static Links fromJSON(String links) {
 		Links l = new Links();
@@ -31,6 +28,7 @@ public class Links implements Serializable {
 		return l;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static Links fromJSON(JSONObject links) {
 		return fromJSON(new Links(), links);
 	}
@@ -40,7 +38,7 @@ public class Links implements Serializable {
 		if (links == null) return l;
 		
 		try {
-			l.setWebshop(links.getString(S_WEBSHOP));
+			l.setWebshop(links.getString(S_WEBSHOP).equals("null") ? null : links.getString(S_WEBSHOP));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();

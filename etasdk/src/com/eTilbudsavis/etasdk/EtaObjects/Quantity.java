@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects.Helpers;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
@@ -7,14 +7,10 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class Quantity implements Serializable {
+public class Quantity extends EtaObject implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String S_UNIT = "unit";
-	private static final String S_SIZE = "size";
-	private static final String S_PIECES = "pieces";
-	
 	public static final String TAG = "Quantity";
 	
 	private Unit mUnit;
@@ -35,6 +31,7 @@ public class Quantity implements Serializable {
 		return q;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static Quantity fromJSON(JSONObject quantity) {
 		return fromJSON(new Quantity(), quantity);
 	}

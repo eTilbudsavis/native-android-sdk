@@ -8,14 +8,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Pageflip;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 
 import android.graphics.Color;
 
-public class Dealer extends EtaObject implements Serializable {
+public class Dealer extends EtaErnObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -48,8 +47,6 @@ public class Dealer extends EtaObject implements Serializable {
 	/** Endpoint for searching dealers */
 	public static final String ENDPOINT_SEARCH = Endpoint.DEALER_SEARCH;
 	
-	private String mId;
-	private String mErn;
 	private String mName;
 	private String mUrlName;
 	private String mWebsite;
@@ -120,24 +117,6 @@ public class Dealer extends EtaObject implements Serializable {
 		return o; 
 	}
 	
-	public Dealer setId(String id) {
-		mId = id;
-		return this;
-	}
-
-	public String getId() {
-		return mId;
-	}
-
-	public Dealer setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-
-	public String getErn() {
-		return mErn;
-	}
-
 	public Dealer setName(String name) {
 		mName = name;
 		return this;

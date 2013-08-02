@@ -8,11 +8,10 @@ import org.json.JSONObject;
 
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Permission;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 
-public class User implements Serializable {
+public class User extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -48,15 +47,9 @@ public class User implements Serializable {
 	/** Endpoint for a user resource */
 	public static final String ENDPOINT_RESET = Endpoint.USER_RESET;
 	
-	private static final String S_ID = "id";
-	private static final String S_ERN = "ern";
-	private static final String S_GENDER = "gender";
-	private static final String S_BIRTH_YEAR = "birth_year";
-	private static final String S_NAME = "name";
-	private static final String S_EMAIL = "email";
-	private static final String S_PERMISSIONS = "permissions";
-
-	private int mId = 0;
+	public static final int NO_USER = -1;
+	
+	private int mId = NO_USER;
 	private String mErn;
 	private String mGender;
 	private int mBirthYear = 0;
@@ -65,8 +58,7 @@ public class User implements Serializable {
 	private Permission mPermissions;
 	private ArrayList<User.UserStatusListener> mSubscribers = new ArrayList<User.UserStatusListener>();
 
-	public User() {
-	}
+	public User() { }
 
 	public static User fromJSON(String user) {	
 		User u = new User();
@@ -79,6 +71,7 @@ public class User implements Serializable {
 		return u;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static User fromJSON(JSONObject user) {	
 		return fromJSON(new User(), user);
 	}

@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects.Helpers;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
@@ -7,15 +7,11 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class Images implements Serializable {
+public class Images extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Images";
-	
-	private static final String S_VIEW = "view";
-	private static final String S_ZOOM = "zoom";
-	private static final String S_THUMB = "thumb";
 	
 	private String mView;
 	private String mZoom;
@@ -35,6 +31,7 @@ public class Images implements Serializable {
 		return i;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Images fromJSON(JSONObject images) {
 		return fromJSON(new Images(), images);
 	}

@@ -44,17 +44,11 @@ public class Eta implements Serializable {
 	 * Please only set to <code>true</code> while developing to avoid leaking sensitive information */
 	public static boolean DEBUG = false;
 	
-	/** The date format as returned from the server */
-	public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss+SSSS";
-	
-	/** Name for the SDK SharedPreferences file */
-	public static final String PREFS_NAME = "eta_sdk";
-	
 	private Context mContext;
 	private final String mApiKey;
 	private final String mApiSecret;
+	private Settings mSettings;
 	private Session mSession;
-	private SharedPreferences mPrefs;
 	private EtaLocation mLocation;
 	private EtaCache mCache;
 	private ShoppinglistManager mShoppinglistManager;
@@ -72,12 +66,12 @@ public class Eta implements Serializable {
 		mContext = context;
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
-		mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-		mLocation = new EtaLocation(mPrefs);
+		mSettings = new Settings(mContext);
+		mLocation = new EtaLocation(this);
 		mCache = new EtaCache();
-		mSession = new Session(this);
-		mSession.start();
 		mShoppinglistManager = new ShoppinglistManager(this);
+		mSession = new Session(this);
+		mSession.init();
 	}
 
 	/**
@@ -119,11 +113,12 @@ public class Eta implements Serializable {
 	public User getUser() {
 		return getSession().getUser();
 	}
+	
 	/**
-	 * Get the SharedPreferences, that ETA SDK is using.
+	 * Get the settings, that ETA SDK is using.
 	 */
-	public SharedPreferences getPrefs() {
-		return mPrefs;
+	public Settings getSettings() {
+		return mSettings;
 	}
 
 	/**
@@ -170,7 +165,7 @@ public class Eta implements Serializable {
 	 */
 	public boolean clearPreferences() {
 		mSession = new Session(this);
-		return mPrefs.edit().clear().commit();
+		return mSettings.clear();
 	}
 
 	public boolean isDebug() {
@@ -194,27 +189,29 @@ public class Eta implements Serializable {
 	
 	public void onPause() {
 		mShoppinglistManager.onPause();
+		mLocation.saveState();
 		pageflipPause();
 	}
 	
 	public void onResume() {
 		mShoppinglistManager.onResume();
+		mLocation.restoreState();
 		pageflipResume();
 	}
 
 	private void pageflipLocation() {
 		for (Pageflip p : mPageflips)
-			p.resume();
+			p.onResume();
 	}
 	
 	private void pageflipResume() {
 		for (Pageflip p : mPageflips)
-			p.resume();
+			p.onResume();
 	}
 	
 	private void pageflipPause() {
 		for (Pageflip p : mPageflips)
-			p.pause();
+			p.onPause();
 	}
 	
 	private Bundle getApiParams(int offset, int limit, String orderBy) {

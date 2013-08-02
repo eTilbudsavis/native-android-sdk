@@ -129,7 +129,6 @@ public final class Params {
 	/** Parameter for a delete filter */
 	public static final String FILTER_DELETE = "filter";
 
-	
 	public static final String ID = "id";
 	public static final String MODIFIED = "modified";
 	public static final String ERN = "ern";

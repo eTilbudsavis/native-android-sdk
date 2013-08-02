@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects.Helpers;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -8,14 +8,10 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class Share implements Comparable<Share>, Serializable {
+public class Share extends EtaObject implements Comparable<Share>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	private static final String S_USER = "user";
-	private static final String S_ACCESS = "access";
-	private static final String S_ACCEPTED = "accepted";
-	
 	public static final String ACCESS_OWNER = "owner";
 	public static final String ACCESS_READWRITE = "rw";
 	public static final String ACCESS_READONLY = "r";
@@ -26,21 +22,8 @@ public class Share implements Comparable<Share>, Serializable {
 	private String mAccess;
 	private boolean mAccepted;
 
-	public Share() {
-		
-	}
+	public Share() { }
 
-	public static Share fromJSON(String share) {
-		Share s = new Share();
-		try {
-			s = fromJSON(s, new JSONObject(share));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-		return s;
-	}
-	
 	public static Share fromJSON(JSONObject share) {
 		return fromJSON(new Share(), share);
 	}

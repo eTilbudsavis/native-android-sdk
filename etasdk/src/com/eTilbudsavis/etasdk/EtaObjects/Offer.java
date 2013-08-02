@@ -13,15 +13,12 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Images;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Links;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Pricing;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Quantity;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Offer extends EtaObject implements Serializable {
+public class Offer extends EtaErnObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -72,31 +69,7 @@ public class Offer extends EtaObject implements Serializable {
 	/** Endpoint for searching offers */
 	public static final String ENDPOINT_SEARCH = Endpoint.OFFER_SEARCH;
 	
-	@SuppressLint("SimpleDateFormat")
-	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
-
-	private static final String S_ID = "id";
-	private static final String S_ERN = "ern";
-	private static final String S_HEADING = "heading";
-	private static final String S_DESCRIPTION = "description";
-	private static final String S_CATALOG_PAGE = "catalog_page";
-	private static final String S_PRICING = "pricing";
-	private static final String S_QUANTITY = "quantity";
-	private static final String S_IMAGES = "images";
-	private static final String S_LINKS = "links";
-	private static final String S_RUN_FROM = "run_from";
-	private static final String S_RUN_TILL = "run_till";
-	private static final String S_PUBLISH = "publish";
-	private static final String S_DEALER_URL = "dealer_url";
-	private static final String S_DEALER_ID = "dealer_id";
-	private static final String S_STORE_URL = "store_url";
-	private static final String S_STORE_ID = "store_id";
-	private static final String S_CATALOG_URL = "catalog_url";
-	private static final String S_CATALOG_ID = "catalog_id";
-	
 	// From JSON blob
-	private String mId;
-	private String mErn;
 	private String mHeading;
 	private String mDescription;
 	private int mCatalogPage = 0;
@@ -104,9 +77,9 @@ public class Offer extends EtaObject implements Serializable {
 	private Quantity mQuantity;
 	private Images mImages;
 	private Links mLinks;
-	private long mRunFrom = 0L;
-	private long mRunTill = 0L;
-	private long mPublish = 0L;
+	private Date mRunFrom = null;
+	private Date mRunTill = null;
+	private Date mPublish = null;
 	private String mDealerUrl;
 	private String mDealerId;
 	private String mStoreUrl;
@@ -197,8 +170,7 @@ public class Offer extends EtaObject implements Serializable {
 		}
 		return o;
 	}
-	
-	@Override
+
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -215,8 +187,8 @@ public class Offer extends EtaObject implements Serializable {
 			o.put(S_QUANTITY, offer.getQuantity() == null ? null : offer.getQuantity().toJSON());
 			o.put(S_IMAGES, offer.getImages() == null ? null : offer.getImages().toJSON());
 			o.put(S_LINKS, offer.getLinks() == null ? null : offer.getLinks().toJSON());
-			o.put(S_RUN_FROM, offer.getRunFromString());
-			o.put(S_RUN_TILL, offer.getRunTillString());
+			o.put(S_RUN_FROM, Utils.formatDate(offer.getRunFrom()));
+			o.put(S_RUN_TILL, Utils.formatDate(offer.getRunTill()));
 			o.put(S_PUBLISH, offer.getPublish());
 			o.put(S_DEALER_URL, offer.getDealerUrl());
 			o.put(S_DEALER_ID, offer.getDealerId());
@@ -231,24 +203,6 @@ public class Offer extends EtaObject implements Serializable {
 		return o;
 	}
 	
-	public String getId() {
-		return mId;
-	}
-
-	public Offer setId(String id) {
-		mId = id;
-		return this;
-	}
-
-	public String getErn() {
-		return mErn;
-	}
-
-	public Offer setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-
 	public String getHeading() {
 		return mHeading;
 	}
@@ -312,69 +266,45 @@ public class Offer extends EtaObject implements Serializable {
 		return this;
 	}
 
-	public long getRunFrom() {
+	public Date getRunFrom() {
 		return mRunFrom;
 	}
 
-	public String getRunFromString() {
-		return sdf.format(new Date(mRunFrom));
-	}
-
-	public Offer setRunFrom(long time) {
+	public Offer setRunFrom(Date time) {
 		mRunFrom = time;
 		return this;
 	}
 
 	public Offer setRunFrom(String time) {
-		try {
-			mRunFrom = sdf.parse(time).getTime();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		mRunFrom = Utils.parseDate(time);
 		return this;
 	}
 
-	public long getRunTill() {
+	public Date getRunTill() {
 		return mRunTill;
 	}
 
-	public String getRunTillString() {
-		return sdf.format(new Date(mRunTill));
-	}
-
-	public Offer setRunTill(long time) {
+	public Offer setRunTill(Date time) {
 		mRunTill = time;
 		return this;
 	}
 
 	public Offer setRunTill(String time) {
-		try {
-			mRunTill = sdf.parse(time).getTime();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		mRunTill = Utils.parseDate(time);
 		return this;
 	}
 
-	public long getPublish() {
+	public Date getPublish() {
 		return mPublish;
 	}
 
-	public String getPublishString() {
-		return sdf.format(new Date(mPublish));
-	}
-
-	public Offer setPublish(long time) {
+	public Offer setPublish(Date time) {
 		mPublish = time;
 		return this;
 	}
 
 	public Offer setPublish(String time) {
-		try {
-			mPublish = sdf.parse(time).getTime();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		mPublish = Utils.parseDate(time);
 		return this;
 	}
 
@@ -508,8 +438,8 @@ public class Offer extends EtaObject implements Serializable {
 		.append(", description=").append(mDescription)
 		.append(", dealer=").append(mDealer == null ? mDealerId : mDealer.toString(everything))
 		.append(", pricing=").append(mPricing == null ? null : mPricing.toString())
-		.append(", runFrom=").append(getRunFromString())
-		.append(", runTill=").append(getRunTillString());
+		.append(", runFrom=").append(Utils.formatDate(getRunFrom()))
+		.append(", runTill=").append(Utils.formatDate(getRunTill()));
 		
 		if (everything) {
 			sb.append(", ern=").append(mErn)

@@ -22,7 +22,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.eTilbudsavis.etasdk.Api.ApiListener;
 import com.eTilbudsavis.etasdk.Api.StringListener;
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
@@ -103,6 +102,7 @@ public final class Pageflip extends WebView {
 	private String mCatalogId;
 	private boolean mInitializing = true;
 	private JSONObject mCatalogView = new JSONObject();
+	private String mDebugWeinre = null;
 	
 	/**
 	 * Used for manual inflation
@@ -261,9 +261,18 @@ public final class Pageflip extends WebView {
 		
 		if (cache == null ) {
 			
+//			loadUrl(Endpoint.getPageflipProxy(mUuid));
+			
 			StringListener cb = new StringListener() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
+					
+					if (mDebugWeinre != null) {
+						String endScript = "</head>";
+						data = data.replaceFirst(endScript, mDebugWeinre + endScript);
+						Utils.logdMax(TAG, data);
+					}
+					
 					if (Utils.isSuccess(statusCode)) {
 						mEta.getCache().putHtml(mUuid, data, statusCode);
 						loadDataWithBaseURL(null, data, "text/html", "utf-8", null);
@@ -375,16 +384,20 @@ public final class Pageflip extends WebView {
 		}
 	};
 	
-	public void pause() {
+	public void onPause() {
 		mEta.getLocation().unSubscribe(ll);
 		// TODO: Call something to stop analytics
 	}
 	
-	public void resume() {
+	public void onResume() {
 		if (!mInitializing) {
 			mEta.getLocation().subscribe(ll);
 			//TODO: Call something to start analytics
 		}
+	}
+	
+	public void useWeinreDebugger(String hostIp, String hostPort) {
+		mDebugWeinre = "<script src=\"http://" + hostIp + ":" + hostPort + "/target/target-script-min.js\"></script>";
 	}
 	
 	public void toggleThumbnails() {

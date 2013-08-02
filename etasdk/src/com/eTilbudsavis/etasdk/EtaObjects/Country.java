@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects.Helpers;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
@@ -7,14 +7,10 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class Country implements Serializable {
+public class Country extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	private static final String S_ID = "id";
-	private static final String S_AREA_ID = "area_id";
-	private static final String S_COUNTRY = "country";
-	private static final String S_LANGUAGE = "language";
 
 	public static final String TAG = "Country";
 	
@@ -23,20 +19,9 @@ public class Country implements Serializable {
 	private String mCountry;
 	private String mLanguage;
 	
-	public Country() {
-	}
+	public Country() { }
 	
-	public static Country fromJSON(String country) {
-		Country c = new Country();
-		try {
-			c = fromJSON(c, new JSONObject(country));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-		return c;
-	}
-	
+	@SuppressWarnings("unchecked")
 	public static Country fromJSON(JSONObject country) {
 		return fromJSON(new Country(), country);
 	}
@@ -46,10 +31,10 @@ public class Country implements Serializable {
 		if (country == null) return c;
 		
 		try {
-			c.setId(country.getInt(S_ID));
-			c.setAreaId(country.getInt(S_AREA_ID));
-			c.setCountry(country.getString(S_COUNTRY));
-			c.setLanguage(country.getString(S_LANGUAGE));
+			c.setId(country.getInt(EtaObject.S_ID));
+			c.setAreaId(country.getInt(EtaObject.S_AREA_ID));
+			c.setCountry(country.getString(EtaObject.S_COUNTRY));
+			c.setLanguage(country.getString(EtaObject.S_LANGUAGE));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();
@@ -64,17 +49,16 @@ public class Country implements Serializable {
 	public static JSONObject toJSON(Country c) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_ID, c.getId());
-			o.put(S_AREA_ID, c.getAreaId());
-			o.put(S_COUNTRY, c.getCountry());
-			o.put(S_LANGUAGE, c.getLanguage());
+			o.put(EtaObject.S_ID, c.getId());
+			o.put(EtaObject.S_AREA_ID, c.getAreaId());
+			o.put(EtaObject.S_COUNTRY, c.getCountry());
+			o.put(EtaObject.S_LANGUAGE, c.getLanguage());
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
 		return o;
 	}
-	
 	
 	public int getId() {
 		return mId;

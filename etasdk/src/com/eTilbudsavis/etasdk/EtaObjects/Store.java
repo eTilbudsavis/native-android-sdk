@@ -8,14 +8,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Branding;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Country;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 
 
-public class Store extends EtaObject implements Serializable {
+public class Store extends EtaErnObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -48,21 +46,7 @@ public class Store extends EtaObject implements Serializable {
 	/** Endpoint for fast searching stores */
 	public static final String ENDPOINT_QUICK_SEARCH = Endpoint.STORE_QUICK_SEARCH;
 
-	private static final String S_ID = "id";
-	private static final String S_ERN = "ern";
-	private static final String S_STREET = "street";
-	private static final String S_CITY = "city";
-	private static final String S_ZIP_CODE = "zip_code";
-	private static final String S_COUNTRY = "country";
-	private static final String S_LATITUDE = "latitude";
-	private static final String S_LONGITUDE = "longitude";
-	private static final String S_DEALER_URL = "dealer_url";
-	private static final String S_DEALER_ID = "dealer_id";
-	private static final String S_BRANDING = "branding";
-	private static final String S_CONTACT = "contact";
 	
-	private String mId;
-	private String mErn;
 	private String mStreet;
 	private String mCity;
 	private String mZipcode;
@@ -76,8 +60,7 @@ public class Store extends EtaObject implements Serializable {
 	
 	private Dealer mDealer;
 
-	public Store() {
-	}
+	public Store() { }
 
 	@SuppressWarnings("unchecked")
 	public static ArrayList<Store> fromJSON(JSONArray stores) {
@@ -148,24 +131,6 @@ public class Store extends EtaObject implements Serializable {
 		return o;
 	}
 	
-	public Store setId(String id) {
-		mId = id;
-		return this;
-	}
-
-	public String getId() {
-		return mId;
-	}
-
-	public String getErn() {
-		return mErn;
-	}
-
-	public Store setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-
 	public Store setStreet(String street) {
 		mStreet = street;
 		return this;

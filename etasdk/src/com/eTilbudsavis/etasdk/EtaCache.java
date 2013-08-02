@@ -13,7 +13,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.ResponseWrapper;
+import com.eTilbudsavis.etasdk.EtaObjects.ResponseWrapper;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class EtaCache implements Serializable {

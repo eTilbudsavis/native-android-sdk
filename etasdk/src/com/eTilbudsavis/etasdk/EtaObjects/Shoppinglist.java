@@ -1,24 +1,20 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Share;
+import com.eTilbudsavis.etasdk.ShoppinglistManager;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Shoppinglist extends EtaObject implements Serializable {
+public class Shoppinglist extends EtaErnObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -30,31 +26,19 @@ public class Shoppinglist extends EtaObject implements Serializable {
 	public static final String EMPTY_TICKED = "ticked";
 	public static final String EMPTY_UNTICKED = "unticked";
 	
-	public static final int STATE_INIT = 0;
-	public static final int STATE_SYNCHRONIZING = 1;
-	public static final int STATE_SYNCHRONIZED = 2;
-	public static final int STATE_OFFLINE = 2;
-	public static final int STATE_ERROR = 3;
-	public static final int STATE_DELETING = 4;
-	public static final int STATE_DELETED = 5;
-	
-	@SuppressLint("SimpleDateFormat")
-	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
-
 	// server vars
-	private String mId = "";
-	private String mErn = "";
 	private String mName = "";
 	private String mAccess = ACCESS_PRIVATE;
-	private long mModified = 0L;
+	private Date mModified = null;
 	private Share mOwner = new Share();
 	
 	// local vars
-	private int mState = STATE_INIT;
+	private int mState;
 	
 	private Shoppinglist() {
 		setId(Utils.createUUID());
-		setModified(System.currentTimeMillis());
+		setModified(new Date());
+		setState(ShoppinglistManager.STATE_TO_SYNC);
 	}
 
 	public static Shoppinglist fromName(String name) {
@@ -98,7 +82,7 @@ public class Shoppinglist extends EtaObject implements Serializable {
 			sl.setName(shoppinglist.getString(S_NAME));
 			sl.setAccess(shoppinglist.getString(S_ACCESS));
 			sl.setModified(shoppinglist.getString(S_MODIFIED));
-			sl.setOwner(Share.fromJSON(shoppinglist.getString(S_OWNER)));
+			sl.setOwner(Share.fromJSON(shoppinglist.getJSONObject(S_OWNER)));
 			
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
@@ -109,30 +93,12 @@ public class Shoppinglist extends EtaObject implements Serializable {
 	
 	public Bundle getApiParams() {
 		Bundle apiParams = new Bundle();
-		apiParams.putString(S_MODIFIED, getModifiedString());
+		apiParams.putString(S_MODIFIED, Utils.formatDate(mModified));
 		apiParams.putString(S_NAME, getName());
 		apiParams.putString(S_ACCESS, getAccess());
 		return apiParams;
 	}
 	
-	public String getId() {
-		return mId;
-	}
-
-	public Shoppinglist setId(String id) {
-		mId = id;
-		return this;
-	}
-
-	public String getErn() {
-		return mErn;
-	}
-
-	public Shoppinglist setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-
 	public String getName() {
 		return mName;
 	}
@@ -151,15 +117,11 @@ public class Shoppinglist extends EtaObject implements Serializable {
 		return this;
 	}
 
-	public long getModified() {
+	public Date getModified() {
 		return mModified;
 	}
 
-	public String getModifiedString() {
-		return sdf.format(new Date(mModified));
-	}
-
-	public Shoppinglist setModified(long time) {
+	public Shoppinglist setModified(Date time) {
 		mModified = time;
 		return this;
 	}
@@ -169,51 +131,13 @@ public class Shoppinglist extends EtaObject implements Serializable {
 	}
 	
 	public Shoppinglist setState(int state) {
-		if (STATE_INIT <= state && state <= STATE_DELETED) {
+		if (ShoppinglistManager.STATE_TO_SYNC <= state && state <= ShoppinglistManager.STATE_ERROR)
 			mState = state;
-		}
-		return this;
-	}
-	
-	public boolean isStateSynchronized() {
-		return mState == STATE_SYNCHRONIZED;
-	}
-
-	public boolean isStateSynchronizing() {
-		return mState == STATE_SYNCHRONIZING;
-	}
-
-	public boolean isStateDeleted() {
-		return mState == STATE_DELETED;
-	}
-
-	public boolean isStateInitial() {
-		return mState == STATE_INIT;
-	}
-
-	public boolean isStateOffline() {
-		return mState == STATE_OFFLINE;
-	}
-
-	public boolean isStateError() {
-		return mState == STATE_ERROR;
-	}
-
-	public Shoppinglist setModifiedFromJSON(JSONObject time) {
-		try {
-			setModified(time.getString(S_MODIFIED));
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
 		return this;
 	}
 	
 	public Shoppinglist setModified(String time) {
-		try {
-			mModified = sdf.parse(time).getTime();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		mModified = Utils.parseDate(time);
 		return this;
 	}
 	
@@ -242,8 +166,8 @@ public class Shoppinglist extends EtaObject implements Serializable {
 		return mId.equals(sl.getId()) &&
 				mErn.equals(sl.getErn()) &&
 				mAccess.equals(sl.getAccess()) &&
-				mModified == sl.getModified() &&
-				mState == sl.getState() &&
+				mModified.equals(sl.getModified()) &&
+//				mState == sl.getState() &&
 				mOwner.equals(sl.getOwner()) &&
 				mName.equals(sl.getName());
 	}

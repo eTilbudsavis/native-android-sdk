@@ -1,8 +1,6 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -11,67 +9,58 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.ShoppinglistManager;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class ShoppinglistItem extends EtaObject implements Comparable<ShoppinglistItem>, Serializable {
+public class ShoppinglistItem extends EtaErnObject implements Comparable<ShoppinglistItem>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "ShoppinglistItem";
 	
-	private static final String S_ID = "id";
-	private static final String S_TICK = "tick";
-	private static final String S_OFFER_ID = "offer_id";
-	private static final String S_COUNT = "count";
-	private static final String S_DESCRIPTION = "description";
-	private static final String S_SHOPPINGLIST_ID = "shopping_list_id";
-	private static final String S_ERN = "ern";
-	private static final String S_CREATOR = "creator";
-	private static final String S_MODIFIED = "modified";
-
-	public static final int STATE_INIT = 0;
-	public static final int STATE_SYNCHRONIZING = 1;
-	public static final int STATE_SYNCHRONIZED = 2;
-	public static final int STATE_ERROR = 3;
-	public static final int STATE_DELETING = 4;
-	public static final int STATE_DELETED = 5;
-	
-	@SuppressLint("SimpleDateFormat")
-	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
-
 	// Server vars
-	private String mId = "";
 	private boolean mTick = false;
-	private String mOfferId = "";
+	private String mOfferId;
 	private int mCount = 1;
-	private String mDescription = "";
-
-	/** @deprecated */
+	private String mDescription;
 	private String mShoppinglistIdDepricated = "";
-	
-	private String mErn = "";
 	private String mCreator = "";
-	private long mModified = 0L;
-	private int mState = STATE_INIT;
-	
-	// local vars
+	private Date mModified = null;
+	private int mState;
 	private Offer mOffer = null;
 	private String mShoppinglistId = "";
 
 	public ShoppinglistItem() {
 		setId(Utils.createUUID());
-		setModified(System.currentTimeMillis());
+		setModified(new Date());
+		setState(ShoppinglistManager.STATE_TO_SYNC);
+	}
+	
+	public boolean isState(int mask) {
+		return (mState & mask) == mask;
+	}
+	
+	public void setbState(int mask) {
+		mState |= mask;
+	}
+	
+	public void toggle(int mask) {
+		mState ^= mask;
 	}
 	
 	public ShoppinglistItem(Shoppinglist shoppinglist, String description) {
-		setId(Utils.createUUID());
-		setModified(System.currentTimeMillis());
+		this();
 		setDescription(description);
 		setShoppinglistId(shoppinglist.getId());
+	}
+
+	public ShoppinglistItem(Shoppinglist shoppinglist, Offer offer) {
+		this();
+		setShoppinglistId(shoppinglist.getId());
+		setOffer(offer);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -99,8 +88,8 @@ public class ShoppinglistItem extends EtaObject implements Comparable<Shoppingli
 	}
 
 	private static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem, String shoppinglistId) {
-		if (sli == null) sli = new ShoppinglistItem();
-		if (shoppinglistItem == null) return sli;
+		
+		Utils.logd(TAG, shoppinglistItem.toString());
 		
 		try {
 			sli.setId(shoppinglistItem.getString(S_ID));
@@ -111,7 +100,7 @@ public class ShoppinglistItem extends EtaObject implements Comparable<Shoppingli
 			sli.setShoppinglistIdDepricated(shoppinglistItem.getString(S_SHOPPINGLIST_ID));
 			sli.setErn(shoppinglistItem.getString(S_ERN));
 			sli.setCreator(shoppinglistItem.getString(S_CREATOR));
-			sli.setModified(shoppinglistItem.getString(S_MODIFIED));
+			sli.setModified(Utils.parseDate(shoppinglistItem.getString(S_MODIFIED)));
 			sli.setShoppinglistId(shoppinglistId);
 		} catch (JSONException e) {
 			if (Eta.DEBUG) e.printStackTrace();
@@ -121,17 +110,6 @@ public class ShoppinglistItem extends EtaObject implements Comparable<Shoppingli
 	
 	public String getTitle() {
 		return mOffer == null ? mDescription : mOffer.getHeading();
-	}
-
-	
-	
-	public String getId() {
-		return mId;
-	}
-
-	public ShoppinglistItem setId(String id) {
-		mId = id;
-		return this;
 	}
 
 	public String getDescription() {
@@ -208,34 +186,12 @@ public class ShoppinglistItem extends EtaObject implements Comparable<Shoppingli
 		return this;
 	}
 
-	public String getErn() {
-		return mErn;
-	}
-
-	public ShoppinglistItem setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-
-	public long getModified() {
+	public Date getModified() {
 		return mModified;
 	}
 
-	public String getModifiedString() {
-		return sdf.format(new Date(mModified));
-	}
-
-	public ShoppinglistItem setModified(long time) {
+	public ShoppinglistItem setModified(Date time) {
 		mModified = time;
-		return this;
-	}
-
-	public ShoppinglistItem setModified(String time) {
-		try {
-			mModified = sdf.parse(time).getTime();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
 		return this;
 	}
 
@@ -244,21 +200,26 @@ public class ShoppinglistItem extends EtaObject implements Comparable<Shoppingli
 	}
 	
 	public ShoppinglistItem setState(int state) {
-		if (STATE_INIT <= state && state <= STATE_DELETED) {
+		if (ShoppinglistManager.STATE_TO_SYNC <= state ||
+			state <= ShoppinglistManager.STATE_ERROR)
 			mState = state;
-		}
 		return this;
 	}
 	
 	public Bundle getApiParams() {
-
+		
 		Bundle apiParams = new Bundle();
 		apiParams.putString(S_DESCRIPTION, getDescription());
 		apiParams.putInt(S_COUNT, getCount());
 		apiParams.putBoolean(S_TICK, isTicked());
-		apiParams.putString(S_OFFER_ID, getOfferId());
-		apiParams.putString(S_MODIFIED, getModifiedString());
-
+		apiParams.putString(S_OFFER_ID, getOfferId() == null ? "" : getOfferId());
+		Utils.logd(TAG, mModified.toLocaleString());
+		apiParams.putString(S_MODIFIED, Utils.formatDate(getModified()));
+		
+		apiParams.putString(S_SHOPPINGLIST_ID, getShoppinglistIdDepricated());
+//		apiParams.putString(S_ERN, getErn());
+//		apiParams.putString(S_CREATOR, getCreator());
+		
 		return apiParams;
 	}
 

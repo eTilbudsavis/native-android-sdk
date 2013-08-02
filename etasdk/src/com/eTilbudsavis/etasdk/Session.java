@@ -1,22 +1,20 @@
 package com.eTilbudsavis.etasdk;
 
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
+import com.eTilbudsavis.etasdk.EtaObjects.Permission;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Permission;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -33,24 +31,20 @@ public class Session implements Serializable {
 	
 	public static final String TAG = "Session";
 
-	public static final String PREFS_SESSION = "session";
-	public static final String PREFS_SESSION_USER = "session_user";
-	public static final String PREFS_SESSION_PASS = "session_pass";
-
 	/** API v2 Session endpoint */
 	public static final String ENDPOINT = Endpoint.SESSIONS;
 	
-	@SuppressLint("SimpleDateFormat")
-	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
-	
 	private JSONObject mJson = null;
 	private String mToken = null;
-	private long mExpires = 0L;
+	private Date mExpires = new Date(0L);
 	private User mUser = null;
 	private Permission mPermission = null;
 	private String mProvider;
 	private String mUserStr = null;
 	private String mPassStr = null;
+	private String mFacebookToken = null;
+	
+	private Object lock = new Object();
 	
 	private Eta mEta;
 	private boolean mIsUpdating = false;
@@ -60,27 +54,19 @@ public class Session implements Serializable {
 	public Session(Eta eta) {
 		mEta = eta;
 		mUser = new User();
+		
 	}
 	
-	public void start() {
+	public void init() {
 
-		// Try to get a session from SharedPreferences, and check if it's okay
-		// If it doesn't exist or is invalid then update it.
-		String sessionJson = mEta.getPrefs().getString(PREFS_SESSION, null);
-		mUserStr = mEta.getPrefs().getString(PREFS_SESSION_USER, null);
-		mPassStr = mEta.getPrefs().getString(PREFS_SESSION_PASS, null);
-		if (sessionJson == null) {
+		JSONObject json = mEta.getSettings().getSessionJson();
+		mUserStr = mEta.getSettings().getSessionUser();
+		mPassStr = mEta.getSettings().getSessionPass();
+		mFacebookToken = mEta.getSettings().getSessionFacebook();
+		if (json == null) {
 			update();
 		} else {
-			try {
-				set(new JSONObject(sessionJson));
-			} catch (JSONException e) {
-				if (Eta.DEBUG)
-					e.printStackTrace();
-			}
-			if (isExpired()) {
-				update();
-			} 
+			set(json);
 		}
 
 	}
@@ -96,34 +82,34 @@ public class Session implements Serializable {
 		    mPermission = Permission.fromJSON(session.getJSONObject(S_PERMISSIONS));
 		    mProvider = session.getString(S_PROVIDER);
 		    mJson = session;
-			saveJSON();
+		    mEta.getSettings().setSessionJson(mJson);
 
-			if (!mQueue.isEmpty()) {
-				for (Api a : mQueue) {
-					mQueue.remove(a);
-					a.execute();
-				}
-			}
-			
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 		
+	    if (isExpired()) {
+	    	update();
+	    } else {
+	    	for (Api a : mQueue) {
+				mQueue.remove(a);
+				a.execute();
+			}
+	    }
+		
 	}
 	
-	private void saveJSON() {
-		new Thread() {
-	        public void run() {
-	        	mEta.getPrefs().edit().putString(PREFS_SESSION, mJson.toString()).commit();
-	        }
-		}.start();
-	}
-	
-	public void login(String user, String password, final JsonObjectListener listener) {
-		// Save user and pass to preferences
-		mEta.getPrefs().edit().putString(PREFS_SESSION_USER, user).putString(PREFS_SESSION_PASS, password).commit();
+	public void login(String user, String password, JsonObjectListener listener) {
 		mUserStr = user;
 		mPassStr = password;
+		mEta.getSettings().setSessionUser(mUserStr);
+		mEta.getSettings().setSessionPass(mPassStr);
+		update(listener);
+	}
+	
+	public void loginFacebook(String facebookAccessToken, JsonObjectListener listener) {
+		mFacebookToken = facebookAccessToken;
+		mEta.getSettings().setSessionFacebook(facebookAccessToken);
 		update(listener);
 	}
 	
@@ -135,10 +121,15 @@ public class Session implements Serializable {
 
 		if (Utils.isSuccess(statusCode)) {
 			set(data);
+			if (mUser.isLoggedIn()) {
+				mEta.getShoppinglistManager().startSync();
+			}
 		} else {
 			Utils.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
 		}
-		mIsUpdating = false;
+		synchronized (lock) {
+			mIsUpdating = false;
+		}
 		notifySubscribers();
 	}
 	
@@ -147,14 +138,20 @@ public class Session implements Serializable {
 	}
 	
 	private synchronized void update(final JsonObjectListener listener) {
-		if (mIsUpdating)
-			return;
+
+		synchronized (lock) {
+			if (mIsUpdating)
+				return;
 		
-		mIsUpdating = true;
+			mIsUpdating = true;
+		}
+		
 		Bundle b = new Bundle();
 		if (mUserStr != null && mPassStr != null) {
 			b.putString(Params.EMAIL, mUserStr);
 			b.putString(Params.PASSWORD, mPassStr);
+		} else if (mFacebookToken != null) {
+			b.putString(Params.FACEBOOK_TOKEN, mFacebookToken);
 		}
 		JsonObjectListener session = new JsonObjectListener() {
 			
@@ -163,7 +160,7 @@ public class Session implements Serializable {
 				if (listener != null) listener.onComplete(statusCode, data, error);
 			}
 		};
-		mEta.api().setUseLocation(false).post(Session.ENDPOINT, session, b).execute();
+		mEta.api().post(Session.ENDPOINT, session, b).execute();
 	}
 	
 	/**
@@ -212,7 +209,7 @@ public class Session implements Serializable {
 	}
 	
 	public boolean isExpired() {
-		return mExpires < (System.currentTimeMillis() + Utils.MINUTE_IN_MILLIS);
+		return mExpires.getTime() < (System.currentTimeMillis() + Utils.MINUTE_IN_MILLIS);
 	}
 
 	public void addToQueue(Api api) {
@@ -226,8 +223,10 @@ public class Session implements Serializable {
 	 */
 	public synchronized void update(String headerToken, String headerExpires) {
 		
-		if (mIsUpdating)
-			return;
+		synchronized (lock) {
+			if (mIsUpdating)
+				return;
+		}
 		
 		if (mJson == null) {
 			update();
@@ -241,15 +240,12 @@ public class Session implements Serializable {
 				set(mJson);
 				return;
 			}
-			long expire = ( sdf.parse(headerExpires).getTime() - Utils.DAY_IN_MILLIS );
-			if ( expire < System.currentTimeMillis()) {
+			if ( ( Utils.parseDate(headerExpires).getTime() - Utils.DAY_IN_MILLIS ) < System.currentTimeMillis()) {
 				update();
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		} 
 	}
 	
 	/**
@@ -257,7 +253,11 @@ public class Session implements Serializable {
 	 * A new {@link #login(String, String) login} is needed to get access to user stuff again.
 	 */
 	public synchronized void signout(final JsonObjectListener listener) {
-		mIsUpdating = true;
+		
+		synchronized (lock) {
+			mIsUpdating = true;
+		}
+		
 		clearUser();
 		Bundle b = new Bundle();
 		b.putString(Params.EMAIL, "");
@@ -273,11 +273,12 @@ public class Session implements Serializable {
 	}
 	
 	private void clearUser() {
-		mEta.getPrefs().edit()
-		.putString(PREFS_SESSION_USER, null)
-		.putString(PREFS_SESSION_PASS, null).commit();
 		mUserStr = null;
 		mPassStr = null;
+		mFacebookToken = null;
+		mEta.getSettings().setSessionUser(mUserStr);
+		mEta.getSettings().setSessionPass(mPassStr);
+		mEta.getSettings().setSessionFacebook(mFacebookToken);
 		mUser = new User();
 	}
 	
@@ -288,11 +289,11 @@ public class Session implements Serializable {
 	public void invalidate(final JsonObjectListener listener) {
 		mJson = null;
 		mToken = null;
-		mExpires = 0L;
+		mExpires = null;
 		mPermission = null;
 		mProvider = null;
 		mSubscribers = new ArrayList<Session.SessionListener>();
-		mEta.getPrefs().edit().putString(PREFS_SESSION, null).commit();
+		mEta.getSettings().setSessionJson(mJson);
 		clearUser();
 		JsonObjectListener session = new JsonObjectListener() {
 			
@@ -340,25 +341,17 @@ public class Session implements Serializable {
 	}
 
 	public Session setExpires(String time) {
-	    try {
-			mExpires = sdf.parse(time).getTime();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+	    mExpires = Utils.parseDate(time);
 	    return this;
 	}
 
-	public Session setExpires(long time) {
+	public Session setExpires(Date time) {
 	    mExpires = time;
 	    return this;
 	}
 
-	public long getExpire() {
+	public Date getExpire() {
 		return mExpires;
-	}
-
-	public String getExpireString() {
-		return sdf.format(mExpires);
 	}
 
 	public Session subscribe(SessionListener listener) {
@@ -394,7 +387,7 @@ public class Session implements Serializable {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getClass().getSimpleName()).append("[")
 		.append("token=").append(mToken)
-		.append(", expires=").append(getExpireString());
+		.append(", expires=").append(Utils.formatDate(getExpire()));
 		
 		if (everything) {
 			sb.append(", user=").append(mUser == null ? "null" : mUser.toString(everything))

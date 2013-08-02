@@ -1,6 +1,6 @@
 package com.eTilbudsavis.sdkdemo;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONObject;
 
@@ -10,15 +10,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.eTilbudsavis.etasdk.Api;
-import com.eTilbudsavis.etasdk.Api.CallbackCatalogList;
+import com.eTilbudsavis.etasdk.Api.ListListener;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Pageflip;
+import com.eTilbudsavis.etasdk.Pageflip.PageflipListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
-import com.eTilbudsavis.etasdk.Pageflip.PageflipListener;
-import com.eTilbudsavis.etasdk.Session.SessionListener;
-import com.eTilbudsavis.etasdk.Tools.Utilities;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 import com.eTilbudsavis.sdkdemo.helpers.Keys;
 import com.etilbudsavis.sdkdemo.R;
 
@@ -28,55 +26,40 @@ public class CatalogViewer extends Activity {
 	Eta mEta;
 	Pageflip pf;
 
-	// The session listener (triggered on session events)
-    SessionListener sl = new SessionListener() {
-		
-		@Override
-		public void onUpdate() {
-			if (!mEta.getSession().isExpired()) {
-				
-				// If the session is ready, unsubscribe this listener
-				// and get a list of catalogs.
-				mEta.getSession().unSubscribe(this);
-				mEta.getCatalogList(cbcl).execute();
-			}
-		}
-	};
-
 	// A catalogs listener, 
-	Api.CallbackCatalogList cbcl = new CallbackCatalogList() {
+	ListListener<Catalog> catalogListener = new ListListener<Catalog>() {
 		
 		@Override
-		public void onComplete(int statusCode, ArrayList<Catalog> catalogs,
-				EtaError error) {
+		public void onComplete(int statusCode, List<Catalog> list, EtaError error) {
 
-			if (statusCode == 200 && !catalogs.isEmpty()) {
+			if (statusCode == 200 && !list.isEmpty()) {
 				// If the callback one or more catalogs, 
 				// show the first catalog in a pageflip.
 				pf = (Pageflip)findViewById(R.id.pageflip);
-		        pf.execute(mEta, pfl, catalogs.get(0).getId());
+//				pf.setWe("192.168.1.131", "8081");
+		        pf.execute(mEta, pfl, list.get(0).getId());
 		        
 			} else {
 				
-				Tools.logd(TAG, error.toString());
+				Utils.logd(TAG, error.toString());
 				
 			}
 		}
 	};
-    
+	
 	// Pageflip listener, triggered on callbacks from the pageflip.
     PageflipListener pfl = new PageflipListener() {
 		
 		@Override
 		public void onEvent(String event, String uuid, JSONObject object) {
 			Toast.makeText(getApplicationContext(), event, Toast.LENGTH_SHORT).show();
-			Utilities.logd(TAG, event + " - " + object.toString());
+			Utils.logd(TAG, event + " - " + object.toString());
 		}
 		
 		@Override
 		public void onReady(String uuid) {
 			Toast.makeText(getApplicationContext(), "Ready", Toast.LENGTH_SHORT).show();
-			Utilities.logd(TAG, "Ready: " + uuid);
+			Utils.logd(TAG, "Ready: " + uuid);
 		}
 
 	};
@@ -90,12 +73,12 @@ public class CatalogViewer extends Activity {
         mEta = new Eta(Keys.API_KEY, Keys.API_SECRET, this).debug(true);
         
         // Set the location (This could also be set via LocationManager)
-        mEta.getLocation().set(55.63105, 12.5766, 700000, false);	// Fields Copenhagen
+        mEta.getLocation().setLatitude(55.63105);
+        mEta.getLocation().setLongitude(12.5766);
+        mEta.getLocation().setRadius(700000);
+        mEta.getLocation().setSensor(false);
         
-        // Subscribe a session listener, and start the session.
-        // As soon as the session is ready, the listener is triggered.
-        mEta.getSession().subscribe(sl).start();
-        
+		mEta.getCatalogList(catalogListener).execute();
     }
     
     @Override
@@ -113,11 +96,11 @@ public class CatalogViewer extends Activity {
     	switch (item.getItemId()) {
 
     	case 0:
-    		pf.togglePagelist();
+    		pf.toggleThumbnails();
     		break;
 
     	case 1:
-    		pf.togglePagelist();
+    		pf.toggleThumbnails();
     		break;
     		
     	default:

@@ -2,15 +2,15 @@ package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
-import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
-import com.eTilbudsavis.etasdk.Utils.Utils;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
+import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class DbHelper extends SQLiteOpenHelper {
 
@@ -18,9 +18,12 @@ public class DbHelper extends SQLiteOpenHelper {
 	
 	private static final String DB_NAME = "shoppinglist.db";
 	private static final int DB_VERSION = 1;
-	
+
 	public static final String SL = "shoppinglists";
 	public static final String SLI = "shoppinglistitems";
+	
+	public static final String SL_OFFLINE = "shoppinglists_offline";
+	public static final String SLI_OFFLINE = "shoppinglistitems_offline";
 	
 	public static final String ID = "id";
 	public static final String MODIFIED = "modified";
@@ -36,47 +39,54 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String TICK = "tick";
 	public static final String OFFER_ID = "offer_id";
 	public static final String CREATOR = "creator";
+	public static final String SHOPPINGLIST_ID_DEP = "shopping_list_id_dep";
 	public static final String SHOPPINGLIST_ID = "shopping_list_id";
 
 	private SQLiteDatabase mDatabase;
+	private Eta mEta;
 	
 	// Shoppinglist table
-	private static final String DB_CREATE_SL = 
-		"create table if not exists " + SL + "(" + 
-		ID + " text primary key, " + 
-		MODIFIED + " text not null, " + 
-		ERN + " text, " + 
-		NAME + " text not null, " + 
-		ACCESS + " text not null, " + 
-		STATE + " integer not null, " + 
-		OWNER_USER + " text, " + 
-		OWNER_ACCESS + " text, " + 
-		OWNER_ACCEPTED + " integer " + 
-		");";
-
-	// Shoppinglist item table
-	private static final String DB_CREATE_SLI = 
-		"create table if not exists " + SLI + "(" + 
-		ID + " text primary key, " + 
-		ERN + " text not null, " + 
-		MODIFIED + " text not null, " + 
-		DESCRIPTION + " text, " + 
-		COUNT + " integer not null, " + 
-		TICK + " integer not null, " + 
-		OFFER_ID + " text, " + 
-		CREATOR + " text not null, " + 
-		SHOPPINGLIST_ID + " text not null, " + 
-		STATE + " integer not null " + 
-		");";
-
-	public DbHelper(Context context) {
+	private String dbCreateSL(String name) {
+		return "create table if not exists " + name + "(" + 
+				ID + " text primary key, " + 
+				MODIFIED + " text not null, " + 
+				ERN + " text, " + 
+				NAME + " text not null, " + 
+				ACCESS + " text not null, " + 
+				STATE + " integer not null, " + 
+				OWNER_USER + " text, " + 
+				OWNER_ACCESS + " text, " + 
+				OWNER_ACCEPTED + " integer " + 
+				");";
+	}
+	
+	private String dbCreateSLI(String name) {
+		return "create table if not exists " + name + "(" + 
+				ID + " text primary key, " + 
+				ERN + " text not null, " + 
+				MODIFIED + " text not null, " + 
+				DESCRIPTION + " text, " + 
+				COUNT + " integer not null, " + 
+				TICK + " integer not null, " + 
+				OFFER_ID + " text, " + 
+				CREATOR + " text not null, " + 
+				SHOPPINGLIST_ID_DEP + " text not null, " + 
+				SHOPPINGLIST_ID + " text not null, " + 
+				STATE + " integer not null " + 
+				");";
+	}
+	
+	public DbHelper(Context context, Eta eta) {
 		super(context, DB_NAME, null, DB_VERSION);
+		mEta = eta;
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase database) {
-		database.execSQL(DB_CREATE_SL);
-		database.execSQL(DB_CREATE_SLI);
+		database.execSQL(dbCreateSL(SL));
+		database.execSQL(dbCreateSL(SL_OFFLINE));
+		database.execSQL(dbCreateSLI(SLI));
+		database.execSQL(dbCreateSLI(SLI_OFFLINE));
 	}
 
 	@Override
@@ -84,7 +94,9 @@ public class DbHelper extends SQLiteOpenHelper {
 		Utils.logd(TAG, "Upgrading database from version " + oldVersion + " to "
 				+ newVersion + ", which will destroy all old data");
 		db.execSQL("DROP TABLE IF EXISTS " + SL);
+		db.execSQL("DROP TABLE IF EXISTS " + SL_OFFLINE);
 		db.execSQL("DROP TABLE IF EXISTS " + SLI);
+		db.execSQL("DROP TABLE IF EXISTS " + SLI_OFFLINE);
 		onCreate(db);
 	}
 
@@ -105,7 +117,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static ContentValues slToCV(Shoppinglist sl) {
 		ContentValues c = new ContentValues();
 		c.put(ID, sl.getId());
-		c.put(MODIFIED, sl.getModifiedString());
+		c.put(MODIFIED, Utils.formatDate(sl.getModified()));
 		c.put(ERN, sl.getErn());
 		c.put(NAME, sl.getName());
 		c.put(ACCESS, sl.getAccess());
@@ -125,14 +137,15 @@ public class DbHelper extends SQLiteOpenHelper {
 		ShoppinglistItem sli = new ShoppinglistItem();
 		sli.setId(cursor.getString(0));
 		sli.setErn(cursor.getString(1));
-		sli.setModified(cursor.getLong(2));
+		sli.setModified(Utils.parseDate(cursor.getString(2)));
 		sli.setDescription(cursor.getString(3));
 		sli.setCount(cursor.getInt(4));
 		sli.setTick(0 < cursor.getInt(5));
 		sli.setOfferId(cursor.getString(6));
 		sli.setCreator(cursor.getString(7));
-		sli.setShoppinglistId(cursor.getString(8));
-		sli.setState(cursor.getInt(9));
+		sli.setShoppinglistIdDepricated(cursor.getString(8));
+		sli.setShoppinglistId(cursor.getString(9));
+		sli.setState(cursor.getInt(10));
 		return sli;
 	}
 
@@ -140,12 +153,13 @@ public class DbHelper extends SQLiteOpenHelper {
 		ContentValues c = new ContentValues();
 		c.put(ID, sli.getId());
 		c.put(ERN, sli.getErn());
-		c.put(MODIFIED, sli.getModified());
+		c.put(MODIFIED, Utils.formatDate(sli.getModified()));
 		c.put(DESCRIPTION, sli.getDescription());
 		c.put(COUNT, sli.getCount());
 		c.put(TICK, sli.isTicked());
 		c.put(OFFER_ID, sli.getOfferId());
 		c.put(CREATOR, sli.getCreator());
+		c.put(SHOPPINGLIST_ID_DEP, sli.getShoppinglistIdDepricated());
 		c.put(SHOPPINGLIST_ID, sli.getShoppinglistId());
 		c.put(STATE, sli.getState());
 		return c;
@@ -156,7 +170,10 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * If Eta.onResume() is called, there should be no need to call this.
 	 */
 	public void openDB() {
-		mDatabase = getWritableDatabase();
+		Utils.logd(TAG, "Opening DB...");
+//		if (mDatabase == null || !mDatabase.isOpen()) {
+			mDatabase = getWritableDatabase();
+//		}
 	}
 	
 	/**
@@ -164,6 +181,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * If Eta.onPause() is called, there should be no need to call this.
 	 */
 	public void closeDB() {
+//		Utils.logd(TAG, "Closing DB...");
+//		Utils.printStackTrace();
 		close();
 	}
 
@@ -173,6 +192,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * This cannot be undone.
 	 */
 	public void clearDatabase() {
+//		openDB();
 		onUpgrade(mDatabase, 0, 0);
 	}
 	
@@ -182,7 +202,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public long insertList(Shoppinglist list) {
-		return mDatabase.insert(SL, null, DbHelper.slToCV(list));
+//		openDB();
+		return mDatabase.insert(getItemTable(), null, DbHelper.slToCV(list));
 	}
 
 	/**
@@ -191,7 +212,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return A cursor with a shopping list that matches the id, or empty cursor 
 	 */
 	public Cursor getList(String id) {
-		return mDatabase.query(SL, null, DbHelper.ID + "=?", new String[]{id}, null, null, null, null);
+//		openDB();
+		return mDatabase.query(getItemTable(), null, DbHelper.ID + "=?", new String[]{id}, null, null, null, null);
 	}
 
 	/**
@@ -201,6 +223,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return true if it exists, else false
 	 */
 	public boolean existsList(String id) {
+//		openDB();
 		Cursor c = getList(id);
 		boolean res = c.moveToFirst();
 		c.close();
@@ -213,7 +236,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return Cursor with shopping lists that matches name
 	 */
 	public Cursor getListFromName(String name) {
-		return mDatabase.query(SL, null, DbHelper.NAME + "=?", new String[]{name}, null, null, null);
+//		openDB();
+		return mDatabase.query(getItemTable(), null, DbHelper.NAME + "=?", new String[]{name}, null, null, null);
 	}
 	
 	/**
@@ -221,7 +245,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return Cursor with shoppinglists from db
 	 */
 	public Cursor getLists() {
-		return mDatabase.query(SL, null, null, null, null, null, null);
+//		openDB();
+		return mDatabase.query(getItemTable(), null, null, null, null, null, null);
 	}
 	
 	/**
@@ -230,7 +255,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the number of rows affected.
 	 */
 	public int deleteList(String shoppinglistId) {
-		return mDatabase.delete(SL, DbHelper.ID + "=?", new String[]{shoppinglistId});
+//		openDB();
+		return mDatabase.delete(getItemTable(), DbHelper.ID + "=?", new String[]{shoppinglistId});
 	}
 	
 	/**
@@ -239,7 +265,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public long editList(Shoppinglist list) {
-		return mDatabase.replace(SL, null, DbHelper.slToCV(list));
+//		openDB();
+		return mDatabase.replace(getItemTable(), null, DbHelper.slToCV(list));
 	}
 
 	/**
@@ -248,6 +275,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return true if all items have successfully been inserted, else false
 	 */
 	public boolean addItems(ArrayList<ShoppinglistItem> items) {
+//		openDB();
 		boolean resp = true;
 		for (ShoppinglistItem sli : items)
 			if (addItem(sli) == -1)
@@ -262,7 +290,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return A Cursor object, which is positioned before the first entry
 	 */
 	public Cursor getItem(String itemId) {
-		return mDatabase.query(SLI, null, DbHelper.ID + "=?", new String[]{itemId}, null, null, null);
+//		openDB();
+		return mDatabase.query(getItemTable(), null, DbHelper.ID + "=?", new String[]{itemId}, null, null, null);
 	}
 
 	/**
@@ -271,7 +300,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return A Cursor object, which is positioned before the first entry
 	 */
 	public Cursor getItems(Shoppinglist sl) {
-		return mDatabase.query(SLI, null, DbHelper.SHOPPINGLIST_ID + "=?", new String[]{sl.getId()}, null, null, null);
+//		openDB();
+		return mDatabase.query(getItemTable(), null, DbHelper.SHOPPINGLIST_ID + "=?", new String[]{sl.getId()}, null, null, null);
 	}
 
 	/**
@@ -280,6 +310,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return true, if it exists, else false
 	 */
 	public boolean existsItem(String id) {
+//		openDB();
 		Cursor c = getItem(id);
 		boolean res = c.moveToFirst();
 		c.close();
@@ -292,7 +323,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public long addItem(ShoppinglistItem sli) {
-		return existsItem(sli.getId()) ? -1 : mDatabase.insert(SLI, null, DbHelper.sliToCV(sli));
+//		openDB();
+		return existsItem(sli.getId()) ? -1 : mDatabase.insert(getItemTable(), null, DbHelper.sliToCV(sli));
 	}
 	
 	/**
@@ -304,11 +336,12 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return number of affected rows
 	 */
 	public int deleteItems(String shoppinglistId, Boolean state) {
+//		openDB();
 		
 		if (state == null) {
-			return mDatabase.delete(SLI, DbHelper.ID + "=?", new String[]{shoppinglistId});
+			return mDatabase.delete(getItemTable(), DbHelper.ID + "=?", new String[]{shoppinglistId});
 		} else {
-			return mDatabase.delete(SLI, DbHelper.ID + "=? AND " + DbHelper.TICK + "=?", new String[]{shoppinglistId, String.valueOf(state)});
+			return mDatabase.delete(getItemTable(), DbHelper.ID + "=? AND " + DbHelper.TICK + "=?", new String[]{shoppinglistId, String.valueOf(state)});
 		}
 	}
 
@@ -318,7 +351,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the number of rows affected
 	 */
 	public int deleteItem(String id) {
-		return mDatabase.delete(SLI, DbHelper.ID + "=?", new String[]{id});
+//		openDB();
+		return mDatabase.delete(getItemTable(), DbHelper.ID + "=?", new String[]{id});
 	}
 
 	/**
@@ -327,8 +361,16 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public long editItem(ShoppinglistItem sli) {
+//		openDB();
 		return mDatabase.replace(SLI, null, DbHelper.sliToCV(sli));
 	}
 
+	private String getItemTable() {
+		return mEta.getUser().isLoggedIn() ? SLI : SLI_OFFLINE;
+	}
+
+	private String getListTable() {
+		return mEta.getUser().isLoggedIn() ? SL : SL_OFFLINE;
+	}
 	
 }

@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects.Helpers;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
@@ -13,13 +13,6 @@ public class Branding implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	private static final String S_NAME = "name";
-	private static final String S_URL_NAME = "url_name";
-	private static final String S_WEBSITE = "website";
-	private static final String S_LOGO = "logo";
-	private static final String S_COLOR = "color";
-	private static final String S_PAGEFLIP = "pageflip";
-	
 	public static final String TAG = "Branding";
 	
 	private String mName;
@@ -29,20 +22,8 @@ public class Branding implements Serializable {
 	private Integer mColor;
 	private Pageflip mPageflip;
 	
-	public Branding() {
-	}
+	public Branding() { }
 	
-	public static Branding fromJSON(String branding) {
-		Branding b = new Branding();
-		try {
-			b = fromJSON(b, new JSONObject(branding));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-		return b;
-	}
-
 	public static Branding fromJSON(JSONObject branding) {
 		return fromJSON(new Branding(), branding);
 	}
@@ -52,12 +33,12 @@ public class Branding implements Serializable {
 		if (branding == null) return b;
 		
 		try {
-			b.setName(branding.getString(S_NAME));
-			b.setUrlName(branding.getString(S_URL_NAME));
-			b.setWebsite(branding.getString(S_WEBSITE));
-			b.setLogo(branding.getString(S_LOGO));
-			b.setColor(Color.parseColor("#"+branding.getString(S_COLOR)));
-			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(S_PAGEFLIP)));
+			b.setName(branding.getString(EtaObject.S_NAME));
+			b.setUrlName(branding.getString(EtaObject.S_URL_NAME));
+			b.setWebsite(branding.getString(EtaObject.S_WEBSITE));
+			b.setLogo(branding.getString(EtaObject.S_LOGO));
+			b.setColor(Color.parseColor("#"+branding.getString(EtaObject.S_COLOR)));
+			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(EtaObject.S_PAGEFLIP)));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();
@@ -72,12 +53,12 @@ public class Branding implements Serializable {
 	public static JSONObject toJSON(Branding b) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_NAME, b.getName());
-			o.put(S_URL_NAME, b.getUrlName());
-			o.put(S_WEBSITE, b.getWebsite());
-			o.put(S_LOGO, b.getLogo());
-			o.put(S_COLOR, b.getColorString());
-			o.put(S_PAGEFLIP, b.getPageflip().toJSON());
+			o.put(EtaObject.S_NAME, b.getName());
+			o.put(EtaObject.S_URL_NAME, b.getUrlName());
+			o.put(EtaObject.S_WEBSITE, b.getWebsite());
+			o.put(EtaObject.S_LOGO, b.getLogo());
+			o.put(EtaObject.S_COLOR, b.getColorString());
+			o.put(EtaObject.S_PAGEFLIP, b.getPageflip().toJSON());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

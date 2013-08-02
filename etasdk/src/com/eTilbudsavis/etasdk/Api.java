@@ -51,9 +51,12 @@ import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.Api.RequestType;
 import com.eTilbudsavis.etasdk.Session.SessionListener;
+import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaErnObject;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.ResponseWrapper;
+import com.eTilbudsavis.etasdk.EtaObjects.Links;
+import com.eTilbudsavis.etasdk.EtaObjects.ResponseWrapper;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
@@ -82,7 +85,27 @@ public class Api implements Serializable {
 
 	/** The default page limit for API calls */
 	public static final int DEFAULT_LIMIT = Params.DEFAULT_LIMIT;
+
+	/** Use this flag to enable and disable the usage of location, in the API call */
+	public static final int FLAG_LOCATION			= 1 << 0;
+
+	/** Use this flag to enable and disable the usage of cache, in the API call */
+	public static final int FLAG_CACHE				= 1 << 1;
+
+	/** Use this flag to enable and disable the usage of location, in the API call */
+	public static final int FLAG_DEBUG				= 1 << 2;
+
+	/** Use this flag to enable and disable the usage of location, in the API call */
+	public static final int FLAG_CANCEL				= 1 << 3;
+
+	/** Use this flag to enable and disable the usage of multiple callbacks, in the API call.
+	 * use this if you want to use cache hits only */
+	public static final int FLAG_MULTIPLE_CALLBACKS	= 1 << 4;
+
+	private static final int FLAG_SESSION_REFRESH	= 1 << 5;
 	
+	private static final int FLAG_CACHE_HIT			= 1 << 6;
+
 	/**
 	 * Expected return type.<br />
 	 * <i>API v2 currently only serves JSON</i><br>
@@ -130,18 +153,63 @@ public class Api implements Serializable {
 	private ContentType mContentType = null;
 	private List<NameValuePair> mQuery;
 	private List<Header> mHeaders;
-
-	
 	private String mId = null;
-	private boolean mSessionRefreshCall = false;
-	private boolean mCacheHit = false;
-	private boolean mMultipleCallbacks = false;
+	private int mFlags;
 
+	/**
+	 * Default constructor for API
+	 * @param Eta object with relevant information e.g. location
+	 */
+	public Api(Eta eta) {
+		mEta = eta;
+		// set default flags
+		mFlags = FLAG_LOCATION | FLAG_CACHE;
+	}
+
+	/**
+	 * Set various options for this API call.
+	 * All flags are defined with a prefix "FLAG_", so to enable debugging output, just:
+	 * {@link #enableFlag(int...) enableFlag(Api.FLAG_DEBUG, Api.CANCEL)} 
+	 * @param flags to enable
+	 * @return this API object
+	 */
+	public Api enableFlag(int... flags) {
+		for (int i = 0; i < flags.length ; i++)
+			mFlags |= flags[i];
+		return this;
+	}
+
+	/**
+	 * Set various options for this API call.
+	 * All flags are defined with a prefix "FLAG_", so to enable debugging output, just:
+	 * {@link #enableFlag(int) enableFlag(Api.FLAG_DEBUG)} 
+	 * @param flag to enable
+	 * @return this API object
+	 */
+	public Api enableFlag(int mask) {
+		mFlags |= mask;
+		return this;
+	}
 	
-	private boolean mUseLocation = true;
-	private boolean mUseCache = true;
-	private boolean mPrintDebug = false;
-	private boolean mCanceled = false;
+	/**
+	 * Ask if a specific flag is set.<br />
+	 * {@link #isFlag(int) isFlag(Api.DEBUG)} will tell you if debugging is enabled
+	 * @param flag to query for
+	 * @return
+	 */
+	public boolean isFlag(int flag) {
+		return (mFlags & flag) == flag;
+	}
+	
+	/**
+	 * Disable flags previously set.
+	 * @param flag to disable
+	 * @return
+	 */
+	public Api disableFlag(int flag) {
+		mFlags = mFlags & ~flag;
+		return this;
+	}
 	
 	/**
 	 * TODO: Write proper JavaDoc<br>
@@ -384,67 +452,7 @@ public class Api implements Serializable {
 	public List<Header> getHeaders() {
 		return mHeaders;
 	}
-
-	public Api setUseCache(boolean useCache) {
-		mUseCache = useCache;
-		return this;
-	}
 	
-	public boolean useCache() {
-		return mUseCache;
-	}
-	
-	/**
-	 * 
-	 * @param multipleCallbacks
-	 * @return
-	 */
-	public Api setMultipleCallbacks(boolean multipleCallbacks) {
-		mMultipleCallbacks = multipleCallbacks;
-		return this;
-	}
-	
-	public boolean useMultipleCallbacks() {
-		return mMultipleCallbacks = false;
-	}
-
-	/**
-	 * Whether to use location for this API call
-	 * @param useLocation
-	 * @return
-	 */
-	public Api setUseLocation(boolean useLocation) {
-		this.mUseLocation = useLocation;
-		return this;
-	}
-
-	/**
-	 * Determine whether location is being used, for this API call
-	 * @return True if location is being used, false otherwise.
-	 */
-	public boolean useLocation() {
-		return mUseLocation;
-	}
-
-	/**
-	 * Whether to print debug information to LogCat.<br><br>
-	 * Prints URL, query and headers before execute. <br>
-	 * And prints return headers, and the raw date of the reply.
-	 * @param useDebug
-	 * @return this object
-	 */
-	public Api setDebug(boolean useDebug) {
-		this.mPrintDebug = useDebug;
-		return this;
-	}
-
-	/**
-	 * Tells whether the current {@link com.etilbudsavis.etasdk.API Api()} is printing debug information
-	 */
-	public boolean isDebug() {
-		return mPrintDebug;
-	}
-
 	/**
 	 * Attempts to cancel execution of this task.<br><br>
 	 * This is just as cancelable as any other thread. (no guarantees)
@@ -452,25 +460,12 @@ public class Api implements Serializable {
 	 * @return this object
 	 */
 	public synchronized Api cancel(boolean cancleIfPossible) {
-		this.mCanceled = cancleIfPossible;
+		if (cancleIfPossible) {
+			enableFlag(FLAG_CANCEL);
+		} else {
+			disableFlag(FLAG_CANCEL);
+		}
 		return this;
-	}
-
-	/**
-	 * Has this {@link com.etilbudsavis.etasdk.API Api()} been cancelled
-	 */
-	public synchronized boolean isCanceled() {
-		return mCanceled;
-	}
-	
-	
-	
-	/**
-	 * Default constructor for API
-	 * @param Eta object with relevant information e.g. location
-	 */
-	public Api(Eta eta) {
-		mEta = eta;
 	}
 
 	public Api search(String url, ListListener<?> listener, String query) {
@@ -592,7 +587,7 @@ public class Api implements Serializable {
 		mQuery.add(Utils.getNameValuePair(API_KEY, mEta.getApiKey()));
 
 		// Add location
-		if (mUseLocation && mEta.getLocation().isSet()) {
+		if (isFlag(FLAG_LOCATION) && mEta.getLocation().isSet()) {
 			mQuery.addAll(mEta.getLocation().getQuery());
 		}
 
@@ -618,7 +613,7 @@ public class Api implements Serializable {
 	
 	private void checkCache() {
 		
-		if (!mUseCache && mRequestType != RequestType.GET)
+		if (isFlag(FLAG_CACHE) && mRequestType != RequestType.GET)
 			return;
 		
 		/**
@@ -649,7 +644,6 @@ public class Api implements Serializable {
 	private void execHttp() {
 		
 		printDebugPreExecute();
-		Utils.logd(TAG, mUri.toString());
 		
 		// Start the interwebs work stuff
 		DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -694,7 +688,7 @@ public class Api implements Serializable {
 
 			for (Header h : mHeaders)
 				request.setHeader(h);
-
+			
 			httpResponse = httpClient.execute(request);
 			int statusCode = httpResponse.getStatusLine().getStatusCode();
 			String data = EntityUtils.toString(httpResponse.getEntity(), HTTP.UTF_8);
@@ -720,7 +714,7 @@ public class Api implements Serializable {
 			
 			mEta.getCache().put(respWrapper);
 			
-			if (!mCacheHit || mMultipleCallbacks)
+			if (!isFlag(FLAG_CACHE_HIT) || isFlag(FLAG_MULTIPLE_CALLBACKS))
 				convert(respWrapper);
 		
 		// Error, try to get new session token, then do request again.
@@ -728,8 +722,8 @@ public class Api implements Serializable {
 			
 			EtaError error = EtaError.fromJSON(respWrapper.getJSONObject());
 			
-			if ( !mSessionRefreshCall && ( (error.getCode() == 1108 || error.getCode() == 1101) ) ) {
-				mSessionRefreshCall = true;
+			if ( !isFlag(FLAG_SESSION_REFRESH) && ( (error.getCode() == 1108 || error.getCode() == 1101) ) ) {
+				enableFlag(FLAG_SESSION_REFRESH);
 				mEta.getSession().subscribe(new SessionListener() {
 					
 					public void onUpdate() {
@@ -771,7 +765,7 @@ public class Api implements Serializable {
 
 	private void printDebugPreExecute() {
 
-		if (mPrintDebug) {
+		if (isFlag(FLAG_DEBUG) ) {
 			Utils.logd(TAG, "*** Pre Execute - " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
 			Utils.logd(TAG, "Url: " + mUri.toString());
 			Utils.logd(TAG, "Type: " + mRequestType.toString());
@@ -782,7 +776,7 @@ public class Api implements Serializable {
 	
 	private void printDebugPostExecute(HttpResponse httpResponse, String resp) {
 
-	    if (mPrintDebug) {
+	    if (isFlag(FLAG_DEBUG) ) {
 			Utils.logd(TAG, "*** Post Execute - " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
 			Utils.logd(TAG, "StatusCode: " + httpResponse.getStatusLine().getStatusCode());
 			Utils.logd(TAG, "Type: " + mRequestType.toString());
@@ -792,7 +786,7 @@ public class Api implements Serializable {
 				headers.append(h.getName()).append(": ").append(h.getValue()).append(", ");
 			Utils.logd(TAG, "Headers: " + headers.toString());
 
-			Utils.logd(TAG, "Object: " + (resp.length() < 200 ? resp : resp.substring(0, 199)));
+			Utils.logd(TAG, "Object: " + resp );
 	    }
 	    
 	}
@@ -804,7 +798,7 @@ public class Api implements Serializable {
 		switch (getListenerType(mListener)) {
 		
 		case ITEM: 
-			EtaObject object = EtaObject.fromJSON(resp.getJSONObject());
+			EtaObject object = EtaErnObject.fromJSON(resp.getJSONObject());
 			if (object == null) {
 				er = new EtaError();
 				er.setCode(EtaError.SDK_ERROR_MISMATCH).setMessage("").setOriginalData(resp.getString());
@@ -813,7 +807,7 @@ public class Api implements Serializable {
 			break;
 			
 		case LIST:
-			ArrayList<EtaObject> objects = EtaObject.fromJSON(resp.getJSONArray());
+			ArrayList<EtaObject> objects = EtaErnObject.fromJSON(resp.getJSONArray());
 			if (objects.size() == 0) {
 				er = new EtaError();
 				er.setOriginalData(resp.getString());
@@ -846,23 +840,23 @@ public class Api implements Serializable {
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			public void run() {
 
-				if (!isCanceled()) {
+				if (isFlag(FLAG_CANCEL)) {
 
 					switch (getListenerType(mListener)) {
 					case ITEM:
-						((ItemListener)mListener).onComplete(statusCode, (EtaObject)data, error);
+						((ItemListener)mListener).onComplete(statusCode, (EtaErnObject)data, error);
 						break;
 
 					case LIST: 
-						((ListListener)mListener).onComplete(statusCode, (ArrayList<EtaObject>)data, error); 
+						((ListListener)mListener).onComplete(statusCode, (ArrayList<EtaErnObject>)data, error); 
 						break;
 
 					case OBJECT:
-						((JsonArrayListener)mListener).onComplete(statusCode, (JSONArray)data, error);
+						((JsonObjectListener)mListener).onComplete(statusCode, (JSONObject)data, error);
 						break;
 
 					case ARRAY:
-						((JsonObjectListener)mListener).onComplete(statusCode, (JSONObject)data, error);
+						((JsonArrayListener)mListener).onComplete(statusCode, (JSONArray)data, error);
 						break;
 
 					case STRING:
@@ -903,11 +897,11 @@ public class Api implements Serializable {
 	
 	public interface ApiListener<T> { }
 
-	public interface ItemListener<T extends EtaObject> extends ApiListener<T> {
+	public interface ItemListener<T extends EtaErnObject> extends ApiListener<T> {
 		public void onComplete(int statusCode, T item, EtaError error);
 	}
 
-	public interface ListListener<T extends EtaObject> extends ApiListener<List<T>> {
+	public interface ListListener<T extends EtaErnObject> extends ApiListener<List<? extends EtaErnObject>> {
 		public void onComplete(int statusCode, List<T> list, EtaError error);
 	}
 

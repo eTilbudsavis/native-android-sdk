@@ -1,11 +1,14 @@
 package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.database.Cursor;
@@ -14,12 +17,11 @@ import android.os.Bundle;
 import com.eTilbudsavis.etasdk.Api.JsonArrayListener;
 import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
 import com.eTilbudsavis.etasdk.Api.ListListener;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaErnObject;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
-import com.eTilbudsavis.etasdk.EtaObjects.Offer;
+import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
-import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Share;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -27,38 +29,126 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 public class ShoppinglistManager {
 
 	public static final String TAG = "ShoppinglistManager";
+	
+	public static final int SYNC_SLOW = 10000;
+	public static final int SYNC_MEDIUM = 6000;
+	public static final int SYNC_FAST = 3000;
 
-	public static final String PREFS_SHOPPINGLISTMANAGER_CURRENT = "shoppinglistmanager_current";
+	public static final int STATE_TO_SYNC	= 0;
+	public static final int STATE_SYNCING	= 1;
+	public static final int STATE_SYNCED	= 2;
+	public static final int STATE_TO_DELET	= 3;
+	public static final int STATE_DELETING	= 4;
+	public static final int STATE_DELETED	= 5;
+	public static final int STATE_ERROR		= 6;
 	
 	private Eta mEta;
 	private DbHelper mDatabase;
-	private int mItemSyncInterval = 6000;
-	private int mListSyncInterval = mItemSyncInterval*3;
+	private int mSyncSpeed = SYNC_MEDIUM;
 	private String mCurrentSlId = null;
+
+	private List<QueueItem> mApiQueue = Collections.synchronizedList(new ArrayList<QueueItem>());
+	
 	private ArrayList<ShoppinglistManagerListener> mSubscribers = new ArrayList<ShoppinglistManager.ShoppinglistManagerListener>();
 	
-	private Runnable mListSync = new Runnable() {
+	private int syncCount = 0;
+	private Runnable mSyncLoop = new Runnable() {
 		
 		public void run() {
-			syncLists();
-			mEta.getHandler().postDelayed(mListSync, mListSyncInterval);
+			
+			mEta.getHandler().postDelayed(mSyncLoop, mSyncSpeed);
+			
+			if (mApiQueue.size() > 0) {
+				execApiQueue();
+			} else {		
+				if (syncCount%3 == 0) {
+					syncLists();
+				} else {
+					syncItems();
+				}
+				syncCount++;
+			}
+			
 		}
 		
 	};
 
-	private Runnable mItemSync = new Runnable() {
+	private void execApiQueue() {
+		for (QueueItem q : mApiQueue) {
+			if (q.retries > 0) {
+				q.execute();
+			} else {
+				
+			}
+		}
+	}
+	
+	private void addQueue(Api api) {
+		mApiQueue.add(new QueueItem(api));
+		execApiQueue();
+	}
+	
+	class QueueItem {
+		private int user;
+		private int retries = 5;
+		private boolean working = false;
+		private Api api;
+		private JsonObjectListener oldListener;
+		private JsonObjectListener listener = new JsonObjectListener() {
+			
+			public void onComplete(int statusCode, JSONObject item, EtaError error) {
+				
+				if (Utils.isSuccess(statusCode)) {
+					
+					mApiQueue.remove(QueueItem.this);
+					if (user == mEta.getUser().getId()) {
+						oldListener.onComplete(statusCode, item, error);
+					}
+					
+				} else if (statusCode == -1) {
+					
+					mEta.getHandler().postDelayed(new Runnable() {
+						
+						public void run() {
+							call();
+						}
+					}, 10000);
+					
+				} else {
+					mApiQueue.remove(QueueItem.this);
+					oldListener.onComplete(statusCode, item, error);
+				}
+				
+			}
+		};
 		
-		public void run() {
-			syncItems();
-			mEta.getHandler().postDelayed(mItemSync, mItemSyncInterval);
+		public QueueItem(Api api) {
+			user = mEta.getUser().getId();
+			this.api = api;
+			oldListener = (JsonObjectListener)api.getListener();
+			api.setListener(listener);
 		}
 		
-	};
+		public void execute() {
+			if (working)
+				return;
+			
+			call();
+		}
+		
+		private void call() {
+			working = true;
+			retries--;
+			api.execute();
+		}
+		
+	}
 	
 	public ShoppinglistManager(Eta eta) {
 		mEta = eta;
-		mDatabase = new DbHelper(mEta.getContext());
-		mCurrentSlId = mEta.getPrefs().getString(PREFS_SHOPPINGLISTMANAGER_CURRENT, null);
+		mDatabase = new DbHelper(mEta.getContext(), mEta);
+		mDatabase.openDB();
+		mCurrentSlId = mEta.getSettings().getShoppinglistManagerCurrent();
 	}
 
 	/**
@@ -100,7 +190,7 @@ public class ShoppinglistManager {
 	 */
 	public ShoppinglistManager setCurrentList(Shoppinglist sl) {
 		mCurrentSlId = sl.getId();
-		mEta.getPrefs().edit().putString(PREFS_SHOPPINGLISTMANAGER_CURRENT, mCurrentSlId).commit();
+		mEta.getSettings().setShoppinglistManagerCurrent(mCurrentSlId);
 		return this;
 	}
 	
@@ -147,10 +237,6 @@ public class ShoppinglistManager {
 		return list;
 	}
 
-	public void addList(String name, SyncListener listener) {
-		addList(Shoppinglist.fromName(name), listener);
-	}
-	
 	/**
 	 * Add a new shopping list.<br>
 	 * If owner haven't been set, we will assume that it is the user who is currently logged in.
@@ -159,7 +245,7 @@ public class ShoppinglistManager {
 	 * 
 	 * @param sl - the new shoppinglist to add to the database, and server
 	 */
-	public void addList(final Shoppinglist sl, SyncListener listener) {
+	public void addList(final Shoppinglist sl, final JsonObjectListener listener) {
 		
 		// Make sure the UUID does not exist, before adding it
 		while (mDatabase.existsList(sl.getId())) {
@@ -174,7 +260,7 @@ public class ShoppinglistManager {
 				sl.getOwner().setAccepted(true);
 			}
 			
-			sl.setState(Shoppinglist.STATE_SYNCHRONIZING);
+			sl.setState(STATE_SYNCING);
 			
 			// Sync online if possible
 			JsonObjectListener cb = new JsonObjectListener() {
@@ -183,25 +269,26 @@ public class ShoppinglistManager {
 //					Utils.logd(TAG, "addList", statusCode, data, error);
 					if (Utils.isSuccess(statusCode)) {
 						Shoppinglist newSl = new Shoppinglist(data);
-						newSl.setState(Shoppinglist.STATE_SYNCHRONIZED);
+						newSl.setState(STATE_SYNCED);
 						mDatabase.editList(newSl);
-						notifyListAdd(newSl.getId());
+						notifyListEdit(newSl.getId());
 					} else {
 //						Utilities.logd(TAG, error.toString());
-						sl.setState(Shoppinglist.STATE_INIT);
+						sl.setState(STATE_ERROR);
 						mDatabase.editList(sl);
-						notifyListAdd(sl.getId());
+						notifyListDelete(sl.getId());
 					}
+					listener.onComplete(statusCode, data, error);
 				}
 			};
 			
-			mEta.api().put(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), cb, sl.getApiParams()).execute();
-			
+			Api a = mEta.api().put(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), cb, sl.getApiParams());
+			addQueue(a);
 		}
 
 		// Insert the new list to DB
 		mDatabase.insertList(sl);
-
+		
 		notifyListAdd(sl.getId());
 		
 	}
@@ -212,12 +299,14 @@ public class ShoppinglistManager {
 	 * @param sl - Shopping list to be replaced
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
-	public void editList(final Shoppinglist sl, SyncListener listener) {
+	public boolean editList(final Shoppinglist sl) {
+		
+		boolean resp = false;
 		
 		if (mustSync()) {
 
-			sl.setState(Shoppinglist.STATE_SYNCHRONIZING);
-			mDatabase.editList(sl);
+			sl.setState(STATE_SYNCING);
+			resp = mDatabase.editList(sl) == -1 ? false : true;
 			
 			JsonObjectListener editItem = new JsonObjectListener() {
 				
@@ -226,10 +315,10 @@ public class ShoppinglistManager {
 					Shoppinglist s = sl;
 					if (Utils.isSuccess(statusCode)) {
 						s = new Shoppinglist(data);
-						s.setState(Shoppinglist.STATE_SYNCHRONIZED);
+						s.setState(STATE_SYNCED);
 					} else {
 						Utils.logd(TAG, error.toString());
-						s.setState(Shoppinglist.STATE_ERROR);
+						s.setState(STATE_ERROR);
 					}
 					mDatabase.editList(s);
 					notifyListEdit(s.getId());
@@ -238,15 +327,11 @@ public class ShoppinglistManager {
 			
 			mEta.api().put(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), editItem, sl.getApiParams()).execute();
 		} else {
-			mDatabase.editList(sl);
-			notifyListEdit(sl.getId());
+			resp = mDatabase.editList(sl) == -1 ? false : true;
+			if (resp)
+				notifyListEdit(sl.getId());
 		}
-	}
-
-	public void deleteList(String id, SyncListener listener) {
-		Shoppinglist sl = getList(id);
-		if (sl != null) 
-			deleteList(sl, listener);
+		return resp;
 	}
 
 	/**
@@ -256,11 +341,11 @@ public class ShoppinglistManager {
 	 * @param sl - Shopping list to delete
 	 * @return the number of rows affected.
 	 */
-	public void deleteList(final Shoppinglist sl, SyncListener listener) {
-		
+	public int deleteList(final Shoppinglist sl, final JsonObjectListener listener) {
+		int count;
 		if (mustSync()) {
 			
-			sl.setState(Shoppinglist.STATE_DELETING);
+			sl.setState(STATE_DELETING);
 			mDatabase.editList(sl);
 			
 			JsonObjectListener cb = new JsonObjectListener() {
@@ -268,23 +353,31 @@ public class ShoppinglistManager {
 				public void onComplete(int statusCode, JSONObject data, EtaError error) {
 //					Utilities.logd(TAG, "deleteList", statusCode, data, error);
 					if (Utils.isSuccess(statusCode)) {
-						mDatabase.deleteList(sl.getId());
-						mDatabase.deleteItems(sl.getId(), null);
+						if (mDatabase.deleteList(sl.getId()) > 0) {
+							mDatabase.deleteItems(sl.getId(), null);
+							notifyListDelete(sl.getId());
+						}
 					} else {
 						// TODO: What state are we in here? Server knows?
-						Utils.logd(TAG, error.toString());
-						sl.setState(Shoppinglist.STATE_ERROR);
+						Shoppinglist s = getList(sl.getId());
+						s.setState(STATE_SYNCED);
+						mDatabase.editList(s);
+						notifyListEdit(sl.getId());
 					}
+					listener.onComplete(statusCode, data, error);
 				}
 			};
 			
 			mEta.api().delete(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), cb, sl.getApiParams()).execute();
+			count = -1;
 		} else {
-			mDatabase.deleteList(sl.getId());
-			mDatabase.deleteItems(sl.getId(), null);
-			notifyListDelete(sl.getId());
+			count = mDatabase.deleteList(sl.getId());
+			if (count > 0) {
+				mDatabase.deleteItems(sl.getId(), null);
+				notifyListDelete(sl.getId());
+			}
 		}
-		
+		return count;
 	}
 
 	/**
@@ -318,11 +411,6 @@ public class ShoppinglistManager {
 		
 	}
 	
-	public long addItem(final Shoppinglist sl, final Offer offer, SyncListener listener) {
-		// TODO: Add item implementation
-		return 0L;
-	}
-	
 	/**
 	 * TODO: Check if shopping list exists, and do stuff accordingly
 	 * Add an item to a shopping list.<br>
@@ -332,7 +420,7 @@ public class ShoppinglistManager {
 	 * @param sli - shopping list item that should be added.
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
-	public long addItem(final Shoppinglist sl, final ShoppinglistItem sli, SyncListener listener) {
+	public long addItem(final Shoppinglist sl, final ShoppinglistItem sli, final JsonObjectListener listener) {
 		
 		if (mustSync()) {
 
@@ -342,21 +430,20 @@ public class ShoppinglistManager {
 //					Utilities.logd(TAG, "addItem", statusCode, data, error);
 					if (Utils.isSuccess(statusCode)) {
 						ShoppinglistItem s = ShoppinglistItem.fromJSON(data, sl.getId());
-						s.setState(ShoppinglistItem.STATE_SYNCHRONIZED);
+						s.setState(STATE_SYNCED);
 						mDatabase.editItem(s);
 						notifyItemUpdate(s.getId());
 					} else {
 						Utils.logd(TAG, error.toString());
-						sli.setState(ShoppinglistItem.STATE_ERROR);
+						sli.setState(STATE_ERROR);
 						mDatabase.editItem(sli);
 						notifyItemUpdate(sli.getId());
 					}
+					listener.onComplete(statusCode, data, error);
 				}
 			};
 			
 			mEta.api().put(Endpoint.getItemById(mEta.getUser().getId(), sl.getId(), sli.getId()), cb, sli.getApiParams()).execute();
-		} else {
-			
 		}
 		
 		return mDatabase.addItem(sli.setShoppinglistId(sl.getId()));
@@ -368,11 +455,12 @@ public class ShoppinglistManager {
 	 * shopping list items is replaced in the database, and changes is synchronized to the server if possible.
 	 * @param sli - shopping list item to edit
 	 */
-	public void editItem(final ShoppinglistItem sli, SyncListener listener) {
-		
+	public boolean editItem(final ShoppinglistItem sli, final JsonObjectListener listener) {
+		boolean resp = true;
 		if (mustSync()) {
 			
-			sli.setState(ShoppinglistItem.STATE_SYNCHRONIZING);
+			sli.setState(STATE_SYNCING);
+			resp = mDatabase.editItem(sli) == -1 ? false : true;
 
 			JsonObjectListener cb = new JsonObjectListener() {
 				
@@ -381,20 +469,25 @@ public class ShoppinglistManager {
 					ShoppinglistItem s = sli;
 					if (Utils.isSuccess(statusCode)) {
 						s = ShoppinglistItem.fromJSON(data, sli.getId());
-						s.setState(ShoppinglistItem.STATE_SYNCHRONIZED);
+						s.setState(STATE_SYNCED);
+						mDatabase.editItem(s);
+						notifyItemUpdate(s.getShoppinglistId());
 					} else {
 						Utils.logd(TAG, error.toString());
-						s.setState(ShoppinglistItem.STATE_ERROR);
+						s.setState(STATE_SYNCED);
 					}
+					listener.onComplete(statusCode, data, error);
 				}
 			};
 			
-			mEta.api().put(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams()).execute();
+			mEta.api().put(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams()).enableFlag(Api.FLAG_DEBUG).execute();
 			
 		} else {
-			
-			mDatabase.editItem(sli);
+			resp = mDatabase.editItem(sli) == -1 ? false : true;
+			if (resp)
+				notifyItemUpdate(sli.getShoppinglistId());
 		}
+		return resp;
 
 	}
 
@@ -404,10 +497,8 @@ public class ShoppinglistManager {
 	 * @param sl - shoppinglist to delete items from
 	 * @return number of affected rows
 	 */
-	public void deleteItemsTicked(Shoppinglist sl, SyncListener listener) {
-		Bundle b = new Bundle();
-		b.putString(Params.FILTER_DELETE, Shoppinglist.EMPTY_TICKED);
-		deleteItems(sl, b, listener);
+	public void deleteItemsTicked(Shoppinglist sl, final JsonObjectListener listener) {
+		deleteItems(sl, Shoppinglist.EMPTY_TICKED, listener);
 	}
 
 	/**
@@ -416,10 +507,8 @@ public class ShoppinglistManager {
 	 * @param sl - shoppinglist to delete items from
 	 * @return number of affected rows
 	 */
-	public void deleteItemsUnticked(Shoppinglist sl, SyncListener listener) {
-		Bundle b = new Bundle();
-		b.putString(Params.FILTER_DELETE, Shoppinglist.EMPTY_UNTICKED);
-		deleteItems(sl, b, listener);
+	public void deleteItemsUnticked(Shoppinglist sl, final JsonObjectListener listener) {
+		deleteItems(sl, Shoppinglist.EMPTY_UNTICKED, listener);
 	}
 
 	/**
@@ -428,42 +517,65 @@ public class ShoppinglistManager {
 	 * @param sl - shoppinglist to delete items from
 	 * @return number of affected rows
 	 */
-	public void deleteItems(Shoppinglist sl, SyncListener listener) {
-		Bundle b = new Bundle();
-		b.putString(Params.FILTER_DELETE, Shoppinglist.EMPTY_ALL);
-		deleteItems(sl, b, listener);
+	public void deleteItemsAll(Shoppinglist sl, final JsonObjectListener listener) {
+		deleteItems(sl, Shoppinglist.EMPTY_ALL, listener);
 	}
 	
 	/**
 	 * Generic method to delete all items that matches any clauses given in the <code>apiParams</code><br>
 	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
 	 * @param sl to remove items from
-	 * @param apiParams that describe what needs to be deleted
-	 * @return number of affected rows
+	 * @param whatToDelete describes what needs to be deleted
+	 * @return number of affected rows of any local call, if it synchronizes to server, it returns 0
 	 */
-	private void deleteItems(final Shoppinglist sl, Bundle apiParams, SyncListener listener) {
+	private int deleteItems(final Shoppinglist sl, final String whatToDelete, final JsonObjectListener listener) {
+		
+		Bundle b = new Bundle();
+		b.putString(Params.FILTER_DELETE, whatToDelete);
+		
+		final Boolean state =  (whatToDelete == Shoppinglist.EMPTY_TICKED) ? true : (whatToDelete == Shoppinglist.EMPTY_UNTICKED) ? false : null;
+		
+		int count = 0;
+		ArrayList<ShoppinglistItem> list = getItems(sl);
+		for (ShoppinglistItem sli : list) {
+			if (state == null) {
+				sli.setState(STATE_DELETING);
+				mDatabase.editItem(sli);
+			} else {
+				if (sli.isTicked() == state) {
+					sli.setState(STATE_DELETING);
+					mDatabase.editItem(sli);
+				}
+			}
+		}
 		
 		if (mustSync()) {
-			sl.setState(Shoppinglist.STATE_SYNCHRONIZING);
+			
 			JsonObjectListener cb = new JsonObjectListener() {
 				
 				public void onComplete(int statusCode, JSONObject data, EtaError error) {
-//					Utilities.logd(TAG, "deleteAllItems", statusCode, data, error);
+					
 					if (Utils.isSuccess(statusCode)) {
-						mDatabase.deleteItems(sl.getId(), null);
-						sl.setState(Shoppinglist.STATE_SYNCHRONIZED);
+						mDatabase.deleteItems(sl.getId(), state);
 					} else {
-						Utils.logd(TAG, error.toString());
-						sl.setState(Shoppinglist.STATE_ERROR);
+						ArrayList<ShoppinglistItem> list = getItems(sl);
+						for (ShoppinglistItem sli : list) {
+							if (sli.getState() == STATE_DELETING) {
+								sli.setState(STATE_SYNCED);
+								mDatabase.editItem(sli);
+							} 
+						}
 					}
+					listener.onComplete(statusCode, data, error);
 				}
 			};
-			mEta.api().delete(Endpoint.getListEmpty(mEta.getUser().getId(), sl.getId()), cb, apiParams).execute();
+			mEta.api().delete(Endpoint.getListEmpty(mEta.getUser().getId(), sl.getId()), cb, b).execute();
 		} else {
-			mDatabase.deleteItems(sl.getId(), null);
-			notifyItemUpdate(sl.getId());
+			count = mDatabase.deleteItems(sl.getId(), state);
 		}
-
+		notifyItemUpdate(sl.getId());
+		return count;
+		
 	}
 	
 	/**
@@ -472,24 +584,29 @@ public class ShoppinglistManager {
 	 * @param sli to delete from the db
 	 * @return the number of rows affected
 	 */
-	public int deleteItem(ShoppinglistItem sli, SyncListener listener) {
+	public int deleteItem(ShoppinglistItem sli, final JsonObjectListener listener) {
 		// TODO: Shoppinglist - Delete item from server
+		Utils.logd(TAG, "ShoppinglistManager.deleteItem() not implemented yet");
 		return mDatabase.deleteItem(sli.getId());
 	}
 
-	public void addShare(Shoppinglist sl, Share share, SyncListener listener) {
+	public void addShare(Shoppinglist sl, Share share, final JsonObjectListener listener) {
 		// TODO: Share - Add share implementation
+		Utils.logd(TAG, "ShoppinglistManager.addShare() not implemented yet");
 	}
 
-	public void deleteShare(Shoppinglist sl, Share share, SyncListener listener) {
+	public void deleteShare(Shoppinglist sl, Share share) {
 		// TODO: Share - Delete share implementation
+		Utils.logd(TAG, "ShoppinglistManager.deleteShare() not implemented yet");
 	}
 
-	public void editShare(Shoppinglist sl, Share share, SyncListener listener) {
+	public void editShare(Shoppinglist sl, Share share) {
 		// TODO: Share - Edit share implementation
+		Utils.logd(TAG, "ShoppinglistManager.editShare() not implemented yet");
 	}
 	
 	public List<Share> getShares(Shoppinglist sl) {
+		Utils.logd(TAG, "ShoppinglistManager.getShares() not implemented yet");
 		return new ArrayList<Share>();
 		// TODO: Share - get shares implementation
 	}
@@ -507,8 +624,9 @@ public class ShoppinglistManager {
 		ListListener<Shoppinglist> sll = new ListListener<Shoppinglist>() {
 			
 			public void onComplete(int statusCode, List<Shoppinglist> data, EtaError error) {
+				
 				if (Utils.isSuccess(statusCode)) {
-					mergeLists(data, getLists());
+					mergeErnObjects(data, getLists());
 				} else {
 					Utils.logd(TAG, error.toString());
 				}
@@ -517,27 +635,22 @@ public class ShoppinglistManager {
 		mEta.api().get(Endpoint.getListsByUserId(mEta.getUser().getId()), sll).execute();
 	}
 	
-	/**
-	 * Method, that will merge to sets of shopping lists and find which lists
-	 * have been edited, added and deleted. Finally it will <code>notifyListUpdate()</code>
-	 * @param newLists - The newly recieved items
-	 * @param oldLists - The old list of items
-	 */
-	private void mergeLists(List<Shoppinglist> newLists, List<Shoppinglist> oldLists) {
+	
+	private <T extends List<? extends EtaErnObject>> void mergeErnObjects(T newLists, T oldLists) {
 		
-		HashMap<String, Shoppinglist> dblist = new HashMap<String, Shoppinglist>();
-		for (Shoppinglist sl : oldLists) {
-			dblist.put(sl.getId(), sl);
+		HashMap<String, EtaErnObject> oldset = new HashMap<String, EtaErnObject>();
+		for (EtaErnObject sl : oldLists) {
+			oldset.put(sl.getId(), sl);
 		}
 
-		HashMap<String, Shoppinglist> tmplists = new HashMap<String, Shoppinglist>();
-		for (Shoppinglist sl : newLists) {
-			tmplists.put(sl.getId(), sl);
+		HashMap<String, EtaErnObject> newset = new HashMap<String, EtaErnObject>();
+		for (EtaErnObject eeo : newLists) {
+			newset.put(eeo.getId(), eeo);
 		}
 		
 		HashSet<String> union = new HashSet<String>();
-		union.addAll(tmplists.keySet());
-		union.addAll(dblist.keySet());
+		union.addAll(newset.keySet());
+		union.addAll(oldset.keySet());
 
 		List<String> added = new ArrayList<String>();
 		List<String> deleted = new ArrayList<String>();
@@ -545,11 +658,15 @@ public class ShoppinglistManager {
 
 		for (String key : union) {
 			
-			if (dblist.containsKey(key)) {
-				if (tmplists.containsKey(key)) {
-					if (!dblist.get(key).equals(tmplists.get(key))) {
+			if (oldset.containsKey(key)) {
+				if (newset.containsKey(key)) {
+					if (!oldset.get(key).equals(newset.get(key))) {
 						edited.add(key);
-						mDatabase.editList(tmplists.get(key));
+						if (newset.get(key) instanceof Shoppinglist) {
+							mDatabase.editList((Shoppinglist)newset.get(key));
+						} else if (newset.get(key) instanceof Shoppinglist) {
+							mDatabase.editItem((ShoppinglistItem)newset.get(key));
+						}
 					}
 				} else {
 					deleted.add(key);
@@ -557,7 +674,11 @@ public class ShoppinglistManager {
 				}
 			} else {
 				added.add(key);
-				mDatabase.insertList(tmplists.get(key));
+				if (newset.get(key) instanceof Shoppinglist) {
+					mDatabase.insertList((Shoppinglist)newset.get(key));
+				} else if (newset.get(key) instanceof Shoppinglist) {
+//					mDatabase.insertItem((ShoppinglistItem)newset.get(key));
+				}
 			}
 		}
 		
@@ -567,6 +688,7 @@ public class ShoppinglistManager {
 		}
 		
 		notifyListUpdate(added.isEmpty() ? null : added, deleted.isEmpty() ? null : deleted, edited.isEmpty() ? null : edited);
+		
 	}
 
 	/**
@@ -578,10 +700,10 @@ public class ShoppinglistManager {
 	public void syncItems() {
 
 		if (!mustSync()) return;
-		
+
 		for (final Shoppinglist sl : getLists()) {
-			if (!sl.isStateSynchronizing()) {
-				if (!sl.isStateSynchronized()) {
+			if (sl.getState() != STATE_SYNCING || sl.getState() != STATE_DELETING) {
+				if (sl.getState() != STATE_SYNCED) {
 					// If the list haven't synced yet, then don't ask, just do it
 					// this is the case for both new lists and modified lists
 					syncItems(sl);
@@ -595,10 +717,14 @@ public class ShoppinglistManager {
 							
 							if (Utils.isSuccess(statusCode)) {
 								// If callback says the list has been modified, then sync items
-								long oldModified = sl.getModified();
-								sl.setModifiedFromJSON(data);
-								if (oldModified < sl.getModified())
-									syncItems(sl);
+								Date oldModified = sl.getModified();
+								try {
+									sl.setModified(data.getString(Shoppinglist.S_MODIFIED));
+									if (oldModified.before(sl.getModified()))
+										syncItems(sl);
+								} catch (JSONException e) {
+									e.printStackTrace();
+								}
 							} else {
 								Utils.logd(TAG, error.toString());
 							}
@@ -620,8 +746,10 @@ public class ShoppinglistManager {
 	 * @param shoppinglist update
 	 */
 	public void syncItems(final Shoppinglist sl) {
+
+		Utils.logd(TAG, "syncItems(Shoppinglist)");
 		
-		sl.setState(Shoppinglist.STATE_SYNCHRONIZING);
+		sl.setState(STATE_SYNCING);
 		mDatabase.editList(sl);
 		
 		JsonArrayListener cb = new JsonArrayListener() {
@@ -631,10 +759,10 @@ public class ShoppinglistManager {
 				if (Utils.isSuccess(statusCode)) {
 					mDatabase.deleteItems(sl.getId(), null);
 					mDatabase.addItems(ShoppinglistItem.fromJSON(data, sl.getId()));
-					sl.setState(Shoppinglist.STATE_SYNCHRONIZED);
+					sl.setState(STATE_SYNCED);
 				} else {
 					Utils.logd(TAG, error.toString());
-					sl.setState(Shoppinglist.STATE_ERROR);
+					sl.setState(STATE_ERROR);
 				}
 				mDatabase.editList(sl);
 				notifyItemUpdate(sl.getId());
@@ -651,8 +779,7 @@ public class ShoppinglistManager {
 	 */
 	public void startSync() {
 		if (mustSync()) {
-			mListSync.run();
-			mItemSync.run();
+			mSyncLoop.run();
 		}
 	}
 	
@@ -661,8 +788,7 @@ public class ShoppinglistManager {
 	 * If Eta.onPause() is called, there should be no need to call this.
 	 */
 	public void stopSync() {
-		mEta.getHandler().removeCallbacks(mListSync);
-		mEta.getHandler().removeCallbacks(mItemSync);
+		mEta.getHandler().removeCallbacks(mSyncLoop);
 	}
 	
 	public void onResume() {
@@ -682,13 +808,9 @@ public class ShoppinglistManager {
 	 * are less subjected to change. Also time must be 3000 milliseconds or more.
 	 * @param time in milliseconds
 	 */
-	public void setSyncInterval(int time) {
-		if (time < 3000) {
-			mItemSyncInterval = 3000;
-		} else {
-			mItemSyncInterval = time;
-		}
-		mListSyncInterval = mItemSyncInterval*3;
+	public void setSyncSpeed(int time) {
+		if (time == SYNC_SLOW || time == SYNC_MEDIUM || time == SYNC_FAST )
+			mSyncSpeed = time;
 	}
 	
 	/**
@@ -725,21 +847,21 @@ public class ShoppinglistManager {
 	public ShoppinglistManager notifyListAdd(String id) {
 		List<String> list = new ArrayList<String>();
 		list.add(id);
-		notifyListUpdate( list , null, null);
+		notifyListUpdate( list , new ArrayList<String>(), new ArrayList<String>());
 		return this;
 	}
 
 	public ShoppinglistManager notifyListDelete(String id) {
 		List<String> list = new ArrayList<String>();
 		list.add(id);
-		notifyListUpdate(null, list, null);
+		notifyListUpdate(new ArrayList<String>(), list, new ArrayList<String>());
 		return this;
 	}
 
 	public ShoppinglistManager notifyListEdit(String id) {
 		List<String> list = new ArrayList<String>();
 		list.add(id);
-		notifyListUpdate(null, null, list);
+		notifyListUpdate(new ArrayList<String>(), new ArrayList<String>(), list);
 		return this;
 	}
 	
@@ -771,10 +893,6 @@ public class ShoppinglistManager {
 	public interface ShoppinglistManagerListener {
 		public void onListUpdate(List<String> addedIds, List<String> deletedIds, List<String> editedIds);
 		public void onItemUpdate(String shoppinglistId);
-	}
-	
-	public interface SyncListener {
-		public void onComplete(int statucCode, String data);
 	}
 	
 }

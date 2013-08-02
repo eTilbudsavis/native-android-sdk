@@ -16,6 +16,12 @@
         android:layout_height="wrap_content"
         android:text="Start Testing" />
 
+    <Button
+        android:id="@+id/btnWeinre"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Weinre" />
+
     <TextView
         android:id="@+id/tvDebug"
         android:layout_width="wrap_content"

@@ -13,16 +13,12 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Branding;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Dimension;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Images;
-import com.eTilbudsavis.etasdk.EtaObjects.Helpers.Pages;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Catalog extends EtaObject implements Serializable {
+public class Catalog extends EtaErnObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -94,16 +90,11 @@ public class Catalog extends EtaObject implements Serializable {
 	/** Endpoint for searching catalogs */
 	public static final String ENDPOINT_SEARCH = Endpoint.CATALOG_SEARCH;
 
-	@SuppressLint("SimpleDateFormat")
-	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
-
 	// From JSON blob
-	private String mId;
-	private String mErn;
 	private String mLabel;
 	private String mBackground;
-	private long mRunFrom = 0L;
-	private long mRunTill = 0L;
+	private Date mRunFrom;
+	private Date mRunTill;
 	private int mPageCount = 0;
 	private int mOfferCount = 0;
 	private Branding mBranding;
@@ -188,6 +179,7 @@ public class Catalog extends EtaObject implements Serializable {
 		}
 		return c;
 	}
+	
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -199,8 +191,8 @@ public class Catalog extends EtaObject implements Serializable {
 			o.put(S_ERN, c.getErn());
 			o.put(S_LABEL, c.getLabel());
 			o.put(S_BACKGROUND, c.getBackground());
-			o.put(S_RUN_FROM, c.getRunFromString());
-			o.put(S_RUN_TILL, c.getRunFromString());
+			o.put(S_RUN_FROM, Utils.formatDate(c.getRunFrom()));
+			o.put(S_RUN_TILL, Utils.formatDate(c.getRunTill()));
 			o.put(S_PAGE_COUNT, c.getPageCount());
 			o.put(S_OFFER_COUNT, c.getOfferCount());
 			o.put(S_BRANDING, c.getBranding().toJSON());
@@ -236,24 +228,6 @@ public class Catalog extends EtaObject implements Serializable {
 		mPages = c.getPages();
 	}
 
-	public Catalog setId(String id) {
-		this.mId = id;
-		return this;
-	}
-
-	public String getId() {
-		return mId;
-	}
-
-	public Catalog setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-
-	public String getErn() {
-		return mErn;
-	}
-
 	public String getLabel() {
 		return mLabel;
 	}
@@ -272,48 +246,32 @@ public class Catalog extends EtaObject implements Serializable {
 		return this;
 	}
 
-	public Catalog setRunFrom(Long time) {
+	public Catalog setRunFrom(Date time) {
 		this.mRunFrom = time;
 		return this;
 	}
 
 	public Catalog setRunFrom(String time) {
-		try {
-			mRunFrom = sdf.parse(time).getTime();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		mRunFrom = Utils.parseDate(time);
 		return this;
 	}
 
-	public Long getRunFrom() {
+	public Date getRunFrom() {
 		return mRunFrom;
 	}
 
-	public String getRunFromString() {
-		return sdf.format(new Date(mRunFrom));
-	}
-
-	public Catalog setRunTill(Long time) {
+	public Catalog setRunTill(Date time) {
 		this.mRunTill = time;
 		return this;
 	}
 
 	public Catalog setRunTill(String time) {
-		try {
-			mRunTill = sdf.parse(time).getTime();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		mRunTill = Utils.parseDate(time);
 		return this;
 	}
 
-	public Long getRunTill() {
+	public Date getRunTill() {
 		return mRunTill;
-	}
-
-	public String getRunTillString() {
-		return sdf.format(new Date(mRunTill));
 	}
 
 	public Catalog setPageCount(Integer mPageCount) {
@@ -472,8 +430,8 @@ public class Catalog extends EtaObject implements Serializable {
 		sb.append(getClass().getSimpleName()).append("[")
 		.append("branding=").append(mBranding == null ? null : mBranding.toString(everything))
 		.append(", id=").append(mId)
-		.append(", from=").append(getRunFromString())
-		.append(", till=").append(getRunTillString());
+		.append(", from=").append(Utils.formatDate(getRunFrom()))
+		.append(", till=").append(Utils.formatDate(getRunTill()));
 		if(everything) {
 			sb.append(", ern=").append(mErn)
 			.append(", background=").append(mBackground)

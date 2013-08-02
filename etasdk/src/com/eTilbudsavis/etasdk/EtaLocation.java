@@ -12,7 +12,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.location.Location;
 import android.location.LocationManager;
 
@@ -50,8 +49,6 @@ public class EtaLocation extends Location {
 	/** API v2 parameter name for bounds west. */
 	public static final String BOUND_WEST = Params.BOUND_WEST;
 
-	private static final String ADDRESS = "etasdk_loc_address";
-	private static final String TIME = "etasdk_loc_time";
 	private static final int RADIUS_MIN = 0;
 	private static final int RADIUS_MAX = 700000;
 	private static final double BOUND_DEFAULT = 0.0;
@@ -64,21 +61,22 @@ public class EtaLocation extends Location {
 	private double mBoundEast = BOUND_DEFAULT;
 	private double mBoundSouth = BOUND_DEFAULT;
 	private double mBoundWest = BOUND_DEFAULT;
-	private SharedPreferences mSharedPrefs;
+	private Eta mEta;
+	private boolean mPushNotifications = false;
 	private ArrayList<LocationListener> mSubscribers;
 
-	public EtaLocation(SharedPreferences prefs) {
+	public EtaLocation(Eta eta) {
 		super(ETA_PROVIDER);
-		mSharedPrefs = prefs;
 		mSubscribers = new ArrayList<LocationListener>();
-		fromSharedPrefs();
+		mEta = eta;
+		restoreState();
 	}
 
 	@Override
 	public void set(Location l) {
 		super.set(l);
 		mSensor = (getProvider().equals(LocationManager.GPS_PROVIDER) || getProvider().equals(LocationManager.NETWORK_PROVIDER) );
-		toSharedPrefs();
+		mPushNotifications = true;
 	}
 	
 	/**
@@ -95,7 +93,8 @@ public class EtaLocation extends Location {
 		mAddress = address;
 		setLatitude(latitude);
 		setLongitude(longitude);
-		toSharedPrefs();
+		setTime(System.currentTimeMillis());
+		save();
 		return this;
 	}
 	
@@ -106,7 +105,7 @@ public class EtaLocation extends Location {
 	 */
 	public EtaLocation setRadius(int radius) {
 		mRadius =  radius < RADIUS_MIN ? RADIUS_MIN : ( radius > RADIUS_MAX ? RADIUS_MAX : radius );
-		toSharedPrefs();
+		setTime(System.currentTimeMillis());
 		return this;
 	}
 
@@ -120,7 +119,8 @@ public class EtaLocation extends Location {
 
 	public EtaLocation setSensor(boolean sensor) {
 		mSensor = sensor;
-		toSharedPrefs();
+		setTime(System.currentTimeMillis());
+		save();
 		return this;
 	}
 	
@@ -137,7 +137,8 @@ public class EtaLocation extends Location {
 	 */
 	public EtaLocation setAddress(String address) {
 		mAddress = address;
-		toSharedPrefs();
+		setTime(System.currentTimeMillis());
+		save();
 		return this;
 	}
 	
@@ -200,7 +201,8 @@ public class EtaLocation extends Location {
 		mBoundNorth = boundNorth;
 		mBoundSouth = boundSouth;
 		mBoundWest = boundWest;
-		toSharedPrefs();
+		setTime(System.currentTimeMillis());
+		save();
 	}
 
 	/**
@@ -209,7 +211,8 @@ public class EtaLocation extends Location {
 	 */
 	public EtaLocation setBoundNorth(double boundNorth) {
 		mBoundNorth = boundNorth;
-		toSharedPrefs();
+		setTime(System.currentTimeMillis());
+		save();
 		return this;
 	}
 
@@ -219,7 +222,8 @@ public class EtaLocation extends Location {
 	 */
 	public EtaLocation setBoundEast(double boundEast) {
 		mBoundEast = boundEast;
-		toSharedPrefs();
+		setTime(System.currentTimeMillis());
+		save();
 		return this;
 	}
 
@@ -229,7 +233,7 @@ public class EtaLocation extends Location {
 	 */
 	public EtaLocation setBoundSouth(double boundSouth) {
 		mBoundSouth = boundSouth;
-		toSharedPrefs();
+		setTime(System.currentTimeMillis());
 		return this;
 	}
 
@@ -239,7 +243,8 @@ public class EtaLocation extends Location {
 	 */
 	public EtaLocation setBoundWest(double boundWest) {
 		mBoundWest = boundWest;
-		toSharedPrefs();
+		setTime(System.currentTimeMillis());
+		save();
 		return this;
 	}
 	
@@ -278,73 +283,47 @@ public class EtaLocation extends Location {
 		return query;
 	}
 
-//	public void onSaveInstanceState(Bundle savedInstanceState) {
-//		savedInstanceState.putBoolean(SENSOR, mSensor);
-//		savedInstanceState.putInt(RADIUS, mRadius);
-//		savedInstanceState.putDouble(LATITUDE, getLatitude());
-//		savedInstanceState.putDouble(LONGITUDE, getLongitude());
-//		savedInstanceState.putDouble(BOUND_EAST, mBoundEast);
-//		savedInstanceState.putDouble(BOUND_WEST, mBoundWest);
-//		savedInstanceState.putDouble(BOUND_NORTH, mBoundNorth);
-//		savedInstanceState.putDouble(BOUND_SOUTH, mBoundSouth);
-//		savedInstanceState.putString(ADDRESS, mAddress);
-//		savedInstanceState.putLong(TIME, getTime());
-//
-//	}
-//	
-//	public void onRestoreInstanceState(Bundle savedInstanceState) {
-//		mSensor = savedInstanceState.getBoolean(SENSOR);
-//		mRadius = savedInstanceState.getInt(RADIUS);
-//		setLatitude(savedInstanceState.getDouble(LATITUDE));
-//		setLongitude(savedInstanceState.getDouble(LONGITUDE));
-//		mBoundEast = savedInstanceState.getDouble(BOUND_EAST);
-//		mBoundWest = savedInstanceState.getDouble(BOUND_WEST);
-//		mBoundNorth = savedInstanceState.getDouble(BOUND_NORTH);
-//		mBoundSouth = savedInstanceState.getDouble(BOUND_SOUTH);
-//		mAddress = savedInstanceState.getString(ADDRESS);
-//		setTime(savedInstanceState.getLong(TIME));
-//	}
-	
-	private void toSharedPrefs() {
-		setTime(System.currentTimeMillis());
-		new Thread() {
-	        public void run() {
-	        	mSharedPrefs.edit()
-	    		.putBoolean(SENSOR, mSensor)
-	    		.putInt(RADIUS, mRadius)
-	    		.putFloat(LATITUDE, (float)getLatitude())
-	    		.putFloat(LONGITUDE, (float)getLongitude())
-	    		.putFloat(BOUND_EAST, (float)mBoundEast)
-	    		.putFloat(BOUND_WEST, (float)mBoundWest)
-	    		.putFloat(BOUND_NORTH, (float)mBoundNorth)
-	    		.putFloat(BOUND_SOUTH, (float)mBoundSouth)
-	    		.putString(ADDRESS, mAddress)
-	    		.putLong(TIME, getTime())
-	    		.commit();
-	        }
-		}.start();
-		
+
+	public void saveState() {
+		SharedPreferences.Editor editor = mEta.getSettings().getPrefs().edit();
+    	editor
+		.putBoolean(Settings.LOC_SENSOR, mSensor)
+		.putInt(Settings.LOC_RADIUS, mRadius)
+		.putFloat(Settings.LOC_LATITUDE, (float)getLatitude())
+		.putFloat(Settings.LOC_LONGITUDE, (float)getLongitude())
+		.putFloat(Settings.LOC_BOUND_EAST, (float)mBoundEast)
+		.putFloat(Settings.LOC_BOUND_WEST, (float)mBoundWest)
+		.putFloat(Settings.LOC_BOUND_NORTH, (float)mBoundNorth)
+		.putFloat(Settings.LOC_BOUND_SOUTH, (float)mBoundSouth)
+		.putString(Settings.LOC_ADDRESS, mAddress)
+		.putLong(Settings.LOC_TIME, getTime())
+		.commit();
 	}
 	
-	private boolean fromSharedPrefs() {
-		if (mSharedPrefs.contains(SENSOR) && mSharedPrefs.contains(RADIUS) && mSharedPrefs.contains(LATITUDE) && 
-				mSharedPrefs.contains(LONGITUDE) && mSharedPrefs.contains(BOUND_EAST) && mSharedPrefs.contains(BOUND_WEST) && 
-				mSharedPrefs.contains(BOUND_NORTH) && mSharedPrefs.contains(BOUND_SOUTH) && mSharedPrefs.contains(TIME) ) {
+	public boolean restoreState() {
+		SharedPreferences prefs = mEta.getSettings().getPrefs();
+		if (prefs.contains(Settings.LOC_SENSOR) && prefs.contains(Settings.LOC_RADIUS) && prefs.contains(Settings.LOC_LATITUDE) && 
+				prefs.contains(Settings.LOC_LONGITUDE) && prefs.contains(Settings.LOC_ADDRESS)  && prefs.contains(Settings.LOC_TIME) ) {
 			
-			mSensor = mSharedPrefs.getBoolean(SENSOR, false);
-			mRadius = mSharedPrefs.getInt(RADIUS, Integer.MAX_VALUE);
-			setLatitude(mSharedPrefs.getFloat(LATITUDE, 0f));
-			setLongitude(mSharedPrefs.getFloat(LONGITUDE, 0f));
-			mBoundEast = mSharedPrefs.getFloat(BOUND_EAST, 0f);
-			mBoundWest = mSharedPrefs.getFloat(BOUND_WEST, 0f);
-			mBoundNorth = mSharedPrefs.getFloat(BOUND_NORTH, 0f);
-			mBoundSouth = mSharedPrefs.getFloat(BOUND_SOUTH, 0f);
-			mAddress = mSharedPrefs.getString(ADDRESS, null);
-			setTime(mSharedPrefs.getLong(TIME, System.currentTimeMillis()));
+			mSensor = prefs.getBoolean(Settings.LOC_SENSOR, false);
+			mRadius = prefs.getInt(Settings.LOC_RADIUS, Integer.MAX_VALUE);
+			setLatitude(prefs.getFloat(Settings.LOC_LATITUDE, 0f));
+			setLongitude(prefs.getFloat(Settings.LOC_LONGITUDE, 0f));
+			mBoundEast = prefs.getFloat(Settings.LOC_BOUND_EAST, 0f);
+			mBoundWest = prefs.getFloat(Settings.LOC_BOUND_WEST, 0f);
+			mBoundNorth = prefs.getFloat(Settings.LOC_BOUND_NORTH, 0f);
+			mBoundSouth = prefs.getFloat(Settings.LOC_BOUND_SOUTH, 0f);
+			mAddress = prefs.getString(Settings.LOC_ADDRESS, null);
+			setTime(prefs.getLong(Settings.LOC_TIME, System.currentTimeMillis()));
 			return true;
 		} 
 		return false;
 		
+	}
+	
+	public void save() {
+		saveState();
+		notifySubscribers();
 	}
 	
 	/**
@@ -352,6 +331,9 @@ public class EtaLocation extends Location {
 	 * This object automatically notifies all subscribers on changes.
 	 */
 	public void notifySubscribers() {
+		if (!mPushNotifications)
+			return;
+		
 		for (LocationListener l : mSubscribers) {
 			try {
 				l.onLocationChange();

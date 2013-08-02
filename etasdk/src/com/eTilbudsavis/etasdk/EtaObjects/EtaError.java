@@ -10,8 +10,9 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class EtaError  implements Serializable {
+public class EtaError extends EtaObject implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -20,25 +21,18 @@ public class EtaError  implements Serializable {
 	public static final int SDK_ERROR_UNKNOWN = 0;
 	public static final int SDK_ERROR_MISMATCH = 1;
 	
-	private static final String S_ID = "id";
-	private static final String S_CODE = "code";
-	private static final String S_MESSAGE = "message";
-	private static final String S_DETAILS = "details";
-	
-	@SuppressLint("SimpleDateFormat")
-	private SimpleDateFormat sdf = new SimpleDateFormat(Eta.DATE_FORMAT);
-	
 	private String mId = new String();
 	private int mCode = 0;
 	private String mMessage = new String();
 	private String mDetails = new String();
 	private String mOrigData = new String();
-	private long mTime = 0L;
+	private Date mTime = null;
 	
 	public EtaError() {
-		mTime = System.currentTimeMillis();
+		mTime = new Date();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static EtaError fromJSON(JSONObject error) {
 		return fromJSON(new EtaError(), error);
 	}
@@ -97,7 +91,7 @@ public class EtaError  implements Serializable {
 		return this;
 	}
 
-	public EtaError setTime(long time) {
+	public EtaError setTime(Date time) {
 		mTime = time;
 		return this;
 	}
@@ -127,14 +121,10 @@ public class EtaError  implements Serializable {
 		return this;
 	}
 	
-	public long getTime() {
+	public Date getTime() {
 		return mTime;
 	}
 
-	public String getTimeString() {
-		return sdf.format(new Date(mTime));
-	}
-	
 	/**
 	 * Gives a detailed description of this object.<br>
 	 * E.g.: <code>{ id: 123xyz, code: 123xyz, message: the message, details: the details, time: 1369211987830 }</code> 
@@ -148,7 +138,7 @@ public class EtaError  implements Serializable {
 				.append(", code=").append(mCode)
 				.append(", message=").append(mMessage)
 				.append(", details=").append(mDetails)
-				.append(", time=").append(getTimeString())
+				.append(", time=").append(Utils.formatDate(getTime()))
 				.append(", original_data=").append(mOrigData)
 				.append("]").toString();
 	}

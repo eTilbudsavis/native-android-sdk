@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects.Helpers;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
@@ -9,15 +9,12 @@ import com.eTilbudsavis.etasdk.Eta;
 
 import android.graphics.Color;
 
-public class Pageflip implements Serializable {
+public class Pageflip extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Pageflip";
 	
-	public static final String S_LOGO = "logo";
-	public static final String S_COLOR = "color";
-
 	private String mLogo;
 	private int mColor = 0;
 

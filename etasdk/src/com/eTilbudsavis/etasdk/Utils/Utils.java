@@ -7,8 +7,12 @@ package com.eTilbudsavis.etasdk.Utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -46,6 +50,11 @@ public final class Utils {
 	/** A year in milliseconds */
 	public static final long YEAR_IN_MILLIS = WEEK_IN_MILLIS * 52;
 
+	/** The date format as returned from the server */
+	public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZZ";
+	
+//	public static SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
+	
 	/**
 	 * Create universally unique identifier.
 	 *
@@ -296,6 +305,20 @@ public final class Utils {
 
 	public static boolean isServerError(int statusCode) {
 		return 500 <= statusCode && statusCode < 600;
+	}
+	
+	public static Date parseDate(String date) {
+		Date d = null;
+		try {
+			d = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(date);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return d;
+	}
+
+	public static String formatDate(Date date) {
+		return new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(date);
 	}
 	
 }

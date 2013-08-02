@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects.Helpers;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class Permission implements Serializable {
+public class Permission extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -33,6 +33,7 @@ public class Permission implements Serializable {
 		return p;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Permission fromJSON(JSONObject permission) {
 		return fromJSON(new Permission(), permission);
 	}
