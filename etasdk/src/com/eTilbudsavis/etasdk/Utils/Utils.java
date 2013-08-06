@@ -156,41 +156,37 @@ public final class Utils {
 	    return hash;
 	}
 	
-	/**
-	 * Add any object to a NameValuePair.
-	 * The Object will be cast to string and URLEncoded.
-	 * @param nameValuePair NameValuePair to add data to
-	 * @param name
-	 * @param value
-	 * @return
-	 */
-	public static NameValuePair getNameValuePair(String name, Object value) {
-		return new BasicNameValuePair(name, value.toString());
-	}
-	
-	public static List<NameValuePair> bundleToNVP(Bundle b) {
-		List<NameValuePair> list = new ArrayList<NameValuePair>(b.size());
-		for (String key : b.keySet()) {
-			if (b.get(key) instanceof Bundle) {
-				list.addAll(bundleToNVP((Bundle)b.get(key)));
+	public static String bundleToQueryString( Bundle apiParams) {
+		StringBuilder result = new StringBuilder();
+		for (String key : apiParams.keySet()) {
+			if (apiParams.get(key) instanceof Bundle) {
+				logd("Utils", "Nested parameters not allowed.");
 			} else {
-				list.add(getNameValuePair(key, b.get(key)));
+				if (result.length() > 0)
+					result.append("&");
+				result.append(key);
+				result.append("=");
+				result.append(apiParams.get(key) == null ? "" : apiParams.get(key));
+				
+			}
+		}
+		
+		return result.toString();
+	}
+
+	public static List<NameValuePair> bundleToNameValuePair( Bundle apiParams) {
+		List<NameValuePair> list = new ArrayList<NameValuePair>(apiParams.size());
+		for (String key : apiParams.keySet()) {
+			if (apiParams.get(key) instanceof Bundle) {
+				logd("Utils", "Nested parameters not allowed.");
+			} else {
+				Object o = apiParams.get(key);
+				list.add(new BasicNameValuePair(key, o == null ? "" : o.toString()));
 			}
 		}
 		return list;
 	}
 	
-	public static String formatQuery ( List <? extends NameValuePair> parameters, String encoding) {
-		StringBuilder result = new StringBuilder();
-		for (NameValuePair parameter : parameters) {
-			if (result.length() > 0)
-				result.append("&");
-			result.append(parameter.getName());
-			result.append("=");
-			result.append(parameter.getValue() == null ? "" : parameter.getValue());
-		}
-		return result.toString();
-	}
 	/**
 	 * Builds the block of JavaScript parameters for injecting into a WebView.
 	 *

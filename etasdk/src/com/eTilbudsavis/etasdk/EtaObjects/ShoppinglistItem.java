@@ -21,12 +21,10 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 
 	public static final String TAG = "ShoppinglistItem";
 	
-	// Server vars
 	private boolean mTick = false;
-	private String mOfferId;
+	private String mOfferId = null;
 	private int mCount = 1;
 	private String mDescription;
-	private String mShoppinglistIdDepricated = "";
 	private String mCreator = "";
 	private Date mModified = null;
 	private int mState;
@@ -37,18 +35,6 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		setId(Utils.createUUID());
 		setModified(new Date());
 		setState(ShoppinglistManager.STATE_TO_SYNC);
-	}
-	
-	public boolean isState(int mask) {
-		return (mState & mask) == mask;
-	}
-	
-	public void setbState(int mask) {
-		mState |= mask;
-	}
-	
-	public void toggle(int mask) {
-		mState ^= mask;
 	}
 	
 	public ShoppinglistItem(Shoppinglist shoppinglist, String description) {
@@ -65,14 +51,10 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 
 	@SuppressWarnings("unchecked")
 	public static ArrayList<ShoppinglistItem> fromJSON(JSONArray shoppinglistItems) {
-		return fromJSON(shoppinglistItems, null);
-	}
-	
-	public static ArrayList<ShoppinglistItem> fromJSON(JSONArray shoppinglistItems, String shoppinglistId) {
 		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
 		try {
 			for (int i = 0 ; i < shoppinglistItems.length() ; i++ ) {
-				ShoppinglistItem sli = ShoppinglistItem.fromJSON((JSONObject)shoppinglistItems.get(i), shoppinglistId);
+				ShoppinglistItem sli = ShoppinglistItem.fromJSON((JSONObject)shoppinglistItems.get(i));
 				list.add(sli);
 			}
 			
@@ -83,25 +65,26 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		return list;
 	}
 	
-	public static ShoppinglistItem fromJSON(JSONObject shoppinglistItem, String shoppinglistId) {
-		return fromJSON(new ShoppinglistItem(), shoppinglistItem, shoppinglistId);
+	@SuppressWarnings("unchecked")
+	public static ShoppinglistItem fromJSON(JSONObject shoppinglistItem) {
+		return fromJSON(new ShoppinglistItem(), shoppinglistItem);
 	}
 
-	private static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem, String shoppinglistId) {
-		
-		Utils.logd(TAG, shoppinglistItem.toString());
-		
+	private static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem) {
 		try {
 			sli.setId(shoppinglistItem.getString(S_ID));
 			sli.setTick(shoppinglistItem.getBoolean(S_TICK));
-			sli.setOfferId(shoppinglistItem.getString(S_OFFER_ID));
+			sli.setOfferId(shoppinglistItem.isNull(S_OFFER_ID) ? null : shoppinglistItem.getString(S_OFFER_ID));
 			sli.setCount(shoppinglistItem.getInt(S_COUNT));
 			sli.setDescription(shoppinglistItem.getString(S_DESCRIPTION));
-			sli.setShoppinglistIdDepricated(shoppinglistItem.getString(S_SHOPPINGLIST_ID));
+			sli.setShoppinglistId(shoppinglistItem.getString(S_SHOPPINGLIST_ID));
 			sli.setErn(shoppinglistItem.getString(S_ERN));
 			sli.setCreator(shoppinglistItem.getString(S_CREATOR));
-			sli.setModified(Utils.parseDate(shoppinglistItem.getString(S_MODIFIED)));
-			sli.setShoppinglistId(shoppinglistId);
+			if (shoppinglistItem.isNull(S_MODIFIED)) {
+				sli.setModified(Utils.parseDate("1970-01-01T00:00:00+0000"));
+			} else {
+				sli.setModified(Utils.parseDate(shoppinglistItem.getString(S_MODIFIED)));
+			}
 		} catch (JSONException e) {
 			if (Eta.DEBUG) e.printStackTrace();
 		}
@@ -166,17 +149,6 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		return this;
 	}
 
-	/** @deprecated */
-	public String getShoppinglistIdDepricated() {
-		return mShoppinglistIdDepricated;
-	}
-
-	/** @deprecated */
-	public ShoppinglistItem setShoppinglistIdDepricated(String oldShoppinglistIdFormat) {
-		mShoppinglistIdDepricated = oldShoppinglistIdFormat;
-		return this;
-	}
-
 	public String getOfferId() {
 		return mOfferId;
 	}
@@ -212,14 +184,10 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		apiParams.putString(S_DESCRIPTION, getDescription());
 		apiParams.putInt(S_COUNT, getCount());
 		apiParams.putBoolean(S_TICK, isTicked());
-		apiParams.putString(S_OFFER_ID, getOfferId() == null ? "" : getOfferId());
-		Utils.logd(TAG, mModified.toLocaleString());
+		apiParams.putString(S_OFFER_ID, getOfferId());
 		apiParams.putString(S_MODIFIED, Utils.formatDate(getModified()));
-		
-		apiParams.putString(S_SHOPPINGLIST_ID, getShoppinglistIdDepricated());
-//		apiParams.putString(S_ERN, getErn());
-//		apiParams.putString(S_CREATOR, getCreator());
-		
+		apiParams.putString(S_CREATOR, getCreator());
+		apiParams.putString(S_SHOPPINGLIST_ID, getShoppinglistId());
 		return apiParams;
 	}
 
@@ -242,8 +210,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 				mCount == sli.getCount() &&
 				mTick == sli.isTicked() &&
 				( mOffer == null ? sli.getOffer() == null : mOffer.equals(sli.getOffer())) &&
-				mCreator.equals(sli.getCreator()) &&
-				mShoppinglistIdDepricated.equals(sli.getShoppinglistId());
+				mCreator.equals(sli.getCreator());
 	}
 
 	public static Comparator<ShoppinglistItem> TitleComparator  = new Comparator<ShoppinglistItem>() {

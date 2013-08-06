@@ -45,7 +45,12 @@ public class Pricing implements Serializable {
 		
 		try {
 			p.setPrice(pricing.getDouble(S_PRICE));
-			p.setPrePrice(pricing.getString(S_PREPRICE).equals("null") == true ? null : pricing.getDouble(S_PREPRICE));
+			if (pricing.has(S_PREPRICE)) {
+				p.setPrePrice(pricing.getString(S_PREPRICE).equals("null") == true ? null : pricing.getDouble(S_PREPRICE));
+			} else {
+				// TODO remove this pre_price hack, when server is ready
+				p.setPrePrice(pricing.getString("preprice").equals("null") == true ? null : pricing.getDouble(S_PREPRICE));
+			}
 			p.setCurrency(pricing.getString(S_CURRENCY).equals("null") == true ? null : pricing.getString(S_CURRENCY));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)

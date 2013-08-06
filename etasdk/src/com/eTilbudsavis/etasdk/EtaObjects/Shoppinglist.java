@@ -31,8 +31,6 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 	private String mAccess = ACCESS_PRIVATE;
 	private Date mModified = null;
 	private Share mOwner = new Share();
-	
-	// local vars
 	private int mState;
 	
 	private Shoppinglist() {
@@ -167,7 +165,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 				mErn.equals(sl.getErn()) &&
 				mAccess.equals(sl.getAccess()) &&
 				mModified.equals(sl.getModified()) &&
-//				mState == sl.getState() &&
+				mState == sl.getState() &&
 				mOwner.equals(sl.getOwner()) &&
 				mName.equals(sl.getName());
 	}

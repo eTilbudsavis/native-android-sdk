@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
@@ -44,8 +45,6 @@ public class Session implements Serializable {
 	private String mPassStr = null;
 	private String mFacebookToken = null;
 	
-	private Object lock = new Object();
-	
 	private Eta mEta;
 	private boolean mIsUpdating = false;
 	private ArrayList<SessionListener> mSubscribers = new ArrayList<Session.SessionListener>();
@@ -54,7 +53,6 @@ public class Session implements Serializable {
 	public Session(Eta eta) {
 		mEta = eta;
 		mUser = new User();
-		
 	}
 	
 	public void init() {
@@ -127,9 +125,8 @@ public class Session implements Serializable {
 		} else {
 			Utils.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
 		}
-		synchronized (lock) {
-			mIsUpdating = false;
-		}
+		mIsUpdating = false;
+		
 		notifySubscribers();
 	}
 	
@@ -139,13 +136,12 @@ public class Session implements Serializable {
 	
 	private synchronized void update(final JsonObjectListener listener) {
 
-		synchronized (lock) {
-			if (mIsUpdating)
-				return;
-		
-			mIsUpdating = true;
+		if (mIsUpdating) {
+			return;
 		}
-		
+
+		mIsUpdating = true;
+
 		Bundle b = new Bundle();
 		if (mUserStr != null && mPassStr != null) {
 			b.putString(Params.EMAIL, mUserStr);
@@ -156,6 +152,7 @@ public class Session implements Serializable {
 		JsonObjectListener session = new JsonObjectListener() {
 			
 			public void onComplete(int statusCode, JSONObject data, EtaError error) {
+
 				sessionUpdate(statusCode, data, error);
 				if (listener != null) listener.onComplete(statusCode, data, error);
 			}
@@ -223,10 +220,8 @@ public class Session implements Serializable {
 	 */
 	public synchronized void update(String headerToken, String headerExpires) {
 		
-		synchronized (lock) {
-			if (mIsUpdating)
-				return;
-		}
+		if (mIsUpdating)
+			return;
 		
 		if (mJson == null) {
 			update();
@@ -254,9 +249,9 @@ public class Session implements Serializable {
 	 */
 	public synchronized void signout(final JsonObjectListener listener) {
 		
-		synchronized (lock) {
-			mIsUpdating = true;
-		}
+		Utils.logd(TAG, "signout");
+		
+		mIsUpdating = true;
 		
 		clearUser();
 		Bundle b = new Bundle();

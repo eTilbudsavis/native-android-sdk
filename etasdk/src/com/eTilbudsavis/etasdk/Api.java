@@ -26,11 +26,13 @@ import javax.net.ssl.HttpsURLConnection;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -147,11 +149,10 @@ public class Api implements Serializable {
 	private ApiListener<?> mListener = null;
 	
 	private String mPath = null;
-	private URI mUri = null;
 	private Bundle mApiParams = null;
 	private RequestType mRequestType = null;
 	private ContentType mContentType = null;
-	private List<NameValuePair> mQuery;
+//	private List<NameValuePair> mQuery;
 	private List<Header> mHeaders;
 	private String mId = null;
 	private int mFlags;
@@ -169,11 +170,11 @@ public class Api implements Serializable {
 	/**
 	 * Set various options for this API call.
 	 * All flags are defined with a prefix "FLAG_", so to enable debugging output, just:
-	 * {@link #enableFlag(int...) enableFlag(Api.FLAG_DEBUG, Api.CANCEL)} 
+	 * {@link #setFlag(int...) enableFlag(Api.FLAG_DEBUG, Api.CANCEL)} 
 	 * @param flags to enable
 	 * @return this API object
 	 */
-	public Api enableFlag(int... flags) {
+	public Api setFlag(int... flags) {
 		for (int i = 0; i < flags.length ; i++)
 			mFlags |= flags[i];
 		return this;
@@ -182,11 +183,11 @@ public class Api implements Serializable {
 	/**
 	 * Set various options for this API call.
 	 * All flags are defined with a prefix "FLAG_", so to enable debugging output, just:
-	 * {@link #enableFlag(int) enableFlag(Api.FLAG_DEBUG)} 
+	 * {@link #setFlag(int) enableFlag(Api.FLAG_DEBUG)} 
 	 * @param flag to enable
 	 * @return this API object
 	 */
-	public Api enableFlag(int mask) {
+	public Api setFlag(int mask) {
 		mFlags |= mask;
 		return this;
 	}
@@ -206,7 +207,7 @@ public class Api implements Serializable {
 	 * @param flag to disable
 	 * @return
 	 */
-	public Api disableFlag(int flag) {
+	public Api removeFlag(int flag) {
 		mFlags = mFlags & ~flag;
 		return this;
 	}
@@ -461,9 +462,9 @@ public class Api implements Serializable {
 	 */
 	public synchronized Api cancel(boolean cancleIfPossible) {
 		if (cancleIfPossible) {
-			enableFlag(FLAG_CANCEL);
+			setFlag(FLAG_CANCEL);
 		} else {
-			disableFlag(FLAG_CANCEL);
+			removeFlag(FLAG_CANCEL);
 		}
 		return this;
 	}
@@ -541,11 +542,9 @@ public class Api implements Serializable {
 			mPath = Endpoint.HOST + mPath;
 		}
 		
-		mUri = URI.create(mPath);
-
 		if (mId != null) {
-			if (Endpoint.isItemEndpoint(mUri.getPath())) {
-				mUri = URI.create(mPath + mId);
+			if (Endpoint.isItemEndpoint(mPath)) {
+				mPath += mId;
 			} else {
 				Utils.logd(TAG, "Id does not match a single id endpoint, continuing without id");
 			}
@@ -554,7 +553,7 @@ public class Api implements Serializable {
 		// TODO Check endpoint against listener, and
 
 		// Is Session okay? If not, check if it's a session call? If not try to make a session before continuing
-		if (mEta.getSession().isExpired() && !mUri.getPath().matches(Endpoint.SESSIONS)) {
+		if (mEta.getSession().isExpired() && !mPath.contains(Endpoint.SESSIONS)) {
 				mEta.getSession().addToQueue(Api.this);
 				mEta.getSession().update();
 		} else {
@@ -580,24 +579,12 @@ public class Api implements Serializable {
 	
 	private void prepQuery() {
 
-		// Prepare data.
-		mQuery = new ArrayList<NameValuePair>();
-		
 		// Required API key.
-		mQuery.add(Utils.getNameValuePair(API_KEY, mEta.getApiKey()));
+		mApiParams.putString(API_KEY, mEta.getApiKey());
 
 		// Add location
 		if (isFlag(FLAG_LOCATION) && mEta.getLocation().isSet()) {
-			mQuery.addAll(mEta.getLocation().getQuery());
-		}
-
-		// Add optional data.
-		mQuery.addAll(Utils.bundleToNVP(mApiParams));
-		
-		try {
-			mUri = new URI(mUri.getScheme(), mUri.getAuthority(), mUri.getPath(), Utils.formatQuery(mQuery, HTTP.UTF_8), mUri.getFragment());
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
+			mApiParams.putAll(mEta.getLocation().getQuery());
 		}
 
 		// Set headers if session is OK
@@ -670,31 +657,54 @@ public class Api implements Serializable {
 		// End SSL Certificates hack
 		
 		HttpRequestBase request;
-		HttpResponse httpResponse = null;
 		ResponseWrapper respWrapper = null;
 		try {
 			
 			// Execute the correct request type
 			switch (mRequestType) {
-			case POST: request = new HttpPost(mUri); break;
-			case GET: request = new HttpGet(mUri); break;
-			case PUT: request = new HttpPut(mUri); break;
-			case DELETE: request = new HttpDelete(mUri); break;
+			case POST: 
+				HttpPost post = new HttpPost(mPath);
+				post.setEntity(new UrlEncodedFormEntity(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8));
+				request = post;
+				break;
+				
+			case GET: 
+				
+				if (mApiParams.size() > 0)
+					mPath = mPath + "?" + URLEncodedUtils.format(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8);
+				
+				HttpGet get = new HttpGet(mPath);
+				request = get;
+				break;
+				
+			case PUT: 
+				HttpPut put = new HttpPut(mPath); 
+				put.setEntity(new UrlEncodedFormEntity(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8));
+				request = put;
+				break;
+				
+			case DELETE: 
+
+				if (mApiParams.size() > 0)
+					mPath = mPath + "?" + URLEncodedUtils.format(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8);
+				
+				HttpDelete delete = new HttpDelete(mPath);
+				request = delete;
+				break;
 				
 			default:
 				Utils.logd(TAG, "Unknown RequestType: " + mRequestType.toString() + " - Aborting!");
 				return;
 			}
-
+			
 			for (Header h : mHeaders)
 				request.setHeader(h);
 			
-			httpResponse = httpClient.execute(request);
-			int statusCode = httpResponse.getStatusLine().getStatusCode();
-			String data = EntityUtils.toString(httpResponse.getEntity(), HTTP.UTF_8);
-			respWrapper = new ResponseWrapper(statusCode, data);
+			HttpResponse httpResponse = httpClient.execute(request);
 			
-			updateSessionInfo(httpResponse.getAllHeaders());
+			respWrapper = new ResponseWrapper(httpResponse);
+			
+			updateSessionInfo(respWrapper.getHeaders());
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -703,12 +713,7 @@ public class Api implements Serializable {
 			httpClient.getConnectionManager().shutdown();
 		}
 		
-		
-		if (respWrapper == null) {
-			
-		}
-		
-		printDebugPostExecute(httpResponse, respWrapper.getString());
+		printDebugPostExecute(respWrapper);
 		
 		if (Utils.isSuccess(respWrapper.getStatusCode())) {
 			
@@ -723,7 +728,7 @@ public class Api implements Serializable {
 			EtaError error = EtaError.fromJSON(respWrapper.getJSONObject());
 			
 			if ( !isFlag(FLAG_SESSION_REFRESH) && ( (error.getCode() == 1108 || error.getCode() == 1101) ) ) {
-				enableFlag(FLAG_SESSION_REFRESH);
+				setFlag(FLAG_SESSION_REFRESH);
 				mEta.getSession().subscribe(new SessionListener() {
 					
 					public void onUpdate() {
@@ -767,32 +772,31 @@ public class Api implements Serializable {
 
 		if (isFlag(FLAG_DEBUG) ) {
 			Utils.logd(TAG, "*** Pre Execute - " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
-			Utils.logd(TAG, "Url: " + mUri.toString());
-			Utils.logd(TAG, "Type: " + mRequestType.toString());
+			Utils.logd(TAG, mRequestType.toString() + " " + mPath);
 			Utils.logd(TAG, "Headers: " + mHeaders.toString());
 		}
 		
 	}
 	
-	private void printDebugPostExecute(HttpResponse httpResponse, String resp) {
+	private void printDebugPostExecute(ResponseWrapper wrap) {
 
 	    if (isFlag(FLAG_DEBUG) ) {
 			Utils.logd(TAG, "*** Post Execute - " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
-			Utils.logd(TAG, "StatusCode: " + httpResponse.getStatusLine().getStatusCode());
-			Utils.logd(TAG, "Type: " + mRequestType.toString());
+			Utils.logd(TAG, "Status: " + mRequestType.toString() + " " + wrap.getStatusCode());
 
 			StringBuilder headers = new StringBuilder();
-			for (Header h : httpResponse.getAllHeaders())
+			for (Header h : wrap.getHeaders())
 				headers.append(h.getName()).append(": ").append(h.getValue()).append(", ");
 			Utils.logd(TAG, "Headers: " + headers.toString());
 
-			Utils.logd(TAG, "Object: " + resp );
+			Utils.logd(TAG, "Object: " + wrap.getString() );
 	    }
 	    
 	}
 	
 	private void convert(ResponseWrapper resp) {
-
+		
+		
 		EtaError er = null;
 		
 		switch (getListenerType(mListener)) {
@@ -840,8 +844,9 @@ public class Api implements Serializable {
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			public void run() {
 
-				if (isFlag(FLAG_CANCEL)) {
-
+				if (!isFlag(FLAG_CANCEL)) {
+					
+					
 					switch (getListenerType(mListener)) {
 					case ITEM:
 						((ItemListener)mListener).onComplete(statusCode, (EtaErnObject)data, error);

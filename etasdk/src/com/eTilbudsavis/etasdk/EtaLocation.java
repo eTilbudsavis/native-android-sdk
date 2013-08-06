@@ -14,6 +14,8 @@ import org.json.JSONObject;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Bundle;
+import android.text.style.BackgroundColorSpan;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Utils.Params;
@@ -264,23 +266,38 @@ public class EtaLocation extends Location {
 		return mBoundWest;
 	}
 	
-	public List<NameValuePair> getQuery() {
+	public Bundle getQuery() {
 		
-		List<NameValuePair> query = new ArrayList<NameValuePair>();
-		
-		query.add(Utils.getNameValuePair(LATITUDE, getLatitude()));
-		query.add(Utils.getNameValuePair(LONGITUDE, getLongitude()));
-		query.add(Utils.getNameValuePair(SENSOR, isSensor()));
-		query.add(Utils.getNameValuePair(RADIUS, getRadius()));
+		Bundle b = new Bundle();
+
+		b.putDouble(LATITUDE, getLatitude());
+		b.putDouble(LONGITUDE, getLongitude());
+		b.putBoolean(SENSOR, isSensor());
+		b.putInt(RADIUS, getRadius());
 
 		// Determine whether to include bounds.
 		if (isBoundsSet()) {
-			query.add(Utils.getNameValuePair(BOUND_EAST, getBoundEast()));
-			query.add(Utils.getNameValuePair(BOUND_NORTH, getBoundNorth()));
-			query.add(Utils.getNameValuePair(BOUND_SOUTH, getBoundSouth()));
-			query.add(Utils.getNameValuePair(BOUND_WEST, getBoundWest()));
+			b.putDouble(BOUND_EAST, getBoundEast());
+			b.putDouble(BOUND_NORTH, getBoundNorth());
+			b.putDouble(BOUND_SOUTH, getBoundSouth());
+			b.putDouble(BOUND_WEST, getBoundWest());
 		}
-		return query;
+		return b;
+//		List<NameValuePair> query = new ArrayList<NameValuePair>();
+//		
+//		query.add(Utils.getNameValuePair(LATITUDE, getLatitude()));
+//		query.add(Utils.getNameValuePair(LONGITUDE, getLongitude()));
+//		query.add(Utils.getNameValuePair(SENSOR, isSensor()));
+//		query.add(Utils.getNameValuePair(RADIUS, getRadius()));
+//
+//		// Determine whether to include bounds.
+//		if (isBoundsSet()) {
+//			query.add(Utils.getNameValuePair(BOUND_EAST, getBoundEast()));
+//			query.add(Utils.getNameValuePair(BOUND_NORTH, getBoundNorth()));
+//			query.add(Utils.getNameValuePair(BOUND_SOUTH, getBoundSouth()));
+//			query.add(Utils.getNameValuePair(BOUND_WEST, getBoundWest()));
+//		}
+//		return query;
 	}
 
 

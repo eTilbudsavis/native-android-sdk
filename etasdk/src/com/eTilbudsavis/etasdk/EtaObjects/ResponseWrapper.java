@@ -1,5 +1,12 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
+import java.io.IOException;
+
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,10 +15,22 @@ public class ResponseWrapper {
 
 	private Object mData;
 	private int mStatusCode = -1;
+	private Header[] mHeaders;
 	
-	public ResponseWrapper(int statusCode, String response) {
+	public ResponseWrapper(HttpResponse httpResponse) {
 		
-		mStatusCode = statusCode;
+		mStatusCode = httpResponse.getStatusLine().getStatusCode();
+		mHeaders = httpResponse.getAllHeaders();
+		
+		String response = null;
+		try {
+			response = EntityUtils.toString(httpResponse.getEntity(), HTTP.UTF_8);
+		} catch (ParseException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
 		if (response == null || response.length() == 0) {
 			mData = response;
 			return;
@@ -61,5 +80,9 @@ public class ResponseWrapper {
 	
 	public boolean isString() {
 		return mData instanceof String;
+	}
+	
+	public Header[] getHeaders() {
+		return mHeaders;
 	}
 }

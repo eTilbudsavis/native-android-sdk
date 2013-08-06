@@ -42,7 +42,7 @@ public class Eta implements Serializable {
 	/** 
 	 * Variable to decide whether to show debug log messages.<br><br>
 	 * Please only set to <code>true</code> while developing to avoid leaking sensitive information */
-	public static boolean DEBUG = false;
+	public static boolean DEBUG = true;
 	
 	private Context mContext;
 	private final String mApiKey;

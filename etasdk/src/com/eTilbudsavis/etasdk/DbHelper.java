@@ -39,7 +39,6 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String TICK = "tick";
 	public static final String OFFER_ID = "offer_id";
 	public static final String CREATOR = "creator";
-	public static final String SHOPPINGLIST_ID_DEP = "shopping_list_id_dep";
 	public static final String SHOPPINGLIST_ID = "shopping_list_id";
 
 	private SQLiteDatabase mDatabase;
@@ -49,8 +48,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	private String dbCreateSL(String name) {
 		return "create table if not exists " + name + "(" + 
 				ID + " text primary key, " + 
-				MODIFIED + " text not null, " + 
 				ERN + " text, " + 
+				MODIFIED + " text not null, " + 
 				NAME + " text not null, " + 
 				ACCESS + " text not null, " + 
 				STATE + " integer not null, " + 
@@ -70,7 +69,6 @@ public class DbHelper extends SQLiteOpenHelper {
 				TICK + " integer not null, " + 
 				OFFER_ID + " text, " + 
 				CREATOR + " text not null, " + 
-				SHOPPINGLIST_ID_DEP + " text not null, " + 
 				SHOPPINGLIST_ID + " text not null, " + 
 				STATE + " integer not null " + 
 				");";
@@ -97,15 +95,20 @@ public class DbHelper extends SQLiteOpenHelper {
 		db.execSQL("DROP TABLE IF EXISTS " + SL_OFFLINE);
 		db.execSQL("DROP TABLE IF EXISTS " + SLI);
 		db.execSQL("DROP TABLE IF EXISTS " + SLI_OFFLINE);
+		Utils.logd(TAG, "Drop done");
 		onCreate(db);
+		Utils.logd(TAG, "Create done");
+	}
+	
+	public void clear() {
+		onUpgrade(mDatabase, 0, 0);
 	}
 
 	public static Shoppinglist curToSl(Cursor c) {
-		Shoppinglist sl = Shoppinglist.fromName("");
+		Shoppinglist sl = Shoppinglist.fromName(c.getString(3));
 		sl.setId(c.getString(0));
-		sl.setModified(c.getString(1));
-		sl.setErn(c.getString(2));
-		sl.setName(c.getString(3));
+		sl.setErn(c.getString(1));
+		sl.setModified(c.getString(2));
 		sl.setAccess(c.getString(4));
 		sl.setState(c.getInt(5));
 		sl.getOwner().setUser(c.getString(6));
@@ -117,8 +120,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static ContentValues slToCV(Shoppinglist sl) {
 		ContentValues c = new ContentValues();
 		c.put(ID, sl.getId());
-		c.put(MODIFIED, Utils.formatDate(sl.getModified()));
 		c.put(ERN, sl.getErn());
+		c.put(MODIFIED, Utils.formatDate(sl.getModified()));
 		c.put(NAME, sl.getName());
 		c.put(ACCESS, sl.getAccess());
 		c.put(STATE, sl.getState());
@@ -143,9 +146,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		sli.setTick(0 < cursor.getInt(5));
 		sli.setOfferId(cursor.getString(6));
 		sli.setCreator(cursor.getString(7));
-		sli.setShoppinglistIdDepricated(cursor.getString(8));
-		sli.setShoppinglistId(cursor.getString(9));
-		sli.setState(cursor.getInt(10));
+		sli.setShoppinglistId(cursor.getString(8));
+		sli.setState(cursor.getInt(9));
 		return sli;
 	}
 
@@ -159,7 +161,6 @@ public class DbHelper extends SQLiteOpenHelper {
 		c.put(TICK, sli.isTicked());
 		c.put(OFFER_ID, sli.getOfferId());
 		c.put(CREATOR, sli.getCreator());
-		c.put(SHOPPINGLIST_ID_DEP, sli.getShoppinglistIdDepricated());
 		c.put(SHOPPINGLIST_ID, sli.getShoppinglistId());
 		c.put(STATE, sli.getState());
 		return c;
@@ -170,10 +171,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * If Eta.onResume() is called, there should be no need to call this.
 	 */
 	public void openDB() {
-		Utils.logd(TAG, "Opening DB...");
-//		if (mDatabase == null || !mDatabase.isOpen()) {
-			mDatabase = getWritableDatabase();
-//		}
+		mDatabase = getWritableDatabase();
 	}
 	
 	/**
@@ -181,8 +179,6 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * If Eta.onPause() is called, there should be no need to call this.
 	 */
 	public void closeDB() {
-//		Utils.logd(TAG, "Closing DB...");
-//		Utils.printStackTrace();
 		close();
 	}
 
@@ -202,8 +198,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public long insertList(Shoppinglist list) {
-//		openDB();
-		return mDatabase.insert(getItemTable(), null, DbHelper.slToCV(list));
+		return mDatabase.insert(getListTable(), null, slToCV(list));
 	}
 
 	/**
@@ -212,8 +207,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return A cursor with a shopping list that matches the id, or empty cursor 
 	 */
 	public Cursor getList(String id) {
-//		openDB();
-		return mDatabase.query(getItemTable(), null, DbHelper.ID + "=?", new String[]{id}, null, null, null, null);
+		return mDatabase.query(getListTable(), null, ID + "=?", new String[]{id}, null, null, null, null);
 	}
 
 	/**
@@ -223,7 +217,6 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return true if it exists, else false
 	 */
 	public boolean existsList(String id) {
-//		openDB();
 		Cursor c = getList(id);
 		boolean res = c.moveToFirst();
 		c.close();
@@ -236,8 +229,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return Cursor with shopping lists that matches name
 	 */
 	public Cursor getListFromName(String name) {
-//		openDB();
-		return mDatabase.query(getItemTable(), null, DbHelper.NAME + "=?", new String[]{name}, null, null, null);
+		return mDatabase.query(getListTable(), null, NAME + "=?", new String[]{name}, null, null, null);
 	}
 	
 	/**
@@ -245,8 +237,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return Cursor with shoppinglists from db
 	 */
 	public Cursor getLists() {
-//		openDB();
-		return mDatabase.query(getItemTable(), null, null, null, null, null, null);
+		return mDatabase.query(getListTable(), null, null, null, null, null, null);
 	}
 	
 	/**
@@ -255,8 +246,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the number of rows affected.
 	 */
 	public int deleteList(String shoppinglistId) {
-//		openDB();
-		return mDatabase.delete(getItemTable(), DbHelper.ID + "=?", new String[]{shoppinglistId});
+		return mDatabase.delete(getListTable(), ID + "=?", new String[]{shoppinglistId});
 	}
 	
 	/**
@@ -265,8 +255,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public long editList(Shoppinglist list) {
-//		openDB();
-		return mDatabase.replace(getItemTable(), null, DbHelper.slToCV(list));
+		return mDatabase.replace(getListTable(), null, slToCV(list));
 	}
 
 	/**
@@ -275,11 +264,11 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return true if all items have successfully been inserted, else false
 	 */
 	public boolean addItems(ArrayList<ShoppinglistItem> items) {
-//		openDB();
 		boolean resp = true;
-		for (ShoppinglistItem sli : items)
+		for (ShoppinglistItem sli : items) {
 			if (addItem(sli) == -1)
 				resp = false;
+		}
 		
 		return resp;
 	}
@@ -290,8 +279,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return A Cursor object, which is positioned before the first entry
 	 */
 	public Cursor getItem(String itemId) {
-//		openDB();
-		return mDatabase.query(getItemTable(), null, DbHelper.ID + "=?", new String[]{itemId}, null, null, null);
+		return mDatabase.query(getItemTable(), null, ID + "=?", new String[]{itemId}, null, null, null);
 	}
 
 	/**
@@ -300,8 +288,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return A Cursor object, which is positioned before the first entry
 	 */
 	public Cursor getItems(Shoppinglist sl) {
-//		openDB();
-		return mDatabase.query(getItemTable(), null, DbHelper.SHOPPINGLIST_ID + "=?", new String[]{sl.getId()}, null, null, null);
+		return mDatabase.query(getItemTable(), null, SHOPPINGLIST_ID + "=?", new String[]{sl.getId()}, null, null, null);
 	}
 
 	/**
@@ -310,7 +297,6 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return true, if it exists, else false
 	 */
 	public boolean existsItem(String id) {
-//		openDB();
 		Cursor c = getItem(id);
 		boolean res = c.moveToFirst();
 		c.close();
@@ -323,8 +309,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public long addItem(ShoppinglistItem sli) {
-//		openDB();
-		return existsItem(sli.getId()) ? -1 : mDatabase.insert(getItemTable(), null, DbHelper.sliToCV(sli));
+		return existsItem(sli.getId()) ? -1 : mDatabase.insert(getItemTable(), null, sliToCV(sli));
 	}
 	
 	/**
@@ -336,12 +321,10 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return number of affected rows
 	 */
 	public int deleteItems(String shoppinglistId, Boolean state) {
-//		openDB();
-		
 		if (state == null) {
-			return mDatabase.delete(getItemTable(), DbHelper.ID + "=?", new String[]{shoppinglistId});
+			return mDatabase.delete(getItemTable(), ID + "=?", new String[]{shoppinglistId});
 		} else {
-			return mDatabase.delete(getItemTable(), DbHelper.ID + "=? AND " + DbHelper.TICK + "=?", new String[]{shoppinglistId, String.valueOf(state)});
+			return mDatabase.delete(getItemTable(), ID + "=? AND " + TICK + "=?", new String[]{shoppinglistId, String.valueOf(state)});
 		}
 	}
 
@@ -351,8 +334,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the number of rows affected
 	 */
 	public int deleteItem(String id) {
-//		openDB();
-		return mDatabase.delete(getItemTable(), DbHelper.ID + "=?", new String[]{id});
+		return mDatabase.delete(getItemTable(), ID + "=?", new String[]{id});
 	}
 
 	/**
@@ -361,8 +343,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public long editItem(ShoppinglistItem sli) {
-//		openDB();
-		return mDatabase.replace(SLI, null, DbHelper.sliToCV(sli));
+		return mDatabase.replace(SLI, null, sliToCV(sli));
 	}
 
 	private String getItemTable() {
