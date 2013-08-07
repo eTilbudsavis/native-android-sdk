@@ -95,9 +95,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		db.execSQL("DROP TABLE IF EXISTS " + SL_OFFLINE);
 		db.execSQL("DROP TABLE IF EXISTS " + SLI);
 		db.execSQL("DROP TABLE IF EXISTS " + SLI_OFFLINE);
-		Utils.logd(TAG, "Drop done");
 		onCreate(db);
-		Utils.logd(TAG, "Create done");
 	}
 	
 	public void clear() {
@@ -188,12 +186,11 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * This cannot be undone.
 	 */
 	public void clearDatabase() {
-//		openDB();
 		onUpgrade(mDatabase, 0, 0);
 	}
 	
 	/**
-	 * Insert new shoppinglist into db
+	 * Insert new shopping list into DB
 	 * @param list to insert
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
@@ -210,19 +207,6 @@ public class DbHelper extends SQLiteOpenHelper {
 		return mDatabase.query(getListTable(), null, ID + "=?", new String[]{id}, null, null, null, null);
 	}
 
-	/**
-	 * Check if a list by a given id exists in db.<br>
-	 * Good for checking if a UUID exists before inserting a new list.
-	 * @param id to check for
-	 * @return true if it exists, else false
-	 */
-	public boolean existsList(String id) {
-		Cursor c = getList(id);
-		boolean res = c.moveToFirst();
-		c.close();
-		return res;
-	}
-	
 	/**
 	 * Get a shopping list from it's readable name
 	 * @param name of the shopping list
@@ -259,14 +243,23 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 
 	/**
+	 * Adds item to db, IF it does not yet exist, else nothing
+	 * @param sli to add to db
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred
+	 */
+	public long insertItem(ShoppinglistItem sli) {
+		return mDatabase.insert(getItemTable(), null, sliToCV(sli));
+	}
+	
+	/**
 	 * Adds a list of items to db, IF they do not yet exist, else nothing
 	 * @param items to insert
 	 * @return true if all items have successfully been inserted, else false
 	 */
-	public boolean addItems(ArrayList<ShoppinglistItem> items) {
+	public boolean insertItems(ArrayList<ShoppinglistItem> items) {
 		boolean resp = true;
 		for (ShoppinglistItem sli : items) {
-			if (addItem(sli) == -1)
+			if (insertItem(sli) == -1)
 				resp = false;
 		}
 		
@@ -292,26 +285,14 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * Check if a given item id exists in db
-	 * @param id to check for
-	 * @return true, if it exists, else false
+	 * Deletes an item from db
+	 * @param id of the item to delete
+	 * @return the number of rows affected
 	 */
-	public boolean existsItem(String id) {
-		Cursor c = getItem(id);
-		boolean res = c.moveToFirst();
-		c.close();
-		return res;
+	public int deleteItem(String id) {
+		return mDatabase.delete(getItemTable(), ID + "=?", new String[]{id});
 	}
-	
-	/**
-	 * Adds item to db, IF it does not yet exist, else nothing
-	 * @param sli to add to db
-	 * @return the row ID of the newly inserted row, or -1 if an error occurred
-	 */
-	public long addItem(ShoppinglistItem sli) {
-		return existsItem(sli.getId()) ? -1 : mDatabase.insert(getItemTable(), null, sliToCV(sli));
-	}
-	
+
 	/**
 	 * Deletes all items from a specific shopping list<br>
 	 * true = Ticked<br>
@@ -329,15 +310,6 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * Deletes an item from db
-	 * @param id of the item to delete
-	 * @return the number of rows affected
-	 */
-	public int deleteItem(String id) {
-		return mDatabase.delete(getItemTable(), ID + "=?", new String[]{id});
-	}
-
-	/**
 	 * replaces an item in db
 	 * @param sli to insert
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
@@ -346,12 +318,45 @@ public class DbHelper extends SQLiteOpenHelper {
 		return mDatabase.replace(SLI, null, sliToCV(sli));
 	}
 
+	/**
+	 * Check if a list by a given id exists in db.<br>
+	 * Good for checking if a UUID exists before inserting a new list.
+	 * @param id to check for
+	 * @return true if it exists, else false
+	 */
+	public boolean existsList(String id) {
+		Cursor c = getList(id);
+		boolean res = c.moveToFirst();
+		c.close();
+		return res;
+	}
+
+	/**
+	 * Check if a given item id exists in db
+	 * @param id to check for
+	 * @return true, if it exists, else false
+	 */
+	public boolean existsItem(String id) {
+		Cursor c = getItem(id);
+		boolean res = c.moveToFirst();
+		c.close();
+		return res;
+	}
+	
+	/**
+	 * Get the table that should currently be used for shopping list items
+	 * @return table name
+	 */
 	private String getItemTable() {
 		return mEta.getUser().isLoggedIn() ? SLI : SLI_OFFLINE;
 	}
 
+	/**
+	 * Get the table that should currently be used for shopping list 
+	 * @return table name
+	 */
 	private String getListTable() {
 		return mEta.getUser().isLoggedIn() ? SL : SL_OFFLINE;
 	}
-	
+
 }
