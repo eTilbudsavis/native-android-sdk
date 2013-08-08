@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
+import android.util.EventLogTags.Description;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ShoppinglistManager;
@@ -24,23 +25,21 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	private boolean mTick = false;
 	private String mOfferId = null;
 	private int mCount = 1;
-	private String mDescription;
+	private String mDescription = null;
 	private String mCreator = "";
-	private Date mModified = null;
-	private int mState;
+	private Date mModified = new Date();
+	private int mState = ShoppinglistManager.STATE_TO_SYNC;
 	private Offer mOffer = null;
 	private String mShoppinglistId = "";
 
 	public ShoppinglistItem() {
 		setId(Utils.createUUID());
-		setModified(new Date());
-		setState(ShoppinglistManager.STATE_TO_SYNC);
 	}
 	
 	public ShoppinglistItem(Shoppinglist shoppinglist, String description) {
 		this();
-		setDescription(description);
 		setShoppinglistId(shoppinglist.getId());
+		setDescription(description);
 	}
 
 	public ShoppinglistItem(Shoppinglist shoppinglist, Offer offer) {
@@ -128,6 +127,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 
 	public ShoppinglistItem setOffer(Offer offer) {
 		mOffer = offer;
+		setOfferId(offer.getId());
 		return this;
 	}
 
@@ -206,13 +206,42 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 
 		ShoppinglistItem sli = (ShoppinglistItem)o;
 		return mId.equals(sli.getId()) &&
-				( mDescription == null ? sli.getDescription() == null : mDescription.equals(sli.getDescription())) && 
+				mErn.equals(sli.getErn()) &&
+				mDescription == null ? sli.getDescription() == null : mDescription.equals(sli.getDescription()) && 
 				mCount == sli.getCount() &&
 				mTick == sli.isTicked() &&
-				( mOffer == null ? sli.getOffer() == null : mOffer.equals(sli.getOffer())) &&
+				mOfferId == null ? sli.getOfferId() == null : mOfferId.equals(sli.getOfferId()) &&
+				mModified.equals(sli.getModified()) &&
+				mShoppinglistId.equals(sli.getShoppinglistId()) &&
 				mCreator.equals(sli.getCreator());
 	}
 
+	@Override
+	public String toString() {
+		return toString(false);
+	}
+
+
+	public String toString(boolean everything) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName()).append("[");
+		sb.append("id=").append(mId);
+		if (mDescription != null) {
+			sb.append(", description=").append(mDescription);
+		} else if (mOfferId != null) {
+			sb.append(", offer_id=").append(mOfferId);
+		}
+		sb.append(", count=").append(mCount)
+		.append(", ticked=").append(mTick)
+		.append(", modified=").append(Utils.formatDate(mModified));
+		if(everything) {
+			sb.append(", creator=").append(mCreator)
+			.append(", shoppinglist_id=").append(mShoppinglistId)
+			.append(", state=").append(mState);
+		}
+		return sb.append("]").toString();
+	}
+	
 	public static Comparator<ShoppinglistItem> TitleComparator  = new Comparator<ShoppinglistItem>() {
 
 		public int compare(ShoppinglistItem item1, ShoppinglistItem item2) {

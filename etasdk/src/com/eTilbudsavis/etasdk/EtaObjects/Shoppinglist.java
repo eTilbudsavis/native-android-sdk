@@ -165,7 +165,6 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 				mErn.equals(sl.getErn()) &&
 				mAccess.equals(sl.getAccess()) &&
 				mModified.equals(sl.getModified()) &&
-				mState == sl.getState() &&
 				mOwner.equals(sl.getOwner()) &&
 				mName.equals(sl.getName());
 	}

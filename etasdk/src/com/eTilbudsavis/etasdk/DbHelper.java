@@ -61,14 +61,14 @@ public class DbHelper extends SQLiteOpenHelper {
 	
 	private String dbCreateSLI(String name) {
 		return "create table if not exists " + name + "(" + 
-				ID + " text primary key, " + 
+				ID + " text not null primary key, " + 
 				ERN + " text not null, " + 
 				MODIFIED + " text not null, " + 
 				DESCRIPTION + " text, " + 
 				COUNT + " integer not null, " + 
 				TICK + " integer not null, " + 
 				OFFER_ID + " text, " + 
-				CREATOR + " text not null, " + 
+				CREATOR + " text, " + 
 				SHOPPINGLIST_ID + " text not null, " + 
 				STATE + " integer not null " + 
 				");";
@@ -275,6 +275,15 @@ public class DbHelper extends SQLiteOpenHelper {
 		return mDatabase.query(getItemTable(), null, ID + "=?", new String[]{itemId}, null, null, null);
 	}
 
+	/**
+	 * Get a shopping list from it's readable name
+	 * @param name of the shopping list
+	 * @return Cursor with shopping lists that matches name
+	 */
+	public Cursor getItemFromDescription(String description) {
+		return mDatabase.query(getItemTable(), null, DESCRIPTION + "=?", new String[]{description}, null, null, null);
+	}
+	
 	/**
 	 * Get a shopping lite item from the db
 	 * @param id to get from db

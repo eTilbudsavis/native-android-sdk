@@ -114,8 +114,9 @@ public class ShoppinglistManager {
 
 		for (final Shoppinglist sl : getLists()) {
 			if (sl.getState() != STATE_SYNCING || sl.getState() != STATE_DELETING) {
-				if (sl.getState() != STATE_TO_SYNC) {
+				if (sl.getState() == STATE_TO_SYNC) {
 					// New shopping lists must always sync
+					Utils.logd(TAG, sl.toString(true));
 					syncItems(sl);
 				} else {
 					
@@ -158,7 +159,7 @@ public class ShoppinglistManager {
 	 * @param shoppinglist update
 	 */
 	public void syncItems(final Shoppinglist sl) {
-
+		
 		sl.setState(STATE_SYNCING);
 		mDatabase.editList(sl);
 		
@@ -193,7 +194,7 @@ public class ShoppinglistManager {
 			Utils.logd(TAG, "Nothing to merge");
 			return;
 		}
-		
+
 		HashMap<String, EtaErnObject> oldset = new HashMap<String, EtaErnObject>();
 		for (EtaErnObject o : oldLists) {
 			oldset.put(o.getId(), o);
@@ -256,6 +257,7 @@ public class ShoppinglistManager {
 				syncListsModified();
 			}
 			notifySubscribers(isList, added, deleted, edited);
+
 		}
 		
 	}
@@ -628,6 +630,23 @@ public class ShoppinglistManager {
 		boolean b = c.moveToFirst();
 		c.close();
 		return b ? DbHelper.curToSli(c) : null;
+	}
+
+	/**
+	 * Get a shopping list from it's human readable name
+	 * @param id of the shopping list to get
+	 * @return <li>Shopping list or null if no shopping list exists
+	 */
+	public ArrayList<ShoppinglistItem> getItemFromDescription(String description) {
+		Cursor c = mDatabase.getItemFromDescription(description);
+		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
+		if (c.moveToFirst() ) {
+			do { 
+				list.add(DbHelper.curToSli(c));
+			} while (c.moveToNext());
+		}
+		c.close();
+		return list;
 	}
 
 	/**
