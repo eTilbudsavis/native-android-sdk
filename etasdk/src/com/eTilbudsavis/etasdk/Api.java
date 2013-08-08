@@ -629,7 +629,7 @@ public class Api implements Serializable {
 	}
 	
 	private void execHttp() {
-		
+
 		printDebugPreExecute();
 		
 		// Start the interwebs work stuff
@@ -687,6 +687,8 @@ public class Api implements Serializable {
 
 				if (mApiParams.size() > 0)
 					mPath = mPath + "?" + URLEncodedUtils.format(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8);
+				
+				Utils.logd(TAG, mPath);
 				
 				HttpDelete delete = new HttpDelete(mPath);
 				request = delete;
@@ -773,6 +775,7 @@ public class Api implements Serializable {
 		if (isFlag(FLAG_DEBUG) ) {
 			Utils.logd(TAG, "*** Pre Execute - " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
 			Utils.logd(TAG, mRequestType.toString() + " " + mPath);
+			Utils.logd(TAG, "Query: " + URLEncodedUtils.format(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8));
 			Utils.logd(TAG, "Headers: " + mHeaders.toString());
 		}
 		

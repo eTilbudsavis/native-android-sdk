@@ -1,6 +1,8 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -22,8 +24,29 @@ public class ResponseWrapper {
 		mStatusCode = httpResponse.getStatusLine().getStatusCode();
 		mHeaders = httpResponse.getAllHeaders();
 		
+		
+		
 		String response = null;
+		
+		
 		try {
+			
+//			if (mStatusCode == 200) {
+//				BufferedReader reader;
+//					reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
+//				
+//			    StringBuilder sb = new StringBuilder();
+//			    String line = null;
+//			    try {
+//			        while ((line = reader.readLine()) != null)
+//			            sb.append(line);
+//
+//			    } catch (IOException e) {
+//			        e.printStackTrace();
+//			    } 
+//			    response = sb.toString();
+//			} 
+			
 			response = EntityUtils.toString(httpResponse.getEntity(), HTTP.UTF_8);
 		} catch (ParseException e1) {
 			e1.printStackTrace();

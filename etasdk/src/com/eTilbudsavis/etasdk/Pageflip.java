@@ -261,8 +261,6 @@ public final class Pageflip extends WebView {
 		
 		if (cache == null ) {
 			
-//			loadUrl(Endpoint.getPageflipProxy(mUuid));
-			
 			StringListener cb = new StringListener() {
 				
 				public void onComplete(int statusCode, String data, EtaError error) {
@@ -281,7 +279,7 @@ public final class Pageflip extends WebView {
 					}
 				}
 			};	
-			mEta.api().get(Endpoint.getPageflipProxy(mUuid), cb).execute();
+			mEta.api().get(Endpoint.getPageflipProxy(mUuid, false), cb).setFlag(Api.FLAG_DEBUG).execute();
 			
 		} else {
 			this.loadDataWithBaseURL(null, cache, "text/html", "utf-8", null);

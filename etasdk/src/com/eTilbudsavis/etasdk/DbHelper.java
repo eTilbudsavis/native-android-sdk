@@ -195,7 +195,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public long insertList(Shoppinglist list) {
-		return mDatabase.insert(getListTable(), null, slToCV(list));
+		return mDatabase.insert(listTable(), null, slToCV(list));
 	}
 
 	/**
@@ -204,7 +204,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return A cursor with a shopping list that matches the id, or empty cursor 
 	 */
 	public Cursor getList(String id) {
-		return mDatabase.query(getListTable(), null, ID + "=?", new String[]{id}, null, null, null, null);
+		return mDatabase.query(listTable(), null, ID + "=?", new String[]{id}, null, null, null, null);
 	}
 
 	/**
@@ -213,7 +213,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return Cursor with shopping lists that matches name
 	 */
 	public Cursor getListFromName(String name) {
-		return mDatabase.query(getListTable(), null, NAME + "=?", new String[]{name}, null, null, null);
+		return mDatabase.query(listTable(), null, NAME + "=?", new String[]{name}, null, null, null);
 	}
 	
 	/**
@@ -221,7 +221,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return Cursor with shoppinglists from db
 	 */
 	public Cursor getLists() {
-		return mDatabase.query(getListTable(), null, null, null, null, null, null);
+		return mDatabase.query(listTable(), null, null, null, null, null, null);
 	}
 	
 	/**
@@ -230,7 +230,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the number of rows affected.
 	 */
 	public int deleteList(String shoppinglistId) {
-		return mDatabase.delete(getListTable(), ID + "=?", new String[]{shoppinglistId});
+		return mDatabase.delete(listTable(), ID + "=?", new String[]{shoppinglistId});
 	}
 	
 	/**
@@ -239,7 +239,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public long editList(Shoppinglist list) {
-		return mDatabase.replace(getListTable(), null, slToCV(list));
+		return mDatabase.replace(listTable(), null, slToCV(list));
 	}
 
 	/**
@@ -248,7 +248,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public long insertItem(ShoppinglistItem sli) {
-		return mDatabase.insert(getItemTable(), null, sliToCV(sli));
+		return mDatabase.insert(itemTable(), null, sliToCV(sli));
 	}
 	
 	/**
@@ -272,7 +272,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return A Cursor object, which is positioned before the first entry
 	 */
 	public Cursor getItem(String itemId) {
-		return mDatabase.query(getItemTable(), null, ID + "=?", new String[]{itemId}, null, null, null);
+		return mDatabase.query(itemTable(), null, ID + "=?", new String[]{itemId}, null, null, null);
 	}
 
 	/**
@@ -281,7 +281,9 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return Cursor with shopping lists that matches name
 	 */
 	public Cursor getItemFromDescription(String description) {
-		return mDatabase.query(getItemTable(), null, DESCRIPTION + "=?", new String[]{description}, null, null, null);
+		String q = "SELECT * FROM " + itemTable() + " WHERE " + DESCRIPTION + "=" + description;
+		mDatabase.rawQuery(q, null);
+		return mDatabase.query(itemTable(), null, DESCRIPTION + "=?", new String[]{description}, null, null, null);
 	}
 	
 	/**
@@ -290,7 +292,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return A Cursor object, which is positioned before the first entry
 	 */
 	public Cursor getItems(Shoppinglist sl) {
-		return mDatabase.query(getItemTable(), null, SHOPPINGLIST_ID + "=?", new String[]{sl.getId()}, null, null, null);
+		return mDatabase.query(itemTable(), null, SHOPPINGLIST_ID + "=?", new String[]{sl.getId()}, null, null, null);
 	}
 
 	/**
@@ -299,7 +301,9 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the number of rows affected
 	 */
 	public int deleteItem(String id) {
-		return mDatabase.delete(getItemTable(), ID + "=?", new String[]{id});
+		String q = "DELETE FROM " + itemTable() + " WHERE " + ID + "=" + id;
+		return cursorCount(query(q));
+//		return mDatabase.delete(itemTable(), ID + "=?", new String[]{id});
 	}
 
 	/**
@@ -312,9 +316,9 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public int deleteItems(String shoppinglistId, Boolean state) {
 		if (state == null) {
-			return mDatabase.delete(getItemTable(), ID + "=?", new String[]{shoppinglistId});
+			return mDatabase.delete(itemTable(), ID + "=?", new String[]{shoppinglistId});
 		} else {
-			return mDatabase.delete(getItemTable(), ID + "=? AND " + TICK + "=?", new String[]{shoppinglistId, String.valueOf(state)});
+			return mDatabase.delete(itemTable(), ID + "=? AND " + TICK + "=?", new String[]{shoppinglistId, String.valueOf(state)});
 		}
 	}
 
@@ -352,11 +356,24 @@ public class DbHelper extends SQLiteOpenHelper {
 		return res;
 	}
 	
+	private Cursor query(String query) {
+		return mDatabase.rawQueryWithFactory(null, query, null, null);
+	}
+	
+	private int cursorCount(Cursor c) {
+		if (c == null) {
+			return 0;
+		} else {
+			int i = c.getCount();
+			c.close();
+			return i;
+		}
+	}
 	/**
 	 * Get the table that should currently be used for shopping list items
 	 * @return table name
 	 */
-	private String getItemTable() {
+	private String itemTable() {
 		return mEta.getUser().isLoggedIn() ? SLI : SLI_OFFLINE;
 	}
 
@@ -364,7 +381,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * Get the table that should currently be used for shopping list 
 	 * @return table name
 	 */
-	private String getListTable() {
+	private String listTable() {
 		return mEta.getUser().isLoggedIn() ? SL : SL_OFFLINE;
 	}
 

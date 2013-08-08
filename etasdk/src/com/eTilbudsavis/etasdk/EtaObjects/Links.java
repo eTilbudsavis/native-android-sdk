@@ -38,7 +38,7 @@ public class Links extends EtaObject implements Serializable {
 		if (links == null) return l;
 		
 		try {
-			l.setWebshop(links.getString(S_WEBSHOP).equals("null") ? null : links.getString(S_WEBSHOP));
+			l.setWebshop(links.isNull(S_WEBSHOP) ? null : links.getString(S_WEBSHOP));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();

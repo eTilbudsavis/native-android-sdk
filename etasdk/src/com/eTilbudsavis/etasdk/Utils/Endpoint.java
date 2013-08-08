@@ -54,7 +54,8 @@ public final class Endpoint {
 		public static final String ITEMS = "/items";
 		public static final String EMPTY = "/empty";
 		public static final String RESET = "/reset";
-		public static final String PAGEFLIP_PROXY = "https://etilbudsavis.dk/proxy/";
+		public static final String PAGEFLIP_PROXY = "http://etilbudsavis.dk/proxy/";
+		public static final String PAGEFLIP_PROXY_DEBUG = "http://192.168.1.119:3000/proxy/";
 	}
 	
 	
@@ -95,8 +96,8 @@ public final class Endpoint {
 	 * @param id of pageflip proxy (can be random)
 	 * @return https://etilbudsavis.dk/proxy/{id}/
 	 */
-	public static String getPageflipProxy(String id) {
-		return Path.PAGEFLIP_PROXY + id + ITEM;
+	public static String getPageflipProxy(String id, boolean debug) {
+		return debug ? (Path.PAGEFLIP_PROXY_DEBUG + id + ITEM) : (Path.PAGEFLIP_PROXY + id + ITEM);
 	}
 
 	/**

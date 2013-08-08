@@ -116,7 +116,6 @@ public class ShoppinglistManager {
 			if (sl.getState() != STATE_SYNCING || sl.getState() != STATE_DELETING) {
 				if (sl.getState() == STATE_TO_SYNC) {
 					// New shopping lists must always sync
-					Utils.logd(TAG, sl.toString(true));
 					syncItems(sl);
 				} else {
 					
@@ -220,7 +219,6 @@ public class ShoppinglistManager {
 				if (newset.containsKey(key)) {
 
 					Object o = setState(isList, newset.get(key), STATE_SYNCED);
-					
 					if (!oldset.get(key).equals(o)) {
 						edited.add(key);
 						if (isList) {
@@ -816,6 +814,7 @@ public class ShoppinglistManager {
 		
 		Bundle b = new Bundle();
 		b.putString(Params.FILTER_DELETE, whatToDelete);
+		b.putString(Params.MODIFIED, Utils.formatDate(new Date()));
 		
 		final List<String> deleted = new ArrayList<String>();
 		
@@ -861,11 +860,13 @@ public class ShoppinglistManager {
 					notifySubscribers(false, null, deleted, null);
 				}
 			};
-			Api a = mEta.api().delete(Endpoint.getListEmpty(mEta.getUser().getId(), sl.getId()), cb, b);
+			Api a = mEta.api().post(Endpoint.getListEmpty(mEta.getUser().getId(), sl.getId()), cb, b).setFlag(Api.FLAG_DEBUG);
+//			Api a = mEta.api().delete(Endpoint.getListEmpty(mEta.getUser().getId(), sl.getId()), cb, b).setFlag(Api.FLAG_DEBUG);
 			addQueue(a);
 			
 		} else {
-			row = mDatabase.deleteItems(sl.getId(), state);
+			row = mDatabase.deleteItems(sl.getId(), state) ;
+			row = row > 0 ? row : -1;
 		}
 		
 		// Do local callback stuff

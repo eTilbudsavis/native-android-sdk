@@ -79,11 +79,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 			sli.setShoppinglistId(shoppinglistItem.getString(S_SHOPPINGLIST_ID));
 			sli.setErn(shoppinglistItem.getString(S_ERN));
 			sli.setCreator(shoppinglistItem.getString(S_CREATOR));
-			if (shoppinglistItem.isNull(S_MODIFIED)) {
-				sli.setModified(Utils.parseDate("1970-01-01T00:00:00+0000"));
-			} else {
-				sli.setModified(Utils.parseDate(shoppinglistItem.getString(S_MODIFIED)));
-			}
+			sli.setModified(Utils.parseDate(shoppinglistItem.isNull(S_MODIFIED) ? "1970-01-01T00:00:00+0000" : shoppinglistItem.getString(S_MODIFIED)));
 		} catch (JSONException e) {
 			if (Eta.DEBUG) e.printStackTrace();
 		}
@@ -205,12 +201,13 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 			return false;
 
 		ShoppinglistItem sli = (ShoppinglistItem)o;
+		
 		return mId.equals(sli.getId()) &&
 				mErn.equals(sli.getErn()) &&
 				mDescription == null ? sli.getDescription() == null : mDescription.equals(sli.getDescription()) && 
 				mCount == sli.getCount() &&
 				mTick == sli.isTicked() &&
-				mOfferId == null ? sli.getOfferId() == null : mOfferId.equals(sli.getOfferId()) &&
+//				mOfferId == null ? sli.getOfferId() == null : mOfferId.equals(sli.getOfferId()) &&
 				mModified.equals(sli.getModified()) &&
 				mShoppinglistId.equals(sli.getShoppinglistId()) &&
 				mCreator.equals(sli.getCreator());
