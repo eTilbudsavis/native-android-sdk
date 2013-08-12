@@ -52,6 +52,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.Api.RequestType;
+import com.eTilbudsavis.etasdk.EtaCache.CacheItem;
 import com.eTilbudsavis.etasdk.Session.SessionListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaErnObject;
@@ -89,25 +90,27 @@ public class Api implements Serializable {
 	public static final int DEFAULT_LIMIT = Params.DEFAULT_LIMIT;
 
 	/** Use this flag to enable and disable the usage of location, in the API call */
-	public static final int FLAG_LOCATION			= 1 << 0;
+	public static final int LOCATION			= 1 << 0;
 
 	/** Use this flag to enable and disable the usage of cache, in the API call */
-	public static final int FLAG_CACHE				= 1 << 1;
+	public static final int CACHE				= 1 << 1;
 
 	/** Use this flag to enable and disable the usage of location, in the API call */
-	public static final int FLAG_DEBUG				= 1 << 2;
+	public static final int DEBUG_OUTPUT				= 1 << 2;
 
 	/** Use this flag to enable and disable the usage of location, in the API call */
-	public static final int FLAG_CANCEL				= 1 << 3;
+	public static final int CANCEL_IF_POSSIBLE				= 1 << 3;
 
 	/** Use this flag to enable and disable the usage of multiple callbacks, in the API call.
 	 * use this if you want to use cache hits only */
-	public static final int FLAG_MULTIPLE_CALLBACKS	= 1 << 4;
+	public static final int ONLY_RETURN_CACHE	= 1 << 4;
 
-	private static final int FLAG_SESSION_REFRESH	= 1 << 5;
+	private static final int SESSION_REFRESH	= 1 << 25;
+
+	private static final int CACHE_HIT			= 1 << 26;
+
+	private static final int AVOID_SERVER_CALL	= 1 << 27;
 	
-	private static final int FLAG_CACHE_HIT			= 1 << 6;
-
 	/**
 	 * Expected return type.<br />
 	 * <i>API v2 currently only serves JSON</i><br>
@@ -164,7 +167,7 @@ public class Api implements Serializable {
 	public Api(Eta eta) {
 		mEta = eta;
 		// set default flags
-		mFlags = FLAG_LOCATION | FLAG_CACHE;
+		mFlags = LOCATION | CACHE;
 	}
 
 	/**
@@ -462,9 +465,9 @@ public class Api implements Serializable {
 	 */
 	public synchronized Api cancel(boolean cancleIfPossible) {
 		if (cancleIfPossible) {
-			setFlag(FLAG_CANCEL);
+			setFlag(CANCEL_IF_POSSIBLE);
 		} else {
-			removeFlag(FLAG_CANCEL);
+			removeFlag(CANCEL_IF_POSSIBLE);
 		}
 		return this;
 	}
@@ -583,7 +586,7 @@ public class Api implements Serializable {
 		mApiParams.putString(API_KEY, mEta.getApiKey());
 
 		// Add location
-		if (isFlag(FLAG_LOCATION) && mEta.getLocation().isSet()) {
+		if (isFlag(LOCATION) && mEta.getLocation().isSet()) {
 			mApiParams.putAll(mEta.getLocation().getQuery());
 		}
 
@@ -600,7 +603,7 @@ public class Api implements Serializable {
 	
 	private void checkCache() {
 		
-		if (isFlag(FLAG_CACHE) && mRequestType != RequestType.GET)
+		if (!isFlag(CACHE) || mRequestType != RequestType.GET)
 			return;
 		
 		/**
@@ -610,21 +613,48 @@ public class Api implements Serializable {
 		 * - check if last element is in Endpoint.ItemName.CATALOG (+others)
 		 * - if not check if second last is in it. 
 		 * - if one of the above is true, then 
-		 * 
-		 * If it's a list endpoint , then check if it has any _ids e.g.: Params.FILTER_CATALOG_IDS
-		 * 
 		 */
 		
-//		String prefix = mPath.contains(Endpoint.CATALOG_ID) ? "ern:catalog:" :
-//			mPath.contains(Endpoint.DEALER_ID) ? "ern:dealer:" :
-//				mPath.contains(Endpoint.STORE_ID) ? "ern:store:" : 
-//					mPath.contains(Endpoint.OFFER_ID) ? "ern:offer:" : "";
-//		
-//		CacheItem c = mEta.getCache().get(prefix + mId);
-//		if (c != null) {
-//			mCacheHit = true;
-//			runOnUiThread(c.statuscode, c.object, null);
-//		}
+		/*
+		 * Check for request of specific id's
+		 */
+		String prefix = "";
+		Set<String> list = new HashSet<String>(0);
+		if (mApiParams.containsKey(Params.FILTER_CATALOG_IDS)) {
+			list = getFilter(Params.FILTER_CATALOG_IDS);
+			prefix = "ern:catalog:";
+		} else if (mApiParams.containsKey(Params.FILTER_OFFER_IDS)) {
+			list = getFilter(Params.FILTER_OFFER_IDS);
+			prefix = "ern:offer:";
+		} else if (mApiParams.containsKey(Params.FILTER_DEALER_IDS)) {
+			list = getFilter(Params.FILTER_DEALER_IDS);
+			prefix = "ern:dealer:";
+		} else if (mApiParams.containsKey(Params.FILTER_STORE_IDS)) {
+			list = getFilter(Params.FILTER_STORE_IDS);
+			prefix = "ern:store:";
+		}
+		
+		if (list.size() > 0) {
+			JSONArray jArray = new JSONArray();
+			for (String s : list) {
+				CacheItem c = mEta.getCache().get(prefix + s);
+				if (c != null) {
+					jArray.put((JSONObject)c.object);
+				}
+			}
+			int size = jArray.length();
+			if (size > 0 && (size == list.size()) ) {
+				setFlag(CACHE_HIT);
+				convert(true, new ResponseWrapper(200, jArray.toString()));
+				return;
+			}
+		} else {
+			String[] parts = mPath.split("/");
+			parts[parts.length-1].equals(Endpoint.Path.CATALOGS);
+		}
+		
+		
+		
 		
 	}
 	
@@ -721,16 +751,16 @@ public class Api implements Serializable {
 			
 			mEta.getCache().put(respWrapper);
 			
-			if (!isFlag(FLAG_CACHE_HIT) || isFlag(FLAG_MULTIPLE_CALLBACKS))
-				convert(respWrapper);
+			if ( !isFlag(CACHE_HIT) || !isFlag(ONLY_RETURN_CACHE)) 
+				convert(false, respWrapper);
 		
 		// Error, try to get new session token, then do request again.
 		} else {
 			
 			EtaError error = EtaError.fromJSON(respWrapper.getJSONObject());
 			
-			if ( !isFlag(FLAG_SESSION_REFRESH) && ( (error.getCode() == 1108 || error.getCode() == 1101) ) ) {
-				setFlag(FLAG_SESSION_REFRESH);
+			if ( !isFlag(SESSION_REFRESH) && ( (error.getCode() == 1108 || error.getCode() == 1101) ) ) {
+				setFlag(SESSION_REFRESH);
 				mEta.getSession().subscribe(new SessionListener() {
 					
 					public void onUpdate() {
@@ -740,7 +770,7 @@ public class Api implements Serializable {
 				}).update();
 			} else {
 				error.setOriginalData(respWrapper.getString());
-				runOnUiThread(respWrapper.getStatusCode(), null, error);
+				runOnUiThread(false, respWrapper.getStatusCode(), null, error);
 			}
 		}
 		
@@ -772,7 +802,7 @@ public class Api implements Serializable {
 
 	private void printDebugPreExecute() {
 
-		if (isFlag(FLAG_DEBUG) ) {
+		if (isFlag(DEBUG_OUTPUT) ) {
 			Utils.logd(TAG, "*** Pre Execute - " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
 			Utils.logd(TAG, mRequestType.toString() + " " + mPath);
 			Utils.logd(TAG, "Query: " + URLEncodedUtils.format(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8));
@@ -783,7 +813,7 @@ public class Api implements Serializable {
 	
 	private void printDebugPostExecute(ResponseWrapper wrap) {
 
-	    if (isFlag(FLAG_DEBUG) ) {
+	    if (isFlag(DEBUG_OUTPUT) ) {
 			Utils.logd(TAG, "*** Post Execute - " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
 			Utils.logd(TAG, "Status: " + mRequestType.toString() + " " + wrap.getStatusCode());
 
@@ -797,7 +827,7 @@ public class Api implements Serializable {
 	    
 	}
 	
-	private void convert(ResponseWrapper resp) {
+	private void convert(boolean isCache, ResponseWrapper resp) {
 		
 		
 		EtaError er = null;
@@ -810,7 +840,7 @@ public class Api implements Serializable {
 				er = new EtaError();
 				er.setCode(EtaError.SDK_ERROR_MISMATCH).setMessage("").setOriginalData(resp.getString());
 			}
-			runOnUiThread(resp.getStatusCode(), object, er);
+			runOnUiThread(isCache, resp.getStatusCode(), object, er);
 			break;
 			
 		case LIST:
@@ -819,19 +849,19 @@ public class Api implements Serializable {
 				er = new EtaError();
 				er.setOriginalData(resp.getString());
 			}
-			runOnUiThread(resp.getStatusCode(), objects, er);
+			runOnUiThread(isCache, resp.getStatusCode(), objects, er);
 			break;
 
 		case OBJECT:
-			runOnUiThread(resp.getStatusCode(), resp.getJSONObject(), er);
+			runOnUiThread(isCache, resp.getStatusCode(), resp.getJSONObject(), er);
 			break;
 
 		case ARRAY:
-			runOnUiThread(resp.getStatusCode(), resp.getJSONArray(), er);
+			runOnUiThread(isCache, resp.getStatusCode(), resp.getJSONArray(), er);
 			break;
 
 		case STRING:
-			runOnUiThread(resp.getStatusCode(), resp.getString(), er);
+			runOnUiThread(isCache, resp.getStatusCode(), resp.getString(), er);
 			break;
 			
 		default:
@@ -840,35 +870,35 @@ public class Api implements Serializable {
 		}
 	}
 	
-	private void runOnUiThread(final int statusCode,final Object data,final EtaError error) {
+	private void runOnUiThread(final boolean isCache, final int statusCode,final Object data,final EtaError error) {
 		
 		Runnable r = new Runnable() {
 			
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			public void run() {
 
-				if (!isFlag(FLAG_CANCEL)) {
+				if (!isFlag(CANCEL_IF_POSSIBLE)) {
 					
 					
 					switch (getListenerType(mListener)) {
 					case ITEM:
-						((ItemListener)mListener).onComplete(statusCode, (EtaErnObject)data, error);
+						((ItemListener)mListener).onComplete(isCache, statusCode, (EtaErnObject)data, error);
 						break;
 
 					case LIST: 
-						((ListListener)mListener).onComplete(statusCode, (ArrayList<EtaErnObject>)data, error); 
+						((ListListener)mListener).onComplete(isCache, statusCode, (ArrayList<EtaErnObject>)data, error); 
 						break;
 
 					case OBJECT:
-						((JsonObjectListener)mListener).onComplete(statusCode, (JSONObject)data, error);
+						((JsonObjectListener)mListener).onComplete(isCache, statusCode, (JSONObject)data, error);
 						break;
 
 					case ARRAY:
-						((JsonArrayListener)mListener).onComplete(statusCode, (JSONArray)data, error);
+						((JsonArrayListener)mListener).onComplete(isCache, statusCode, (JSONArray)data, error);
 						break;
 
 					case STRING:
-						((StringListener)mListener).onComplete(statusCode, (String)data, error);
+						((StringListener)mListener).onComplete(isCache, statusCode, (String)data, error);
 						break;
 
 					default:
@@ -906,23 +936,23 @@ public class Api implements Serializable {
 	public interface ApiListener<T> { }
 
 	public interface ItemListener<T extends EtaErnObject> extends ApiListener<T> {
-		public void onComplete(int statusCode, T item, EtaError error);
+		public void onComplete(boolean isCache, int statusCode, T item, EtaError error);
 	}
 
 	public interface ListListener<T extends EtaErnObject> extends ApiListener<List<? extends EtaErnObject>> {
-		public void onComplete(int statusCode, List<T> list, EtaError error);
+		public void onComplete(boolean isCache, int statusCode, List<T> list, EtaError error);
 	}
 
     public interface JsonObjectListener extends ApiListener<JSONObject> {
-		public void onComplete(int statusCode, JSONObject item, EtaError error);
+		public void onComplete(boolean isCache, int statusCode, JSONObject item, EtaError error);
     }
 
     public interface JsonArrayListener extends ApiListener<JSONArray> {
-		public void onComplete(int statusCode, JSONArray list, EtaError error);
+		public void onComplete(boolean isCache, int statusCode, JSONArray list, EtaError error);
     }
 
     public interface StringListener extends ApiListener<String> {
-		public void onComplete(int statusCode, String string, EtaError error);
+		public void onComplete(boolean isCache, int statusCode, String string, EtaError error);
     }
 
 }

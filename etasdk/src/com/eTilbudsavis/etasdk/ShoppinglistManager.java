@@ -37,8 +37,7 @@ public class ShoppinglistManager {
 	public static final int STATE_TO_SYNC	= 0;
 	public static final int STATE_SYNCING	= 1;
 	public static final int STATE_SYNCED	= 2;
-	public static final int STATE_TO_DELET	= 3;
-	public static final int STATE_DELETING	= 4;
+	public static final int STATE_DELETE	= 4;
 	public static final int STATE_ERROR		= 5;
 	
 	private static final int CONNECTION_TIMEOUR_RETRY = 10000;
@@ -47,6 +46,7 @@ public class ShoppinglistManager {
 	private DbHelper mDatabase;
 	private int mSyncSpeed = SYNC_MEDIUM;
 	private String mCurrentSlId = null;
+	private boolean mIsResumed = false;
 
 	private List<QueueItem> mApiQueue = Collections.synchronizedList(new ArrayList<QueueItem>());
 	
@@ -87,7 +87,10 @@ public class ShoppinglistManager {
 
 		ListListener<Shoppinglist> sll = new ListListener<Shoppinglist>() {
 			
-			public void onComplete(int statusCode, List<Shoppinglist> data, EtaError error) {
+			public void onComplete(boolean isCache, int statusCode, List<Shoppinglist> data, EtaError error) {
+				
+				if (mApiQueue.size() > 0)
+					return;
 				
 				if (Utils.isSuccess(statusCode)) {
 					mergeErnObjects( data, getLists());
@@ -113,7 +116,7 @@ public class ShoppinglistManager {
 			return;
 
 		for (final Shoppinglist sl : getLists()) {
-			if (sl.getState() != STATE_SYNCING || sl.getState() != STATE_DELETING) {
+			if (sl.getState() != STATE_SYNCING || sl.getState() != STATE_DELETE) {
 				if (sl.getState() == STATE_TO_SYNC) {
 					// New shopping lists must always sync
 					syncItems(sl);
@@ -125,8 +128,11 @@ public class ShoppinglistManager {
 					// Else make a call to check when it's been modified
 					JsonObjectListener cb = new JsonObjectListener() {
 						
-						public void onComplete(int statusCode, JSONObject data, EtaError error) {
+						public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 
+							if (mApiQueue.size() > 0)
+								return;
+							
 							if (Utils.isSuccess(statusCode)) {
 								// If callback says the list has been modified, then sync items
 								try {
@@ -164,7 +170,10 @@ public class ShoppinglistManager {
 		
 		JsonArrayListener cb = new JsonArrayListener() {
 			
-			public void onComplete(int statusCode, JSONArray data, EtaError error) {
+			public void onComplete(boolean isCache, int statusCode, JSONArray data, EtaError error) {
+
+				if (mApiQueue.size() > 0)
+					return;
 				
 				if (Utils.isSuccess(statusCode)) {
 					sl.setState(STATE_SYNCED);
@@ -311,9 +320,7 @@ public class ShoppinglistManager {
 		private JsonObjectListener oldListener;
 		private JsonObjectListener listener = new JsonObjectListener() {
 			
-			public void onComplete(int statusCode, JSONObject item, EtaError error) {
-				
-				// TODO Figure out what errors we can recover from, and number of retries
+			public void onComplete(boolean isCache, int statusCode, JSONObject item, EtaError error) {
 				
 				// If connection timeout
 				if (statusCode == -1) {
@@ -321,7 +328,8 @@ public class ShoppinglistManager {
 					mEta.getHandler().postDelayed(new Runnable() {
 						
 						public void run() {
-							call();
+							if (mIsResumed)
+								call();
 						}
 					}, CONNECTION_TIMEOUR_RETRY);
 					
@@ -329,7 +337,7 @@ public class ShoppinglistManager {
 					
 					mApiQueue.remove(QueueItem.this);
 					if (user == mEta.getUser().getId()) {
-						oldListener.onComplete(statusCode, item, error);
+						oldListener.onComplete(false, statusCode, item, error);
 					}
 					
 				}
@@ -374,25 +382,15 @@ public class ShoppinglistManager {
 	 */
 	public Shoppinglist getCurrentList() {
 		Shoppinglist sl = null;
-		if (mCurrentSlId == null) {
-			sl = setRandomCurrent();
-		} else {
-			sl = getList(mCurrentSlId);
-			if (sl == null) {
-				sl = setRandomCurrent();
+		sl = getList(mCurrentSlId);
+		if (sl == null) {
+			Cursor c = mDatabase.getLists();
+			if (c.moveToFirst()) {
+				sl = DbHelper.curToSl(c);
+				setCurrentList(sl);
 			}
+			c.close();
 		}
-		return sl;
-	}
-	
-	private Shoppinglist setRandomCurrent() {
-		Shoppinglist sl = null;
-		Cursor c = mDatabase.getLists();
-		if (c.moveToFirst()) {
-			sl = DbHelper.curToSl(c);
-			setCurrentList(sl);
-		} 
-		c.close();
 		return sl;
 	}
 	
@@ -415,6 +413,8 @@ public class ShoppinglistManager {
 	 * @return A shopping list, or <code>null</code> if no shopping list exists
 	 */
 	public Shoppinglist getList(String id) {
+		if (id == null)
+			return null;
 		Cursor c = mDatabase.getList(id);
 		return c.moveToFirst() == true ? DbHelper.curToSl(c) : null;
 	}
@@ -478,7 +478,7 @@ public class ShoppinglistManager {
 			// Sync online if possible
 			JsonObjectListener cb = new JsonObjectListener() {
 				
-				public void onComplete(int statusCode, JSONObject data, EtaError error) {
+				public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 					
 					Shoppinglist s = sl;
 					if (Utils.isSuccess(statusCode)) {
@@ -517,9 +517,13 @@ public class ShoppinglistManager {
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public void editList(final Shoppinglist sl, final OnCompletetionListener listener) {
+		editList(sl, listener, new Date());
+	}
+	
+	private void editList(final Shoppinglist sl, final OnCompletetionListener listener, Date date) {
 		
 		long row = -1;
-		sl.setModified(new Date());
+		sl.setModified(date);
 		
 		if (mustSync()) {
 
@@ -527,7 +531,7 @@ public class ShoppinglistManager {
 			
 			JsonObjectListener editItem = new JsonObjectListener() {
 				
-				public void onComplete(int statusCode, JSONObject data, EtaError error) {
+				public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 					
 					Shoppinglist s = sl;
 					if (Utils.isSuccess(statusCode)) {
@@ -568,18 +572,22 @@ public class ShoppinglistManager {
 	 * @return the number of rows affected.
 	 */
 	public void deleteList(final Shoppinglist sl, final OnCompletetionListener listener) {
+		deleteList(sl, listener, new Date());
+	}
+	
+	private void deleteList(final Shoppinglist sl, final OnCompletetionListener listener, Date date) {
 		
 		long row = -1;
-		sl.setModified(new Date());
+		sl.setModified(date);
 		
 		if (mustSync()) {
 			
-			sl.setState(STATE_DELETING);
+			sl.setState(STATE_DELETE);
 			mDatabase.editList(sl);
 			
 			JsonObjectListener cb = new JsonObjectListener() {
 				
-				public void onComplete(int statusCode, JSONObject data, EtaError error) {
+				public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 					
 					if (Utils.isSuccess(statusCode)) {
 						if (mDatabase.deleteList(sl.getId()) > 0) {
@@ -685,7 +693,7 @@ public class ShoppinglistManager {
 			
 			JsonObjectListener cb = new JsonObjectListener() {
 				
-				public void onComplete(int statusCode, JSONObject data, EtaError error) {
+				public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 					
 					ShoppinglistItem s = sli;
 					if (Utils.isSuccess(statusCode)) {
@@ -725,8 +733,12 @@ public class ShoppinglistManager {
 	 * @param sli - shopping list item to edit
 	 */
 	public void editItem(final ShoppinglistItem sli, final OnCompletetionListener listener) {
+		editItem(sli, listener, new Date());
+	}
 
-		sli.setModified(new Date());
+	private void editItem(final ShoppinglistItem sli, final OnCompletetionListener listener, Date date) {
+
+		sli.setModified(date);
 		long row = -1;
 		
 		// Edit state according to login state, and push to DB
@@ -737,7 +749,7 @@ public class ShoppinglistManager {
 			// Setup callback
 			JsonObjectListener cb = new JsonObjectListener() {
 				
-				public void onComplete(int statusCode, JSONObject data, EtaError error) {
+				public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 					
 					ShoppinglistItem s = sli;
 					if (Utils.isSuccess(statusCode)) {
@@ -812,9 +824,11 @@ public class ShoppinglistManager {
 	 */
 	private void deleteItems(final Shoppinglist sl, final String whatToDelete, final OnCompletetionListener listener) {
 		
+		Date d = new Date();
+		
 		Bundle b = new Bundle();
 		b.putString(Params.FILTER_DELETE, whatToDelete);
-		b.putString(Params.MODIFIED, Utils.formatDate(new Date()));
+		b.putString(Params.MODIFIED, Utils.formatDate(d));
 		
 		final List<String> deleted = new ArrayList<String>();
 		
@@ -824,14 +838,14 @@ public class ShoppinglistManager {
 		for (ShoppinglistItem sli : list) {
 			if (state == null) {
 				// Delete all items
-				sli.setState(STATE_DELETING);
-				sli.setModified(new Date());
+				sli.setState(STATE_DELETE);
+				sli.setModified(d);
 				mDatabase.editItem(sli);
 				deleted.add(sli.getId());
 			} else if (sli.isTicked() == state) {
 				// Delete if ticked matches the requested state
-				sli.setState(STATE_DELETING);
-				sli.setModified(new Date());
+				sli.setState(STATE_DELETE);
+				sli.setModified(d);
 				mDatabase.editItem(sli);
 				deleted.add(sli.getId());				
 			}
@@ -843,14 +857,14 @@ public class ShoppinglistManager {
 			
 			JsonObjectListener cb = new JsonObjectListener() {
 				
-				public void onComplete(int statusCode, JSONObject data, EtaError error) {
+				public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 					
 					if (Utils.isSuccess(statusCode)) {
 						mDatabase.deleteItems(sl.getId(), state);
 					} else {
 						ArrayList<ShoppinglistItem> list = getItems(sl);
 						for (ShoppinglistItem sli : list) {
-							if (sli.getState() == STATE_DELETING) {
+							if (sli.getState() == STATE_DELETE) {
 								sli.setState(STATE_ERROR);
 								mDatabase.editItem(sli);
 							} 
@@ -860,8 +874,7 @@ public class ShoppinglistManager {
 					notifySubscribers(false, null, deleted, null);
 				}
 			};
-			Api a = mEta.api().post(Endpoint.getListEmpty(mEta.getUser().getId(), sl.getId()), cb, b).setFlag(Api.FLAG_DEBUG);
-//			Api a = mEta.api().delete(Endpoint.getListEmpty(mEta.getUser().getId(), sl.getId()), cb, b).setFlag(Api.FLAG_DEBUG);
+			Api a = mEta.api().post(Endpoint.getListEmpty(mEta.getUser().getId(), sl.getId()), cb, b);
 			addQueue(a);
 			
 		} else {
@@ -886,18 +899,22 @@ public class ShoppinglistManager {
 	 * @return the number of rows affected
 	 */
 	public void deleteItem(final ShoppinglistItem sli, final OnCompletetionListener listener) {
+		deleteItem(sli, listener, new Date());
+	}
+	
+	private void deleteItem(final ShoppinglistItem sli, final OnCompletetionListener listener, Date date) {
 
 		long row = -1;
-		sli.setModified(new Date());
+		sli.setModified(date);
 		
 		if (mustSync()) {
 			
-			sli.setState(STATE_DELETING);
+			sli.setState(STATE_DELETE);
 			row = mDatabase.editItem(sli);
 			
 			JsonObjectListener cb = new JsonObjectListener() {
 				
-				public void onComplete(int statusCode, JSONObject item, EtaError error) {
+				public void onComplete(boolean isCache, int statusCode, JSONObject item, EtaError error) {
 					
 					if (Utils.isSuccess(statusCode)) {
 						mDatabase.deleteItems(sli.getId(), null);
@@ -930,12 +947,66 @@ public class ShoppinglistManager {
 		
 	}
 
+	private void cleanupDB() {
+		
+		OnCompletetionListener ocl = new OnCompletetionListener() {
+			
+			public void onComplete(boolean isLocalCallback, int statusCode,
+					JSONObject item, EtaError error) {
+				Utils.logd(TAG, "DB Cleanup", statusCode, item, error);
+			}
+		};
+		
+		if (mustSync()) {
+			
+			for (Shoppinglist sl : getLists()) {
+				
+				switch (sl.getState()) {
+				case STATE_DELETE:
+					deleteList(sl, ocl, sl.getModified());
+					break;
+				case STATE_SYNCING:
+				case STATE_TO_SYNC:
+					editList(sl, ocl, sl.getModified());
+					break;
+
+				default:
+					break;
+				}
+				
+				for (ShoppinglistItem sli : getItems(sl)) {
+					
+					switch (sli.getState()) {
+					case STATE_DELETE:
+						deleteItem(sli, ocl, sli.getModified());
+						break;
+					case STATE_SYNCING:
+					case STATE_TO_SYNC:
+						editItem(sli, ocl, sli.getModified());
+						break;
+
+					default:
+						break;
+					}
+					
+					
+				}
+				
+			}
+			
+		}
+		
+	}
+	
 	public void onResume() {
+		mIsResumed = true;
 		mDatabase.openDB();
+		cleanupDB();
 		startSync();
 	}
 	
 	public void onPause() {
+		mIsResumed = false;
 		stopSync();
 		mDatabase.closeDB();
 	}

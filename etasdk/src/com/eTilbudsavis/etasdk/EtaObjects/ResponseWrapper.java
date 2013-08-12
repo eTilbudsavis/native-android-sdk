@@ -1,8 +1,6 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -24,28 +22,9 @@ public class ResponseWrapper {
 		mStatusCode = httpResponse.getStatusLine().getStatusCode();
 		mHeaders = httpResponse.getAllHeaders();
 		
-		
-		
 		String response = null;
 		
-		
 		try {
-			
-//			if (mStatusCode == 200) {
-//				BufferedReader reader;
-//					reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
-//				
-//			    StringBuilder sb = new StringBuilder();
-//			    String line = null;
-//			    try {
-//			        while ((line = reader.readLine()) != null)
-//			            sb.append(line);
-//
-//			    } catch (IOException e) {
-//			        e.printStackTrace();
-//			    } 
-//			    response = sb.toString();
-//			} 
 			
 			response = EntityUtils.toString(httpResponse.getEntity(), HTTP.UTF_8);
 		} catch (ParseException e1) {
@@ -53,26 +32,35 @@ public class ResponseWrapper {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		
-		if (response == null || response.length() == 0) {
-			mData = response;
+		setData(response);
+	}
+	
+	public ResponseWrapper(int StatusCode, String data) {
+		mStatusCode = StatusCode;
+		setData(data);
+	}
+	
+	private void setData(String data) {
+
+		if (data == null || data.length() == 0) {
+			mData = data;
 			return;
 		}
 		
 		try {
-			if (response.startsWith("[") && response.endsWith("]")) {
-				mData = new JSONArray(response);
-			} else if(response.startsWith("{") && response.endsWith("}")) {
-				mData = new JSONObject(response);
+			if (data.startsWith("[") && data.endsWith("]")) {
+				mData = new JSONArray(data);
+			} else if(data.startsWith("{") && data.endsWith("}")) {
+				mData = new JSONObject(data);
 			} else {
-				mData = response;
+				mData = data;
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
-			mData = response;
+			mData = data;
 		}
 	}
-
+	
 	public int getStatusCode() {
 		return mStatusCode;
 	}

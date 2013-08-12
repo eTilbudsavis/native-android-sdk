@@ -263,7 +263,7 @@ public final class Pageflip extends WebView {
 			
 			StringListener cb = new StringListener() {
 				
-				public void onComplete(int statusCode, String data, EtaError error) {
+				public void onComplete(boolean isCache, int statusCode, String data, EtaError error) {
 					
 					if (mDebugWeinre != null) {
 						String endScript = "</head>";
@@ -279,7 +279,7 @@ public final class Pageflip extends WebView {
 					}
 				}
 			};	
-			mEta.api().get(Endpoint.getPageflipProxy(mUuid, false), cb).setFlag(Api.FLAG_DEBUG).execute();
+			mEta.api().get(Endpoint.getPageflipProxy(mUuid), cb).execute();
 			
 		} else {
 			this.loadDataWithBaseURL(null, cache, "text/html", "utf-8", null);
@@ -371,7 +371,6 @@ public final class Pageflip extends WebView {
 	 */
 	private void injectJS(String option) {
 		String s = "javascript:(function() { " + option + "})()";
-		Utils.logd(TAG, s);
 		loadUrl(s);
 	}
 	

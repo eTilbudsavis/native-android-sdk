@@ -151,10 +151,10 @@ public class Session implements Serializable {
 		}
 		JsonObjectListener session = new JsonObjectListener() {
 			
-			public void onComplete(int statusCode, JSONObject data, EtaError error) {
+			public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 
 				sessionUpdate(statusCode, data, error);
-				if (listener != null) listener.onComplete(statusCode, data, error);
+				if (listener != null) listener.onComplete(isCache, statusCode, data, error);
 			}
 		};
 		mEta.api().post(Session.ENDPOINT, session, b).execute();
@@ -190,14 +190,14 @@ public class Session implements Serializable {
 		
 		JsonObjectListener userCreate = new JsonObjectListener() {
 			
-			public void onComplete(int statusCode, JSONObject data, EtaError error) {
+			public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 
 				if (Utils.isSuccess(statusCode)) {
 					Utils.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + data.toString());
 				} else {
 					Utils.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
 				}
-				if (listener != null) listener.onComplete(statusCode, data, error);
+				if (listener != null) listener.onComplete(isCache, statusCode, data, error);
 			}
 		};
 
@@ -258,9 +258,9 @@ public class Session implements Serializable {
 		b.putString(Params.EMAIL, "");
 		JsonObjectListener session = new JsonObjectListener() {
 			
-			public void onComplete(int statusCode, JSONObject data, EtaError error) {
+			public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 				sessionUpdate(statusCode, data, error);
-				if (listener != null) listener.onComplete(statusCode, data, error);
+				if (listener != null) listener.onComplete(isCache, statusCode, data, error);
 			}
 		};
 
@@ -292,9 +292,9 @@ public class Session implements Serializable {
 		clearUser();
 		JsonObjectListener session = new JsonObjectListener() {
 			
-			public void onComplete(int statusCode, JSONObject data, EtaError error) {
+			public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 				sessionUpdate(statusCode, data, error);
-				if (listener != null) listener.onComplete(statusCode, data, error);
+				if (listener != null) listener.onComplete(isCache, statusCode, data, error);
 			}
 		};
 

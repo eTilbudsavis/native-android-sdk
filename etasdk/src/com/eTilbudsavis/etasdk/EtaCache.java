@@ -26,7 +26,7 @@ public class EtaCache implements Serializable {
 	private static final long HTML_CACHE_TIME = 15 * Utils.MINUTE_IN_MILLIS;
 	private static final String HTML_REGEX = ".*\\<[^>]+>.*";
 	
-	private Map<String, CacheItem> mItems = Collections.synchronizedMap(new WeakHashMap<String, EtaCache.CacheItem>());
+	private Map<String, CacheItem> mItems = Collections.synchronizedMap(new HashMap<String, EtaCache.CacheItem>());
 
 	public EtaCache() {
 	}
@@ -88,9 +88,10 @@ public class EtaCache implements Serializable {
 	public CacheItem get(String key) {
 		CacheItem c = mItems.get(key);
 		if (c != null) {
-			c = (c.time + ITEM_CACHE_TIME) > System.currentTimeMillis() ? c : null;
-		} else {
-			c = null;
+			if ( ! ((c.time + ITEM_CACHE_TIME) > System.currentTimeMillis()) ) {
+				mItems.remove(c);
+				c = null;
+			}
 		}
 		return c;
 	}
