@@ -62,7 +62,6 @@ public class EtaErnObject extends EtaObject {
 		List<? extends EtaObject> list = new ArrayList<EtaObject>(0);
 		
 		if (objects.length() == 0) {
-			Utils.logd(TAG, "Array is empty");
 			return (T) list;
 		}
 

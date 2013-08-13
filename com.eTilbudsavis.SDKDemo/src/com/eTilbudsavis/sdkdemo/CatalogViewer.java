@@ -30,7 +30,7 @@ public class CatalogViewer extends Activity {
 	ListListener<Catalog> catalogListener = new ListListener<Catalog>() {
 		
 		@Override
-		public void onComplete(int statusCode, List<Catalog> list, EtaError error) {
+		public void onComplete(boolean isCache, int statusCode, List<Catalog> list, EtaError error) {
 
 			if (statusCode == 200 && !list.isEmpty()) {
 				// If the callback one or more catalogs, 

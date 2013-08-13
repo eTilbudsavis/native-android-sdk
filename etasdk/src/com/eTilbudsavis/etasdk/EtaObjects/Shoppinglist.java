@@ -45,10 +45,6 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 		return sl;
 	}
 	
-	public Shoppinglist(JSONObject shoppinglist) {
-		set(shoppinglist);
-	}
-
 	public void set(JSONObject shoppinglist) {
 		fromJSON(this, shoppinglist);
 	}

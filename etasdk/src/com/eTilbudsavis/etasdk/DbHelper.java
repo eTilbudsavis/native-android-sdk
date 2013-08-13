@@ -91,11 +91,10 @@ public class DbHelper extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		Utils.logd(TAG, "Upgrading database from version " + oldVersion + " to "
 				+ newVersion + ", which will destroy all old data");
-		db.execSQL("DROP TABLE IF EXISTS " + SL);
-		db.execSQL("DROP TABLE IF EXISTS " + SL_OFFLINE);
-		db.execSQL("DROP TABLE IF EXISTS " + SLI);
-		db.execSQL("DROP TABLE IF EXISTS " + SLI_OFFLINE);
-		onCreate(db);
+		db.execSQL("DELETE FROM " + SL + " WHERE 1");
+		db.execSQL("DELETE FROM " + SL_OFFLINE + " WHERE 1");
+		db.execSQL("DELETE FROM " + SLI + " WHERE 1");
+		db.execSQL("DELETE FROM " + SLI_OFFLINE + " WHERE 1");
 	}
 	
 	public void clear() {
@@ -301,9 +300,9 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return the number of rows affected
 	 */
 	public int deleteItem(String id) {
-		String q = "DELETE FROM " + itemTable() + " WHERE " + ID + "=" + id;
-		return cursorCount(query(q));
-//		return mDatabase.delete(itemTable(), ID + "=?", new String[]{id});
+//		String q = "DELETE FROM " + itemTable() + " WHERE " + ID + "=" + id;
+//		return cursorCount(query(q));
+		return mDatabase.delete(itemTable(), ID + "=?", new String[]{id});
 	}
 
 	/**
@@ -316,9 +315,9 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public int deleteItems(String shoppinglistId, Boolean state) {
 		if (state == null) {
-			return mDatabase.delete(itemTable(), ID + "=?", new String[]{shoppinglistId});
+			return mDatabase.delete(itemTable(), SHOPPINGLIST_ID + "=?", new String[]{shoppinglistId});
 		} else {
-			return mDatabase.delete(itemTable(), ID + "=? AND " + TICK + "=?", new String[]{shoppinglistId, String.valueOf(state)});
+			return mDatabase.delete(itemTable(), SHOPPINGLIST_ID + "=? AND " + TICK + "=?", new String[]{shoppinglistId, String.valueOf(state)});
 		}
 	}
 

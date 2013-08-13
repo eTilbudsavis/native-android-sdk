@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import android.database.Cursor;
 import android.os.Bundle;
 
+import com.eTilbudsavis.etasdk.Api.ItemListener;
 import com.eTilbudsavis.etasdk.Api.JsonArrayListener;
 import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
 import com.eTilbudsavis.etasdk.Api.ListListener;
@@ -48,6 +49,7 @@ public class ShoppinglistManager {
 	private String mCurrentSlId = null;
 	private boolean mIsResumed = false;
 
+	private HashSet<String> mApiQueueItems = new HashSet<String>();
 	private List<QueueItem> mApiQueue = Collections.synchronizedList(new ArrayList<QueueItem>());
 	
 	private ArrayList<ShoppinglistManagerListener> mSubscribers = new ArrayList<ShoppinglistManager.ShoppinglistManagerListener>();
@@ -61,7 +63,7 @@ public class ShoppinglistManager {
 			
 			if (mApiQueue.size() > 0) {
 				execApiQueue();
-			} else {		
+			} else {
 				if (syncCount%3 == 0) {
 					syncLists();
 				} else {
@@ -307,12 +309,14 @@ public class ShoppinglistManager {
 		}
 	}
 	
-	private void addQueue(Api api) {
-		mApiQueue.add(new QueueItem(api));
+	private void addQueue(Api api, String id) {
+		mApiQueue.add(new QueueItem(api, id));
+		mApiQueueItems.add(id);
 		execApiQueue();
 	}
 	
 	class QueueItem {
+		public String id;
 		private int user;
 		private int retries = 5;
 		private boolean working = false;
@@ -336,6 +340,8 @@ public class ShoppinglistManager {
 				} else {
 					
 					mApiQueue.remove(QueueItem.this);
+					mApiQueueItems.remove(id);
+					
 					if (user == mEta.getUser().getId()) {
 						oldListener.onComplete(false, statusCode, item, error);
 					}
@@ -345,8 +351,9 @@ public class ShoppinglistManager {
 			}
 		};
 		
-		public QueueItem(Api api) {
+		public QueueItem(Api api, String id) {
 			user = mEta.getUser().getId();
+			this.id = id;
 			this.api = api;
 			oldListener = (JsonObjectListener)api.getListener();
 			api.setListener(listener);
@@ -482,10 +489,11 @@ public class ShoppinglistManager {
 					
 					Shoppinglist s = sl;
 					if (Utils.isSuccess(statusCode)) {
-						s = new Shoppinglist(data);
+						s = Shoppinglist.fromJSON(data);
 						s.setState(STATE_SYNCED);
 					} else {
 						s.setState(STATE_ERROR);
+						revertList(sl);
 					}
 					mDatabase.editList(s);
 					listener.onComplete(false, statusCode, data, error);
@@ -494,7 +502,7 @@ public class ShoppinglistManager {
 			};
 			
 			Api a = mEta.api().put(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), cb, sl.getApiParams());
-			addQueue(a);
+			addQueue(a, sl.getId());
 		} else {
 			sl.setState(STATE_SYNCED);
 		}
@@ -535,10 +543,11 @@ public class ShoppinglistManager {
 					
 					Shoppinglist s = sl;
 					if (Utils.isSuccess(statusCode)) {
-						s = new Shoppinglist(data);
+						s = Shoppinglist.fromJSON(data);
 						s.setState(STATE_SYNCED);
 					} else {
 						s.setState(STATE_ERROR);
+						revertList(sl);
 					}
 					mDatabase.editList(s);
 					listener.onComplete(false, statusCode, data, error);
@@ -548,7 +557,7 @@ public class ShoppinglistManager {
 			};
 			
 			Api a = mEta.api().put(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), editItem, sl.getApiParams());
-			addQueue(a);
+			addQueue(a, sl.getId());
 		} else {
 			sl.setState(STATE_SYNCED);
 		}
@@ -580,10 +589,15 @@ public class ShoppinglistManager {
 		long row = -1;
 		sl.setModified(date);
 		
+		for (ShoppinglistItem sli : getItems(sl)) {
+			sli.setState(STATE_DELETE);
+			mDatabase.editItem(sli);
+		}
+
+		sl.setState(STATE_DELETE);
+		mDatabase.editList(sl);
+		
 		if (mustSync()) {
-			
-			sl.setState(STATE_DELETE);
-			mDatabase.editList(sl);
 			
 			JsonObjectListener cb = new JsonObjectListener() {
 				
@@ -598,6 +612,7 @@ public class ShoppinglistManager {
 						if (s != null) {
 							s.setState(STATE_ERROR);
 							mDatabase.editList(s);
+							revertList(sl);
 						}
 					}
 					listener.onComplete(true, statusCode, data, error);
@@ -606,7 +621,7 @@ public class ShoppinglistManager {
 			};
 			
 			Api a = mEta.api().delete(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), cb, sl.getApiParams());
-			addQueue(a);
+			addQueue(a, sl.getId());
 			
 		} else {
 			row = mDatabase.deleteList(sl.getId());
@@ -701,6 +716,7 @@ public class ShoppinglistManager {
 						s.setState(STATE_SYNCED);
 					} else {
 						s.setState(STATE_ERROR);
+						revertItem(sli);
 					}
 					mDatabase.editItem(s);
 					listener.onComplete(false, statusCode, data, error);
@@ -709,7 +725,7 @@ public class ShoppinglistManager {
 			};
 			
 			Api a = mEta.api().put(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams());
-			addQueue(a);
+			addQueue(a, sli.getId());
 			
 		} else {
 			sli.setState(STATE_SYNCED);
@@ -757,6 +773,7 @@ public class ShoppinglistManager {
 						s.setState(STATE_SYNCED);
 					} else {
 						s.setState(STATE_ERROR);
+						revertItem(sli);
 					}
 					mDatabase.editItem(s);
 					listener.onComplete(false, statusCode, data, error);
@@ -767,7 +784,7 @@ public class ShoppinglistManager {
 			
 			// Push edit to server
 			Api a = mEta.api().put(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams());
-			addQueue(a);
+			addQueue(a, sli.getId());
 			
 		} else {
 			sli.setState(STATE_SYNCED);
@@ -832,7 +849,14 @@ public class ShoppinglistManager {
 		
 		final List<String> deleted = new ArrayList<String>();
 		
-		final Boolean state = (whatToDelete == Shoppinglist.EMPTY_TICKED) ? true : (whatToDelete == Shoppinglist.EMPTY_UNTICKED) ? false : null;
+		Boolean tmp = null;
+		if (whatToDelete.equals(Shoppinglist.EMPTY_TICKED)) {
+			tmp = true;
+		} else if (whatToDelete.equals(Shoppinglist.EMPTY_UNTICKED)) {
+			tmp = false;
+		}
+		
+		final Boolean state = tmp;
 		
 		ArrayList<ShoppinglistItem> list = getItems(sl);
 		for (ShoppinglistItem sli : list) {
@@ -867,6 +891,7 @@ public class ShoppinglistManager {
 							if (sli.getState() == STATE_DELETE) {
 								sli.setState(STATE_ERROR);
 								mDatabase.editItem(sli);
+								revertItem(sli);
 							} 
 						}
 					}
@@ -875,14 +900,15 @@ public class ShoppinglistManager {
 				}
 			};
 			Api a = mEta.api().post(Endpoint.getListEmpty(mEta.getUser().getId(), sl.getId()), cb, b);
-			addQueue(a);
+			addQueue(a, sl.getId());
 			
 		} else {
 			row = mDatabase.deleteItems(sl.getId(), state) ;
 			row = row > 0 ? row : -1;
 		}
 		
-		// Do local callback stuff
+		Utils.logd(TAG, "Delete count: " + String.valueOf(row));
+		
 		if (row != -1) {
 			listener.onComplete(true, 200, null, null);
 			notifySubscribers(false, null, deleted, null);
@@ -921,6 +947,7 @@ public class ShoppinglistManager {
 					} else {
 						sli.setState(STATE_ERROR);
 						mDatabase.editItem(sli);
+						revertItem(sli);
 					}
 					listener.onComplete(false, statusCode, item, error);
 					notifySubscribers(false, null, idToList(sli.getId()), null);
@@ -928,7 +955,7 @@ public class ShoppinglistManager {
 			};
 			
 			Api a = mEta.api().delete(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams());
-			addQueue(a);
+			addQueue(a, sli.getId());
 			
 			
 		} else {
@@ -947,54 +974,118 @@ public class ShoppinglistManager {
 		
 	}
 
+	OnCompletetionListener cleanupListener = new OnCompletetionListener() {
+		
+		public void onComplete(boolean isLocalCallback, int statusCode,
+				JSONObject item, EtaError error) {
+		}
+	};
+	
 	private void cleanupDB() {
 		
-		OnCompletetionListener ocl = new OnCompletetionListener() {
-			
-			public void onComplete(boolean isLocalCallback, int statusCode,
-					JSONObject item, EtaError error) {
-				Utils.logd(TAG, "DB Cleanup", statusCode, item, error);
-			}
-		};
+		Utils.logd(TAG, "cleanupDB");
 		
-		if (mustSync()) {
+		if (!mustSync())
+			return;
 			
-			for (Shoppinglist sl : getLists()) {
-				
+		for (Shoppinglist sl : getLists()) {
+			
+			if (!mApiQueueItems.contains(sl.getId())) {
 				switch (sl.getState()) {
-				case STATE_DELETE:
-					deleteList(sl, ocl, sl.getModified());
-					break;
-				case STATE_SYNCING:
-				case STATE_TO_SYNC:
-					editList(sl, ocl, sl.getModified());
-					break;
-
-				default:
-					break;
-				}
-				
-				for (ShoppinglistItem sli : getItems(sl)) {
 					
-					switch (sli.getState()) {
 					case STATE_DELETE:
-						deleteItem(sli, ocl, sli.getModified());
+						deleteList(sl, cleanupListener, sl.getModified());
 						break;
+						
 					case STATE_SYNCING:
 					case STATE_TO_SYNC:
-						editItem(sli, ocl, sli.getModified());
+						editList(sl, cleanupListener, sl.getModified());
+						break;
+	
+					case STATE_ERROR:
+						revertList(sl);
+						break;
+						
+					default:
+						break;
+				}
+			}
+			cleanItems(sl);
+			
+		}
+		
+	}
+	
+	private void cleanItems(Shoppinglist sl) {
+
+		for (ShoppinglistItem sli : getItems(sl)) {
+			
+			if (!mApiQueueItems.contains(sli.getId())) {
+				switch (sli.getState()) {
+					case STATE_DELETE:
+						deleteItem(sli, cleanupListener, sli.getModified());
+						break;
+						
+					case STATE_SYNCING:
+					case STATE_TO_SYNC:
+						editItem(sli, cleanupListener, sli.getModified());
+						break;
+						
+					case STATE_ERROR:
+						revertItem(sli);
 						break;
 
 					default:
 						break;
-					}
-					
-					
+				}
+			}
+			
+			
+		}
+	}
+	
+	private void revertList(final Shoppinglist sl) {
+
+		JsonObjectListener listListener = new JsonObjectListener() {
+			
+			public void onComplete(boolean isCache, int statusCode, JSONObject item,
+					EtaError error) {
+
+				
+				if (Utils.isSuccess(statusCode)) {
+					Shoppinglist s = Shoppinglist.fromJSON(item);
+					s.setState(STATE_SYNCED);
+					mDatabase.editList(s);
+				} else {
+					mDatabase.deleteList(sl.getId());
 				}
 				
 			}
+		};
+		
+		mEta.api().get(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), listListener).execute();
+		
+	}
+	
+	private void revertItem(final ShoppinglistItem sli) {
+
+		JsonObjectListener itemListener = new JsonObjectListener() {
 			
-		}
+			public void onComplete(boolean isCache, int statusCode, JSONObject item,
+					EtaError error) {
+
+				if (Utils.isSuccess(statusCode)) {
+					ShoppinglistItem s = ShoppinglistItem.fromJSON(item);
+					s.setState(STATE_SYNCED);
+					mDatabase.editItem(s);
+				} else {
+					mDatabase.deleteItem(sli.getId());
+				}
+				
+			}
+		};
+		
+		mEta.api().get(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), itemListener).execute();
 		
 	}
 	
