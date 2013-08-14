@@ -33,7 +33,9 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	private String mShoppinglistId = "";
 
 	public ShoppinglistItem() {
-		setId(Utils.createUUID());
+        String id =Utils.createUUID();
+		setId(id);
+        setErn("ern:shopping:item:" + id);
 	}
 	
 	public ShoppinglistItem(Shoppinglist shoppinglist, String description) {

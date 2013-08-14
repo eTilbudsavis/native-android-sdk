@@ -90,7 +90,7 @@ public class Api implements Serializable {
 	public static final int DEFAULT_LIMIT = Params.DEFAULT_LIMIT;
 
 	/** Use this flag to enable and disable the usage of location, in the API call */
-	public static final int LOCATION			= 1 << 0;
+	public static final int LOCATION			= 1;
 
 	/** Use this flag to enable and disable the usage of cache, in the API call */
 	public static final int CACHE				= 1 << 1;

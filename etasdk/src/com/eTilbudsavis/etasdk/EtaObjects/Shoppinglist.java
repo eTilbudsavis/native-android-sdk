@@ -29,14 +29,14 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 	// server vars
 	private String mName = "";
 	private String mAccess = ACCESS_PRIVATE;
-	private Date mModified = null;
+	private Date mModified = new Date();
 	private Share mOwner = new Share();
-	private int mState;
+	private int mState = ShoppinglistManager.STATE_TO_SYNC;
 	
 	private Shoppinglist() {
-		setId(Utils.createUUID());
-		setModified(new Date());
-		setState(ShoppinglistManager.STATE_TO_SYNC);
+        String id = Utils.createUUID();
+		setId(id);
+        setErn("ern:shopping:list:" + id);
 	}
 
 	public static Shoppinglist fromName(String name) {

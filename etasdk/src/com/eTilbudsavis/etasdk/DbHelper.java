@@ -276,7 +276,6 @@ public class DbHelper extends SQLiteOpenHelper {
 
 	/**
 	 * Get a shopping list from it's readable name
-	 * @param name of the shopping list
 	 * @return Cursor with shopping lists that matches name
 	 */
 	public Cursor getItemFromDescription(String description) {
@@ -287,7 +286,6 @@ public class DbHelper extends SQLiteOpenHelper {
 	
 	/**
 	 * Get a shopping lite item from the db
-	 * @param id to get from db
 	 * @return A Cursor object, which is positioned before the first entry
 	 */
 	public Cursor getItems(Shoppinglist sl) {

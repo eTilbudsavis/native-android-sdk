@@ -4,22 +4,18 @@
  */
 package com.eTilbudsavis.etasdk;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.text.style.BackgroundColorSpan;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class EtaLocation extends Location {
 
@@ -84,12 +80,12 @@ public class EtaLocation extends Location {
 	/**
 	 * Set location for an address that has been geocoded to a latitude, longitude format<br /><br />
 	 * NOTE: This implicitly implies that, no {@link #setSensor(boolean) sensor} has been used.
-	 * @see https://developers.google.com/maps/documentation/geocoding/ for more info
+	 * https://developers.google.com/maps/documentation/geocoding/ for more info
 	 * 
 	 * @param address that has been geocoded
 	 * @param latitude of the address
 	 * @param longitude of the address
-	 * @return
+	 * @return this object
 	 */
 	public EtaLocation set(String address, double latitude, double longitude) {
 		mAddress = address;
@@ -149,11 +145,11 @@ public class EtaLocation extends Location {
 		return mAddress;
 	}
 
-	public Boolean isSet() {
+	public boolean isSet() {
 		return (getLatitude() != 0.0 && getLongitude() != 0.0);
 	}
 
-	public Boolean isBoundsSet() {
+	public boolean isBoundsSet() {
 		return (mBoundNorth != BOUND_DEFAULT && 
 				mBoundSouth != BOUND_DEFAULT && 
 				mBoundEast != BOUND_DEFAULT && 
@@ -192,10 +188,10 @@ public class EtaLocation extends Location {
 	/**
 	 * Set the bounds for your search.
 	 * All parameters should be GPS coordinates.
-	 * @param boundsNorth 
-	 * @param boundsEast
-	 * @param boundsSouth
-	 * @param boundsWest
+	 * @param boundEast
+	 * @param boundWest
+	 * @param boundEast
+	 * @param boundEast
 	 */
 	public void setBounds(double boundNorth, double boundEast,
 			double boundSouth, double boundWest) {
@@ -209,7 +205,7 @@ public class EtaLocation extends Location {
 
 	/**
 	 * GPS coordinate for the northern bound of a search.
-	 * @param boundsNorth
+	 * @param boundNorth
 	 */
 	public EtaLocation setBoundNorth(double boundNorth) {
 		mBoundNorth = boundNorth;

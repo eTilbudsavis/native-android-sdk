@@ -1,13 +1,13 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import java.io.Serializable;
+import android.graphics.Color;
+
+import com.eTilbudsavis.etasdk.Eta;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
-
-import android.graphics.Color;
+import java.io.Serializable;
 
 public class Branding implements Serializable {
 	

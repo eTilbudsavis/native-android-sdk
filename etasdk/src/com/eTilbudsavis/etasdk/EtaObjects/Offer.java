@@ -1,22 +1,18 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.annotation.SuppressLint;
-
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class Offer extends EtaErnObject implements Serializable {
 	
@@ -79,7 +75,6 @@ public class Offer extends EtaErnObject implements Serializable {
 	private Links mLinks;
 	private Date mRunFrom = null;
 	private Date mRunTill = null;
-	private Date mPublish = null;
 	private String mDealerUrl;
 	private String mDealerId;
 	private String mStoreUrl;
@@ -96,38 +91,12 @@ public class Offer extends EtaErnObject implements Serializable {
 		
 	}
 
-	public Offer(JSONObject offer) {
-		try {
-			setId(offer.getString(S_ID));
-			setErn(offer.getString(S_ERN));
-			setHeading(offer.getString(S_HEADING));
-			setDescription(offer.getString(S_DESCRIPTION));
-			setCatalogPage(offer.getInt(S_CATALOG_PAGE));
-			setPricing(Pricing.fromJSON(offer.getJSONObject(S_PRICING)));
-			setQuantity(Quantity.fromJSON(offer.getJSONObject(S_QUANTITY)));
-			setImages(Images.fromJSON(offer.getJSONObject(S_IMAGES)));
-			setLinks(Links.fromJSON(offer.getJSONObject(S_LINKS)));
-			setRunFrom(offer.getString(S_RUN_FROM));
-			setRunTill(offer.getString(S_RUN_TILL));
-			setPublish(offer.getString(S_PUBLISH));
-			setDealerUrl(offer.getString(S_DEALER_URL));
-			setDealerId(offer.getString(S_DEALER_ID));
-			setStoreUrl(offer.getString(S_STORE_URL));
-			setStoreId(offer.getString(S_STORE_ID));
-			setCatalogUrl(offer.getString(S_CATALOG_URL));
-			setCatalogId(offer.getString(S_CATALOG_ID));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
-	}
-	
 	@SuppressWarnings("unchecked")
 	public static ArrayList<Offer> fromJSON(JSONArray offers) {
 		ArrayList<Offer> list = new ArrayList<Offer>();
 		try {
 			for (int i = 0 ; i < offers.length() ; i++ )
-				list.add(new Offer((JSONObject)offers.get(i)));
+				list.add(Offer.fromJSON((JSONObject) offers.get(i)));
 			
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
@@ -157,7 +126,6 @@ public class Offer extends EtaErnObject implements Serializable {
 			o.setLinks(Links.fromJSON(offer.getJSONObject(S_LINKS)));
 			o.setRunFrom(offer.getString(S_RUN_FROM));
 			o.setRunTill(offer.getString(S_RUN_TILL));
-			o.setPublish(offer.getString(S_PUBLISH));
 			o.setDealerUrl(offer.getString(S_DEALER_URL));
 			o.setDealerId(offer.getString(S_DEALER_ID));
 			o.setStoreUrl(offer.getString(S_STORE_URL));
@@ -189,7 +157,6 @@ public class Offer extends EtaErnObject implements Serializable {
 			o.put(S_LINKS, offer.getLinks() == null ? null : offer.getLinks().toJSON());
 			o.put(S_RUN_FROM, Utils.formatDate(offer.getRunFrom()));
 			o.put(S_RUN_TILL, Utils.formatDate(offer.getRunTill()));
-			o.put(S_PUBLISH, offer.getPublish());
 			o.put(S_DEALER_URL, offer.getDealerUrl());
 			o.put(S_DEALER_ID, offer.getDealerId());
 			o.put(S_STORE_URL, offer.getStoreUrl());
@@ -294,20 +261,6 @@ public class Offer extends EtaErnObject implements Serializable {
 		return this;
 	}
 
-	public Date getPublish() {
-		return mPublish;
-	}
-
-	public Offer setPublish(Date time) {
-		mPublish = time;
-		return this;
-	}
-
-	public Offer setPublish(String time) {
-		mPublish = Utils.parseDate(time);
-		return this;
-	}
-
 	public String getDealerUrl() {
 		return mDealerUrl;
 	}
@@ -399,7 +352,7 @@ public class Offer extends EtaErnObject implements Serializable {
 
 		Offer o = (Offer)obj;
 		return mId.equals(o.getId()) &&
-				mErn == o.getErn() &&
+				mErn.equals(o.getErn()) &&
 				mHeading.equals(o.getHeading()) &&
 				mDescription.equals(o.getDescription()) &&
 				mCatalogPage == o.getCatalogPage() &&
@@ -409,7 +362,6 @@ public class Offer extends EtaErnObject implements Serializable {
 				mLinks == null ? o.getLinks() == null : mLinks.equals(o.getLinks()) &&
 				mRunFrom == o.getRunFrom() &&
 				mRunTill == o.getRunTill() &&
-				mPublish == o.getPublish() &&
 				mDealerUrl.equals(o.getDealerUrl()) &&
 				mDealerId.equals(o.getDealerId()) &&
 				mStoreUrl.equals(o.getStoreUrl()) &&
@@ -447,7 +399,6 @@ public class Offer extends EtaErnObject implements Serializable {
 			.append(", quantity=").append(mQuantity == null ? null : mQuantity.toString())
 			.append(", images=").append(mImages == null ? null : mImages.toString())
 			.append(", links=").append(mLinks == null ? null : mLinks.toString())
-			.append(", publish=").append(mPublish)
 			.append(", store=").append(mStore == null ? mStoreId : mStore.toString())
 			.append(", catalog=").append(mCatalog == null ? mCatalogId : mCatalog.toString(everything));
 		}

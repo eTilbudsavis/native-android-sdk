@@ -1,22 +1,18 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.annotation.SuppressLint;
-
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class Catalog extends EtaErnObject implements Serializable {
 	
@@ -415,8 +411,8 @@ public class Catalog extends EtaErnObject implements Serializable {
 				mDimension == null ? c.getDimension() == null : mDimension.equals(c.getDimension()) &&
 				mImages == null ? c.getImages() == null : mImages.equals(c.getImages()) &&
 				mPages == null ? c.getPages() == null : mPages.equals(c.getPages()) &&
-				mDealer == null ? c.getDealer() == null : (c.getDealer() == null ? false : mDealer.equals(c.getDealer())) &&
-				mStore == null ? c.getStore() == null : (c.getStore() == null ? false : mStore.equals(c.getStore())) &&
+				mDealer == null ? c.getDealer() == null : (c.getDealer() != null && mDealer.equals(c.getDealer())) &&
+				mStore == null ? c.getStore() == null : (c.getStore() != null && mStore.equals(c.getStore())) &&
 				mOfferOnPage == c.getOfferOnPage();
 	}
 	

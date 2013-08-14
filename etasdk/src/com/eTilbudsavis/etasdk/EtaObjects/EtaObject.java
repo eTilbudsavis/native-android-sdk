@@ -54,7 +54,6 @@ public class EtaObject {
 	protected static final String S_PRICING = "pricing";
 	protected static final String S_QUANTITY = "quantity";
 	protected static final String S_LINKS = "links";
-	protected static final String S_PUBLISH = "publish";
 	protected static final String S_CATALOG_URL = "catalog_url";
 	protected static final String S_CATALOG_ID = "catalog_id";
 	protected static final String S_STREET = "street";

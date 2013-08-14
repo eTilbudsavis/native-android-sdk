@@ -1,20 +1,8 @@
 package com.eTilbudsavis.etasdk;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.database.Cursor;
 import android.os.Bundle;
 
-import com.eTilbudsavis.etasdk.Api.ItemListener;
 import com.eTilbudsavis.etasdk.Api.JsonArrayListener;
 import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
 import com.eTilbudsavis.etasdk.Api.ListListener;
@@ -26,6 +14,17 @@ import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 public class ShoppinglistManager {
 
@@ -61,15 +60,14 @@ public class ShoppinglistManager {
 			
 			mEta.getHandler().postDelayed(mSyncLoop, mSyncSpeed);
 			
-			if (mApiQueue.size() > 0) {
-				execApiQueue();
-			} else {
-				if (syncCount%3 == 0) {
-					syncLists();
-				} else {
-					syncListsModified();
-				}
-				syncCount++;
+			if (mApiQueue.size() == 0) {
+
+                if (syncCount%3 == 0) {
+                    syncLists();
+                } else {
+                    syncListsModified();
+                }
+                syncCount++;
 			}
 			
 		}
@@ -81,7 +79,6 @@ public class ShoppinglistManager {
 	 * Sync all shopping lists.<br>
 	 * This is run at certain intervals if startSync() has been called.<br>
 	 * startSync() is called if Eta.onResume() is called.
-	 * @param shoppinglist update
 	 */
 	public void syncLists() {
 		
@@ -110,7 +107,6 @@ public class ShoppinglistManager {
 	 * Sync all shopping list items, in all shopping lists.<br>
 	 * This is run at certain intervals if startSync() has been called.<br>
 	 * startSync() is called if Eta.onResume() is called.
-	 * @param shoppinglist update
 	 */
 	public void syncListsModified() {
 
@@ -163,7 +159,7 @@ public class ShoppinglistManager {
 	 * Sync all shopping list items, associated with the given shopping list.<br>
 	 * This is run at certain intervals if startSync() has been called.<br>
 	 * startSync() is called if Eta.onResume() is called.
-	 * @param shoppinglist update
+	 * @param sl shoppinglist to update
 	 */
 	public void syncItems(final Shoppinglist sl) {
 		
@@ -174,7 +170,9 @@ public class ShoppinglistManager {
 			
 			public void onComplete(boolean isCache, int statusCode, JSONArray data, EtaError error) {
 
-				if (mApiQueue.size() > 0)
+                Utils.logd(TAG, "syncItems", statusCode, data, error);
+
+                if (mApiQueue.size() > 0)
 					return;
 				
 				if (Utils.isSuccess(statusCode)) {
@@ -184,7 +182,7 @@ public class ShoppinglistManager {
 				} else {
 					sl.setState(STATE_ERROR);
 					mDatabase.editList(sl);
-					notifySubscribers(true, null, null, idToList(sl.getId()));
+					notifySubscribers(false, true, null, null, idToList(sl.getId()));
 				}
 			}
 		};
@@ -195,7 +193,7 @@ public class ShoppinglistManager {
 
 	private <T extends List<? extends EtaErnObject>> void mergeErnObjects(T newLists, T oldLists) {
 		
-		boolean isList = false;
+		boolean isList;
 		if (0 < newLists.size()) {
 			isList = (newLists.get(0) instanceof Shoppinglist);
 		} else if (0 < oldLists.size()) {
@@ -265,7 +263,7 @@ public class ShoppinglistManager {
 			if (isList) {
 				syncListsModified();
 			}
-			notifySubscribers(isList, added, deleted, edited);
+			notifySubscribers(false, isList, added, deleted, edited);
 
 		}
 		
@@ -297,28 +295,18 @@ public class ShoppinglistManager {
 	public void stopSync() {
 		mEta.getHandler().removeCallbacks(mSyncLoop);
 	}
-	
-	
-	private void execApiQueue() {
-		for (QueueItem q : mApiQueue) {
-			if (q.retries > 0) {
-				q.execute();
-			} else {
-				
-			}
-		}
-	}
-	
+
 	private void addQueue(Api api, String id) {
 		mApiQueue.add(new QueueItem(api, id));
 		mApiQueueItems.add(id);
-		execApiQueue();
+        for (QueueItem q : mApiQueue) {
+            q.execute();
+        }
 	}
 	
 	class QueueItem {
 		public String id;
 		private int user;
-		private int retries = 5;
 		private boolean working = false;
 		private Api api;
 		private JsonObjectListener oldListener;
@@ -368,7 +356,6 @@ public class ShoppinglistManager {
 		
 		private void call() {
 			working = true;
-			retries--;
 			api.execute();
 		}
 		
@@ -388,7 +375,7 @@ public class ShoppinglistManager {
 	 * @return The shopping list currently in use. or <code>null</code> if no shoppinglists exist.
 	 */
 	public Shoppinglist getCurrentList() {
-		Shoppinglist sl = null;
+		Shoppinglist sl;
 		sl = getList(mCurrentSlId);
 		if (sl == null) {
 			Cursor c = mDatabase.getLists();
@@ -423,7 +410,7 @@ public class ShoppinglistManager {
 		if (id == null)
 			return null;
 		Cursor c = mDatabase.getList(id);
-		return c.moveToFirst() == true ? DbHelper.curToSl(c) : null;
+		return c.moveToFirst() ? DbHelper.curToSl(c) : null;
 	}
 
 	/**
@@ -444,7 +431,7 @@ public class ShoppinglistManager {
 	
 	/**
 	 * Get a shopping list from it's human readable name
-	 * @param id of the shopping list to get
+	 * @param name of the shopping list to get
 	 * @return <li>Shopping list or null if no shopping list exists
 	 */
 	public ArrayList<Shoppinglist> getListFromName(String name) {
@@ -470,7 +457,7 @@ public class ShoppinglistManager {
 	public void addList(final Shoppinglist sl, final OnCompletetionListener listener) {
 		
 		sl.setModified(new Date());
-		long row = -1;
+		long row;
 		
 		if (mustSync()) {
 
@@ -486,7 +473,8 @@ public class ShoppinglistManager {
 			JsonObjectListener cb = new JsonObjectListener() {
 				
 				public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
-					
+
+                    Utils.logd(TAG,"addList",  statusCode, data, error);
 					Shoppinglist s = sl;
 					if (Utils.isSuccess(statusCode)) {
 						s = Shoppinglist.fromJSON(data);
@@ -495,9 +483,11 @@ public class ShoppinglistManager {
 						s.setState(STATE_ERROR);
 						revertList(sl);
 					}
-					mDatabase.editList(s);
+
+                    mDatabase.editList(s);
+                    syncItems(s);
 					listener.onComplete(false, statusCode, data, error);
-					notifySubscribers(true, idToList(s.getId()), null, null);
+					notifySubscribers(false, true, idToList(s.getId()), null, null);
 				}
 			};
 			
@@ -508,10 +498,9 @@ public class ShoppinglistManager {
 		}
 		
 		row = mDatabase.insertList(sl);
-		// Do local callback stuff
 		if (row != -1) {
 			listener.onComplete(true, 200, null, null);
-			notifySubscribers(false, idToList(sl.getId()), null, null);
+			notifySubscribers(true, false, idToList(sl.getId()), null, null);
 		} else {
 			listener.onComplete(true, 400, null, null);
 		}
@@ -522,7 +511,6 @@ public class ShoppinglistManager {
 	 * Edit a shopping list already in the database.<br>
 	 * shopping list is replaced in the database, and changes is synchronized to the server if possible.<br>
 	 * @param sl - Shopping list to be replaced
-	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public void editList(final Shoppinglist sl, final OnCompletetionListener listener) {
 		editList(sl, listener, new Date());
@@ -530,7 +518,7 @@ public class ShoppinglistManager {
 	
 	private void editList(final Shoppinglist sl, final OnCompletetionListener listener, Date date) {
 		
-		long row = -1;
+		long row;
 		sl.setModified(date);
 		
 		if (mustSync()) {
@@ -551,7 +539,7 @@ public class ShoppinglistManager {
 					}
 					mDatabase.editList(s);
 					listener.onComplete(false, statusCode, data, error);
-					notifySubscribers(true, null, null, idToList(s.getId()));
+					notifySubscribers(false, true, null, null, idToList(s.getId()));
 					
 				}
 			};
@@ -566,7 +554,7 @@ public class ShoppinglistManager {
 		// Do local callback stuff
 		if (row != -1) {
 			listener.onComplete(true, 200, null, null);
-			notifySubscribers(false, null, null, idToList(sl.getId()));
+			notifySubscribers(true, false, null, null, idToList(sl.getId()));
 		} else {
 			listener.onComplete(true, 400, null, null);
 		}
@@ -578,7 +566,6 @@ public class ShoppinglistManager {
 	 * shopping list is deleted from the database, and changes is synchronized to the server if possible.<br>
 	 * All shopping list items associated with the shopping list are also deleted.
 	 * @param sl - Shopping list to delete
-	 * @return the number of rows affected.
 	 */
 	public void deleteList(final Shoppinglist sl, final OnCompletetionListener listener) {
 		deleteList(sl, listener, new Date());
@@ -586,7 +573,7 @@ public class ShoppinglistManager {
 	
 	private void deleteList(final Shoppinglist sl, final OnCompletetionListener listener, Date date) {
 		
-		long row = -1;
+		long row = 0;
 		sl.setModified(date);
 		
 		for (ShoppinglistItem sli : getItems(sl)) {
@@ -616,7 +603,7 @@ public class ShoppinglistManager {
 						}
 					}
 					listener.onComplete(true, statusCode, data, error);
-					notifySubscribers(true, null, idToList(sl.getId()), null);
+					notifySubscribers(false, true, null, idToList(sl.getId()), null);
 				}
 			};
 			
@@ -625,16 +612,15 @@ public class ShoppinglistManager {
 			
 		} else {
 			row = mDatabase.deleteList(sl.getId());
-			row = row == 0 ? -1 : row;
-			if (row != -1) {
+			if (row > 0) {
 				mDatabase.deleteItems(sl.getId(), null);
 			}
 		}
 		
 		// Do local callback stuff
-		if (row != -1) {
+		if (row > 0) {
 			listener.onComplete(true, 200, null, null);
-			notifySubscribers(false, null, idToList(sl.getId()), null);
+			notifySubscribers(true, false, null, idToList(sl.getId()), null);
 		} else {
 			listener.onComplete(true, 400, null, null);
 		}
@@ -655,7 +641,7 @@ public class ShoppinglistManager {
 
 	/**
 	 * Get a shopping list from it's human readable name
-	 * @param id of the shopping list to get
+	 * @param description of the shopping list to get
 	 * @return <li>Shopping list or null if no shopping list exists
 	 */
 	public ArrayList<ShoppinglistItem> getItemFromDescription(String description) {
@@ -672,7 +658,7 @@ public class ShoppinglistManager {
 
 	/**
 	 * Get a shopping list item by it's ID
-	 * @param id of the shopping list item
+	 * @param sl of the shopping list item
 	 * @return A shopping list item, or <code>null</code> if no item can be found.
 	 */
 	public ArrayList<ShoppinglistItem> getItems(Shoppinglist sl) {
@@ -693,14 +679,12 @@ public class ShoppinglistManager {
 	 * Add an item to a shopping list.<br>
 	 * shopping list items is inserted into the database, and changes is synchronized to the server if possible.
 	 * If the shopping list does not exist in the database or the server, a new one is created and synchronized if possible
-	 * @param sl - shopping list where item should be added to
 	 * @param sli - shopping list item that should be added.
-	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
 	public void addItem(final ShoppinglistItem sli, final OnCompletetionListener listener) {
 		
 		sli.setModified(new Date());
-		long row = -1;
+		long row;
 		
 		if (mustSync()) {
 			
@@ -720,7 +704,7 @@ public class ShoppinglistManager {
 					}
 					mDatabase.editItem(s);
 					listener.onComplete(false, statusCode, data, error);
-					notifySubscribers(false, idToList(s.getId()), null, null);
+					notifySubscribers(false, false, idToList(s.getId()), null, null);
 				}
 			};
 			
@@ -736,7 +720,7 @@ public class ShoppinglistManager {
 		// Do local callback stuff
 		if (row != -1) {
 			listener.onComplete(true, 200, null, null);
-			notifySubscribers(false, idToList(sli.getId()), null, null);
+			notifySubscribers(true, false, idToList(sli.getId()), null, null);
 		} else {
 			listener.onComplete(true, 400, null, null);
 		}
@@ -746,7 +730,7 @@ public class ShoppinglistManager {
 	/**
 	 * Insert an updated shopping list item into the db.<br>
 	 * shopping list items is replaced in the database, and changes is synchronized to the server if possible.
-	 * @param sli - shopping list item to edit
+	 * @param sli shopping list item to edit
 	 */
 	public void editItem(final ShoppinglistItem sli, final OnCompletetionListener listener) {
 		editItem(sli, listener, new Date());
@@ -755,7 +739,7 @@ public class ShoppinglistManager {
 	private void editItem(final ShoppinglistItem sli, final OnCompletetionListener listener, Date date) {
 
 		sli.setModified(date);
-		long row = -1;
+		long row;
 		
 		// Edit state according to login state, and push to DB
 		if (mustSync()) {
@@ -777,7 +761,7 @@ public class ShoppinglistManager {
 					}
 					mDatabase.editItem(s);
 					listener.onComplete(false, statusCode, data, error);
-					notifySubscribers(false, null, null, idToList(s.getId()));
+					notifySubscribers(false, false, null, null, idToList(s.getId()));
 					
 				}
 			};
@@ -794,7 +778,7 @@ public class ShoppinglistManager {
 		// Do local callback stuff
 		if (row != -1) {
 			listener.onComplete(true, 200, null, null);
-			notifySubscribers(false, null, null, idToList(sli.getId()));
+			notifySubscribers(true, false, null, null, idToList(sli.getId()));
 		} else {
 			listener.onComplete(true, 400, null, null);
 		}
@@ -805,7 +789,6 @@ public class ShoppinglistManager {
 	 * Delete all items from a shoppinglist where <code>isTicked() == true.</code><br>
 	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
 	 * @param sl - shoppinglist to delete items from
-	 * @return number of affected rows
 	 */
 	public void deleteItemsTicked(Shoppinglist sl, final OnCompletetionListener listener) {
 		sl.setModified(new Date());
@@ -816,7 +799,6 @@ public class ShoppinglistManager {
 	 * Delete all items from a shoppinglist where <code>isTicked() == false.</code><br>
 	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
 	 * @param sl - shoppinglist to delete items from
-	 * @return number of affected rows
 	 */
 	public void deleteItemsUnticked(Shoppinglist sl, final OnCompletetionListener listener) {
 		deleteItems(sl, Shoppinglist.EMPTY_UNTICKED, listener);
@@ -826,7 +808,6 @@ public class ShoppinglistManager {
 	 * Delete ALL items from a given shoppinglist.<br>
 	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
 	 * @param sl - shoppinglist to delete items from
-	 * @return number of affected rows
 	 */
 	public void deleteItemsAll(Shoppinglist sl, final OnCompletetionListener listener) {
 		deleteItems(sl, Shoppinglist.EMPTY_ALL, listener);
@@ -837,7 +818,6 @@ public class ShoppinglistManager {
 	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
 	 * @param sl to remove items from
 	 * @param whatToDelete describes what needs to be deleted
-	 * @return number of affected rows of any local call, if it synchronizes to server, it returns 0
 	 */
 	private void deleteItems(final Shoppinglist sl, final String whatToDelete, final OnCompletetionListener listener) {
 		
@@ -857,8 +837,10 @@ public class ShoppinglistManager {
 		}
 		
 		final Boolean state = tmp;
-		
-		ArrayList<ShoppinglistItem> list = getItems(sl);
+
+        long row = 0;
+
+        ArrayList<ShoppinglistItem> list = getItems(sl);
 		for (ShoppinglistItem sli : list) {
 			if (state == null) {
 				// Delete all items
@@ -866,17 +848,17 @@ public class ShoppinglistManager {
 				sli.setModified(d);
 				mDatabase.editItem(sli);
 				deleted.add(sli.getId());
+                row++;
 			} else if (sli.isTicked() == state) {
 				// Delete if ticked matches the requested state
 				sli.setState(STATE_DELETE);
 				sli.setModified(d);
 				mDatabase.editItem(sli);
-				deleted.add(sli.getId());				
+				deleted.add(sli.getId());
+                row++;
 			}
 		}
-		
-		long row = -1;
-		
+
 		if (mustSync()) {
 			
 			JsonObjectListener cb = new JsonObjectListener() {
@@ -896,7 +878,7 @@ public class ShoppinglistManager {
 						}
 					}
 					listener.onComplete(false, statusCode, data, error);
-					notifySubscribers(false, null, deleted, null);
+					notifySubscribers(false, false, null, deleted, null);
 				}
 			};
 			Api a = mEta.api().post(Endpoint.getListEmpty(mEta.getUser().getId(), sl.getId()), cb, b);
@@ -904,14 +886,11 @@ public class ShoppinglistManager {
 			
 		} else {
 			row = mDatabase.deleteItems(sl.getId(), state) ;
-			row = row > 0 ? row : -1;
 		}
-		
-		Utils.logd(TAG, "Delete count: " + String.valueOf(row));
-		
-		if (row != -1) {
+
+        if (row == deleted.size()) {
 			listener.onComplete(true, 200, null, null);
-			notifySubscribers(false, null, deleted, null);
+			notifySubscribers(true, false, null, deleted, null);
 		} else {
 			listener.onComplete(true, 400, null, null);
 		}
@@ -922,7 +901,6 @@ public class ShoppinglistManager {
 	 * Deletes a given shopping list item<br>
 	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
 	 * @param sli to delete from the db
-	 * @return the number of rows affected
 	 */
 	public void deleteItem(final ShoppinglistItem sli, final OnCompletetionListener listener) {
 		deleteItem(sli, listener, new Date());
@@ -930,7 +908,7 @@ public class ShoppinglistManager {
 	
 	private void deleteItem(final ShoppinglistItem sli, final OnCompletetionListener listener, Date date) {
 
-		long row = -1;
+		long row = 0;
 		sli.setModified(date);
 		
 		if (mustSync()) {
@@ -950,7 +928,7 @@ public class ShoppinglistManager {
 						revertItem(sli);
 					}
 					listener.onComplete(false, statusCode, item, error);
-					notifySubscribers(false, null, idToList(sli.getId()), null);
+					notifySubscribers(false, false, null, idToList(sli.getId()), null);
 				}
 			};
 			
@@ -959,15 +937,13 @@ public class ShoppinglistManager {
 			
 			
 		} else {
-			sli.setState(STATE_SYNCED);
 			row = mDatabase.deleteItem(sli.getId());
-			row = row == 0 ? -1 : row;
 		}
 		
 		// Do local callback stuff
-		if (row != -1) {
+		if (row > 0) {
 			listener.onComplete(true, 200, null, null);
-			notifySubscribers(false, null, idToList(sli.getId()), null);
+			notifySubscribers(true, false, null, idToList(sli.getId()), null);
 		} else {
 			listener.onComplete(true, 400, null, null);
 		}
@@ -1149,7 +1125,16 @@ public class ShoppinglistManager {
 		return list;
 	}
 
-	public ShoppinglistManager notifySubscribers(boolean isList, List<String> added, List<String> deleted, List<String> edited) {
+    /**
+     * Nethod for notifying all subscribers is changes to any shoppinglist/shoppinglistitems.
+     *
+     * @param isLocalChange true if the change occoured in the local database, else it's a callback from server
+     * @param isList true if it's changes to a shoppinglist, else it's changes to a shoppinglist item
+     * @param added the id's thats been added
+     * @param deleted the id's thats been deleted
+     * @param edited the id's thats been edited
+     */
+	public ShoppinglistManager notifySubscribers(boolean isLocalChange, boolean isList, List<String> added, List<String> deleted, List<String> edited) {
 		
 		if (added == null)
 			added = new ArrayList<String>(0);
@@ -1162,7 +1147,7 @@ public class ShoppinglistManager {
 		
 		for (ShoppinglistManagerListener s : mSubscribers) {
 			try {
-				s.onUpdate(isList, added, deleted, edited);
+				s.onUpdate(isLocalChange, isList, added, deleted, edited);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -1172,11 +1157,27 @@ public class ShoppinglistManager {
 	}
 
 	public interface ShoppinglistManagerListener {
-		public void onUpdate(boolean isList, List<String> addedIds, List<String> deletedIds, List<String> editedIds);
+        /**
+         * The interface for recieving updates from the shoppinglist manager, given that you have subscribed to updates.
+         *
+         * @param isLocalChange true if the change occoured in the local database, else it's a callback from server
+         * @param isList true if it's changes to a shoppinglist, else it's changes to a shoppinglist item
+         * @param addedIds the id's thats been added
+         * @param deletedIds the id's thats been deleted
+         * @param editedIds the id's thats been edited
+         */
+		public void onUpdate(boolean isLocalChange, boolean isList, List<String> addedIds, List<String> deletedIds, List<String> editedIds);
 	}
 	
 	public interface OnCompletetionListener {
-		public void onComplete(boolean isLocalCallback, int statusCode, JSONObject item, EtaError error);
+        /**
+         * The interface for recieving callbacks, whenever you are interacting with the shoppinglist manager
+         * @param isLocalChange true if the change occoured in the local database, else it's a callback from server
+         * @param statusCode that the server has responede with
+         * @param item the server reaponds with on a successfull request. Is <code>null</code> if server responded with an error
+         * @param error if server isn't able to fulfill the request, an error is returned and item is <code>null</code>
+         */
+		public void onComplete(boolean isLocalChange, int statusCode, JSONObject item, EtaError error);
 	}
 	
 }
