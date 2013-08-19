@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.sdkdemo.helpers.Keys;
 import com.eTilbudsavis.sdkdemo.helpers.Test;
 import com.eTilbudsavis.sdkdemo.helpers.TestVarDump;
 import com.etilbudsavis.sdkdemo.R;
@@ -40,8 +39,9 @@ public class Testing extends Activity {
 
         llMain = (LinearLayout)findViewById(R.id.llMain);
         mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        
-        mEta = new Eta(Keys.API_KEY, Keys.API_SECRET, this);
+
+        // TODO: Un comment line below and add own API KEY/SECRET
+//        mEta = new Eta(Keys.API_KEY, Keys.API_SECRET, this);
         mEta.debug(true);
 //        mEta.clearPreferences();
 //        mEta.getLocation().set(55.63105, 12.5766, false).setRadius(700000);	// Fields

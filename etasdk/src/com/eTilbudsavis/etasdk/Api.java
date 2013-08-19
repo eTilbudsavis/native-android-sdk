@@ -822,7 +822,7 @@ public class Api implements Serializable {
 				headers.append(h.getName()).append(": ").append(h.getValue()).append(", ");
 			Utils.logd(TAG, "Headers: " + headers.toString());
 
-			Utils.logd(TAG, "Object: " + wrap.getString() );
+			Utils.logd(TAG, "Object: " + (wrap.getString().length() > 100 ? wrap.getString().substring(0, 100) : wrap.getString()) );
 	    }
 	    
 	}

@@ -26,17 +26,43 @@ public class CatalogViewer extends Activity {
 	Eta mEta;
 	Pageflip pf;
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.catalog_viewer);
+        
+        /* Create a new instance of Eta 
+         * TODO: Un comment line below and add own API KEY/SECRET
+         */
+        mEta = new Eta(Keys.API_KEY, Keys.API_SECRET, this);
+        
+        /* Enable debug mode, so debug info will show in LogCat
+         * You might not want to have this set to true in a release version.
+         */
+        mEta.debug(true);
+        
+        // Set the location (This could also be set via LocationManager)
+        mEta.getLocation().setLatitude(55.63105);
+        mEta.getLocation().setLongitude(12.5766);
+        mEta.getLocation().setRadius(700000);
+        mEta.getLocation().setSensor(false);
+        
+		mEta.getCatalogList(catalogListener).execute();
+    }
+    
 	// A catalogs listener, 
 	ListListener<Catalog> catalogListener = new ListListener<Catalog>() {
 		
 		@Override
 		public void onComplete(boolean isCache, int statusCode, List<Catalog> list, EtaError error) {
 
-			if (statusCode == 200 && !list.isEmpty()) {
-				// If the callback one or more catalogs, 
-				// show the first catalog in a pageflip.
+			if (Utils.isSuccess(statusCode) && !list.isEmpty()) {
+				
+				/* If the callback one or more catalogs,
+				 * show the first catalog in a pageflip.
+				 */
+				
 				pf = (Pageflip)findViewById(R.id.pageflip);
-//				pf.setWe("192.168.1.131", "8081");
 		        pf.execute(mEta, pfl, list.get(0).getId());
 		        
 			} else {
@@ -65,27 +91,9 @@ public class CatalogViewer extends Activity {
 	};
     
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.catalog_viewer);
-        
-        // Create a new instance of Eta
-        mEta = new Eta(Keys.API_KEY, Keys.API_SECRET, this).debug(true);
-        
-        // Set the location (This could also be set via LocationManager)
-        mEta.getLocation().setLatitude(55.63105);
-        mEta.getLocation().setLongitude(12.5766);
-        mEta.getLocation().setRadius(700000);
-        mEta.getLocation().setSensor(false);
-        
-		mEta.getCatalogList(catalogListener).execute();
-    }
-    
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
     menu.add(Menu.NONE, 0, 0, "Sideoversigt");
-    menu.add(Menu.NONE, 1, 1, "Luk");
 
     return super.onCreateOptionsMenu(menu); 
     }
@@ -99,10 +107,6 @@ public class CatalogViewer extends Activity {
     		pf.toggleThumbnails();
     		break;
 
-    	case 1:
-    		pf.toggleThumbnails();
-    		break;
-    		
     	default:
     		break;
 

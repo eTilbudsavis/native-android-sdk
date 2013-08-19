@@ -63,6 +63,9 @@ public final class Params {
 	/** Parameter for a resource name, e.g. dealer name */
 	public static final String NAME = "name";
 
+	/** Parameter for a dealer resource */
+	public static final String DEALER = "dealer";
+
 	/** Parameter for the friendly name of a website */
 	public static final String URL_NAME = "url_name";
 
@@ -124,7 +127,7 @@ public final class Params {
 	public static final int DEFAULT_OFFSET = 0;
 
 	/** The default item limit for API calls */
-	public static final int DEFAULT_LIMIT = 10;
+	public static final int DEFAULT_LIMIT = 25;
 
 	/** Parameter for a delete filter */
 	public static final String FILTER_DELETE = "filter";

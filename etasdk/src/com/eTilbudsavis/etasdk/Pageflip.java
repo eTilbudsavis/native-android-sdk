@@ -252,9 +252,7 @@ public final class Pageflip extends WebView {
 		getSettings().setDefaultTextEncodingName("utf-8");
 		setWebViewClient(wvc);
 		
-//		if (Eta.DEBUG) {
-//			setWebChromeClient(wcc);
-//		}
+//		if (Eta.DEBUG) setWebChromeClient(wcc);
 		
 		// Check if it's necessary to update the HTML (it's time consuming to download HTML).
 		String cache = mEta.getCache().getHtml(mUuid);
@@ -397,6 +395,9 @@ public final class Pageflip extends WebView {
 		mDebugWeinre = "<script src=\"http://" + hostIp + ":" + hostPort + "/target/target-script-min.js\"></script>";
 	}
 	
+	/**
+	 * Interface for showing/hiding the thumbnail list.
+	 */
 	public void toggleThumbnails() {
 		etaProxy(ETA_THUMB);
 	}
