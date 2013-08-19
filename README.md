@@ -11,10 +11,10 @@ If you want to get started quickly, just clone the [native-android-sdk](https://
 Start a new Android Application Project and import the ETA SDK into Eclipse as a library via the menu `Project -> Properties -> Android`.
 
 - [Eta](#eta)
-- [Session](#eession)
-- [Api](#api)
 - [Location](#location)
+- [Api](#api)
 - [Pageflip](#pageflip)
+- [Session](#session)
 - [Shoppinglist Manager](#shoppinglist-manager)
 
 
@@ -26,16 +26,35 @@ For any information on API specifics please refer to our engineering page: [eta-
 
 
 ### Eta
-This is the main Class. This must be instanciated, before any further calls to the SDK.
+This is the main Class. First a new `Eta` must be instanciated, before any further calls to the SDK.
+
+	mEta = new Eta("YOUR_API_KEY", "YOUR_API_SECRET", Context);
+
 The `Eta` class, must also be part of your app's Lifecycle, which means that `onResume()` and `onPause()`
-must be called on the `eta` object, this ensures all preferences are saved correctly, and database connections are
+must be called on the `mEta` object, this ensures all preferences are saved correctly, and database connections are
 opened/closed.
 
-	mEta = new Eta(Keys.API_KEY, Keys.API_SECRET, this);
+	@Override
+	protected void onResume() {
+		super.onResume();
+		mEta.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		mEta.onPause();
+	}
+
 
 To ebable the debug output, just set it to `true`:
 
 	mEta.debug(true);
+
+
+Easy way, create a always accessible Class:
+
+	<application android:name="com.eTilbudsavis.test.App">
 
 The `eta` object offers several usefull methods, see each Class for details:
 
@@ -60,34 +79,6 @@ They are mostly selfexplainatory from their method names, and parameters. And fo
 - `searchStore*` - search interface for `Store`
 
 
-
-### Session
-All API requests require a valid Session, and the session must opdate based on headers from the API. 
-Furthermore, Session is a shared state between client and server, and also describes what permissions a given user/session has.
-
-_luckily the SDK takes care of all of this, so you don't have to_ :-)
-
-The commonly used methods in the session are:
-
-- `login()` - For logging in a user
-- `loginFacebook()` - For loggingin via Facebook (This requires you to implement the Facebook Android SDK)
-- `forgotPassword()` - To retrieve a forgotton password
-- `createUser()` - Create a new eTilbudsavis user
-- `signout()` - Sign a user out.
-
-Furthermore the Session has a subscriber system, so anyone (class) who want's notification on state change will be notified via an `SessionListener`.
-To subscribe/unsubscribe, use `subscribe()` and `unSubscribe()` methods respectively.
-
-<big>Session is not yet intended for a multi user setup</big>
-
-### Api
-You can include various options into the api.request() call, just create a Bundle 
-with key/value pairs, and send it as a parameter. See more about REST API options
-[here](https://etilbudsavis.dk/developers/docs/).
-
-#### Api Listeners
-
-
 ### Location
 The EtaLocation object, is a pure state object, and is where you want to store any Location information.
 Without a valid location set, the API won't respond with any data, as the whole service is geolocation based.
@@ -97,6 +88,32 @@ If you are using `LocationManager` you can pass any new `location` objects direc
 
 `EtaLocation` will save the last known location to shared preferences, so a valid location is always accessible,
 once an initial location have been given.
+
+### Api
+You can include various options into the api.request() call, just create a Bundle 
+with key/value pairs, and send it as a parameter. See more about REST API options
+[here](https://etilbudsavis.dk/developers/docs/).
+
+#### Api Listeners
+We've created a neat callback interface, for returning data for you, so you don't have to do any work.
+Basically, you just define the type of data you want returned, and we'll get it for you. So if you want
+to get a catalog, just pass the `Api` a `ItemListener<Catalog>`:
+
+	ItemListener<Catalog> listener = new ItemListener<Catalog> {
+		
+		@Override
+		public void onComplete(boolean isCache, int statusCode, Catalog item, EtaError error) {
+		}
+	}
+
+We have defined 5 basic interfaces for returning data:
+
+- `ItemListener<T extends EtaErnObject>` returns an `Object` of type `T`, where `T` can be of type `Catalog`, `Offer`, `Store`, `Dealer`, `Shoppinglist`, `ShoppinglistItem`
+- `ListListener<T extends EtaErnObject>` returns an `List` of type `T`, where `T` can be of type `Catalog`, `Offer`, `Store`, `Dealer`, `Shoppinglist`, `ShoppinglistItem`
+- `ItemListener<JSONObject>` returns a `JSONObject`
+- `ListListener<JSONArray>` returns a `JSONArray`
+- `ApiListener<String>` returns the result as `String`
+
 
 ### Pageflip
 Pageflip, is basically just a simple and smooth catalog viewer. With a simple yet effective interface.
@@ -137,6 +154,26 @@ _doubletap_ - A double tap/click
 _close_ - Pageflip closed
 
 - None.
+
+
+### Session
+All API requests require a valid Session, and the session must opdate based on headers from the API. 
+Furthermore, Session is a shared state between client and server, and also describes what permissions a given user/session has.
+
+_luckily the SDK takes care of all of this, so you don't have to_ :-)
+
+The commonly used methods in the session are:
+
+- `login()` - For logging in a user
+- `loginFacebook()` - For loggingin via Facebook (This requires you to implement the Facebook Android SDK)
+- `forgotPassword()` - To retrieve a forgotton password
+- `createUser()` - Create a new eTilbudsavis user
+- `signout()` - Sign a user out.
+
+Furthermore the Session has a subscriber system, so anyone (class) who want's notification on state change will be notified via an `SessionListener`.
+To subscribe/unsubscribe, use `subscribe()` and `unSubscribe()` methods respectively.
+
+<big>Session is not yet intended for a multi user setup</big>
 
 
 ### Shoppinglist Manager
