@@ -10,12 +10,12 @@ some basic features, some of which are also described in this README.
 If you want to get started quickly, just clone the [native-android-sdk](https://github.com/eTilbudsavis/native-android-sdk.git) repository.
 Start a new Android Application Project and import the ETA SDK into Eclipse as a library via the menu `Project -> Properties -> Android`.
 
-- [Eta](#Eta)
-- [Session](#Session)
-- [Api](#Api)
-- [Location](#Location)
-- [Pageflip](#Pageflip)
-- [Shoppinglist Manager](#Shoppinglist Manager)
+- [Eta](#eta)
+- [Session](#eession)
+- [Api](#api)
+- [Location](#location)
+- [Pageflip](#pageflip)
+- [Shoppinglist Manager](#shoppinglist-manager)
 
 
 ## Usage
@@ -48,11 +48,11 @@ The `eta` object offers several usefull methods, see each Class for details:
 
 We have an array of convenience methods, for the most commonly used methodcalls to the API, all located in the `eta` object.
 They all return an `Api` object, that can have further options enabled before `execute()`is called.
-Theyare mostly selfexplainatory from their method names, and parameters. And for further details, i'll refer to the JavaDoc.
+They are mostly selfexplainatory from their method names, and parameters. And for further details, i'll refer to the JavaDoc.
 
 - `getCatalog` - methods will get some type of `Catalog` either an object or list, based on the exact method.
 - `getOffer*` - methods will get some type of `Offer` either an object or list, based on the exact method.
-- `getDealer* - methods will get some type of `Dealer` either an object or list, based on the exact method.`
+- `getDealer*` - methods will get some type of `Dealer` either an object or list, based on the exact method.
 - `getStore*` - methods will get some type of `Store` either an object or list, based on the exact method.
 - `searchCatalog*` - search interface for `Catalog`
 - `searchOffer*` - search interface for `Offer`
@@ -84,6 +84,9 @@ To subscribe/unsubscribe, use `subscribe()` and `unSubscribe()` methods respecti
 You can include various options into the api.request() call, just create a Bundle 
 with key/value pairs, and send it as a parameter. See more about REST API options
 [here](https://etilbudsavis.dk/developers/docs/).
+
+#### Api Listeners
+
 
 ### Location
 The EtaLocation object, is a pure state object, and is where you want to store any Location information.
