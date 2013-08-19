@@ -11,5 +11,9 @@
 #proguard.config=${sdk.dir}/tools/proguard/proguard-android.txt:proguard-project.txt
 
 # Project target.
+<<<<<<< HEAD
+target=android-7
+=======
 target=android-17
+>>>>>>> v2
 android.library=true

@@ -1,8 +1,10 @@
 <resources>
 
     <string name="app_name">eTilbudsavis SDK Demo</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="menu_settings">Settings</string>
     <string name="title_activity_main">eTilbudsavis SDK Demo</string>
-
+    <string name="session_header">Session:</string>
+    <string name="default_head">header</string>
+    <string name="default_time">Time(ms): </string>
+    <string name="default_body">body</string>
+    
 </resources>

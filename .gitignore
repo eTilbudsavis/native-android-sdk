@@ -5,12 +5,13 @@
 # files for the dex VM
 *.dex
 
-# Java class files
+z# Java class files
 *.class
 
 # generated files
 bin/
 gen/
+com.eTilbudsavis.SDKDemo/src/com/eTilbudsavis/sdkdemo/helpers/Keys.java
 
 # Local configuration file (sdk path, etc)
 local.properties
