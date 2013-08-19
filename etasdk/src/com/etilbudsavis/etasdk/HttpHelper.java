@@ -30,7 +30,6 @@ import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.protocol.HTTP;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
@@ -50,11 +49,7 @@ public class HttpHelper {
 	private String mResult = "";
 	private Integer mResponseCode = -1;
 	private boolean mDoCallback = true;
-	
 	private Handler mHandler = new Handler();
-	
-	private Thread t;
-	
 	private Runnable mStop = new Runnable() {
 		
 		public void run() {
@@ -84,7 +79,7 @@ public class HttpHelper {
 		
 		mHandler.postDelayed(mStop, CONNECTION_TIME_OUT);
 		
-		t = new Thread(new Runnable() {
+		Thread t = new Thread(new Runnable() {
 			
 			public void run() {
 				DefaultHttpClient httpClient = new DefaultHttpClient();
