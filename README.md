@@ -16,6 +16,7 @@ Start a new Android Application Project and import the ETA SDK into Eclipse as a
 - [Pageflip](#pageflip)
 - [Session](#session)
 - [Shoppinglist Manager](#shoppinglist-manager)
+- [Eta Objects](#eta-objects)
 
 
 ## Usage
@@ -108,8 +109,8 @@ to get a catalog, just pass the `Api` a `ItemListener<Catalog>`:
 
 We have defined 5 basic interfaces for returning data:
 
-- `ItemListener<T extends EtaErnObject>` returns an `Object` of type `T`, where `T` can be of type `Catalog`, `Offer`, `Store`, `Dealer`, `Shoppinglist`, `ShoppinglistItem`
-- `ListListener<T extends EtaErnObject>` returns an `List` of type `T`, where `T` can be of type `Catalog`, `Offer`, `Store`, `Dealer`, `Shoppinglist`, `ShoppinglistItem`
+- `ItemListener<T extends EtaErnObject>` returns an `Object` of type `T`, where `T` can be of any type that extends `EtaErnObject`, see [Eta Objects](#eta-objects)
+- `ListListener<T extends EtaErnObject>` returns an `List` of type `T`, where `T` can be of any type that extends `EtaErnObject`, see [Eta Objects](#eta-objects)
 - `ItemListener<JSONObject>` returns a `JSONObject`
 - `ListListener<JSONArray>` returns a `JSONArray`
 - `ApiListener<String>` returns the result as `String`
@@ -177,6 +178,8 @@ To subscribe/unsubscribe, use `subscribe()` and `unSubscribe()` methods respecti
 
 
 ### Shoppinglist Manager
+
+### Eta Objects
 
 
 ## Utilities
