@@ -170,8 +170,6 @@ public class ShoppinglistManager {
 			
 			public void onComplete(boolean isCache, int statusCode, JSONArray data, EtaError error) {
 
-                Utils.logd(TAG, "syncItems", statusCode, data, error);
-
                 if (mApiQueue.size() > 0)
 					return;
 				
