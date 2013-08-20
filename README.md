@@ -154,6 +154,15 @@ To subscribe/unsubscribe, use `subscribe()` and `unSubscribe()` methods respecti
 ## Shoppinglist Manager
 Though some functionality is developed, and integrated allready, the `ShoppinglistManager` isn't fully implemented yet. And you can experience some odd behavior at times.
 
+## Caching
+We have strived to make the API as well as the SDK as fast as possible, therefore we have implemented
+caching of all objects, that is by nature cachable. This includes all objects which is identified by an "ern" (unique identifier). But never any list calls, as these are subject to change far more than identifiable objects.
+
+This is on by default, and you don't have to do anything to harvest the benefits of this.
+
+Cached callbacks can be identified, by the argument `isCache` present in the callback interface for the `Api` requests.
+The callback interface will actually give you both the cached result as well as the API data, unless you set a flag on the `Api` object, stating otherwise (`ONLY_RETURN_CACHE`).
+
 ## Eta Objects
 The SDK comes with a full set of Java Objects, to match responses from the API.
 Where the base Class is `EtaObject`, all other classes inherits from this class.
