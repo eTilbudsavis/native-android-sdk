@@ -2,30 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="10dp"
     android:orientation="vertical" >
 
     <Button
-        android:id="@+id/btnPageflip"
-        android:layout_width="wrap_content"
+        android:id="@+id/btnCatalogs"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start Pageflip" />
+        android:text="Show catalog" />
 
     <Button
-        android:id="@+id/btnTesting"
-        android:layout_width="wrap_content"
+        android:id="@+id/btnSearch"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start Testing" />
-
-    <Button
-        android:id="@+id/btnWeinre"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start Weinre" />
-
-    <TextView
-        android:id="@+id/tvDebug"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="debug" />
+        android:text="Search offers" />
     
 </LinearLayout>

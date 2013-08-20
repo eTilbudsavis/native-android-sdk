@@ -5,6 +5,7 @@ import java.util.List;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,16 +25,15 @@ public class CatalogViewer extends Activity {
 
 	public static final String TAG = "CatalogViewer";
 	Eta mEta;
-	Pageflip pf;
+	Pageflip mPageflip;
+	ProgressDialog mPd;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.catalog_viewer);
         
-        /* Create a new instance of Eta 
-         * TODO: Un comment line below and add own API KEY/SECRET
-         */
+        //Create a new instance of Eta
         mEta = new Eta(Keys.API_KEY, Keys.API_SECRET, this);
         
         /* Enable debug mode, so debug info will show in LogCat
@@ -47,7 +47,20 @@ public class CatalogViewer extends Activity {
         mEta.getLocation().setRadius(700000);
         mEta.getLocation().setSensor(false);
         
+    }
+    
+    @Override
+    public void onResume() {
+    	super.onResume();
+    	mEta.onResume();
+    	mPd = ProgressDialog.show(CatalogViewer.this, "", "Getting catalogs...", true, true);
 		mEta.getCatalogList(catalogListener).execute();
+    }
+    
+    @Override
+    public void onPause() {
+    	super.onPause();
+    	mEta.onPause();
     }
     
 	// A catalogs listener, 
@@ -56,14 +69,17 @@ public class CatalogViewer extends Activity {
 		@Override
 		public void onComplete(boolean isCache, int statusCode, List<Catalog> list, EtaError error) {
 
+			mPd.dismiss();
+			
 			if (Utils.isSuccess(statusCode) && !list.isEmpty()) {
+				
+				mPd = ProgressDialog.show(CatalogViewer.this, "", "Loading catalog into pageflip...", true, true);
 				
 				/* If the callback one or more catalogs,
 				 * show the first catalog in a pageflip.
 				 */
-				
-				pf = (Pageflip)findViewById(R.id.pageflip);
-		        pf.execute(mEta, pfl, list.get(0).getId());
+				mPageflip = (Pageflip)findViewById(R.id.pageflip);
+		        mPageflip.execute(mEta, pfl, list.get(0).getId());
 		        
 			} else {
 				
@@ -79,13 +95,11 @@ public class CatalogViewer extends Activity {
 		@Override
 		public void onEvent(String event, String uuid, JSONObject object) {
 			Toast.makeText(getApplicationContext(), event, Toast.LENGTH_SHORT).show();
-			Utils.logd(TAG, event + " - " + object.toString());
 		}
 		
 		@Override
 		public void onReady(String uuid) {
-			Toast.makeText(getApplicationContext(), "Ready", Toast.LENGTH_SHORT).show();
-			Utils.logd(TAG, "Ready: " + uuid);
+			mPd.dismiss();
 		}
 
 	};
@@ -104,7 +118,7 @@ public class CatalogViewer extends Activity {
     	switch (item.getItemId()) {
 
     	case 0:
-    		pf.toggleThumbnails();
+    		mPageflip.toggleThumbnails();
     		break;
 
     	default:
