@@ -37,8 +37,7 @@ public class CatalogViewer extends Activity {
         mEta = new Eta(Keys.API_KEY, Keys.API_SECRET, this);
         
         /* Enable debug mode, so debug info will show in LogCat
-         * You might not want to have this set to true in a release version.
-         */
+         * You might not want to have this set to true in a release version. */
         mEta.debug(true);
         
         // Set the location (This could also be set via LocationManager)
@@ -70,14 +69,13 @@ public class CatalogViewer extends Activity {
 		public void onComplete(boolean isCache, int statusCode, List<Catalog> list, EtaError error) {
 
 			mPd.dismiss();
-			
+
+			/* If the request is a success and one or more catalogs is returned,
+			 * show the first catalog in a pageflip. */
 			if (Utils.isSuccess(statusCode) && !list.isEmpty()) {
 				
 				mPd = ProgressDialog.show(CatalogViewer.this, "", "Loading catalog into pageflip...", true, true);
 				
-				/* If the callback one or more catalogs,
-				 * show the first catalog in a pageflip.
-				 */
 				mPageflip = (Pageflip)findViewById(R.id.pageflip);
 		        mPageflip.execute(mEta, pfl, list.get(0).getId());
 		        
