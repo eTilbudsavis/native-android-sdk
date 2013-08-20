@@ -1,53 +1,41 @@
 package com.eTilbudsavis.testing;
 
-import java.util.ArrayList;
-
 import android.app.Activity;
-import android.content.Context;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Utils.Utils;
-import com.eTilbudsavis.testing.Test.PrintListener;
 
 public class Testing extends Activity {
 
 	public static final String TAG = "Testing";
-	
-	public static final boolean PRINT_CONSOL_BODY = true;
-	public static final boolean PRINT_CONSOL_HEADER = true;
-	public static final boolean PRINT_CONSOL_SUB_HEADER = true;
-	public static final boolean PRINT_VIEW = true;
-	
-	private Eta mEta;
-	private LayoutInflater mInflater;
-	private LinearLayout llMain;
-	TestVarDump mTvd = new TestVarDump();
-	
-	long mHttpTime = 0L;
-	long mTestStart = System.currentTimeMillis();
-	
-	ArrayList<Test> tests = new ArrayList<Test>();
-	
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.testing);
+//	
+//	public static final boolean PRINT_CONSOL_BODY = true;
+//	public static final boolean PRINT_CONSOL_HEADER = true;
+//	public static final boolean PRINT_CONSOL_SUB_HEADER = true;
+//	public static final boolean PRINT_VIEW = true;
+//	
+//	private Eta mEta;
+//	private LayoutInflater mInflater;
+//	private LinearLayout llMain;
+//	TestVarDump mTvd = new TestVarDump();
+//	
+//	long mHttpTime = 0L;
+//	long mTestStart = System.currentTimeMillis();
+//	
+//	ArrayList<Test> tests = new ArrayList<Test>();
+//	
+//    @Override
+//    public void onCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//        setContentView(R.layout.testing);
 
-        llMain = (LinearLayout)findViewById(R.id.llMain);
-        mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//        llMain = (LinearLayout)findViewById(R.id.llMain);
+//        mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         // TODO: Un comment line below and add own API KEY/SECRET
 //        mEta = new Eta(Keys.API_KEY, Keys.API_SECRET, this);
-        mEta.debug(true);
+//        mEta.debug(true);
 //        mEta.clearPreferences();
 //        mEta.getLocation().set(55.63105, 12.5766, false).setRadius(700000);	// Fields
-        
-        
+//        
+//        
 //        tests.add(tSessionStart);
 //        tests.add(tSessionLogin);
 //        tests.add(tDeleteRandom);
@@ -55,97 +43,97 @@ public class Testing extends Activity {
 //        tests.add(tEndpointAndListenerMismatch);
 //        tests.add(tCache);
 //        tests.add(tLocation);
-        
+//        
 //        main.setEta(mEta).setVarDump(mTvd).run();
-        
-    }
-    
-    PrintListener printer = new PrintListener() {
-
-		@Override
-		public void header(String name) {
-			if (PRINT_CONSOL_HEADER) {
-	    		StringBuilder sb = new StringBuilder();
-	    		sb.append("### ").append(name).append(" ###");
-
-	    		Utils.logd(TAG, sb.toString());
-	    	}
-	    	if (PRINT_VIEW) {
-		    	TextView t = new TextView(getApplicationContext());
-		    	t.setText(name);
-		    	t.setBackgroundColor(Color.parseColor("#0000FF"));
-		    	t.setTextAppearance(getApplicationContext(), android.R.style.TextAppearance_Medium);
-		    	llMain.addView(t);
-	    	}
-		}
-		@Override
-		public void subHeader(String name) {
-			if (PRINT_CONSOL_SUB_HEADER) {
-	    		StringBuilder sb = new StringBuilder();
-	    		sb.append("*** ").append(name).append(" ***");
-	    		Utils.logd(TAG, sb.toString());
-	    	}
-	    	if (PRINT_VIEW) {
-		    	TextView t = new TextView(getApplicationContext());
-		    	t.setText(name);
-		    	t.setBackgroundColor(Color.parseColor("#0000aa"));
-		    	t.setTextAppearance(getApplicationContext(), android.R.style.TextAppearance_Medium);
-		    	llMain.addView(t);
-	    	}
-		}
-		
-		@Override
-		public void positive(String testName, String id, long time, String body) {
-			if (id != null)
-	    		testName = testName + ": " + id;
-	    	
-	    	if (PRINT_CONSOL_BODY) {
-	    		StringBuilder sb = new StringBuilder();
-	    		sb.append("--- ").append(testName).append(" ---\n");
-	    		sb.append("Time: ").append(time).append("\n");
-	    		sb.append(body);
-	    		Utils.logd(TAG, sb.toString());
-			}
-	    	if (PRINT_VIEW) {
-	        	LinearLayout llCon = (LinearLayout)mInflater.inflate(R.layout.test_layout, null);
-	        	TextView tvHead = (TextView)llCon.findViewById(R.id.tvHeader);
-	        	TextView tvBody = (TextView)llCon.findViewById(R.id.tvBody);
-	        	TextView tvTime = (TextView)llCon.findViewById(R.id.tvTime);
-	        	tvHead.setText(testName);
-	        	tvTime.append(String.valueOf(time));
-	        	tvBody.setText(body);
-	        	llMain.addView(llCon);
-	    	}
-	    	mHttpTime += time;
-		}
-		
-		@Override
-		public void negative(String testName, String id, long time, int code, Object object) {
-			if (id != null)
-	    		testName = testName + ": " + id;
-	    	
-	    	if (PRINT_CONSOL_BODY) {
-	    		StringBuilder sb = new StringBuilder();
-	    		sb.append("--- ").append(testName).append(" ---\n");
-	    		sb.append("Time: ").append(time).append("\n");
-	    		sb.append("StatusCode: ").append(code).append("\n");
-	    		sb.append(object.toString());
-	    		Utils.logd(TAG, sb.toString());
-	    	}
-	    	if (PRINT_VIEW) {
-		    	TextView t = new TextView(getApplicationContext());
-		    	t.setBackgroundColor(Color.parseColor("#FF0000"));
-		    	t.setText(testName);
-		    	llMain.addView(t);
-		    	TextView i = new TextView(getApplicationContext());
-		    	i.setText(String.valueOf(code + ": " + object.toString()));
-		    	llMain.addView(i);
-	    	}
-	    	mHttpTime += time;
-		}
-		
-	};
-	
+//        
+//    }
+//    
+//    PrintListener printer = new PrintListener() {
+//
+//		@Override
+//		public void header(String name) {
+//			if (PRINT_CONSOL_HEADER) {
+//	    		StringBuilder sb = new StringBuilder();
+//	    		sb.append("### ").append(name).append(" ###");
+//
+//	    		Utils.logd(TAG, sb.toString());
+//	    	}
+//	    	if (PRINT_VIEW) {
+//		    	TextView t = new TextView(getApplicationContext());
+//		    	t.setText(name);
+//		    	t.setBackgroundColor(Color.parseColor("#0000FF"));
+//		    	t.setTextAppearance(getApplicationContext(), android.R.style.TextAppearance_Medium);
+//		    	llMain.addView(t);
+//	    	}
+//		}
+//		@Override
+//		public void subHeader(String name) {
+//			if (PRINT_CONSOL_SUB_HEADER) {
+//	    		StringBuilder sb = new StringBuilder();
+//	    		sb.append("*** ").append(name).append(" ***");
+//	    		Utils.logd(TAG, sb.toString());
+//	    	}
+//	    	if (PRINT_VIEW) {
+//		    	TextView t = new TextView(getApplicationContext());
+//		    	t.setText(name);
+//		    	t.setBackgroundColor(Color.parseColor("#0000aa"));
+//		    	t.setTextAppearance(getApplicationContext(), android.R.style.TextAppearance_Medium);
+//		    	llMain.addView(t);
+//	    	}
+//		}
+//		
+//		@Override
+//		public void positive(String testName, String id, long time, String body) {
+//			if (id != null)
+//	    		testName = testName + ": " + id;
+//	    	
+//	    	if (PRINT_CONSOL_BODY) {
+//	    		StringBuilder sb = new StringBuilder();
+//	    		sb.append("--- ").append(testName).append(" ---\n");
+//	    		sb.append("Time: ").append(time).append("\n");
+//	    		sb.append(body);
+//	    		Utils.logd(TAG, sb.toString());
+//			}
+//	    	if (PRINT_VIEW) {
+//	        	LinearLayout llCon = (LinearLayout)mInflater.inflate(R.layout.test_layout, null);
+//	        	TextView tvHead = (TextView)llCon.findViewById(R.id.tvHeader);
+//	        	TextView tvBody = (TextView)llCon.findViewById(R.id.tvBody);
+//	        	TextView tvTime = (TextView)llCon.findViewById(R.id.tvTime);
+//	        	tvHead.setText(testName);
+//	        	tvTime.append(String.valueOf(time));
+//	        	tvBody.setText(body);
+//	        	llMain.addView(llCon);
+//	    	}
+//	    	mHttpTime += time;
+//		}
+//		
+//		@Override
+//		public void negative(String testName, String id, long time, int code, Object object) {
+//			if (id != null)
+//	    		testName = testName + ": " + id;
+//	    	
+//	    	if (PRINT_CONSOL_BODY) {
+//	    		StringBuilder sb = new StringBuilder();
+//	    		sb.append("--- ").append(testName).append(" ---\n");
+//	    		sb.append("Time: ").append(time).append("\n");
+//	    		sb.append("StatusCode: ").append(code).append("\n");
+//	    		sb.append(object.toString());
+//	    		Utils.logd(TAG, sb.toString());
+//	    	}
+//	    	if (PRINT_VIEW) {
+//		    	TextView t = new TextView(getApplicationContext());
+//		    	t.setBackgroundColor(Color.parseColor("#FF0000"));
+//		    	t.setText(testName);
+//		    	llMain.addView(t);
+//		    	TextView i = new TextView(getApplicationContext());
+//		    	i.setText(String.valueOf(code + ": " + object.toString()));
+//		    	llMain.addView(i);
+//	    	}
+//	    	mHttpTime += time;
+//		}
+//		
+//	};
+//	
 //	
 //    Test main = new Test("Main", printer) {
 //    	

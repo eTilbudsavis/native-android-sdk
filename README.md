@@ -1,6 +1,6 @@
 # eTilbudsavis - Android SDK
 
-## Introduction
+# Introduction
 This is a short guide to guide you through our Android SDK. We will assume you
 are using [eclipse](http://www.eclipse.org/) and the [Android Development Tools](http://developer.android.com/tools/sdk/eclipse-adt.html) plugin. 
 Furthermore you are goind to need an API key and secret from [found here](https://etilbudsavis.dk/developers/api/).
@@ -19,14 +19,14 @@ Start a new Android Application Project and import the ETA SDK into Eclipse as a
 - [Eta Objects](#eta-objects)
 
 
-## Usage
+# Usage
 
 The SDK offers several classes, for different purposes (some contain state, some are worker classes.
 Here we will give a short presentation of each class, it's purpose and functionality.
 For any information on API specifics please refer to our engineering page: [eta-api](http://engineering.etilbudsavis.dk/eta-api/)
 
 
-### Eta
+## Eta
 This is the main Class. First a new `Eta` must be instanciated, before any further calls to the SDK.
 
 	mEta = new Eta("YOUR_API_KEY", "YOUR_API_SECRET", Context);
@@ -80,7 +80,7 @@ They are mostly selfexplainatory from their method names, and parameters. And fo
 - `searchStore*` - search interface for `Store`
 
 
-### Location
+## Location
 The EtaLocation object, is a pure state object, and is where you want to store any Location information.
 Without a valid location set, the API won't respond with any data, as the whole service is geolocation based.
 
@@ -90,12 +90,12 @@ If you are using `LocationManager` you can pass any new `location` objects direc
 `EtaLocation` will save the last known location to shared preferences, so a valid location is always accessible,
 once an initial location have been given.
 
-### Api
+## Api
 You can include various options into the api.request() call, just create a Bundle 
 with key/value pairs, and send it as a parameter. See more about REST API options
 [here](https://etilbudsavis.dk/developers/docs/).
 
-#### Api Listeners
+### Api Listeners
 We've created a neat callback interface, for returning data for you, so you don't have to do any work.
 Basically, you just define the type of data you want returned, and we'll get it for you. So if you want
 to get a catalog, just pass the `Api` a `ItemListener<Catalog>`:
@@ -116,48 +116,22 @@ We have defined 5 basic interfaces for returning data:
 - `ApiListener<String>` returns the result as `String`
 
 
-### Pageflip
+## Pageflip
 Pageflip, is basically just a simple and smooth catalog viewer. With a simple yet effective interface.
+The Pageflip view, can be added to any XML layout you're using in eclipse, either via the GUI editor,
+under _Custom and Library Views->Pageflip_ or with this XML tag:
+	
+	<com.eTilbudsavis.etasdk.Pageflip />
 
+The `Pageflip` must be executed like other elements in the SDK with the `execute()` method. This way, you'll 
+have full control of setting up any options, you want before actually loading the `Pageflip`, and make sure that
+you to decide what happens, and when. See a simple working example of how to interact with the `Pageflip`, in the SDKDemo (bundled in the SDK).
 
-The type of events and their corresponding JSON response currently implemented are:
+### Events
+`Pageflip` takes a `PageflipListener`, through which you will recieve information about the actions the user
+performs on the view. The current list of events, and corresponding JSONObjects can be found [here](http://engineering.etilbudsavis.dk/eta-web-app/#eta-catalog-view).
 
-_pagechange_ - When a page changes
-
-- `init` Indicates the very first page change (finished initialization).
-- `page` The current page (normalized to the verso).
-- `pageLabel` The entire page spread (1-2, 2-3, ..., n or 1, 2, 3, ..., n).
-- `pages` Pages currently visible.
-- `pageCount` The total amount of single page pages.
-- `id` Catalog identifier.
-
-_outofbounds_ - When desired page is out of bounds
-
-- `page` Failed page tried to be reached.
-- `direction` In what direction the failed page is in relation to the current page.
-
-_thumbnails_ - Thumbnails dialog toggled 	
-
-- `visible` Whether the dialog is visible or not.
-
-_hotspot_ - A hotspot is clicked
-
-- Offer info.
-
-_singletap_ - A single tap/click
-
-- None.
-
-_doubletap_ - A double tap/click
-
-- None.
-
-_close_ - Pageflip closed
-
-- None.
-
-
-### Session
+## Session
 All API requests require a valid Session, and the session must opdate based on headers from the API. 
 Furthermore, Session is a shared state between client and server, and also describes what permissions a given user/session has.
 
@@ -177,12 +151,32 @@ To subscribe/unsubscribe, use `subscribe()` and `unSubscribe()` methods respecti
 <big>Session is not yet intended for a multi user setup</big>
 
 
-### Shoppinglist Manager
+## Shoppinglist Manager
+Though some functionality is developed, and integrated allready, the `ShoppinglistManager` isn't fully implemented yet. And you can experience some odd behavior at times.
 
-### Eta Objects
+## Eta Objects
+The SDK comes with a full set of Java Objects, to match responses from the API.
+Where the base Class is `EtaObject`, all other classes inherits from this class.
+
+There is a special group of identifiable classes, which has a unique identifier called `ern` as a key in the JSON response. 
+These objects extends from the `EtaErnObject` and are the "base" for all objects, in the sense that they are what you are actually quering the API for.
+The objects are:
+
+- `Catalog`
+- `Offer`
+- `Dealer`
+- `Store`
+- `Shoppinglist`
+- `ShoppinglistItem`
+- `EtaError`
+
+The objects will in someway contain parts of all other objects, that have been included in this SDK.
+
+# Utilities
+The Utils class, has a static set of methods, that you will hopefully find usefull during development.
+
+It contains simple tools for input validation (e-mail, name, gender e.t.c.), data transformation (bundle to JavaScript string, SHA256 hasher e.t.c.) and easily printing API responses to LogCat.
 
 
-## Utilities
-
-## Feedback
+# Feedback
 If you have any feedback or comments feel free to contact danny@etilbudsavis.dk :-)
