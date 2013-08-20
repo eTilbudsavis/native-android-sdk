@@ -52,20 +52,19 @@ public class EtaLocation extends Location {
 	private static final double BOUND_DEFAULT = 0.0;
 	
 	// Location.
-	private int mRadius = RADIUS_MAX;
-	private boolean mSensor = false;
-	private String mAddress = "";
-	private double mBoundNorth = BOUND_DEFAULT;
-	private double mBoundEast = BOUND_DEFAULT;
-	private double mBoundSouth = BOUND_DEFAULT;
-	private double mBoundWest = BOUND_DEFAULT;
-	private Eta mEta;
-	private boolean mPushNotifications = false;
-	private ArrayList<LocationListener> mSubscribers;
+	private static int mRadius = RADIUS_MAX;
+	private static boolean mSensor = false;
+	private static String mAddress = "";
+	private static double mBoundNorth = BOUND_DEFAULT;
+	private static double mBoundEast = BOUND_DEFAULT;
+	private static double mBoundSouth = BOUND_DEFAULT;
+	private static double mBoundWest = BOUND_DEFAULT;
+	private static Eta mEta;
+	private static boolean mPushNotifications = false;
+	private static ArrayList<LocationListener> mSubscribers = new ArrayList<LocationListener>();
 
 	public EtaLocation(Eta eta) {
 		super(ETA_PROVIDER);
-		mSubscribers = new ArrayList<LocationListener>();
 		mEta = eta;
 		restoreState();
 	}

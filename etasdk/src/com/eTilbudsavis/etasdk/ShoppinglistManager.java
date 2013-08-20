@@ -98,7 +98,7 @@ public class ShoppinglistManager {
 				}
 			}
 		};
-		mEta.api().get(Endpoint.getListsByUserId(mEta.getUser().getId()), sll).execute();
+		mEta.getApi().get(Endpoint.getListsByUserId(mEta.getUser().getId()), sll).execute();
 		
 	}
 	
@@ -147,7 +147,7 @@ public class ShoppinglistManager {
 						}
 					};
 					
-					mEta.api().get(Endpoint.getListModifiedById(mEta.getUser().getId(), sl.getId()), cb).execute();
+					mEta.getApi().get(Endpoint.getListModifiedById(mEta.getUser().getId(), sl.getId()), cb).execute();
 				}
 			}
 			
@@ -185,7 +185,7 @@ public class ShoppinglistManager {
 			}
 		};
 		
-		mEta.api().get(Endpoint.getItemByListId(mEta.getUser().getId(), sl.getId()), cb).execute();
+		mEta.getApi().get(Endpoint.getItemByListId(mEta.getUser().getId(), sl.getId()), cb).execute();
 		
 	}
 
@@ -489,7 +489,7 @@ public class ShoppinglistManager {
 				}
 			};
 			
-			Api a = mEta.api().put(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), cb, sl.getApiParams());
+			Api a = mEta.getApi().put(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), cb, sl.getApiParams());
 			addQueue(a, sl.getId());
 		} else {
 			sl.setState(STATE_SYNCED);
@@ -542,7 +542,7 @@ public class ShoppinglistManager {
 				}
 			};
 			
-			Api a = mEta.api().put(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), editItem, sl.getApiParams());
+			Api a = mEta.getApi().put(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), editItem, sl.getApiParams());
 			addQueue(a, sl.getId());
 		} else {
 			sl.setState(STATE_SYNCED);
@@ -605,7 +605,7 @@ public class ShoppinglistManager {
 				}
 			};
 			
-			Api a = mEta.api().delete(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), cb, sl.getApiParams());
+			Api a = mEta.getApi().delete(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), cb, sl.getApiParams());
 			addQueue(a, sl.getId());
 			
 		} else {
@@ -706,7 +706,7 @@ public class ShoppinglistManager {
 				}
 			};
 			
-			Api a = mEta.api().put(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams());
+			Api a = mEta.getApi().put(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams());
 			addQueue(a, sli.getId());
 			
 		} else {
@@ -765,7 +765,7 @@ public class ShoppinglistManager {
 			};
 			
 			// Push edit to server
-			Api a = mEta.api().put(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams());
+			Api a = mEta.getApi().put(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams());
 			addQueue(a, sli.getId());
 			
 		} else {
@@ -879,7 +879,7 @@ public class ShoppinglistManager {
 					notifySubscribers(false, false, null, deleted, null);
 				}
 			};
-			Api a = mEta.api().post(Endpoint.getListEmpty(mEta.getUser().getId(), sl.getId()), cb, b);
+			Api a = mEta.getApi().post(Endpoint.getListEmpty(mEta.getUser().getId(), sl.getId()), cb, b);
 			addQueue(a, sl.getId());
 			
 		} else {
@@ -930,7 +930,7 @@ public class ShoppinglistManager {
 				}
 			};
 			
-			Api a = mEta.api().delete(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams());
+			Api a = mEta.getApi().delete(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), cb, sli.getApiParams());
 			addQueue(a, sli.getId());
 			
 			
@@ -1037,7 +1037,7 @@ public class ShoppinglistManager {
 			}
 		};
 		
-		mEta.api().get(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), listListener).execute();
+		mEta.getApi().get(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), listListener).execute();
 		
 	}
 	
@@ -1059,7 +1059,7 @@ public class ShoppinglistManager {
 			}
 		};
 		
-		mEta.api().get(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), itemListener).execute();
+		mEta.getApi().get(Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId()), itemListener).execute();
 		
 	}
 	

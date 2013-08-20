@@ -1,4 +1,4 @@
-package com.eTilbudsavis.sdkdemo.helpers;
+package com.eTilbudsavis.testing;
 
 import java.util.ArrayList;
 

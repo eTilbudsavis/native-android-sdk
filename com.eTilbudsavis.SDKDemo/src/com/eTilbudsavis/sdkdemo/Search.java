@@ -20,7 +20,6 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.Utils.Utils;
-import com.eTilbudsavis.sdkdemo.helpers.Keys;
 import com.etilbudsavis.sdkdemo.R;
 
 public class Search extends Activity {

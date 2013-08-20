@@ -7,7 +7,9 @@
 package com.eTilbudsavis.etasdk;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.URLDecoder;
+import java.util.List;
 import java.util.Locale;
 
 import org.json.JSONException;
@@ -43,7 +45,7 @@ public final class Pageflip extends WebView {
 	/** String identifying the change event, called when the session has changed. See pageflip documentation for more details */
 	public static final String EVENT_CHANGE = "change";
 	
-	/** String identifying session events */	
+	/** String identifying session events */
 	private static final String ETA_THUMB = "catalog-view-thumbnails";
 	
 	/** String identifying the initialize parameter, used when initializing pageflip */
@@ -103,6 +105,7 @@ public final class Pageflip extends WebView {
 	private boolean mInitializing = true;
 	private JSONObject mCatalogView = new JSONObject();
 	private String mDebugWeinre = null;
+	private List<Pageflip> mPageflips;
 	
 	/**
 	 * Used for manual inflation
@@ -168,8 +171,7 @@ public final class Pageflip extends WebView {
 					initPageflip();
 					initCatalog();
 				}
-				
-			} 
+			}
 			return true;
 			
 		}
@@ -239,6 +241,7 @@ public final class Pageflip extends WebView {
 	 * @param Listener for pageflip events
 	 * @param CatalogId of the catalog to display
 	 */
+	@SuppressWarnings("unchecked")
 	public void execute(Eta eta, PageflipListener Listener, String CatalogId) {
 
 		mEta = eta;
@@ -246,7 +249,17 @@ public final class Pageflip extends WebView {
 		mCatalogId = CatalogId;
 		mUuid = Utils.createUUID();
 
-		mEta.addPageflip(this);
+		try {
+			Field f = mEta.getClass().getDeclaredField("mPageflips");
+			f.setAccessible(true);
+			mPageflips = (List<Pageflip>) f.get(mEta);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (mPageflips != null) {
+			mPageflips.add(this);
+			Utils.logd(TAG, "found pageflip list");
+		}
 		
 		getSettings().setJavaScriptEnabled(true);
 		getSettings().setDefaultTextEncodingName("utf-8");
@@ -266,7 +279,6 @@ public final class Pageflip extends WebView {
 					if (mDebugWeinre != null) {
 						String endScript = "</head>";
 						data = data.replaceFirst(endScript, mDebugWeinre + endScript);
-						Utils.logdMax(TAG, data);
 					}
 					
 					if (Utils.isSuccess(statusCode)) {
@@ -277,7 +289,7 @@ public final class Pageflip extends WebView {
 					}
 				}
 			};	
-			mEta.api().get(Endpoint.getPageflipProxy(mUuid), cb).execute();
+			mEta.getApi().get(Endpoint.getPageflipProxy(mUuid), cb).execute();
 			
 		} else {
 			this.loadDataWithBaseURL(null, cache, "text/html", "utf-8", null);
@@ -296,9 +308,18 @@ public final class Pageflip extends WebView {
 			o.put(API_SECRET, mEta.getApiSecret());
 			o.put(SESSION, mEta.getSession().toJSON());
 			o.put(LOCALE, Locale.getDefault().toString());
-			if (mEta.getLocation().isSet())
-				o.put(LOCATION, locationToJSON());
-			
+			if (mEta.getLocation().isSet()) {
+				JSONObject loc = new JSONObject();
+				try {
+					loc.put(LOCATION_LAT, mEta.getLocation().getLatitude());
+					loc.put(LOCATION_LNG, mEta.getLocation().getLongitude());
+					loc.put(LOCATION_SENSOR, mEta.getLocation().isSensor());
+					loc.put(LOCATION_RADIUS, mEta.getLocation().getRadius());
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				o.put(LOCATION, loc);
+			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -316,25 +337,9 @@ public final class Pageflip extends WebView {
 			e.printStackTrace();
 		}
 		etaProxy(PARAM_CATALOG_VIEW, mCatalogView);
+		// TODO: Fix a session thing, so we can resume
 	}
 	
-	/**
-	 * Generates a JSON representation of the current {@link com.eTilbudsavis.etasdk.EtaLocation EtaLocation} for usage in pageflip.
-	 * @return
-	 */
-	private JSONObject locationToJSON() {
-		JSONObject o = new JSONObject();
-		try {
-			o.put(LOCATION_LAT, mEta.getLocation().getLatitude());
-			o.put(LOCATION_LNG, mEta.getLocation().getLongitude());
-			o.put(LOCATION_SENSOR, mEta.getLocation().isSensor());
-			o.put(LOCATION_RADIUS, mEta.getLocation().getRadius());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return o;
-	}
-
 	/**
 	 * Wrapper for the "window.etaProxy.push" command.
 	 * @param parameter
@@ -378,6 +383,7 @@ public final class Pageflip extends WebView {
 			// TODO: Propagate change into pageflip
 		}
 	};
+	
 	
 	public void onPause() {
 		mEta.getLocation().unSubscribe(ll);

@@ -11,7 +11,8 @@ z# Java class files
 # generated files
 bin/
 gen/
-com.eTilbudsavis.SDKDemo/src/com/eTilbudsavis/sdkdemo/helpers/Keys.java
+com.eTilbudsavis.SDKDemo/src/com/eTilbudsavis/sdkdemo/Keys.java
+com.eTilbudsavis.Testing/src/com/eTilbudsavis/testing/Keys.java
 
 # Local configuration file (sdk path, etc)
 local.properties

@@ -18,7 +18,6 @@ import com.eTilbudsavis.etasdk.Pageflip.PageflipListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.Utils.Utils;
-import com.eTilbudsavis.sdkdemo.helpers.Keys;
 import com.etilbudsavis.sdkdemo.R;
 
 public class CatalogViewer extends Activity {

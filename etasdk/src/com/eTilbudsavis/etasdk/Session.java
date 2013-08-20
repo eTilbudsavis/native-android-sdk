@@ -157,7 +157,7 @@ public class Session implements Serializable {
 				if (listener != null) listener.onComplete(isCache, statusCode, data, error);
 			}
 		};
-		mEta.api().post(Session.ENDPOINT, session, b).execute();
+		mEta.getApi().post(Session.ENDPOINT, session, b).execute();
 	}
 	
 	/**
@@ -201,7 +201,7 @@ public class Session implements Serializable {
 			}
 		};
 
-		mEta.api().post(Session.ENDPOINT, userCreate, b).execute();
+		mEta.getApi().post(Session.ENDPOINT, userCreate, b).execute();
 		return true;
 	}
 	
@@ -264,7 +264,7 @@ public class Session implements Serializable {
 			}
 		};
 
-		mEta.api().put(ENDPOINT, session, b).execute();
+		mEta.getApi().put(ENDPOINT, session, b).execute();
 	}
 	
 	private void clearUser() {
@@ -298,7 +298,7 @@ public class Session implements Serializable {
 			}
 		};
 
-		mEta.api().delete(ENDPOINT, session, new Bundle()).execute();
+		mEta.getApi().delete(ENDPOINT, session, new Bundle()).execute();
 	}
 	
 	public JSONObject toJSON() {

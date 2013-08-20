@@ -2,9 +2,5 @@
 
     <string name="app_name">eTilbudsavis SDK Demo</string>
     <string name="title_activity_main">eTilbudsavis SDK Demo</string>
-    <string name="session_header">Session:</string>
-    <string name="default_head">header</string>
-    <string name="default_time">Time(ms): </string>
-    <string name="default_body">body</string>
     
 </resources>

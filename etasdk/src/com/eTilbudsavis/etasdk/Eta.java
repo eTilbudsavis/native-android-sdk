@@ -12,15 +12,14 @@
 package com.eTilbudsavis.etasdk;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -36,14 +35,9 @@ import com.eTilbudsavis.etasdk.Utils.Sort;
 public class Eta implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	
-	/** Debug tag */
 	public static final String TAG = "ETA";
-	
-	/** 
-	 * Variable to decide whether to show debug log messages.<br><br>
-	 * Please only set to <code>true</code> while developing to avoid leaking sensitive information */
-	public static boolean DEBUG = true;
+	public static boolean DEBUG = false;
+	private List<Pageflip> mPageflips = new ArrayList<Pageflip>();
 	
 	private Context mContext;
 	private final String mApiKey;
@@ -54,7 +48,6 @@ public class Eta implements Serializable {
 	private EtaCache mCache;
 	private ShoppinglistManager mShoppinglistManager;
 	private static Handler mHandler = new Handler();
-	private ArrayList<Pageflip> mPageflips = new ArrayList<Pageflip>();
 	private ExecutorService mThreads = Executors.newFixedThreadPool(10);
 	
 	/**
@@ -68,10 +61,10 @@ public class Eta implements Serializable {
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
 		mSettings = new Settings(mContext);
-		mLocation = new EtaLocation(this);
+		mLocation = new EtaLocation(Eta.this);
 		mCache = new EtaCache();
-		mShoppinglistManager = new ShoppinglistManager(this);
-		mSession = new Session(this);
+		mShoppinglistManager = new ShoppinglistManager(Eta.this);
+		mSession = new Session(Eta.this);
 		mSession.init();
 	}
 
@@ -143,19 +136,30 @@ public class Eta implements Serializable {
 		return mShoppinglistManager;
 	}
 	
+	/**
+	 * Get a static handler, to avoid memory leaks.
+	 * @return a handler
+	 */
 	public Handler getHandler() {
 		return mHandler;
 	}
 	
+	/**
+	 * Returns an ExecutorService (thread pool), used by the Api.<br>
+	 * Using a custom thread pool, rather than AsyncTast, is way better for
+	 * parallel actions, as the AsyncTash sometimes only has one thread (sequential execution).
+	 * @return ExecutorService used by Api class
+	 */
 	public ExecutorService getThreadPool() {
 		return mThreads;
 	}
+	
 	/**
 	 * Simply instantiates and returns a new Api object.
 	 * @return a new Api object
 	 */
-	public Api api() {
-		return new Api(this);
+	public Api getApi() {
+		return new Api(Eta.this);
 	}
 	
 	/**
@@ -165,7 +169,7 @@ public class Eta implements Serializable {
 	 * @return Returns true if the new values were successfully written to persistent storage.
 	 */
 	public boolean clearPreferences() {
-		mSession = new Session(this);
+		mSession = new Session(Eta.this);
 		return mSettings.clear();
 	}
 
@@ -178,16 +182,6 @@ public class Eta implements Serializable {
 		return this;
 	}
 
-	public Eta addPageflip(Pageflip p) {
-		mPageflips.add(p);
-		return this;
-	}
-
-	public Eta removePageflip(Pageflip p) {
-		mPageflips.remove(p);
-		return this;
-	}
-	
 	public void onPause() {
 		mShoppinglistManager.onPause();
 		mLocation.saveState();
@@ -200,16 +194,15 @@ public class Eta implements Serializable {
 		pageflipResume();
 	}
 
-	private void pageflipLocation() {
-		for (Pageflip p : mPageflips)
-			p.onResume();
-	}
-	
+	// Why does it keep bothering me about, API v11 when i've implemented the method?
+	@SuppressLint("NewApi")
 	private void pageflipResume() {
 		for (Pageflip p : mPageflips)
 			p.onResume();
 	}
-	
+
+	// Why does it keep bothering me about, API v11 when i've implemented the method?
+	@SuppressLint("NewApi")
 	private void pageflipPause() {
 		for (Pageflip p : mPageflips)
 			p.onPause();
@@ -239,21 +232,21 @@ public class Eta implements Serializable {
 	}
 
 	public Api getCatalogList(Api.ListListener<Catalog> listener, int offset, int limit) {
-		return api().get(Catalog.ENDPOINT_LIST, listener, getApiParams(offset, limit, null));
+		return getApi().get(Catalog.ENDPOINT_LIST, listener, getApiParams(offset, limit, null));
 	}
 
 	public Api getCatalogList(Api.ListListener<Catalog> listener, int offset, int limit, String orderBy) {
-		Api a = api().get(Catalog.ENDPOINT_LIST, listener).setOffset(offset).setLimit(limit);
+		Api a = getApi().get(Catalog.ENDPOINT_LIST, listener).setOffset(offset).setLimit(limit);
 		if (orderBy != null) a.setOrderBy(orderBy);
 		return a;
 	}
 
 	public Api getCatalogFromId(Api.ItemListener<Catalog> listener, String catalogId) {
-		return api().get(Catalog.ENDPOINT_ID, listener).setId(catalogId);
+		return getApi().get(Catalog.ENDPOINT_ID, listener).setId(catalogId);
 	}
 
 	public Api getCatalogFromIds(Api.ListListener<Catalog> listener, Set<String> catalogIds) {
-		return api().get(Catalog.ENDPOINT_LIST, listener).setCatalogIds(catalogIds);
+		return getApi().get(Catalog.ENDPOINT_LIST, listener).setCatalogIds(catalogIds);
 	}
 
 //  **************
@@ -265,19 +258,19 @@ public class Eta implements Serializable {
 	}
 
 	public Api getOfferList(Api.ListListener<Offer> listener, int offset, int limit) {
-		return api().get(Offer.ENDPOINT_LIST, listener, getApiParams(offset, limit, null));
+		return getApi().get(Offer.ENDPOINT_LIST, listener, getApiParams(offset, limit, null));
 	}
 
 	public Api getOfferList(Api.ListListener<Offer> listener, int offset, int limit, String orderBy) {
-		return api().get(Offer.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
+		return getApi().get(Offer.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
 	}
 	
 	public Api getOfferFromId(Api.ItemListener<Offer> listener, String offerId) {
-		return api().get(Offer.ENDPOINT_ID, listener, new Bundle()).setId(offerId);
+		return getApi().get(Offer.ENDPOINT_ID, listener, new Bundle()).setId(offerId);
 	}
 	
 	public Api getOfferFromIds(Api.ListListener<Offer> listener, Set<String> offerIds) {
-		return api().get(Offer.ENDPOINT_LIST, listener, new Bundle()).setOfferIds(offerIds);
+		return getApi().get(Offer.ENDPOINT_LIST, listener, new Bundle()).setOfferIds(offerIds);
 	}
 	
 	public Api searchOffers(Api.ListListener<Offer> listener, String query) {
@@ -289,7 +282,7 @@ public class Eta implements Serializable {
 	}
 
 	public Api searchOffers(Api.ListListener<Offer> listener, String query, int offset, int limit, String orderBy) {
-		return api().get(Offer.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
+		return getApi().get(Offer.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
 	}
 
 //  **************
@@ -301,19 +294,19 @@ public class Eta implements Serializable {
 	}
 
 	public Api getDealerList(Api.ListListener<Dealer> listener, int offset, int limit) {
-		return api().get(Dealer.ENDPOINT_LIST, listener, getApiParams(offset, limit, null));
+		return getApi().get(Dealer.ENDPOINT_LIST, listener, getApiParams(offset, limit, null));
 	}
 
 	public Api getDealerList(Api.ListListener<Dealer> listener, int offset, int limit, String orderBy) {
-		return api().get(Dealer.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
+		return getApi().get(Dealer.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
 	}
 	
 	public Api getDealerFromId(Api.ItemListener<Dealer> listener, String dealerId) {
-		return api().get(Dealer.ENDPOINT_ID, listener, new Bundle()).setId(dealerId);
+		return getApi().get(Dealer.ENDPOINT_ID, listener, new Bundle()).setId(dealerId);
 	}
 	
 	public Api getDealerFromIds(Api.ListListener<Dealer> listener, Set<String> dealerIds) {
-		return api().get(Dealer.ENDPOINT_LIST, listener, new Bundle()).setDealerIds(dealerIds);
+		return getApi().get(Dealer.ENDPOINT_LIST, listener, new Bundle()).setDealerIds(dealerIds);
 	}
 
 	public Api searchDealers(Api.ListListener<Dealer> listener, String query) {
@@ -325,7 +318,7 @@ public class Eta implements Serializable {
 	}
 
 	public Api searchDealers(Api.ListListener<Dealer> listener, String query, int offset, int limit, String orderBy) {
-		return api().get(Dealer.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
+		return getApi().get(Dealer.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
 	}
 
 //  **************
@@ -337,19 +330,19 @@ public class Eta implements Serializable {
 	}
 
 	public Api getStoreList(Api.ListListener<Store> listener, int offset, int limit) {
-		return api().get(Store.ENDPOINT_LIST, listener).setOffset(offset).setLimit(limit);
+		return getApi().get(Store.ENDPOINT_LIST, listener).setOffset(offset).setLimit(limit);
 	}
 
 	public Api getStoreList(Api.ListListener<Store> listener, int offset, int limit, String orderBy) {
-		return api().get(Store.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
+		return getApi().get(Store.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
 	}
 	
 	public Api getStoreFromId(Api.ItemListener<Store> listener, String storeId) {
-		return api().get(Store.ENDPOINT_ID, listener, new Bundle()).setId(storeId);
+		return getApi().get(Store.ENDPOINT_ID, listener, new Bundle()).setId(storeId);
 	}
 	
 	public Api getStoreFromIds(Api.ListListener<Store> listener, Set<String> storeIds) {
-		return api().get(Store.ENDPOINT_LIST, listener, new Bundle()).setStoreIds(storeIds);
+		return getApi().get(Store.ENDPOINT_LIST, listener, new Bundle()).setStoreIds(storeIds);
 	}
 
 	public Api searchStores(Api.ListListener<Store> listener, String query) {
@@ -361,7 +354,7 @@ public class Eta implements Serializable {
 	}
 
 	public Api searchStores(Api.ListListener<Store> listener, String query, int offset, int limit, String orderBy) {
-		return api().get(Store.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
+		return getApi().get(Store.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
 	}
 
 }
