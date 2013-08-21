@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.eTilbudsavis.etasdk.Api;
 import com.eTilbudsavis.etasdk.Api.ListListener;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Pageflip;
@@ -26,6 +27,8 @@ public class CatalogViewer extends Activity {
 	Eta mEta;
 	Pageflip mPageflip;
 	ProgressDialog mPd;
+	// Pageflip viewer hack
+	String mViewSession = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,7 +47,12 @@ public class CatalogViewer extends Activity {
         mEta.getLocation().setLongitude(12.5766);
         mEta.getLocation().setRadius(700000);
         mEta.getLocation().setSensor(false);
-        
+
+		mPageflip = (Pageflip)findViewById(R.id.pageflip);
+		/* The view session hack, to fix a problem of redrawing the WebView
+		 * in a Fragment, that has had a onDestroyView() */
+		mPageflip.setViewSession(mViewSession);
+		
     }
     
     @Override
@@ -75,7 +83,6 @@ public class CatalogViewer extends Activity {
 				
 				mPd = ProgressDialog.show(CatalogViewer.this, "", "Loading catalog into pageflip...", true, true);
 				
-				mPageflip = (Pageflip)findViewById(R.id.pageflip);
 		        mPageflip.execute(mEta, pfl, list.get(0).getId());
 		        
 			} else {
@@ -95,7 +102,9 @@ public class CatalogViewer extends Activity {
 		}
 		
 		@Override
-		public void onReady(String uuid) {
+		public void onReady(String uuid, String viewSession) {
+			// Remember to set the viewSession variable, first chance you get.
+			mViewSession = viewSession;
 			mPd.dismiss();
 		}
 

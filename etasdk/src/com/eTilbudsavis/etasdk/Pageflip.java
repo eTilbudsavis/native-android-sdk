@@ -19,10 +19,12 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebSettings.RenderPriority;
 
 import com.eTilbudsavis.etasdk.Api.StringListener;
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
@@ -65,6 +67,9 @@ public final class Pageflip extends WebView {
 	/** String identifying the catalog-view parameter, used when loading a catalog. All available options for this parameter is prefixed with "OPTION" as in {@link Pageflip#OPTION_CATALOG OPTION_CATALOG} */
 	private static final String PARAM_CATALOG_VIEW = "catalog-view";
 	/** String identifying the catalog option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+//	private static final String OPTION_VIEW_SESSION = "viewSession";
+	private static final String OPTION_VIEW_SESSION = "session";
+	/** String identifying the catalog option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
 	public static final String OPTION_CATALOG = "catalog";
 	/** String identifying the page option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
 	public static final String OPTION_PAGE = "page";
@@ -102,10 +107,10 @@ public final class Pageflip extends WebView {
 	private String mUuid;
 	private PageflipListener mListener;
 	private String mCatalogId;
-	private boolean mInitializing = true;
 	private JSONObject mCatalogView = new JSONObject();
 	private String mDebugWeinre = null;
 	private List<Pageflip> mPageflips;
+	private String mViewSession = null;
 	
 	/**
 	 * Used for manual inflation
@@ -146,11 +151,11 @@ public final class Pageflip extends WebView {
 			if (request[0].equals(ETA_CATALOG_VIEW)) {
 
 				// Send ready callback
-				if (mInitializing && request[1].equals(EVENT_PAGECHANGE) && o.has("init")) {
+				if (request[1].equals(EVENT_PAGECHANGE) && o.has("init")) {
 					try {
 						if (o.getBoolean("init")) {
-							mInitializing = false;
-							mListener.onReady(mUuid);
+							mViewSession = o.getString(OPTION_VIEW_SESSION);
+							mListener.onReady(mUuid, mViewSession);
 						}
 					} catch (JSONException e) {
 						e.printStackTrace();
@@ -168,8 +173,7 @@ public final class Pageflip extends WebView {
 				
 				// On document ready, run catalog-view options
 				if (request[1].equals(EVENT_READY)) {
-					initPageflip();
-					initCatalog();
+					initializeJavaScript();
 				}
 			}
 			return true;
@@ -256,9 +260,8 @@ public final class Pageflip extends WebView {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (mPageflips != null) {
+		if (mPageflips != null && !mPageflips.contains(Pageflip.this)) {
 			mPageflips.add(this);
-			Utils.logd(TAG, "found pageflip list");
 		}
 		
 		getSettings().setJavaScriptEnabled(true);
@@ -282,13 +285,14 @@ public final class Pageflip extends WebView {
 					}
 					
 					if (Utils.isSuccess(statusCode)) {
+						
 						mEta.getCache().putHtml(mUuid, data, statusCode);
 						loadDataWithBaseURL(null, data, "text/html", "utf-8", null);
 					} else {
 						loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
 					}
 				}
-			};	
+			};
 			mEta.getApi().get(Endpoint.getPageflipProxy(mUuid), cb).execute();
 			
 		} else {
@@ -298,10 +302,13 @@ public final class Pageflip extends WebView {
 	}
 	
 	/**
-	 * Method to initialize the pageflip, with the use of etaProxy.<br>
-	 * This method should not be called, before eta-proxy:ready has been triggered.
+	 * Method to initialize the Javascript in the pageflip, via the etaProxy.<br>
+	 * Method for loading a catalog, into the initialized pageflip.<br>
+	 * This method should not be called, before eta-proxy:ready has been triggered.<br>
 	 */
-	private void initPageflip() {
+	private void initializeJavaScript() {
+		
+		// General setup of Pageflip JS
 		JSONObject o = new JSONObject();
 		try {
 			o.put(API_KEY, mEta.getApiKey());
@@ -324,20 +331,18 @@ public final class Pageflip extends WebView {
 			e.printStackTrace();
 		}
 		etaProxy(PARAM_INITIALIZE, o);
-	}
-	
-	/**
-	 * Method for loading a catalog, into the initialized pageflip.<br>
-	 * This method should be called post {@link #initPageflip() initPageflip()}.
-	 */
-	private void initCatalog() {
+		
+		// Initialize the catalog
 		try {
+
 			mCatalogView.put(OPTION_CATALOG, mCatalogId);
+			if (mViewSession != null)
+				mCatalogView.put(OPTION_VIEW_SESSION, mViewSession);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 		etaProxy(PARAM_CATALOG_VIEW, mCatalogView);
-		// TODO: Fix a session thing, so we can resume
+		
 	}
 	
 	/**
@@ -346,13 +351,7 @@ public final class Pageflip extends WebView {
 	 * @param data
 	 */
 	private void etaProxy(String parameter, JSONObject data) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("window.etaProxy.push(['")
-		.append(parameter)
-		.append("', '")
-		.append(data.toString())
-		.append("']);");
-		injectJS(sb.toString());
+		etaProxy(parameter + "', '" + data.toString());
 	}
 
 	/**
@@ -387,14 +386,10 @@ public final class Pageflip extends WebView {
 	
 	public void onPause() {
 		mEta.getLocation().unSubscribe(ll);
-		// TODO: Call something to stop analytics
 	}
 	
 	public void onResume() {
-		if (!mInitializing) {
-			mEta.getLocation().subscribe(ll);
-			//TODO: Call something to start analytics
-		}
+		mEta.getLocation().subscribe(ll);
 	}
 	
 	public void useWeinreDebugger(String hostIp, String hostPort) {
@@ -515,6 +510,10 @@ public final class Pageflip extends WebView {
 		}
 	}
 
+	public void setViewSession(String viewSession) {
+		mViewSession = viewSession;
+	}
+	
 	/**
 	 * Callback interface for Pageflip.
 	 * Used for callback's on events in the WebView
@@ -526,7 +525,7 @@ public final class Pageflip extends WebView {
 		 * @param data The data received from pageflip
 		 */
 		public void onEvent(String event, String uuid, JSONObject object);
-		public void onReady(String uuid);
+		public void onReady(String uuid, String viewSession);
 	}
 	
 }

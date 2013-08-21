@@ -650,7 +650,24 @@ public class Api implements Serializable {
 			}
 		} else {
 			String[] parts = mPath.split("/");
-			parts[parts.length-1].equals(Endpoint.Path.CATALOGS);
+			String id = parts[parts.length-1];
+			String type = parts[parts.length-2];
+			
+			if (type.equals("catalogs")) {
+				prefix = "ern:catalog:";
+			} else if (type.equals("offers")) {
+				prefix = "ern:offer:";
+			} else if (type.equals("stores")) {
+				prefix = "ern:store:";
+			} else if (type.equals("dealers")) {
+				prefix = "ern:dealer:";
+			}
+
+			CacheItem c = mEta.getCache().get(prefix + id);
+			if (c != null) {
+				setFlag(CACHE_HIT);
+				convert(true, new ResponseWrapper(c.statuscode, c.object.toString()));
+			}
 		}
 		
 		
