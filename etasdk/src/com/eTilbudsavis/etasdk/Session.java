@@ -111,8 +111,18 @@ public class Session implements Serializable {
 		update(listener);
 	}
 	
-	public void forgotPassword(String email, final JsonObjectListener listener) {
-		// TODO: Forgot password implementation
+	public void forgotPassword(String email, String successRedirect, String errorRedirect, final JsonObjectListener listener) {
+		
+		if ( !Utils.isEmailValid(email) )
+			return;
+		
+		Bundle b = new Bundle();
+		b.putString(Params.EMAIL, email);
+		b.putString(Params.SUCCESS_REDIRECT, successRedirect);
+		b.putString(Params.ERROR_REDIRECT, errorRedirect);
+		
+		mEta.getApi().post(Endpoint.USER_RESET, listener, b).execute();
+		
 	}
 
 	private void sessionUpdate(int statusCode, JSONObject data, EtaError error) {
@@ -140,24 +150,31 @@ public class Session implements Serializable {
 			return;
 		}
 
+		JsonObjectListener session = new JsonObjectListener() {
+			
+			public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
+
+				sessionUpdate(statusCode, data, error);
+				if (listener != null) 
+					listener.onComplete(isCache, statusCode, data, error);
+				
+			}
+		};
+		
 		mIsUpdating = true;
 
 		Bundle b = new Bundle();
 		if (mUserStr != null && mPassStr != null) {
 			b.putString(Params.EMAIL, mUserStr);
 			b.putString(Params.PASSWORD, mPassStr);
+			mEta.getApi().post(Session.ENDPOINT, session, b).execute();
 		} else if (mFacebookToken != null) {
 			b.putString(Params.FACEBOOK_TOKEN, mFacebookToken);
+			mEta.getApi().put(Session.ENDPOINT, session, b).execute();
+		} else {
+			mEta.getApi().post(Session.ENDPOINT, session, b).execute();
 		}
-		JsonObjectListener session = new JsonObjectListener() {
-			
-			public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
-
-				sessionUpdate(statusCode, data, error);
-				if (listener != null) listener.onComplete(isCache, statusCode, data, error);
-			}
-		};
-		mEta.getApi().post(Session.ENDPOINT, session, b).execute();
+		
 	}
 	
 	/**
@@ -249,11 +266,10 @@ public class Session implements Serializable {
 	 */
 	public synchronized void signout(final JsonObjectListener listener) {
 		
-		Utils.logd(TAG, "signout");
-		
 		mIsUpdating = true;
 		
 		clearUser();
+		mEta.getShoppinglistManager().clearUserDB();
 		Bundle b = new Bundle();
 		b.putString(Params.EMAIL, "");
 		JsonObjectListener session = new JsonObjectListener() {

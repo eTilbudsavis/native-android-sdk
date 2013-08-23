@@ -76,30 +76,29 @@ public final class Utils {
 			Log.d(tag, msg);
 	}	
 
-	public static void logd(String tag, int statusCode, Object object) {
-		if (Eta.DEBUG)
-			Log.d(tag, "Status: " + String.valueOf(statusCode) + ", Data: " + object.toString());
-	}
-
-	public static void logd(String tag, String name, int statusCode, Object data, EtaError error) {
+	public static void logd(String tag, String name, boolean isCache, int statusCode, Object data, EtaError error) {
 		if (!Eta.DEBUG)
 			return;
 		
-		String print = "";
+		StringBuilder sb = new StringBuilder();
+		sb.append(name).append(": ")
+		.append("cache: ").append(isCache)
+		.append(", status: ").append(statusCode)
+		.append(", data: ");
 		if (isSuccess(statusCode)) {
-			if (data != null) {
-				if (data instanceof List<?>) {
-					print = "Size: " + String.valueOf(((List<?>) data).size());
-				} else {
-					print = data.toString();
-				}
+			if (data == null) {
+				sb.append("null");
 			} else {
-				print = "null";
+				if (data instanceof List<?>) {
+					sb.append("List Size: ").append(((List<?>) data).size());
+				} else {
+					sb.append(data.toString());
+				}
 			}
 		} else {
-			print = error.toString();
+			sb.append(error.toString());
 		}
-		Log.d(tag, name + " - " + print);
+		Log.d(tag, sb.toString());
 	}
 	
 	public static void logdMax(String tag, String sb) {

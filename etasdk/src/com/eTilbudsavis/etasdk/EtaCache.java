@@ -3,17 +3,19 @@ package com.eTilbudsavis.etasdk;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.regex.Pattern;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
+import android.os.Bundle;
+import android.text.TextUtils;
+
 import com.eTilbudsavis.etasdk.EtaObjects.ResponseWrapper;
+import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class EtaCache implements Serializable {
@@ -58,7 +60,7 @@ public class EtaCache implements Serializable {
 		}
 	}
 	
-	public void put(int statusCode, JSONArray objects) {
+	private void put(int statusCode, JSONArray objects) {
 
 		try {
 		if (objects != null && objects.length()>0) {
@@ -75,7 +77,7 @@ public class EtaCache implements Serializable {
 		
 	}
 	
-	public void put(int statucCode, JSONObject object) {
+	private void put(int statucCode, JSONObject object) {
 		if (object != null && object.has("ern")) {
 			try {
 				mItems.put(object.getString("ern"), new CacheItem(object, statucCode));
@@ -85,7 +87,7 @@ public class EtaCache implements Serializable {
 		}
 	}
 	
-	public CacheItem get(String key) {
+	private CacheItem get(String key) {
 		CacheItem c = mItems.get(key);
 		if (c != null) {
 			if ( ! ((c.time + ITEM_CACHE_TIME) > System.currentTimeMillis()) ) {
@@ -111,6 +113,78 @@ public class EtaCache implements Serializable {
 			this.statuscode = statusCode;
 			object = o;
 		}
+	}
+	
+	private Set<String> getFilter(String filterName, Bundle apiParams) {
+		String tmp = apiParams.getString(filterName);
+		Set<String> list = new HashSet<String>();
+		Collections.addAll(list, TextUtils.split(tmp, ","));
+		return list;
+	}
+	
+	private String getErnPrefix(String type) {
+		return "ern:" + type.substring(0, type.length()-1) + ":";
+	}
+	
+	public ResponseWrapper get(String url, Bundle apiParams) {
+
+		ResponseWrapper resp = null;
+		
+		// Define catchable types
+		Map<String, String>	types = new HashMap<String, String>(4);
+		types.put("catalogs", Params.FILTER_CATALOG_IDS);
+		types.put("offers", Params.FILTER_OFFER_IDS);
+		types.put("dealers", Params.FILTER_DEALER_IDS);
+		types.put("stores", Params.FILTER_STORE_IDS);
+		
+		String[] path = url.split("/");
+		
+		if (types.containsKey(path[path.length-1])) {
+			// if last element is a type, then we'll expect a list
+			String type = path[path.length-1];
+
+			Set<String> ids = new HashSet<String>(0);
+			String filter = types.get(type);
+			if (apiParams.containsKey(filter)) {
+				ids = getFilter(filter, apiParams);
+			}
+			
+			// No ids? no catchable items...
+			if (ids.size() == 0)
+				return resp;
+
+			// Get all possible items requested from cache
+			JSONArray jArray = new JSONArray();
+			for (String id : ids) {
+				String ern = getErnPrefix(type) + id;
+				CacheItem c = get(ern);
+				if (c != null) {
+					jArray.put((JSONObject)c.object);
+				}
+			}
+			
+			// If cache had ALL items, then return the list.
+			int size = jArray.length();
+			if (size > 0 && (size == ids.size()) ) {
+				resp = new ResponseWrapper(200, jArray.toString());
+			}
+			
+		} else if (types.containsKey(path[path.length-2])) {
+			// if second to last element is a valid type, then we'll expect an item id
+			// (this isn't always true, but if it isn't then the item-id, shouldn't be in cache )
+
+			String id = path[path.length-1];
+			String type = path[path.length-2];
+			
+			String ern = getErnPrefix(type) + id;
+			CacheItem c = get(ern);
+			if (c != null) {
+				resp = new ResponseWrapper(c.statuscode, c.object.toString());
+			}
+		}
+		
+		return resp;
+		
 	}
 	
 }

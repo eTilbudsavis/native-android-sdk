@@ -96,11 +96,27 @@ public class DbHelper extends SQLiteOpenHelper {
 		db.execSQL("DELETE FROM " + SLI + " WHERE 1");
 		db.execSQL("DELETE FROM " + SLI_OFFLINE + " WHERE 1");
 	}
-	
+
+	/**
+	 * Deletes all tables (<i>shoppinglists</i> and <i>shoppinglistitems</i>)
+	 * and creates two new tables<br>
+	 * This cannot be undone.
+	 */
 	public void clear() {
-		onUpgrade(mDatabase, 0, 0);
+		clearUserDB();
+		clearNonUserDB();
 	}
 
+	public void clearUserDB() {
+		mDatabase.execSQL("DELETE FROM " + SL + " WHERE 1");
+		mDatabase.execSQL("DELETE FROM " + SLI + " WHERE 1");
+	}
+
+	public void clearNonUserDB() {
+		mDatabase.execSQL("DELETE FROM " + SL_OFFLINE + " WHERE 1");
+		mDatabase.execSQL("DELETE FROM " + SLI_OFFLINE + " WHERE 1");
+	}
+	
 	public static Shoppinglist curToSl(Cursor c) {
 		Shoppinglist sl = Shoppinglist.fromName(c.getString(3));
 		sl.setId(c.getString(0));
@@ -179,15 +195,6 @@ public class DbHelper extends SQLiteOpenHelper {
 		close();
 	}
 
-	/**
-	 * Deletes all tables (<i>shoppinglists</i> and <i>shoppinglistitems</i>)
-	 * and creates two new tables<br>
-	 * This cannot be undone.
-	 */
-	public void clearDatabase() {
-		onUpgrade(mDatabase, 0, 0);
-	}
-	
 	/**
 	 * Insert new shopping list into DB
 	 * @param list to insert

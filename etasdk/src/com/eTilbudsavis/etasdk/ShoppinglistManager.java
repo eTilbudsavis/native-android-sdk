@@ -472,7 +472,6 @@ public class ShoppinglistManager {
 				
 				public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 
-                    Utils.logd(TAG,"addList",  statusCode, data, error);
 					Shoppinglist s = sl;
 					if (Utils.isSuccess(statusCode)) {
 						s = Shoppinglist.fromJSON(data);
@@ -957,8 +956,6 @@ public class ShoppinglistManager {
 	
 	private void cleanupDB() {
 		
-		Utils.logd(TAG, "cleanupDB");
-		
 		if (!mustSync())
 			return;
 			
@@ -1088,8 +1085,25 @@ public class ShoppinglistManager {
 			mSyncSpeed = time;
 	}
 	
+	/**
+	 * Deletes all rows in DB.
+	 */
 	public void clearDB() {
 		mDatabase.clear();
+	}
+
+	/**
+	 * Deletes all rows belonging to a logged in user
+	 */
+	public void clearUserDB() {
+		mDatabase.clearUserDB();
+	}
+
+	/**
+	 * Deletes all rows not belonging to a user (offline usage)
+	 */
+	public void clearNonUserDB() {
+		mDatabase.clearNonUserDB();
 	}
 	
 	/**
