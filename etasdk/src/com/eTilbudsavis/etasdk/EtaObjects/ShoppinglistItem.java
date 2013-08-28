@@ -125,7 +125,8 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 
 	public ShoppinglistItem setOffer(Offer offer) {
 		mOffer = offer;
-		setOfferId(offer.getId());
+		if (mOffer != null)
+			setOfferId(offer.getId());
 		return this;
 	}
 

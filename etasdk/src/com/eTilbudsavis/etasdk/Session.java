@@ -113,9 +113,6 @@ public class Session implements Serializable {
 	
 	public void forgotPassword(String email, String successRedirect, String errorRedirect, final JsonObjectListener listener) {
 		
-		if ( !Utils.isEmailValid(email) )
-			return;
-		
 		Bundle b = new Bundle();
 		b.putString(Params.EMAIL, email);
 		b.putString(Params.SUCCESS_REDIRECT, successRedirect);
@@ -189,12 +186,6 @@ public class Session implements Serializable {
 	 * @return true if all arguments are valid, false otherwise
 	 */
 	public boolean createUser(String email, String password, String name, int birthYear, String gender, String successRedirect, String errorRedirect, final JsonObjectListener listener) {
-		if ( !Utils.isEmailValid(email) || 
-				!Utils.isPasswordValid(password) || 
-				!Utils.isNameValid(name) || 
-				!Utils.isBirthyearValid(birthYear) || 
-				!Utils.isGenderValid(gender))
-			return false;
 		
 		Bundle b = new Bundle();
 		b.putString(Params.EMAIL, email);

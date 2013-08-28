@@ -27,10 +27,17 @@ public class EtaCache implements Serializable {
 	private static final long ITEM_CACHE_TIME = 15 * Utils.MINUTE_IN_MILLIS;
 	private static final long HTML_CACHE_TIME = 15 * Utils.MINUTE_IN_MILLIS;
 	private static final String HTML_REGEX = ".*\\<[^>]+>.*";
+
+	// Define catchable types
+	Map<String, String>	types = new HashMap<String, String>(4);
 	
 	private Map<String, CacheItem> mItems = Collections.synchronizedMap(new HashMap<String, EtaCache.CacheItem>());
 
 	public EtaCache() {
+		types.put("catalogs", Params.FILTER_CATALOG_IDS);
+		types.put("offers", Params.FILTER_OFFER_IDS);
+		types.put("dealers", Params.FILTER_DEALER_IDS);
+		types.put("stores", Params.FILTER_STORE_IDS);
 	}
 
 	public void putHtml(String uuid, String html, int statusCode) {
@@ -129,13 +136,6 @@ public class EtaCache implements Serializable {
 	public ResponseWrapper get(String url, Bundle apiParams) {
 
 		ResponseWrapper resp = null;
-		
-		// Define catchable types
-		Map<String, String>	types = new HashMap<String, String>(4);
-		types.put("catalogs", Params.FILTER_CATALOG_IDS);
-		types.put("offers", Params.FILTER_OFFER_IDS);
-		types.put("dealers", Params.FILTER_DEALER_IDS);
-		types.put("stores", Params.FILTER_STORE_IDS);
 		
 		String[] path = url.split("/");
 		

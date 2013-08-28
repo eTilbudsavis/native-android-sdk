@@ -126,10 +126,10 @@ public class Offer extends EtaErnObject implements Serializable {
 			o.setLinks(Links.fromJSON(offer.getJSONObject(S_LINKS)));
 			o.setRunFrom(offer.getString(S_RUN_FROM));
 			o.setRunTill(offer.getString(S_RUN_TILL));
-			o.setDealerUrl(offer.getString(S_DEALER_URL));
-			o.setDealerId(offer.getString(S_DEALER_ID));
-			o.setStoreUrl(offer.getString(S_STORE_URL));
-			o.setStoreId(offer.getString(S_STORE_ID));
+			o.setDealerUrl(offer.isNull(S_DEALER_URL) ? null : offer.getString(S_DEALER_URL));
+			o.setDealerId(offer.isNull(S_DEALER_ID) ? null : offer.getString(S_DEALER_ID));
+			o.setStoreUrl(offer.isNull(S_STORE_URL) ? null : offer.getString(S_STORE_URL));
+			o.setStoreId(offer.isNull(S_STORE_ID) ? null : offer.getString(S_STORE_ID));
 			o.setCatalogUrl(offer.getString(S_CATALOG_URL));
 			o.setCatalogId(offer.getString(S_CATALOG_ID));
 		} catch (JSONException e) {

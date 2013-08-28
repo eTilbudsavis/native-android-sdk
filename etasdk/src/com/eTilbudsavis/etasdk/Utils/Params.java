@@ -130,6 +130,7 @@ public final class Params {
 	public static final String MODIFIED = "modified";
 	public static final String ERN = "ern";
 	public static final String ACCESS = "access";
+	public static final String ACCEPT_URL = "accept_url";
 
 	public static final String DESCRIPTION = "description";
 	public static final String COUNT = "count";

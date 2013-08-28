@@ -63,9 +63,9 @@ public class EtaLocation extends Location {
 	private static boolean mPushNotifications = false;
 	private static ArrayList<LocationListener> mSubscribers = new ArrayList<LocationListener>();
 
-	public EtaLocation(Eta eta) {
+	public EtaLocation() {
 		super(ETA_PROVIDER);
-		mEta = eta;
+		mEta = Eta.getInstance();
 		restoreState();
 	}
 

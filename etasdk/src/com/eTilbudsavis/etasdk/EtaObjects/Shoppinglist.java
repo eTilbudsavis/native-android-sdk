@@ -18,6 +18,8 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
+	public static final String TAG = "Shoppinglist";
+	
 	public static final String ACCESS_PRIVATE = "private";
 	public static final String ACCESS_SHARED = "shared";
 	public static final String ACCESS_PUBLIC = "public";

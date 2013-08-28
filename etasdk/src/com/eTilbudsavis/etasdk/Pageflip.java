@@ -68,7 +68,7 @@ public final class Pageflip extends WebView {
 	private static final String PARAM_CATALOG_VIEW = "catalog-view";
 	/** String identifying the catalog option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
 //	private static final String OPTION_VIEW_SESSION = "viewSession";
-	private static final String OPTION_VIEW_SESSION = "session";
+	private static final String OPTION_VIEW_SESSION = "viewSession";
 	/** String identifying the catalog option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
 	public static final String OPTION_CATALOG = "catalog";
 	/** String identifying the page option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */

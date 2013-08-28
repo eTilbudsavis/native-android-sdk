@@ -217,31 +217,6 @@ public final class Utils {
 	}
 	
 	/**
-	 * Method checks is a given e-mail is of a valid format.<br>
-	 * e.g.: danny@etilbudsavis.dk
-	 * 
-	 * @param email to check
-	 * @return boolean true for valid, false for invalid
-	 */
-	public static boolean isEmailValid(String email) {
-
-		if (email.length() == 0)
-			return false;
-
-	    boolean isValid = false;
-
-	    String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
-	    CharSequence inputStr = email;
-
-	    Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
-	    Matcher matcher = pattern.matcher(inputStr);
-	    if (matcher.matches()) {
-	        isValid = true;
-	    }
-	    return isValid;
-	}
-
-	/**
 	 * Checks if the name is a valid user name for eta.dk <br><br>
 	 * 
 	 * Requirements: length > 2 chars.
@@ -262,7 +237,7 @@ public final class Utils {
 	public static boolean isPasswordValid(String password) {
 		return 5 < password.length() && password.length() < 40;
 	}
-
+	
 	/**
 	 * Checks if a given integer is a valid birth year.<br>
 	 * 

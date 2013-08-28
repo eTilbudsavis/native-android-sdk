@@ -57,7 +57,6 @@ public final class Endpoint {
 		public static final String PAGEFLIP_PROXY = "http://etilbudsavis.dk/proxy/";
 	}
 	
-	
 	// GLOBALS
 	public static final String HOST = "https://edge.etilbudsavis.dk";
 	
@@ -164,7 +163,7 @@ public final class Endpoint {
 	 * @param shareEmail
 	 * @return
 	 */
-	public static String getShoppinglistShareById(int userId, String listUuid, String shareEmail) {
+	public static String getShareByEmail(int userId, String listUuid, String shareEmail) {
 		return getSharesByListId(userId, listUuid) + ITEM + shareEmail;
 	}
 
@@ -199,28 +198,5 @@ public final class Endpoint {
 	public static String getItemModifiedById(int userId, String listId, String itemId) {
 		return getItemById(userId, listId, itemId) + Path.MODIFIED;
 	}
-
-	public static boolean isItemEndpoint(String path) {
-		return path.contains(CATALOG_ID) || 
-				path.contains(OFFER_ID) ||
-				path.contains(DEALER_ID) || 
-				path.contains(STORE_ID);
-	}
 	
-	public static boolean isListEndpoint(String path) {
-		return !isItemEndpoint(path) &&
-				(path.matches(CATALOG_LIST) || 
-				path.matches(OFFER_LIST) || 
-				path.matches(DEALER_LIST) || 
-				path.matches(STORE_LIST));
-	}
-	
-	public static boolean isMatch(ApiListener<?> listener) {
-		
-		return false;
-	}
-	
-	public static boolean s(String path) {
-		return false;
-	}
 }

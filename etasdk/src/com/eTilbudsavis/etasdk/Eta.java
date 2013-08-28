@@ -30,6 +30,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 // Main object for interacting with the SDK.
 public class Eta implements Serializable {
@@ -39,9 +40,11 @@ public class Eta implements Serializable {
 	public static boolean DEBUG = false;
 	private List<Pageflip> mPageflips = new ArrayList<Pageflip>();
 	
+	private static Eta mEta;
+	
 	private Context mContext;
-	private final String mApiKey;
-	private final String mApiSecret;
+	private String mApiKey;
+	private String mApiSecret;
 	private Settings mSettings;
 	private Session mSession;
 	private EtaLocation mLocation;
@@ -50,27 +53,53 @@ public class Eta implements Serializable {
 	private static Handler mHandler = new Handler();
 	private ExecutorService mThreads = Executors.newFixedThreadPool(10);
 	
+	private Eta() { }
+
 	/**
 	 * TODO: Write a long story about usage, this will basically be the documentation
 	 * @param apiKey The API key found at http://etilbudsavis.dk/api/
 	 * @param apiSecret The API secret found at http://etilbudsavis.dk/api/
 	 * @param context The context of the activity instantiating this class.
 	 */
-	public Eta(String apiKey, String apiSecret, Context context) {
+	public static Eta getInstance() {
+		if (mEta == null) {
+			synchronized (Eta.class) {
+				if (mEta == null) {
+					mEta = new Eta();
+				}
+			}
+		}
+		return mEta;
+	}
+	
+	public void set(String apiKey, String apiSecret, Context context) {
+
 		mContext = context;
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
-		mSettings = new Settings(mContext);
-		mLocation = new EtaLocation(Eta.this);
-		mCache = new EtaCache();
-		mShoppinglistManager = new ShoppinglistManager(Eta.this);
-		mSession = new Session(Eta.this);
-		mSession.init();
+		
+		if (!isSet()) {
+			mSettings = new Settings(mContext);
+			mLocation = new EtaLocation();
+			mCache = new EtaCache();
+			mShoppinglistManager = new ShoppinglistManager(Eta.this);
+			mSession = new Session(Eta.this);
+			mSession.init();
+		} else {
+			Utils.logd(TAG, "Eta already set. apiKey, apiSecret and context has been switched");
+		}
+		
 	}
-
+	
+	public boolean isSet() {
+		return mApiKey != null && mApiSecret == null;
+	}
+	
 	/**
-	 * Returns the Context
-	 * @return API key as String
+	 * The context, the given Eta has been set in.<br>
+	 * This context, does not necessarily have real estate on screen
+	 * to instantiate any views.
+	 * @return A context
 	 */
 	public Context getContext() {
 		return mContext;
@@ -159,7 +188,7 @@ public class Eta implements Serializable {
 	 * @return a new Api object
 	 */
 	public Api getApi() {
-		return new Api(Eta.this);
+		return new Api(this);
 	}
 	
 	/**

@@ -124,7 +124,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		sl.setModified(c.getString(2));
 		sl.setAccess(c.getString(4));
 		sl.setState(c.getInt(5));
-		sl.getOwner().setUser(c.getString(6));
+		sl.getOwner().setEmail(c.getString(6));
 		sl.getOwner().setAccess(c.getString(7));
 		sl.getOwner().setAccepted(0 < c.getInt(8));
 		return sl;
@@ -138,7 +138,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		c.put(NAME, sl.getName());
 		c.put(ACCESS, sl.getAccess());
 		c.put(STATE, sl.getState());
-		c.put(OWNER_USER, sl.getOwner().getUser());
+		c.put(OWNER_USER, sl.getOwner().getEmail());
 		c.put(OWNER_ACCESS, sl.getOwner().getAccess());
 		c.put(OWNER_ACCEPTED, sl.getOwner().getAccepted());
 		return c;

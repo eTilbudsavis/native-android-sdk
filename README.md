@@ -27,9 +27,11 @@ For any information on API specifics please refer to our engineering page: [eta-
 
 
 ## Eta
-This is the main Class. First a new `Eta` must be instanciated, before any further calls to the SDK.
+This is the main Class. Before you can start using the SDK, you must set the `Eta` object. This only needs to be done once
+because the `Eta` object is a singleton. The singleton pattern assures that the database, session and other settings are not
+ending up in a corrupt state.
 
-	mEta = new Eta("YOUR_API_KEY", "YOUR_API_SECRET", Context);
+	Eta.getInstance().set("YOUR_API_KEY", "YOUR_API_SECRET", Context);
 
 The `Eta` class, must also be part of your app's Lifecycle, which means that `onResume()` and `onPause()`
 must be called on the `mEta` object, this ensures all preferences are saved correctly, and database connections are
@@ -38,24 +40,20 @@ opened/closed.
 	@Override
 	protected void onResume() {
 		super.onResume();
-		mEta.onResume();
+		Eta.getInstance().onResume();
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		mEta.onPause();
+		Eta.getInstance().onPause();
 	}
 
 
 To ebable the debug output, just set it to `true`:
 
-	mEta.debug(true);
+	Eta.getInstance().debug(true);
 
-
-Easy way, create a always accessible Class:
-
-	<application android:name="com.eTilbudsavis.test.App">
 
 The `eta` object offers several usefull methods, see each Class for details:
 

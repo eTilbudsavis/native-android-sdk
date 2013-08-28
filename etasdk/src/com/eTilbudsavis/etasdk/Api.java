@@ -45,6 +45,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.os.Bundle;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.Session.SessionListener;
@@ -555,11 +556,7 @@ public class Api implements Serializable {
 		}
 		
 		if (mId != null) {
-			if (Endpoint.isItemEndpoint(mPath)) {
-				mPath += mId;
-			} else {
-				Utils.logd(TAG, "Id does not match a single id endpoint, continuing without id");
-			}
+			mPath += mId;
 		}
 		
 		// TODO Check endpoint against listener, and
@@ -576,48 +573,50 @@ public class Api implements Serializable {
 	}
 	
 	private void runThread() {
+		
+
+		/*
+		 * Prepare the query
+		 */
+		
+		// Required API key.
+		mApiParams.putString(API_KEY, mEta.getApiKey());
+
+		// Add location
+		if (isFlag(FLAG_USE_LOCATION) && mEta.getLocation().isSet()) {
+			mApiParams.putAll(mEta.getLocation().getQuery());
+		}
+
+		// Set headers if session is OK
+		if (mEta.getSession().getToken() != null) {
+			setHeader(HEADER_X_TOKEN, mEta.getSession().getToken());
+			String sha256 = Utils.generateSHA256(mEta.getApiSecret() + mEta.getSession().getToken());
+			setHeader(HEADER_X_SIGNATURE, sha256);
+		}
+		
+		setHeader(HEADER_CONTENT_TYPE, mContentType.toString());
+		
+		/*
+		 * Check cache for data if possible
+		 */
+
+		if (isFlag(FLAG_USE_CACHE) && mRequestType == RequestType.GET) {
+
+			ResponseWrapper r = mEta.getCache().get(mPath, mApiParams);
+			if (r != null) {
+				setFlag(FLAG_CACHE_HIT);
+				convert(true, new ResponseWrapper(r.getStatusCode(), r.getString()));
+			}
+
+		}
+
+		
 		mEta.getThreadPool().execute(worker);
 	}
 	
 	Runnable worker = new Runnable() {
 		
 		public void run() {
-			
-			/*
-			 * Prepare the query
-			 */
-			
-			// Required API key.
-			mApiParams.putString(API_KEY, mEta.getApiKey());
-
-			// Add location
-			if (isFlag(FLAG_USE_LOCATION) && mEta.getLocation().isSet()) {
-				mApiParams.putAll(mEta.getLocation().getQuery());
-			}
-
-			// Set headers if session is OK
-			if (mEta.getSession().getToken() != null) {
-				setHeader(HEADER_X_TOKEN, mEta.getSession().getToken());
-				String sha256 = Utils.generateSHA256(mEta.getApiSecret() + mEta.getSession().getToken());
-				setHeader(HEADER_X_SIGNATURE, sha256);
-			}
-			
-			setHeader(HEADER_CONTENT_TYPE, mContentType.toString());
-			
-			
-			/*
-			 * Check cache for data if possible
-			 */
-			
-			if (isFlag(FLAG_USE_CACHE) && mRequestType == RequestType.GET) {
-
-				ResponseWrapper r = mEta.getCache().get(mPath, mApiParams);
-				if (r != null) {
-					setFlag(FLAG_CACHE_HIT);
-					convert(true, new ResponseWrapper(r.getStatusCode(), r.getString()));
-				}
-				
-			}
 			
 			printDebugPreExecute();
 			
@@ -680,8 +679,6 @@ public class Api implements Serializable {
 
 					if (mApiParams.size() > 0)
 						mPath = mPath + "?" + URLEncodedUtils.format(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8);
-					
-					Utils.logd(TAG, mPath);
 					
 					HttpDelete delete = new HttpDelete(mPath);
 					request = delete;
@@ -763,6 +760,9 @@ public class Api implements Serializable {
 	    mEta.getSession().update(token, expire);
 	}
 
+	/**
+	 * Prints any relevant information about the Api object about to be executed
+	 */
 	private void printDebugPreExecute() {
 
 		if (isFlag(FLAG_PRINT_DEBUG) ) {
@@ -774,22 +774,32 @@ public class Api implements Serializable {
 		
 	}
 	
-	private void printDebugPostExecute(ResponseWrapper wrap) {
+	/**
+	 * Prints any relevant information about the Api object, that has just been executed
+	 * @param dataWrapper with information
+	 */
+	private void printDebugPostExecute(ResponseWrapper dataWrapper) {
 
 	    if (isFlag(FLAG_PRINT_DEBUG) ) {
 			Utils.logd(TAG, "*** Post Execute - " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
-			Utils.logd(TAG, "Status: " + mRequestType.toString() + " " + wrap.getStatusCode());
+			Utils.logd(TAG, "Status: " + mRequestType.toString() + " " + dataWrapper.getStatusCode());
 
 			StringBuilder headers = new StringBuilder();
-			for (Header h : wrap.getHeaders())
+			for (Header h : dataWrapper.getHeaders())
 				headers.append(h.getName()).append(": ").append(h.getValue()).append(", ");
 			Utils.logd(TAG, "Headers: " + headers.toString());
 
-			Utils.logd(TAG, "Object: " + (wrap.getString().length() > 100 ? wrap.getString().substring(0, 100) : wrap.getString()) );
+			Utils.logd(TAG, "Object: " + (dataWrapper.getString().length() > 100 ? dataWrapper.getString().substring(0, 100) : dataWrapper.getString()) );
 	    }
 	    
 	}
 	
+	/**
+	 * Converts a valid http response into a format, that will match the 
+	 * callback interface given to this Api object.
+	 * @param isCache is data from the EtaCache
+	 * @param resp the data to convert
+	 */
 	private void convert(boolean isCache, ResponseWrapper resp) {
 		
 		EtaError er = null;
@@ -811,6 +821,7 @@ public class Api implements Serializable {
 				er = new EtaError();
 				er.setOriginalData(resp.getString());
 			}
+
 			runOnUiThread(isCache, resp.getStatusCode(), objects, er);
 			break;
 
@@ -830,50 +841,75 @@ public class Api implements Serializable {
 			
 			break;
 		}
+
 	}
 	
+	/**
+	 * Determines if current thread is UI thread, or we need a Runnable when
+	 * doing the callback. <br>
+	 * Creating a Runnable and adding a new message to the main Looper is rather time
+	 * consuming (100+ milliseconds) so, we'd rather not hit that every time.
+	 * @param isCache is the data from the EtaCache
+	 * @param statusCode from the Api response
+	 * @param data from the Api response
+	 * @param error from the Api response
+	 */
 	private void runOnUiThread(final boolean isCache, final int statusCode,final Object data,final EtaError error) {
 		
-		Runnable r = new Runnable() {
-			
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			public void run() {
-
-				if (!isFlag(FLAG_CANCEL_IF_POSSIBLE)) {
-					
-					
-					switch (getListenerType(mListener)) {
-					case ITEM:
-						((ItemListener)mListener).onComplete(isCache, statusCode, (EtaErnObject)data, error);
-						break;
-
-					case LIST: 
-						((ListListener)mListener).onComplete(isCache, statusCode, (ArrayList<EtaErnObject>)data, error); 
-						break;
-
-					case OBJECT:
-						((JsonObjectListener)mListener).onComplete(isCache, statusCode, (JSONObject)data, error);
-						break;
-
-					case ARRAY:
-						((JsonArrayListener)mListener).onComplete(isCache, statusCode, (JSONArray)data, error);
-						break;
-
-					case STRING:
-						((StringListener)mListener).onComplete(isCache, statusCode, (String)data, error);
-						break;
-
-					default:
-						throw new IllegalArgumentException("Invalid interface: " + mListener.getClass().getName());
-					}
-					
+		if (Looper.myLooper() == Looper.getMainLooper()) {
+			triggerListener(isCache, statusCode, data, error);
+		} else {
+			mEta.getHandler().post(new Runnable() {
+				
+				public void run() {
+					triggerListener(isCache, statusCode, data, error);
 				}
-			}
-		};
-		
-		mEta.getHandler().post(r);
-	}
+			});
+		}
 
+		
+	}
+	
+	/**
+	 * The thing that actually does the callback.
+	 * @param isCache
+	 * @param statusCode
+	 * @param data
+	 * @param error
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void triggerListener(final boolean isCache, final int statusCode,final Object data,final EtaError error) {
+
+		if (!isFlag(FLAG_CANCEL_IF_POSSIBLE)) {
+			
+			switch (getListenerType(mListener)) {
+			case ITEM:
+				((ItemListener)mListener).onComplete(isCache, statusCode, (EtaErnObject)data, error);
+				break;
+
+			case LIST: 
+				((ListListener)mListener).onComplete(isCache, statusCode, (ArrayList<EtaErnObject>)data, error); 
+				break;
+
+			case OBJECT:
+				((JsonObjectListener)mListener).onComplete(isCache, statusCode, (JSONObject)data, error);
+				break;
+
+			case ARRAY:
+				((JsonArrayListener)mListener).onComplete(isCache, statusCode, (JSONArray)data, error);
+				break;
+
+			case STRING:
+				((StringListener)mListener).onComplete(isCache, statusCode, (String)data, error);
+				break;
+
+			default:
+				throw new IllegalArgumentException("Invalid interface: " + mListener.getClass().getName());
+			}
+			
+		}
+	}
+	
 	private ListenerType getListenerType(ApiListener<?> listener) {
 
 		if (mListener instanceof ItemListener<?>)

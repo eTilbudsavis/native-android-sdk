@@ -1,15 +1,16 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 
 public class Share extends EtaObject implements Comparable<Share>, Serializable {
-	
 	private static final long serialVersionUID = 1L;
 
 	public static final String ACCESS_OWNER = "owner";
@@ -18,25 +19,52 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 	
 	public static final String TAG = "Share";
 	
-	private String mUser;
+	private String mName;
+	private String mEmail;
 	private String mAccess;
 	private boolean mAccepted;
 
 	public Share() { }
 
+	@SuppressWarnings("unchecked")
+	public static ArrayList<Share> fromJSON(JSONArray shares) {
+		ArrayList<Share> list = new ArrayList<Share>();
+		try {
+			for (int i = 0 ; i < shares.length() ; i++ )
+				list.add(Share.fromJSON((JSONObject)shares.get(i)));
+			
+		} catch (JSONException e) {
+			if (Eta.DEBUG)
+				e.printStackTrace();
+		}
+		return list;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public static Share fromJSON(JSONObject share) {
 		return fromJSON(new Share(), share);
 	}
 	
 	public static Share fromJSON(Share s, JSONObject share) {
+		
+		String email = "";
+		
 		try {
-			s.setUser(share.getString(S_USER));
+			email = share.getString(S_USER);
+			if (email.startsWith("{") && email.endsWith("}")) {
+				JSONObject o = new JSONObject(email);
+				s.setEmail(o.getString(S_EMAIL));
+				s.setName(o.getString(S_NAME));
+			} else {
+				s.setEmail(email);
+			}
 			s.setAccess(share.getString(S_ACCESS));
 			s.setAccepted(share.getBoolean(S_ACCEPTED));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();
 		}
+		
 		return s;
 	}
 	
@@ -45,18 +73,27 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 	 * @param user the e-mail address of the share
 	 * @param readwrite true for 'read and write' access, false for 'read only'
 	 */
-	public Share(String user, String permission) {
-		mUser = user;
+	public Share(String email, String permission) {
+		mEmail = email;
 		mAccess = permission;
 		mAccepted = false;
 	}
 
-	public String getUser() {
-		return mUser;
+	public String getEmail() {
+		return mEmail;
 	}
 	
-	public Share setUser(String user) {
-		mUser = user;
+	public Share setEmail(String email) {
+		mEmail = email;
+		return this;
+	}
+
+	public String getName() {
+		return mName;
+	}
+	
+	public Share setName(String name) {
+		mName = name;
 		return this;
 	}
 
@@ -93,15 +130,17 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 
 		Share share = (Share)o;
 		return share.getAccepted() == mAccepted &&
-				share.getAccess().equals(mAccess) &&
-				share.getUser().equals(mUser);
+				share.getAccess() == null ? mAccess == null : share.getAccess().equals(mAccess) &&
+				share.getEmail() == null ? mEmail == null : share.getEmail().equals(mEmail) &&
+				share.getName() == null ? mName == null : share.getName().equals(mName);
 	}
 
 	@Override
 	public String toString() {
 		return new StringBuilder()
 		.append(getClass().getSimpleName()).append("[")
-		.append("user=").append(mUser)
+		.append("email=").append(mEmail)
+		.append(", name=").append(mName)
 		.append(", access=").append(mAccess)
 		.append(", accepted=").append(mAccepted)
 		.append("]").toString();
@@ -111,18 +150,15 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 		return 0;
 	}
 
-	public static Comparator<Share> UserComparator  = new Comparator<Share>() {
+	public static Comparator<Share> EmailComparator  = new Comparator<Share>() {
 
 		public int compare(Share item1, Share item2) {
 
-			String itemName1 = item1.getUser().toUpperCase();
-			String itemName2 = item2.getUser().toUpperCase();
-
+			String itemName1 = item1.getEmail().toUpperCase();
+			String itemName2 = item2.getEmail().toUpperCase();
+			
 			//ascending order
 			return itemName1.compareTo(itemName2);
-
-			//descending order
-			//return itemName2.compareTo(itemName1);
 		}
 
 	};

@@ -94,7 +94,7 @@ public class Search extends Activity {
 				 * E.g.: You can enable the debug flag, to get more info on this particulare
 				 * Api request as it executes. 
 				 * (This requires the Eta object to have set debugging to true, mEta.debug(true)) */
-				api.setFlag(Api.DEBUG_OUTPUT);
+				api.setFlag(Api.FLAG_PRINT_DEBUG);
 				
 				// Finally execute the Api request, as you would with any other AsyncTast :-)
 				api.execute();

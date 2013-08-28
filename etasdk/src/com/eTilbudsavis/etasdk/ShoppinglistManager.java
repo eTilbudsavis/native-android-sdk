@@ -1,8 +1,8 @@
 package com.eTilbudsavis.etasdk;
 
+import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.os.Bundle;
-
 import com.eTilbudsavis.etasdk.Api.JsonArrayListener;
 import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
 import com.eTilbudsavis.etasdk.Api.ListListener;
@@ -14,11 +14,9 @@ import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Utils;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -459,8 +457,8 @@ public class ShoppinglistManager {
 		
 		if (mustSync()) {
 
-			if (sl.getOwner().getUser() == null) {
-				sl.getOwner().setUser(mEta.getUser().getEmail());
+			if (sl.getOwner().getEmail() == null) {
+				sl.getOwner().setEmail(mEta.getUser().getEmail());
 				sl.getOwner().setAccess(Share.ACCESS_OWNER);
 				sl.getOwner().setAccepted(true);
 			}
@@ -671,7 +669,7 @@ public class ShoppinglistManager {
 		return list;
 		
 	}
-	
+
 	/**
 	 * Add an item to a shopping list.<br>
 	 * shopping list items is inserted into the database, and changes is synchronized to the server if possible.
@@ -679,7 +677,57 @@ public class ShoppinglistManager {
 	 * @param sli - shopping list item that should be added.
 	 */
 	public void addItem(final ShoppinglistItem sli, final OnCompletetionListener listener) {
+		addItem(sli, true, listener);
+	}
+
+	/**
+	 * Add an item to a shopping list.<br>
+	 * shopping list items is inserted into the database, and changes is synchronized to the server if possible.
+	 * If the shopping list does not exist in the database or the server, a new one is created and synchronized if possible
+	 * @param sli - shoppinglist item to add
+	 * @param incrementCountIfEqual - 
+	 * 			increment the count on the shoppinglistitem if an item like it exists, 
+	 * 			instead of adding new item.
+	 * @param listener for completion callback
+	 */
+	@SuppressLint("DefaultLocale") 
+	public void addItem(final ShoppinglistItem sli, boolean incrementCountIfEqual, final OnCompletetionListener listener) {
 		
+		if (sli.getOfferId() == null && sli.getDescription() == null) {
+			Utils.logd(TAG, "Shoppinglist item seems to be empty");
+			return;
+		}
+		
+		boolean skipAdd = false;
+		
+		if (incrementCountIfEqual) {
+			
+			List<ShoppinglistItem> items = getItems(getList(sli.getShoppinglistId()));
+			
+			if (sli.getOfferId() != null) {
+				for (ShoppinglistItem s : items) {
+					if (sli.getOfferId().equals(s.getOfferId())) {
+						skipAdd = true;
+						int c = s.getCount();
+						s.setCount(c++);
+						editItem(s, listener);
+					}
+				}
+			} else {
+				for (ShoppinglistItem s : items) {
+					if (s.getDescription() != null && sli.getDescription().toLowerCase().equals(s.getDescription().toLowerCase())) {
+						skipAdd = true;
+						int c = s.getCount();
+						s.setCount(c++);
+						editItem(s, listener);
+					}
+				}
+			}
+		}
+		
+		if (skipAdd)
+			return;
+
 		sli.setModified(new Date());
 		long row;
 		
@@ -721,6 +769,7 @@ public class ShoppinglistManager {
 		} else {
 			listener.onComplete(true, 400, null, null);
 		}
+		
 		
 	}
 
