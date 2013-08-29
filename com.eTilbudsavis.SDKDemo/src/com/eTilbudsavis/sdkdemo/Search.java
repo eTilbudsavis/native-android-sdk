@@ -26,7 +26,6 @@ public class Search extends Activity {
 
 	public static final String TAG = "Search";
 
-	Eta mEta;
 	EditText mQuery;
 	Button mPerformSearch;
 	ProgressDialog mPd;
@@ -37,19 +36,13 @@ public class Search extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search);
-        
-        // Instantiate a new Eta object;
-        mEta = new Eta(Keys.API_KEY, Keys.API_SECRET, getApplicationContext());
-        
-        // Enable debugging, if you want the SDK to output to LogCat
-        mEta.debug(true);
-        
-        // Set the location, several methods are available
-        mEta.getLocation().setLatitude(55.63105);
-        mEta.getLocation().setLongitude(12.5766);
-        mEta.getLocation().setRadius(700000);
-        mEta.getLocation().setSensor(false);
 
+        /*
+         *  Note here, that because we setup Eta in the Main activity, 
+         *  we don't necessarily need to do t again. So we can just
+         *  call Eta.getInstance()
+         */
+        
         // Find views
         mQuery = (EditText) findViewById(R.id.etQuery);
         mResultDisplayer = (ListView) findViewById(R.id.lvResult);
@@ -88,7 +81,7 @@ public class Search extends Activity {
 				};
 				
 				// Make the Api object, with one of the simple wrapper methods found in mEta
-				Api api = mEta.searchOffers(offerListener, q);
+				Api api = Eta.getInstance().searchOffers(offerListener, q);
 				
 				/* You can set other options on the Api object, as you please.
 				 * E.g.: You can enable the debug flag, to get more info on this particulare
@@ -111,13 +104,13 @@ public class Search extends Activity {
     @Override
     public void onResume() {
     	super.onResume();
-    	mEta.onResume();
+    	Eta.getInstance().onResume();
     }
     
     @Override
     public void onPause() {
     	super.onPause();
-    	mEta.onPause();
+    	Eta.getInstance().onPause();
     }
     
     class SearchAdapter extends BaseAdapter {

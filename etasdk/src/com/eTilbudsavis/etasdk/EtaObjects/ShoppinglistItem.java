@@ -110,7 +110,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		return this;
 	}
 
-	public Boolean isTicked() {
+	public boolean isTicked() {
 		return mTick;
 	}
 

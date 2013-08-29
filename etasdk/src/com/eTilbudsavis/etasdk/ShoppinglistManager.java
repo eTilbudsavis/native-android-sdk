@@ -1,8 +1,19 @@
 package com.eTilbudsavis.etasdk;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.annotation.SuppressLint;
-import android.database.Cursor;
 import android.os.Bundle;
+
 import com.eTilbudsavis.etasdk.Api.JsonArrayListener;
 import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
 import com.eTilbudsavis.etasdk.Api.ListListener;
@@ -14,15 +25,6 @@ import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Utils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 
 public class ShoppinglistManager {
 
@@ -41,7 +43,6 @@ public class ShoppinglistManager {
 	private static final int CONNECTION_TIMEOUR_RETRY = 10000;
 	
 	private Eta mEta;
-	private DbHelper mDatabase;
 	private int mSyncSpeed = SYNC_MEDIUM;
 	private String mCurrentSlId = null;
 	private boolean mIsResumed = false;
@@ -72,6 +73,10 @@ public class ShoppinglistManager {
 		
 	};
 
+	public ShoppinglistManager(Eta eta) {
+		mEta = eta;
+		mCurrentSlId = mEta.getSettings().getShoppinglistManagerCurrent();
+	}
 
 	/**
 	 * Sync all shopping lists.<br>
@@ -119,7 +124,7 @@ public class ShoppinglistManager {
 				} else {
 					
 					sl.setState(STATE_SYNCING);
-					mDatabase.editList(sl);
+					DbHelper.getInstance().editList(sl);
 					
 					// Else make a call to check when it's been modified
 					JsonObjectListener cb = new JsonObjectListener() {
@@ -140,7 +145,7 @@ public class ShoppinglistManager {
 								}
 							} else {
 								sl.setState(STATE_ERROR);
-								mDatabase.editList(sl);
+								DbHelper.getInstance().editList(sl);
 							}
 						}
 					};
@@ -162,7 +167,7 @@ public class ShoppinglistManager {
 	public void syncItems(final Shoppinglist sl) {
 		
 		sl.setState(STATE_SYNCING);
-		mDatabase.editList(sl);
+		DbHelper.getInstance().editList(sl);
 		
 		JsonArrayListener cb = new JsonArrayListener() {
 			
@@ -173,11 +178,11 @@ public class ShoppinglistManager {
 				
 				if (Utils.isSuccess(statusCode)) {
 					sl.setState(STATE_SYNCED);
-					mDatabase.editList(sl);
+					DbHelper.getInstance().editList(sl);
 					mergeErnObjects( ShoppinglistItem.fromJSON(data), getItems(sl));
 				} else {
 					sl.setState(STATE_ERROR);
-					mDatabase.editList(sl);
+					DbHelper.getInstance().editList(sl);
 					notifySubscribers(false, true, null, null, idToList(sl.getId()));
 				}
 			}
@@ -227,17 +232,17 @@ public class ShoppinglistManager {
 					if (!oldset.get(key).equals(o)) {
 						edited.add(key);
 						if (isList) {
-							mDatabase.editList((Shoppinglist)o);
+							DbHelper.getInstance().editList((Shoppinglist)o);
 						} else {
-							mDatabase.editItem((ShoppinglistItem)o);
+							DbHelper.getInstance().editItem((ShoppinglistItem)o);
 						}
 					}
 				} else {
 					deleted.add(key);
 					if (isList) {
-						mDatabase.deleteList(key);
+						DbHelper.getInstance().deleteList(key);
 					} else {
-						mDatabase.deleteItem(key);
+						DbHelper.getInstance().deleteItem(key);
 					}
 				}
 			} else {
@@ -246,10 +251,10 @@ public class ShoppinglistManager {
 				Object o = setState(isList, newset.get(key), STATE_TO_SYNC);
 				
 				if (isList) {
-					mDatabase.insertList((Shoppinglist)o);
+					DbHelper.getInstance().insertList((Shoppinglist)o);
 					syncItems((Shoppinglist)o);
 				} else {
-					mDatabase.insertItem((ShoppinglistItem)newset.get(key));
+					DbHelper.getInstance().insertItem((ShoppinglistItem)newset.get(key));
 				}
 			}
 		}
@@ -357,13 +362,6 @@ public class ShoppinglistManager {
 		
 	}
 	
-	public ShoppinglistManager(Eta eta) {
-		mEta = eta;
-		mDatabase = new DbHelper(mEta.getContext(), mEta);
-		mDatabase.openDB();
-		mCurrentSlId = mEta.getSettings().getShoppinglistManagerCurrent();
-	}
-
 	/**
 	 * Get the shopping list that is currently in use, by the user.<br>
 	 * The current list is synchronized more often, than other lists, since the list is likely
@@ -374,12 +372,13 @@ public class ShoppinglistManager {
 		Shoppinglist sl;
 		sl = getList(mCurrentSlId);
 		if (sl == null) {
-			Cursor c = mDatabase.getLists();
-			if (c.moveToFirst()) {
-				sl = DbHelper.curToSl(c);
+			List<Shoppinglist> list =  DbHelper.getInstance().getLists();
+			if (list.size()>0) {
+				sl = list.get(0);
 				setCurrentList(sl);
+			} else {
+				//There is no lists..
 			}
-			c.close();
 		}
 		return sl;
 	}
@@ -405,8 +404,7 @@ public class ShoppinglistManager {
 	public Shoppinglist getList(String id) {
 		if (id == null)
 			return null;
-		Cursor c = mDatabase.getList(id);
-		return c.moveToFirst() ? DbHelper.curToSl(c) : null;
+		return DbHelper.getInstance().getList(id);
 	}
 
 	/**
@@ -414,15 +412,7 @@ public class ShoppinglistManager {
 	 * @return <li>All shopping lists
 	 */
 	public ArrayList<Shoppinglist> getLists() {
-		Cursor c = mDatabase.getLists();
-		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
-		if (c.moveToFirst() ) {
-			do { 
-				list.add(DbHelper.curToSl(c));
-			} while (c.moveToNext());
-		}
-		c.close();
-		return list;
+		return DbHelper.getInstance().getLists();
 	}
 	
 	/**
@@ -431,15 +421,7 @@ public class ShoppinglistManager {
 	 * @return <li>Shopping list or null if no shopping list exists
 	 */
 	public ArrayList<Shoppinglist> getListFromName(String name) {
-		Cursor c = mDatabase.getListFromName(name);
-		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
-		if (c.moveToFirst() ) {
-			do { 
-				list.add(DbHelper.curToSl(c));
-			} while (c.moveToNext());
-		}
-		c.close();
-		return list;
+		return DbHelper.getInstance().getListFromName(name);
 	}
 
 	/**
@@ -479,7 +461,7 @@ public class ShoppinglistManager {
 						revertList(sl);
 					}
 
-                    mDatabase.editList(s);
+                    DbHelper.getInstance().editList(s);
                     syncItems(s);
 					listener.onComplete(false, statusCode, data, error);
 					notifySubscribers(false, true, idToList(s.getId()), null, null);
@@ -492,7 +474,7 @@ public class ShoppinglistManager {
 			sl.setState(STATE_SYNCED);
 		}
 		
-		row = mDatabase.insertList(sl);
+		row = DbHelper.getInstance().insertList(sl);
 		if (row != -1) {
 			listener.onComplete(true, 200, null, null);
 			notifySubscribers(true, false, idToList(sl.getId()), null, null);
@@ -532,7 +514,7 @@ public class ShoppinglistManager {
 						s.setState(STATE_ERROR);
 						revertList(sl);
 					}
-					mDatabase.editList(s);
+					DbHelper.getInstance().editList(s);
 					listener.onComplete(false, statusCode, data, error);
 					notifySubscribers(false, true, null, null, idToList(s.getId()));
 					
@@ -545,7 +527,7 @@ public class ShoppinglistManager {
 			sl.setState(STATE_SYNCED);
 		}
 
-		row = mDatabase.editList(sl);
+		row = DbHelper.getInstance().editList(sl);
 		// Do local callback stuff
 		if (row != -1) {
 			listener.onComplete(true, 200, null, null);
@@ -573,11 +555,11 @@ public class ShoppinglistManager {
 		
 		for (ShoppinglistItem sli : getItems(sl)) {
 			sli.setState(STATE_DELETE);
-			mDatabase.editItem(sli);
+			DbHelper.getInstance().editItem(sli);
 		}
 
 		sl.setState(STATE_DELETE);
-		mDatabase.editList(sl);
+		DbHelper.getInstance().editList(sl);
 		
 		if (mustSync()) {
 			
@@ -586,14 +568,14 @@ public class ShoppinglistManager {
 				public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 					
 					if (Utils.isSuccess(statusCode)) {
-						if (mDatabase.deleteList(sl.getId()) > 0) {
-							mDatabase.deleteItems(sl.getId(), null);
+						if (DbHelper.getInstance().deleteList(sl.getId()) > 0) {
+							DbHelper.getInstance().deleteItems(sl.getId(), null);
 						}
 					} else {
 						Shoppinglist s = getList(sl.getId());
 						if (s != null) {
 							s.setState(STATE_ERROR);
-							mDatabase.editList(s);
+							DbHelper.getInstance().editList(s);
 							revertList(sl);
 						}
 					}
@@ -606,9 +588,9 @@ public class ShoppinglistManager {
 			addQueue(a, sl.getId());
 			
 		} else {
-			row = mDatabase.deleteList(sl.getId());
+			row = DbHelper.getInstance().deleteList(sl.getId());
 			if (row > 0) {
-				mDatabase.deleteItems(sl.getId(), null);
+				DbHelper.getInstance().deleteItems(sl.getId(), null);
 			}
 		}
 		
@@ -628,10 +610,7 @@ public class ShoppinglistManager {
 	 * @return A shopping list item, or <code>null</code> if no item can be found.
 	 */
 	public ShoppinglistItem getItem(String id) {
-		Cursor c = mDatabase.getItem(id);
-		boolean b = c.moveToFirst();
-		c.close();
-		return b ? DbHelper.curToSli(c) : null;
+		return DbHelper.getInstance().getItem(id);
 	}
 
 	/**
@@ -640,33 +619,16 @@ public class ShoppinglistManager {
 	 * @return <li>Shopping list or null if no shopping list exists
 	 */
 	public ArrayList<ShoppinglistItem> getItemFromDescription(String description) {
-		Cursor c = mDatabase.getItemFromDescription(description);
-		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
-		if (c.moveToFirst() ) {
-			do { 
-				list.add(DbHelper.curToSli(c));
-			} while (c.moveToNext());
-		}
-		c.close();
-		return list;
+		return DbHelper.getInstance().getItemFromDescription(description);
 	}
 
 	/**
 	 * Get a shopping list item by it's ID
 	 * @param sl of the shopping list item
-	 * @return A shopping list item, or <code>null</code> if no item can be found.
+	 * @return A list of shoppinglistitem.
 	 */
 	public ArrayList<ShoppinglistItem> getItems(Shoppinglist sl) {
-
-		Cursor c = mDatabase.getItems(sl);
-		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
-		if (c.moveToFirst() ) {
-			do { 
-				list.add(DbHelper.curToSli(c));
-			} while (c.moveToNext());
-		}
-		c.close();
-		return list;
+		return DbHelper.getInstance().getItems(sl);
 		
 	}
 
@@ -685,13 +647,13 @@ public class ShoppinglistManager {
 	 * shopping list items is inserted into the database, and changes is synchronized to the server if possible.
 	 * If the shopping list does not exist in the database or the server, a new one is created and synchronized if possible
 	 * @param sli - shoppinglist item to add
-	 * @param incrementCountIfEqual - 
+	 * @param incrementCountItemExists - 
 	 * 			increment the count on the shoppinglistitem if an item like it exists, 
 	 * 			instead of adding new item.
 	 * @param listener for completion callback
 	 */
 	@SuppressLint("DefaultLocale") 
-	public void addItem(final ShoppinglistItem sli, boolean incrementCountIfEqual, final OnCompletetionListener listener) {
+	public void addItem(final ShoppinglistItem sli, boolean incrementCountItemExists, final OnCompletetionListener listener) {
 		
 		if (sli.getOfferId() == null && sli.getDescription() == null) {
 			Utils.logd(TAG, "Shoppinglist item seems to be empty");
@@ -700,7 +662,7 @@ public class ShoppinglistManager {
 		
 		boolean skipAdd = false;
 		
-		if (incrementCountIfEqual) {
+		if (incrementCountItemExists) {
 			
 			List<ShoppinglistItem> items = getItems(getList(sli.getShoppinglistId()));
 			
@@ -715,7 +677,9 @@ public class ShoppinglistManager {
 				}
 			} else {
 				for (ShoppinglistItem s : items) {
-					if (s.getDescription() != null && sli.getDescription().toLowerCase().equals(s.getDescription().toLowerCase())) {
+					String s1 = sli.getDescription().toLowerCase();
+					String s2 = s.getDescription().toLowerCase();
+					if (s.getDescription() != null && s1.equals(s2)) {
 						skipAdd = true;
 						int c = s.getCount();
 						s.setCount(c++);
@@ -747,7 +711,7 @@ public class ShoppinglistManager {
 						s.setState(STATE_ERROR);
 						revertItem(sli);
 					}
-					mDatabase.editItem(s);
+					DbHelper.getInstance().editItem(s);
 					listener.onComplete(false, statusCode, data, error);
 					notifySubscribers(false, false, idToList(s.getId()), null, null);
 				}
@@ -760,7 +724,7 @@ public class ShoppinglistManager {
 			sli.setState(STATE_SYNCED);
 		}
 		
-		row = mDatabase.insertItem(sli);
+		row = DbHelper.getInstance().insertItem(sli);
 
 		// Do local callback stuff
 		if (row != -1) {
@@ -805,7 +769,7 @@ public class ShoppinglistManager {
 						s.setState(STATE_ERROR);
 						revertItem(sli);
 					}
-					mDatabase.editItem(s);
+					DbHelper.getInstance().editItem(s);
 					listener.onComplete(false, statusCode, data, error);
 					notifySubscribers(false, false, null, null, idToList(s.getId()));
 					
@@ -820,7 +784,7 @@ public class ShoppinglistManager {
 			sli.setState(STATE_SYNCED);
 		}
 
-		row = mDatabase.editItem(sli);
+		row = DbHelper.getInstance().editItem(sli);
 		// Do local callback stuff
 		if (row != -1) {
 			listener.onComplete(true, 200, null, null);
@@ -892,14 +856,14 @@ public class ShoppinglistManager {
 				// Delete all items
 				sli.setState(STATE_DELETE);
 				sli.setModified(d);
-				mDatabase.editItem(sli);
+				DbHelper.getInstance().editItem(sli);
 				deleted.add(sli.getId());
                 row++;
 			} else if (sli.isTicked() == state) {
 				// Delete if ticked matches the requested state
 				sli.setState(STATE_DELETE);
 				sli.setModified(d);
-				mDatabase.editItem(sli);
+				DbHelper.getInstance().editItem(sli);
 				deleted.add(sli.getId());
                 row++;
 			}
@@ -912,13 +876,13 @@ public class ShoppinglistManager {
 				public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 					
 					if (Utils.isSuccess(statusCode)) {
-						mDatabase.deleteItems(sl.getId(), state);
+						DbHelper.getInstance().deleteItems(sl.getId(), state);
 					} else {
 						ArrayList<ShoppinglistItem> list = getItems(sl);
 						for (ShoppinglistItem sli : list) {
 							if (sli.getState() == STATE_DELETE) {
 								sli.setState(STATE_ERROR);
-								mDatabase.editItem(sli);
+								DbHelper.getInstance().editItem(sli);
 								revertItem(sli);
 							} 
 						}
@@ -931,7 +895,7 @@ public class ShoppinglistManager {
 			addQueue(a, sl.getId());
 			
 		} else {
-			row = mDatabase.deleteItems(sl.getId(), state) ;
+			row = DbHelper.getInstance().deleteItems(sl.getId(), state) ;
 		}
 
         if (row == deleted.size()) {
@@ -960,17 +924,17 @@ public class ShoppinglistManager {
 		if (mustSync()) {
 			
 			sli.setState(STATE_DELETE);
-			row = mDatabase.editItem(sli);
+			row = DbHelper.getInstance().editItem(sli);
 			
 			JsonObjectListener cb = new JsonObjectListener() {
 				
 				public void onComplete(boolean isCache, int statusCode, JSONObject item, EtaError error) {
 					
 					if (Utils.isSuccess(statusCode)) {
-						mDatabase.deleteItems(sli.getId(), null);
+						DbHelper.getInstance().deleteItems(sli.getId(), null);
 					} else {
 						sli.setState(STATE_ERROR);
-						mDatabase.editItem(sli);
+						DbHelper.getInstance().editItem(sli);
 						revertItem(sli);
 					}
 					listener.onComplete(false, statusCode, item, error);
@@ -983,7 +947,7 @@ public class ShoppinglistManager {
 			
 			
 		} else {
-			row = mDatabase.deleteItem(sli.getId());
+			row = DbHelper.getInstance().deleteItem(sli.getId());
 		}
 		
 		// Do local callback stuff
@@ -1075,9 +1039,9 @@ public class ShoppinglistManager {
 				if (Utils.isSuccess(statusCode)) {
 					Shoppinglist s = Shoppinglist.fromJSON(item);
 					s.setState(STATE_SYNCED);
-					mDatabase.editList(s);
+					DbHelper.getInstance().editList(s);
 				} else {
-					mDatabase.deleteList(sl.getId());
+					DbHelper.getInstance().deleteList(sl.getId());
 				}
 				
 			}
@@ -1097,9 +1061,9 @@ public class ShoppinglistManager {
 				if (Utils.isSuccess(statusCode)) {
 					ShoppinglistItem s = ShoppinglistItem.fromJSON(item);
 					s.setState(STATE_SYNCED);
-					mDatabase.editItem(s);
+					DbHelper.getInstance().editItem(s);
 				} else {
-					mDatabase.deleteItem(sli.getId());
+					DbHelper.getInstance().deleteItem(sli.getId());
 				}
 				
 			}
@@ -1111,7 +1075,7 @@ public class ShoppinglistManager {
 	
 	public void onResume() {
 		mIsResumed = true;
-		mDatabase.openDB();
+		DbHelper.getInstance().openDB();
 		cleanupDB();
 		startSync();
 	}
@@ -1119,7 +1083,7 @@ public class ShoppinglistManager {
 	public void onPause() {
 		mIsResumed = false;
 		stopSync();
-		mDatabase.closeDB();
+		DbHelper.getInstance().closeDB();
 	}
 	
 	/**
@@ -1138,21 +1102,21 @@ public class ShoppinglistManager {
 	 * Deletes all rows in DB.
 	 */
 	public void clearDB() {
-		mDatabase.clear();
+		DbHelper.getInstance().clear();
 	}
 
 	/**
 	 * Deletes all rows belonging to a logged in user
 	 */
 	public void clearUserDB() {
-		mDatabase.clearUserDB();
+		DbHelper.getInstance().clearUserDB();
 	}
 
 	/**
 	 * Deletes all rows not belonging to a user (offline usage)
 	 */
 	public void clearNonUserDB() {
-		mDatabase.clearNonUserDB();
+		DbHelper.getInstance().clearNonUserDB();
 	}
 	
 	/**
