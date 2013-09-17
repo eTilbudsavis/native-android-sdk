@@ -165,7 +165,7 @@ public final class Utils {
 					result.append("&");
 				result.append(key);
 				result.append("=");
-				result.append(apiParams.get(key) == null ? "" : apiParams.get(key));
+				result.append(valueIsNull(apiParams.get(key)));
 				
 			}
 		}
@@ -179,11 +179,15 @@ public final class Utils {
 			if (apiParams.get(key) instanceof Bundle) {
 				logd("Utils", "Nested parameters not allowed.");
 			} else {
-				Object o = apiParams.get(key);
-				list.add(new BasicNameValuePair(key, o == null ? "" : o.toString()));
+				list.add(new BasicNameValuePair(key, valueIsNull(apiParams.get(key))));
 			}
 		}
 		return list;
+	}
+	
+	private static String valueIsNull(Object value) {
+		String s = value == null ? "" : value.toString();
+		return s;
 	}
 	
 	/**

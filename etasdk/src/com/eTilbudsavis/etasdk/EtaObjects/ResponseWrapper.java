@@ -19,13 +19,15 @@ public class ResponseWrapper {
 	
 	public ResponseWrapper(HttpResponse httpResponse) {
 		
-		mStatusCode = httpResponse.getStatusLine().getStatusCode();
+		Integer i = httpResponse.getStatusLine().getStatusCode();
+		if (i != null)
+			mStatusCode = i;
+		
 		mHeaders = httpResponse.getAllHeaders();
 		
 		String response = null;
 		
 		try {
-			
 			response = EntityUtils.toString(httpResponse.getEntity(), HTTP.UTF_8);
 		} catch (ParseException e1) {
 			e1.printStackTrace();
@@ -43,6 +45,7 @@ public class ResponseWrapper {
 	private void setData(String data) {
 
 		if (data == null || data.length() == 0) {
+			// TODO: Create a json-error object with timeout response
 			mData = data;
 			return;
 		}

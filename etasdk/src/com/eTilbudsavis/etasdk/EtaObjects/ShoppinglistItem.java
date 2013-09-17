@@ -10,7 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
-import android.util.EventLogTags.Description;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ShoppinglistManager;
@@ -72,12 +71,13 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	}
 
 	private static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem) {
+		
 		try {
 			sli.setId(shoppinglistItem.getString(S_ID));
 			sli.setTick(shoppinglistItem.getBoolean(S_TICK));
 			sli.setOfferId(shoppinglistItem.isNull(S_OFFER_ID) ? null : shoppinglistItem.getString(S_OFFER_ID));
 			sli.setCount(shoppinglistItem.getInt(S_COUNT));
-			sli.setDescription(shoppinglistItem.getString(S_DESCRIPTION));
+			sli.setDescription(shoppinglistItem.isNull(S_DESCRIPTION) ? null : shoppinglistItem.getString(S_DESCRIPTION));
 			sli.setShoppinglistId(shoppinglistItem.getString(S_SHOPPINGLIST_ID));
 			sli.setErn(shoppinglistItem.getString(S_ERN));
 			sli.setCreator(shoppinglistItem.getString(S_CREATOR));
@@ -125,8 +125,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 
 	public ShoppinglistItem setOffer(Offer offer) {
 		mOffer = offer;
-		if (mOffer != null)
-			setOfferId(offer.getId());
+		setOfferId(mOffer == null ? null : offer.getId());
 		return this;
 	}
 
@@ -228,7 +227,8 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		sb.append("id=").append(mId);
 		if (mDescription != null) {
 			sb.append(", description=").append(mDescription);
-		} else if (mOfferId != null) {
+		} 
+		if (mOfferId != null) {
 			sb.append(", offer_id=").append(mOfferId);
 		}
 		sb.append(", count=").append(mCount)

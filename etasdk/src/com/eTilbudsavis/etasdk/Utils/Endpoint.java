@@ -58,7 +58,7 @@ public final class Endpoint {
 	}
 	
 	// GLOBALS
-	public static final String HOST = "https://edge.etilbudsavis.dk";
+	public static final String HOST = "https://api.etilbudsavis.dk";
 	
 	// LISTS
 	public static final String CATALOG_LIST = Path.CATALOGS;
