@@ -1,6 +1,9 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -13,18 +16,15 @@ import org.json.JSONObject;
 
 public class ResponseWrapper {
 
+	
 	private Object mData;
 	private int mStatusCode = -1;
 	private Header[] mHeaders;
 	
 	public ResponseWrapper(HttpResponse httpResponse) {
 		
-		Integer i = httpResponse.getStatusLine().getStatusCode();
-		if (i != null)
-			mStatusCode = i;
-		
+		mStatusCode = httpResponse.getStatusLine().getStatusCode();
 		mHeaders = httpResponse.getAllHeaders();
-		
 		String response = null;
 		
 		try {
@@ -37,11 +37,16 @@ public class ResponseWrapper {
 		setData(response);
 	}
 	
+	public ResponseWrapper(EtaError error) {
+		mStatusCode = -1;
+		setData(error.toJSON().toString());
+	}
+
 	public ResponseWrapper(int StatusCode, String data) {
 		mStatusCode = StatusCode;
 		setData(data);
 	}
-	
+
 	private void setData(String data) {
 
 		if (data == null || data.length() == 0) {

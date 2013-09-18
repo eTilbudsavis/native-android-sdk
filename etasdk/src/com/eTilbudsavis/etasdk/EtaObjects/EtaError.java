@@ -3,6 +3,8 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,8 +20,12 @@ public class EtaError extends EtaObject implements Serializable {
 
 	public static final String TAG = "EtaError";
 
-	public static final int SDK_ERROR_UNKNOWN = 0;
-	public static final int SDK_ERROR_MISMATCH = 1;
+	public static final int SDK_ERROR_UNKNOWN			= 10000;
+	public static final int SDK_ERROR_MISMATCH			= 10001;
+	
+	public static final int UNKNOWN_HOST				= 10100;
+	public static final int CLIENT_PROTOCOL_EXCEPTION	= 10101;
+	public static final int IO_EXCEPTION				= 10102;
 	
 	private String mId = new String();
 	private int mCode = 0;

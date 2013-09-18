@@ -11,7 +11,9 @@
  */
 package com.eTilbudsavis.etasdk;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,6 +26,7 @@ import javax.net.ssl.HttpsURLConnection;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -699,8 +702,21 @@ public class Api implements Serializable {
 				
 				updateSessionInfo(response.getHeaders());
 				
-			} catch (Exception e) {
-				e.printStackTrace();
+			} catch (UnknownHostException e) {
+				
+				response = new ResponseWrapper(-1, errorToString(EtaError.UNKNOWN_HOST, "UnknownHostException"));
+//				if (Eta.DEBUG) e.printStackTrace();
+				
+			} catch (ClientProtocolException e) {
+
+				response = new ResponseWrapper(-1, errorToString(EtaError.CLIENT_PROTOCOL_EXCEPTION, "ClientProtocolException"));
+//				if (Eta.DEBUG) e.printStackTrace();
+				
+			} catch (IOException e) {
+
+				response = new ResponseWrapper(-1, errorToString(EtaError.IO_EXCEPTION, "IOException"));
+//				if (Eta.DEBUG) e.printStackTrace();
+				
 			} finally {
 				// Close connection, to deallocate resources
 				httpClient.getConnectionManager().shutdown();
@@ -930,6 +946,15 @@ public class Api implements Serializable {
 		
 		return null;
 		
+	}
+	
+	private String errorToString(int errorCode, String data) {
+		EtaError er = new EtaError();
+		er.setCode(EtaError.UNKNOWN_HOST);
+		er.setDetails(data);
+		er.setId("No API error code available.");
+		er.setMessage("Client side error, perhaps no internet?");
+		return er.toJSON().toString();
 	}
 	
 	public interface ApiListener<T> { }

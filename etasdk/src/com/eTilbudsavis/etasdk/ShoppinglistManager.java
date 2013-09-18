@@ -96,9 +96,7 @@ public class ShoppinglistManager {
 				
 				if (Utils.isSuccess(statusCode)) {
 					mergeErnObjects( data, getLists());
-				} else {
-					Utils.logd(TAG, error.toString());
-				}
+				} 
 			}
 		};
 		mEta.getApi().get(Endpoint.getListsByUserId(mEta.getUser().getId()), sll).execute();
@@ -379,6 +377,7 @@ public class ShoppinglistManager {
 	public ShoppinglistManager setCurrentList(Shoppinglist sl) {
 		mCurrentSlId = sl.getId();
 		mEta.getSettings().setShoppinglistManagerCurrent(mCurrentSlId);
+		notifySubscribers(true, false, new ArrayList<String>(0), new ArrayList<String>(0), new ArrayList<String>(0));
 		return this;
 	}
 	
@@ -816,8 +815,8 @@ public class ShoppinglistManager {
 		
 		final List<String> deleted = new ArrayList<String>();
 		
-		// Ticked = true, unticked = false, all = null.. all in a nice ternary 
-		final Boolean state = whatToDelete.equals(Shoppinglist.EMPTY_TICKED) ? true : whatToDelete.equals(Shoppinglist.EMPTY_UNTICKED) ? false : null;;
+		// Ticked = true, unticked = false, all = null.. all in a nice ternary
+		final Boolean state = whatToDelete == null ? null : whatToDelete.equals(Shoppinglist.EMPTY_TICKED) ? true : false;
 
         long row = 0;
 
