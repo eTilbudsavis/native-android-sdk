@@ -86,18 +86,18 @@ public class Store extends EtaErnObject implements Serializable {
 		if (store == null) return s;
 		
 		try {
-			s.setId(store.getString(S_ID));
-			s.setErn(store.getString(S_ERN));
-			s.setStreet(store.getString(S_STREET));
-			s.setCity(store.getString(S_CITY));
-			s.setZipcode(store.getString(S_ZIP_CODE));
+			s.setId(getJsonString(store, S_ID));
+			s.setErn(getJsonString(store, S_ERN));
+			s.setStreet(getJsonString(store, S_STREET));
+			s.setCity(getJsonString(store, S_CITY));
+			s.setZipcode(getJsonString(store, S_ZIP_CODE));
 			s.setCountry(Country.fromJSON(store.getJSONObject(S_COUNTRY)));
 			s.setLatitude(store.getDouble(S_LATITUDE));
 			s.setLongitude(store.getDouble(S_LONGITUDE));
-			s.setDealerUrl(store.getString(S_DEALER_URL));
-			s.setDealerId(store.getString(S_DEALER_ID));
+			s.setDealerUrl(getJsonString(store, S_DEALER_URL));
+			s.setDealerId(getJsonString(store, S_DEALER_ID));
 			s.setBranding(Branding.fromJSON(store.getJSONObject(S_BRANDING)));
-			s.setContact(store.getString(S_CONTACT));
+			s.setContact(getJsonString(store, S_CONTACT));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();
@@ -239,18 +239,18 @@ public class Store extends EtaErnObject implements Serializable {
 			return false;
 
 		Store s = (Store)o;
-		return mId.equals(s.getId()) &&
-				mErn.equals(s.getErn()) &&
-				mStreet.equals(s.getStreet()) &&
-				mCity.equals(s.getCity()) &&
-				mZipcode.equals(s.getZipcode()) &&
+		return stringCompare(mId, s.getId()) &&
+				stringCompare(mErn, s.getErn()) &&
+				stringCompare(mStreet, s.getStreet()) &&
+				stringCompare(mCity, s.getCity()) &&
+				stringCompare(mZipcode, s.getZipcode()) &&
 				mCountry == null ? s.getCountry() == null : mCountry.equals(s.getCountry()) &&
 				mLatitude == s.getLatitude() &&
 				mLongitude == s.getLongitude() &&
-				mDealerUrl.equals(s.getDealerUrl()) &&
-				mDealerId.equals(s.getDealerId()) &&
+				stringCompare(mDealerUrl, s.getDealerUrl()) &&
+				stringCompare(mDealerId, s.getDealerId()) &&
 				mBranding == null ? s.getBranding() == null : mBranding.equals(s.getBranding()) &&
-				mContact.equals(s.getContact());
+				stringCompare(mContact, s.getContact());
 	}
 	
 	@Override

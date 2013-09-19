@@ -37,12 +37,8 @@ public class Links extends EtaObject implements Serializable {
 		if (l == null) l = new Links();
 		if (links == null) return l;
 		
-		try {
-			l.setWebshop(links.isNull(S_WEBSHOP) ? null : links.getString(S_WEBSHOP));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
+		l.setWebshop(getJsonString(links, S_WEBSHOP));
+		
 		return l;
 	}
 	
@@ -67,6 +63,18 @@ public class Links extends EtaObject implements Serializable {
 	
 	public String getWebshop() {
 		return mWebshop;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		
+		if (!(o instanceof Links))
+			return false;
+
+		Links l = (Links)o;
+		return stringCompare(mWebshop, l.getWebshop());
 	}
 	
 	@Override

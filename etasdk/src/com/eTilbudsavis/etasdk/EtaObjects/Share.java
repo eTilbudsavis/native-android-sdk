@@ -47,18 +47,20 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 	
 	public static Share fromJSON(Share s, JSONObject share) {
 		
-		String email = "";
-		
 		try {
-			email = share.getString(S_USER);
+			String email = getJsonString(share, S_USER);
+			
+			if (email == null)
+				return s;
+			
 			if (email.startsWith("{") && email.endsWith("}")) {
 				JSONObject o = new JSONObject(email);
-				s.setEmail(o.getString(S_EMAIL));
-				s.setName(o.getString(S_NAME));
+				s.setEmail(getJsonString(o, S_EMAIL));
+				s.setName(getJsonString(o, S_NAME));
 			} else {
 				s.setEmail(email);
 			}
-			s.setAccess(share.getString(S_ACCESS));
+			s.setAccess(getJsonString(share, S_ACCESS));
 			s.setAccepted(share.getBoolean(S_ACCEPTED));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
@@ -130,9 +132,9 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 
 		Share share = (Share)o;
 		return share.getAccepted() == mAccepted &&
-				share.getAccess() == null ? mAccess == null : share.getAccess().equals(mAccess) &&
-				share.getEmail() == null ? mEmail == null : share.getEmail().equals(mEmail) &&
-				share.getName() == null ? mName == null : share.getName().equals(mName);
+				stringCompare(share.getAccess(), mAccess) &&
+				stringCompare(share.getEmail(), mEmail) &&
+				stringCompare(share.getName(), mName);
 	}
 
 	@Override

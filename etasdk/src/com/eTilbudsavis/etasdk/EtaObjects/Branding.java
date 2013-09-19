@@ -9,7 +9,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 
-public class Branding implements Serializable {
+public class Branding extends EtaObject  implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -24,6 +24,7 @@ public class Branding implements Serializable {
 	
 	public Branding() { }
 	
+	@SuppressWarnings("unchecked")
 	public static Branding fromJSON(JSONObject branding) {
 		return fromJSON(new Branding(), branding);
 	}
@@ -33,10 +34,10 @@ public class Branding implements Serializable {
 		if (branding == null) return b;
 		
 		try {
-			b.setName(branding.getString(EtaObject.S_NAME));
-			b.setUrlName(branding.getString(EtaObject.S_URL_NAME));
-			b.setWebsite(branding.getString(EtaObject.S_WEBSITE));
-			b.setLogo(branding.getString(EtaObject.S_LOGO));
+			b.setName(getJsonString(branding, S_NAME));
+			b.setUrlName(getJsonString(branding, S_URL_NAME));
+			b.setWebsite(getJsonString(branding, S_WEBSITE));
+			b.setLogo(getJsonString(branding, S_LOGO));
 			b.setColor(Color.parseColor("#"+branding.getString(EtaObject.S_COLOR)));
 			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(EtaObject.S_PAGEFLIP)));
 		} catch (JSONException e) {
@@ -53,12 +54,12 @@ public class Branding implements Serializable {
 	public static JSONObject toJSON(Branding b) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(EtaObject.S_NAME, b.getName());
-			o.put(EtaObject.S_URL_NAME, b.getUrlName());
-			o.put(EtaObject.S_WEBSITE, b.getWebsite());
-			o.put(EtaObject.S_LOGO, b.getLogo());
-			o.put(EtaObject.S_COLOR, b.getColorString());
-			o.put(EtaObject.S_PAGEFLIP, b.getPageflip().toJSON());
+			o.put(S_NAME, b.getName());
+			o.put(S_URL_NAME, b.getUrlName());
+			o.put(S_WEBSITE, b.getWebsite());
+			o.put(S_LOGO, b.getLogo());
+			o.put(S_COLOR, b.getColorString());
+			o.put(S_PAGEFLIP, b.getPageflip().toJSON());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -132,10 +133,10 @@ public class Branding implements Serializable {
 			return false;
 
 		Branding b = (Branding)o;
-		return mName.equals(b.getName()) &&
-				mUrlName.equals(b.getUrlName()) &&
-				mWebsite.equals(b.getWebsite()) &&
-				mLogo.equals(b.getLogo()) &&
+		return stringCompare(mName, b.getName()) &&
+				stringCompare(mUrlName, b.getUrlName()) &&
+				stringCompare(mWebsite, b.getWebsite()) &&
+				stringCompare(mLogo, b.getLogo()) &&
 				mColor.equals(b.getColor()) &&
 				mPageflip.equals(b.getPageflip());
 	}

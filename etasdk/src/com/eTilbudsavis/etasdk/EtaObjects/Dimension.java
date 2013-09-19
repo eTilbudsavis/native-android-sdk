@@ -7,7 +7,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class Dimension implements Serializable {
+public class Dimension extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -33,6 +33,7 @@ public class Dimension implements Serializable {
 		return d;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Dimension fromJSON(JSONObject dimension) {
 		return fromJSON(new Dimension(), dimension);
 	}

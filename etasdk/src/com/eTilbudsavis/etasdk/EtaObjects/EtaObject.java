@@ -121,5 +121,19 @@ public class EtaObject {
 	public JSONObject toJSON() {
 		return new JSONObject();
 	}
-	
+
+	protected static String getJsonString(JSONObject object, String name) {
+		if (object == null || name == null) 
+			return null;
+		
+		try {
+			return object.isNull(name) ? null : object.getString(name);
+		} catch (JSONException e) { }
+		return null;
+	}
+
+	protected static boolean stringCompare(String first, String second) {
+		return first == null ? second == null : first.equals(second);
+	}
+
 }

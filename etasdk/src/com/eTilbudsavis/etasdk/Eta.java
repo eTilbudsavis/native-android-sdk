@@ -28,8 +28,10 @@ import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.Network.EtaCache;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
+import com.eTilbudsavis.etasdk.Utils.Timer;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 // Main object for interacting with the SDK.
@@ -52,6 +54,9 @@ public class Eta implements Serializable {
 	private ShoppinglistManager mShoppinglistManager;
 	private static Handler mHandler = new Handler();
 	private ExecutorService mThreads = Executors.newFixedThreadPool(10);
+	private boolean mResumed = false;
+	
+	public Timer tp;
 	
 	private Eta() { }
 
@@ -205,19 +210,25 @@ public class Eta implements Serializable {
 	public boolean isDebug() {
 		return DEBUG;
 	}
-
+	
+	public boolean isResumed() {
+		return mResumed;
+	}
+	
 	public Eta debug(boolean useDebug) {
 		DEBUG = useDebug;
 		return this;
 	}
 
 	public void onPause() {
+		mResumed = false;
 		mShoppinglistManager.onPause();
 		mLocation.saveState();
 		pageflipPause();
 	}
 	
 	public void onResume() {
+		mResumed = true;
 		mShoppinglistManager.onResume();
 		mLocation.restoreState();
 		pageflipResume();
@@ -259,7 +270,7 @@ public class Eta implements Serializable {
 	public Api getCatalogList(Api.ListListener<Catalog> listener) {
 		return getCatalogList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
 	}
-
+	
 	public Api getCatalogList(Api.ListListener<Catalog> listener, int offset, int limit) {
 		return getApi().get(Catalog.ENDPOINT_LIST, listener, getApiParams(offset, limit, null));
 	}

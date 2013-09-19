@@ -41,9 +41,9 @@ public class Quantity extends EtaObject implements Serializable {
 		if (quantity == null) return q;
 		
 		try {
-			q.setUnit(quantity.getString(S_UNIT).equals("null") ? null : Unit.fromJSON(quantity.getJSONObject(S_UNIT)));
-			q.setSize(quantity.getString(S_SIZE).equals("null") ? null : Size.fromJSON(quantity.getJSONObject(S_SIZE)));
-			q.setPieces(quantity.getString(S_PIECES).equals("null") ? null : Pieces.fromJSON(quantity.getJSONObject(S_PIECES)));
+			q.setUnit(quantity.isNull(S_UNIT) ? null : Unit.fromJSON(quantity.getJSONObject(S_UNIT)));
+			q.setSize(quantity.isNull(S_SIZE) ? null : Size.fromJSON(quantity.getJSONObject(S_SIZE)));
+			q.setPieces(quantity.isNull(S_PIECES) ? null : Pieces.fromJSON(quantity.getJSONObject(S_PIECES)));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();

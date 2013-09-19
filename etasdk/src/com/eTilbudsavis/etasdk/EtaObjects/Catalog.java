@@ -143,19 +143,19 @@ public class Catalog extends EtaErnObject implements Serializable {
 		if (catalog.has(S_STORE_ID) && catalog.has(S_OFFER_COUNT)) {
 			// if we have a full catalog
 			try {
-				c.setId(catalog.getString(S_ID));
-				c.setErn(catalog.getString(S_ERN));
-				c.setLabel(catalog.getString(S_LABEL));
-				c.setBackground(catalog.getString(S_BACKGROUND));
-				c.setRunFrom(catalog.getString(S_RUN_FROM));
-				c.setRunTill(catalog.getString(S_RUN_TILL));
+				c.setId(getJsonString(catalog, S_ID));
+				c.setErn(getJsonString(catalog, S_ERN));
+				c.setLabel(getJsonString(catalog, S_LABEL));
+				c.setBackground(getJsonString(catalog, S_BACKGROUND));
+				c.setRunFrom(getJsonString(catalog, S_RUN_FROM));
+				c.setRunTill(getJsonString(catalog, S_RUN_TILL));
 				c.setPageCount(catalog.getInt(S_PAGE_COUNT));
 				c.setOfferCount(catalog.getInt(S_OFFER_COUNT));
 				c.setBranding(Branding.fromJSON(catalog.getJSONObject(S_BRANDING)));
-				c.setDealerId(catalog.getString(S_DEALER_ID));
-				c.setDealerUrl(catalog.getString(S_DEALER_URL));
-				c.setStoreId(catalog.getString(S_STORE_ID));
-				c.setStoreUrl(catalog.getString(S_STORE_URL));
+				c.setDealerId(getJsonString(catalog, S_DEALER_ID));
+				c.setDealerUrl(getJsonString(catalog, S_DEALER_URL));
+				c.setStoreId(getJsonString(catalog, S_STORE_ID));
+				c.setStoreUrl(getJsonString(catalog, S_STORE_URL));
 				c.setDimension(Dimension.fromJSON(catalog.getJSONObject(S_DIMENSIONS)));
 				c.setImages(Images.fromJSON(catalog.getJSONObject(S_IMAGES)));
 				c.setPages(Pages.fromJSON(catalog.getJSONObject(S_PAGES)));
@@ -166,7 +166,7 @@ public class Catalog extends EtaErnObject implements Serializable {
 		} else if (catalog.has(S_ID) && catalog.has(P_PAGE)) {
 			// If it is a partial catalog
 			try {
-				c.setId(catalog.getString(S_ID));
+				c.setId(getJsonString(catalog, S_ID));
 				c.setOfferOnPage(catalog.getInt(P_PAGE));
 			} catch (JSONException e) {
 				if (Eta.DEBUG)
@@ -397,17 +397,17 @@ public class Catalog extends EtaErnObject implements Serializable {
 		Catalog c = (Catalog)o;
 		return mId.equals(c.getId()) &&
 				mErn.equals(c.getErn()) &&
-				mLabel.equals(c.getLabel()) &&
-				mBackground.equals(c.getBackground()) &&
+				stringCompare(mLabel, c.getLabel()) &&
+				stringCompare(mBackground, c.getBackground()) &&
 				mRunFrom == c.getRunFrom() &&
 				mRunTill == c.getRunTill() &&
 				mPageCount == c.getPageCount() &&
 				mOfferCount == c.getOfferCount() &&
 				mBranding == null ? c.getBranding() == null : mBranding.equals(c.getBranding()) &&
-				mDealerId.equals(c.getDealerId()) &&
-				mDealerUrl.equals(c.getDealerUrl()) &&
-				mStoreId.equals(c.getStoreId()) &&
-				mStoreUrl.equals(c.getStoreUrl()) &&
+				stringCompare(mDealerId, c.getDealerId()) &&
+				stringCompare(mDealerUrl, c.getDealerUrl()) &&
+				stringCompare(mStoreId, c.getStoreId()) &&
+				stringCompare(mStoreUrl, c.getStoreUrl()) &&
 				mDimension == null ? c.getDimension() == null : mDimension.equals(c.getDimension()) &&
 				mImages == null ? c.getImages() == null : mImages.equals(c.getImages()) &&
 				mPages == null ? c.getPages() == null : mPages.equals(c.getPages()) &&

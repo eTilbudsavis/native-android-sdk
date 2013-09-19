@@ -73,14 +73,14 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	private static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem) {
 		
 		try {
-			sli.setId(shoppinglistItem.getString(S_ID));
+			sli.setId(getJsonString(shoppinglistItem, S_ID));
 			sli.setTick(shoppinglistItem.getBoolean(S_TICK));
-			sli.setOfferId(shoppinglistItem.isNull(S_OFFER_ID) ? null : shoppinglistItem.getString(S_OFFER_ID));
+			sli.setOfferId(getJsonString(shoppinglistItem, S_OFFER_ID));
 			sli.setCount(shoppinglistItem.getInt(S_COUNT));
-			sli.setDescription(shoppinglistItem.isNull(S_DESCRIPTION) ? null : shoppinglistItem.getString(S_DESCRIPTION));
-			sli.setShoppinglistId(shoppinglistItem.getString(S_SHOPPINGLIST_ID));
-			sli.setErn(shoppinglistItem.getString(S_ERN));
-			sli.setCreator(shoppinglistItem.getString(S_CREATOR));
+			sli.setDescription(getJsonString(shoppinglistItem, S_DESCRIPTION));
+			sli.setShoppinglistId(getJsonString(shoppinglistItem, S_SHOPPINGLIST_ID));
+			sli.setErn(getJsonString(shoppinglistItem, S_ERN));
+			sli.setCreator(getJsonString(shoppinglistItem, S_CREATOR));
 			sli.setModified(Utils.parseDate(shoppinglistItem.isNull(S_MODIFIED) ? "1970-01-01T00:00:00+0000" : shoppinglistItem.getString(S_MODIFIED)));
 		} catch (JSONException e) {
 			if (Eta.DEBUG) e.printStackTrace();
@@ -204,15 +204,15 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 
 		ShoppinglistItem sli = (ShoppinglistItem)o;
 		
-		return mId.equals(sli.getId()) &&
-				mErn.equals(sli.getErn()) &&
-				mDescription == null ? sli.getDescription() == null : mDescription.equals(sli.getDescription()) && 
+		return stringCompare(mId, sli.getId()) &&
+				stringCompare(mErn, sli.getErn()) &&
+				stringCompare(mDescription, sli.getDescription()) && 
 				mCount == sli.getCount() &&
 				mTick == sli.isTicked() &&
-//				mOfferId == null ? sli.getOfferId() == null : mOfferId.equals(sli.getOfferId()) &&
+				stringCompare(mOfferId, sli.getOfferId()) &&
 				mModified.equals(sli.getModified()) &&
-				mShoppinglistId.equals(sli.getShoppinglistId()) &&
-				mCreator.equals(sli.getCreator());
+				stringCompare(mShoppinglistId, sli.getShoppinglistId()) &&
+				stringCompare(mCreator, sli.getCreator());
 	}
 
 	@Override

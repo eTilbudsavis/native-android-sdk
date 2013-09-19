@@ -37,12 +37,8 @@ public class Unit extends EtaObject implements Serializable {
 		if (u == null) u = new Unit();
 		if (unit == null) return u;
 		
-		try {
-			u.setSymbol(unit.getString(S_SYMBOL));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
+		u.setSymbol(getJsonString(unit, S_SYMBOL));
+		
 		return u;
 	}
 	
@@ -79,7 +75,7 @@ public class Unit extends EtaObject implements Serializable {
 			return false;
 
 		Unit u = (Unit)o;
-		return mSymbol.equals(u.getSymbol());
+		return stringCompare(mSymbol, u.getSymbol());
 	}
 	
 	@Override

@@ -80,13 +80,13 @@ public class Dealer extends EtaErnObject implements Serializable {
 		if (dealer == null) return d;
 
 		try {
-			d.setId(dealer.getString(S_ID));
-			d.setErn(dealer.getString(S_ERN));
-			d.setName(dealer.getString(S_NAME));
-			d.setUrlName(dealer.getString(S_URL_NAME));
-			d.setWebsite(dealer.getString(S_WEBSITE));
-			d.setLogo(dealer.getString(S_LOGO));
-			d.setColor(Color.parseColor("#"+dealer.getString(S_COLOR)));
+			d.setId(getJsonString(dealer, S_ID));
+			d.setErn(getJsonString(dealer, S_ERN));
+			d.setName(getJsonString(dealer, S_NAME));
+			d.setUrlName(getJsonString(dealer, S_URL_NAME));
+			d.setWebsite(getJsonString(dealer, S_WEBSITE));
+			d.setLogo(getJsonString(dealer, S_LOGO));
+			d.setColor(Color.parseColor("#"+getJsonString(dealer, S_COLOR)));
 			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(S_PAGEFLIP)));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
@@ -184,12 +184,12 @@ public class Dealer extends EtaErnObject implements Serializable {
 			return false;
 
 		Dealer dealer = (Dealer)o;
-		return mId.equals(dealer.getId()) &&
-				mErn.equals(dealer.getErn()) &&
-				mName.equals(dealer.getName()) &&
-				mUrlName.equals(dealer.getUrlName()) &&
-				mWebsite.equals(dealer.getWebsite()) &&
-				mLogo.equals(dealer.getLogo()) &&
+		return stringCompare(mId, dealer.getId()) &&
+				stringCompare(mErn, dealer.getErn()) &&
+				stringCompare(mName, dealer.getName()) &&
+				stringCompare(mUrlName, dealer.getUrlName()) &&
+				stringCompare(mWebsite, dealer.getWebsite()) &&
+				stringCompare(mLogo, dealer.getLogo()) &&
 				mColor.equals(dealer.getColor()) &&
 				mPageflip == null ? dealer.getPageflip() == null : mPageflip.equals(dealer.getPageflip());
 	}

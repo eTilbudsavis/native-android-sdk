@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
@@ -82,11 +81,11 @@ public class User extends EtaObject implements Serializable {
 		
 		try {
 			u.setId(user.getInt(S_ID));
-			u.setErn(user.getString(S_ERN));
-			u.setGender(user.getString(S_GENDER));
+			u.setErn(getJsonString(user, S_ERN));
+			u.setGender(getJsonString(user, S_GENDER));
 			u.setBirthYear(user.getInt(S_BIRTH_YEAR));
-			u.setName(user.getString(S_NAME));
-			u.setEmail(user.getString(S_EMAIL));
+			u.setName(getJsonString(user, S_NAME));
+			u.setEmail(getJsonString(user, S_EMAIL));
 			u.setPermissions(Permission.fromJSON(user.getJSONObject(S_PERMISSIONS)));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
@@ -211,6 +210,24 @@ public class User extends EtaObject implements Serializable {
 		public void onStatusChange(Integer response, Object object);
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		
+		if (!(o instanceof User))
+			return false;
+
+		User u = (User)o;
+		return mId == u.getId() &&
+				stringCompare(mErn, u.getErn()) &&
+				stringCompare(mGender, u.getGender()) &&
+				mBirthYear == u.getBirthYear() &&
+				stringCompare(mName, u.getName()) &&
+				stringCompare(mEmail, u.getEmail()) &&
+				mPermissions.equals(u.getPermissions());
+	}
+	
 	@Override
 	public String toString() {
 		return toString(false);

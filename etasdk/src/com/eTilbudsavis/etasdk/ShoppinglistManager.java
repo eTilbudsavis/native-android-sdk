@@ -45,7 +45,6 @@ public class ShoppinglistManager {
 	private Eta mEta;
 	private int mSyncSpeed = SYNC_MEDIUM;
 	private String mCurrentSlId = null;
-	private boolean mIsResumed = false;
 
 	private HashSet<String> mApiQueueItems = new HashSet<String>();
 	private List<QueueItem> mApiQueue = Collections.synchronizedList(new ArrayList<QueueItem>());
@@ -226,7 +225,7 @@ public class ShoppinglistManager {
 			if (oldset.containsKey(key)) {
 				
 				if (newset.containsKey(key)) {
-
+					
 					Object o = setState(isList, newset.get(key), STATE_SYNCED);
 					if (!oldset.get(key).equals(o)) {
 						edited.add(key);
@@ -304,7 +303,7 @@ public class ShoppinglistManager {
 					mEta.getHandler().postDelayed(new Runnable() {
 						
 						public void run() {
-							if (mIsResumed)
+							if (mEta.isResumed())
 								call();
 						}
 					}, CONNECTION_TIMEOUR_RETRY);
@@ -945,12 +944,14 @@ public class ShoppinglistManager {
 	
 	private void cleanupDB() {
 		
-		if (!mustSync())
-			return;
+		List<Shoppinglist> sls = getLists();
+		int count = 0;
+		
+		for (Shoppinglist sl : sls) {
 			
-		for (Shoppinglist sl : getLists()) {
-			
+			// First check if any items in the db need to be synced
 			if (!mApiQueueItems.contains(sl.getId())) {
+				
 				switch (sl.getState()) {
 					
 					case STATE_DELETE:
@@ -967,20 +968,38 @@ public class ShoppinglistManager {
 						break;
 						
 					default:
+						count += 1;
 						break;
 				}
+				
 			}
+			
 			cleanItems(sl);
 			
 		}
 		
+		// If we didn't have anything local to commit, then sync everything 
+		if (sls.size() == count)
+			syncLists();
+		
 	}
 	
 	private void cleanItems(Shoppinglist sl) {
+		
+		List<ShoppinglistItem> slis = getItems(sl);
+		int count = 0;
 
-		for (ShoppinglistItem sli : getItems(sl)) {
+		int inQueue = 0;
+		int notInQueue = 0;
+		
+		for (ShoppinglistItem sli : slis) {
 			
+			// If, the items not currently in the process of being sync'ed
+			// Then check state, and determine if further action is necessary
 			if (!mApiQueueItems.contains(sli.getId())) {
+				
+				notInQueue += 1;
+				
 				switch (sli.getState()) {
 					case STATE_DELETE:
 						deleteItem(sli, cleanupListener, sli.getModified());
@@ -996,12 +1015,21 @@ public class ShoppinglistManager {
 						break;
 
 					default:
+						count += 1;
 						break;
 				}
+				
+			} else {
+				inQueue += 1;
 			}
 			
 			
 		}
+		
+		// If we didn't have anything local to commit, then sync everything 
+		if (slis.size() == count)
+			syncItems(sl);
+		
 	}
 	
 	private void revertList(final Shoppinglist sl) {
@@ -1050,19 +1078,17 @@ public class ShoppinglistManager {
 	}
 	
 	public void onResume() {
-		if (!mIsResumed) {
-			DbHelper.getInstance().openDB();
+		DbHelper.getInstance().openDB();
+		if (mEta.getUser().isLoggedIn()) {
 			cleanupDB();
-		}
-		mIsResumed = true;
-		if (mustSync()) {
 			mSyncLoop.run();
 		}
 	}
 	
 	public void onPause() {
-		mIsResumed = false;
-		mEta.getHandler().removeCallbacks(mSyncLoop);
+		if (mEta.getUser().isLoggedIn()) {
+			mEta.getHandler().removeCallbacks(mSyncLoop);
+		}
 		DbHelper.getInstance().closeDB();
 	}
 	

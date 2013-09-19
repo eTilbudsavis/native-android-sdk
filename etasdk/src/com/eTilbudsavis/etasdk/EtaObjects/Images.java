@@ -40,14 +40,10 @@ public class Images extends EtaObject implements Serializable {
 		if (i == null) i = new Images();
 		if (image == null) return i;
 		
-    	try {
-			i.setView(image.getString("view"));
-			i.setZoom(image.getString("zoom"));
-			i.setThumb(image.getString("thumb"));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
+		i.setView(getJsonString(image, S_VIEW));
+		i.setZoom(getJsonString(image, S_ZOOM));
+		i.setThumb(getJsonString(image, S_THUMB));
+		
     	return i;
 	}
 	
@@ -92,6 +88,20 @@ public class Images extends EtaObject implements Serializable {
 		this.mThumb = thumbUrl;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		
+		if (!(o instanceof Images))
+			return false;
+
+		Images i = (Images)o;
+		return stringCompare(mThumb, i.getThumb()) &&
+				stringCompare(mView, i.getView()) &&
+				stringCompare(mZoom, i.getZoom());
+	}
+	
 	@Override
 	public String toString() {
 		return new StringBuilder()

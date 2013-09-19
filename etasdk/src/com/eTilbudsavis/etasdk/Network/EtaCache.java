@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk;
+package com.eTilbudsavis.etasdk.Network;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -14,7 +14,6 @@ import org.json.JSONObject;
 import android.os.Bundle;
 import android.text.TextUtils;
 
-import com.eTilbudsavis.etasdk.EtaObjects.ResponseWrapper;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -57,7 +56,7 @@ public class EtaCache implements Serializable {
 		return html;
 	}
 
-	public void put(ResponseWrapper response) {
+	public void put(EtaResponse response) {
 		if (Utils.isSuccess(response.getStatusCode())) {
 			if (response.isJSONArray()) {
 				put(response.getStatusCode(), response.getJSONArray());
@@ -133,9 +132,9 @@ public class EtaCache implements Serializable {
 		return "ern:" + type.substring(0, type.length()-1) + ":";
 	}
 	
-	public ResponseWrapper get(String url, Bundle apiParams) {
+	public EtaResponse get(String url, Bundle apiParams) {
 
-		ResponseWrapper resp = null;
+		EtaResponse resp = null;
 		
 		String[] path = url.split("/");
 		
@@ -166,7 +165,8 @@ public class EtaCache implements Serializable {
 			// If cache had ALL items, then return the list.
 			int size = jArray.length();
 			if (size > 0 && (size == ids.size()) ) {
-				resp = new ResponseWrapper(200, jArray.toString());
+				resp = new EtaResponse();
+				resp.set(200, jArray.toString());
 			}
 			
 		} else if (types.containsKey(path[path.length-2])) {
@@ -179,7 +179,8 @@ public class EtaCache implements Serializable {
 			String ern = getErnPrefix(type) + id;
 			CacheItem c = get(ern);
 			if (c != null) {
-				resp = new ResponseWrapper(c.statuscode, c.object.toString());
+				resp = new EtaResponse();
+				resp.set(c.statuscode, c.object.toString());
 			}
 		}
 		

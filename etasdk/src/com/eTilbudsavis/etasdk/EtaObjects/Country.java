@@ -33,8 +33,8 @@ public class Country extends EtaObject implements Serializable {
 		try {
 			c.setId(country.getInt(EtaObject.S_ID));
 			c.setAreaId(country.getInt(EtaObject.S_AREA_ID));
-			c.setCountry(country.getString(EtaObject.S_COUNTRY));
-			c.setLanguage(country.getString(EtaObject.S_LANGUAGE));
+			c.setCountry(getJsonString(country, S_COUNTRY));
+			c.setLanguage(getJsonString(country, S_LANGUAGE));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();
@@ -119,8 +119,8 @@ public class Country extends EtaObject implements Serializable {
 		Country c = (Country)o;
 		return mId == c.getId() &&
 				mAreaId == c.getAreaId() &&
-				mCountry.equals(c.getCountry()) &&
-				mLanguage.equals(c.getLanguage());
+						stringCompare(mCountry, c.getCountry()) &&
+						stringCompare(mLanguage, c.getLanguage());
 	}
 
 	@Override

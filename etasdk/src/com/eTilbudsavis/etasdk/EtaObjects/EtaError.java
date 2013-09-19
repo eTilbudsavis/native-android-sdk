@@ -1,15 +1,10 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -48,10 +43,10 @@ public class EtaError extends EtaObject implements Serializable {
 		if (error == null) return er;
 		
 		try {
-			er.setId(error.getString(S_ID));
+			er.setId(getJsonString(error, S_ID));
 			er.setCode(error.getInt(S_CODE));
-			er.setMessage(error.getString(S_MESSAGE));
-			er.setDetails(error.getString(S_DETAILS));
+			er.setMessage(getJsonString(error, S_MESSAGE));
+			er.setDetails(getJsonString(error, S_DETAILS));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();

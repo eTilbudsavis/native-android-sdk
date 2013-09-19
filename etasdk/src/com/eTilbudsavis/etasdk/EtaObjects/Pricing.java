@@ -7,7 +7,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class Pricing implements Serializable {
+public class Pricing extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -35,6 +35,7 @@ public class Pricing implements Serializable {
 		return p;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static Pricing fromJSON(JSONObject pricing) {
 		return fromJSON(new Pricing(), pricing);
 	}
@@ -45,13 +46,8 @@ public class Pricing implements Serializable {
 		
 		try {
 			p.setPrice(pricing.getDouble(S_PRICE));
-			if (pricing.has(S_PREPRICE)) {
-				p.setPrePrice(pricing.getString(S_PREPRICE).equals("null") == true ? null : pricing.getDouble(S_PREPRICE));
-			} else {
-				// TODO remove this pre_price hack, when server is ready
-				p.setPrePrice(pricing.getString("preprice").equals("null") == true ? null : pricing.getDouble(S_PREPRICE));
-			}
-			p.setCurrency(pricing.getString(S_CURRENCY).equals("null") == true ? null : pricing.getString(S_CURRENCY));
+			p.setPrePrice(pricing.isNull(S_PREPRICE) ? null : pricing.getDouble(S_PREPRICE));
+			p.setCurrency(getJsonString(pricing, S_CURRENCY));
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();
@@ -114,7 +110,7 @@ public class Pricing implements Serializable {
 		Pricing p = (Pricing)o;
 		return mPrice == p.getPrice() &&
 				mPrePrice == null ? p.getPrePrice() == null : mPrePrice == p.getPrePrice() &&
-				mCurrency.equals(p.getCurrency());
+				stringCompare(mCurrency, p.getCurrency());
 	}
 	
 	@Override

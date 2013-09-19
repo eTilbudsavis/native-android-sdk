@@ -43,14 +43,10 @@ public class Pageflip extends EtaObject implements Serializable {
 	public static Pageflip fromJSON(Pageflip p, JSONObject pageflip) {
 		if (p == null) p = new Pageflip();
 		if (pageflip == null) return p;
-			
-		try {
-			p.setLogo(pageflip.getString(S_LOGO));
-			p.setColor(Color.parseColor("#"+pageflip.getString(S_COLOR)));
-		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
-		}
+		
+		p.setLogo(getJsonString(pageflip, S_LOGO));
+		p.setColor(Color.parseColor("#"+getJsonString(pageflip, S_COLOR)));
+		
 		return p;
 	}
 
@@ -101,7 +97,7 @@ public class Pageflip extends EtaObject implements Serializable {
 			return false;
 
 		Pageflip p = (Pageflip)o;
-		return mLogo.equals(p.getLogo()) &&
+		return stringCompare(mLogo, p.getLogo()) &&
 				mColor == p.getColor();
 	}
 	

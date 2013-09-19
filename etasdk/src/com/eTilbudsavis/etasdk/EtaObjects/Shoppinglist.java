@@ -73,11 +73,11 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 	private static Shoppinglist fromJSON(Shoppinglist sl, JSONObject shoppinglist) {
 		
 		try {
-			sl.setId(shoppinglist.getString(S_ID));
-			sl.setErn(shoppinglist.getString(S_ERN));
-			sl.setName(shoppinglist.getString(S_NAME));
-			sl.setAccess(shoppinglist.getString(S_ACCESS));
-			sl.setModified(shoppinglist.getString(S_MODIFIED));
+			sl.setId(getJsonString(shoppinglist, S_ID));
+			sl.setErn(getJsonString(shoppinglist, S_ERN));
+			sl.setName(getJsonString(shoppinglist, S_NAME));
+			sl.setAccess(getJsonString(shoppinglist, S_ACCESS));
+			sl.setModified(getJsonString(shoppinglist, S_MODIFIED));
 			sl.setOwner(Share.fromJSON(shoppinglist.getJSONObject(S_OWNER)));
 			
 		} catch (JSONException e) {
@@ -159,12 +159,12 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 			return false;
 
 		Shoppinglist sl = (Shoppinglist)o;
-		return mId.equals(sl.getId()) &&
-				mErn.equals(sl.getErn()) &&
+		return stringCompare(mId, sl.getId()) &&
+				stringCompare(mErn, sl.getErn()) &&
 				mAccess.equals(sl.getAccess()) &&
 				mModified.equals(sl.getModified()) &&
 				mOwner.equals(sl.getOwner()) &&
-				mName.equals(sl.getName());
+				stringCompare(mName, sl.getName());
 	}
 
 	@Override
