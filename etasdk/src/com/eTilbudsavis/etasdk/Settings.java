@@ -19,8 +19,9 @@ public class Settings {
 	private static final String SESSION_USER		= "session_user";
 	private static final String SESSION_PASS		= "session_pass";
 	private static final String SESSION_FACEBOOK	= "session_facebook";
-	
-	private static final String SLM_CURRENT			= "slm_current";
+
+	private static final String SLM_CURRENT_ONLINE	= "slm_current_online";
+	private static final String SLM_CURRENT_OFFLINE	= "slm_current_offline";
 	
 	public static final String LOC_SENSOR			= "loc_sensor";
 	public static final String LOC_LATITUDE			= "loc_latitude";
@@ -88,12 +89,12 @@ public class Settings {
 		return mEditor.putString(SESSION_PASS, pass).commit();
 	}
 
-	public String getShoppinglistManagerCurrent() {
-		return mPrefs.getString(SLM_CURRENT, null);
+	public String getShoppinglistManagerCurrent(boolean isLoggedin) {
+		return mPrefs.getString(isLoggedin ? SLM_CURRENT_ONLINE : SLM_CURRENT_OFFLINE , null);
 	}
 
-	public boolean setShoppinglistManagerCurrent(String id) {
-		return mEditor.putString(SLM_CURRENT, id).commit();
+	public boolean setShoppinglistManagerCurrent(String id, boolean isLoggedin) {
+		return mEditor.putString(isLoggedin ? SLM_CURRENT_ONLINE : SLM_CURRENT_OFFLINE , id).commit();
 	}
 	
 	public SharedPreferences getPrefs() {

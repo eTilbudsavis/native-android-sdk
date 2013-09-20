@@ -64,7 +64,7 @@ public class EtaErnObject extends EtaObject {
 		if (objects.length() == 0) {
 			return (T) list;
 		}
-
+		
 		try {
 			JSONObject o = objects.getJSONObject(0);
 			if (o.has(S_ERN)) {
@@ -126,8 +126,5 @@ public class EtaErnObject extends EtaObject {
 		}
 		return (T) item;
 	}
-	
-	private JSONObject data = null;
-	
 	
 }

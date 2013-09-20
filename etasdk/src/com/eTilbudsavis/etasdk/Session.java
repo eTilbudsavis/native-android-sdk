@@ -126,9 +126,6 @@ public class Session implements Serializable {
 
 		if (Utils.isSuccess(statusCode)) {
 			set(data);
-			if (mUser.isLoggedIn()) {
-				mEta.getShoppinglistManager().onResume();
-			}
 		} else {
 			Utils.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
 		}

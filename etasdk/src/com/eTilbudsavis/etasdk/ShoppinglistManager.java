@@ -17,6 +17,7 @@ import android.os.Bundle;
 import com.eTilbudsavis.etasdk.Api.JsonArrayListener;
 import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
 import com.eTilbudsavis.etasdk.Api.ListListener;
+import com.eTilbudsavis.etasdk.Session.SessionListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaErnObject;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
@@ -44,7 +45,7 @@ public class ShoppinglistManager {
 	
 	private Eta mEta;
 	private int mSyncSpeed = SYNC_MEDIUM;
-	private String mCurrentSlId = null;
+	private boolean mHasFirstListSync = false;
 
 	private HashSet<String> mApiQueueItems = new HashSet<String>();
 	private List<QueueItem> mApiQueue = Collections.synchronizedList(new ArrayList<QueueItem>());
@@ -74,7 +75,6 @@ public class ShoppinglistManager {
 
 	public ShoppinglistManager(Eta eta) {
 		mEta = eta;
-		mCurrentSlId = mEta.getSettings().getShoppinglistManagerCurrent();
 	}
 
 	/**
@@ -94,6 +94,7 @@ public class ShoppinglistManager {
 					return;
 				
 				if (Utils.isSuccess(statusCode)) {
+					mHasFirstListSync = true;
 					mergeErnObjects( data, getLists());
 				} 
 			}
@@ -343,6 +344,10 @@ public class ShoppinglistManager {
 		}
 		
 	}
+
+	public boolean hasFirstListSync() {
+		return mHasFirstListSync;
+	}
 	
 	/**
 	 * Get the shopping list that is currently in use, by the user.<br>
@@ -352,15 +357,14 @@ public class ShoppinglistManager {
 	 */
 	public Shoppinglist getCurrentList() {
 		Shoppinglist sl;
-		sl = getList(mCurrentSlId);
+		boolean isLoggedIn = mEta.getUser().isLoggedIn();
+		String c = mEta.getSettings().getShoppinglistManagerCurrent(isLoggedIn);
+		sl = getList(c);
 		if (sl == null) {
 			List<Shoppinglist> list =  DbHelper.getInstance().getLists();
 			if (list.size()>0) {
 				sl = list.get(0);
 				setCurrentList(sl);
-			} else {
-				//There is no lists..
-				// TODO: Either create a list, or check if we have already updated
 			}
 		}
 		return sl;
@@ -374,8 +378,8 @@ public class ShoppinglistManager {
 	 * @return This ShoppinglistManager
 	 */
 	public ShoppinglistManager setCurrentList(Shoppinglist sl) {
-		mCurrentSlId = sl.getId();
-		mEta.getSettings().setShoppinglistManagerCurrent(mCurrentSlId);
+		String c = sl.getId();
+		mEta.getSettings().setShoppinglistManagerCurrent(c, mEta.getUser().isLoggedIn());
 		notifySubscribers(true, false, new ArrayList<String>(0), new ArrayList<String>(0), new ArrayList<String>(0));
 		return this;
 	}
@@ -981,7 +985,7 @@ public class ShoppinglistManager {
 		// If we didn't have anything local to commit, then sync everything 
 		if (sls.size() == count)
 			syncLists();
-		
+
 	}
 	
 	private void cleanItems(Shoppinglist sl) {
@@ -989,16 +993,11 @@ public class ShoppinglistManager {
 		List<ShoppinglistItem> slis = getItems(sl);
 		int count = 0;
 
-		int inQueue = 0;
-		int notInQueue = 0;
-		
 		for (ShoppinglistItem sli : slis) {
 			
 			// If, the items not currently in the process of being sync'ed
 			// Then check state, and determine if further action is necessary
 			if (!mApiQueueItems.contains(sli.getId())) {
-				
-				notInQueue += 1;
 				
 				switch (sli.getState()) {
 					case STATE_DELETE:
@@ -1019,10 +1018,7 @@ public class ShoppinglistManager {
 						break;
 				}
 				
-			} else {
-				inQueue += 1;
 			}
-			
 			
 		}
 		
@@ -1077,18 +1073,43 @@ public class ShoppinglistManager {
 		
 	}
 	
-	public void onResume() {
-		DbHelper.getInstance().openDB();
-		if (mEta.getUser().isLoggedIn()) {
-			cleanupDB();
-			mSyncLoop.run();
+	SessionListener sessionListener = new SessionListener() {
+
+		public void onUpdate() {
+			onUserlogin(Eta.getInstance().getUser().isLoggedIn());
+			notifySubscribers(true, false, new ArrayList<String>(0), new ArrayList<String>(0), new ArrayList<String>(0));
 		}
+		
+	};
+	
+	/** 
+	 * Setup sync an cleaning tasks based on whether the user is logged in or not.
+	 * @param isLoggedin
+	 */
+	private void onUserlogin(boolean isLoggedin) {
+		
+		if (isLoggedin) {
+			// Clean the database to even out any inconsistencies
+			cleanupDB();
+
+			// Start syncLooper to perform standard sync
+			mSyncLoop.run();
+			
+		} else {
+			mEta.getHandler().removeCallbacks(mSyncLoop);
+		}
+		
+	}
+	
+	public void onResume() {
+		Eta.getInstance().getSession().subscribe(sessionListener);
+		DbHelper.getInstance().openDB();
+		onUserlogin(mEta.getUser().isLoggedIn());
 	}
 	
 	public void onPause() {
-		if (mEta.getUser().isLoggedIn()) {
-			mEta.getHandler().removeCallbacks(mSyncLoop);
-		}
+		Eta.getInstance().getSession().subscribe(sessionListener);
+		onUserlogin(false);
 		DbHelper.getInstance().closeDB();
 	}
 	
