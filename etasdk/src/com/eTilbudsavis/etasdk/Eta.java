@@ -56,7 +56,9 @@ public class Eta implements Serializable {
 	private ExecutorService mThreads = Executors.newFixedThreadPool(10);
 	private boolean mResumed = false;
 	
-	public Timer tp;
+
+	public static int count = 0;
+	public static String name = "ostehaps";
 	
 	private Eta() { }
 

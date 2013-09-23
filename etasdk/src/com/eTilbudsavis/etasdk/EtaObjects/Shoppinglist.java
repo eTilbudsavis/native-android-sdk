@@ -19,6 +19,8 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String TAG = "Shoppinglist";
+
+	public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
 	
 	public static final String ACCESS_PRIVATE = "private";
 	public static final String ACCESS_SHARED = "shared";
@@ -34,6 +36,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 	private Date mModified = new Date();
 	private Share mOwner = new Share();
 	private int mState = ShoppinglistManager.STATE_TO_SYNC;
+	private String mPrevId;
 	
 	private Shoppinglist() {
         String id = Utils.createUUID();
@@ -54,10 +57,21 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 	@SuppressWarnings("unchecked")
 	public static ArrayList<Shoppinglist> fromJSON(JSONArray shoppinglists) {
 		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
+		
 		try {
-			for (int i = 0 ; i < shoppinglists.length() ; i++ )
-				list.add(Shoppinglist.fromJSON(new Shoppinglist(), (JSONObject)shoppinglists.get(i)));
+			Shoppinglist tmp = null;
 			
+			// Parse in opposite order, to get the right ordering from server until sorting is implemented
+			for (int i = shoppinglists.length()-1 ; i >= 0 ; i-- ) {
+				
+				Shoppinglist s = Shoppinglist.fromJSON(shoppinglists.getJSONObject(i));
+				if (s.getPreviousId() == null) {
+					s.setPreviousId(tmp == null ? FIRST_ITEM : tmp.getId());
+					tmp = s;
+				}
+				list.add(s);
+			}
+
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();
@@ -79,6 +93,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 			sl.setAccess(getJsonString(shoppinglist, S_ACCESS));
 			sl.setModified(getJsonString(shoppinglist, S_MODIFIED));
 			sl.setOwner(Share.fromJSON(shoppinglist.getJSONObject(S_OWNER)));
+			sl.setPreviousId(getJsonString(shoppinglist, S_PREVIOUS_ID));
 			
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
@@ -92,6 +107,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 		apiParams.putString(S_MODIFIED, Utils.formatDate(mModified));
 		apiParams.putString(S_NAME, getName());
 		apiParams.putString(S_ACCESS, getAccess());
+		apiParams.putString(S_PREVIOUS_ID, getPreviousId());
 		return apiParams;
 	}
 	
@@ -131,7 +147,16 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 			mState = state;
 		return this;
 	}
-	
+
+	public String getPreviousId() {
+		return mPrevId;
+	}
+
+	public Shoppinglist setPreviousId(String id) {
+		mPrevId = id;
+		return this;
+	}
+
 	public Shoppinglist setModified(String time) {
 		mModified = Utils.parseDate(time);
 		return this;
@@ -164,7 +189,8 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 				mAccess.equals(sl.getAccess()) &&
 				mModified.equals(sl.getModified()) &&
 				mOwner.equals(sl.getOwner()) &&
-				stringCompare(mName, sl.getName());
+				stringCompare(mName, sl.getName()) &&
+				stringCompare(mPrevId, sl.getPreviousId());
 	}
 
 	@Override
@@ -181,7 +207,8 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 		.append(", access=").append(mAccess)
 		.append(", modified=").append(mModified)
 		.append(", state=").append(mState)
-		.append(", owner=").append(mOwner.toString());
+		.append(", owner=").append(mOwner.toString())
+		.append(", previous_id=").append(mPrevId);
 		return sb.append("]").toString();
 	}
 	

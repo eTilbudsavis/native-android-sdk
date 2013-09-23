@@ -85,6 +85,7 @@ public class EtaObject {
 	protected static final String S_BIRTH_YEAR = "birth_year";
 	protected static final String S_EMAIL = "email";
 	protected static final String S_PERMISSIONS = "permissions";
+	protected static final String S_PREVIOUS_ID = "previous_id";
 	
 	public EtaObject() { }
 	
@@ -127,6 +128,8 @@ public class EtaObject {
 			return null;
 		
 		try {
+			if (!object.has(name))
+				return null;
 			return object.isNull(name) ? null : object.getString(name);
 		} catch (JSONException e) { }
 		return null;

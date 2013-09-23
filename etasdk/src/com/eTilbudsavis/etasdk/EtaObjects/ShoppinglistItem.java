@@ -20,16 +20,19 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "ShoppinglistItem";
+
+	public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
 	
 	private boolean mTick = false;
 	private String mOfferId = null;
 	private int mCount = 1;
 	private String mDescription = null;
-	private String mCreator = "";
+	private String mCreator;
 	private Date mModified = new Date();
 	private int mState = ShoppinglistManager.STATE_TO_SYNC;
 	private Offer mOffer = null;
-	private String mShoppinglistId = "";
+	private String mShoppinglistId;
+	private String mPrevId;
 
 	public ShoppinglistItem() {
         String id =Utils.createUUID();
@@ -53,11 +56,19 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	public static ArrayList<ShoppinglistItem> fromJSON(JSONArray shoppinglistItems) {
 		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
 		try {
-			for (int i = 0 ; i < shoppinglistItems.length() ; i++ ) {
-				ShoppinglistItem sli = ShoppinglistItem.fromJSON((JSONObject)shoppinglistItems.get(i));
-				list.add(sli);
+			ShoppinglistItem tmp = null;
+			// Parse in opposite order, to get the right ordering from server until sorting is implemented
+			for (int i = shoppinglistItems.length()-1 ; i >= 0 ; i-- ) {
+				
+				ShoppinglistItem s = ShoppinglistItem.fromJSON((JSONObject)shoppinglistItems.get(i));
+				if (s.getPreviousId() == null) {
+					s.setPreviousId(tmp == null ? FIRST_ITEM : tmp.getId());
+					tmp = s;
+				}
+				list.add(s);
+				
 			}
-			
+
 		} catch (JSONException e) {
 			if (Eta.DEBUG)
 				e.printStackTrace();
@@ -82,6 +93,8 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 			sli.setErn(getJsonString(shoppinglistItem, S_ERN));
 			sli.setCreator(getJsonString(shoppinglistItem, S_CREATOR));
 			sli.setModified(Utils.parseDate(shoppinglistItem.isNull(S_MODIFIED) ? "1970-01-01T00:00:00+0000" : shoppinglistItem.getString(S_MODIFIED)));
+			sli.setPreviousId(getJsonString(shoppinglistItem, S_PREVIOUS_ID));
+			
 		} catch (JSONException e) {
 			if (Eta.DEBUG) e.printStackTrace();
 		}
@@ -147,6 +160,15 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		return this;
 	}
 
+	public String getPreviousId() {
+		return mPrevId;
+	}
+
+	public ShoppinglistItem setPreviousId(String id) {
+		mPrevId = id;
+		return this;
+	}
+
 	public String getOfferId() {
 		return mOfferId;
 	}
@@ -186,6 +208,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		apiParams.putString(S_MODIFIED, Utils.formatDate(getModified()));
 		apiParams.putString(S_CREATOR, getCreator());
 		apiParams.putString(S_SHOPPINGLIST_ID, getShoppinglistId());
+		apiParams.putString(S_PREVIOUS_ID, getPreviousId());
 		return apiParams;
 	}
 
@@ -212,7 +235,8 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 				stringCompare(mOfferId, sli.getOfferId()) &&
 				mModified.equals(sli.getModified()) &&
 				stringCompare(mShoppinglistId, sli.getShoppinglistId()) &&
-				stringCompare(mCreator, sli.getCreator());
+				stringCompare(mCreator, sli.getCreator()) &&
+				stringCompare(mPrevId, sli.getPreviousId());
 	}
 
 	@Override
@@ -237,7 +261,8 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		if(everything) {
 			sb.append(", creator=").append(mCreator)
 			.append(", shoppinglist_id=").append(mShoppinglistId)
-			.append(", state=").append(mState);
+			.append(", state=").append(mState)
+			.append(", previous_id=").append(mPrevId);
 		}
 		return sb.append("]").toString();
 	}

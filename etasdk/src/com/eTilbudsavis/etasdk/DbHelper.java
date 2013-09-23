@@ -42,6 +42,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String OFFER_ID = "offer_id";
 	public static final String CREATOR = "creator";
 	public static final String SHOPPINGLIST_ID = "shopping_list_id";
+	public static final String PREVIOUS_ID = "previous_id";
 	
 	private Object LOCK = new Object();
 	
@@ -56,7 +57,8 @@ public class DbHelper extends SQLiteOpenHelper {
 				STATE + " integer not null, " + 
 				OWNER_USER + " text, " + 
 				OWNER_ACCESS + " text, " + 
-				OWNER_ACCEPTED + " integer " + 
+				OWNER_ACCEPTED + " integer, " + 
+				PREVIOUS_ID + " text " + 
 				");";
 	}
 	
@@ -71,7 +73,8 @@ public class DbHelper extends SQLiteOpenHelper {
 				OFFER_ID + " text, " + 
 				CREATOR + " text, " + 
 				SHOPPINGLIST_ID + " text not null, " + 
-				STATE + " integer not null " + 
+				STATE + " integer not null, " + 
+				PREVIOUS_ID + " text " + 
 				");";
 	}
 	
@@ -134,18 +137,13 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 
 	public synchronized void clearUserDB() {
-		Cursor c = execQuery("DELETE FROM " + SL);
-		cursorClose(c);
-		c = execQuery("DELETE FROM " + SLI);
-		cursorClose(c);
-		cursorClose(c);
+		execQueryWithChangesCount("DELETE FROM " + SL);
+		execQueryWithChangesCount("DELETE FROM " + SLI);
 	}
 
 	public synchronized void clearNonUserDB() {
-		Cursor c = execQuery("DELETE FROM " + SL_OFFLINE);
-		cursorClose(c);
-		c = execQuery("DELETE FROM " + SLI_OFFLINE);
-		cursorClose(c);
+		execQueryWithChangesCount("DELETE FROM " + SL_OFFLINE);
+		execQueryWithChangesCount("DELETE FROM " + SLI_OFFLINE);
 	}
 	
 	public static Shoppinglist cursorToSl(Cursor c) {
@@ -158,6 +156,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		sl.getOwner().setEmail(c.getString(c.getColumnIndex(OWNER_USER)));
 		sl.getOwner().setAccess(c.getString(c.getColumnIndex(OWNER_ACCESS)));
 		sl.getOwner().setAccepted(0 < c.getInt(c.getColumnIndex(OWNER_ACCEPTED)));
+		sl.setPreviousId(c.getString(c.getColumnIndex(PREVIOUS_ID)));
 		return sl;
 	}
 
@@ -181,7 +180,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(STATE).append(",")
 		.append(OWNER_USER).append(",")
 		.append(OWNER_ACCESS).append(",")
-		.append(OWNER_ACCEPTED)
+		.append(OWNER_ACCEPTED).append(",")
+		.append(PREVIOUS_ID)
 		.append(") VALUES (")
 		.append(escape(sl.getId())).append(",")
 		.append(escape(sl.getErn())).append(",")
@@ -191,9 +191,14 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(escape(sl.getState())).append(",")
 		.append(escape(s.getEmail())).append(",")
 		.append(escape(s.getAccess())).append(",")
-		.append(escape(s.getAccepted())).append(")");
+		.append(escape(s.getAccepted())).append(",")
+		.append(escape(sl.getPreviousId())).append(")");
 		
-		return sb.toString();
+		String str = sb.toString();
+		
+//		Utils.logd(TAG, str);
+		
+		return str;
 	}
 	
 	/**
@@ -213,6 +218,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		sli.setCreator(cursor.getString(cursor.getColumnIndex(CREATOR)));
 		sli.setShoppinglistId(cursor.getString(cursor.getColumnIndex(SHOPPINGLIST_ID)));
 		sli.setState(cursor.getInt(cursor.getColumnIndex(STATE)));
+		sli.setPreviousId(cursor.getString(cursor.getColumnIndex(PREVIOUS_ID)));
 		return sli;
 	}
 	
@@ -235,7 +241,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(OFFER_ID).append(",")
 		.append(CREATOR).append(",")
 		.append(SHOPPINGLIST_ID).append(",")
-		.append(STATE)
+		.append(STATE).append(",")
+		.append(PREVIOUS_ID)
 		.append(") VALUES (")
 		.append(escape(sli.getId())).append(",")
 		.append(escape(sli.getErn())).append(",")
@@ -246,8 +253,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(escape(sli.getOfferId())).append(",")
 		.append(escape(sli.getCreator())).append(",")
 		.append(escape(sli.getShoppinglistId())).append(",")
-		.append(escape(sli.getState())).append(")");
-		
+		.append(escape(sli.getState())).append(",")
+		.append(escape(sli.getPreviousId())).append(")");
 		return sb.toString();
 	}
 		
@@ -258,7 +265,12 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public int insertList(Shoppinglist list) {
 		String q = "INSERT INTO " + getTableList() + " " + listToValues(list) + ";";
-		return execQueryWithChangesCount(q);
+		
+		int i = execQueryWithChangesCount(q);
+		
+		Utils.logd(TAG, "c: " + String.valueOf(i) + ", q: " + q);
+		
+		return i;
 	}
 
 	/**
@@ -299,7 +311,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return A list of shoppinglists
 	 */
 	public ArrayList<Shoppinglist> getLists() {
-		String q = "SELECT * FROM " + getTableList() + ";";
+		String q = "SELECT * FROM " + getTableList() + " WHERE " + STATE + "!=" + ShoppinglistManager.STATE_DELETE + ";";
 		Cursor c = execQuery(q);
 		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
 		if (c.moveToFirst() ) {
@@ -368,7 +380,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		cursorClose(c);
 		return sli;
 	}
-
+	
 	/**
 	 * Get all Shoppinglistitems that match the given description.
 	 * @param description from which to get items
@@ -395,7 +407,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public ArrayList<ShoppinglistItem> getItems(Shoppinglist sl) {
 		String id = escape(sl.getId());
-		String q = "SELECT * FROM " + getTableItem() + " WHERE " + SHOPPINGLIST_ID + "=" + id + ";";
+		String q = "SELECT * FROM " + getTableItem() + " WHERE " + SHOPPINGLIST_ID + "=" + id + " AND " + STATE + "!=" + ShoppinglistManager.STATE_DELETE + ";";
 		Cursor c = execQuery(q);
 		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
 		if (c.moveToFirst() ) {
@@ -407,6 +419,33 @@ public class DbHelper extends SQLiteOpenHelper {
 		return list;
 	}
 
+	public ShoppinglistItem getFirstItem(String shoppinglistId) {
+		return getItemPrevious(shoppinglistId, ShoppinglistItem.FIRST_ITEM);
+	}
+	
+	public ShoppinglistItem getItemPrevious(String shoppinglistId, String previousId) {
+		String id = escape(shoppinglistId);
+		String prev = escape(previousId);
+		String q = "SELECT * FROM " + getTableItem() + " WHERE " + SHOPPINGLIST_ID + "=" + id + " AND " + PREVIOUS_ID + "=" + prev + ";";
+		Cursor c = execQuery(q);
+		ShoppinglistItem sli = c.moveToFirst() ? cursorToSli(c) : null;
+		cursorClose(c);
+		return sli;
+	}
+
+	public Shoppinglist getFirstList() {
+		return getListPrevious(Shoppinglist.FIRST_ITEM);
+	}
+	
+	public Shoppinglist getListPrevious(String previousId) {
+		String prev = escape(previousId);
+		String q = "SELECT * FROM " + getTableList() + " WHERE " + PREVIOUS_ID + "=" + prev + ";";
+		Cursor c = execQuery(q);
+		Shoppinglist sl = c.moveToFirst() ? cursorToSl(c) : null;
+		cursorClose(c);
+		return sl;
+	}
+	
 	/**
 	 * Deletes an item from db
 	 * @param id of the item to delete
@@ -472,7 +511,7 @@ public class DbHelper extends SQLiteOpenHelper {
 			// Clean up
 			cursorClose(c);
 		}
-		
+
 		return i;
 	}
 	
@@ -493,7 +532,7 @@ public class DbHelper extends SQLiteOpenHelper {
 				mCloseDb = true;
 			}
 		}
-		
+
 		return c;
 	}
 

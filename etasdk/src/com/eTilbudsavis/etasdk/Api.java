@@ -540,6 +540,7 @@ public class Api implements Serializable {
 	}
 	
 	private void runThread() {
+		
 		mEta.getThreadPool().execute(worker);
 	}
 	
@@ -817,7 +818,7 @@ public class Api implements Serializable {
 	 * @param error from the Api response
 	 */
 	private void runOnUiThread(final boolean isCache, final int statusCode,final Object data,final EtaError error) {
-
+		
 		mEta.getHandler().post(new Runnable() {
 
 			public void run() {
