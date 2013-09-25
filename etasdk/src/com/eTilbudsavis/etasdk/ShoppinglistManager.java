@@ -13,7 +13,6 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.widget.TextView;
 
 import com.eTilbudsavis.etasdk.Api.JsonArrayListener;
 import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
@@ -26,6 +25,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
+import com.eTilbudsavis.etasdk.Utils.Timer;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ShoppinglistManager {
@@ -52,13 +52,6 @@ public class ShoppinglistManager {
 	private List<QueueItem> mApiQueue = Collections.synchronizedList(new ArrayList<QueueItem>());
 	
 	private ArrayList<ShoppinglistManagerListener> mSubscribers = new ArrayList<ShoppinglistManager.ShoppinglistManagerListener>();
-	private OnCompletetionListener mOcl = new OnCompletetionListener() {
-		
-		public void onComplete(boolean isLocalChange, int statusCode, JSONObject item, EtaError error) {
-			// TODO Auto-generated method stub
-			
-		}
-	};
 	
 	private int syncCount = 0;
 	private Runnable mSyncLoop = new Runnable() {
@@ -80,7 +73,7 @@ public class ShoppinglistManager {
 		}
 		
 	};
-
+	
 	public ShoppinglistManager(Eta eta) {
 		mEta = eta;
 	}
@@ -147,6 +140,9 @@ public class ShoppinglistManager {
 										// Make sure to set a variable, so we can sync on resume if necessary
 										syncItems(sl);
 									}
+
+									sl.setState(STATE_SYNCED);
+									
 								} catch (JSONException e) {
 									e.printStackTrace();
 								}
@@ -154,6 +150,9 @@ public class ShoppinglistManager {
 								sl.setState(STATE_ERROR);
 								DbHelper.getInstance().editList(sl);
 							}
+							
+							DbHelper.getInstance().editList(sl);
+							
 						}
 					};
 					
@@ -323,7 +322,7 @@ public class ShoppinglistManager {
 						
 						public void run() {
 							if (mEta.isResumed())
-								call();
+								api.execute();
 						}
 					}, CONNECTION_TIMEOUR_RETRY);
 					
@@ -353,10 +352,6 @@ public class ShoppinglistManager {
 			if (working)
 				return;
 			
-			call();
-		}
-		
-		private void call() {
 			working = true;
 			api.execute();
 		}
@@ -696,52 +691,19 @@ public class ShoppinglistManager {
 	public ArrayList<ShoppinglistItem> getItemFromDescription(String description) {
 		return DbHelper.getInstance().getItemFromDescription(description);
 	}
-
+	
+	
 	/**
 	 * Get a shopping list item by it's ID
 	 * @param sl of the shopping list item
 	 * @return A list of shoppinglistitem.
 	 */
 	public ArrayList<ShoppinglistItem> getItems(Shoppinglist sl) {
+		Timer t = new Timer();
+		
 		ArrayList<ShoppinglistItem> list = DbHelper.getInstance().getItems(sl);
-		Utils.logd(TAG, "Get req: " + sl.getName());
-		if (sl.getName().equals(Eta.name)) {
-			Eta.count += 1;
-		}
-		sortItemsByPrev(list);
+//		t.print("getItems");
 		return list;
-	}
-
-	private void sortItemsByPrev(ArrayList<ShoppinglistItem> items) {
-		HashMap<String, ShoppinglistItem> prevs = new HashMap<String, ShoppinglistItem>(items.size());
-		ArrayList<ShoppinglistItem> i = (ArrayList<ShoppinglistItem>)items.clone();
-		
-		for (ShoppinglistItem sli : items) {
-			prevs.put(sli.getPreviousId(), sli);
-		}
-		items.clear();
-		
-		// Assume that there exists an item with PrevioudItem = null
-		// Start to find and add items to new list
-		String prevId = ShoppinglistItem.FIRST_ITEM;
-		TextView tv = null;
-		
-		while (!prevs.isEmpty()) {
-			ShoppinglistItem s = prevs.get(prevId);
-			if (s == null) {
-				Utils.logd(TAG, "Failde prevId: " + prevId + ", Size of items: " + String.valueOf(items.size()));
-				for (ShoppinglistItem sli : i) {
-					Utils.logd(TAG, sli.getTitle() + ", prev: " + sli.getPreviousId() + ", id: " + sli.getId());
-					prevs.put(sli.getPreviousId(), sli);
-				}
-				tv.setText("dsagd");
-			} else {
-				prevs.remove(prevId);
-				prevId = s.getId();
-				items.add(s);
-			}
-		}
-		
 	}
 	
 	/**
@@ -984,15 +946,18 @@ public class ShoppinglistManager {
 		Bundle b = new Bundle();
 		b.putString(Params.FILTER_DELETE, whatToDelete);
 		b.putString(Params.MODIFIED, Utils.formatDate(d));
-		
-		final List<String> deleted = new ArrayList<String>();
+		int i = 0;
 		
 		// Ticked = true, unticked = false, all = null.. all in a nice ternary
-		final Boolean state = whatToDelete == null ? null : whatToDelete.equals(Shoppinglist.EMPTY_TICKED) ? true : false;
+		final Boolean state = whatToDelete.equals(Shoppinglist.EMPTY_ALL) ? null : whatToDelete.equals(Shoppinglist.EMPTY_TICKED) ? true : false;
 
-        long row = 0;
-
+        
         ArrayList<ShoppinglistItem> list = getItems(sl);
+        final List<String> deleted = new ArrayList<String>();
+        int row = list.size();
+
+		String preGoodId = ShoppinglistItem.FIRST_ITEM;
+		
 		for (ShoppinglistItem sli : list) {
 			if (state == null) {
 				// Delete all items
@@ -1000,14 +965,19 @@ public class ShoppinglistManager {
 				sli.setModified(d);
 				DbHelper.getInstance().editItem(sli);
 				deleted.add(sli.getId());
-                row++;
 			} else if (sli.isTicked() == state) {
 				// Delete if ticked matches the requested state
 				sli.setState(STATE_DELETE);
 				sli.setModified(d);
 				DbHelper.getInstance().editItem(sli);
 				deleted.add(sli.getId());
-                row++;
+			} else {
+				if (!sli.getPreviousId().equals(preGoodId)) {
+					sli.setPreviousId(preGoodId);
+					DbHelper.getInstance().editItem(sli);
+				}
+				preGoodId = sli.getId();
+				row --;
 			}
 		}
 		
@@ -1123,6 +1093,8 @@ public class ShoppinglistManager {
 	};
 	
 	private void cleanupDB() {
+
+		Timer t = new Timer();
 		
 		List<Shoppinglist> sls = getLists();
 		int count = 0;
@@ -1157,6 +1129,10 @@ public class ShoppinglistManager {
 			cleanItems(sl);
 			
 		}
+
+		Utils.logd(TAG, "CleanDb to sync: " + String.valueOf(sls.size() - count));
+		
+		t.print("Cleanup");
 		
 		// If we didn't have anything local to commit, then sync everything 
 		if (sls.size() == count)
@@ -1170,7 +1146,7 @@ public class ShoppinglistManager {
 		int count = 0;
 
 		for (ShoppinglistItem sli : slis) {
-			
+
 			// If, the items not currently in the process of being sync'ed
 			// Then check state, and determine if further action is necessary
 			if (!mApiQueueItems.contains(sli.getId())) {
@@ -1197,6 +1173,8 @@ public class ShoppinglistManager {
 			}
 			
 		}
+
+		Utils.logd(TAG, "CleanItems to sync from " + sl.getName() + ": " + String.valueOf(slis.size() - count));
 		
 		// If we didn't have anything local to commit, then sync everything 
 		if (slis.size() == count)
@@ -1273,7 +1251,7 @@ public class ShoppinglistManager {
 		
 		if (isLoggedin) {
 			// Clean the database to even out any inconsistencies
-			cleanupDB();
+//			cleanupDB();
 
 			// Start syncLooper to perform standard sync
 			mSyncLoop.run();
@@ -1355,7 +1333,7 @@ public class ShoppinglistManager {
 	}
 
 	public List<String> idToList(String id) {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<String>(1);
 		list.add(id);
 		return list;
 	}
@@ -1402,6 +1380,10 @@ public class ShoppinglistManager {
          * @param editedIds the id's thats been edited
          */
 		public void onUpdate(boolean isLocalChange, boolean isList, List<String> addedIds, List<String> deletedIds, List<String> editedIds);
+	}
+	
+	public interface GetInterface {
+		public void done(ArrayList<ShoppinglistItem> data);
 	}
 	
 	public interface OnCompletetionListener {

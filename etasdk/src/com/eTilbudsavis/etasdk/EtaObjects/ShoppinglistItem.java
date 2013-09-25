@@ -50,6 +50,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		this();
 		setShoppinglistId(shoppinglist.getId());
 		setOffer(offer);
+		setDescription(offer.getHeading());
 	}
 
 	@SuppressWarnings("unchecked")
