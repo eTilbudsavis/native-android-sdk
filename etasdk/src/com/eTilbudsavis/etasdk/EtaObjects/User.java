@@ -8,37 +8,12 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Params;
 
 public class User extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	public static final String TAG = "User";
-	
-	/** Parameter for a user e-mail */
-	public static final String PARAM_EMAIL = Params.EMAIL;
-	
-	/** Parameter for a user password */
-	public static final String PARAM_PASSWORD = Params.PASSWORD;
-	
-	/** Parameter for a user birth year */
-	public static final String PARAM_BIRTH_YEAR = Params.BIRTH_YEAR;
-	
-	/** Parameter for a user gender */
-	public static final String PARAM_GENDER = Params.GENDER;
-	
-	/** Parameter for a user success redirect */
-	public static final String PARAM_SUCCESS_REDIRECT = Params.SUCCESS_REDIRECT;
-	
-	/** Parameter for a user error redirect */
-	public static final String PARAM_ERROR_REDIRECT = Params.ERROR_REDIRECT;
-	
-	/** Parameter for a user old password */
-	public static final String PARAM_OLD_PASSWORD = Params.OLD_PASSWORD;
-	
-	/** Parameter for a facebook token */
-	public static final String PARAM_FACEBOOK_TOKEN = Params.FACEBOOK_TOKEN;
 	
 	/** Endpoint for a single user resource */
 	public static final String ENDPOINT_ID = Endpoint.USER_ID;

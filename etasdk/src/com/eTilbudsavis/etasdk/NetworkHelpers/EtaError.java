@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.NetworkHelpers;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class EtaError extends EtaObject implements Serializable {

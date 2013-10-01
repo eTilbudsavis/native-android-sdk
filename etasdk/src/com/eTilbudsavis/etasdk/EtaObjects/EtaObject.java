@@ -13,9 +13,9 @@ public class EtaObject {
 	
 	public static final String TAG = "EtaBaseObject";
 	
-	/*
-	 * All possible JSON keys returned from server
-	 */
+	/** A set of possible JSON keys returned from server */
+	
+	public static final String S_MODIFIED = "modified";
 	protected static final String S_ID = "id";
 	protected static final String S_ERN = "ern";
 	protected static final String S_NAME = "name";
@@ -27,7 +27,6 @@ public class EtaObject {
 	protected static final String S_STORE_URL = "store_url";
 	protected static final String S_IMAGES = "images";
 	protected static final String S_BRANDING = "branding";
-	public static final String S_MODIFIED = "modified";
 	protected static final String S_DESCRIPTION = "description";
 	protected static final String S_URL_NAME = "url_name";
 	protected static final String S_WEBSITE = "website";
@@ -85,6 +84,9 @@ public class EtaObject {
 	protected static final String S_BIRTH_YEAR = "birth_year";
 	protected static final String S_EMAIL = "email";
 	protected static final String S_PERMISSIONS = "permissions";
+	protected static final String S_TOKEN = "token";
+	protected static final String S_EXPIRES = "expires";
+	protected static final String S_PROVIDER = "provider";
 	
 	public EtaObject() { }
 	

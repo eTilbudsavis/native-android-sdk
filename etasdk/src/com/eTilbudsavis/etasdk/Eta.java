@@ -14,24 +14,15 @@ package com.eTilbudsavis.etasdk;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
-import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.Network.EtaCache;
-import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Sort;
-import com.eTilbudsavis.etasdk.Utils.Timer;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 // Main object for interacting with the SDK.
@@ -48,15 +39,11 @@ public class Eta implements Serializable {
 	private String mApiKey;
 	private String mApiSecret;
 	private Settings mSettings;
-	private Session mSession;
+	private SessionManager mSessionManager;
 	private EtaLocation mLocation;
-	private EtaCache mCache;
 	private ShoppinglistManager mShoppinglistManager;
 	private static Handler mHandler = new Handler();
-	private ExecutorService mThreads = Executors.newFixedThreadPool(10);
 	private boolean mResumed = false;
-	
-	public Timer tp;
 	
 	private Eta() { }
 
@@ -86,10 +73,8 @@ public class Eta implements Serializable {
 		if (!isSet()) {
 			mSettings = new Settings(mContext);
 			mLocation = new EtaLocation();
-			mCache = new EtaCache();
 			mShoppinglistManager = new ShoppinglistManager(Eta.this);
-			mSession = new Session(Eta.this);
-			mSession.init();
+			mSessionManager = new SessionManager(Eta.this);
 		} else {
 			Utils.logd(TAG, "Eta already set. apiKey, apiSecret and context has been switched");
 		}
@@ -130,8 +115,8 @@ public class Eta implements Serializable {
 	 * Get the currently active session.
 	 * @return a session
 	 */
-	public Session getSession() {
-		return mSession;
+	public SessionManager getSessionManager() {
+		return mSessionManager;
 	}
 
 	/**
@@ -139,7 +124,7 @@ public class Eta implements Serializable {
 	 * @return a user
 	 */
 	public User getUser() {
-		return getSession().getUser();
+		return getSessionManager().getSession().getUser();
 	}
 	
 	/**
@@ -157,14 +142,6 @@ public class Eta implements Serializable {
 	public EtaLocation getLocation() {
 		return mLocation;
 	}
-
-	/**
-	 * Get the ETA SDK cache for various items and objects.
-	 * @return 
-	 */
-	public EtaCache getCache() {
-		return mCache;
-	}
 	
 	public ShoppinglistManager getShoppinglistManager() {
 		return mShoppinglistManager;
@@ -179,31 +156,13 @@ public class Eta implements Serializable {
 	}
 	
 	/**
-	 * Returns an ExecutorService (thread pool), used by the Api.<br>
-	 * Using a custom thread pool, rather than AsyncTast, is way better for
-	 * parallel actions, as the AsyncTash sometimes only has one thread (sequential execution).
-	 * @return ExecutorService used by Api class
-	 */
-	public ExecutorService getThreadPool() {
-		return mThreads;
-	}
-	
-	/**
-	 * Simply instantiates and returns a new Api object.
-	 * @return a new Api object
-	 */
-	public Api getApi() {
-		return new Api(this);
-	}
-	
-	/**
 	 * Clears ALL preferences that the SDK has created.<br><br>
 	 * 
 	 * This includes the session and user.
 	 * @return Returns true if the new values were successfully written to persistent storage.
 	 */
 	public boolean clearPreferences() {
-		mSession = new Session(Eta.this);
+		mSessionManager.invalidate();
 		return mSettings.clear();
 	}
 
@@ -250,8 +209,8 @@ public class Eta implements Serializable {
 	
 	private Bundle getApiParams(int offset, int limit, String orderBy) {
 		Bundle apiParams = new Bundle();
-		apiParams.putInt(Params.OFFSET, offset);
-		apiParams.putInt(Params.LIMIT, limit);
+		apiParams.putInt(Param.OFFSET, offset);
+		apiParams.putInt(Param.LIMIT, limit);
 		if (orderBy != null) 
 			apiParams.putString(Sort.ORDER_BY, orderBy);
 		return apiParams;
@@ -259,142 +218,8 @@ public class Eta implements Serializable {
 	
 	private Bundle getSearchApiParams(int offset, int limit, String orderBy, String query) {
 		Bundle apiParams = getApiParams(offset, limit, orderBy);
-		apiParams.putString(Params.QUERY, query);
+		apiParams.putString(Param.QUERY, query);
 		return apiParams;
-	}
-
-//  ****************
-//	*   CATALOGS   *
-//	****************
-	
-	public Api getCatalogList(Api.ListListener<Catalog> listener) {
-		return getCatalogList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-	
-	public Api getCatalogList(Api.ListListener<Catalog> listener, int offset, int limit) {
-		return getApi().get(Catalog.ENDPOINT_LIST, listener, getApiParams(offset, limit, null));
-	}
-
-	public Api getCatalogList(Api.ListListener<Catalog> listener, int offset, int limit, String orderBy) {
-		Api a = getApi().get(Catalog.ENDPOINT_LIST, listener).setOffset(offset).setLimit(limit);
-		if (orderBy != null) a.setOrderBy(orderBy);
-		return a;
-	}
-
-	public Api getCatalogFromId(Api.ItemListener<Catalog> listener, String catalogId) {
-		return getApi().get(Catalog.ENDPOINT_ID, listener).setId(catalogId);
-	}
-
-	public Api getCatalogFromIds(Api.ListListener<Catalog> listener, Set<String> catalogIds) {
-		return getApi().get(Catalog.ENDPOINT_LIST, listener).setCatalogIds(catalogIds);
-	}
-
-//  **************
-//	*   OFFER    *
-//	**************
-	
-	public Api getOfferList(Api.ListListener<Offer> listener) {
-		return getOfferList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public Api getOfferList(Api.ListListener<Offer> listener, int offset, int limit) {
-		return getApi().get(Offer.ENDPOINT_LIST, listener, getApiParams(offset, limit, null));
-	}
-
-	public Api getOfferList(Api.ListListener<Offer> listener, int offset, int limit, String orderBy) {
-		return getApi().get(Offer.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
-	}
-	
-	public Api getOfferFromId(Api.ItemListener<Offer> listener, String offerId) {
-		return getApi().get(Offer.ENDPOINT_ID, listener, new Bundle()).setId(offerId);
-	}
-	
-	public Api getOfferFromIds(Api.ListListener<Offer> listener, Set<String> offerIds) {
-		return getApi().get(Offer.ENDPOINT_LIST, listener, new Bundle()).setOfferIds(offerIds);
-	}
-	
-	public Api searchOffers(Api.ListListener<Offer> listener, String query) {
-		return searchOffers(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public Api searchOffers(Api.ListListener<Offer> listener, String query, int offset, int limit) {
-		return searchOffers(listener, query, offset, limit, null);
-	}
-
-	public Api searchOffers(Api.ListListener<Offer> listener, String query, int offset, int limit, String orderBy) {
-		return getApi().get(Offer.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
-	}
-
-//  **************
-//	*   DEALER   *
-//	**************
-	
-	public Api getDealerList(Api.ListListener<Dealer> listener) {
-		return getDealerList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public Api getDealerList(Api.ListListener<Dealer> listener, int offset, int limit) {
-		return getApi().get(Dealer.ENDPOINT_LIST, listener, getApiParams(offset, limit, null));
-	}
-
-	public Api getDealerList(Api.ListListener<Dealer> listener, int offset, int limit, String orderBy) {
-		return getApi().get(Dealer.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
-	}
-	
-	public Api getDealerFromId(Api.ItemListener<Dealer> listener, String dealerId) {
-		return getApi().get(Dealer.ENDPOINT_ID, listener, new Bundle()).setId(dealerId);
-	}
-	
-	public Api getDealerFromIds(Api.ListListener<Dealer> listener, Set<String> dealerIds) {
-		return getApi().get(Dealer.ENDPOINT_LIST, listener, new Bundle()).setDealerIds(dealerIds);
-	}
-
-	public Api searchDealers(Api.ListListener<Dealer> listener, String query) {
-		return searchDealers(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public Api searchDealers(Api.ListListener<Dealer> listener, String query, int offset, int limit) {
-		return searchDealers(listener, query, offset, limit, null);
-	}
-
-	public Api searchDealers(Api.ListListener<Dealer> listener, String query, int offset, int limit, String orderBy) {
-		return getApi().get(Dealer.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
-	}
-
-//  **************
-//	*   STORES   *
-//	**************
-	
-	public Api getStoreList(Api.ListListener<Store> listener) {
-		return getStoreList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public Api getStoreList(Api.ListListener<Store> listener, int offset, int limit) {
-		return getApi().get(Store.ENDPOINT_LIST, listener).setOffset(offset).setLimit(limit);
-	}
-
-	public Api getStoreList(Api.ListListener<Store> listener, int offset, int limit, String orderBy) {
-		return getApi().get(Store.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
-	}
-	
-	public Api getStoreFromId(Api.ItemListener<Store> listener, String storeId) {
-		return getApi().get(Store.ENDPOINT_ID, listener, new Bundle()).setId(storeId);
-	}
-	
-	public Api getStoreFromIds(Api.ListListener<Store> listener, Set<String> storeIds) {
-		return getApi().get(Store.ENDPOINT_LIST, listener, new Bundle()).setStoreIds(storeIds);
-	}
-
-	public Api searchStores(Api.ListListener<Store> listener, String query) {
-		return searchStores(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public Api searchStores(Api.ListListener<Store> listener, String query, int offset, int limit) {
-		return searchStores(listener, query, offset, limit, null);
-	}
-
-	public Api searchStores(Api.ListListener<Store> listener, String query, int offset, int limit, String orderBy) {
-		return getApi().get(Store.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
 	}
 
 }

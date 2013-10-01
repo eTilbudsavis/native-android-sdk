@@ -7,12 +7,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.graphics.Color;
+
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Sort;
-
-import android.graphics.Color;
 
 public class Dealer extends EtaErnObject implements Serializable {
 	
@@ -20,24 +18,6 @@ public class Dealer extends EtaErnObject implements Serializable {
 	
 	public static final String TAG = "Dealer";
 
-	/** Sort a list by name in ascending order. (smallest to largest) */
-	public static final String SORT_NAME = Sort.NAME;
-
-	/** Sort a list by name in descending order. (largest to smallest)*/
-	public static final String SORT_NAME_DESC = Sort.NAME_DESC;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Sort.CREATED;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
-
-	/** Parameter for getting a list of specific dealer id's */
-	public static final String FILTER_DEALER_IDS = Params.FILTER_DEALER_IDS;
-
-	/** String identifying the query parameter */
-	public static final String PARAM_QUERY = Params.QUERY;
-	
 	/** Endpoint for dealer list resource */
 	public static final String ENDPOINT_LIST = Endpoint.DEALER_LIST;
 

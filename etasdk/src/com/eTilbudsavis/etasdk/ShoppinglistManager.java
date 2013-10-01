@@ -17,12 +17,12 @@ import android.os.Bundle;
 import com.eTilbudsavis.etasdk.Api.JsonArrayListener;
 import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
 import com.eTilbudsavis.etasdk.Api.ListListener;
-import com.eTilbudsavis.etasdk.Session.SessionListener;
+import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaErnObject;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.EtaObjects.Session.SessionListener;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -813,8 +813,8 @@ public class ShoppinglistManager {
 		Date d = new Date();
 		
 		Bundle b = new Bundle();
-		b.putString(Params.FILTER_DELETE, whatToDelete);
-		b.putString(Params.MODIFIED, Utils.formatDate(d));
+		b.putString(Param.FILTER_DELETE, whatToDelete);
+		b.putString(Param.MODIFIED, Utils.formatDate(d));
 		
 		final List<String> deleted = new ArrayList<String>();
 		

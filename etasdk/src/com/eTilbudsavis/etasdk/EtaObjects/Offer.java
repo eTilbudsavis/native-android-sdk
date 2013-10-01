@@ -1,60 +1,22 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Sort;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
+import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Offer extends EtaErnObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Offer";
-	
-	/** Sort a list by popularity in ascending order. (smallest to largest) */
-	public static final String SORT_POPULARITY = Sort.POPULARITY;
-
-	/** Sort a list by popularity in descending order. (largest to smallest)*/
-	public static final String SORT_POPULARITY_DESC = Sort.POPULARITY_DESC;
-
-	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = Sort.DISTANCE;
-
-	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = Sort.DISTANCE_DESC;
-
-	/** Sort a list by page (in catalog) in ascending order. (smallest to largest) */
-	public static final String SORT_PAGE = Sort.PAGE;
-
-	/** Sort a list by page (in catalog) in descending order. (largest to smallest)*/
-	public static final String SORT_PAGE_DESC = Sort.PAGE_DESC;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Sort.CREATED;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
-
-	/** Parameter for getting a list of specific catalog id's */
-	public static final String FILTER_CATALOG_IDS = Params.FILTER_CATALOG_IDS;
-
-	/** Parameter for posting a list of store id's to publish the catalog in */
-	public static final String FILTER_STORE_IDS = Params.FILTER_STORE_IDS;
-
-	/** Parameter for posting a list of store id's to publish the catalog in */
-	public static final String FILTER_DEALER_IDS = Params.FILTER_DEALER_IDS;
-
-	/** String identifying the query parameter */
-	public static final String PARAM_QUERY = Params.QUERY;
 	
 	/** Endpoint for offer list resource */
 	public static final String ENDPOINT_LIST = Endpoint.OFFER_LIST;

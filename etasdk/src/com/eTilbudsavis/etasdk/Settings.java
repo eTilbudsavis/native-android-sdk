@@ -1,5 +1,8 @@
 package com.eTilbudsavis.etasdk;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,6 +40,7 @@ public class Settings {
 	private static SharedPreferences mPrefs;
 	private static SharedPreferences.Editor mEditor;
 	private static Context mContext;
+	private static Map<String, String> mPageflipHtml = new HashMap<String, String>();
 	
 	public Settings(Context context) {
 		mContext = context;
@@ -95,6 +99,14 @@ public class Settings {
 
 	public boolean setShoppinglistManagerCurrent(String id, boolean isLoggedin) {
 		return mEditor.putString(isLoggedin ? SLM_CURRENT_ONLINE : SLM_CURRENT_OFFLINE , id).commit();
+	}
+	
+	public void setPageflipHtml(String uuid, String html) {
+		mPageflipHtml.put(uuid, html);
+	}
+	
+	public String getPageflipHtml(String uuid) {
+		return mPageflipHtml.get(uuid);
 	}
 	
 	public SharedPreferences getPrefs() {

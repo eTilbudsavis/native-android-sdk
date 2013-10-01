@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.Network;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,7 +20,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.Timer;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class EtaResponse {
@@ -43,9 +42,6 @@ public class EtaResponse {
 		String response = null;
 
 		try {
-			
-			Timer tp = new Timer();
-			tp.setSizeMin(1000);
 			
 			response = EntityUtils.toString(httpResponse.getEntity(), HTTP.UTF_8);
 //			response = getString(httpResponse.getEntity(), HTTP.UTF_8);

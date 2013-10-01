@@ -1,81 +1,22 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Sort;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
+import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Catalog extends EtaErnObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Catalog";
-	
-	/** Sort a list by popularity in ascending order. (smallest to largest) */
-	public static final String SORT_POPULARITY = Sort.POPULARITY;
-
-	/** Sort a list by popularity in descending order. (largest to smallest)*/
-	public static final String SORT_POPULARITY_DESC = Sort.POPULARITY_DESC;
-
-	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = Sort.DISTANCE;
-
-	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = Sort.DISTANCE_DESC;
-
-	/** Sort a list by name in ascending order. (smallest to largest) */
-	public static final String SORT_NAME = Sort.NAME;
-
-	/** Sort a list by name in descending order. (largest to smallest)*/
-	public static final String SORT_NAME_DESC = Sort.NAME_DESC;
-
-	/** Sort a list by published in ascending order. (smallest to largest) */
-	public static final String SORT_PUBLISHED = Sort.PUBLISHED;
-
-	/** Sort a list by published in descending order. (largest to smallest)*/
-	public static final String SORT_PUBLISHED_DESC = Sort.PUBLISHED_DESC;
-
-	/** Sort a list by expired in ascending order. (smallest to largest) */
-	public static final String SORT_EXPIRED = Sort.EXPIRED;
-
-	/** Sort a list by expired in descending order. (largest to smallest)*/
-	public static final String SORT_EXPIRED_DESC = Sort.EXPIRED_DESC;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Sort.CREATED;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
-
-	/** Parameter for getting a list of specific catalog id's */
-	public static final String FILTER_CATALOG_IDS = Params.FILTER_CATALOG_IDS;
-
-	/** Parameter for posting a list of store id's to publish the catalog in */
-	public static final String FILTER_STORE_IDS = Params.FILTER_STORE_IDS;
-
-	/** Parameter for posting a list of area id's to publish the catalog in */
-	public static final String FILTER_AREA_IDS = Params.FILTER_AREA_IDS;
-
-	/** Parameter for the location of the PDF to post */
-	public static final String PARAM_PDF = Params.PDF;
-
-	/** String identifying the offset parameter for all list calls to the API */
-	public static final String PARAM_OFFSET = Params.OFFSET;
-
-	/** String identifying the offset parameter for all list calls to the API */
-	public static final String PARAM_LIMIT = Params.LIMIT;
-
-	/** String identifying the query parameter */
-	public static final String PARAM_QUERY = Params.QUERY;
 	
 	/** Endpoint for catalog list resource */
 	public static final String ENDPOINT_LIST = Endpoint.CATALOG_LIST;

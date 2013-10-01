@@ -9,8 +9,6 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Sort;
 
 
 public class Store extends EtaErnObject implements Serializable {
@@ -19,21 +17,6 @@ public class Store extends EtaErnObject implements Serializable {
 
 	public static final String TAG = "Store";
 	
-	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = Sort.DISTANCE;
-
-	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = Sort.DISTANCE_DESC;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Sort.CREATED;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
-
-	/** Parameter for getting a list of specific store id's */
-	public static final String FILTER_STORE_IDS = Params.FILTER_STORE_IDS;
-
 	/** Endpoint for store list resource */
 	public static final String ENDPOINT_LIST = Endpoint.STORE_LIST;
 

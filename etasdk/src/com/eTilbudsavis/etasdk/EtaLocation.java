@@ -4,18 +4,18 @@
  */
 package com.eTilbudsavis.etasdk;
 
+import java.util.ArrayList;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
-import com.eTilbudsavis.etasdk.Utils.Params;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 
 public class EtaLocation extends Location {
 
@@ -23,30 +23,6 @@ public class EtaLocation extends Location {
 	
 	private static final String ETA_PROVIDER	= "etasdk";
 	
-	/** API v2 parameter name for sensor. */
-	public static final String SENSOR = Params.SENSOR;
-	
-	/** API v2 parameter name for latitude. */
-	public static final String LATITUDE = Params.LATITUDE;
-	
-	/** API v2 parameter name for longitude. */
-	public static final String LONGITUDE = Params.LONGITUDE;
-	
-	/** API v2 parameter name for radius. */
-	public static final String RADIUS = Params.RADIUS;
-	
-	/** API v2 parameter name for bounds east. */
-	public static final String BOUND_EAST = Params.BOUND_EAST;
-	
-	/** API v2 parameter name for bounds north. */
-	public static final String BOUND_NORTH = Params.BOUND_NORTH;
-	
-	/** API v2 parameter name for bounds south. */
-	public static final String BOUND_SOUTH = Params.BOUND_SOUTH;
-	
-	/** API v2 parameter name for bounds west. */
-	public static final String BOUND_WEST = Params.BOUND_WEST;
-
 	private static final int RADIUS_MIN = 0;
 	private static final int RADIUS_MAX = 700000;
 	private static final double BOUND_DEFAULT = 0.0;
@@ -166,10 +142,10 @@ public class EtaLocation extends Location {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(LATITUDE, getLatitude());
-			o.put(LONGITUDE, getLongitude());
-			o.put(SENSOR, isSensor());
-			o.put(RADIUS, getRadius());
+			o.put(Request.Param.LATITUDE, getLatitude());
+			o.put(Request.Param.LONGITUDE, getLongitude());
+			o.put(Request.Param.SENSOR, isSensor());
+			o.put(Request.Param.RADIUS, getRadius());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -265,17 +241,17 @@ public class EtaLocation extends Location {
 		
 		Bundle b = new Bundle();
 
-		b.putDouble(LATITUDE, getLatitude());
-		b.putDouble(LONGITUDE, getLongitude());
-		b.putBoolean(SENSOR, isSensor());
-		b.putInt(RADIUS, getRadius());
+		b.putDouble(Request.Param.LATITUDE, getLatitude());
+		b.putDouble(Request.Param.LONGITUDE, getLongitude());
+		b.putBoolean(Request.Param.SENSOR, isSensor());
+		b.putInt(Request.Param.RADIUS, getRadius());
 
 		// Determine whether to include bounds.
 		if (isBoundsSet()) {
-			b.putDouble(BOUND_EAST, getBoundEast());
-			b.putDouble(BOUND_NORTH, getBoundNorth());
-			b.putDouble(BOUND_SOUTH, getBoundSouth());
-			b.putDouble(BOUND_WEST, getBoundWest());
+			b.putDouble(Request.Param.BOUND_EAST, getBoundEast());
+			b.putDouble(Request.Param.BOUND_NORTH, getBoundNorth());
+			b.putDouble(Request.Param.BOUND_SOUTH, getBoundSouth());
+			b.putDouble(Request.Param.BOUND_WEST, getBoundWest());
 		}
 		return b;
 //		List<NameValuePair> query = new ArrayList<NameValuePair>();

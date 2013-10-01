@@ -19,16 +19,15 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.webkit.WebSettings.RenderPriority;
 
-import com.eTilbudsavis.etasdk.Api.StringListener;
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
+import com.eTilbudsavis.etasdk.EtaObjects.Session;
+import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
+import com.eTilbudsavis.etasdk.NetworkInterface.Cache.CacheItem;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -167,7 +166,7 @@ public final class Pageflip extends WebView {
 				
 			} else if (request[0].equals(ETA_SESSION)) {
 				
-				mEta.getSession().set(o);
+				mEta.getSessionManager().setSession(Session.fromJSON(o));
 				
 			} else if (request[0].equals(ETA_PROXY)) {
 				
@@ -271,9 +270,13 @@ public final class Pageflip extends WebView {
 //		if (Eta.DEBUG) setWebChromeClient(wcc);
 		
 		// Check if it's necessary to update the HTML (it's time consuming to download HTML).
-		String cache = mEta.getCache().getHtml(mUuid);
+		String html = mEta.getSettings().getPageflipHtml(mUuid);
 		
-		if (cache == null ) {
+		if (html != null ) {
+			
+			this.loadDataWithBaseURL(null, html, "text/html", "utf-8", null);
+			
+		} else {
 			
 			StringListener cb = new StringListener() {
 				
@@ -286,7 +289,7 @@ public final class Pageflip extends WebView {
 					
 					if (Utils.isSuccess(statusCode)) {
 						
-						mEta.getCache().putHtml(mUuid, data, statusCode);
+						mEta.getSettings().setPageflipHtml(mUuid, data);
 						loadDataWithBaseURL(null, data, "text/html", "utf-8", null);
 					} else {
 						loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
@@ -295,8 +298,6 @@ public final class Pageflip extends WebView {
 			};
 			mEta.getApi().get(Endpoint.getPageflipProxy(mUuid), cb).execute();
 			
-		} else {
-			this.loadDataWithBaseURL(null, cache, "text/html", "utf-8", null);
 		}
 		
 	}
@@ -313,7 +314,7 @@ public final class Pageflip extends WebView {
 		try {
 			o.put(API_KEY, mEta.getApiKey());
 			o.put(API_SECRET, mEta.getApiSecret());
-			o.put(SESSION, mEta.getSession().toJSON());
+			o.put(SESSION, mEta.getSessionManager().getSession().toJSON());
 			o.put(LOCALE, Locale.getDefault().toString());
 			if (mEta.getLocation().isSet()) {
 				JSONObject loc = new JSONObject();

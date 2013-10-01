@@ -25,7 +25,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
+import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 
 public final class Utils {
 	
@@ -52,8 +52,8 @@ public final class Utils {
 
 	/** The date format as returned from the server */
 	public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZZ";
-	
-//	public static SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
+
+	private static final SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
 	
 	/**
 	 * Create universally unique identifier.
@@ -63,7 +63,7 @@ public final class Utils {
 	public static String createUUID() {
 		return UUID.randomUUID().toString();
 	}
-
+	
 	/**
 	 * A proxy for Log.d API that silences log messages in release.
 	 *
@@ -76,24 +76,19 @@ public final class Utils {
 			Log.d(tag, msg);
 	}	
 
-	public static void logd(String tag, String name, boolean isCache, int statusCode, Object data, EtaError error) {
+	public static void logd(String tag, String name, boolean isCache, Object data, EtaError error) {
 		if (!Eta.DEBUG)
 			return;
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append(name).append(": ")
 		.append("cache: ").append(isCache)
-		.append(", status: ").append(statusCode)
 		.append(", data: ");
-		if (isSuccess(statusCode)) {
-			if (data == null) {
-				sb.append("null");
+		if (data != null) {
+			if (data instanceof List<?>) {
+				sb.append("list size ").append(((List<?>) data).size());
 			} else {
-				if (data instanceof List<?>) {
-					sb.append("List Size: ").append(((List<?>) data).size());
-				} else {
-					sb.append(data.toString());
-				}
+				sb.append(data.toString());
 			}
 		} else {
 			sb.append(error.toString());
@@ -282,17 +277,21 @@ public final class Utils {
 	}
 	
 	public static Date parseDate(String date) {
-		Date d = null;
-		try {
-			d = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(date);
-		} catch (ParseException e) {
-			e.printStackTrace();
+		synchronized (sdf) {
+			Date d = null;
+			try {
+				d = sdf.parse(date);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			return d;
 		}
-		return d;
 	}
 
 	public static String formatDate(Date date) {
-		return new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(date);
+		synchronized (sdf) {
+			return sdf.format(date);
+		}
 	}
 	
 }
