@@ -22,6 +22,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
@@ -52,7 +53,7 @@ public class Eta implements Serializable {
 	private EtaLocation mLocation;
 	private EtaCache mCache;
 	private ShoppinglistManager mShoppinglistManager;
-	private static Handler mHandler = new Handler();
+	private static Handler mHandler;
 	private ExecutorService mThreads = Executors.newFixedThreadPool(10);
 	private boolean mResumed = false;
 	
@@ -83,7 +84,7 @@ public class Eta implements Serializable {
 		
 		if (!isSet()) {
 			mSettings = new Settings(mContext);
-			mLocation = new EtaLocation();
+			mLocation = new EtaLocation(Eta.this);
 			mCache = new EtaCache();
 			mShoppinglistManager = new ShoppinglistManager(Eta.this);
 			mSession = new Session(Eta.this);
@@ -173,6 +174,9 @@ public class Eta implements Serializable {
 	 * @return a handler
 	 */
 	public Handler getHandler() {
+		if (mHandler == null) {
+			mHandler = new Handler(Looper.getMainLooper());
+		}
 		return mHandler;
 	}
 	

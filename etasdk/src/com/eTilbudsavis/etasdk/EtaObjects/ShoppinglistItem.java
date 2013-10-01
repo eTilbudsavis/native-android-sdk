@@ -13,6 +13,7 @@ import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ShoppinglistManager;
+import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist.State;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ShoppinglistItem extends EtaErnObject implements Comparable<ShoppinglistItem>, Serializable {
@@ -21,6 +22,15 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 
 	public static final String TAG = "ShoppinglistItem";
 
+	/** States a shopppingItem list can be in */
+	public interface State {
+		int TO_SYNC	= 0;
+		int SYNCING	= 1;
+		int SYNCED	= 2;
+		int DELETE	= 4;
+		int ERROR	= 5;
+	}
+	
 	public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
 	
 	private boolean mTick = false;
@@ -29,7 +39,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	private String mDescription = null;
 	private String mCreator;
 	private Date mModified = new Date();
-	private int mState = ShoppinglistManager.STATE_TO_SYNC;
+	private int mState = State.TO_SYNC;
 	private Offer mOffer = null;
 	private String mShoppinglistId;
 	private String mPrevId;
@@ -139,7 +149,13 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 
 	public ShoppinglistItem setOffer(Offer offer) {
 		mOffer = offer;
-		setOfferId(mOffer == null ? null : offer.getId());
+		if (mOffer != null) {
+			setOfferId(offer.getId());
+			setDescription(mOffer.getHeading());
+		} else {
+			setOfferId(null);
+		}
+		
 		return this;
 	}
 
@@ -193,8 +209,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	}
 	
 	public ShoppinglistItem setState(int state) {
-		if (ShoppinglistManager.STATE_TO_SYNC <= state ||
-			state <= ShoppinglistManager.STATE_ERROR)
+		if (State.TO_SYNC <= state && state <= State.ERROR)
 			mState = state;
 		return this;
 	}

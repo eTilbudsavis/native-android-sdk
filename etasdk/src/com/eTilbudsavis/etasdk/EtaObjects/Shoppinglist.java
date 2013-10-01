@@ -20,6 +20,15 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 	
 	public static final String TAG = "Shoppinglist";
 
+	/** States a shoppping list can be in */
+	public interface State {
+		int TO_SYNC	= 0;
+		int SYNCING	= 1;
+		int SYNCED	= 2;
+		int DELETE	= 4;
+		int ERROR	= 5;
+	}
+	
 	public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
 	
 	public static final String ACCESS_PRIVATE = "private";
@@ -35,7 +44,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 	private String mAccess = ACCESS_PRIVATE;
 	private Date mModified = new Date();
 	private Share mOwner = new Share();
-	private int mState = ShoppinglistManager.STATE_TO_SYNC;
+	private int mState = State.TO_SYNC;
 	private String mPrevId;
 	
 	private Shoppinglist() {
@@ -143,7 +152,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 	}
 	
 	public Shoppinglist setState(int state) {
-		if (ShoppinglistManager.STATE_TO_SYNC <= state && state <= ShoppinglistManager.STATE_ERROR)
+		if (State.TO_SYNC <= state && state <= State.ERROR)
 			mState = state;
 		return this;
 	}

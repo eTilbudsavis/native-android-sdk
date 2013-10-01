@@ -11,6 +11,7 @@ import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Utils.Params;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,6 +55,9 @@ public class EtaLocation extends Location {
 	// Location.
 	private static int mRadius = RADIUS_MAX;
 	private static boolean mSensor = false;
+	private static double mLatitude = 0.0;
+	private static double mLongitude = 0.0;
+	private static long mTime = 0;
 	private static String mAddress = "";
 	private static double mBoundNorth = BOUND_DEFAULT;
 	private static double mBoundEast = BOUND_DEFAULT;
@@ -63,9 +67,9 @@ public class EtaLocation extends Location {
 	private static boolean mPushNotifications = false;
 	private static ArrayList<LocationListener> mSubscribers = new ArrayList<LocationListener>();
 
-	public EtaLocation() {
+	public EtaLocation(Eta eta) {
 		super(ETA_PROVIDER);
-		mEta = Eta.getInstance();
+		mEta = eta;
 		restoreState();
 	}
 
@@ -74,6 +78,7 @@ public class EtaLocation extends Location {
 		super.set(l);
 		mSensor = (getProvider().equals(LocationManager.GPS_PROVIDER) || getProvider().equals(LocationManager.NETWORK_PROVIDER) );
 		mPushNotifications = true;
+		save();
 	}
 	
 	/**
@@ -101,6 +106,7 @@ public class EtaLocation extends Location {
 	 * @return this Object, for easy chaining of set methods.
 	 */
 	public EtaLocation setRadius(int radius) {
+
 		mRadius =  radius < RADIUS_MIN ? RADIUS_MIN : ( radius > RADIUS_MAX ? RADIUS_MAX : radius );
 		setTime(System.currentTimeMillis());
 		return this;
@@ -313,14 +319,15 @@ public class EtaLocation extends Location {
 	}
 	
 	public boolean restoreState() {
+		
 		SharedPreferences prefs = mEta.getSettings().getPrefs();
 		if (prefs.contains(Settings.LOC_SENSOR) && prefs.contains(Settings.LOC_RADIUS) && prefs.contains(Settings.LOC_LATITUDE) && 
 				prefs.contains(Settings.LOC_LONGITUDE) && prefs.contains(Settings.LOC_ADDRESS)  && prefs.contains(Settings.LOC_TIME) ) {
 			
 			mSensor = prefs.getBoolean(Settings.LOC_SENSOR, false);
 			mRadius = prefs.getInt(Settings.LOC_RADIUS, Integer.MAX_VALUE);
-			setLatitude(prefs.getFloat(Settings.LOC_LATITUDE, 0f));
-			setLongitude(prefs.getFloat(Settings.LOC_LONGITUDE, 0f));
+			setLatitude(prefs.getFloat(Settings.LOC_LATITUDE, 0.111f));
+			setLongitude(prefs.getFloat(Settings.LOC_LONGITUDE, 0.111f));
 			mBoundEast = prefs.getFloat(Settings.LOC_BOUND_EAST, 0f);
 			mBoundWest = prefs.getFloat(Settings.LOC_BOUND_WEST, 0f);
 			mBoundNorth = prefs.getFloat(Settings.LOC_BOUND_NORTH, 0f);
