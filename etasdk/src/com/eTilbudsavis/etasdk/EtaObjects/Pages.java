@@ -7,7 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Pages extends EtaObject implements Serializable {
 	
@@ -27,8 +27,7 @@ public class Pages extends EtaObject implements Serializable {
 		try {
 			p = fromJSON(p, new JSONObject(pages));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return p;
 	}
@@ -57,8 +56,7 @@ public class Pages extends EtaObject implements Serializable {
 				p.getZoom().add(jArray.getString(i));
 			}
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return p;
 	}
@@ -86,8 +84,7 @@ public class Pages extends EtaObject implements Serializable {
 			o.put(S_VIEW, aView);
 			o.put(S_ZOOM, aZoom);
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return o;
 	}

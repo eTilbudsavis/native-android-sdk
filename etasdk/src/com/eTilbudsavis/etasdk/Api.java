@@ -48,19 +48,16 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.os.Bundle;
-import android.os.Looper;
 import android.text.TextUtils;
 
-import com.eTilbudsavis.etasdk.Api.RequestType;
-import com.eTilbudsavis.etasdk.Network.EtaResponse;
 import com.eTilbudsavis.etasdk.Session.SessionListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaErnObject;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
+import com.eTilbudsavis.etasdk.Network.EtaResponse;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
-import com.eTilbudsavis.etasdk.Utils.Timer;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Api implements Serializable {

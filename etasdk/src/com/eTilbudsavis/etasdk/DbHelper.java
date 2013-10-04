@@ -338,6 +338,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		}
 		cursorClose(c);
 //		sortListssByPrev(list);
+//		Utils.logd(TAG, "lists: " + String.valueOf(list.size()));
 		return list;
 	}
 
@@ -673,6 +674,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		
 		// If we are resuming the activity
 		if (mDatabase == null) openDB();
+		
+		query = query.replaceAll(";", "");
 		
 		Cursor c;
 		

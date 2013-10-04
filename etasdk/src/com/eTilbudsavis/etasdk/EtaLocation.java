@@ -4,6 +4,11 @@
  */
 package com.eTilbudsavis.etasdk;
 
+import java.util.ArrayList;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
@@ -11,12 +16,6 @@ import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Utils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 public class EtaLocation extends Location {
 
@@ -55,9 +54,6 @@ public class EtaLocation extends Location {
 	// Location.
 	private static int mRadius = RADIUS_MAX;
 	private static boolean mSensor = false;
-	private static double mLatitude = 0.0;
-	private static double mLongitude = 0.0;
-	private static long mTime = 0;
 	private static String mAddress = "";
 	private static double mBoundNorth = BOUND_DEFAULT;
 	private static double mBoundEast = BOUND_DEFAULT;

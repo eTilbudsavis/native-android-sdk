@@ -44,7 +44,8 @@ public class Timer {
 		int length = mResponse != null ? mResponse.length() : 0;
 		
 		if (mMinTime <= mTime && mTime <= mMaxTime && mMinSize <= length && length <= mMaxSize) {
-			Utils.logd("TimePrinter", mThreadName + ": " + String.valueOf(mTime) + "ms, " + name + " (size: " + String.valueOf(length) + ")");
+			
+			Utils.logd("TimePrinter", name + ": " + String.valueOf(mTime) + "ms [Thread: " + mThreadName + "]");
 		}
 	}
 

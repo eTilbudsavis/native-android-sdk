@@ -32,7 +32,6 @@ import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Network.EtaCache;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
-import com.eTilbudsavis.etasdk.Utils.Timer;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 // Main object for interacting with the SDK.
@@ -77,7 +76,7 @@ public class Eta implements Serializable {
 	}
 	
 	public void set(String apiKey, String apiSecret, Context context) {
-
+		
 		mContext = context;
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;

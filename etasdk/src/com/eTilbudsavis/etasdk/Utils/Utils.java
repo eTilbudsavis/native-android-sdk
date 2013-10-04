@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -74,6 +72,11 @@ public final class Utils {
 	public static void logd(String tag, String msg) {
 		if (Eta.DEBUG)
 			Log.d(tag, msg);
+	}	
+
+	public static void logd(String tag, Exception e) {
+		if (Eta.DEBUG)
+			e.printStackTrace();
 	}	
 
 	public static void logd(String tag, String name, boolean isCache, int statusCode, Object data, EtaError error) {

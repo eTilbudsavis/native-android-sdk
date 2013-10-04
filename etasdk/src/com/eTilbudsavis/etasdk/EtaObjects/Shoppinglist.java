@@ -10,8 +10,6 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.ShoppinglistManager;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Shoppinglist extends EtaErnObject implements Serializable {
@@ -82,8 +80,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 			}
 
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return list;
 	}
@@ -105,8 +102,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 			sl.setPreviousId(getJsonString(shoppinglist, S_PREVIOUS_ID));
 			
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return sl;
 	}

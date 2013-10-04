@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Country extends EtaObject implements Serializable {
 	
@@ -36,8 +36,7 @@ public class Country extends EtaObject implements Serializable {
 			c.setCountry(getJsonString(country, S_COUNTRY));
 			c.setLanguage(getJsonString(country, S_LANGUAGE));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return c;
 	}
@@ -54,8 +53,7 @@ public class Country extends EtaObject implements Serializable {
 			o.put(EtaObject.S_COUNTRY, c.getCountry());
 			o.put(EtaObject.S_LANGUAGE, c.getLanguage());
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return o;
 	}

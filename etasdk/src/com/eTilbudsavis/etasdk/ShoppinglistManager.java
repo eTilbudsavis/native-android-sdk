@@ -30,7 +30,6 @@ import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Timer;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ShoppinglistManager {
@@ -45,7 +44,6 @@ public class ShoppinglistManager {
 	}
 	
 	private static final int CONNECTION_TIMEOUR_RETRY = 10000;
-	private static final int QUERY_DISPATCHER_DEFAULT_SIZE = 1;
 	
 	/** The global eta object */
 	private Eta mEta;
@@ -54,7 +52,6 @@ public class ShoppinglistManager {
 	@SuppressWarnings("rawtypes")
 	private final BlockingQueue<DbQuery> mQueue = new PriorityBlockingQueue<DbQuery>();
 	private QueryDispatcher mQueryDispatcher;
-//	private QueryDispatcher[] mQueryDispatchers = new QueryDispatcher[QUERY_DISPATCHER_DEFAULT_SIZE];
 	private AtomicInteger mSequence = new AtomicInteger();
 	
 	private int mSyncSpeed = SyncSpeed.MEDIUM;
@@ -76,18 +73,11 @@ public class ShoppinglistManager {
 		mEta = eta;
 		mQueryDispatcher = new QueryDispatcher(mQueue);
 		mQueryDispatcher.start();
-//		for (QueryDispatcher q : mQueryDispatchers) {
-//			q = new QueryDispatcher(mQueue);
-//			q.start();
-//		}
 	}
 
 	private void addQueue(Runnable r) {
 		RunnableQuery q = new RunnableQuery(r);
 		int i = mSequence.incrementAndGet();
-//		if (i%5==0) {
-//			Utils.logd(TAG, "Seq: " + String.valueOf(i));
-//		}
 		q.setSequence(i);
 		mQueue.add(q);
 	}
@@ -208,7 +198,7 @@ public class ShoppinglistManager {
 			for (Shoppinglist sl : getLists()) {
 				syncItems(sl);
 			}
-			notifyListsChange(true, added, deleted, edited);
+			notifyListSubscribers(true, added, deleted, edited);
 			
 		}
 		
@@ -397,7 +387,7 @@ public class ShoppinglistManager {
 		
 		// If no changes has been registeres, ship the rest
 		if (!added.isEmpty() || !deleted.isEmpty() || !edited.isEmpty()) {
-			notifyItemsChange(true, added, deleted, edited);
+			notifyItemSubscribers(true, added, deleted, edited);
 
 		}
 		
@@ -423,7 +413,7 @@ public class ShoppinglistManager {
 				
 				// If connection timeout
 				if (statusCode == -1) {
-
+					
 					mEta.getHandler().postDelayed(new Runnable() {
 						
 						public void run() {
@@ -498,7 +488,7 @@ public class ShoppinglistManager {
 	public ShoppinglistManager setCurrentList(Shoppinglist sl) {
 		String c = sl.getId();
 		mEta.getSettings().setShoppinglistManagerCurrent(c, mEta.getUser().isLoggedIn());
-		notifyListsChange(false, null, null, null);
+		notifyListSubscribers(false, null, null, null);
 		return this;
 	}
 	
@@ -576,12 +566,15 @@ public class ShoppinglistManager {
 									Shoppinglist s = sl;
 									if (Utils.isSuccess(statusCode)) {
 										s = Shoppinglist.fromJSON(data);
-										s.setState(Shoppinglist.State.SYNCED);
-										s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
-					                    DbHelper.getInstance().editList(s);
-					                    syncItems(s);
-										notifyListListener(l, false, 200, sl, null);
-										notifyListsChange(false, idToList(sl), null, null);
+										Shoppinglist dbList = DbHelper.getInstance().getList(s.getId());
+										if (dbList != null && !s.getModified().before(dbList.getModified()) ) {
+											s.setState(Shoppinglist.State.SYNCED);
+											s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
+						                    DbHelper.getInstance().editList(s);
+						                    syncItems(s);
+											notifyListListener(l, false, 200, sl, null);
+											notifyListSubscribers(false, idToList(sl), null, null);
+										}
 									} else {
 										revertList(s, l);
 									}
@@ -601,7 +594,7 @@ public class ShoppinglistManager {
 				
 				if (count == 1) {
 					notifyListListener(l, false, 200, sl, null);
-					notifyListsChange(false, idToList(sl), null, null);
+					notifyListSubscribers(false, idToList(sl), null, null);
 				} else {
 					revertList(sl, l);
 				}
@@ -667,12 +660,16 @@ public class ShoppinglistManager {
 							Shoppinglist s = sl;
 							if (Utils.isSuccess(statusCode)) {
 								s = Shoppinglist.fromJSON(data);
-								s.setState(Shoppinglist.State.SYNCED);
-								// If server havent delivered an prev_id, then use old id
-								s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
-								DbHelper.getInstance().editList(s);
-								notifyListListener(l, false, 200, sl, null);
-								notifyListsChange(false, null, null, idToList(sl));
+								Shoppinglist dbList = DbHelper.getInstance().getList(s.getId());
+								if (dbList != null && !s.getModified().before(dbList.getModified()) ) {
+									s.setState(Shoppinglist.State.SYNCED);
+									// If server havent delivered an prev_id, then use old id
+									s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
+									DbHelper.getInstance().editList(s);
+									notifyListListener(l, false, 200, sl, null);
+									notifyListSubscribers(false, null, null, idToList(sl));
+								}
+
 							} else {
 								revertList(sl, l);
 							}
@@ -691,7 +688,7 @@ public class ShoppinglistManager {
 				// Do local callback stuff
 				if (row == 1) {
 					notifyListListener(l, false, 200, sl, null);
-					notifyListsChange(false, null, null, idToList(sl));
+					notifyListSubscribers(false, null, null, idToList(sl));
 				} else {
 					revertList(sl, l);
 				}
@@ -753,7 +750,7 @@ public class ShoppinglistManager {
 										DbHelper.getInstance().deleteList(sl);
 										DbHelper.getInstance().deleteItems(sl.getId(), null);
 										notifyListListener(l, true, statusCode, sl, null);
-										notifyListsChange(true, null, idToList(sl), null);
+										notifyListSubscribers(true, null, idToList(sl), null);
 									} else {
 										revertList(sl, l);
 									}
@@ -777,7 +774,7 @@ public class ShoppinglistManager {
 				// Do local callback stuff
 				if (row == 1) {
 					notifyListListener(l, false, 200, sl, null);
-					notifyListsChange(false, null, idToList(sl), null);
+					notifyListSubscribers(false, null, idToList(sl), null);
 				} else {
 					revertList(sl, l);
 				}
@@ -901,10 +898,13 @@ public class ShoppinglistManager {
 									ShoppinglistItem s = sli;
 									if (Utils.isSuccess(statusCode)) {
 										s = ShoppinglistItem.fromJSON(data);
-										s.setState(ShoppinglistItem.State.SYNCED);
-										// If server havent delivered an prev_id, then use old id
-										s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
-										DbHelper.getInstance().editItem(s);
+										ShoppinglistItem dbItem = DbHelper.getInstance().getItem(s.getId());
+										if (dbItem != null && !s.getModified().before(dbItem.getModified()) ) {
+											s.setState(ShoppinglistItem.State.SYNCED);
+											// If server havent delivered an prev_id, then use old id
+											s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
+											DbHelper.getInstance().editItem(s);
+										}
 									} else {
 										revertItem(sli, l);
 									}
@@ -927,7 +927,7 @@ public class ShoppinglistManager {
 				// Do local callback stuff
 				if (count == 1) {
 					notifyItemListener(l, false, 200, sli, null);
-					notifyItemsChange(false, idToList(sli), null, null);
+					notifyItemSubscribers(false, idToList(sli), null, null);
 				} else {
 					revertItem(sli, l);
 				}
@@ -1001,12 +1001,15 @@ public class ShoppinglistManager {
 									ShoppinglistItem s = sli;
 									if (Utils.isSuccess(statusCode)) {
 										s = ShoppinglistItem.fromJSON(data);
-										s.setState(ShoppinglistItem.State.SYNCED);
-										// If server havent delivered an prev_id, then use old id
-										s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
-										DbHelper.getInstance().editItem(s);
-							        	notifyItemListener(l, true, statusCode, s, null);
-							        	notifyItemsChange(true, null, null, idToList(s));
+										ShoppinglistItem dbItem = DbHelper.getInstance().getItem(s.getId());
+										if (dbItem != null && !s.getModified().before(dbItem.getModified()) ) {
+											s.setState(ShoppinglistItem.State.SYNCED);
+											// If server havent delivered an prev_id, then use old id
+											s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
+											DbHelper.getInstance().editItem(s);
+								        	notifyItemListener(l, true, statusCode, s, null);
+								        	notifyItemSubscribers(true, null, null, idToList(s));
+										}
 									} else {
 										revertItem(s, l);
 									}
@@ -1030,7 +1033,7 @@ public class ShoppinglistManager {
 				
 		        if (row == 1) {
 		        	notifyItemListener(l, false, 200, sli, null);
-		        	notifyItemsChange(false, null, null, idToList(sli));
+		        	notifyItemSubscribers(false, null, null, idToList(sli));
 				} else {
 					revertItem(sli, l);
 				}
@@ -1157,7 +1160,7 @@ public class ShoppinglistManager {
 
 		        if (count == deleted.size()) {
 		        	notifyListListener(l, false, 200, sl, null);
-		        	notifyListsChange(false, null, idToList(sl), null);
+		        	notifyListSubscribers(false, null, idToList(sl), null);
 				} else {
 		        	revertList(sl, l);
 				}
@@ -1209,7 +1212,7 @@ public class ShoppinglistManager {
 										ShoppinglistItem s = ShoppinglistItem.fromJSON(item);
 										DbHelper.getInstance().deleteItem(s);
 							        	notifyItemListener(l, true, statusCode, s, null);
-							        	notifyItemsChange(true, null, idToList(s), null);
+							        	notifyItemSubscribers(true, null, idToList(s), null);
 									} else {
 										revertItem(sli, l);
 									}
@@ -1230,7 +1233,7 @@ public class ShoppinglistManager {
 				// Do local callback stuff
 				if (count == 1) {
 					notifyItemListener(l, false, 200, sli, null);
-					notifyItemsChange(false, null, idToList(sli), null);
+					notifyItemSubscribers(false, null, idToList(sli), null);
 				} else {
 					revertItem(sli, l);
 				}
@@ -1346,7 +1349,7 @@ public class ShoppinglistManager {
 						} else {
 							DbHelper.getInstance().deleteList(sl);
 						}
-						notifyListsChange(true, null, null, idToList(s));
+						notifyListSubscribers(true, null, null, idToList(s));
 					}
 				};
 				mEta.getApi().get(Endpoint.getListById(mEta.getUser().getId(), sl.getId()), listListener).execute();
@@ -1381,7 +1384,7 @@ public class ShoppinglistManager {
 							DbHelper.getInstance().deleteItem(sli);
 						}
 						notifyItemListener(l, true, statusCode, s, error);
-						notifyItemsChange(true, null, null, idToList(s));
+						notifyItemSubscribers(true, null, null, idToList(s));
 					}
 				};
 				
@@ -1488,6 +1491,7 @@ public class ShoppinglistManager {
 	}
 	
 
+	@SuppressWarnings("rawtypes")
 	private void notifyListListener(final OnCompletetionListener l, final boolean isServer, final int statusCode, final Shoppinglist o, final EtaError e) {
 		if (l == null)
 			return;
@@ -1501,6 +1505,7 @@ public class ShoppinglistManager {
 		});
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void notifyItemListener(final OnCompletetionListener l, final boolean isServer, final int statusCode, final ShoppinglistItem o, final EtaError e) {
 		if (l == null)
 			return;
@@ -1514,7 +1519,7 @@ public class ShoppinglistManager {
 		});
 	}
 	
-	private void notifyItemsChange(boolean isServer, List<ShoppinglistItem> added, List<ShoppinglistItem> deleted, List<ShoppinglistItem> edited) {
+	private void notifyItemSubscribers(boolean isServer, List<ShoppinglistItem> added, List<ShoppinglistItem> deleted, List<ShoppinglistItem> edited) {
 
 		if (added == null) added = new ArrayList<ShoppinglistItem>(0);
 		
@@ -1522,11 +1527,11 @@ public class ShoppinglistManager {
 		
 		if (edited == null) edited = new ArrayList<ShoppinglistItem>(0);
 		
-		postItemsChange(isServer, added, deleted, edited);
+		postItemSubscribers(isServer, added, deleted, edited);
 		
 	}
 	
-	private void postItemsChange(final boolean isServer, final List<ShoppinglistItem> added, final List<ShoppinglistItem> deleted, final List<ShoppinglistItem> edited) {
+	private void postItemSubscribers(final boolean isServer, final List<ShoppinglistItem> added, final List<ShoppinglistItem> deleted, final List<ShoppinglistItem> edited) {
 		
 		for (final OnChangeListener<ShoppinglistItem> s : mItemSubscribers) {
 			try {
@@ -1542,7 +1547,7 @@ public class ShoppinglistManager {
 		}
 	}
 
-	private void notifyListsChange(boolean isServer, List<Shoppinglist> added, List<Shoppinglist> deleted, List<Shoppinglist> edited) {
+	private void notifyListSubscribers(boolean isServer, List<Shoppinglist> added, List<Shoppinglist> deleted, List<Shoppinglist> edited) {
 
 		if (added == null) added = new ArrayList<Shoppinglist>(0);
 		
@@ -1550,7 +1555,7 @@ public class ShoppinglistManager {
 		
 		if (edited == null) edited = new ArrayList<Shoppinglist>(0);
 		
-		postListsChange(isServer, added, deleted, edited);
+		postListSubscribers(isServer, added, deleted, edited);
 		
 	}
 	
@@ -1562,7 +1567,7 @@ public class ShoppinglistManager {
      * @param deleted the id's thats been deleted
      * @param edited the id's thats been edited
      */
-	private void postListsChange(final boolean isServer, final List<Shoppinglist> added, final List<Shoppinglist> deleted, final List<Shoppinglist> edited) {
+	private void postListSubscribers(final boolean isServer, final List<Shoppinglist> added, final List<Shoppinglist> deleted, final List<Shoppinglist> edited) {
 
 		for (final OnChangeListener<Shoppinglist> s : mListSubscribers) {
 			mEta.getHandler().post(new Runnable() {

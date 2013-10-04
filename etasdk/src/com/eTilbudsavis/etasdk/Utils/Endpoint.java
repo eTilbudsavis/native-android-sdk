@@ -1,11 +1,5 @@
 package com.eTilbudsavis.etasdk.Utils;
 
-import java.net.URI;
-
-import com.eTilbudsavis.etasdk.Api;
-import com.eTilbudsavis.etasdk.Api.ApiListener;
-
-import android.net.Uri;
 
 
 /**

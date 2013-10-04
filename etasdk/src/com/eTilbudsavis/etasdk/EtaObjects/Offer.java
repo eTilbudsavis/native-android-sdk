@@ -1,18 +1,17 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Sort;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Params;
+import com.eTilbudsavis.etasdk.Utils.Sort;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Offer extends EtaErnObject implements Serializable {
 	
@@ -99,8 +98,7 @@ public class Offer extends EtaErnObject implements Serializable {
 				list.add(Offer.fromJSON((JSONObject) offers.get(i)));
 			
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return list;
 	}
@@ -133,8 +131,7 @@ public class Offer extends EtaErnObject implements Serializable {
 			o.setCatalogUrl(getJsonString(offer, S_CATALOG_URL));
 			o.setCatalogId(getJsonString(offer, S_CATALOG_ID));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return o;
 	}

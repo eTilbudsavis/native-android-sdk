@@ -2,13 +2,12 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.eTilbudsavis.etasdk.Eta;
+import android.annotation.SuppressLint;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Params;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class User extends EtaObject implements Serializable {
 	
@@ -64,8 +63,7 @@ public class User extends EtaObject implements Serializable {
 		try {
 			u = fromJSON(u, new JSONObject(user));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return u;
 	}
@@ -88,8 +86,7 @@ public class User extends EtaObject implements Serializable {
 			u.setEmail(getJsonString(user, S_EMAIL));
 			u.setPermissions(Permission.fromJSON(user.getJSONObject(S_PERMISSIONS)));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return u;
 	}
@@ -109,8 +106,7 @@ public class User extends EtaObject implements Serializable {
 			o.put(S_EMAIL, u.getEmail());
 			o.put(S_PERMISSIONS, u.getPermissions() == null ? null : u.getPermissions().toJSON());
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return o;
 	}

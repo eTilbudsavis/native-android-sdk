@@ -8,7 +8,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
+import android.annotation.SuppressLint;
+
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Share extends EtaObject implements Comparable<Share>, Serializable {
 	private static final long serialVersionUID = 1L;
@@ -34,8 +36,7 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 				list.add(Share.fromJSON((JSONObject)shares.get(i)));
 			
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return list;
 	}
@@ -63,8 +64,7 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 			s.setAccess(getJsonString(share, S_ACCESS));
 			s.setAccepted(share.getBoolean(S_ACCEPTED));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		
 		return s;
@@ -153,7 +153,7 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 	}
 
 	public static Comparator<Share> EmailComparator  = new Comparator<Share>() {
-
+		
 		public int compare(Share item1, Share item2) {
 
 			String itemName1 = item1.getEmail().toUpperCase();

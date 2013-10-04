@@ -86,6 +86,8 @@ public class EtaObject {
 	protected static final String S_EMAIL = "email";
 	protected static final String S_PERMISSIONS = "permissions";
 	protected static final String S_PREVIOUS_ID = "previous_id";
+	protected static final String S_SI = "si";
+	protected static final String S_FACTOR = "factor";
 	
 	public EtaObject() { }
 	

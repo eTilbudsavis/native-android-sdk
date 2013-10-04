@@ -6,7 +6,6 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class EtaError extends EtaObject implements Serializable {
@@ -48,8 +47,7 @@ public class EtaError extends EtaObject implements Serializable {
 			er.setMessage(getJsonString(error, S_MESSAGE));
 			er.setDetails(getJsonString(error, S_DETAILS));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return er;
 	}
@@ -66,8 +64,7 @@ public class EtaError extends EtaObject implements Serializable {
 			o.put(S_MESSAGE, er.getMessage());
 			o.put(S_DETAILS, er.getDetails());
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			Utils.logd(TAG, e);
 		}
 		return o;
 	}
