@@ -63,8 +63,6 @@ public class EtaObject {
 	protected static final String S_LONGITUDE = "longitude";
 	protected static final String S_CONTACT = "contact";
 	protected static final String S_WEBSHOP = "webshop";
-	protected static final String S_AREA_ID = "area_id";
-	protected static final String S_LANGUAGE = "language";
 	protected static final String S_WIDTH = "width";
 	protected static final String S_HEIGHT = "height";
 	protected static final String S_CODE = "code";
@@ -88,6 +86,7 @@ public class EtaObject {
 	protected static final String S_PREVIOUS_ID = "previous_id";
 	protected static final String S_SI = "si";
 	protected static final String S_FACTOR = "factor";
+	protected static final String S_UNSUBSCRIBE_PRINT_URL = "unsubscribe_print_url";
 	
 	public EtaObject() { }
 	

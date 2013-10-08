@@ -923,7 +923,9 @@ public class ShoppinglistManager {
 				}
 				
 				count = DbHelper.getInstance().insertItem(sli);
-
+				
+				Utils.logd(TAG, "Count: " + String.valueOf(count));
+				
 				// Do local callback stuff
 				if (count == 1) {
 					notifyItemListener(l, false, 200, sli, null);
@@ -1242,8 +1244,10 @@ public class ShoppinglistManager {
 		
 	}
 
-	private void cleanupDB() {
-
+	private void dbCleanup() {
+		
+		if (!mustSync()) return;
+		
 		List<Shoppinglist> sls = getLists();
 		int count = 0;
 		
@@ -1259,8 +1263,13 @@ public class ShoppinglistManager {
 						break;
 						
 					case Shoppinglist.State.SYNCING:
-					case Shoppinglist.State.TO_SYNC:
 						editList(sl, null, sl.getModified());
+						break;
+						
+					case Shoppinglist.State.TO_SYNC:
+						// Don't sync if not logged in
+						if (mustSync())
+							editList(sl, null, sl.getModified());
 						break;
 	
 					case Shoppinglist.State.ERROR:
@@ -1301,8 +1310,13 @@ public class ShoppinglistManager {
 						break;
 						
 					case ShoppinglistItem.State.SYNCING:
-					case ShoppinglistItem.State.TO_SYNC:
 						editItem(sli, null, sli.getModified());
+						break;
+						
+					case ShoppinglistItem.State.TO_SYNC:
+						// Don't sync if not logged in
+						if (mustSync())
+							editItem(sli, null, sli.getModified());
 						break;
 						
 					case ShoppinglistItem.State.ERROR:
@@ -1409,7 +1423,7 @@ public class ShoppinglistManager {
 	public void onResume() {
 		Eta.getInstance().getSession().subscribe(sessionListener);
 		DbHelper.getInstance().openDB();
-		cleanupDB();
+		dbCleanup();
 		mSyncLoop.run();
 	}
 	

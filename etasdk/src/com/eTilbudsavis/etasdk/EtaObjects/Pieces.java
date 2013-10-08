@@ -13,8 +13,8 @@ public class Pieces extends EtaObject implements Serializable {
 
 	public static final String TAG = "Pieces";
 	
-	private int mFrom = 0;
-	private int mTo = 0;
+	private int mFrom = 1;
+	private int mTo = 1;
 	
 	public Pieces() {
 	}

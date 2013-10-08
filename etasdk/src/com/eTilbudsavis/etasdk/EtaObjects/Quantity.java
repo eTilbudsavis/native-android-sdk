@@ -39,8 +39,6 @@ public class Quantity extends EtaObject implements Serializable {
 		if (q == null) q = new Quantity();
 		if (quantity == null) return q;
 		
-		Utils.logd(TAG, quantity.toString());
-		
 		try {
 			q.setUnit(quantity.isNull(S_UNIT) ? null : Unit.fromJSON(quantity.getJSONObject(S_UNIT)));
 			q.setSize(quantity.isNull(S_SIZE) ? null : Size.fromJSON(quantity.getJSONObject(S_SIZE)));

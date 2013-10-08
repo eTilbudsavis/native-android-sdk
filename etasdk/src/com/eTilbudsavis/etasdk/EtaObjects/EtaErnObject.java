@@ -83,8 +83,8 @@ public class EtaErnObject extends EtaObject {
 					list = Shoppinglist.fromJSON(objects);
 				} else if (ern.startsWith(ERN_SHOPPINGLISTITEM)) {
 					list = ShoppinglistItem.fromJSON(objects);
-				} 
-					
+				}
+				
 			} else {
 				Utils.logd(TAG, "ArrayElements does not contain an ERN");
 			}

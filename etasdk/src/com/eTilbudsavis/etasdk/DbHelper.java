@@ -659,8 +659,6 @@ public class DbHelper extends SQLiteOpenHelper {
 			
 			if (c.moveToFirst()) {
 				i = c.getInt(0);
-				if (i>1)
-					Utils.logd(TAG, "Multi-hit: " + String.valueOf(i));
 			}
 			
 			// Clean up

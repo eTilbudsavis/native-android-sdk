@@ -13,8 +13,8 @@ public class Size extends EtaObject implements Serializable {
 
 	public static final String TAG = "Size";
 	
-	private double mFrom = 0.0;
-	private double mTo = 0.0;
+	private double mFrom = 1;
+	private double mTo = 1;
 	
 	public Size() {
 	}
