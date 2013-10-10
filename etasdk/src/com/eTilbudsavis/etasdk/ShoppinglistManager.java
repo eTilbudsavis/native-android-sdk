@@ -123,7 +123,6 @@ public class ShoppinglistManager {
 					return;
 				
 				if (Utils.isSuccess(statusCode)) {
-					mHasFirstListSync = true;
 					mergeShoppinglists( data, getLists());
 				} 
 			}
@@ -134,10 +133,8 @@ public class ShoppinglistManager {
 
 	private void mergeShoppinglists(List<Shoppinglist> newList, List<Shoppinglist> oldList) {
 
-		if (newList.isEmpty() && oldList.isEmpty()) {
-			Utils.logd(TAG, "Nothing to merge");
+		if (newList.isEmpty() && oldList.isEmpty())
 			return;
-		}
 
 		HashMap<String, Shoppinglist> oldset = new HashMap<String, Shoppinglist>();
 		for (Shoppinglist o : oldList) {
@@ -191,6 +188,9 @@ public class ShoppinglistManager {
 				DbHelper.getInstance().insertList(sl);
 			}
 		}
+
+		// At this point, all lists (not their items) are sync'ed to the DB
+		mHasFirstListSync = true;
 		
 		// If no changes has been registeres, ship the rest
 		if (!added.isEmpty() || !deleted.isEmpty() || !edited.isEmpty()) {
@@ -328,10 +328,8 @@ public class ShoppinglistManager {
 
 	private void mergeShoppinglistItems(List<ShoppinglistItem> newList, List<ShoppinglistItem> oldList) {
 		
-		if (newList.isEmpty() && oldList.isEmpty()) {
-			Utils.logd(TAG, "Nothing to merge");
+		if (newList.isEmpty() && oldList.isEmpty())
 			return;
-		}
 
 		HashMap<String, ShoppinglistItem> oldset = new HashMap<String, ShoppinglistItem>();
 		for (ShoppinglistItem sli : oldList) {
@@ -923,8 +921,6 @@ public class ShoppinglistManager {
 				}
 				
 				count = DbHelper.getInstance().insertItem(sli);
-				
-				Utils.logd(TAG, "Count: " + String.valueOf(count));
 				
 				// Do local callback stuff
 				if (count == 1) {

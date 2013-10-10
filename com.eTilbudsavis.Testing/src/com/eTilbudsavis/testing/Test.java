@@ -1,9 +1,5 @@
 package com.eTilbudsavis.testing;
 
-import java.util.ArrayList;
-
-import com.eTilbudsavis.etasdk.Eta;
-
 public class Test {
 
 //	private String mName;

@@ -112,7 +112,7 @@ public class User extends EtaObject implements Serializable {
 	}
 	
 	public boolean isLoggedIn() {
-		return mEmail != null && mId != 0;
+		return mEmail != null && mId > -1;
 	}
 	
 	public int getId() {
