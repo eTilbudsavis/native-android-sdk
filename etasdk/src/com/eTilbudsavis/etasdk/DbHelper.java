@@ -283,7 +283,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return number of affected rows
 	 */
 	public int insertList(Shoppinglist list) {
-		String q = "INSERT INTO " + getTableList() + " " + listToValues(list) + ";";
+		String q = String.format("INSERT INTO %s %s", getTableList(), listToValues(list));
+//		String q = "INSERT INTO " + getTableList() + " " + listToValues(list) + ";";
 		int i = execQueryWithChangesCount(q);
 		return i;
 	}
@@ -295,7 +296,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public Shoppinglist getList(String id) {
 		id = escape(id);
-		String q = "SELECT * FROM " + getTableList() + " WHERE " + ID + "=" + id + ";";
+		String q = String.format("SELECT * FROM %s WHERE %s=%s", getTableList(), ID, id);
+//		String q = "SELECT * FROM " + getTableList() + " WHERE " + ID + "=" + id + ";";
 		Cursor c = execQuery(q);
 		Shoppinglist sl = c.moveToFirst() ? cursorToSl(c) : null;
 		cursorClose(c);
@@ -309,7 +311,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public ArrayList<Shoppinglist> getListFromName(String name) {
 		name = escape(name);
-		String q = String.format("SELECT * FROM %s WHERE %s='%s';", getTableList(), NAME, name);
+		String q = String.format("SELECT * FROM %s WHERE %s=%s", getTableList(), NAME, name);
 //		String q = "SELECT * FROM " + getTableList() + " WHERE " + NAME + "='" + name + "';";
 		Cursor c = execQuery(q);
 		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
@@ -327,18 +329,22 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return A list of shoppinglists
 	 */
 	public ArrayList<Shoppinglist> getLists() {
-		String q = String.format("SELECT * FROM %s WHERE %s!=%s;", getTableList(), STATE, Shoppinglist.State.DELETE);
+		String q = String.format("SELECT * FROM %s WHERE %s!=%s", getTableList(), STATE, Shoppinglist.State.DELETE);
 //		String q = "SELECT * FROM " + getTableList() + " WHERE " + STATE + "!=" + ShoppinglistManager.STATE_DELETE + ";";
 		Cursor c = execQuery(q);
 		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
-		if (c.moveToFirst() ) {
-			do { 
-				list.add(cursorToSl(c));
-			} while (c.moveToNext());
+		try {
+			if (c.moveToFirst() ) {
+				do { 
+					list.add(cursorToSl(c));
+				} while (c.moveToNext());
+			}
+			cursorClose(c);
+		} catch (Exception e) {
+			// Calls to getLists, before DB is ready results in a java.lang.IllegalStateException
+			Utils.logd(TAG, e);
 		}
-		cursorClose(c);
 //		sortListssByPrev(list);
-//		Utils.logd(TAG, "lists: " + String.valueOf(list.size()));
 		return list;
 	}
 
@@ -372,7 +378,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	public int deleteList(Shoppinglist sl) {
 		dirtyItems(sl.getId());
 		String id = escape(sl.getId());
-		String q = "DELETE FROM " + getTableList() + " WHERE " + ID + "=" + id + ";";
+		String q = String.format("DELETE FROM %s WHERE %s!=%s", getTableList(), ID, id);
+//		String q = "DELETE FROM " + getTableList() + " WHERE " + ID + "=" + id + ";";
 		return execQueryWithChangesCount(q);
 	}
 	
@@ -382,7 +389,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return number of affected rows
 	 */
 	public int editList(Shoppinglist list) {
-		String q = "REPLACE INTO " + getTableList() + " " + listToValues(list) + ";";
+		String q = String.format("REPLACE INTO %s %s", getTableList(), listToValues(list));
+//		String q = "REPLACE INTO " + getTableList() + " " + listToValues(list) + ";";
 		return execQueryWithChangesCount(q);
 	}
 
@@ -393,7 +401,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public int insertItem(ShoppinglistItem sli) {
 		dirtyItems(sli.getShoppinglistId());
-		String q = "INSERT INTO " + getTableItem() + " " + itemToValues(sli) + ";";
+		String q = String.format("INSERT INTO %s %s", getTableItem(), itemToValues(sli));
+//		String q = "INSERT INTO " + getTableItem() + " " + itemToValues(sli) + ";";
 		return execQueryWithChangesCount(q);
 	}
 	
@@ -418,7 +427,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public ShoppinglistItem getItem(String itemId) {
 		itemId = escape(itemId);
-		String q = "SELECT * FROM " + getTableItem() + " WHERE " + ID + "=" + itemId + ";";
+		String q = String.format("SELECT * FROM %s WHERE %s=%s", getTableItem(), ID, itemId);
+//		String q = "SELECT * FROM " + getTableItem() + " WHERE " + ID + "=" + itemId + ";";
 		Cursor c = execQuery(q);
 		ShoppinglistItem sli = c.moveToFirst() ? cursorToSli(c) : null;
 		cursorClose(c);
@@ -432,7 +442,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public ArrayList<ShoppinglistItem> getItemFromDescription(String description) {
 		description = escape(description);
-		String q = "SELECT * FROM " + getTableItem() + " WHERE " + DESCRIPTION + "=" + description + ";";
+		String q = String.format("SELECT * FROM %s WHERE %s=%s", getTableItem(), DESCRIPTION, description);
+//		String q = "SELECT * FROM " + getTableItem() + " WHERE " + DESCRIPTION + "=" + description + ";";
 		Cursor c = execQuery(q);
 		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
 		if (c.moveToFirst() ) {
@@ -455,7 +466,8 @@ public class DbHelper extends SQLiteOpenHelper {
 			return list;
 		}
 		String id = escape(sl.getId());
-		String q = "SELECT * FROM " + getTableItem() + " WHERE " + SHOPPINGLIST_ID + "=" + id + " AND " + STATE + "!=" + ShoppinglistItem.State.DELETE + ";";
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s", getTableItem(), SHOPPINGLIST_ID, id, STATE, ShoppinglistItem.State.DELETE);
+//		String q = "SELECT * FROM " + getTableItem() + " WHERE " + SHOPPINGLIST_ID + "=" + id + " AND " + STATE + "!=" + ShoppinglistItem.State.DELETE + ";";
 		Cursor c = execQuery(q);
 		list = new ArrayList<ShoppinglistItem>();
 		if (c.moveToFirst() ) {
@@ -522,7 +534,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	public ShoppinglistItem getItemPrevious(String shoppinglistId, String previousId) {
 		String id = escape(shoppinglistId);
 		String prev = escape(previousId);
-		String q = "SELECT * FROM " + getTableItem() + " WHERE " + SHOPPINGLIST_ID + "=" + id + " AND " + PREVIOUS_ID + "=" + prev + ";";
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", getTableItem(), SHOPPINGLIST_ID, id, PREVIOUS_ID, prev);
+//		String q = "SELECT * FROM " + getTableItem() + " WHERE " + SHOPPINGLIST_ID + "=" + id + " AND " + PREVIOUS_ID + "=" + prev + ";";
 		Cursor c = execQuery(q);
 		ShoppinglistItem sli = c.moveToFirst() ? cursorToSli(c) : null;
 		cursorClose(c);
@@ -535,7 +548,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	
 	public Shoppinglist getListPrevious(String previousId) {
 		String prev = escape(previousId);
-		String q = "SELECT * FROM " + getTableList() + " WHERE " + PREVIOUS_ID + "=" + prev + ";";
+		String q = String.format("SELECT * FROM %s WHERE %s=%s", getTableList(), PREVIOUS_ID, prev);
+//		String q = "SELECT * FROM " + getTableList() + " WHERE " + PREVIOUS_ID + "=" + prev;
 		Cursor c = execQuery(q);
 		Shoppinglist sl = c.moveToFirst() ? cursorToSl(c) : null;
 		cursorClose(c);
@@ -550,7 +564,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	public int deleteItem(ShoppinglistItem sli) {
 		dirtyItems(sli.getShoppinglistId());
 		String id = escape(sli.getId());
-		String q = "DELETE FROM " + getTableItem() + " WHERE " + ID + "=" + id + ";";
+		String q = String.format("DELETE FROM %s WHERE %s=%s", getTableItem(), ID, id);
+//		String q = "DELETE FROM " + getTableItem() + " WHERE " + ID + "=" + id;
 		return execQueryWithChangesCount(q);
 	}
 
@@ -566,11 +581,11 @@ public class DbHelper extends SQLiteOpenHelper {
 	public int deleteItems(String shoppinglistId, Boolean state) {
 		dirtyItems(shoppinglistId);
 		shoppinglistId = escape(shoppinglistId);
-		String q = "DELETE FROM " + getTableItem() + " WHERE " + SHOPPINGLIST_ID + "=" + shoppinglistId;
+		String q = String.format("DELETE FROM %s WHERE %s=%s", getTableItem(), SHOPPINGLIST_ID, shoppinglistId);
+//		String q = "DELETE FROM " + getTableItem() + " WHERE " + SHOPPINGLIST_ID + "=" + shoppinglistId;
 		if (state != null) {
 			q += " AND " + TICK + "=" + escape(state);
 		}
-		q += ";";
 		return execQueryWithChangesCount(q);
 	}
 
@@ -581,7 +596,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public int editItem(ShoppinglistItem sli) {
 		dirtyItems(sli.getShoppinglistId());
-		String q = "REPLACE INTO " + getTableItem() + " " + itemToValues(sli) + ";";
+		String q = String.format("REPLACE INTO %s %s", getTableItem(),  itemToValues(sli));
+//		String q = "REPLACE INTO " + getTableItem() + " " + itemToValues(sli);
 		return execQueryWithChangesCount(q);
 	}
 

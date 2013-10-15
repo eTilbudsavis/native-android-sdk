@@ -105,6 +105,12 @@ public final class Params {
 	/** Parameter for a resource password */
 	public static final String PASSWORD = "password";
 
+	/** Parameter for a resource old token */
+	public static final String TOKEN_OLD = "token_old";
+
+	/** Parameter for a resource token time to live */
+	public static final String TOKEN_TTL = "token_ttl";
+
 	/** Parameter for a resource birth year */
 	public static final String BIRTH_YEAR = "birth_year";
 

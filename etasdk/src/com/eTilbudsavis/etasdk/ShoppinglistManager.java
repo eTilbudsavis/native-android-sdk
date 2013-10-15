@@ -1410,8 +1410,11 @@ public class ShoppinglistManager {
 
 		public void onUpdate() {
 			// Remove this from UI thread, and into looper queue
-			if (mEta.getUser().isLoggedIn())
+			if (mEta.getUser().isLoggedIn()) {
 				mSyncLoop.run();
+			} else {
+				DbHelper.getInstance().clearUserDB();
+			}
 		}
 		
 	};

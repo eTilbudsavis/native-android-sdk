@@ -42,6 +42,7 @@ public class Session implements Serializable {
 	private String mProvider;
 	private String mUserStr = null;
 	private String mPassStr = null;
+	private String mTokenApiV1 = null;
 	private String mFacebookToken = null;
 	
 	private Eta mEta;
@@ -95,12 +96,19 @@ public class Session implements Serializable {
 	    }
 		
 	}
-	
+
 	public void login(String user, String password, JsonObjectListener listener) {
 		mUserStr = user;
 		mPassStr = password;
 		mEta.getSettings().setSessionUser(mUserStr);
 		mEta.getSettings().setSessionPass(mPassStr);
+		update(listener);
+	}
+
+	public void loginWithToken(String user, String oldToken, JsonObjectListener listener) {
+		mUserStr = user;
+		mTokenApiV1 = oldToken;
+		mEta.getSettings().setSessionUser(mUserStr);
 		update(listener);
 	}
 	
@@ -157,9 +165,13 @@ public class Session implements Serializable {
 		mIsUpdating = true;
 
 		Bundle b = new Bundle();
-		if (mUserStr != null && mPassStr != null) {
+		if (mUserStr != null) {
 			b.putString(Params.EMAIL, mUserStr);
-			b.putString(Params.PASSWORD, mPassStr);
+			if (mPassStr != null) {
+				b.putString(Params.PASSWORD, mPassStr);
+			} else if (mTokenApiV1 != null) {
+				b.putString(Params.TOKEN_OLD, mTokenApiV1);
+			}
 			mEta.getApi().post(Session.ENDPOINT, session, b).execute();
 		} else if (mFacebookToken != null) {
 			b.putString(Params.FACEBOOK_TOKEN, mFacebookToken);
@@ -190,6 +202,7 @@ public class Session implements Serializable {
 		b.putInt(Params.BIRTH_YEAR, birthYear);
 		b.putString(Params.GENDER, gender);
 		b.putString(Params.SUCCESS_REDIRECT, successRedirect);
+		b.putString("locale", "da_DK");
 		b.putString(Params.ERROR_REDIRECT, errorRedirect);
 		
 		JsonObjectListener userCreate = new JsonObjectListener() {
@@ -205,7 +218,7 @@ public class Session implements Serializable {
 			}
 		};
 
-		mEta.getApi().post(Session.ENDPOINT, userCreate, b).execute();
+		mEta.getApi().post(Endpoint.Path.USERS, userCreate, b).setFlag(Api.FLAG_PRINT_DEBUG).execute();
 		return true;
 	}
 	
