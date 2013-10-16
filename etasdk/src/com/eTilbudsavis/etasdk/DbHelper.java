@@ -1,6 +1,7 @@
 package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -299,8 +300,13 @@ public class DbHelper extends SQLiteOpenHelper {
 		String q = String.format("SELECT * FROM %s WHERE %s=%s", getTableList(), ID, id);
 //		String q = "SELECT * FROM " + getTableList() + " WHERE " + ID + "=" + id + ";";
 		Cursor c = execQuery(q);
-		Shoppinglist sl = c.moveToFirst() ? cursorToSl(c) : null;
-		cursorClose(c);
+		Shoppinglist sl = null;
+		try {
+			sl = c.moveToFirst() ? cursorToSl(c) : null;
+			cursorClose(c);
+		} catch (Exception e) {
+			Utils.logd(TAG, e);
+		}
 		return sl;
 	}
 
@@ -344,30 +350,10 @@ public class DbHelper extends SQLiteOpenHelper {
 			// Calls to getLists, before DB is ready results in a java.lang.IllegalStateException
 			Utils.logd(TAG, e);
 		}
-//		sortListssByPrev(list);
+		
+		Collections.sort(list);
+		
 		return list;
-	}
-
-	private void sortListssByPrev(ArrayList<Shoppinglist> lists) {
-		HashMap<String, Shoppinglist> prevs = new HashMap<String, Shoppinglist>(lists.size());
-		
-		for (Shoppinglist sl : lists) {
-//			Utils.logd(TAG, sl.getName() + ", prev: " + sl.getPreviousId() + ", id: " + sl.getId());
-			prevs.put(sl.getPreviousId(), sl);
-		}
-		
-		lists.clear();
-		
-		// Assume that there exists an item with PrevioudItem = null
-		// Start to find and add items to new list
-		String prevId = Shoppinglist.FIRST_ITEM;
-		while (!prevs.isEmpty()) {
-			Shoppinglist s = prevs.get(prevId);
-			prevs.remove(prevId);
-			prevId = s.getId();
-			lists.add(s);
-		}
-		
 	}
 	
 	/**
@@ -430,8 +416,13 @@ public class DbHelper extends SQLiteOpenHelper {
 		String q = String.format("SELECT * FROM %s WHERE %s=%s", getTableItem(), ID, itemId);
 //		String q = "SELECT * FROM " + getTableItem() + " WHERE " + ID + "=" + itemId + ";";
 		Cursor c = execQuery(q);
-		ShoppinglistItem sli = c.moveToFirst() ? cursorToSli(c) : null;
-		cursorClose(c);
+		ShoppinglistItem sli = null;
+		try {
+			sli = c.moveToFirst() ? cursorToSli(c) : null;
+			cursorClose(c);
+		} catch (Exception e) {
+			Utils.logd(TAG, e);
+		}
 		return sli;
 	}
 	

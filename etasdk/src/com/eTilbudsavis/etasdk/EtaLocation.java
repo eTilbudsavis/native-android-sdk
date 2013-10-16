@@ -54,7 +54,7 @@ public class EtaLocation extends Location {
 	// Location.
 	private static int mRadius = RADIUS_MAX;
 	private static boolean mSensor = false;
-	private static String mAddress = "";
+	private static String mAddress = null;
 	private static double mBoundNorth = BOUND_DEFAULT;
 	private static double mBoundEast = BOUND_DEFAULT;
 	private static double mBoundSouth = BOUND_DEFAULT;
@@ -91,6 +91,7 @@ public class EtaLocation extends Location {
 		mAddress = address;
 		setLatitude(latitude);
 		setLongitude(longitude);
+		setSensor(false);
 		setTime(System.currentTimeMillis());
 		save();
 		return this;

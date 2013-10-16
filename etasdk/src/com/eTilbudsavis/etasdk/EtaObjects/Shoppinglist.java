@@ -2,6 +2,7 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 
 import org.json.JSONArray;
@@ -12,7 +13,7 @@ import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Shoppinglist extends EtaErnObject implements Serializable {
+public class Shoppinglist extends EtaErnObject implements Serializable, Comparable<Shoppinglist> {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -216,6 +217,18 @@ public class Shoppinglist extends EtaErnObject implements Serializable {
 		.append(", previous_id=").append(mPrevId);
 		return sb.append("]").toString();
 	}
-	
+
+	public static Comparator<Shoppinglist> NameComparator  = new Comparator<Shoppinglist>() {
+
+		public int compare(Shoppinglist item1, Shoppinglist item2) {
+			return item1.getName().compareToIgnoreCase(item2.getName());
+		}
+
+	};
+
+	public int compareTo(Shoppinglist another) {
+        return this.mName.compareTo(another.getName());
+	}
+
 }
 
