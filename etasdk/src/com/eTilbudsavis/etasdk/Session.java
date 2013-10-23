@@ -44,6 +44,7 @@ public class Session implements Serializable {
 	private String mPassStr = null;
 	private String mTokenApiV1 = null;
 	private String mFacebookToken = null;
+	private Object LOCK = new Object();
 	
 	private Eta mEta;
 	private boolean mIsUpdating = false;
@@ -89,9 +90,11 @@ public class Session implements Serializable {
 	    if (isExpired()) {
 	    	update();
 	    } else {
-	    	for (Api a : mQueue) {
-				mQueue.remove(a);
-				a.execute();
+	    	synchronized (mQueue) {
+		    	for (Api a : mQueue) {
+					mQueue.remove(a);
+					a.execute();
+				}
 			}
 	    }
 		
@@ -227,7 +230,9 @@ public class Session implements Serializable {
 	}
 
 	public void addToQueue(Api api) {
-		mQueue.add(api);
+		synchronized (mQueue) {
+			mQueue.add(api);
+		}
 	}
 	
 	/**

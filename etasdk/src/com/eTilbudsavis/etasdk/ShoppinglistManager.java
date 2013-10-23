@@ -1472,7 +1472,6 @@ public class ShoppinglistManager {
 	private boolean mustSync() {
 		boolean sync = mEta.getUser().isLoggedIn();
 		if (!sync) {
-			Utils.logd(TAG, "Not able to sync - user loggedin");
 			onPause();
 		} 
 		return sync;

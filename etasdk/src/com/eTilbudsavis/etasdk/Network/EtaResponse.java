@@ -154,9 +154,9 @@ public class EtaResponse {
 
 		String s = "";
 
-//		s = fromBytes(instream, charset);
+		s = fromBytes(instream, charset);
 //		s = fromCharArray(instream, charset);
-		s = fromStringBuilder(instream, charset);
+//		s = fromStringBuilder(instream, charset);
 		
 		return s;
 	}

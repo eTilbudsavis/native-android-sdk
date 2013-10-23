@@ -294,6 +294,14 @@ public class Eta implements Serializable {
 		return getApi().get(Catalog.ENDPOINT_LIST, listener).setCatalogIds(catalogIds);
 	}
 
+	public Api searchCatalogss(Api.ListListener<Catalog> listener, String query) {
+		return searchCatalogss(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
+	}
+
+	public Api searchCatalogss(Api.ListListener<Catalog> listener, String query, int offset, int limit, String orderBy) {
+		return getApi().get(Catalog.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
+	}
+
 //  **************
 //	*   OFFER    *
 //	**************

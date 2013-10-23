@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.util.AttributeSet;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -109,6 +110,7 @@ public final class Pageflip extends WebView {
 	private String mDebugWeinre = null;
 	private List<Pageflip> mPageflips;
 	private String mViewSession = null;
+	private boolean mThumbnailsToggled = false;
 	
 	/**
 	 * Used for manual inflation
@@ -140,6 +142,7 @@ public final class Pageflip extends WebView {
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			
 			String[] request = url.split(":", 3);
+			
 			
 			if ( request.length < 2 )
 				return false;
@@ -264,9 +267,10 @@ public final class Pageflip extends WebView {
 		
 		getSettings().setJavaScriptEnabled(true);
 		getSettings().setDefaultTextEncodingName("utf-8");
+		
 		setWebViewClient(wvc);
 		
-//		if (Eta.DEBUG) setWebChromeClient(wcc);
+		if (Eta.DEBUG) setWebChromeClient(wcc);
 		
 		// Check if it's necessary to update the HTML (it's time consuming to download HTML).
 		String cache = mEta.getCache().getHtml(mUuid);
@@ -290,8 +294,12 @@ public final class Pageflip extends WebView {
 						loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
 					}
 				}
+
 			};
-			mEta.getApi().get(Endpoint.getPageflipProxy(mUuid), cb).execute();
+			
+			String url = Endpoint.getPageflipProxy(mUuid);
+			
+			mEta.getApi().get(url, cb).execute();
 			
 		} else {
 			this.loadDataWithBaseURL(null, cache, "text/html", "utf-8", null);
@@ -394,10 +402,14 @@ public final class Pageflip extends WebView {
 		mDebugWeinre = "<script src=\"http://" + hostIp + ":" + hostPort + "/target/target-script-min.js\"></script>";
 	}
 	
+	public boolean isThumbnailsToggled() {
+		return mThumbnailsToggled;
+	}
 	/**
 	 * Interface for showing/hiding the thumbnail list.
 	 */
 	public void toggleThumbnails() {
+		mThumbnailsToggled = !mThumbnailsToggled;
 		etaProxy(ETA_THUMB);
 	}
 	

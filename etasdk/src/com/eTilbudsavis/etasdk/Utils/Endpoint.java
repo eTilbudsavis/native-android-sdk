@@ -48,7 +48,7 @@ public final class Endpoint {
 		public static final String ITEMS = "/items";
 		public static final String EMPTY = "/empty";
 		public static final String RESET = "/reset";
-		public static final String PAGEFLIP_PROXY = "http://etilbudsavis.dk/proxy/";
+		public static final String PAGEFLIP_PROXY = "https://etilbudsavis.dk/proxy/";
 	}
 	
 	// GLOBALS
