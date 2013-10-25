@@ -88,14 +88,16 @@ public class ShoppinglistManager {
 			
 			if (mEta.getUser().isLoggedIn() && mEta.isResumed()) {
 				
+				int user = user();
+				
 				mEta.getHandler().postDelayed(mSyncLoop, mSyncSpeed);
 				
 				if (mApiQueue.size() == 0) {
 
 	                if (syncCount%3 == 0) {
-	                    syncLists();
+	                    syncLists(user);
 	                } else {
-	                    syncListsModified();
+	                    syncListsModified(user);
 	                }
 	                syncCount++;
 				}
@@ -111,7 +113,7 @@ public class ShoppinglistManager {
 	 * This is run at certain intervals if startSync() has been called.<br>
 	 * startSync() is called if Eta.onResume() is called.
 	 */
-	public void syncLists() {
+	public void syncLists(final int user) {
 		
 		if (!mustSync()) return;
 
@@ -123,7 +125,7 @@ public class ShoppinglistManager {
 					return;
 				
 				if (Utils.isSuccess(statusCode)) {
-					mergeShoppinglists( data, getLists());
+					mergeShoppinglists( data, getLists(), user);
 				} 
 			}
 		};
@@ -131,7 +133,7 @@ public class ShoppinglistManager {
 		
 	}
 
-	private void mergeShoppinglists(List<Shoppinglist> newList, List<Shoppinglist> oldList) {
+	private void mergeShoppinglists(List<Shoppinglist> newList, List<Shoppinglist> oldList, int userId) {
 
 		if (newList.isEmpty() && oldList.isEmpty())
 			return;
@@ -167,25 +169,25 @@ public class ShoppinglistManager {
 					
 					if (slold.getModified().before(sl.getModified())) {
 						edited.add(sl);
-						DbHelper.getInstance().editList(sl);
+						DbHelper.getInstance().editList(sl, user());
 					} else if (slold.getModified().after(sl.getModified())) {
 						if (slold.getState() != ShoppinglistItem.State.SYNCING) {
-							editList(slold, null, sl.getModified());
+							editList(slold, null, sl.getModified(), sl.getUserId());
 						}
 					}
 					if (!oldset.get(key).getModified().equals(sl)) {
-						DbHelper.getInstance().editList(sl);
+						DbHelper.getInstance().editList(sl, user());
 					}
 					
 				} else {
 					deleted.add(oldset.get(key));
-					DbHelper.getInstance().deleteList(oldset.get(key));
+					DbHelper.getInstance().deleteList(oldset.get(key), user());
 				}
 			} else {
 				added.add(newset.get(key));
 				Shoppinglist sl = newset.get(key);
 				sl.setState(Shoppinglist.State.TO_SYNC);
-				DbHelper.getInstance().insertList(sl);
+				DbHelper.getInstance().insertList(sl, user());
 			}
 		}
 
@@ -196,7 +198,7 @@ public class ShoppinglistManager {
 		if (!added.isEmpty() || !deleted.isEmpty() || !edited.isEmpty()) {
 			
 			for (Shoppinglist sl : getLists()) {
-				syncItems(sl);
+				syncItems(sl, userId);
 			}
 			notifyListSubscribers(true, added, deleted, edited);
 			
@@ -210,7 +212,7 @@ public class ShoppinglistManager {
 	 * This is run at certain intervals if startSync() has been called.<br>
 	 * startSync() is called if Eta.onResume() is called.
 	 */
-	public void syncListsModified() {
+	public void syncListsModified(final int userId) {
 		
 		addQueue(new Runnable() {
 			
@@ -225,13 +227,13 @@ public class ShoppinglistManager {
 					// If it obviously needs syncing, then just do it
 					if (sl.getState() == Shoppinglist.State.TO_SYNC) {
 						// New shopping lists must always sync
-						syncItems(sl);
+						syncItems(sl, userId);
 						return;
 					} 
 					
 					// Run the check 
 					sl.setState(Shoppinglist.State.SYNCING);
-					DbHelper.getInstance().editList(sl);
+					DbHelper.getInstance().editList(sl, userId);
 					
 					JsonObjectListener cb = new JsonObjectListener() {
 						
@@ -251,16 +253,16 @@ public class ShoppinglistManager {
 											
 											// If list has been modified, then sync
 											if (sl.getModified().before(newDate)) {
-												syncItems(sl);
+												syncItems(sl, userId);
 											}
 											sl.setState(Shoppinglist.State.SYNCED);
-											DbHelper.getInstance().editList(sl);
+											DbHelper.getInstance().editList(sl, userId);
 											
 										} catch (JSONException e) {
 											e.printStackTrace();
 										}
 									} else {
-										revertList(sl, null);
+										revertList(sl, null, userId);
 									}
 									
 								}
@@ -285,14 +287,16 @@ public class ShoppinglistManager {
 	 * startSync() is called if Eta.onResume() is called.
 	 * @param sl shoppinglist to update
 	 */
-	public void syncItems(final Shoppinglist sl) {
+	public void syncItems(final Shoppinglist sl, final int user) {
+		
+		final int userId = user();
 		
 		addQueue(new Runnable() {
 			
 			public void run() {
 				
 				sl.setState(Shoppinglist.State.SYNCING);
-				DbHelper.getInstance().editList(sl);
+				DbHelper.getInstance().editList(sl, userId);
 				
 				JsonArrayListener cb = new JsonArrayListener() {
 					
@@ -307,10 +311,10 @@ public class ShoppinglistManager {
 								
 								if (Utils.isSuccess(statusCode)) {
 									sl.setState(Shoppinglist.State.SYNCED);
-									DbHelper.getInstance().editList(sl);
+									DbHelper.getInstance().editList(sl, userId);
 									mergeShoppinglistItems( ShoppinglistItem.fromJSON(data), getItems(sl));
 								} else {
-									revertList(sl, null);
+									revertList(sl, null, userId);
 								}
 								
 							}
@@ -327,6 +331,8 @@ public class ShoppinglistManager {
 	}
 
 	private void mergeShoppinglistItems(List<ShoppinglistItem> newList, List<ShoppinglistItem> oldList) {
+		
+		int user = user();
 		
 		if (newList.isEmpty() && oldList.isEmpty())
 			return;
@@ -361,25 +367,25 @@ public class ShoppinglistManager {
 					
 					if (sold.getModified().before(snew.getModified())) {
 						edited.add(snew);
-						DbHelper.getInstance().editItem(snew);
+						DbHelper.getInstance().editItem(snew, user);
 					} else if (sold.getModified().after(snew.getModified()) && 
 							sold.getState() != ShoppinglistItem.State.SYNCING) {
-						editItem(sold, null, sold.getModified());
+						editItem(sold, null, sold.getModified(), user);
 					} else if (!sold.getPreviousId().equals(snew.getPreviousId())) {
 						
 						// This is a special case, thats only relevant as long as the
 						// server isn't sending previous_id's
 						
 						sold.setPreviousId(snew.getPreviousId());
-						DbHelper.getInstance().editItem(sold);
+						DbHelper.getInstance().editItem(sold, user);
 					}
 				} else {
 					deleted.add(oldset.get(key));
-					DbHelper.getInstance().deleteItem(oldset.get(key));
+					DbHelper.getInstance().deleteItem(oldset.get(key), user);
 				}
 			} else {
 				added.add(snew);
-				DbHelper.getInstance().insertItem(snew);
+				DbHelper.getInstance().insertItem(snew, user);
 			}
 		}
 		
@@ -468,7 +474,7 @@ public class ShoppinglistManager {
 		String c = mEta.getSettings().getShoppinglistManagerCurrent(isLoggedIn);
 		sl = getList(c);
 		if (sl == null) {
-			sl = DbHelper.getInstance().getFirstList();
+			sl = DbHelper.getInstance().getFirstList(user());
 			if (sl != null) {
 				setCurrentList(sl);
 			}
@@ -496,7 +502,7 @@ public class ShoppinglistManager {
 	 * @return A shopping list, or <code>null</code> if no shopping list exists
 	 */
 	public Shoppinglist getList(String id) {
-		return DbHelper.getInstance().getList(id);
+		return DbHelper.getInstance().getList(id, user());
 	}
 
 	/**
@@ -504,7 +510,7 @@ public class ShoppinglistManager {
 	 * @return <li>All shopping lists
 	 */
 	public ArrayList<Shoppinglist> getLists() {
-		ArrayList<Shoppinglist> list = DbHelper.getInstance().getLists(); 
+		ArrayList<Shoppinglist> list = DbHelper.getInstance().getLists(user()); 
 		return list;
 	}
 	
@@ -514,7 +520,7 @@ public class ShoppinglistManager {
 	 * @return <li>Shopping list or null if no shopping list exists
 	 */
 	public ArrayList<Shoppinglist> getListFromName(String name) {
-		return DbHelper.getInstance().getListFromName(name);
+		return DbHelper.getInstance().getListFromName(name,user());
 	}
 
 	/**
@@ -527,6 +533,8 @@ public class ShoppinglistManager {
 	 */
 	public void addList(final Shoppinglist sl, final OnCompletetionListener<Shoppinglist> l) {
 		
+		final int userId = user();
+		
 		addQueue(new Runnable() {
 			
 			public void run() {
@@ -535,10 +543,10 @@ public class ShoppinglistManager {
 				sl.setPreviousId(ShoppinglistItem.FIRST_ITEM);
 				int count = 0;
 				
-				Shoppinglist first = DbHelper.getInstance().getFirstList();
+				Shoppinglist first = DbHelper.getInstance().getFirstList(userId);
 				if (first != null) {
 					first.setPreviousId(sl.getId());
-					DbHelper.getInstance().editList(first);
+					DbHelper.getInstance().editList(first, userId);
 				}
 				
 				if (mustSync()) {
@@ -550,7 +558,7 @@ public class ShoppinglistManager {
 					}
 					
 					sl.setState(Shoppinglist.State.SYNCING);
-					count = DbHelper.getInstance().insertList(sl);
+					count = DbHelper.getInstance().insertList(sl, userId);
 					
 					// Sync online if possible
 					JsonObjectListener cb = new JsonObjectListener() {
@@ -564,17 +572,17 @@ public class ShoppinglistManager {
 									Shoppinglist s = sl;
 									if (Utils.isSuccess(statusCode)) {
 										s = Shoppinglist.fromJSON(data);
-										Shoppinglist dbList = DbHelper.getInstance().getList(s.getId());
+										Shoppinglist dbList = DbHelper.getInstance().getList(s.getId(), userId);
 										if (dbList != null && !s.getModified().before(dbList.getModified()) ) {
 											s.setState(Shoppinglist.State.SYNCED);
 											s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
-						                    DbHelper.getInstance().editList(s);
-						                    syncItems(s);
+						                    DbHelper.getInstance().editList(s, userId);
+						                    syncItems(s, userId);
 											notifyListListener(l, false, 200, sl, null);
 											notifyListSubscribers(false, idToList(sl), null, null);
 										}
 									} else {
-										revertList(s, l);
+										revertList(s, l, userId);
 									}
 									
 								}
@@ -587,14 +595,14 @@ public class ShoppinglistManager {
 					addQueue(a, sl.getId());
 				} else {
 					sl.setState(Shoppinglist.State.SYNCED);
-					count = DbHelper.getInstance().insertList(sl);
+					count = DbHelper.getInstance().insertList(sl, userId);
 				}
 				
 				if (count == 1) {
 					notifyListListener(l, false, 200, sl, null);
 					notifyListSubscribers(false, idToList(sl), null, null);
 				} else {
-					revertList(sl, l);
+					revertList(sl, l, userId);
 				}
 				
 				
@@ -609,17 +617,17 @@ public class ShoppinglistManager {
 	 * @param sl - Shopping list to be replaced
 	 */
 	public void editList(Shoppinglist sl, OnCompletetionListener<Shoppinglist> listener) {
-		editList(sl, listener, new Date());
+		editList(sl, listener, new Date(), user());
 	}
 	
-	private void editList(final Shoppinglist sl, final OnCompletetionListener<Shoppinglist> l, final Date date) {
-
+	private void editList(final Shoppinglist sl, final OnCompletetionListener<Shoppinglist> l, final Date date, final int userId) {
+		
 		addQueue(new Runnable() {
 			
 			public void run() {
 				
 				// Check for changes in previous item, and update surrounding
-				Shoppinglist oldList = DbHelper.getInstance().getList(sl.getId());
+				Shoppinglist oldList = DbHelper.getInstance().getList(sl.getId(), userId);
 				if (oldList == null) {
 					Utils.logd(TAG, "No such list exists, considder addList() instead: " + sl.toString());
 					return;
@@ -630,17 +638,17 @@ public class ShoppinglistManager {
 					DbHelper d = DbHelper.getInstance();
 					
 					// If there is an item pointing at sl, it needs to point at the oldList.prev
-					Shoppinglist sliAfter = d.getListPrevious(sl.getId());
+					Shoppinglist sliAfter = d.getListPrevious(sl.getId(), userId);
 					if (sliAfter != null) {
 						sliAfter.setPreviousId(oldList.getPreviousId());
-						d.editList(sliAfter);
+						d.editList(sliAfter, userId);
 					}
 					
 					// If some another sl was pointing at the same item, it should be pointing at sl
-					Shoppinglist sliSamePointer = d.getListPrevious(sl.getPreviousId());
+					Shoppinglist sliSamePointer = d.getListPrevious(sl.getPreviousId(), userId);
 					if (sliSamePointer != null) {
 						sliSamePointer.setPreviousId(sl.getId());
-						d.editList(sliSamePointer);
+						d.editList(sliSamePointer, userId);
 					}
 					
 				}
@@ -658,18 +666,18 @@ public class ShoppinglistManager {
 							Shoppinglist s = sl;
 							if (Utils.isSuccess(statusCode)) {
 								s = Shoppinglist.fromJSON(data);
-								Shoppinglist dbList = DbHelper.getInstance().getList(s.getId());
+								Shoppinglist dbList = DbHelper.getInstance().getList(s.getId(), userId);
 								if (dbList != null && !s.getModified().before(dbList.getModified()) ) {
 									s.setState(Shoppinglist.State.SYNCED);
 									// If server havent delivered an prev_id, then use old id
 									s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
-									DbHelper.getInstance().editList(s);
+									DbHelper.getInstance().editList(s, userId);
 									notifyListListener(l, false, 200, sl, null);
 									notifyListSubscribers(false, null, null, idToList(sl));
 								}
 
 							} else {
-								revertList(sl, l);
+								revertList(sl, l, userId);
 							}
 							
 						}
@@ -682,13 +690,13 @@ public class ShoppinglistManager {
 				}
 
 
-				int row = DbHelper.getInstance().editList(sl);
+				int row = DbHelper.getInstance().editList(sl, userId);
 				// Do local callback stuff
 				if (row == 1) {
 					notifyListListener(l, false, 200, sl, null);
 					notifyListSubscribers(false, null, null, idToList(sl));
 				} else {
-					revertList(sl, l);
+					revertList(sl, l, userId);
 				}
 				
 				
@@ -705,10 +713,10 @@ public class ShoppinglistManager {
 	 * @param sl - Shopping list to delete
 	 */
 	public void deleteList(final Shoppinglist sl, final OnCompletetionListener<Shoppinglist> listener) {
-		deleteList(sl, listener, new Date());
+		deleteList(sl, listener, new Date(), user());
 	}
 	
-	private void deleteList(final Shoppinglist sl, final OnCompletetionListener<Shoppinglist> l, final Date date) {
+	private void deleteList(final Shoppinglist sl, final OnCompletetionListener<Shoppinglist> l, final Date date, final int userId) {
 		
 		addQueue(new Runnable() {
 			
@@ -718,21 +726,21 @@ public class ShoppinglistManager {
 				sl.setModified(date);
 				
 				// Update previous pointer, to preserve order
-				Shoppinglist after = DbHelper.getInstance().getListPrevious(sl.getId());
+				Shoppinglist after = DbHelper.getInstance().getListPrevious(sl.getId(), userId);
 				if (after != null) {
 					after.setPreviousId(sl.getPreviousId());
-					DbHelper.getInstance().editList(after);
+					DbHelper.getInstance().editList(after, userId);
 				}
 				
 				// Mark all items in list to be deleted
 				for (ShoppinglistItem sli : getItems(sl)) {
 					sli.setState(Shoppinglist.State.DELETE);
-					DbHelper.getInstance().editItem(sli);
+					DbHelper.getInstance().editItem(sli, userId);
 				}
 				
 				// Update local version of shoppinglist
 				sl.setState(Shoppinglist.State.DELETE);
-				DbHelper.getInstance().editList(sl);
+				DbHelper.getInstance().editList(sl, userId);
 				
 				if (mustSync()) {
 					
@@ -745,12 +753,12 @@ public class ShoppinglistManager {
 								public void run() {
 									
 									if (Utils.isSuccess(statusCode)) {
-										DbHelper.getInstance().deleteList(sl);
-										DbHelper.getInstance().deleteItems(sl.getId(), null);
+										DbHelper.getInstance().deleteList(sl, userId);
+										DbHelper.getInstance().deleteItems(sl.getId(), null, userId);
 										notifyListListener(l, true, statusCode, sl, null);
 										notifyListSubscribers(true, null, idToList(sl), null);
 									} else {
-										revertList(sl, l);
+										revertList(sl, l, userId);
 									}
 									
 								}
@@ -763,9 +771,9 @@ public class ShoppinglistManager {
 					addQueue(a, sl.getId());
 					
 				} else {
-					row = DbHelper.getInstance().deleteList(sl);
+					row = DbHelper.getInstance().deleteList(sl, userId);
 					if (row == 1) {
-						DbHelper.getInstance().deleteItems(sl.getId(), null);
+						DbHelper.getInstance().deleteItems(sl.getId(), null, userId);
 					}
 				}
 				
@@ -774,7 +782,7 @@ public class ShoppinglistManager {
 					notifyListListener(l, false, 200, sl, null);
 					notifyListSubscribers(false, null, idToList(sl), null);
 				} else {
-					revertList(sl, l);
+					revertList(sl, l, userId);
 				}
 				
 			}
@@ -788,7 +796,7 @@ public class ShoppinglistManager {
 	 * @return A shopping list item, or <code>null</code> if no item can be found.
 	 */
 	public ShoppinglistItem getItem(String id) {
-		return DbHelper.getInstance().getItem(id);
+		return DbHelper.getInstance().getItem(id, user());
 	}
 
 	/**
@@ -797,7 +805,7 @@ public class ShoppinglistManager {
 	 * @return <li>Shopping list or null if no shopping list exists
 	 */
 	public ArrayList<ShoppinglistItem> getItemFromDescription(String description) {
-		return DbHelper.getInstance().getItemFromDescription(description);
+		return DbHelper.getInstance().getItemFromDescription(description, user());
 	}
 	
 	
@@ -807,7 +815,7 @@ public class ShoppinglistManager {
 	 * @return A list of shoppinglistitem.
 	 */
 	public ArrayList<ShoppinglistItem> getItems(Shoppinglist sl) {
-		ArrayList<ShoppinglistItem> list = DbHelper.getInstance().getItems(sl);
+		ArrayList<ShoppinglistItem> list = DbHelper.getInstance().getItems(sl, user());
 		return list;
 	}
 	
@@ -833,6 +841,8 @@ public class ShoppinglistManager {
 	 */
 	@SuppressLint("DefaultLocale") 
 	public void addItem(final ShoppinglistItem sli, final boolean incrementCountItemExists, final OnCompletetionListener<ShoppinglistItem> l) {
+		
+		final int userId = user();
 		
 		addQueue(new Runnable() {
 			
@@ -873,10 +883,10 @@ public class ShoppinglistManager {
 				sli.setModified(new Date());
 				sli.setPreviousId(ShoppinglistItem.FIRST_ITEM);
 				
-				ShoppinglistItem first = DbHelper.getInstance().getFirstItem(sli.getShoppinglistId());
+				ShoppinglistItem first = DbHelper.getInstance().getFirstItem(sli.getShoppinglistId(), userId);
 				if (first != null) {
 					first.setPreviousId(sli.getId());
-					DbHelper.getInstance().editItem(first);
+					DbHelper.getInstance().editItem(first, userId);
 				}
 				
 				int count = 0;
@@ -896,15 +906,15 @@ public class ShoppinglistManager {
 									ShoppinglistItem s = sli;
 									if (Utils.isSuccess(statusCode)) {
 										s = ShoppinglistItem.fromJSON(data);
-										ShoppinglistItem dbItem = DbHelper.getInstance().getItem(s.getId());
+										ShoppinglistItem dbItem = DbHelper.getInstance().getItem(s.getId(), userId);
 										if (dbItem != null && !s.getModified().before(dbItem.getModified()) ) {
 											s.setState(ShoppinglistItem.State.SYNCED);
 											// If server havent delivered an prev_id, then use old id
 											s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
-											DbHelper.getInstance().editItem(s);
+											DbHelper.getInstance().editItem(s, userId);
 										}
 									} else {
-										revertItem(sli, l);
+										revertItem(sli, l, userId);
 									}
 									
 								}
@@ -920,14 +930,14 @@ public class ShoppinglistManager {
 					sli.setState(ShoppinglistItem.State.SYNCED);
 				}
 				
-				count = DbHelper.getInstance().insertItem(sli);
+				count = DbHelper.getInstance().insertItem(sli, userId);
 				
 				// Do local callback stuff
 				if (count == 1) {
 					notifyItemListener(l, false, 200, sli, null);
 					notifyItemSubscribers(false, idToList(sli), null, null);
 				} else {
-					revertItem(sli, l);
+					revertItem(sli, l, userId);
 				}
 					
 				
@@ -942,17 +952,17 @@ public class ShoppinglistManager {
 	 * @param sli shopping list item to edit
 	 */
 	public void editItem(ShoppinglistItem sli, OnCompletetionListener<ShoppinglistItem> listener) {
-		editItem(sli, listener, new Date());
+		editItem(sli, listener, new Date(), user());
 	}
 
-	private void editItem(final ShoppinglistItem sli, final OnCompletetionListener<ShoppinglistItem> l, final Date date) {
+	private void editItem(final ShoppinglistItem sli, final OnCompletetionListener<ShoppinglistItem> l, final Date date, final int userId) {
 		
 		addQueue(new Runnable() {
 			
 			public void run() {
 				
 				// Check for changes in previous item, and update surrounding
-				ShoppinglistItem oldItem = DbHelper.getInstance().getItem(sli.getId());
+				ShoppinglistItem oldItem = DbHelper.getInstance().getItem(sli.getId(), userId);
 				if (oldItem == null) {
 					Utils.logd(TAG, "No such item exists, considder addItem() instead: " + sli.toString());
 					return;
@@ -964,17 +974,17 @@ public class ShoppinglistManager {
 					String sl = sli.getShoppinglistId();
 					
 					// If there is an item pointing at sli, it needs to point at the oldSli.prev
-					ShoppinglistItem sliAfter = d.getItemPrevious(sl, sli.getId());
+					ShoppinglistItem sliAfter = d.getItemPrevious(sl, sli.getId(), userId);
 					if (sliAfter != null) {
 						sliAfter.setPreviousId(oldItem.getPreviousId());
-						d.editItem(sliAfter);
+						d.editItem(sliAfter, userId);
 					}
 					
 					// If some another sli was pointing at the same item, it should be pointing at sli
-					ShoppinglistItem sliSamePointer = d.getItemPrevious(sl, sli.getPreviousId());
+					ShoppinglistItem sliSamePointer = d.getItemPrevious(sl, sli.getPreviousId(), userId);
 					if (sliSamePointer != null) {
 						sliSamePointer.setPreviousId(sli.getId());
-						d.editItem(sliSamePointer);
+						d.editItem(sliSamePointer, userId);
 					}
 					
 				}
@@ -999,17 +1009,17 @@ public class ShoppinglistManager {
 									ShoppinglistItem s = sli;
 									if (Utils.isSuccess(statusCode)) {
 										s = ShoppinglistItem.fromJSON(data);
-										ShoppinglistItem dbItem = DbHelper.getInstance().getItem(s.getId());
+										ShoppinglistItem dbItem = DbHelper.getInstance().getItem(s.getId(), userId);
 										if (dbItem != null && !s.getModified().before(dbItem.getModified()) ) {
 											s.setState(ShoppinglistItem.State.SYNCED);
 											// If server havent delivered an prev_id, then use old id
 											s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
-											DbHelper.getInstance().editItem(s);
+											DbHelper.getInstance().editItem(s, userId);
 								        	notifyItemListener(l, true, statusCode, s, null);
 								        	notifyItemSubscribers(true, null, null, idToList(s));
 										}
 									} else {
-										revertItem(s, l);
+										revertItem(s, l, userId);
 									}
 									
 								}
@@ -1027,13 +1037,13 @@ public class ShoppinglistManager {
 					sli.setState(ShoppinglistItem.State.SYNCED);
 				}
 
-				row = DbHelper.getInstance().editItem(sli);
+				row = DbHelper.getInstance().editItem(sli, userId);
 				
 		        if (row == 1) {
 		        	notifyItemListener(l, false, 200, sli, null);
 		        	notifyItemSubscribers(false, null, null, idToList(sli));
 				} else {
-					revertItem(sli, l);
+					revertItem(sli, l, userId);
 				}
 		        
 			}
@@ -1077,6 +1087,8 @@ public class ShoppinglistManager {
 	 */
 	private void deleteItems(final Shoppinglist sl, final String whatToDelete, final OnCompletetionListener<Shoppinglist> l) {
 		
+		final int userId = user();
+		
 		addQueue(new Runnable() {
 			
 			public void run() {
@@ -1102,18 +1114,18 @@ public class ShoppinglistManager {
 						// Delete all items
 						sli.setState(ShoppinglistItem.State.DELETE);
 						sli.setModified(d);
-						DbHelper.getInstance().editItem(sli);
+						DbHelper.getInstance().editItem(sli, userId);
 						deleted.add(sli.getId());
 					} else if (sli.isTicked() == state) {
 						// Delete if ticked matches the requested state
 						sli.setState(ShoppinglistItem.State.DELETE);
 						sli.setModified(d);
-						DbHelper.getInstance().editItem(sli);
+						DbHelper.getInstance().editItem(sli, userId);
 						deleted.add(sli.getId());
 					} else {
 						if (!sli.getPreviousId().equals(preGoodId)) {
 							sli.setPreviousId(preGoodId);
-							DbHelper.getInstance().editItem(sli);
+							DbHelper.getInstance().editItem(sli, userId);
 						}
 						preGoodId = sli.getId();
 						count --;
@@ -1133,12 +1145,12 @@ public class ShoppinglistManager {
 								public void run() {
 									
 									if (Utils.isSuccess(statusCode)) {
-										DbHelper.getInstance().deleteItems(sl.getId(), state);
+										DbHelper.getInstance().deleteItems(sl.getId(), state, userId);
 									} else {
 										ArrayList<ShoppinglistItem> items = getItems(sl);
 										for (ShoppinglistItem sli : items) {
 											if (sli.getState() == ShoppinglistItem.State.DELETE) {
-												revertItem(sli, null);
+												revertItem(sli, null, userId);
 											} 
 										}
 									}
@@ -1152,7 +1164,7 @@ public class ShoppinglistManager {
 					addQueue(a, sl.getId());
 					
 				} else {
-					count = DbHelper.getInstance().deleteItems(sl.getId(), state) ;
+					count = DbHelper.getInstance().deleteItems(sl.getId(), state, userId) ;
 
 				}
 
@@ -1160,7 +1172,7 @@ public class ShoppinglistManager {
 		        	notifyListListener(l, false, 200, sl, null);
 		        	notifyListSubscribers(false, null, idToList(sl), null);
 				} else {
-		        	revertList(sl, l);
+		        	revertList(sl, l, userId);
 				}
 		        
 			}
@@ -1175,20 +1187,20 @@ public class ShoppinglistManager {
 	 * @param sli to delete from the db
 	 */
 	public void deleteItem(final ShoppinglistItem sli, final OnCompletetionListener<ShoppinglistItem> listener) {
-		deleteItem(sli, listener, new Date());
+		deleteItem(sli, listener, new Date(), user());
 	}
 	
-	private void deleteItem(final ShoppinglistItem sli, final OnCompletetionListener<ShoppinglistItem> l, final Date date) {
+	private void deleteItem(final ShoppinglistItem sli, final OnCompletetionListener<ShoppinglistItem> l, final Date date, final int userId) {
 		
 		addQueue(new Runnable() {
 			
 			public void run() {
 				
 				// Update previous pointer
-				ShoppinglistItem after = DbHelper.getInstance().getItemPrevious(sli.getShoppinglistId(), sli.getId());
+				ShoppinglistItem after = DbHelper.getInstance().getItemPrevious(sli.getShoppinglistId(), sli.getId(), userId);
 				if (after != null) {
 					after.setPreviousId(sli.getPreviousId());
-					DbHelper.getInstance().editItem(after);
+					DbHelper.getInstance().editItem(after, userId);
 				}
 
 				int count = 0;
@@ -1197,7 +1209,7 @@ public class ShoppinglistManager {
 				if (mustSync()) {
 					
 					sli.setState(ShoppinglistItem.State.DELETE);
-					count = DbHelper.getInstance().editItem(sli);
+					count = DbHelper.getInstance().editItem(sli, userId);
 					
 					JsonObjectListener cb = new JsonObjectListener() {
 						
@@ -1208,11 +1220,11 @@ public class ShoppinglistManager {
 								public void run() {
 									if (Utils.isSuccess(statusCode)) {
 										ShoppinglistItem s = ShoppinglistItem.fromJSON(item);
-										DbHelper.getInstance().deleteItem(s);
+										DbHelper.getInstance().deleteItem(s, userId);
 							        	notifyItemListener(l, true, statusCode, s, null);
 							        	notifyItemSubscribers(true, null, idToList(s), null);
 									} else {
-										revertItem(sli, l);
+										revertItem(sli, l, userId);
 									}
 								}
 							};
@@ -1225,7 +1237,7 @@ public class ShoppinglistManager {
 					
 					
 				} else {
-					count = DbHelper.getInstance().deleteItem(sli);
+					count = DbHelper.getInstance().deleteItem(sli, userId);
 				}
 				
 				// Do local callback stuff
@@ -1233,7 +1245,7 @@ public class ShoppinglistManager {
 					notifyItemListener(l, false, 200, sli, null);
 					notifyItemSubscribers(false, null, idToList(sli), null);
 				} else {
-					revertItem(sli, l);
+					revertItem(sli, l, userId);
 				}
 			}
 		});
@@ -1255,21 +1267,21 @@ public class ShoppinglistManager {
 				switch (sl.getState()) {
 					
 					case Shoppinglist.State.DELETE:
-						deleteList(sl, null, sl.getModified());
+						deleteList(sl, null, sl.getModified(), sl.getUserId());
 						break;
 						
 					case Shoppinglist.State.SYNCING:
-						editList(sl, null, sl.getModified());
+						editList(sl, null, sl.getModified(), sl.getUserId());
 						break;
 						
 					case Shoppinglist.State.TO_SYNC:
 						// Don't sync if not logged in
 						if (mustSync())
-							editList(sl, null, sl.getModified());
+							editList(sl, null, sl.getModified(), sl.getUserId());
 						break;
 	
 					case Shoppinglist.State.ERROR:
-						revertList(sl, null);
+						revertList(sl, null, sl.getUserId());
 						break;
 						
 					default:
@@ -1285,7 +1297,7 @@ public class ShoppinglistManager {
 
 		// If we didn't have anything local to commit, then sync everything 
 		if (sls.size() == count)
-			syncLists();
+			syncLists(user());
 
 	}
 	
@@ -1302,21 +1314,21 @@ public class ShoppinglistManager {
 				
 				switch (sli.getState()) {
 					case ShoppinglistItem.State.DELETE:
-						deleteItem(sli, null, sli.getModified());
+						deleteItem(sli, null, sli.getModified(), sli.getUserId());
 						break;
 						
 					case ShoppinglistItem.State.SYNCING:
-						editItem(sli, null, sli.getModified());
+						editItem(sli, null, sli.getModified(), sli.getUserId());
 						break;
 						
 					case ShoppinglistItem.State.TO_SYNC:
 						// Don't sync if not logged in
 						if (mustSync())
-							editItem(sli, null, sli.getModified());
+							editItem(sli, null, sli.getModified(), sli.getUserId());
 						break;
 						
 					case ShoppinglistItem.State.ERROR:
-						revertItem(sli, null);
+						revertItem(sli, null, sli.getUserId());
 						break;
 
 					default:
@@ -1330,12 +1342,12 @@ public class ShoppinglistManager {
 
 		// If we didn't have anything local to commit, then sync everything 
 		if (slis.size() == count) {
-			syncItems(sl);
+			syncItems(sl, sl.getUserId());
 		}
 		
 	}
 	
-	private void revertList(final Shoppinglist sl, final OnCompletetionListener<Shoppinglist> l) {
+	private void revertList(final Shoppinglist sl, final OnCompletetionListener<Shoppinglist> l, final int userId) {
 		
 		addQueue(new Runnable() {
 			
@@ -1343,7 +1355,7 @@ public class ShoppinglistManager {
 
 				if (sl.getState() != Shoppinglist.State.ERROR) {
 					sl.setState(Shoppinglist.State.ERROR);
-					DbHelper.getInstance().editList(sl);
+					DbHelper.getInstance().editList(sl, userId);
 				}
 				
 				JsonObjectListener listListener = new JsonObjectListener() {
@@ -1355,9 +1367,9 @@ public class ShoppinglistManager {
 							s = Shoppinglist.fromJSON(item);
 							s.setState(Shoppinglist.State.SYNCED);
 							s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
-							DbHelper.getInstance().editList(s);
+							DbHelper.getInstance().editList(s, userId);
 						} else {
-							DbHelper.getInstance().deleteList(sl);
+							DbHelper.getInstance().deleteList(sl, userId);
 						}
 						notifyListSubscribers(true, null, null, idToList(s));
 					}
@@ -1369,7 +1381,7 @@ public class ShoppinglistManager {
 		
 	}
 	
-	private void revertItem(final ShoppinglistItem sli, final OnCompletetionListener<ShoppinglistItem> l) {
+	private void revertItem(final ShoppinglistItem sli, final OnCompletetionListener<ShoppinglistItem> l, final int userId) {
 		
 		addQueue(new Runnable() {
 			
@@ -1377,7 +1389,7 @@ public class ShoppinglistManager {
 				
 				if (sli.getState() != ShoppinglistItem.State.ERROR) {
 					sli.setState(ShoppinglistItem.State.ERROR);
-					DbHelper.getInstance().editItem(sli);
+					DbHelper.getInstance().editItem(sli, userId);
 				}
 				
 				JsonObjectListener itemListener = new JsonObjectListener() {
@@ -1389,9 +1401,9 @@ public class ShoppinglistManager {
 							s = ShoppinglistItem.fromJSON(item);
 							s.setState(ShoppinglistItem.State.SYNCED);
 							s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
-							DbHelper.getInstance().editItem(s);
+							DbHelper.getInstance().editItem(s, userId);
 						} else {
-							DbHelper.getInstance().deleteItem(sli);
+							DbHelper.getInstance().deleteItem(sli, userId);
 						}
 						notifyItemListener(l, true, statusCode, s, error);
 						notifyItemSubscribers(true, null, null, idToList(s));
@@ -1412,8 +1424,6 @@ public class ShoppinglistManager {
 			// Remove this from UI thread, and into looper queue
 			if (mEta.getUser().isLoggedIn()) {
 				mSyncLoop.run();
-			} else {
-				DbHelper.getInstance().clearUserDB();
 			}
 		}
 		
@@ -1421,14 +1431,12 @@ public class ShoppinglistManager {
 	
 	public void onResume() {
 		Eta.getInstance().getSession().subscribe(sessionListener);
-		DbHelper.getInstance().openDB();
 		dbCleanup();
 		mSyncLoop.run();
 	}
 	
 	public void onPause() {
 		Eta.getInstance().getSession().subscribe(sessionListener);
-		DbHelper.getInstance().closeDB();
 	}
 	
 	/**
@@ -1443,28 +1451,27 @@ public class ShoppinglistManager {
 			mSyncSpeed = time;
 	}
 	
+	private int user() {
+		return Eta.getInstance().getUser().getId();
+	}
+	
 	/**
 	 * Deletes all rows in DB.
 	 */
-	public void clearDB() {
+	public void clear() {
 		DbHelper.getInstance().clear();
-		syncLists();
+		if (Eta.getInstance().getUser().isLoggedIn())
+			syncLists(user());
 	}
 
 	/**
 	 * Deletes all rows belonging to a logged in user
 	 */
-	public void clearUserDB() {
-		DbHelper.getInstance().clearUserDB();
+	public void clear(int userId) {
+		DbHelper.getInstance().clear(userId);
+		syncLists(userId);
 	}
 
-	/**
-	 * Deletes all rows not belonging to a user (offline usage)
-	 */
-	public void clearNonUserDB() {
-		DbHelper.getInstance().clearNonUserDB();
-	}
-	
 	/**
 	 * Checks if a user is logged in, and are able to sync items.
 	 * @return true if we can sync, else false.

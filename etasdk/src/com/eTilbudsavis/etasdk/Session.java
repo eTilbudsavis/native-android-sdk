@@ -272,9 +272,9 @@ public class Session implements Serializable {
 	public synchronized void signout(final JsonObjectListener listener) {
 		
 		mIsUpdating = true;
-		
+		int userId = mUser.getId();
 		clearUser();
-		mEta.getShoppinglistManager().clearUserDB();
+		mEta.getShoppinglistManager().clear(userId);
 		Bundle b = new Bundle();
 		b.putString(Params.EMAIL, "");
 		JsonObjectListener session = new JsonObjectListener() {

@@ -3,6 +3,8 @@ package com.eTilbudsavis.etasdk;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.User;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -17,7 +19,7 @@ public class Settings {
 	private static final String SESSION_USER		= "session_user";
 	private static final String SESSION_PASS		= "session_pass";
 	private static final String SESSION_FACEBOOK	= "session_facebook";
-
+	
 	private static final String SLM_CURRENT_ONLINE	= "slm_current_online";
 	private static final String SLM_CURRENT_OFFLINE	= "slm_current_offline";
 	
@@ -94,7 +96,7 @@ public class Settings {
 	public boolean setShoppinglistManagerCurrent(String id, boolean isLoggedin) {
 		return mEditor.putString(isLoggedin ? SLM_CURRENT_ONLINE : SLM_CURRENT_OFFLINE , id).commit();
 	}
-	
+
 	public SharedPreferences getPrefs() {
 		return mPrefs;
 	}

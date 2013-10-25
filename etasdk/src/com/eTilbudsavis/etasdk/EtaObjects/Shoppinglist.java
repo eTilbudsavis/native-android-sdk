@@ -45,6 +45,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	private Share mOwner = new Share();
 	private int mState = State.TO_SYNC;
 	private String mPrevId;
+	private int mUserId = -1;
 	
 	private Shoppinglist() {
         String id = Utils.createUUID();
@@ -176,6 +177,15 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		mOwner = owner;
 		return this;
 	}
+
+	public int getUserId() {
+		return mUserId;
+	}
+
+	public Shoppinglist setUserId(int userId) {
+		mUserId = userId;
+		return this;
+	}
 	
 	/**
 	 * We are not comparing the modified field, as this field does not
@@ -196,6 +206,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 				mModified.equals(sl.getModified()) &&
 				mOwner.equals(sl.getOwner()) &&
 				stringCompare(mName, sl.getName()) &&
+				mUserId == sl.getUserId() &&
 				stringCompare(mPrevId, sl.getPreviousId());
 	}
 
@@ -214,6 +225,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		.append(", modified=").append(mModified)
 		.append(", state=").append(mState)
 		.append(", owner=").append(mOwner.toString())
+		.append(", user=").append(mUserId)
 		.append(", previous_id=").append(mPrevId);
 		return sb.append("]").toString();
 	}
@@ -221,13 +233,13 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	public static Comparator<Shoppinglist> NameComparator  = new Comparator<Shoppinglist>() {
 
 		public int compare(Shoppinglist item1, Shoppinglist item2) {
-			return item1.getName().compareToIgnoreCase(item2.getName());
+			return item1.getName().toLowerCase().compareTo(item2.getName().toLowerCase());
 		}
 
 	};
 
 	public int compareTo(Shoppinglist another) {
-        return this.mName.compareTo(another.getName());
+        return this.mName.toLowerCase().compareTo(another.getName().toLowerCase());
 	}
 
 }

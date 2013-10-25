@@ -40,6 +40,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	private Offer mOffer = null;
 	private String mShoppinglistId;
 	private String mPrevId;
+	private int mUserId = -1;
 
 	public ShoppinglistItem() {
         String id =Utils.createUUID();
@@ -209,7 +210,16 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 			mState = state;
 		return this;
 	}
-	
+
+	public int getUserId() {
+		return mUserId;
+	}
+
+	public ShoppinglistItem setUserId(int userId) {
+		mUserId = userId;
+		return this;
+	}
+
 	public Bundle getApiParams() {
 		
 		Bundle apiParams = new Bundle();
@@ -248,7 +258,8 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 				mModified.equals(sli.getModified()) &&
 				stringCompare(mShoppinglistId, sli.getShoppinglistId()) &&
 				stringCompare(mCreator, sli.getCreator()) &&
-				stringCompare(mPrevId, sli.getPreviousId());
+				stringCompare(mPrevId, sli.getPreviousId()) &&
+				mUserId == sli.getUserId();
 	}
 
 	@Override
@@ -274,6 +285,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 			sb.append(", creator=").append(mCreator)
 			.append(", shoppinglist_id=").append(mShoppinglistId)
 			.append(", state=").append(mState)
+			.append(", userId=").append(mUserId)
 			.append(", previous_id=").append(mPrevId);
 		}
 		return sb.append("]").toString();
