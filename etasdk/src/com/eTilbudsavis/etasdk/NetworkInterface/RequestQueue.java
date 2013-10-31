@@ -70,12 +70,7 @@ public class RequestQueue {
     public RequestQueue(Eta eta, Cache cache, Network network) {
     	this(eta, cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE, new Delivery(eta.getHandler()));
     }
-
-	/** Construct a plain and simple RequestQueue */
-    public RequestQueue(Eta eta) {
-    	this(eta, new Cache(), new HttpNetwork());
-    }
-
+    
 	/** Initialize all mechanisms required to dispatch requests */
 	public void start() {
 		
@@ -127,9 +122,8 @@ public class RequestQueue {
 			});
 				
 		} else {
-			
-			/* If this method had lock while a thread tried to add new request,
-			 * session might not be expired any more, so just retry immediately. */
+			// If this method had lock while a thread tried to add new request,
+			// session might not be expired any more, so just retry immediately.
 			mNetworkQueue.add(r);
 		}
 		

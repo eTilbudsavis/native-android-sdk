@@ -7,11 +7,15 @@ import android.os.Process;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
+import com.eTilbudsavis.etasdk.NetworkHelpers.SessionError;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 @SuppressWarnings("rawtypes")
 public class NetworkDispatcher extends Thread {
 
+	public static final String TAG = "NetworkDispatcher";
+	
     /** Eta object controlling the whole lot */
     private final Eta mEta;
     
@@ -76,24 +80,33 @@ public class NetworkDispatcher extends Thread {
                 
                 // Perform the network request.
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
-                
+
+                updateSessionInfo(networkResponse.headers);
+
                 // Parse the response here on the worker thread.
                 Response<?> response = request.parseNetworkResponse(networkResponse);
-
+                
                 if(request.shouldPrintDebug()) {
                 	request.printDebug(request, networkResponse);
                 }
                 
-                updateSessionInfo(networkResponse.headers);
-                
-                //TODO add to cache, if possible
-                // hmm, we'd need a parsed response for that... 
+                // If the request is cachable
+                if (request.shouldCache() && response.cache != null)
+                	mCache.put(response.cache);
                 
                 mDelivery.postResponse(request, response);
                 
+            } catch (SessionError e) {
+            	if (request.doSessionUpdate()) {
+            		request.doSessionUpdate(false);
+            		mRequestQueue.sessionUpdate(request);
+            	} else {
+                    mDelivery.postError(request, e);
+            	}
+            } catch (EtaError e) {
+                mDelivery.postError(request, e);
             } catch (Exception e) {
-            	// What kind of errors do we expect?
-                // VolleyLog.e(e, "Unhandled exception %s", e.toString());
+            	EtaLog.d(TAG, e);
                 mDelivery.postError(request, new EtaError());
             }
         }

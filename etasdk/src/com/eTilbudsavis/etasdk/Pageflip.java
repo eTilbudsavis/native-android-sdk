@@ -27,7 +27,7 @@ import android.webkit.WebViewClient;
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
-import com.eTilbudsavis.etasdk.NetworkInterface.Cache.CacheItem;
+import com.eTilbudsavis.etasdk.NetworkInterface.Cache.Item;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 

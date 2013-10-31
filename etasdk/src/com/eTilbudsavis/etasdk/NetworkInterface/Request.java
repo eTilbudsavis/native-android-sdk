@@ -12,236 +12,263 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressWarnings("rawtypes")
 public abstract class Request<T> implements Comparable<Request<T>> {
-	
+
 	public static final String TAG = "Request";
+
+	/** Default encoding for POST or PUT parameters. See {@link #getParamsEncoding()}. */
+	private static final String DEFAULT_PARAMS_ENCODING = "UTF-8";
+
+	/** Listener interface, for responses */
+	private final Listener<T> mListener;
+
+	/** Request method of this request.  Currently supports GET, POST, PUT, and DELETE. */
+	private final int mMethod;
+
+	/** URL of this request. */
+	private String mUrl;
+
+	/** Headers to be used in this request */
+	private Map<String, String> mHeaders = new HashMap<String, String>();
+
+	/** Parameters to use in this request */
+	private Bundle mQuery = new Bundle();
+
+	/** Sequence number used for prioritizing the queue */
+	private int mSequence = 0;
+
+	/** Should this request use location in the query */
+	private boolean mUseLocation = true;
+
+	/** If true Request will return data from cache if exists */
+	private boolean mUseCache = true;
+
+	/** Whether or not responses to this request should be cached. */
+	private boolean mShouldCache = true;
+
+	/** Whether to only return cache item. */
+	private boolean mReturnCacheOnlyIfPossible = false;
+
+	/** Prints debug information when a request is done */
+	private boolean mPrintDebug = false;
+
+	/** Whether or not this request has been canceled. */
+	private boolean mCanceled = false;
+
+	/** Determine if we should try to update session */
+	private boolean mSessionUpdate = true;
 	
-    /** Default encoding for POST or PUT parameters. See {@link #getParamsEncoding()}. */
-    private static final String DEFAULT_PARAMS_ENCODING = "UTF-8";
+	public enum Priority {
+		LOW, MEDIUM, HIGH
+	}
 
-    /** Listener interface, for responses */
-    private final Listener<T> mListener;
-    
-    /** Request method of this request.  Currently supports GET, POST, PUT, and DELETE. */
-    private final int mMethod;
+	/** Supported request methods. */
+	public interface Method {
+		int GET = 0;
+		int POST = 1;
+		int PUT = 2;
+		int DELETE = 3;
+	}
 
-    /** URL of this request. */
-    private String mUrl;
-    
-    /** Headers to be used in this request */
-    private Map<String, String> mHeaders = new HashMap<String, String>();
-    
-    /** Parameters to use in this request */
-    private Bundle mQuery = new Bundle();
-    
-    /** Sequence number used for prioritizing the queue */
-    private int mSequence = 0;
-    
-    /** Should this request use location in the query */
-    private boolean mUseLocation = true;
-    
-    /** If true Request will return data from cache if exists */
-    private boolean mUseCache = true;
-    
-    /** Whether or not responses to this request should be cached. */
-    private boolean mShouldCache = true;
-    
-    /** Whether to only return cache item. */
-    private boolean mReturnCacheOnlyIfPossible = false;
+	/**
+	 * Creates a new request with the given method (one of the values from {@link Method}),
+	 * URL, and error listener.  Note that the normal response listener is not provided here as
+	 * delivery of responses is provided by subclasses, who have a better idea of how to deliver
+	 * an already-parsed response.
+	 */
+	public Request(int method, String url, Listener<T> listener) {
+		mMethod = method;
+		mUrl = url;
+		mListener = listener;
+	}
 
-    /** Prints debug information when a request is done */
-    private boolean mPrintDebug = false;
-    
-    /** Whether or not this request has been canceled. */
-    private boolean mCanceled = false;
-    
-    public enum Priority {
-    	LOW, MEDIUM, HIGH
-    }
-    
-    /** Supported request methods. */
-    public interface Method {
-        int GET = 0;
-        int POST = 1;
-        int PUT = 2;
-        int DELETE = 3;
-    }
+	/** Mark this request as canceled.  No callback will be delivered. */
+	public void cancel() {
+		mCanceled = true;
+	}
 
-    /**
-     * Creates a new request with the given method (one of the values from {@link Method}),
-     * URL, and error listener.  Note that the normal response listener is not provided here as
-     * delivery of responses is provided by subclasses, who have a better idea of how to deliver
-     * an already-parsed response.
-     */
-    public Request(int method, String url, Listener<T> listener) {
-        mMethod = method;
-        mUrl = url;
-        mListener = listener;
-    }
+	/** Returns true if this request has been canceled. */
+	public boolean isCanceled() {
+		return mCanceled;
+	}
 
-    /** Mark this request as canceled.  No callback will be delivered. */
-    public void cancel() {
-        mCanceled = true;
-    }
+	/** Returns a list of headers for this request. */
+	public Map<String, String> getHeaders() {
+		return mHeaders;
+	}
 
-    /** Returns true if this request has been canceled. */
-    public boolean isCanceled() {
-        return mCanceled;
-    }
+	public void setHeaders(Map<String, String> headers) {
+		mHeaders.putAll(headers);
+	}
 
-    /** Returns a list of headers for this request. */
-    public Map<String, String> getHeaders() {
-        return mHeaders;
-    }
-    
-    public void setHeaders(Map<String, String> headers) {
-    	mHeaders.putAll(headers);
-    }
+	/**
+	 * Return the method for this request.  Can be one of the values in {@link Method}.
+	 */
+	public int getMethod() {
+		return mMethod;
+	}
 
-    /**
-     * Return the method for this request.  Can be one of the values in {@link Method}.
-     */
-    public int getMethod() {
-        return mMethod;
-    }
-    
-    /**
-     * Returns the response listener for this request
-     * @return
-     */
-    public Listener getListener() {
-    	return mListener;
-    }
-    
-    /**
-     * returns wether this request is cachable or not
-     * @return
-     */
-    public boolean shouldCache() {
-    	return mShouldCache;
-    }
-    
-    protected void shouldCache(boolean cacheable) {
-    	mShouldCache = cacheable;
-    }
-    
-    /**
-     * Returns true, if this request should return cache, else false
-     * @return
-     */
-    public boolean useCache() {
-    	return mUseCache;
-    }
-    
-    /**
-     * Set whether this request may use data from cache or not
-     * @param useCache
-     * @return
-     */
-    public Request useCache(boolean useCache) {
-    	mUseCache = useCache;
-    	return Request.this;
-    }
-    
-    /**
-     * If true, this request wants debug information about the http request
-     * printed to consol
-     */
-    public boolean shouldPrintDebug() {
-    	return mPrintDebug;
-    }
-    
+	/**
+	 * Returns the response listener for this request
+	 * @return
+	 */
+	public Listener getListener() {
+		return mListener;
+	}
+
+	/**
+	 * returns wether this request is cachable or not
+	 * @return
+	 */
+	public boolean shouldCache() {
+		return mShouldCache;
+	}
+
+	protected void shouldCache(boolean cacheable) {
+		mShouldCache = cacheable;
+	}
+	
+	/**
+	 * Method for determining if this request should attempt a session update
+	 * @return true if session update should be attempted
+	 */
+	public boolean doSessionUpdate() {
+		return mSessionUpdate;
+	}
+
+	/**
+	 * Method for enabeling or disabeling session updates, on errors.
+	 */
+	public void doSessionUpdate(boolean update) {
+		mSessionUpdate = update;
+	}
+	
+	/**
+	 * Returns true, if this request should return cache, else false
+	 * @return
+	 */
+	public boolean useCache() {
+		return mUseCache;
+	}
+
+	/**
+	 * Set whether this request may use data from cache or not
+	 * @param useCache
+	 * @return
+	 */
+	public Request useCache(boolean useCache) {
+		mUseCache = useCache;
+		return Request.this;
+	}
+
+	/**
+	 * If true, this request wants debug information about the http request
+	 * printed to consol
+	 */
+	public boolean shouldPrintDebug() {
+		return mPrintDebug;
+	}
+
 	public Request printDebug(boolean print) {
-    	mPrintDebug = print;
-    	return Request.this;
-    }
-    
+		mPrintDebug = print;
+		return Request.this;
+	}
+
 	public boolean useLocation() {
 		return mUseLocation;
 	}
-	
+
 	public Request useLocation(boolean useLocation) {
 		mUseLocation = useLocation;
 		return Request.this;
 	}
-	
-    public void cacheOnlyIfPossible(boolean onlyCache) {
-    	mReturnCacheOnlyIfPossible = onlyCache;
-    }
-    
-    public boolean cacheOnlyIfPossible() {
-    	return mReturnCacheOnlyIfPossible;
-    }
 
-    /** Return the url for this request. */
-    public String getUrl() {
-        return mUrl;
-    }
+	public void cacheOnlyIfPossible(boolean onlyCache) {
+		mReturnCacheOnlyIfPossible = onlyCache;
+	}
 
-    /** Set the url of this request. */
-    public Request setUrl(String url) {
-    	mUrl = url;
-    	return Request.this;
-    }
-    
-    protected Bundle getQuery() {
-        return mQuery;
-    }
-    
-    public Request setQuery(Bundle query) {
-    	mQuery.putAll(query);
-    	return Request.this;
-    }
+	public boolean cacheOnlyIfPossible() {
+		return mReturnCacheOnlyIfPossible;
+	}
 
-    protected Priority getPriority() {
-    	return Priority.MEDIUM;
-    }
+	/** Return the url for this request. */
+	public String getUrl() {
+		return mUrl;
+	}
 
-    protected int getSequence() {
-    	return mSequence;
-    }
+	/** Set the url of this request. */
+	public Request setUrl(String url) {
+		mUrl = url;
+		return Request.this;
+	}
 
-    protected void setSequence(int seq) {
-    	mSequence = seq;
-    }
-    
-    protected String getParamsEncoding() {
-        return DEFAULT_PARAMS_ENCODING;
-    }
+	protected Bundle getQuery() {
+		return mQuery;
+	}
 
-    public String getBodyContentType() {
-        return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
-    }
-    
-    public byte[] getBody() {
-    	Bundle params = getQuery();
-        if (params != null && params.size() > 0) {
-            try {
+	public Request setQuery(Bundle query) {
+		mQuery.putAll(query);
+		return Request.this;
+	}
+
+	protected Priority getPriority() {
+		return Priority.MEDIUM;
+	}
+
+	protected int getSequence() {
+		return mSequence;
+	}
+
+	protected void setSequence(int seq) {
+		mSequence = seq;
+	}
+
+	protected String getParamsEncoding() {
+		return DEFAULT_PARAMS_ENCODING;
+	}
+
+	public String getBodyContentType() {
+		return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
+	}
+
+	public byte[] getBody() {
+		Bundle params = getQuery();
+		if (params != null && params.size() > 0) {
+			try {
 				return Utils.bundleToQueryString(params).getBytes(getParamsEncoding());
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
-        }
-        return null;
-    }
-    
-    abstract protected Response<T> parseNetworkResponse(NetworkResponse response);
-    
-    protected EtaError parseNetworkError(EtaError error) {
-        return error;
-    }
-    
+		}
+		return null;
+	}
+
+	abstract protected Response<T> parseNetworkResponse(NetworkResponse response);
+
+	protected EtaError parseNetworkError(EtaError error) {
+		return error;
+	}
+
 	abstract protected void deliverResponse(T response);
-	
+
 	public int compareTo(Request<T> other) {
 		Priority left = this.getPriority();
 		Priority right = other.getPriority();
 		return left == right ? this.mSequence - other.mSequence : right.ordinal() - left.ordinal();
+	}
+	
+
+    public boolean mayCache(NetworkResponse response) {
+    	String cacheControl = "Cache-Control";
+    	String noCache = "no-cache";
+    	String noStore = "no-store";
+    	return false;
     }
+    
 	
 	public void printDebug(Request request, NetworkResponse response) {
-		
+
 		String newLine = System.getProperty("line.separator");
-		
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("*** Pre execute ***").append(newLine);
 		sb.append("Method: ").append(getMethod()).append(newLine);
@@ -273,7 +300,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * @author Danny Hvam - danny@etilbudsavis.dk
 	 */
 	public static class Param {
-		
+
 		/** String identifying the order by parameter for all list calls to the API */
 		public static final String ORDER_BY = "order_by";
 
@@ -402,7 +429,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		public static final String SHOPPING_LIST_ID = "shopping_list_id";
 
 	}
-	
+
 	/**
 	 * Helper class for headers the eTilbudsavis API uses
 	 * @author Danny Hvam - danny@etilbudsavis.dk
@@ -411,10 +438,10 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
 		/** Header name for the session token */
 		public static final String X_TOKEN = "X-Token";
-		
+
 		/** Header name for the session expire token */
 		public static final String X_TOKEN_EXPIRES = "X-Token-Expires";
-		
+
 		/** Header name for the signature */
 		public static final String X_SIGNATURE = "X-Signature";
 
@@ -439,7 +466,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
 		/** String identifying the descending variable */
 		public static final String DESC = "-";
-		
+
 		/** Sort a list by popularity in ascending order. (smallest to largest) */
 		public static final String POPULARITY = "popularity";
 
@@ -483,5 +510,126 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		public static final String PAGE_DESC = DESC + PAGE;
 
 	}
-	
+
+	/**
+	 * @author Danny Hvam - danny@etilbudsavis.dk
+	 */
+	public static class Endpoint {
+		
+
+		// GLOBALS
+		public static final String PRODUCTION = "https://api.etilbudsavis.dk";
+		public static final String EDGE = "https://edge.etilbudsavis.dk";
+		public static final String STAGING = "https://staging.etilbudsavis.dk";
+
+		// LISTS
+		public static final String CATALOG_LIST = "/v2/catalogs";
+		public static final String CATALOG_ID = "/v2/catalogs/";
+		public static final String CATALOG_SEARCH = "/v2/catalogs/search";
+		
+		public static final String DEALER_LIST = "/v2/dealers";
+		public static final String DEALER_ID = "/v2/dealers/";
+		public static final String DEALER_SEARCH = "/v2/dealers/search";
+		
+		public static final String OFFER_LIST = "/v2/offers";
+		public static final String OFFER_ID = "/v2/offers/";
+		public static final String OFFER_SEARCH = "/v2/offers/search";
+		public static final String OFFER_TYPEAHEAD = "/v2/offers/typeahead";
+		
+		public static final String STORE_LIST = "/v2/stores";
+		public static final String STORE_ID = "/v2/stores/";
+		public static final String STORE_SEARCH = "/v2/stores/search";
+		public static final String STORE_QUICK_SEARCH = "/v2/stores/quicksearch";
+		
+		public static final String SESSIONS = "/v2/sessions";
+		
+		public static final String USER_ID = "/v2/users/";
+		public static final String USER_RESET = "/v2/users/reset";
+		
+		public static final String CATEGORIES	= "/v2/categories";
+
+		/**
+		 * https://etilbudsavis.dk/proxy/{id}/
+		 */
+		public String getPageflipProxy(String id) {
+			return String.format("http://etilbudsavis.dk/proxy/%s/", id);
+		}
+
+		/**
+		 * /v2/users/{user_id}/facebook
+		 */
+		public String getFacebook(int userId) {
+			return String.format("/v2/users/%s/facebook", userId);
+		}
+
+		/**
+		 * /v2/users/{user_id}/shoppinglists
+		 */
+		public String getLists(int userId) {
+			return String.format("/v2/users/%s/shoppinglists", userId);
+		}
+
+		/**
+		 * /v2/users/{user_id}/shoppinglists/{list_uuid}
+		 * @param userId
+		 * @param listId
+		 * @return
+		 */
+		public String getList(int userId, String listId) {
+			return String.format("/v2/users/%s/shoppinglists/%s", userId, listId);
+		}
+
+		/**
+		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/modified
+		 */
+		public String getListModified(int userId, String listId) {
+			return String.format("/v2/users/%s/shoppinglists/%s/modified", userId, listId);
+		}
+
+		/**
+		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/empty
+		 */
+		public String getListEmpty(int userId, String listId) {
+			return String.format("/v2/users/%s/shoppinglists/%s/empty", userId, listId);
+		}
+
+		/**
+		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares
+		 * @param userId
+		 * @param listId
+		 * @return
+		 */
+		public String getListShares(int userId, String listId) {
+			return String.format("/v2/users/%s/shoppinglists/%s/shares", userId, listId);
+		}
+
+		/**
+		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email}
+		 */
+		public String getListShareEmail(int userId, String listId, String email) {
+			return String.format("/v2/users/%s/shoppinglists/%s/shares/%s", userId, listId, email);
+		}
+
+		/**
+		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items
+		 */
+		public String getItems(int userId, String listId) {
+			return String.format("/v2/users/%s/shoppinglists/%s/items", userId, listId);
+		}
+
+		/**
+		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}
+		 */
+		public String getItem(int userId, String listId, String itemId) {
+			return String.format("/v2/users/%s/shoppinglists/%s/items/%s", userId, listId, itemId);
+		}
+
+		/**
+		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified
+		 */
+		public String getItemModifiedById(int userId, String listId, String itemId) {
+			return String.format("/v2/users/%s/shoppinglists/%s/items/%s/modified", userId, listId, itemId);
+		}
+
+	}
 }

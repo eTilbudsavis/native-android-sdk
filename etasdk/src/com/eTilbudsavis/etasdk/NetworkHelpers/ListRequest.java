@@ -1,16 +1,11 @@
 package com.eTilbudsavis.etasdk.NetworkHelpers;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import android.text.TextUtils;
 
-import com.eTilbudsavis.etasdk.Api;
-import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
-import com.eTilbudsavis.etasdk.NetworkInterface.Response;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 
 public abstract class ListRequest extends Request<List<?>>{

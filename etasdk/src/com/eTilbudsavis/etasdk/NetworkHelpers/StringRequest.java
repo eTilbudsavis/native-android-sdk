@@ -13,7 +13,6 @@ public class StringRequest extends Request<String> {
 	/** Return interface */
 	private final Listener<String> mListener;
 	
-	
 	public StringRequest(int method, String url, Listener<String> listener) {
 		super(method, url, listener);	
 		mListener = listener;
@@ -34,13 +33,11 @@ public class StringRequest extends Request<String> {
         } catch (UnsupportedEncodingException e) {
             parsed = new String(response.data);
         }
-        return Response.fromSuccess(parsed, false);
+        return Response.fromSuccess(parsed, null, false);
 	}
 	
 	@Override
 	protected void deliverResponse(String response) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

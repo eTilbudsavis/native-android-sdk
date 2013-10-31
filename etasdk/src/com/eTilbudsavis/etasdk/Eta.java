@@ -21,8 +21,14 @@ import android.os.Bundle;
 import android.os.Handler;
 
 import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.NetworkHelpers.HttpNetwork;
+import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
+import com.eTilbudsavis.etasdk.NetworkInterface.Network;
+import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Sort;
+import com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 // Main object for interacting with the SDK.
@@ -44,8 +50,14 @@ public class Eta implements Serializable {
 	private ShoppinglistManager mShoppinglistManager;
 	private static Handler mHandler = new Handler();
 	private boolean mResumed = false;
+	private RequestQueue mRequestQueue;
 	
-	private Eta() { }
+	private Eta() {
+		Cache c = new Cache();
+		Network n = new HttpNetwork();
+		mRequestQueue = new RequestQueue(this, c, n);
+		mRequestQueue.start();
+	}
 
 	/**
 	 * TODO: Write a long story about usage, this will basically be the documentation
@@ -110,7 +122,12 @@ public class Eta implements Serializable {
 	public String getApiSecret() {
 		return mApiSecret;
 	}
-
+	
+	public <T> Request<T> add(Request<T> r) {
+		mRequestQueue.add(r);
+		return r;
+	}
+	
 	/**
 	 * Get the currently active session.
 	 * @return a session
@@ -165,10 +182,6 @@ public class Eta implements Serializable {
 		mSessionManager.invalidate();
 		return mSettings.clear();
 	}
-
-	public boolean isDebug() {
-		return DEBUG;
-	}
 	
 	public boolean isResumed() {
 		return mResumed;
@@ -179,32 +192,22 @@ public class Eta implements Serializable {
 		return this;
 	}
 
+	@SuppressLint("NewApi")
 	public void onPause() {
 		mResumed = false;
 		mShoppinglistManager.onPause();
 		mLocation.saveState();
-		pageflipPause();
+		for (Pageflip p : mPageflips)
+			p.onPause();
 	}
 	
+	@SuppressLint("NewApi")
 	public void onResume() {
 		mResumed = true;
 		mShoppinglistManager.onResume();
 		mLocation.restoreState();
-		pageflipResume();
-	}
-
-	// Why does it keep bothering me about, API v11 when i've implemented the method?
-	@SuppressLint("NewApi")
-	private void pageflipResume() {
 		for (Pageflip p : mPageflips)
 			p.onResume();
-	}
-
-	// Why does it keep bothering me about, API v11 when i've implemented the method?
-	@SuppressLint("NewApi")
-	private void pageflipPause() {
-		for (Pageflip p : mPageflips)
-			p.onPause();
 	}
 	
 	private Bundle getApiParams(int offset, int limit, String orderBy) {

@@ -27,7 +27,7 @@ public class Cache implements Serializable {
 	// Define catchable types
 	Map<String, String>	types = new HashMap<String, String>(4);
 	
-	private Map<String, CacheItem> mItems = Collections.synchronizedMap(new HashMap<String, Cache.CacheItem>());
+	private Map<String, Item> mItems = Collections.synchronizedMap(new HashMap<String, Cache.Item>());
 
 	public Cache() {
 		types.put("catalogs", Request.Param.FILTER_CATALOG_IDS);
@@ -36,12 +36,20 @@ public class Cache implements Serializable {
 		types.put("stores", Request.Param.FILTER_STORE_IDS);
 	}
 	
-	public void put(String cacheKey, CacheItem c) {
-		mItems.put(cacheKey, c);
+	public void put(Item c) {
+		mItems.put(c.key, c);
 	}
-
-	public CacheItem get(String key) {
-		CacheItem c = mItems.get(key);
+	
+	public Item get(Request<?> r) {
+		if (r.getMethod() != Request.Method.GET)
+			return null;
+		
+		
+		return null;
+	}
+	
+	public Item get(String key) {
+		Item c = mItems.get(key);
 		if (c == null)
 			return null;
 		
@@ -50,14 +58,9 @@ public class Cache implements Serializable {
 		}
 		return c;
 	}
-
-	public Response get(Request r) {
-		
-		return null;
-	}
 	
 	public void clear() {
-		mItems = new HashMap<String, Cache.CacheItem>();
+		mItems = new HashMap<String, Cache.Item>();
 	}
 	
 	private Set<String> getFilter(String filterName, Bundle apiParams) {
@@ -95,7 +98,7 @@ public class Cache implements Serializable {
 			JSONArray jArray = new JSONArray();
 			for (String id : ids) {
 				String ern = getErnPrefix(type) + id;
-				CacheItem c = get(ern);
+				Item c = get(ern);
 				if (c != null) {
 					jArray.put((JSONObject)c.object);
 				}
@@ -116,7 +119,7 @@ public class Cache implements Serializable {
 			String type = path[path.length-2];
 			
 			String ern = getErnPrefix(type) + id;
-			CacheItem c = get(ern);
+			Item c = get(ern);
 			if (c != null) {
 				resp = new EtaResponse();
 //				resp.set(c.statuscode, c.object.toString());
@@ -126,26 +129,28 @@ public class Cache implements Serializable {
 		return resp;
 		
 	}
-
-	public class CacheItem {
+	
+	public static class Item {
 		
 		// Time of insertion
 		public final long time;
 		public final long ttl;
 		public final Object object;
+		public final String key;
 		
-		public CacheItem(Object o, long ttl) {
+		public Item(String key, Object o, long ttl) {
 			this.time = System.currentTimeMillis();
 			this.ttl = ttl;
 			this.object = o;
+			this.key = key;
 		}
 		
-		public CacheItem(Object o) {
-			this(o, ITEM_CACHE_TIME);
+		public Item(String key, Object o) {
+			this(key, o, ITEM_CACHE_TIME);
 		}
 		
 		/**
-		 * Returns true if the CacheItem is still valid.
+		 * Returns true if the Item is still valid.
 		 * 
 		 * this is based on the time to live factor
 		 * @return

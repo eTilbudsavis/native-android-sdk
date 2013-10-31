@@ -25,5 +25,5 @@ public class NetworkResponse {
         this.data = data;
         this.headers = headers;
     }
-
+    
 }

@@ -65,17 +65,10 @@ public class CacheDispatcher extends Thread {
                 
                 prepare(request);
                 
-                Response response = mCache.get(request);
-                
-                // Try cache, only if Method == GET
-                NetworkResponse networkResponse = null;
-                
-                
-                //TODO add to cache, if possible
-                // hmm, we'd need a parsed response for that...
+                Cache.Item cache = mCache.get(request);
                 
                 // Parse the response here on the worker thread.
-                response = request.parseNetworkResponse(networkResponse);
+                Response response = null; // = request.parseCacheResponse(networkResponse);
                 
                 
                 mDelivery.postResponse(request, response);
