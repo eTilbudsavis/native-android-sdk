@@ -504,7 +504,7 @@ public class ShoppinglistManager {
 	public Shoppinglist getList(String id) {
 		return DbHelper.getInstance().getList(id, user());
 	}
-
+	
 	/**
 	 * The complete set of shopping lists
 	 * @return <li>All shopping lists

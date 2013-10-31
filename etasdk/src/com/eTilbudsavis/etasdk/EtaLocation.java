@@ -92,7 +92,6 @@ public class EtaLocation extends Location {
 		setLatitude(latitude);
 		setLongitude(longitude);
 		setSensor(false);
-		setTime(System.currentTimeMillis());
 		save();
 		return this;
 	}
@@ -103,9 +102,8 @@ public class EtaLocation extends Location {
 	 * @return this Object, for easy chaining of set methods.
 	 */
 	public EtaLocation setRadius(int radius) {
-
 		mRadius =  radius < RADIUS_MIN ? RADIUS_MIN : ( radius > RADIUS_MAX ? RADIUS_MAX : radius );
-		setTime(System.currentTimeMillis());
+		save();
 		return this;
 	}
 
@@ -119,7 +117,6 @@ public class EtaLocation extends Location {
 
 	public EtaLocation setSensor(boolean sensor) {
 		mSensor = sensor;
-		setTime(System.currentTimeMillis());
 		save();
 		return this;
 	}
@@ -137,7 +134,6 @@ public class EtaLocation extends Location {
 	 */
 	public EtaLocation setAddress(String address) {
 		mAddress = address;
-		setTime(System.currentTimeMillis());
 		save();
 		return this;
 	}
@@ -195,59 +191,14 @@ public class EtaLocation extends Location {
 	 * @param boundEast
 	 * @param boundEast
 	 */
-	public void setBounds(double boundNorth, double boundEast,
-			double boundSouth, double boundWest) {
+	public void setBounds(double boundNorth, double boundEast, double boundSouth, double boundWest) {
 		mBoundEast = boundEast;
 		mBoundNorth = boundNorth;
 		mBoundSouth = boundSouth;
 		mBoundWest = boundWest;
-		setTime(System.currentTimeMillis());
 		save();
 	}
 
-	/**
-	 * GPS coordinate for the northern bound of a search.
-	 * @param boundNorth
-	 */
-	public EtaLocation setBoundNorth(double boundNorth) {
-		mBoundNorth = boundNorth;
-		setTime(System.currentTimeMillis());
-		save();
-		return this;
-	}
-
-	/**
-	 * GPS coordinate for the eastern bound of a search.
-	 * @param boundEast
-	 */
-	public EtaLocation setBoundEast(double boundEast) {
-		mBoundEast = boundEast;
-		setTime(System.currentTimeMillis());
-		save();
-		return this;
-	}
-
-	/**
-	 * GPS coordinate for the southern bound of a search.
-	 * @param boundSouth
-	 */
-	public EtaLocation setBoundSouth(double boundSouth) {
-		mBoundSouth = boundSouth;
-		setTime(System.currentTimeMillis());
-		return this;
-	}
-
-	/**
-	 * GPS coordinate for the western bound of a search.
-	 * @param boundWest
-	 */
-	public EtaLocation setBoundWest(double boundWest) {
-		mBoundWest = boundWest;
-		setTime(System.currentTimeMillis());
-		save();
-		return this;
-	}
-	
 	public double getBoundEast() {
 		return mBoundEast;
 	}
@@ -338,6 +289,7 @@ public class EtaLocation extends Location {
 	}
 	
 	public void save() {
+		setTime(System.currentTimeMillis());
 		saveState();
 		notifySubscribers();
 	}

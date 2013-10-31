@@ -41,9 +41,7 @@ public class EtaCache implements Serializable {
 
 	public void putHtml(String uuid, String html, int statusCode) {
 		// Validate input.
-		if (html.matches(HTML_REGEX)) {
 			mItems.put(uuid, new CacheItem(html, statusCode));
-		}
 	}
 
 	public String getHtml(String uuid) {
@@ -51,7 +49,6 @@ public class EtaCache implements Serializable {
 		String html = null;
 		if (c != null && c.time > (System.currentTimeMillis() - HTML_CACHE_TIME) ) {
 			html =  c.object.toString();
-			html = html.matches(HTML_REGEX) ? html : null;
 		}
 		return html;
 	}

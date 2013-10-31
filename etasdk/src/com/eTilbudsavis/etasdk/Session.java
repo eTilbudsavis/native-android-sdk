@@ -30,9 +30,12 @@ public class Session implements Serializable {
 	private static final String S_PROVIDER = "provider";
 	
 	public static final String TAG = "Session";
-
+	
 	/** API v2 Session endpoint */
 	public static final String ENDPOINT = Endpoint.SESSIONS;
+	
+	/** Token time to live, 6 weeks */
+	private static final int TTL = 3628800;
 	
 	private JSONObject mJson = null;
 	private String mToken = null;
@@ -44,7 +47,6 @@ public class Session implements Serializable {
 	private String mPassStr = null;
 	private String mTokenApiV1 = null;
 	private String mFacebookToken = null;
-	private Object LOCK = new Object();
 	
 	private Eta mEta;
 	private boolean mIsUpdating = false;
@@ -133,7 +135,7 @@ public class Session implements Serializable {
 	}
 
 	private void sessionUpdate(int statusCode, JSONObject data, EtaError error) {
-
+		
 		if (Utils.isSuccess(statusCode)) {
 			set(data);
 		} else {
@@ -157,7 +159,8 @@ public class Session implements Serializable {
 		JsonObjectListener session = new JsonObjectListener() {
 			
 			public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
-
+				
+				Utils.logd(TAG, data.toString());
 				sessionUpdate(statusCode, data, error);
 				if (listener != null) 
 					listener.onComplete(isCache, statusCode, data, error);
@@ -168,6 +171,7 @@ public class Session implements Serializable {
 		mIsUpdating = true;
 
 		Bundle b = new Bundle();
+		b.putInt(Params.TOKEN_TTL, TTL);
 		if (mUserStr != null) {
 			b.putString(Params.EMAIL, mUserStr);
 			if (mPassStr != null) {

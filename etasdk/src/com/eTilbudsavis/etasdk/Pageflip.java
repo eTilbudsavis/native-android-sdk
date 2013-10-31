@@ -19,9 +19,12 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.util.AttributeSet;
+import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -35,7 +38,9 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 public final class Pageflip extends WebView {
 
 	private static final String TAG = "Pageflip";
-
+	
+	public static final boolean DEBUG = true;
+	
 	/** String identifying etaProxy events */
 	private static final String ETA_PROXY = "eta-proxy";
 	/** String identifying the ready pageflip event. See pageflip documentation for more details */
@@ -143,7 +148,6 @@ public final class Pageflip extends WebView {
 			
 			String[] request = url.split(":", 3);
 			
-			
 			if ( request.length < 2 )
 				return false;
 			
@@ -155,6 +159,7 @@ public final class Pageflip extends WebView {
 				if (request[1].equals(EVENT_PAGECHANGE) && o.has("init")) {
 					try {
 						if (o.getBoolean("init")) {
+
 							mViewSession = o.getString(OPTION_VIEW_SESSION);
 							mListener.onReady(mUuid, mViewSession);
 						}
@@ -227,6 +232,9 @@ public final class Pageflip extends WebView {
 		@Override
 		public boolean onJsAlert(WebView view, String url, String message, final android.webkit.JsResult result) {
 			Utils.logd(TAG, "JsAlert: " + message);
+			if (!Eta.getInstance().isResumed())
+				return true;
+			
 			new AlertDialog.Builder(mEta.getContext())  
             .setTitle("JavaScript Alert")  
             .setMessage(message)  
@@ -246,13 +254,13 @@ public final class Pageflip extends WebView {
 	 * @param Listener for pageflip events
 	 * @param CatalogId of the catalog to display
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressLint({ "NewApi", "InlinedApi" }) @SuppressWarnings("unchecked")
 	public void execute(Eta eta, PageflipListener Listener, String CatalogId) {
-
+		
 		mEta = eta;
 		mListener = Listener;
 		mCatalogId = CatalogId;
-		mUuid = Utils.createUUID();
+		mUuid = "test_id";
 
 		try {
 			Field f = mEta.getClass().getDeclaredField("mPageflips");
@@ -265,8 +273,15 @@ public final class Pageflip extends WebView {
 			mPageflips.add(this);
 		}
 		
-		getSettings().setJavaScriptEnabled(true);
-		getSettings().setDefaultTextEncodingName("utf-8");
+		
+		WebSettings ws = getSettings();
+		ws.setJavaScriptEnabled(true);
+		ws.setDefaultTextEncodingName("utf-8");
+		ws.setRenderPriority(RenderPriority.HIGH);
+		if (Build.VERSION.SDK_INT >= 11){
+			setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+		}
+		ws.setAllowFileAccess(true);
 		
 		setWebViewClient(wvc);
 		
@@ -274,6 +289,13 @@ public final class Pageflip extends WebView {
 		
 		// Check if it's necessary to update the HTML (it's time consuming to download HTML).
 		String cache = mEta.getCache().getHtml(mUuid);
+		String url = Endpoint.getPageflipProxy(mUuid);
+		
+		if (DEBUG) {
+			cache = null;
+			url = String.format("http://10.0.1.3:3000/proxy/%s/", mUuid);
+//			url = String.format("https://staging.etilbudsavis.dk/proxy/%s/", mUuid);
+		}
 		
 		if (cache == null ) {
 			
@@ -286,9 +308,10 @@ public final class Pageflip extends WebView {
 						data = data.replaceFirst(endScript, mDebugWeinre + endScript);
 					}
 					
-					if (Utils.isSuccess(statusCode)) {
+					if (Utils.isSuccess(statusCode) && !isCache) {
 						
 						mEta.getCache().putHtml(mUuid, data, statusCode);
+						
 						loadDataWithBaseURL(null, data, "text/html", "utf-8", null);
 					} else {
 						loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
@@ -297,9 +320,7 @@ public final class Pageflip extends WebView {
 
 			};
 			
-			String url = Endpoint.getPageflipProxy(mUuid);
-			
-			mEta.getApi().get(url, cb).execute();
+			mEta.getApi().get(url, cb).setFlag(Api.FLAG_ONLY_RETURN_CACHE).execute();
 			
 		} else {
 			this.loadDataWithBaseURL(null, cache, "text/html", "utf-8", null);
@@ -337,7 +358,6 @@ public final class Pageflip extends WebView {
 			e.printStackTrace();
 		}
 		etaProxy(PARAM_INITIALIZE, o);
-		
 		// Initialize the catalog
 		try {
 
@@ -378,7 +398,7 @@ public final class Pageflip extends WebView {
 	 * @param option a snippet of JavaScript
 	 */
 	private void injectJS(String option) {
-		String s = "javascript:(function() { " + option + "})()";
+		String s = String.format("javascript:(function() {%s})()", option);
 		loadUrl(s);
 	}
 	
@@ -399,7 +419,7 @@ public final class Pageflip extends WebView {
 	}
 	
 	public void useWeinreDebugger(String hostIp, String hostPort) {
-		mDebugWeinre = "<script src=\"http://" + hostIp + ":" + hostPort + "/target/target-script-min.js\"></script>";
+		mDebugWeinre = String.format("<script src=\"http://%s:%s/target/target-script-min.js\"></script>", hostIp, hostPort);
 	}
 	
 	public boolean isThumbnailsToggled() {

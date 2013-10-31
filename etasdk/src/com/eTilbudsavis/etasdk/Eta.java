@@ -75,6 +75,13 @@ public class Eta implements Serializable {
 		return mEta;
 	}
 	
+	/**
+	 * Use this method to do the initial instanciation of the Eta object.<br>
+	 * If you do not the SDK will not function.
+	 * @param apiKey for your app
+	 * @param apiSecret for your app
+	 * @param context for your app
+	 */
 	public void set(String apiKey, String apiSecret, Context context) {
 		
 		mContext = context;
@@ -94,6 +101,11 @@ public class Eta implements Serializable {
 		
 	}
 	
+	/**
+	 * Method for checking if the Eta object have been set.<br>
+	 * note: Nothing happens if Eta.set() is called multiple times.
+	 * @return
+	 */
 	public boolean isSet() {
 		return mApiKey != null && mApiSecret == null;
 	}
@@ -158,18 +170,24 @@ public class Eta implements Serializable {
 
 	/**
 	 * Get the ETA SDK cache for various items and objects.
-	 * @return 
+	 * @return the current cache object
 	 */
 	public EtaCache getCache() {
 		return mCache;
 	}
 	
+	/**
+	 * Gets the current ShoppinglistManager.<br>
+	 * Use this manager for all shopping list relevant operations to ensure data consistency.
+	 * @return an instance of ShoppinglistManager
+	 */
 	public ShoppinglistManager getShoppinglistManager() {
 		return mShoppinglistManager;
 	}
 	
 	/**
-	 * Get a static handler, to avoid memory leaks.
+	 * Get a static handler, created on the main looper. <br>
+	 * Use this to avoid memory leaks.
 	 * @return a handler
 	 */
 	public Handler getHandler() {
@@ -208,19 +226,36 @@ public class Eta implements Serializable {
 		return mSettings.clear();
 	}
 
-	public boolean isDebug() {
-		return DEBUG;
-	}
-	
-	public boolean isResumed() {
-		return mResumed;
-	}
-	
+	/**
+	 * The debug mode will allow for printing of Exceptions e.t.c. to LogCat.
+	 * @param useDebug true if Eta hsould be in debug mode
+	 * @return this object
+	 */
 	public Eta debug(boolean useDebug) {
 		DEBUG = useDebug;
 		return this;
 	}
 
+	/**
+	 * Is the SDK in debug mode?
+	 * @return true if eta is in debug
+	 */
+	public boolean isDebug() {
+		return DEBUG;
+	}
+	
+	/**
+	 * Method for querying for the current life cycle state of the app.
+	 * @return true if resumed
+	 */
+	public boolean isResumed() {
+		return mResumed;
+	}
+	
+	/**
+	 * Method to call on Activity.onPause().
+	 * This method will clean up the SDK.
+	 */
 	public void onPause() {
 		if (mResumed) {
 			mResumed = false;
@@ -230,6 +265,10 @@ public class Eta implements Serializable {
 		}
 	}
 	
+	/**
+	 * Method to call on Activity.onResume().<br>
+	 * This method will resume all SDK relevant stuff.
+	 */
 	public void onResume() {
 		if (!mResumed) {
 			mResumed = true;
@@ -239,14 +278,14 @@ public class Eta implements Serializable {
 		}
 	}
 
-	// Why does it keep bothering me about, API v11 when i've implemented the method?
+	// We have overridden the onResume
 	@SuppressLint("NewApi")
 	private void pageflipResume() {
 		for (Pageflip p : mPageflips)
 			p.onResume();
 	}
 
-	// Why does it keep bothering me about, API v11 when i've implemented the method?
+	// We have overridden the onResume
 	@SuppressLint("NewApi")
 	private void pageflipPause() {
 		for (Pageflip p : mPageflips)

@@ -108,7 +108,9 @@ public class Api implements Serializable {
 	private static final int FLAG_SESSION_REFRESH	= 1 << 25;
 
 	private static final int FLAG_CACHE_HIT			= 1 << 26;
-
+	
+	private boolean mFinished = false;
+	
 	/** Type of HTTP request. */
 	public enum RequestType { POST, GET, PUT, DELETE }
 	
@@ -131,7 +133,9 @@ public class Api implements Serializable {
 	private List<Header> mHeaders;
 	private String mId = null;
 	private int mFlags;
-
+	
+	private StringBuilder debug = new StringBuilder();
+	
 	/**
 	 * Default constructor for API
 	 * @param Eta object with relevant information e.g. location
@@ -139,7 +143,7 @@ public class Api implements Serializable {
 	public Api(Eta eta) {
 		mEta = eta;
 		// set default flags
-		mFlags = FLAG_USE_LOCATION | FLAG_USE_CACHE;
+		mFlags = FLAG_USE_LOCATION | FLAG_USE_CACHE | FLAG_PRINT_DEBUG;
 	}
 
 	/**
@@ -184,6 +188,19 @@ public class Api implements Serializable {
 	 */
 	public Api removeFlag(int flag) {
 		mFlags = mFlags & ~flag;
+		return this;
+	}
+	
+	/**
+	 * Set an option to have debug info printed to LogCat
+	 * @param print true if debug should print
+	 * @return this object
+	 */
+	public Api printDebug(boolean print) {
+		if (print)
+			setFlag(FLAG_PRINT_DEBUG);
+		else
+			removeFlag(FLAG_PRINT_DEBUG);
 		return this;
 	}
 	
@@ -555,7 +572,10 @@ public class Api implements Serializable {
 
 			// Set headers if session is OK
 			if (mEta.getSession().getToken() != null) {
-				setHeader(HEADER_X_TOKEN, mEta.getSession().getToken());
+				String t = mEta.getSession().getToken();
+				t =  t + (isFlag(FLAG_SESSION_REFRESH) ? "" : "xxxxx" );
+				Utils.logd(TAG, t);
+				setHeader(HEADER_X_TOKEN, t);
 				String sha256 = Utils.generateSHA256(mEta.getApiSecret() + mEta.getSession().getToken());
 				setHeader(HEADER_X_SIGNATURE, sha256);
 			}
@@ -655,13 +675,13 @@ public class Api implements Serializable {
 				
 			} catch (UnknownHostException e) {
 				response.set(errorToString(EtaError.UNKNOWN_HOST, "UnknownHostException"));
-				if (Eta.DEBUG) e.printStackTrace();
+				Utils.logd(TAG, e);
 			} catch (ClientProtocolException e) {
 				response.set(errorToString(EtaError.CLIENT_PROTOCOL_EXCEPTION, "ClientProtocolException"));
-				if (Eta.DEBUG) e.printStackTrace();
+				Utils.logd(TAG, e);
 			} catch (IOException e) {
 				response.set(errorToString(EtaError.IO_EXCEPTION, "IOException"));
-				if (Eta.DEBUG) e.printStackTrace();
+				Utils.logd(TAG, e);
 			} finally {
 				// Close connection, to deallocate resources
 				httpClient.getConnectionManager().shutdown();
@@ -680,14 +700,23 @@ public class Api implements Serializable {
 			// Error, try to get new session token, then do request again.
 			} else {
 				
+				Utils.logd(TAG, response.getString());
+				
 				EtaError error = EtaError.fromJSON(response.getJSONObject());
 				
-				if ( !isFlag(FLAG_SESSION_REFRESH) && ( (error.getCode() == 1108 || error.getCode() == 1101) ) ) {
+				if ( !isFlag(FLAG_SESSION_REFRESH) && ( (
+						error.getCode() == 1101 || 
+						error.getCode() == 1104 ||
+						error.getCode() == 1108 ||
+						error.getCode() == 1300 ||
+						error.getCode() == 1301 ) ) ) {
+					Utils.logd(TAG, "Hit stuff");
 					setFlag(FLAG_SESSION_REFRESH);
 					mEta.getSession().subscribe(new SessionListener() {
 						
 						public void onUpdate() {
 							mEta.getSession().unSubscribe(this);
+							Utils.logd(TAG, "Hit stuff again");
 							runThread();
 						}
 					}).update();
@@ -728,10 +757,10 @@ public class Api implements Serializable {
 	private void printDebugPreExecute() {
 
 		if (isFlag(FLAG_PRINT_DEBUG) ) {
-			Utils.logd(TAG, "*** Pre Execute - " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
-			Utils.logd(TAG, mRequestType.toString() + " " + mPath);
-			Utils.logd(TAG, "Query: " + URLEncodedUtils.format(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8));
-			Utils.logd(TAG, "Headers: " + mHeaders.toString());
+			debug.append("*** Pre Execute ***").append("\n");
+			debug.append(mRequestType.toString()).append(" ").append(mPath).append("\n");
+			debug.append("Query: ").append(URLEncodedUtils.format(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8)).append("\n");
+			debug.append("Headers: ").append(mHeaders.toString()).append("\n");
 		}
 		
 	}
@@ -743,15 +772,14 @@ public class Api implements Serializable {
 	private void printDebugPostExecute(EtaResponse dataWrapper) {
 
 	    if (isFlag(FLAG_PRINT_DEBUG) ) {
-			Utils.logd(TAG, "*** Post Execute - " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
-			Utils.logd(TAG, "Status: " + mRequestType.toString() + " " + dataWrapper.getStatusCode());
-
-			StringBuilder headers = new StringBuilder();
+	    	debug.append("Status: ").append(dataWrapper.getStatusCode()).append("\n");
+	    	debug.append("Headers: ");
 			for (Header h : dataWrapper.getHeaders())
-				headers.append(h.getName()).append(": ").append(h.getValue()).append(", ");
-			Utils.logd(TAG, "Headers: " + headers.toString());
-
-			Utils.logd(TAG, "Object: " + (dataWrapper.getString().length() > 100 ? dataWrapper.getString().substring(0, 100) : dataWrapper.getString()) );
+				debug.append(h.getName()).append(": ").append(h.getValue()).append(", ");
+			debug.append("\n");
+	    	debug.append("Data: ").append((dataWrapper.getString().length() > 100 ? dataWrapper.getString().substring(0, 100) : dataWrapper.getString()));
+			
+	    	Utils.logd(TAG, debug.toString());
 	    }
 	    
 	}
