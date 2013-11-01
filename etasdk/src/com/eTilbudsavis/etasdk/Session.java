@@ -155,7 +155,7 @@ public class Session implements Serializable {
 		JsonObjectListener sessionListener = new JsonObjectListener() {
 			
 			public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
-				EtaLog.d(TAG, data.toString());
+
 				sessionUpdate(statusCode, data, error);
 				if (listener != null) 
 					listener.onComplete(isCache, statusCode, data, error);

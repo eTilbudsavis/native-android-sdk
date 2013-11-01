@@ -15,6 +15,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Params;
 
 public class EtaLocation extends Location {
@@ -290,6 +291,7 @@ public class EtaLocation extends Location {
 	
 	public void save() {
 		setTime(System.currentTimeMillis());
+		EtaLog.d(TAG,toString());
 		saveState();
 		notifySubscribers();
 	}
