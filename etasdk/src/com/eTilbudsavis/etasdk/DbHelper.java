@@ -14,6 +14,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class DbHelper extends SQLiteOpenHelper {
@@ -108,7 +109,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-		Utils.logd(TAG, "Upgrading database from version " + oldVersion + " to "
+		EtaLog.d(TAG, "Upgrading database from version " + oldVersion + " to "
 				+ newVersion + ", which will destroy all old data");
 		
 		synchronized (LOCK) {
@@ -464,8 +465,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		}
 		
 		if (c>initCount) {
-			Utils.logd(TAG, sb.toString());
-			Utils.printStackTrace();
+			EtaLog.d(TAG, sb.toString());
+			EtaLog.printStackTrace();
 		}
 		
 		

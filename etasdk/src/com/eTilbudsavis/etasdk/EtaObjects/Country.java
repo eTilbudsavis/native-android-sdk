@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Country extends EtaObject implements Serializable {
 	
@@ -44,7 +44,7 @@ public class Country extends EtaObject implements Serializable {
 			o.put(S_ID, c.getId());
 			o.put(S_UNSUBSCRIBE_PRINT_URL, c.getUnsubscribePrintUrl());
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

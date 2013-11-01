@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Shoppinglist extends EtaErnObject implements Serializable, Comparable<Shoppinglist> {
@@ -82,7 +83,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 			}
 
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return list;
 	}
@@ -104,7 +105,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 			sl.setPreviousId(getJsonString(shoppinglist, S_PREVIOUS_ID));
 			
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return sl;
 	}

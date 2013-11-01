@@ -7,7 +7,7 @@ import org.json.JSONObject;
 
 import android.graphics.Color;
 
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Branding extends EtaObject  implements Serializable {
 	
@@ -41,7 +41,7 @@ public class Branding extends EtaObject  implements Serializable {
 			b.setColor(Color.parseColor("#"+branding.getString(EtaObject.S_COLOR)));
 			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(EtaObject.S_PAGEFLIP)));
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return b;
 	}
@@ -60,7 +60,7 @@ public class Branding extends EtaObject  implements Serializable {
 			o.put(S_COLOR, b.getColorString());
 			o.put(S_PAGEFLIP, b.getPageflip().toJSON());
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

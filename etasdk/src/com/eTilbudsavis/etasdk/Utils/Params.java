@@ -132,6 +132,15 @@ public final class Params {
 	/** Parameter for a delete filter */
 	public static final String FILTER_DELETE = "filter";
 
+	/** Parameter for a v1 session migration */
+	public static final String V1_AUTH_ID = "v1_auth_id";
+
+	/** Parameter for a v1 session migration */
+	public static final String V1_AUTH_TIME = "v1_auth_time";
+
+	/** Parameter for a v1 session migration */
+	public static final String V1_AUTH_HASH = "v1_auth_hash";
+
 	public static final String ID = "id";
 	public static final String MODIFIED = "modified";
 	public static final String ERN = "ern";

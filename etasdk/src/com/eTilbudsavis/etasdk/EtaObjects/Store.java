@@ -8,9 +8,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
-import com.eTilbudsavis.etasdk.Utils.Utils;
 
 
 public class Store extends EtaErnObject implements Serializable {
@@ -70,7 +70,7 @@ public class Store extends EtaErnObject implements Serializable {
 				list.add(Store.fromJSON((JSONObject)stores.get(i)));
 			
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return list;
 	}
@@ -98,7 +98,7 @@ public class Store extends EtaErnObject implements Serializable {
 			s.setBranding(Branding.fromJSON(store.getJSONObject(S_BRANDING)));
 			s.setContact(getJsonString(store, S_CONTACT));
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return s;
 	}
@@ -123,7 +123,7 @@ public class Store extends EtaErnObject implements Serializable {
 			o.put(S_BRANDING, s.getBranding().toJSON());
 			o.put(S_CONTACT, s.getContact());
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

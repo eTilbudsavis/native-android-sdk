@@ -10,12 +10,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
+import android.text.style.EasyEditSpan;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 
 import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Permission;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -37,16 +41,12 @@ public class Session implements Serializable {
 	/** Token time to live, 6 weeks */
 	private static final int TTL = 3628800;
 	
-	private JSONObject mJson = null;
 	private String mToken = null;
 	private Date mExpires = new Date(0L);
 	private User mUser = null;
 	private Permission mPermission = null;
 	private String mProvider;
-	private String mUserStr = null;
 	private String mPassStr = null;
-	private String mTokenApiV1 = null;
-	private String mFacebookToken = null;
 	
 	private Eta mEta;
 	private boolean mIsUpdating = false;
@@ -59,17 +59,13 @@ public class Session implements Serializable {
 	}
 	
 	public void init() {
-
-		JSONObject json = mEta.getSettings().getSessionJson();
-		mUserStr = mEta.getSettings().getSessionUser();
-		mPassStr = mEta.getSettings().getSessionPass();
-		mFacebookToken = mEta.getSettings().getSessionFacebook();
-		if (json == null) {
-			update();
+		
+		JSONObject session = mEta.getSettings().getSessionJson();
+		if (session != null) {
+			set(session);
 		} else {
-			set(json);
+			update(null);
 		}
-
 	}
 	
 	public void set(JSONObject session) {
@@ -82,43 +78,34 @@ public class Session implements Serializable {
 		    }
 		    mPermission = Permission.fromJSON(session.getJSONObject(S_PERMISSIONS));
 		    mProvider = session.getString(S_PROVIDER);
-		    mJson = session;
-		    mEta.getSettings().setSessionJson(mJson);
+		    mEta.getSettings().setSessionJson(session);
 
 		} catch (JSONException e) {
-			e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		
-	    if (isExpired()) {
-	    	update();
+	    if (isExpired() || !mIsUpdating) {
+	    	update(null);
 	    } else {
 	    	synchronized (mQueue) {
+	    		List<Api> tmp = new ArrayList<Api>(mQueue.size());
 		    	for (Api a : mQueue) {
-					mQueue.remove(a);
+		    		tmp.add(a);
 					a.execute();
 				}
+		    	mQueue.removeAll(tmp);
 			}
 	    }
 		
 	}
 
 	public void login(String user, String password, JsonObjectListener listener) {
-		mUserStr = user;
 		mPassStr = password;
-		mEta.getSettings().setSessionUser(mUserStr);
-		mEta.getSettings().setSessionPass(mPassStr);
-		update(listener);
-	}
-
-	public void loginWithToken(String user, String oldToken, JsonObjectListener listener) {
-		mUserStr = user;
-		mTokenApiV1 = oldToken;
-		mEta.getSettings().setSessionUser(mUserStr);
+		mEta.getSettings().setSessionUser(user);
 		update(listener);
 	}
 	
 	public void loginFacebook(String facebookAccessToken, JsonObjectListener listener) {
-		mFacebookToken = facebookAccessToken;
 		mEta.getSettings().setSessionFacebook(facebookAccessToken);
 		update(listener);
 	}
@@ -139,7 +126,7 @@ public class Session implements Serializable {
 		if (Utils.isSuccess(statusCode)) {
 			set(data);
 		} else {
-			Utils.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
+			EtaLog.d(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
 		}
 		mIsUpdating = false;
 		
@@ -156,11 +143,12 @@ public class Session implements Serializable {
 			return;
 		}
 
-		JsonObjectListener session = new JsonObjectListener() {
+		mIsUpdating = true;
+
+		JsonObjectListener sessionListener = new JsonObjectListener() {
 			
 			public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
-				
-				Utils.logd(TAG, data.toString());
+				EtaLog.d(TAG, data.toString());
 				sessionUpdate(statusCode, data, error);
 				if (listener != null) 
 					listener.onComplete(isCache, statusCode, data, error);
@@ -168,23 +156,71 @@ public class Session implements Serializable {
 			}
 		};
 		
-		mIsUpdating = true;
+		Bundle args = new Bundle();
+		args.putInt(Params.TOKEN_TTL, TTL);
 
-		Bundle b = new Bundle();
-		b.putInt(Params.TOKEN_TTL, TTL);
-		if (mUserStr != null) {
-			b.putString(Params.EMAIL, mUserStr);
-			if (mPassStr != null) {
-				b.putString(Params.PASSWORD, mPassStr);
-			} else if (mTokenApiV1 != null) {
-				b.putString(Params.TOKEN_OLD, mTokenApiV1);
-			}
-			mEta.getApi().post(Session.ENDPOINT, session, b).execute();
-		} else if (mFacebookToken != null) {
-			b.putString(Params.FACEBOOK_TOKEN, mFacebookToken);
-			mEta.getApi().put(Session.ENDPOINT, session, b).execute();
+		String user = mEta.getSettings().getSessionUser();
+		String facebook = mEta.getSettings().getSessionFacebook();
+		
+		if (user != null && mPassStr != null) {
+			
+			// Regulare login
+			args.putString(Params.EMAIL, user);
+			args.putString(Params.PASSWORD, mPassStr);
+			mEta.getApi().post(Session.ENDPOINT, sessionListener, args).execute();
+			
+		} else if (facebook != null) {
+			
+			// Login with facebook token
+			args.putString(Params.FACEBOOK_TOKEN, facebook);
+			mEta.getApi().put(Session.ENDPOINT, sessionListener, args).execute();
+			
 		} else {
-			mEta.getApi().post(Session.ENDPOINT, session, b).execute();
+			
+			if (mEta.getSettings().getSessionJson() == null) {
+
+            	EtaLog.d(TAG, "JSON is null");
+            	
+				// No session yet, check cookies for old token
+				String authId = null;
+				String authTime = null;
+				String authHash = null;
+				
+	            CookieSyncManager.createInstance(mEta.getContext());
+	            String cookies = CookieManager.getInstance().getCookie("etilbudsavis.dk");
+	            if (cookies != null) {
+	            	EtaLog.d(TAG, cookies);
+		            String[] keyValueSets = cookies.split(";");
+		            for(String cookie : keyValueSets) {
+		            	
+		                String[] keyValue = cookie.split("=");
+		                
+		                if (keyValue[0].equals("auth[id]")) {
+		                	authId = (keyValue.length > 1) ? keyValue[1] : null;
+		                } else if (keyValue[0].equals("auth[hash]")) {
+		                	authTime = (keyValue.length > 1) ? keyValue[1] : null;
+		                } else if (keyValue[0].equals("auth[time]")) {
+		                	authHash = (keyValue.length > 1) ? keyValue[1] : null;
+		                }
+		            }
+		            
+		            if (authId != null && authHash != null && authTime != null) {
+		            	args.putString(Params.V1_AUTH_ID, authId);
+		            	args.putString(Params.V1_AUTH_HASH, authHash);
+		            	args.putString(Params.V1_AUTH_TIME, authTime);
+		            }
+	            } else {
+
+	            	EtaLog.d(TAG, "cookies is null");
+	            	
+	            }
+				
+			}
+
+        	EtaLog.d(TAG, "passed migration part");
+        	
+			// Just create plain read only session
+			mEta.getApi().post(Session.ENDPOINT, sessionListener, args).printDebug(true).execute();
 		}
 		
 	}
@@ -217,9 +253,9 @@ public class Session implements Serializable {
 			public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 
 				if (Utils.isSuccess(statusCode)) {
-					Utils.logd(TAG, "Success: " + String.valueOf(statusCode) + " - " + data.toString());
+					EtaLog.d(TAG, "Success: " + String.valueOf(statusCode) + " - " + data.toString());
 				} else {
-					Utils.logd(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
+					EtaLog.d(TAG, "Error: " + String.valueOf(statusCode) + " - " + error.toString());
 				}
 				if (listener != null) listener.onComplete(isCache, statusCode, data, error);
 			}
@@ -249,24 +285,30 @@ public class Session implements Serializable {
 		if (mIsUpdating)
 			return;
 		
-		if (mJson == null) {
-			update();
-			return;
+		JSONObject session = mEta.getSettings().getSessionJson();
+		
+		if (session == null) {
+			
+			update(null);
+			
+		} else {
+			
+			try {
+				if (!mToken.equals(headerToken) ) {
+					session.put(S_TOKEN, headerToken);
+					session.put(S_EXPIRES, headerExpires);
+					set(session);
+					return;
+				}
+				if ( ( Utils.parseDate(headerExpires).getTime() - Utils.DAY_IN_MILLIS ) < System.currentTimeMillis()) {
+					update(null);
+				}
+			} catch (JSONException e) {
+				EtaLog.d(TAG, e);
+			} 
+			
 		}
 		
-		try {
-			if (!mToken.equals(headerToken) ) {
-				mJson.put(S_TOKEN, headerToken);
-				mJson.put(S_EXPIRES, headerExpires);
-				set(mJson);
-				return;
-			}
-			if ( ( Utils.parseDate(headerExpires).getTime() - Utils.DAY_IN_MILLIS ) < System.currentTimeMillis()) {
-				update();
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		} 
 	}
 	
 	/**
@@ -293,12 +335,9 @@ public class Session implements Serializable {
 	}
 	
 	private void clearUser() {
-		mUserStr = null;
 		mPassStr = null;
-		mFacebookToken = null;
-		mEta.getSettings().setSessionUser(mUserStr);
-		mEta.getSettings().setSessionPass(mPassStr);
-		mEta.getSettings().setSessionFacebook(mFacebookToken);
+		mEta.getSettings().setSessionUser(null);
+		mEta.getSettings().setSessionFacebook(null);
 		mUser = new User();
 	}
 	
@@ -307,13 +346,12 @@ public class Session implements Serializable {
 	 * And returns a new session, completely clean session.
 	 */
 	public void invalidate(final JsonObjectListener listener) {
-		mJson = null;
 		mToken = null;
 		mExpires = null;
 		mPermission = null;
 		mProvider = null;
 		mSubscribers = new ArrayList<Session.SessionListener>();
-		mEta.getSettings().setSessionJson(mJson);
+		mEta.getSettings().setSessionJson(null);
 		clearUser();
 		JsonObjectListener session = new JsonObjectListener() {
 			
@@ -327,7 +365,7 @@ public class Session implements Serializable {
 	}
 	
 	public JSONObject toJSON() {
-		return mJson;
+		return mEta.getSettings().getSessionJson();
 	}
 	
 	/**
@@ -390,7 +428,7 @@ public class Session implements Serializable {
 			try {
 				sl.onUpdate();
 			} catch (Exception e) {
-				e.printStackTrace();
+				EtaLog.d(TAG, e);
 			}
 		}
 			

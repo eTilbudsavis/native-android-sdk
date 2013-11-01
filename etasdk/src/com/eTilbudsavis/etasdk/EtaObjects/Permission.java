@@ -9,7 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Permission extends EtaObject implements Serializable {
 	
@@ -27,7 +27,7 @@ public class Permission extends EtaObject implements Serializable {
 		try {
 			p = fromJSON(p, new JSONObject(permission));
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return p;
 	}
@@ -59,7 +59,7 @@ public class Permission extends EtaObject implements Serializable {
 			}
 			
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		
 		return p;
@@ -82,7 +82,7 @@ public class Permission extends EtaObject implements Serializable {
 				o.put(name, jArray);
 			}
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

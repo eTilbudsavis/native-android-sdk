@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -98,7 +99,7 @@ public class Offer extends EtaErnObject implements Serializable {
 				list.add(Offer.fromJSON((JSONObject) offers.get(i)));
 			
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return list;
 	}
@@ -131,7 +132,7 @@ public class Offer extends EtaErnObject implements Serializable {
 			o.setCatalogUrl(getJsonString(offer, S_CATALOG_URL));
 			o.setCatalogId(getJsonString(offer, S_CATALOG_ID));
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

@@ -20,10 +20,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import android.os.Bundle;
-import android.util.Log;
-
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 
 public final class Utils {
 	
@@ -61,72 +57,7 @@ public final class Utils {
 	public static String createUUID() {
 		return UUID.randomUUID().toString();
 	}
-
-	/**
-	 * A proxy for Log.d API that silences log messages in release.
-	 *
-	 * @param tag Used to identify the source of a log message. It usually
-	 *			identifies the class or activity where the log call occurs.
-	 * @param msg The message you would like logged.
-	 */
-	public static void logd(String tag, String msg) {
-		if (Eta.DEBUG)
-			Log.d(tag, msg);
-	}	
-
-	public static void logd(String tag, Exception e) {
-		if (Eta.DEBUG)
-			e.printStackTrace();
-	}	
-
-	public static void logd(String tag, String name, boolean isCache, int statusCode, Object data, EtaError error) {
-		if (!Eta.DEBUG)
-			return;
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append(name).append(": ")
-		.append("cache: ").append(isCache)
-		.append(", status: ").append(statusCode)
-		.append(", data: ");
-		if (isSuccess(statusCode)) {
-			if (data == null) {
-				sb.append("null");
-			} else {
-				if (data instanceof List<?>) {
-					sb.append("List Size: ").append(((List<?>) data).size());
-				} else {
-					sb.append(data.toString());
-				}
-			}
-		} else {
-			sb.append(error.toString());
-		}
-		Log.d(tag, sb.toString());
-	}
 	
-	public static void logdMax(String tag, String sb) {
-		if (!Eta.DEBUG)
-			return;
-		
-		if (sb.length() > 4000) {
-		    Log.d(tag, "sb.length = " + sb.length());
-		    int chunkCount = sb.length() / 4000;     // integer division
-		    for (int i = 0; i <= chunkCount; i++) {
-		        int max = 4000 * (i + 1);
-		        if (max >= sb.length()) {
-		            Log.d(tag, "chunk " + i + " of " + chunkCount + ":" + sb.substring(4000 * i));
-		        } else {
-		            Log.d(tag, "chunk " + i + " of " + chunkCount + ":" + sb.substring(4000 * i, max));
-		        }
-		    }
-		}
-	}
-	
-	public static void printStackTrace() {
-		if (Eta.DEBUG)
-			for (StackTraceElement ste : Thread.currentThread().getStackTrace())
-				System.out.println(ste);
-	}
     /**
      * Generate a SHA256 checksum of a string.
      * 
@@ -162,7 +93,7 @@ public final class Utils {
 		StringBuilder result = new StringBuilder();
 		for (String key : apiParams.keySet()) {
 			if (apiParams.get(key) instanceof Bundle) {
-				logd("Utils", "Nested parameters not allowed.");
+				EtaLog.d("Utils", "Nested parameters not allowed.");
 			} else {
 				if (result.length() > 0)
 					result.append("&");
@@ -180,7 +111,7 @@ public final class Utils {
 		List<NameValuePair> list = new ArrayList<NameValuePair>(apiParams.size());
 		for (String key : apiParams.keySet()) {
 			if (apiParams.get(key) instanceof Bundle) {
-				logd("Utils", "Nested parameters not allowed.");
+				EtaLog.d("Utils", "Nested parameters not allowed.");
 			} else {
 				list.add(new BasicNameValuePair(key, valueIsNull(apiParams.get(key))));
 			}

@@ -30,6 +30,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Network.EtaCache;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -96,7 +97,7 @@ public class Eta implements Serializable {
 			mSession = new Session(Eta.this);
 			mSession.init();
 		} else {
-			Utils.logd(TAG, "Eta already set. apiKey, apiSecret and context has been switched");
+			EtaLog.d(TAG, "Eta already set. apiKey, apiSecret and context has been switched");
 		}
 		
 	}

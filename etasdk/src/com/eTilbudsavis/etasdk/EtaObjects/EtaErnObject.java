@@ -7,7 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 
 /**
@@ -86,7 +86,7 @@ public class EtaErnObject extends EtaObject {
 				}
 				
 			} else {
-				Utils.logd(TAG, "ArrayElements does not contain an ERN");
+				EtaLog.d(TAG, "ArrayElements does not contain an ERN");
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -118,7 +118,7 @@ public class EtaErnObject extends EtaObject {
 					
 				
 			} else {
-				Utils.logd(TAG, "JSONObject does not contain an ERN");
+				EtaLog.d(TAG, "JSONObject does not contain an ERN");
 			}
 					
 		} catch (JSONException e) {

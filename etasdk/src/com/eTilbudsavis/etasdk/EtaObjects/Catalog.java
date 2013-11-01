@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -121,7 +122,7 @@ public class Catalog extends EtaErnObject implements Serializable {
 				list.add(Catalog.fromJSON((JSONObject)catalogs.get(i)));
 			
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return list;
 	}
@@ -158,7 +159,7 @@ public class Catalog extends EtaErnObject implements Serializable {
 				c.setImages(Images.fromJSON(catalog.getJSONObject(S_IMAGES)));
 				c.setPages(Pages.fromJSON(catalog.getJSONObject(S_PAGES)));
 			} catch (JSONException e) {
-				Utils.logd(TAG, e);
+				EtaLog.d(TAG, e);
 			}
 		} else if (catalog.has(S_ID) && catalog.has(P_PAGE)) {
 			// If it is a partial catalog
@@ -166,7 +167,7 @@ public class Catalog extends EtaErnObject implements Serializable {
 				c.setId(getJsonString(catalog, S_ID));
 				c.setOfferOnPage(catalog.getInt(P_PAGE));
 			} catch (JSONException e) {
-				Utils.logd(TAG, e);
+				EtaLog.d(TAG, e);
 			}
 		}
 		return c;
@@ -196,7 +197,7 @@ public class Catalog extends EtaErnObject implements Serializable {
 			o.put(S_IMAGES, c.getImages().toJSON());
 			o.put(S_PAGES, c.getPages().toJSON());
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

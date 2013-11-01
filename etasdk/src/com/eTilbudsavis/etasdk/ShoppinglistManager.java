@@ -29,6 +29,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -629,7 +630,7 @@ public class ShoppinglistManager {
 				// Check for changes in previous item, and update surrounding
 				Shoppinglist oldList = DbHelper.getInstance().getList(sl.getId(), userId);
 				if (oldList == null) {
-					Utils.logd(TAG, "No such list exists, considder addList() instead: " + sl.toString());
+					EtaLog.d(TAG, "No such list exists, considder addList() instead: " + sl.toString());
 					return;
 				}
 				
@@ -849,7 +850,7 @@ public class ShoppinglistManager {
 			public void run() {
 				
 				if (sli.getOfferId() == null && sli.getDescription() == null) {
-					Utils.logd(TAG, "Shoppinglist item seems to be empty, please add stuff");
+					EtaLog.d(TAG, "Shoppinglist item seems to be empty, please add stuff");
 					return;
 				}
 				
@@ -964,7 +965,7 @@ public class ShoppinglistManager {
 				// Check for changes in previous item, and update surrounding
 				ShoppinglistItem oldItem = DbHelper.getInstance().getItem(sli.getId(), userId);
 				if (oldItem == null) {
-					Utils.logd(TAG, "No such item exists, considder addItem() instead: " + sli.toString());
+					EtaLog.d(TAG, "No such item exists, considder addItem() instead: " + sli.toString());
 					return;
 				}
 				

@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Si  extends EtaObject implements Serializable {
 
@@ -25,7 +25,7 @@ public class Si  extends EtaObject implements Serializable {
 		try {
 			s = fromJSON(s, new JSONObject(si));
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return s;
 	}
@@ -43,7 +43,7 @@ public class Si  extends EtaObject implements Serializable {
 			s.setSymbol(getJsonString(si, S_SYMBOL));
 			s.setFactor(si.getDouble(S_FACTOR));
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		
 		return s;
@@ -59,7 +59,7 @@ public class Si  extends EtaObject implements Serializable {
 			o.put(S_SYMBOL, s.getSymbol());
 			o.put(S_FACTOR, s.getFactor());
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

@@ -8,9 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.annotation.SuppressLint;
-
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Share extends EtaObject implements Comparable<Share>, Serializable {
 	private static final long serialVersionUID = 1L;
@@ -36,7 +34,7 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 				list.add(Share.fromJSON((JSONObject)shares.get(i)));
 			
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return list;
 	}
@@ -64,7 +62,7 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 			s.setAccess(getJsonString(share, S_ACCESS));
 			s.setAccepted(share.getBoolean(S_ACCEPTED));
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		
 		return s;

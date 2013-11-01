@@ -17,7 +17,6 @@ public class Settings {
 
 	private static final String SESSION_JSON		= "session_json";
 	private static final String SESSION_USER		= "session_user";
-	private static final String SESSION_PASS		= "session_pass";
 	private static final String SESSION_FACEBOOK	= "session_facebook";
 	
 	private static final String SLM_CURRENT_ONLINE	= "slm_current_online";
@@ -73,20 +72,12 @@ public class Settings {
 		return mEditor.putString(SESSION_USER, user).commit();
 	}
 
-	public String getSessionPass() {
-		return mPrefs.getString(SESSION_PASS, null);
-	}
-
 	public boolean setSessionFacebook(String token) {
 		return mEditor.putString(SESSION_FACEBOOK, token).commit();
 	}
 
 	public String getSessionFacebook() {
 		return mPrefs.getString(SESSION_FACEBOOK, null);
-	}
-
-	public boolean setSessionPass(String pass) {
-		return mEditor.putString(SESSION_PASS, pass).commit();
 	}
 
 	public String getShoppinglistManagerCurrent(boolean isLoggedin) {

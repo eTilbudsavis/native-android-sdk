@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Images extends EtaObject implements Serializable {
 	
@@ -25,7 +25,7 @@ public class Images extends EtaObject implements Serializable {
 		try {
 			i = fromJSON(i, new JSONObject(images));
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return i;
 	}
@@ -57,7 +57,7 @@ public class Images extends EtaObject implements Serializable {
 			o.put(S_ZOOM, i.getZoom());
 			o.put(S_THUMB, i.getThumb());
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

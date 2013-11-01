@@ -32,6 +32,7 @@ import com.eTilbudsavis.etasdk.Api.StringListener;
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -39,7 +40,7 @@ public final class Pageflip extends WebView {
 
 	private static final String TAG = "Pageflip";
 	
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 	
 	/** String identifying etaProxy events */
 	private static final String ETA_PROXY = "eta-proxy";
@@ -231,7 +232,7 @@ public final class Pageflip extends WebView {
 		
 		@Override
 		public boolean onJsAlert(WebView view, String url, String message, final android.webkit.JsResult result) {
-			Utils.logd(TAG, "JsAlert: " + message);
+			EtaLog.d(TAG, "JsAlert: " + message);
 			if (!Eta.getInstance().isResumed())
 				return true;
 			

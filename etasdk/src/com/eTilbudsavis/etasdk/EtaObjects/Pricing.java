@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Pricing extends EtaObject implements Serializable {
 	
@@ -29,7 +29,7 @@ public class Pricing extends EtaObject implements Serializable {
 		try {
 			p = fromJSON(p, new JSONObject(pricing));
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return p;
 	}
@@ -48,7 +48,7 @@ public class Pricing extends EtaObject implements Serializable {
 			p.setPrePrice(pricing.isNull(S_PREPRICE) ? null : pricing.getDouble(S_PREPRICE));
 			p.setCurrency(getJsonString(pricing, S_CURRENCY));
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return p;
 	}
@@ -64,7 +64,7 @@ public class Pricing extends EtaObject implements Serializable {
 			o.put(S_PREPRICE, p.getPrePrice());
 			o.put(S_CURRENCY, p.getCurrency());
 		} catch (JSONException e) {
-			Utils.logd(TAG, e);
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

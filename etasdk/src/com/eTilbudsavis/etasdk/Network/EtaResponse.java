@@ -20,8 +20,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.Timer;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class EtaResponse {
 
@@ -44,13 +43,7 @@ public class EtaResponse {
 
 		try {
 			
-			Timer tp = new Timer();
-			tp.setSizeMin(1000);
-			
 			response = EntityUtils.toString(httpResponse.getEntity(), HTTP.UTF_8);
-//			response = getString(httpResponse.getEntity(), HTTP.UTF_8);
-
-//			tp.print("HttpEntity.toString()", response);
 			
 		} catch (ParseException e1) {
 			e1.printStackTrace();
@@ -174,7 +167,7 @@ public class EtaResponse {
 				buffer1.append(buf, 0, r1);
 				count += 1;
 			}
-			Utils.logd("ddsdsa", "Count: " + String.valueOf(count));
+			EtaLog.d("ddsdsa", "Count: " + String.valueOf(count));
 			resp = new String(buffer1.toByteArray(), charset);
 		} catch (IOException e) {
 			e.printStackTrace();

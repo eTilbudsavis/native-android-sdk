@@ -56,6 +56,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Network.EtaResponse;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -109,6 +110,7 @@ public class Api implements Serializable {
 
 	private static final int FLAG_CACHE_HIT			= 1 << 26;
 	
+	/** Determins if the request is finished */
 	private boolean mFinished = false;
 	
 	/** Type of HTTP request. */
@@ -143,7 +145,7 @@ public class Api implements Serializable {
 	public Api(Eta eta) {
 		mEta = eta;
 		// set default flags
-		mFlags = FLAG_USE_LOCATION | FLAG_USE_CACHE | FLAG_PRINT_DEBUG;
+		mFlags = FLAG_USE_LOCATION | FLAG_USE_CACHE ;
 	}
 
 	/**
@@ -462,10 +464,14 @@ public class Api implements Serializable {
 		}
 		return this;
 	}
-
+	
+	public boolean isFinished() {
+		return mFinished;
+	}
+	
 	public Api search(String url, ListListener<?> listener, String query) {
 		if (!url.contains(Endpoint.Path.SEARCH))
-			Utils.logd(TAG, "url does not match a search endpoint, don't expect anything good...");
+			EtaLog.d(TAG, "url does not match a search endpoint, don't expect anything good...");
 		
 		Bundle apiParams = new Bundle();
 		apiParams.putString(Params.QUERY, query);
@@ -496,7 +502,7 @@ public class Api implements Serializable {
 		if (url == null || 
 			listener == null || 
 			requestType == null ) {
-			Utils.logd(TAG, "Api parameters error: url, callback interface and requestType must not be null");
+			EtaLog.d(TAG, "Api parameters error: url, callback interface and requestType must not be null");
 			return null;
 		}
 		mPath = url;
@@ -527,7 +533,7 @@ public class Api implements Serializable {
 				mRequestType == null || 
 				mHeaders == null) {
 			
-			Utils.logd(TAG, "A request() must be made before execute()");
+			EtaLog.d(TAG, "A request() must be made before execute()");
 			return null;
 		}
 		
@@ -572,10 +578,7 @@ public class Api implements Serializable {
 
 			// Set headers if session is OK
 			if (mEta.getSession().getToken() != null) {
-				String t = mEta.getSession().getToken();
-				t =  t + (isFlag(FLAG_SESSION_REFRESH) ? "" : "xxxxx" );
-				Utils.logd(TAG, t);
-				setHeader(HEADER_X_TOKEN, t);
+				setHeader(HEADER_X_TOKEN, mEta.getSession().getToken());
 				String sha256 = Utils.generateSHA256(mEta.getApiSecret() + mEta.getSession().getToken());
 				setHeader(HEADER_X_SIGNATURE, sha256);
 			}
@@ -660,7 +663,7 @@ public class Api implements Serializable {
 					break;
 					
 				default:
-					Utils.logd(TAG, "Unknown RequestType: " + mRequestType.toString() + " - Aborting!");
+					EtaLog.d(TAG, "Unknown RequestType: " + mRequestType.toString() + " - Aborting!");
 					return;
 				}
 				
@@ -675,13 +678,13 @@ public class Api implements Serializable {
 				
 			} catch (UnknownHostException e) {
 				response.set(errorToString(EtaError.UNKNOWN_HOST, "UnknownHostException"));
-				Utils.logd(TAG, e);
+				EtaLog.d(TAG, e);
 			} catch (ClientProtocolException e) {
 				response.set(errorToString(EtaError.CLIENT_PROTOCOL_EXCEPTION, "ClientProtocolException"));
-				Utils.logd(TAG, e);
+				EtaLog.d(TAG, e);
 			} catch (IOException e) {
 				response.set(errorToString(EtaError.IO_EXCEPTION, "IOException"));
-				Utils.logd(TAG, e);
+				EtaLog.d(TAG, e);
 			} finally {
 				// Close connection, to deallocate resources
 				httpClient.getConnectionManager().shutdown();
@@ -700,7 +703,7 @@ public class Api implements Serializable {
 			// Error, try to get new session token, then do request again.
 			} else {
 				
-				Utils.logd(TAG, response.getString());
+				EtaLog.d(TAG, response.getString());
 				
 				EtaError error = EtaError.fromJSON(response.getJSONObject());
 				
@@ -710,13 +713,13 @@ public class Api implements Serializable {
 						error.getCode() == 1108 ||
 						error.getCode() == 1300 ||
 						error.getCode() == 1301 ) ) ) {
-					Utils.logd(TAG, "Hit stuff");
+					EtaLog.d(TAG, "Hit stuff");
 					setFlag(FLAG_SESSION_REFRESH);
 					mEta.getSession().subscribe(new SessionListener() {
 						
 						public void onUpdate() {
 							mEta.getSession().unSubscribe(this);
-							Utils.logd(TAG, "Hit stuff again");
+							EtaLog.d(TAG, "Hit stuff again");
 							runThread();
 						}
 					}).update();
@@ -777,9 +780,11 @@ public class Api implements Serializable {
 			for (Header h : dataWrapper.getHeaders())
 				debug.append(h.getName()).append(": ").append(h.getValue()).append(", ");
 			debug.append("\n");
-	    	debug.append("Data: ").append((dataWrapper.getString().length() > 100 ? dataWrapper.getString().substring(0, 100) : dataWrapper.getString()));
+			String data = dataWrapper.getString();
+			data = data.length() > 200 ? data.substring(0,200) : data;
+	    	debug.append("Data: ").append(data);
 			
-	    	Utils.logd(TAG, debug.toString());
+	    	EtaLog.d(TAG, debug.toString());
 	    }
 	    
 	}
@@ -844,6 +849,8 @@ public class Api implements Serializable {
 	 */
 	private void runOnUiThread(final boolean isCache, final int statusCode,final Object data,final EtaError error) {
 		
+		mFinished = true;
+		
 		mEta.getHandler().post(new Runnable() {
 
 			public void run() {
@@ -861,7 +868,7 @@ public class Api implements Serializable {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void triggerListener(final boolean isCache, final int statusCode,final Object data,final EtaError error) {
-
+		
 		if (!isFlag(FLAG_CANCEL_IF_POSSIBLE)) {
 			
 			switch (getListenerType(mListener)) {
