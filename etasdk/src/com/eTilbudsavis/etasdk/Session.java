@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,19 +29,24 @@ public class Session implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String TAG = "Session";
+	
 	private static final String S_TOKEN = "token";
 	private static final String S_EXPIRES = "expires";
 	private static final String S_USER = "user";
 	private static final String S_PERMISSIONS = "permissions";
 	private static final String S_PROVIDER = "provider";
 	
-	public static final String TAG = "Session";
-	
+    public static final String COOKIE_DOMAIN = "etilbudsavis.dk";
+    public static final String COOKIE_AUTH_ID = "auth[id]";
+    public static final String COOKIE_AUTH_TIME = "auth[time]";
+    public static final String COOKIE_AUTH_HASH = "auth[hash]";
+    
 	/** API v2 Session endpoint */
 	public static final String ENDPOINT = Endpoint.SESSIONS;
 	
-	/** Token time to live, 6 weeks */
-	private static final int TTL = 3628800;
+	/** Token time to live, 45days */
+	private static final int TTL = 3888000;
 	
 	private String mToken = null;
 	private Date mExpires = new Date(0L);
@@ -162,66 +169,59 @@ public class Session implements Serializable {
 		String user = mEta.getSettings().getSessionUser();
 		String facebook = mEta.getSettings().getSessionFacebook();
 		
-		if (user != null && mPassStr != null) {
-			
-			// Regulare login
-			args.putString(Params.EMAIL, user);
-			args.putString(Params.PASSWORD, mPassStr);
-			mEta.getApi().post(Session.ENDPOINT, sessionListener, args).execute();
-			
-		} else if (facebook != null) {
+		if (facebook != null) {
 			
 			// Login with facebook token
 			args.putString(Params.FACEBOOK_TOKEN, facebook);
 			mEta.getApi().put(Session.ENDPOINT, sessionListener, args).execute();
+			return;
 			
-		} else {
+		} else if (user != null && mPassStr != null) {
 			
-			if (mEta.getSettings().getSessionJson() == null) {
-
-            	EtaLog.d(TAG, "JSON is null");
+			// Regulare login
+			args.putString(Params.EMAIL, user);
+			args.putString(Params.PASSWORD, mPassStr);
+			
+		} else if (mEta.getSettings().getSessionJson() == null) {
+			
+			// No session yet, check cookies for old token
+			String authId = null;
+			String authTime = null;
+			String authHash = null;
+			
+            CookieSyncManager.createInstance(mEta.getContext());
+            CookieManager cm = CookieManager.getInstance();
+            String cookieString = cm.getCookie(COOKIE_DOMAIN);
+            if (cookieString != null) {
             	
-				// No session yet, check cookies for old token
-				String authId = null;
-				String authTime = null;
-				String authHash = null;
-				
-	            CookieSyncManager.createInstance(mEta.getContext());
-	            String cookies = CookieManager.getInstance().getCookie("etilbudsavis.dk");
-	            if (cookies != null) {
-	            	EtaLog.d(TAG, cookies);
-		            String[] keyValueSets = cookies.split(";");
-		            for(String cookie : keyValueSets) {
-		            	
-		                String[] keyValue = cookie.split("=");
-		                
-		                if (keyValue[0].equals("auth[id]")) {
-		                	authId = (keyValue.length > 1) ? keyValue[1] : null;
-		                } else if (keyValue[0].equals("auth[hash]")) {
-		                	authTime = (keyValue.length > 1) ? keyValue[1] : null;
-		                } else if (keyValue[0].equals("auth[time]")) {
-		                	authHash = (keyValue.length > 1) ? keyValue[1] : null;
-		                }
-		            }
-		            
-		            if (authId != null && authHash != null && authTime != null) {
-		            	args.putString(Params.V1_AUTH_ID, authId);
-		            	args.putString(Params.V1_AUTH_HASH, authHash);
-		            	args.putString(Params.V1_AUTH_TIME, authTime);
-		            }
-	            } else {
-
-	            	EtaLog.d(TAG, "cookies is null");
+	            String[] cookies = cookieString.split(";");
+	            for(String cookie : cookies) {
 	            	
+	                String[] keyValue = cookie.split("=");
+	                String key = keyValue[0].trim();
+	                String value = keyValue[1];
+	                
+	                if (key.equals(COOKIE_AUTH_ID)) {
+	                	authId = value;
+	                } else if (key.equals(COOKIE_AUTH_HASH)) {
+		                authHash = value;
+	                } else if (key.equals(COOKIE_AUTH_TIME)) {
+	                	authTime = value;
+	                }
+	                
 	            }
-				
-			}
-
-        	EtaLog.d(TAG, "passed migration part");
-        	
-			// Just create plain read only session
-			mEta.getApi().post(Session.ENDPOINT, sessionListener, args).printDebug(true).execute();
+	            
+	            if (authId != null && authHash != null && authTime != null) {
+	            	args.putString(Params.V1_AUTH_ID, authId);
+	            	args.putString(Params.V1_AUTH_HASH, authHash);
+	            	args.putString(Params.V1_AUTH_TIME, authTime);
+	            }
+	            
+            }
+	            
 		}
+
+		mEta.getApi().post(Session.ENDPOINT, sessionListener, args).execute();
 		
 	}
 	

@@ -703,8 +703,6 @@ public class Api implements Serializable {
 			// Error, try to get new session token, then do request again.
 			} else {
 				
-				EtaLog.d(TAG, response.getString());
-				
 				EtaError error = EtaError.fromJSON(response.getJSONObject());
 				
 				if ( !isFlag(FLAG_SESSION_REFRESH) && ( (
@@ -713,13 +711,11 @@ public class Api implements Serializable {
 						error.getCode() == 1108 ||
 						error.getCode() == 1300 ||
 						error.getCode() == 1301 ) ) ) {
-					EtaLog.d(TAG, "Hit stuff");
 					setFlag(FLAG_SESSION_REFRESH);
 					mEta.getSession().subscribe(new SessionListener() {
 						
 						public void onUpdate() {
 							mEta.getSession().unSubscribe(this);
-							EtaLog.d(TAG, "Hit stuff again");
 							runThread();
 						}
 					}).update();
@@ -760,8 +756,7 @@ public class Api implements Serializable {
 	private void printDebugPreExecute() {
 
 		if (isFlag(FLAG_PRINT_DEBUG) ) {
-			debug.append("*** Pre Execute ***").append("\n");
-			debug.append(mRequestType.toString()).append(" ").append(mPath).append("\n");
+			debug.append("# Request: ").append(mRequestType.toString()).append(" ").append(mPath).append("\n");
 			debug.append("Query: ").append(URLEncodedUtils.format(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8)).append("\n");
 			debug.append("Headers: ").append(mHeaders.toString()).append("\n");
 		}
