@@ -52,8 +52,8 @@ public final class Pageflip extends WebView {
 	/** String identifying the change event, called when the session has changed. See pageflip documentation for more details */
 	public static final String EVENT_CHANGE = "change";
 	
-	/** String identifying session events */
 	private static final String ETA_THUMB = "catalog-view-thumbnails";
+	private static final String ETA_PAGE = "catalog-view-go-to-page";
 	
 	/** String identifying the initialize parameter, used when initializing pageflip */
 	private static final String PARAM_INITIALIZE = "initialize";
@@ -72,7 +72,6 @@ public final class Pageflip extends WebView {
 	/** String identifying the catalog-view parameter, used when loading a catalog. All available options for this parameter is prefixed with "OPTION" as in {@link Pageflip#OPTION_CATALOG OPTION_CATALOG} */
 	private static final String PARAM_CATALOG_VIEW = "catalog-view";
 	/** String identifying the catalog option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
-//	private static final String OPTION_VIEW_SESSION = "viewSession";
 	private static final String OPTION_VIEW_SESSION = "viewSession";
 	/** String identifying the catalog option, used when setting options with the parameter {@link Pageflip#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
 	public static final String OPTION_CATALOG = "catalog";
@@ -117,6 +116,7 @@ public final class Pageflip extends WebView {
 	private List<Pageflip> mPageflips;
 	private String mViewSession = null;
 	private boolean mThumbnailsToggled = false;
+	private boolean mReady = false;
 	
 	/**
 	 * Used for manual inflation
@@ -162,6 +162,7 @@ public final class Pageflip extends WebView {
 						if (o.getBoolean("init")) {
 
 							mViewSession = o.getString(OPTION_VIEW_SESSION);
+							mReady = true;
 							mListener.onReady(mUuid, mViewSession);
 						}
 					} catch (JSONException e) {
@@ -274,7 +275,6 @@ public final class Pageflip extends WebView {
 			mPageflips.add(this);
 		}
 		
-		
 		WebSettings ws = getSettings();
 		ws.setJavaScriptEnabled(true);
 		ws.setDefaultTextEncodingName("utf-8");
@@ -351,12 +351,12 @@ public final class Pageflip extends WebView {
 					loc.put(LOCATION_SENSOR, mEta.getLocation().isSensor());
 					loc.put(LOCATION_RADIUS, mEta.getLocation().getRadius());
 				} catch (JSONException e) {
-					e.printStackTrace();
+					EtaLog.d(TAG, e);
 				}
 				o.put(LOCATION, loc);
 			}
 		} catch (JSONException e) {
-			e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		etaProxy(PARAM_INITIALIZE, o);
 		// Initialize the catalog
@@ -366,40 +366,36 @@ public final class Pageflip extends WebView {
 			if (mViewSession != null)
 				mCatalogView.put(OPTION_VIEW_SESSION, mViewSession);
 		} catch (JSONException e) {
-			e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		etaProxy(PARAM_CATALOG_VIEW, mCatalogView);
 		
 	}
-	
+
 	/**
 	 * Wrapper for the "window.etaProxy.push" command.
-	 * @param parameter
-	 * @param data
+	 * @param command to push in pageflip
+	 * @param data to handle in pageflip
 	 */
-	private void etaProxy(String parameter, JSONObject data) {
-		etaProxy(parameter + "', '" + data.toString());
+	private void etaProxy(String command, JSONObject data) {
+		injectJS(String.format("window.etaProxy.push( ['%s', '%s'] );", command, data.toString()));
 	}
 
 	/**
 	 * Wrapper for the "window.etaProxy.push" command.
-	 * @param parameter
-	 * @param data
+	 * @param command to push in pageflip
 	 */
-	private void etaProxy(String parameter) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("window.etaProxy.push(['")
-		.append(parameter)
-		.append("']);");
-		injectJS(sb.toString());
+	private void etaProxy(String command) {
+		injectJS(String.format("window.etaProxy.push( ['%s'] );", command));
 	}
-	
+
 	/**
 	 * Wrapper for JavaScript commands to be injected into the pageflip.
 	 * @param option a snippet of JavaScript
 	 */
-	private void injectJS(String option) {
-		String s = String.format("javascript:(function() {%s})()", option);
+	private void injectJS(String jsCommand) {
+		String s = String.format("javascript:(function() { %s })()", jsCommand);
+		EtaLog.d(TAG, s);
 		loadUrl(s);
 	}
 	
@@ -432,6 +428,22 @@ public final class Pageflip extends WebView {
 	public void toggleThumbnails() {
 		mThumbnailsToggled = !mThumbnailsToggled;
 		etaProxy(ETA_THUMB);
+	}
+
+	/**
+	 * Method for going to a specific page AFTER pageflip have been initialized.
+	 * @param page to go to
+	 */
+	public void gotoPage(int page) {
+		try {
+			JSONObject data = new JSONObject();
+			data.put("page", String.valueOf(page));
+			data.put("animated", "false");
+			etaProxy(ETA_PAGE, data);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		
 	}
 	
 	/**
@@ -475,7 +487,15 @@ public final class Pageflip extends WebView {
 			e.printStackTrace();
 		}
 	}
-
+	
+	/**
+	 * Method for determining if the pageflip is ready.
+	 * @return true if the catalog is ready
+	 */
+	public boolean isReady() {
+		return mReady;
+	}
+	
 	/**
 	 * Whether to disable hotspot overlay or not.<br>
 	 * Options must be set before {@link #execute() execute()}
