@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -30,6 +31,9 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	}
 	
 	public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
+
+	public static final String TYPE_SHOPPING_LIST = null;
+	public static final String TYPE_WISH_LIST = "wish_list";
 	
 	public static final String ACCESS_PRIVATE = "private";
 	public static final String ACCESS_SHARED = "shared";
@@ -46,6 +50,8 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	private Share mOwner = new Share();
 	private int mState = State.TO_SYNC;
 	private String mPrevId;
+	private String mType;
+	private JSONObject mMeta;
 	private int mUserId = -1;
 	
 	private Shoppinglist() {
@@ -96,26 +102,29 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	private static Shoppinglist fromJSON(Shoppinglist sl, JSONObject shoppinglist) {
 		
 		try {
-			sl.setId(getJsonString(shoppinglist, S_ID));
-			sl.setErn(getJsonString(shoppinglist, S_ERN));
-			sl.setName(getJsonString(shoppinglist, S_NAME));
-			sl.setAccess(getJsonString(shoppinglist, S_ACCESS));
-			sl.setModified(getJsonString(shoppinglist, S_MODIFIED));
-			sl.setOwner(Share.fromJSON(shoppinglist.getJSONObject(S_OWNER)));
-			sl.setPreviousId(getJsonString(shoppinglist, S_PREVIOUS_ID));
-			
+			sl.setId(getJsonString(shoppinglist, ServerKey.ID));
+			sl.setErn(getJsonString(shoppinglist, ServerKey.ERN));
+			sl.setName(getJsonString(shoppinglist, ServerKey.NAME));
+			sl.setAccess(getJsonString(shoppinglist, ServerKey.ACCESS));
+			sl.setModified(getJsonString(shoppinglist, ServerKey.MODIFIED));
+			sl.setOwner(Share.fromJSON(shoppinglist.getJSONObject(ServerKey.OWNER)));
+			sl.setPreviousId(getJsonString(shoppinglist, ServerKey.PREVIOUS_ID));
+			sl.setType(getJsonString(shoppinglist, ServerKey.TYPE));
+			String meta = getJsonString(shoppinglist, ServerKey.META);
+			sl.setMeta(shoppinglist.isNull(ServerKey.META) ? null : (meta.equals("") ? null : new JSONObject(meta)));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
+		
 		return sl;
 	}
 	
 	public Bundle getApiParams() {
 		Bundle apiParams = new Bundle();
-		apiParams.putString(S_MODIFIED, Utils.formatDate(mModified));
-		apiParams.putString(S_NAME, getName());
-		apiParams.putString(S_ACCESS, getAccess());
-		apiParams.putString(S_PREVIOUS_ID, getPreviousId());
+		apiParams.putString(ServerKey.MODIFIED, Utils.formatDate(mModified));
+		apiParams.putString(ServerKey.NAME, getName());
+		apiParams.putString(ServerKey.ACCESS, getAccess());
+		apiParams.putString(ServerKey.PREVIOUS_ID, getPreviousId());
 		return apiParams;
 	}
 	
@@ -165,6 +174,24 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		return this;
 	}
 
+	public String getType() {
+		return mType;
+	}
+
+	public Shoppinglist setType(String type) {
+		mType = type;
+		return this;
+	}
+
+	public JSONObject getMeta() {
+		return mMeta;
+	}
+
+	public Shoppinglist setMeta(JSONObject meta) {
+		mMeta = meta;
+		return this;
+	}
+
 	public Shoppinglist setModified(String time) {
 		mModified = Utils.parseDate(time);
 		return this;
@@ -208,7 +235,9 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 				mOwner.equals(sl.getOwner()) &&
 				stringCompare(mName, sl.getName()) &&
 				mUserId == sl.getUserId() &&
-				stringCompare(mPrevId, sl.getPreviousId());
+				stringCompare(mPrevId, sl.getPreviousId()) &&
+				stringCompare(mType, sl.getType()) &&
+				mMeta == null ? sl.getMeta() == null : mMeta.toString().equals(sl.getMeta().toString());
 	}
 
 	@Override
@@ -227,7 +256,9 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		.append(", state=").append(mState)
 		.append(", owner=").append(mOwner.toString())
 		.append(", user=").append(mUserId)
-		.append(", previous_id=").append(mPrevId);
+		.append(", previous_id=").append(mPrevId)
+		.append(", type=").append(mType)
+		.append(", meta=").append(mMeta);
 		return sb.append("]").toString();
 	}
 

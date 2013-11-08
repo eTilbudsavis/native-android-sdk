@@ -29,7 +29,7 @@ public class Country extends EtaObject implements Serializable {
 		if (country == null) return c;
 		
 		c.setId(getJsonString(country, S_ID));
-		c.setUnsubscribePrintUrl(getJsonString(country, S_UNSUBSCRIBE_PRINT_URL));
+		c.setUnsubscribePrintUrl(getJsonString(country, SERVER_UNSUBSCRIBE_PRINT_URL));
 		
 		return c;
 	}
@@ -42,7 +42,7 @@ public class Country extends EtaObject implements Serializable {
 		JSONObject o = new JSONObject();
 		try {
 			o.put(S_ID, c.getId());
-			o.put(S_UNSUBSCRIBE_PRINT_URL, c.getUnsubscribePrintUrl());
+			o.put(SERVER_UNSUBSCRIBE_PRINT_URL, c.getUnsubscribePrintUrl());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

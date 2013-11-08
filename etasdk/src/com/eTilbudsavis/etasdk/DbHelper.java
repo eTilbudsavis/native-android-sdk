@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -22,7 +25,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String TAG = "DbHelper";
 	
 	private static final String DB_NAME = "shoppinglist.db";
-	private static final int DB_VERSION = 2;
+	private static final int DB_VERSION = 3;
 	
 	public static final String LIST_TABLE = "shoppinglists";
 	public static final String ITEM_TABLE = "shoppinglistitems";
@@ -43,6 +46,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String CREATOR = "creator";
 	public static final String SHOPPINGLIST_ID = "shopping_list_id";
 	public static final String PREVIOUS_ID = "previous_id";
+	public static final String TYPE = "type";
+	public static final String META = "meta";
 	public static final String USER = "user";
 	
 	private Object LOCK = new Object();
@@ -69,7 +74,9 @@ public class DbHelper extends SQLiteOpenHelper {
 				OWNER_ACCESS + " text, " + 
 				OWNER_ACCEPTED + " integer, " + 
 				PREVIOUS_ID + " text, " + 
-				USER + "  integer not null " + 
+				TYPE + " text, " + 
+				META + " text, " + 
+				USER + " integer not null " + 
 				");";
 	
 	private static final String CREATE_ITEM_TABLE = 
@@ -85,12 +92,12 @@ public class DbHelper extends SQLiteOpenHelper {
 				SHOPPINGLIST_ID + " text not null, " + 
 				STATE + " integer not null, " + 
 				PREVIOUS_ID + " text, " + 
+				META + " text, " + 
 				USER + "  integer not null " + 
 				");";
 	
 	private static DbHelper mDbHelper;
 	private SQLiteDatabase mDatabase;
-	private boolean mCloseDb = false;
 	
 	private DbHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
@@ -153,6 +160,13 @@ public class DbHelper extends SQLiteOpenHelper {
 		sl.getOwner().setAccess(c.getString(c.getColumnIndex(OWNER_ACCESS)));
 		sl.getOwner().setAccepted(0 < c.getInt(c.getColumnIndex(OWNER_ACCEPTED)));
 		sl.setPreviousId(c.getString(c.getColumnIndex(PREVIOUS_ID)));
+		sl.setType(c.getString(c.getColumnIndex(TYPE)));
+		String meta = c.getString(c.getColumnIndex(META));
+		try {
+			sl.setMeta(meta == null ? null : new JSONObject(meta));
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
 		return sl;
 	}
 
@@ -178,6 +192,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(OWNER_ACCESS).append(",")
 		.append(OWNER_ACCEPTED).append(",")
 		.append(PREVIOUS_ID).append(",")
+		.append(TYPE).append(",")
+		.append(META).append(",")
 		.append(USER)
 		.append(") VALUES (")
 		.append(escape(sl.getId())).append(",")
@@ -190,6 +206,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(escape(s.getAccess())).append(",")
 		.append(escape(s.getAccepted())).append(",")
 		.append(escape(sl.getPreviousId())).append(",")
+		.append(escape(sl.getType())).append(",")
+		.append(escape(sl.getMeta() == null ? null : sl.getMeta().toString())).append(",")
 		.append(escape(userId)).append(")");
 		
 		String str = sb.toString();
@@ -215,6 +233,12 @@ public class DbHelper extends SQLiteOpenHelper {
 		sli.setShoppinglistId(cursor.getString(cursor.getColumnIndex(SHOPPINGLIST_ID)));
 		sli.setState(cursor.getInt(cursor.getColumnIndex(STATE)));
 		sli.setPreviousId(cursor.getString(cursor.getColumnIndex(PREVIOUS_ID)));
+		String meta = cursor.getString(cursor.getColumnIndex(META));
+		try {
+			sli.setMeta(meta == null ? null : new JSONObject(meta));
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
 		return sli;
 	}
 	
@@ -238,6 +262,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(SHOPPINGLIST_ID).append(",")
 		.append(STATE).append(",")
 		.append(PREVIOUS_ID).append(",")
+		.append(META).append(",")
 		.append(USER)
 		.append(") VALUES (")
 		.append(escape(sli.getId())).append(",")
@@ -251,6 +276,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(escape(sli.getShoppinglistId())).append(",")
 		.append(escape(sli.getState())).append(",")
 		.append(escape(sli.getPreviousId())).append(",")
+		.append(escape(sli.getMeta() == null ? null : sli.getMeta().toString())).append(",")
 		.append(escape(userId)).append(")");
 		return sb.toString();
 	}

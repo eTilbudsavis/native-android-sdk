@@ -19,7 +19,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "ShoppinglistItem";
-
+	
 	/** States a shopppingItem list can be in */
 	public interface State {
 		int TO_SYNC	= 0;
@@ -41,6 +41,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	private Offer mOffer = null;
 	private String mShoppinglistId;
 	private String mPrevId;
+	private JSONObject mMeta;
 	private int mUserId = -1;
 
 	public ShoppinglistItem() {
@@ -212,6 +213,15 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		return this;
 	}
 
+	public JSONObject getMeta() {
+		return mMeta;
+	}
+
+	public ShoppinglistItem setMeta(JSONObject meta) {
+		mMeta = meta;
+		return this;
+	}
+
 	public int getUserId() {
 		return mUserId;
 	}
@@ -260,7 +270,8 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 				stringCompare(mShoppinglistId, sli.getShoppinglistId()) &&
 				stringCompare(mCreator, sli.getCreator()) &&
 				stringCompare(mPrevId, sli.getPreviousId()) &&
-				mUserId == sli.getUserId();
+				mUserId == sli.getUserId() &&
+				mMeta == null ? sli.getMeta() == null : mMeta.toString().equals(sli.getMeta().toString());
 	}
 
 	@Override
@@ -287,7 +298,8 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 			.append(", shoppinglist_id=").append(mShoppinglistId)
 			.append(", state=").append(mState)
 			.append(", userId=").append(mUserId)
-			.append(", previous_id=").append(mPrevId);
+			.append(", previous_id=").append(mPrevId)
+			.append(", meta=").append(mMeta);
 		}
 		return sb.append("]").toString();
 	}
