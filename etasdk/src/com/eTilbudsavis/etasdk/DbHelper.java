@@ -287,7 +287,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return number of affected rows
 	 */
 	public int insertList(Shoppinglist list, int userId) {
-		String q = String.format("INSERT INTO %s %s", LIST_TABLE, listToValues(list, userId));
+		String q = String.format("INSERT OR REPLACE INTO %s %s", LIST_TABLE, listToValues(list, userId));
 		int i = execQueryWithChangesCount(q);
 		return i;
 	}
@@ -354,7 +354,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	public int deleteList(Shoppinglist sl, int userId) {
 		dirtyItems(sl.getId());
 		String id = escape(sl.getId());
-		String q = String.format("DELETE FROM %s WHERE %s!=%s AND %s=%s", LIST_TABLE, ID, id, USER, userId);
+		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", LIST_TABLE, ID, id, USER, userId);
 		return execQueryWithChangesCount(q);
 	}
 	
@@ -375,7 +375,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public int insertItem(ShoppinglistItem sli, int userId) {
 		dirtyItems(sli.getShoppinglistId());
-		String q = String.format("INSERT INTO %s %s", ITEM_TABLE, itemToValues(sli, userId));
+		String q = String.format("INSERT OR REPLACE INTO %s %s", ITEM_TABLE, itemToValues(sli, userId));
 		return execQueryWithChangesCount(q);
 	}
 	
@@ -566,64 +566,10 @@ public class DbHelper extends SQLiteOpenHelper {
 		String q = String.format("REPLACE INTO %s %s", ITEM_TABLE,  itemToValues(sli, userId));
 		return execQueryWithChangesCount(q);
 	}
-
-//	/**
-//	 * replaces an item in db
-//	 * @param sli to insert
-//	 * @return number of affected rows
-//	 */
-//	public int insertItems(List<ShoppinglistItem> list) {
-//		dirty();
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("INSERT INTO " + getTableItem() + " ");
-//		boolean first = true;
-//		for (ShoppinglistItem sli : list) {
-//			if (first) {
-//				first = false;
-//				sb.append(" SELECT ").append(itemToMultiValuesAS(sli)).append(" ");
-//			} else {
-//				sb.append(" UNION SELECT ").append(itemToMultiValues(sli));
-//			}
-//		}
-//		sb.append(";");
-//		Utils.logd(TAG, sb.toString());
-//		return execQueryWithChangesCount(sb.toString());
-//	}
-//
-//	public static String itemToMultiValuesAS(ShoppinglistItem sli) {
-//		StringBuilder sb = new StringBuilder();
-//		sb.append(escape(sli.getId())).append(" AS ").append(ID).append(",")
-//		.append(escape(sli.getErn())).append(" AS ").append(ERN).append(",")
-//		.append(escape(Utils.formatDate(sli.getModified()))).append(" AS ").append(MODIFIED).append(",")
-//		.append(escape(sli.getDescription())).append(" AS ").append(DESCRIPTION).append(",")
-//		.append(escape(sli.getCount())).append(" AS ").append(COUNT).append(",")
-//		.append(escape(sli.isTicked())).append(" AS ").append(TICK).append(",")
-//		.append(escape(sli.getOfferId())).append(" AS ").append(OFFER_ID).append(",")
-//		.append(escape(sli.getCreator())).append(" AS ").append(CREATOR).append(",")
-//		.append(escape(sli.getShoppinglistId())).append(" AS ").append(SHOPPINGLIST_ID).append(",")
-//		.append(escape(sli.getState())).append(" AS ").append(STATE).append(",")
-//		.append(escape(sli.getPreviousId())).append(" AS ").append(PREVIOUS_ID);
-//		return sb.toString();
-//	}
-//
-//	public static String itemToMultiValues(ShoppinglistItem sli) {
-//		StringBuilder sb = new StringBuilder();
-//		sb.append(escape(sli.getId())).append(",")
-//		.append(escape(sli.getErn())).append(",")
-//		.append(escape(Utils.formatDate(sli.getModified()))).append(",")
-//		.append(escape(sli.getDescription())).append(",")
-//		.append(escape(sli.getCount())).append(",")
-//		.append(escape(sli.isTicked())).append(",")
-//		.append(escape(sli.getOfferId())).append(",")
-//		.append(escape(sli.getCreator())).append(",")
-//		.append(escape(sli.getShoppinglistId())).append(",")
-//		.append(escape(sli.getState())).append(",")
-//		.append(escape(sli.getPreviousId()));
-//		return sb.toString();
-//	}
-		
 	
 	private int execQueryWithChangesCount(String query) {
+		
+//		EtaLog.d(TAG, query);
 		
 		int i = 0;
 		

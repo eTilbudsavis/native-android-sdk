@@ -163,21 +163,20 @@ public class ShoppinglistManager {
 				
 				if (newset.containsKey(key)) {
 					
-					Shoppinglist sl = newset.get(key);
-					sl.setState(Shoppinglist.State.SYNCED);
+					Shoppinglist newSl = newset.get(key);
+					newSl.setState(Shoppinglist.State.SYNCED);
 
-					Shoppinglist slold = oldset.get(key);
+					Shoppinglist oldSl = oldset.get(key);
 					
-					if (slold.getModified().before(sl.getModified())) {
-						edited.add(sl);
-						DbHelper.getInstance().editList(sl, user());
-					} else if (slold.getModified().after(sl.getModified())) {
-						if (slold.getState() != ShoppinglistItem.State.SYNCING) {
-							editList(slold, null, sl.getModified(), sl.getUserId());
-						}
+					if (oldSl.getModified().before(newSl.getModified())) {
+						edited.add(newSl);
+						DbHelper.getInstance().editList(newSl, user());
+					} else if (oldSl.getModified().after(newSl.getModified()) && oldSl.getState() != ShoppinglistItem.State.SYNCING) {
+						editList(oldSl, null, newSl.getModified(), newSl.getUserId());
 					}
-					if (!oldset.get(key).getModified().equals(sl)) {
-						DbHelper.getInstance().editList(sl, user());
+					
+					if (!oldSl.getModified().equals(newSl.getModified())) {
+						DbHelper.getInstance().editList(newSl, user());
 					}
 					
 				} else {
@@ -1105,7 +1104,7 @@ public class ShoppinglistManager {
 
 		        
 		        ArrayList<ShoppinglistItem> list = getItems(sl);
-		        final List<String> deleted = new ArrayList<String>();
+		        final List<ShoppinglistItem> deleted = new ArrayList<ShoppinglistItem>();
 		        int count = list.size();
 
 				String preGoodId = ShoppinglistItem.FIRST_ITEM;
@@ -1116,13 +1115,13 @@ public class ShoppinglistManager {
 						sli.setState(ShoppinglistItem.State.DELETE);
 						sli.setModified(d);
 						DbHelper.getInstance().editItem(sli, userId);
-						deleted.add(sli.getId());
+						deleted.add(sli);
 					} else if (sli.isTicked() == state) {
 						// Delete if ticked matches the requested state
 						sli.setState(ShoppinglistItem.State.DELETE);
 						sli.setModified(d);
 						DbHelper.getInstance().editItem(sli, userId);
-						deleted.add(sli.getId());
+						deleted.add(sli);
 					} else {
 						if (!sli.getPreviousId().equals(preGoodId)) {
 							sli.setPreviousId(preGoodId);
@@ -1170,8 +1169,10 @@ public class ShoppinglistManager {
 				}
 
 		        if (count == deleted.size()) {
-		        	notifyListListener(l, false, 200, sl, null);
-		        	notifyListSubscribers(false, null, idToList(sl), null);
+		        	for (ShoppinglistItem sli : deleted) {
+			        	notifyItemListener(l, false, 200, sli, null);
+			        	notifyItemSubscribers(false, null, deleted, null);
+		        	}
 				} else {
 		        	revertList(sl, l, userId);
 				}

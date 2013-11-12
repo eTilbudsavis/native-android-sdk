@@ -270,8 +270,8 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 				stringCompare(mShoppinglistId, sli.getShoppinglistId()) &&
 				stringCompare(mCreator, sli.getCreator()) &&
 				stringCompare(mPrevId, sli.getPreviousId()) &&
-				mUserId == sli.getUserId() &&
-				mMeta == null ? sli.getMeta() == null : mMeta.toString().equals(sli.getMeta().toString());
+				mUserId == sli.getUserId();// &&
+//				mMeta == null ? sli.getMeta() == null : mMeta.toString().equals(sli.getMeta().toString());
 	}
 
 	@Override

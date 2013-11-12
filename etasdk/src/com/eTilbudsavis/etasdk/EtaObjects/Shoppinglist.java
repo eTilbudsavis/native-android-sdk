@@ -124,6 +124,8 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		apiParams.putString(ServerKey.MODIFIED, Utils.formatDate(mModified));
 		apiParams.putString(ServerKey.NAME, getName());
 		apiParams.putString(ServerKey.ACCESS, getAccess());
+		apiParams.putString(ServerKey.META, getMeta() == null ? null : getMeta().toString());
+		apiParams.putString(ServerKey.TYPE, getType());
 		apiParams.putString(ServerKey.PREVIOUS_ID, getPreviousId());
 		return apiParams;
 	}
