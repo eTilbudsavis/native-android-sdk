@@ -124,23 +124,6 @@ public class Branding extends EtaObject  implements Serializable {
 	}
 	
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Branding))
-			return false;
-
-		Branding b = (Branding)o;
-		return stringCompare(mName, b.getName()) &&
-				stringCompare(mUrlName, b.getUrlName()) &&
-				stringCompare(mWebsite, b.getWebsite()) &&
-				stringCompare(mLogo, b.getLogo()) &&
-				mColor.equals(b.getColor()) &&
-				mPageflip.equals(b.getPageflip());
-	}
-	
-	@Override
 	public String toString() {
 		return toString(false);
 	}
@@ -161,4 +144,63 @@ public class Branding extends EtaObject  implements Serializable {
 		return sb.append("]").toString();
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((mColor == null) ? 0 : mColor.hashCode());
+		result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
+		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
+		result = prime * result
+				+ ((mPageflip == null) ? 0 : mPageflip.hashCode());
+		result = prime * result
+				+ ((mUrlName == null) ? 0 : mUrlName.hashCode());
+		result = prime * result
+				+ ((mWebsite == null) ? 0 : mWebsite.hashCode());
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Branding other = (Branding) obj;
+		if (mColor == null) {
+			if (other.mColor != null)
+				return false;
+		} else if (!mColor.equals(other.mColor))
+			return false;
+		if (mLogo == null) {
+			if (other.mLogo != null)
+				return false;
+		} else if (!mLogo.equals(other.mLogo))
+			return false;
+		if (mName == null) {
+			if (other.mName != null)
+				return false;
+		} else if (!mName.equals(other.mName))
+			return false;
+		if (mPageflip == null) {
+			if (other.mPageflip != null)
+				return false;
+		} else if (!mPageflip.equals(other.mPageflip))
+			return false;
+		if (mUrlName == null) {
+			if (other.mUrlName != null)
+				return false;
+		} else if (!mUrlName.equals(other.mUrlName))
+			return false;
+		if (mWebsite == null) {
+			if (other.mWebsite != null)
+				return false;
+		} else if (!mWebsite.equals(other.mWebsite))
+			return false;
+		return true;
+	}
+	
+	
 }

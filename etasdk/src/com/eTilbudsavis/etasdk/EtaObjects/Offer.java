@@ -123,8 +123,10 @@ public class Offer extends EtaErnObject implements Serializable {
 			o.setQuantity(Quantity.fromJSON(offer.getJSONObject(S_QUANTITY)));
 			o.setImages(Images.fromJSON(offer.getJSONObject(S_IMAGES)));
 			o.setLinks(Links.fromJSON(offer.getJSONObject(S_LINKS)));
-			o.setRunFrom(offer.getString(S_RUN_FROM));
-			o.setRunTill(offer.getString(S_RUN_TILL));
+			Date runFrom = Utils.parseDate(getJsonString(offer, S_RUN_FROM));
+			o.setRunFrom(runFrom);
+			Date runTill = Utils.parseDate(getJsonString(offer, S_RUN_TILL));
+			o.setRunTill(runTill);
 			o.setDealerUrl(getJsonString(offer, S_DEALER_URL));
 			o.setDealerId(getJsonString(offer, S_DEALER_ID));
 			o.setStoreUrl(getJsonString(offer, S_STORE_URL));
@@ -236,12 +238,8 @@ public class Offer extends EtaErnObject implements Serializable {
 	}
 
 	public Offer setRunFrom(Date time) {
+		time.setTime(1000 * (time.getTime()/ 1000));
 		mRunFrom = time;
-		return this;
-	}
-
-	public Offer setRunFrom(String time) {
-		mRunFrom = Utils.parseDate(time);
 		return this;
 	}
 
@@ -250,12 +248,8 @@ public class Offer extends EtaErnObject implements Serializable {
 	}
 
 	public Offer setRunTill(Date time) {
+		time.setTime(1000 * (time.getTime()/ 1000));
 		mRunTill = time;
-		return this;
-	}
-
-	public Offer setRunTill(String time) {
-		mRunTill = Utils.parseDate(time);
 		return this;
 	}
 

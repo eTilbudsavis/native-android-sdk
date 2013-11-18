@@ -51,7 +51,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	private int mState = State.TO_SYNC;
 	private String mPrevId;
 	private String mType;
-	private JSONObject mMeta;
+	private String mMeta;
 	private int mUserId = -1;
 	
 	private Shoppinglist() {
@@ -153,6 +153,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	}
 
 	public Shoppinglist setModified(Date time) {
+		time.setTime(1000 * (time.getTime()/ 1000));
 		mModified = time;
 		return this;
 	}
@@ -184,13 +185,18 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		mType = type;
 		return this;
 	}
-
+	
 	public JSONObject getMeta() {
-		return mMeta;
+		try {
+			return mMeta == null ? null : new JSONObject(mMeta);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return null;
 	}
 
 	public Shoppinglist setMeta(JSONObject meta) {
-		mMeta = meta;
+		mMeta = meta == null ? null : meta.toString();
 		return this;
 	}
 
@@ -217,31 +223,6 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		return this;
 	}
 	
-	/**
-	 * We are not comparing the modified field, as this field does not
-	 * update the same as 
-	 */
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Shoppinglist))
-			return false;
-
-		Shoppinglist sl = (Shoppinglist)o;
-		return stringCompare(mId, sl.getId()) &&
-				stringCompare(mErn, sl.getErn()) &&
-				mAccess.equals(sl.getAccess()) &&
-				mModified.equals(sl.getModified()) &&
-				mOwner.equals(sl.getOwner()) &&
-				stringCompare(mName, sl.getName()) &&
-				mUserId == sl.getUserId() &&
-				stringCompare(mPrevId, sl.getPreviousId()) &&
-				stringCompare(mType, sl.getType()) &&
-				mMeta == null ? sl.getMeta() == null : mMeta.toString().equals(sl.getMeta().toString());
-	}
-
 	@Override
 	public String toString() {
 		return toString(false);
@@ -276,5 +257,72 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
         return this.mName.toLowerCase().compareTo(another.getName().toLowerCase());
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((mAccess == null) ? 0 : mAccess.hashCode());
+		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
+		result = prime * result + ((mModified == null) ? 0 : mModified.hashCode());
+		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
+		result = prime * result + ((mOwner == null) ? 0 : mOwner.hashCode());
+		result = prime * result + ((mPrevId == null) ? 0 : mPrevId.hashCode());
+		result = prime * result + mState;
+		result = prime * result + ((mType == null) ? 0 : mType.hashCode());
+		result = prime * result + mUserId;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Shoppinglist other = (Shoppinglist) obj;
+		if (mAccess == null) {
+			if (other.mAccess != null)
+				return false;
+		} else if (!mAccess.equals(other.mAccess))
+			return false;
+		if (mMeta == null) {
+			if (other.mMeta != null)
+				return false;
+		} else if (!mMeta.equals(other.mMeta))
+			return false;
+		if (mModified == null) {
+			if (other.mModified != null)
+				return false;
+		} else if (!mModified.equals(other.mModified))
+			return false;
+		if (mName == null) {
+			if (other.mName != null)
+				return false;
+		} else if (!mName.equals(other.mName))
+			return false;
+		if (mOwner == null) {
+			if (other.mOwner != null)
+				return false;
+		} else if (!mOwner.equals(other.mOwner))
+			return false;
+		if (mPrevId == null) {
+			if (other.mPrevId != null)
+				return false;
+		} else if (!mPrevId.equals(other.mPrevId))
+			return false;
+		if (mState != other.mState)
+			return false;
+		if (mType == null) {
+			if (other.mType != null)
+				return false;
+		} else if (!mType.equals(other.mType))
+			return false;
+		if (mUserId != other.mUserId)
+			return false;
+		return true;
+	}
+	
 }
 

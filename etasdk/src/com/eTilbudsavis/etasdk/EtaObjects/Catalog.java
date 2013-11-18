@@ -146,8 +146,10 @@ public class Catalog extends EtaErnObject implements Serializable {
 				c.setErn(getJsonString(catalog, S_ERN));
 				c.setLabel(getJsonString(catalog, S_LABEL));
 				c.setBackground(getJsonString(catalog, S_BACKGROUND));
-				c.setRunFrom(getJsonString(catalog, S_RUN_FROM));
-				c.setRunTill(getJsonString(catalog, S_RUN_TILL));
+				Date runFrom = Utils.parseDate(getJsonString(catalog, S_RUN_FROM));
+				c.setRunFrom(runFrom);
+				Date runTill = Utils.parseDate(getJsonString(catalog, S_RUN_TILL));
+				c.setRunTill(runTill);
 				c.setPageCount(catalog.getInt(S_PAGE_COUNT));
 				c.setOfferCount(catalog.getInt(S_OFFER_COUNT));
 				c.setBranding(Branding.fromJSON(catalog.getJSONObject(S_BRANDING)));
@@ -240,12 +242,8 @@ public class Catalog extends EtaErnObject implements Serializable {
 	}
 
 	public Catalog setRunFrom(Date time) {
-		this.mRunFrom = time;
-		return this;
-	}
-
-	public Catalog setRunFrom(String time) {
-		mRunFrom = Utils.parseDate(time);
+		time.setTime(1000 * (time.getTime()/ 1000));
+		mRunFrom = time;
 		return this;
 	}
 
@@ -254,12 +252,8 @@ public class Catalog extends EtaErnObject implements Serializable {
 	}
 
 	public Catalog setRunTill(Date time) {
-		this.mRunTill = time;
-		return this;
-	}
-
-	public Catalog setRunTill(String time) {
-		mRunTill = Utils.parseDate(time);
+		time.setTime(1000 * (time.getTime() / 1000));
+		mRunTill = time;
 		return this;
 	}
 

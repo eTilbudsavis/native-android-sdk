@@ -20,6 +20,8 @@ import java.util.concurrent.Executors;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -52,12 +54,14 @@ public class Eta implements Serializable {
 	private Session mSession;
 	private EtaLocation mLocation;
 	private EtaCache mCache;
-	private ShoppinglistManager mShoppinglistManager;
+	private ListManager mListManager;
 	private static Handler mHandler;
 	private ExecutorService mThreads = Executors.newFixedThreadPool(10);
 	private boolean mResumed = false;
+	private ConnectivityManager mConnectivityManager;
 	
-	private Eta() { }
+	private Eta() {
+	}
 
 	/**
 	 * TODO: Write a long story about usage, this will basically be the documentation
@@ -85,6 +89,8 @@ public class Eta implements Serializable {
 	 */
 	public void set(String apiKey, String apiSecret, Context context) {
 		
+		mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		
 		mContext = context;
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
@@ -93,7 +99,7 @@ public class Eta implements Serializable {
 			mSettings = new Settings(mContext);
 			mLocation = new EtaLocation(Eta.this);
 			mCache = new EtaCache();
-			mShoppinglistManager = new ShoppinglistManager(Eta.this);
+			mListManager = new ListManager(Eta.this);
 			mSession = new Session(Eta.this);
 			mSession.init();
 		} else {
@@ -109,6 +115,11 @@ public class Eta implements Serializable {
 	 */
 	public boolean isSet() {
 		return mApiKey != null && mApiSecret == null;
+	}
+	
+	public boolean isOnline() {
+		NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
+		return netInfo != null && netInfo.isConnected();
 	}
 	
 	/**
@@ -182,8 +193,8 @@ public class Eta implements Serializable {
 	 * Use this manager for all shopping list relevant operations to ensure data consistency.
 	 * @return an instance of ShoppinglistManager
 	 */
-	public ShoppinglistManager getShoppinglistManager() {
-		return mShoppinglistManager;
+	public ListManager getListManager() {
+		return mListManager;
 	}
 	
 	/**
@@ -260,7 +271,7 @@ public class Eta implements Serializable {
 	public void onPause() {
 		if (mResumed) {
 			mResumed = false;
-			mShoppinglistManager.onPause();
+			mListManager.onPause();
 			mLocation.saveState();
 			pageflipPause();
 		}
@@ -273,7 +284,7 @@ public class Eta implements Serializable {
 	public void onResume() {
 		if (!mResumed) {
 			mResumed = true;
-			mShoppinglistManager.onResume();
+			mListManager.onResume();
 			mLocation.restoreState();
 			pageflipResume();
 		}

@@ -41,11 +41,11 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	private Offer mOffer = null;
 	private String mShoppinglistId;
 	private String mPrevId;
-	private JSONObject mMeta;
+	private String mMeta;
 	private int mUserId = -1;
 
 	public ShoppinglistItem() {
-        String id =Utils.createUUID();
+        String id = Utils.createUUID();
 		setId(id);
         setErn("ern:shopping:item:" + id);
 	}
@@ -106,6 +106,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 			sli.setPreviousId(getJsonString(shoppinglistItem, S_PREVIOUS_ID));
 			
 		} catch (JSONException e) {
+			EtaLog.d(TAG, shoppinglistItem.toString());
 			EtaLog.d(TAG, e);
 		}
 		return sli;
@@ -199,6 +200,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	}
 
 	public ShoppinglistItem setModified(Date time) {
+		time.setTime(1000 * (time.getTime()/ 1000));
 		mModified = time;
 		return this;
 	}
@@ -212,13 +214,18 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 			mState = state;
 		return this;
 	}
-
+	
 	public JSONObject getMeta() {
-		return mMeta;
+		try {
+			return mMeta == null ? null : new JSONObject(mMeta);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return null;
 	}
 
 	public ShoppinglistItem setMeta(JSONObject meta) {
-		mMeta = meta;
+		mMeta = meta == null ? null : meta.toString();
 		return this;
 	}
 
@@ -248,30 +255,6 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	public int compareTo(ShoppinglistItem another) {
 
 		return 0;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-
-		if (!(o instanceof ShoppinglistItem))
-			return false;
-
-		ShoppinglistItem sli = (ShoppinglistItem)o;
-		
-		return stringCompare(mId, sli.getId()) &&
-				stringCompare(mErn, sli.getErn()) &&
-				stringCompare(mDescription, sli.getDescription()) && 
-				mCount == sli.getCount() &&
-				mTick == sli.isTicked() &&
-				stringCompare(mOfferId, sli.getOfferId()) &&
-				mModified.equals(sli.getModified()) &&
-				stringCompare(mShoppinglistId, sli.getShoppinglistId()) &&
-				stringCompare(mCreator, sli.getCreator()) &&
-				stringCompare(mPrevId, sli.getPreviousId()) &&
-				mUserId == sli.getUserId();// &&
-//				mMeta == null ? sli.getMeta() == null : mMeta.toString().equals(sli.getMeta().toString());
 	}
 
 	@Override
@@ -317,5 +300,83 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 
 	};
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + mCount;
+		result = prime * result + ((mCreator == null) ? 0 : mCreator.hashCode());
+		result = prime * result + ((mDescription == null) ? 0 : mDescription.hashCode());
+		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
+		result = prime * result + ((mModified == null) ? 0 : mModified.hashCode());
+		result = prime * result + ((mOffer == null) ? 0 : mOffer.hashCode());
+		result = prime * result + ((mOfferId == null) ? 0 : mOfferId.hashCode());
+		result = prime * result + ((mPrevId == null) ? 0 : mPrevId.hashCode());
+		result = prime * result + ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
+		result = prime * result + mState;
+		result = prime * result + (mTick ? 1231 : 1237);
+		result = prime * result + mUserId;
+		return result;
+	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ShoppinglistItem other = (ShoppinglistItem) obj;
+		if (mCount != other.mCount)
+			return false;
+		if (mCreator == null) {
+			if (other.mCreator != null)
+				return false;
+		} else if (!mCreator.equals(other.mCreator))
+			return false;
+		if (mDescription == null) {
+			if (other.mDescription != null)
+				return false;
+		} else if (!mDescription.equals(other.mDescription))
+			return false;
+		if (mMeta == null) {
+			if (other.mMeta != null)
+				return false;
+		} else if (!mMeta.equals(other.mMeta))
+			return false;
+		if (mModified == null) {
+			if (other.mModified != null)
+				return false;
+		} else if (!mModified.equals(other.mModified))
+			return false;
+		if (mOffer == null) {
+			if (other.mOffer != null)
+				return false;
+		} else if (!mOffer.equals(other.mOffer))
+			return false;
+		if (mOfferId == null) {
+			if (other.mOfferId != null)
+				return false;
+		} else if (!mOfferId.equals(other.mOfferId))
+			return false;
+		if (mPrevId == null) {
+			if (other.mPrevId != null)
+				return false;
+		} else if (!mPrevId.equals(other.mPrevId))
+			return false;
+		if (mShoppinglistId == null) {
+			if (other.mShoppinglistId != null)
+				return false;
+		} else if (!mShoppinglistId.equals(other.mShoppinglistId))
+			return false;
+		if (mState != other.mState)
+			return false;
+		if (mTick != other.mTick)
+			return false;
+		if (mUserId != other.mUserId)
+			return false;
+		return true;
+	}
+	
 }

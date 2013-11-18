@@ -320,7 +320,7 @@ public class Session implements Serializable {
 		mIsUpdating = true;
 		int userId = mUser.getId();
 		clearUser();
-		mEta.getShoppinglistManager().clear(userId);
+		mEta.getListManager().clear(userId);
 		Bundle b = new Bundle();
 		b.putString(Params.EMAIL, "");
 		JsonObjectListener session = new JsonObjectListener() {

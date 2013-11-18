@@ -48,6 +48,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.Session.SessionListener;
@@ -135,6 +136,7 @@ public class Api implements Serializable {
 	private List<Header> mHeaders;
 	private String mId = null;
 	private int mFlags;
+	private Handler mHandler;
 	
 	private StringBuilder debug = new StringBuilder();
 	
@@ -147,7 +149,17 @@ public class Api implements Serializable {
 		// set default flags
 		mFlags = FLAG_USE_LOCATION | FLAG_USE_CACHE ;
 	}
-
+	
+	/**
+	 * Set a handler, for the return, this way you can have the SDK return results on any thread.
+	 * @param handler to return callbacks
+	 * @return this Object
+	 */
+	public Api setHandler(Handler handler) {
+		mHandler = handler;
+		return this;
+	}
+	
 	/**
 	 * Set various options for this API call.
 	 * All flags are defined with a prefix "FLAG_", so to enable debugging output, just:
@@ -595,7 +607,17 @@ public class Api implements Serializable {
 				}
 
 			}
-
+			
+			if (!mEta.isOnline()) {
+				EtaError e = new EtaError();
+				e.setCode(-1);
+				e.setDetails("Please check connection status");
+				e.setMessage("No internet");
+				e.setId("internal error");
+				runOnUiThread(false, -1, null, e);
+				return;
+			}
+			
 			printDebugPreExecute();
 			
 			/*
@@ -846,12 +868,19 @@ public class Api implements Serializable {
 		
 		mFinished = true;
 		
-		mEta.getHandler().post(new Runnable() {
+		Runnable postResult = new Runnable() {
 
 			public void run() {
 				triggerListener(isCache, statusCode, data, error);
 			}
-		});
+		};
+		
+		if (mHandler != null) {
+			mHandler.post(postResult);
+		} else {
+			mEta.getHandler().post(postResult);
+		}
+		
 	}
 	
 	/**
