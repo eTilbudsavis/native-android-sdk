@@ -2,16 +2,16 @@ package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
 
+import org.json.JSONObject;
+
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
-import com.eTilbudsavis.etasdk.EtaObjects.Session.SessionListener;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
-import com.eTilbudsavis.etasdk.NetworkHelpers.StringRequest;
+import com.eTilbudsavis.etasdk.NetworkHelpers.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class SessionManager {
@@ -25,7 +25,7 @@ public class SessionManager {
 	private String mFacebookToken = null;
 	private boolean mIsUpdating = false;
 	private Object LOCK = new Object();
-	private ArrayList<SessionListener> mSubscribers = new ArrayList<Session.SessionListener>();
+	private ArrayList<OnSessionChangeListener> mSubscribers = new ArrayList<OnSessionChangeListener>();
 	
 	public SessionManager(Eta eta) {
 		mEta = eta;
@@ -113,11 +113,9 @@ public class SessionManager {
 		b.putString(Request.Param.SUCCESS_REDIRECT, successRedirect);
 		b.putString(Request.Param.ERROR_REDIRECT, errorRedirect);
 		
-		StringRequest forgot = new StringRequest(Method.GET, Endpoint.USER_RESET, new Listener<String>() {
+		JsonObjectRequest forgot = new JsonObjectRequest(Endpoint.USER_RESET, new Listener<JSONObject>() {
 
-			public void onComplete(boolean isCache, String response,
-					EtaError error) {
-				// TODO Auto-generated method stub
+			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
 				
 			}
 		});
@@ -133,7 +131,7 @@ public class SessionManager {
 		synchronized (LOCK) {
 			// On signout, clear current user details, then get new from server
 			clearUser();
-			mEta.getShoppinglistManager().clearUserDB();
+//			mEta.getShoppinglistManager().clearUserDB();
 			Bundle b = new Bundle();
 			b.putString(Request.Param.EMAIL, "");
 			sendSessionRequest(getParams(), listener);
@@ -211,19 +209,19 @@ public class SessionManager {
 		mEta.getSettings().setSessionFacebook(mFacebookToken);
 	}
 	
-	public SessionManager subscribe(SessionListener listener) {
-		if (!mSubscribers.contains(listener)) {
-			mSubscribers.add(listener);
+	public SessionManager subscribe(OnSessionChangeListener l) {
+		if (!mSubscribers.contains(l)) {
+			mSubscribers.add(l);
 		}
 		return this;
 	}
 	
-	public void unSubscribe(SessionListener listener) {
-		mSubscribers.remove(listener);
+	public void unSubscribe(OnSessionChangeListener l) {
+		mSubscribers.remove(l);
 	}
 	
 	public SessionManager notifySubscribers() {
-		for (SessionListener sl : mSubscribers) {
+		for (OnSessionChangeListener sl : mSubscribers) {
 			try {
 				sl.onUpdate();
 			} catch (Exception e) {
@@ -233,4 +231,8 @@ public class SessionManager {
 		return this;
 	}
 
+	public interface OnSessionChangeListener {
+		public void onUpdate();
+	}
+	
 }

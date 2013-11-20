@@ -6,7 +6,9 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Header;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -38,11 +40,11 @@ public class Session extends EtaObject implements Serializable {
 		if (s == null) s = new Session();
 		if (session == null) return s;
 		
-		s.setToken(getJsonString(session, S_TOKEN));
-		s.setExpires(getJsonString(session, S_EXPIRES));
-		s.setUser(User.fromJSON(getJsonString(session, S_USER)));
-		s.setPermission(Permission.fromJSON(getJsonString(session, S_PERMISSIONS))) ;
-		s.setProvider(getJsonString(session, S_PROVIDER));
+		s.setToken(getJsonString(session, Key.TOKEN));
+		s.setExpires(getJsonString(session, Key.EXPIRES));
+		s.setUser(User.fromJSON(getJsonString(session, Key.USER)));
+		s.setPermission(Permission.fromJSON(getJsonString(session, Key.PERMISSIONS))) ;
+		s.setProvider(getJsonString(session, Key.PROVIDER));
 		
 		return s;
 	}
@@ -55,11 +57,11 @@ public class Session extends EtaObject implements Serializable {
 		JSONObject o = new JSONObject();
 		
 		try {
-			o.put(S_TOKEN, s.getToken());
-			o.put(S_EXPIRES, s.getExpire());
-			o.put(S_USER, s.getUser().toJSON());
-			o.put(S_PERMISSIONS, s.getPermission());
-			o.put(S_PROVIDER, s.getProvider());
+			o.put(Key.TOKEN, s.getToken());
+			o.put(Key.EXPIRES, s.getExpire());
+			o.put(Key.USER, s.getUser().toJSON());
+			o.put(Key.PERMISSIONS, s.getPermission());
+			o.put(Key.PROVIDER, s.getProvider());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -142,10 +144,5 @@ public class Session extends EtaObject implements Serializable {
 		}
 		return sb.append("]").toString();
 	}
-	
-	public interface SessionListener {
-		public void onUpdate();
-	}
-	
 	
 }

@@ -7,7 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 
 /**
@@ -67,9 +67,9 @@ public class EtaErnObject extends EtaObject {
 		
 		try {
 			JSONObject o = objects.getJSONObject(0);
-			if (o.has(S_ERN)) {
+			if (o.has(Key.ERN)) {
 				
-				String ern = o.getString(S_ERN);
+				String ern = o.getString(Key.ERN);
 				
 				if (ern.startsWith(ERN_CATALOG)) {
 					list = Catalog.fromJSON(objects);
@@ -83,10 +83,10 @@ public class EtaErnObject extends EtaObject {
 					list = Shoppinglist.fromJSON(objects);
 				} else if (ern.startsWith(ERN_SHOPPINGLISTITEM)) {
 					list = ShoppinglistItem.fromJSON(objects);
-				} 
-					
+				}
+				
 			} else {
-				Utils.logd(TAG, "ArrayElements does not contain an ERN");
+				EtaLog.d(TAG, "ArrayElements does not contain an ERN");
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -98,9 +98,9 @@ public class EtaErnObject extends EtaObject {
 	public static <T extends EtaObject> T fromJSON(JSONObject object) {
 		EtaObject item = new EtaObject();
 		try {
-			if (object.has(S_ERN)) {
+			if (object.has(Key.ERN)) {
 				
-				String ern = object.getString(S_ERN);
+				String ern = object.getString(Key.ERN);
 					
 				if (ern.startsWith(ERN_CATALOG)) {
 					item = Catalog.fromJSON(object);
@@ -118,7 +118,7 @@ public class EtaErnObject extends EtaObject {
 					
 				
 			} else {
-				Utils.logd(TAG, "JSONObject does not contain an ERN");
+				EtaLog.d(TAG, "JSONObject does not contain an ERN");
 			}
 					
 		} catch (JSONException e) {

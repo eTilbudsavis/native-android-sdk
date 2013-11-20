@@ -6,7 +6,7 @@ import android.os.Process;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
 
 @SuppressWarnings("rawtypes")
 public class CacheDispatcher extends Thread {
@@ -86,7 +86,7 @@ public class CacheDispatcher extends Thread {
 		// Append HOST if needed
 		String url = request.getUrl();
 		if (!url.matches("^http.*")) {
-			request.setUrl(Endpoint.HOST + url);
+			request.setUrl(Endpoint.PRODUCTION + url);
 		}
 		
 //		if (mId != null) {

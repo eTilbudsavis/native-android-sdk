@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Images extends EtaObject implements Serializable {
 	
@@ -25,8 +25,7 @@ public class Images extends EtaObject implements Serializable {
 		try {
 			i = fromJSON(i, new JSONObject(images));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return i;
 	}
@@ -40,9 +39,9 @@ public class Images extends EtaObject implements Serializable {
 		if (i == null) i = new Images();
 		if (image == null) return i;
 		
-		i.setView(getJsonString(image, S_VIEW));
-		i.setZoom(getJsonString(image, S_ZOOM));
-		i.setThumb(getJsonString(image, S_THUMB));
+		i.setView(getJsonString(image, Key.VIEW));
+		i.setZoom(getJsonString(image, Key.ZOOM));
+		i.setThumb(getJsonString(image, Key.THUMB));
 		
     	return i;
 	}
@@ -54,12 +53,11 @@ public class Images extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Images i) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_VIEW, i.getView());
-			o.put(S_ZOOM, i.getZoom());
-			o.put(S_THUMB, i.getThumb());
+			o.put(Key.VIEW, i.getView());
+			o.put(Key.ZOOM, i.getZoom());
+			o.put(Key.THUMB, i.getThumb());
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

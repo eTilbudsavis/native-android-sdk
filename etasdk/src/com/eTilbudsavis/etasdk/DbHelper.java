@@ -1,6 +1,12 @@
 package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -11,6 +17,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class DbHelper extends SQLiteOpenHelper {
@@ -18,14 +25,10 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String TAG = "DbHelper";
 	
 	private static final String DB_NAME = "shoppinglist.db";
-	private static final int DB_VERSION = 1;
-	private static final String NUM_OF_AFFECTED_ROWS = "SELECT changes() AS 'changes';";
+	private static final int DB_VERSION = 3;
 	
-	public static final String SL = "shoppinglists";
-	public static final String SLI = "shoppinglistitems";
-	
-	public static final String SL_OFFLINE = "shoppinglists_offline";
-	public static final String SLI_OFFLINE = "shoppinglistitems_offline";
+	public static final String LIST_TABLE = "shoppinglists";
+	public static final String ITEM_TABLE = "shoppinglistitems";
 	
 	public static final String ID = "id";
 	public static final String MODIFIED = "modified";
@@ -42,12 +45,15 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String OFFER_ID = "offer_id";
 	public static final String CREATOR = "creator";
 	public static final String SHOPPINGLIST_ID = "shopping_list_id";
+	public static final String PREVIOUS_ID = "previous_id";
+	public static final String TYPE = "type";
+	public static final String META = "meta";
+	public static final String USER = "user";
 	
 	private Object LOCK = new Object();
-	
-	// Shoppinglist table
-	private String dbCreateSL(String name) {
-		return "create table if not exists " + name + "(" + 
+
+	private static final String CREATE_LIST_TABLE = 
+			"create table if not exists " + LIST_TABLE + "(" + 
 				ID + " text primary key, " + 
 				ERN + " text, " + 
 				MODIFIED + " text not null, " + 
@@ -56,12 +62,15 @@ public class DbHelper extends SQLiteOpenHelper {
 				STATE + " integer not null, " + 
 				OWNER_USER + " text, " + 
 				OWNER_ACCESS + " text, " + 
-				OWNER_ACCEPTED + " integer " + 
+				OWNER_ACCEPTED + " integer, " + 
+				PREVIOUS_ID + " text, " + 
+				TYPE + " text, " + 
+				META + " text, " + 
+				USER + " integer not null " + 
 				");";
-	}
 	
-	private String dbCreateSLI(String name) {
-		return "create table if not exists " + name + "(" + 
+	private static final String CREATE_ITEM_TABLE = 
+			"create table if not exists " + ITEM_TABLE + "(" + 
 				ID + " text not null primary key, " + 
 				ERN + " text not null, " + 
 				MODIFIED + " text not null, " + 
@@ -71,13 +80,14 @@ public class DbHelper extends SQLiteOpenHelper {
 				OFFER_ID + " text, " + 
 				CREATOR + " text, " + 
 				SHOPPINGLIST_ID + " text not null, " + 
-				STATE + " integer not null " + 
+				STATE + " integer not null, " + 
+				PREVIOUS_ID + " text, " + 
+				META + " text, " + 
+				USER + "  integer not null " + 
 				");";
-	}
 	
 	private static DbHelper mDbHelper;
 	private SQLiteDatabase mDatabase;
-	private boolean mCloseDb = false;
 	
 	private DbHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
@@ -85,20 +95,26 @@ public class DbHelper extends SQLiteOpenHelper {
 	
 	@Override
 	public void onCreate(SQLiteDatabase database) {
-		database.execSQL(dbCreateSL(SL));
-		database.execSQL(dbCreateSL(SL_OFFLINE));
-		database.execSQL(dbCreateSLI(SLI));
-		database.execSQL(dbCreateSLI(SLI_OFFLINE));
+		
+		synchronized (LOCK) {
+			database.execSQL(CREATE_LIST_TABLE);
+			database.execSQL(CREATE_ITEM_TABLE);
+		}
+		
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		Utils.logd(TAG, "Upgrading database from version " + oldVersion + " to "
+
+		EtaLog.d(TAG, "Upgrading database from version " + oldVersion + " to "
 				+ newVersion + ", which will destroy all old data");
-		db.execSQL("DELETE FROM " + SL);
-		db.execSQL("DELETE FROM " + SL_OFFLINE);
-		db.execSQL("DELETE FROM " + SLI);
-		db.execSQL("DELETE FROM " + SLI_OFFLINE);
+		
+		synchronized (LOCK) {
+			db.execSQL("DROP TABLE " + LIST_TABLE);
+			db.execSQL("DROP TABLE " + ITEM_TABLE);
+		}
+		
+		onCreate(db);
 	}
 
 	public static DbHelper getInstance() {
@@ -109,45 +125,20 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 	
 	/**
-	 * Open a database connection to the shoppinglists and items.
-	 */
-	public void openDB() {
-		mDatabase = getWritableDatabase();
-	}
-	
-	/**
-	 * Close the database connection.
-	 */
-	public synchronized void closeDB() {
-		mCloseDb = false;
-		mDatabase.close();
-	}
-	
-	/**
-	 * Deletes all tables (<i>shoppinglists</i> and <i>shoppinglistitems</i>)
-	 * and creates two new tables<br>
-	 * This cannot be undone.
+	 * Clears the whole DB. This cannot be undone.
 	 */
 	public synchronized void clear() {
-		clearUserDB();
-		clearNonUserDB();
+		execQueryWithChangesCount("DELETE FROM " + LIST_TABLE);
+		execQueryWithChangesCount("DELETE FROM " + ITEM_TABLE);
 	}
 
-	public synchronized void clearUserDB() {
-		Cursor c = execQuery("DELETE FROM " + SL);
-		cursorClose(c);
-		c = execQuery("DELETE FROM " + SLI);
-		cursorClose(c);
-		cursorClose(c);
+	public synchronized void clear(int userId) {
+		String query = String.format("DELETE FROM %s WHERE %s=%s", LIST_TABLE, USER, userId);
+		execQuery(query);
+		query = String.format("DELETE FROM %s WHERE %s=%s", ITEM_TABLE, USER, userId);
+		execQuery(query);
 	}
 
-	public synchronized void clearNonUserDB() {
-		Cursor c = execQuery("DELETE FROM " + SL_OFFLINE);
-		cursorClose(c);
-		c = execQuery("DELETE FROM " + SLI_OFFLINE);
-		cursorClose(c);
-	}
-	
 	public static Shoppinglist cursorToSl(Cursor c) {
 		Shoppinglist sl = Shoppinglist.fromName(c.getString(c.getColumnIndex(NAME)));
 		sl.setId(c.getString(c.getColumnIndex(ID)));
@@ -158,6 +149,15 @@ public class DbHelper extends SQLiteOpenHelper {
 		sl.getOwner().setEmail(c.getString(c.getColumnIndex(OWNER_USER)));
 		sl.getOwner().setAccess(c.getString(c.getColumnIndex(OWNER_ACCESS)));
 		sl.getOwner().setAccepted(0 < c.getInt(c.getColumnIndex(OWNER_ACCEPTED)));
+		sl.setPreviousId(c.getString(c.getColumnIndex(PREVIOUS_ID)));
+		sl.setType(c.getString(c.getColumnIndex(TYPE)));
+		String meta = c.getString(c.getColumnIndex(META));
+		try {
+			sl.setMeta(meta == null ? null : new JSONObject(meta));
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		sl.setUserId(c.getInt(c.getColumnIndex(USER)));
 		return sl;
 	}
 
@@ -167,7 +167,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @param sli to convert
 	 * @return a string of the format: (column1, column2) VALUES (value1, value2)
 	 */
-	public static String listToValues(Shoppinglist sl) {
+	public static String listToValues(Shoppinglist sl, int userId) {
 
 		Share s = sl.getOwner();
 		
@@ -181,7 +181,11 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(STATE).append(",")
 		.append(OWNER_USER).append(",")
 		.append(OWNER_ACCESS).append(",")
-		.append(OWNER_ACCEPTED)
+		.append(OWNER_ACCEPTED).append(",")
+		.append(PREVIOUS_ID).append(",")
+		.append(TYPE).append(",")
+		.append(META).append(",")
+		.append(USER)
 		.append(") VALUES (")
 		.append(escape(sl.getId())).append(",")
 		.append(escape(sl.getErn())).append(",")
@@ -191,28 +195,42 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(escape(sl.getState())).append(",")
 		.append(escape(s.getEmail())).append(",")
 		.append(escape(s.getAccess())).append(",")
-		.append(escape(s.getAccepted())).append(")");
+		.append(escape(s.getAccepted())).append(",")
+		.append(escape(sl.getPreviousId())).append(",")
+		.append(escape(sl.getType())).append(",")
+		.append(escape(sl.getMeta() == null ? null : sl.getMeta().toString())).append(",")
+		.append(escape(userId)).append(")");
 		
-		return sb.toString();
+		String str = sb.toString();
+		
+		return str;
 	}
 	
 	/**
 	 * Method does not close the Cursor.
-	 * @param cursor with data
+	 * @param c with data
 	 * @return A shoppinglistitem
 	 */
-	public static ShoppinglistItem cursorToSli(Cursor cursor) {
+	public static ShoppinglistItem cursorToSli(Cursor c) {
 		ShoppinglistItem sli = new ShoppinglistItem();
-		sli.setId(cursor.getString(cursor.getColumnIndex(ID)));
-		sli.setErn(cursor.getString(cursor.getColumnIndex(ERN)));
-		sli.setModified(Utils.parseDate(cursor.getString(cursor.getColumnIndex(MODIFIED))));
-		sli.setDescription(cursor.getString(cursor.getColumnIndex(DESCRIPTION)));
-		sli.setCount(cursor.getInt(cursor.getColumnIndex(COUNT)));
-		sli.setTick(0 < cursor.getInt(cursor.getColumnIndex(TICK)));
-		sli.setOfferId(cursor.getString(cursor.getColumnIndex(OFFER_ID)));
-		sli.setCreator(cursor.getString(cursor.getColumnIndex(CREATOR)));
-		sli.setShoppinglistId(cursor.getString(cursor.getColumnIndex(SHOPPINGLIST_ID)));
-		sli.setState(cursor.getInt(cursor.getColumnIndex(STATE)));
+		sli.setId(c.getString(c.getColumnIndex(ID)));
+		sli.setErn(c.getString(c.getColumnIndex(ERN)));
+		sli.setModified(Utils.parseDate(c.getString(c.getColumnIndex(MODIFIED))));
+		sli.setDescription(c.getString(c.getColumnIndex(DESCRIPTION)));
+		sli.setCount(c.getInt(c.getColumnIndex(COUNT)));
+		sli.setTick(0 < c.getInt(c.getColumnIndex(TICK)));
+		sli.setOfferId(c.getString(c.getColumnIndex(OFFER_ID)));
+		sli.setCreator(c.getString(c.getColumnIndex(CREATOR)));
+		sli.setShoppinglistId(c.getString(c.getColumnIndex(SHOPPINGLIST_ID)));
+		sli.setState(c.getInt(c.getColumnIndex(STATE)));
+		sli.setPreviousId(c.getString(c.getColumnIndex(PREVIOUS_ID)));
+		String meta = c.getString(c.getColumnIndex(META));
+		try {
+			sli.setMeta(meta == null ? null : new JSONObject(meta));
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		sli.setUserId(c.getInt(c.getColumnIndex(USER)));
 		return sli;
 	}
 	
@@ -222,9 +240,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @param sli to convert
 	 * @return a string of the format: (column1, column2) VALUES (value1, value2)
 	 */
-	public static String itemToValues(ShoppinglistItem sli) {
+	public static String itemToValues(ShoppinglistItem sli, int userId) {
 		StringBuilder sb = new StringBuilder();
-		
 		sb.append("(")
 		.append(ID).append(",")
 		.append(ERN).append(",")
@@ -235,7 +252,10 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(OFFER_ID).append(",")
 		.append(CREATOR).append(",")
 		.append(SHOPPINGLIST_ID).append(",")
-		.append(STATE)
+		.append(STATE).append(",")
+		.append(PREVIOUS_ID).append(",")
+		.append(META).append(",")
+		.append(USER)
 		.append(") VALUES (")
 		.append(escape(sli.getId())).append(",")
 		.append(escape(sli.getErn())).append(",")
@@ -246,8 +266,10 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(escape(sli.getOfferId())).append(",")
 		.append(escape(sli.getCreator())).append(",")
 		.append(escape(sli.getShoppinglistId())).append(",")
-		.append(escape(sli.getState())).append(")");
-		
+		.append(escape(sli.getState())).append(",")
+		.append(escape(sli.getPreviousId())).append(",")
+		.append(escape(sli.getMeta() == null ? null : sli.getMeta().toString())).append(",")
+		.append(escape(userId)).append(")");
 		return sb.toString();
 	}
 		
@@ -256,8 +278,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @param list to insert
 	 * @return number of affected rows
 	 */
-	public int insertList(Shoppinglist list) {
-		String q = "INSERT INTO " + getTableList() + " " + listToValues(list) + ";";
+	public int insertList(Shoppinglist list, int userId) {
+		String q = String.format("INSERT OR REPLACE INTO %s %s", LIST_TABLE, listToValues(list, userId));
 		return execQueryWithChangesCount(q);
 	}
 
@@ -266,12 +288,13 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @param id to get from db
 	 * @return A shoppinglist or null if no march is found
 	 */
-	public Shoppinglist getList(String id) {
+	public Shoppinglist getList(String id, int userId) {
 		id = escape(id);
-		String q = "SELECT * FROM " + getTableList() + " WHERE " + ID + "=" + id + ";";
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", LIST_TABLE, ID, id, USER, userId);
 		Cursor c = execQuery(q);
-		Shoppinglist sl = c.moveToFirst() ? cursorToSl(c) : null;
-		cursorClose(c);
+		Shoppinglist sl = null;
+		sl = c.moveToFirst() ? cursorToSl(c) : null;
+		close(c);
 		return sl;
 	}
 
@@ -280,9 +303,9 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @param name to match up against
 	 * @return A list of shoppinglists
 	 */
-	public ArrayList<Shoppinglist> getListFromName(String name) {
+	public ArrayList<Shoppinglist> getListFromName(String name, int userId) {
 		name = escape(name);
-		String q = "SELECT * FROM " + getTableList() + " WHERE " + NAME + "='" + name + "';";
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", LIST_TABLE, NAME, name, USER, userId);
 		Cursor c = execQuery(q);
 		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
 		if (c.moveToFirst() ) {
@@ -290,25 +313,42 @@ public class DbHelper extends SQLiteOpenHelper {
 				list.add(cursorToSl(c));
 			} while (c.moveToNext());
 		}
-		cursorClose(c);
+		close(c);
 		return list;
 	}
-	
+
 	/**
 	 * Get all shoppinglists
 	 * @return A list of shoppinglists
 	 */
-	public ArrayList<Shoppinglist> getLists() {
-		String q = "SELECT * FROM " + getTableList() + ";";
+	public List<Shoppinglist> getLists(int userId) {
+		return getLists(userId, false);
+	}
+
+	/**
+	 * 
+	 * @param userId
+	 * @param includeDeleted
+	 * @return A list of shoppinglists
+	 */
+	public List<Shoppinglist> getLists(int userId, boolean includeDeleted) {
+		String q = null;
+		if (includeDeleted) {
+			q = String.format("SELECT * FROM %s WHERE %s=%s", LIST_TABLE, USER, userId);
+		} else {
+			q = String.format("SELECT * FROM %s WHERE %s!=%s AND %s=%s", LIST_TABLE, STATE, Shoppinglist.State.DELETE, USER, userId);
+		}
 		Cursor c = execQuery(q);
-		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
+		List<Shoppinglist> lists = new ArrayList<Shoppinglist>(c.getCount());
 		if (c.moveToFirst() ) {
 			do { 
-				list.add(cursorToSl(c));
+				lists.add(cursorToSl(c));
 			} while (c.moveToNext());
 		}
-		cursorClose(c);
-		return list;
+		close(c);
+
+		Collections.sort(lists);
+		return lists;
 	}
 	
 	/**
@@ -316,9 +356,9 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @param shoppinglistId to delete
 	 * @return number of affected rows
 	 */
-	public int deleteList(String shoppinglistId) {
-		shoppinglistId = escape(shoppinglistId);
-		String q = "DELETE FROM " + getTableList() + " WHERE " + ID + "=" + shoppinglistId + ";";
+	public int deleteList(Shoppinglist sl, int userId) {
+		String id = escape(sl.getId());
+		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", LIST_TABLE, ID, id, USER, userId);
 		return execQueryWithChangesCount(q);
 	}
 	
@@ -327,8 +367,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @param list that have been edited
 	 * @return number of affected rows
 	 */
-	public int editList(Shoppinglist list) {
-		String q = "REPLACE INTO " + getTableList() + " " + listToValues(list) + ";";
+	public int editList(Shoppinglist list, int userId) {
+		String q = String.format("REPLACE INTO %s %s", LIST_TABLE, listToValues(list, userId));
 		return execQueryWithChangesCount(q);
 	}
 
@@ -337,8 +377,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @param sli to add to db
 	 * @return number of affected rows
 	 */
-	public int insertItem(ShoppinglistItem sli) {
-		String q = "INSERT INTO " + getTableItem() + " " + itemToValues(sli) + ";";
+	public int insertItem(ShoppinglistItem sli, int userId) {
+		String q = String.format("INSERT OR REPLACE INTO %s %s", ITEM_TABLE, itemToValues(sli, userId));
 		return execQueryWithChangesCount(q);
 	}
 	
@@ -347,10 +387,10 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @param items to insert
 	 * @return number of affected rows
 	 */
-	public int insertItems(ArrayList<ShoppinglistItem> items) {
+	public int insertItems(ArrayList<ShoppinglistItem> items, int userId) {
 		int count = 0;
 		for (ShoppinglistItem sli : items) {
-			count += insertItem(sli);
+			count += insertItem(sli, userId);
 		}
 		return count;
 	}
@@ -360,32 +400,51 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @param itemId to get from db
 	 * @return A shoppinglistitem or null if no match is found
 	 */
-	public ShoppinglistItem getItem(String itemId) {
+	public ShoppinglistItem getItem(String itemId, int userId) {
 		itemId = escape(itemId);
-		String q = "SELECT * FROM " + getTableItem() + " WHERE " + ID + "=" + itemId + ";";
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND  %s=%s", ITEM_TABLE, ID, itemId, USER , userId);
 		Cursor c = execQuery(q);
-		ShoppinglistItem sli = c.moveToFirst() ? cursorToSli(c) : null;
-		cursorClose(c);
+		ShoppinglistItem sli = null;
+		sli = c.moveToFirst() ? cursorToSli(c) : null;
+		close(c);
 		return sli;
 	}
-
+	
 	/**
 	 * Get all Shoppinglistitems that match the given description.
 	 * @param description from which to get items
 	 * @return A list of shoppinglistitems
 	 */
-	public ArrayList<ShoppinglistItem> getItemFromDescription(String description) {
+	public List<ShoppinglistItem> getItemFromDescription(String description, int userId) {
 		description = escape(description);
-		String q = "SELECT * FROM " + getTableItem() + " WHERE " + DESCRIPTION + "=" + description + ";";
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, DESCRIPTION, description, USER, userId);
 		Cursor c = execQuery(q);
-		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
+		List<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
 		if (c.moveToFirst() ) {
 			do { 
 				list.add(cursorToSli(c));
 			} while (c.moveToNext());
 		}
-		cursorClose(c);
+		close(c);
 		return list;
+	}
+
+	/**
+	 * Get all Shoppinglistitems from a shoppinglist.
+	 * @param sl from which to get items
+	 * @return A list of shoppinglistitems
+	 */
+	public List<ShoppinglistItem> getItems(Shoppinglist sl, int userId) {
+		return getItems(sl.getId(), userId, false);
+	}
+
+	/**
+	 * Get all Shoppinglistitems from a shoppinglist.
+	 * @param sl from which to get items
+	 * @return A list of shoppinglistitems
+	 */
+	public List<ShoppinglistItem> getItems(Shoppinglist sl, int userId, boolean includeDeleted) {
+		return getItems(sl.getId(), userId, includeDeleted);
 	}
 	
 	/**
@@ -393,28 +452,106 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @param sl from which to get items
 	 * @return A list of shoppinglistitems
 	 */
-	public ArrayList<ShoppinglistItem> getItems(Shoppinglist sl) {
-		String id = escape(sl.getId());
-		String q = "SELECT * FROM " + getTableItem() + " WHERE " + SHOPPINGLIST_ID + "=" + id + ";";
+	public List<ShoppinglistItem> getItems(String slId, int userId, boolean includeDeleted) {
+		String id = escape(slId);
+		String q = null;
+		if (includeDeleted) {
+			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, USER, userId);
+		} else {
+			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, STATE, ShoppinglistItem.State.DELETE, USER, userId);
+		}
 		Cursor c = execQuery(q);
-		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
+		List<ShoppinglistItem> items = new ArrayList<ShoppinglistItem>();
 		if (c.moveToFirst() ) {
 			do { 
-				list.add(cursorToSli(c));
+				items.add(cursorToSli(c));
 			} while (c.moveToNext());
 		}
-		cursorClose(c);
-		return list;
+		close(c);
+		sortItemsByPrev(items);
+		return items;
 	}
 
+	/** 
+	 * Sorts an List of ShoppinglistItems according to their previous_id
+	 * @param items items to sort
+	 */
+	public static void sortItemsByPrev(List<ShoppinglistItem> items) {
+		
+		if (items == null)
+			return;
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("*** Sorting - hashmap ***").append("\n");
+		
+		HashMap<String, ShoppinglistItem> map = new HashMap<String, ShoppinglistItem>(items.size());
+		for (ShoppinglistItem sli : items) {
+			sb.append(sli.getTitle()).append(" - ").append("Prev: ").append(sli.getPreviousId()).append(" - ").append(sli.getId()).append("\n");
+			map.put(sli.getPreviousId(), sli);
+		}
+		items.clear();
+		
+		sb.append("*** Sorting - while ***").append("\n");
+		
+		String prevId = ShoppinglistItem.FIRST_ITEM;
+		
+		int initCount= map.size();
+		int c = 0;
+		
+		while (!map.isEmpty() && c != initCount+5) {
+			c += 1;
+			ShoppinglistItem s = map.get(prevId);
+			sb.append(prevId).append(" - ").append(s == null ? "null" : s.getTitle()).append("\n");
+			if (s != null) {
+				map.remove(prevId);
+				prevId = s.getId();
+				items.add(s);
+			} 
+		}
+		
+		if (c>initCount) {
+			EtaLog.d(TAG, sb.toString());
+			EtaLog.printStackTrace();
+		}
+		
+		
+	}
+	
+	public ShoppinglistItem getFirstItem(String shoppinglistId, int userId) {
+		return getItemPrevious(shoppinglistId, ShoppinglistItem.FIRST_ITEM, userId);
+	}
+	
+	public ShoppinglistItem getItemPrevious(String shoppinglistId, String previousId, int userId) {
+		String id = escape(shoppinglistId);
+		String prev = escape(previousId);
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, PREVIOUS_ID, prev, USER, userId);
+		Cursor c = execQuery(q);
+		ShoppinglistItem sli = c.moveToFirst() ? cursorToSli(c) : null;
+		close(c);
+		return sli;
+	}
+
+	public Shoppinglist getFirstList(int userId) {
+		return getListPrevious(Shoppinglist.FIRST_ITEM, userId);
+	}
+	
+	public Shoppinglist getListPrevious(String previousId, int userId) {
+		String prev = escape(previousId);
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", LIST_TABLE, PREVIOUS_ID, prev, USER, userId);
+		Cursor c = execQuery(q);
+		Shoppinglist sl = c.moveToFirst() ? cursorToSl(c) : null;
+		close(c);
+		return sl;
+	}
+	
 	/**
 	 * Deletes an item from db
 	 * @param id of the item to delete
 	 * @return the number of rows affected
 	 */
-	public int deleteItem(String id) {
-		id = escape(id);
-		String q = "DELETE FROM " + getTableItem() + " WHERE " + ID + "=" + id + ";";
+	public int deleteItem(ShoppinglistItem sli, int userId) {
+		String id = escape(sli.getId());
+		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, ID, id, USER, userId);
 		return execQueryWithChangesCount(q);
 	}
 
@@ -427,13 +564,12 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @param state that items must have to be removed
 	 * @return number of affected rows
 	 */
-	public int deleteItems(String shoppinglistId, Boolean state) {
+	public int deleteItems(String shoppinglistId, Boolean state, int userId) {
 		shoppinglistId = escape(shoppinglistId);
-		String q = "DELETE FROM " + getTableItem() + " WHERE " + SHOPPINGLIST_ID + "=" + shoppinglistId;
+		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, shoppinglistId, USER, userId);
 		if (state != null) {
-			q += " AND " + TICK + "=" + escape(state);
+			q += String.format(" AND %s=%s", TICK, escape(state));
 		}
-		q += ";";
 		return execQueryWithChangesCount(q);
 	}
 
@@ -442,8 +578,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @param sli to insert
 	 * @return number of affected rows
 	 */
-	public int editItem(ShoppinglistItem sli) {
-		String q = "REPLACE INTO " + getTableItem() + " " + itemToValues(sli) + ";";
+	public int editItem(ShoppinglistItem sli, int userId) {
+		String q = String.format("REPLACE INTO %s %s", ITEM_TABLE,  itemToValues(sli, userId));
 		return execQueryWithChangesCount(q);
 	}
 	
@@ -455,54 +591,45 @@ public class DbHelper extends SQLiteOpenHelper {
 			// Get the actual query out of the way...
 			Cursor c = execQuery(query);
 			if (c != null) {
-				// Dunno why, but we need this, but we do...
 				c.moveToFirst();
+				c.close();
 			}
-			c.close();
 			
 			// Get number of affected rows in last statement (query)
-			c = execQuery(NUM_OF_AFFECTED_ROWS);
+			c = execQuery("SELECT changes() AS 'changes'");
 			
-			if (c.moveToFirst()) {
+			if (c != null && c.moveToFirst()) {
 				i = c.getInt(0);
-				if (i>1)
-					Utils.logd(TAG, "Multi-hit: " + String.valueOf(i));
 			}
 			
-			// Clean up
-			cursorClose(c);
+			close(c);
 		}
-		
+
 		return i;
 	}
 	
 	private Cursor execQuery(String query) {
 		
 		// If we are resuming the activity
-		if (mDatabase == null) openDB();
+		if (mDatabase == null || !mDatabase.isOpen())
+			mDatabase = getWritableDatabase();
 		
 		Cursor c;
-		
 		synchronized (LOCK) {
-			if (mDatabase.isOpen()) {
-				c = mDatabase.rawQueryWithFactory(null, query, null, null);
-				mCloseDb = false;
-			} else {
-				mDatabase = getWritableDatabase();
-				c = mDatabase.rawQueryWithFactory(null, query, null, null);
-				mCloseDb = true;
-			}
+			c = mDatabase.rawQueryWithFactory(null, query, null, null);
 		}
 		
 		return c;
 	}
 
-	private void cursorClose(Cursor c) {
-		if (c != null)
+	private void close(Cursor c) {
+		if (c != null) {
 			c.close();
+		}
 		
-		if (mCloseDb)
-			closeDB();
+		if (!Eta.getInstance().isResumed()) {
+			mDatabase.close();
+		}
 	}
 	
 	private static String escape(Object o) {
@@ -514,22 +641,6 @@ public class DbHelper extends SQLiteOpenHelper {
 		StringBuilder sb = new StringBuilder();
 		DatabaseUtils.appendValueToSql(sb, o);
 		return sb.toString();
-	}
-	
-	/**
-	 * Get the table that should currently be used for shopping list items
-	 * @return table name
-	 */
-	private String getTableItem() {
-		return Eta.getInstance().getUser().isLoggedIn() ? SLI : SLI_OFFLINE;
-	}
-
-	/**
-	 * Get the table that should currently be used for shopping list 
-	 * @return table name
-	 */
-	private String getTableList() {
-		return Eta.getInstance().getUser().isLoggedIn() ? SL : SL_OFFLINE;
 	}
 	
 }

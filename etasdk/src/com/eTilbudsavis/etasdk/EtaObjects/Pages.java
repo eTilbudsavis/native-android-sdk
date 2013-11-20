@@ -7,7 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Pages extends EtaObject implements Serializable {
 	
@@ -27,8 +27,7 @@ public class Pages extends EtaObject implements Serializable {
 		try {
 			p = fromJSON(p, new JSONObject(pages));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return p;
 	}
@@ -43,22 +42,21 @@ public class Pages extends EtaObject implements Serializable {
 		if (pages == null) return p;
 		
 		try {
-			JSONArray jArray = pages.getJSONArray(S_THUMB);
+			JSONArray jArray = pages.getJSONArray(Key.THUMB);
 			int i;
 			for (i = 0 ; i < jArray.length() ; i++ ) {
 				p.getThumb().add(jArray.getString(i));
 			}
-			jArray = pages.getJSONArray(S_VIEW);
+			jArray = pages.getJSONArray(Key.VIEW);
 			for (i = 0 ; i < jArray.length() ; i++ ) {
 				p.getView().add(jArray.getString(i));
 			}
-			jArray = pages.getJSONArray(S_ZOOM);
+			jArray = pages.getJSONArray(Key.ZOOM);
 			for (i = 0 ; i < jArray.length() ; i++ ) {
 				p.getZoom().add(jArray.getString(i));
 			}
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return p;
 	}
@@ -82,12 +80,11 @@ public class Pages extends EtaObject implements Serializable {
 			for (String s : p.getZoom())
 				aZoom.put(s);
 
-			o.put(S_THUMB, aThumb);
-			o.put(S_VIEW, aView);
-			o.put(S_ZOOM, aZoom);
+			o.put(Key.THUMB, aThumb);
+			o.put(Key.VIEW, aView);
+			o.put(Key.ZOOM, aZoom);
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

@@ -8,7 +8,7 @@ import android.os.Process;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkHelpers.SessionError;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 @SuppressWarnings("rawtypes")
@@ -86,7 +86,7 @@ public class NetworkDispatcher extends Thread {
                 // Parse the response here on the worker thread.
                 Response<?> response = request.parseNetworkResponse(networkResponse);
                 
-                if(request.shouldPrintDebug()) {
+                if(request.printDebug()) {
                 	request.printDebug(request, networkResponse);
                 }
                 

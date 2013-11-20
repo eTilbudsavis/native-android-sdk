@@ -27,8 +27,11 @@ import android.webkit.WebViewClient;
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
+import com.eTilbudsavis.etasdk.NetworkHelpers.StringRequest;
 import com.eTilbudsavis.etasdk.NetworkInterface.Cache.Item;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
+import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -278,25 +281,25 @@ public final class Pageflip extends WebView {
 			
 		} else {
 			
-			StringListener cb = new StringListener() {
-				
-				public void onComplete(boolean isCache, int statusCode, String data, EtaError error) {
-					
+			StringRequest req = new StringRequest(Method.GET, "", new Listener<String>() {
+
+				public void onComplete(boolean isCache, String response, EtaError error) {
+
 					if (mDebugWeinre != null) {
 						String endScript = "</head>";
-						data = data.replaceFirst(endScript, mDebugWeinre + endScript);
+						response = response.replaceFirst(endScript, mDebugWeinre + endScript);
 					}
 					
-					if (Utils.isSuccess(statusCode)) {
-						
-						mEta.getSettings().setPageflipHtml(mUuid, data);
-						loadDataWithBaseURL(null, data, "text/html", "utf-8", null);
+					if (response != null) {
+						mEta.getSettings().setPageflipHtml(mUuid, response);
+						loadDataWithBaseURL(null, response, "text/html", "utf-8", null);
 					} else {
 						loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
 					}
 				}
-			};
-			mEta.getApi().get(Endpoint.getPageflipProxy(mUuid), cb).execute();
+			});
+			Eta.getInstance().add(req);
+			
 			
 		}
 		

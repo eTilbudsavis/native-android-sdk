@@ -17,6 +17,8 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -24,7 +26,6 @@ import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.NetworkHelpers.HttpNetwork;
 import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
 import com.eTilbudsavis.etasdk.NetworkInterface.Network;
-import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Sort;
@@ -47,10 +48,11 @@ public class Eta implements Serializable {
 	private Settings mSettings;
 	private SessionManager mSessionManager;
 	private EtaLocation mLocation;
-	private ShoppinglistManager mShoppinglistManager;
+	private ListManager mListManager;
 	private static Handler mHandler = new Handler();
 	private boolean mResumed = false;
 	private RequestQueue mRequestQueue;
+	private ConnectivityManager mConnectivityManager;
 	
 	private Eta() {
 		Cache c = new Cache();
@@ -85,7 +87,7 @@ public class Eta implements Serializable {
 		if (!isSet()) {
 			mSettings = new Settings(mContext);
 			mLocation = new EtaLocation();
-			mShoppinglistManager = new ShoppinglistManager(Eta.this);
+			mListManager = new ListManager(Eta.this);
 			mSessionManager = new SessionManager(Eta.this);
 		} else {
 			Utils.logd(TAG, "Eta already set. apiKey, apiSecret and context has been switched");
@@ -95,6 +97,11 @@ public class Eta implements Serializable {
 	
 	public boolean isSet() {
 		return mApiKey != null && mApiSecret == null;
+	}
+
+	public boolean isOnline() {
+		NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
+		return netInfo != null && netInfo.isConnected();
 	}
 	
 	/**
@@ -160,8 +167,8 @@ public class Eta implements Serializable {
 		return mLocation;
 	}
 	
-	public ShoppinglistManager getShoppinglistManager() {
-		return mShoppinglistManager;
+	public ListManager getListManager() {
+		return mListManager;
 	}
 	
 	/**
@@ -195,7 +202,7 @@ public class Eta implements Serializable {
 	@SuppressLint("NewApi")
 	public void onPause() {
 		mResumed = false;
-		mShoppinglistManager.onPause();
+		mListManager.onPause();
 		mLocation.saveState();
 		for (Pageflip p : mPageflips)
 			p.onPause();
@@ -204,7 +211,7 @@ public class Eta implements Serializable {
 	@SuppressLint("NewApi")
 	public void onResume() {
 		mResumed = true;
-		mShoppinglistManager.onResume();
+		mListManager.onResume();
 		mLocation.restoreState();
 		for (Pageflip p : mPageflips)
 			p.onResume();

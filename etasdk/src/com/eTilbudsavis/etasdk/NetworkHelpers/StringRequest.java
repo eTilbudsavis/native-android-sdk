@@ -10,18 +10,13 @@ import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 
 public class StringRequest extends Request<String> {
 
-	/** Return interface */
-	private final Listener<String> mListener;
-	
 	public StringRequest(int method, String url, Listener<String> listener) {
 		super(method, url, listener);	
-		mListener = listener;
 		
 	}
 
 	public StringRequest(int method, String url, Map<String, String> params, Listener<String> listener) {
 		super(method, url, listener);
-		mListener = listener;
 		
 	}
 

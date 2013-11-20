@@ -6,7 +6,6 @@ import java.util.Map;
 
 import android.os.Bundle;
 
-import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -16,7 +15,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	public static final String TAG = "Request";
 
 	/** Default encoding for POST or PUT parameters. See {@link #getParamsEncoding()}. */
-	private static final String DEFAULT_PARAMS_ENCODING = "UTF-8";
+	protected static final String DEFAULT_PARAMS_ENCODING = "utf-8";
 
 	/** Listener interface, for responses */
 	private final Listener<T> mListener;
@@ -164,7 +163,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * If true, this request wants debug information about the http request
 	 * printed to consol
 	 */
-	public boolean shouldPrintDebug() {
+	public boolean printDebug() {
 		return mPrintDebug;
 	}
 
@@ -201,11 +200,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return Request.this;
 	}
 
-	protected Bundle getQuery() {
+	protected Bundle getQueryParameters() {
 		return mQuery;
 	}
 
-	public Request setQuery(Bundle query) {
+	public Request putQueryParameters(Bundle query) {
 		mQuery.putAll(query);
 		return Request.this;
 	}
@@ -229,9 +228,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	public String getBodyContentType() {
 		return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
 	}
-
+	
 	public byte[] getBody() {
-		Bundle params = getQuery();
+		Bundle params = getQueryParameters();
 		if (params != null && params.size() > 0) {
 			try {
 				return Utils.bundleToQueryString(params).getBytes(getParamsEncoding());
@@ -243,11 +242,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	}
 
 	abstract protected Response<T> parseNetworkResponse(NetworkResponse response);
-
-	protected EtaError parseNetworkError(EtaError error) {
-		return error;
-	}
-
+	
 	abstract protected void deliverResponse(T response);
 
 	public int compareTo(Request<T> other) {
@@ -256,7 +251,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return left == right ? this.mSequence - other.mSequence : right.ordinal() - left.ordinal();
 	}
 	
-
     public boolean mayCache(NetworkResponse response) {
     	String cacheControl = "Cache-Control";
     	String noCache = "no-cache";
@@ -551,21 +545,21 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		/**
 		 * https://etilbudsavis.dk/proxy/{id}/
 		 */
-		public String getPageflipProxy(String id) {
+		public static String getPageflipProxy(String id) {
 			return String.format("http://etilbudsavis.dk/proxy/%s/", id);
 		}
 
 		/**
 		 * /v2/users/{user_id}/facebook
 		 */
-		public String getFacebook(int userId) {
+		public static String getFacebook(int userId) {
 			return String.format("/v2/users/%s/facebook", userId);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists
 		 */
-		public String getLists(int userId) {
+		public static String getLists(int userId) {
 			return String.format("/v2/users/%s/shoppinglists", userId);
 		}
 
@@ -575,21 +569,21 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		 * @param listId
 		 * @return
 		 */
-		public String getList(int userId, String listId) {
+		public static String getList(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s", userId, listId);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/modified
 		 */
-		public String getListModified(int userId, String listId) {
+		public static String getListModified(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/modified", userId, listId);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/empty
 		 */
-		public String getListEmpty(int userId, String listId) {
+		public static String getListEmpty(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/empty", userId, listId);
 		}
 
@@ -599,35 +593,35 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		 * @param listId
 		 * @return
 		 */
-		public String getListShares(int userId, String listId) {
+		public static String getListShares(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/shares", userId, listId);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email}
 		 */
-		public String getListShareEmail(int userId, String listId, String email) {
+		public static String getListShareEmail(int userId, String listId, String email) {
 			return String.format("/v2/users/%s/shoppinglists/%s/shares/%s", userId, listId, email);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items
 		 */
-		public String getItems(int userId, String listId) {
+		public static String getItems(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/items", userId, listId);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}
 		 */
-		public String getItem(int userId, String listId, String itemId) {
+		public static String getItem(int userId, String listId, String itemId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/items/%s", userId, listId, itemId);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified
 		 */
-		public String getItemModifiedById(int userId, String listId, String itemId) {
+		public static String getItemModifiedById(int userId, String listId, String itemId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/items/%s/modified", userId, listId, itemId);
 		}
 

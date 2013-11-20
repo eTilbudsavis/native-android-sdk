@@ -5,9 +5,9 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
-
 import android.graphics.Color;
+
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Pageflip extends EtaObject implements Serializable {
 	
@@ -30,12 +30,12 @@ public class Pageflip extends EtaObject implements Serializable {
 		try {
 			p = fromJSON(p, new JSONObject(pageflip));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return p;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Pageflip fromJSON(JSONObject pageflip) {
 		return fromJSON(new Pageflip(), pageflip);
 	}
@@ -44,8 +44,8 @@ public class Pageflip extends EtaObject implements Serializable {
 		if (p == null) p = new Pageflip();
 		if (pageflip == null) return p;
 		
-		p.setLogo(getJsonString(pageflip, S_LOGO));
-		p.setColor(Color.parseColor("#"+getJsonString(pageflip, S_COLOR)));
+		p.setLogo(getJsonString(pageflip, Key.LOGO));
+		p.setColor(Color.parseColor("#"+getJsonString(pageflip, Key.COLOR)));
 		
 		return p;
 	}
@@ -57,11 +57,10 @@ public class Pageflip extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Pageflip p) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_LOGO, p.getLogo());
-			o.put(S_COLOR, p.getColorString());
+			o.put(Key.LOGO, p.getLogo());
+			o.put(Key.COLOR, p.getColorString());
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

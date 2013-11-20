@@ -11,8 +11,7 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.ShoppinglistManager;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ShoppinglistItem extends EtaErnObject implements Comparable<ShoppinglistItem>, Serializable {
@@ -21,18 +20,32 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 
 	public static final String TAG = "ShoppinglistItem";
 	
+	/** States a shopppingItem list can be in */
+	public interface State {
+		int TO_SYNC	= 0;
+		int SYNCING	= 1;
+		int SYNCED	= 2;
+		int DELETE	= 4;
+		int ERROR	= 5;
+	}
+	
+	public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
+	
 	private boolean mTick = false;
 	private String mOfferId = null;
 	private int mCount = 1;
 	private String mDescription = null;
-	private String mCreator = "";
+	private String mCreator;
 	private Date mModified = new Date();
-	private int mState = ShoppinglistManager.STATE_TO_SYNC;
+	private int mState = State.TO_SYNC;
 	private Offer mOffer = null;
-	private String mShoppinglistId = "";
+	private String mShoppinglistId;
+	private String mPrevId;
+	private String mMeta;
+	private int mUserId = -1;
 
 	public ShoppinglistItem() {
-        String id =Utils.createUUID();
+        String id = Utils.createUUID();
 		setId(id);
         setErn("ern:shopping:item:" + id);
 	}
@@ -47,20 +60,28 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		this();
 		setShoppinglistId(shoppinglist.getId());
 		setOffer(offer);
+		setDescription(offer.getHeading());
 	}
 
 	@SuppressWarnings("unchecked")
 	public static ArrayList<ShoppinglistItem> fromJSON(JSONArray shoppinglistItems) {
 		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
 		try {
-			for (int i = 0 ; i < shoppinglistItems.length() ; i++ ) {
-				ShoppinglistItem sli = ShoppinglistItem.fromJSON((JSONObject)shoppinglistItems.get(i));
-				list.add(sli);
+			ShoppinglistItem tmp = null;
+			// Parse in opposite order, to get the right ordering from server until sorting is implemented
+			for (int i = shoppinglistItems.length()-1 ; i >= 0 ; i-- ) {
+				
+				ShoppinglistItem s = ShoppinglistItem.fromJSON((JSONObject)shoppinglistItems.get(i));
+				if (s.getPreviousId() == null) {
+					s.setPreviousId(tmp == null ? FIRST_ITEM : tmp.getId());
+					tmp = s;
+				}
+				list.add(s);
+				
 			}
-			
+
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return list;
 	}
@@ -73,17 +94,20 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	private static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem) {
 		
 		try {
-			sli.setId(getJsonString(shoppinglistItem, S_ID));
-			sli.setTick(shoppinglistItem.getBoolean(S_TICK));
-			sli.setOfferId(getJsonString(shoppinglistItem, S_OFFER_ID));
-			sli.setCount(shoppinglistItem.getInt(S_COUNT));
-			sli.setDescription(getJsonString(shoppinglistItem, S_DESCRIPTION));
-			sli.setShoppinglistId(getJsonString(shoppinglistItem, S_SHOPPINGLIST_ID));
-			sli.setErn(getJsonString(shoppinglistItem, S_ERN));
-			sli.setCreator(getJsonString(shoppinglistItem, S_CREATOR));
-			sli.setModified(Utils.parseDate(shoppinglistItem.isNull(S_MODIFIED) ? "1970-01-01T00:00:00+0000" : shoppinglistItem.getString(S_MODIFIED)));
+			sli.setId(getJsonString(shoppinglistItem, Key.ID));
+			sli.setTick(shoppinglistItem.getBoolean(Key.TICK));
+			sli.setOfferId(getJsonString(shoppinglistItem, Key.OFFER_ID));
+			sli.setCount(shoppinglistItem.getInt(Key.COUNT));
+			sli.setDescription(getJsonString(shoppinglistItem, Key.DESCRIPTION));
+			sli.setShoppinglistId(getJsonString(shoppinglistItem, Key.SHOPPINGLIST_ID));
+			sli.setErn(getJsonString(shoppinglistItem, Key.ERN));
+			sli.setCreator(getJsonString(shoppinglistItem, Key.CREATOR));
+			sli.setModified(Utils.parseDate(shoppinglistItem.isNull(Key.MODIFIED) ? "1970-01-01T00:00:00+0000" : shoppinglistItem.getString(Key.MODIFIED)));
+			sli.setPreviousId(getJsonString(shoppinglistItem, Key.PREVIOUS_ID));
+			
 		} catch (JSONException e) {
-			if (Eta.DEBUG) e.printStackTrace();
+			EtaLog.d(TAG, shoppinglistItem.toString());
+			EtaLog.d(TAG, e);
 		}
 		return sli;
 	}
@@ -125,7 +149,13 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 
 	public ShoppinglistItem setOffer(Offer offer) {
 		mOffer = offer;
-		setOfferId(mOffer == null ? null : offer.getId());
+		if (mOffer != null) {
+			setOfferId(offer.getId());
+			setDescription(mOffer.getHeading());
+		} else {
+			setOfferId(null);
+		}
+		
 		return this;
 	}
 
@@ -147,6 +177,15 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		return this;
 	}
 
+	public String getPreviousId() {
+		return mPrevId;
+	}
+
+	public ShoppinglistItem setPreviousId(String id) {
+		mPrevId = id;
+		return this;
+	}
+
 	public String getOfferId() {
 		return mOfferId;
 	}
@@ -161,6 +200,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	}
 
 	public ShoppinglistItem setModified(Date time) {
+		time.setTime(1000 * (time.getTime()/ 1000));
 		mModified = time;
 		return this;
 	}
@@ -170,49 +210,51 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	}
 	
 	public ShoppinglistItem setState(int state) {
-		if (ShoppinglistManager.STATE_TO_SYNC <= state ||
-			state <= ShoppinglistManager.STATE_ERROR)
+		if (State.TO_SYNC <= state && state <= State.ERROR)
 			mState = state;
 		return this;
 	}
 	
+	public JSONObject getMeta() {
+		try {
+			return mMeta == null ? null : new JSONObject(mMeta);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return null;
+	}
+
+	public ShoppinglistItem setMeta(JSONObject meta) {
+		mMeta = meta == null ? null : meta.toString();
+		return this;
+	}
+
+	public int getUserId() {
+		return mUserId;
+	}
+
+	public ShoppinglistItem setUserId(int userId) {
+		mUserId = userId;
+		return this;
+	}
+
 	public Bundle getApiParams() {
 		
 		Bundle apiParams = new Bundle();
-		apiParams.putString(S_DESCRIPTION, getDescription());
-		apiParams.putInt(S_COUNT, getCount());
-		apiParams.putBoolean(S_TICK, isTicked());
-		apiParams.putString(S_OFFER_ID, getOfferId());
-		apiParams.putString(S_MODIFIED, Utils.formatDate(getModified()));
-		apiParams.putString(S_CREATOR, getCreator());
-		apiParams.putString(S_SHOPPINGLIST_ID, getShoppinglistId());
+		apiParams.putString(Key.DESCRIPTION, getDescription());
+		apiParams.putInt(Key.COUNT, getCount());
+		apiParams.putBoolean(Key.TICK, isTicked());
+		apiParams.putString(Key.OFFER_ID, getOfferId());
+		apiParams.putString(Key.MODIFIED, Utils.formatDate(getModified()));
+		apiParams.putString(Key.CREATOR, getCreator());
+		apiParams.putString(Key.SHOPPINGLIST_ID, getShoppinglistId());
+		apiParams.putString(Key.PREVIOUS_ID, getPreviousId());
 		return apiParams;
 	}
 
 	public int compareTo(ShoppinglistItem another) {
 
 		return 0;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-
-		if (!(o instanceof ShoppinglistItem))
-			return false;
-
-		ShoppinglistItem sli = (ShoppinglistItem)o;
-		
-		return stringCompare(mId, sli.getId()) &&
-				stringCompare(mErn, sli.getErn()) &&
-				stringCompare(mDescription, sli.getDescription()) && 
-				mCount == sli.getCount() &&
-				mTick == sli.isTicked() &&
-				stringCompare(mOfferId, sli.getOfferId()) &&
-				mModified.equals(sli.getModified()) &&
-				stringCompare(mShoppinglistId, sli.getShoppinglistId()) &&
-				stringCompare(mCreator, sli.getCreator());
 	}
 
 	@Override
@@ -237,7 +279,10 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		if(everything) {
 			sb.append(", creator=").append(mCreator)
 			.append(", shoppinglist_id=").append(mShoppinglistId)
-			.append(", state=").append(mState);
+			.append(", state=").append(mState)
+			.append(", userId=").append(mUserId)
+			.append(", previous_id=").append(mPrevId)
+			.append(", meta=").append(mMeta);
 		}
 		return sb.append("]").toString();
 	}
@@ -255,5 +300,83 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 
 	};
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + mCount;
+		result = prime * result + ((mCreator == null) ? 0 : mCreator.hashCode());
+		result = prime * result + ((mDescription == null) ? 0 : mDescription.hashCode());
+		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
+		result = prime * result + ((mModified == null) ? 0 : mModified.hashCode());
+		result = prime * result + ((mOffer == null) ? 0 : mOffer.hashCode());
+		result = prime * result + ((mOfferId == null) ? 0 : mOfferId.hashCode());
+		result = prime * result + ((mPrevId == null) ? 0 : mPrevId.hashCode());
+		result = prime * result + ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
+		result = prime * result + mState;
+		result = prime * result + (mTick ? 1231 : 1237);
+		result = prime * result + mUserId;
+		return result;
+	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ShoppinglistItem other = (ShoppinglistItem) obj;
+		if (mCount != other.mCount)
+			return false;
+		if (mCreator == null) {
+			if (other.mCreator != null)
+				return false;
+		} else if (!mCreator.equals(other.mCreator))
+			return false;
+		if (mDescription == null) {
+			if (other.mDescription != null)
+				return false;
+		} else if (!mDescription.equals(other.mDescription))
+			return false;
+		if (mMeta == null) {
+			if (other.mMeta != null)
+				return false;
+		} else if (!mMeta.equals(other.mMeta))
+			return false;
+		if (mModified == null) {
+			if (other.mModified != null)
+				return false;
+		} else if (!mModified.equals(other.mModified))
+			return false;
+		if (mOffer == null) {
+			if (other.mOffer != null)
+				return false;
+		} else if (!mOffer.equals(other.mOffer))
+			return false;
+		if (mOfferId == null) {
+			if (other.mOfferId != null)
+				return false;
+		} else if (!mOfferId.equals(other.mOfferId))
+			return false;
+		if (mPrevId == null) {
+			if (other.mPrevId != null)
+				return false;
+		} else if (!mPrevId.equals(other.mPrevId))
+			return false;
+		if (mShoppinglistId == null) {
+			if (other.mShoppinglistId != null)
+				return false;
+		} else if (!mShoppinglistId.equals(other.mShoppinglistId))
+			return false;
+		if (mState != other.mState)
+			return false;
+		if (mTick != other.mTick)
+			return false;
+		if (mUserId != other.mUserId)
+			return false;
+		return true;
+	}
+	
 }

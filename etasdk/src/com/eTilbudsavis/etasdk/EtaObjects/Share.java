@@ -8,7 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Share extends EtaObject implements Comparable<Share>, Serializable {
 	private static final long serialVersionUID = 1L;
@@ -34,8 +34,7 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 				list.add(Share.fromJSON((JSONObject)shares.get(i)));
 			
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return list;
 	}
@@ -48,23 +47,22 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 	public static Share fromJSON(Share s, JSONObject share) {
 		
 		try {
-			String email = getJsonString(share, S_USER);
+			String email = getJsonString(share, Key.USER);
 			
 			if (email == null)
 				return s;
 			
 			if (email.startsWith("{") && email.endsWith("}")) {
 				JSONObject o = new JSONObject(email);
-				s.setEmail(getJsonString(o, S_EMAIL));
-				s.setName(getJsonString(o, S_NAME));
+				s.setEmail(getJsonString(o, Key.EMAIL));
+				s.setName(getJsonString(o, Key.NAME));
 			} else {
 				s.setEmail(email);
 			}
-			s.setAccess(getJsonString(share, S_ACCESS));
-			s.setAccepted(share.getBoolean(S_ACCEPTED));
+			s.setAccess(getJsonString(share, Key.ACCESS));
+			s.setAccepted(share.getBoolean(Key.ACCEPTED));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		
 		return s;
@@ -153,7 +151,7 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 	}
 
 	public static Comparator<Share> EmailComparator  = new Comparator<Share>() {
-
+		
 		public int compare(Share item1, Share item2) {
 
 			String itemName1 = item1.getEmail().toUpperCase();

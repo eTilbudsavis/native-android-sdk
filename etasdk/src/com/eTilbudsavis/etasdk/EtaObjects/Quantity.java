@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Quantity extends EtaObject implements Serializable {
 
@@ -25,8 +25,7 @@ public class Quantity extends EtaObject implements Serializable {
 		try {
 			q = fromJSON(q, new JSONObject(quantity));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return q;
 	}
@@ -41,12 +40,11 @@ public class Quantity extends EtaObject implements Serializable {
 		if (quantity == null) return q;
 		
 		try {
-			q.setUnit(quantity.isNull(S_UNIT) ? null : Unit.fromJSON(quantity.getJSONObject(S_UNIT)));
-			q.setSize(quantity.isNull(S_SIZE) ? null : Size.fromJSON(quantity.getJSONObject(S_SIZE)));
-			q.setPieces(quantity.isNull(S_PIECES) ? null : Pieces.fromJSON(quantity.getJSONObject(S_PIECES)));
+			q.setUnit(quantity.isNull(Key.UNIT) ? null : Unit.fromJSON(quantity.getJSONObject(Key.UNIT)));
+			q.setSize(quantity.isNull(Key.SIZE) ? null : Size.fromJSON(quantity.getJSONObject(Key.SIZE)));
+			q.setPieces(quantity.isNull(Key.PIECES) ? null : Pieces.fromJSON(quantity.getJSONObject(Key.PIECES)));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return q;
 	}
@@ -58,12 +56,11 @@ public class Quantity extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Quantity q) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_UNIT, q.getUnit() == null ? null : q.getUnit().toJSON());
-			o.put(S_SIZE, q.getSize() == null ? null : q.getSize().toJSON());
-			o.put(S_PIECES, q.getPieces() == null ? null : q.getPieces().toJSON());
+			o.put(Key.UNIT, q.getUnit() == null ? null : q.getUnit().toJSON());
+			o.put(Key.SIZE, q.getSize() == null ? null : q.getSize().toJSON());
+			o.put(Key.PIECES, q.getPieces() == null ? null : q.getPieces().toJSON());
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

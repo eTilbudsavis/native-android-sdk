@@ -167,8 +167,8 @@ public final class Utils {
 		
 		return result.toString();
 	}
-
-	public static List<NameValuePair> bundleToNameValuePair( Bundle apiParams) {
+	
+	public static List<NameValuePair> bundleToNameValuePair(Bundle apiParams) {
 		List<NameValuePair> list = new ArrayList<NameValuePair>(apiParams.size());
 		for (String key : apiParams.keySet()) {
 			if (apiParams.get(key) instanceof Bundle) {

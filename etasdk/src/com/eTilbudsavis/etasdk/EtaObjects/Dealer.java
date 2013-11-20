@@ -9,8 +9,10 @@ import org.json.JSONObject;
 
 import android.graphics.Color;
 
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Sort;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Dealer extends EtaErnObject implements Serializable {
 	
@@ -18,6 +20,24 @@ public class Dealer extends EtaErnObject implements Serializable {
 	
 	public static final String TAG = "Dealer";
 
+	/** Sort a list by name in ascending order. (smallest to largest) */
+	public static final String SORT_NAME = Sort.NAME;
+
+	/** Sort a list by name in descending order. (largest to smallest)*/
+	public static final String SORT_NAME_DESC = Sort.NAME_DESC;
+
+	/** Sort a list by created in ascending order. (smallest to largest) */
+	public static final String SORT_CREATED = Sort.CREATED;
+
+	/** Sort a list by created in ascending order. (smallest to largest) */
+	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
+
+	/** Parameter for getting a list of specific dealer id's */
+	public static final String FILTER_DEALER_IDS = Param.FILTER_DEALER_IDS;
+
+	/** String identifying the query parameter */
+	public static final String PARAM_QUERY = Param.QUERY;
+	
 	/** Endpoint for dealer list resource */
 	public static final String ENDPOINT_LIST = Endpoint.DEALER_LIST;
 
@@ -44,8 +64,7 @@ public class Dealer extends EtaErnObject implements Serializable {
 				list.add(Dealer.fromJSON((JSONObject)dealers.get(i)));
 			
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return list;
 	}
@@ -60,17 +79,16 @@ public class Dealer extends EtaErnObject implements Serializable {
 		if (dealer == null) return d;
 
 		try {
-			d.setId(getJsonString(dealer, S_ID));
-			d.setErn(getJsonString(dealer, S_ERN));
-			d.setName(getJsonString(dealer, S_NAME));
-			d.setUrlName(getJsonString(dealer, S_URL_NAME));
-			d.setWebsite(getJsonString(dealer, S_WEBSITE));
-			d.setLogo(getJsonString(dealer, S_LOGO));
-			d.setColor(Color.parseColor("#"+getJsonString(dealer, S_COLOR)));
-			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(S_PAGEFLIP)));
+			d.setId(getJsonString(dealer, Key.ID));
+			d.setErn(getJsonString(dealer, Key.ERN));
+			d.setName(getJsonString(dealer, Key.NAME));
+			d.setUrlName(getJsonString(dealer, Key.URL_NAME));
+			d.setWebsite(getJsonString(dealer, Key.WEBSITE));
+			d.setLogo(getJsonString(dealer, Key.LOGO));
+			d.setColor(Color.parseColor("#"+getJsonString(dealer, Key.COLOR)));
+			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(Key.PAGEFLIP)));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return d;
 	}
@@ -82,17 +100,16 @@ public class Dealer extends EtaErnObject implements Serializable {
 	public static JSONObject toJSON(Dealer d) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_ID, d.getId());
-			o.put(S_ERN, d.getErn());
-			o.put(S_NAME, d.getName());
-			o.put(S_URL_NAME, d.getUrlName());
-			o.put(S_WEBSITE, d.getWebsite());
-			o.put(S_LOGO, d.getLogo());
-			o.put(S_COLOR, d.getColorString());
-			o.put(S_PAGEFLIP, d.getPageflip().toJSON());
+			o.put(Key.ID, d.getId());
+			o.put(Key.ERN, d.getErn());
+			o.put(Key.NAME, d.getName());
+			o.put(Key.URL_NAME, d.getUrlName());
+			o.put(Key.WEBSITE, d.getWebsite());
+			o.put(Key.LOGO, d.getLogo());
+			o.put(Key.COLOR, d.getColorString());
+			o.put(Key.PAGEFLIP, d.getPageflip().toJSON());
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return o; 
 	}

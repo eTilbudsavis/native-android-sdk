@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Size extends EtaObject implements Serializable {
 
@@ -13,8 +13,8 @@ public class Size extends EtaObject implements Serializable {
 
 	public static final String TAG = "Size";
 	
-	private double mFrom = 0.0;
-	private double mTo = 0.0;
+	private double mFrom = 1;
+	private double mTo = 1;
 	
 	public Size() {
 	}
@@ -24,8 +24,7 @@ public class Size extends EtaObject implements Serializable {
 		try {
 			s = fromJSON(s, new JSONObject(size));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return s;
 	}
@@ -40,11 +39,10 @@ public class Size extends EtaObject implements Serializable {
 		if (size == null) return s;
 		
 		try {
-			s.setFrom(size.getDouble(S_FROM));
-			s.setTo(size.getDouble(S_TO));
+			s.setFrom(size.getDouble(Key.FROM));
+			s.setTo(size.getDouble(Key.TO));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return s;
 	}
@@ -56,11 +54,10 @@ public class Size extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Size s) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_FROM, s.getFrom());
-			o.put(S_TO, s.getTo());
+			o.put(Key.FROM, s.getFrom());
+			o.put(Key.TO, s.getTo());
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}

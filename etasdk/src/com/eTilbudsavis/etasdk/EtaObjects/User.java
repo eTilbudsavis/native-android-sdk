@@ -6,14 +6,39 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class User extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	public static final String TAG = "User";
+	
+	/** Parameter for a user e-mail */
+	public static final String PARAM_EMAIL = Param.EMAIL;
+	
+	/** Parameter for a user password */
+	public static final String PARAM_PASSWORD = Param.PASSWORD;
+	
+	/** Parameter for a user birth year */
+	public static final String PARAM_BIRTH_YEAR = Param.BIRTH_YEAR;
+	
+	/** Parameter for a user gender */
+	public static final String PARAM_GENDER = Param.GENDER;
+	
+	/** Parameter for a user success redirect */
+	public static final String PARAM_SUCCESS_REDIRECT = Param.SUCCESS_REDIRECT;
+	
+	/** Parameter for a user error redirect */
+	public static final String PARAM_ERROR_REDIRECT = Param.ERROR_REDIRECT;
+	
+	/** Parameter for a user old password */
+	public static final String PARAM_OLD_PASSWORD = Param.OLD_PASSWORD;
+	
+	/** Parameter for a facebook token */
+	public static final String PARAM_FACEBOOK_TOKEN = Param.FACEBOOK_TOKEN;
 	
 	/** Endpoint for a single user resource */
 	public static final String ENDPOINT_ID = Endpoint.USER_ID;
@@ -39,8 +64,7 @@ public class User extends EtaObject implements Serializable {
 		try {
 			u = fromJSON(u, new JSONObject(user));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return u;
 	}
@@ -55,16 +79,15 @@ public class User extends EtaObject implements Serializable {
 		if (user == null) return u;
 		
 		try {
-			u.setId(user.getInt(S_ID));
-			u.setErn(getJsonString(user, S_ERN));
-			u.setGender(getJsonString(user, S_GENDER));
-			u.setBirthYear(user.getInt(S_BIRTH_YEAR));
-			u.setName(getJsonString(user, S_NAME));
-			u.setEmail(getJsonString(user, S_EMAIL));
-			u.setPermissions(Permission.fromJSON(user.getJSONObject(S_PERMISSIONS)));
+			u.setId(user.getInt(Key.ID));
+			u.setErn(getJsonString(user, Key.ERN));
+			u.setGender(getJsonString(user, Key.GENDER));
+			u.setBirthYear(user.getInt(Key.BIRTH_YEAR));
+			u.setName(getJsonString(user, Key.NAME));
+			u.setEmail(getJsonString(user, Key.EMAIL));
+			u.setPermissions(Permission.fromJSON(user.getJSONObject(Key.PERMISSIONS)));
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return u;
 	}
@@ -76,22 +99,21 @@ public class User extends EtaObject implements Serializable {
 	public static JSONObject toJSON(User u) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_ID, u.getId());
-			o.put(S_ERN, u.getErn());
-			o.put(S_GENDER, u.getGender());
-			o.put(S_BIRTH_YEAR, u.getBirthYear());
-			o.put(S_NAME, u.getName());
-			o.put(S_EMAIL, u.getEmail());
-			o.put(S_PERMISSIONS, u.getPermissions() == null ? null : u.getPermissions().toJSON());
+			o.put(Key.ID, u.getId());
+			o.put(Key.ERN, u.getErn());
+			o.put(Key.GENDER, u.getGender());
+			o.put(Key.BIRTH_YEAR, u.getBirthYear());
+			o.put(Key.NAME, u.getName());
+			o.put(Key.EMAIL, u.getEmail());
+			o.put(Key.PERMISSIONS, u.getPermissions() == null ? null : u.getPermissions().toJSON());
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
 	
 	public boolean isLoggedIn() {
-		return mEmail != null && mId != 0;
+		return mEmail != null && mId > -1;
 	}
 	
 	public int getId() {
@@ -161,10 +183,6 @@ public class User extends EtaObject implements Serializable {
 
 	public void setPermissions(Permission permissions) {
 		this.mPermissions = permissions;
-	}
-
-	public String getFacebookEndpoint() {
-		return Endpoint.getFacebookByUserId(mId);
 	}
 	
 	public void subscribe(UserStatusListener statusListener) {

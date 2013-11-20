@@ -8,8 +8,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Sort;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Catalog extends EtaErnObject implements Serializable {
@@ -17,6 +19,63 @@ public class Catalog extends EtaErnObject implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Catalog";
+	
+	/** Sort a list by popularity in ascending order. (smallest to largest) */
+	public static final String SORT_POPULARITY = Sort.POPULARITY;
+
+	/** Sort a list by popularity in descending order. (largest to smallest)*/
+	public static final String SORT_POPULARITY_DESC = Sort.POPULARITY_DESC;
+
+	/** Sort a list by distance in ascending order. (smallest to largest) */
+	public static final String SORT_DISTANCE = Sort.DISTANCE;
+
+	/** Sort a list by distance in descending order. (largest to smallest)*/
+	public static final String SORT_DISTANCE_DESC = Sort.DISTANCE_DESC;
+
+	/** Sort a list by name in ascending order. (smallest to largest) */
+	public static final String SORT_NAME = Sort.NAME;
+
+	/** Sort a list by name in descending order. (largest to smallest)*/
+	public static final String SORT_NAME_DESC = Sort.NAME_DESC;
+
+	/** Sort a list by published in ascending order. (smallest to largest) */
+	public static final String SORT_PUBLISHED = Sort.PUBLISHED;
+
+	/** Sort a list by published in descending order. (largest to smallest)*/
+	public static final String SORT_PUBLISHED_DESC = Sort.PUBLISHED_DESC;
+
+	/** Sort a list by expired in ascending order. (smallest to largest) */
+	public static final String SORT_EXPIRED = Sort.EXPIRED;
+
+	/** Sort a list by expired in descending order. (largest to smallest)*/
+	public static final String SORT_EXPIRED_DESC = Sort.EXPIRED_DESC;
+
+	/** Sort a list by created in ascending order. (smallest to largest) */
+	public static final String SORT_CREATED = Sort.CREATED;
+
+	/** Sort a list by created in ascending order. (smallest to largest) */
+	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
+
+	/** Parameter for getting a list of specific catalog id's */
+	public static final String FILTER_CATALOG_IDS = Param.FILTER_CATALOG_IDS;
+
+	/** Parameter for posting a list of store id's to publish the catalog in */
+	public static final String FILTER_STORE_IDS = Param.FILTER_STORE_IDS;
+
+	/** Parameter for posting a list of area id's to publish the catalog in */
+	public static final String FILTER_AREA_IDS = Param.FILTER_AREA_IDS;
+
+	/** Parameter for the location of the PDF to post */
+	public static final String PARAM_PDF = Param.PDF;
+
+	/** String identifying the offset parameter for all list calls to the API */
+	public static final String PARAM_OFFSET = Param.OFFSET;
+
+	/** String identifying the offset parameter for all list calls to the API */
+	public static final String PARAM_LIMIT = Param.LIMIT;
+
+	/** String identifying the query parameter */
+	public static final String PARAM_QUERY = Param.QUERY;
 	
 	/** Endpoint for catalog list resource */
 	public static final String ENDPOINT_LIST = Endpoint.CATALOG_LIST;
@@ -63,8 +122,7 @@ public class Catalog extends EtaErnObject implements Serializable {
 				list.add(Catalog.fromJSON((JSONObject)catalogs.get(i)));
 			
 		} catch (JSONException e) {
-			if (Eta.DEBUG)
-				e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return list;
 	}
@@ -81,37 +139,37 @@ public class Catalog extends EtaErnObject implements Serializable {
 		if (catalog == null)
 			return c;
 
-		if (catalog.has(S_STORE_ID) && catalog.has(S_OFFER_COUNT)) {
+		if (catalog.has(Key.STORE_ID) && catalog.has(Key.OFFER_COUNT)) {
 			// if we have a full catalog
 			try {
-				c.setId(getJsonString(catalog, S_ID));
-				c.setErn(getJsonString(catalog, S_ERN));
-				c.setLabel(getJsonString(catalog, S_LABEL));
-				c.setBackground(getJsonString(catalog, S_BACKGROUND));
-				c.setRunFrom(getJsonString(catalog, S_RUN_FROM));
-				c.setRunTill(getJsonString(catalog, S_RUN_TILL));
-				c.setPageCount(catalog.getInt(S_PAGE_COUNT));
-				c.setOfferCount(catalog.getInt(S_OFFER_COUNT));
-				c.setBranding(Branding.fromJSON(catalog.getJSONObject(S_BRANDING)));
-				c.setDealerId(getJsonString(catalog, S_DEALER_ID));
-				c.setDealerUrl(getJsonString(catalog, S_DEALER_URL));
-				c.setStoreId(getJsonString(catalog, S_STORE_ID));
-				c.setStoreUrl(getJsonString(catalog, S_STORE_URL));
-				c.setDimension(Dimension.fromJSON(catalog.getJSONObject(S_DIMENSIONS)));
-				c.setImages(Images.fromJSON(catalog.getJSONObject(S_IMAGES)));
-				c.setPages(Pages.fromJSON(catalog.getJSONObject(S_PAGES)));
+				c.setId(getJsonString(catalog, Key.ID));
+				c.setErn(getJsonString(catalog, Key.ERN));
+				c.setLabel(getJsonString(catalog, Key.LABEL));
+				c.setBackground(getJsonString(catalog, Key.BACKGROUND));
+				Date runFrom = Utils.parseDate(getJsonString(catalog, Key.RUN_FROM));
+				c.setRunFrom(runFrom);
+				Date runTill = Utils.parseDate(getJsonString(catalog, Key.RUN_TILL));
+				c.setRunTill(runTill);
+				c.setPageCount(catalog.getInt(Key.PAGE_COUNT));
+				c.setOfferCount(catalog.getInt(Key.OFFER_COUNT));
+				c.setBranding(Branding.fromJSON(catalog.getJSONObject(Key.BRANDING)));
+				c.setDealerId(getJsonString(catalog, Key.DEALER_ID));
+				c.setDealerUrl(getJsonString(catalog, Key.DEALER_URL));
+				c.setStoreId(getJsonString(catalog, Key.STORE_ID));
+				c.setStoreUrl(getJsonString(catalog, Key.STORE_URL));
+				c.setDimension(Dimension.fromJSON(catalog.getJSONObject(Key.DIMENSIONS)));
+				c.setImages(Images.fromJSON(catalog.getJSONObject(Key.IMAGES)));
+				c.setPages(Pages.fromJSON(catalog.getJSONObject(Key.PAGES)));
 			} catch (JSONException e) {
-				if (Eta.DEBUG)
-					e.printStackTrace();
+				EtaLog.d(TAG, e);
 			}
-		} else if (catalog.has(S_ID) && catalog.has(P_PAGE)) {
+		} else if (catalog.has(Key.ID) && catalog.has(Key.PAGE)) {
 			// If it is a partial catalog
 			try {
-				c.setId(getJsonString(catalog, S_ID));
-				c.setOfferOnPage(catalog.getInt(P_PAGE));
+				c.setId(getJsonString(catalog, Key.ID));
+				c.setOfferOnPage(catalog.getInt(Key.PAGE));
 			} catch (JSONException e) {
-				if (Eta.DEBUG)
-					e.printStackTrace();
+				EtaLog.d(TAG, e);
 			}
 		}
 		return c;
@@ -124,24 +182,24 @@ public class Catalog extends EtaErnObject implements Serializable {
 	public static JSONObject toJSON(Catalog c) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_ID, c.getId());
-			o.put(S_ERN, c.getErn());
-			o.put(S_LABEL, c.getLabel());
-			o.put(S_BACKGROUND, c.getBackground());
-			o.put(S_RUN_FROM, Utils.formatDate(c.getRunFrom()));
-			o.put(S_RUN_TILL, Utils.formatDate(c.getRunTill()));
-			o.put(S_PAGE_COUNT, c.getPageCount());
-			o.put(S_OFFER_COUNT, c.getOfferCount());
-			o.put(S_BRANDING, c.getBranding().toJSON());
-			o.put(S_DEALER_ID, c.getDealerId());
-			o.put(S_DEALER_URL, c.getDealerUrl());
-			o.put(S_STORE_ID, c.getStoreId());
-			o.put(S_STORE_URL, c.getStoreUrl());
-			o.put(S_DIMENSIONS, c.getDimension().toJSON());
-			o.put(S_IMAGES, c.getImages().toJSON());
-			o.put(S_PAGES, c.getPages().toJSON());
+			o.put(Key.ID, c.getId());
+			o.put(Key.ERN, c.getErn());
+			o.put(Key.LABEL, c.getLabel());
+			o.put(Key.BACKGROUND, c.getBackground());
+			o.put(Key.RUN_FROM, Utils.formatDate(c.getRunFrom()));
+			o.put(Key.RUN_TILL, Utils.formatDate(c.getRunTill()));
+			o.put(Key.PAGE_COUNT, c.getPageCount());
+			o.put(Key.OFFER_COUNT, c.getOfferCount());
+			o.put(Key.BRANDING, c.getBranding().toJSON());
+			o.put(Key.DEALER_ID, c.getDealerId());
+			o.put(Key.DEALER_URL, c.getDealerUrl());
+			o.put(Key.STORE_ID, c.getStoreId());
+			o.put(Key.STORE_URL, c.getStoreUrl());
+			o.put(Key.DIMENSIONS, c.getDimension().toJSON());
+			o.put(Key.IMAGES, c.getImages().toJSON());
+			o.put(Key.PAGES, c.getPages().toJSON());
 		} catch (JSONException e) {
-			e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
@@ -184,12 +242,8 @@ public class Catalog extends EtaErnObject implements Serializable {
 	}
 
 	public Catalog setRunFrom(Date time) {
-		this.mRunFrom = time;
-		return this;
-	}
-
-	public Catalog setRunFrom(String time) {
-		mRunFrom = Utils.parseDate(time);
+		time.setTime(1000 * (time.getTime()/ 1000));
+		mRunFrom = time;
 		return this;
 	}
 
@@ -198,12 +252,8 @@ public class Catalog extends EtaErnObject implements Serializable {
 	}
 
 	public Catalog setRunTill(Date time) {
-		this.mRunTill = time;
-		return this;
-	}
-
-	public Catalog setRunTill(String time) {
-		mRunTill = Utils.parseDate(time);
+		time.setTime(1000 * (time.getTime() / 1000));
+		mRunTill = time;
 		return this;
 	}
 
