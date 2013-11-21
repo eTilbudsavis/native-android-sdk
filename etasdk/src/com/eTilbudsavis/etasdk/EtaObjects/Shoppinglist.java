@@ -75,16 +75,18 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
 		
 		try {
-			Shoppinglist tmp = null;
 			
-			// Parse in opposite order, to get the right ordering from server until sorting is implemented
+			String prevId = FIRST_ITEM;
+			
+			// Order from server is newest to oldest, so we'll have to reverse the list
+			// And check if the previous_id is set, while doing it
 			for (int i = shoppinglists.length()-1 ; i >= 0 ; i-- ) {
 				
 				Shoppinglist s = Shoppinglist.fromJSON(shoppinglists.getJSONObject(i));
 				if (s.getPreviousId() == null) {
-					s.setPreviousId(tmp == null ? FIRST_ITEM : tmp.getId());
-					tmp = s;
+					s.setPreviousId(prevId);
 				}
+				prevId = s.getId();
 				list.add(s);
 			}
 
@@ -124,7 +126,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		apiParams.putString(ServerKey.MODIFIED, Utils.formatDate(mModified));
 		apiParams.putString(ServerKey.NAME, getName());
 		apiParams.putString(ServerKey.ACCESS, getAccess());
-		apiParams.putString(ServerKey.META, getMeta() == null ? null : getMeta().toString());
+		apiParams.putString(ServerKey.META, mMeta == null ? null : mMeta.toString());
 		apiParams.putString(ServerKey.TYPE, getType());
 		apiParams.putString(ServerKey.PREVIOUS_ID, getPreviousId());
 		return apiParams;
@@ -187,12 +189,13 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	}
 	
 	public JSONObject getMeta() {
+		JSONObject meta = null;
 		try {
-			return mMeta == null ? null : new JSONObject(mMeta);
+			meta = mMeta == null ? null : new JSONObject(mMeta);
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
-		return null;
+		return meta;
 	}
 
 	public Shoppinglist setMeta(JSONObject meta) {
@@ -241,7 +244,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		.append(", user=").append(mUserId)
 		.append(", previous_id=").append(mPrevId)
 		.append(", type=").append(mType)
-		.append(", meta=").append(mMeta);
+		.append(", meta=").append(getMeta() == null ? null : getMeta().toString());
 		return sb.append("]").toString();
 	}
 

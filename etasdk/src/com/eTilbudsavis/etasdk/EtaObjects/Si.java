@@ -14,7 +14,7 @@ public class Si  extends EtaObject implements Serializable {
 	public static final String TAG = "Unit";
 	
 	private String mSymbol;
-	private double mFactor;
+	private double mFactor = 1;
 	
 	public Si() {
 		
@@ -73,12 +73,12 @@ public class Si  extends EtaObject implements Serializable {
 		return this;
 	}
 
-	public double getFactor() {
+	public Double getFactor() {
 		return mFactor;
 	}
 
-	public Si setFactor(double factor) {
-		mFactor = factor;
+	public Si setFactor(Double factor) {
+		mFactor = factor == null ? 1 : factor;
 		return this;
 	}
 	

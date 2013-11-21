@@ -522,6 +522,10 @@ public class ListManager {
 		mSyncManager.onPause();
 	}
 	
+	public void forceSync() {
+		mSyncManager.forceSync();
+	}
+	
 	public void setOnItemChangeListener(OnChangeListener<ShoppinglistItem> l) {
 		if (!mItemSubscribers.contains(l)) mItemSubscribers.add(l);
 	}

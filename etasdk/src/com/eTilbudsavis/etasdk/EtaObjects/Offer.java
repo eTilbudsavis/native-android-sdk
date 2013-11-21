@@ -162,7 +162,7 @@ public class Offer extends EtaErnObject implements Serializable {
 			o.put(S_STORE_URL, offer.getStoreUrl());
 			o.put(S_STORE_ID, offer.getStoreId());
 			o.put(S_CATALOG_URL, offer.getCatalogUrl());
-			o.put(S_CATALOG_PAGE, offer.getCatalogId());
+			o.put(S_CATALOG_ID, offer.getCatalogId());
 			
 		} catch (JSONException e) {
 			e.printStackTrace();

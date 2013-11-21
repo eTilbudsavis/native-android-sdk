@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -66,16 +67,20 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	@SuppressWarnings("unchecked")
 	public static ArrayList<ShoppinglistItem> fromJSON(JSONArray shoppinglistItems) {
 		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
+		
 		try {
-			ShoppinglistItem tmp = null;
-			// Parse in opposite order, to get the right ordering from server until sorting is implemented
+
+			String prevId = FIRST_ITEM;
+
+			// Order from server is newest to oldest, so we'll have to reverse the list
+			// And check if the previous_id is set, while doing it
 			for (int i = shoppinglistItems.length()-1 ; i >= 0 ; i-- ) {
 				
 				ShoppinglistItem s = ShoppinglistItem.fromJSON((JSONObject)shoppinglistItems.get(i));
 				if (s.getPreviousId() == null) {
-					s.setPreviousId(tmp == null ? FIRST_ITEM : tmp.getId());
-					tmp = s;
+					s.setPreviousId(prevId);
 				}
+				prevId = s.getId();
 				list.add(s);
 				
 			}
@@ -106,7 +111,6 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 			sli.setPreviousId(getJsonString(shoppinglistItem, S_PREVIOUS_ID));
 			
 		} catch (JSONException e) {
-			EtaLog.d(TAG, shoppinglistItem.toString());
 			EtaLog.d(TAG, e);
 		}
 		return sli;
@@ -214,14 +218,15 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 			mState = state;
 		return this;
 	}
-	
+
 	public JSONObject getMeta() {
+		JSONObject meta = null;
 		try {
-			return mMeta == null ? null : new JSONObject(mMeta);
+			meta = mMeta == null ? null : new JSONObject(mMeta);
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
-		return null;
+		return meta;
 	}
 
 	public ShoppinglistItem setMeta(JSONObject meta) {
@@ -249,6 +254,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		apiParams.putString(S_CREATOR, getCreator());
 		apiParams.putString(S_SHOPPINGLIST_ID, getShoppinglistId());
 		apiParams.putString(S_PREVIOUS_ID, getPreviousId());
+		apiParams.putString(ServerKey.META, mMeta);
 		return apiParams;
 	}
 

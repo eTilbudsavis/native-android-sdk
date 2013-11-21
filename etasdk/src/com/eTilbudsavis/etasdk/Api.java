@@ -798,7 +798,7 @@ public class Api implements Serializable {
 				debug.append(h.getName()).append(": ").append(h.getValue()).append(", ");
 			debug.append("\n");
 			String data = dataWrapper.getString();
-			data = data.length() > 200 ? data.substring(0,200) : data;
+//			data = data.length() > 200 ? data.substring(0,200) : data;
 	    	debug.append("Data: ").append(data);
 			
 	    	EtaLog.d(TAG, debug.toString());

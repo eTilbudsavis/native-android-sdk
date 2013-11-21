@@ -11,6 +11,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -18,11 +19,15 @@ import java.util.UUID;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.os.Bundle;
 
 public final class Utils {
 	
+	public static final String TAG = "Utils";
 	/** A second in milliseconds */
 	public static final long SECOND_IN_MILLIS = 1000;
 
@@ -90,35 +95,31 @@ public final class Utils {
 	}
 	
 	public static String bundleToQueryString( Bundle apiParams) {
-		StringBuilder result = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		for (String key : apiParams.keySet()) {
-			if (apiParams.get(key) instanceof Bundle) {
-				EtaLog.d("Utils", "Nested parameters not allowed.");
+			Object o = apiParams.get(key);
+			if (o instanceof Bundle) {
+				EtaLog.d(TAG, "Nested parameters not allowed.");
 			} else {
-				if (result.length() > 0)
-					result.append("&");
-				result.append(key);
-				result.append("=");
-				result.append(valueIsNull(apiParams.get(key)));
-				
+				if (sb.length() > 0) sb.append("&");
+				sb.append(key).append("=").append(valueIsNull(o));
 			}
 		}
-		
-		return result.toString();
+		return sb.toString();
 	}
 
 	public static List<NameValuePair> bundleToNameValuePair( Bundle apiParams) {
 		List<NameValuePair> list = new ArrayList<NameValuePair>(apiParams.size());
 		for (String key : apiParams.keySet()) {
 			if (apiParams.get(key) instanceof Bundle) {
-				EtaLog.d("Utils", "Nested parameters not allowed.");
+				EtaLog.d(TAG, "Nested parameters not allowed.");
 			} else {
 				list.add(new BasicNameValuePair(key, valueIsNull(apiParams.get(key))));
 			}
 		}
 		return list;
 	}
-	
+
 	private static String valueIsNull(Object value) {
 		String s = value == null ? "" : value.toString();
 		return s;

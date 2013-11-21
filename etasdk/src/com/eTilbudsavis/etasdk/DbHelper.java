@@ -346,9 +346,53 @@ public class DbHelper extends SQLiteOpenHelper {
 			} while (c.moveToNext());
 		}
 		close(c);
-
+//		sortListssByPrev(lists);
 		Collections.sort(lists);
 		return lists;
+	}
+
+	/** 
+	 * Sorts an List of ShoppinglistItems according to their previous_id
+	 * @param items items to sort
+	 */
+	public static void sortListssByPrev(List<Shoppinglist> lists) {
+		
+		if (lists == null)
+			return;
+		
+		List<Shoppinglist> ul = new ArrayList<Shoppinglist>(lists.size());
+		StringBuilder sb = new StringBuilder();
+		sb.append("\n").append("*** What to sort ***").append("\n");
+		for (Shoppinglist sl : lists) {
+			ul.add(sl);
+			sb.append(sl.getName()).append(", ").append(sl.getPreviousId()).append(" - ").append(sl.getId()).append("\n");
+		}
+		lists.clear();
+		
+		sb.append("*** Sorting ***").append("\n");
+		
+		String prevId = ShoppinglistItem.FIRST_ITEM;
+		for (Shoppinglist s : ul) {
+			
+			for (Shoppinglist sl : ul) {
+				
+				if (sl.getPreviousId().equals(prevId)) {
+					sb.append(sl.getName()).append(", ").append(sl.getPreviousId()).append(" - ").append(sl.getId()).append("\n");
+					lists.add(sl);
+					prevId = sl.getId();
+					continue;
+				}
+				
+			}
+			
+		}
+		sb.append("\n");
+		
+		if (ul.size() != lists.size()) {
+			EtaLog.d(TAG, "##### SIZES OF UNSORTED AND SORTED LISTS DOESN'T MATCH");
+			EtaLog.d(TAG, sb.toString());
+		}
+		
 	}
 	
 	/**
@@ -481,39 +525,38 @@ public class DbHelper extends SQLiteOpenHelper {
 		if (items == null)
 			return;
 		
+		List<ShoppinglistItem> ul = new ArrayList<ShoppinglistItem>(items.size());
 		StringBuilder sb = new StringBuilder();
-		sb.append("*** Sorting - hashmap ***").append("\n");
-		
-		HashMap<String, ShoppinglistItem> map = new HashMap<String, ShoppinglistItem>(items.size());
+		sb.append("\n").append("*** What to sort ***").append("\n");
 		for (ShoppinglistItem sli : items) {
-			sb.append(sli.getTitle()).append(" - ").append("Prev: ").append(sli.getPreviousId()).append(" - ").append(sli.getId()).append("\n");
-			map.put(sli.getPreviousId(), sli);
+			ul.add(sli);
+			sb.append(sli.getTitle()).append(", ").append(sli.getPreviousId()).append(" - ").append(sli.getId()).append("\n");
 		}
 		items.clear();
 		
-		sb.append("*** Sorting - while ***").append("\n");
+		sb.append("*** Sorting ***").append("\n");
 		
 		String prevId = ShoppinglistItem.FIRST_ITEM;
-		
-		int initCount= map.size();
-		int c = 0;
-		
-		while (!map.isEmpty() && c != initCount+5) {
-			c += 1;
-			ShoppinglistItem s = map.get(prevId);
-			sb.append(prevId).append(" - ").append(s == null ? "null" : s.getTitle()).append("\n");
-			if (s != null) {
-				map.remove(prevId);
-				prevId = s.getId();
-				items.add(s);
-			} 
+		for (ShoppinglistItem s : ul) {
+			
+			for (ShoppinglistItem sli : ul) {
+				
+				if (sli.getPreviousId().equals(prevId)) {
+					sb.append(sli.getTitle()).append(", ").append(sli.getPreviousId()).append(" - ").append(sli.getId()).append("\n");
+					items.add(sli);
+					prevId = sli.getId();
+					continue;
+				}
+				
+			}
+			
 		}
+		sb.append("\n");
 		
-		if (c>initCount) {
+		if (ul.size() != items.size()) {
+			EtaLog.d(TAG, "##### SIZES OF UNSORTED AND SORTED LISTS DOESN'T MATCH");
 			EtaLog.d(TAG, sb.toString());
-			EtaLog.printStackTrace();
 		}
-		
 		
 	}
 	

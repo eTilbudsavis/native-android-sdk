@@ -528,7 +528,7 @@ public class ListSyncManager {
 			}
 		};
 		String url = Endpoint.getListById(mEta.getUser().getId(), sl.getId());
-		addRequest(api().put(url, editList, sl.getApiParams()).execute());
+		addRequest(api().put(url, editList, sl.getApiParams()).setFlag(Api.FLAG_PRINT_DEBUG).execute());
 		
 	}
 
