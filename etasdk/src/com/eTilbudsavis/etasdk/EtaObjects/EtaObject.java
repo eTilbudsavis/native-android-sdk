@@ -217,5 +217,6 @@ public class EtaObject {
 		public static final String UNSUBSCRIBE_PRINT_URL = "unsubscribe_print_url";
 		public static final String TYPE = "type";
 		public static final String META = "meta";
+		public static final String SHARES = "shares";
 	}
 }

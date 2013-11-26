@@ -618,8 +618,6 @@ public class Api implements Serializable {
 				return;
 			}
 			
-			printDebugPreExecute();
-			
 			/*
 			 * Do the actual interwebs stuff
 			 */
@@ -712,7 +710,9 @@ public class Api implements Serializable {
 				httpClient.getConnectionManager().shutdown();
 			}
 			
-			printDebugPostExecute(response);
+			if (isFlag(FLAG_PRINT_DEBUG)) {
+				printDebug(response);
+			}
 
 			if (Utils.isSuccess(response.getStatusCode())) {
 				
@@ -773,37 +773,21 @@ public class Api implements Serializable {
 	}
 
 	/**
-	 * Prints any relevant information about the Api object about to be executed
-	 */
-	private void printDebugPreExecute() {
-
-		if (isFlag(FLAG_PRINT_DEBUG) ) {
-			debug.append("# Request: ").append(mRequestType.toString()).append(" ").append(mPath).append("\n");
-			debug.append("Query: ").append(URLEncodedUtils.format(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8)).append("\n");
-			debug.append("Headers: ").append(mHeaders.toString()).append("\n");
-		}
-		
-	}
-	
-	/**
 	 * Prints any relevant information about the Api object, that has just been executed
 	 * @param dataWrapper with information
 	 */
-	private void printDebugPostExecute(EtaResponse dataWrapper) {
-
-	    if (isFlag(FLAG_PRINT_DEBUG) ) {
-	    	debug.append("Status: ").append(dataWrapper.getStatusCode()).append("\n");
-	    	debug.append("Headers: ");
-			for (Header h : dataWrapper.getHeaders())
-				debug.append(h.getName()).append(": ").append(h.getValue()).append(", ");
-			debug.append("\n");
-			String data = dataWrapper.getString();
-//			data = data.length() > 200 ? data.substring(0,200) : data;
-	    	debug.append("Data: ").append(data);
-			
-	    	EtaLog.d(TAG, debug.toString());
-	    }
-	    
+	private void printDebug(EtaResponse dataWrapper) {
+    	debug.append("#Request: ").append(mRequestType.toString()).append(" ").append(mPath).append("?").append(URLEncodedUtils.format(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8)).append("\n");
+		debug.append("Headers: ").append(mHeaders.toString()).append("\n");
+    	
+    	debug.append("Status: ").append(dataWrapper.getStatusCode()).append("\n");
+    	debug.append("Return Headers: ");
+		for (Header h : dataWrapper.getHeaders())
+			debug.append(h.getName()).append(": ").append(h.getValue()).append(", ");
+		debug.append("\n");
+		String data = dataWrapper.getString();
+    	debug.append("Data: ").append(data);
+    	EtaLog.d(TAG, debug.toString());
 	}
 	
 	/**

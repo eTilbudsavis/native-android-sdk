@@ -69,7 +69,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
 		
 		try {
-
+			
 			String prevId = FIRST_ITEM;
 
 			// Order from server is newest to oldest, so we'll have to reverse the list
