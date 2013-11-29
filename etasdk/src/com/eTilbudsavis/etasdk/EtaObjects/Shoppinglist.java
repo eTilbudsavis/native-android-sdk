@@ -77,21 +77,10 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
 		
 		try {
-			
-			String prevId = FIRST_ITEM;
-			
-			// Order from server is newest to oldest, so we'll have to reverse the list
-			// And check if the previous_id is set, while doing it
-			for (int i = shoppinglists.length()-1 ; i >= 0 ; i-- ) {
-				
+			for (int i = 0 ; i < shoppinglists.length() ; i++ ) {
 				Shoppinglist s = Shoppinglist.fromJSON(shoppinglists.getJSONObject(i));
-				if (s.getPreviousId() == null) {
-					s.setPreviousId(prevId);
-				}
-				prevId = s.getId();
 				list.add(s);
 			}
-
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

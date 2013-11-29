@@ -35,14 +35,16 @@ import com.eTilbudsavis.etasdk.Network.EtaCache;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Sort;
-import com.eTilbudsavis.etasdk.Utils.Utils;
 
 // Main object for interacting with the SDK.
 public class Eta implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	public static final String TAG = "ETA";
-	public static boolean DEBUG = false;
+	
+	public static boolean DEBUG_LOGD = false;
+	public static boolean DEBUG_PAGEFLIP = false;
+	
 	private List<Pageflip> mPageflips = new ArrayList<Pageflip>();
 	
 	private static Eta mEta;
@@ -244,7 +246,7 @@ public class Eta implements Serializable {
 	 * @return this object
 	 */
 	public Eta debug(boolean useDebug) {
-		DEBUG = useDebug;
+		DEBUG_LOGD = useDebug;
 		return this;
 	}
 
@@ -253,7 +255,7 @@ public class Eta implements Serializable {
 	 * @return true if eta is in debug
 	 */
 	public boolean isDebug() {
-		return DEBUG;
+		return DEBUG_LOGD;
 	}
 	
 	/**

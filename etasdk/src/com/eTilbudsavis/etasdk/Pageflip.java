@@ -31,6 +31,7 @@ import android.webkit.WebViewClient;
 import com.eTilbudsavis.etasdk.Api.StringListener;
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
+import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -39,8 +40,6 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 public final class Pageflip extends WebView {
 
 	private static final String TAG = "Pageflip";
-	
-	public static final boolean DEBUG = false;
 	
 	/** String identifying etaProxy events */
 	private static final String ETA_PROXY = "eta-proxy";
@@ -286,16 +285,15 @@ public final class Pageflip extends WebView {
 		
 		setWebViewClient(wvc);
 		
-		if (Eta.DEBUG) setWebChromeClient(wcc);
+		if (Eta.DEBUG_PAGEFLIP) setWebChromeClient(wcc);
 		
 		// Check if it's necessary to update the HTML (it's time consuming to download HTML).
 		String cache = mEta.getCache().getHtml(mUuid);
 		String url = Endpoint.getPageflipProxy(mUuid);
 		
-		if (DEBUG) {
+		if (Eta.DEBUG_PAGEFLIP) {
 			cache = null;
-			url = String.format("http://10.0.1.3:3000/proxy/%s/", mUuid);
-//			url = String.format("https://staging.etilbudsavis.dk/proxy/%s/", mUuid);
+			url = Request.Endpoint.pageflipProxy(mUuid);
 		}
 		
 		if (cache == null ) {

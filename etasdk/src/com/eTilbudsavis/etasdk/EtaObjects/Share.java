@@ -45,6 +45,7 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 		mAccess = access;
 		mAcceptUrl = acceptUrl;
 		mState = State.TO_SYNC;
+		mName = email;
 	}
 	
 	private Share() { }

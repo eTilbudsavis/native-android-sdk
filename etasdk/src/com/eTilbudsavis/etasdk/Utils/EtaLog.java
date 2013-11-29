@@ -13,17 +13,22 @@ public class EtaLog {
 	public static final String TAG = "EtaLog";
 	
 	public static void d(String tag, String message) {
-		if (!Eta.DEBUG) return;
+		if (!Eta.DEBUG_LOGD) return;
 		Log.d(tag, message);
 	}
 
 	public static void d(String tag, Exception e) {
-		if (!Eta.DEBUG) return;
+		if (!Eta.DEBUG_LOGD) return;
 		e.printStackTrace(); 
 	}
 
+	public static void d(String tag, Throwable t) {
+		if (!Eta.DEBUG_LOGD) return;
+		t.printStackTrace(); 
+	}
+
 	public static void dAll(String tag, String message) {
-		if (!Eta.DEBUG) return;
+		if (!Eta.DEBUG_LOGD) return;
 		
 		if (message.length() > 4000) {
 		    int chunkCount = message.length() / 4000;     // integer division
@@ -42,7 +47,7 @@ public class EtaLog {
 	}
 
 	public static void printStackTrace() {
-		if (!Eta.DEBUG) return;
+		if (!Eta.DEBUG_LOGD) return;
 			for (StackTraceElement ste : Thread.currentThread().getStackTrace())
 				System.out.println(ste);
 	}

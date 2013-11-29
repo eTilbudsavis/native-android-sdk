@@ -69,22 +69,10 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
 		
 		try {
-			
-			String prevId = FIRST_ITEM;
-
-			// Order from server is newest to oldest, so we'll have to reverse the list
-			// And check if the previous_id is set, while doing it
-			for (int i = shoppinglistItems.length()-1 ; i >= 0 ; i-- ) {
-				
+			for (int i = 0 ; i < shoppinglistItems.length() ; i++ ) {
 				ShoppinglistItem s = ShoppinglistItem.fromJSON((JSONObject)shoppinglistItems.get(i));
-				if (s.getPreviousId() == null) {
-					s.setPreviousId(prevId);
-				}
-				prevId = s.getId();
 				list.add(s);
-				
 			}
-
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -259,8 +247,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	}
 
 	public int compareTo(ShoppinglistItem another) {
-
-		return 0;
+		return getTitle().compareToIgnoreCase(another.getTitle());
 	}
 
 	@Override

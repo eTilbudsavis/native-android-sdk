@@ -316,21 +316,21 @@ public class Session implements Serializable {
 	 * A new {@link #login(String, String) login} is needed to get access to user stuff again.
 	 */
 	public synchronized void signout(final JsonObjectListener listener) {
-		
 		mIsUpdating = true;
-		int userId = mUser.getId();
+		final User u = mUser;
 		clearUser();
-		mEta.getListManager().clear(userId);
+		mEta.getListManager().clear(u.getId());
 		Bundle b = new Bundle();
 		b.putString(Params.EMAIL, "");
 		JsonObjectListener session = new JsonObjectListener() {
 			
 			public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 				sessionUpdate(statusCode, data, error);
+				mEta.getListManager().clear(u.getId());
 				if (listener != null) listener.onComplete(isCache, statusCode, data, error);
 			}
 		};
-
+		
 		mEta.getApi().put(ENDPOINT, session, b).execute();
 	}
 	
@@ -350,7 +350,9 @@ public class Session implements Serializable {
 		mExpires = null;
 		mPermission = null;
 		mProvider = null;
-		mSubscribers = new ArrayList<Session.SessionListener>();
+		synchronized (mSubscribers) {
+			mSubscribers = new ArrayList<Session.SessionListener>();
+		}
 		mEta.getSettings().setSessionJson(null);
 		clearUser();
 		JsonObjectListener session = new JsonObjectListener() {
@@ -413,26 +415,30 @@ public class Session implements Serializable {
 	}
 
 	public Session subscribe(SessionListener listener) {
-		if (!mSubscribers.contains(listener)) {
-			mSubscribers.add(listener);
+		synchronized (mSubscribers) {
+			if (!mSubscribers.contains(listener)) {
+				mSubscribers.add(listener);
+			}
 		}
 		return this;
 	}
 	
 	public void unSubscribe(SessionListener listener) {
-		mSubscribers.remove(listener);
+		synchronized (mSubscribers) {
+			mSubscribers.remove(listener);
+		}
 	}
 	
 	public Session notifySubscribers() {
-		for (SessionListener sl : mSubscribers) {
-			try {
-				sl.onUpdate();
-			} catch (Exception e) {
-				EtaLog.d(TAG, e);
+		synchronized (mSubscribers) {
+			for (SessionListener sl : mSubscribers) {
+				try {
+					sl.onUpdate();
+				} catch (Exception e) {
+					EtaLog.d(TAG, e);
+				}
 			}
 		}
-			
-
 		return this;
 	}
 

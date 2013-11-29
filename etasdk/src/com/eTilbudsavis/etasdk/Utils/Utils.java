@@ -10,7 +10,10 @@ import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -22,6 +25,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 
 import android.os.Bundle;
 
@@ -229,5 +234,62 @@ public final class Utils {
 	public static String formatDate(Date date) {
 		return new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(date);
 	}
+	
+
+	public static void sortItems(List<ShoppinglistItem> items) {
+		int size = items.size();
+		
+		HashSet<String> allId = new HashSet<String>(size);
+		for (ShoppinglistItem sli : items) {
+			allId.add(sli.getId());
+		}
+		
+		List<ShoppinglistItem> first = new ArrayList<ShoppinglistItem>(size);
+		List<ShoppinglistItem> nil = new ArrayList<ShoppinglistItem>(size);
+		List<ShoppinglistItem> orphan = new ArrayList<ShoppinglistItem>(size);
+		HashMap<String, ShoppinglistItem> prevItems = new HashMap<String, ShoppinglistItem>(size);
+		
+		for (ShoppinglistItem sli : items) {
+			
+			String prev = sli.getPreviousId();
+			
+			if (prev == null) {
+				nil.add(sli);
+			} else if (prev.equals(ShoppinglistItem.FIRST_ITEM)) {
+				first.add(sli);
+			} else if ( !prevItems.containsKey(prev) && allId.contains(prev) ) {
+				prevItems.put(prev, sli);
+			} else {
+				orphan.add(sli);
+			}
+			
+		}
+		
+		// Clear the original items list, items in this list is to be restored shortly
+		items.clear();
+		
+		Collections.sort(first, ShoppinglistItem.TitleComparator);
+		Collections.sort(nil, ShoppinglistItem.TitleComparator);
+		Collections.sort(orphan, ShoppinglistItem.TitleComparator);
+		
+		List<ShoppinglistItem> newItems = new ArrayList<ShoppinglistItem>(size);
+		newItems.addAll(nil);
+		newItems.addAll(first);
+		newItems.addAll(orphan);
+		
+		ShoppinglistItem next;
+		String id;
+		for (ShoppinglistItem sli : newItems) {
+			next = sli;
+			while (next != null) {
+				id = next.getId();
+				items.add(next);
+				next = prevItems.get(id);
+				prevItems.remove(id);
+			}
+		}
+		
+	}
+	
 	
 }

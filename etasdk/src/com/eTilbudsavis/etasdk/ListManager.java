@@ -18,6 +18,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ListManager {
 
@@ -337,7 +338,9 @@ public class ListManager {
 	 * @return A list of shoppinglistitem.
 	 */
 	public List<ShoppinglistItem> getItems(Shoppinglist sl) {
-		return DbHelper.getInstance().getItems(sl, user());
+		List<ShoppinglistItem> items = DbHelper.getInstance().getItems(sl, user());
+		Utils.sortItems(items);
+		return items;
 	}
 	
 	/**
@@ -638,7 +641,6 @@ public class ListManager {
 	 */
 	public void clear() {
 		DbHelper.getInstance().clear();
-		mSyncManager.forceSync();
 	}
 
 	/**
@@ -646,7 +648,6 @@ public class ListManager {
 	 */
 	public void clear(int userId) {
 		DbHelper.getInstance().clear(userId);
-		mSyncManager.forceSync();
 	}
 
 	public void onResume() {

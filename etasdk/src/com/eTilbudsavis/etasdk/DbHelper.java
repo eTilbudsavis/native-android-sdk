@@ -148,12 +148,20 @@ public class DbHelper extends SQLiteOpenHelper {
 		execQueryWithChangesCount("DELETE FROM " + ITEM_TABLE);
 		execQueryWithChangesCount("DELETE FROM " + SHARE_TABLE);
 	}
-	
+
 	public synchronized void clear(int userId) {
-		String query = String.format("DELETE FROM %s WHERE %s=%s", LIST_TABLE, USER, userId);
-		execQuery(query);
-		query = String.format("DELETE FROM %s WHERE %s=%s", ITEM_TABLE, USER, userId);
-		execQuery(query);
+		String lists = String.format("DELETE FROM %s WHERE %s=%s", LIST_TABLE, USER, userId);
+		int clearedLists = execQueryWithChangesCount(lists);
+		EtaLog.d(TAG, lists + " " + clearedLists);
+		
+		String items = String.format("DELETE FROM %s WHERE %s=%s", ITEM_TABLE, USER, userId);
+		int clearedItems = execQueryWithChangesCount(items);
+		EtaLog.d(TAG, items + " " + clearedItems);
+		
+		String shares = String.format("DELETE FROM %s WHERE %s=%s", SHARE_TABLE, USER, userId);
+		int clearedShares = execQueryWithChangesCount(shares);
+		EtaLog.d(TAG, shares + " " + clearedShares);
+		
 	}
 
 	public static Shoppinglist cursorToSl(Cursor c) {
@@ -419,50 +427,6 @@ public class DbHelper extends SQLiteOpenHelper {
 		return lists;
 	}
 
-	/** 
-	 * Sorts an List of ShoppinglistItems according to their previous_id
-	 * @param items items to sort
-	 */
-	public static void sortListssByPrev(List<Shoppinglist> lists) {
-		
-		if (lists == null)
-			return;
-		
-		List<Shoppinglist> ul = new ArrayList<Shoppinglist>(lists.size());
-		StringBuilder sb = new StringBuilder();
-		sb.append("\n").append("*** What to sort ***").append("\n");
-		for (Shoppinglist sl : lists) {
-			ul.add(sl);
-			sb.append(sl.getName()).append(", ").append(sl.getPreviousId()).append(" - ").append(sl.getId()).append("\n");
-		}
-		lists.clear();
-		
-		sb.append("*** Sorting ***").append("\n");
-		
-		String prevId = ShoppinglistItem.FIRST_ITEM;
-		for (Shoppinglist s : ul) {
-			
-			for (Shoppinglist sl : ul) {
-				
-				if (sl.getPreviousId().equals(prevId)) {
-					sb.append(sl.getName()).append(", ").append(sl.getPreviousId()).append(" - ").append(sl.getId()).append("\n");
-					lists.add(sl);
-					prevId = sl.getId();
-					continue;
-				}
-				
-			}
-			
-		}
-		sb.append("\n");
-		
-//		if (ul.size() != lists.size()) {
-//			EtaLog.d(TAG, "##### SIZES OF UNSORTED AND SORTED LISTS DOESN'T MATCH");
-//			EtaLog.d(TAG, sb.toString());
-//		}
-		
-	}
-
 	/**
 	 * Delete a list, from the db
 	 * @param shoppinglistId to delete
@@ -590,54 +554,9 @@ public class DbHelper extends SQLiteOpenHelper {
 			} while (c.moveToNext());
 		}
 		close(c);
-		sortItemsByPrev(items);
 		return items;
 	}
 
-	/** 
-	 * Sorts an List of ShoppinglistItems according to their previous_id
-	 * @param items items to sort
-	 */
-	public static void sortItemsByPrev(List<ShoppinglistItem> items) {
-		
-		if (items == null)
-			return;
-		
-		List<ShoppinglistItem> ul = new ArrayList<ShoppinglistItem>(items.size());
-		StringBuilder sb = new StringBuilder();
-		sb.append("\n").append("*** What to sort ***").append("\n");
-		for (ShoppinglistItem sli : items) {
-			ul.add(sli);
-			sb.append(sli.getTitle()).append(", ").append(sli.getPreviousId()).append(" - ").append(sli.getId()).append("\n");
-		}
-		items.clear();
-		
-		sb.append("*** Sorting ***").append("\n");
-		
-		String prevId = ShoppinglistItem.FIRST_ITEM;
-		for (ShoppinglistItem s : ul) {
-			
-			for (ShoppinglistItem sli : ul) {
-				
-				if (sli.getPreviousId().equals(prevId)) {
-					sb.append(sli.getTitle()).append(", ").append(sli.getPreviousId()).append(" - ").append(sli.getId()).append("\n");
-					items.add(sli);
-					prevId = sli.getId();
-					continue;
-				}
-				
-			}
-			
-		}
-		sb.append("\n");
-		
-//		if (ul.size() != items.size()) {
-//			EtaLog.d(TAG, "##### SIZES OF UNSORTED AND SORTED LISTS DOESN'T MATCH");
-//			EtaLog.d(TAG, sb.toString());
-//		}
-		
-	}
-	
 	public ShoppinglistItem getFirstItem(String shoppinglistId, User user) {
 		return getItemPrevious(shoppinglistId, ShoppinglistItem.FIRST_ITEM, user);
 	}

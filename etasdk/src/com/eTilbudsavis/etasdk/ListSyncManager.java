@@ -1,6 +1,7 @@
 package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -181,6 +182,16 @@ public class ListSyncManager {
 			public void onComplete(boolean isCache, int statusCode, List<Shoppinglist> serverList, EtaError error) {
 				
 				if (Utils.isSuccess(statusCode)) {
+					
+					// Server usually returns items in the order oldest to newest (not guaranteed)
+					// We want them to be reversed
+					Collections.reverse(serverList);
+					
+					for (Shoppinglist sl : serverList) {
+						if (sl.getPreviousId() == null)
+						sl.setPreviousId(Shoppinglist.FIRST_ITEM);
+					}
+					
 					DbHelper db = DbHelper.getInstance();
 					List<Shoppinglist> localList = db.getLists(user);
 					mergeShoppinglists(serverList, localList, user);
@@ -228,10 +239,6 @@ public class ListSyncManager {
 					
 					Shoppinglist serverSl = serverset.get(key);
 					Shoppinglist localSl = localset.get(key);
-					
-					if (serverSl.getName().contains("brandbil")) {
-						EtaLog.d(TAG, serverSl.toString(true));
-					}
 					
 					if (localSl.getModified().before(serverSl.getModified())) {
 						serverSl.setState(Shoppinglist.State.SYNCED);
@@ -357,11 +364,34 @@ public class ListSyncManager {
 			public void onComplete(final boolean isCache, final int statusCode, final JSONArray data, final EtaError error) {
 				
 				if (Utils.isSuccess(statusCode)) {
+					
 					sl.setState(Shoppinglist.State.SYNCED);
 					db.editList(sl, user);
-					List<ShoppinglistItem> items = db.getItems(sl, user);
-					mergeShoppinglistItems( ShoppinglistItem.fromJSON(data), items, user );
+					
+					List<ShoppinglistItem> localItems = db.getItems(sl, user);
+					List<ShoppinglistItem> serverItems = ShoppinglistItem.fromJSON(data);
+					
+					// So far, we get items in reverse order, well just keep reversing it for now.
+					Collections.reverse(serverItems);
+					
+					// Sort items according to our definition of correct ordering
+					Utils.sortItems(localItems);
+					Utils.sortItems(serverItems);
+					
+					// Update previous_id's (and modified) if needed
+					String id = ShoppinglistItem.FIRST_ITEM;
+					for (ShoppinglistItem sli : serverItems) {
+						if (!id.equals(sli.getPreviousId())) {
+							sli.setPreviousId(id);
+							sli.setModified(new Date());
+						}
+						id = sli.getId();
+					}
+					
+					diffItems(serverItems, localItems, user);
+					
 					pushNotifications();
+					
 				} else {
 					popRequest();
 					revertList(sl, user);
@@ -371,14 +401,13 @@ public class ListSyncManager {
 		};
 		
 		addRequest(api().get(Endpoint.getItemByListId(mEta.getUser().getId(), sl.getId()), itemListener).execute());
-				
 	}
-
-	private void mergeShoppinglistItems(List<ShoppinglistItem> newList, List<ShoppinglistItem> oldList, User user) {
+	
+	private void diffItems(List<ShoppinglistItem> newList, List<ShoppinglistItem> oldList, User user) {
 		
 		if (newList.isEmpty() && oldList.isEmpty())
 			return;
-
+		
 		DbHelper db = DbHelper.getInstance();
 		
 		HashMap<String, ShoppinglistItem> localSet = new HashMap<String, ShoppinglistItem>();
@@ -408,7 +437,7 @@ public class ListSyncManager {
 				ShoppinglistItem localSli = localSet.get(key);
 				
 				if (serverSet.containsKey(key)) {
-
+					
 					ShoppinglistItem serverSli = serverSet.get(key);
 					
 					if (localSli.getModified().before(serverSli.getModified())) {
