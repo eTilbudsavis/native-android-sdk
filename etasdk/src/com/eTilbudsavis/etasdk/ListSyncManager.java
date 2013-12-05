@@ -20,13 +20,13 @@ import android.os.Process;
 import com.eTilbudsavis.etasdk.Api.JsonArrayListener;
 import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
 import com.eTilbudsavis.etasdk.Api.ListListener;
-import com.eTilbudsavis.etasdk.Session.SessionListener;
+import com.eTilbudsavis.etasdk.SessionManager.OnSessionChangeListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -36,14 +36,10 @@ public class ListSyncManager {
 
 	private static final String THREAD_NAME = "ShoppinglistSyncManager";
 	
-	private int mSyncSpeed = 6000;
+	private int mSyncSpeed = 3000;
 	
 	/** Simple counter keeping track of sync loop */
 	private int mSyncCount = 0;
-	
-	/** Counter for checking if notifications should be pushed.
-	 * It's basically a count of how many shopping lists are missing their item sync. */
-//	private Integer mSyncWorkCount = 0;
 	
 	private Stack<Api> mCurrentRequests = new Stack<Api>();
 	
@@ -54,13 +50,13 @@ public class ListSyncManager {
 	private Handler mHandler;
 
 	/** Listening for session changes, starting and stopping sync as needed */
-	private SessionListener sessionListener = new SessionListener() {
+	private OnSessionChangeListener sessionListener = new OnSessionChangeListener() {
 
 		public void onUpdate() {
 			runSyncLoop(mEta.getUser().isLoggedIn());
 		}
 	};
-
+	
 	/** The actual sync loop running every x seconds*/
 	private Runnable mSyncLoop = new Runnable() {
 		
@@ -76,6 +72,7 @@ public class ListSyncManager {
 			// Only do an update, if there are no pending transactions, and we are online
 			if (!mCurrentRequests.isEmpty() || !mEta.isOnline()) 
 				return;
+			
 			
 			// If there are local changes to a list, then syncLocalListChanges will handle it: return
 			List<Shoppinglist> lists = DbHelper.getInstance().getLists(mEta.getUser(), true);
@@ -95,8 +92,10 @@ public class ListSyncManager {
 			// Now finally we can query the server for any remote changes
 			
             if (mSyncCount%3 == 0) {
+//    			EtaLog.d(TAG, "syncLists");
                 syncLists(user);
             } else {
+//    			EtaLog.d(TAG, "syncListsModified");
                 syncListsModified(user);
             }
             mSyncCount++;
@@ -134,13 +133,13 @@ public class ListSyncManager {
 	}
 
 	public void onResume() {
-		mEta.getSession().subscribe(sessionListener);
+		mEta.getSessionManager().subscribe(sessionListener);
 		runSyncLoop(true);
 	}
 	
 	public void onPause() {
 		runSyncLoop(false);
-		mEta.getSession().unSubscribe(sessionListener);
+		mEta.getSessionManager().unSubscribe(sessionListener);
 	}
 	
 	/**
@@ -174,8 +173,6 @@ public class ListSyncManager {
 	 * startSync() is called if Eta.onResume() is called.
 	 */
 	public void syncLists(final User user) {
-
-		EtaLog.d(TAG, "syncLists");
 		
 		ListListener<Shoppinglist> listListener = new ListListener<Shoppinglist>() {
 			
@@ -201,7 +198,7 @@ public class ListSyncManager {
 				}
 			}
 		};
-		addRequest(api().get(Endpoint.getListsByUserId(mEta.getUser().getId()), listListener).execute());
+		addRequest(api().get(Request.Endpoint.lists(mEta.getUser().getId()), listListener).execute());
 		
 	}
 
@@ -340,7 +337,7 @@ public class ListSyncManager {
 				}
 			};
 			
-			addRequest(api().get(Endpoint.getListModifiedById(mEta.getUser().getId(), sl.getId()), cb).execute());
+			addRequest(api().get(Request.Endpoint.listModified(mEta.getUser().getId(), sl.getId()), cb).execute());
 			
 		}
 				
@@ -400,7 +397,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		addRequest(api().get(Endpoint.getItemByListId(mEta.getUser().getId(), sl.getId()), itemListener).execute());
+		addRequest(api().get(Request.Endpoint.items(mEta.getUser().getId(), sl.getId()), itemListener).execute());
 	}
 	
 	private void diffItems(List<ShoppinglistItem> newList, List<ShoppinglistItem> oldList, User user) {
@@ -565,12 +562,16 @@ public class ListSyncManager {
 					syncLocalItemChanges(sl, user);
 				} else {
 					popRequest();
-					revertList(sl, user);
+					if (statusCode == -1) {
+						
+					} else {
+						revertList(sl, user);
+					}
 				}
 
 			}
 		};
-		String url = Endpoint.getListById(mEta.getUser().getId(), sl.getId());
+		String url = Request.Endpoint.list(user.getId(), sl.getId());
 		addRequest(api().put(url, editList, sl.getApiParams()).execute());
 		
 	}
@@ -578,7 +579,9 @@ public class ListSyncManager {
 	private void delList(final Shoppinglist sl, final User user) {
 
 		final DbHelper db = DbHelper.getInstance();
-
+		
+		EtaLog.d(TAG, "Delete: " + sl.getName());
+		
 		JsonObjectListener cb = new JsonObjectListener() {
 
 			public void onComplete(final boolean isCache, final int statusCode, final JSONObject data, final EtaError error) {
@@ -590,13 +593,19 @@ public class ListSyncManager {
 					popRequest();
 				} else {
 					popRequest();
-					revertList(sl, user);
+					if (error.getCode() != 1501) {
+						db.deleteList(sl, user);
+					} else if (statusCode == -1) {
+						// nothing, trying again later
+					} else {
+						revertList(sl, user);
+					}
 				}
 
 			}
 		};
-		String url = Endpoint.getListById(mEta.getUser().getId(), sl.getId());
-		addRequest(api().delete(url, cb, sl.getApiParams()).execute());
+		String url = Request.Endpoint.list(user.getId(), sl.getId());
+		addRequest(api().delete(url, cb, sl.getApiParams()).setFlag(Api.FLAG_PRINT_DEBUG).execute());
 
 	}
 
@@ -628,7 +637,7 @@ public class ListSyncManager {
 				pushNotifications();
 			}
 		};
-		String url = Endpoint.getListById(mEta.getUser().getId(), sl.getId());
+		String url = Request.Endpoint.list(user.getId(), sl.getId());
 		addRequest(api().get(url, listListener).execute());
 		
 	}
@@ -659,12 +668,14 @@ public class ListSyncManager {
 					popRequest();
 				} else {
 					popRequest();
-					revertItem(s, user);
+					if (statusCode != -1) {
+						revertItem(s, user);
+					}
 				}
 
 			}
 		};
-		String url = Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId());
+		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
 		addRequest(api().put(url, cb, sli.getApiParams()).execute());
 
 	}
@@ -682,12 +693,20 @@ public class ListSyncManager {
 					popRequest();
 				} else {
 					popRequest();
-					revertItem(sli, user);
+					
+					if(error.getCode() == 1501) {
+						db.deleteItem(sli, user);
+					} else if (statusCode == -1) {
+						// Nothing
+					} else {
+						revertItem(sli, user);
+					}
+					
 				}
 
 			}
 		};
-		String url = Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId());
+		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
 		addRequest(api().delete(url, cb, sli.getApiParams()).execute());
 	}
 	
@@ -719,7 +738,7 @@ public class ListSyncManager {
 			}
 		};
 
-		String url = Endpoint.getItemById(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId());
+		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
 		addRequest(api().get(url, itemListener).execute());
 		
 	}
@@ -785,7 +804,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		String url = Endpoint.getShareByEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
+		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
 		addRequest(api().put(url, shareListener, s.getApiParams()).setFlag(Api.FLAG_PRINT_DEBUG).execute());
 		
 	}
@@ -813,12 +832,18 @@ public class ListSyncManager {
 					popRequest();
 				} else {
 					popRequest();
-					revertShare(s, user);
+					if (statusCode == -1) {
+						// Nothing
+					} else if (error.getCode() == 1501) {
+						db.deleteShare(s, user);
+					} else {
+						revertShare(s, user);
+					}
 				}
 				
 			}
 		};
-		String url = Endpoint.getShareByEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
+		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
 		addRequest(api().delete(url, shareListener, new Bundle()).setFlag(Api.FLAG_PRINT_DEBUG).execute());
 	}
 	
@@ -844,11 +869,11 @@ public class ListSyncManager {
 				} else {
 					db.deleteShare(s, user);
 				}
-				
+				popRequest();
 			}
 		};
-
-		String url = Endpoint.getShareByEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
+		
+		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
 		addRequest(api().get(url, shareListener).execute());
 		
 	}

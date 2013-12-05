@@ -1,5 +1,13 @@
 package com.eTilbudsavis.etasdk.Utils;
 
+import com.eTilbudsavis.etasdk.Network.Request;
+
+/**
+ * Params are being depricated, for new/updated values, goto {@link Request.Param Request.Param}
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ */
+@Deprecated
 public final class Params {
 	
 

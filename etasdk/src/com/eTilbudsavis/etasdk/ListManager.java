@@ -291,6 +291,8 @@ public class ListManager {
 		
 		int count = 0;
 		if (mEta.getUser().isLoggedIn()) {
+
+			EtaLog.d(TAG, "logged in");
 			
 			// Update local version of shoppinglist
 			sl.setState(Shoppinglist.State.DELETE);
@@ -303,10 +305,16 @@ public class ListManager {
 			}
 			
 		} else {
+			
+			EtaLog.d(TAG, "not logged in");
 			count = db.deleteList(sl, user);
 			db.deleteShares(sl, user);
 			db.deleteItems(sl.getId(), null, user);
+			
 		}
+		
+		EtaLog.d(TAG, count + " " + sl.toJSON().toString());
+		
 		boolean success = count == 1;
 		if (success) notifyListSubscribers(false, null, idToList(sl), null);
 		return success;
@@ -649,7 +657,7 @@ public class ListManager {
 	public void clear(int userId) {
 		DbHelper.getInstance().clear(userId);
 	}
-
+	
 	public void onResume() {
 		mSyncManager.onResume();
 	}

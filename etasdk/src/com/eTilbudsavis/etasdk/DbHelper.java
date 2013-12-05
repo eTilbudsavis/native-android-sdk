@@ -125,9 +125,9 @@ public class DbHelper extends SQLiteOpenHelper {
 				+ newVersion + ", which will destroy all old data");
 		
 		synchronized (LOCK) {
-			db.execSQL("DROP TABLE " + LIST_TABLE);
-			db.execSQL("DROP TABLE " + ITEM_TABLE);
-			db.execSQL("DROP TABLE " + SHARE_TABLE);
+			db.execSQL("DROP TABLE IF EXISTS " + LIST_TABLE);
+			db.execSQL("DROP TABLE IF EXISTS " + ITEM_TABLE);
+			db.execSQL("DROP TABLE IF EXISTS " + SHARE_TABLE);
 		}
 		
 		onCreate(db);
@@ -151,16 +151,13 @@ public class DbHelper extends SQLiteOpenHelper {
 
 	public synchronized void clear(int userId) {
 		String lists = String.format("DELETE FROM %s WHERE %s=%s", LIST_TABLE, USER, userId);
-		int clearedLists = execQueryWithChangesCount(lists);
-		EtaLog.d(TAG, lists + " " + clearedLists);
+		execQueryWithChangesCount(lists);
 		
 		String items = String.format("DELETE FROM %s WHERE %s=%s", ITEM_TABLE, USER, userId);
-		int clearedItems = execQueryWithChangesCount(items);
-		EtaLog.d(TAG, items + " " + clearedItems);
+		execQueryWithChangesCount(items);
 		
 		String shares = String.format("DELETE FROM %s WHERE %s=%s", SHARE_TABLE, USER, userId);
-		int clearedShares = execQueryWithChangesCount(shares);
-		EtaLog.d(TAG, shares + " " + clearedShares);
+		execQueryWithChangesCount(shares);
 		
 	}
 

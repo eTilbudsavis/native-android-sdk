@@ -1,5 +1,7 @@
 package com.eTilbudsavis.etasdk.Utils;
 
+import com.eTilbudsavis.etasdk.Network.Request;
+
 /**
  * {@link com.eTilbudsavis.etasdk.Util.Sort Sort} holds all variables describing sorting methods that the server allows.<br><br>
  * 
@@ -17,11 +19,15 @@ package com.eTilbudsavis.etasdk.Utils;
  * 
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
+ * Params are being depricated, for new/updated values, goto {@link Request.Param Request.Param}
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
  */
+@Deprecated
 public final class Sort {
 
 	/** String identifying the order by parameter for all list calls to the API */
-	public static final String ORDER_BY = Params.ORDER_BY;
+	public static final String ORDER_BY = Request.Param.ORDER_BY;
 
 	/** String identifying the descending variable */
 	public static final String DESC = "-";

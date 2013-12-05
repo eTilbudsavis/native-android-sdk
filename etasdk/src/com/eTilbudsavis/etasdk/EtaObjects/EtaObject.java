@@ -218,5 +218,9 @@ public class EtaObject {
 		public static final String TYPE = "type";
 		public static final String META = "meta";
 		public static final String SHARES = "shares";
+		public static final String TOKEN = "token";
+		public static final String EXPIRES = "expires";
+		public static final String PROVIDER = "provider";
+		
 	}
 }

@@ -32,9 +32,8 @@ import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Network.EtaCache;
+import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Sort;
 
 // Main object for interacting with the SDK.
 public class Eta implements Serializable {
@@ -45,7 +44,7 @@ public class Eta implements Serializable {
 	public static boolean DEBUG_LOGD = false;
 	public static boolean DEBUG_PAGEFLIP = false;
 	
-	private List<Pageflip> mPageflips = new ArrayList<Pageflip>();
+	public static boolean USE_FALSE_TOKEN = true;
 	
 	private static Eta mEta;
 	
@@ -53,7 +52,7 @@ public class Eta implements Serializable {
 	private String mApiKey;
 	private String mApiSecret;
 	private Settings mSettings;
-	private Session mSession;
+	private SessionManager mSessionManager;
 	private EtaLocation mLocation;
 	private EtaCache mCache;
 	private ListManager mListManager;
@@ -102,8 +101,7 @@ public class Eta implements Serializable {
 			mLocation = new EtaLocation(Eta.this);
 			mCache = new EtaCache();
 			mListManager = new ListManager(Eta.this);
-			mSession = new Session(Eta.this);
-			mSession.init();
+			mSessionManager = new SessionManager(this);
 		} else {
 			EtaLog.d(TAG, "Eta already set. apiKey, apiSecret and context has been switched");
 		}
@@ -154,8 +152,8 @@ public class Eta implements Serializable {
 	 * Get the currently active session.
 	 * @return a session
 	 */
-	public Session getSession() {
-		return mSession;
+	public SessionManager getSessionManager() {
+		return mSessionManager;
 	}
 
 	/**
@@ -163,7 +161,7 @@ public class Eta implements Serializable {
 	 * @return a user
 	 */
 	public User getUser() {
-		return getSession().getUser();
+		return mSessionManager.getSession().getUser();
 	}
 	
 	/**
@@ -236,7 +234,8 @@ public class Eta implements Serializable {
 	 * @return Returns true if the new values were successfully written to persistent storage.
 	 */
 	public boolean clearPreferences() {
-		mSession = new Session(Eta.this);
+		mSessionManager.invalidate();
+		mListManager.clear();
 		return mSettings.clear();
 	}
 
@@ -288,36 +287,38 @@ public class Eta implements Serializable {
 			mResumed = true;
 			mListManager.onResume();
 			mLocation.restoreState();
+			mSessionManager.onResume();
 			pageflipResume();
 		}
 	}
-
-	// We have overridden the onResume
-	@SuppressLint("NewApi")
+	
 	private void pageflipResume() {
-		for (Pageflip p : mPageflips)
-			p.onResume();
+		for (PageflipWebview p : PageflipWebview.pageflips)
+			p.resume();
 	}
-
-	// We have overridden the onResume
-	@SuppressLint("NewApi")
+	
 	private void pageflipPause() {
-		for (Pageflip p : mPageflips)
-			p.onPause();
+		for (PageflipWebview p : PageflipWebview.pageflips)
+			p.pause();
+	}
+	
+	public void pageflipSessionChange() {
+		for (PageflipWebview p : PageflipWebview.pageflips)
+			p.updateSession();
 	}
 	
 	private Bundle getApiParams(int offset, int limit, String orderBy) {
 		Bundle apiParams = new Bundle();
-		apiParams.putInt(Params.OFFSET, offset);
-		apiParams.putInt(Params.LIMIT, limit);
+		apiParams.putInt(Request.Param.OFFSET, offset);
+		apiParams.putInt(Request.Param.LIMIT, limit);
 		if (orderBy != null) 
-			apiParams.putString(Sort.ORDER_BY, orderBy);
+			apiParams.putString(Request.Sort.ORDER_BY, orderBy);
 		return apiParams;
 	}
 	
 	private Bundle getSearchApiParams(int offset, int limit, String orderBy, String query) {
 		Bundle apiParams = getApiParams(offset, limit, orderBy);
-		apiParams.putString(Params.QUERY, query);
+		apiParams.putString(Request.Param.QUERY, query);
 		return apiParams;
 	}
 

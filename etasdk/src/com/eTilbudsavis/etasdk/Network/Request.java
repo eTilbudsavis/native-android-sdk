@@ -152,6 +152,18 @@ public abstract class Request {
 		
 		public static final String SHOPPING_LIST_ID = "shopping_list_id";
 
+		/** Parameter for a resource token time to live */
+		public static final String TOKEN_TTL = "token_ttl";
+
+		/** Parameter for a v1 session migration */
+		public static final String V1_AUTH_ID = "v1_auth_id";
+	
+		/** Parameter for a v1 session migration */
+		public static final String V1_AUTH_TIME = "v1_auth_time";
+	
+		/** Parameter for a v1 session migration */
+		public static final String V1_AUTH_HASH = "v1_auth_hash";
+		
 	}
 
 	/**
@@ -171,6 +183,9 @@ public abstract class Request {
 
 		/** Header name for content_type */
 		public static final String CONTENT_TYPE = "Content-Type";
+
+		/** Header name for content_type */
+		public static final String RETRY_AFTER = "Retry-After";
 
 	}
 
@@ -240,7 +255,8 @@ public abstract class Request {
 	 */
 	public static class Endpoint {
 		
-
+		
+		
 		// GLOBALS
 		public static final String PRODUCTION = "https://api.etilbudsavis.dk";
 		public static final String EDGE = "https://edge.etilbudsavis.dk";
@@ -271,13 +287,32 @@ public abstract class Request {
 		public static final String USER_RESET = "/v2/users/reset";
 		
 		public static final String CATEGORIES	= "/v2/categories";
+		
+		
+		public static String getHost() {
+			return Eta.DEBUG_LOGD ? EDGE : PRODUCTION;
+		}
 
+		/**
+		 * /v2/offers/{offer_id}/collect
+		 */
+		public static String offerCollect(String offerId) {
+			return String.format("/v2/offers/%s/collect", offerId);
+		}
+
+		/**
+		 * /v2/stores/{offer_id}/collect
+		 */
+		public static String storeCollect(String storeId) {
+			return String.format("/v2/stores/%s/collect", storeId);
+		}
+		
 		/**
 		 * https://etilbudsavis.dk/proxy/{id}/
 		 */
 		public static String pageflipProxy(String id) {
-			String production = "http://etilbudsavis.dk/proxy/%s/";
-			String staging = "http://10.0.1.3:3000/proxy/%s/";
+			String production = "https://etilbudsavis.dk/proxy/%s/";
+			String staging = "http://10.0.1.6:3000/proxy/%s/";
 //			String staging = "https://staging.etilbudsavis.dk/proxy/%s/";
 			return String.format(Eta.DEBUG_PAGEFLIP ? staging : production, id);
 		}
@@ -328,7 +363,7 @@ public abstract class Request {
 		public static String listEmpty(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/empty", userId, listId);
 		}
-
+		
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares
 		 * @param userId

@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Params;
@@ -21,49 +22,49 @@ public class Offer extends EtaErnObject implements Serializable {
 	public static final String TAG = "Offer";
 	
 	/** Sort a list by popularity in ascending order. (smallest to largest) */
-	public static final String SORT_POPULARITY = Sort.POPULARITY;
+	public static final String SORT_POPULARITY = Request.Sort.POPULARITY;
 
 	/** Sort a list by popularity in descending order. (largest to smallest)*/
-	public static final String SORT_POPULARITY_DESC = Sort.POPULARITY_DESC;
+	public static final String SORT_POPULARITY_DESC = Request.Sort.POPULARITY_DESC;
 
 	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = Sort.DISTANCE;
+	public static final String SORT_DISTANCE = Request.Sort.DISTANCE;
 
 	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = Sort.DISTANCE_DESC;
+	public static final String SORT_DISTANCE_DESC = Request.Sort.DISTANCE_DESC;
 
 	/** Sort a list by page (in catalog) in ascending order. (smallest to largest) */
-	public static final String SORT_PAGE = Sort.PAGE;
+	public static final String SORT_PAGE = Request.Sort.PAGE;
 
 	/** Sort a list by page (in catalog) in descending order. (largest to smallest)*/
-	public static final String SORT_PAGE_DESC = Sort.PAGE_DESC;
+	public static final String SORT_PAGE_DESC = Request.Sort.PAGE_DESC;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Sort.CREATED;
+	public static final String SORT_CREATED = Request.Sort.CREATED;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
+	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific catalog id's */
-	public static final String FILTER_CATALOG_IDS = Params.FILTER_CATALOG_IDS;
+	public static final String FILTER_CATALOG_IDS = Request.Param.FILTER_CATALOG_IDS;
 
 	/** Parameter for posting a list of store id's to publish the catalog in */
-	public static final String FILTER_STORE_IDS = Params.FILTER_STORE_IDS;
+	public static final String FILTER_STORE_IDS = Request.Param.FILTER_STORE_IDS;
 
 	/** Parameter for posting a list of store id's to publish the catalog in */
-	public static final String FILTER_DEALER_IDS = Params.FILTER_DEALER_IDS;
+	public static final String FILTER_DEALER_IDS = Request.Param.FILTER_DEALER_IDS;
 
 	/** String identifying the query parameter */
-	public static final String PARAM_QUERY = Params.QUERY;
+	public static final String PARAM_QUERY = Request.Param.QUERY;
 	
 	/** Endpoint for offer list resource */
-	public static final String ENDPOINT_LIST = Endpoint.OFFER_LIST;
+	public static final String ENDPOINT_LIST = Request.Endpoint.OFFER_LIST;
 
 	/** Endpoint for a single offer resource */
-	public static final String ENDPOINT_ID = Endpoint.OFFER_ID;
+	public static final String ENDPOINT_ID = Request.Endpoint.OFFER_ID;
 
 	/** Endpoint for searching offers */
-	public static final String ENDPOINT_SEARCH = Endpoint.OFFER_SEARCH;
+	public static final String ENDPOINT_SEARCH = Request.Endpoint.OFFER_SEARCH;
 	
 	// From JSON blob
 	private String mHeading;

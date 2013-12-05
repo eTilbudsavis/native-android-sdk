@@ -17,6 +17,7 @@ import com.eTilbudsavis.etasdk.Pageflip;
 import com.eTilbudsavis.etasdk.Pageflip.PageflipListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 import com.etilbudsavis.sdkdemo.R;
 
@@ -78,7 +79,7 @@ public class CatalogViewer extends Activity {
 		        
 			} else {
 				
-				Utils.logd(TAG, error.toString());
+				EtaLog.d(TAG, error.toString());
 				
 			}
 		}

@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import android.graphics.Color;
 
+import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Params;
@@ -21,31 +22,31 @@ public class Dealer extends EtaErnObject implements Serializable {
 	public static final String TAG = "Dealer";
 
 	/** Sort a list by name in ascending order. (smallest to largest) */
-	public static final String SORT_NAME = Sort.NAME;
+	public static final String SORT_NAME = Request.Sort.NAME;
 
 	/** Sort a list by name in descending order. (largest to smallest)*/
-	public static final String SORT_NAME_DESC = Sort.NAME_DESC;
+	public static final String SORT_NAME_DESC = Request.Sort.NAME_DESC;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Sort.CREATED;
+	public static final String SORT_CREATED = Request.Sort.CREATED;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
+	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific dealer id's */
-	public static final String FILTER_DEALER_IDS = Params.FILTER_DEALER_IDS;
+	public static final String FILTER_DEALER_IDS = Request.Param.FILTER_DEALER_IDS;
 
 	/** String identifying the query parameter */
-	public static final String PARAM_QUERY = Params.QUERY;
+	public static final String PARAM_QUERY = Request.Param.QUERY;
 	
 	/** Endpoint for dealer list resource */
-	public static final String ENDPOINT_LIST = Endpoint.DEALER_LIST;
-
+	public static final String ENDPOINT_LIST = Request.Endpoint.DEALER_LIST;
+	
 	/** Endpoint for a single dealer resource */
-	public static final String ENDPOINT_ID = Endpoint.DEALER_ID;
-
+	public static final String ENDPOINT_ID = Request.Endpoint.DEALER_ID;
+	
 	/** Endpoint for searching dealers */
-	public static final String ENDPOINT_SEARCH = Endpoint.DEALER_SEARCH;
+	public static final String ENDPOINT_SEARCH = Request.Endpoint.DEALER_SEARCH;
 	
 	private String mName;
 	private String mUrlName;

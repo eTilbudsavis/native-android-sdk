@@ -7,10 +7,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Sort;
 
 
 public class Store extends EtaErnObject implements Serializable {
@@ -20,31 +18,31 @@ public class Store extends EtaErnObject implements Serializable {
 	public static final String TAG = "Store";
 	
 	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = Sort.DISTANCE;
+	public static final String SORT_DISTANCE = Request.Sort.DISTANCE;
 
 	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = Sort.DISTANCE_DESC;
+	public static final String SORT_DISTANCE_DESC = Request.Sort.DISTANCE_DESC;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Sort.CREATED;
+	public static final String SORT_CREATED = Request.Sort.CREATED;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
+	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific store id's */
-	public static final String FILTER_STORE_IDS = Params.FILTER_STORE_IDS;
+	public static final String FILTER_STORE_IDS = Request.Param.FILTER_STORE_IDS;
 
 	/** Endpoint for store list resource */
-	public static final String ENDPOINT_LIST = Endpoint.STORE_LIST;
+	public static final String ENDPOINT_LIST = Request.Endpoint.STORE_LIST;
 
 	/** Endpoint for a single store resource */
-	public static final String ENDPOINT_ID = Endpoint.STORE_ID;
+	public static final String ENDPOINT_ID = Request.Endpoint.STORE_ID;
 
 	/** Endpoint for searching stores */
-	public static final String ENDPOINT_SEARCH = Endpoint.STORE_SEARCH;
+	public static final String ENDPOINT_SEARCH = Request.Endpoint.STORE_SEARCH;
 
 	/** Endpoint for fast searching stores */
-	public static final String ENDPOINT_QUICK_SEARCH = Endpoint.STORE_QUICK_SEARCH;
+	public static final String ENDPOINT_QUICK_SEARCH = Request.Endpoint.STORE_QUICK_SEARCH;
 
 	
 	private String mStreet;

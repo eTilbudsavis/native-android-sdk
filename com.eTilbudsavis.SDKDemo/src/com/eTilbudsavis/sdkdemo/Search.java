@@ -19,6 +19,7 @@ import com.eTilbudsavis.etasdk.Api.ListListener;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 import com.etilbudsavis.sdkdemo.R;
 
@@ -74,7 +75,9 @@ public class Search extends Activity {
 							mOffers = list;
 							mResultDisplayer.setAdapter(new SearchAdapter());
 						} else {
-							Utils.logd(TAG, error.toString());
+							
+							EtaLog.d(TAG, error.toString());
+							
 						}
 						
 					}

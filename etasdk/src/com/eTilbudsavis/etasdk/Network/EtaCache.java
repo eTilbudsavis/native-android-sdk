@@ -33,10 +33,10 @@ public class EtaCache implements Serializable {
 	private Map<String, CacheItem> mItems = Collections.synchronizedMap(new HashMap<String, EtaCache.CacheItem>());
 
 	public EtaCache() {
-		types.put("catalogs", Params.FILTER_CATALOG_IDS);
-		types.put("offers", Params.FILTER_OFFER_IDS);
-		types.put("dealers", Params.FILTER_DEALER_IDS);
-		types.put("stores", Params.FILTER_STORE_IDS);
+		types.put("catalogs", Request.Param.FILTER_CATALOG_IDS);
+		types.put("offers", Request.Param.FILTER_OFFER_IDS);
+		types.put("dealers", Request.Param.FILTER_DEALER_IDS);
+		types.put("stores", Request.Param.FILTER_STORE_IDS);
 	}
 
 	public void putHtml(String uuid, String html, int statusCode) {

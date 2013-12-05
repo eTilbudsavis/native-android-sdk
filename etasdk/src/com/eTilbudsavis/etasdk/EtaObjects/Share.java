@@ -173,7 +173,7 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 
 		Bundle b = new Bundle();
 		b.putString(Request.Param.ACCESS, getAccess());
-		b.putString(Params.ACCEPT_URL, getAcceptUrl());
+		b.putString(Request.Param.ACCEPT_URL, getAcceptUrl());
 		
 		return b;
 	}

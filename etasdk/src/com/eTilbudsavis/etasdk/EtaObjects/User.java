@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Params;
@@ -17,34 +18,34 @@ public class User extends EtaObject implements Serializable {
 	public static final String TAG = "User";
 	
 	/** Parameter for a user e-mail */
-	public static final String PARAM_EMAIL = Params.EMAIL;
+	public static final String PARAM_EMAIL = Request.Param.EMAIL;
 	
 	/** Parameter for a user password */
-	public static final String PARAM_PASSWORD = Params.PASSWORD;
+	public static final String PARAM_PASSWORD = Request.Param.PASSWORD;
 	
 	/** Parameter for a user birth year */
-	public static final String PARAM_BIRTH_YEAR = Params.BIRTH_YEAR;
+	public static final String PARAM_BIRTH_YEAR = Request.Param.BIRTH_YEAR;
 	
 	/** Parameter for a user gender */
-	public static final String PARAM_GENDER = Params.GENDER;
+	public static final String PARAM_GENDER = Request.Param.GENDER;
 	
 	/** Parameter for a user success redirect */
-	public static final String PARAM_SUCCESS_REDIRECT = Params.SUCCESS_REDIRECT;
+	public static final String PARAM_SUCCESS_REDIRECT = Request.Param.SUCCESS_REDIRECT;
 	
 	/** Parameter for a user error redirect */
-	public static final String PARAM_ERROR_REDIRECT = Params.ERROR_REDIRECT;
+	public static final String PARAM_ERROR_REDIRECT = Request.Param.ERROR_REDIRECT;
 	
 	/** Parameter for a user old password */
-	public static final String PARAM_OLD_PASSWORD = Params.OLD_PASSWORD;
+	public static final String PARAM_OLD_PASSWORD = Request.Param.OLD_PASSWORD;
 	
 	/** Parameter for a facebook token */
-	public static final String PARAM_FACEBOOK_TOKEN = Params.FACEBOOK_TOKEN;
+	public static final String PARAM_FACEBOOK_TOKEN = Request.Param.FACEBOOK_TOKEN;
 	
 	/** Endpoint for a single user resource */
-	public static final String ENDPOINT_ID = Endpoint.USER_ID;
+	public static final String ENDPOINT_ID = Request.Endpoint.USER_ID;
 	
 	/** Endpoint for a user resource */
-	public static final String ENDPOINT_RESET = Endpoint.USER_RESET;
+	public static final String ENDPOINT_RESET = Request.Endpoint.USER_RESET;
 	
 	public static final int NO_USER = -1;
 	
@@ -144,9 +145,11 @@ public class User extends EtaObject implements Serializable {
 	 * @return
 	 */
 	public User setGender(String gender) {
-		String test = gender.toLowerCase();
-		if (gender.equals("male") || gender.equals("female") )
-			mGender = test;
+		if (gender != null) {
+			gender = gender.toLowerCase();
+			if (gender.equals("male") || gender.equals("female") )
+				mGender = gender;
+		}		
 		return this;
 	}
 
@@ -186,7 +189,7 @@ public class User extends EtaObject implements Serializable {
 	}
 
 	public String getFacebookEndpoint() {
-		return Endpoint.getFacebookByUserId(mId);
+		return Request.Endpoint.facebook(mId);
 	}
 	
 	public void subscribe(UserStatusListener statusListener) {
