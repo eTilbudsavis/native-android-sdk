@@ -6,13 +6,12 @@
  */
 package com.eTilbudsavis.etasdk;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.http.message.BasicHeader;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,9 +26,10 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.Toast;
 
+import com.eTilbudsavis.etasdk.Api.ContentType;
+import com.eTilbudsavis.etasdk.Api.JsonObjectListener;
+import com.eTilbudsavis.etasdk.Api.RequestType;
 import com.eTilbudsavis.etasdk.Api.StringListener;
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
@@ -42,40 +42,38 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 public final class PageflipWebview extends WebView {
 
 	private static final String TAG = "Pageflip";
-	
-	/** String identifying etaProxy events */
-	private static final String ETA_PROXY = "eta-proxy";
-	/** String identifying the ready pageflip event. See pageflip documentation for more details */
-	public static final String EVENT_READY = "ready";
 
-	/** String identifying session events */	
-	private static final String ETA_SESSION = "eta-session";
-	/** String identifying the change event, called when the session has changed. See pageflip documentation for more details */
-	public static final String EVENT_CHANGE = "change";
+	private static final String PAGEFLIP_PROXY_NAME = "AndroidInterface";
+
+	private static final String EVENT_PROXY_READY = "eta-proxy-ready";
 	
-	private static final String ETA_THUMB = "catalog-view-thumbnails";
-	private static final String ETA_PAGE = "catalog-view-go-to-page";
-	private static final String ETA_CLOSE = "catalog-view-close";
+	private static final String EVENT_SESSION_CHANGE = "eta-session-change";
 	
-	/** String identifying the initialize parameter, used when initializing pageflip */
+	private static final String EVENT_API_REQUEST = "eta-api-request";
+	
+	private static final String API_REQUEST_COMPLETE = "api-request-complete";
+	
 	private static final String PARAM_INITIALIZE = "initialize";
-	private static final String API_KEY = "apiKey";
-	private static final String API_SECRET = "apiSecret";
-	private static final String SESSION = "session";
-	private static final String TOKEN_TTL = "tokenTTL";
-	private static final String LOCALE = "locale";
-	private static final String LOCATION = "geolocation";
-	private static final String LOCATION_LAT = "latitude";
-	private static final String LOCATION_LNG = "longitude";
-	private static final String LOCATION_SENSOR = "sensor";
-	private static final String LOCATION_RADIUS = "radius";
-
-
-
+	private static final String INIT_API_KEY = "apiKey";
+	private static final String INIT_API_SECRET = "apiSecret";
+	private static final String INIT_SESSION = "session";
+	private static final String INIT_TOKEN_TTL = "tokenTTL";
+	private static final String INIT_LOCALE = "locale";
+	private static final String INIT_LOCATION = "geolocation";
+	private static final String INIT_LOCATION_LAT = "latitude";
+	private static final String INIT_LOCATION_LNG = "longitude";
+	private static final String INIT_LOCATION_SENSOR = "sensor";
+	private static final String INIT_LOCATION_RADIUS = "radius";
+	
+	/** String identifying the option to toggle visibility of the thumbnail view, in pageflip. @see {@link #toggleThumbnails() toggleThumbnails()}*/
+	public static final String CATALOG_VIEW_THUMBNAILS = "catalog-view-thumbnails";
+	/** String identifying the option to go to a certain page in pageflip @see {@link #gotoPage(int) gotoPage()}*/
+	public static final String CATALOG_VIEW_GOTO_PAGE = "catalog-view-go-to-page";
+	/** String identifying the option to close the JavaScript inside PageflipWebview */
+	public static final String CATALOG_VIEW_CLOSE = "catalog-view-close";
+	
 	/** String identifying the catalog-view parameter, used when loading a catalog. All available options for this parameter is prefixed with "OPTION" as in {@link PageflipWebview#OPTION_CATALOG OPTION_CATALOG} */
 	private static final String PARAM_CATALOG_VIEW = "catalog-view";
-	/** String identifying the catalog option, used when setting options with the parameter {@link PageflipWebview#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
-	private static final String OPTION_VIEW_SESSION = "viewSession";
 	/** String identifying the catalog option, used when setting options with the parameter {@link PageflipWebview#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
 	public static final String OPTION_CATALOG = "catalog";
 	/** String identifying the page option, used when setting options with the parameter {@link PageflipWebview#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
@@ -88,35 +86,32 @@ public final class PageflipWebview extends WebView {
 	public static final String OPTION_CAN_CLOSE = "canClose";
 	/** String identifying the headless option, used when setting options with the parameter {@link PageflipWebview#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
 	public static final String OPTION_HEADLESS = "headless";
-	/** String identifying the put of bounds option, used when setting options with the parameter {@link PageflipWebview#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+	/** String identifier for the put of bounds option, used when setting options with the parameter {@link PageflipWebview#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
 	public static final String OPTION_OUT_OF_BOUNDS = "outOfBounds";
 	/** String identifying the white lable option, used when setting options with the parameter {@link PageflipWebview#PARAM_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details<br>
 	 * <b>NOTE</b> The usage of this option can violate the terms of use. */
 	private static final String OPTION_WHITE_LABLE = "whiteLabel";
+	/** String identifier for session change option */
 	private static final String OPTION_SESSION_CHANGE = "session-change";
 	
-
-	/** String identifying the prefix for a view event. All available events this that follow this event is prefixed with "EVENT" as in {@link PageflipWebview#EVENT_PAGECHANGE EVENT_PAGECHANGE} */
-	public static final String ETA_CATALOG_VIEW = "eta-catalog-view";
 	/** String identifying the pagechange pageflip event. See pageflip documentation for more details */
-	public static final String EVENT_PAGECHANGE = "pagechange";
+	public static final String EVENT_PAGECHANGE = "eta-catalog-view-pagechange";
 	/** String identifying the outofbounds pageflip event. See pageflip documentation for more details */
-	public static final String EVENT_OUTOFBOUNDS = "outofbounds";
+	public static final String EVENT_OUTOFBOUNDS = "eta-catalog-view-outofbounds";
 	/** String identifying the hotspot pageflip event. See pageflip documentation for more details */
-	public static final String EVENT_HOTSPOT = "hotspot";
+	public static final String EVENT_HOTSPOT = "eta-catalog-view-hotspot";
 	/** String identifying the singletap pageflip event. See pageflip documentation for more details */
-	public static final String EVENT_SINGLETAP = "singletap";
+	public static final String EVENT_SINGLETAP = "eta-catalog-view-singletap";
 	/** String identifying the doubletap pageflip event. See pageflip documentation for more details */
-	public static final String EVENT_DOUBLETAP = "doubletap";
+	public static final String EVENT_DOUBLETAP = "eta-catalog-view-doubletap";
 	/** String identifying the dragstart pageflip event. See pageflip documentation for more details */
-	public static final String EVENT_DRAGSTART = "dragstart";
+	public static final String EVENT_DRAGSTART = "eta-catalog-view-dragstart";
 	
 	private Eta mEta;
 	private String mUuid;
 	private PageflipListener mListener;
 	private String mCatalogId;
-	private JSONObject mCatalogView = new JSONObject();
-	private String mViewSession = null;
+	private JSONObject mCatalogViewOptions = new JSONObject();
 	private boolean mThumbnailsToggled = false;
 	private boolean mReady = false;
 	
@@ -147,96 +142,142 @@ public final class PageflipWebview extends WebView {
         setHeadless(true);
         setOutOfBounds(false);
     }
-
-	/**
-	 * The WebViewClient used in the WebView as a communication proxy.
-	 */
-	WebViewClient wvc = new WebViewClient() {
+	
+	public class PageflipJavaScriptInterface {
 		
-		@Override
-		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+		public boolean dispatch(String payload) {
+
+			EtaLog.d(TAG, "onEvent: " + payload.toString());
 			
-			String[] request = url.split(":", 3);
-			
-			if ( request.length < 2 )
+			try {
+				JSONObject tmp = new JSONObject(payload);
+				String event = tmp.getString("eventName");
+				JSONObject data = tmp.getJSONObject("data");
+				return onEvent(event, data);
+			} catch (JSONException e) {
+				e.printStackTrace();
 				return false;
+			}
 			
-			JSONObject o = decodeData(request[2]);
+		}
+		
+		public boolean onEvent(String event, JSONObject data){
 			
-			if (request[0].equals(ETA_CATALOG_VIEW)) {
+			if (event.equals(EVENT_SESSION_CHANGE)) {
 				
-				// Send ready callback
-				if (request[1].equals(EVENT_PAGECHANGE) && o.has("init")) {
-					try {
+				mEta.getSessionManager().setSession(data);
+				
+			} else if (event.equals(EVENT_PROXY_READY)) {
+				
+				initializeJavaScript();
+				
+			} else if (event.equals(EVENT_API_REQUEST)) {
+				
+				String urlapi = null;
+				RequestType method = null;
+				List<org.apache.http.Header> reqHeaders = new ArrayList<org.apache.http.Header>();
+				
+				try {
+					
+					JSONObject requestData = data.getJSONObject("data");
+					
+					final String id = data.getString("id");
+					
+					String m = requestData.getString("type").toLowerCase();
+					if (m.equals("get")) {
+						method = RequestType.GET;
+					} else if (m.equals("put")) {
+						method = RequestType.PUT;
+					} else if (m.equals("delete")) {
+						method = RequestType.DELETE;
+					} else if (m.equals("post")) {
+						method = RequestType.POST;
+					}
+					
+					urlapi = requestData.getString("url");
+					
+					if (requestData.has("headers")) {
+						JSONObject h = requestData.getJSONObject("headers");
+						Iterator<?> keys = h.keys();
+				        while( keys.hasNext() ){
+				            String key = (String)keys.next();
+				            reqHeaders.add(new BasicHeader(key, h.getString(key)));
+				        }
+					}
+					
+					
+					// Callback that is able to convert to strings
+					final StringListener pfListener = new StringListener() {
 						
-						if (o.getBoolean("init")) {
+						public void onComplete(boolean isCache, int statusCode, String string, EtaError error) {
+							StringBuilder sb = new StringBuilder();
 							
-							mViewSession = o.getString(OPTION_VIEW_SESSION);
-							mReady = true;
-							mListener.onReady(mUuid, mViewSession);
-						} 
+							sb.append("{\"id\":\"").append(id).append("\",");
+							if (string != null) {
+								sb.append("\"success\":").append(string);
+							} else {
+								sb.append("\"error\":").append(error.toJSON().toString());
+							}
+							sb.append("}");
+							
+							JSONObject response = null;
+							try {
+								response = new JSONObject(sb.toString());
+								etaProxy(API_REQUEST_COMPLETE, response);
+							} catch (JSONException e1) {
+								EtaLog.d(TAG, e1);
+							}
+							
+						}
+					};
+					
+					// Wrapper for session calls
+					JsonObjectListener sessionPfListener = new JsonObjectListener() {
 						
+						public void onComplete(boolean isCache, int statusCode, JSONObject item, EtaError error) {
+							pfListener.onComplete(isCache, statusCode, item.toString(), error);
+						}
+					};
+					
+					if (urlapi.contains(Request.Endpoint.SESSIONS)) {
+						
+						mEta.getApi().request(urlapi, sessionPfListener, null, method, ContentType.JSON, reqHeaders).setFlag(Api.FLAG_ONLY_RETURN_CACHE).execute();
+						
+					} else {
+						
+						mEta.getApi().request(urlapi, pfListener, null, method, ContentType.JSON, reqHeaders).setFlag(Api.FLAG_ONLY_RETURN_CACHE).execute();
+						
+					}
+					
+			        
+				} catch (JSONException e) {
+					EtaLog.d(TAG, e);
+				}
+				
+			} else {
+				
+				if (event.equals(EVENT_PAGECHANGE)) {
+					
+					try {
+						if (data.has("init") && data.getBoolean("init")) {
+							mReady = true;
+							mListener.onReady(mUuid);
+						}
 					} catch (JSONException e) {
 						e.printStackTrace();
 					}
+					
 				}
 				
-				// Send standart event
-				mListener.onEvent(request[1], mUuid, o);
+				// Send standard event
+				mListener.onEvent(event, mUuid, data);
 				
-			} else if (request[0].equals(ETA_SESSION)) {
-				
-				if (request[1].equals(EVENT_CHANGE)) {
-					mEta.getSessionManager().setSession(o);
-				} 
-				
-			} else if (request[0].equals(ETA_PROXY)) {
-				
-				// On document ready, run catalog-view options
-				if (request[1].equals(EVENT_READY)) {
-					initializeJavaScript();
-				}
-			}
+			} 
+			
 			return true;
 			
 		}
-
-		// Notify when loading of WebView is done, now insert JavaScript init.
-		public void onPageFinished(WebView view, String url) {
-			
-		}
-	};
-	
-	private JSONObject decodeData(String data) {
 		
-		try {
-			JSONObject o;
-			
-			if (data.length() == 0) {
-				
-				o = new JSONObject();
-				
-			} else {
-
-				String resp = "{}";
-				try {
-					resp = URLDecoder.decode(data, "utf-8");
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
-				o = new JSONObject(resp);
-
-				if (o.has("data"))
-					o = o.getJSONObject("data");
-				
-			}
-			return o;
-			
-		} catch (JSONException e) {
-			e.printStackTrace();
-		} 
-		
-		return new JSONObject();
 	}
 	
 	/**
@@ -269,7 +310,7 @@ public final class PageflipWebview extends WebView {
 	 * @param Listener for pageflip events
 	 * @param CatalogId of the catalog to display
 	 */
-	@SuppressLint({ "NewApi", "InlinedApi" }) @SuppressWarnings("unchecked")
+	@SuppressLint("NewApi")
 	public void execute(Eta eta, PageflipListener Listener, String CatalogId) {
 		
 		mEta = eta;
@@ -296,7 +337,7 @@ public final class PageflipWebview extends WebView {
 		
 		ws.setAllowFileAccess(true);
 		
-		setWebViewClient(wvc);
+		addJavascriptInterface(new PageflipJavaScriptInterface(), PAGEFLIP_PROXY_NAME);
 		
 		if (Eta.DEBUG_PAGEFLIP) {
 			setWebChromeClient(wcc);
@@ -307,6 +348,7 @@ public final class PageflipWebview extends WebView {
 			public void onComplete(boolean isCache, int statusCode, String data, EtaError error) {
 				
 				if (!isCache) {
+					EtaLog.d(TAG, "Pageflip: " + statusCode);
 					String html = data == null ? "<html><body>" + error.toString() + "</body></html>" : data;
 					loadDataWithBaseURL(null, html, "text/html", "utf-8", null);
 				}
@@ -328,40 +370,37 @@ public final class PageflipWebview extends WebView {
 	private void initializeJavaScript() {
 		
 		// General setup of Pageflip JS
-		JSONObject o = new JSONObject();
+		JSONObject init = new JSONObject();
 		try {
-			o.put(API_KEY, mEta.getApiKey());
-			o.put(API_SECRET, mEta.getApiSecret());
+			init.put(INIT_API_KEY, mEta.getApiKey());
+			init.put(INIT_API_SECRET, mEta.getApiSecret());
 			JSONObject ses = mEta.getSessionManager().getSession().toJSON();
-			o.put(SESSION, ses);
-			o.put(TOKEN_TTL, SessionManager.TTL);
-			o.put(LOCALE, Locale.getDefault().toString());
+			init.put(INIT_SESSION, ses);
+			init.put(INIT_TOKEN_TTL, SessionManager.TTL);
+			init.put(INIT_LOCALE, Locale.getDefault().toString());
 			if (mEta.getLocation().isSet()) {
 				JSONObject loc = new JSONObject();
 				try {
-					loc.put(LOCATION_LAT, mEta.getLocation().getLatitude());
-					loc.put(LOCATION_LNG, mEta.getLocation().getLongitude());
-					loc.put(LOCATION_SENSOR, mEta.getLocation().isSensor());
-					loc.put(LOCATION_RADIUS, mEta.getLocation().getRadius());
+					loc.put(INIT_LOCATION_LAT, mEta.getLocation().getLatitude());
+					loc.put(INIT_LOCATION_LNG, mEta.getLocation().getLongitude());
+					loc.put(INIT_LOCATION_SENSOR, mEta.getLocation().isSensor());
+					loc.put(INIT_LOCATION_RADIUS, mEta.getLocation().getRadius());
 				} catch (JSONException e) {
 					EtaLog.d(TAG, e);
 				}
-				o.put(LOCATION, loc);
+				init.put(INIT_LOCATION, loc);
 			}
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
-		etaProxy(PARAM_INITIALIZE, o);
+		etaProxy(PARAM_INITIALIZE, init);
 		// Initialize the catalog
 		try {
-
-			mCatalogView.put(OPTION_CATALOG, mCatalogId);
-			if (mViewSession != null)
-				mCatalogView.put(OPTION_VIEW_SESSION, mViewSession);
+			mCatalogViewOptions.put(OPTION_CATALOG, mCatalogId);
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
-		etaProxy(PARAM_CATALOG_VIEW, mCatalogView);
+		etaProxy(PARAM_CATALOG_VIEW, mCatalogViewOptions);
 		
 	}
 
@@ -387,8 +426,13 @@ public final class PageflipWebview extends WebView {
 	 * @param option a snippet of JavaScript
 	 */
 	private void injectJS(String jsCommand) {
-		String s = String.format("javascript:(function() { %s })()", jsCommand);
-		loadUrl(s);
+		final String s = String.format("javascript:(function() { %s })()", jsCommand);
+		mEta.getHandler().post(new Runnable() {
+			
+			public void run() {
+				loadUrl(s);
+			}
+		});
 	}
 	
 	LocationListener ll = new LocationListener() {
@@ -397,7 +441,6 @@ public final class PageflipWebview extends WebView {
 			// TODO: Propagate change into pageflip
 		}
 	};
-	
 	
 	public void pause() {
 		mEta.getLocation().unSubscribe(ll);
@@ -416,7 +459,7 @@ public final class PageflipWebview extends WebView {
 	 */
 	public void toggleThumbnails() {
 		mThumbnailsToggled = !mThumbnailsToggled;
-		etaProxy(ETA_THUMB);
+		etaProxy(CATALOG_VIEW_THUMBNAILS);
 	}
 	
 	public void updateSession() {
@@ -426,7 +469,7 @@ public final class PageflipWebview extends WebView {
 	
 	public void closePageflip() {
 		pageflips.remove(PageflipWebview.this);
-		etaProxy(ETA_CLOSE);
+		etaProxy(CATALOG_VIEW_CLOSE);
 	}
 	
 	/**
@@ -438,7 +481,7 @@ public final class PageflipWebview extends WebView {
 			JSONObject data = new JSONObject();
 			data.put("page", String.valueOf(page));
 			data.put("animated", "false");
-			etaProxy(ETA_PAGE, data);
+			etaProxy(CATALOG_VIEW_GOTO_PAGE, data);
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -455,7 +498,7 @@ public final class PageflipWebview extends WebView {
 	 */
 	public void setOption(String key, String value) {
 		try {
-			mCatalogView.put(key, value);
+			mCatalogViewOptions.put(key, value);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -468,7 +511,7 @@ public final class PageflipWebview extends WebView {
 	 */
 	public void setPage(int page) {
 		try {
-			mCatalogView.put(OPTION_PAGE, page);
+			mCatalogViewOptions.put(OPTION_PAGE, page);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -481,7 +524,7 @@ public final class PageflipWebview extends WebView {
 	 */
 	public void setHotspotsEnabled(boolean enabled) {
 		try {
-			mCatalogView.put(OPTION_HOTSPOTS, enabled);
+			mCatalogViewOptions.put(OPTION_HOTSPOTS, enabled);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -502,7 +545,7 @@ public final class PageflipWebview extends WebView {
 	 */
 	public void setHotspotOverlayVisible(boolean visible) {
 		try {
-			mCatalogView.put(OPTION_HOTSPOT_OVERLAY, visible);
+			mCatalogViewOptions.put(OPTION_HOTSPOT_OVERLAY, visible);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -515,7 +558,7 @@ public final class PageflipWebview extends WebView {
 	 */
 	public void setCanClose(boolean closeable) {
 		try {
-			mCatalogView.put(OPTION_CAN_CLOSE, closeable);
+			mCatalogViewOptions.put(OPTION_CAN_CLOSE, closeable);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -528,7 +571,7 @@ public final class PageflipWebview extends WebView {
 	 */
 	private void setHeadless(boolean headless) {
 		try {
-			mCatalogView.put(OPTION_HEADLESS, headless);
+			mCatalogViewOptions.put(OPTION_HEADLESS, headless);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -541,7 +584,7 @@ public final class PageflipWebview extends WebView {
 	 */
 	private void setOutOfBounds(boolean displayOutOfBounds) {
 		try {
-			mCatalogView.put(OPTION_OUT_OF_BOUNDS, displayOutOfBounds);
+			mCatalogViewOptions.put(OPTION_OUT_OF_BOUNDS, displayOutOfBounds);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -554,14 +597,10 @@ public final class PageflipWebview extends WebView {
 	 */
 	public void setWhiteLable(boolean displayBranding) {
 		try {
-			mCatalogView.put(OPTION_WHITE_LABLE, displayBranding);
+			mCatalogViewOptions.put(OPTION_WHITE_LABLE, displayBranding);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public void setViewSession(String viewSession) {
-		mViewSession = viewSession;
 	}
 	
 	/**
@@ -575,7 +614,7 @@ public final class PageflipWebview extends WebView {
 		 * @param data The data received from pageflip
 		 */
 		public void onEvent(String event, String uuid, JSONObject object);
-		public void onReady(String uuid, String viewSession);
+		public void onReady(String uuid);
 	}
 	
 }

@@ -17,7 +17,6 @@ import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Request.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class SessionManager {
@@ -30,8 +29,8 @@ public class SessionManager {
     public static final String COOKIE_AUTH_HASH = "auth[hash]";
 
 	/** Token time to live, 45days */
-    public static final int TTL = 3888000;
-//	public static final int TTL = 15;
+//    public static final int TTL = 3888000;
+	public static final int TTL = 15;
 	
 	private Eta mEta;
 	private Session mSession;
@@ -55,14 +54,6 @@ public class SessionManager {
 		
 	}
 	
-	private void addSessionRequest(Api a) {
-//    	a.setFlag(Api.FLAG_PRINT_DEBUG);
-		mSessionQueue.add(a);
-		if (!mUpdating) {
-			runSessionQueue();
-		}
-	}
-
 	private void runSessionQueue() {
 		
 		if (mSessionQueue.isEmpty()) {
@@ -72,7 +63,25 @@ public class SessionManager {
 			mUpdating = true;
 			Api a = mSessionQueue.get(0);
 			mSessionQueue.remove(a);
-			a.execute();
+			
+			final JsonObjectListener tmp = (JsonObjectListener) a.getListener();
+			
+			a.setListener(new JsonObjectListener() {
+				
+				public void onComplete(boolean isCache, int statusCode, JSONObject item,EtaError error) {
+					
+					if (item != null) {
+						setSession(item);
+					} else {
+						EtaLog.d(TAG, "Session issue...");
+						runSessionQueue();
+					}
+					if (tmp != null) {
+						tmp.onComplete(isCache, statusCode, item, error);
+					}
+				}
+			});
+			a.runThread();
 		}
 		
 	}
@@ -83,7 +92,9 @@ public class SessionManager {
 			List<Api> tmp = new ArrayList<Api>(mQueue.size());
 			for (Api a : mQueue) {
 				tmp.add(a);
-//				EtaLog.d(TAG, a.getUrl());
+				if (a.getUrl().contains("collect")) {
+					EtaLog.d(TAG, a.getUrl());
+				}
 				a.runThread();
 			}
 			mQueue.removeAll(tmp);
@@ -115,7 +126,8 @@ public class SessionManager {
 			if (s.getToken().equals(mSession.getToken())) {
 				return;				
 			}
-			EtaLog.d(TAG, "setSession: " + session.toString());
+			
+//			EtaLog.d(TAG, "setSession: " + session.toString());
 			mSession = s;
 			mEta.getSettings().setSessionJson(session);
 			notifySubscribers();
@@ -125,27 +137,19 @@ public class SessionManager {
 		
 	}
 
-	private void postSession(final Bundle args, final JsonObjectListener l) {
+	private void postSession(final Bundle args, JsonObjectListener l) {
 		
-		JsonObjectListener sessionListener = new JsonObjectListener() {
-			
-			public void onComplete(boolean isCache, int statusCode, JSONObject item, EtaError error) {
+		if (l == null) {
+			l = new JsonObjectListener() {
 				
-				if (Utils.isSuccess(statusCode)) {
-					setSession(item);
-				} else {
-					EtaLog.d(TAG, "Create new session failed... this is a real issue");
-					runSessionQueue();
+				public void onComplete(boolean isCache, int statusCode, JSONObject item,EtaError error) {
+					
 				}
-				if (l != null) { l.onComplete(isCache, statusCode, item, error); }
-				
-			}
-			
-		};
+			};
+		}
 		
 		args.putInt(Request.Param.TOKEN_TTL, TTL);
 		
-
 		// No session yet, check cookies for old token
 		String authId = null;
 		String authTime = null;
@@ -185,8 +189,7 @@ public class SessionManager {
         	
         } else {
         	
-        	Api a = mEta.getApi().post(Request.Endpoint.SESSIONS, sessionListener, args);
-        	addSessionRequest(a);
+        	mEta.getApi().post(Request.Endpoint.SESSIONS, l, args).execute();
     		
         }
         
@@ -200,9 +203,7 @@ public class SessionManager {
 			
 			public void onComplete(boolean isCache, int statusCode, JSONObject item, EtaError error) {
 				
-				if (Utils.isSuccess(statusCode)) {
-					setSession(item);
-				} else {
+				if (!Utils.isSuccess(statusCode)) {
 					postSession(new Bundle(), l);
 				}
 				
@@ -211,11 +212,11 @@ public class SessionManager {
 			}
 		};
 
-    	Api a = mEta.getApi().put(Request.Endpoint.SESSIONS, sessionListener, args);
-    	addSessionRequest(a);
+    	mEta.getApi().put(Request.Endpoint.SESSIONS, sessionListener, args).execute();
+		
 		
 	}
-
+	
 	/**
 	 * Perform a standard login, using an existing eTilbudsavis user.
 	 * @param user - etilbudsavis user name (e-mail)
@@ -264,16 +265,31 @@ public class SessionManager {
 	 */
 	public synchronized void performRequest(Api api) {
 		
-		mQueue.add(api);
-		
-		if (mUpdating) {
-			EtaLog.d(TAG, "Request waiting for session...");
-		} else if (mSession.isExpired()) {
-			postSession(new Bundle(), null);
-		} else if ( mSession.getExpire().getTime()-System.currentTimeMillis() < ( (TTL/2)*1000 )) {
-			putSession(new Bundle(), null);
+
+		if (api.getUrl().contains(Request.Endpoint.SESSIONS)) {
+
+			EtaLog.d(TAG, "Session request... " + api.getRequestType());
+
+//	    	a.setFlag(Api.FLAG_PRINT_DEBUG);
+			mSessionQueue.add(api);
+			if (!mUpdating) {
+				runSessionQueue();
+			}
+			
 		} else {
-			runApiQueue();
+
+			mQueue.add(api);
+			
+			if (mUpdating) {
+				EtaLog.d(TAG, "Request waiting for session...");
+			} else if (mSession.isExpired()) {
+				postSession(new Bundle(), null);
+			} else if ( mSession.getExpire().getTime()-System.currentTimeMillis() < ( (TTL/2)*1000 )) {
+				putSession(new Bundle(), null);
+			} else {
+				runApiQueue();
+			}
+			
 		}
 		
 	}
@@ -305,8 +321,7 @@ public class SessionManager {
 			
 		};
 		
-		Api a = mEta.getApi().put(Request.Endpoint.SESSIONS, sessionListener, b);
-		addSessionRequest(a);
+		mEta.getApi().put(Request.Endpoint.SESSIONS, sessionListener, b).execute();
 		
 	}
 	

@@ -3,6 +3,8 @@ package com.eTilbudsavis.etasdk.Utils;
 import com.eTilbudsavis.etasdk.Network.Request;
 
 /**
+ * Sort is being depricated, for new/updated values, goto {@link Request.Sort Request.Sort}
+ * 
  * {@link com.eTilbudsavis.etasdk.Util.Sort Sort} holds all variables describing sorting methods that the server allows.<br><br>
  * 
  * This class should be referenced, when using the 
@@ -19,8 +21,6 @@ import com.eTilbudsavis.etasdk.Network.Request;
  * 
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
- * Params are being depricated, for new/updated values, goto {@link Request.Param Request.Param}
- * 
  * @author Danny Hvam - danny@etilbudsavis.dk
  */
 @Deprecated

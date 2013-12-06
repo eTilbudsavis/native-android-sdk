@@ -32,9 +32,9 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ListSyncManager {
 
-	public static final String TAG = "ShoppinglistSyncManager";
+	public static final String TAG = "ListSyncManager";
 
-	private static final String THREAD_NAME = "ShoppinglistSyncManager";
+	private static final String THREAD_NAME = "ListSyncManager";
 	
 	private int mSyncSpeed = 3000;
 	

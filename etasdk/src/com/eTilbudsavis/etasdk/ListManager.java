@@ -22,7 +22,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ListManager {
 
-	public static final String TAG = "ShoppinglistManager";
+	public static final String TAG = "ListManager";
 
 	/** Supported sync speeds for shopping list manager */
 	public interface SyncSpeed {

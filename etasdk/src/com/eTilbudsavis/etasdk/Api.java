@@ -25,6 +25,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
@@ -38,6 +39,7 @@ import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.DefaultHttpRoutePlanner;
 import org.apache.http.impl.conn.SingleClientConnManager;
@@ -104,7 +106,7 @@ public class Api implements Serializable {
 	
 	/** Content-Type used in request. */
 	public enum ContentType {
-//		JSON			{ public String toString() { return "application/json; charset=utf-8"; } },
+		JSON			{ public String toString() { return "application/json; charset=utf-8"; } },
 		URLENCODED		{ public String toString() { return "application/x-www-form-urlencoded; charset=utf-8"; } },
 //		FORMDATA		{ public String toString() { return "multipart/form-data; charset=utf-8"; } }
 	}
@@ -123,6 +125,7 @@ public class Api implements Serializable {
 	private int mFlags;
 	private Handler mHandler;
 	private int mRetryCount = 0;
+	private JSONObject mBody = null;
 	
 	private StringBuilder debug = new StringBuilder();
 	
@@ -134,6 +137,11 @@ public class Api implements Serializable {
 		mEta = eta;
 		// set default flags
 		mFlags = FLAG_USE_LOCATION | FLAG_USE_CACHE ;
+	}
+	
+	public Api setBody(JSONObject data) {
+		mBody = data;
+		return this;
 	}
 	
 	/**
@@ -544,16 +552,8 @@ public class Api implements Serializable {
 			mPath += mId;
 		}
 		
-		// TODO Check endpoint against listener, and
-		
-		// Is Session okay? If not, check if it's a session call? If not try to make a session before continuing
-
-		if (mPath.contains(Request.Endpoint.SESSIONS)) {
-//			setFlag(Api.FLAG_PRINT_DEBUG);
-			runThread();
-		} else {
-			mEta.getSessionManager().performRequest(Api.this);
-		}
+		// Give the request to SessionManager
+		mEta.getSessionManager().performRequest(Api.this);
 		return this;
 	}
 	
@@ -585,7 +585,9 @@ public class Api implements Serializable {
 				mApiParams.putAll(mEta.getLocation().getQuery());
 			}
 			
-			setHeader(Request.Header.CONTENT_TYPE, mContentType.toString());
+			if (mBody != null || mContentType != ContentType.JSON) {
+				setHeader(Request.Header.CONTENT_TYPE, mContentType.toString());
+			}
 			
 			if (isFlag(FLAG_USE_CACHE) && mRequestType == RequestType.GET) {
 
@@ -642,32 +644,44 @@ public class Api implements Serializable {
 				
 				// Execute the correct request type
 				switch (mRequestType) {
-				case POST: 
-					HttpPost post = new HttpPost(mPath);
-					post.setEntity(new UrlEncodedFormEntity(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8));
+				case POST:
+					HttpPost post = null;
+					if (mBody == null) {
+						post = new HttpPost(mPath);
+						post.setEntity(new UrlEncodedFormEntity(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8));
+					} else {
+						mPath = pathQuery(mPath, mApiParams);
+						post = new HttpPost(mPath);
+						if (mBody != null) {
+							post.setEntity(new StringEntity(mBody.toString()));
+						}
+					}
 					request = post;
 					break;
 					
 				case GET: 
-					
-					if (mApiParams.size() > 0)
-						mPath = mPath + "?" + URLEncodedUtils.format(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8);
-					
+					mPath = pathQuery(mPath, mApiParams);
 					HttpGet get = new HttpGet(mPath);
 					request = get;
 					break;
 					
 				case PUT: 
-					HttpPut put = new HttpPut(mPath); 
-					put.setEntity(new UrlEncodedFormEntity(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8));
+					HttpPut put = null;
+					if (mBody == null) {
+						put = new HttpPut(mPath);
+						put.setEntity(new UrlEncodedFormEntity(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8));						
+					} else {
+						mPath = pathQuery(mPath, mApiParams);
+						put = new HttpPut(mPath);
+						if (mBody != null) {
+							put.setEntity(new StringEntity(mBody.toString()));
+						}
+					}
 					request = put;
 					break;
 					
-				case DELETE: 
-
-					if (mApiParams.size() > 0)
-						mPath = mPath + "?" + URLEncodedUtils.format(Utils.bundleToNameValuePair(mApiParams), HTTP.UTF_8);
-					
+				case DELETE:
+					mPath = pathQuery(mPath, mApiParams);
 					HttpDelete delete = new HttpDelete(mPath);
 					request = delete;
 					break;
@@ -752,6 +766,14 @@ public class Api implements Serializable {
 		}
 	};
 	
+	private String pathQuery(String path, Bundle params) {
+		if (params.size() == 0)
+			return path;
+		
+		List<NameValuePair> nvp = Utils.bundleToNameValuePair(mApiParams);
+		return path + "?" + URLEncodedUtils.format(nvp, HTTP.UTF_8);
+	}
+	
 	/**
 	 * Method checks headers to find X-Token and X-Token-Expires.<br>
 	 * If they do not exist, nothing happens as the call has a wrong endpoint, or other
@@ -782,7 +804,10 @@ public class Api implements Serializable {
 	 */
 	private void printDebug(EtaResponse dataWrapper) {
     	debug.append("#Request: ").append(mRequestType.toString()).append(" ").append(mPath).append("\n");
-		debug.append("Headers: ").append(mHeaders.toString()).append("\n");
+    	if (mBody != null) {
+        	debug.append("Body: ").append(mBody.toString()).append("\n");
+    	}
+    	debug.append("Headers: ").append(mHeaders.toString()).append("\n");
     	
     	debug.append("Status: ").append(dataWrapper.getStatusCode()).append("\n");
     	debug.append("Return Headers: ");

@@ -1,8 +1,12 @@
 package com.eTilbudsavis.etasdk.Utils;
 
+import com.eTilbudsavis.etasdk.Network.Request;
+
 
 
 /**
+ * Endpoint is being depricated, for new/updated values, goto {@link Request.Endpoint Request.Endpoint}
+ * 
  * {@link com.eTilbudsavis.etasdk.Utils.Endpoint Endpoint} holds most endpoint-links for API v2.<br><br>
  * 
  * This class should be referenced, when using the 
@@ -21,6 +25,7 @@ package com.eTilbudsavis.etasdk.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
+@Deprecated
 public final class Endpoint {
 
 	private static final String ITEM = "/";

@@ -255,13 +255,11 @@ public abstract class Request {
 	 */
 	public static class Endpoint {
 		
-		
-		
 		// GLOBALS
 		public static final String PRODUCTION = "https://api.etilbudsavis.dk";
 		public static final String EDGE = "https://edge.etilbudsavis.dk";
 		public static final String STAGING = "https://staging.etilbudsavis.dk";
-
+		
 		// LISTS
 		public static final String CATALOG_LIST = "/v2/catalogs";
 		public static final String CATALOG_ID = "/v2/catalogs/";

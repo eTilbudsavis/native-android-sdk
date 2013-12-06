@@ -3,7 +3,7 @@ package com.eTilbudsavis.etasdk.Utils;
 import com.eTilbudsavis.etasdk.Network.Request;
 
 /**
- * Params are being depricated, for new/updated values, goto {@link Request.Param Request.Param}
+ * Params is being depricated, for new/updated values, goto {@link Request.Params Request.Params}
  * 
  * @author Danny Hvam - danny@etilbudsavis.dk
  */
