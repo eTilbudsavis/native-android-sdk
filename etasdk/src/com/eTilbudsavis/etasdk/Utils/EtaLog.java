@@ -1,8 +1,12 @@
 package com.eTilbudsavis.etasdk.Utils;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -111,4 +115,33 @@ public class EtaLog {
 		}
 
 	}
+	
+	public static boolean isExternalStorageWritable() {
+	    String state = Environment.getExternalStorageState();
+	    return Environment.MEDIA_MOUNTED.equals(state);
+	}
+	
+	/**
+	 * Writes a file to root of external storage <br><br>
+	 * 
+	 * Requires permission: android.permission.WRITE_EXTERNAL_STORAGE
+	 * 
+	 * @param fileContents
+	 * @param fileName
+	 */
+	public static void writeToFile(String fileName, String fileContents) {
+
+		if (!isExternalStorageWritable())
+			return;
+		
+        try {
+        	File f = new File(android.os.Environment.getExternalStorageDirectory(), fileName);
+            FileWriter out = new FileWriter(f);
+            out.write(fileContents);
+            out.close();
+        } catch (IOException e) {
+        	d(TAG, e);
+        }
+    }
+	
 }

@@ -14,7 +14,6 @@ import org.json.JSONObject;
 import android.os.Bundle;
 import android.text.TextUtils;
 
-import com.eTilbudsavis.etasdk.Utils.Params;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class EtaCache implements Serializable {

@@ -28,6 +28,7 @@ public class EtaError extends EtaObject implements Serializable {
 	private String mDetails = new String();
 	private String mOrigData = new String();
 	private Date mTime = null;
+	private String mFailedOnField = null;
 	
 	public EtaError() {
 		mTime = new Date();
@@ -47,6 +48,9 @@ public class EtaError extends EtaObject implements Serializable {
 			er.setCode(error.getInt(S_CODE));
 			er.setMessage(getJsonString(error, S_MESSAGE));
 			er.setDetails(getJsonString(error, S_DETAILS));
+			if (error.has("failed_on_field")) {
+				er.setFailedOnField(error.getString("failed_on_field"));
+			}
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -109,6 +113,14 @@ public class EtaError extends EtaObject implements Serializable {
 
 	public String getDetails() {
 		return mDetails;
+	}
+
+	public void setFailedOnField(String failedOnField) {
+		mFailedOnField = failedOnField;
+	}
+
+	public String getFailedOnField() {
+		return mFailedOnField;
 	}
 
 	public String getOriginalData() {

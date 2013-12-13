@@ -12,8 +12,6 @@
 package com.eTilbudsavis.etasdk;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -61,8 +59,7 @@ public class Eta implements Serializable {
 	private boolean mResumed = false;
 	private ConnectivityManager mConnectivityManager;
 	
-	private Eta() {
-	}
+	private Eta() { }
 
 	/**
 	 * TODO: Write a long story about usage, this will basically be the documentation
@@ -269,12 +266,14 @@ public class Eta implements Serializable {
 	 * Method to call on Activity.onPause().
 	 * This method will clean up the SDK.
 	 */
+	@SuppressLint("NewApi")
 	public void onPause() {
 		if (mResumed) {
 			mResumed = false;
-			mListManager.onPause();
 			mLocation.saveState();
-			pageflipPause();
+			mListManager.onPause();
+			for (PageflipWebview p : PageflipWebview.pageflips)
+				p.onPause();
 		}
 	}
 	
@@ -282,29 +281,16 @@ public class Eta implements Serializable {
 	 * Method to call on Activity.onResume().<br>
 	 * This method will resume all SDK relevant stuff.
 	 */
+	@SuppressLint("NewApi")
 	public void onResume() {
 		if (!mResumed) {
 			mResumed = true;
-			mListManager.onResume();
 			mLocation.restoreState();
+			mListManager.onResume();
 			mSessionManager.onResume();
-			pageflipResume();
+			for (PageflipWebview p : PageflipWebview.pageflips)
+				p.onResume();
 		}
-	}
-	
-	private void pageflipResume() {
-		for (PageflipWebview p : PageflipWebview.pageflips)
-			p.resume();
-	}
-	
-	private void pageflipPause() {
-		for (PageflipWebview p : PageflipWebview.pageflips)
-			p.pause();
-	}
-	
-	public void pageflipSessionChange() {
-		for (PageflipWebview p : PageflipWebview.pageflips)
-			p.updateSession();
 	}
 	
 	private Bundle getApiParams(int offset, int limit, String orderBy) {

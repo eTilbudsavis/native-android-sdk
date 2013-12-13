@@ -16,7 +16,6 @@ import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Utils.Params;
 
 public class EtaLocation extends Location {
 
@@ -281,7 +280,7 @@ public class EtaLocation extends Location {
 		
 		for (LocationListener l : mSubscribers) {
 			try {
-				l.onLocationChange();
+				l.onChange();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -317,7 +316,7 @@ public class EtaLocation extends Location {
 	}
 	
 	public interface LocationListener {
-		public void onLocationChange();
+		public void onChange();
 	}
 	
 }

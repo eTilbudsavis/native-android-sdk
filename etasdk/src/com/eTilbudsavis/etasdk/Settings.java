@@ -3,8 +3,6 @@ package com.eTilbudsavis.etasdk;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.EtaObjects.User;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 

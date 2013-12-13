@@ -157,28 +157,6 @@ public final class Utils {
 	}
 	
 	/**
-	 * Checks if the name is a valid user name for eta.dk <br><br>
-	 * 
-	 * Requirements: length > 2 chars.
-	 * @param name to check
-	 * @return boolean, true if name if valid
-	 */
-	public static boolean isNameValid(String name) {
-		return name.length() > 1 ? (name.length() < 81 ? true : false ) : false;
-	}
-
-	/**
-	 * Checks if a given password fits the requirements of etilbudsavis.dk.<br><br>
-	 * 
-	 * Requirements: password length from 6 through 39 chars.
-	 * @param password
-	 * @return
-	 */
-	public static boolean isPasswordValid(String password) {
-		return 5 < password.length() && password.length() < 40;
-	}
-	
-	/**
 	 * Checks if a given integer is a valid birth year.<br>
 	 * 
 	 * Requirements: birth year from 1901 through 2011.
@@ -186,7 +164,17 @@ public final class Utils {
 	 * @return
 	 */
 	public static boolean isBirthyearValid(Integer birthyear) {
-		return birthyear > 1900 ? (birthyear < 2012 ? true : false ) : false ;
+		return birthyear > 1900 ? (birthyear < 2013 ? true : false ) : false ;
+	}
+	
+	/**
+	 * A very naive implementation of email validation.<br>
+	 * 
+	 * @param email
+	 * @return
+	 */
+	public static boolean isEmailValid(String email) {
+		return email.contains("@") && email.split("@").length > 1; 
 	}
 
 	/**

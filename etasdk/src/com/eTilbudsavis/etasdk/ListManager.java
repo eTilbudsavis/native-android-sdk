@@ -667,7 +667,7 @@ public class ListManager {
 	}
 	
 	public void forceSync() {
-		mSyncManager.forceSync();
+		mSyncManager.runSyncLoop();
 	}
 	
 	public void setOnItemChangeListener(OnChangeListener<ShoppinglistItem> l) {

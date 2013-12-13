@@ -54,16 +54,12 @@ import android.os.Handler;
 import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.Api.RequestType;
-import com.eTilbudsavis.etasdk.SessionManager.OnSessionChangeListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaErnObject;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Network.EtaResponse;
 import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Params;
-import com.eTilbudsavis.etasdk.Utils.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Api implements Serializable {
@@ -120,7 +116,7 @@ public class Api implements Serializable {
 	private Bundle mApiParams = null;
 	private RequestType mRequestType = null;
 	private ContentType mContentType = null;
-	private List<Header> mHeaders;
+	private List<Header> mHeaders = new ArrayList<Header>(3);
 	private String mId = null;
 	private int mFlags;
 	private Handler mHandler;
@@ -443,7 +439,9 @@ public class Api implements Serializable {
 	 * @return This {@link com.eTilbudsavis.etasdk.Api Api} object to allow for chaining of calls to set methods
 	 */
 	public Api setHeader(String name, String value) {
-		mHeaders.add(new BasicHeader(name, value));
+		synchronized (mHeaders) {
+			mHeaders.add(new BasicHeader(name, value));
+		}
 		return this;
 	}
 	
@@ -516,7 +514,9 @@ public class Api implements Serializable {
 		mApiParams = apiParams == null ? new Bundle() : apiParams;
 		mRequestType = requestType;
 		mContentType = contentType == null ? ContentType.URLENCODED : contentType;
-		mHeaders = headers == null ? new ArrayList<Header>(3) : headers;
+		synchronized (mHeaders) {
+			mHeaders = headers == null ? new ArrayList<Header>(3) : headers;
+		}
 		return this;
 	}
 
@@ -691,8 +691,11 @@ public class Api implements Serializable {
 					return;
 				}
 				
-				for (Header h : mHeaders)
-					request.setHeader(h);
+				// TODO: ConcurrentModificationException, but why?
+				synchronized (mHeaders) {
+					for (Header h : mHeaders)
+						request.setHeader(h);
+				}
 				
 				HttpResponse resp = httpClient.execute(request);
 				
@@ -735,11 +738,15 @@ public class Api implements Serializable {
 				
 				int e = error.getCode();
 				
-				if ( !isFlag(FLAG_SESSION_REFRESH) && ( e == 1101 || e == 1108 ) ) {
+				if (mPath.contains(Request.Endpoint.SESSIONS)) {
 					
-					setFlag(FLAG_SESSION_REFRESH);
-					mEta.getSessionManager().performRequest(Api.this);
-					mEta.getSessionManager().recoverSession();
+					error.setOriginalData(response.getString());
+					runOnUiThread(false, response.getStatusCode(), null, error);
+					
+				} else if ( !isFlag(FLAG_SESSION_REFRESH) && ( e == 1101 || e == 1108 ) ) {
+					
+						setFlag(FLAG_SESSION_REFRESH);
+						mEta.getSessionManager().performRequest(Api.this);
 					
 				} else if ( e == 2015 && mRetryCount < 3) {
 					
@@ -807,7 +814,10 @@ public class Api implements Serializable {
     	if (mBody != null) {
         	debug.append("Body: ").append(mBody.toString()).append("\n");
     	}
-    	debug.append("Headers: ").append(mHeaders.toString()).append("\n");
+
+		synchronized (mHeaders) {
+	    	debug.append("Headers: ").append(mHeaders.toString()).append("\n");
+		}
     	
     	debug.append("Status: ").append(dataWrapper.getStatusCode()).append("\n");
     	debug.append("Return Headers: ");

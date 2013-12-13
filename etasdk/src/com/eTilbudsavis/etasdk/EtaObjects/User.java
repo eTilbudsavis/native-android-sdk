@@ -7,9 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Params;
 
 public class User extends EtaObject implements Serializable {
 	
@@ -40,9 +38,6 @@ public class User extends EtaObject implements Serializable {
 	
 	/** Parameter for a facebook token */
 	public static final String PARAM_FACEBOOK_TOKEN = Request.Param.FACEBOOK_TOKEN;
-	
-	/** Endpoint for a single user resource */
-	public static final String ENDPOINT_ID = Request.Endpoint.USER_ID;
 	
 	/** Endpoint for a user resource */
 	public static final String ENDPOINT_RESET = Request.Endpoint.USER_RESET;

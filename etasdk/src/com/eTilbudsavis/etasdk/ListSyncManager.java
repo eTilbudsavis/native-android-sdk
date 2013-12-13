@@ -48,12 +48,17 @@ public class ListSyncManager {
 	
 	/** The Handler instantiated on the sync Thread */
 	private Handler mHandler;
-
+	
+	private User mUser;
+	
 	/** Listening for session changes, starting and stopping sync as needed */
 	private OnSessionChangeListener sessionListener = new OnSessionChangeListener() {
 
 		public void onUpdate() {
-			runSyncLoop(mEta.getUser().isLoggedIn());
+			if (mUser.getId() != mEta.getUser().getId()) {
+				mSyncCount = 0;
+				runSyncLoop();
+			}
 		}
 	};
 	
@@ -61,6 +66,8 @@ public class ListSyncManager {
 	private Runnable mSyncLoop = new Runnable() {
 		
 		public void run() {
+			
+			mUser = mEta.getUser();
 			
 			if (!mEta.getUser().isLoggedIn() || !mEta.isResumed())
 				return;
@@ -90,12 +97,9 @@ public class ListSyncManager {
 				return;
 			
 			// Now finally we can query the server for any remote changes
-			
             if (mSyncCount%3 == 0) {
-//    			EtaLog.d(TAG, "syncLists");
                 syncLists(user);
             } else {
-//    			EtaLog.d(TAG, "syncListsModified");
                 syncListsModified(user);
             }
             mSyncCount++;
@@ -119,26 +123,18 @@ public class ListSyncManager {
 	 * Method for starting and stopping the sync manager
 	 * @param run, true if manager should sync.
 	 */
-	public void runSyncLoop(boolean run) {
+	public void runSyncLoop() {
 		// First make sure, that we do not leak memory by posting the runnable multiple times
 		mHandler.removeCallbacks(mSyncLoop);
-		// The optionally add it again
-		if (run) mHandler.post(mSyncLoop);
+		mHandler.post(mSyncLoop);
 	}
 	
-	/** Forces the ShoppinglistSyncManager to do a sync of all lists and items */
-	public void forceSync() {
-		mSyncCount = 0;
-		runSyncLoop(true);
-	}
-
 	public void onResume() {
 		mEta.getSessionManager().subscribe(sessionListener);
-		runSyncLoop(true);
+		runSyncLoop();
 	}
 	
 	public void onPause() {
-		runSyncLoop(false);
 		mEta.getSessionManager().unSubscribe(sessionListener);
 	}
 	

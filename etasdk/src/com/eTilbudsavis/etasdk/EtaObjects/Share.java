@@ -12,7 +12,6 @@ import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Params;
 
 public class Share extends EtaObject implements Comparable<Share>, Serializable {
 	private static final long serialVersionUID = 1L;

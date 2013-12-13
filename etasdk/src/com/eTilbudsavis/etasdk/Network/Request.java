@@ -160,9 +160,12 @@ public abstract class Request {
 	
 		/** Parameter for a v1 session migration */
 		public static final String V1_AUTH_TIME = "v1_auth_time";
-	
+
 		/** Parameter for a v1 session migration */
 		public static final String V1_AUTH_HASH = "v1_auth_hash";
+		
+		/** Parameter for locale */
+		public static final String LOCALE = "locale";
 		
 	}
 
@@ -281,7 +284,7 @@ public abstract class Request {
 		
 		public static final String SESSIONS = "/v2/sessions";
 		
-		public static final String USER_ID = "/v2/users/";
+		public static final String USER = "/v2/users";
 		public static final String USER_RESET = "/v2/users/reset";
 		
 		public static final String CATEGORIES	= "/v2/categories";
@@ -310,8 +313,8 @@ public abstract class Request {
 		 */
 		public static String pageflipProxy(String id) {
 			String production = "https://etilbudsavis.dk/proxy/%s/";
-			String staging = "http://10.0.1.6:3000/proxy/%s/";
-//			String staging = "https://staging.etilbudsavis.dk/proxy/%s/";
+//			String staging = "http://10.0.1.6:3000/proxy/%s/";
+			String staging = "https://staging.etilbudsavis.dk/proxy/%s/";
 			return String.format(Eta.DEBUG_PAGEFLIP ? staging : production, id);
 		}
 		
