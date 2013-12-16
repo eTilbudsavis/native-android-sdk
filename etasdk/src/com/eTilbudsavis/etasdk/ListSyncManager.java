@@ -26,6 +26,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject.ServerKey;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -93,6 +94,7 @@ public class ListSyncManager {
 				hasLocalChanges = syncLocalItemChanges(sl, user) || hasLocalChanges;
 				hasLocalChanges = syncLocalShareChanges(sl, user) || hasLocalChanges;
 			}
+			
 			if (hasLocalChanges)
 				return;
 			
@@ -188,7 +190,37 @@ public class ListSyncManager {
 					DbHelper db = DbHelper.getInstance();
 					List<Shoppinglist> localList = db.getLists(user);
 					mergeShoppinglists(serverList, localList, user);
+					
+					if (serverList.size() == 0 && localList.size() == 0) {
+						
+						User nou = new User();
+						List<Shoppinglist> noUserLists = db.getLists(nou);
+						
+						if (noUserLists.size() == 0) {
+							return; 
+						}
+						
+						for (Shoppinglist sl : noUserLists) {
+							
+							List<ShoppinglistItem> noUserItems = db.getItems(sl, nou);
+							if (noUserItems.size() == 0)
+								return;
+								
+							Shoppinglist tmpSl = Shoppinglist.fromName(sl.getName());
+							
+							mEta.getListManager().addList(tmpSl);
+							
+							for (ShoppinglistItem sli : noUserItems) {
+								sli.setShoppinglistId(tmpSl.getId());
+								sli.setId(Utils.createUUID());
+								sli.setErn("ern:shopping:item:" + sli.getId());
+								mEta.getListManager().addItem(sli);
+							}
+						}
+					}
+					
 					pushNotifications();
+					
 				} else {
 					popRequest();
 				}

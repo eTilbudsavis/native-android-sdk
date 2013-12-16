@@ -163,9 +163,12 @@ public abstract class Request {
 
 		/** Parameter for a v1 session migration */
 		public static final String V1_AUTH_HASH = "v1_auth_hash";
-		
+
 		/** Parameter for locale */
 		public static final String LOCALE = "locale";
+
+		/** Parameter for sending the user agent (app version) for better app statistics in Ingisht*/
+		public static final String API_UA = "api_ua";
 		
 	}
 

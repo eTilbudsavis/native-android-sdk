@@ -49,6 +49,7 @@ public class Eta implements Serializable {
 	private Context mContext;
 	private String mApiKey;
 	private String mApiSecret;
+	private String mAppVersion;
 	private Settings mSettings;
 	private SessionManager mSessionManager;
 	private EtaLocation mLocation;
@@ -135,6 +136,32 @@ public class Eta implements Serializable {
 	 */
 	public String getApiKey() {
 		return mApiKey;
+	}
+
+	/**
+	 * Set the version of your app, for better statistics collection on http://insight.etilbudsavis.dk/.<br><br>
+	 * App version should follow http://semver.org/ specifications (MAJOR.MINOR.PATCH), e.g.:<br>
+	 * <li> 1.0.0
+	 * <li> 1.0.0-beta
+	 * <li> 1.0.0-rc.1
+	 * 
+	 * @return API key as String
+	 */
+	public void setAppVersion(String appVersion) {
+		mAppVersion = appVersion;
+	}
+
+	/**
+	 * Set the version of your app, for better statistics collection on http://insight.etilbudsavis.dk/.<br><br>
+	 * App version should follow http://semver.org/ specifications (MAJOR.MINOR.PATCH), e.g.:<br>
+	 * <li> 1.0.0
+	 * <li> 1.0.0-beta
+	 * <li> 1.0.0-rc.1
+	 * 
+	 * @return API key as String
+	 */
+	public String getAppVersion() {
+		return mAppVersion;
 	}
 	
 	/**

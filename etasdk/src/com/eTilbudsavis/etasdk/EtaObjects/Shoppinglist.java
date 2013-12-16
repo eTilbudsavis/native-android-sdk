@@ -184,6 +184,15 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		return mShares;
 	}
 	
+	public Shoppinglist setShares(List<Share> shares) {
+		mShares.clear();
+		for (Share s : shares) {
+			s.setShoppinglistId(mId);
+			mShares.put(s.getEmail(), s);
+		}
+		return this;
+	}
+	
 	public Shoppinglist putShares(List<Share> shares) {
 		if (shares == null) return this;
 		
