@@ -357,7 +357,7 @@ public class DbHelper extends SQLiteOpenHelper {
 			sl.putShares(getShares(sl, user, false));
 		return sl.getShares().containsKey(user.getEmail()) ? sl : null;
 	}
-
+	
 	/**
 	 * Get all Shoppinglists that match the given name.
 	 * @param name to match up against

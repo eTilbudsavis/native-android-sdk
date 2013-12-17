@@ -167,8 +167,8 @@ public abstract class Request {
 		/** Parameter for locale */
 		public static final String LOCALE = "locale";
 
-		/** Parameter for sending the user agent (app version) for better app statistics in Ingisht*/
-		public static final String API_UA = "api_ua";
+		/** Parameter for sending the app version for better app statistics in insight */
+		public static final String API_AV = "api_av";
 		
 	}
 
@@ -316,8 +316,8 @@ public abstract class Request {
 		 */
 		public static String pageflipProxy(String id) {
 			String production = "https://etilbudsavis.dk/proxy/%s/";
-//			String staging = "http://10.0.1.6:3000/proxy/%s/";
-			String staging = "https://staging.etilbudsavis.dk/proxy/%s/";
+			String staging = "http://10.0.1.6:3000/proxy/%s/";
+//			String staging = "https://staging.etilbudsavis.dk/proxy/%s/";
 			return String.format(Eta.DEBUG_PAGEFLIP ? staging : production, id);
 		}
 		

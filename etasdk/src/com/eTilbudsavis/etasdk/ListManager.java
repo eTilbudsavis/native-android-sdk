@@ -730,6 +730,28 @@ public class ListManager {
 		}
 	}
 	
+	public void notifyFirstSync() {
+		
+		for (final OnChangeListener<Shoppinglist> sub : mListSubscribers) {
+			mEta.getHandler().post(new Runnable() {
+				
+				public void run() {
+					sub.onFirstSync();
+				}
+			});
+		}
+
+		for (final OnChangeListener<ShoppinglistItem> sub : mItemSubscribers) {
+			mEta.getHandler().post(new Runnable() {
+				
+				public void run() {
+					sub.onFirstSync();
+				}
+			});
+		}
+		
+	}
+	
 	public interface OnChangeListener<T> {
         /**
          * The interface for recieving updates from the shoppinglist manager, given that you have subscribed to updates.
@@ -740,6 +762,9 @@ public class ListManager {
          * @param editedIds the id's thats been edited
          */
 		public void onUpdate(boolean isServer, List<T> addedIds, List<T> deletedIds, List<T> editedIds);
+		
+		public void onFirstSync();
+			
 	}
 	
 }

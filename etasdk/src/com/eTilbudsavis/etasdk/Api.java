@@ -568,7 +568,7 @@ public class Api implements Serializable {
 			
 			String version = Eta.getInstance().getAppVersion();
 			if (version != null) {
-				mApiParams.putString(Request.Param.API_UA, version);
+				mApiParams.putString(Request.Param.API_AV, version);
 			}
 			
 			// Required API key.

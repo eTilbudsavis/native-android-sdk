@@ -56,7 +56,7 @@ public class ListSyncManager {
 	private OnSessionChangeListener sessionListener = new OnSessionChangeListener() {
 
 		public void onUpdate() {
-			if (mUser.getId() != mEta.getUser().getId()) {
+			if (mUser == null || mUser.getId() != mEta.getUser().getId()) {
 				mSyncCount = 0;
 				runSyncLoop();
 			}
@@ -67,12 +67,12 @@ public class ListSyncManager {
 	private Runnable mSyncLoop = new Runnable() {
 		
 		public void run() {
-			
+
 			mUser = mEta.getUser();
 			
 			if (!mEta.getUser().isLoggedIn() || !mEta.isResumed())
 				return;
-
+			
 			User user = mEta.getUser();
 			
 			mHandler.postDelayed(mSyncLoop, mSyncSpeed);
@@ -128,7 +128,8 @@ public class ListSyncManager {
 	public void runSyncLoop() {
 		// First make sure, that we do not leak memory by posting the runnable multiple times
 		mHandler.removeCallbacks(mSyncLoop);
-		mHandler.post(mSyncLoop);
+		mHandler.postDelayed(mSyncLoop, 10000);
+//		mHandler.post(mSyncLoop);
 	}
 	
 	public void onResume() {
@@ -172,6 +173,8 @@ public class ListSyncManager {
 	 */
 	public void syncLists(final User user) {
 		
+		
+		
 		ListListener<Shoppinglist> listListener = new ListListener<Shoppinglist>() {
 			
 			public void onComplete(boolean isCache, int statusCode, List<Shoppinglist> serverList, EtaError error) {
@@ -191,32 +194,38 @@ public class ListSyncManager {
 					List<Shoppinglist> localList = db.getLists(user);
 					mergeShoppinglists(serverList, localList, user);
 					
-					if (serverList.size() == 0 && localList.size() == 0) {
+					// On first iteration, check and merge lists plus notify subscribers of first sync event
+					if (mSyncCount == 1) {
 						
-						User nou = new User();
-						List<Shoppinglist> noUserLists = db.getLists(nou);
-						
-						if (noUserLists.size() == 0) {
-							return; 
-						}
-						
-						for (Shoppinglist sl : noUserLists) {
+						if (serverList.size() == 0 && localList.size() == 0) {
+							User nou = new User();
+							List<Shoppinglist> noUserLists = db.getLists(nou);
 							
-							List<ShoppinglistItem> noUserItems = db.getItems(sl, nou);
-							if (noUserItems.size() == 0)
-								return;
+							if (noUserLists.size() == 0) {
+								return; 
+							}
+							
+							for (Shoppinglist sl : noUserLists) {
 								
-							Shoppinglist tmpSl = Shoppinglist.fromName(sl.getName());
-							
-							mEta.getListManager().addList(tmpSl);
-							
-							for (ShoppinglistItem sli : noUserItems) {
-								sli.setShoppinglistId(tmpSl.getId());
-								sli.setId(Utils.createUUID());
-								sli.setErn("ern:shopping:item:" + sli.getId());
-								mEta.getListManager().addItem(sli);
+								List<ShoppinglistItem> noUserItems = db.getItems(sl, nou);
+								if (noUserItems.size() == 0)
+									return;
+									
+								Shoppinglist tmpSl = Shoppinglist.fromName(sl.getName());
+								
+								mEta.getListManager().addList(tmpSl);
+								
+								for (ShoppinglistItem sli : noUserItems) {
+									sli.setShoppinglistId(tmpSl.getId());
+									sli.setId(Utils.createUUID());
+									sli.setErn("ern:shopping:item:" + sli.getId());
+									mEta.getListManager().addItem(sli);
+								}
 							}
 						}
+						
+						mEta.getListManager().notifyFirstSync();
+						
 					}
 					
 					pushNotifications();
@@ -582,7 +591,7 @@ public class ListSyncManager {
 					Shoppinglist dbList = db.getList(s.getId(), user);
 					if (dbList != null && !s.getModified().before(dbList.getModified()) ) {
 						s.setState(Shoppinglist.State.SYNCED);
-						// If server havent delivered an prev_id, then use old id
+						// If server haven't delivered an prev_id, then use old id
 						s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
 						db.editList(s, user);
 					}

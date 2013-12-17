@@ -72,6 +72,7 @@ public final class PageflipWebview extends WebView {
 	private static final String INIT_LOCATION_LNG = "longitude";
 	private static final String INIT_LOCATION_SENSOR = "sensor";
 	private static final String INIT_LOCATION_RADIUS = "radius";
+	private static final String INIT_USERAGENT = "userAgent";
 	
 	/** String identifying the option to toggle visibility of the thumbnail view, in pageflip. @see {@link #toggleThumbnails() toggleThumbnails()}*/
 	public static final String CATALOG_VIEW_THUMBNAILS = "catalog-view-thumbnails";
@@ -235,8 +236,9 @@ public final class PageflipWebview extends WebView {
 			}
 
 		};
-		
-		mEta.getApi().get(Request.Endpoint.pageflipProxy(mUuid), htmlListener).execute();
+		String url = Request.Endpoint.pageflipProxy(mUuid);
+		EtaLog.d(TAG, url);
+		mEta.getApi().get(url, htmlListener).execute();
 		
 	}
 	
@@ -274,6 +276,7 @@ public final class PageflipWebview extends WebView {
 			init.put(INIT_SESSION, ses);
 			init.put(INIT_TOKEN_TTL, SessionManager.TTL);
 			init.put(INIT_LOCALE, Locale.getDefault().toString());
+			init.put(INIT_USERAGENT, mEta.getAppVersion());
 			if (mEta.getLocation().isSet()) {
 				init.put(INIT_LOCATION, location());
 			}
