@@ -6,9 +6,8 @@
  */
 package com.eTilbudsavis.etasdk;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -474,6 +473,8 @@ public final class PageflipWebview extends WebView {
 
 	public class PageflipJavaScriptInterface {
 		
+		HashMap<String, JSONObject> mResponses = new HashMap<String, JSONObject>();
+		
 		@JavascriptInterface
 		public void dispatch(String payload) {
 			
@@ -500,25 +501,42 @@ public final class PageflipWebview extends WebView {
 			}
 			
 		}
+
+		@JavascriptInterface
+		public String getData(String id) {
+			JSONObject resp = mResponses.get(id);
+			String r = "";
+			if (resp != null) {
+				mResponses.remove(id);
+				r = resp.toString();
+			}
+			return r;
+		}
+		
+		private void etaProxy(String command, JSONObject data) {
+			etaProxy(Utils.createUUID(), command, data);
+		}
 		
 		/**
 		 * Wrapper for the "window.etaProxy.push" command.
 		 * @param command to push in pageflip
 		 * @param data to handle in pageflip
 		 */
-		private void etaProxy(String command, JSONObject data) {
-			String encoded = data.toString();
+		private void etaProxy(String id, String command, JSONObject data) {
+			
+			mResponses.put(id, data);
+			JSONObject o = new JSONObject();
 			try {
-				
-				// Manually replace + sign with %20
-				encoded = URLEncoder.encode(encoded, "utf-8").replace("+", "%20");
-				
-				injectJS(String.format("window.etaProxy.push( ['%s', '%s'] );", command, encoded));
-			} catch (UnsupportedEncodingException e) {
+				o.put("id", id);
+			} catch (JSONException e) {
 				EtaLog.d(TAG, e);
 			}
 			
+			injectJS(String.format("window.etaProxy.push( ['%s', '%s'] );", command, o.toString()));
+			
 		}
+		
+		
 		
 		/**
 		 * Wrapper for the "window.etaProxy.push" command.
@@ -613,7 +631,7 @@ public final class PageflipWebview extends WebView {
 									resp.put("error", error.toJSON());
 								}
 								
-								etaProxy(API_REQUEST_COMPLETE, resp);
+								etaProxy(rId, API_REQUEST_COMPLETE, resp);
 								
 							} catch (JSONException e) {
 								EtaLog.d(TAG, e);

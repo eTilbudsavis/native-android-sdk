@@ -17,7 +17,7 @@ public class Session extends EtaObject implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private String mToken = null;
-	private Date mExpires = new Date();
+	private Date mExpires = new Date(1000);
 	private User mUser = new User();
 	private Permission mPermission = null;
 	private String mProvider = null;

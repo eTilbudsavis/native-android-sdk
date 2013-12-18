@@ -9,9 +9,14 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorWrapper;
 import android.database.DatabaseUtils;
+import android.database.MatrixCursor;
+import android.database.MergeCursor;
+import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.test.mock.MockCursor;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
@@ -353,9 +358,11 @@ public class DbHelper extends SQLiteOpenHelper {
 		Shoppinglist sl = null;
 		sl = c.moveToFirst() ? cursorToSl(c) : null;
 		close(c);
-		if (sl != null)
+		if (sl != null) {
 			sl.putShares(getShares(sl, user, false));
-		return sl.getShares().containsKey(user.getEmail()) ? sl : null;
+			sl = sl.getShares().containsKey(user.getEmail()) ? sl : null;
+		}
+		return sl;
 	}
 	
 	/**
@@ -712,12 +719,16 @@ public class DbHelper extends SQLiteOpenHelper {
 		if (mDatabase == null || !mDatabase.isOpen())
 			mDatabase = getWritableDatabase();
 		
-		Cursor c;
 		synchronized (LOCK) {
-			c = mDatabase.rawQueryWithFactory(null, query, null, null);
+			
+			try {
+				return mDatabase.rawQueryWithFactory(null, query, null, null);
+			} catch (Exception e) {
+				EtaLog.d(TAG, e);
+				return new MatrixCursor(new String[] {"empty"});
+			}
 		}
 		
-		return c;
 	}
 
 	private void close(Cursor c) {

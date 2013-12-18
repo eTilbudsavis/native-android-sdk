@@ -18,10 +18,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
@@ -275,5 +277,12 @@ public final class Utils {
 		
 	}
 	
+	public static boolean validVersion(String version) {
+		
+	    String FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([+-][0-9A-Za-z-.]*)?";
+	    Pattern PATTERN = Pattern.compile(FORMAT);
+	    return PATTERN.matcher(version).matches();
+		
+	}
 	
 }

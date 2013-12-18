@@ -294,7 +294,7 @@ public abstract class Request {
 		
 		
 		public static String getHost() {
-			return Eta.DEBUG_LOGD ? EDGE : PRODUCTION;
+			return Eta.DEBUG_ENDPOINT ? EDGE : PRODUCTION;
 		}
 
 		/**
@@ -316,8 +316,8 @@ public abstract class Request {
 		 */
 		public static String pageflipProxy(String id) {
 			String production = "https://etilbudsavis.dk/proxy/%s/";
-			String staging = "http://10.0.1.6:3000/proxy/%s/";
-//			String staging = "https://staging.etilbudsavis.dk/proxy/%s/";
+//			String staging = "http://10.0.1.6:3000/proxy/%s/";
+			String staging = "https://staging.etilbudsavis.dk/proxy/%s/";
 			return String.format(Eta.DEBUG_PAGEFLIP ? staging : production, id);
 		}
 		

@@ -27,7 +27,7 @@ public class SessionManager {
     public static final String COOKIE_AUTH_ID = "auth[id]";
     public static final String COOKIE_AUTH_TIME = "auth[time]";
     public static final String COOKIE_AUTH_HASH = "auth[hash]";
-
+    
 	/** Token time to live, 45days */
     public static int TTL = 3888000;
 	
@@ -91,7 +91,6 @@ public class SessionManager {
 		};
 		
 		mSIF.setListener(tmp);
-		EtaLog.d(TAG, mSIF.getRequestType().toString() + ": " + mSIF.getUrl());
 //		mSIF.setFlag(Api.FLAG_PRINT_DEBUG);
 		mSIF.runThread();
 		
@@ -207,16 +206,17 @@ public class SessionManager {
 		Bundle args = new Bundle();
 		args.putInt(Request.Param.TOKEN_TTL, TTL);
 		
-		// No session yet, check cookies for old token
-		String authId = null;
-		String authTime = null;
-		String authHash = null;
-		
 	    CookieSyncManager.createInstance(mEta.getContext());
 	    CookieManager cm = CookieManager.getInstance();
 	    String cookieString = cm.getCookie(COOKIE_DOMAIN);
+	    
 	    if (cookieString != null) {
-	    	
+
+			// No session yet, check cookies for old token
+			String authId = null;
+			String authTime = null;
+			String authHash = null;
+			
 	        String[] cookies = cookieString.split(";");
 	        for(String cookie : cookies) {
 	        	
@@ -233,25 +233,18 @@ public class SessionManager {
 	            }
 	            
 	        }
+
+	        if (authId != null && authHash != null && authTime != null) {
+	        	args.putString(Request.Param.V1_AUTH_ID, authId);
+	        	args.putString(Request.Param.V1_AUTH_HASH, authHash);
+	        	args.putString(Request.Param.V1_AUTH_TIME, authTime);
+	        	cm.setCookie(COOKIE_DOMAIN, null);
+	        }
 	        
 	    }
-
-        if (authId != null && authHash != null && authTime != null) {
-        	
-        	args.putString(Request.Param.V1_AUTH_ID, authId);
-        	args.putString(Request.Param.V1_AUTH_HASH, authHash);
-        	args.putString(Request.Param.V1_AUTH_TIME, authTime);
-        	cm.setCookie(COOKIE_DOMAIN, null);
-        	putSession(args);
-        	
-        } else {
-        	
-        	mEta.getApi().post(Request.Endpoint.SESSIONS, postListener, args).execute();
-        	
-        }
+	    
+        mEta.getApi().post(Request.Endpoint.SESSIONS, postListener, args).execute();
         
-		
-		
 	}
 	
 	private void putSession(final Bundle args){

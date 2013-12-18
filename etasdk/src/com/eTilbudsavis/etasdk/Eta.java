@@ -15,9 +15,12 @@ import java.io.Serializable;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 
+import android.R.string;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -32,17 +35,17 @@ import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Network.EtaCache;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 // Main object for interacting with the SDK.
 public class Eta implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	public static final String TAG = "ETA";
-	
+
+	public static boolean DEBUG_ENDPOINT = false;
 	public static boolean DEBUG_LOGD = false;
 	public static boolean DEBUG_PAGEFLIP = false;
-	
-	public static boolean USE_FALSE_TOKEN = true;
 	
 	private static Eta mEta;
 	
@@ -84,6 +87,7 @@ public class Eta implements Serializable {
 	 * If you do not the SDK will not function.
 	 * @param apiKey for your app
 	 * @param apiSecret for your app
+	 * @param appVersion Please see {@link #setAppVersion(String) appVersion()}
 	 * @param context for your app
 	 */
 	public void set(String apiKey, String apiSecret, Context context) {
@@ -93,6 +97,14 @@ public class Eta implements Serializable {
 		mContext = context;
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
+		
+		try {
+			String name = context.getPackageName();
+			String version = context.getPackageManager().getPackageInfo(name, 0 ).versionName;
+			setAppVersion(version);
+		} catch (NameNotFoundException e) {
+			EtaLog.d(TAG, e);
+		}
 		
 		if (!isSet()) {
 			mSettings = new Settings(mContext);
@@ -148,7 +160,10 @@ public class Eta implements Serializable {
 	 * @return API key as String
 	 */
 	public void setAppVersion(String appVersion) {
-		mAppVersion = appVersion;
+		if (Utils.validVersion(appVersion)) {
+			mAppVersion = appVersion;
+		}
+		EtaLog.d(TAG, "AppVersion: " + (mAppVersion == null ? "version not valid" : mAppVersion));
 	}
 
 	/**
@@ -268,17 +283,9 @@ public class Eta implements Serializable {
 	 * @param useDebug true if Eta hsould be in debug mode
 	 * @return this object
 	 */
-	public Eta debug(boolean useDebug) {
+	public Eta printLogCat(boolean useDebug) {
 		DEBUG_LOGD = useDebug;
 		return this;
-	}
-
-	/**
-	 * Is the SDK in debug mode?
-	 * @return true if eta is in debug
-	 */
-	public boolean isDebug() {
-		return DEBUG_LOGD;
 	}
 	
 	/**
