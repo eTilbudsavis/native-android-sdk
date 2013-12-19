@@ -129,10 +129,12 @@ public class ListManager {
 		Shoppinglist first = db.getFirstList(user);
 		if (first != null) {
 			first.setPreviousId(sl.getId());
-			DbHelper.getInstance().editList(first, user);
+			first.setModified(new Date());
+			first.setState(Shoppinglist.State.TO_SYNC);
+			db.editList(first, user);
 		}
 		
-		int count = DbHelper.getInstance().insertList(sl, user);
+		int count = db.insertList(sl, user);
 		boolean success = count == 1;
 		if (success) notifyListSubscribers(false, idToList(sl), null, null);
 		return success;
@@ -417,6 +419,8 @@ public class ListManager {
 		ShoppinglistItem first = db.getFirstItem(sli.getShoppinglistId(), user);
 		if (first != null) {
 			first.setPreviousId(sli.getId());
+			first.setModified(new Date());
+			first.setState(ShoppinglistItem.State.TO_SYNC);
 			db.editItem(first, user);
 		}
 		
@@ -444,7 +448,7 @@ public class ListManager {
 		
 		
 		DbHelper db = DbHelper.getInstance();
-
+		
 		sli.setModified(new Date());
 		sli.setState(ShoppinglistItem.State.TO_SYNC);
 		

@@ -82,25 +82,48 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	public static ShoppinglistItem fromJSON(JSONObject shoppinglistItem) {
 		return fromJSON(new ShoppinglistItem(), shoppinglistItem);
 	}
-
+	
 	private static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem) {
 		
 		try {
-			sli.setId(getJsonString(shoppinglistItem, S_ID));
-			sli.setTick(shoppinglistItem.getBoolean(S_TICK));
-			sli.setOfferId(getJsonString(shoppinglistItem, S_OFFER_ID));
-			sli.setCount(shoppinglistItem.getInt(S_COUNT));
-			sli.setDescription(getJsonString(shoppinglistItem, S_DESCRIPTION));
-			sli.setShoppinglistId(getJsonString(shoppinglistItem, S_SHOPPINGLIST_ID));
-			sli.setErn(getJsonString(shoppinglistItem, S_ERN));
-			sli.setCreator(getJsonString(shoppinglistItem, S_CREATOR));
-			sli.setModified(Utils.parseDate(shoppinglistItem.isNull(S_MODIFIED) ? "1970-01-01T00:00:00+0000" : shoppinglistItem.getString(S_MODIFIED)));
-			sli.setPreviousId(getJsonString(shoppinglistItem, S_PREVIOUS_ID));
+			sli.setId(getJsonString(shoppinglistItem, ServerKey.ID));
+			sli.setTick(shoppinglistItem.getBoolean(ServerKey.TICK));
+			sli.setOfferId(getJsonString(shoppinglistItem, ServerKey.OFFER_ID));
+			sli.setCount(shoppinglistItem.getInt(ServerKey.COUNT));
+			sli.setDescription(getJsonString(shoppinglistItem, ServerKey.DESCRIPTION));
+			sli.setShoppinglistId(getJsonString(shoppinglistItem, ServerKey.SHOPPINGLIST_ID));
+			sli.setErn(getJsonString(shoppinglistItem, ServerKey.ERN));
+			sli.setCreator(getJsonString(shoppinglistItem, ServerKey.CREATOR));
+			sli.setModified(Utils.parseDate(shoppinglistItem.isNull(ServerKey.MODIFIED) ? "1970-01-01T00:00:00+0000" : shoppinglistItem.getString(S_MODIFIED)));
+			sli.setPreviousId(getJsonString(shoppinglistItem, ServerKey.PREVIOUS_ID));
 			
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return sli;
+	}
+
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(ShoppinglistItem s) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(ServerKey.ID, s.getId());
+			o.put(ServerKey.TICK, s.isTicked());
+			o.put(ServerKey.OFFER_ID, s.getOfferId());
+			o.put(ServerKey.COUNT, s.getCount());
+			o.put(ServerKey.DESCRIPTION, s.getDescription());
+			o.put(ServerKey.SHOPPINGLIST_ID, s.getShoppinglistId());
+			o.put(ServerKey.ERN, s.getErn());
+			o.put(ServerKey.CREATOR, s.getCreator());
+			o.put(ServerKey.MODIFIED, Utils.formatDate(s.getModified()));
+			o.put(ServerKey.PREVIOUS_ID, s.getPreviousId());
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return o;
 	}
 	
 	public String getTitle() {
@@ -137,7 +160,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	public Offer getOffer() {
 		return mOffer;
 	}
-
+	
 	public ShoppinglistItem setOffer(Offer offer) {
 		mOffer = offer;
 		if (mOffer != null) {
@@ -189,7 +212,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	public Date getModified() {
 		return mModified;
 	}
-
+	
 	public ShoppinglistItem setModified(Date time) {
 		time.setTime(1000 * (time.getTime()/ 1000));
 		mModified = time;
@@ -233,61 +256,50 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	public Bundle getApiParams() {
 		
 		Bundle apiParams = new Bundle();
-		apiParams.putString(S_DESCRIPTION, getDescription());
-		apiParams.putInt(S_COUNT, getCount());
-		apiParams.putBoolean(S_TICK, isTicked());
-		apiParams.putString(S_OFFER_ID, getOfferId());
-		apiParams.putString(S_MODIFIED, Utils.formatDate(getModified()));
-		apiParams.putString(S_CREATOR, getCreator());
-		apiParams.putString(S_SHOPPINGLIST_ID, getShoppinglistId());
-		apiParams.putString(S_PREVIOUS_ID, getPreviousId());
+		apiParams.putString(ServerKey.ID, getId());
+		apiParams.putString(ServerKey.DESCRIPTION, getDescription());
+		apiParams.putInt(ServerKey.COUNT, getCount());
+		apiParams.putBoolean(ServerKey.TICK, isTicked());
+		apiParams.putString(ServerKey.OFFER_ID, getOfferId());
+		apiParams.putString(ServerKey.MODIFIED, Utils.formatDate(getModified()));
+		apiParams.putString(ServerKey.CREATOR, getCreator());
+		apiParams.putString(ServerKey.SHOPPINGLIST_ID, getShoppinglistId());
+		apiParams.putString(ServerKey.PREVIOUS_ID, getPreviousId());
 		apiParams.putString(ServerKey.META, mMeta);
 		return apiParams;
 	}
 
 	public int compareTo(ShoppinglistItem another) {
-		return getTitle().compareToIgnoreCase(another.getTitle());
-	}
-
-	@Override
-	public String toString() {
-		return toString(false);
-	}
-
-
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[");
-		sb.append("id=").append(mId);
-		if (mDescription != null) {
-			sb.append(", description=").append(mDescription);
-		} 
-		if (mOfferId != null) {
-			sb.append(", offer_id=").append(mOfferId);
+		if (another == null)
+			return -1;
+		
+		String t1 = getTitle();
+		String t2 = another.getTitle();
+		if (t1 == null || t2 == null) {
+			return t1 == null ? (t2 == null ? 0 : 1) : -1;
 		}
-		sb.append(", count=").append(mCount)
-		.append(", ticked=").append(mTick)
-		.append(", modified=").append(Utils.formatDate(mModified));
-		if(everything) {
-			sb.append(", creator=").append(mCreator)
-			.append(", shoppinglist_id=").append(mShoppinglistId)
-			.append(", state=").append(mState)
-			.append(", userId=").append(mUserId)
-			.append(", previous_id=").append(mPrevId)
-			.append(", meta=").append(mMeta);
-		}
-		return sb.append("]").toString();
+		
+		//ascending order
+		return t1.compareToIgnoreCase(t2);
 	}
 	
 	public static Comparator<ShoppinglistItem> TitleComparator  = new Comparator<ShoppinglistItem>() {
 
 		public int compare(ShoppinglistItem item1, ShoppinglistItem item2) {
 
-			//ascending order
-			return item1.getTitle().compareToIgnoreCase(item2.getTitle());
-
-			//descending order
-//			return item2.getTitle().compareToIgnoreCase(item1.getTitle());
+			if (item1 == null || item2 == null) {
+				return item1 == null ? (item2 == null ? 0 : 1) : -1;
+			} else {
+				String t1 = item1.getTitle();
+				String t2 = item2.getTitle();
+				if (t1 == null || t2 == null) {
+					return t1 == null ? (t2 == null ? 0 : 1) : -1;
+				}
+				
+				//ascending order
+				return t1.compareToIgnoreCase(t2);
+			}
+			
 		}
 
 	};

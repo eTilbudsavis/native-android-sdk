@@ -72,8 +72,6 @@ public class SessionManager {
 		JsonObjectListener tmp = new JsonObjectListener() {
 			
 			public void onComplete(boolean isCache, int statusCode, JSONObject item,EtaError error) {
-
-				EtaLog.d(TAG, "SIF: " + statusCode);
 				
 				mSIF = null;
 				
@@ -102,9 +100,9 @@ public class SessionManager {
 			List<Api> tmp = new ArrayList<Api>(mQueue.size());
 			for (Api a : mQueue) {
 				tmp.add(a);
-				if (!a.getUrl().contains("shoppinglists")) {
-					EtaLog.d(TAG, a.getUrl());
-				}
+//				if (!a.getUrl().contains("shoppinglists")) {
+//					EtaLog.d(TAG, a.getUrl());
+//				}
 				a.runThread();
 			}
 			mQueue.removeAll(tmp);

@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -243,7 +244,7 @@ public final class Utils {
 				nil.add(sli);
 			} else if (prev.equals(ShoppinglistItem.FIRST_ITEM)) {
 				first.add(sli);
-			} else if ( !prevItems.containsKey(prev) && allId.contains(prev) ) {
+			} else if ( !prevItems.containsKey(prev) && allId.contains(prev)) {
 				prevItems.put(prev, sli);
 			} else {
 				orphan.add(sli);
@@ -274,6 +275,9 @@ public final class Utils {
 				prevItems.remove(id);
 			}
 		}
+		
+		for (ShoppinglistItem s : prevItems.values())
+			items.add(s);
 		
 	}
 	

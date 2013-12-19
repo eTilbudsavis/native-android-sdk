@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -111,6 +112,32 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		}
 		
 		return sl;
+	}
+
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
+	public static JSONObject toJSON(Shoppinglist s) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(ServerKey.ID, s.getId());
+			o.put(ServerKey.ERN, s.getErn());
+			o.put(ServerKey.NAME, s.getName());
+			o.put(ServerKey.ACCESS, s.getAccess());
+			o.put(ServerKey.MODIFIED, Utils.formatDate(s.getModified()));
+			o.put(ServerKey.PREVIOUS_ID, s.getPreviousId());
+			o.put(ServerKey.TYPE, s.getType());
+			o.put(ServerKey.META, s.getMeta());
+			JSONArray shares = new JSONArray();
+			for (Share share : s.getShares().values()) {
+				shares.put(Share.toJSON(share));
+			}
+			o.put(ServerKey.SHARES, shares);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return o;
 	}
 	
 	public Bundle getApiParams() {
@@ -252,45 +279,42 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		mUserId = userId;
 		return this;
 	}
-	
-	@Override
-	public String toString() {
-		return toString(false);
-	}
-	
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[")
-		.append("name=").append(mName)
-		.append(", id=").append(mId)
-		.append(", ern=").append(mErn)
-		.append(", access=").append(mAccess)
-		.append(", modified=").append(mModified)
-		.append(", state=").append(mState)
-		.append(", user=").append(mUserId)
-		.append(", previous_id=").append(mPrevId)
-		.append(", type=").append(mType);
-		String shares = "";
-		for (Share s : mShares.values()) {
-			shares += "[" + s.toString() + "]";
-		}
-		sb.append(", shares=").append(shares)
-		.append(", meta=").append(getMeta() == null ? null : getMeta().toString());
-		return sb.append("]").toString();
-	}
 
+	public int compareTo(Shoppinglist another) {
+		if (another == null)
+			return -1;
+		
+		String t1 = getName();
+		String t2 = another.getName();
+		if (t1 == null || t2 == null) {
+			return t1 == null ? (t2 == null ? 0 : 1) : -1;
+		}
+		
+		//ascending order
+		return t1.compareToIgnoreCase(t2);
+	}
+	
 	public static Comparator<Shoppinglist> NameComparator  = new Comparator<Shoppinglist>() {
 
 		public int compare(Shoppinglist item1, Shoppinglist item2) {
-			return item1.getName().toLowerCase().compareTo(item2.getName().toLowerCase());
+
+			if (item1 == null || item2 == null) {
+				return item1 == null ? (item2 == null ? 0 : 1) : -1;
+			} else {
+				String t1 = item1.getName();
+				String t2 = item2.getName();
+				if (t1 == null || t2 == null) {
+					return t1 == null ? (t2 == null ? 0 : 1) : -1;
+				}
+				
+				//ascending order
+				return t1.compareToIgnoreCase(t2);
+			}
+			
 		}
 
 	};
-
-	public int compareTo(Shoppinglist another) {
-        return this.mName.toLowerCase().compareTo(another.getName().toLowerCase());
-	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

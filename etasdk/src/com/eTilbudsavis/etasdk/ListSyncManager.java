@@ -197,21 +197,23 @@ public class ListSyncManager {
 					// On first iteration, check and merge lists plus notify subscribers of first sync event
 					if (mSyncCount == 1) {
 						
-						if (serverList.size() == 0 && localList.size() == 0) {
+						if (serverList.isEmpty() && localList.isEmpty()) {
 							User nou = new User();
 							List<Shoppinglist> noUserLists = db.getLists(nou);
 							
-							if (noUserLists.size() == 0) {
+							if (noUserLists.isEmpty()) {
 								return; 
 							}
 							
 							for (Shoppinglist sl : noUserLists) {
 								
 								List<ShoppinglistItem> noUserItems = db.getItems(sl, nou);
-								if (noUserItems.size() == 0)
-									return;
+								if (noUserItems.isEmpty()) {
+									continue;
+								}
 									
 								Shoppinglist tmpSl = Shoppinglist.fromName(sl.getName());
+								tmpSl.setType(sl.getType());
 								
 								mEta.getListManager().addList(tmpSl);
 								
@@ -399,6 +401,20 @@ public class ListSyncManager {
 				
 				if (Utils.isSuccess(statusCode)) {
 					
+					if (sl.getName().toLowerCase().contains("dev")) {
+						
+						StringBuilder sb = new StringBuilder();
+						
+						List<ShoppinglistItem> items = ShoppinglistItem.fromJSON(data);
+						
+						for (ShoppinglistItem sli : items)
+							sb.append(sli.getTitle()).append(": ").append(sli.getPreviousId()).append(" - ").append(sli.getId()).append("\n");
+
+						EtaLog.writeToFile("list-json.txt", sb.toString());
+						EtaLog.d(TAG, sb.toString());
+						EtaLog.d(TAG, sl.getName());
+					}
+					
 					sl.setState(Shoppinglist.State.SYNCED);
 					db.editList(sl, user);
 					
@@ -407,6 +423,16 @@ public class ListSyncManager {
 					
 					// So far, we get items in reverse order, well just keep reversing it for now.
 					Collections.reverse(serverItems);
+					
+					EtaLog.d(TAG, "### localItems: ");
+					for (ShoppinglistItem s : localItems) {
+						EtaLog.d(TAG, s.getTitle() + " - " + s.getPreviousId() + " - " + s.getId());
+					}
+					
+					EtaLog.d(TAG, "### serverItems: ");
+					for (ShoppinglistItem s : serverItems) {
+						EtaLog.d(TAG, s.getTitle() + " - " + s.getPreviousId() + " - " + s.getId());
+					}
 					
 					// Sort items according to our definition of correct ordering
 					Utils.sortItems(localItems);
@@ -420,6 +446,16 @@ public class ListSyncManager {
 							sli.setModified(new Date());
 						}
 						id = sli.getId();
+					}
+
+					EtaLog.d(TAG, "### Sorted localItems: ");
+					for (ShoppinglistItem s : localItems) {
+						EtaLog.d(TAG, s.getTitle() + " - " + s.getPreviousId() + " - " + s.getId());
+					}
+					
+					EtaLog.d(TAG, "### Sorted serverItems: ");
+					for (ShoppinglistItem s : serverItems) {
+						EtaLog.d(TAG, s.getTitle() + " - " + s.getPreviousId() + " - " + s.getId());
 					}
 					
 					diffItems(serverItems, localItems, user);
@@ -713,7 +749,7 @@ public class ListSyncManager {
 			}
 		};
 		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
-		addRequest(api().put(url, cb, sli.getApiParams()).execute());
+		addRequest(api().put(url, cb, sli.getApiParams()).setFlag(Api.FLAG_PRINT_DEBUG).execute());
 
 	}
 
