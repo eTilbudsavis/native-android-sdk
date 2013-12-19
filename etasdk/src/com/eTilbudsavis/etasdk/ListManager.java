@@ -146,23 +146,13 @@ public class ListManager {
 	 * @param sl - Shopping list to be replaced
 	 */
 	public boolean editList(Shoppinglist sl) {
-		User u = user();
-		if (canEdit(sl, u)) {
-			return editList(sl, u);
-		} else {
-			return editListRemoveSelf(sl, u);
-		}
-	}
-	
-	private boolean editListRemoveSelf(Shoppinglist sl, User user) {
-		return false;
+		return editList(sl, user());
 	}
 	
 	private boolean editList(Shoppinglist sl, User user) {
 		
 		DbHelper db = DbHelper.getInstance();
 		
-		String email = Eta.getInstance().getUser().getEmail();
 		Map<String, Share> dbShares = new HashMap<String, Share>();
 		for (Share s : db.getShares(sl, user, false)) {
 			dbShares.put(s.getEmail(), s);
@@ -170,22 +160,23 @@ public class ListManager {
 		
 		Map<String, Share> slShares = sl.getShares();
 		
+		// User have remove it self.
+		if (!slShares.containsKey(user.getEmail())) {
+			Share dbShare = dbShares.get(user.getEmail());
+			dbShare.setState(Share.State.DELETE);
+			db.editShare(dbShare, user);
+			notifyListSubscribers(false, null, idToList(sl), null);
+			return true;
+		}
+		
+		if (!canEdit(sl, slShares.get(user.getEmail()))) {
+			EtaLog.d(TAG, "User, doesn't have rights to edit this list");
+			return false;
+		}
+		
 		HashSet<String> union = new HashSet<String>();
 		union.addAll(slShares.keySet());
 		union.addAll(dbShares.keySet());
-		
-
-		Share me = dbShares.get(email);
-		if (me.getAccess().equals(Share.ACCESS_READONLY) ) {
-			if (!slShares.containsKey(me.getEmail())) {
-				me.setState(Share.State.DELETE);
-				db.editShare(me, user);
-				return true;
-			} else {
-				EtaLog.d(TAG, "User, doesn't have rights to edit this list");
-				return false;
-			}
-		}
 		
 		// Variable for owner. If it has been removed from the sl-shares-list then we need to re-add it from the DB
 		Share owner = null;
@@ -293,7 +284,7 @@ public class ListManager {
 		
 		int count = 0;
 		if (mEta.getUser().isLoggedIn()) {
-
+			
 			EtaLog.d(TAG, "logged in");
 			
 			// Update local version of shoppinglist
@@ -625,15 +616,19 @@ public class ListManager {
 	private User user() {
 		return Eta.getInstance().getUser();
 	}
-	
-	private boolean canEdit(Shoppinglist sl, User user) {
-		Share s = sl.getShares().get(user.getEmail());
-		return s != null && ( s.getAccess().equals(Share.ACCESS_OWNER) || s.getAccess().equals(Share.ACCESS_READWRITE) );
-	}
 
-	private boolean canEdit(String shoppinglistId, User user) {
+	public boolean canEdit(String shoppinglistId, User user) {
 		Shoppinglist sl = DbHelper.getInstance().getList(shoppinglistId, user());
 		return canEdit(sl, user);
+	}
+
+	public boolean canEdit(Shoppinglist sl, User user) {
+		Share s = sl.getShares().get(user.getEmail());
+		return canEdit(sl, s);
+	}
+
+	public boolean canEdit(Shoppinglist sl, Share s) {
+		return s != null && ( s.getAccess().equals(Share.ACCESS_OWNER) || s.getAccess().equals(Share.ACCESS_READWRITE) );
 	}
 
 	/**

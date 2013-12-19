@@ -424,16 +424,6 @@ public class ListSyncManager {
 					// So far, we get items in reverse order, well just keep reversing it for now.
 					Collections.reverse(serverItems);
 					
-					EtaLog.d(TAG, "### localItems: ");
-					for (ShoppinglistItem s : localItems) {
-						EtaLog.d(TAG, s.getTitle() + " - " + s.getPreviousId() + " - " + s.getId());
-					}
-					
-					EtaLog.d(TAG, "### serverItems: ");
-					for (ShoppinglistItem s : serverItems) {
-						EtaLog.d(TAG, s.getTitle() + " - " + s.getPreviousId() + " - " + s.getId());
-					}
-					
 					// Sort items according to our definition of correct ordering
 					Utils.sortItems(localItems);
 					Utils.sortItems(serverItems);
@@ -446,16 +436,6 @@ public class ListSyncManager {
 							sli.setModified(new Date());
 						}
 						id = sli.getId();
-					}
-
-					EtaLog.d(TAG, "### Sorted localItems: ");
-					for (ShoppinglistItem s : localItems) {
-						EtaLog.d(TAG, s.getTitle() + " - " + s.getPreviousId() + " - " + s.getId());
-					}
-					
-					EtaLog.d(TAG, "### Sorted serverItems: ");
-					for (ShoppinglistItem s : serverItems) {
-						EtaLog.d(TAG, s.getTitle() + " - " + s.getPreviousId() + " - " + s.getId());
 					}
 					
 					diffItems(serverItems, localItems, user);
