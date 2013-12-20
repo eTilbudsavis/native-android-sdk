@@ -9,14 +9,10 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.CursorWrapper;
 import android.database.DatabaseUtils;
 import android.database.MatrixCursor;
-import android.database.MergeCursor;
-import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.test.mock.MockCursor;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;

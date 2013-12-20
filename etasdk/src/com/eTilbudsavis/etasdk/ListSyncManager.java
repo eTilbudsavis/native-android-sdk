@@ -26,7 +26,6 @@ import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaObject.ServerKey;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -807,12 +806,10 @@ public class ListSyncManager {
 			
 			switch (s.getState()) {
 			case Share.State.TO_SYNC:
-				EtaLog.d(TAG, "# Shares - " + sl.getName() + " - " + s.getEmail() + " TO_SYNC");
-				putShare(s, user);
+				putShare(sl, s, user);
 				break;
 
 			case Share.State.DELETE:
-				EtaLog.d(TAG, "# Shares - " + sl.getName() + " - " + s.getEmail() + " DELETE");
 				delShare(s, user);
 				break;
 				
@@ -831,7 +828,7 @@ public class ListSyncManager {
 		
 	}
 
-	private void putShare(final Share s, final User user) {
+	private void putShare(final Shoppinglist sl, final Share s, final User user) {
 
 		final DbHelper db = DbHelper.getInstance();
 		
@@ -846,12 +843,17 @@ public class ListSyncManager {
 					Share tmp = Share.fromJSON(data);
 					tmp.setState(Share.State.SYNCED);
 					tmp.setShoppinglistId(s.getShoppinglistId());
-					int count = db.editShare(tmp, user);
-					EtaLog.d(TAG, "ShareEditCount: " + String.valueOf(count));
 					popRequest();
 				} else {
 					popRequest();
-					revertShare(s, user);
+					if (error.getFailedOnField() != null) {
+						// If the request failed on a field, then we cannot really do anything, but delete
+						db.deleteShare(s, user);
+						sl.removeShare(s);
+						Eta.getInstance().getListManager().notifyListSubscribers(true, null, null, idToList(sl));
+					} else {
+						revertShare(s, user);
+					}
 				}
 
 			}

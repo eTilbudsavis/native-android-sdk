@@ -222,10 +222,10 @@ public abstract class Request {
 		public static final String NAME = "name";
 
 		/** Sort a list by published in ascending order. (smallest to largest) */
-		public static final String PUBLISHED = "published";
+		public static final String PUBLICATION_DATE = "publication_date";
 
 		/** Sort a list by expired in ascending order. (smallest to largest) */
-		public static final String EXPIRED = "expired";
+		public static final String EXPIRATION_DATE = "expiration_date";
 
 		/** Sort a list by created in ascending order. (smallest to largest) */
 		public static final String CREATED = "created";
@@ -243,10 +243,10 @@ public abstract class Request {
 		public static final String NAME_DESC = DESC + NAME;
 
 		/** Sort a list by published in descending order. (largest to smallest)*/
-		public static final String PUBLISHED_DESC = DESC + PUBLISHED;
+		public static final String PUBLICATION_DATE_DESC = DESC + PUBLICATION_DATE;
 
 		/** Sort a list by expired in descending order. (largest to smallest)*/
-		public static final String EXPIRED_DESC = DESC + EXPIRED;
+		public static final String EXPIRATION_DATE_DESC = DESC + EXPIRATION_DATE;
 
 		/** Sort a list by created in ascending order. (smallest to largest) */
 		public static final String CREATED_DESC = DESC + CREATED;

@@ -18,39 +18,6 @@ public class Catalog extends EtaErnObject implements Serializable {
 
 	public static final String TAG = "Catalog";
 	
-	/** Sort a list by popularity in ascending order. (smallest to largest) */
-	public static final String SORT_POPULARITY = Request.Sort.POPULARITY;
-
-	/** Sort a list by popularity in descending order. (largest to smallest)*/
-	public static final String SORT_POPULARITY_DESC = Request.Sort.POPULARITY_DESC;
-
-	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = Request.Sort.DISTANCE;
-
-	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = Request.Sort.DISTANCE_DESC;
-
-	/** Sort a list by name in ascending order. (smallest to largest) */
-	public static final String SORT_NAME = Request.Sort.NAME;
-
-	/** Sort a list by name in descending order. (largest to smallest)*/
-	public static final String SORT_NAME_DESC = Request.Sort.NAME_DESC;
-
-	/** Sort a list by published in ascending order. (smallest to largest) */
-	public static final String SORT_PUBLISHED = Request.Sort.PUBLISHED;
-
-	/** Sort a list by published in descending order. (largest to smallest)*/
-	public static final String SORT_PUBLISHED_DESC = Request.Sort.PUBLISHED_DESC;
-
-	/** Sort a list by expired in ascending order. (smallest to largest) */
-	public static final String SORT_EXPIRED = Request.Sort.EXPIRED;
-
-	/** Sort a list by expired in descending order. (largest to smallest)*/
-	public static final String SORT_EXPIRED_DESC = Request.Sort.EXPIRED_DESC;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Request.Sort.CREATED;
-
 	/** Sort a list by created in ascending order. (smallest to largest) */
 	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
 

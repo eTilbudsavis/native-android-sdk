@@ -15,9 +15,7 @@ import java.io.Serializable;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Pattern;
 
-import android.R.string;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;

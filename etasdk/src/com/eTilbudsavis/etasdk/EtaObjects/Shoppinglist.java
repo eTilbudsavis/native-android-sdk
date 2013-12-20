@@ -14,7 +14,6 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 
-import com.eTilbudsavis.etasdk.EtaObjects.EtaObject.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 

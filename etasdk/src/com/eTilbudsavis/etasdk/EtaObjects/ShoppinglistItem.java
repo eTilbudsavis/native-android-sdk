@@ -127,7 +127,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	}
 	
 	public String getTitle() {
-		return mOffer == null ? mDescription : mOffer.getHeading();
+		return mDescription == null ? (mOffer == null ? "" : mOffer.getHeading()) : mDescription;
 	}
 
 	public String getDescription() {
@@ -164,8 +164,10 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	public ShoppinglistItem setOffer(Offer offer) {
 		mOffer = offer;
 		if (mOffer != null) {
+			if (mDescription == null || !mOffer.getId().equals(mOfferId)) {
+				setDescription(mOffer.getHeading());
+			}
 			setOfferId(offer.getId());
-			setDescription(mOffer.getHeading());
 		} else {
 			setOfferId(null);
 		}
