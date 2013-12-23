@@ -9,12 +9,14 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.Api.ListListener;
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Pageflip;
-import com.eTilbudsavis.etasdk.Pageflip.PageflipListener;
+import com.eTilbudsavis.etasdk.PageflipWebview;
+import com.eTilbudsavis.etasdk.PageflipWebview.PageflipListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
@@ -24,26 +26,25 @@ import com.etilbudsavis.sdkdemo.R;
 public class CatalogViewer extends Activity {
 
 	public static final String TAG = "CatalogViewer";
-	Pageflip mPageflip;
+	FrameLayout mPageflipContainer;
+	PageflipWebview mPageflip;
 	ProgressDialog mPd;
-	// Pageflip viewer hack
-	String mViewSession = null;
+	boolean gotCatalogs = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.catalog_viewer);
         
-        /*
-         *  Note here, that because we setup Eta in the Main activity, 
-         *  we don't necessarily need to do t again. So we can just
-         *  call Eta.getInstance()
-         */
+        // Eta was 'set' once in the Main activity,  we do not need to do it again.
         
-		mPageflip = (Pageflip)findViewById(R.id.pageflip);
-		/* The view session hack, to fix a problem of redrawing the WebView
-		 * in a Fragment, that has had a onDestroyView() */
-		mPageflip.setViewSession(mViewSession);
+        // Notice this: We use a FrameLayout in the xml, and add a new pageflip view to it
+        // in this way, we do not have to initialize the pageflip object again (slow process)
+        mPageflipContainer = (FrameLayout) findViewById(R.id.pageflip);
+		if (mPageflip == null) {
+			mPageflip = new PageflipWebview(getApplicationContext());
+			mPageflip.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		}
 		
     }
     
@@ -51,14 +52,18 @@ public class CatalogViewer extends Activity {
     public void onResume() {
     	super.onResume();
     	Eta.getInstance().onResume();
-    	mPd = ProgressDialog.show(CatalogViewer.this, "", "Getting catalogs...", true, true);
-    	Eta.getInstance().getCatalogList(catalogListener).execute();
+		mPageflipContainer.addView(mPageflip);
+    	if (!gotCatalogs) {
+        	mPd = ProgressDialog.show(CatalogViewer.this, "", "Getting catalogs...", true, true);
+        	Eta.getInstance().getCatalogList(catalogListener).execute();
+    	}
     }
     
     @Override
     public void onPause() {
     	super.onPause();
     	Eta.getInstance().onPause();
+    	mPageflipContainer.removeAllViews();
     }
     
 	// A catalogs listener, 
@@ -73,8 +78,8 @@ public class CatalogViewer extends Activity {
 			 * show the first catalog in a pageflip. */
 			if (Utils.isSuccess(statusCode) && !list.isEmpty()) {
 				
+				gotCatalogs = true;
 				mPd = ProgressDialog.show(CatalogViewer.this, "", "Loading catalog into pageflip...", true, true);
-				
 		        mPageflip.execute(Eta.getInstance(), pfl, list.get(0).getId());
 		        
 			} else {
@@ -87,43 +92,39 @@ public class CatalogViewer extends Activity {
 	
 	// Pageflip listener, triggered on callbacks from the pageflip.
     PageflipListener pfl = new PageflipListener() {
+
+		@Override
+		public void onReady(String uuid) {
+			mPd.dismiss();
+		}
 		
 		@Override
 		public void onEvent(String event, String uuid, JSONObject object) {
 			Toast.makeText(getApplicationContext(), event, Toast.LENGTH_SHORT).show();
 		}
 		
-		@Override
-		public void onReady(String uuid, String viewSession) {
-			// Remember to set the viewSession variable, first chance you get.
-			mViewSession = viewSession;
-			mPd.dismiss();
-		}
-
 	};
     
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		menu.add(Menu.NONE, 0, 0, "Sideoversigt");
+		return super.onCreateOptionsMenu(menu); 
+	}
 
-    menu.add(Menu.NONE, 0, 0, "Sideoversigt");
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
 
-    return super.onCreateOptionsMenu(menu); 
-    }
+		switch (item.getItemId()) {
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+		case 0:
+			mPageflip.toggleThumbnails();
+			break;
 
-    	switch (item.getItemId()) {
+		default:
+			break;
 
-    	case 0:
-    		mPageflip.toggleThumbnails();
-    		break;
-
-    	default:
-    		break;
-
-    	}
-    	return super.onOptionsItemSelected(item);
-    }
+		}
+		return super.onOptionsItemSelected(item);
+	}
     
 }
