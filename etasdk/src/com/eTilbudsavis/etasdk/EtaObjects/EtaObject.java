@@ -90,6 +90,8 @@ public class EtaObject {
 	protected static final String SERVER_TYPE = "type";
 	protected static final String SERVER_META = "meta";
 	
+	public JSONObject serverData;
+	
 	public EtaObject() { }
 	
 	/**

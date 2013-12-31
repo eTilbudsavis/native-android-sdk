@@ -196,6 +196,8 @@ public class ListSyncManager {
 					// On first iteration, check and merge lists plus notify subscribers of first sync event
 					if (mSyncCount == 1) {
 						
+						
+						
 						if (serverList.isEmpty() && localList.isEmpty()) {
 							User nou = new User();
 							List<Shoppinglist> noUserLists = db.getLists(nou);

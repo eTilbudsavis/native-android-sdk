@@ -38,7 +38,7 @@ public class EtaLocation extends Location {
 	private static Eta mEta;
 	private static boolean mPushNotifications = false;
 	private static ArrayList<LocationListener> mSubscribers = new ArrayList<LocationListener>();
-
+	
 	public EtaLocation(Eta eta) {
 		super(ETA_PROVIDER);
 		mEta = eta;
@@ -120,9 +120,20 @@ public class EtaLocation extends Location {
 	}
 
 	public boolean isSet() {
-		return (getLatitude() != 0.0 && getLongitude() != 0.0);
+		return isValidLocation(getLatitude(), getLongitude());
+	}
+	
+	public static boolean isValidLocation(double lat, double lng) {
+		return isValid(lat) && isValid(lng);
 	}
 
+	/*
+	 * A coordinate is valid is it's not in the range of -0.1 to 0.1
+	 */
+	private static boolean isValid(double coordinate) {
+		return !(-0.1 < coordinate && coordinate < 0.1);
+	}
+	
 	public boolean isBoundsSet() {
 		return (mBoundNorth != BOUND_DEFAULT && 
 				mBoundSouth != BOUND_DEFAULT && 
@@ -250,12 +261,12 @@ public class EtaLocation extends Location {
 			
 			mSensor = prefs.getBoolean(Settings.LOC_SENSOR, false);
 			mRadius = prefs.getInt(Settings.LOC_RADIUS, Integer.MAX_VALUE);
-			setLatitude(prefs.getFloat(Settings.LOC_LATITUDE, 0.111f));
-			setLongitude(prefs.getFloat(Settings.LOC_LONGITUDE, 0.111f));
-			mBoundEast = prefs.getFloat(Settings.LOC_BOUND_EAST, 0f);
-			mBoundWest = prefs.getFloat(Settings.LOC_BOUND_WEST, 0f);
-			mBoundNorth = prefs.getFloat(Settings.LOC_BOUND_NORTH, 0f);
-			mBoundSouth = prefs.getFloat(Settings.LOC_BOUND_SOUTH, 0f);
+			setLatitude(prefs.getFloat(Settings.LOC_LATITUDE, 0.0f));
+			setLongitude(prefs.getFloat(Settings.LOC_LONGITUDE, 0.0f));
+			mBoundEast = prefs.getFloat(Settings.LOC_BOUND_EAST, 0.0f);
+			mBoundWest = prefs.getFloat(Settings.LOC_BOUND_WEST, 0.0f);
+			mBoundNorth = prefs.getFloat(Settings.LOC_BOUND_NORTH, 0.0f);
+			mBoundSouth = prefs.getFloat(Settings.LOC_BOUND_SOUTH, 0.0f);
 			mAddress = prefs.getString(Settings.LOC_ADDRESS, null);
 			setTime(prefs.getLong(Settings.LOC_TIME, System.currentTimeMillis()));
 			return true;

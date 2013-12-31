@@ -202,7 +202,12 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	}
 
 	public Shoppinglist setType(String type) {
-		mType = type;
+		if (type == null || type.equals("")) {
+			// it s a shoppinglist
+			mType = TYPE_SHOPPING_LIST;
+		} else {
+			mType = type;
+		}
 		return this;
 	}
 
