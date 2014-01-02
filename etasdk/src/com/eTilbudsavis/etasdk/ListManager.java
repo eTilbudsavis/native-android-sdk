@@ -623,7 +623,8 @@ public class ListManager {
 	}
 
 	public boolean canEdit(Shoppinglist sl, User user) {
-		Share s = sl.getShares().get(user.getEmail());
+		String email = user.getEmail();
+		Share s = sl.getShares().get(email);
 		return canEdit(sl, s);
 	}
 
