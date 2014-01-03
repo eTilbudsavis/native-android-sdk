@@ -24,6 +24,8 @@ public class Permission extends EtaObject implements Serializable {
 
 	public static Permission fromJSON(String permission) {
 		Permission p = new Permission();
+		if (permission == null)
+			return p;
 		try {
 			p = fromJSON(p, new JSONObject(permission));
 		} catch (JSONException e) {

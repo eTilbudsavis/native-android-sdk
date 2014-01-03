@@ -17,6 +17,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Request.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class SessionManager {
@@ -34,6 +35,7 @@ public class SessionManager {
 	private Eta mEta;
 	private Session mSession;
 	private Object LOCK = new Object();
+	public EventLog mLog = new EventLog();
 
 	// Queue of ApiRequests to execute, when session is okay
 	private List<Api> mQueue = Collections.synchronizedList(new ArrayList<Api>());
@@ -56,6 +58,9 @@ public class SessionManager {
 	public SessionManager(Eta eta) {
 		mEta = eta;
 		JSONObject session = mEta.getSettings().getSessionJson();
+		
+		mLog.add(session == null ? "session null" : session.toString());
+		
 		mSession = Session.fromJSON(session);
 		if (mSession == null)
 			mSession = new Session();
@@ -73,18 +78,33 @@ public class SessionManager {
 			
 			public void onComplete(boolean isCache, int statusCode, JSONObject item,EtaError error) {
 				
+				String resp = statusCode + ": " + mSIF.getUrl();
+				EtaLog.d(TAG, resp);
+				mLog.add(resp);
+				
 				mSIF = null;
 				
-				if (item != null) {
+				if (Utils.isSuccess(statusCode)) {
+					
 					setSession(item);
-				} else if (original == putListener){
-					postSession();
-				} else {
+					
+				} else if (300 <= statusCode && statusCode < 600) {
+					
+					if (original == putListener || original == postListener) {
+						invalidate();
+					}
 					performNextRequest();
+					
+				} else {
+					
+					performNextRequest();
+					
 				}
+				
 				if (original != null) {
 					original.onComplete(isCache, statusCode, item, error);
 				}
+				
 			}
 		};
 		
@@ -94,7 +114,7 @@ public class SessionManager {
 		
 	}
 	
-	private void runApiQueue() {
+	private void runRequestQueue() {
 		
 		synchronized (mQueue) {
 			List<Api> tmp = new ArrayList<Api>(mQueue.size());
@@ -111,7 +131,8 @@ public class SessionManager {
 	}
 	
 	private boolean shouldPut() {
-		return mSession.getExpire().getTime()-System.currentTimeMillis() < ( (TTL/2)*1000 );
+		int halfTTL = (TTL/2)*1000;
+		return mSession.getExpire().getTime()-System.currentTimeMillis() < halfTTL;
 	}
 	
 	/**
@@ -120,6 +141,10 @@ public class SessionManager {
 	 * @param api to execute on session-ok
 	 */
 	public synchronized void performRequest(Api api) {
+		
+		String log = "Request: " + api.getRequestType().toString() + " " + api.getUrl();
+		EtaLog.d(TAG, log);
+		mLog.add(log);
 		
 		if (api.getUrl().contains(Request.Endpoint.SESSIONS)) {
 			mSessionQueue.add(api);
@@ -143,7 +168,7 @@ public class SessionManager {
 				} else if ( shouldPut() ) {
 					putSession(new Bundle());
 				} else {
-					runApiQueue();
+					runRequestQueue();
 				}
 				
 			} else if (Eta.getInstance().isResumed()) {
@@ -163,20 +188,13 @@ public class SessionManager {
 	 */
 	public void onResume() {
 		
-		if (mSIF != null)
-			return;
-		
-		if (mSession.isExpired()) {
-			postSession();	
-		} else {
-			putSession(new Bundle());
-		}
-		
 	}
 	
 	public void setSession(JSONObject session) {
 
 		synchronized (LOCK) {
+			
+			mLog.add(session.toString());
 			
 			Session s = Session.fromJSON(session);
 			
@@ -379,8 +397,6 @@ public class SessionManager {
 		}
 		
 	}
-	
-	
 	
 	/**
 	 * Destroys this session.<br>

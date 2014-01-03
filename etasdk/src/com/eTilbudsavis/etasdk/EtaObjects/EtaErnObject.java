@@ -61,7 +61,7 @@ public class EtaErnObject extends EtaObject {
 		
 		List<? extends EtaObject> list = new ArrayList<EtaObject>(0);
 		
-		if (objects.length() == 0) {
+		if (objects == null || objects.length() == 0) {
 			return (T) list;
 		}
 		
@@ -96,6 +96,9 @@ public class EtaErnObject extends EtaObject {
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends EtaObject> T fromJSON(JSONObject object) {
+		if (object == null)
+			return null;
+		
 		EtaObject item = new EtaObject();
 		try {
 			if (object.has(S_ERN)) {

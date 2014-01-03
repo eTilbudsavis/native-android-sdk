@@ -69,18 +69,29 @@ public class EtaLog {
 		public void add(Event e) {
 			mEvents.add(e);
 		}
-
-		public void print(String name) {
-			d(TAG, getString(name));
+		
+		/**
+		 * Prints a human readable string to Log.d<br>
+		 * This method can be called multiple times, with different event names
+		 * @param eventName of the log or event
+		 */
+		public void print(String eventName) {
+			d(TAG, getString(eventName));
 		}
 		
-		public String getString(String name) {
-			if (mEvents.isEmpty())
-				return String.format("[%+6d ms] %s", 0, name);
+		/**
+		 * Returns a human readable string containing all events in this log, along with timings
+		 * @param eventName of the log or event
+		 * @return
+		 */
+		public String getString(String eventName) {
+			if (mEvents.isEmpty()) {
+				return String.format("[%+6d ms] %s", 0, eventName);
+			}
 			
 			StringBuilder sb = new StringBuilder();
 			long prevTime = mEvents.get(0).time;
-			sb.append(String.format("     [%+6d ms] %s", getTotalDuration(), name)).append("\n");
+			sb.append(String.format("     [%+6d ms] %s", getTotalDuration(), eventName)).append("\n");
 			for (int i = 0; i < mEvents.size() ; i++) {
 				Event e = mEvents.get(i);
 				long thisTime = e.time;
@@ -113,7 +124,7 @@ public class EtaLog {
 			}
 
 		}
-
+		
 	}
 	
 	public static boolean isExternalStorageWritable() {
