@@ -127,7 +127,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	}
 	
 	public String getTitle() {
-		return mDescription == null ? (mOffer == null ? "" : mOffer.getHeading()) : mDescription;
+		return (mDescription == null || mDescription.length() == 0) ? (mOffer == null ? "" : mOffer.getHeading()) : mDescription;
 	}
 
 	public String getDescription() {

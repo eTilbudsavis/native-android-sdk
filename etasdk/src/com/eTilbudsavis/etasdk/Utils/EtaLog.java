@@ -24,6 +24,7 @@ public class EtaLog {
 	public static void d(String tag, Exception e) {
 		if (!Eta.DEBUG_LOGD) return;
 		e.printStackTrace(); 
+		
 	}
 
 	public static void d(String tag, Throwable t) {

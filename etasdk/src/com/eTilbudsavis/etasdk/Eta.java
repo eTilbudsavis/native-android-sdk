@@ -44,6 +44,7 @@ public class Eta implements Serializable {
 	public static boolean DEBUG_ENDPOINT = false;
 	public static boolean DEBUG_LOGD = false;
 	public static boolean DEBUG_PAGEFLIP = false;
+	public static boolean DEBUG_SESSIONMANAGER = false;
 	
 	private static Eta mEta;
 	

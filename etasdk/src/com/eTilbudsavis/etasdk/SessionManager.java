@@ -16,6 +16,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Session;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Request.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.DebugDump;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -24,18 +25,22 @@ public class SessionManager {
 	
 	public static final String TAG = "SessionManager";
 	
-    public static final String COOKIE_DOMAIN = "etilbudsavis.dk";
+    public static final String ETA_COOKIE_DOMAIN = "etilbudsavis.dk";
     public static final String COOKIE_AUTH_ID = "auth[id]";
     public static final String COOKIE_AUTH_TIME = "auth[time]";
     public static final String COOKIE_AUTH_HASH = "auth[hash]";
     
 	/** Token time to live, 45days */
     public static int TTL = 3888000;
+    
+    private static final int SESSION_RETRIES = 2;
 	
 	private Eta mEta;
 	private Session mSession;
 	private Object LOCK = new Object();
 	public EventLog mLog = new EventLog();
+	
+	private int mSessionRetryCount = 0;
 
 	// Queue of ApiRequests to execute, when session is okay
 	private List<Api> mQueue = Collections.synchronizedList(new ArrayList<Api>());
@@ -62,12 +67,15 @@ public class SessionManager {
 		mLog.add(session == null ? "session null" : session.toString());
 		
 		mSession = Session.fromJSON(session);
-		if (mSession == null)
-			mSession = new Session();
+		// Make sure, that the session isn't null
+		mSession = mSession == null ? new Session() : mSession;
+		
 		
 	}
 	
 	private void runSessionQueue() {
+
+		mSessionRetryCount++;
 		
 		mSIF = mSessionQueue.get(0);
 		mSessionQueue.remove(mSIF);
@@ -84,21 +92,24 @@ public class SessionManager {
 				
 				mSIF = null;
 				
-				if (Utils.isSuccess(statusCode)) {
+				if (item != null) {
 					
 					setSession(item);
 					
-				} else if (300 <= statusCode && statusCode < 600) {
+				} else if (error != null && 
+						(error.getCode() == 1101 || error.getCode() == 1104 || error.getCode() == 1108) 
+						&& mSessionRetryCount < SESSION_RETRIES ) {
 					
-					if (original == putListener || original == postListener) {
-						invalidate();
-					}
-					performNextRequest();
+					postSession();
 					
 				} else {
 					
 					performNextRequest();
 					
+				}
+				
+				if (Eta.DEBUG_SESSIONMANAGER && mSessionRetryCount == 2) {
+					printDebug(isCache, statusCode, item, error);
 				}
 				
 				if (original != null) {
@@ -109,7 +120,7 @@ public class SessionManager {
 		};
 		
 		mSIF.setListener(tmp);
-//		mSIF.setFlag(Api.FLAG_PRINT_DEBUG);
+		mSIF.setFlag(Api.FLAG_PRINT_DEBUG);
 		mSIF.runThread();
 		
 	}
@@ -126,6 +137,9 @@ public class SessionManager {
 				a.runThread();
 			}
 			mQueue.removeAll(tmp);
+			
+			// Reset session queue, so user can force a new session refresh if necessary
+			mSessionRetryCount = 0;
 		}
 		
 	}
@@ -158,28 +172,36 @@ public class SessionManager {
 	private void performNextRequest() {
 		
 		// If no session inflight, we continue
-		if (mSIF == null) {
+		if (mSIF != null) {
+			EtaLog.d(TAG, "Session in flight, waiting for call to finish");
+			return;
+		}
+		
+		// If session queue is empty
+		if (mSessionQueue.isEmpty()) {
 			
-			// If session queue is empty
-			if (mSessionQueue.isEmpty()) {
+			boolean canRetry = mSessionRetryCount < SESSION_RETRIES;
+			
+			if (canRetry && mSession.isExpired()) {
 				
-				if (mSession.isExpired()) {
-					postSession();
-				} else if ( shouldPut() ) {
-					putSession(new Bundle());
-				} else {
-					runRequestQueue();
-				}
+				postSession();
 				
-			} else if (Eta.getInstance().isResumed()) {
+			} else if (canRetry && shouldPut() ) {
 				
-				runSessionQueue();
+				putSession(new Bundle());
+				
+			} else {
+				
+				runRequestQueue();
 				
 			}
 			
-		} else {
-			EtaLog.d(TAG, "Session in flight, waiting for call to finish");
+		} else if (Eta.getInstance().isResumed()) {
+			
+			runSessionQueue();
+			
 		}
+			
 		
 	}
 	
@@ -212,11 +234,14 @@ public class SessionManager {
 				p.updateSession();
 			}
 			
+			// Reset session counter
+			mSessionRetryCount = 0;
+			
 			performNextRequest();
 		}
 		
 	}
-
+	
 	private void postSession() {
 		
 		Bundle args = new Bundle();
@@ -224,10 +249,10 @@ public class SessionManager {
 		
 	    CookieSyncManager.createInstance(mEta.getContext());
 	    CookieManager cm = CookieManager.getInstance();
-	    String cookieString = cm.getCookie(COOKIE_DOMAIN);
+	    String cookieString = cm.getCookie(ETA_COOKIE_DOMAIN);
 	    
 	    if (cookieString != null) {
-
+	    	
 			// No session yet, check cookies for old token
 			String authId = null;
 			String authTime = null;
@@ -254,9 +279,10 @@ public class SessionManager {
 	        	args.putString(Request.Param.V1_AUTH_ID, authId);
 	        	args.putString(Request.Param.V1_AUTH_HASH, authHash);
 	        	args.putString(Request.Param.V1_AUTH_TIME, authTime);
-	        	cm.setCookie(COOKIE_DOMAIN, null);
 	        }
 	        
+        	cm.setCookie(ETA_COOKIE_DOMAIN, null);
+        	
 	    }
 	    
         mEta.getApi().post(Request.Endpoint.SESSIONS, postListener, args).execute();
@@ -454,5 +480,26 @@ public class SessionManager {
 	public interface OnSessionChangeListener {
 		public void onUpdate();
 	}
+	
+	private void printDebug(boolean isCache, int statusCode, JSONObject item,EtaError error) {
+		
+		mSessionRetryCount++;
+		if (mSessionRetryCount == 1 && Eta.DEBUG_SESSIONMANAGER) {
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("------- Current Data -------").append("\n");
+			sb.append("Session: ").append(mSession.toJSON().toString()).append("\n");
+			sb.append("------- API Response -------").append("\n");
+			sb.append("StatusCode: ").append(statusCode).append("\n");
+			sb.append("isCache: ").append(isCache).append("\n");
+			sb.append("Item: ").append(item == null ? "null" : item.toString()).append("\n");
+			sb.append("EtaError: ").append(error == null ? "null" : error.toString()).append("\n");
+			sb.append("------- Log Entries -------").append("\n");
+			sb.append("Log: ").append(mLog.getString("SessionManager")).append("\n");
+			
+			(new DebugDump("SessionManagerDebug", sb.toString())).execute();
+		}
+	}
+	
 	
 }

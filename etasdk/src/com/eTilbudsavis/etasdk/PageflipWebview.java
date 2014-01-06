@@ -335,9 +335,11 @@ public final class PageflipWebview extends WebView {
 	}
 	
 	public void closePageflip() {
-		Eta.getInstance().getLocation().unSubscribe(ll);
-		pageflips.remove(PageflipWebview.this);
-		mPFInterface.etaProxy(CATALOG_VIEW_CLOSE);
+		if (mPFInterface != null) {
+			Eta.getInstance().getLocation().unSubscribe(ll);
+			pageflips.remove(PageflipWebview.this);
+			mPFInterface.etaProxy(CATALOG_VIEW_CLOSE);
+		}
 	}
 	
 	/**

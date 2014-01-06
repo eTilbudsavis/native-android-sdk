@@ -233,6 +233,9 @@ public abstract class Request {
 		/** Sort a list by page (in catalog) in ascending order. (smallest to largest) */
 		public static final String PAGE = "page";
 
+		/** Sort a list by price in ascending order. (smallest to largest) */
+		public static final String PRICE = "price";
+
 		/** Sort a list by popularity in descending order. (largest to smallest)*/
 		public static final String POPULARITY_DESC = DESC + POPULARITY;
 
@@ -253,6 +256,9 @@ public abstract class Request {
 
 		/** Sort a list by page (in catalog) in descending order. (largest to smallest)*/
 		public static final String PAGE_DESC = DESC + PAGE;
+
+		/** Sort a list by price in descending order. (largest to smallest)*/
+		public static final String PRICE_DESC = DESC + PRICE;
 
 	}
 

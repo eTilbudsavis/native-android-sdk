@@ -741,19 +741,7 @@ public class Api implements Serializable {
 				
 				EtaError error = EtaError.fromJSON(response.getJSONObject());
 				
-				int e = error.getCode();
-				
-				if (mPath.contains(Request.Endpoint.SESSIONS)) {
-					
-					error.setOriginalData(response.getString());
-					runOnUiThread(false, response.getStatusCode(), null, error);
-					
-				} else if ( !isFlag(FLAG_SESSION_REFRESH) && ( e == 1101 || e == 1108 ) ) {
-					
-						setFlag(FLAG_SESSION_REFRESH);
-						mEta.getSessionManager().performRequest(Api.this);
-					
-				} else if ( e == 2015 && mRetryCount < 3) {
+				if ( error.getCode() == 2015 && mRetryCount < 3) {
 					
 				    for (Header h : response.getHeaders()) {
 				    	if (h.getName().equals(Request.Header.RETRY_AFTER)) {
@@ -774,6 +762,7 @@ public class Api implements Serializable {
 					error.setOriginalData(response.getString());
 					runOnUiThread(false, response.getStatusCode(), null, error);
 				}
+				
 			}
 		}
 	};
