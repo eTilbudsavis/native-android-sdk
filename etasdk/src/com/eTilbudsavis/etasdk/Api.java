@@ -815,9 +815,11 @@ public class Api implements Serializable {
     	
     	debug.append("Status: ").append(dataWrapper.getStatusCode()).append("\n");
     	debug.append("Return Headers: ");
-		for (Header h : dataWrapper.getHeaders())
-			debug.append(h.getName()).append(": ").append(h.getValue()).append(", ");
-		debug.append("\n");
+    	if (dataWrapper.getHeaders() != null) {
+    		for (Header h : dataWrapper.getHeaders())
+    			debug.append(h.getName()).append(": ").append(h.getValue()).append(", ");
+    		debug.append("\n");
+    	}
 		String data = dataWrapper.getString();
     	debug.append("Data: ").append(data);
     	EtaLog.d(TAG, debug.toString());

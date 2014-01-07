@@ -2,6 +2,7 @@ package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -131,9 +132,6 @@ public class SessionManager {
 			List<Api> tmp = new ArrayList<Api>(mQueue.size());
 			for (Api a : mQueue) {
 				tmp.add(a);
-//				if (!a.getUrl().contains("shoppinglists")) {
-//					EtaLog.d(TAG, a.getUrl());
-//				}
 				a.runThread();
 			}
 			mQueue.removeAll(tmp);
@@ -146,7 +144,13 @@ public class SessionManager {
 	
 	private boolean shouldPut() {
 		int halfTTL = (TTL/2)*1000;
-		return mSession.getExpire().getTime()-System.currentTimeMillis() < halfTTL;
+		long now = System.currentTimeMillis();
+		EtaLog.d(TAG, "Session: " + mSession.getExpire().toGMTString());
+		EtaLog.d(TAG, "now:     " + new Date(now).toGMTString());
+		EtaLog.d(TAG, "half:    " + halfTTL);
+		boolean put = mSession.getExpire().getTime()-now < halfTTL;
+		EtaLog.d(TAG, "put:     " + halfTTL);
+		return put;
 	}
 	
 	/**
@@ -237,6 +241,9 @@ public class SessionManager {
 			// Reset session counter
 			mSessionRetryCount = 0;
 			
+
+			EtaLog.d(TAG, "setSession: " + mSession.toJSON().toString());
+			
 			performNextRequest();
 		}
 		
@@ -279,6 +286,7 @@ public class SessionManager {
 	        	args.putString(Request.Param.V1_AUTH_ID, authId);
 	        	args.putString(Request.Param.V1_AUTH_HASH, authHash);
 	        	args.putString(Request.Param.V1_AUTH_TIME, authTime);
+
 	        }
 	        
         	cm.setCookie(ETA_COOKIE_DOMAIN, null);

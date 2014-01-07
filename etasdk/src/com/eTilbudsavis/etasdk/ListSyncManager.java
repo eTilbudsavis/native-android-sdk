@@ -127,8 +127,7 @@ public class ListSyncManager {
 	public void runSyncLoop() {
 		// First make sure, that we do not leak memory by posting the runnable multiple times
 		mHandler.removeCallbacks(mSyncLoop);
-		mHandler.postDelayed(mSyncLoop, 10000);
-//		mHandler.post(mSyncLoop);
+		mHandler.post(mSyncLoop);
 	}
 	
 	public void onResume() {
