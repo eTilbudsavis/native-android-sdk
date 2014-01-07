@@ -273,7 +273,7 @@ public final class PageflipWebview extends WebView {
 			init.put(INIT_API_SECRET, mEta.getApiSecret());
 			JSONObject ses = mEta.getSessionManager().getSession().toJSON();
 			init.put(INIT_SESSION, ses);
-			init.put(INIT_TOKEN_TTL, SessionManager.TTL);
+			init.put(INIT_TOKEN_TTL, mEta.getSettings().getSessionTTL());
 			init.put(INIT_LOCALE, Locale.getDefault().toString());
 			init.put(INIT_USERAGENT, mEta.getAppVersion());
 			if (mEta.getLocation().isSet()) {

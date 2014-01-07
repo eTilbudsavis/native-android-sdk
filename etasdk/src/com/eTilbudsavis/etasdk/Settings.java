@@ -16,6 +16,7 @@ public class Settings {
 	private static final String SESSION_JSON		= "session_json";
 	private static final String SESSION_USER		= "session_user";
 	private static final String SESSION_FACEBOOK	= "session_facebook";
+	private static final String SESSION_TTL			= "session_ttl";
 	
 	private static final String SLM_CURRENT_ONLINE	= "slm_current_online";
 	private static final String SLM_CURRENT_OFFLINE	= "slm_current_offline";
@@ -76,6 +77,14 @@ public class Settings {
 
 	public String getSessionFacebook() {
 		return mPrefs.getString(SESSION_FACEBOOK, null);
+	}
+
+	public boolean setSessionTTL(int ttl) {
+		return mEditor.putInt(SESSION_TTL, ttl).commit();
+	}
+
+	public int getSessionTTL() {
+		return mPrefs.getInt(SESSION_TTL, 0);
 	}
 
 	public String getShoppinglistManagerCurrent(boolean isLoggedin) {

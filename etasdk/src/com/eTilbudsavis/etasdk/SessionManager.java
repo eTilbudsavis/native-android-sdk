@@ -17,9 +17,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Session;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Request.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.DebugDump;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class SessionManager {
@@ -31,7 +29,7 @@ public class SessionManager {
     public static final String COOKIE_AUTH_TIME = "auth[time]";
     public static final String COOKIE_AUTH_HASH = "auth[hash]";
     
-	/** Token time to live, 45days */
+	/** Token time to live i'm requesting, 45days */
     public static int TTL = 3888000;
     
     private static final int SESSION_RETRIES = 2;
@@ -39,7 +37,6 @@ public class SessionManager {
 	private Eta mEta;
 	private Session mSession;
 	private Object LOCK = new Object();
-	public EventLog mLog = new EventLog();
 	
 	private int mSessionRetryCount = 0;
 
@@ -65,12 +62,9 @@ public class SessionManager {
 		mEta = eta;
 		JSONObject session = mEta.getSettings().getSessionJson();
 		
-		mLog.add(session == null ? "session null" : session.toString());
-		
 		mSession = Session.fromJSON(session);
 		// Make sure, that the session isn't null
 		mSession = mSession == null ? new Session() : mSession;
-		
 		
 	}
 	
@@ -86,10 +80,6 @@ public class SessionManager {
 		JsonObjectListener tmp = new JsonObjectListener() {
 			
 			public void onComplete(boolean isCache, int statusCode, JSONObject item,EtaError error) {
-				
-				String resp = statusCode + ": " + mSIF.getUrl();
-				EtaLog.d(TAG, resp);
-				mLog.add(resp);
 				
 				mSIF = null;
 				
@@ -107,10 +97,6 @@ public class SessionManager {
 					
 					performNextRequest();
 					
-				}
-				
-				if (Eta.DEBUG_SESSIONMANAGER && mSessionRetryCount == 2) {
-					printDebug(isCache, statusCode, item, error);
 				}
 				
 				if (original != null) {
@@ -143,14 +129,9 @@ public class SessionManager {
 	}
 	
 	private boolean shouldPut() {
-		int halfTTL = (TTL/2)*1000;
-		long now = System.currentTimeMillis();
-		EtaLog.d(TAG, "Session: " + mSession.getExpire().toGMTString());
-		EtaLog.d(TAG, "now:     " + new Date(now).toGMTString());
-		EtaLog.d(TAG, "half:    " + halfTTL);
-		boolean put = mSession.getExpire().getTime()-now < halfTTL;
-		EtaLog.d(TAG, "put:     " + halfTTL);
-		return put;
+		int ttl = Eta.getInstance().getSettings().getSessionTTL();
+		int halfTTL = (ttl/2)*1000;
+		return mSession.getExpire().getTime()-System.currentTimeMillis() < halfTTL;
 	}
 	
 	/**
@@ -159,10 +140,6 @@ public class SessionManager {
 	 * @param api to execute on session-ok
 	 */
 	public synchronized void performRequest(Api api) {
-		
-		String log = "Request: " + api.getRequestType().toString() + " " + api.getUrl();
-		EtaLog.d(TAG, log);
-		mLog.add(log);
 		
 		if (api.getUrl().contains(Request.Endpoint.SESSIONS)) {
 			mSessionQueue.add(api);
@@ -214,25 +191,34 @@ public class SessionManager {
 	 */
 	public void onResume() {
 		
+		// Make sure, that the session is up to date
+		if (mSession.isExpired()) {
+			postSession();
+		} else {
+			putSession(new Bundle());
+		}
+		
 	}
 	
 	public void setSession(JSONObject session) {
 
 		synchronized (LOCK) {
 			
-			mLog.add(session.toString());
-			
 			Session s = Session.fromJSON(session);
 			
 			// If SessionManager does a session change, and propagates it to pageflip
 			// Then pageflip propagate the session back, making nasty recursion
 			if (s.getToken().equals(mSession.getToken())) {
-				return;				
+				return;
 			}
 			
-//			EtaLog.d(TAG, "setSession: " + session.toString());
 			mSession = s;
 			mEta.getSettings().setSessionJson(session);
+			
+			// Dynamically set the ttl, so we won't have any odd errors
+			int ttl = (int)(mSession.getExpire().getTime() - (new Date()).getTime()) / 1000;
+			mEta.getSettings().setSessionTTL(ttl);
+			
 			notifySubscribers();
 			for (PageflipWebview p : PageflipWebview.pageflips) {
 				p.updateSession();
@@ -240,9 +226,6 @@ public class SessionManager {
 			
 			// Reset session counter
 			mSessionRetryCount = 0;
-			
-
-			EtaLog.d(TAG, "setSession: " + mSession.toJSON().toString());
 			
 			performNextRequest();
 		}
@@ -488,26 +471,5 @@ public class SessionManager {
 	public interface OnSessionChangeListener {
 		public void onUpdate();
 	}
-	
-	private void printDebug(boolean isCache, int statusCode, JSONObject item,EtaError error) {
-		
-		mSessionRetryCount++;
-		if (mSessionRetryCount == 1 && Eta.DEBUG_SESSIONMANAGER) {
-			
-			StringBuilder sb = new StringBuilder();
-			sb.append("------- Current Data -------").append("\n");
-			sb.append("Session: ").append(mSession.toJSON().toString()).append("\n");
-			sb.append("------- API Response -------").append("\n");
-			sb.append("StatusCode: ").append(statusCode).append("\n");
-			sb.append("isCache: ").append(isCache).append("\n");
-			sb.append("Item: ").append(item == null ? "null" : item.toString()).append("\n");
-			sb.append("EtaError: ").append(error == null ? "null" : error.toString()).append("\n");
-			sb.append("------- Log Entries -------").append("\n");
-			sb.append("Log: ").append(mLog.getString("SessionManager")).append("\n");
-			
-			(new DebugDump("SessionManagerDebug", sb.toString())).execute();
-		}
-	}
-	
 	
 }
