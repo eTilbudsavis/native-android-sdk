@@ -193,7 +193,6 @@ public class ListManager {
 					if (!dbShare.equals(slShare)) {
 						slShare.setState(Share.State.TO_SYNC);
 						db.editShare(slShare, user);
-						EtaLog.d(TAG, "Edited share: " + slShare.getEmail());
 					}
 					
 				} else {
@@ -207,14 +206,12 @@ public class ListManager {
 						} else {
 							db.deleteShare(dbShare, user);
 						}
-						EtaLog.d(TAG, "Deleted share: " + dbShare.getEmail());
 					}
 				}
 				
 			} else {
 				Share slShare = slShares.get(unionS);
 				db.insertShare(slShare, user);
-				EtaLog.d(TAG, "Added share: " + slShare.getEmail());
 			}
 			
 		}
@@ -285,8 +282,6 @@ public class ListManager {
 		int count = 0;
 		if (mEta.getUser().isLoggedIn()) {
 			
-			EtaLog.d(TAG, "logged in");
-			
 			// Update local version of shoppinglist
 			sl.setState(Shoppinglist.State.DELETE);
 			count = db.editList(sl, user);
@@ -299,14 +294,11 @@ public class ListManager {
 			
 		} else {
 			
-			EtaLog.d(TAG, "not logged in");
 			count = db.deleteList(sl, user);
 			db.deleteShares(sl, user);
 			db.deleteItems(sl.getId(), null, user);
 			
 		}
-		
-		EtaLog.d(TAG, count + " " + sl.toJSON().toString());
 		
 		boolean success = count == 1;
 		if (success) notifyListSubscribers(false, null, idToList(sl), null);
@@ -619,17 +611,23 @@ public class ListManager {
 
 	public boolean canEdit(String shoppinglistId, User user) {
 		Shoppinglist sl = DbHelper.getInstance().getList(shoppinglistId, user());
-		return canEdit(sl, user);
+		return sl == null ? false : canEdit(sl, user);
 	}
 
 	public boolean canEdit(Shoppinglist sl, User user) {
-		String email = user.getEmail();
-		Share s = sl.getShares().get(email);
-		return canEdit(sl, s);
+		if (sl == null) {
+			return false;
+		}
+		Share s = sl.getShares().get(user.getEmail());
+		return s == null ? false : canEdit(sl, s);
 	}
-
+	
 	public boolean canEdit(Shoppinglist sl, Share s) {
-		return s != null && ( s.getAccess().equals(Share.ACCESS_OWNER) || s.getAccess().equals(Share.ACCESS_READWRITE) );
+		if (s==null||sl==null) {
+			return false;
+		}
+		boolean isInList = s.getShoppinglistId().equals(sl.getId());
+		return isInList && ( s.getAccess().equals(Share.ACCESS_OWNER) || s.getAccess().equals(Share.ACCESS_READWRITE) );
 	}
 
 	/**

@@ -69,7 +69,7 @@ public class ListSyncManager {
 
 			mUser = mEta.getUser();
 			
-			if (!mEta.getUser().isLoggedIn() || !mEta.isResumed())
+			if (!mEta.getUser().isLoggedIn() || !mEta.isResumed() )
 				return;
 			
 			User user = mEta.getUser();
@@ -400,20 +400,6 @@ public class ListSyncManager {
 				
 				if (Utils.isSuccess(statusCode)) {
 					
-					if (sl.getName().toLowerCase().contains("dev")) {
-						
-						StringBuilder sb = new StringBuilder();
-						
-						List<ShoppinglistItem> items = ShoppinglistItem.fromJSON(data);
-						
-						for (ShoppinglistItem sli : items)
-							sb.append(sli.getTitle()).append(": ").append(sli.getPreviousId()).append(" - ").append(sli.getId()).append("\n");
-
-						EtaLog.writeToFile("list-json.txt", sb.toString());
-						EtaLog.d(TAG, sb.toString());
-						EtaLog.d(TAG, sl.getName());
-					}
-					
 					sl.setState(Shoppinglist.State.SYNCED);
 					db.editList(sl, user);
 					
@@ -632,8 +618,6 @@ public class ListSyncManager {
 
 		final DbHelper db = DbHelper.getInstance();
 		
-		EtaLog.d(TAG, "Delete: " + sl.getName());
-		
 		JsonObjectListener cb = new JsonObjectListener() {
 
 			public void onComplete(final boolean isCache, final int statusCode, final JSONObject data, final EtaError error) {
@@ -657,7 +641,7 @@ public class ListSyncManager {
 			}
 		};
 		String url = Request.Endpoint.list(user.getId(), sl.getId());
-		addRequest(api().delete(url, cb, sl.getApiParams()).setFlag(Api.FLAG_PRINT_DEBUG).execute());
+		addRequest(api().delete(url, cb, sl.getApiParams()).execute());
 
 	}
 
@@ -728,7 +712,7 @@ public class ListSyncManager {
 			}
 		};
 		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
-		addRequest(api().put(url, cb, sli.getApiParams()).setFlag(Api.FLAG_PRINT_DEBUG).execute());
+		addRequest(api().put(url, cb, sli.getApiParams()).execute());
 
 	}
 
@@ -860,7 +844,7 @@ public class ListSyncManager {
 		};
 		
 		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
-		addRequest(api().put(url, shareListener, s.getApiParams()).setFlag(Api.FLAG_PRINT_DEBUG).execute());
+		addRequest(api().put(url, shareListener, s.getApiParams()).execute());
 		
 	}
 
@@ -899,7 +883,7 @@ public class ListSyncManager {
 			}
 		};
 		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
-		addRequest(api().delete(url, shareListener, new Bundle()).setFlag(Api.FLAG_PRINT_DEBUG).execute());
+		addRequest(api().delete(url, shareListener, new Bundle()).execute());
 	}
 	
 	private void revertShare(final Share s, final User user) {

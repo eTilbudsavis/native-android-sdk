@@ -808,7 +808,9 @@ public class Api implements Serializable {
     	if (mBody != null) {
         	debug.append("Body: ").append(mBody.toString()).append("\n");
     	}
-
+    	if (mRequestType == RequestType.POST || mRequestType == RequestType.PUT) {
+    		debug.append("#Params: ").append(mApiParams.toString()).append("\n");
+    	}
 		synchronized (mHeaders) {
 	    	debug.append("Headers: ").append(mHeaders.toString()).append("\n");
 		}

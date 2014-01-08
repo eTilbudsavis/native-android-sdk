@@ -50,11 +50,9 @@ public final class Utils {
 
 	/** A year in milliseconds */
 	public static final long YEAR_IN_MILLIS = WEEK_IN_MILLIS * 52;
-
+	
 	/** The date format as returned from the server */
 	public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZZ";
-	
-//	public static SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
 	
 	/**
 	 * Create universally unique identifier.

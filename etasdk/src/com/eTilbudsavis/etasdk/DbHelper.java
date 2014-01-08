@@ -10,7 +10,6 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -717,12 +716,12 @@ public class DbHelper extends SQLiteOpenHelper {
 		
 		synchronized (LOCK) {
 			
-			try {
+//			try {
 				return mDatabase.rawQueryWithFactory(null, query, null, null);
-			} catch (Exception e) {
-				EtaLog.d(TAG, e);
-				return new MatrixCursor(new String[] {"empty"});
-			}
+//			} catch (Exception e) {
+//				EtaLog.d(TAG, e);
+//				return new MatrixCursor(new String[] {"empty"});
+//			}
 		}
 		
 	}
