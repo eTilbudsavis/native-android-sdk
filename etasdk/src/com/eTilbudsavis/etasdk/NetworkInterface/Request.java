@@ -6,12 +6,14 @@ import java.util.Map;
 
 import android.os.Bundle;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressWarnings("rawtypes")
 public abstract class Request<T> implements Comparable<Request<T>> {
-
+	
 	public static final String TAG = "Request";
 
 	/** Default encoding for POST or PUT parameters. See {@link #getParamsEncoding()}. */
@@ -19,7 +21,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
 	/** Listener interface, for responses */
 	private final Listener<T> mListener;
-
+	
 	/** Request method of this request.  Currently supports GET, POST, PUT, and DELETE. */
 	private final int mMethod;
 
@@ -37,24 +39,21 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
 	/** Should this request use location in the query */
 	private boolean mUseLocation = true;
-
+	
 	/** If true Request will return data from cache if exists */
-	private boolean mUseCache = true;
-
+	private boolean mSkipCache = true;
+	
 	/** Whether or not responses to this request should be cached. */
-	private boolean mShouldCache = true;
+	private boolean mCacheResponse = true;
 
 	/** Whether to only return cache item. */
-	private boolean mReturnCacheOnlyIfPossible = false;
-
-	/** Prints debug information when a request is done */
-	private boolean mPrintDebug = false;
-
+	private boolean mReturnCacheOnly = false;
+	
 	/** Whether or not this request has been canceled. */
 	private boolean mCanceled = false;
-
-	/** Determine if we should try to update session */
-	private boolean mSessionUpdate = true;
+	
+	/** Item for containing cache items */
+	private Cache.Item mCache;
 	
 	public enum Priority {
 		LOW, MEDIUM, HIGH
@@ -98,7 +97,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	public void setHeaders(Map<String, String> headers) {
 		mHeaders.putAll(headers);
 	}
-
+	
 	/**
 	 * Return the method for this request.  Can be one of the values in {@link Method}.
 	 */
@@ -118,35 +117,20 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * returns wether this request is cachable or not
 	 * @return
 	 */
-	public boolean shouldCache() {
-		return mShouldCache;
+	public boolean cacheResponse() {
+		return mCacheResponse;
 	}
 
-	protected void shouldCache(boolean cacheable) {
-		mShouldCache = cacheable;
-	}
-	
-	/**
-	 * Method for determining if this request should attempt a session update
-	 * @return true if session update should be attempted
-	 */
-	public boolean doSessionUpdate() {
-		return mSessionUpdate;
-	}
-
-	/**
-	 * Method for enabeling or disabeling session updates, on errors.
-	 */
-	public void doSessionUpdate(boolean update) {
-		mSessionUpdate = update;
+	protected void cacheResponse(boolean isResponseCachable) {
+		mCacheResponse = isResponseCachable;
 	}
 	
 	/**
 	 * Returns true, if this request should return cache, else false
 	 * @return
 	 */
-	public boolean useCache() {
-		return mUseCache;
+	public boolean skipCache() {
+		return mSkipCache;
 	}
 
 	/**
@@ -154,39 +138,26 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * @param useCache
 	 * @return
 	 */
-	public Request useCache(boolean useCache) {
-		mUseCache = useCache;
+	public Request skipCache(boolean skip) {
+		mSkipCache = skip;
 		return Request.this;
 	}
-
-	/**
-	 * If true, this request wants debug information about the http request
-	 * printed to consol
-	 */
-	public boolean printDebug() {
-		return mPrintDebug;
-	}
-
-	public Request printDebug(boolean print) {
-		mPrintDebug = print;
-		return Request.this;
-	}
-
+	
 	public boolean useLocation() {
 		return mUseLocation;
 	}
-
+	
 	public Request useLocation(boolean useLocation) {
 		mUseLocation = useLocation;
 		return Request.this;
 	}
 
 	public void cacheOnlyIfPossible(boolean onlyCache) {
-		mReturnCacheOnlyIfPossible = onlyCache;
+		mReturnCacheOnly = onlyCache;
 	}
 
 	public boolean cacheOnlyIfPossible() {
-		return mReturnCacheOnlyIfPossible;
+		return mReturnCacheOnly;
 	}
 
 	/** Return the url for this request. */
@@ -199,7 +170,16 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		mUrl = url;
 		return Request.this;
 	}
-
+	
+	public boolean isCache() {
+		return mCache != null;
+	}
+	
+	public Request setCacheItem(Cache.Item cache) {
+		mCache = cache;
+		return Request.this;
+	}
+	
 	protected Bundle getQueryParameters() {
 		return mQuery;
 	}
@@ -258,11 +238,10 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     	return false;
     }
     
-	
 	public void printDebug(Request request, NetworkResponse response) {
 
 		String newLine = System.getProperty("line.separator");
-
+		
 		StringBuilder sb = new StringBuilder();
 		sb.append("*** Pre execute ***").append(newLine);
 		sb.append("Method: ").append(getMethod()).append(newLine);
@@ -282,7 +261,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 			data = "not of type string";
 		}
 		sb.append("Object: ").append(data.length() > 100 ? data.substring(0, 100) : data);
-		Utils.logd(TAG, sb.toString());
+		EtaLog.d(TAG, sb.toString());
 	}
 
 	/**
@@ -294,7 +273,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * @author Danny Hvam - danny@etilbudsavis.dk
 	 */
 	public static class Param {
-
+		
 		/** String identifying the order by parameter for all list calls to the API */
 		public static final String ORDER_BY = "order_by";
 
@@ -410,18 +389,45 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		public static final String FILTER_DELETE = "filter";
 
 		public static final String ID = "id";
+		
 		public static final String MODIFIED = "modified";
+		
 		public static final String ERN = "ern";
+		
 		public static final String ACCESS = "access";
+		
 		public static final String ACCEPT_URL = "accept_url";
 
 		public static final String DESCRIPTION = "description";
+		
 		public static final String COUNT = "count";
+		
 		public static final String TICK = "tick";
+		
 		public static final String OFFER_ID = "offer_id";
+		
 		public static final String CREATOR = "creator";
+		
 		public static final String SHOPPING_LIST_ID = "shopping_list_id";
 
+		/** Parameter for a resource token time to live */
+		public static final String TOKEN_TTL = "token_ttl";
+
+		/** Parameter for a v1 session migration */
+		public static final String V1_AUTH_ID = "v1_auth_id";
+	
+		/** Parameter for a v1 session migration */
+		public static final String V1_AUTH_TIME = "v1_auth_time";
+
+		/** Parameter for a v1 session migration */
+		public static final String V1_AUTH_HASH = "v1_auth_hash";
+
+		/** Parameter for locale */
+		public static final String LOCALE = "locale";
+
+		/** Parameter for sending the app version for better app statistics in insight */
+		public static final String API_AV = "api_av";
+		
 	}
 
 	/**
@@ -441,6 +447,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
 		/** Header name for content_type */
 		public static final String CONTENT_TYPE = "Content-Type";
+
+		/** Header name for content_type */
+		public static final String RETRY_AFTER = "Retry-After";
 
 	}
 
@@ -471,16 +480,19 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		public static final String NAME = "name";
 
 		/** Sort a list by published in ascending order. (smallest to largest) */
-		public static final String PUBLISHED = "published";
+		public static final String PUBLICATION_DATE = "publication_date";
 
 		/** Sort a list by expired in ascending order. (smallest to largest) */
-		public static final String EXPIRED = "expired";
+		public static final String EXPIRATION_DATE = "expiration_date";
 
 		/** Sort a list by created in ascending order. (smallest to largest) */
 		public static final String CREATED = "created";
 
 		/** Sort a list by page (in catalog) in ascending order. (smallest to largest) */
 		public static final String PAGE = "page";
+
+		/** Sort a list by price in ascending order. (smallest to largest) */
+		public static final String PRICE = "price";
 
 		/** Sort a list by popularity in descending order. (largest to smallest)*/
 		public static final String POPULARITY_DESC = DESC + POPULARITY;
@@ -492,16 +504,19 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		public static final String NAME_DESC = DESC + NAME;
 
 		/** Sort a list by published in descending order. (largest to smallest)*/
-		public static final String PUBLISHED_DESC = DESC + PUBLISHED;
+		public static final String PUBLICATION_DATE_DESC = DESC + PUBLICATION_DATE;
 
 		/** Sort a list by expired in descending order. (largest to smallest)*/
-		public static final String EXPIRED_DESC = DESC + EXPIRED;
+		public static final String EXPIRATION_DATE_DESC = DESC + EXPIRATION_DATE;
 
 		/** Sort a list by created in ascending order. (smallest to largest) */
 		public static final String CREATED_DESC = DESC + CREATED;
 
 		/** Sort a list by page (in catalog) in descending order. (largest to smallest)*/
 		public static final String PAGE_DESC = DESC + PAGE;
+
+		/** Sort a list by price in descending order. (largest to smallest)*/
+		public static final String PRICE_DESC = DESC + PRICE;
 
 	}
 
@@ -510,12 +525,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 */
 	public static class Endpoint {
 		
-
 		// GLOBALS
 		public static final String PRODUCTION = "https://api.etilbudsavis.dk";
 		public static final String EDGE = "https://edge.etilbudsavis.dk";
 		public static final String STAGING = "https://staging.etilbudsavis.dk";
-
+		
 		// LISTS
 		public static final String CATALOG_LIST = "/v2/catalogs";
 		public static final String CATALOG_ID = "/v2/catalogs/";
@@ -537,29 +551,60 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		
 		public static final String SESSIONS = "/v2/sessions";
 		
-		public static final String USER_ID = "/v2/users/";
+		public static final String USER = "/v2/users";
 		public static final String USER_RESET = "/v2/users/reset";
 		
 		public static final String CATEGORIES	= "/v2/categories";
-
-		/**
-		 * https://etilbudsavis.dk/proxy/{id}/
-		 */
-		public static String getPageflipProxy(String id) {
-			return String.format("http://etilbudsavis.dk/proxy/%s/", id);
+		
+		
+		public static String getHost() {
+			return Eta.DEBUG_ENDPOINT ? EDGE : PRODUCTION;
 		}
 
 		/**
+		 * /v2/offers/{offer_id}/collect
+		 */
+		public static String offerCollect(String offerId) {
+			return String.format("/v2/offers/%s/collect", offerId);
+		}
+
+		/**
+		 * /v2/stores/{offer_id}/collect
+		 */
+		public static String storeCollect(String storeId) {
+			return String.format("/v2/stores/%s/collect", storeId);
+		}
+		
+		/**
+		 * https://etilbudsavis.dk/proxy/{id}/
+		 */
+		public static String pageflipProxy(String id) {
+			String production = "https://etilbudsavis.dk/proxy/%s/";
+//			String staging = "http://10.0.1.6:3000/proxy/%s/";
+//			String staging = "https://staging.etilbudsavis.dk/proxy/%s/";
+			return String.format( production, id);
+		}
+		
+		/**
+		 * https://staging.etilbudsavis.dk/utils/ajax/lists/themes/
+		 */
+		public static String themes() {
+			String production = "https://etilbudsavis.dk/utils/ajax/lists/themes/";
+			String staging = "https://staging.etilbudsavis.dk/utils/ajax/lists/themes/";
+			return production;
+		}
+		
+		/**
 		 * /v2/users/{user_id}/facebook
 		 */
-		public static String getFacebook(int userId) {
+		public static String facebook(int userId) {
 			return String.format("/v2/users/%s/facebook", userId);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists
 		 */
-		public static String getLists(int userId) {
+		public static String lists(int userId) {
 			return String.format("/v2/users/%s/shoppinglists", userId);
 		}
 
@@ -569,61 +614,62 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		 * @param listId
 		 * @return
 		 */
-		public static String getList(int userId, String listId) {
+		public static String list(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s", userId, listId);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/modified
 		 */
-		public static String getListModified(int userId, String listId) {
+		public static String listModified(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/modified", userId, listId);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/empty
 		 */
-		public static String getListEmpty(int userId, String listId) {
+		public static String listEmpty(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/empty", userId, listId);
 		}
-
+		
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares
 		 * @param userId
 		 * @param listId
 		 * @return
 		 */
-		public static String getListShares(int userId, String listId) {
+		public static String listShares(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/shares", userId, listId);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email}
 		 */
-		public static String getListShareEmail(int userId, String listId, String email) {
+		public static String listShareEmail(int userId, String listId, String email) {
 			return String.format("/v2/users/%s/shoppinglists/%s/shares/%s", userId, listId, email);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items
 		 */
-		public static String getItems(int userId, String listId) {
+		public static String items(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/items", userId, listId);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}
 		 */
-		public static String getItem(int userId, String listId, String itemId) {
+		public static String item(int userId, String listId, String itemId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/items/%s", userId, listId, itemId);
 		}
 
 		/**
 		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified
 		 */
-		public static String getItemModifiedById(int userId, String listId, String itemId) {
+		public static String itemModifiedById(int userId, String listId, String itemId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/items/%s/modified", userId, listId, itemId);
 		}
 
 	}
+	
 }

@@ -15,7 +15,7 @@ public class Response<T> {
 
     /** Parsed response, or null in the case of error. */
     public final Cache.Item cache;
-
+    
     /** Detailed error information if <code>errorCode != OK</code>. */
     public final EtaError error;
 

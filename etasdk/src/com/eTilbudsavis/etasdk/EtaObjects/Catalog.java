@@ -8,9 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Sort;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -20,73 +18,42 @@ public class Catalog extends EtaErnObject implements Serializable {
 
 	public static final String TAG = "Catalog";
 	
-	/** Sort a list by popularity in ascending order. (smallest to largest) */
-	public static final String SORT_POPULARITY = Sort.POPULARITY;
-
-	/** Sort a list by popularity in descending order. (largest to smallest)*/
-	public static final String SORT_POPULARITY_DESC = Sort.POPULARITY_DESC;
-
-	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = Sort.DISTANCE;
-
-	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = Sort.DISTANCE_DESC;
-
-	/** Sort a list by name in ascending order. (smallest to largest) */
-	public static final String SORT_NAME = Sort.NAME;
-
-	/** Sort a list by name in descending order. (largest to smallest)*/
-	public static final String SORT_NAME_DESC = Sort.NAME_DESC;
-
-	/** Sort a list by published in ascending order. (smallest to largest) */
-	public static final String SORT_PUBLISHED = Sort.PUBLISHED;
-
-	/** Sort a list by published in descending order. (largest to smallest)*/
-	public static final String SORT_PUBLISHED_DESC = Sort.PUBLISHED_DESC;
-
-	/** Sort a list by expired in ascending order. (smallest to largest) */
-	public static final String SORT_EXPIRED = Sort.EXPIRED;
-
-	/** Sort a list by expired in descending order. (largest to smallest)*/
-	public static final String SORT_EXPIRED_DESC = Sort.EXPIRED_DESC;
-
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Sort.CREATED;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
+	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific catalog id's */
-	public static final String FILTER_CATALOG_IDS = Param.FILTER_CATALOG_IDS;
+	public static final String FILTER_CATALOG_IDS = Request.Param.FILTER_CATALOG_IDS;
 
 	/** Parameter for posting a list of store id's to publish the catalog in */
-	public static final String FILTER_STORE_IDS = Param.FILTER_STORE_IDS;
+	public static final String FILTER_STORE_IDS = Request.Param.FILTER_STORE_IDS;
 
 	/** Parameter for posting a list of area id's to publish the catalog in */
-	public static final String FILTER_AREA_IDS = Param.FILTER_AREA_IDS;
+	public static final String FILTER_AREA_IDS = Request.Param.FILTER_AREA_IDS;
 
 	/** Parameter for the location of the PDF to post */
-	public static final String PARAM_PDF = Param.PDF;
+	public static final String PARAM_PDF = Request.Param.PDF;
 
 	/** String identifying the offset parameter for all list calls to the API */
-	public static final String PARAM_OFFSET = Param.OFFSET;
+	public static final String PARAM_OFFSET = Request.Param.OFFSET;
 
 	/** String identifying the offset parameter for all list calls to the API */
-	public static final String PARAM_LIMIT = Param.LIMIT;
+	public static final String PARAM_LIMIT = Request.Param.LIMIT;
 
 	/** String identifying the query parameter */
-	public static final String PARAM_QUERY = Param.QUERY;
+	public static final String PARAM_QUERY = Request.Param.QUERY;
 	
 	/** Endpoint for catalog list resource */
-	public static final String ENDPOINT_LIST = Endpoint.CATALOG_LIST;
+	public static final String ENDPOINT_LIST = Request.Endpoint.CATALOG_LIST;
 
 	/** Endpoint for a single catalog resource */
-	public static final String ENDPOINT_ID = Endpoint.CATALOG_ID;
+	public static final String ENDPOINT_ID = Request.Endpoint.CATALOG_ID;
 
 	/** Endpoint for searching catalogs */
-	public static final String ENDPOINT_SEARCH = Endpoint.CATALOG_SEARCH;
+	public static final String ENDPOINT_SEARCH = Request.Endpoint.CATALOG_SEARCH;
 
 	// From JSON blob
+	private String mId;
+	private String mErn;
 	private String mLabel;
 	private String mBackground;
 	private Date mRunFrom;
@@ -139,35 +106,35 @@ public class Catalog extends EtaErnObject implements Serializable {
 		if (catalog == null)
 			return c;
 
-		if (catalog.has(Key.STORE_ID) && catalog.has(Key.OFFER_COUNT)) {
+		if (catalog.has(ServerKey.STORE_ID) && catalog.has(ServerKey.OFFER_COUNT)) {
 			// if we have a full catalog
 			try {
-				c.setId(getJsonString(catalog, Key.ID));
-				c.setErn(getJsonString(catalog, Key.ERN));
-				c.setLabel(getJsonString(catalog, Key.LABEL));
-				c.setBackground(getJsonString(catalog, Key.BACKGROUND));
-				Date runFrom = Utils.parseDate(getJsonString(catalog, Key.RUN_FROM));
+				c.setId(getJsonString(catalog, ServerKey.ID));
+				c.setErn(getJsonString(catalog, ServerKey.ERN));
+				c.setLabel(getJsonString(catalog, ServerKey.LABEL));
+				c.setBackground(getJsonString(catalog, ServerKey.BACKGROUND));
+				Date runFrom = Utils.parseDate(getJsonString(catalog, ServerKey.RUN_FROM));
 				c.setRunFrom(runFrom);
-				Date runTill = Utils.parseDate(getJsonString(catalog, Key.RUN_TILL));
+				Date runTill = Utils.parseDate(getJsonString(catalog, ServerKey.RUN_TILL));
 				c.setRunTill(runTill);
-				c.setPageCount(catalog.getInt(Key.PAGE_COUNT));
-				c.setOfferCount(catalog.getInt(Key.OFFER_COUNT));
-				c.setBranding(Branding.fromJSON(catalog.getJSONObject(Key.BRANDING)));
-				c.setDealerId(getJsonString(catalog, Key.DEALER_ID));
-				c.setDealerUrl(getJsonString(catalog, Key.DEALER_URL));
-				c.setStoreId(getJsonString(catalog, Key.STORE_ID));
-				c.setStoreUrl(getJsonString(catalog, Key.STORE_URL));
-				c.setDimension(Dimension.fromJSON(catalog.getJSONObject(Key.DIMENSIONS)));
-				c.setImages(Images.fromJSON(catalog.getJSONObject(Key.IMAGES)));
-				c.setPages(Pages.fromJSON(catalog.getJSONObject(Key.PAGES)));
+				c.setPageCount(catalog.getInt(ServerKey.PAGE_COUNT));
+				c.setOfferCount(catalog.getInt(ServerKey.OFFER_COUNT));
+				c.setBranding(Branding.fromJSON(catalog.getJSONObject(ServerKey.BRANDING)));
+				c.setDealerId(getJsonString(catalog, ServerKey.DEALER_ID));
+				c.setDealerUrl(getJsonString(catalog, ServerKey.DEALER_URL));
+				c.setStoreId(getJsonString(catalog, ServerKey.STORE_ID));
+				c.setStoreUrl(getJsonString(catalog, ServerKey.STORE_URL));
+				c.setDimension(Dimension.fromJSON(catalog.getJSONObject(ServerKey.DIMENSIONS)));
+				c.setImages(Images.fromJSON(catalog.getJSONObject(ServerKey.IMAGES)));
+				c.setPages(Pages.fromJSON(catalog.getJSONObject(ServerKey.PAGES)));
 			} catch (JSONException e) {
 				EtaLog.d(TAG, e);
 			}
-		} else if (catalog.has(Key.ID) && catalog.has(Key.PAGE)) {
+		} else if (catalog.has(ServerKey.ID) && catalog.has(ServerKey.PAGE)) {
 			// If it is a partial catalog
 			try {
-				c.setId(getJsonString(catalog, Key.ID));
-				c.setOfferOnPage(catalog.getInt(Key.PAGE));
+				c.setId(getJsonString(catalog, ServerKey.ID));
+				c.setOfferOnPage(catalog.getInt(ServerKey.PAGE));
 			} catch (JSONException e) {
 				EtaLog.d(TAG, e);
 			}
@@ -182,22 +149,22 @@ public class Catalog extends EtaErnObject implements Serializable {
 	public static JSONObject toJSON(Catalog c) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Key.ID, c.getId());
-			o.put(Key.ERN, c.getErn());
-			o.put(Key.LABEL, c.getLabel());
-			o.put(Key.BACKGROUND, c.getBackground());
-			o.put(Key.RUN_FROM, Utils.formatDate(c.getRunFrom()));
-			o.put(Key.RUN_TILL, Utils.formatDate(c.getRunTill()));
-			o.put(Key.PAGE_COUNT, c.getPageCount());
-			o.put(Key.OFFER_COUNT, c.getOfferCount());
-			o.put(Key.BRANDING, c.getBranding().toJSON());
-			o.put(Key.DEALER_ID, c.getDealerId());
-			o.put(Key.DEALER_URL, c.getDealerUrl());
-			o.put(Key.STORE_ID, c.getStoreId());
-			o.put(Key.STORE_URL, c.getStoreUrl());
-			o.put(Key.DIMENSIONS, c.getDimension().toJSON());
-			o.put(Key.IMAGES, c.getImages().toJSON());
-			o.put(Key.PAGES, c.getPages().toJSON());
+			o.put(ServerKey.ID, c.getId());
+			o.put(ServerKey.ERN, c.getErn());
+			o.put(ServerKey.LABEL, c.getLabel());
+			o.put(ServerKey.BACKGROUND, c.getBackground());
+			o.put(ServerKey.RUN_FROM, Utils.formatDate(c.getRunFrom()));
+			o.put(ServerKey.RUN_TILL, Utils.formatDate(c.getRunTill()));
+			o.put(ServerKey.PAGE_COUNT, c.getPageCount());
+			o.put(ServerKey.OFFER_COUNT, c.getOfferCount());
+			o.put(ServerKey.BRANDING, c.getBranding().toJSON());
+			o.put(ServerKey.DEALER_ID, c.getDealerId());
+			o.put(ServerKey.DEALER_URL, c.getDealerUrl());
+			o.put(ServerKey.STORE_ID, c.getStoreId());
+			o.put(ServerKey.STORE_URL, c.getStoreUrl());
+			o.put(ServerKey.DIMENSIONS, c.getDimension().toJSON());
+			o.put(ServerKey.IMAGES, c.getImages().toJSON());
+			o.put(ServerKey.PAGES, c.getPages().toJSON());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -221,6 +188,24 @@ public class Catalog extends EtaErnObject implements Serializable {
 		mDimension = c.getDimension();
 		mImages = c.getImages();
 		mPages = c.getPages();
+	}
+
+	public Catalog setId(String id) {
+		this.mId = id;
+		return this;
+	}
+
+	public String getId() {
+		return mId;
+	}
+	
+	public Catalog setErn(String ern) {
+		mErn = ern;
+		return this;
+	}
+	
+	public String getErn() {
+		return mErn;
 	}
 
 	public String getLabel() {
@@ -378,59 +363,124 @@ public class Catalog extends EtaErnObject implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Catalog))
-			return false;
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((mBackground == null) ? 0 : mBackground.hashCode());
+		result = prime * result
+				+ ((mBranding == null) ? 0 : mBranding.hashCode());
+		result = prime * result
+				+ ((mDealerId == null) ? 0 : mDealerId.hashCode());
+		result = prime * result
+				+ ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
+		result = prime * result
+				+ ((mDimension == null) ? 0 : mDimension.hashCode());
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
+		result = prime * result + ((mImages == null) ? 0 : mImages.hashCode());
+		result = prime * result + ((mLabel == null) ? 0 : mLabel.hashCode());
+		result = prime * result + mOfferCount;
+		result = prime * result + mOfferOnPage;
+		result = prime * result + mPageCount;
+		result = prime * result + ((mPages == null) ? 0 : mPages.hashCode());
+		result = prime * result
+				+ ((mRunFrom == null) ? 0 : mRunFrom.hashCode());
+		result = prime * result
+				+ ((mRunTill == null) ? 0 : mRunTill.hashCode());
+		result = prime * result
+				+ ((mStoreId == null) ? 0 : mStoreId.hashCode());
+		result = prime * result
+				+ ((mStoreUrl == null) ? 0 : mStoreUrl.hashCode());
+		return result;
+	}
 
-		Catalog c = (Catalog)o;
-		return mId.equals(c.getId()) &&
-				mErn.equals(c.getErn()) &&
-				stringCompare(mLabel, c.getLabel()) &&
-				stringCompare(mBackground, c.getBackground()) &&
-				mRunFrom == c.getRunFrom() &&
-				mRunTill == c.getRunTill() &&
-				mPageCount == c.getPageCount() &&
-				mOfferCount == c.getOfferCount() &&
-				mBranding == null ? c.getBranding() == null : mBranding.equals(c.getBranding()) &&
-				stringCompare(mDealerId, c.getDealerId()) &&
-				stringCompare(mDealerUrl, c.getDealerUrl()) &&
-				stringCompare(mStoreId, c.getStoreId()) &&
-				stringCompare(mStoreUrl, c.getStoreUrl()) &&
-				mDimension == null ? c.getDimension() == null : mDimension.equals(c.getDimension()) &&
-				mImages == null ? c.getImages() == null : mImages.equals(c.getImages()) &&
-				mPages == null ? c.getPages() == null : mPages.equals(c.getPages()) &&
-				mDealer == null ? c.getDealer() == null : (c.getDealer() != null && mDealer.equals(c.getDealer())) &&
-				mStore == null ? c.getStore() == null : (c.getStore() != null && mStore.equals(c.getStore())) &&
-				mOfferOnPage == c.getOfferOnPage();
-	}
-	
 	@Override
-	public String toString() {
-		return toString(false);
-	}
-	
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[")
-		.append("branding=").append(mBranding == null ? null : mBranding.toString(everything))
-		.append(", id=").append(mId)
-		.append(", from=").append(Utils.formatDate(getRunFrom()))
-		.append(", till=").append(Utils.formatDate(getRunTill()));
-		if(everything) {
-			sb.append(", ern=").append(mErn)
-			.append(", background=").append(mBackground)
-			.append(", pageCount=").append(mPageCount)
-			.append(", offerCount=").append(mOfferCount)
-			.append(", dealer=").append(mDealer == null ? mDealerId : mDealer.toString())
-			.append(", store=").append(mStore == null ? mStoreId : mStore.toString())
-			.append(", dimension=").append(mDimension == null ? null : mDimension.toString())
-			.append(", images=").append(mImages == null ? null : mImages.toString())
-			.append(", pages=").append(mPages == null ? null : mPages.toString());
-		}
-		return sb.append("]").toString();
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Catalog other = (Catalog) obj;
+		if (mBackground == null) {
+			if (other.mBackground != null)
+				return false;
+		} else if (!mBackground.equals(other.mBackground))
+			return false;
+		if (mBranding == null) {
+			if (other.mBranding != null)
+				return false;
+		} else if (!mBranding.equals(other.mBranding))
+			return false;
+		if (mDealerId == null) {
+			if (other.mDealerId != null)
+				return false;
+		} else if (!mDealerId.equals(other.mDealerId))
+			return false;
+		if (mDealerUrl == null) {
+			if (other.mDealerUrl != null)
+				return false;
+		} else if (!mDealerUrl.equals(other.mDealerUrl))
+			return false;
+		if (mDimension == null) {
+			if (other.mDimension != null)
+				return false;
+		} else if (!mDimension.equals(other.mDimension))
+			return false;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
+			return false;
+		if (mImages == null) {
+			if (other.mImages != null)
+				return false;
+		} else if (!mImages.equals(other.mImages))
+			return false;
+		if (mLabel == null) {
+			if (other.mLabel != null)
+				return false;
+		} else if (!mLabel.equals(other.mLabel))
+			return false;
+		if (mOfferCount != other.mOfferCount)
+			return false;
+		if (mOfferOnPage != other.mOfferOnPage)
+			return false;
+		if (mPageCount != other.mPageCount)
+			return false;
+		if (mPages == null) {
+			if (other.mPages != null)
+				return false;
+		} else if (!mPages.equals(other.mPages))
+			return false;
+		if (mRunFrom == null) {
+			if (other.mRunFrom != null)
+				return false;
+		} else if (!mRunFrom.equals(other.mRunFrom))
+			return false;
+		if (mRunTill == null) {
+			if (other.mRunTill != null)
+				return false;
+		} else if (!mRunTill.equals(other.mRunTill))
+			return false;
+		if (mStoreId == null) {
+			if (other.mStoreId != null)
+				return false;
+		} else if (!mStoreId.equals(other.mStoreId))
+			return false;
+		if (mStoreUrl == null) {
+			if (other.mStoreUrl != null)
+				return false;
+		} else if (!mStoreUrl.equals(other.mStoreUrl))
+			return false;
+		return true;
 	}
 	
 }

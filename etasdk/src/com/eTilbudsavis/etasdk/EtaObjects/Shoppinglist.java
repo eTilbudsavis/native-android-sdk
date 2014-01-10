@@ -4,23 +4,23 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.Bundle;
-import android.util.Log;
-
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Shoppinglist extends EtaErnObject implements Serializable, Comparable<Shoppinglist> {
+public class Shoppinglist extends EtaObject implements Serializable, Comparable<Shoppinglist> {
 	
 	private static final long serialVersionUID = 1L;
 	
 	public static final String TAG = "Shoppinglist";
-
+	
 	/** States a shoppping list can be in */
 	public interface State {
 		int TO_SYNC	= 0;
@@ -31,7 +31,7 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	}
 	
 	public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
-
+	
 	public static final String TYPE_SHOPPING_LIST = null;
 	public static final String TYPE_WISH_LIST = "wish_list";
 	
@@ -42,16 +42,17 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	public static final String EMPTY_ALL = "all";
 	public static final String EMPTY_TICKED = "ticked";
 	public static final String EMPTY_UNTICKED = "unticked";
-	
-	// server vars
+
+	private String mId;
+	private String mErn;
 	private String mName = "";
 	private String mAccess = ACCESS_PRIVATE;
 	private Date mModified = new Date();
-	private Share mOwner = new Share();
 	private int mState = State.TO_SYNC;
 	private String mPrevId;
 	private String mType;
 	private String mMeta;
+	private Map<String, Share> mShares = new HashMap<String, Share>(1);
 	private int mUserId = -1;
 	
 	private Shoppinglist() {
@@ -69,32 +70,21 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	public void set(JSONObject shoppinglist) {
 		fromJSON(this, shoppinglist);
 	}
-
-	@SuppressWarnings("unchecked")
+	
 	public static ArrayList<Shoppinglist> fromJSON(JSONArray shoppinglists) {
 		ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
 		
 		try {
-			Shoppinglist tmp = null;
-			
-			// Parse in opposite order, to get the right ordering from server until sorting is implemented
-			for (int i = shoppinglists.length()-1 ; i >= 0 ; i-- ) {
-				
+			for (int i = 0 ; i < shoppinglists.length() ; i++ ) {
 				Shoppinglist s = Shoppinglist.fromJSON(shoppinglists.getJSONObject(i));
-				if (s.getPreviousId() == null) {
-					s.setPreviousId(tmp == null ? FIRST_ITEM : tmp.getId());
-					tmp = s;
-				}
 				list.add(s);
 			}
-
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return list;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Shoppinglist fromJSON(JSONObject shoppinglist) {
 		return fromJSON(new Shoppinglist(), shoppinglist);
 	}
@@ -102,34 +92,68 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	private static Shoppinglist fromJSON(Shoppinglist sl, JSONObject shoppinglist) {
 		
 		try {
-			sl.setId(getJsonString(shoppinglist, Key.ID));
-			sl.setErn(getJsonString(shoppinglist, Key.ERN));
-			sl.setName(getJsonString(shoppinglist, Key.NAME));
-			sl.setAccess(getJsonString(shoppinglist, Key.ACCESS));
-			sl.setModified(getJsonString(shoppinglist, Key.MODIFIED));
-			sl.setOwner(Share.fromJSON(shoppinglist.getJSONObject(Key.OWNER)));
-			sl.setPreviousId(getJsonString(shoppinglist, Key.PREVIOUS_ID));
-			sl.setType(getJsonString(shoppinglist, Key.TYPE));
-			String meta = getJsonString(shoppinglist, Key.META);
-			sl.setMeta(shoppinglist.isNull(Key.META) ? null : (meta.equals("") ? null : new JSONObject(meta)));
+			// We've don't use OWNER anymore, since we now get all share info.
+			sl.setId(getJsonString(shoppinglist, ServerKey.ID));
+			sl.setErn(getJsonString(shoppinglist, ServerKey.ERN));
+			sl.setName(getJsonString(shoppinglist, ServerKey.NAME));
+			sl.setAccess(getJsonString(shoppinglist, ServerKey.ACCESS));
+			sl.setModified(getJsonString(shoppinglist, ServerKey.MODIFIED));
+			sl.setPreviousId(getJsonString(shoppinglist, ServerKey.PREVIOUS_ID));
+			sl.setType(getJsonString(shoppinglist, ServerKey.TYPE));
+			String meta = getJsonString(shoppinglist, ServerKey.META);
+			sl.setMeta(shoppinglist.isNull(ServerKey.META) ? null : (meta.equals("") ? null : new JSONObject(meta)));
+			sl.putShares(Share.fromJSON(shoppinglist.getJSONArray(ServerKey.SHARES)));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		
 		return sl;
 	}
-	
-	public Bundle getApiParams() {
-		Bundle apiParams = new Bundle();
-		apiParams.putString(Key.MODIFIED, Utils.formatDate(mModified));
-		apiParams.putString(Key.NAME, getName());
-		apiParams.putString(Key.ACCESS, getAccess());
-		apiParams.putString(Key.META, getMeta() == null ? null : getMeta().toString());
-		apiParams.putString(Key.TYPE, getType());
-		apiParams.putString(Key.PREVIOUS_ID, getPreviousId());
-		return apiParams;
+
+	public JSONObject toJSON() {
+		return toJSON(this);
 	}
 	
+	public static JSONObject toJSON(Shoppinglist s) {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(ServerKey.ID, s.getId());
+			o.put(ServerKey.ERN, s.getErn());
+			o.put(ServerKey.NAME, s.getName());
+			o.put(ServerKey.ACCESS, s.getAccess());
+			o.put(ServerKey.MODIFIED, Utils.formatDate(s.getModified()));
+			o.put(ServerKey.PREVIOUS_ID, s.getPreviousId());
+			o.put(ServerKey.TYPE, s.getType());
+			o.put(ServerKey.META, s.getMeta());
+			JSONArray shares = new JSONArray();
+			for (Share share : s.getShares().values()) {
+				shares.put(Share.toJSON(share));
+			}
+			o.put(ServerKey.SHARES, shares);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return o;
+	}
+	
+	public Shoppinglist setId(String id) {
+		this.mId = id;
+		return this;
+	}
+
+	public String getId() {
+		return mId;
+	}
+	
+	public Shoppinglist setErn(String ern) {
+		mErn = ern;
+		return this;
+	}
+	
+	public String getErn() {
+		return mErn;
+	}
+
 	public String getName() {
 		return mName;
 	}
@@ -182,17 +206,59 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	}
 
 	public Shoppinglist setType(String type) {
-		mType = type;
+		if (type == null || type.equals("")) {
+			// it s a shoppinglist
+			mType = TYPE_SHOPPING_LIST;
+		} else {
+			mType = type;
+		}
+		return this;
+	}
+
+	public Map<String, Share> getShares() {
+		return mShares;
+	}
+	
+	public Shoppinglist setShares(List<Share> shares) {
+		mShares.clear();
+		for (Share s : shares) {
+			s.setShoppinglistId(mId);
+			mShares.put(s.getEmail(), s);
+		}
+		return this;
+	}
+	
+	public Shoppinglist putShares(List<Share> shares) {
+		if (shares == null) return this;
+		
+		for (Share s : shares) {
+			s.setShoppinglistId(mId);
+			mShares.put(s.getEmail(), s);
+		}
+		return this;
+	}
+	
+	public Shoppinglist putShare(Share s) {
+		if (s == null) return this;
+		s.setShoppinglistId(mId);
+		mShares.put(s.getEmail(), s);
+		return this;
+	}
+	
+	public Shoppinglist removeShare(Share s) {
+		if (s == null) return this;
+		mShares.remove(s.getEmail());
 		return this;
 	}
 	
 	public JSONObject getMeta() {
+		JSONObject meta = null;
 		try {
-			return mMeta == null ? null : new JSONObject(mMeta);
+			meta = mMeta == null ? null : new JSONObject(mMeta);
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
-		return null;
+		return meta;
 	}
 
 	public Shoppinglist setMeta(JSONObject meta) {
@@ -206,14 +272,13 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 	}
 	
 	public Share getOwner() {
-		return mOwner;
+		for (Share s : mShares.values()) {
+			if (s.getAccess().equals(Share.ACCESS_OWNER))
+				return s;
+		}
+		return null;
 	}
 	
-	public Shoppinglist setOwner(Share owner) {
-		mOwner = owner;
-		return this;
-	}
-
 	public int getUserId() {
 		return mUserId;
 	}
@@ -222,51 +287,53 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 		mUserId = userId;
 		return this;
 	}
-	
-	@Override
-	public String toString() {
-		return toString(false);
-	}
-	
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[")
-		.append("name=").append(mName)
-		.append(", id=").append(mId)
-		.append(", ern=").append(mErn)
-		.append(", access=").append(mAccess)
-		.append(", modified=").append(mModified)
-		.append(", state=").append(mState)
-		.append(", owner=").append(mOwner.toString())
-		.append(", user=").append(mUserId)
-		.append(", previous_id=").append(mPrevId)
-		.append(", type=").append(mType)
-		.append(", meta=").append(mMeta);
-		return sb.append("]").toString();
-	}
 
+	public int compareTo(Shoppinglist another) {
+		if (another == null)
+			return -1;
+		
+		String t1 = getName();
+		String t2 = another.getName();
+		if (t1 == null || t2 == null) {
+			return t1 == null ? (t2 == null ? 0 : 1) : -1;
+		}
+		
+		//ascending order
+		return t1.compareToIgnoreCase(t2);
+	}
+	
 	public static Comparator<Shoppinglist> NameComparator  = new Comparator<Shoppinglist>() {
 
 		public int compare(Shoppinglist item1, Shoppinglist item2) {
-			return item1.getName().toLowerCase().compareTo(item2.getName().toLowerCase());
+
+			if (item1 == null || item2 == null) {
+				return item1 == null ? (item2 == null ? 0 : 1) : -1;
+			} else {
+				String t1 = item1.getName();
+				String t2 = item2.getName();
+				if (t1 == null || t2 == null) {
+					return t1 == null ? (t2 == null ? 0 : 1) : -1;
+				}
+				
+				//ascending order
+				return t1.compareToIgnoreCase(t2);
+			}
+			
 		}
 
 	};
-
-	public int compareTo(Shoppinglist another) {
-        return this.mName.toLowerCase().compareTo(another.getName().toLowerCase());
-	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((mAccess == null) ? 0 : mAccess.hashCode());
 		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
-		result = prime * result + ((mModified == null) ? 0 : mModified.hashCode());
+		result = prime * result
+				+ ((mModified == null) ? 0 : mModified.hashCode());
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
-		result = prime * result + ((mOwner == null) ? 0 : mOwner.hashCode());
 		result = prime * result + ((mPrevId == null) ? 0 : mPrevId.hashCode());
+		result = prime * result + ((mShares == null) ? 0 : mShares.hashCode());
 		result = prime * result + mState;
 		result = prime * result + ((mType == null) ? 0 : mType.hashCode());
 		result = prime * result + mUserId;
@@ -302,15 +369,15 @@ public class Shoppinglist extends EtaErnObject implements Serializable, Comparab
 				return false;
 		} else if (!mName.equals(other.mName))
 			return false;
-		if (mOwner == null) {
-			if (other.mOwner != null)
-				return false;
-		} else if (!mOwner.equals(other.mOwner))
-			return false;
 		if (mPrevId == null) {
 			if (other.mPrevId != null)
 				return false;
 		} else if (!mPrevId.equals(other.mPrevId))
+			return false;
+		if (mShares == null) {
+			if (other.mShares != null)
+				return false;
+		} else if (!mShares.equals(other.mShares))
 			return false;
 		if (mState != other.mState)
 			return false;

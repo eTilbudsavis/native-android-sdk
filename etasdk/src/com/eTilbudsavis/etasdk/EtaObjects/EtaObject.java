@@ -1,54 +1,16 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
-
 public class EtaObject {
 	
-	public static final String TAG = "EtaBaseObject";
+	public static final String TAG = "EtaObject";
+	
+	private JSONObject serverData;
 	
 	public EtaObject() { }
 	
-	/**
-	 * More or less a static factory method, for ease of creating lists of objects, in situations where
-	 * the type is irrelevant, like conversion of objects in the shoppinglist manager.
-	 * @param objects to be converted
-	 * @return List of something that extends EtaBaseObjects
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T extends List<? extends EtaObject>> T fromJSON(JSONArray objects) {
-		ArrayList<EtaObject> list = new ArrayList<EtaObject>(0);
-		try {
-			JSONObject o = objects.getJSONObject(0);
-			if (o.has(Key.ERN)) {
-				list = EtaErnObject.fromJSON(objects);
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return (T) list;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static <T extends EtaObject> T fromJSON(JSONObject object) {
-		EtaObject item = new EtaObject();
-		if (object.has(Key.ERN)) {
-			item = EtaErnObject.fromJSON(object);
-		}
-		return (T) item;
-	}
-	
-	public JSONObject toJSON() {
-		return new JSONObject();
-	}
-
 	protected static String getJsonString(JSONObject object, String name) {
 		if (object == null || name == null) 
 			return null;
@@ -60,13 +22,45 @@ public class EtaObject {
 		} catch (JSONException e) { }
 		return null;
 	}
-
+	
 	protected static boolean stringCompare(String first, String second) {
 		return first == null ? second == null : first.equals(second);
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((serverData == null) ? 0 : serverData.hashCode());
+		return result;
+	}
 
-	public class Key {
-		
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		EtaObject other = (EtaObject) obj;
+		if (serverData == null) {
+			if (other.serverData != null)
+				return false;
+		} else if (!serverData.equals(other.serverData))
+			return false;
+		return true;
+	}
+	
+	/**
+	 * This class contains all strings, that eTilbudsavis API v2 can return as keys in any JSONObject.
+	 * <br><br>
+	 * Note, that this is a convenience class, and that the keys aren't necessarily a full
+	 * set of the available keys in the API v2, but covers all keys used for creation of any Android SDK object.
+	 * @author Danny Hvam - danny@etilbudsavis.dk
+	 */
+	public class ServerKey {
 		public static final String ID = "id";
 		public static final String ERN = "ern";
 		public static final String NAME = "name";
@@ -140,10 +134,10 @@ public class EtaObject {
 		public static final String UNSUBSCRIBE_PRINT_URL = "unsubscribe_print_url";
 		public static final String TYPE = "type";
 		public static final String META = "meta";
-		public static final String PROVIDER = "provider";
+		public static final String SHARES = "shares";
 		public static final String TOKEN = "token";
 		public static final String EXPIRES = "expires";
-		public static final String SERVER_UNSUBSCRIBE_PRINT_URL = "ARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRGGGGGGGGGGG_Change ME!!";
+		public static final String PROVIDER = "provider";
 		
 	}
 }

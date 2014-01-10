@@ -10,24 +10,28 @@ import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.os.Bundle;
-import android.util.Log;
 
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
+import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 
 public final class Utils {
+	
+	public static final String TAG = "Utils";
 	
 	/** A second in milliseconds */
 	public static final long SECOND_IN_MILLIS = 1000;
@@ -49,11 +53,9 @@ public final class Utils {
 
 	/** A year in milliseconds */
 	public static final long YEAR_IN_MILLIS = WEEK_IN_MILLIS * 52;
-
+	
 	/** The date format as returned from the server */
 	public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZZ";
-
-	private static final SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
 	
 	/**
 	 * Create universally unique identifier.
@@ -64,61 +66,6 @@ public final class Utils {
 		return UUID.randomUUID().toString();
 	}
 	
-	/**
-	 * A proxy for Log.d API that silences log messages in release.
-	 *
-	 * @param tag Used to identify the source of a log message. It usually
-	 *			identifies the class or activity where the log call occurs.
-	 * @param msg The message you would like logged.
-	 */
-	public static void logd(String tag, String msg) {
-		if (Eta.DEBUG)
-			Log.d(tag, msg);
-	}	
-
-	public static void logd(String tag, String name, boolean isCache, Object data, EtaError error) {
-		if (!Eta.DEBUG)
-			return;
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append(name).append(": ")
-		.append("cache: ").append(isCache)
-		.append(", data: ");
-		if (data != null) {
-			if (data instanceof List<?>) {
-				sb.append("list size ").append(((List<?>) data).size());
-			} else {
-				sb.append(data.toString());
-			}
-		} else {
-			sb.append(error.toString());
-		}
-		Log.d(tag, sb.toString());
-	}
-	
-	public static void logdMax(String tag, String sb) {
-		if (!Eta.DEBUG)
-			return;
-		
-		if (sb.length() > 4000) {
-		    Log.d(tag, "sb.length = " + sb.length());
-		    int chunkCount = sb.length() / 4000;     // integer division
-		    for (int i = 0; i <= chunkCount; i++) {
-		        int max = 4000 * (i + 1);
-		        if (max >= sb.length()) {
-		            Log.d(tag, "chunk " + i + " of " + chunkCount + ":" + sb.substring(4000 * i));
-		        } else {
-		            Log.d(tag, "chunk " + i + " of " + chunkCount + ":" + sb.substring(4000 * i, max));
-		        }
-		    }
-		}
-	}
-	
-	public static void printStackTrace() {
-		if (Eta.DEBUG)
-			for (StackTraceElement ste : Thread.currentThread().getStackTrace())
-				System.out.println(ste);
-	}
     /**
      * Generate a SHA256 checksum of a string.
      * 
@@ -151,38 +98,63 @@ public final class Utils {
 	}
 	
 	public static String bundleToQueryString( Bundle apiParams) {
-		StringBuilder result = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		for (String key : apiParams.keySet()) {
-			if (apiParams.get(key) instanceof Bundle) {
-				logd("Utils", "Nested parameters not allowed.");
+			Object o = apiParams.get(key);
+			if (o instanceof Bundle) {
+				EtaLog.d(TAG, "Nested parameters not allowed.");
 			} else {
-				if (result.length() > 0)
-					result.append("&");
-				result.append(key);
-				result.append("=");
-				result.append(valueIsNull(apiParams.get(key)));
-				
+				if (sb.length() > 0) sb.append("&");
+				sb.append(key).append("=").append(valueIsNull(o));
 			}
 		}
-		
-		return result.toString();
+		return sb.toString();
 	}
 	
-	public static List<NameValuePair> bundleToNameValuePair(Bundle apiParams) {
+	public static List<NameValuePair> bundleToNameValuePair( Bundle apiParams) {
 		List<NameValuePair> list = new ArrayList<NameValuePair>(apiParams.size());
 		for (String key : apiParams.keySet()) {
 			if (apiParams.get(key) instanceof Bundle) {
-				logd("Utils", "Nested parameters not allowed.");
+				EtaLog.d(TAG, "Nested parameters not allowed.");
 			} else {
 				list.add(new BasicNameValuePair(key, valueIsNull(apiParams.get(key))));
 			}
 		}
 		return list;
 	}
-	
+
 	private static String valueIsNull(Object value) {
 		String s = value == null ? "" : value.toString();
 		return s;
+	}
+
+	/**
+	 * Builds JSONObject from a given Bundle.
+	 *
+	 * @param b - the Bundle to convert
+	 * @return A JSONObject containing all key-value pairs from the bundle.
+	 */
+	public static JSONObject createJSON(Bundle b) {
+		return new JSONObject(createMap(b));
+	}
+	
+	/**
+	 * Builds Map<String, Object> from a given Bundle.
+	 * 
+	 * @param b - the Bundle to convert
+	 * @return A Map<String, Object> containing all key-value pairs from the bundle.
+	 */
+	public static Map<String, Object> createMap(Bundle b) {
+		Map<String, Object> map = new HashMap<String, Object>();
+//		try {
+			for (String s : b.keySet()) {
+				Object o = b.get(s);
+				map.put(s, (o instanceof Bundle) ? createMap((Bundle)o) : 0);
+			}
+//		} catch (Exception e) {
+//			EtaLog.d(TAG, e);
+//		}
+		return map;
 	}
 	
 	/**
@@ -216,28 +188,6 @@ public final class Utils {
 	}
 	
 	/**
-	 * Checks if the name is a valid user name for eta.dk <br><br>
-	 * 
-	 * Requirements: length > 2 chars.
-	 * @param name to check
-	 * @return boolean, true if name if valid
-	 */
-	public static boolean isNameValid(String name) {
-		return name.length() > 1 ? (name.length() < 81 ? true : false ) : false;
-	}
-
-	/**
-	 * Checks if a given password fits the requirements of etilbudsavis.dk.<br><br>
-	 * 
-	 * Requirements: password length from 6 through 39 chars.
-	 * @param password
-	 * @return
-	 */
-	public static boolean isPasswordValid(String password) {
-		return 5 < password.length() && password.length() < 40;
-	}
-	
-	/**
 	 * Checks if a given integer is a valid birth year.<br>
 	 * 
 	 * Requirements: birth year from 1901 through 2011.
@@ -245,7 +195,17 @@ public final class Utils {
 	 * @return
 	 */
 	public static boolean isBirthyearValid(Integer birthyear) {
-		return birthyear > 1900 ? (birthyear < 2012 ? true : false ) : false ;
+		return birthyear > 1900 ? (birthyear < 2013 ? true : false ) : false ;
+	}
+	
+	/**
+	 * A very naive implementation of email validation.<br>
+	 * 
+	 * @param email
+	 * @return
+	 */
+	public static boolean isEmailValid(String email) {
+		return email.contains("@") && email.split("@").length > 1; 
 	}
 
 	/**
@@ -259,39 +219,86 @@ public final class Utils {
 		gender = gender.toLowerCase();
 		return (gender.equals("male") || gender.equals("female") );
 	}
-
-	public static boolean isSuccess(int statusCode) {
-		return 200 <= statusCode && statusCode < 300;
-	}
-
-	public static boolean isRedirection(int statusCode) {
-		return 300 <= statusCode && statusCode < 400;
-	}
-
-	public static boolean isClientError(int statusCode) {
-		return 400 <= statusCode && statusCode < 500;
-	}
-
-	public static boolean isServerError(int statusCode) {
-		return 500 <= statusCode && statusCode < 600;
-	}
 	
 	public static Date parseDate(String date) {
-		synchronized (sdf) {
-			Date d = null;
-			try {
-				d = sdf.parse(date);
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-			return d;
+		Date d = null;
+		try {
+			d = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(date);
+		} catch (ParseException e) {
+			e.printStackTrace();
 		}
+		return d;
 	}
 
 	public static String formatDate(Date date) {
-		synchronized (sdf) {
-			return sdf.format(date);
+		return new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(date);
+	}
+	
+
+	public static void sortItems(List<ShoppinglistItem> items) {
+		int size = items.size();
+		
+		HashSet<String> allId = new HashSet<String>(size);
+		for (ShoppinglistItem sli : items) {
+			allId.add(sli.getId());
 		}
+		
+		List<ShoppinglistItem> first = new ArrayList<ShoppinglistItem>(size);
+		List<ShoppinglistItem> nil = new ArrayList<ShoppinglistItem>(size);
+		List<ShoppinglistItem> orphan = new ArrayList<ShoppinglistItem>(size);
+		HashMap<String, ShoppinglistItem> prevItems = new HashMap<String, ShoppinglistItem>(size);
+		
+		for (ShoppinglistItem sli : items) {
+			
+			String prev = sli.getPreviousId();
+			
+			if (prev == null) {
+				nil.add(sli);
+			} else if (prev.equals(ShoppinglistItem.FIRST_ITEM)) {
+				first.add(sli);
+			} else if ( !prevItems.containsKey(prev) && allId.contains(prev)) {
+				prevItems.put(prev, sli);
+			} else {
+				orphan.add(sli);
+			}
+			
+		}
+		
+		// Clear the original items list, items in this list is to be restored shortly
+		items.clear();
+		
+		Collections.sort(first, ShoppinglistItem.TitleComparator);
+		Collections.sort(nil, ShoppinglistItem.TitleComparator);
+		Collections.sort(orphan, ShoppinglistItem.TitleComparator);
+		
+		List<ShoppinglistItem> newItems = new ArrayList<ShoppinglistItem>(size);
+		newItems.addAll(nil);
+		newItems.addAll(first);
+		newItems.addAll(orphan);
+		
+		ShoppinglistItem next;
+		String id;
+		for (ShoppinglistItem sli : newItems) {
+			next = sli;
+			while (next != null) {
+				id = next.getId();
+				items.add(next);
+				next = prevItems.get(id);
+				prevItems.remove(id);
+			}
+		}
+		
+		for (ShoppinglistItem s : prevItems.values())
+			items.add(s);
+		
+	}
+	
+	public static boolean validVersion(String version) {
+		
+	    String FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([+-][0-9A-Za-z-.]*)?";
+	    Pattern PATTERN = Pattern.compile(FORMAT);
+	    return PATTERN.matcher(version).matches();
+		
 	}
 	
 }

@@ -19,7 +19,6 @@ public class Country extends EtaObject implements Serializable {
 	
 	public Country() { }
 	
-	@SuppressWarnings("unchecked")
 	public static Country fromJSON(JSONObject country) {
 		return fromJSON(new Country(), country);
 	}
@@ -28,8 +27,8 @@ public class Country extends EtaObject implements Serializable {
 		if (c == null) c = new Country();
 		if (country == null) return c;
 		
-		c.setId(getJsonString(country, Key.ID));
-		c.setUnsubscribePrintUrl(getJsonString(country, Key.SERVER_UNSUBSCRIBE_PRINT_URL));
+		c.setId(getJsonString(country, ServerKey.ID));
+		c.setUnsubscribePrintUrl(getJsonString(country, ServerKey.UNSUBSCRIBE_PRINT_URL));
 		
 		return c;
 	}
@@ -41,8 +40,8 @@ public class Country extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Country c) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Key.ID, c.getId());
-			o.put(Key.SERVER_UNSUBSCRIBE_PRINT_URL, c.getUnsubscribePrintUrl());
+			o.put(ServerKey.ID, c.getId());
+			o.put(ServerKey.UNSUBSCRIBE_PRINT_URL, c.getUnsubscribePrintUrl());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -80,30 +79,39 @@ public class Country extends EtaObject implements Serializable {
 	 */
 	public void setErn(String ern) {
 	}
-	
+
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
+		result = prime * result
+				+ ((mUnsubscribeUrl == null) ? 0 : mUnsubscribeUrl.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		
-		if (!(o instanceof Country))
+		if (!super.equals(obj))
 			return false;
-
-		Country c = (Country)o;
-		return stringCompare(mId, c.getId()) &&
-				stringCompare(mUnsubscribeUrl, c.getUnsubscribePrintUrl());
+		if (getClass() != obj.getClass())
+			return false;
+		Country other = (Country) obj;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
+			return false;
+		if (mUnsubscribeUrl == null) {
+			if (other.mUnsubscribeUrl != null)
+				return false;
+		} else if (!mUnsubscribeUrl.equals(other.mUnsubscribeUrl))
+			return false;
+		return true;
 	}
-
-	@Override
-	public String toString() {
-		return toString(true);
-	}
-
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[")
-		.append(", id=").append(mId)
-		.append(", unsubscribe_url=").append(mUnsubscribeUrl);
-		return sb.append("]").toString();
-	}
+	
+	
+	
 }

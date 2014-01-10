@@ -64,8 +64,9 @@ public class RequestQueue {
 		mNetwork = network;
 		mDelivery = delivery;
 		mNetworkDispatchers = new NetworkDispatcher[poolSize];
+		mDelivery.mRequestQueue = this;
 	}
-
+    
 	/** Construct with default poolsize, and the eta handler running on main thread */
     public RequestQueue(Eta eta, Cache cache, Network network) {
     	this(eta, cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE, new Delivery(eta.getHandler()));
@@ -100,33 +101,25 @@ public class RequestQueue {
     	
     }
     
-	public synchronized void sessionUpdate(Request r) {
+    // TODO: This method shouldn't force SessionManager to update, but just queue the request
+    // and await the SessionManager. FIGURE THIS OUT!
+	public synchronized boolean performSessionUpdate(Request r) {
 		
-		if (mEta.getSessionManager().getSession().isExpired()) {
-			// If the session is still expired
+		boolean refreshing = mEta.getSessionManager().refresh(); 
+		if (refreshing) {
 			mSessionQueue.add(r);
-			
-			mEta.getSessionManager().update(new Listener<String>() {
-
-				public void onComplete(boolean isCache, String response, EtaError error) {
-					
-					if (response != null) {
-						for(Request r : mSessionQueue) {
-				    		mNetworkQueue.add(r);
-				    	}
-					} else {
-						// TODO: retry somehow, based on error code
-					}
-					
-				}
-			});
-				
-		} else {
-			// If this method had lock while a thread tried to add new request,
-			// session might not be expired any more, so just retry immediately.
-			mNetworkQueue.add(r);
 		}
+		return refreshing;
 		
+	}
+	
+	public void sessionUpdateComplete() {
+		mNetworkQueue.addAll(mSessionQueue);
+		mSessionQueue.clear();
+	}
+	
+	public void complete(Request r) {
+		// TODO: Do we want' to do any work on this object?
 	}
 	
 	/** Add a new request to this RequestQueue, everything from this point onward will be performed on separate threads */

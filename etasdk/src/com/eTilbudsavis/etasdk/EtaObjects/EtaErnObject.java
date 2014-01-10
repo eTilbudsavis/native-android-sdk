@@ -20,36 +20,13 @@ public class EtaErnObject extends EtaObject {
 
 	public static final String TAG = "EtaErnObject";
 
-	protected String mId;
-	protected String mErn;
-	
 	private static final String ERN_CATALOG = "ern:catalog";
 	private static final String ERN_OFFER = "ern:offer";
 	private static final String ERN_DEALER = "ern:dealer";
 	private static final String ERN_STORE = "ern:store";
 	private static final String ERN_SHOPPINGLIST = "ern:shopping:list";
 	private static final String ERN_SHOPPINGLISTITEM = "ern:shoppinglist:item";
-
-	@SuppressWarnings("unchecked")
-	public <T extends EtaErnObject> T setId(String id) {
-		this.mId = id;
-		return (T)this;
-	}
-
-	public String getId() {
-		return mId;
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T extends EtaErnObject> T setErn(String ern) {
-		mErn = ern;
-		return (T)this;
-	}
-
-	public String getErn() {
-		return mErn;
-	}
-
+	
 	/**
 	 * More or less a static factory method, for ease of creating lists of objects, in situations where
 	 * the type is irrelevant, like conversion of objects in the shoppinglist manager.
@@ -61,15 +38,15 @@ public class EtaErnObject extends EtaObject {
 		
 		List<? extends EtaObject> list = new ArrayList<EtaObject>(0);
 		
-		if (objects.length() == 0) {
+		if (objects == null || objects.length() == 0) {
 			return (T) list;
 		}
 		
 		try {
 			JSONObject o = objects.getJSONObject(0);
-			if (o.has(Key.ERN)) {
+			if (o.has(ServerKey.ERN)) {
 				
-				String ern = o.getString(Key.ERN);
+				String ern = o.getString(ServerKey.ERN);
 				
 				if (ern.startsWith(ERN_CATALOG)) {
 					list = Catalog.fromJSON(objects);
@@ -96,11 +73,14 @@ public class EtaErnObject extends EtaObject {
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends EtaObject> T fromJSON(JSONObject object) {
+		if (object == null)
+			return null;
+		
 		EtaObject item = new EtaObject();
 		try {
-			if (object.has(Key.ERN)) {
+			if (object.has(ServerKey.ERN)) {
 				
-				String ern = object.getString(Key.ERN);
+				String ern = object.getString(ServerKey.ERN);
 					
 				if (ern.startsWith(ERN_CATALOG)) {
 					item = Catalog.fromJSON(object);

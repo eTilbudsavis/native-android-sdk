@@ -27,7 +27,6 @@ public class Links extends EtaObject implements Serializable {
 		return l;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Links fromJSON(JSONObject links) {
 		return fromJSON(new Links(), links);
 	}
@@ -36,7 +35,7 @@ public class Links extends EtaObject implements Serializable {
 		if (l == null) l = new Links();
 		if (links == null) return l;
 		
-		l.setWebshop(getJsonString(links, Key.WEBSHOP));
+		l.setWebshop(getJsonString(links, ServerKey.WEBSHOP));
 		
 		return l;
 	}
@@ -48,7 +47,7 @@ public class Links extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Links l) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Key.WEBSHOP, l.getWebshop());
+			o.put(ServerKey.WEBSHOP, l.getWebshop());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -64,23 +63,30 @@ public class Links extends EtaObject implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Links))
-			return false;
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((mWebshop == null) ? 0 : mWebshop.hashCode());
+		return result;
+	}
 
-		Links l = (Links)o;
-		return stringCompare(mWebshop, l.getWebshop());
-	}
-	
 	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(getClass().getSimpleName()).append("[")
-		.append("webshop=").append(mWebshop)
-		.append("]").toString();
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Links other = (Links) obj;
+		if (mWebshop == null) {
+			if (other.mWebshop != null)
+				return false;
+		} else if (!mWebshop.equals(other.mWebshop))
+			return false;
+		return true;
 	}
+
 	
 }

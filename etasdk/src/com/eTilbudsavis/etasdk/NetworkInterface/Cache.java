@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import android.os.Bundle;
 import android.text.TextUtils;
 
-import com.eTilbudsavis.etasdk.EtaObjects.EtaResponse;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Cache implements Serializable {
@@ -53,7 +52,7 @@ public class Cache implements Serializable {
 		if (c == null)
 			return null;
 		
-		if ( !c.isValid() ) {
+		if ( !c.isExpired() ) {
 			mItems.remove(c);
 		}
 		return c;
@@ -130,6 +129,14 @@ public class Cache implements Serializable {
 		
 	}
 	
+	public class EtaResponse {
+		
+		public void set(int i, String s) {
+			
+		}
+		
+	}
+	
 	public static class Item {
 		
 		// Time of insertion
@@ -155,8 +162,8 @@ public class Cache implements Serializable {
 		 * this is based on the time to live factor
 		 * @return
 		 */
-		public boolean isValid() {
-			return (time - ttl) > System.currentTimeMillis();
+		public boolean isExpired() {
+			return (time - ttl) < System.currentTimeMillis();
 		}
 		
 	}

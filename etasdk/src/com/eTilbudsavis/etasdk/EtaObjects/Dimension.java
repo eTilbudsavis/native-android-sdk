@@ -31,8 +31,7 @@ public class Dimension extends EtaObject implements Serializable {
 		}
 		return d;
 	}
-
-	@SuppressWarnings("unchecked")
+	
 	public static Dimension fromJSON(JSONObject dimension) {
 		return fromJSON(new Dimension(), dimension);
 	}
@@ -84,26 +83,34 @@ public class Dimension extends EtaObject implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Dimension))
-			return false;
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		long temp;
+		temp = Double.doubleToLongBits(mHeight);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(mWidth);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
 
-		Dimension d = (Dimension)o;
-		return 
-				mWidth == d.getWidth() &&
-				mHeight == d.getHeight();
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Dimension other = (Dimension) obj;
+		if (Double.doubleToLongBits(mHeight) != Double
+				.doubleToLongBits(other.mHeight))
+			return false;
+		if (Double.doubleToLongBits(mWidth) != Double
+				.doubleToLongBits(other.mWidth))
+			return false;
+		return true;
 	}
 	
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(getClass().getSimpleName()).append("[")
-		.append("width=").append(mWidth)
-		.append(", height=").append(mHeight)
-		.append("]").toString();
-	}
-
+	
 }

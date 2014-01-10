@@ -8,64 +8,63 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Sort;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Offer extends EtaErnObject implements Serializable {
+public class Offer extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Offer";
 	
 	/** Sort a list by popularity in ascending order. (smallest to largest) */
-	public static final String SORT_POPULARITY = Sort.POPULARITY;
+	public static final String SORT_POPULARITY = Request.Sort.POPULARITY;
 
 	/** Sort a list by popularity in descending order. (largest to smallest)*/
-	public static final String SORT_POPULARITY_DESC = Sort.POPULARITY_DESC;
+	public static final String SORT_POPULARITY_DESC = Request.Sort.POPULARITY_DESC;
 
 	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = Sort.DISTANCE;
+	public static final String SORT_DISTANCE = Request.Sort.DISTANCE;
 
 	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = Sort.DISTANCE_DESC;
+	public static final String SORT_DISTANCE_DESC = Request.Sort.DISTANCE_DESC;
 
 	/** Sort a list by page (in catalog) in ascending order. (smallest to largest) */
-	public static final String SORT_PAGE = Sort.PAGE;
+	public static final String SORT_PAGE = Request.Sort.PAGE;
 
 	/** Sort a list by page (in catalog) in descending order. (largest to smallest)*/
-	public static final String SORT_PAGE_DESC = Sort.PAGE_DESC;
+	public static final String SORT_PAGE_DESC = Request.Sort.PAGE_DESC;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Sort.CREATED;
+	public static final String SORT_CREATED = Request.Sort.CREATED;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
+	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific catalog id's */
-	public static final String FILTER_CATALOG_IDS = Param.FILTER_CATALOG_IDS;
+	public static final String FILTER_CATALOG_IDS = Request.Param.FILTER_CATALOG_IDS;
 
 	/** Parameter for posting a list of store id's to publish the catalog in */
-	public static final String FILTER_STORE_IDS = Param.FILTER_STORE_IDS;
+	public static final String FILTER_STORE_IDS = Request.Param.FILTER_STORE_IDS;
 
 	/** Parameter for posting a list of store id's to publish the catalog in */
-	public static final String FILTER_DEALER_IDS = Param.FILTER_DEALER_IDS;
+	public static final String FILTER_DEALER_IDS = Request.Param.FILTER_DEALER_IDS;
 
 	/** String identifying the query parameter */
-	public static final String PARAM_QUERY = Param.QUERY;
+	public static final String PARAM_QUERY = Request.Param.QUERY;
 	
 	/** Endpoint for offer list resource */
-	public static final String ENDPOINT_LIST = Endpoint.OFFER_LIST;
+	public static final String ENDPOINT_LIST = Request.Endpoint.OFFER_LIST;
 
 	/** Endpoint for a single offer resource */
-	public static final String ENDPOINT_ID = Endpoint.OFFER_ID;
+	public static final String ENDPOINT_ID = Request.Endpoint.OFFER_ID;
 
 	/** Endpoint for searching offers */
-	public static final String ENDPOINT_SEARCH = Endpoint.OFFER_SEARCH;
-	
-	// From JSON blob
+	public static final String ENDPOINT_SEARCH = Request.Endpoint.OFFER_SEARCH;
+
+	private String mId;
+	private String mErn;
 	private String mHeading;
 	private String mDescription;
 	private int mCatalogPage = 0;
@@ -87,11 +86,8 @@ public class Offer extends EtaErnObject implements Serializable {
 	private Dealer mDealer;
 	private Store mStore;
 
-	public Offer() {
-		
-	}
-
-	@SuppressWarnings("unchecked")
+	public Offer() { }
+	
 	public static ArrayList<Offer> fromJSON(JSONArray offers) {
 		ArrayList<Offer> list = new ArrayList<Offer>();
 		try {
@@ -104,7 +100,6 @@ public class Offer extends EtaErnObject implements Serializable {
 		return list;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Offer fromJSON(JSONObject offer) {
 		return fromJSON(new Offer(), offer);
 	}
@@ -114,25 +109,25 @@ public class Offer extends EtaErnObject implements Serializable {
 		if (offer == null) return o;
 
 		try {
-			o.setId(offer.getString(Key.ID));
-			o.setErn(offer.getString(Key.ERN));
-			o.setHeading(offer.getString(Key.HEADING));
-			o.setDescription(getJsonString(offer, Key.DESCRIPTION));
-			o.setCatalogPage(offer.getInt(Key.CATALOG_PAGE));
-			o.setPricing(Pricing.fromJSON(offer.getJSONObject(Key.PRICING)));
-			o.setQuantity(Quantity.fromJSON(offer.getJSONObject(Key.QUANTITY)));
-			o.setImages(Images.fromJSON(offer.getJSONObject(Key.IMAGES)));
-			o.setLinks(Links.fromJSON(offer.getJSONObject(Key.LINKS)));
-			Date runFrom = Utils.parseDate(getJsonString(offer, Key.RUN_FROM));
+			o.setId(offer.getString(ServerKey.ID));
+			o.setErn(offer.getString(ServerKey.ERN));
+			o.setHeading(offer.getString(ServerKey.HEADING));
+			o.setDescription(getJsonString(offer, ServerKey.DESCRIPTION));
+			o.setCatalogPage(offer.getInt(ServerKey.CATALOG_PAGE));
+			o.setPricing(Pricing.fromJSON(offer.getJSONObject(ServerKey.PRICING)));
+			o.setQuantity(Quantity.fromJSON(offer.getJSONObject(ServerKey.QUANTITY)));
+			o.setImages(Images.fromJSON(offer.getJSONObject(ServerKey.IMAGES)));
+			o.setLinks(Links.fromJSON(offer.getJSONObject(ServerKey.LINKS)));
+			Date runFrom = Utils.parseDate(getJsonString(offer, ServerKey.RUN_FROM));
 			o.setRunFrom(runFrom);
-			Date runTill = Utils.parseDate(getJsonString(offer, Key.RUN_TILL));
+			Date runTill = Utils.parseDate(getJsonString(offer, ServerKey.RUN_TILL));
 			o.setRunTill(runTill);
-			o.setDealerUrl(getJsonString(offer, Key.DEALER_URL));
-			o.setDealerId(getJsonString(offer, Key.DEALER_ID));
-			o.setStoreUrl(getJsonString(offer, Key.STORE_URL));
-			o.setStoreId(getJsonString(offer, Key.STORE_ID));
-			o.setCatalogUrl(getJsonString(offer, Key.CATALOG_URL));
-			o.setCatalogId(getJsonString(offer, Key.CATALOG_ID));
+			o.setDealerUrl(getJsonString(offer, ServerKey.DEALER_URL));
+			o.setDealerId(getJsonString(offer, ServerKey.DEALER_ID));
+			o.setStoreUrl(getJsonString(offer, ServerKey.STORE_URL));
+			o.setStoreId(getJsonString(offer, ServerKey.STORE_ID));
+			o.setCatalogUrl(getJsonString(offer, ServerKey.CATALOG_URL));
+			o.setCatalogId(getJsonString(offer, ServerKey.CATALOG_ID));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -146,28 +141,46 @@ public class Offer extends EtaErnObject implements Serializable {
 	public static JSONObject toJSON(Offer offer) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Key.ID, offer.getId());
-			o.put(Key.ERN, offer.getErn());
-			o.put(Key.HEADING, offer.getHeading());
-			o.put(Key.DESCRIPTION, offer.getDescription());
-			o.put(Key.CATALOG_PAGE, offer.getCatalogPage());
-			o.put(Key.PRICING, offer.getPricing() == null ? null : offer.getPricing().toJSON());
-			o.put(Key.QUANTITY, offer.getQuantity() == null ? null : offer.getQuantity().toJSON());
-			o.put(Key.IMAGES, offer.getImages() == null ? null : offer.getImages().toJSON());
-			o.put(Key.LINKS, offer.getLinks() == null ? null : offer.getLinks().toJSON());
-			o.put(Key.RUN_FROM, Utils.formatDate(offer.getRunFrom()));
-			o.put(Key.RUN_TILL, Utils.formatDate(offer.getRunTill()));
-			o.put(Key.DEALER_URL, offer.getDealerUrl());
-			o.put(Key.DEALER_ID, offer.getDealerId());
-			o.put(Key.STORE_URL, offer.getStoreUrl());
-			o.put(Key.STORE_ID, offer.getStoreId());
-			o.put(Key.CATALOG_URL, offer.getCatalogUrl());
-			o.put(Key.CATALOG_PAGE, offer.getCatalogId());
+			o.put(ServerKey.ID, offer.getId());
+			o.put(ServerKey.ERN, offer.getErn());
+			o.put(ServerKey.HEADING, offer.getHeading());
+			o.put(ServerKey.DESCRIPTION, offer.getDescription());
+			o.put(ServerKey.CATALOG_PAGE, offer.getCatalogPage());
+			o.put(ServerKey.PRICING, offer.getPricing() == null ? null : offer.getPricing().toJSON());
+			o.put(ServerKey.QUANTITY, offer.getQuantity() == null ? null : offer.getQuantity().toJSON());
+			o.put(ServerKey.IMAGES, offer.getImages() == null ? null : offer.getImages().toJSON());
+			o.put(ServerKey.LINKS, offer.getLinks() == null ? null : offer.getLinks().toJSON());
+			o.put(ServerKey.RUN_FROM, Utils.formatDate(offer.getRunFrom()));
+			o.put(ServerKey.RUN_TILL, Utils.formatDate(offer.getRunTill()));
+			o.put(ServerKey.DEALER_URL, offer.getDealerUrl());
+			o.put(ServerKey.DEALER_ID, offer.getDealerId());
+			o.put(ServerKey.STORE_URL, offer.getStoreUrl());
+			o.put(ServerKey.STORE_ID, offer.getStoreId());
+			o.put(ServerKey.CATALOG_URL, offer.getCatalogUrl());
+			o.put(ServerKey.CATALOG_ID, offer.getCatalogId());
 			
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 		return o;
+	}
+
+	public Offer setId(String id) {
+		this.mId = id;
+		return this;
+	}
+
+	public String getId() {
+		return mId;
+	}
+	
+	public Offer setErn(String ern) {
+		mErn = ern;
+		return this;
+	}
+	
+	public String getErn() {
+		return mErn;
 	}
 	
 	public String getHeading() {
@@ -335,66 +348,135 @@ public class Offer extends EtaErnObject implements Serializable {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((mCatalogId == null) ? 0 : mCatalogId.hashCode());
+		result = prime * result + mCatalogPage;
+		result = prime * result
+				+ ((mCatalogUrl == null) ? 0 : mCatalogUrl.hashCode());
+		result = prime * result
+				+ ((mDealerId == null) ? 0 : mDealerId.hashCode());
+		result = prime * result
+				+ ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
+		result = prime * result
+				+ ((mDescription == null) ? 0 : mDescription.hashCode());
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
+		result = prime * result
+				+ ((mHeading == null) ? 0 : mHeading.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
+		result = prime * result + ((mImages == null) ? 0 : mImages.hashCode());
+		result = prime * result + ((mLinks == null) ? 0 : mLinks.hashCode());
+		result = prime * result
+				+ ((mPricing == null) ? 0 : mPricing.hashCode());
+		result = prime * result
+				+ ((mQuantity == null) ? 0 : mQuantity.hashCode());
+		result = prime * result
+				+ ((mRunFrom == null) ? 0 : mRunFrom.hashCode());
+		result = prime * result
+				+ ((mRunTill == null) ? 0 : mRunTill.hashCode());
+		result = prime * result
+				+ ((mStoreId == null) ? 0 : mStoreId.hashCode());
+		result = prime * result
+				+ ((mStoreUrl == null) ? 0 : mStoreUrl.hashCode());
+		return result;
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		
-		if (!(obj instanceof Offer))
+		if (!super.equals(obj))
 			return false;
-
-		Offer o = (Offer)obj;
-		return stringCompare(mId, o.getId()) &&
-				stringCompare(mErn, o.getErn()) &&
-				stringCompare(mHeading, o.getHeading()) &&
-				stringCompare(mDescription, o.getDescription()) &&
-				mCatalogPage == o.getCatalogPage() &&
-				mPricing == null ? o.getPricing() == null : mPricing.equals(o.getPricing()) &&
-				mQuantity == null ? o.getQuantity() == null : mQuantity.equals(o.getQuantity()) &&
-				mImages == null ? o.getImages() == null : mImages.equals(o.getImages()) &&
-				mLinks == null ? o.getLinks() == null : mLinks.equals(o.getLinks()) &&
-				mRunFrom == o.getRunFrom() &&
-				mRunTill == o.getRunTill() &&
-				stringCompare(mDealerUrl, o.getDealerUrl()) &&
-				stringCompare(mDealerId, o.getDealerId()) &&
-				stringCompare(mStoreUrl, o.getStoreUrl()) &&
-				stringCompare(mStoreId, o.getStoreId()) &&
-				stringCompare(mCatalogUrl, o.getCatalogUrl()) &&
-				stringCompare(mCatalogId, o.getCatalogId()) &&
-				mCatalog == null ? o.getCatalog() == null : mCatalog.equals(o.getCatalog()) &&
-				mDealer == null ? o.getDealer() == null : mDealer.equals(o.getDealer()) &&
-				mStore == null ? o.getStore() == null : mStore.equals(o.getStore());
+		if (getClass() != obj.getClass())
+			return false;
+		Offer other = (Offer) obj;
+		if (mCatalogId == null) {
+			if (other.mCatalogId != null)
+				return false;
+		} else if (!mCatalogId.equals(other.mCatalogId))
+			return false;
+		if (mCatalogPage != other.mCatalogPage)
+			return false;
+		if (mCatalogUrl == null) {
+			if (other.mCatalogUrl != null)
+				return false;
+		} else if (!mCatalogUrl.equals(other.mCatalogUrl))
+			return false;
+		if (mDealerId == null) {
+			if (other.mDealerId != null)
+				return false;
+		} else if (!mDealerId.equals(other.mDealerId))
+			return false;
+		if (mDealerUrl == null) {
+			if (other.mDealerUrl != null)
+				return false;
+		} else if (!mDealerUrl.equals(other.mDealerUrl))
+			return false;
+		if (mDescription == null) {
+			if (other.mDescription != null)
+				return false;
+		} else if (!mDescription.equals(other.mDescription))
+			return false;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
+		if (mHeading == null) {
+			if (other.mHeading != null)
+				return false;
+		} else if (!mHeading.equals(other.mHeading))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
+			return false;
+		if (mImages == null) {
+			if (other.mImages != null)
+				return false;
+		} else if (!mImages.equals(other.mImages))
+			return false;
+		if (mLinks == null) {
+			if (other.mLinks != null)
+				return false;
+		} else if (!mLinks.equals(other.mLinks))
+			return false;
+		if (mPricing == null) {
+			if (other.mPricing != null)
+				return false;
+		} else if (!mPricing.equals(other.mPricing))
+			return false;
+		if (mQuantity == null) {
+			if (other.mQuantity != null)
+				return false;
+		} else if (!mQuantity.equals(other.mQuantity))
+			return false;
+		if (mRunFrom == null) {
+			if (other.mRunFrom != null)
+				return false;
+		} else if (!mRunFrom.equals(other.mRunFrom))
+			return false;
+		if (mRunTill == null) {
+			if (other.mRunTill != null)
+				return false;
+		} else if (!mRunTill.equals(other.mRunTill))
+			return false;
+		if (mStoreId == null) {
+			if (other.mStoreId != null)
+				return false;
+		} else if (!mStoreId.equals(other.mStoreId))
+			return false;
+		if (mStoreUrl == null) {
+			if (other.mStoreUrl != null)
+				return false;
+		} else if (!mStoreUrl.equals(other.mStoreUrl))
+			return false;
+		return true;
 	}
 	
-	/**
-	 * Returns a human readable string containing id, heading, dealer of the offer. <br>
-	 * SimpleClassName[prop1=value, prop2=NestedObject[prop3=value]]
-	 * @return <li> Offer digest as a string 
-	 */
-	@Override
-	public String toString() {
-		return toString(false);
-	}
 	
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[")
-		.append("heading=").append(mHeading)
-		.append(", description=").append(mDescription)
-		.append(", dealer=").append(mDealer == null ? mDealerId : mDealer.toString(everything))
-		.append(", pricing=").append(mPricing == null ? null : mPricing.toString())
-		.append(", runFrom=").append(Utils.formatDate(getRunFrom()))
-		.append(", runTill=").append(Utils.formatDate(getRunTill()));
-		
-		if (everything) {
-			sb.append(", ern=").append(mErn)
-			.append(", catalogPage=").append(mCatalogPage)
-			.append(", quantity=").append(mQuantity == null ? null : mQuantity.toString())
-			.append(", images=").append(mImages == null ? null : mImages.toString())
-			.append(", links=").append(mLinks == null ? null : mLinks.toString())
-			.append(", store=").append(mStore == null ? mStoreId : mStore.toString())
-			.append(", catalog=").append(mCatalog == null ? mCatalogId : mCatalog.toString(everything));
-		}
-		return sb.append("]").toString();
-	}
 	
 }

@@ -34,8 +34,7 @@ public class Pageflip extends EtaObject implements Serializable {
 		}
 		return p;
 	}
-
-	@SuppressWarnings("unchecked")
+	
 	public static Pageflip fromJSON(JSONObject pageflip) {
 		return fromJSON(new Pageflip(), pageflip);
 	}
@@ -44,8 +43,8 @@ public class Pageflip extends EtaObject implements Serializable {
 		if (p == null) p = new Pageflip();
 		if (pageflip == null) return p;
 		
-		p.setLogo(getJsonString(pageflip, Key.LOGO));
-		p.setColor(Color.parseColor("#"+getJsonString(pageflip, Key.COLOR)));
+		p.setLogo(getJsonString(pageflip, ServerKey.LOGO));
+		p.setColor(Color.parseColor("#"+getJsonString(pageflip, ServerKey.COLOR)));
 		
 		return p;
 	}
@@ -57,8 +56,8 @@ public class Pageflip extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Pageflip p) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Key.LOGO, p.getLogo());
-			o.put(Key.COLOR, p.getColorString());
+			o.put(ServerKey.LOGO, p.getLogo());
+			o.put(ServerKey.COLOR, p.getColorString());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -86,27 +85,34 @@ public class Pageflip extends EtaObject implements Serializable {
 		mColor = color;
 		return this;
 	}
-	
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Pageflip))
-			return false;
 
-		Pageflip p = (Pageflip)o;
-		return stringCompare(mLogo, p.getLogo()) &&
-				mColor == p.getColor();
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + mColor;
+		result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Pageflip other = (Pageflip) obj;
+		if (mColor != other.mColor)
+			return false;
+		if (mLogo == null) {
+			if (other.mLogo != null)
+				return false;
+		} else if (!mLogo.equals(other.mLogo))
+			return false;
+		return true;
 	}
 	
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(getClass().getSimpleName()).append("[")
-		.append("logo=").append(mLogo)
-		.append(", color=").append(mColor)
-		.append("]").toString();
-	}
 	
 }

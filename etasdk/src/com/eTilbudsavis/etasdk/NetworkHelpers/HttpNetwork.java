@@ -1,8 +1,6 @@
 package com.eTilbudsavis.etasdk.NetworkHelpers;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +9,6 @@ import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -19,7 +16,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -40,6 +36,7 @@ import com.eTilbudsavis.etasdk.Utils.EtaLog;
 public class HttpNetwork implements Network {
 
 	public static final String TAG = "HttpNetwork";
+	
 	/**
 	 * Default connection timeout, this is for both connection and socket
 	 */
@@ -74,14 +71,14 @@ public class HttpNetwork implements Network {
 				sc = resp.getStatusLine().getStatusCode();
 				NetworkResponse r = new NetworkResponse(sc, content, responseHeaders);
 				EtaError er = new EtaError(r);
-				if (isClientError(sc) || isServerError(sc)) {
-					if (er.getCode() == 1101 ||
-							er.getCode() == 1104 || 
-							er.getCode() == 1108 || 
-							er.getCode() == 1300 || 
-							er.getCode() == 1301) {
+				if (!isSuccess(sc)) {
+					
+					int c = er.getCode();
+					boolean isSessionError = er != null && (c == 1101 || c == 1104 || c == 1108);
+					if (isSessionError) {
 						throw new SessionError(r);
-					} 
+					}
+					
 				}
 				throw er;
 			}
@@ -156,7 +153,7 @@ public class HttpNetwork implements Network {
 		}
 
 	}
-
+	
 	private static void setEntity(HttpEntityEnclosingRequestBase httpRequest, Request<?> request) {
 		byte[] body = request.getBody();
 		if (body != null) {
@@ -165,17 +162,14 @@ public class HttpNetwork implements Network {
 			httpRequest.setHeader(Request.Header.CONTENT_TYPE, request.getBodyContentType());
 		}
 	}
-
-
-	@SuppressWarnings("rawtypes")
-	private void setHeaders(Request request, HttpRequestBase http) {
+	
+	private void setHeaders(Request<?> request, HttpRequestBase http) {
 		HashMap<String, String> headers = new HashMap<String, String>(request.getHeaders().size());
 		headers.putAll(request.getHeaders());
 		for(String key : headers.keySet())
 			http.setHeader(key, headers.get(key));
 	}
-
-
+	
 	private static byte[] entityToBytes(HttpEntity entity) {
 		ByteArrayBuffer bytes = new ByteArrayBuffer((int)entity.getContentLength());
 		try {
@@ -189,18 +183,9 @@ public class HttpNetwork implements Network {
 		}
 		return bytes.toByteArray();
 	}
-
-
+	
 	public static boolean isSuccess(int statusCode) {
 		return 200 <= statusCode && statusCode < 300 || statusCode == 304;
-	}
-
-	public static boolean isClientError(int statusCode) {
-		return 400 <= statusCode && statusCode < 500;
-	}
-
-	public static boolean isServerError(int statusCode) {
-		return 500 < statusCode;
 	}
 	
 }

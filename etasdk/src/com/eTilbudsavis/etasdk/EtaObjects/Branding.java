@@ -24,7 +24,6 @@ public class Branding extends EtaObject  implements Serializable {
 	
 	public Branding() { }
 	
-	@SuppressWarnings("unchecked")
 	public static Branding fromJSON(JSONObject branding) {
 		return fromJSON(new Branding(), branding);
 	}
@@ -34,12 +33,12 @@ public class Branding extends EtaObject  implements Serializable {
 		if (branding == null) return b;
 		
 		try {
-			b.setName(getJsonString(branding, Key.NAME));
-			b.setUrlName(getJsonString(branding, Key.URL_NAME));
-			b.setWebsite(getJsonString(branding, Key.WEBSITE));
-			b.setLogo(getJsonString(branding, Key.LOGO));
-			b.setColor(Color.parseColor("#"+branding.getString(EtaObject.Key.COLOR)));
-			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(EtaObject.Key.PAGEFLIP)));
+			b.setName(getJsonString(branding, ServerKey.NAME));
+			b.setUrlName(getJsonString(branding, ServerKey.URL_NAME));
+			b.setWebsite(getJsonString(branding, ServerKey.WEBSITE));
+			b.setLogo(getJsonString(branding, ServerKey.LOGO));
+			b.setColor(Color.parseColor("#"+branding.getString(EtaObject.ServerKey.COLOR)));
+			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(EtaObject.ServerKey.PAGEFLIP)));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -53,12 +52,12 @@ public class Branding extends EtaObject  implements Serializable {
 	public static JSONObject toJSON(Branding b) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Key.NAME, b.getName());
-			o.put(Key.URL_NAME, b.getUrlName());
-			o.put(Key.WEBSITE, b.getWebsite());
-			o.put(Key.LOGO, b.getLogo());
-			o.put(Key.COLOR, b.getColorString());
-			o.put(Key.PAGEFLIP, b.getPageflip().toJSON());
+			o.put(ServerKey.NAME, b.getName());
+			o.put(ServerKey.URL_NAME, b.getUrlName());
+			o.put(ServerKey.WEBSITE, b.getWebsite());
+			o.put(ServerKey.LOGO, b.getLogo());
+			o.put(ServerKey.COLOR, b.getColorString());
+			o.put(ServerKey.PAGEFLIP, b.getPageflip().toJSON());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -123,27 +122,6 @@ public class Branding extends EtaObject  implements Serializable {
 		return mPageflip;
 	}
 	
-	@Override
-	public String toString() {
-		return toString(false);
-	}
-	
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[")
-		.append("name=").append(mName)
-		.append(", urlName=").append(mUrlName)
-		.append(", website=").append(mWebsite);
-				
-		if (everything) {
-			sb.append(", logo=").append(mLogo)
-			.append(", color=").append(mColor)
-			.append(", pageflip=").append(mPageflip == null ? null : mPageflip.toString());
-		}
-		
-		return sb.append("]").toString();
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;

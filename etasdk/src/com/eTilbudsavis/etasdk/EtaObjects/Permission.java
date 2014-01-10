@@ -24,6 +24,8 @@ public class Permission extends EtaObject implements Serializable {
 
 	public static Permission fromJSON(String permission) {
 		Permission p = new Permission();
+		if (permission == null)
+			return p;
 		try {
 			p = fromJSON(p, new JSONObject(permission));
 		} catch (JSONException e) {
@@ -31,8 +33,7 @@ public class Permission extends EtaObject implements Serializable {
 		}
 		return p;
 	}
-
-	@SuppressWarnings("unchecked")
+	
 	public static Permission fromJSON(JSONObject permission) {
 		return fromJSON(new Permission(), permission);
 	}
@@ -44,6 +45,11 @@ public class Permission extends EtaObject implements Serializable {
 		try {
 			
 			JSONArray groups = permission.names();
+			if (groups == null) {
+				EtaLog.d(TAG, "Permission is empty. Reddis error!");
+				return p;
+			}
+			
 			for (int i = 0; i < groups.length() ; i++) {
 				
 				String group = groups.get(i).toString();
@@ -103,28 +109,6 @@ public class Permission extends EtaObject implements Serializable {
 	public Permission putAll(HashMap<String, ArrayList<String>> permissions) {
 		perm.putAll(permissions);
 		return this;
-	}
-	
-	
-	
-	/**
-	 * Prints this object
-	 */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[");
-		
-		Iterator<String> it = perm.keySet().iterator();
-		while (it.hasNext()) {
-			String group = (String) it.next();
-			sb.append(group).append("[");
-			for (String permission : perm.get(group)) {
-				sb.append(permission).append(", ");
-			}
-			sb.append("]");
-		}
-		return sb.append("]").toString();
 	}
 	
 }

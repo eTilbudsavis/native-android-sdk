@@ -7,46 +7,45 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Sort;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 
-public class Store extends EtaErnObject implements Serializable {
+public class Store extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Store";
 	
 	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = Sort.DISTANCE;
+	public static final String SORT_DISTANCE = Request.Sort.DISTANCE;
 
 	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = Sort.DISTANCE_DESC;
+	public static final String SORT_DISTANCE_DESC = Request.Sort.DISTANCE_DESC;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Sort.CREATED;
+	public static final String SORT_CREATED = Request.Sort.CREATED;
 
 	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Sort.CREATED_DESC;
+	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
 
 	/** Parameter for getting a list of specific store id's */
-	public static final String FILTER_STORE_IDS = Param.FILTER_STORE_IDS;
+	public static final String FILTER_STORE_IDS = Request.Param.FILTER_STORE_IDS;
 
 	/** Endpoint for store list resource */
-	public static final String ENDPOINT_LIST = Endpoint.STORE_LIST;
+	public static final String ENDPOINT_LIST = Request.Endpoint.STORE_LIST;
 
 	/** Endpoint for a single store resource */
-	public static final String ENDPOINT_ID = Endpoint.STORE_ID;
+	public static final String ENDPOINT_ID = Request.Endpoint.STORE_ID;
 
 	/** Endpoint for searching stores */
-	public static final String ENDPOINT_SEARCH = Endpoint.STORE_SEARCH;
+	public static final String ENDPOINT_SEARCH = Request.Endpoint.STORE_SEARCH;
 
 	/** Endpoint for fast searching stores */
-	public static final String ENDPOINT_QUICK_SEARCH = Endpoint.STORE_QUICK_SEARCH;
+	public static final String ENDPOINT_QUICK_SEARCH = Request.Endpoint.STORE_QUICK_SEARCH;
 
-	
+	private String mId;
+	private String mErn;
 	private String mStreet;
 	private String mCity;
 	private String mZipcode;
@@ -61,8 +60,7 @@ public class Store extends EtaErnObject implements Serializable {
 	private Dealer mDealer;
 
 	public Store() { }
-
-	@SuppressWarnings("unchecked")
+	
 	public static ArrayList<Store> fromJSON(JSONArray stores) {
 		ArrayList<Store> list = new ArrayList<Store>();
 		try {
@@ -75,7 +73,6 @@ public class Store extends EtaErnObject implements Serializable {
 		return list;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Store fromJSON(JSONObject store) {
 		return fromJSON(new Store(), store);
 	}
@@ -85,18 +82,18 @@ public class Store extends EtaErnObject implements Serializable {
 		if (store == null) return s;
 		
 		try {
-			s.setId(getJsonString(store, Key.ID));
-			s.setErn(getJsonString(store, Key.ERN));
-			s.setStreet(getJsonString(store, Key.STREET));
-			s.setCity(getJsonString(store, Key.CITY));
-			s.setZipcode(getJsonString(store, Key.ZIP_CODE));
-			s.setCountry(Country.fromJSON(store.getJSONObject(Key.COUNTRY)));
-			s.setLatitude(store.getDouble(Key.LATITUDE));
-			s.setLongitude(store.getDouble(Key.LONGITUDE));
-			s.setDealerUrl(getJsonString(store, Key.DEALER_URL));
-			s.setDealerId(getJsonString(store, Key.DEALER_ID));
-			s.setBranding(Branding.fromJSON(store.getJSONObject(Key.BRANDING)));
-			s.setContact(getJsonString(store, Key.CONTACT));
+			s.setId(getJsonString(store, ServerKey.ID));
+			s.setErn(getJsonString(store, ServerKey.ERN));
+			s.setStreet(getJsonString(store, ServerKey.STREET));
+			s.setCity(getJsonString(store, ServerKey.CITY));
+			s.setZipcode(getJsonString(store, ServerKey.ZIP_CODE));
+			s.setCountry(Country.fromJSON(store.getJSONObject(ServerKey.COUNTRY)));
+			s.setLatitude(store.getDouble(ServerKey.LATITUDE));
+			s.setLongitude(store.getDouble(ServerKey.LONGITUDE));
+			s.setDealerUrl(getJsonString(store, ServerKey.DEALER_URL));
+			s.setDealerId(getJsonString(store, ServerKey.DEALER_ID));
+			s.setBranding(Branding.fromJSON(store.getJSONObject(ServerKey.BRANDING)));
+			s.setContact(getJsonString(store, ServerKey.CONTACT));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -110,24 +107,42 @@ public class Store extends EtaErnObject implements Serializable {
 	public static JSONObject toJSON(Store s) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Key.ID, s.getId());
-			o.put(Key.ERN, s.getErn());
-			o.put(Key.STREET, s.getStreet());
-			o.put(Key.CITY, s.getCity());
-			o.put(Key.ZIP_CODE, s.getZipcode());
-			o.put(Key.COUNTRY, s.getCountry().toJSON());
-			o.put(Key.LATITUDE, s.getLatitude());
-			o.put(Key.LONGITUDE, s.getLongitude());
-			o.put(Key.DEALER_URL, s.getDealerUrl());
-			o.put(Key.DEALER_ID, s.getDealerId());
-			o.put(Key.BRANDING, s.getBranding().toJSON());
-			o.put(Key.CONTACT, s.getContact());
+			o.put(ServerKey.ID, s.getId());
+			o.put(ServerKey.ERN, s.getErn());
+			o.put(ServerKey.STREET, s.getStreet());
+			o.put(ServerKey.CITY, s.getCity());
+			o.put(ServerKey.ZIP_CODE, s.getZipcode());
+			o.put(ServerKey.COUNTRY, s.getCountry().toJSON());
+			o.put(ServerKey.LATITUDE, s.getLatitude());
+			o.put(ServerKey.LONGITUDE, s.getLongitude());
+			o.put(ServerKey.DEALER_URL, s.getDealerUrl());
+			o.put(ServerKey.DEALER_ID, s.getDealerId());
+			o.put(ServerKey.BRANDING, s.getBranding().toJSON());
+			o.put(ServerKey.CONTACT, s.getContact());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
+
+	public Store setId(String id) {
+		this.mId = id;
+		return this;
+	}
+
+	public String getId() {
+		return mId;
+	}
 	
+	public Store setErn(String ern) {
+		mErn = ern;
+		return this;
+	}
+	
+	public String getErn() {
+		return mErn;
+	}
+
 	public Store setStreet(String street) {
 		mStreet = street;
 		return this;
@@ -228,50 +243,101 @@ public class Store extends EtaErnObject implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Store))
-			return false;
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((mBranding == null) ? 0 : mBranding.hashCode());
+		result = prime * result + ((mCity == null) ? 0 : mCity.hashCode());
+		result = prime * result
+				+ ((mContact == null) ? 0 : mContact.hashCode());
+		result = prime * result
+				+ ((mCountry == null) ? 0 : mCountry.hashCode());
+		result = prime * result
+				+ ((mDealerId == null) ? 0 : mDealerId.hashCode());
+		result = prime * result
+				+ ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(mLatitude);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(mLongitude);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((mStreet == null) ? 0 : mStreet.hashCode());
+		result = prime * result
+				+ ((mZipcode == null) ? 0 : mZipcode.hashCode());
+		return result;
+	}
 
-		Store s = (Store)o;
-		return stringCompare(mId, s.getId()) &&
-				stringCompare(mErn, s.getErn()) &&
-				stringCompare(mStreet, s.getStreet()) &&
-				stringCompare(mCity, s.getCity()) &&
-				stringCompare(mZipcode, s.getZipcode()) &&
-				mCountry == null ? s.getCountry() == null : mCountry.equals(s.getCountry()) &&
-				mLatitude == s.getLatitude() &&
-				mLongitude == s.getLongitude() &&
-				stringCompare(mDealerUrl, s.getDealerUrl()) &&
-				stringCompare(mDealerId, s.getDealerId()) &&
-				mBranding == null ? s.getBranding() == null : mBranding.equals(s.getBranding()) &&
-				stringCompare(mContact, s.getContact());
-	}
-	
 	@Override
-	public String toString() {
-		return toString(false);
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Store other = (Store) obj;
+		if (mBranding == null) {
+			if (other.mBranding != null)
+				return false;
+		} else if (!mBranding.equals(other.mBranding))
+			return false;
+		if (mCity == null) {
+			if (other.mCity != null)
+				return false;
+		} else if (!mCity.equals(other.mCity))
+			return false;
+		if (mContact == null) {
+			if (other.mContact != null)
+				return false;
+		} else if (!mContact.equals(other.mContact))
+			return false;
+		if (mCountry == null) {
+			if (other.mCountry != null)
+				return false;
+		} else if (!mCountry.equals(other.mCountry))
+			return false;
+		if (mDealerId == null) {
+			if (other.mDealerId != null)
+				return false;
+		} else if (!mDealerId.equals(other.mDealerId))
+			return false;
+		if (mDealerUrl == null) {
+			if (other.mDealerUrl != null)
+				return false;
+		} else if (!mDealerUrl.equals(other.mDealerUrl))
+			return false;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
+			return false;
+		if (Double.doubleToLongBits(mLatitude) != Double
+				.doubleToLongBits(other.mLatitude))
+			return false;
+		if (Double.doubleToLongBits(mLongitude) != Double
+				.doubleToLongBits(other.mLongitude))
+			return false;
+		if (mStreet == null) {
+			if (other.mStreet != null)
+				return false;
+		} else if (!mStreet.equals(other.mStreet))
+			return false;
+		if (mZipcode == null) {
+			if (other.mZipcode != null)
+				return false;
+		} else if (!mZipcode.equals(other.mZipcode))
+			return false;
+		return true;
 	}
 	
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[")
-		.append("branding=").append(mBranding.toString(everything))
-		.append(", id=").append(mId)
-		.append(", street=").append(mStreet)
-		.append(", city=").append(mCity);
-		
-		if (everything) {
-			sb.append(", zipcode=").append(mZipcode)
-			.append(", country=").append(mCountry.toString(everything))
-			.append(", latitude=").append(mLatitude)
-			.append(", longitude=").append(mLongitude)
-			.append(", dealer=").append(mDealer == null ? mDealerId : mDealer.toString(everything))
-			.append(", contact=").append(mContact);
-		}
-		return sb.append("]").toString();
-	}
+	
 	
 }

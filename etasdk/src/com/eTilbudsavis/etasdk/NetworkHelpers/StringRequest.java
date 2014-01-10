@@ -19,7 +19,7 @@ public class StringRequest extends Request<String> {
 		super(method, url, listener);
 		
 	}
-
+	
 	@Override
 	protected Response<String> parseNetworkResponse(NetworkResponse response) {
 		String parsed;

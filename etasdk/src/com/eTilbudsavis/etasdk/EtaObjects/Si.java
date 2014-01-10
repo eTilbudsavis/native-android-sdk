@@ -14,7 +14,7 @@ public class Si  extends EtaObject implements Serializable {
 	public static final String TAG = "Unit";
 	
 	private String mSymbol;
-	private double mFactor;
+	private double mFactor = 1;
 	
 	public Si() {
 		
@@ -30,7 +30,6 @@ public class Si  extends EtaObject implements Serializable {
 		return s;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Si fromJSON(JSONObject si) {
 		return fromJSON(new Si(), si);
 	}
@@ -40,8 +39,8 @@ public class Si  extends EtaObject implements Serializable {
 		if (si == null) return s;
 		
 		try {
-			s.setSymbol(getJsonString(si, Key.SYMBOL));
-			s.setFactor(si.getDouble(Key.FACTOR));
+			s.setSymbol(getJsonString(si, ServerKey.SYMBOL));
+			s.setFactor(si.getDouble(ServerKey.FACTOR));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -56,8 +55,8 @@ public class Si  extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Si s) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Key.SYMBOL, s.getSymbol());
-			o.put(Key.FACTOR, s.getFactor());
+			o.put(ServerKey.SYMBOL, s.getSymbol());
+			o.put(ServerKey.FACTOR, s.getFactor());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -73,35 +72,45 @@ public class Si  extends EtaObject implements Serializable {
 		return this;
 	}
 
-	public double getFactor() {
+	public Double getFactor() {
 		return mFactor;
 	}
 
-	public Si setFactor(double factor) {
-		mFactor = factor;
+	public Si setFactor(Double factor) {
+		mFactor = factor == null ? 1 : factor;
 		return this;
 	}
-	
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Si))
-			return false;
 
-		Si s = (Si)o;
-		return stringCompare(mSymbol, s.getSymbol()) &&
-				mFactor == s.getFactor();
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		long temp;
+		temp = Double.doubleToLongBits(mFactor);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((mSymbol == null) ? 0 : mSymbol.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Si other = (Si) obj;
+		if (Double.doubleToLongBits(mFactor) != Double
+				.doubleToLongBits(other.mFactor))
+			return false;
+		if (mSymbol == null) {
+			if (other.mSymbol != null)
+				return false;
+		} else if (!mSymbol.equals(other.mSymbol))
+			return false;
+		return true;
 	}
 	
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(getClass().getSimpleName()).append("[")
-		.append("symbol=").append(mSymbol)
-		.append("factor=").append(mFactor)
-		.append("]").toString();
-		
-	}
+	
 }

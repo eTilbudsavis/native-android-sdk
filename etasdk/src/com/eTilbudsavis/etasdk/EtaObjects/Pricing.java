@@ -34,7 +34,6 @@ public class Pricing extends EtaObject implements Serializable {
 		return p;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Pricing fromJSON(JSONObject pricing) {
 		return fromJSON(new Pricing(), pricing);
 	}
@@ -97,26 +96,43 @@ public class Pricing extends EtaObject implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Pricing))
-			return false;
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((mCurrency == null) ? 0 : mCurrency.hashCode());
+		result = prime * result
+				+ ((mPrePrice == null) ? 0 : mPrePrice.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(mPrice);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
 
-		Pricing p = (Pricing)o;
-		return mPrice == p.getPrice() &&
-				mPrePrice == null ? p.getPrePrice() == null : mPrePrice == p.getPrePrice() &&
-				stringCompare(mCurrency, p.getCurrency());
-	}
-	
 	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(getClass().getSimpleName()).append("[")
-		.append("price=").append(mPrice)
-		.append(", preprice=").append(mPrePrice == null ? "null" : mPrePrice)
-		.append(", currency=").append(mCurrency)
-		.append("]").toString();
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Pricing other = (Pricing) obj;
+		if (mCurrency == null) {
+			if (other.mCurrency != null)
+				return false;
+		} else if (!mCurrency.equals(other.mCurrency))
+			return false;
+		if (mPrePrice == null) {
+			if (other.mPrePrice != null)
+				return false;
+		} else if (!mPrePrice.equals(other.mPrePrice))
+			return false;
+		if (Double.doubleToLongBits(mPrice) != Double
+				.doubleToLongBits(other.mPrice))
+			return false;
+		return true;
 	}
+
+	
 }

@@ -17,10 +17,12 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.NetworkHelpers.HttpNetwork;
@@ -30,30 +32,34 @@ import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Sort;
 import com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 // Main object for interacting with the SDK.
 public class Eta implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	public static final String TAG = "ETA";
-	public static boolean DEBUG = false;
-	private List<Pageflip> mPageflips = new ArrayList<Pageflip>();
+
+	public static boolean DEBUG_ENDPOINT = false;
+	public static boolean DEBUG_LOGD = false;
+	public static boolean DEBUG_PAGEFLIP = false;
 	
 	private static Eta mEta;
 	
 	private Context mContext;
 	private String mApiKey;
 	private String mApiSecret;
+	private String mAppVersion;
 	private Settings mSettings;
 	private SessionManager mSessionManager;
 	private EtaLocation mLocation;
 	private ListManager mListManager;
-	private static Handler mHandler = new Handler();
+	private static Handler mHandler;
 	private boolean mResumed = false;
 	private RequestQueue mRequestQueue;
 	private ConnectivityManager mConnectivityManager;
-	
+
 	private Eta() {
 		Cache c = new Cache();
 		Network n = new HttpNetwork();
@@ -77,24 +83,34 @@ public class Eta implements Serializable {
 		}
 		return mEta;
 	}
-	
-	public void set(String apiKey, String apiSecret, Context context) {
 
+	public void set(String apiKey, String apiSecret, Context context) {
+		
+		mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		
 		mContext = context;
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
-		
+
+		try {
+			String name = context.getPackageName();
+			String version = context.getPackageManager().getPackageInfo(name, 0 ).versionName;
+			setAppVersion(version);
+		} catch (NameNotFoundException e) {
+			EtaLog.d(TAG, e);
+		}
+
 		if (!isSet()) {
 			mSettings = new Settings(mContext);
 			mLocation = new EtaLocation();
 			mListManager = new ListManager(Eta.this);
 			mSessionManager = new SessionManager(Eta.this);
 		} else {
-			Utils.logd(TAG, "Eta already set. apiKey, apiSecret and context has been switched");
+			EtaLog.d(TAG, "Eta already set. apiKey, apiSecret and context has been switched");
 		}
-		
+
 	}
-	
+
 	public boolean isSet() {
 		return mApiKey != null && mApiSecret == null;
 	}
@@ -103,7 +119,7 @@ public class Eta implements Serializable {
 		NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
 		return netInfo != null && netInfo.isConnected();
 	}
-	
+
 	/**
 	 * The context, the given Eta has been set in.<br>
 	 * This context, does not necessarily have real estate on screen
@@ -121,7 +137,36 @@ public class Eta implements Serializable {
 	public String getApiKey() {
 		return mApiKey;
 	}
-	
+
+	/**
+	 * Set the version of your app, for better statistics collection on http://insight.etilbudsavis.dk/.<br><br>
+	 * App version should follow http://semver.org/ specifications (MAJOR.MINOR.PATCH), e.g.:<br>
+	 * <li> 1.0.0
+	 * <li> 1.0.0-beta
+	 * <li> 1.0.0-rc.1
+	 * 
+	 * @return API key as String
+	 */
+	public void setAppVersion(String appVersion) {
+		if (Utils.validVersion(appVersion)) {
+			mAppVersion = appVersion;
+		}
+		EtaLog.d(TAG, "AppVersion: " + (mAppVersion == null ? "version not valid" : mAppVersion));
+	}
+
+	/**
+	 * Set the version of your app, for better statistics collection on http://insight.etilbudsavis.dk/.<br><br>
+	 * App version should follow http://semver.org/ specifications (MAJOR.MINOR.PATCH), e.g.:<br>
+	 * <li> 1.0.0
+	 * <li> 1.0.0-beta
+	 * <li> 1.0.0-rc.1
+	 * 
+	 * @return API key as String
+	 */
+	public String getAppVersion() {
+		return mAppVersion;
+	}
+
 	/**
 	 * Returns the API secret found at http://etilbudsavis.dk/api/.
 	 * @return API secret as String
@@ -129,12 +174,16 @@ public class Eta implements Serializable {
 	public String getApiSecret() {
 		return mApiSecret;
 	}
-	
+
 	public <T> Request<T> add(Request<T> r) {
 		mRequestQueue.add(r);
 		return r;
 	}
-	
+
+	public RequestQueue getRequestQueue() {
+		return mRequestQueue;
+	}
+
 	/**
 	 * Get the currently active session.
 	 * @return a session
@@ -150,7 +199,7 @@ public class Eta implements Serializable {
 	public User getUser() {
 		return getSessionManager().getSession().getUser();
 	}
-	
+
 	/**
 	 * Get the settings, that ETA SDK is using.
 	 */
@@ -166,19 +215,23 @@ public class Eta implements Serializable {
 	public EtaLocation getLocation() {
 		return mLocation;
 	}
-	
+
 	public ListManager getListManager() {
 		return mListManager;
 	}
-	
+
 	/**
-	 * Get a static handler, to avoid memory leaks.
+	 * Get a static handler, created on the main looper. <br>
+	 * Use this to avoid memory leaks.
 	 * @return a handler
 	 */
 	public Handler getHandler() {
+		if (mHandler == null) {
+			mHandler = new Handler(Looper.getMainLooper());
+		}
 		return mHandler;
 	}
-	
+
 	/**
 	 * Clears ALL preferences that the SDK has created.<br><br>
 	 * 
@@ -189,47 +242,32 @@ public class Eta implements Serializable {
 		mSessionManager.invalidate();
 		return mSettings.clear();
 	}
-	
+
 	public boolean isResumed() {
 		return mResumed;
-	}
-	
-	public Eta debug(boolean useDebug) {
-		DEBUG = useDebug;
-		return this;
 	}
 
 	@SuppressLint("NewApi")
 	public void onPause() {
-		mResumed = false;
-		mListManager.onPause();
-		mLocation.saveState();
-		for (Pageflip p : mPageflips)
-			p.onPause();
+		if (mResumed) {
+			mResumed = false;
+			mLocation.saveState();
+			mListManager.onPause();
+			for (PageflipWebview p : PageflipWebview.pageflips)
+				p.onPause();
+		}
 	}
-	
+
 	@SuppressLint("NewApi")
 	public void onResume() {
-		mResumed = true;
-		mListManager.onResume();
-		mLocation.restoreState();
-		for (Pageflip p : mPageflips)
-			p.onResume();
-	}
-	
-	private Bundle getApiParams(int offset, int limit, String orderBy) {
-		Bundle apiParams = new Bundle();
-		apiParams.putInt(Param.OFFSET, offset);
-		apiParams.putInt(Param.LIMIT, limit);
-		if (orderBy != null) 
-			apiParams.putString(Sort.ORDER_BY, orderBy);
-		return apiParams;
-	}
-	
-	private Bundle getSearchApiParams(int offset, int limit, String orderBy, String query) {
-		Bundle apiParams = getApiParams(offset, limit, orderBy);
-		apiParams.putString(Param.QUERY, query);
-		return apiParams;
+		if (!mResumed) {
+			mResumed = true;
+			mLocation.restoreState();
+			mListManager.onResume();
+			mSessionManager.onResume();
+			for (PageflipWebview p : PageflipWebview.pageflips)
+				p.onResume();
+		}
 	}
 
 }

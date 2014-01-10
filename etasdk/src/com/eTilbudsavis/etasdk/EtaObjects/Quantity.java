@@ -30,7 +30,6 @@ public class Quantity extends EtaObject implements Serializable {
 		return q;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Quantity fromJSON(JSONObject quantity) {
 		return fromJSON(new Quantity(), quantity);
 	}
@@ -40,9 +39,9 @@ public class Quantity extends EtaObject implements Serializable {
 		if (quantity == null) return q;
 		
 		try {
-			q.setUnit(quantity.isNull(Key.UNIT) ? null : Unit.fromJSON(quantity.getJSONObject(Key.UNIT)));
-			q.setSize(quantity.isNull(Key.SIZE) ? null : Size.fromJSON(quantity.getJSONObject(Key.SIZE)));
-			q.setPieces(quantity.isNull(Key.PIECES) ? null : Pieces.fromJSON(quantity.getJSONObject(Key.PIECES)));
+			q.setUnit(quantity.isNull(ServerKey.UNIT) ? null : Unit.fromJSON(quantity.getJSONObject(ServerKey.UNIT)));
+			q.setSize(quantity.isNull(ServerKey.SIZE) ? null : Size.fromJSON(quantity.getJSONObject(ServerKey.SIZE)));
+			q.setPieces(quantity.isNull(ServerKey.PIECES) ? null : Pieces.fromJSON(quantity.getJSONObject(ServerKey.PIECES)));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -56,9 +55,9 @@ public class Quantity extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Quantity q) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Key.UNIT, q.getUnit() == null ? null : q.getUnit().toJSON());
-			o.put(Key.SIZE, q.getSize() == null ? null : q.getSize().toJSON());
-			o.put(Key.PIECES, q.getPieces() == null ? null : q.getPieces().toJSON());
+			o.put(ServerKey.UNIT, q.getUnit() == null ? null : q.getUnit().toJSON());
+			o.put(ServerKey.SIZE, q.getSize() == null ? null : q.getSize().toJSON());
+			o.put(ServerKey.PIECES, q.getPieces() == null ? null : q.getPieces().toJSON());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -93,27 +92,41 @@ public class Quantity extends EtaObject implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Quantity))
-			return false;
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((mPieces == null) ? 0 : mPieces.hashCode());
+		result = prime * result + ((mSize == null) ? 0 : mSize.hashCode());
+		result = prime * result + ((mUnit == null) ? 0 : mUnit.hashCode());
+		return result;
+	}
 
-		Quantity q = (Quantity)o;
-		return mUnit == null ? q.getUnit() == null : mUnit.equals(q.getUnit()) &&
-				mSize == null ? q.getSize() == null : mSize.equals(q.getSize()) &&
-				mPieces == null ? q.getPieces() == null : mPieces.equals(q.getPieces());
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Quantity other = (Quantity) obj;
+		if (mPieces == null) {
+			if (other.mPieces != null)
+				return false;
+		} else if (!mPieces.equals(other.mPieces))
+			return false;
+		if (mSize == null) {
+			if (other.mSize != null)
+				return false;
+		} else if (!mSize.equals(other.mSize))
+			return false;
+		if (mUnit == null) {
+			if (other.mUnit != null)
+				return false;
+		} else if (!mUnit.equals(other.mUnit))
+			return false;
+		return true;
 	}
 	
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(getClass().getSimpleName()).append("[")
-		.append("unit=").append(mUnit == null ? "null" : mUnit.toString())
-		.append("size=").append(mSize == null ? "null" : mSize.toString())
-		.append("pieces=").append(mPieces == null ? "null" : mPieces.toString())
-		.append("]").toString();
-		
-	}
+	
 }

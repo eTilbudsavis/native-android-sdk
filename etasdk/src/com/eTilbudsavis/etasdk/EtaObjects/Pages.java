@@ -32,7 +32,6 @@ public class Pages extends EtaObject implements Serializable {
 		return p;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Pages fromJSON(JSONObject pages) {
 		return fromJSON(new Pages(), pages);
 	}
@@ -42,16 +41,16 @@ public class Pages extends EtaObject implements Serializable {
 		if (pages == null) return p;
 		
 		try {
-			JSONArray jArray = pages.getJSONArray(Key.THUMB);
+			JSONArray jArray = pages.getJSONArray(ServerKey.THUMB);
 			int i;
 			for (i = 0 ; i < jArray.length() ; i++ ) {
 				p.getThumb().add(jArray.getString(i));
 			}
-			jArray = pages.getJSONArray(Key.VIEW);
+			jArray = pages.getJSONArray(ServerKey.VIEW);
 			for (i = 0 ; i < jArray.length() ; i++ ) {
 				p.getView().add(jArray.getString(i));
 			}
-			jArray = pages.getJSONArray(Key.ZOOM);
+			jArray = pages.getJSONArray(ServerKey.ZOOM);
 			for (i = 0 ; i < jArray.length() ; i++ ) {
 				p.getZoom().add(jArray.getString(i));
 			}
@@ -80,9 +79,9 @@ public class Pages extends EtaObject implements Serializable {
 			for (String s : p.getZoom())
 				aZoom.put(s);
 
-			o.put(Key.THUMB, aThumb);
-			o.put(Key.VIEW, aView);
-			o.put(Key.ZOOM, aZoom);
+			o.put(ServerKey.THUMB, aThumb);
+			o.put(ServerKey.VIEW, aView);
+			o.put(ServerKey.ZOOM, aZoom);
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -117,37 +116,42 @@ public class Pages extends EtaObject implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Pages))
-			return false;
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((mThumb == null) ? 0 : mThumb.hashCode());
+		result = prime * result + ((mView == null) ? 0 : mView.hashCode());
+		result = prime * result + ((mZoom == null) ? 0 : mZoom.hashCode());
+		return result;
+	}
 
-		Pages p = (Pages)o;
-		return mThumb == null ? p.getThumb() == null : mThumb.equals(p.getThumb()) &&
-				mView == null ? p.getView() == null : mView.equals(p.getView()) &&
-				mZoom == null ? p.getZoom() == null : mZoom.equals(p.getZoom());
-	}
-	
 	@Override
-	public String toString() {
-		return toString(false);
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Pages other = (Pages) obj;
+		if (mThumb == null) {
+			if (other.mThumb != null)
+				return false;
+		} else if (!mThumb.equals(other.mThumb))
+			return false;
+		if (mView == null) {
+			if (other.mView != null)
+				return false;
+		} else if (!mView.equals(other.mView))
+			return false;
+		if (mZoom == null) {
+			if (other.mZoom != null)
+				return false;
+		} else if (!mZoom.equals(other.mZoom))
+			return false;
+		return true;
 	}
 	
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[");
-		if (everything) {
-			sb.append("view=").append(mView.toString())
-			.append(", zoom=").append(mZoom.toString())
-			.append(", thumb=").append(mThumb.toString());
-		} else {
-			sb.append("viewCount=").append(mView.size())
-			.append(", zoomCount=").append(mZoom.size())
-			.append(", thumbCount=").append(mThumb.size());
-		}
-		return sb.append("]").toString();
-	}
+	
 	
 }

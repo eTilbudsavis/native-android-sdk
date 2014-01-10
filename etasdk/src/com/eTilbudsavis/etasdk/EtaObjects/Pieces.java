@@ -29,7 +29,6 @@ public class Pieces extends EtaObject implements Serializable {
 		return p;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Pieces fromJSON(JSONObject pieces) {
 		return fromJSON(new Pieces(), pieces);
 	}
@@ -39,8 +38,8 @@ public class Pieces extends EtaObject implements Serializable {
 		if (pieces == null) return p;
 		
 		try {
-			p.setFrom(pieces.getInt(Key.FROM));
-			p.setTo(pieces.getInt(Key.TO));
+			p.setFrom(pieces.getInt(ServerKey.FROM));
+			p.setTo(pieces.getInt(ServerKey.TO));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -54,8 +53,8 @@ public class Pieces extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Pieces p) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Key.FROM, p.getFrom());
-			o.put(Key.TO, p.getTo());
+			o.put(ServerKey.FROM, p.getFrom());
+			o.put(ServerKey.TO, p.getTo());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -84,27 +83,29 @@ public class Pieces extends EtaObject implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Pieces))
-			return false;
-
-		Pieces p = (Pieces)o;
-		return mFrom == p.getFrom() &&
-				mTo == p.getTo();
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + mFrom;
+		result = prime * result + mTo;
+		return result;
 	}
-	
+
 	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(getClass().getSimpleName()).append("[")
-		.append("from=").append(mFrom)
-		.append(", to=").append(mTo)
-		.append("]").toString();
-		
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Pieces other = (Pieces) obj;
+		if (mFrom != other.mFrom)
+			return false;
+		if (mTo != other.mTo)
+			return false;
+		return true;
 	}
 	
-
+	
 }

@@ -29,7 +29,6 @@ public class Size extends EtaObject implements Serializable {
 		return s;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Size fromJSON(JSONObject size) {
 		return fromJSON(new Size(), size);
 	}
@@ -39,8 +38,8 @@ public class Size extends EtaObject implements Serializable {
 		if (size == null) return s;
 		
 		try {
-			s.setFrom(size.getDouble(Key.FROM));
-			s.setTo(size.getDouble(Key.TO));
+			s.setFrom(size.getDouble(ServerKey.FROM));
+			s.setTo(size.getDouble(ServerKey.TO));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -54,8 +53,8 @@ public class Size extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Size s) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Key.FROM, s.getFrom());
-			o.put(Key.TO, s.getTo());
+			o.put(ServerKey.FROM, s.getFrom());
+			o.put(ServerKey.TO, s.getTo());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -81,26 +80,33 @@ public class Size extends EtaObject implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Size))
-			return false;
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		long temp;
+		temp = Double.doubleToLongBits(mFrom);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(mTo);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
 
-		Size s = (Size)o;
-		return mFrom == s.getFrom() &&
-				mTo == s.getTo();
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Size other = (Size) obj;
+		if (Double.doubleToLongBits(mFrom) != Double
+				.doubleToLongBits(other.mFrom))
+			return false;
+		if (Double.doubleToLongBits(mTo) != Double.doubleToLongBits(other.mTo))
+			return false;
+		return true;
 	}
 	
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(getClass().getSimpleName()).append("[")
-		.append("from=").append(mFrom)
-		.append(", to=").append(mTo)
-		.append("]").toString();
-		
-	}
 	
 }

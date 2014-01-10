@@ -17,8 +17,7 @@ public class Images extends EtaObject implements Serializable {
 	private String mZoom;
 	private String mThumb;
 
-	public Images() {
-	}
+	public Images() { }
 	
 	public static Images fromJSON(String images) {
 		Images i = new Images();
@@ -29,8 +28,7 @@ public class Images extends EtaObject implements Serializable {
 		}
 		return i;
 	}
-
-	@SuppressWarnings("unchecked")
+	
 	public static Images fromJSON(JSONObject images) {
 		return fromJSON(new Images(), images);
 	}
@@ -39,9 +37,9 @@ public class Images extends EtaObject implements Serializable {
 		if (i == null) i = new Images();
 		if (image == null) return i;
 		
-		i.setView(getJsonString(image, Key.VIEW));
-		i.setZoom(getJsonString(image, Key.ZOOM));
-		i.setThumb(getJsonString(image, Key.THUMB));
+		i.setView(getJsonString(image, ServerKey.VIEW));
+		i.setZoom(getJsonString(image, ServerKey.ZOOM));
+		i.setThumb(getJsonString(image, ServerKey.THUMB));
 		
     	return i;
 	}
@@ -53,9 +51,9 @@ public class Images extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Images i) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Key.VIEW, i.getView());
-			o.put(Key.ZOOM, i.getZoom());
-			o.put(Key.THUMB, i.getThumb());
+			o.put(ServerKey.VIEW, i.getView());
+			o.put(ServerKey.ZOOM, i.getZoom());
+			o.put(ServerKey.THUMB, i.getThumb());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -87,27 +85,41 @@ public class Images extends EtaObject implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Images))
-			return false;
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((mThumb == null) ? 0 : mThumb.hashCode());
+		result = prime * result + ((mView == null) ? 0 : mView.hashCode());
+		result = prime * result + ((mZoom == null) ? 0 : mZoom.hashCode());
+		return result;
+	}
 
-		Images i = (Images)o;
-		return stringCompare(mThumb, i.getThumb()) &&
-				stringCompare(mView, i.getView()) &&
-				stringCompare(mZoom, i.getZoom());
-	}
-	
 	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(getClass().getSimpleName()).append("[")
-		.append("view=").append(mView)
-		.append(", zoom=").append(mZoom)
-		.append(", thumb=").append(mThumb)
-		.append("]").toString();
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Images other = (Images) obj;
+		if (mThumb == null) {
+			if (other.mThumb != null)
+				return false;
+		} else if (!mThumb.equals(other.mThumb))
+			return false;
+		if (mView == null) {
+			if (other.mView != null)
+				return false;
+		} else if (!mView.equals(other.mView))
+			return false;
+		if (mZoom == null) {
+			if (other.mZoom != null)
+				return false;
+		} else if (!mZoom.equals(other.mZoom))
+			return false;
+		return true;
 	}
+
 	
 }

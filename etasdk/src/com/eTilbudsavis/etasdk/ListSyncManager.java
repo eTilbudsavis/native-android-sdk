@@ -1,6 +1,7 @@
 package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,63 +12,65 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.SessionManager.OnSessionChangeListener;
+import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
-import com.eTilbudsavis.etasdk.NetworkHelpers.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.NetworkHelpers.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.NetworkHelpers.JsonRequest;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
-import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ListSyncManager {
 
-	public static final String TAG = "ShoppinglistSyncManager";
+	public static final String TAG = "ListSyncManager";
 
-	private static final String THREAD_NAME = "ShoppinglistSyncManager";
+	private static final String THREAD_NAME = "ListSyncManager";
 	
-	private int mSyncSpeed = 6000;
+	private int mSyncSpeed = 3000;
 	
 	/** Simple counter keeping track of sync loop */
 	private int mSyncCount = 0;
 	
-	/** Counter for checking if notifications should be pushed.
-	 * It's basically a count of how many shopping lists are missing their item sync. */
-//	private Integer mSyncWorkCount = 0;
-	
-	private Stack<Request> mCurrentRequests = new Stack<Request>();
+	private Stack<Request<?>> mCurrentRequests = new Stack<Request<?>>();
 	
 	/** Reference to the main Eta object, for Api calls, and Shoppinglistmanager */
 	private Eta mEta;
 	
 	/** The Handler instantiated on the sync Thread */
 	private Handler mHandler;
-
+	
+	private User mUser;
+	
 	/** Listening for session changes, starting and stopping sync as needed */
 	private OnSessionChangeListener sessionListener = new OnSessionChangeListener() {
 
 		public void onUpdate() {
-			runSyncLoop(mEta.getUser().isLoggedIn());
+			if (mUser == null || mUser.getId() != mEta.getUser().getId()) {
+				mSyncCount = 0;
+				runSyncLoop();
+			}
 		}
 	};
-
+	
 	/** The actual sync loop running every x seconds*/
 	private Runnable mSyncLoop = new Runnable() {
 		
 		public void run() {
+
+			mUser = mEta.getUser();
 			
-			if (!mEta.getUser().isLoggedIn() || !mEta.isResumed())
+			if (!mEta.getUser().isLoggedIn() || !mEta.isResumed() )
 				return;
-				
+			
+			User user = mEta.getUser();
+			
 			mHandler.postDelayed(mSyncLoop, mSyncSpeed);
 			
 			// Only do an update, if there are no pending transactions, and we are online
@@ -75,19 +78,22 @@ public class ListSyncManager {
 				return;
 			
 			// If there are local changes to a list, then syncLocalListChanges will handle it: return
-			List<Shoppinglist> lists = DbHelper.getInstance().getLists(mEta.getUser().getId(), true);
-			boolean changes = syncLocalListChanges(lists);
-			if (changes) return;
+			List<Shoppinglist> lists = DbHelper.getInstance().getLists(mEta.getUser(), true);
+
+			if (syncLocalListChanges(lists, user))
+				return;
 			
 			// If there are changes to any items, then syncLocalItemChanges will handle it: return
+			boolean hasLocalChanges = false;
 			for (Shoppinglist sl : lists) {
-				changes = syncLocalItemChanges(sl) || changes;
+				hasLocalChanges = syncLocalItemChanges(sl, user) || hasLocalChanges;
+				hasLocalChanges = syncLocalShareChanges(sl, user) || hasLocalChanges;
 			}
-			if (changes) return;
+			
+			if (hasLocalChanges)
+				return;
 			
 			// Now finally we can query the server for any remote changes
-			int user = mEta.getUser().getId();
-			
             if (mSyncCount%3 == 0) {
                 syncLists(user);
             } else {
@@ -114,47 +120,36 @@ public class ListSyncManager {
 	 * Method for starting and stopping the sync manager
 	 * @param run, true if manager should sync.
 	 */
-	public void runSyncLoop(boolean run) {
+	public void runSyncLoop() {
 		// First make sure, that we do not leak memory by posting the runnable multiple times
 		mHandler.removeCallbacks(mSyncLoop);
-		// The optionally add it again
-		if (run) mHandler.post(mSyncLoop);
+		mHandler.post(mSyncLoop);
 	}
 	
-	/** Forces the ShoppinglistSyncManager to do a sync of all lists and items */
-	public void forceSync() {
-		mSyncCount = 0;
-		runSyncLoop(true);
-	}
-
 	public void onResume() {
 		mEta.getSessionManager().subscribe(sessionListener);
-		runSyncLoop(true);
+		runSyncLoop();
 	}
 	
 	public void onPause() {
-		runSyncLoop(false);
 		mEta.getSessionManager().unSubscribe(sessionListener);
 	}
 	
 	/**
 	 * Set the speed, at which the SyncManager should do updates.
-	 * NOTE: minimum sync time is 3 seconds (3000ms), to spare both the phone connection and the server
+	 * NOTE: lower bound on sync time is 3 seconds (3000ms), to spare both the phone and the server
 	 * @param time in milliseconds between sync loops
 	 */
 	public void setSyncSpeed(int time) {
 		mSyncSpeed = time < 3000 ? 3000 : time;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void addRequest(Request r) {
+	private void addRequest(Request<?> r) {
 		synchronized (mCurrentRequests) {
-			//TODO: Set a handler so calls will return to this thread
 			mCurrentRequests.add(r);
-			Eta.getInstance().add(r);
 		}
 	}
-
+	
 	private void popRequest() {
 		synchronized (mCurrentRequests) {
 			try {
@@ -170,30 +165,76 @@ public class ListSyncManager {
 	 * This is run at certain intervals if startSync() has been called.<br>
 	 * startSync() is called if Eta.onResume() is called.
 	 */
-	public void syncLists(final int user) {
+	public void syncLists(final User user) {
 		
-		String url = Endpoint.getLists(mEta.getUser().getId());
-		
-		JsonArrayRequest r = new JsonArrayRequest(Method.GET, url, null, new Listener<JSONArray>() {
-
-			public void onComplete(boolean isCache, JSONArray response, EtaError error) {
-
-				if (response != null) {
+		ListListener<Shoppinglist> listListener = new ListListener<Shoppinglist>() {
+			
+			public void onComplete(boolean isCache, int statusCode, List<Shoppinglist> serverList, EtaError error) {
+				
+				if (Utils.isSuccess(statusCode)) {
+					
+					// Server usually returns items in the order oldest to newest (not guaranteed)
+					// We want them to be reversed
+					Collections.reverse(serverList);
+					
+					for (Shoppinglist sl : serverList) {
+						if (sl.getPreviousId() == null)
+						sl.setPreviousId(Shoppinglist.FIRST_ITEM);
+					}
+					
 					DbHelper db = DbHelper.getInstance();
 					List<Shoppinglist> localList = db.getLists(user);
-					mergeShoppinglists(Shoppinglist.fromJSON(response), localList, user);
+					mergeShoppinglists(serverList, localList, user);
+					
+					// On first iteration, check and merge lists plus notify subscribers of first sync event
+					if (mSyncCount == 1) {
+						
+						if (serverList.isEmpty() && localList.isEmpty()) {
+							
+							User nou = new User();
+							List<Shoppinglist> noUserLists = db.getLists(nou);
+							
+							if (noUserLists.isEmpty()) {
+								return; 
+							}
+							
+							for (Shoppinglist sl : noUserLists) {
+								
+								List<ShoppinglistItem> noUserItems = db.getItems(sl, nou);
+								if (noUserItems.isEmpty()) {
+									continue;
+								}
+								
+								Shoppinglist tmpSl = Shoppinglist.fromName(sl.getName());
+								tmpSl.setType(sl.getType());
+								
+								mEta.getListManager().addList(tmpSl);
+								
+								for (ShoppinglistItem sli : noUserItems) {
+									sli.setShoppinglistId(tmpSl.getId());
+									sli.setId(Utils.createUUID());
+									sli.setErn("ern:shopping:item:" + sli.getId());
+									mEta.getListManager().addItem(sli);
+								}
+							}
+						}
+						
+						mEta.getListManager().notifyFirstSync();
+						
+					}
+					
 					pushNotifications();
+					
 				} else {
 					popRequest();
 				}
 			}
-		});
-		
-		addRequest(r);
+		};
+		addRequest(api().get(Request.Endpoint.lists(mEta.getUser().getId()), listListener).execute());
 		
 	}
 
-	private void mergeShoppinglists(List<Shoppinglist> serverList, List<Shoppinglist> localList, int userId) {
+	private void mergeShoppinglists(List<Shoppinglist> serverList, List<Shoppinglist> localList, User user) {
 		
 		if (serverList.isEmpty() && localList.isEmpty())
 			return;
@@ -226,24 +267,24 @@ public class ListSyncManager {
 				if (serverset.containsKey(key)) {
 					
 					Shoppinglist serverSl = serverset.get(key);
-					serverSl.setState(Shoppinglist.State.SYNCED);
-
 					Shoppinglist localSl = localset.get(key);
 					
 					if (localSl.getModified().before(serverSl.getModified())) {
+						serverSl.setState(Shoppinglist.State.SYNCED);
 						edited.add(serverSl);
-						db.editList(serverSl, userId);
+						db.editList(serverSl, user);
+						db.cleanShares(serverSl, user);
 					}
 					
 				} else {
 					deleted.add(localset.get(key));
-					db.deleteList(localset.get(key), userId);
+					db.deleteList(localset.get(key), user);
 				}
 			} else {
 				Shoppinglist sl = serverset.get(key);
 				sl.setState(Shoppinglist.State.TO_SYNC);
 				added.add(sl);
-				db.insertList(sl, userId);
+				db.insertList(sl, user);
 			}
 			
 		}
@@ -253,8 +294,8 @@ public class ListSyncManager {
 
 			List<ShoppinglistItem> delItems = new ArrayList<ShoppinglistItem>();
 			for (Shoppinglist sl : deleted) {
-				delItems.addAll(db.getItems(sl, userId));
-				db.deleteItems(sl.getId(), null, userId);
+				delItems.addAll(db.getItems(sl, user));
+				db.deleteItems(sl.getId(), null, user);
 			}
 			
 			addItemNotification(null, delItems, null);
@@ -263,11 +304,11 @@ public class ListSyncManager {
 			addListNotification(added, deleted, edited);
 			
 			for (Shoppinglist sl : added) {
-				syncItems(sl, userId);
+				syncItems(sl, user);
 			}
 			
 			for (Shoppinglist sl : edited) {
-				syncItems(sl, userId);
+				syncItems(sl, user);
 			}
 			
 		}
@@ -280,10 +321,10 @@ public class ListSyncManager {
 	 * This is run at certain intervals if startSync() has been called.<br>
 	 * startSync() is called if Eta.onResume() is called.
 	 */
-	public void syncListsModified(final int userId) {
+	public void syncListsModified(final User user) {
 
 		final DbHelper db = DbHelper.getInstance();
-		List<Shoppinglist> currentList = db.getLists(userId);
+		List<Shoppinglist> currentList = db.getLists(user);
 		
 		for (final Shoppinglist sl : currentList) {
 			
@@ -294,43 +335,41 @@ public class ListSyncManager {
 			// If it obviously needs to sync, then just do it
 			if (sl.getState() == Shoppinglist.State.TO_SYNC) {
 				// New shopping lists must always sync
-				syncItems(sl, userId);
+				syncItems(sl, user);
 				continue;
 			} 
 			
 			// Run the check 
 			sl.setState(Shoppinglist.State.SYNCING);
-			db.editList(sl, userId);
+			db.editList(sl, user);
 			
-			String url = Endpoint.getListModified(mEta.getUser().getId(), sl.getId());
+			JsonObjectListener cb = new JsonObjectListener() {
+				
+				public void onComplete(final boolean isCache, final int statusCode, final JSONObject data, final EtaError error) {
 			
-			JsonObjectRequest r = new JsonObjectRequest(url, new Listener<JSONObject>() {
-
-				public void onComplete(boolean isCache, JSONObject response, EtaError error) {
-
-					if (response != null) {
+					if (Utils.isSuccess(statusCode)) {
 						
 						sl.setState(Shoppinglist.State.SYNCED);
 						try {
-							String modified = response.getString(Shoppinglist.Key.MODIFIED);
+							String modified = data.getString(Shoppinglist.S_MODIFIED);
 							Date date = Utils.parseDate(modified);
 							if (sl.getModified().before(date)) {
-								syncItems(sl, userId);
+								syncItems(sl, user);
 							}
 						} catch (JSONException e) {
 							EtaLog.d(TAG, e);
 						}
-						db.editList(sl, userId);
+						db.editList(sl, user);
 						pushNotifications();
 					} else {
 						popRequest();
-						revertList(sl);
+						revertList(sl, user);
 					}
 					
 				}
-			});
+			};
 			
-			addRequest(r);
+			addRequest(api().get(Request.Endpoint.listModified(mEta.getUser().getId(), sl.getId()), cb).execute());
 			
 		}
 				
@@ -342,42 +381,62 @@ public class ListSyncManager {
 	 * startSync() is called if Eta.onResume() is called.
 	 * @param sl shoppinglist to update
 	 */
-	public void syncItems(final Shoppinglist sl, final int userId) {
+	public void syncItems(final Shoppinglist sl, final User user) {
 
 		final DbHelper db = DbHelper.getInstance();
 		
 		sl.setState(Shoppinglist.State.SYNCING);
-		db.editList(sl, userId);
-
-		String url = Endpoint.getItems(mEta.getUser().getId(), sl.getId());
+		db.editList(sl, user);
 		
-		JsonArrayRequest r = new JsonArrayRequest(Method.GET, url, null, new Listener<JSONArray>() {
-
-			public void onComplete(boolean isCache, JSONArray response, EtaError error) {
-
-				if (response != null) {
+		JsonArrayListener itemListener = new JsonArrayListener() {
+			
+			public void onComplete(final boolean isCache, final int statusCode, final JSONArray data, final EtaError error) {
+				
+				if (Utils.isSuccess(statusCode)) {
+					
 					sl.setState(Shoppinglist.State.SYNCED);
-					db.editList(sl, userId);
-					List<ShoppinglistItem> items = db.getItems(sl, userId);
-					mergeShoppinglistItems( ShoppinglistItem.fromJSON(response), items, userId );
+					db.editList(sl, user);
+					
+					List<ShoppinglistItem> localItems = db.getItems(sl, user);
+					List<ShoppinglistItem> serverItems = ShoppinglistItem.fromJSON(data);
+					
+					// So far, we get items in reverse order, well just keep reversing it for now.
+					Collections.reverse(serverItems);
+					
+					// Sort items according to our definition of correct ordering
+					Utils.sortItems(localItems);
+					Utils.sortItems(serverItems);
+					
+					// Update previous_id's (and modified) if needed
+					String id = ShoppinglistItem.FIRST_ITEM;
+					for (ShoppinglistItem sli : serverItems) {
+						if (!id.equals(sli.getPreviousId())) {
+							sli.setPreviousId(id);
+							sli.setModified(new Date());
+						}
+						id = sli.getId();
+					}
+					
+					diffItems(serverItems, localItems, user);
+					
 					pushNotifications();
+					
 				} else {
 					popRequest();
-					revertList(sl);
+					revertList(sl, user);
 				}
-					
+				
 			}
-		});
+		};
 		
-		addRequest(r);
-		
+		addRequest(api().get(Request.Endpoint.items(mEta.getUser().getId(), sl.getId()), itemListener).execute());
 	}
-
-	private void mergeShoppinglistItems(List<ShoppinglistItem> newList, List<ShoppinglistItem> oldList, int userId) {
+	
+	private void diffItems(List<ShoppinglistItem> newList, List<ShoppinglistItem> oldList, User user) {
 		
 		if (newList.isEmpty() && oldList.isEmpty())
 			return;
-
+		
 		DbHelper db = DbHelper.getInstance();
 		
 		HashMap<String, ShoppinglistItem> localSet = new HashMap<String, ShoppinglistItem>();
@@ -407,28 +466,28 @@ public class ListSyncManager {
 				ShoppinglistItem localSli = localSet.get(key);
 				
 				if (serverSet.containsKey(key)) {
-
+					
 					ShoppinglistItem serverSli = serverSet.get(key);
 					
 					if (localSli.getModified().before(serverSli.getModified())) {
 						edited.add(serverSli);
-						db.editItem(serverSli, userId);
+						db.editItem(serverSli, user);
 					} else if (!localSli.getPreviousId().equals(serverSli.getPreviousId())) {
 						
 						// This is a special case, thats only relevant as long as the
 						// server isn't sending previous_id's
 						localSli.setPreviousId(serverSli.getPreviousId());
-						db.editItem(localSli, userId);
+						db.editItem(localSli, user);
 						
 					}
 				} else {
 					deleted.add(localSet.get(key));
-					db.deleteItem(localSet.get(key), userId);
+					db.deleteItem(localSet.get(key), user);
 				}
 			} else {
 				ShoppinglistItem serverSli = serverSet.get(key);
 				added.add(serverSli);
-				db.insertItem(serverSli, userId);
+				db.insertItem(serverSli, user);
 			}
 		}
 		
@@ -443,7 +502,7 @@ public class ListSyncManager {
 	 * Method for pushing all local changes to server.
 	 * @return true if there was changes, else false
 	 */
-	private boolean syncLocalListChanges(List<Shoppinglist> lists) {
+	private boolean syncLocalListChanges(List<Shoppinglist> lists, User user) {
 		
 		int count = lists.size();
 		
@@ -452,15 +511,15 @@ public class ListSyncManager {
 			switch (sl.getState()) {
 
 			case Shoppinglist.State.TO_SYNC:
-				putList(sl);
+				putList(sl, user);
 				break;
 
 			case Shoppinglist.State.DELETE:
-				delList(sl);
+				delList(sl, user);
 				break;
 
 			case Shoppinglist.State.ERROR:
-				revertList(sl);
+				revertList(sl, user);
 				break;
 
 			default:
@@ -479,25 +538,25 @@ public class ListSyncManager {
 	 * @param sl to get items from
 	 * @return true if there was changes, else false
 	 */
-	private boolean syncLocalItemChanges(Shoppinglist sl) {
+	private boolean syncLocalItemChanges(Shoppinglist sl, User user) {
 		
 		DbHelper db = DbHelper.getInstance();
-		List<ShoppinglistItem> items = db.getItems(sl, sl.getUserId(), true);
+		List<ShoppinglistItem> items = db.getItems(sl, user, true);
 		int count = items.size();
 		
 		for (ShoppinglistItem sli : items) {
 
 			switch (sli.getState()) {
 			case ShoppinglistItem.State.TO_SYNC:
-				putItem(sli);
+				putItem(sli, user);
 				break;
 
 			case ShoppinglistItem.State.DELETE:
-				delItem(sli);
+				delItem(sli, user);
 				break;
 
 			case ShoppinglistItem.State.ERROR:
-				revertItem(sli);
+				revertItem(sli, user);
 				break;
 
 			default:
@@ -510,197 +569,350 @@ public class ListSyncManager {
 		return count != 0;
 		
 	}
-
-	private void putList(final Shoppinglist sl) {
+	
+	private void putList(final Shoppinglist sl, final User user) {
 
 		final DbHelper db = DbHelper.getInstance();
 		
 		sl.setState(Shoppinglist.State.SYNCING);
-		db.editList(sl, sl.getUserId());
-
-		String url = Endpoint.getList(mEta.getUser().getId(), sl.getId());
+		db.editList(sl, user);
 		
-		JsonObjectRequest r = new JsonObjectRequest(Method.PUT, url, sl.toJSON(), new Listener<JSONObject>() {
+		JsonObjectListener editList = new JsonObjectListener() {
 
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
-				
+			public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
 				Shoppinglist s = sl;
-				
-				if (response != null) {
-					s = Shoppinglist.fromJSON(response);
-					Shoppinglist dbList = db.getList(s.getId(), sl.getUserId());
+				if (Utils.isSuccess(statusCode)) {
+					s = Shoppinglist.fromJSON(data);
+					Shoppinglist dbList = db.getList(s.getId(), user);
 					if (dbList != null && !s.getModified().before(dbList.getModified()) ) {
 						s.setState(Shoppinglist.State.SYNCED);
-						// If server havent delivered an prev_id, then use old id
+						// If server haven't delivered an prev_id, then use old id
 						s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
-						db.editList(s, sl.getUserId());
+						db.editList(s, user);
 					}
 					popRequest();
-					syncLocalItemChanges(sl);
+					syncLocalItemChanges(sl, user);
 				} else {
 					popRequest();
-					revertList(sl);
+					if (statusCode == -1) {
+						
+					} else {
+						revertList(sl, user);
+					}
 				}
 
 			}
-		});
-		
-		addRequest(r);
+		};
+		String url = Request.Endpoint.list(user.getId(), sl.getId());
+		addRequest(api().put(url, editList, sl.getApiParams()).execute());
 		
 	}
 
-	private void delList(final Shoppinglist sl) {
+	private void delList(final Shoppinglist sl, final User user) {
 
 		final DbHelper db = DbHelper.getInstance();
-
-		String url = Endpoint.getList(mEta.getUser().getId(), sl.getId());
 		
-		JsonObjectRequest r = new JsonObjectRequest(Method.DELETE, url, sl.toJSON(), new Listener<JSONObject>() {
+		JsonObjectListener cb = new JsonObjectListener() {
 
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+			public void onComplete(final boolean isCache, final int statusCode, final JSONObject data, final EtaError error) {
 
-				if (response != null) {
-					db.deleteList(sl, sl.getUserId());
-					db.deleteItems(sl.getId(), null, sl.getUserId());
+				if (Utils.isSuccess(statusCode)) {
+					db.deleteList(sl, user);
+					db.deleteShares(sl, user);
+					db.deleteItems(sl.getId(), null, user);
 					popRequest();
 				} else {
 					popRequest();
-					revertList(sl);
+					if (error.getCode() != 1501) {
+						db.deleteList(sl, user);
+					} else if (statusCode == -1) {
+						// nothing, trying again later
+					} else {
+						revertList(sl, user);
+					}
 				}
 
 			}
-		});
-		
-		addRequest(r);
-		
+		};
+		String url = Request.Endpoint.list(user.getId(), sl.getId());
+		addRequest(api().delete(url, cb, sl.getApiParams()).execute());
+
 	}
 
-	private void revertList(final Shoppinglist sl) {
+	private void revertList(final Shoppinglist sl, final User user) {
 		
 		final DbHelper db = DbHelper.getInstance();
 		
 		if (sl.getState() != Shoppinglist.State.ERROR) {
 			sl.setState(Shoppinglist.State.ERROR);
-			db.editList(sl, sl.getUserId());
+			db.editList(sl, user);
 		}
 		
-		String url = Endpoint.getList(mEta.getUser().getId(), sl.getId());
-		
-		JsonObjectRequest r = new JsonObjectRequest(url, new Listener<JSONObject>() {
-
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+		JsonObjectListener listListener = new JsonObjectListener() {
+			
+			public void onComplete(boolean isCache, int statusCode, JSONObject item, EtaError error) {
 
 				Shoppinglist s = null;
-				if (response != null) {
-					s = Shoppinglist.fromJSON(response);
+				if (Utils.isSuccess(statusCode)) {
+					s = Shoppinglist.fromJSON(item);
 					s.setState(Shoppinglist.State.SYNCED);
 					s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
-					db.editList(s, sl.getUserId());
+					db.editList(s, user);
 					addListNotification(null, null, idToList(s));
-					syncLocalItemChanges(sl);
+					syncLocalItemChanges(sl, user);
 				} else {
-					db.deleteList(sl, sl.getUserId());
+					db.deleteList(sl, user);
 					addListNotification(null, idToList(s), null);
 				}
 				pushNotifications();
 			}
-		});
-		
-		addRequest(r);
+		};
+		String url = Request.Endpoint.list(user.getId(), sl.getId());
+		addRequest(api().get(url, listListener).execute());
 		
 	}
 
-	private void putItem(final ShoppinglistItem sli) {
+	private void putItem(final ShoppinglistItem sli, final User user) {
 
 		final DbHelper db = DbHelper.getInstance();
 		
 		sli.setState(ShoppinglistItem.State.SYNCING);
-		db.editItem(sli, sli.getUserId());
+		db.editItem(sli, user);
 		
-		String url = Endpoint.getItem(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId());
-		
-		JsonObjectRequest r = new JsonObjectRequest(Method.PUT, url, sli.toJSON(), new Listener<JSONObject>() {
+		JsonObjectListener cb = new JsonObjectListener() {
 
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
-
+			public void onComplete(final boolean isCache, final int statusCode, final JSONObject data, EtaError error) {
+				
 				ShoppinglistItem s = sli;
 				
-				if (response != null) {
+				if (Utils.isSuccess(statusCode)) {
 					
-					s = ShoppinglistItem.fromJSON(response);
-					ShoppinglistItem local = db.getItem(sli.getId(), sli.getUserId());
+					s = ShoppinglistItem.fromJSON(data);
+					ShoppinglistItem local = db.getItem(sli.getId(), user);
 					if (local != null && local.getModified().after(s.getModified()) ) {
 						s.setState(ShoppinglistItem.State.SYNCED);
 						// If server havent delivered an prev_id, then use old id
 						s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
-						db.editItem(s, sli.getUserId());
+						db.editItem(s, user);
 					}
 					popRequest();
 				} else {
 					popRequest();
-					revertItem(s);
+					if (statusCode != -1) {
+						revertItem(s, user);
+					}
 				}
 
 			}
-		});
-		addRequest(r);
+		};
+		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
+		addRequest(api().put(url, cb, sli.getApiParams()).execute());
+
 	}
 
-	private void delItem(final ShoppinglistItem sli) {
+	private void delItem(final ShoppinglistItem sli, final User user) {
 
 		final DbHelper db = DbHelper.getInstance();
 
-		String url = Endpoint.getItem(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId());
-		
-		JsonObjectRequest r = new JsonObjectRequest(Method.DELETE, url, sli.toJSON(), new Listener<JSONObject>() {
+		JsonObjectListener cb = new JsonObjectListener() {
 
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
-
-				if (response != null) {
-					db.deleteItem(sli, sli.getUserId());
+			public void onComplete(final boolean isCache,final  int statusCode,final  JSONObject item,final  EtaError error) {
+				
+				if (Utils.isSuccess(statusCode)) {
+					db.deleteItem(sli, user);
 					popRequest();
 				} else {
 					popRequest();
-					revertItem(sli);
+					
+					if(error.getCode() == 1501) {
+						db.deleteItem(sli, user);
+					} else if (statusCode == -1) {
+						// Nothing
+					} else {
+						revertItem(sli, user);
+					}
+					
 				}
 
 			}
-		});
-		addRequest(r);
+		};
+		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
+		addRequest(api().delete(url, cb, sli.getApiParams()).execute());
 	}
 	
-	private void revertItem(final ShoppinglistItem sli) {
+	private void revertItem(final ShoppinglistItem sli, final User user) {
 		
-		final int userId = sli.getUserId();
 		final DbHelper db = DbHelper.getInstance();
 		
 		if (sli.getState() != ShoppinglistItem.State.ERROR) {
 			sli.setState(ShoppinglistItem.State.ERROR);
-			db.editItem(sli, userId);
+			db.editItem(sli, user);
 		}
 		
-		String url = Endpoint.getItem(mEta.getUser().getId(), sli.getShoppinglistId(), sli.getId());
-		
-		JsonObjectRequest r = new JsonObjectRequest(url, new Listener<JSONObject>() {
-
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
-
+		JsonObjectListener itemListener = new JsonObjectListener() {
+			
+			public void onComplete(boolean isCache, int statusCode, JSONObject item, EtaError error) {
+				
 				ShoppinglistItem s = null;
-				if (response != null) {
-					s = ShoppinglistItem.fromJSON(response);
+				if (Utils.isSuccess(statusCode)) {
+					s = ShoppinglistItem.fromJSON(item);
 					s.setState(ShoppinglistItem.State.SYNCED);
 					s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
-					db.editItem(s, userId);
+					db.editItem(s, user);
 					addItemNotification(null, null, idToList(s));
 				} else {
-					db.deleteItem(sli, userId);
+					db.deleteItem(sli, user);
 					addItemNotification(null, idToList(s), null);
 				}
 				pushNotifications();
 			}
-		});
-		addRequest(r);
+		};
+
+		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
+		addRequest(api().get(url, itemListener).execute());
 		
+	}
+
+	private boolean syncLocalShareChanges(Shoppinglist sl, User user) {
+		
+		DbHelper db = DbHelper.getInstance();
+		List<Share> shares = db.getShares(sl, user, true);
+		
+		int count = shares.size();
+		
+		for (Share s : shares) {
+			
+			switch (s.getState()) {
+			case Share.State.TO_SYNC:
+				putShare(sl, s, user);
+				break;
+
+			case Share.State.DELETE:
+				delShare(s, user);
+				break;
+				
+			case Share.State.ERROR:
+				revertShare(s, user);
+				break;
+				
+			default:
+				count--;
+				break;
+			}
+			
+		}
+		
+		return count != 0;
+		
+	}
+
+	private void putShare(final Shoppinglist sl, final Share s, final User user) {
+
+		final DbHelper db = DbHelper.getInstance();
+		
+		s.setState(Share.State.SYNCING);
+		db.editShare(s, user);
+		
+		JsonObjectListener shareListener = new JsonObjectListener() {
+			
+			public void onComplete(final boolean isCache, final int statusCode, final JSONObject data, EtaError error) {
+				
+				if (Utils.isSuccess(statusCode)) {
+					Share tmp = Share.fromJSON(data);
+					tmp.setState(Share.State.SYNCED);
+					tmp.setShoppinglistId(s.getShoppinglistId());
+					popRequest();
+				} else {
+					popRequest();
+					if (error.getFailedOnField() != null) {
+						// If the request failed on a field, then we cannot really do anything, but delete
+						db.deleteShare(s, user);
+						sl.removeShare(s);
+						Eta.getInstance().getListManager().notifyListSubscribers(true, null, null, idToList(sl));
+					} else {
+						revertShare(s, user);
+					}
+				}
+
+			}
+		};
+		
+		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
+		addRequest(api().put(url, shareListener, s.getApiParams()).execute());
+		
+	}
+
+	private void delShare(final Share s, final User user) {
+
+		final DbHelper db = DbHelper.getInstance();
+
+		JsonObjectListener shareListener = new JsonObjectListener() {
+
+			public void onComplete(final boolean isCache,final  int statusCode,final  JSONObject item,final  EtaError error) {
+				
+				if (Utils.isSuccess(statusCode)) {
+					
+					if (user.getEmail().equals(s.getEmail())) {
+						// If the share.email == user.email, then we want to remove list, items and shares
+						// As the user no longer has access (have removed him self from shares)
+						db.deleteList(s.getShoppinglistId(), user);
+						db.deleteItems(s.getShoppinglistId(), null, user);
+						db.deleteShares(s.getShoppinglistId(), user);
+					} else {
+						// Else just remove the share in question
+						db.deleteShare(s, user);
+					}
+					popRequest();
+				} else {
+					popRequest();
+					if (statusCode == -1) {
+						// Nothing
+					} else if (error.getCode() == 1501) {
+						db.deleteShare(s, user);
+					} else {
+						revertShare(s, user);
+					}
+				}
+				
+			}
+		};
+		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
+		addRequest(api().delete(url, shareListener, new Bundle()).execute());
+	}
+	
+	private void revertShare(final Share s, final User user) {
+		
+		final DbHelper db = DbHelper.getInstance();
+		
+		if (s.getState() != Share.State.ERROR) {
+			s.setState(Share.State.ERROR);
+			db.editShare(s, user);
+		}
+		
+		JsonObjectListener shareListener = new JsonObjectListener() {
+			
+			public void onComplete(boolean isCache, int statusCode, JSONObject item, EtaError error) {
+				
+				Share tmp = null;
+				if (Utils.isSuccess(statusCode)) {
+					tmp = Share.fromJSON(item);
+					tmp.setState(ShoppinglistItem.State.SYNCED);
+					tmp.setShoppinglistId(s.getShoppinglistId());
+					db.editShare(tmp, user);
+				} else {
+					db.deleteShare(s, user);
+				}
+				popRequest();
+			}
+		};
+		
+		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
+		addRequest(api().get(url, shareListener).execute());
+		
+	}
+	
+	private Api api() {
+		return Eta.getInstance().getApi().setHandler(mHandler);
 	}
 	
 	/**
