@@ -40,7 +40,7 @@ public class EtaLog {
 		}
 		
 	}
-
+	
 	public static void printStackTrace() {
 		if (!Eta.DEBUG_LOGD) return;
 			for (StackTraceElement ste : Thread.currentThread().getStackTrace())
@@ -81,7 +81,7 @@ public class EtaLog {
 			return sb.toString();
 		}
 		
-		private long getTotalDuration() {
+		public long getTotalDuration() {
 			if (mEvents.size() == 0) {
 				return 0;
 			}

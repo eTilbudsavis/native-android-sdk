@@ -36,7 +36,7 @@ public class Main extends Activity {
         
         /* Enable debug mode, so debug info will show in LogCat
          * You might not want to have this set to true in a release version. */
-        eta.debug(true);
+        Eta.DEBUG_LOGD = true;
         
         // Set the location (This could also be set via LocationManager)
         EtaLocation loc = Eta.getInstance().getLocation();
@@ -44,7 +44,6 @@ public class Main extends Activity {
         loc.setLongitude(12.5766);
         loc.setRadius(700000);
         loc.setSensor(false);
-
         
         btnCatalogs= (Button)findViewById(R.id.btnCatalogs);
         btnCatalogs.setOnClickListener(new OnClickListener() {
@@ -55,7 +54,7 @@ public class Main extends Activity {
 				startActivity(i);
 			}
 		});
-
+        
         btnSearch = (Button)findViewById(R.id.btnSearch);
         btnSearch.setOnClickListener(new OnClickListener() {
 			

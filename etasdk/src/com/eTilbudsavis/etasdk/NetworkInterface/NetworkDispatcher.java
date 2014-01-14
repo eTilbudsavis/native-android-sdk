@@ -71,51 +71,57 @@ public class NetworkDispatcher extends Thread {
             }
 
             try {
+            	
+            	request.addEvent("network-dispatcher");
                 // If the request was cancelled already, do not perform the network request.
                 if (request.isCanceled()) {
+                	request.addEvent("request-cancelled");
                     continue;
                 }
                 
-                prepare(request);
-                
                 // If session is expired, add request to a OnSessionUpdate retry queue
-                if (mEta.getSessionManager().getSession().isExpired() && !request.getUrl().contains(Endpoint.SESSIONS)) {
-                	mRequestQueue.performSessionUpdate(request);
-                	continue;
-                }
+                // TODO: This check isn't possible, as it's timebased
+//                if (mEta.getSessionManager().getSession().isExpired() && !request.getUrl().contains(Endpoint.SESSIONS)) {
+//                	request.addEvent("session-expired");
+//                	mRequestQueue.badSession(request);
+//                	continue;
+//                }
+                
+                prepare(request);
                 
                 // Perform the network request.
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
                 
                 updateSessionInfo(networkResponse.headers);
                 
+                request.addEvent("parsing-network-response");
                 // Parse the response here on the worker thread.
                 Response<?> response = request.parseNetworkResponse(networkResponse);
                 
-                request.printDebug(request, networkResponse);
-                
                 // If the request is cachable
                 if (request.getMethod() == Method.GET && request.cacheResponse() && response.cache != null) {
+                	request.addEvent("adding-response-to-cache");
                 	mCache.put(response.cache);
                 }
                 
-                mRequestQueue.complete(request);
                 mDelivery.postResponse(request, response);
                 
             } catch (SessionError e) {
-            	
-            	if (!mRequestQueue.performSessionUpdate(request)) {
-                    mDelivery.postError(request, e);
-            	}
+
+            	request.addEvent("session-error");
+            	EtaLog.d(TAG, "session-error");
+            	mRequestQueue.badSession(request, e);
             	
             } catch (EtaError e) {
-
-            	EtaLog.d(TAG, e);
+            	
+            	request.addEvent("api-error");
+            	EtaLog.d(TAG, "api-error");
                 mDelivery.postError(request, e);
                 
             } catch (Exception e) {
             	
-            	EtaLog.d(TAG, e);
+            	request.addEvent("network-error");
+            	EtaLog.d(TAG, "network-error");
                 mDelivery.postError(request, new EtaError());
                 
             }
@@ -129,19 +135,17 @@ public class NetworkDispatcher extends Thread {
 	 */
 	private void prepare(Request<?> request) {
 		
-        if (request.getMethod() == Method.POST && request.getUrl().contains(Request.Endpoint.SESSIONS)) {
-        	
-        	Bundle b = new Bundle();
-        	b.putString(Request.Param.API_KEY, mEta.getApiKey());
-        	request.putQueryParameters(b);
-        	
-        } else {
+		request.addEvent("preparing-headers");
+		
+		boolean newSession = (request.getMethod() == Method.POST && request.getUrl().contains(Request.Endpoint.SESSIONS));
+		
+        if (!newSession) {
         	
         	Map<String, String> headers = new HashMap<String, String>();
         	String token = mEta.getSessionManager().getSession().getToken();
-        	headers.put(Request.Header.X_TOKEN, token);
+        	headers.put(Request.Headers.X_TOKEN, token);
         	String sha256 = Utils.generateSHA256(mEta.getApiSecret() + token);
-        	headers.put(Request.Header.X_SIGNATURE, sha256);
+        	headers.put(Request.Headers.X_SIGNATURE, sha256);
         	request.setHeaders(headers);
         	
         }
@@ -156,8 +160,8 @@ public class NetworkDispatcher extends Thread {
 	 * @param headers to check for new token.
 	 */
 	private void updateSessionInfo(Map<String, String> headers) {
-		String token = headers.get(Request.Header.X_TOKEN);
-	    String expire = headers.get(Request.Header.X_TOKEN_EXPIRES);
+		String token = headers.get(Request.Headers.X_TOKEN);
+	    String expire = headers.get(Request.Headers.X_TOKEN_EXPIRES);
 	    
 	    if ( !(token == null || expire == null) ) {
 	    	mEta.getSessionManager().updateTokens(token, expire);

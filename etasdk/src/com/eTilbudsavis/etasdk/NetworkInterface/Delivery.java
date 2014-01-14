@@ -27,20 +27,28 @@ public class Delivery {
     }
     
     public void postResponse(Request<?> request, Response<?> response) {
-    	done(request);
-        mResponsePoster.execute(new DeliveryRunnable(request, response));
+    	request.addEvent("post-response");
+    	post(request, response);
     }
 
     public void postError(Request<?> request, EtaError error) {
-    	done(request);
+    	request.addEvent("post-error");
         Response<?> response = Response.fromError(error);
-        mResponsePoster.execute(new DeliveryRunnable(request, response));
+    	post(request, response);
     }
     
-    private void done(Request<?> r) {
+    private void post(Request<?> request, Response<?> response) {
+    	
     	if (mRequestQueue != null) {
-        	mRequestQueue.complete(r);
+        	mRequestQueue.finish(request, response);
     	}
+    	
+    	if (request.getHandler() != null) {
+    		request.getHandler().post(new DeliveryRunnable(request, response));
+    	} else {
+            mResponsePoster.execute(new DeliveryRunnable(request, response));
+    	}
+    	
     }
     
     /**
@@ -59,12 +67,14 @@ public class Delivery {
 
         @SuppressWarnings("unchecked")
         public void run() {
+        	
             // If this request has canceled, finish it and don't deliver.
             if (mRequest.isCanceled()) {
+            	mRequest.addEvent("canceled-at-delivery");
                 return;
             }
             
-            mRequest.deliverResponse(mResponse);
+            mRequest.deliverResponse(mResponse.isCache, mResponse.result, mResponse.error);
             
        }
     }

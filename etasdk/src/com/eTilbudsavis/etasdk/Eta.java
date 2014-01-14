@@ -12,15 +12,12 @@
 package com.eTilbudsavis.etasdk;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -29,8 +26,6 @@ import com.eTilbudsavis.etasdk.NetworkHelpers.HttpNetwork;
 import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
 import com.eTilbudsavis.etasdk.NetworkInterface.Network;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Sort;
 import com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;

@@ -6,8 +6,6 @@
     <com.eTilbudsavis.etasdk.PageflipWebview xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/pageflip"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        
-    </com.eTilbudsavis.etasdk.Pageflip>
+        android:layout_height="match_parent" />
 
 </RelativeLayout>

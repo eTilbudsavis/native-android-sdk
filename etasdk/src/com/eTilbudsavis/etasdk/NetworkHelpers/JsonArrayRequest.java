@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import android.text.TextUtils;
 
@@ -67,8 +68,23 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 		getQueryParameters().putString(type, idList);
 		return this;
 	}
-	
+
+	public JsonArrayRequest(String url, Listener<JSONArray> listener) {
+		super(Method.GET, url, null, listener);
+		
+	}
+
+	public JsonArrayRequest(int method, String url, Listener<JSONArray> listener) {
+		super(method, url, null, listener);
+		
+	}
+
 	public JsonArrayRequest(int method, String url, JSONArray requestBody, Listener<JSONArray> listener) {
+		super(method, url, requestBody == null ? null : requestBody.toString(), listener);
+		
+	}
+	
+	public JsonArrayRequest(int method, String url, JSONObject requestBody, Listener<JSONArray> listener) {
 		super(method, url, requestBody == null ? null : requestBody.toString(), listener);
 		
 	}
@@ -82,12 +98,5 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
             return Response.fromError(new ParseError(response));
         }
 	}
-
-	@Override
-	protected void deliverResponse(JSONArray response) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	
 }

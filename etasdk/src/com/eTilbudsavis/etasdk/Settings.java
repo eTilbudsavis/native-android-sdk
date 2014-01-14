@@ -6,8 +6,6 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.Utils;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 

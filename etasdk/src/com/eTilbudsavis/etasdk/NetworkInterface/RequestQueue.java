@@ -1,22 +1,21 @@
 package com.eTilbudsavis.etasdk.NetworkInterface;
 
+import java.util.LinkedList;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.SessionManager;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
-import com.eTilbudsavis.etasdk.NetworkHelpers.HttpNetwork;
-import com.eTilbudsavis.etasdk.NetworkHelpers.StringRequest;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
-import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 @SuppressWarnings("rawtypes")
 public class RequestQueue {
-
+	
+	public static final String TAG = "RequestQueue";
+	
     /** Number of network request dispatcher threads to start. */
     private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;
     
@@ -28,10 +27,13 @@ public class RequestQueue {
     
     /** The queue of requests that are actually going out to the network. */
     private final PriorityBlockingQueue<Request> mNetworkQueue = new PriorityBlockingQueue<Request>();
+    
+    /** Queue of items waiting for session request */
+    private final LinkedList<Request> mSessionParking = new LinkedList<Request>();
 
     /** Queue of items waiting for session request */
-    private final PriorityBlockingQueue<Request> mSessionQueue = new PriorityBlockingQueue<Request>();
-
+    private final LinkedList<Request> mSessionQueue = new LinkedList<Request>();
+    
     /** Network dispatchers, the threads that will actually perform the work */
     private NetworkDispatcher[] mNetworkDispatchers;
 
@@ -46,6 +48,12 @@ public class RequestQueue {
 
     /** Response delivery mechanism. */
     private final Delivery mDelivery;
+    
+    /** Thread lock */
+    private Object LOCK = new Object();
+    
+    /** Our session in flight */
+    Request mSessionInFlight;
     
     /** Atomic number generator for sequencing requests in the queues */
     private AtomicInteger mSequenceGenerator = new AtomicInteger();
@@ -100,37 +108,142 @@ public class RequestQueue {
     	}
     	
     }
-    
-    // TODO: This method shouldn't force SessionManager to update, but just queue the request
-    // and await the SessionManager. FIGURE THIS OUT!
-	public synchronized boolean performSessionUpdate(Request r) {
+
+	public void badSession(Request req) {
+		badSession(req, null);
+	}
+
+	public void badSession(Request req, EtaError error) {
 		
-		boolean refreshing = mEta.getSessionManager().refresh(); 
-		if (refreshing) {
-			mSessionQueue.add(r);
+		synchronized (LOCK) {
+			
+			if (req.isSession()) {
+				
+				// If it's a login attempt or alike, then we'll just skip it
+				if (error == null || SessionManager.recoverableError(error)) {
+					refreshOrDieTrying(req, error);
+				} else {
+					mDelivery.postError(req, error);
+				}
+				
+			} else {
+				
+				refreshOrDieTrying(req, error);
+				
+			}
+			
 		}
-		return refreshing;
 		
 	}
 	
-	public void sessionUpdateComplete() {
-		mNetworkQueue.addAll(mSessionQueue);
-		mSessionQueue.clear();
+	private void refreshOrDieTrying(Request req, EtaError error) {
+		
+		// Or not session endpoint
+		boolean refreshing = mEta.getSessionManager().refresh();
+		if (refreshing && !req.isSession()) {
+			mSessionParking.add(req);
+		} else {
+			mDelivery.postError(req, error);
+		}
+		
 	}
 	
-	public void complete(Request r) {
-		// TODO: Do we want' to do any work on this object?
+	public boolean isSessionInFlight() {
+		return mSessionInFlight != null;
+	}
+	
+	private void sessionUpdateComplete() {
+		for (Request r : mSessionParking) {
+			r.addEvent("resuming-request");
+		}
+		mNetworkQueue.addAll(mSessionParking);
+		mSessionParking.clear();
+	}
+	
+	public void finish(Request req, Response resp) {
+		
+		if (req.isSession()) {
+			
+			mEta.getSessionManager().setSession(req, resp);
+			
+			if (!mSessionQueue.isEmpty()) {
+				
+				mSessionInFlight = mSessionQueue.removeFirst();
+				mNetworkQueue.add(mSessionInFlight);
+				 
+			} else {
+				
+				mSessionInFlight = null;
+				sessionUpdateComplete();
+				
+			}
+			
+		} else {
+			EtaLog.d(TAG, "Duration: " + req.getLog().getTotalDuration());
+			// nothing yet
+		}
+		
 	}
 	
 	/** Add a new request to this RequestQueue, everything from this point onward will be performed on separate threads */
     public Request add(Request r) {
     	
     	r.setSequence(mSequenceGenerator.incrementAndGet());
-    	
-    	mCacheQueue.add(r);
+    	r.addEvent("request-added");
+    	EtaLog.d(TAG, "Request-added: " + r.getMethod() + ", " + r.getUrl());
+
+		prepareRequest(r);
+		
+    	if (r.isSession()) {
+    		
+    		if (mSessionInFlight == null) {
+    			mSessionInFlight = r;
+    			mNetworkQueue.add(r);
+    		} else {
+        		mSessionQueue.add(r);
+    		}
+    		
+    	} else if (mSessionInFlight != null) {
+    		r.addEvent("session-in-flight-added-to-parking");
+    		mSessionParking.add(r);
+    	} else {
+    		
+        	mCacheQueue.add(r);
+    	}
     	
     	return r;
     	
     }
+    
+	/**
+	 * Method for adding required parameters for calling the eTilbudsavis.<br>
+	 * @param request
+	 */
+	private void prepareRequest(Request request) {
+		
+		request.addEvent("preparing-sdk-parameters");
+		// Append HOST if needed
+		String url = request.getUrl();
+		if (!url.startsWith("http")) {
+			String preUrl = Request.Endpoint.getHost();
+			request.setUrl(preUrl + url);
+		}
+		
+		// Append necessary API parameters
+		Bundle params = new Bundle();
 
+		String version = Eta.getInstance().getAppVersion();
+		if (version != null) {
+			params.putString(Request.Param.API_AV, version);
+		}
+
+		if (request.useLocation() && mEta.getLocation().isSet()) {
+			params.putAll(mEta.getLocation().getQuery());
+		}
+
+		request.putQueryParameters(params);
+
+	}
+
+    
 }

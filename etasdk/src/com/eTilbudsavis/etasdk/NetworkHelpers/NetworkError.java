@@ -1,6 +1,5 @@
 package com.eTilbudsavis.etasdk.NetworkHelpers;
 
-import java.io.IOException;
 
 public class NetworkError extends EtaError {
 	

@@ -12,18 +12,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.SessionManager.OnSessionChangeListener;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
+import com.eTilbudsavis.etasdk.NetworkHelpers.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.NetworkHelpers.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
+import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -63,7 +67,7 @@ public class ListSyncManager {
 	private Runnable mSyncLoop = new Runnable() {
 		
 		public void run() {
-
+			
 			mUser = mEta.getUser();
 			
 			if (!mEta.getUser().isLoggedIn() || !mEta.isResumed() )
@@ -167,11 +171,13 @@ public class ListSyncManager {
 	 */
 	public void syncLists(final User user) {
 		
-		ListListener<Shoppinglist> listListener = new ListListener<Shoppinglist>() {
-			
-			public void onComplete(boolean isCache, int statusCode, List<Shoppinglist> serverList, EtaError error) {
-				
-				if (Utils.isSuccess(statusCode)) {
+		Listener<JSONArray> listListener = new Listener<JSONArray>() {
+
+			public void onComplete(boolean isCache, JSONArray response, EtaError error) {
+
+				if (response != null) {
+					
+					List<Shoppinglist> serverList = Shoppinglist.fromJSON(response);
 					
 					// Server usually returns items in the order oldest to newest (not guaranteed)
 					// We want them to be reversed
@@ -230,7 +236,10 @@ public class ListSyncManager {
 				}
 			}
 		};
-		addRequest(api().get(Request.Endpoint.lists(mEta.getUser().getId()), listListener).execute());
+		
+		JsonArrayRequest listRequest = new JsonArrayRequest(Method.GET, Request.Endpoint.lists(mEta.getUser().getId()), listListener);
+		
+		addRequest(listRequest);
 		
 	}
 
@@ -343,15 +352,16 @@ public class ListSyncManager {
 			sl.setState(Shoppinglist.State.SYNCING);
 			db.editList(sl, user);
 			
-			JsonObjectListener cb = new JsonObjectListener() {
-				
-				public void onComplete(final boolean isCache, final int statusCode, final JSONObject data, final EtaError error) {
-			
-					if (Utils.isSuccess(statusCode)) {
+			Listener<JSONObject> modifiedListener = new Listener<JSONObject>() {
+
+				public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+					
+
+					if (response != null) {
 						
 						sl.setState(Shoppinglist.State.SYNCED);
 						try {
-							String modified = data.getString(Shoppinglist.S_MODIFIED);
+							String modified = response.getString(EtaObject.ServerKey.MODIFIED);
 							Date date = Utils.parseDate(modified);
 							if (sl.getModified().before(date)) {
 								syncItems(sl, user);
@@ -366,10 +376,13 @@ public class ListSyncManager {
 						revertList(sl, user);
 					}
 					
+					
 				}
 			};
 			
-			addRequest(api().get(Request.Endpoint.listModified(mEta.getUser().getId(), sl.getId()), cb).execute());
+			JsonObjectRequest modifiedRequest = new JsonObjectRequest(Request.Endpoint.listModified(mEta.getUser().getId(), sl.getId()), modifiedListener);
+			
+			addRequest(modifiedRequest);
 			
 		}
 				
@@ -388,17 +401,17 @@ public class ListSyncManager {
 		sl.setState(Shoppinglist.State.SYNCING);
 		db.editList(sl, user);
 		
-		JsonArrayListener itemListener = new JsonArrayListener() {
-			
-			public void onComplete(final boolean isCache, final int statusCode, final JSONArray data, final EtaError error) {
-				
-				if (Utils.isSuccess(statusCode)) {
+		Listener<JSONArray> itemListener = new Listener<JSONArray>() {
+
+			public void onComplete(boolean isCache, JSONArray response, EtaError error) {
+
+				if (response != null) {
 					
 					sl.setState(Shoppinglist.State.SYNCED);
 					db.editList(sl, user);
 					
 					List<ShoppinglistItem> localItems = db.getItems(sl, user);
-					List<ShoppinglistItem> serverItems = ShoppinglistItem.fromJSON(data);
+					List<ShoppinglistItem> serverItems = ShoppinglistItem.fromJSON(response);
 					
 					// So far, we get items in reverse order, well just keep reversing it for now.
 					Collections.reverse(serverItems);
@@ -429,7 +442,10 @@ public class ListSyncManager {
 			}
 		};
 		
-		addRequest(api().get(Request.Endpoint.items(mEta.getUser().getId(), sl.getId()), itemListener).execute());
+		JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Request.Endpoint.items(mEta.getUser().getId(), sl.getId()), itemListener);
+		
+		addRequest(itemRequest);
+		
 	}
 	
 	private void diffItems(List<ShoppinglistItem> newList, List<ShoppinglistItem> oldList, User user) {
@@ -577,12 +593,14 @@ public class ListSyncManager {
 		sl.setState(Shoppinglist.State.SYNCING);
 		db.editList(sl, user);
 		
-		JsonObjectListener editList = new JsonObjectListener() {
+		Listener<JSONObject> listListener = new Listener<JSONObject>() {
 
-			public void onComplete(boolean isCache, int statusCode, JSONObject data, EtaError error) {
+			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+				
 				Shoppinglist s = sl;
-				if (Utils.isSuccess(statusCode)) {
-					s = Shoppinglist.fromJSON(data);
+				if (response != null) {
+					
+					s = Shoppinglist.fromJSON(response);
 					Shoppinglist dbList = db.getList(s.getId(), user);
 					if (dbList != null && !s.getModified().before(dbList.getModified()) ) {
 						s.setState(Shoppinglist.State.SYNCED);
@@ -592,19 +610,26 @@ public class ListSyncManager {
 					}
 					popRequest();
 					syncLocalItemChanges(sl, user);
+					
 				} else {
 					popRequest();
-					if (statusCode == -1) {
-						
+					
+					if (error.getCode() == -1) {
+						// TODO: Need better error code definitions, are they going to be types?
 					} else {
 						revertList(sl, user);
 					}
+					
 				}
 
+				
 			}
 		};
+
 		String url = Request.Endpoint.list(user.getId(), sl.getId());
-		addRequest(api().put(url, editList, sl.getApiParams()).execute());
+		JsonObjectRequest listReq = new JsonObjectRequest(Method.PUT, url, sl.toJSON(), listListener);
+		
+		addRequest(listReq);
 		
 	}
 
@@ -612,11 +637,11 @@ public class ListSyncManager {
 
 		final DbHelper db = DbHelper.getInstance();
 		
-		JsonObjectListener cb = new JsonObjectListener() {
+		Listener<JSONObject> listListener = new Listener<JSONObject>() {
 
-			public void onComplete(final boolean isCache, final int statusCode, final JSONObject data, final EtaError error) {
+			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
 
-				if (Utils.isSuccess(statusCode)) {
+				if (response != null) {
 					db.deleteList(sl, user);
 					db.deleteShares(sl, user);
 					db.deleteItems(sl.getId(), null, user);
@@ -625,8 +650,8 @@ public class ListSyncManager {
 					popRequest();
 					if (error.getCode() != 1501) {
 						db.deleteList(sl, user);
-					} else if (statusCode == -1) {
-						// nothing, trying again later
+					} else if (error.getCode() == -1) {
+						// TODO: Need better error code definitions, are they going to be types?
 					} else {
 						revertList(sl, user);
 					}
@@ -634,9 +659,13 @@ public class ListSyncManager {
 
 			}
 		};
+		
 		String url = Request.Endpoint.list(user.getId(), sl.getId());
-		addRequest(api().delete(url, cb, sl.getApiParams()).execute());
-
+		
+		JsonObjectRequest listReq = new JsonObjectRequest(Method.DELETE, url, null, listListener);
+		
+		addRequest(listReq);
+		
 	}
 
 	private void revertList(final Shoppinglist sl, final User user) {
@@ -648,13 +677,13 @@ public class ListSyncManager {
 			db.editList(sl, user);
 		}
 		
-		JsonObjectListener listListener = new JsonObjectListener() {
-			
-			public void onComplete(boolean isCache, int statusCode, JSONObject item, EtaError error) {
+		Listener<JSONObject> listListener = new Listener<JSONObject>() {
+
+			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
 
 				Shoppinglist s = null;
-				if (Utils.isSuccess(statusCode)) {
-					s = Shoppinglist.fromJSON(item);
+				if (response != null) {
+					s = Shoppinglist.fromJSON(response);
 					s.setState(Shoppinglist.State.SYNCED);
 					s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
 					db.editList(s, user);
@@ -667,8 +696,11 @@ public class ListSyncManager {
 				pushNotifications();
 			}
 		};
+		
 		String url = Request.Endpoint.list(user.getId(), sl.getId());
-		addRequest(api().get(url, listListener).execute());
+		JsonObjectRequest listReq = new JsonObjectRequest(url, listListener);
+		
+		addRequest(listReq);
 		
 	}
 
@@ -679,15 +711,15 @@ public class ListSyncManager {
 		sli.setState(ShoppinglistItem.State.SYNCING);
 		db.editItem(sli, user);
 		
-		JsonObjectListener cb = new JsonObjectListener() {
+		Listener<JSONObject> itemListener = new Listener<JSONObject>() {
 
-			public void onComplete(final boolean isCache, final int statusCode, final JSONObject data, EtaError error) {
-				
+			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+
 				ShoppinglistItem s = sli;
 				
-				if (Utils.isSuccess(statusCode)) {
+				if (response != null) {
 					
-					s = ShoppinglistItem.fromJSON(data);
+					s = ShoppinglistItem.fromJSON(response);
 					ShoppinglistItem local = db.getItem(sli.getId(), user);
 					if (local != null && local.getModified().after(s.getModified()) ) {
 						s.setState(ShoppinglistItem.State.SYNCED);
@@ -696,29 +728,32 @@ public class ListSyncManager {
 						db.editItem(s, user);
 					}
 					popRequest();
+					
 				} else {
 					popRequest();
-					if (statusCode != -1) {
+					if (error.getCode() != -1) {
 						revertItem(s, user);
 					}
 				}
 
 			}
 		};
+		
 		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
-		addRequest(api().put(url, cb, sli.getApiParams()).execute());
-
+		JsonObjectRequest itemReq = new JsonObjectRequest(Method.PUT, url, sli.toJSON(), itemListener);
+		addRequest(itemReq);
+		
 	}
 
 	private void delItem(final ShoppinglistItem sli, final User user) {
 
 		final DbHelper db = DbHelper.getInstance();
+		
+		Listener<JSONObject> itemListener = new Listener<JSONObject>() {
 
-		JsonObjectListener cb = new JsonObjectListener() {
+			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
 
-			public void onComplete(final boolean isCache,final  int statusCode,final  JSONObject item,final  EtaError error) {
-				
-				if (Utils.isSuccess(statusCode)) {
+				if (response != null) {
 					db.deleteItem(sli, user);
 					popRequest();
 				} else {
@@ -726,18 +761,21 @@ public class ListSyncManager {
 					
 					if(error.getCode() == 1501) {
 						db.deleteItem(sli, user);
-					} else if (statusCode == -1) {
+					} else if (error.getCode() == -1) {
 						// Nothing
 					} else {
 						revertItem(sli, user);
 					}
 					
 				}
-
+				
 			}
 		};
+		
 		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
-		addRequest(api().delete(url, cb, sli.getApiParams()).execute());
+		JsonObjectRequest itemReq = new JsonObjectRequest(Method.DELETE, url, null, itemListener);
+		addRequest(itemReq);
+		
 	}
 	
 	private void revertItem(final ShoppinglistItem sli, final User user) {
@@ -749,13 +787,13 @@ public class ListSyncManager {
 			db.editItem(sli, user);
 		}
 		
-		JsonObjectListener itemListener = new JsonObjectListener() {
-			
-			public void onComplete(boolean isCache, int statusCode, JSONObject item, EtaError error) {
-				
+		Listener<JSONObject> itemListener = new Listener<JSONObject>() {
+
+			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+
 				ShoppinglistItem s = null;
-				if (Utils.isSuccess(statusCode)) {
-					s = ShoppinglistItem.fromJSON(item);
+				if (response != null) {
+					s = ShoppinglistItem.fromJSON(response);
 					s.setState(ShoppinglistItem.State.SYNCED);
 					s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
 					db.editItem(s, user);
@@ -767,9 +805,10 @@ public class ListSyncManager {
 				pushNotifications();
 			}
 		};
-
+		
 		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
-		addRequest(api().get(url, itemListener).execute());
+		JsonObjectRequest itemReq = new JsonObjectRequest(url, itemListener);
+		addRequest(itemReq);
 		
 	}
 
@@ -813,12 +852,12 @@ public class ListSyncManager {
 		s.setState(Share.State.SYNCING);
 		db.editShare(s, user);
 		
-		JsonObjectListener shareListener = new JsonObjectListener() {
-			
-			public void onComplete(final boolean isCache, final int statusCode, final JSONObject data, EtaError error) {
-				
-				if (Utils.isSuccess(statusCode)) {
-					Share tmp = Share.fromJSON(data);
+		Listener<JSONObject> shareListener = new Listener<JSONObject>() {
+
+			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+
+				if (response != null) {
+					Share tmp = Share.fromJSON(response);
 					tmp.setState(Share.State.SYNCED);
 					tmp.setShoppinglistId(s.getShoppinglistId());
 					popRequest();
@@ -838,7 +877,8 @@ public class ListSyncManager {
 		};
 		
 		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
-		addRequest(api().put(url, shareListener, s.getApiParams()).execute());
+		JsonObjectRequest shareReq = new JsonObjectRequest(Method.PUT, url, s.toJSON(), shareListener);
+		addRequest(shareReq);
 		
 	}
 
@@ -846,11 +886,11 @@ public class ListSyncManager {
 
 		final DbHelper db = DbHelper.getInstance();
 
-		JsonObjectListener shareListener = new JsonObjectListener() {
+		Listener<JSONObject> shareListener = new Listener<JSONObject>() {
 
-			public void onComplete(final boolean isCache,final  int statusCode,final  JSONObject item,final  EtaError error) {
-				
-				if (Utils.isSuccess(statusCode)) {
+			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+
+				if (response != null) {
 					
 					if (user.getEmail().equals(s.getEmail())) {
 						// If the share.email == user.email, then we want to remove list, items and shares
@@ -865,7 +905,7 @@ public class ListSyncManager {
 					popRequest();
 				} else {
 					popRequest();
-					if (statusCode == -1) {
+					if (error.getCode() == -1) {
 						// Nothing
 					} else if (error.getCode() == 1501) {
 						db.deleteShare(s, user);
@@ -876,8 +916,11 @@ public class ListSyncManager {
 				
 			}
 		};
+		
 		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
-		addRequest(api().delete(url, shareListener, new Bundle()).execute());
+		JsonObjectRequest shareReq = new JsonObjectRequest(Method.DELETE, url, null, shareListener);
+		addRequest(shareReq);
+		
 	}
 	
 	private void revertShare(final Share s, final User user) {
@@ -889,13 +932,13 @@ public class ListSyncManager {
 			db.editShare(s, user);
 		}
 		
-		JsonObjectListener shareListener = new JsonObjectListener() {
-			
-			public void onComplete(boolean isCache, int statusCode, JSONObject item, EtaError error) {
-				
+		Listener<JSONObject> shareListener = new Listener<JSONObject>() {
+
+			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+
 				Share tmp = null;
-				if (Utils.isSuccess(statusCode)) {
-					tmp = Share.fromJSON(item);
+				if (response != null) {
+					tmp = Share.fromJSON(response);
 					tmp.setState(ShoppinglistItem.State.SYNCED);
 					tmp.setShoppinglistId(s.getShoppinglistId());
 					db.editShare(tmp, user);
@@ -907,12 +950,9 @@ public class ListSyncManager {
 		};
 		
 		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
-		addRequest(api().get(url, shareListener).execute());
+		JsonObjectRequest shareReq = new JsonObjectRequest(url, shareListener);
+		addRequest(shareReq);
 		
-	}
-	
-	private Api api() {
-		return Eta.getInstance().getApi().setHandler(mHandler);
 	}
 	
 	/**

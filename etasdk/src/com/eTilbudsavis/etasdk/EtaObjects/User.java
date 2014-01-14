@@ -2,9 +2,10 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+
 import org.json.JSONException;
 import org.json.JSONObject;
-import android.annotation.SuppressLint;
+
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 

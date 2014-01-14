@@ -1,6 +1,7 @@
 package com.eTilbudsavis.etasdk.NetworkHelpers;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,10 +29,14 @@ import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.ByteArrayBuffer;
 
+import android.preference.PreferenceActivity.Header;
+
+import com.eTilbudsavis.etasdk.SessionManager;
 import com.eTilbudsavis.etasdk.NetworkInterface.Network;
 import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class HttpNetwork implements Network {
 
@@ -44,69 +49,78 @@ public class HttpNetwork implements Network {
 	private static final int BUFFER_SIZE = 0x1000; // 4K
 	
 	public NetworkResponse performRequest(Request<?> request) throws EtaError {
-
+		
 		HttpResponse resp = null;
 		int sc = 0;
 		byte[] content = null;
 		Map<String, String> responseHeaders = new HashMap<String, String>();
 		try {
-
+			
 			resp = performHttpRequest(request);
+			
 			sc = resp.getStatusLine().getStatusCode();
-			content = resp.getEntity() == null ? new byte[0] : entityToBytes(resp.getEntity());
+			
+			if (resp.getEntity() == null) {
+				// add 0-byte for to mock no-content
+				content = new byte[0];
+			} else {
+				request.addEvent("reading-input");
+				content = entityToBytes(resp.getEntity());
+			}
+			
+			for (org.apache.http.Header h : resp.getAllHeaders()) {
+				responseHeaders.put(h.getName(), h.getValue());
+			}
+			
+			NetworkResponse r = new NetworkResponse(resp.getStatusLine().getStatusCode(), content, responseHeaders);
 			
 			if (!isSuccess(sc)) {
-				throw new IOException();
-			}
-			
-			return new NetworkResponse(sc, content, responseHeaders);
-			
-		} catch (ClientProtocolException e) {
-			EtaLog.d(TAG, e);
-		} catch (IOException e) {
-			EtaLog.d(TAG, e);
-			if (resp == null || content == null) {
-				throw new NetworkError(e);
-			} else {
-				sc = resp.getStatusLine().getStatusCode();
-				NetworkResponse r = new NetworkResponse(sc, content, responseHeaders);
+				
 				EtaError er = new EtaError(r);
-				if (!isSuccess(sc)) {
-					
-					int c = er.getCode();
-					boolean isSessionError = er != null && (c == 1101 || c == 1104 || c == 1108);
-					if (isSessionError) {
-						throw new SessionError(r);
-					}
-					
+				
+				if (SessionManager.isSessionError(er)) {
+					throw new SessionError(r);
+				} else {
+					throw er;
 				}
-				throw er;
+				
 			}
+			
+			return r;
+			
+		} catch (Exception e) {
+			EtaLog.d(TAG, e);
+			throw new NetworkError(e);
 		}
-
-		return null;
+		
 	}
 
 	private HttpResponse performHttpRequest(Request<?> request) throws ClientProtocolException, IOException {
-
+		
 		// Start the interwebs work stuff
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 
+		request.addEvent("set-apache-routeplanner");
 		setHostNameVerifierAndRoutePlanner(httpClient);
 
 		// Set timeouts
+		request.addEvent(String.format("set-connection-timeout-%s", CONNECTION_TIME_OUT*2));
 		HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), CONNECTION_TIME_OUT);
 		HttpConnectionParams.setSoTimeout(httpClient.getParams(), CONNECTION_TIME_OUT);
-
+		
+		appendQueryParams(request);
+		
 		// Get the right request type, and set body if necessary
 		HttpRequestBase httpRequest = createRequest(request);
 		setHeaders(request, httpRequest);
 
+		request.addEvent("performing-http-request");
 		return httpClient.execute(httpRequest);
 	}
 
 	private void setHostNameVerifierAndRoutePlanner(DefaultHttpClient httpClient) {
-
+		
+		
 		// Use custom HostVerifier to accept our wildcard SSL Certificates: *.etilbudsavis.dk
 		HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
 
@@ -128,7 +142,7 @@ public class HttpNetwork implements Network {
 	}
 
 	private HttpRequestBase createRequest(Request<?> request) {
-
+		
 		switch (request.getMethod()) {
 		case Request.Method.POST: 
 			HttpPost post = new HttpPost(request.getUrl());
@@ -154,12 +168,19 @@ public class HttpNetwork implements Network {
 
 	}
 	
+	private void appendQueryParams(Request<?> r) {
+		if (!r.getQueryParameters().isEmpty()) {
+			String url = r.getUrl() + "?" + Utils.bundleToQueryString(r.getQueryParameters());
+			r.setUrl(url);
+		}
+	}
+	
 	private static void setEntity(HttpEntityEnclosingRequestBase httpRequest, Request<?> request) {
 		byte[] body = request.getBody();
 		if (body != null) {
 			HttpEntity entity = new ByteArrayEntity(body);
 			httpRequest.setEntity(entity);
-			httpRequest.setHeader(Request.Header.CONTENT_TYPE, request.getBodyContentType());
+			httpRequest.setHeader(Request.Headers.CONTENT_TYPE, request.getBodyContentType());
 		}
 	}
 	
@@ -170,17 +191,23 @@ public class HttpNetwork implements Network {
 			http.setHeader(key, headers.get(key));
 	}
 	
-	private static byte[] entityToBytes(HttpEntity entity) {
-		ByteArrayBuffer bytes = new ByteArrayBuffer((int)entity.getContentLength());
-		try {
-			byte[] buf = new byte[BUFFER_SIZE];
-			int c = -1;
-			while (( c = entity.getContent().read(buf)) != -1) {
-				bytes.append(buf, 0, c);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+	private static byte[] entityToBytes(HttpEntity entity) throws IllegalStateException, IOException {
+		
+		// Find best buffer size
+		int init_buf = 0 <= entity.getContentLength() ? (int)entity.getContentLength() : BUFFER_SIZE;
+		
+		ByteArrayBuffer bytes = new ByteArrayBuffer(init_buf);
+			
+		InputStream is = entity.getContent();
+		if (is == null)
+			return bytes.toByteArray();
+		
+		byte[] buf = new byte[init_buf];
+		int c = -1;
+		while (( c = is.read(buf)) != -1) {
+			bytes.append(buf, 0, c);
 		}
+		
 		return bytes.toByteArray();
 	}
 	

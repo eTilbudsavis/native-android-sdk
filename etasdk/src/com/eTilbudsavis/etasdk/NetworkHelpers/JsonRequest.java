@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public abstract class JsonRequest<T> extends Request<T> {
 	
@@ -12,6 +13,8 @@ public abstract class JsonRequest<T> extends Request<T> {
 
     private String mRequestBody;
     
+    private Priority mPriority = Priority.MEDIUM;
+    
     public JsonRequest(String url, Listener<T> listener) {
 		super(Method.GET, url, listener);
 		
@@ -19,6 +22,10 @@ public abstract class JsonRequest<T> extends Request<T> {
     
     public JsonRequest(int method, String url, String requestBody, Listener<T> listener) {
 		super(method, url, listener);
+		if (method == Method.GET && requestBody != null) {
+			EtaLog.d(TAG, "Get requests doesn't take a body, and will be ignored.\n"
+					+ "Please append any parameters to Request.putQueryParameters()");
+		}
 		mRequestBody = requestBody;
 	}
     
@@ -35,10 +42,15 @@ public abstract class JsonRequest<T> extends Request<T> {
             return null;
         }
     }
-
-    @Override
-    protected void deliverResponse(T response) {
-//        getListener().onComplete(isCache, response, error);
+    
+    public Request<T> setPriority(Priority p) {
+    	mPriority = p;
+    	return this;
     }
 
+    @Override
+    public Priority getPriority() {
+    	return mPriority;
+    }
+    
 }

@@ -1,9 +1,7 @@
 package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
@@ -17,12 +15,11 @@ import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkHelpers.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Priority;
+import com.eTilbudsavis.etasdk.NetworkInterface.Response;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
-import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class SessionManager {
 	
@@ -45,13 +42,7 @@ public class SessionManager {
 	/** weather or not, the SessionManager should recover from a bad session request */
 	boolean mTryToRecover = true;
 	
-	/** Queue of session requests */
-	private List<Request<?>> mSessionQueue = Collections.synchronizedList(new ArrayList<Request<?>>());
-	
 	private ArrayList<OnSessionChangeListener> mSubscribers = new ArrayList<OnSessionChangeListener>();
-	
-	private Request<?> mReqInFlight;
-	private Listener<JSONObject> mReqInFlightListener;
 	
 	public SessionManager(Eta eta) {
 		mEta = eta;
@@ -72,94 +63,98 @@ public class SessionManager {
 
 		public void onComplete(boolean isCache, JSONObject response, EtaError error) {
 			
-			EtaLog.d(TAG, "SessionCallback: " + (response != null ? "success" : "error"));
-			
-			/*
-			 * Three cases:
-			 * 1 - Session is okay, set it - done
-			 * 2 - There was an error that we can recover from, and we haven't tried before, then do it - done
-			 * 3 - We are out of luck, run the remaining API requests, and probably they will die
-			 *     but the user will at least get some feedback
-			 */
-			
-			if (response != null) {
-				
-				setSession(response);
-				
-			} else if (error != null && 
-					(error.getCode() == 1101 || error.getCode() == 1104 || error.getCode() == 1108) 
-					&& mTryToRecover ) {
-				
-				mTryToRecover = false;
-				postSession();
-				
-			} else {
-				
-				mEta.getRequestQueue().sessionUpdateComplete();
-				
-			}
-			
 		}
 	};
+
+	private synchronized void addRequest(JsonObjectRequest r) {
+		r.setPriority(Priority.HIGH);
+		mEta.add(r);
+	}
 	
+	/**
+	 * Ask the SessionManager to refresh the session.
+	 * @return true if SessionManager is trying, or will try to refresh the session. 
+	 * False if no more tries will be attempted.
+	 */
 	public synchronized boolean refresh() {
 		
-		boolean recovering = (mReqInFlight != null);
-		if (recovering) {
+		// Looks like a loop, just quit
+		if (!mTryToRecover) {
+			return false;
+		}
+		
+		// If a session is in flight, there is no reason to post/put a new one
+		if (!mEta.getRequestQueue().isSessionInFlight()) {
 			putSession();
 		}
-		return recovering;
+		
+		return true;
 		
 	}
 	
-	private synchronized void runQueue(Request<JSONObject> r) {
+	/**
+	 * Update the current 
+	 * @param req
+	 * @param resp
+	 * @return true a new session was set.
+	 */
+	public boolean setSession(Request<?> req, Response<?> resp) {
 		
-		mSessionQueue.add(r);
-		if (mReqInFlight == null) {
-			
-			mReqInFlight = mSessionQueue.get(0);
-			mSessionQueue.remove(0);
-			
-			if (r.getListener() != sessionListener) {
-				
-			}
-			
-		} else {
-			EtaLog.d(TAG, "Session Request in Flight. Waiting...");
+		if (!req.isSession()) {
+			EtaLog.d(TAG, "Request isn't a session endpoint: " + req.getUrl());
+			return false;
 		}
 		
-	}
-	
-	private void performNextRequest() {
+		if (resp.isSuccess()) {
+			
+			try {
+				JSONObject session = (JSONObject)resp.result;
+				return setSession(session);
+			} catch (Exception e) {
+				EtaLog.d(TAG, e);
+			}
+			
+		} else if (mTryToRecover && recoverableError(resp.error) ) {
+			
+			mTryToRecover = false;
+			postSession();
+			
+		}
+		
+		return false;
 		
 	}
 	
-	public void setSession(JSONObject session) {
+	public boolean setSession(JSONObject session) {
+		
+		Session s = Session.fromJSON(session);
+		
+		// Check that the JSON is actually session JSON
+		if (s.getToken() == null) {
+			return false;
+		}
+		
+		// Avoid recursion
+		if (s.getToken().equals(mSession.getToken())) { }
+		
+		mSession = s;
+		mEta.getSettings().setSessionJson(session);
+		
+		// Reset session retry boolean
+		mTryToRecover = true;
+		
+		// Send out notifications
+		notifySubscribers();
+		
+		return true;
+	}
 
-		synchronized (LOCK) {
-			
-			Session s = Session.fromJSON(session);
-			
-			// If SessionManager does a session change, and propagates it to pageflip
-			// Then pageflip propagate the session back, making nasty recursion
-			if (s.getToken().equals(mSession.getToken())) {
-				return;
-			}
-			
-			mSession = s;
-			mEta.getSettings().setSessionJson(session);
-			
-			// Reset session retry boolean
-			mTryToRecover = true;
-			
-			// Send out notifications
-			notifySubscribers();
-			for (PageflipWebview p : PageflipWebview.pageflips) {
-				p.updateSession();
-			}
-			
-		}
-		
+	public static boolean recoverableError(EtaError e) {
+		return ( e != null && ( e.getCode() == 1101 || e.getCode() == 1104 || e.getCode() == 1108) );
+	}
+
+	public static boolean isSessionError(EtaError e) {
+		return ( e != null && ( 1100 <= e.getCode() && e.getCode() < 1200 ) );
 	}
 	
 	/**
@@ -227,14 +222,18 @@ public class SessionManager {
 	        cm.removeAllCookie();
 	        
 	    }
+
+    	Map<String, String> body = new HashMap<String, String>();
+    	body.put(Request.Param.API_KEY, mEta.getApiKey());
+    	
+	    JsonObjectRequest req = new JsonObjectRequest(Method.POST, ENDPOINT, new JSONObject(body), sessionListener);
+	    addRequest(req);
 	    
-	    JsonObjectRequest req = new JsonObjectRequest(Method.POST, ENDPOINT, null, sessionListener);
-	    runQueue(req);
 	}
 	
 	private void putSession(){
 		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, ENDPOINT, null, sessionListener);
-		runQueue(req);
+		addRequest(req);
 	}
 	
 	/**
@@ -250,7 +249,7 @@ public class SessionManager {
 		args.putString(Request.Param.PASSWORD, password);
 		mEta.getSettings().setSessionUser(email);
 		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, ENDPOINT, null, l);
-		runQueue(req);
+		addRequest(req);
 		
 	}
 	
@@ -266,8 +265,8 @@ public class SessionManager {
 		
 		args.put(Request.Param.FACEBOOK_TOKEN, facebookAccessToken);
 		mEta.getSettings().setSessionFacebook(facebookAccessToken);
-		
-		
+		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, new JSONObject(args), l);
+		addRequest(req);
 		
 	}
 	
@@ -281,22 +280,9 @@ public class SessionManager {
         mEta.getListManager().clear(u.getId());
         Map<String, String> args = new HashMap<String, String>();
         args.put(Request.Param.EMAIL, "");
-        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, new JSONObject(args), new Listener<JSONObject>() {
-
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
-
-				if (response != null) {
-	                mEta.getListManager().clear(u.getId());
-					setSession(response);
-				} else {
-					performNextRequest();
-				}
-				if (l != null) { l.onComplete(isCache, response, error); }
-				
-			}
-		});
+        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, new JSONObject(args), l);
+        addRequest(req);
         
-        runQueue(req);
 	}
 	
 	/**
@@ -321,7 +307,7 @@ public class SessionManager {
 		args.put(Request.Param.ERROR_REDIRECT, errorRedirect);
 		args.put(Request.Param.LOCALE, locale);
 		JsonObjectRequest req = new JsonObjectRequest(Method.POST, Request.Endpoint.USER, new JSONObject(args), l);
-		runQueue(req);
+		addRequest(req);
 		
 	}
 	
@@ -339,7 +325,7 @@ public class SessionManager {
 		args.put(Request.Param.SUCCESS_REDIRECT, successRedirect);
 		args.put(Request.Param.ERROR_REDIRECT, errorRedirect);
 		JsonObjectRequest req = new JsonObjectRequest(Method.POST, Request.Endpoint.USER_RESET, new JSONObject(args), l);
-		runQueue(req);
+		addRequest(req);
 		
 	}
 	
@@ -418,6 +404,11 @@ public class SessionManager {
 					EtaLog.d(TAG, e);
 				}
 			}
+			
+			for (PageflipWebview p : PageflipWebview.pageflips) {
+				p.updateSession();
+			}
+			
 		}
 		return this;
 	}

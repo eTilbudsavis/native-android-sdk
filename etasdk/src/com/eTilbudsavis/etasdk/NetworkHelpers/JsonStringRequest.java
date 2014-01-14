@@ -23,11 +23,4 @@ public class JsonStringRequest extends JsonRequest<String>{
         }
 	}
 	
-	@Override
-	protected void deliverResponse(String response) {
-		
-	}
-
-	
-	
 }

@@ -8,9 +8,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.Bundle;
-
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Share extends EtaObject implements Comparable<Share>, Serializable {
@@ -85,6 +82,27 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 		return s;
 	}
 	
+	public JSONObject toJSON() {
+		return toJSON(this); 
+	}
+
+	public static JSONObject toJSON(Share s) {
+		JSONObject o = new JSONObject();
+		try {
+			
+			JSONObject user = new JSONObject();
+			user.put(ServerKey.EMAIL, s.getEmail());
+			user.put(ServerKey.NAME, s.getName());
+			
+			o.put(ServerKey.USER, user);
+			o.put(ServerKey.ACCEPTED, s.getAccepted());
+			o.put(ServerKey.ACCESS, s.getAccess());
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return o;
+	}
+	
 	public String getEmail() {
 		return mEmail;
 	}
@@ -149,43 +167,6 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 		return this;
 	}
 	
-	public static JSONObject toJSON(Share s) {
-		JSONObject o = new JSONObject();
-		try {
-			
-			JSONObject user = new JSONObject();
-			user.put(ServerKey.EMAIL, s.getEmail());
-			user.put(ServerKey.NAME, s.getName());
-			
-			o.put(ServerKey.USER, user);
-			o.put(ServerKey.ACCEPTED, s.getAccepted());
-			o.put(ServerKey.ACCESS, s.getAccess());
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return o;
-	}
-	
-	public Bundle getApiParams() {
-
-		Bundle b = new Bundle();
-		b.putString(Request.Param.ACCESS, getAccess());
-		b.putString(Request.Param.ACCEPT_URL, getAcceptUrl());
-		
-		return b;
-	}
-	
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(getClass().getSimpleName()).append("[")
-		.append("email=").append(mEmail)
-		.append(", name=").append(mName)
-		.append(", access=").append(mAccess)
-		.append(", accepted=").append(mAccepted)
-		.append("]").toString();
-	}
-
 	public int compareTo(Share another) {
 		return 0;
 	}

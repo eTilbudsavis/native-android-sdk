@@ -225,7 +225,7 @@ public final class PageflipWebview extends WebView {
 				if (!isCache) {
 					if (response == null) {
 						loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
-						mListener.onEvent(EVENT_ERROR, mUuid, error.serverMessage);
+						mListener.onEvent(EVENT_ERROR, mUuid, error.toJSON());
 					} else {
 						loadDataWithBaseURL(null, response, "text/html", "utf-8", null);
 					}
@@ -237,7 +237,7 @@ public final class PageflipWebview extends WebView {
 		
 		String url = Request.Endpoint.pageflipProxy(mUuid);
 		EtaLog.d(TAG, url);
-		StringRequest req = new StringRequest(Method.GET, url, h);
+		StringRequest req = new StringRequest(url, h);
 		mEta.add(req);
 		
 	}
@@ -630,7 +630,7 @@ public final class PageflipWebview extends WebView {
 										resp.put("success", new JSONObject(response));
 									}
 								} else {
-									resp.put("error", error.serverMessage);
+									resp.put("error", error.toJSON());
 								}
 								
 								etaProxy(rId, API_REQUEST_COMPLETE, resp);

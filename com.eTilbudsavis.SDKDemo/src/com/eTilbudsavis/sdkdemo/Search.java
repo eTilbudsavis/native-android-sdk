@@ -1,6 +1,11 @@
 package com.eTilbudsavis.sdkdemo;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -14,11 +19,14 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.eTilbudsavis.etasdk.Api;
-import com.eTilbudsavis.etasdk.Api.ListListener;
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
+import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
+import com.eTilbudsavis.etasdk.NetworkHelpers.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
+import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 import com.etilbudsavis.sdkdemo.R;
 
@@ -36,7 +44,7 @@ public class Search extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search);
-
+        
         /*
          *  Note here, that because we setup Eta in the Main activity, 
          *  we don't necessarily need to do t again. So we can just
@@ -61,38 +69,35 @@ public class Search extends Activity {
 				 * This simple query gets a list of offers, based on a search query. */
 				
 				// Create a new Listener
-				ListListener<Offer> offerListener = new ListListener<Offer>() {
-					
+				Listener<JSONArray> offerListener = new Listener<JSONArray>() {
+
 					@Override
-					public void onComplete(boolean isCache, int statusCode, List<Offer> list, EtaError error) {
-						
+					public void onComplete(boolean isCache, JSONArray response, EtaError error) {
+
 						mPd.dismiss();
 						
 						/* If it's a successfull request, the list will be populated and error will be null
 						 * else an error is returned, and the list is null */
-						if (Utils.isSuccess(statusCode)) {
-							mOffers = list;
+						if (response != null) {
+							// Use the factory methods in each Class to easily convert from JSON to Object
+							mOffers = Offer.fromJSON(response);
 							mResultDisplayer.setAdapter(new SearchAdapter());
 						} else {
-							Utils.logd(TAG, error.toString());
+							EtaLog.d(TAG, error == null ? "null" : error.toJSON().toString());
 						}
 						
 					}
 				};
 				
-				// Make the Api object, with one of the simple wrapper methods found in mEta
-				Api api = Eta.getInstance().searchOffers(offerListener, q);
+				Bundle args = new Bundle();
+				args.putString(Request.Param.QUERY, q);
 				
-				/* You can set other options on the Api object, as you please.
-				 * E.g.: You can enable the debug flag, to get more info on this particulare
-				 * Api request as it executes. 
-				 * (This requires the Eta object to have set debugging to true, mEta.debug(true)) */
-				api.setFlag(Api.FLAG_PRINT_DEBUG);
+				// Create the request
+				JsonArrayRequest offerRequest = new JsonArrayRequest(Request.Endpoint.OFFER_SEARCH, offerListener);
+				offerRequest.putQueryParameters(args);
 				
-				// Finally execute the Api request, as you would with any other AsyncTast :-)
-				api.execute();
-				
-				// This can all be wrapped into a one-liner but, for these examples we prefer some readability :-)
+				// Send the request to the SDK for execution
+				Eta.getInstance().add(offerRequest);
 				
 			}
 		});

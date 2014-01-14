@@ -26,10 +26,4 @@ public class JsonObjectRequest extends JsonRequest<JSONObject>{
         }
 	}
 	
-	@Override
-	protected void deliverResponse(JSONObject response) {
-	}
-
-	
-	
 }

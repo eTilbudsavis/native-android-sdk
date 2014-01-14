@@ -4,11 +4,17 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+
 import android.os.Bundle;
+import android.os.Handler;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressWarnings("rawtypes")
@@ -55,6 +61,12 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	/** Item for containing cache items */
 	private Cache.Item mCache;
 	
+	/** Log of this request */
+	private final EventLog mLog;
+	
+	/** Handler, for returning requests on correct queue */
+	private Handler mHandler;
+	
 	public enum Priority {
 		LOW, MEDIUM, HIGH
 	}
@@ -77,8 +89,18 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		mMethod = method;
 		mUrl = url;
 		mListener = listener;
+		mLog = new EventLog();
 	}
-
+	
+	/** Adds event to a request, for later debugging purposes */
+	public void addEvent(String event) {
+		mLog.add(event);
+	}
+	
+	public EventLog getLog() {
+		return mLog;
+	}
+	
 	/** Mark this request as canceled.  No callback will be delivered. */
 	public void cancel() {
 		mCanceled = true;
@@ -143,6 +165,15 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return Request.this;
 	}
 	
+	public Request setHandler(Handler h) {
+		mHandler = h;
+		return Request.this;
+	}
+	
+	public Handler getHandler() {
+		return mHandler;
+	}
+	
 	public boolean useLocation() {
 		return mUseLocation;
 	}
@@ -180,7 +211,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return Request.this;
 	}
 	
-	protected Bundle getQueryParameters() {
+	public Bundle getQueryParameters() {
 		return mQuery;
 	}
 
@@ -200,7 +231,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	protected void setSequence(int seq) {
 		mSequence = seq;
 	}
-
+	
+	public boolean isSession() {
+		return mUrl.contains(Request.Endpoint.SESSIONS);
+	}
+	
 	protected String getParamsEncoding() {
 		return DEFAULT_PARAMS_ENCODING;
 	}
@@ -223,8 +258,12 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
 	abstract protected Response<T> parseNetworkResponse(NetworkResponse response);
 	
-	abstract protected void deliverResponse(T response);
-
+	protected void deliverResponse(boolean isCache, T response, EtaError error) {
+		if (mListener != null) {
+			mListener.onComplete(isCache, response, error);
+		}
+	}
+	
 	public int compareTo(Request<T> other) {
 		Priority left = this.getPriority();
 		Priority right = other.getPriority();
@@ -238,29 +277,24 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     	return false;
     }
     
-	public void printDebug(Request request, NetworkResponse response) {
-
+	public void debugInfo(HttpResponse response) {
+		
 		String newLine = System.getProperty("line.separator");
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("*** Pre execute ***").append(newLine);
-		sb.append("Method: ").append(getMethod()).append(newLine);
-		sb.append("Url: ").append(getUrl()).append(newLine);
-		sb.append("Body: ").append(getUrl()).append(newLine);
+		sb.append(mMethod).append(" ").append(getUrl()).append("?").append(Utils.bundleToQueryString(mQuery)).append(newLine);
+		sb.append("Content-Type: ").append(getBodyContentType()).append(newLine);
+		if (getBody() != null) {
+			sb.append("Body: ").append(new String(getBody())).append(newLine);
+		}
 		sb.append("Headers: ").append(getHeaders().toString()).append(newLine);
 		sb.append("*** Post Execute***").append(newLine);
-		sb.append("StatusCode: ").append(response.statusCode).append(newLine);
+		sb.append("StatusCode: ").append(response.getStatusLine().getStatusCode()).append(newLine);
 		sb.append("Headers: ");
-		for (String k : response.headers.keySet()) {
-			sb.append(k).append(": ").append(response.headers.get(k)).append(", ");
+		for (Header h : response.getAllHeaders()) {
+			sb.append(h.getName()).append(": ").append(h.getValue()).append(", ");
 		}
-		String data = null;
-		try {
-			data = new String(response.data, getParamsEncoding());
-		} catch (Exception e) {
-			data = "not of type string";
-		}
-		sb.append("Object: ").append(data.length() > 100 ? data.substring(0, 100) : data);
 		EtaLog.d(TAG, sb.toString());
 	}
 
@@ -434,7 +468,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * Helper class for headers the eTilbudsavis API uses
 	 * @author Danny Hvam - danny@etilbudsavis.dk
 	 */
-	public static class Header {
+	public static class Headers {
 
 		/** Header name for the session token */
 		public static final String X_TOKEN = "X-Token";
