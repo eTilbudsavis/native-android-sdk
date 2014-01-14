@@ -65,7 +65,7 @@ public class SessionManager {
 			
 		}
 	};
-
+	
 	private synchronized void addRequest(JsonObjectRequest r) {
 		r.setPriority(Priority.HIGH);
 		mEta.add(r);
@@ -93,9 +93,9 @@ public class SessionManager {
 	}
 	
 	/**
-	 * Update the current 
-	 * @param req
-	 * @param resp
+	 * Update current session with new session retrieved from eTilbudsavis API v2.
+	 * @param req - the api request
+	 * @param resp - the response from api-v2 for the given request
 	 * @return true a new session was set.
 	 */
 	public boolean setSession(Request<?> req, Response<?> resp) {
@@ -125,6 +125,11 @@ public class SessionManager {
 		
 	}
 	
+	/**
+	 * Update current session with a JSONObject retrieved from eTilbudsavis API v2.
+	 * @param session to update from
+	 * @return true if session was updated
+	 */
 	public boolean setSession(JSONObject session) {
 		
 		Session s = Session.fromJSON(session);
@@ -148,11 +153,25 @@ public class SessionManager {
 		
 		return true;
 	}
-
+	
+	/**
+	 * Method for determining is a given error is an error that the SessionManager.
+	 * Should, and can recover from.
+	 * @param e - error to check
+	 * @return true if SessionManager can recover from this error, else false
+	 */
 	public static boolean recoverableError(EtaError e) {
 		return ( e != null && ( e.getCode() == 1101 || e.getCode() == 1104 || e.getCode() == 1108) );
 	}
-
+	
+	/**
+	 * Method for determining if an error is a session error.
+	 * This is determined from the error code given by the API.
+	 * Note that SessionManager isn't nescessarily able to recover from all
+	 * session errors, so please check recoverableError() before retrying.
+	 * @param e - error to check
+	 * @return true if it's a session error
+	 */
 	public static boolean isSessionError(EtaError e) {
 		return ( e != null && ( 1100 <= e.getCode() && e.getCode() < 1200 ) );
 	}

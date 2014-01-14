@@ -37,8 +37,9 @@ public class StringRequest extends Request<String> {
 	 */
 	public StringRequest(int method, String url, String requestBody, Listener<String> listener) {
 		super(method, url, listener);
-		if (method == Method.GET && requestBody != null) {
-			EtaLog.d(TAG, "Get requests doesn't take a body, and will be ignored.\n"
+		boolean nonBodyRequest = (method == Method.GET || method == Method.DELETE);
+		if (nonBodyRequest && requestBody != null) {
+			EtaLog.d(TAG, "GET and DELETE requests doesn't take a body, and will be ignored.\n"
 					+ "Please append any parameters to Request.putQueryParameters()");
 		}
 		mRequestBody = requestBody;

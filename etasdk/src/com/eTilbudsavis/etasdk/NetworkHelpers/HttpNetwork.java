@@ -29,8 +29,6 @@ import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.ByteArrayBuffer;
 
-import android.preference.PreferenceActivity.Header;
-
 import com.eTilbudsavis.etasdk.SessionManager;
 import com.eTilbudsavis.etasdk.NetworkInterface.Network;
 import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
@@ -76,10 +74,10 @@ public class HttpNetwork implements Network {
 			
 			if (!isSuccess(sc)) {
 				
-				EtaError er = new EtaError(r);
+				EtaError er = new EtaError(request, r);
 				
 				if (SessionManager.isSessionError(er)) {
-					throw new SessionError(r);
+					throw new SessionError(request, r);
 				} else {
 					throw er;
 				}
@@ -165,7 +163,7 @@ public class HttpNetwork implements Network {
 		default:
 			return null;
 		}
-
+		
 	}
 	
 	private void appendQueryParams(Request<?> r) {

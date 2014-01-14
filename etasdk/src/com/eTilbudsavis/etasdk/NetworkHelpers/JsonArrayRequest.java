@@ -95,7 +95,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
             String jsonString = new String(response.data);
             return Response.fromSuccess(new JSONArray(jsonString), null, false);
         } catch (Exception e) {
-            return Response.fromError(new ParseError(response));
+            return Response.fromError(new ParseError(this, response));
         }
 	}
 	

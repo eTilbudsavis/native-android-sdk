@@ -19,7 +19,7 @@ public class JsonStringRequest extends JsonRequest<String>{
 		try {
             return Response.fromSuccess(new String(response.data), null, false);
         } catch (Exception e) {
-            return Response.fromError(new ParseError(response));
+            return Response.fromError(new ParseError(this, response));
         }
 	}
 	

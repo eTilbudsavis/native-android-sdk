@@ -22,9 +22,10 @@ public abstract class JsonRequest<T> extends Request<T> {
     
     public JsonRequest(int method, String url, String requestBody, Listener<T> listener) {
 		super(method, url, listener);
-		if (method == Method.GET && requestBody != null) {
-			EtaLog.d(TAG, "Get requests doesn't take a body, and will be ignored.\n"
-					+ "Please append any parameters to Request.putQueryParameters()");
+		boolean nonBodyRequest = (method == Method.GET || method == Method.DELETE);
+		if (nonBodyRequest && requestBody != null) {
+			EtaLog.d(TAG, "GET and DELETE requests doesn't take a body, and will be ignored.\n"
+					+ "Please append any GET and DELETE parameters to Request.putQueryParameters()");
 		}
 		mRequestBody = requestBody;
 	}

@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class EtaError extends Exception {
@@ -34,10 +35,15 @@ public class EtaError extends Exception {
 		mMessage = message;
 	}
 	
-	public EtaError(NetworkResponse r) {
+	public EtaError(Request<?> request, NetworkResponse response) {
+		
 		try {
 			String data;
-			data = new String(r.data);
+			try {
+				data = new String(response.data, request.getParamsEncoding());
+			} catch (UnsupportedEncodingException e) {
+				data = new String(response.data);
+			}
 			mApiData = new JSONObject(data);
 			mId = mApiData.getString(ID);
 			mCode = mApiData.getInt(CODE);
@@ -51,6 +57,7 @@ public class EtaError extends Exception {
 			mCode = Sdk.UNKNOWN;
 			mMessage = "Unknown error parsing network body data";
 		}
+		
 	}
 	
 	public EtaError(String detailMessage) {

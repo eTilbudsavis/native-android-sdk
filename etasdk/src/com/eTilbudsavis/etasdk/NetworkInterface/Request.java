@@ -236,7 +236,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return mUrl.contains(Request.Endpoint.SESSIONS);
 	}
 	
-	protected String getParamsEncoding() {
+	public String getParamsEncoding() {
 		return DEFAULT_PARAMS_ENCODING;
 	}
 
