@@ -72,17 +72,7 @@ public class HttpNetwork implements Network {
 			
 			NetworkResponse r = new NetworkResponse(resp.getStatusLine().getStatusCode(), content, responseHeaders);
 			
-			if (!isSuccess(sc)) {
-				
-				EtaError er = new EtaError(request, r);
-				
-				if (SessionManager.isSessionError(er)) {
-					throw new SessionError(request, r);
-				} else {
-					throw er;
-				}
-				
-			}
+			request.debugInfo(r);
 			
 			return r;
 			
@@ -105,8 +95,6 @@ public class HttpNetwork implements Network {
 		request.addEvent(String.format("set-connection-timeout-%s", CONNECTION_TIME_OUT*2));
 		HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), CONNECTION_TIME_OUT);
 		HttpConnectionParams.setSoTimeout(httpClient.getParams(), CONNECTION_TIME_OUT);
-		
-		appendQueryParams(request);
 		
 		// Get the right request type, and set body if necessary
 		HttpRequestBase httpRequest = createRequest(request);
@@ -141,23 +129,25 @@ public class HttpNetwork implements Network {
 
 	private HttpRequestBase createRequest(Request<?> request) {
 		
+		String url = buildUrl(request);
+		
 		switch (request.getMethod()) {
 		case Request.Method.POST: 
-			HttpPost post = new HttpPost(request.getUrl());
+			HttpPost post = new HttpPost(url);
 			setEntity(post, request);
 			return post;
 
 		case Request.Method.GET:
-			HttpGet get = new HttpGet(request.getUrl());
+			HttpGet get = new HttpGet(url);
 			return get;
 
 		case Request.Method.PUT:
-			HttpPut put = new HttpPut(request.getUrl());
+			HttpPut put = new HttpPut(url);
 			setEntity(put, request);
 			return put;
 
 		case Request.Method.DELETE:
-			HttpDelete delete = new HttpDelete(request.getUrl());
+			HttpDelete delete = new HttpDelete(url);
 			return delete;
 
 		default:
@@ -166,11 +156,8 @@ public class HttpNetwork implements Network {
 		
 	}
 	
-	private void appendQueryParams(Request<?> r) {
-		if (!r.getQueryParameters().isEmpty()) {
-			String url = r.getUrl() + "?" + Utils.bundleToQueryString(r.getQueryParameters());
-			r.setUrl(url);
-		}
+	private String buildUrl(Request<?> r) {
+		return r.getQueryParameters().isEmpty() ? r.getUrl() : r.getUrl() + "?" + Utils.bundleToQueryString(r.getQueryParameters());
 	}
 	
 	private static void setEntity(HttpEntityEnclosingRequestBase httpRequest, Request<?> request) {
@@ -207,10 +194,6 @@ public class HttpNetwork implements Network {
 		}
 		
 		return bytes.toByteArray();
-	}
-	
-	public static boolean isSuccess(int statusCode) {
-		return 200 <= statusCode && statusCode < 300 || statusCode == 304;
 	}
 	
 }

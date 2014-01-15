@@ -442,7 +442,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Request.Endpoint.items(mEta.getUser().getId(), sl.getId()), itemListener);
+		JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Request.Endpoint.listitems(mEta.getUser().getId(), sl.getId()), itemListener);
 		
 		addRequest(itemRequest);
 		
@@ -739,7 +739,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
+		String url = Request.Endpoint.listitem(user.getId(), sli.getShoppinglistId(), sli.getId());
 		JsonObjectRequest itemReq = new JsonObjectRequest(Method.PUT, url, sli.toJSON(), itemListener);
 		addRequest(itemReq);
 		
@@ -772,7 +772,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
+		String url = Request.Endpoint.listitem(user.getId(), sli.getShoppinglistId(), sli.getId());
 		JsonObjectRequest itemReq = new JsonObjectRequest(Method.DELETE, url, null, itemListener);
 		addRequest(itemReq);
 		
@@ -806,7 +806,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		String url = Request.Endpoint.item(user.getId(), sli.getShoppinglistId(), sli.getId());
+		String url = Request.Endpoint.listitem(user.getId(), sli.getShoppinglistId(), sli.getId());
 		JsonObjectRequest itemReq = new JsonObjectRequest(url, itemListener);
 		addRequest(itemReq);
 		

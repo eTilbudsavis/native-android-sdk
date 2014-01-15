@@ -30,6 +30,17 @@ public abstract class JsonRequest<T> extends Request<T> {
 		mRequestBody = requestBody;
 	}
     
+    /**
+     * Append single query parameter to the given request.
+     * @param key - a API v2 parameter key
+     * @param value - The value matching the key
+     * @return this object, for easy chaining
+     */
+    public Request<?> putQueryParam(String key, String value) {
+    	getQueryParameters().putString(key, value);
+    	return this;
+    }
+    
     @Override
     public String getBodyContentType() {
         return PROTOCOL_CONTENT_TYPE;

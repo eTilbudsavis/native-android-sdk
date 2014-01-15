@@ -2,6 +2,8 @@ package com.eTilbudsavis.etasdk.NetworkInterface;
 
 import java.util.concurrent.Executor;
 
+import org.json.JSONObject;
+
 import android.os.Handler;
 
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;

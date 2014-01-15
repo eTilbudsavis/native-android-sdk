@@ -29,10 +29,7 @@ public class RequestQueue {
     private final PriorityBlockingQueue<Request> mNetworkQueue = new PriorityBlockingQueue<Request>();
     
     /** Queue of items waiting for session request */
-    private final LinkedList<Request> mSessionParking = new LinkedList<Request>();
-
-    /** Queue of items waiting for session request */
-    private final LinkedList<Request> mSessionQueue = new LinkedList<Request>();
+    private final LinkedList<Request> mParking = new LinkedList<Request>();
     
     /** Network dispatchers, the threads that will actually perform the work */
     private NetworkDispatcher[] mNetworkDispatchers;
@@ -51,9 +48,6 @@ public class RequestQueue {
     
     /** Thread lock */
     private Object LOCK = new Object();
-    
-    /** Our session in flight */
-    Request mSessionInFlight;
     
     /** Atomic number generator for sequencing requests in the queues */
     private AtomicInteger mSequenceGenerator = new AtomicInteger();
@@ -108,32 +102,24 @@ public class RequestQueue {
     	}
     	
     }
-
-	public void badSession(Request req) {
-		badSession(req, null);
-	}
-
+    
 	public void badSession(Request req, EtaError error) {
 		
-		synchronized (LOCK) {
+		if (req.isSession()) {
 			
-			if (req.isSession()) {
-				
-				// If it's a login attempt or alike, then we'll just skip it
-				if (error == null || SessionManager.recoverableError(error)) {
-					refreshOrDieTrying(req, error);
-				} else {
-					mDelivery.postError(req, error);
-				}
-				
-			} else {
-				
+			// If it's a login attempt or alike, then we'll just skip it
+			if (error == null || SessionManager.recoverableError(error)) {
 				refreshOrDieTrying(req, error);
-				
+			} else {
+				mDelivery.postError(req, error);
 			}
 			
+		} else {
+			
+			refreshOrDieTrying(req, error);
+			
 		}
-		
+			
 	}
 	
 	private void refreshOrDieTrying(Request req, EtaError error) {
@@ -141,47 +127,35 @@ public class RequestQueue {
 		// Or not session endpoint
 		boolean refreshing = mEta.getSessionManager().refresh();
 		if (refreshing && !req.isSession()) {
-			mSessionParking.add(req);
+			mParking.add(req);
 		} else {
 			mDelivery.postError(req, error);
 		}
 		
 	}
 	
-	public boolean isSessionInFlight() {
-		return mSessionInFlight != null;
-	}
-	
-	private void sessionUpdateComplete() {
-		for (Request r : mSessionParking) {
-			r.addEvent("resuming-request");
+	public void runParkedQueue() {
+		
+		if (mEta.getSessionManager().requestInFlight()) {
+			EtaLog.d(TAG, "Cannot resume yet, session still in flight.");
+			return;
 		}
-		mNetworkQueue.addAll(mSessionParking);
-		mSessionParking.clear();
+		
+		synchronized (mParking) {
+			
+			for (Request r : mParking) {
+				r.addEvent("resuming-request");
+			}
+			mNetworkQueue.addAll(mParking);
+			mParking.clear();
+			
+		}
+		
 	}
 	
 	public void finish(Request req, Response resp) {
 		
-		if (req.isSession()) {
-			
-			mEta.getSessionManager().setSession(req, resp);
-			
-			if (!mSessionQueue.isEmpty()) {
-				
-				mSessionInFlight = mSessionQueue.removeFirst();
-				mNetworkQueue.add(mSessionInFlight);
-				 
-			} else {
-				
-				mSessionInFlight = null;
-				sessionUpdateComplete();
-				
-			}
-			
-		} else {
-			EtaLog.d(TAG, "Duration: " + req.getLog().getTotalDuration());
-			// nothing yet
-		}
+		EtaLog.d(TAG, "Duration: " + req.getLog().getTotalDuration());
 		
 	}
 	
@@ -190,23 +164,23 @@ public class RequestQueue {
     	
     	r.setSequence(mSequenceGenerator.incrementAndGet());
     	r.addEvent("request-added");
-    	EtaLog.d(TAG, "Request-added: " + r.getMethod() + ", " + r.getUrl());
-
+    	
+    	EtaLog.d(TAG, r.getMethodString()  + ": " + r.getUrl());
+    	
 		prepareRequest(r);
 		
-    	if (r.isSession()) {
+    	if (mEta.getSessionManager().requestInFlight()) {
+    		synchronized (mParking) {
+        		r.addEvent("session-in-flight-added-to-parking");
+        		mParking.add(r);
+			}
     		
-    		if (mSessionInFlight == null) {
-    			mSessionInFlight = r;
-    			mNetworkQueue.add(r);
-    		} else {
-        		mSessionQueue.add(r);
-    		}
-    		
-    	} else if (mSessionInFlight != null) {
-    		r.addEvent("session-in-flight-added-to-parking");
-    		mSessionParking.add(r);
     	} else {
+    		
+    		if (r.getUrl().contains(Request.Endpoint.SESSIONS)) {
+    			EtaLog.d(TAG, "Request to session endpoint, not originating from SessionManager.\n"
+    					+ "If you don't update SessionManager afterwards this will cause problems");
+    		}
     		
         	mCacheQueue.add(r);
     	}

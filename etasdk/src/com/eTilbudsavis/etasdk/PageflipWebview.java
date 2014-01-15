@@ -293,9 +293,10 @@ public final class PageflipWebview extends WebView {
 
 	private LocationListener ll = new LocationListener() {
 		
-		public void onLocationChange() {
+		public void onChange() {
 			mPFInterface.etaProxy(GEOLOCATION_CHANGE, location());
 		}
+		
 	};
 	
 	@SuppressLint("NewApi")

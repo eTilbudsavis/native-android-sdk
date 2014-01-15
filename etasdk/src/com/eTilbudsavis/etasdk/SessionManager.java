@@ -2,6 +2,7 @@ package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.json.JSONObject;
@@ -33,14 +34,16 @@ public class SessionManager {
 	/** Token time to live. I'm requesting 45days */
     public static int TTL = 3888000;
     
-    private final String ENDPOINT = Request.Endpoint.SESSIONS;
-    
 	private Eta mEta;
 	private Session mSession;
 	private Object LOCK = new Object();
 	
 	/** weather or not, the SessionManager should recover from a bad session request */
 	boolean mTryToRecover = true;
+	
+	private LinkedList<Request<?>> mSessionQueue = new LinkedList<Request<?>>();
+	
+	private Request<?> mReqInFlight;
 	
 	private ArrayList<OnSessionChangeListener> mSubscribers = new ArrayList<OnSessionChangeListener>();
 	
@@ -59,16 +62,53 @@ public class SessionManager {
 		
 	}
 	
-	Listener<JSONObject> sessionListener = new Listener<JSONObject>() {
+	private void update(JSONObject response, EtaError error) {
 
-		public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+		mReqInFlight = null;
+		
+		if (response != null) {
+			
+			setSession(response);
+			runQueue();
+			
+		} else if (mTryToRecover && recoverableError(error) ) {
+			
+			mTryToRecover = false;
+			postSession(null);
+			
+		} else {
+			
+			runQueue();
 			
 		}
-	};
+		
+	}
 	
 	private synchronized void addRequest(JsonObjectRequest r) {
 		r.setPriority(Priority.HIGH);
-		mEta.add(r);
+		mSessionQueue.add(r);
+		runQueue();
+	}
+	
+	private void runQueue() {
+		
+		if (requestInFlight()) {
+			EtaLog.d(TAG, "Session in flight, waiting for session call to finish");
+			return;
+		}
+		
+		if (mSessionQueue.isEmpty()) {
+			
+			// SessionManager is done
+			mEta.getRequestQueue().runParkedQueue();
+			
+		} else {
+			
+			mReqInFlight = mSessionQueue.removeFirst();
+			mEta.add(mReqInFlight);
+			
+		}
+		
 	}
 	
 	/**
@@ -78,47 +118,12 @@ public class SessionManager {
 	 */
 	public synchronized boolean refresh() {
 		
+		EtaLog.d(TAG, "refresh()");
+		
 		// Looks like a loop, just quit
-		if (!mTryToRecover) {
-			return false;
-		}
-		
-		// If a session is in flight, there is no reason to post/put a new one
-		if (!mEta.getRequestQueue().isSessionInFlight()) {
-			putSession();
-		}
-		
-		return true;
-		
-	}
-	
-	/**
-	 * Update current session with new session retrieved from eTilbudsavis API v2.
-	 * @param req - the api request
-	 * @param resp - the response from api-v2 for the given request
-	 * @return true a new session was set.
-	 */
-	public boolean setSession(Request<?> req, Response<?> resp) {
-		
-		if (!req.isSession()) {
-			EtaLog.d(TAG, "Request isn't a session endpoint: " + req.getUrl());
-			return false;
-		}
-		
-		if (resp.isSuccess()) {
-			
-			try {
-				JSONObject session = (JSONObject)resp.result;
-				return setSession(session);
-			} catch (Exception e) {
-				EtaLog.d(TAG, e);
-			}
-			
-		} else if (mTryToRecover && recoverableError(resp.error) ) {
-			
-			mTryToRecover = false;
-			postSession();
-			
+		if (mTryToRecover && !requestInFlight()) {
+			putSession(null);
+			return true;
 		}
 		
 		return false;
@@ -131,6 +136,8 @@ public class SessionManager {
 	 * @return true if session was updated
 	 */
 	public boolean setSession(JSONObject session) {
+		
+		EtaLog.d(TAG, "setSession(JSONObject session)");
 		
 		Session s = Session.fromJSON(session);
 		
@@ -176,6 +183,10 @@ public class SessionManager {
 		return ( e != null && ( 1100 <= e.getCode() && e.getCode() < 1200 ) );
 	}
 	
+	public boolean requestInFlight() {
+		return mReqInFlight != null;
+	}
+	
 	/**
 	 * Method for ensuring that there is a valid session on every resume event.
 	 */
@@ -183,14 +194,26 @@ public class SessionManager {
 		
 		// Make sure, that the session is up to date
 		if (mSession.getToken() == null) {
-			postSession();
+			postSession(null);
 		} else {
-			putSession();
+			putSession(null);
 		}
 		
 	}
 	
-	private void postSession() {
+	private void postSession(final Listener<JSONObject> l) {
+		
+		Listener<JSONObject> sessionListener = new Listener<JSONObject>() {
+
+			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+				update(response, error);
+				if (l != null) {
+					l.onComplete(isCache, response, error);
+				}
+			}
+		};
+		
+		EtaLog.d(TAG, "postSession()");
 		
 		Bundle args = new Bundle();
 		args.putInt(Request.Param.TOKEN_TTL, TTL);
@@ -245,13 +268,25 @@ public class SessionManager {
     	Map<String, String> body = new HashMap<String, String>();
     	body.put(Request.Param.API_KEY, mEta.getApiKey());
     	
-	    JsonObjectRequest req = new JsonObjectRequest(Method.POST, ENDPOINT, new JSONObject(body), sessionListener);
+	    JsonObjectRequest req = new JsonObjectRequest(Method.POST, Request.Endpoint.SESSIONS, new JSONObject(body), sessionListener);
 	    addRequest(req);
 	    
 	}
 	
-	private void putSession(){
-		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, ENDPOINT, null, sessionListener);
+	private void putSession(final Listener<JSONObject> l){
+		
+		Listener<JSONObject> sessionListener = new Listener<JSONObject>() {
+			
+			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+				update(response, error);
+				if (l != null) {
+					l.onComplete(isCache, response, error);
+				}
+			}
+		};
+		
+		EtaLog.d(TAG, "putSession()");
+		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, null, sessionListener);
 		addRequest(req);
 	}
 	
@@ -267,7 +302,7 @@ public class SessionManager {
 		args.putString(Request.Param.EMAIL, email);
 		args.putString(Request.Param.PASSWORD, password);
 		mEta.getSettings().setSessionUser(email);
-		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, ENDPOINT, null, l);
+		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, null, l);
 		addRequest(req);
 		
 	}

@@ -53,6 +53,7 @@ public class Eta implements Serializable {
 	private static Handler mHandler;
 	private boolean mResumed = false;
 	private RequestQueue mRequestQueue;
+	private Cache mCache = new Cache();
 	private ConnectivityManager mConnectivityManager;
 
 	private Eta() {
@@ -97,7 +98,7 @@ public class Eta implements Serializable {
 
 		if (!isSet()) {
 			mSettings = new Settings(mContext);
-			mLocation = new EtaLocation();
+			mLocation = new EtaLocation(this);
 			mListManager = new ListManager(Eta.this);
 			mSessionManager = new SessionManager(Eta.this);
 		} else {
@@ -202,15 +203,23 @@ public class Eta implements Serializable {
 		return mSettings;
 	}
 
-	/**
-	 * A location object used by ETA, when making API requests.
-	 * This object should be edited when ever you want to change location.
-	 * @return <li> A location object
-	 */
-	public EtaLocation getLocation() {
-		return mLocation;
-	}
+    /**
+     * A location object used by ETA, when making API requests.
+     * This object should be edited when ever you want to change location.
+     * @return <li> A location object
+     */
+    public EtaLocation getLocation() {
+            return mLocation;
+    }
 
+    /**
+     * Get the ETA SDK cache for various items and objects.
+     * @return the current cache object
+     */
+    public Cache getCache() {
+            return mCache;
+    }
+    
 	public ListManager getListManager() {
 		return mListManager;
 	}

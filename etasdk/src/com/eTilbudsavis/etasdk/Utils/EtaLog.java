@@ -22,6 +22,11 @@ public class EtaLog {
 		e.printStackTrace(); 
 	}
 
+	public static void d(String tag, Throwable t) {
+		if (!Eta.DEBUG_LOGD) return;
+		t.printStackTrace(); 
+	}
+
 	public static void dAll(String tag, String message) {
 		if (!Eta.DEBUG_LOGD) return;
 		

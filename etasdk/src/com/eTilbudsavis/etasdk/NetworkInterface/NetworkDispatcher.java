@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.SessionManager;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkHelpers.SessionError;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
@@ -92,36 +93,44 @@ public class NetworkDispatcher extends Thread {
                 // Perform the network request.
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
                 
-                updateSessionInfo(networkResponse.headers);
-                
-                request.addEvent("parsing-network-response");
-                // Parse the response here on the worker thread.
-                Response<?> response = request.parseNetworkResponse(networkResponse);
-                
-                // If the request is cachable
-                if (request.getMethod() == Method.GET && request.cacheResponse() && response.cache != null) {
-                	request.addEvent("adding-response-to-cache");
-                	mCache.put(response.cache);
-                }
-                
-                mDelivery.postResponse(request, response);
-                
-            } catch (SessionError e) {
 
-            	request.addEvent("session-error");
-            	EtaLog.d(TAG, "session-error");
-            	mRequestQueue.badSession(request, e);
-            	
-            } catch (EtaError e) {
-            	
-            	request.addEvent("api-error");
-            	EtaLog.d(TAG, "api-error");
-                mDelivery.postError(request, e);
+    			if (!Utils.isSuccess(networkResponse.statusCode)) {
+    				
+    				EtaError e = new EtaError(request, networkResponse);
+    				
+                	if (SessionManager.isSessionError(e)) {
+                    	request.addEvent("session-error");
+                    	EtaLog.d(TAG, "session-error: " + e.toJSON().toString());
+                    	mRequestQueue.badSession(request, e);
+                	} else {
+                    	request.addEvent("api-error");
+                    	EtaLog.d(TAG, "api-error: " + e.toJSON().toString());
+                    	mDelivery.postError(request, e);
+                	}
+                	
+    			} else {
+    				
+                    updateSessionInfo(networkResponse.headers);
+                    
+                    request.addEvent("parsing-network-response");
+                    // Parse the response here on the worker thread.
+                    Response<?> response = request.parseNetworkResponse(networkResponse);
+                    
+                    // If the request is cachable
+                    if (request.getMethod() == Method.GET && request.cacheResponse() && response.cache != null) {
+                    	request.addEvent("adding-response-to-cache");
+                    	mCache.put(response.cache);
+                    }
+                    
+                    mDelivery.postResponse(request, response);
+                    
+    			}
+    			
                 
             } catch (Exception e) {
             	
             	request.addEvent("network-error");
-            	EtaLog.d(TAG, "network-error");
+            	EtaLog.d(TAG, e);
                 mDelivery.postError(request, new EtaError());
                 
             }

@@ -4,9 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -33,7 +30,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
 	/** URL of this request. */
 	private String mUrl;
-
+	
 	/** Headers to be used in this request */
 	private Map<String, String> mHeaders = new HashMap<String, String>();
 
@@ -57,6 +54,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	
 	/** Whether or not this request has been canceled. */
 	private boolean mCanceled = false;
+	
+	/** Indication if the request is finished */
+	private boolean mFinished = false;
 	
 	/** Item for containing cache items */
 	private Cache.Item mCache;
@@ -126,7 +126,16 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	public int getMethod() {
 		return mMethod;
 	}
-
+	
+	public String getMethodString() {
+		switch (mMethod) {
+		case 0: return "GET";
+		case 1: return "POST";
+		case 2: return "PUT";
+		case 3: return "DELETE";
+		default: return "UNDEFINED";
+		}
+	}
 	/**
 	 * Returns the response listener for this request
 	 * @return
@@ -206,6 +215,16 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return mCache != null;
 	}
 	
+	public boolean isFinished() {
+		return mFinished;
+	}
+	
+	public Request finished() {
+		mLog.add("finished");
+		mFinished = true;
+		return Request.this;
+	}
+	
 	public Request setCacheItem(Cache.Item cache) {
 		mCache = cache;
 		return Request.this;
@@ -277,7 +296,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     	return false;
     }
     
-	public void debugInfo(HttpResponse response) {
+	public void debugInfo(NetworkResponse response) {
 		
 		String newLine = System.getProperty("line.separator");
 		
@@ -290,11 +309,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		}
 		sb.append("Headers: ").append(getHeaders().toString()).append(newLine);
 		sb.append("*** Post Execute***").append(newLine);
-		sb.append("StatusCode: ").append(response.getStatusLine().getStatusCode()).append(newLine);
-		sb.append("Headers: ");
-		for (Header h : response.getAllHeaders()) {
-			sb.append(h.getName()).append(": ").append(h.getValue()).append(", ");
-		}
+		sb.append("StatusCode: ").append(response.statusCode).append(newLine);
+		sb.append("Headers: ").append(response.headers.toString()).append(newLine);
+		sb.append("Data: ").append(new String(response.data));
 		EtaLog.d(TAG, sb.toString());
 	}
 
@@ -586,18 +603,39 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		public static final String SESSIONS = "/v2/sessions";
 		
 		public static final String USER = "/v2/users";
+		
 		public static final String USER_RESET = "/v2/users/reset";
 		
 		public static final String CATEGORIES	= "/v2/categories";
 		
+		public static final String COUNTRIES = "/v2/countries";
 		
+		/** https://api.etilbudsavis.dk, or https://edge.etilbudsavis.dk if DEBUG_ENDPOINT*/
 		public static String getHost() {
 			return Eta.DEBUG_ENDPOINT ? EDGE : PRODUCTION;
 		}
+		
+		/** /v2/offers/{offer_id} */
+		public static String offerId(String offerId) {
+			return String.format("/v2/offers/%s", offerId);
+		}
 
-		/**
-		 * /v2/offers/{offer_id}/collect
-		 */
+		/** /v2/stores/{store_id} */
+		public static String storeId(String storeId) {
+			return String.format("/v2/stores/%s", storeId);
+		}
+
+		/** /v2/dealers/{dealer_id} */
+		public static String dealerId(String dealerId) {
+			return String.format("/v2/dealers/%s", dealerId);
+		}
+
+		/** /v2/catalogs/{catalog_id} */
+		public static String catalogId(String catalogId) {
+			return String.format("/v2/catalogs/%s", catalogId);
+		}
+		
+		/** /v2/offers/{offer_id}/collect */
 		public static String offerCollect(String offerId) {
 			return String.format("/v2/offers/%s/collect", offerId);
 		}
@@ -609,9 +647,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 			return String.format("/v2/stores/%s/collect", storeId);
 		}
 		
-		/**
-		 * https://etilbudsavis.dk/proxy/{id}/
-		 */
+		/** https://etilbudsavis.dk/proxy/{id}/ */
 		public static String pageflipProxy(String id) {
 			String production = "https://etilbudsavis.dk/proxy/%s/";
 //			String staging = "http://10.0.1.6:3000/proxy/%s/";
@@ -619,88 +655,60 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 			return String.format( production, id);
 		}
 		
-		/**
-		 * https://staging.etilbudsavis.dk/utils/ajax/lists/themes/
-		 */
+		/** https://staging.etilbudsavis.dk/utils/ajax/lists/themes/ */
 		public static String themes() {
 			String production = "https://etilbudsavis.dk/utils/ajax/lists/themes/";
 			String staging = "https://staging.etilbudsavis.dk/utils/ajax/lists/themes/";
 			return production;
 		}
 		
-		/**
-		 * /v2/users/{user_id}/facebook
-		 */
+		/** /v2/users/{user_id}/facebook */
 		public static String facebook(int userId) {
 			return String.format("/v2/users/%s/facebook", userId);
 		}
 
-		/**
-		 * /v2/users/{user_id}/shoppinglists
-		 */
+		/** /v2/users/{user_id}/shoppinglists */
 		public static String lists(int userId) {
 			return String.format("/v2/users/%s/shoppinglists", userId);
 		}
 
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}
-		 * @param userId
-		 * @param listId
-		 * @return
-		 */
+		/** /v2/users/{user_id}/shoppinglists/{list_uuid} */
 		public static String list(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s", userId, listId);
 		}
 
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/modified
-		 */
+		/** /v2/users/{user_id}/shoppinglists/{list_uuid}/modified */
 		public static String listModified(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/modified", userId, listId);
 		}
 
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/empty
-		 */
+		/** /v2/users/{user_id}/shoppinglists/{list_uuid}/empty */
 		public static String listEmpty(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/empty", userId, listId);
 		}
 		
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares
-		 * @param userId
-		 * @param listId
-		 * @return
-		 */
+		/** /v2/users/{user_id}/shoppinglists/{list_uuid}/shares */
 		public static String listShares(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/shares", userId, listId);
 		}
 
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email}
-		 */
+		/** /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email} */
 		public static String listShareEmail(int userId, String listId, String email) {
 			return String.format("/v2/users/%s/shoppinglists/%s/shares/%s", userId, listId, email);
 		}
 
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items
-		 */
-		public static String items(int userId, String listId) {
+		/** /v2/users/{user_id}/shoppinglists/{list_uuid}/items */
+		public static String listitems(int userId, String listId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/items", userId, listId);
 		}
 
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}
-		 */
-		public static String item(int userId, String listId, String itemId) {
+		/** /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid} */
+		public static String listitem(int userId, String listId, String itemId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/items/%s", userId, listId, itemId);
 		}
 
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified
-		 */
-		public static String itemModifiedById(int userId, String listId, String itemId) {
+		/** /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified */
+		public static String listitemModifiedById(int userId, String listId, String itemId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/items/%s/modified", userId, listId, itemId);
 		}
 

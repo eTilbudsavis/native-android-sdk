@@ -291,6 +291,10 @@ public final class Utils {
 			items.add(s);
 		
 	}
+
+	public static boolean isSuccess(int statusCode) {
+		return 200 <= statusCode && statusCode < 300 || statusCode == 304;
+	}
 	
 	public static boolean validVersion(String version) {
 		
