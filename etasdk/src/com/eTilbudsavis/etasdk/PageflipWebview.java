@@ -44,7 +44,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 @SuppressLint("SetJavaScriptEnabled")
 public final class PageflipWebview extends WebView {
 
-	private static final String TAG = "Pageflip";
+	private static final String TAG = "PageflipWebview";
 
 	private static final String PAGEFLIP_PROXY_NAME = "AndroidInterface";
 
@@ -243,8 +243,6 @@ public final class PageflipWebview extends WebView {
 			}
 		});
 		
-		req.cacheOnlyifExists(true);
-		req.debugNetwork(true);
 		mEta.add(req);
 		
 	}
@@ -576,8 +574,6 @@ public final class PageflipWebview extends WebView {
 		}
 		
 		public void onEvent(String event, JSONObject data){
-			
-			EtaLog.d(TAG, "onEvent: " + event);
 			
 			if (event.equals(EVENT_SESSION_CHANGE)) {
 				

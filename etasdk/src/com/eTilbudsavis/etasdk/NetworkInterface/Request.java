@@ -43,13 +43,10 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	private boolean mUseLocation = true;
 	
 	/** If true Request will return data from cache if exists */
-	private boolean mSkipCache = true;
+	private boolean mSkipCache = false;
 	
 	/** Whether or not responses to this request should be cached. */
 	private boolean mCacheResponse = true;
-
-	/** Whether to only return cache item. */
-	private boolean mReturnCacheOnly = false;
 	
 	/** Whether or not this request has been canceled. */
 	private boolean mCanceled = false;
@@ -198,14 +195,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	public Request useLocation(boolean useLocation) {
 		mUseLocation = useLocation;
 		return Request.this;
-	}
-
-	public void cacheOnlyifExists(boolean onlyCache) {
-		mReturnCacheOnly = onlyCache;
-	}
-	
-	public boolean cacheOnlyifExists() {
-		return mReturnCacheOnly;
 	}
 	
 	/** Return the url for this request. */

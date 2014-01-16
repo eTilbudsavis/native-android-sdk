@@ -27,7 +27,7 @@ public class Cache implements Serializable {
 	Map<String, String>	types = new HashMap<String, String>(4);
 	
 	private Map<String, Item> mItems = Collections.synchronizedMap(new HashMap<String, Cache.Item>());
-
+	
 	public Cache() {
 		types.put("catalogs", Request.Param.FILTER_CATALOG_IDS);
 		types.put("offers", Request.Param.FILTER_OFFER_IDS);
@@ -73,16 +73,24 @@ public class Cache implements Serializable {
 		return "ern:" + type.substring(0, type.length()-1) + ":";
 	}
 	
-	public EtaResponse get(String url, Bundle apiParams) {
-
-		EtaResponse resp = null;
+	/*
+	 * 
+	 * If a request contains order_by, then it's not possible to assemble a new response
+	 * from old cache items. But rather save the whole request, and reuse it.
+	 * 
+	 */
+	
+	@SuppressWarnings("rawtypes")
+	public Response<?> get(String url, Bundle apiParams) {
+		
+		Response resp = null;
 		
 		String[] path = url.split("/");
 		
 		if (types.containsKey(path[path.length-1])) {
 			// if last element is a type, then we'll expect a list
 			String type = path[path.length-1];
-
+			
 			Set<String> ids = new HashSet<String>(0);
 			String filter = types.get(type);
 			if (apiParams.containsKey(filter)) {
@@ -106,8 +114,8 @@ public class Cache implements Serializable {
 			// If cache had ALL items, then return the list.
 			int size = jArray.length();
 			if (size > 0 && (size == ids.size()) ) {
-				resp = new EtaResponse();
-				resp.set(200, jArray.toString());
+				
+//				resp.set(200, jArray.toString());
 			}
 			
 		} else if (types.containsKey(path[path.length-2])) {
@@ -120,7 +128,7 @@ public class Cache implements Serializable {
 			String ern = getErnPrefix(type) + id;
 			Item c = get(ern);
 			if (c != null) {
-				resp = new EtaResponse();
+//				resp = new EtaResponse();
 //				resp.set(c.statuscode, c.object.toString());
 			}
 		}
