@@ -24,7 +24,7 @@ public class Response<T> {
     
     private Response(T result, Cache.Item cache, EtaError error, boolean isCache) {
         this.result = result;
-        this.error = null;
+        this.error = error;
         this.cache = cache;
         this.isCache = isCache;
     }

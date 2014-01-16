@@ -126,7 +126,12 @@ public final class PageflipWebview extends WebView {
 	private JSONObject mCatalogViewOptions = new JSONObject();
 	private boolean mThumbnailsToggled = false;
 	private boolean mReady = false;
+	
+	/** The interface between Webview And Pageflip */
 	private PageflipJavaScriptInterface mPFInterface;
+	
+	/** To avoid recursion, when Pageflip updates session */
+	private boolean mSessionFromPageflip = false;
 	
 	/**
 	 * List of all active pageflips. 
@@ -218,11 +223,14 @@ public final class PageflipWebview extends WebView {
 			setWebChromeClient(wcc);
 		}
 		
-		Listener<String> h = new Listener<String>() {
+		String url = Request.Endpoint.pageflipProxy(mUuid);
+		EtaLog.d(TAG, url);
+		StringRequest req = new StringRequest(url, new Listener<String>() {
 
 			public void onComplete(boolean isCache, String response, EtaError error) {
 				
 				if (!isCache) {
+					
 					if (response == null) {
 						loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
 						mListener.onEvent(EVENT_ERROR, mUuid, error.toJSON());
@@ -233,11 +241,10 @@ public final class PageflipWebview extends WebView {
 				}
 				
 			}
-		};
+		});
 		
-		String url = Request.Endpoint.pageflipProxy(mUuid);
-		EtaLog.d(TAG, url);
-		StringRequest req = new StringRequest(url, h);
+		req.cacheOnlyifExists(true);
+		req.debugNetwork(true);
 		mEta.add(req);
 		
 	}
@@ -331,8 +338,11 @@ public final class PageflipWebview extends WebView {
 	}
 	
 	public void updateSession() {
-		Session s = mEta.getSessionManager().getSession();
-		mPFInterface.etaProxy(OPTION_SESSION_CHANGE, s.toJSON());
+		if (!mSessionFromPageflip) {
+			Session s = mEta.getSessionManager().getSession();		
+			mPFInterface.etaProxy(OPTION_SESSION_CHANGE, s.toJSON());
+		}
+		mSessionFromPageflip = false;
 	}
 	
 	public void closePageflip() {
@@ -571,6 +581,7 @@ public final class PageflipWebview extends WebView {
 			
 			if (event.equals(EVENT_SESSION_CHANGE)) {
 				
+				mSessionFromPageflip = true;
 				mEta.getSessionManager().setSession(data);
 				
 			} else if (event.equals(EVENT_PROXY_READY)) {
@@ -613,8 +624,8 @@ public final class PageflipWebview extends WebView {
 				        }
 					}
 					
-					// Callback that is able to convert to strings
-					Listener<String> stringListener = new Listener<String>() {
+					// The request, to be performed
+					JsonStringRequest req = new JsonStringRequest(rMethod, rUrl, rBody, new Listener<String>() {
 						
 						public void onComplete( boolean isCache, String response, EtaError error) {
 
@@ -641,9 +652,7 @@ public final class PageflipWebview extends WebView {
 							}
 							
 						}
-					};
-					
-					JsonStringRequest req = new JsonStringRequest(rMethod, rUrl, rBody, stringListener);
+					});
 					mEta.add(req);
 					
 				} catch (JSONException e) {

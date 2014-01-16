@@ -4,16 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-import android.os.Bundle;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.SessionManager;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
-import com.eTilbudsavis.etasdk.NetworkHelpers.SessionError;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Header;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressWarnings("rawtypes")
@@ -93,35 +92,57 @@ public class NetworkDispatcher extends Thread {
                 // Perform the network request.
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
                 
-
+                request.setNetworkDebug(networkResponse);
+                
     			if (!Utils.isSuccess(networkResponse.statusCode)) {
     				
     				EtaError e = new EtaError(request, networkResponse);
     				
-                	if (SessionManager.isSessionError(e)) {
-                    	request.addEvent("session-error");
-                    	EtaLog.d(TAG, "session-error: " + e.toJSON().toString());
-                    	mRequestQueue.badSession(request, e);
+                	if (SessionManager.recoverableError(e)) {
+                		
+                    	request.addEvent("recoverable-session-error");
+                    	
+                		/*
+                		 * If it's a login attempt, the check for endpoint will not work properly
+                		 * because we actually want that attempt to go into the parkedQueue.
+                		 * TODO: Find a way to distinguish the types of session calls
+                		 */
+                		if (request.isSessionEndpoint()) {
+                			
+                			mDelivery.postError(request, e);
+                			
+                		} else {
+                			
+                    		// Query the session manager to perform an update
+                			if (mEta.getSessionManager().recover(e)) {
+                    			mRequestQueue.add(request);
+                			} else {
+                        		mDelivery.postError(request, e);
+                			}
+                    		
+                		}
+                		
                 	} else {
-                    	request.addEvent("api-error");
-                    	EtaLog.d(TAG, "api-error: " + e.toJSON().toString());
+                		
+                    	request.addEvent("non-recoverable-error");
                     	mDelivery.postError(request, e);
+                    	
                 	}
                 	
     			} else {
     				
-                    updateSessionInfo(networkResponse.headers);
-                    
+    				updateSessionInfo(networkResponse.headers);
+    				
                     request.addEvent("parsing-network-response");
                     // Parse the response here on the worker thread.
                     Response<?> response = request.parseNetworkResponse(networkResponse);
                     
                     // If the request is cachable
                     if (request.getMethod() == Method.GET && request.cacheResponse() && response.cache != null) {
-                    	request.addEvent("adding-response-to-cache");
+                    	request.addEvent("add-response-to-cache");
                     	mCache.put(response.cache);
                     }
-                    
+
                     mDelivery.postResponse(request, response);
                     
     			}
@@ -146,15 +167,15 @@ public class NetworkDispatcher extends Thread {
 		
 		request.addEvent("preparing-headers");
 		
-		boolean newSession = (request.getMethod() == Method.POST && request.getUrl().contains(Request.Endpoint.SESSIONS));
+		boolean newSession = (request.getMethod() == Method.POST && request.getUrl().contains(Endpoint.SESSIONS));
 		
         if (!newSession) {
         	
         	Map<String, String> headers = new HashMap<String, String>();
         	String token = mEta.getSessionManager().getSession().getToken();
-        	headers.put(Request.Headers.X_TOKEN, token);
+        	headers.put(Header.X_TOKEN, token);
         	String sha256 = Utils.generateSHA256(mEta.getApiSecret() + token);
-        	headers.put(Request.Headers.X_SIGNATURE, sha256);
+        	headers.put(Header.X_SIGNATURE, sha256);
         	request.setHeaders(headers);
         	
         }
@@ -169,8 +190,8 @@ public class NetworkDispatcher extends Thread {
 	 * @param headers to check for new token.
 	 */
 	private void updateSessionInfo(Map<String, String> headers) {
-		String token = headers.get(Request.Headers.X_TOKEN);
-	    String expire = headers.get(Request.Headers.X_TOKEN_EXPIRES);
+		String token = headers.get(Header.X_TOKEN);
+	    String expire = headers.get(Header.X_TOKEN_EXPIRES);
 	    
 	    if ( !(token == null || expire == null) ) {
 	    	mEta.getSessionManager().updateTokens(token, expire);

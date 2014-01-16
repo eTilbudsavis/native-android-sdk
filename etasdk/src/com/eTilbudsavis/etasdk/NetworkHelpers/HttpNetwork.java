@@ -29,7 +29,6 @@ import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.ByteArrayBuffer;
 
-import com.eTilbudsavis.etasdk.SessionManager;
 import com.eTilbudsavis.etasdk.NetworkInterface.Network;
 import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
@@ -71,8 +70,6 @@ public class HttpNetwork implements Network {
 			}
 			
 			NetworkResponse r = new NetworkResponse(resp.getStatusLine().getStatusCode(), content, responseHeaders);
-			
-			request.debugInfo(r);
 			
 			return r;
 			
@@ -165,7 +162,7 @@ public class HttpNetwork implements Network {
 		if (body != null) {
 			HttpEntity entity = new ByteArrayEntity(body);
 			httpRequest.setEntity(entity);
-			httpRequest.setHeader(Request.Headers.CONTENT_TYPE, request.getBodyContentType());
+			httpRequest.setHeader(Request.Header.CONTENT_TYPE, request.getBodyContentType());
 		}
 	}
 	

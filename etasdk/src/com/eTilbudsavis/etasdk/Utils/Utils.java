@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import android.os.Bundle;
@@ -110,23 +108,11 @@ public final class Utils {
 		return sb.toString();
 	}
 	
-	public static List<NameValuePair> bundleToNameValuePair( Bundle apiParams) {
-		List<NameValuePair> list = new ArrayList<NameValuePair>(apiParams.size());
-		for (String key : apiParams.keySet()) {
-			if (apiParams.get(key) instanceof Bundle) {
-				EtaLog.d(TAG, "Nested parameters not allowed.");
-			} else {
-				list.add(new BasicNameValuePair(key, valueIsNull(apiParams.get(key))));
-			}
-		}
-		return list;
-	}
-
 	private static String valueIsNull(Object value) {
 		String s = value == null ? "" : value.toString();
 		return s;
 	}
-
+	
 	/**
 	 * Builds JSONObject from a given Bundle.
 	 *
@@ -134,7 +120,7 @@ public final class Utils {
 	 * @return A JSONObject containing all key-value pairs from the bundle.
 	 */
 	public static JSONObject createJSON(Bundle b) {
-		return new JSONObject(createMap(b));
+		return (b == null) ? null : new JSONObject(createMap(b));
 	}
 	
 	/**
@@ -144,15 +130,18 @@ public final class Utils {
 	 * @return A Map<String, Object> containing all key-value pairs from the bundle.
 	 */
 	public static Map<String, Object> createMap(Bundle b) {
+		if (b == null) 
+			return null;
+		
 		Map<String, Object> map = new HashMap<String, Object>();
-//		try {
-			for (String s : b.keySet()) {
-				Object o = b.get(s);
-				map.put(s, (o instanceof Bundle) ? createMap((Bundle)o) : 0);
-			}
-//		} catch (Exception e) {
-//			EtaLog.d(TAG, e);
-//		}
+		
+		if (b.isEmpty()) 
+			return map;
+		
+		for (String s : b.keySet()) {
+			Object o = b.get(s);
+			map.put(s, (o instanceof Bundle) ? createMap((Bundle)o) : o);
+		}
 		return map;
 	}
 	

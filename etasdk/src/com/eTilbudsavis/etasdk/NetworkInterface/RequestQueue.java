@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.SessionManager;
-import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Param;
 
 @SuppressWarnings("rawtypes")
 public class RequestQueue {
@@ -45,9 +45,6 @@ public class RequestQueue {
 
     /** Response delivery mechanism. */
     private final Delivery mDelivery;
-    
-    /** Thread lock */
-    private Object LOCK = new Object();
     
     /** Atomic number generator for sequencing requests in the queues */
     private AtomicInteger mSequenceGenerator = new AtomicInteger();
@@ -103,40 +100,12 @@ public class RequestQueue {
     	
     }
     
-	public void badSession(Request req, EtaError error) {
-		
-		if (req.isSession()) {
-			
-			// If it's a login attempt or alike, then we'll just skip it
-			if (error == null || SessionManager.recoverableError(error)) {
-				refreshOrDieTrying(req, error);
-			} else {
-				mDelivery.postError(req, error);
-			}
-			
-		} else {
-			
-			refreshOrDieTrying(req, error);
-			
-		}
-			
-	}
-	
-	private void refreshOrDieTrying(Request req, EtaError error) {
-		
-		// Or not session endpoint
-		boolean refreshing = mEta.getSessionManager().refresh();
-		if (refreshing && !req.isSession()) {
-			mParking.add(req);
-		} else {
-			mDelivery.postError(req, error);
-		}
-		
-	}
-	
+    /**
+     * Method that allows SessionManager to resume all requests, when no more session requests are to be made.<br>
+     */
 	public void runParkedQueue() {
 		
-		if (mEta.getSessionManager().requestInFlight()) {
+		if (mEta.getSessionManager().isRequestInFlight()) {
 			EtaLog.d(TAG, "Cannot resume yet, session still in flight.");
 			return;
 		}
@@ -144,18 +113,33 @@ public class RequestQueue {
 		synchronized (mParking) {
 			
 			for (Request r : mParking) {
+				
 				r.addEvent("resuming-request");
+	    		if (r.hasCache()) {
+	    			// Request is a retry event, and only needs a NetworkRetry
+	    			mNetworkQueue.add(r);
+	    		} else {
+	            	mCacheQueue.add(r);
+	    		}
+	    		
 			}
-			mNetworkQueue.addAll(mParking);
 			mParking.clear();
 			
 		}
 		
 	}
 	
+	/**
+	 * This method is mostly for statistics and allows RequestQueue to tie up any loose
+	 * ends that might be in a request. In the future, this can be used for better SDK cache control
+	 * as multiple requests to the same endpoint, can be queued, and only one may be dispatched.
+	 * On complete the others can be triggered, and instantly hitting local cache.
+	 * @param req - request, that finished
+	 * @param resp - the server response
+	 */
 	public void finish(Request req, Response resp) {
 		
-		EtaLog.d(TAG, "Duration: " + req.getLog().getTotalDuration());
+    	EtaLog.d(TAG, "( " + req.getLog().getTotalDuration() + "ms ) " + req.getMethodString() + " " + req.getUrl());
 		
 	}
 	
@@ -163,26 +147,27 @@ public class RequestQueue {
     public Request add(Request r) {
     	
     	r.setSequence(mSequenceGenerator.incrementAndGet());
-    	r.addEvent("request-added");
-    	
-    	EtaLog.d(TAG, r.getMethodString()  + ": " + r.getUrl());
     	
 		prepareRequest(r);
 		
-    	if (mEta.getSessionManager().requestInFlight()) {
+    	if (mEta.getSessionManager().isRequestInFlight() && !r.isSessionEndpoint()) {
+    		
+    		r.addEvent("added-to-parking-queue");
+    		
     		synchronized (mParking) {
-        		r.addEvent("session-in-flight-added-to-parking");
         		mParking.add(r);
 			}
     		
     	} else {
     		
-    		if (r.getUrl().contains(Request.Endpoint.SESSIONS)) {
-    			EtaLog.d(TAG, "Request to session endpoint, not originating from SessionManager.\n"
-    					+ "If you don't update SessionManager afterwards this will cause problems");
+        	r.addEvent("added-to-queue");
+        	
+    		if (r.isSessionEndpoint() && r != mEta.getSessionManager().getRequestInFlight()) {
+    			EtaLog.d(TAG, "Session changes should be handled by SessionManager. This request might cause problems");
     		}
     		
-        	mCacheQueue.add(r);
+    		mCacheQueue.add(r);
+    		
     	}
     	
     	return r;
@@ -199,7 +184,7 @@ public class RequestQueue {
 		// Append HOST if needed
 		String url = request.getUrl();
 		if (!url.startsWith("http")) {
-			String preUrl = Request.Endpoint.getHost();
+			String preUrl = Endpoint.getHost();
 			request.setUrl(preUrl + url);
 		}
 		
@@ -208,7 +193,7 @@ public class RequestQueue {
 
 		String version = Eta.getInstance().getAppVersion();
 		if (version != null) {
-			params.putString(Request.Param.API_AV, version);
+			params.putString(Param.API_AV, version);
 		}
 
 		if (request.useLocation() && mEta.getLocation().isSet()) {

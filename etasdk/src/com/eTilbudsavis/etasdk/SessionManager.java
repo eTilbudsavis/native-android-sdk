@@ -18,9 +18,9 @@ import com.eTilbudsavis.etasdk.NetworkHelpers.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Priority;
-import com.eTilbudsavis.etasdk.NetworkInterface.Response;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class SessionManager {
 	
@@ -62,29 +62,46 @@ public class SessionManager {
 		
 	}
 	
-	private void update(JSONObject response, EtaError error) {
-
-		mReqInFlight = null;
+	private Listener<JSONObject> getSessionListener(final Listener<JSONObject> l) {
 		
-		if (response != null) {
-			
-			setSession(response);
-			runQueue();
-			
-		} else if (mTryToRecover && recoverableError(error) ) {
-			
-			mTryToRecover = false;
-			postSession(null);
-			
-		} else {
-			
-			runQueue();
-			
-		}
+		Listener<JSONObject> sessionListener = new Listener<JSONObject>() {
+
+			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+
+				EtaLog.d(TAG, "sessionListener.onComplete()", isCache, response, error);
+				
+				synchronized (LOCK) {
+					mReqInFlight = null;
+				
+					if (response != null) {
+						
+						setSession(response);
+						runQueue();
+						
+					} else if (mTryToRecover && recoverableError(error) ) {
+						
+						mTryToRecover = false;
+						postSession(null);
+						
+					} else {
+						
+						runQueue();
+						
+					}
+				}
+				
+				if (l != null) {
+					l.onComplete(isCache, response, error);
+				}
+			}
+		};
+		
+		return sessionListener;
 		
 	}
 	
 	private synchronized void addRequest(JsonObjectRequest r) {
+//		r.debugNetwork(true);
 		r.setPriority(Priority.HIGH);
 		mSessionQueue.add(r);
 		runQueue();
@@ -92,7 +109,7 @@ public class SessionManager {
 	
 	private void runQueue() {
 		
-		if (requestInFlight()) {
+		if (isRequestInFlight()) {
 			EtaLog.d(TAG, "Session in flight, waiting for session call to finish");
 			return;
 		}
@@ -104,8 +121,10 @@ public class SessionManager {
 			
 		} else {
 			
-			mReqInFlight = mSessionQueue.removeFirst();
-			mEta.add(mReqInFlight);
+			synchronized (LOCK) {
+				mReqInFlight = mSessionQueue.removeFirst();
+				mEta.add(mReqInFlight);
+			}
 			
 		}
 		
@@ -116,18 +135,17 @@ public class SessionManager {
 	 * @return true if SessionManager is trying, or will try to refresh the session. 
 	 * False if no more tries will be attempted.
 	 */
-	public synchronized boolean refresh() {
+	public synchronized boolean recover(EtaError e) {
 		
-		EtaLog.d(TAG, "refresh()");
-		
-		// Looks like a loop, just quit
-		if (mTryToRecover && !requestInFlight()) {
-			putSession(null);
+		if (mTryToRecover) {
+			if (!recoverableError(e)) {
+				postSession(null);
+			} else {
+				putSession(null);
+			}
 			return true;
 		}
-		
 		return false;
-		
 	}
 	
 	/**
@@ -135,9 +153,7 @@ public class SessionManager {
 	 * @param session to update from
 	 * @return true if session was updated
 	 */
-	public boolean setSession(JSONObject session) {
-		
-		EtaLog.d(TAG, "setSession(JSONObject session)");
+	public synchronized boolean setSession(JSONObject session) {
 		
 		Session s = Session.fromJSON(session);
 		
@@ -145,9 +161,6 @@ public class SessionManager {
 		if (s.getToken() == null) {
 			return false;
 		}
-		
-		// Avoid recursion
-		if (s.getToken().equals(mSession.getToken())) { }
 		
 		mSession = s;
 		mEta.getSettings().setSessionJson(session);
@@ -182,9 +195,17 @@ public class SessionManager {
 	public static boolean isSessionError(EtaError e) {
 		return ( e != null && ( 1100 <= e.getCode() && e.getCode() < 1200 ) );
 	}
-	
-	public boolean requestInFlight() {
-		return mReqInFlight != null;
+
+	public Request<?> getRequestInFlight() {
+		synchronized (LOCK) {
+			return mReqInFlight;
+		}
+	}
+
+	public boolean isRequestInFlight() {
+		synchronized (LOCK) {
+			return mReqInFlight != null;
+		}
 	}
 	
 	/**
@@ -203,26 +224,13 @@ public class SessionManager {
 	
 	private void postSession(final Listener<JSONObject> l) {
 		
-		Listener<JSONObject> sessionListener = new Listener<JSONObject>() {
-
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
-				update(response, error);
-				if (l != null) {
-					l.onComplete(isCache, response, error);
-				}
-			}
-		};
-		
-		EtaLog.d(TAG, "postSession()");
-		
 		Bundle args = new Bundle();
 		args.putInt(Request.Param.TOKEN_TTL, TTL);
-		
+	    args.putString(Request.Param.API_KEY, mEta.getApiKey());
+    	
 	    CookieSyncManager.createInstance(mEta.getContext());
 	    CookieManager cm = CookieManager.getInstance();
 	    String cookieString = cm.getCookie(ETA_COOKIE_DOMAIN);
-	    
-	    EtaLog.d(TAG, cookieString == null ? "cookie null" : cookieString);
 	    
 	    if (cookieString != null) {
 	    	
@@ -257,36 +265,20 @@ public class SessionManager {
 	        	args.putString(Request.Param.V1_AUTH_ID, authId);
 	        	args.putString(Request.Param.V1_AUTH_HASH, authHash);
 	        	args.putString(Request.Param.V1_AUTH_TIME, authTime);
-
 	        }
 	        
 	        // Clear all cookie data, just to make sure
 	        cm.removeAllCookie();
 	        
 	    }
-
-    	Map<String, String> body = new HashMap<String, String>();
-    	body.put(Request.Param.API_KEY, mEta.getApiKey());
-    	
-	    JsonObjectRequest req = new JsonObjectRequest(Method.POST, Request.Endpoint.SESSIONS, new JSONObject(body), sessionListener);
+	    
+	    JsonObjectRequest req = new JsonObjectRequest(Method.POST, Request.Endpoint.SESSIONS, Utils.createJSON(args), getSessionListener(l));
 	    addRequest(req);
 	    
 	}
 	
 	private void putSession(final Listener<JSONObject> l){
-		
-		Listener<JSONObject> sessionListener = new Listener<JSONObject>() {
-			
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
-				update(response, error);
-				if (l != null) {
-					l.onComplete(isCache, response, error);
-				}
-			}
-		};
-		
-		EtaLog.d(TAG, "putSession()");
-		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, null, sessionListener);
+		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, null, getSessionListener(l));
 		addRequest(req);
 	}
 	
@@ -297,12 +289,12 @@ public class SessionManager {
 	 * @param l for callback on complete
 	 */
 	public void login(String email, String password, Listener<JSONObject> l) {
-		
+
 		Bundle args = new Bundle();
 		args.putString(Request.Param.EMAIL, email);
 		args.putString(Request.Param.PASSWORD, password);
 		mEta.getSettings().setSessionUser(email);
-		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, null, l);
+		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, Utils.createJSON(args), getSessionListener(l));
 		addRequest(req);
 		
 	}
@@ -316,10 +308,9 @@ public class SessionManager {
 	public void loginFacebook(String facebookAccessToken, Listener<JSONObject> l) {
 		
 		Map<String, String> args = new HashMap<String, String>();
-		
 		args.put(Request.Param.FACEBOOK_TOKEN, facebookAccessToken);
 		mEta.getSettings().setSessionFacebook(facebookAccessToken);
-		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, new JSONObject(args), l);
+		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
 		addRequest(req);
 		
 	}
@@ -334,7 +325,7 @@ public class SessionManager {
         mEta.getListManager().clear(u.getId());
         Map<String, String> args = new HashMap<String, String>();
         args.put(Request.Param.EMAIL, "");
-        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, new JSONObject(args), l);
+        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
         addRequest(req);
         
 	}
@@ -361,7 +352,7 @@ public class SessionManager {
 		args.put(Request.Param.ERROR_REDIRECT, errorRedirect);
 		args.put(Request.Param.LOCALE, locale);
 		JsonObjectRequest req = new JsonObjectRequest(Method.POST, Request.Endpoint.USER, new JSONObject(args), l);
-		addRequest(req);
+		mEta.add(req);
 		
 	}
 	
@@ -379,7 +370,7 @@ public class SessionManager {
 		args.put(Request.Param.SUCCESS_REDIRECT, successRedirect);
 		args.put(Request.Param.ERROR_REDIRECT, errorRedirect);
 		JsonObjectRequest req = new JsonObjectRequest(Method.POST, Request.Endpoint.USER_RESET, new JSONObject(args), l);
-		addRequest(req);
+		mEta.add(req);
 		
 	}
 	

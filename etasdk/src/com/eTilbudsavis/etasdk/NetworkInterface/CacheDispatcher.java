@@ -2,12 +2,10 @@ package com.eTilbudsavis.etasdk.NetworkInterface;
 
 import java.util.concurrent.BlockingQueue;
 
-import android.os.Bundle;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 @SuppressWarnings("rawtypes")
 public class CacheDispatcher extends Thread {
@@ -81,7 +79,6 @@ public class CacheDispatcher extends Thread {
 
 				}
 				
-				EtaLog.d(TAG,"ready-for-network");
 				// Cannot remember what true is suppose to cover... damn it!
 				boolean useNetwork = true || !useCache;
 				if ( useNetwork ) {

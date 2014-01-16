@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
@@ -14,6 +13,11 @@ import android.os.AsyncTask;
 
 import com.eTilbudsavis.etasdk.Eta;
 
+/**
+ * A class used for dumping random debug data, to an endpoint that isn't yet specified.
+ * @author Danny Hvam
+ *
+ */
 public class DebugDump extends AsyncTask<Void, Void, Void> {
 
 	public static final String TAG = "DebugDump";

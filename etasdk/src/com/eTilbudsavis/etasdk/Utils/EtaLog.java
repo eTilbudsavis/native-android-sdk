@@ -3,10 +3,13 @@ package com.eTilbudsavis.etasdk.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONObject;
+
 import android.os.SystemClock;
 import android.util.Log;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 
 public class EtaLog {
 
@@ -44,6 +47,11 @@ public class EtaLog {
 			d(tag,message);
 		}
 		
+	}
+	
+	public static void d(String tag, String name, boolean isCache, JSONObject response, EtaError error) {
+		if (!Eta.DEBUG_LOGD) return;
+		Log.d(tag, name + ": Cache: " + isCache + ", Response: " + (response == null ? "null" : "Success") + ", Error: " + (error == null ? "null" : error.toJSON().toString()));
 	}
 	
 	public static void printStackTrace() {

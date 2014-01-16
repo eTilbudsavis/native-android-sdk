@@ -46,7 +46,6 @@ public class Permission extends EtaObject implements Serializable {
 			
 			JSONArray groups = permission.names();
 			if (groups == null) {
-				EtaLog.d(TAG, "Permission is empty. Reddis error!");
 				return p;
 			}
 			
