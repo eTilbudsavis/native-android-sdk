@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 
 public final class Utils {
 	
@@ -94,12 +95,30 @@ public final class Utils {
 	    return hash;
 	}
 	
-	public static String bundleToQueryString( Bundle apiParams) {
+	/**
+	 * Builds a url + query string.<br>
+	 * e.g.: https://api.etilbudsavis.dk/v2/catalogs?order_by=popular
+	 * @param r to build from
+	 * @return
+	 */
+	public static String buildQueryString(Request<?> r) {
+		return r.getQueryParameters().isEmpty() ? r.getUrl() : r.getUrl() + "?" + Utils.buildQueryString(r.getQueryParameters());
+	}
+	
+	/**
+	 * Returns a string of parameters, ordered alfabetically (for better cache performance)
+	 * @param apiParams to convert into query parameters
+	 * @return a string of parameters
+	 */
+	public static String buildQueryString(Bundle apiParams) {
 		StringBuilder sb = new StringBuilder();
-		for (String key : apiParams.keySet()) {
+		List<String> keys = new ArrayList<String>();
+		keys.addAll(apiParams.keySet());
+		Collections.sort(keys);
+		for (String key : keys) {
 			Object o = apiParams.get(key);
 			if (o instanceof Bundle) {
-				EtaLog.d(TAG, "Nested parameters not allowed.");
+				EtaLog.d(TAG, "Nested parameters not allowed. Ignoring parameter: " + key);
 			} else {
 				if (sb.length() > 0) sb.append("&");
 				sb.append(key).append("=").append(valueIsNull(o));

@@ -126,7 +126,7 @@ public class HttpNetwork implements Network {
 
 	private HttpRequestBase createRequest(Request<?> request) {
 		
-		String url = buildUrl(request);
+		String url = Utils.buildQueryString(request);
 		
 		switch (request.getMethod()) {
 		case Request.Method.POST: 
@@ -151,10 +151,6 @@ public class HttpNetwork implements Network {
 			return null;
 		}
 		
-	}
-	
-	private String buildUrl(Request<?> r) {
-		return r.getQueryParameters().isEmpty() ? r.getUrl() : r.getUrl() + "?" + Utils.bundleToQueryString(r.getQueryParameters());
 	}
 	
 	private static void setEntity(HttpEntityEnclosingRequestBase httpRequest, Request<?> request) {

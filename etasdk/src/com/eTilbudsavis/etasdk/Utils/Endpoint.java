@@ -64,11 +64,16 @@ public class Endpoint {
 		return String.format("/v2/catalogs/%s", catalogId);
 	}
 
+	/** /v2/catalogs/{catalog_id}/collect */
+	public static String catalogCollect(String catalogId) {
+		return String.format("/v2/catalogs/%s/collect", catalogId);
+	}
+	
 	/** /v2/offers/{offer_id}/collect */
 	public static String offerCollect(String offerId) {
 		return String.format("/v2/offers/%s/collect", offerId);
 	}
-
+	
 	/**
 	 * /v2/stores/{offer_id}/collect
 	 */

@@ -264,7 +264,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		Bundle params = getQueryParameters();
 		if (params != null && params.size() > 0) {
 			try {
-				return Utils.bundleToQueryString(params).getBytes(getParamsEncoding());
+				return Utils.buildQueryString(params).getBytes(getParamsEncoding());
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
