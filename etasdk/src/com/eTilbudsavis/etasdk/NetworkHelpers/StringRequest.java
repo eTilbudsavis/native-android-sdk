@@ -2,11 +2,14 @@ package com.eTilbudsavis.etasdk.NetworkHelpers;
 
 import java.io.UnsupportedEncodingException;
 
+import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
 import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class StringRequest extends Request<String> {
 
@@ -70,13 +73,16 @@ public class StringRequest extends Request<String> {
     
 	@Override
 	protected Response<String> parseNetworkResponse(NetworkResponse response) {
-		String parsed;
+		String string;
         try {
-            parsed = new String(response.data, getParamsEncoding());
+            string = new String(response.data, getParamsEncoding());
         } catch (UnsupportedEncodingException e) {
-            parsed = new String(response.data);
+            string = new String(response.data);
         }
-        return Response.fromSuccess(parsed, null, false);
+        
+		mCache.put(Utils.buildQueryString(this), new Cache.Item(string, DEFAULT_CACHE_TTL));
+		        
+        return Response.fromSuccess(string, null, false);
 	}
 	
 }

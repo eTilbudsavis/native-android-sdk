@@ -131,6 +131,10 @@ public class NetworkDispatcher extends Thread {
                 	
     			} else {
     				
+    				if (request.getMethod() == Method.GET && request.hasCache()) {
+    					mCache.put(request.getCache());
+    				}
+    				
     				updateSessionInfo(networkResponse.headers);
     				
                     request.addEvent("parsing-network-response");

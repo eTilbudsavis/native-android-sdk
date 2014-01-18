@@ -20,25 +20,28 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
 	/** Default encoding for POST or PUT parameters. See {@link #getParamsEncoding()}. */
 	protected static final String DEFAULT_PARAMS_ENCODING = "utf-8";
-
+	
+	/** Default cache time */
+	protected static final long DEFAULT_CACHE_TTL = 3 * Utils.MINUTE_IN_MILLIS;
+	
 	/** Listener interface, for responses */
 	private final Listener<T> mListener;
 	
 	/** Request method of this request.  Currently supports GET, POST, PUT, and DELETE. */
 	private final int mMethod;
-
+	
 	/** URL of this request. */
 	private String mUrl;
 	
 	/** Headers to be used in this request */
 	private Map<String, String> mHeaders = new HashMap<String, String>();
-
+	
 	/** Parameters to use in this request */
 	private Bundle mQuery = new Bundle();
-
+	
 	/** Sequence number used for prioritizing the queue */
 	private int mSequence = 0;
-
+	
 	/** Should this request use location in the query */
 	private boolean mUseLocation = true;
 	
@@ -55,11 +58,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	private boolean mFinished = false;
 	
 	/** Item for containing cache items */
-	private Cache.Item mCache;
+	protected Map<String, Cache.Item> mCache = new HashMap<String, Cache.Item>();
 	
 	/** Log of this request */
 	private final EventLog mLog;
-
+	
 	/** Allows for the network reponse printed */
     private boolean mDebugNetwork = false;
 
@@ -156,7 +159,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	public boolean cacheResponse() {
 		return mCacheResponse;
 	}
-
+	
+	public long getCacheTTL() {
+		return DEFAULT_CACHE_TTL;
+	}
+	
 	protected void cacheResponse(boolean isResponseCachable) {
 		mCacheResponse = isResponseCachable;
 	}
@@ -208,10 +215,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return Request.this;
 	}
 	
-	public boolean hasCache() {
-		return mCache != null;
-	}
-	
 	public boolean isFinished() {
 		return mFinished;
 	}
@@ -221,10 +224,13 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		mFinished = true;
 		return Request.this;
 	}
+
+	public boolean hasCache() {
+		return mCache.size() != 0;
+	}
 	
-	public Request setCacheItem(Cache.Item cache) {
-		mCache = cache;
-		return Request.this;
+	public Map<String, Cache.Item> getCache() {
+		return mCache;
 	}
 	
 	public Bundle getQueryParameters() {
@@ -273,6 +279,8 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	}
 
 	abstract protected Response<T> parseNetworkResponse(NetworkResponse response);
+
+	abstract protected Response<T> parseCache(Cache c);
 	
 	protected void deliverResponse(boolean isCache, T response, EtaError error) {
 		if (mListener != null) {

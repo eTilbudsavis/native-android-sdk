@@ -61,30 +61,23 @@ public class CacheDispatcher extends Thread {
 			try {
 				
 				request.addEvent("cache-dispatcher");
+				
 				// If the request was cancelled already, do not perform the network request.
 				if (request.isCanceled()) {
 					request.addEvent("request-cancelled");
 					continue;
 				}
 				
-				Cache.Item cache = mCache.get(request);
-				
+				Response response = request.parseCache(mCache);
 				// if the cache is valid, then return it
-				boolean useCache = !(cache == null || cache.isExpired()) && !request.skipCache();
-				if ( useCache  ) {
-					request.addEvent("cache-item-valid");
+				if ( response != null && !request.skipCache() ) {
+					request.addEvent("post-cache-item");
 					// Parse the response here on the worker thread.
-					Response response = null; // = request.parseCacheResponse(networkResponse);
 					mDelivery.postResponse(request, response);
-
 				}
 				
-				// Cannot remember what true is suppose to cover... damn it!
-				boolean useNetwork = true || !useCache;
-				if ( useNetwork ) {
-					request.addEvent("added-to-network-queue");
-					mNetworkQueue.add(request);
-				}
+				request.addEvent("add-to-network-queue");
+				mNetworkQueue.add(request);
 				
 			} catch (Exception e) {
 				request.addEvent(String.format("request-failed-%s", e.getMessage()));
