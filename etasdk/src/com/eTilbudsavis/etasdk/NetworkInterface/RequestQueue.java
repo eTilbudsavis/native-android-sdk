@@ -10,6 +10,7 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressWarnings("rawtypes")
 public class RequestQueue {
@@ -134,13 +135,15 @@ public class RequestQueue {
 	 */
 	public void finish(Request req, Response resp) {
 		
-    	EtaLog.d(TAG, "( " + req.getLog().getTotalDuration() + "ms ) " + req.getMethodString() + " " + req.getUrl());
+    	EtaLog.d(TAG, "( " + req.getLog().getTotalDuration() + "ms ) " + req.getMethodString() + " " + Utils.buildQueryString(req));
 		
 	}
 	
 	/** Add a new request to this RequestQueue, everything from this point onward will be performed on separate threads */
     public Request add(Request r) {
     	
+    	EtaLog.d(TAG, r.getMethodString() + " " + r.getUrl());
+		
     	r.setSequence(mSequenceGenerator.incrementAndGet());
     	
 		prepareRequest(r);

@@ -133,7 +133,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Method for marking a request as finished
      * @return
      */
-    public Request finished() {
+    public Request finish() {
             mLog.add("finished");
             mFinished = true;
             return Request.this;

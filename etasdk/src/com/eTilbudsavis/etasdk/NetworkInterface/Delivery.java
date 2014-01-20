@@ -77,7 +77,7 @@ public class Delivery {
             mRequest.addEvent("request-on-new-thread");
             
             mRequest.debugPrint();
-        	
+        	mRequest.finish();
             mRequest.deliverResponse(mResponse.result, mResponse.error);
             
        }

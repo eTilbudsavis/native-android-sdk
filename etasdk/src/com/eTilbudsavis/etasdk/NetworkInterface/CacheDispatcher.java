@@ -77,6 +77,7 @@ public class CacheDispatcher extends Thread {
 						// Parse the response here on the worker thread.
 						request.setCacheHit(true);
 						mDelivery.postResponse(request, response);
+						continue;
 					}
 				}
 				

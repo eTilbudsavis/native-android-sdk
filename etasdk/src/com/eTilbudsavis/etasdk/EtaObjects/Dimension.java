@@ -13,11 +13,8 @@ public class Dimension extends EtaObject implements Serializable {
 
 	public static final String TAG = "Dimension";
 	
-	private static final String S_WIDTH = "width";
-	private static final String S_HEIGHT = "height";
-	
-	private double mWidth = 0.0;
-	private double mHeight = 0.0;
+	private Double mWidth = null;
+	private Double mHeight = null;
 	
 	public Dimension() {
 	}
@@ -41,8 +38,12 @@ public class Dimension extends EtaObject implements Serializable {
 		if (dimension == null) return d;
 		
 		try {
-			d.setWidth(dimension.getDouble(S_WIDTH));
-			d.setHeight(dimension.getDouble(S_HEIGHT));
+			if (!dimension.isNull(ServerKey.WIDTH)) {
+				d.setWidth(dimension.getDouble(ServerKey.WIDTH));
+			}
+			if (!dimension.isNull(ServerKey.HEIGHT)) {
+				d.setHeight(dimension.getDouble(ServerKey.HEIGHT));
+			}
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -56,15 +57,15 @@ public class Dimension extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Dimension d) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_HEIGHT, d.getHeight());
-			o.put(S_WIDTH, d.getWidth());
+			o.put(ServerKey.HEIGHT, d.getHeight());
+			o.put(ServerKey.WIDTH, d.getWidth());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
 	
-	public double getWidth() {
+	public Double getWidth() {
 		return mWidth;
 	}
 
@@ -73,7 +74,7 @@ public class Dimension extends EtaObject implements Serializable {
 		return this;
 	}
 
-	public double getHeight() {
+	public Double getHeight() {
 		return mHeight;
 	}
 

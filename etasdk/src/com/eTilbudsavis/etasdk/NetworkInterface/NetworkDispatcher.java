@@ -94,8 +94,23 @@ public class NetworkDispatcher extends Thread {
                 
                 request.debugNetworkResponse(networkResponse);
                 
-    			if (!Utils.isSuccess(networkResponse.statusCode)) {
+    			if (Utils.isSuccess(networkResponse.statusCode)) {
     				
+    				updateSessionInfo(networkResponse.headers);
+    				
+                    request.addEvent("parsing-network-response");
+                    Response<?> response = request.parseNetworkResponse(networkResponse);
+                    
+                    mCache.put(request, response);
+                    
+                    // Only deliver network response if cache haven't been delivered
+                    if(!request.isCacheHit()) {
+                        mDelivery.postResponse(request, response);
+                    }
+                    
+    				
+    			} else {
+
     				EtaError e = new EtaError(request, networkResponse);
     				
                 	if (SessionManager.recoverableError(e)) {
@@ -124,17 +139,6 @@ public class NetworkDispatcher extends Thread {
                     	
                 	}
                 	
-    			} else {
-    				
-    				updateSessionInfo(networkResponse.headers);
-    				
-                    request.addEvent("parsing-network-response");
-                    Response<?> response = request.parseNetworkResponse(networkResponse);
-                    
-                    mCache.put(request, response);
-                    
-                    mDelivery.postResponse(request, response);
-                    
     			}
     			
                 
