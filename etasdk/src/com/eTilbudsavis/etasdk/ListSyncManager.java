@@ -149,6 +149,8 @@ public class ListSyncManager {
 	}
 
 	private void addRequest(Request<?> r) {
+		// No request from here should return a result from cache
+		r.setIgnoreCache(true);
 		synchronized (mCurrentRequests) {
 			mCurrentRequests.add(r);
 		}
@@ -172,8 +174,8 @@ public class ListSyncManager {
 	public void syncLists(final User user) {
 		
 		Listener<JSONArray> listListener = new Listener<JSONArray>() {
-
-			public void onComplete(boolean isCache, JSONArray response, EtaError error) {
+			
+			public void onComplete(JSONArray response, EtaError error) {
 
 				if (response != null) {
 					
@@ -238,7 +240,7 @@ public class ListSyncManager {
 		};
 		
 		JsonArrayRequest listRequest = new JsonArrayRequest(Method.GET, Request.Endpoint.lists(mEta.getUser().getId()), listListener);
-		
+
 		addRequest(listRequest);
 		
 	}
@@ -354,7 +356,7 @@ public class ListSyncManager {
 			
 			Listener<JSONObject> modifiedListener = new Listener<JSONObject>() {
 
-				public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+				public void onComplete( JSONObject response, EtaError error) {
 					
 
 					if (response != null) {
@@ -381,7 +383,7 @@ public class ListSyncManager {
 			};
 			
 			JsonObjectRequest modifiedRequest = new JsonObjectRequest(Request.Endpoint.listModified(mEta.getUser().getId(), sl.getId()), modifiedListener);
-			
+
 			addRequest(modifiedRequest);
 			
 		}
@@ -403,7 +405,7 @@ public class ListSyncManager {
 		
 		Listener<JSONArray> itemListener = new Listener<JSONArray>() {
 
-			public void onComplete(boolean isCache, JSONArray response, EtaError error) {
+			public void onComplete( JSONArray response, EtaError error) {
 
 				if (response != null) {
 					
@@ -443,7 +445,7 @@ public class ListSyncManager {
 		};
 		
 		JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Request.Endpoint.listitems(mEta.getUser().getId(), sl.getId()), itemListener);
-		
+
 		addRequest(itemRequest);
 		
 	}
@@ -595,7 +597,7 @@ public class ListSyncManager {
 		
 		Listener<JSONObject> listListener = new Listener<JSONObject>() {
 
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+			public void onComplete(JSONObject response, EtaError error) {
 				
 				Shoppinglist s = sl;
 				if (response != null) {
@@ -639,7 +641,7 @@ public class ListSyncManager {
 		
 		Listener<JSONObject> listListener = new Listener<JSONObject>() {
 
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+			public void onComplete(JSONObject response, EtaError error) {
 
 				if (response != null) {
 					db.deleteList(sl, user);
@@ -679,7 +681,7 @@ public class ListSyncManager {
 		
 		Listener<JSONObject> listListener = new Listener<JSONObject>() {
 
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+			public void onComplete(JSONObject response, EtaError error) {
 
 				Shoppinglist s = null;
 				if (response != null) {
@@ -699,7 +701,7 @@ public class ListSyncManager {
 		
 		String url = Request.Endpoint.list(user.getId(), sl.getId());
 		JsonObjectRequest listReq = new JsonObjectRequest(url, listListener);
-		
+
 		addRequest(listReq);
 		
 	}
@@ -712,9 +714,9 @@ public class ListSyncManager {
 		db.editItem(sli, user);
 		
 		Listener<JSONObject> itemListener = new Listener<JSONObject>() {
-
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
-
+			
+			public void onComplete(JSONObject response, EtaError error) {
+				
 				ShoppinglistItem s = sli;
 				
 				if (response != null) {
@@ -751,7 +753,7 @@ public class ListSyncManager {
 		
 		Listener<JSONObject> itemListener = new Listener<JSONObject>() {
 
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+			public void onComplete(JSONObject response, EtaError error) {
 
 				if (response != null) {
 					db.deleteItem(sli, user);
@@ -789,7 +791,7 @@ public class ListSyncManager {
 		
 		Listener<JSONObject> itemListener = new Listener<JSONObject>() {
 
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+			public void onComplete(JSONObject response, EtaError error) {
 
 				ShoppinglistItem s = null;
 				if (response != null) {
@@ -808,6 +810,7 @@ public class ListSyncManager {
 		
 		String url = Request.Endpoint.listitem(user.getId(), sli.getShoppinglistId(), sli.getId());
 		JsonObjectRequest itemReq = new JsonObjectRequest(url, itemListener);
+
 		addRequest(itemReq);
 		
 	}
@@ -854,7 +857,7 @@ public class ListSyncManager {
 		
 		Listener<JSONObject> shareListener = new Listener<JSONObject>() {
 
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+			public void onComplete(JSONObject response, EtaError error) {
 
 				if (response != null) {
 					Share tmp = Share.fromJSON(response);
@@ -888,7 +891,7 @@ public class ListSyncManager {
 
 		Listener<JSONObject> shareListener = new Listener<JSONObject>() {
 
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+			public void onComplete(JSONObject response, EtaError error) {
 
 				if (response != null) {
 					
@@ -934,7 +937,7 @@ public class ListSyncManager {
 		
 		Listener<JSONObject> shareListener = new Listener<JSONObject>() {
 
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+			public void onComplete(JSONObject response, EtaError error) {
 
 				Share tmp = null;
 				if (response != null) {
@@ -951,6 +954,7 @@ public class ListSyncManager {
 		
 		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
 		JsonObjectRequest shareReq = new JsonObjectRequest(url, shareListener);
+
 		addRequest(shareReq);
 		
 	}

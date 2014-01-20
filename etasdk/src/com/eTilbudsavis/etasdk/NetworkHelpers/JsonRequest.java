@@ -17,9 +17,9 @@ import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Cache.Item;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request;
+import com.eTilbudsavis.etasdk.NetworkInterface.Response;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -32,9 +32,11 @@ public abstract class JsonRequest<T> extends Request<T> {
     private String mRequestBody;
     
     private Priority mPriority = Priority.MEDIUM;
-
+    
 	// Define catchable types
-	private static Map<String, String> types = new HashMap<String, String>();
+	private static Map<String, String> mFilterTypes = new HashMap<String, String>();
+	
+	private static Set<String> mErnTypes = new HashSet<String>();
 	
     public JsonRequest(String url, Listener<T> listener) {
 		super(Method.GET, url, listener);
@@ -86,8 +88,106 @@ public abstract class JsonRequest<T> extends Request<T> {
     	return mPriority;
     }
     
+    protected Response<JSONArray> getJSONArray(Cache c) {
+    	
+		JSONArray jArray = new JSONArray();
+		// Check if we've previously done this exact call
+		Cache.Item cacheList = c.get(Utils.buildQueryString(this));
+		if (cacheList != null && cacheList.object instanceof LinkedList<?>) {
+			
+			LinkedList<?> cacheListLinkedList = (LinkedList<?>)cacheList.object;
+			if (!cacheListLinkedList.isEmpty() && cacheListLinkedList.get(0) instanceof String) {
+				LinkedList<String> erns = (LinkedList<String>)cacheListLinkedList;
+				for (String string : erns) {
+					Cache.Item jObject = c.get(string);
+					if (jObject != null && jObject.object instanceof JSONObject) {
+						jArray.put((JSONObject)jObject.object);
+					}
+				}
+				
+				if (jArray.length() == erns.size()) {
+					return Response.fromSuccess(jArray, null);
+				}
+			}
+			
+		}
+		
+		// Lets try to see if it's possible to create a response from 
+		// previously cached items
+		Set<String> keys = getQueryParameters().keySet();
+		boolean hasFilter = keys.contains(Param.FILTER_CATALOG_IDS) || 
+				keys.contains(Param.FILTER_DEALER_IDS) || 
+				keys.contains(Param.FILTER_OFFER_IDS) || 
+				keys.contains(Param.FILTER_STORE_IDS);
+		
+		if (!hasFilter) {
+			// Nothing to work with
+			return null;
+		}
+		
+		String[] path = getUrl().split("/");
+		
+		// if last element is a type, then we'll expect a list
+		String type = path[path.length-1];
+		
+		Set<String> ids = getIdsFromFilter(type, getQueryParameters());
+		
+		// No ids? no catchable items...
+		if (ids.size() == 0) {
+			return null;
+		}
+		
+		// Get all possible items requested from cache
+		for (String id : ids) {
+			String ern = buildErn(type, id);
+			Cache.Item cacheId = c.get(ern);
+			if (cacheId != null) {
+				jArray.put((JSONObject)cacheId.object);
+			}
+		}
+		
+		// If cache had ALL items, then return the list.
+		if (jArray.length() == ids.size()) {
+			return Response.fromSuccess(jArray, null);
+		}
+		
+		return null;
+    }
+    
+    protected Response<JSONObject> getJSONObject(Cache cache) {
 
-	protected void putJsonArray(JSONArray a) {
+		String url = getUrl();
+		String[] path = url.split("/");
+
+		// Test all paths with for, to make better checks
+		String id = path[path.length-1];
+		String type = path[path.length-2];
+		
+		String ern = buildErn(type, id);
+		Item ci = cache.get(ern);
+		if (ci != null && ci.object instanceof JSONObject) {
+			return Response.fromSuccess((JSONObject)ci.object, null);
+		}
+		
+//		for (int i = path.length-1; i == 0 ; i-- ) {
+//
+//			// Test all paths with for, to make better checks
+//			String id = path[i];
+//			String type = path[i-1];
+//			
+//			String ern = buildErn(type, id);
+//			Item ci = c.get(ern);
+//			if (c != null && ci.object instanceof JSONObject) {
+//				return Response.fromSuccess((JSONObject)ci.object, null);
+//			}
+//			
+//		}
+		
+		return null;
+		
+    }
+    
+	protected void putJSON(JSONArray a) {
 		
 		LinkedList<String> ernlist = new LinkedList<String>();
 		try {
@@ -95,7 +195,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 			for (int i = 0; i < a.length() ; i++) {
 				Object o = a.get(i);
 				if (o instanceof JSONObject) {
-					String ern = putJsonObject((JSONObject)o);
+					String ern = putJSON((JSONObject)o);
 					if (ern != null) {
 						ernlist.add(ern);
 					}
@@ -111,17 +211,18 @@ public abstract class JsonRequest<T> extends Request<T> {
 			return;
 		}
 		
-		mCache.put(Utils.buildQueryString(this), new Cache.Item(ernlist, getCacheTTL()));
+		getCache().put(Utils.buildQueryString(this), new Cache.Item(ernlist, getCacheTTL()));
 		
 	}
 	
-	protected String putJsonObject(JSONObject o) {
+	protected String putJSON(JSONObject o) {
 		
 		try {
 			if (o.has(EtaObject.ServerKey.ERN)) {
 				String ern = o.getString(EtaObject.ServerKey.ERN);
 				Cache.Item i = new Item(o, getCacheTTL());
-				mCache.put(ern, i);
+				getCache().put(ern, i);
+				
 				return ern;
 			}
 		} catch (JSONException e) {
@@ -130,25 +231,48 @@ public abstract class JsonRequest<T> extends Request<T> {
 		return null;
 	}
 	
-	protected Set<String> getFilter(String filterName, Bundle apiParams) {
-		
-		synchronized (types) {
-			if (types.size() == 0) {
-				types.put("catalogs", Param.FILTER_CATALOG_IDS);
-				types.put("offers", Param.FILTER_OFFER_IDS);
-				types.put("dealers", Param.FILTER_DEALER_IDS);
-				types.put("stores", Param.FILTER_STORE_IDS);			    
+	protected Map<String, String> getFilterTypes() {
+
+		synchronized (mFilterTypes) {
+			if (mFilterTypes.isEmpty()) {
+				mFilterTypes.put("catalogs", Param.FILTER_CATALOG_IDS);
+				mFilterTypes.put("offers", Param.FILTER_OFFER_IDS);
+				mFilterTypes.put("dealers", Param.FILTER_DEALER_IDS);
+				mFilterTypes.put("stores", Param.FILTER_STORE_IDS);
 			}
 		}
+		return mFilterTypes;
+		
+	}
+	
+	protected Set<String> getErnTypes() {
+
+		synchronized (mErnTypes) {
+			if (mErnTypes.isEmpty()) {
+				mErnTypes.add("catalogs");
+				mErnTypes.add("offers");
+				mErnTypes.add("dealers");
+				mErnTypes.add("stores");
+				mErnTypes.add("shoppinglists");
+				mErnTypes.add("items");
+			}
+		}
+		return mErnTypes;
+	}
+	
+	protected Set<String> getIdsFromFilter(String filterName, Bundle apiParams) {
 		
 		String tmp = apiParams.getString(filterName);
 		Set<String> list = new HashSet<String>();
-		Collections.addAll(list, TextUtils.split(tmp, ","));
+		if (tmp != null) {
+			Collections.addAll(list, TextUtils.split(tmp, ","));
+		}
 		return list;
 	}
 	
-	protected String buildErn(String type, String id) {
-		if (ernTypes.contains(type)) {
+	private String buildErn(String type, String id) {
+		
+		if (getErnTypes().contains(type)) {
 			type = type.substring(0, type.length()-1);
 			return String.format("ern:%s:%s", type, id);
 		}

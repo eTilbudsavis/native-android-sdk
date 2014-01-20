@@ -92,7 +92,7 @@ public class NetworkDispatcher extends Thread {
                 // Perform the network request.
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
                 
-                request.setNetworkDebug(networkResponse);
+                request.debugNetworkResponse(networkResponse);
                 
     			if (!Utils.isSuccess(networkResponse.statusCode)) {
     				
@@ -102,11 +102,6 @@ public class NetworkDispatcher extends Thread {
                 		
                     	request.addEvent("recoverable-session-error");
                     	
-                		/*
-                		 * If it's a login attempt, the check for endpoint will not work properly
-                		 * because we actually want that attempt to go into the parkedQueue.
-                		 * TODO: Find a way to distinguish the types of session calls
-                		 */
                 		if (request.isSessionEndpoint()) {
                 			
                 			mDelivery.postError(request, e);
@@ -131,22 +126,13 @@ public class NetworkDispatcher extends Thread {
                 	
     			} else {
     				
-    				if (request.getMethod() == Method.GET && request.hasCache()) {
-    					mCache.put(request.getCache());
-    				}
-    				
     				updateSessionInfo(networkResponse.headers);
     				
                     request.addEvent("parsing-network-response");
-                    // Parse the response here on the worker thread.
                     Response<?> response = request.parseNetworkResponse(networkResponse);
                     
-                    // If the request is cachable
-                    if (request.getMethod() == Method.GET && request.cacheResponse() && response.cache != null) {
-                    	request.addEvent("add-response-to-cache");
-                    	mCache.put(response.cache);
-                    }
-
+                    mCache.put(request, response);
+                    
                     mDelivery.postResponse(request, response);
                     
     			}

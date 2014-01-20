@@ -1,29 +1,11 @@
 package com.eTilbudsavis.etasdk.NetworkInterface;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.annotation.SuppressLint;
-import android.os.Bundle;
-import android.text.TextUtils;
-
-import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Header;
-import com.eTilbudsavis.etasdk.Utils.Param;
-import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Cache implements Serializable {
 
@@ -31,24 +13,32 @@ public class Cache implements Serializable {
 
 	public static final String TAG = "EtaCache";
 	
-	private Map<String, Item> mItems = Collections.synchronizedMap(new HashMap<String, Cache.Item>());
+	private Map<String, Item> mItems;
 	
-	public Cache() { }
+	public Cache() {
+		mItems = Collections.synchronizedMap(new HashMap<String, Cache.Item>());
+	}
 	
 	public void clear() {
-		mItems = new HashMap<String, Cache.Item>();
+		mItems.clear();
 	}
 	
-	@SuppressLint("DefaultLocale")
-	public void put(Map<String, Cache.Item> cacheItems) {
-		mItems.putAll(cacheItems);
+	public void put(Request<?> request, Response<?> response) {
+		
+        // If the request is cachable
+        if (request.getMethod() == Method.GET && request.isCachable() && !request.isCacheHit() && response.cache != null) {
+        	request.addEvent("add-response-to-cache");
+			mItems.putAll(response.cache);
+        }
+        
 	}
 	
-	@SuppressWarnings("rawtypes")
 	public Cache.Item get(String key) {
 		
 		Cache.Item c = mItems.get(key);
-		if (c.isExpired()) {
+		if (c == null) {
+			return null;
+		} else if (c.isExpired()) {
 			mItems.remove(key);
 			return null;
 		}

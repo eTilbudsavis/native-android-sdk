@@ -3,6 +3,7 @@ package com.eTilbudsavis.etasdk.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.os.SystemClock;
@@ -48,10 +49,15 @@ public class EtaLog {
 		}
 		
 	}
-	
-	public static void d(String tag, String name, boolean isCache, JSONObject response, EtaError error) {
+
+	public static void d(String tag, String name, JSONObject response, EtaError error) {
 		if (!Eta.DEBUG_LOGD) return;
-		Log.d(tag, name + ": Cache: " + isCache + ", Response: " + (response == null ? "null" : "Success") + ", Error: " + (error == null ? "null" : error.toJSON().toString()));
+		Log.d(tag, name + ": Response: " + (response == null ? "null" : "Success") + ", Error: " + (error == null ? "null" : error.toJSON().toString()));
+	}
+
+	public static void d(String tag, String name, JSONArray response, EtaError error) {
+		if (!Eta.DEBUG_LOGD) return;
+		Log.d(tag, name + ": Response: " + (response == null ? "null" : "Success") + ", Error: " + (error == null ? "null" : error.toJSON().toString()));
 	}
 	
 	public static void printStackTrace() {

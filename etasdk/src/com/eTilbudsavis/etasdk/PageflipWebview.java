@@ -227,17 +227,13 @@ public final class PageflipWebview extends WebView {
 		EtaLog.d(TAG, url);
 		StringRequest req = new StringRequest(url, new Listener<String>() {
 
-			public void onComplete(boolean isCache, String response, EtaError error) {
+			public void onComplete(String response, EtaError error) {
 				
-				if (!isCache) {
-					
-					if (response == null) {
-						loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
-						mListener.onEvent(EVENT_ERROR, mUuid, error.toJSON());
-					} else {
-						loadDataWithBaseURL(null, response, "text/html", "utf-8", null);
-					}
-					
+				if (response == null) {
+					loadDataWithBaseURL(null, "<html><body>" + error.toString() + "</body></html>", "text/html", "utf-8", null);
+					mListener.onEvent(EVENT_ERROR, mUuid, error.toJSON());
+				} else {
+					loadDataWithBaseURL(null, response, "text/html", "utf-8", null);
 				}
 				
 			}
@@ -623,7 +619,7 @@ public final class PageflipWebview extends WebView {
 					// The request, to be performed
 					JsonStringRequest req = new JsonStringRequest(rMethod, rUrl, rBody, new Listener<String>() {
 						
-						public void onComplete( boolean isCache, String response, EtaError error) {
+						public void onComplete(String response, EtaError error) {
 
 							try {
 								

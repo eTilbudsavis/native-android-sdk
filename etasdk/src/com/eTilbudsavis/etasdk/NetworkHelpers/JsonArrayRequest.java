@@ -1,22 +1,19 @@
 package com.eTilbudsavis.etasdk.NetworkHelpers;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
 import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response;
-import com.eTilbudsavis.etasdk.NetworkInterface.Cache.Item;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class JsonArrayRequest extends JsonRequest<JSONArray> {
@@ -53,56 +50,19 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 		try {
             String jsonString = new String(response.data);
     		JSONArray jArray = new JSONArray(jsonString);
-    		putJsonArray(jArray);
+    		putJSON(jArray);
     		
-            return Response.fromSuccess(jArray, null, false);
+            return Response.fromSuccess(jArray, getCache());
         } catch (Exception e) {
+        	EtaLog.d(TAG, e);
+        	
             return Response.fromError(new ParseError(this, response));
         }
 	}
 	
 	@Override
 	public Response<JSONArray> parseCache(Cache c) {
-
-		// if last element is a type, then we'll expect a list
-		String type = path[path.length-1];
-		
-		Set<String> keys = getQueryParameters().keySet();
-		
-		boolean hasFilter = keys.contains(Param.FILTER_CATALOG_IDS) || 
-				keys.contains(Param.FILTER_DEALER_IDS) || 
-				keys.contains(Param.FILTER_OFFER_IDS) || 
-				keys.contains(Param.FILTER_STORE_IDS);
-		
-		boolean hasOrder = keys.contains(Param.ORDER_BY);
-		
-		Set<String> ids = new HashSet<String>(0);
-		String filter = getFilter(type, getQueryParameters());
-		if (apiParams.containsKey(filter)) {
-			ids = getFilter(filter, apiParams);
-		}
-		
-		// No ids? no catchable items...
-		if (ids.size() == 0)
-			return resp;
-		
-		// Get all possible items requested from cache
-		JSONArray jArray = new JSONArray();
-		for (String id : ids) {
-			String ern = buildErn(type, id);
-			Item c = getItem(ern);
-			if (c != null) {
-				jArray.put((JSONObject)c.object);
-			}
-		}
-		
-		// If cache had ALL items, then return the list.
-		int size = jArray.length();
-		if (size == ids.size()) {
-			
-//			resp.set(200, jArray.toString());
-		}
-		
+		return getJSONArray(c);
 	}
 	
 	@Override

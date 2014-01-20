@@ -4,17 +4,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
 import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class JsonStringRequest extends JsonRequest<String>{
-
-    private static final long CACHE_TTL = 3 * Utils.MINUTE_IN_MILLIS;
-    
+	
 	public JsonStringRequest(String url, Listener<String> listener) {
 		super(url, listener);
 	}
@@ -30,19 +27,43 @@ public class JsonStringRequest extends JsonRequest<String>{
 			
 			try {
 				if (json.startsWith("{") && json.endsWith("}")) {
-					putJsonObject(new JSONObject(json));
+					putJSON(new JSONObject(json));
 				} else if (json.startsWith("[") && json.endsWith("]")) {
-					putJsonArray(new JSONArray(json));
+					putJSON(new JSONArray(json));
 				}
 				
 			} catch (JSONException e) {
 				EtaLog.d(TAG, e);
 			}
 			
-            return Response.fromSuccess(json, null, false);
+            return Response.fromSuccess(json, getCache());
         } catch (Exception e) {
             return Response.fromError(new ParseError(this, response));
         }
+	}
+
+	@Override
+	protected Response<String> parseCache(Cache c) {
+		
+		// This method of guessing isn't perfect, but atleast we won't get false data from cache
+        String[] path = getUrl().split("/");
+        String cacheString = null;
+        if (getFilterTypes().containsKey(path[path.length-1])) {
+        	Response<JSONArray> cacheArray = getJSONArray(c);
+        	if (cacheArray != null) {
+            	cacheString = cacheArray.result.toString();
+        	}
+        } else if (getFilterTypes().containsKey(path[path.length-2])) {
+        	Response<JSONObject> cacheObject = getJSONObject(c);
+        	if (cacheObject != null) {
+        		cacheString = cacheObject.result.toString();
+        	}
+        }
+        
+        if (cacheString != null) {
+        	return Response.fromSuccess(cacheString, null);
+        }
+		return null;
 	}
 	
 	

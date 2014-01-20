@@ -66,9 +66,9 @@ public class SessionManager {
 		
 		Listener<JSONObject> sessionListener = new Listener<JSONObject>() {
 
-			public void onComplete(boolean isCache, JSONObject response, EtaError error) {
+			public void onComplete(JSONObject response, EtaError error) {
 
-				EtaLog.d(TAG, "sessionListener.onComplete()", isCache, response, error);
+				EtaLog.d(TAG, "sessionListener.onComplete()", response, error);
 				
 				synchronized (LOCK) {
 					mReqInFlight = null;
@@ -91,7 +91,7 @@ public class SessionManager {
 				}
 				
 				if (l != null) {
-					l.onComplete(isCache, response, error);
+					l.onComplete( response, error);
 				}
 			}
 		};
@@ -101,7 +101,8 @@ public class SessionManager {
 	}
 	
 	private synchronized void addRequest(JsonObjectRequest r) {
-//		r.debugNetwork(true);
+//		r.debugPrintNetwork(true);
+//		r.debugPrintLog(true);
 		r.setPriority(Priority.HIGH);
 		mSessionQueue.add(r);
 		runQueue();

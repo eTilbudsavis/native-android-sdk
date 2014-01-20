@@ -41,27 +41,29 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	
 	/** Sequence number used for prioritizing the queue */
 	private int mSequence = 0;
+
+	/** Item for containing cache items */
+	protected Map<String, Cache.Item> mCache = new HashMap<String, Cache.Item>();
 	
 	/** Should this request use location in the query */
 	private boolean mUseLocation = true;
 	
 	/** If true Request will return data from cache if exists */
-	private boolean mSkipCache = false;
+	private boolean mIgnoreCache = false;
 	
 	/** Whether or not responses to this request should be cached. */
-	private boolean mCacheResponse = true;
+	private boolean mIsCachable = true;
 	
 	/** Whether or not this request has been canceled. */
 	private boolean mCanceled = false;
-	
-	/** Indication if the request is finished */
-	private boolean mFinished = false;
-	
-	/** Item for containing cache items */
-	protected Map<String, Cache.Item> mCache = new HashMap<String, Cache.Item>();
-	
+
+    /** Indication if the request is finished */
+    private boolean mFinished = false;
+    
 	/** Log of this request */
 	private final EventLog mLog;
+	
+	private boolean mCacheHit = false;
 	
 	/** Allows for the network reponse printed */
     private boolean mDebugNetwork = false;
@@ -118,12 +120,34 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	public boolean isCanceled() {
 		return mCanceled;
 	}
-
+	
+	/**
+	 * Method for determining if the request is finished
+	 * @return
+	 */
+    public boolean isFinished() {
+            return mFinished;
+    }
+    
+    /**
+     * Method for marking a request as finished
+     * @return
+     */
+    public Request finished() {
+            mLog.add("finished");
+            mFinished = true;
+            return Request.this;
+    }
+    
 	/** Returns a list of headers for this request. */
 	public Map<String, String> getHeaders() {
 		return mHeaders;
 	}
-
+	
+	/**
+	 * Set any headers wanted in the request
+	 * @param headers
+	 */
 	public void setHeaders(Map<String, String> headers) {
 		mHeaders.putAll(headers);
 	}
@@ -156,24 +180,41 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * returns wether this request is cachable or not
 	 * @return
 	 */
-	public boolean cacheResponse() {
-		return mCacheResponse;
+	public boolean isCachable() {
+		return mIsCachable;
 	}
 	
+	/**
+	 * Whether this request should be added to cache.
+	 * @param isResponseCachable
+	 */
+	protected void setCachable(boolean isResponseCachable) {
+		mIsCachable = isResponseCachable;
+	}
+	
+	public boolean isCacheHit() {
+		return mCacheHit;
+	}
+	
+	public Request setCacheHit(boolean cacheHit) {
+		mCacheHit = cacheHit;
+		return this;
+	}
+	
+	/**
+	 * The Time To Live for any given Cache.Item this request may create
+	 * @return
+	 */
 	public long getCacheTTL() {
 		return DEFAULT_CACHE_TTL;
 	}
 	
-	protected void cacheResponse(boolean isResponseCachable) {
-		mCacheResponse = isResponseCachable;
-	}
-	
 	/**
-	 * Returns true, if this request should return cache, else false
+	 * Returns true, if this request should query the cache for data
 	 * @return
 	 */
-	public boolean skipCache() {
-		return mSkipCache;
+	public boolean ignoreCache() {
+		return mIgnoreCache;
 	}
 
 	/**
@@ -181,25 +222,45 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * @param useCache
 	 * @return
 	 */
-	public Request skipCache(boolean skip) {
-		mSkipCache = skip;
+	public Request setIgnoreCache(boolean skip) {
+		mIgnoreCache = skip;
 		return Request.this;
 	}
 	
+	/**
+	 * This method enables you to have the response returned on any handler.
+	 * This is handy, if you want to have the reaponse returned on a non-ui thread
+	 * @param h
+	 * @return
+	 */
 	public Request setHandler(Handler h) {
 		mHandler = h;
 		return Request.this;
 	}
 	
+	/**
+	 * Get the custom handler for this request. <br>
+	 * Null will be returned if the default handler will be used.
+	 * @return a handler or null, if using default handler
+	 */
 	public Handler getHandler() {
 		return mHandler;
+	}
+	
+	public Map<String, Cache.Item> getCache() {
+		return mCache;
+	}
+	
+	public Request setCache(Map<String, Cache.Item> cache) {
+		mCache.putAll(cache);
+		return this;
 	}
 	
 	public boolean useLocation() {
 		return mUseLocation;
 	}
 	
-	public Request useLocation(boolean useLocation) {
+	public Request setUseLocation(boolean useLocation) {
 		mUseLocation = useLocation;
 		return Request.this;
 	}
@@ -215,28 +276,21 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return Request.this;
 	}
 	
-	public boolean isFinished() {
-		return mFinished;
-	}
-	
-	public Request finished() {
-		mLog.add("finished");
-		mFinished = true;
-		return Request.this;
-	}
-
-	public boolean hasCache() {
-		return mCache.size() != 0;
-	}
-	
-	public Map<String, Cache.Item> getCache() {
-		return mCache;
-	}
-	
+	/**
+	 * Get the query parameters that will be used to perform this query.<br>
+	 * NOTE that this is NOT the same as appending a body to the request, 
+	 * when doing a PUT or POST request.
+	 * @return
+	 */
 	public Bundle getQueryParameters() {
 		return mQuery;
 	}
-
+	
+	/**
+	 * Add parameters to this request.
+	 * @param query
+	 * @return
+	 */
 	public Request putQueryParameters(Bundle query) {
 		mQuery.putAll(query);
 		return Request.this;
@@ -282,9 +336,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
 	abstract protected Response<T> parseCache(Cache c);
 	
-	protected void deliverResponse(boolean isCache, T response, EtaError error) {
+	protected void deliverResponse(T response, EtaError error) {
 		if (mListener != null) {
-			mListener.onComplete(isCache, response, error);
+			mListener.onComplete(response, error);
 		}
 	}
 	
@@ -295,20 +349,23 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	}
 	
     public boolean mayCache(NetworkResponse response) {
-    	return false;
+    	return true;
     }
-
-	public Request debugNetwork(boolean debug) {
+    
+	public Request debugPrintNetwork(boolean debug) {
 		mDebugNetwork = debug;
 		return this;
 	}
-
-	public Request debugLog(boolean debug) {
+	
+	public Request debugPrintLog(boolean debug) {
 		mDebugLog = debug;
 		return this;
 	}
 	
-    public void printDebug() {
+	/**
+	 * Prints the debug info stores for this request
+	 */
+    public void debugPrint() {
 
     	if (mDebugLog) {
     		EtaLog.d(TAG, mLog.getString(getClass().getSimpleName()));
@@ -319,7 +376,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     }
     
-	public void setNetworkDebug(NetworkResponse r) {
+	public void debugNetworkResponse(NetworkResponse r) {
 		
 		String newLine = System.getProperty("line.separator");
 		

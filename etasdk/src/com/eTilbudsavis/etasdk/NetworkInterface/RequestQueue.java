@@ -115,12 +115,7 @@ public class RequestQueue {
 			for (Request r : mParking) {
 				
 				r.addEvent("resuming-request");
-	    		if (r.hasCache()) {
-	    			// Request is a retry event, and only needs a NetworkRetry
-	    			mNetworkQueue.add(r);
-	    		} else {
-	            	mCacheQueue.add(r);
-	    		}
+	    		mCacheQueue.add(r);
 	    		
 			}
 			mParking.clear();

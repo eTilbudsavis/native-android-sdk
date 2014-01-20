@@ -6,6 +6,7 @@ import android.os.Process;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 @SuppressWarnings("rawtypes")
 public class CacheDispatcher extends Thread {
@@ -68,18 +69,23 @@ public class CacheDispatcher extends Thread {
 					continue;
 				}
 				
-				Response response = request.parseCache(mCache);
-				// if the cache is valid, then return it
-				if ( response != null && !request.skipCache() ) {
-					request.addEvent("post-cache-item");
-					// Parse the response here on the worker thread.
-					mDelivery.postResponse(request, response);
+				if (!request.ignoreCache()) {
+					Response response = request.parseCache(mCache);
+					// if the cache is valid, then return it
+					if ( response != null  ) {
+						request.addEvent("post-cache-item");
+						// Parse the response here on the worker thread.
+						request.setCacheHit(true);
+						mDelivery.postResponse(request, response);
+					}
 				}
 				
 				request.addEvent("add-to-network-queue");
 				mNetworkQueue.add(request);
 				
 			} catch (Exception e) {
+				EtaLog.d(TAG, e);
+				
 				request.addEvent(String.format("request-failed-%s", e.getMessage()));
 				// What kind of errors do we expect?
 				mDelivery.postError(request, new EtaError());

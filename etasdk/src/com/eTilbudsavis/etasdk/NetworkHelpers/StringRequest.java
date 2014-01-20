@@ -6,7 +6,6 @@ import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
 import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -80,9 +79,20 @@ public class StringRequest extends Request<String> {
             string = new String(response.data);
         }
         
-		mCache.put(Utils.buildQueryString(this), new Cache.Item(string, DEFAULT_CACHE_TTL));
+		mCache.put(Utils.buildQueryString(this), new Cache.Item(string, getCacheTTL()));
 		        
-        return Response.fromSuccess(string, null, false);
+        return Response.fromSuccess(string, mCache);
+	}
+
+	@Override
+	protected Response<String> parseCache(Cache c) {
+		
+		String url = Utils.buildQueryString(this);
+		Cache.Item ci = c.get(url);
+		if (ci != null && ci.object instanceof String ) {
+			return Response.fromSuccess((String)ci.object, null);
+		}
+		return null;
 	}
 	
 }
