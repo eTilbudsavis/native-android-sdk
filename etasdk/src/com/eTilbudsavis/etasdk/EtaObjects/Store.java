@@ -7,7 +7,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 
@@ -17,33 +16,6 @@ public class Store extends EtaObject implements Serializable {
 
 	public static final String TAG = "Store";
 	
-	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = Request.Sort.DISTANCE;
-
-	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = Request.Sort.DISTANCE_DESC;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Request.Sort.CREATED;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
-
-	/** Parameter for getting a list of specific store id's */
-	public static final String FILTER_STORE_IDS = Request.Param.FILTER_STORE_IDS;
-
-	/** Endpoint for store list resource */
-	public static final String ENDPOINT_LIST = Request.Endpoint.STORE_LIST;
-
-	/** Endpoint for a single store resource */
-	public static final String ENDPOINT_ID = Request.Endpoint.STORE_ID;
-
-	/** Endpoint for searching stores */
-	public static final String ENDPOINT_SEARCH = Request.Endpoint.STORE_SEARCH;
-
-	/** Endpoint for fast searching stores */
-	public static final String ENDPOINT_QUICK_SEARCH = Request.Endpoint.STORE_QUICK_SEARCH;
-
 	private String mId;
 	private String mErn;
 	private String mStreet;
@@ -82,18 +54,18 @@ public class Store extends EtaObject implements Serializable {
 		if (store == null) return s;
 		
 		try {
-			s.setId(getJsonString(store, ServerKey.ID));
-			s.setErn(getJsonString(store, ServerKey.ERN));
-			s.setStreet(getJsonString(store, ServerKey.STREET));
-			s.setCity(getJsonString(store, ServerKey.CITY));
-			s.setZipcode(getJsonString(store, ServerKey.ZIP_CODE));
+			s.setId(jsonToString(store, ServerKey.ID));
+			s.setErn(jsonToString(store, ServerKey.ERN));
+			s.setStreet(jsonToString(store, ServerKey.STREET));
+			s.setCity(jsonToString(store, ServerKey.CITY));
+			s.setZipcode(jsonToString(store, ServerKey.ZIP_CODE));
 			s.setCountry(Country.fromJSON(store.getJSONObject(ServerKey.COUNTRY)));
-			s.setLatitude(store.getDouble(ServerKey.LATITUDE));
-			s.setLongitude(store.getDouble(ServerKey.LONGITUDE));
-			s.setDealerUrl(getJsonString(store, ServerKey.DEALER_URL));
-			s.setDealerId(getJsonString(store, ServerKey.DEALER_ID));
+			s.setLatitude(jsonToDouble(store, ServerKey.LATITUDE, 56.4067));
+			s.setLongitude(jsonToDouble(store, ServerKey.LONGITUDE, 8.9189));
+			s.setDealerUrl(jsonToString(store, ServerKey.DEALER_URL));
+			s.setDealerId(jsonToString(store, ServerKey.DEALER_ID));
 			s.setBranding(Branding.fromJSON(store.getJSONObject(ServerKey.BRANDING)));
-			s.setContact(getJsonString(store, ServerKey.CONTACT));
+			s.setContact(jsonToString(store, ServerKey.CONTACT));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

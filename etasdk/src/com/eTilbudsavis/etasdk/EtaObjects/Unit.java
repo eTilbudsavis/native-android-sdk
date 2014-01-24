@@ -37,7 +37,7 @@ public class Unit extends EtaObject implements Serializable {
 		if (unit == null) return u;
 		
 		try {
-			u.setSymbol(getJsonString(unit, ServerKey.SYMBOL));
+			u.setSymbol(jsonToString(unit, ServerKey.SYMBOL));
 			u.setSi(Si.fromJSON(unit.getJSONObject(ServerKey.SI)));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);

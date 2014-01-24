@@ -33,10 +33,10 @@ public class Branding extends EtaObject  implements Serializable {
 		if (branding == null) return b;
 		
 		try {
-			b.setName(getJsonString(branding, ServerKey.NAME));
-			b.setUrlName(getJsonString(branding, ServerKey.URL_NAME));
-			b.setWebsite(getJsonString(branding, ServerKey.WEBSITE));
-			b.setLogo(getJsonString(branding, ServerKey.LOGO));
+			b.setName(jsonToString(branding, ServerKey.NAME));
+			b.setUrlName(jsonToString(branding, ServerKey.URL_NAME));
+			b.setWebsite(jsonToString(branding, ServerKey.WEBSITE));
+			b.setLogo(jsonToString(branding, ServerKey.LOGO));
 			b.setColor(Color.parseColor("#"+branding.getString(EtaObject.ServerKey.COLOR)));
 			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(EtaObject.ServerKey.PAGEFLIP)));
 		} catch (JSONException e) {

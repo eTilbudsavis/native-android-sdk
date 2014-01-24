@@ -27,8 +27,8 @@ public class Country extends EtaObject implements Serializable {
 		if (c == null) c = new Country();
 		if (country == null) return c;
 		
-		c.setId(getJsonString(country, ServerKey.ID));
-		c.setUnsubscribePrintUrl(getJsonString(country, ServerKey.UNSUBSCRIBE_PRINT_URL));
+		c.setId(jsonToString(country, ServerKey.ID));
+		c.setUnsubscribePrintUrl(jsonToString(country, ServerKey.UNSUBSCRIBE_PRINT_URL));
 		
 		return c;
 	}

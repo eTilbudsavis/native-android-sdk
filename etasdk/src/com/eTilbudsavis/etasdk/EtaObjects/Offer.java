@@ -8,7 +8,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -18,51 +17,6 @@ public class Offer extends EtaObject implements Serializable {
 
 	public static final String TAG = "Offer";
 	
-	/** Sort a list by popularity in ascending order. (smallest to largest) */
-	public static final String SORT_POPULARITY = Request.Sort.POPULARITY;
-
-	/** Sort a list by popularity in descending order. (largest to smallest)*/
-	public static final String SORT_POPULARITY_DESC = Request.Sort.POPULARITY_DESC;
-
-	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = Request.Sort.DISTANCE;
-
-	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = Request.Sort.DISTANCE_DESC;
-
-	/** Sort a list by page (in catalog) in ascending order. (smallest to largest) */
-	public static final String SORT_PAGE = Request.Sort.PAGE;
-
-	/** Sort a list by page (in catalog) in descending order. (largest to smallest)*/
-	public static final String SORT_PAGE_DESC = Request.Sort.PAGE_DESC;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Request.Sort.CREATED;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
-
-	/** Parameter for getting a list of specific catalog id's */
-	public static final String FILTER_CATALOG_IDS = Request.Param.FILTER_CATALOG_IDS;
-
-	/** Parameter for posting a list of store id's to publish the catalog in */
-	public static final String FILTER_STORE_IDS = Request.Param.FILTER_STORE_IDS;
-
-	/** Parameter for posting a list of store id's to publish the catalog in */
-	public static final String FILTER_DEALER_IDS = Request.Param.FILTER_DEALER_IDS;
-
-	/** String identifying the query parameter */
-	public static final String PARAM_QUERY = Request.Param.QUERY;
-	
-	/** Endpoint for offer list resource */
-	public static final String ENDPOINT_LIST = Request.Endpoint.OFFER_LIST;
-
-	/** Endpoint for a single offer resource */
-	public static final String ENDPOINT_ID = Request.Endpoint.OFFER_ID;
-
-	/** Endpoint for searching offers */
-	public static final String ENDPOINT_SEARCH = Request.Endpoint.OFFER_SEARCH;
-
 	private String mId;
 	private String mErn;
 	private String mHeading;
@@ -112,22 +66,22 @@ public class Offer extends EtaObject implements Serializable {
 			o.setId(offer.getString(ServerKey.ID));
 			o.setErn(offer.getString(ServerKey.ERN));
 			o.setHeading(offer.getString(ServerKey.HEADING));
-			o.setDescription(getJsonString(offer, ServerKey.DESCRIPTION));
-			o.setCatalogPage(offer.getInt(ServerKey.CATALOG_PAGE));
+			o.setDescription(jsonToString(offer, ServerKey.DESCRIPTION));
+			o.setCatalogPage(jsonToInt(offer, ServerKey.CATALOG_PAGE, 0));
 			o.setPricing(Pricing.fromJSON(offer.getJSONObject(ServerKey.PRICING)));
 			o.setQuantity(Quantity.fromJSON(offer.getJSONObject(ServerKey.QUANTITY)));
 			o.setImages(Images.fromJSON(offer.getJSONObject(ServerKey.IMAGES)));
 			o.setLinks(Links.fromJSON(offer.getJSONObject(ServerKey.LINKS)));
-			Date runFrom = Utils.parseDate(getJsonString(offer, ServerKey.RUN_FROM));
+			Date runFrom = Utils.parseDate(jsonToString(offer, ServerKey.RUN_FROM));
 			o.setRunFrom(runFrom);
-			Date runTill = Utils.parseDate(getJsonString(offer, ServerKey.RUN_TILL));
+			Date runTill = Utils.parseDate(jsonToString(offer, ServerKey.RUN_TILL));
 			o.setRunTill(runTill);
-			o.setDealerUrl(getJsonString(offer, ServerKey.DEALER_URL));
-			o.setDealerId(getJsonString(offer, ServerKey.DEALER_ID));
-			o.setStoreUrl(getJsonString(offer, ServerKey.STORE_URL));
-			o.setStoreId(getJsonString(offer, ServerKey.STORE_ID));
-			o.setCatalogUrl(getJsonString(offer, ServerKey.CATALOG_URL));
-			o.setCatalogId(getJsonString(offer, ServerKey.CATALOG_ID));
+			o.setDealerUrl(jsonToString(offer, ServerKey.DEALER_URL));
+			o.setDealerId(jsonToString(offer, ServerKey.DEALER_ID));
+			o.setStoreUrl(jsonToString(offer, ServerKey.STORE_URL));
+			o.setStoreId(jsonToString(offer, ServerKey.STORE_ID));
+			o.setCatalogUrl(jsonToString(offer, ServerKey.CATALOG_URL));
+			o.setCatalogId(jsonToString(offer, ServerKey.CATALOG_ID));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

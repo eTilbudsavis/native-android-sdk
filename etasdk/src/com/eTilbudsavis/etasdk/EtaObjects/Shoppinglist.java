@@ -93,14 +93,14 @@ public class Shoppinglist extends EtaObject implements Serializable, Comparable<
 		
 		try {
 			// We've don't use OWNER anymore, since we now get all share info.
-			sl.setId(getJsonString(shoppinglist, ServerKey.ID));
-			sl.setErn(getJsonString(shoppinglist, ServerKey.ERN));
-			sl.setName(getJsonString(shoppinglist, ServerKey.NAME));
-			sl.setAccess(getJsonString(shoppinglist, ServerKey.ACCESS));
-			sl.setModified(getJsonString(shoppinglist, ServerKey.MODIFIED));
-			sl.setPreviousId(getJsonString(shoppinglist, ServerKey.PREVIOUS_ID));
-			sl.setType(getJsonString(shoppinglist, ServerKey.TYPE));
-			String meta = getJsonString(shoppinglist, ServerKey.META);
+			sl.setId(jsonToString(shoppinglist, ServerKey.ID));
+			sl.setErn(jsonToString(shoppinglist, ServerKey.ERN));
+			sl.setName(jsonToString(shoppinglist, ServerKey.NAME));
+			sl.setAccess(jsonToString(shoppinglist, ServerKey.ACCESS));
+			sl.setModified(jsonToString(shoppinglist, ServerKey.MODIFIED));
+			sl.setPreviousId(jsonToString(shoppinglist, ServerKey.PREVIOUS_ID));
+			sl.setType(jsonToString(shoppinglist, ServerKey.TYPE));
+			String meta = jsonToString(shoppinglist, ServerKey.META);
 			sl.setMeta(shoppinglist.isNull(ServerKey.META) ? null : (meta.equals("") ? null : new JSONObject(meta)));
 			sl.putShares(Share.fromJSON(shoppinglist.getJSONArray(ServerKey.SHARES)));
 		} catch (JSONException e) {

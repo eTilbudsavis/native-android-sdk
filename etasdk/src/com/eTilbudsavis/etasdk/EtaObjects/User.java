@@ -15,33 +15,6 @@ public class User extends EtaObject implements Serializable {
 	
 	public static final String TAG = "User";
 	
-	/** Parameter for a user e-mail */
-	public static final String PARAM_EMAIL = Request.Param.EMAIL;
-	
-	/** Parameter for a user password */
-	public static final String PARAM_PASSWORD = Request.Param.PASSWORD;
-	
-	/** Parameter for a user birth year */
-	public static final String PARAM_BIRTH_YEAR = Request.Param.BIRTH_YEAR;
-	
-	/** Parameter for a user gender */
-	public static final String PARAM_GENDER = Request.Param.GENDER;
-	
-	/** Parameter for a user success redirect */
-	public static final String PARAM_SUCCESS_REDIRECT = Request.Param.SUCCESS_REDIRECT;
-	
-	/** Parameter for a user error redirect */
-	public static final String PARAM_ERROR_REDIRECT = Request.Param.ERROR_REDIRECT;
-	
-	/** Parameter for a user old password */
-	public static final String PARAM_OLD_PASSWORD = Request.Param.OLD_PASSWORD;
-	
-	/** Parameter for a facebook token */
-	public static final String PARAM_FACEBOOK_TOKEN = Request.Param.FACEBOOK_TOKEN;
-	
-	/** Endpoint for a user resource */
-	public static final String ENDPOINT_RESET = Request.Endpoint.USER_RESET;
-	
 	public static final int NO_USER = -1;
 	
 	private int mId = NO_USER;
@@ -75,11 +48,11 @@ public class User extends EtaObject implements Serializable {
 		
 		try {
 			u.setId(user.getInt(ServerKey.ID));
-			u.setErn(getJsonString(user, ServerKey.ERN));
-			u.setGender(getJsonString(user, ServerKey.GENDER));
-			u.setBirthYear(user.getInt(ServerKey.BIRTH_YEAR));
-			u.setName(getJsonString(user, ServerKey.NAME));
-			u.setEmail(getJsonString(user, ServerKey.EMAIL));
+			u.setErn(jsonToString(user, ServerKey.ERN));
+			u.setGender(jsonToString(user, ServerKey.GENDER));
+			u.setBirthYear(jsonToInt(user, ServerKey.BIRTH_YEAR, 0));
+			u.setName(jsonToString(user, ServerKey.NAME));
+			u.setEmail(jsonToString(user, ServerKey.EMAIL));
 			u.setPermissions(Permission.fromJSON(user.getJSONObject(ServerKey.PERMISSIONS)));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);

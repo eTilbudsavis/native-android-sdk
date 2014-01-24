@@ -86,16 +86,16 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	private static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem) {
 		
 		try {
-			sli.setId(getJsonString(shoppinglistItem, ServerKey.ID));
-			sli.setTick(shoppinglistItem.getBoolean(ServerKey.TICK));
-			sli.setOfferId(getJsonString(shoppinglistItem, ServerKey.OFFER_ID));
-			sli.setCount(shoppinglistItem.getInt(ServerKey.COUNT));
-			sli.setDescription(getJsonString(shoppinglistItem, ServerKey.DESCRIPTION));
-			sli.setShoppinglistId(getJsonString(shoppinglistItem, ServerKey.SHOPPINGLIST_ID));
-			sli.setErn(getJsonString(shoppinglistItem, ServerKey.ERN));
-			sli.setCreator(getJsonString(shoppinglistItem, ServerKey.CREATOR));
+			sli.setId(jsonToString(shoppinglistItem, ServerKey.ID));
+			sli.setTick(jsonToBoolean(shoppinglistItem, ServerKey.TICK, false));
+			sli.setOfferId(jsonToString(shoppinglistItem, ServerKey.OFFER_ID));
+			sli.setCount(jsonToInt(shoppinglistItem, ServerKey.COUNT, 1));
+			sli.setDescription(jsonToString(shoppinglistItem, ServerKey.DESCRIPTION));
+			sli.setShoppinglistId(jsonToString(shoppinglistItem, ServerKey.SHOPPINGLIST_ID));
+			sli.setErn(jsonToString(shoppinglistItem, ServerKey.ERN));
+			sli.setCreator(jsonToString(shoppinglistItem, ServerKey.CREATOR));
 			sli.setModified(Utils.parseDate(shoppinglistItem.isNull(ServerKey.MODIFIED) ? "1970-01-01T00:00:00+0000" : shoppinglistItem.getString(ServerKey.MODIFIED)));
-			sli.setPreviousId(getJsonString(shoppinglistItem, ServerKey.PREVIOUS_ID));
+			sli.setPreviousId(jsonToString(shoppinglistItem, ServerKey.PREVIOUS_ID));
 			
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);

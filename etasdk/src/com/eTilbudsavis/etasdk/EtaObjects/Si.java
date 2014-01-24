@@ -38,12 +38,8 @@ public class Si  extends EtaObject implements Serializable {
 		if (s == null) s = new Si();
 		if (si == null) return s;
 		
-		try {
-			s.setSymbol(getJsonString(si, ServerKey.SYMBOL));
-			s.setFactor(si.getDouble(ServerKey.FACTOR));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
+		s.setSymbol(jsonToString(si, ServerKey.SYMBOL));
+		s.setFactor(jsonToDouble(si, ServerKey.FACTOR, 1));
 		
 		return s;
 	}

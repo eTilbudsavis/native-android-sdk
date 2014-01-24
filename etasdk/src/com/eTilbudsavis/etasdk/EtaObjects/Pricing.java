@@ -13,10 +13,6 @@ public class Pricing extends EtaObject implements Serializable {
 
 	public static final String TAG = "Pricing";
 	
-	private static final String S_PRICE = "price";
-	private static final String S_PREPRICE = "pre_price";
-	private static final String S_CURRENCY = "currency";
-	
 	private double mPrice = 0.0;
 	private Double mPrePrice;
 	private String mCurrency;
@@ -43,9 +39,9 @@ public class Pricing extends EtaObject implements Serializable {
 		if (pricing == null) return p;
 		
 		try {
-			p.setPrice(pricing.getDouble(S_PRICE));
-			p.setPrePrice(pricing.isNull(S_PREPRICE) ? null : pricing.getDouble(S_PREPRICE));
-			p.setCurrency(getJsonString(pricing, S_CURRENCY));
+			p.setPrice(jsonToDouble(pricing, ServerKey.PRICE, 0.0));
+			p.setPrePrice(pricing.isNull(ServerKey.PREPRICE) ? null : pricing.getDouble(ServerKey.PREPRICE));
+			p.setCurrency(jsonToString(pricing, ServerKey.CURRENCY));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -59,9 +55,9 @@ public class Pricing extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Pricing p) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_PRICE, p.getPrice());
-			o.put(S_PREPRICE, p.getPrePrice());
-			o.put(S_CURRENCY, p.getCurrency());
+			o.put(ServerKey.PRICE, p.getPrice());
+			o.put(ServerKey.PREPRICE, p.getPrePrice());
+			o.put(ServerKey.CURRENCY, p.getCurrency());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

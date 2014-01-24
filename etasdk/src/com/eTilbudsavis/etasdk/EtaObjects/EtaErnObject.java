@@ -19,7 +19,7 @@ import com.eTilbudsavis.etasdk.Utils.EtaLog;
 public class EtaErnObject extends EtaObject {
 
 	public static final String TAG = "EtaErnObject";
-
+	
 	private static final String ERN_CATALOG = "ern:catalog";
 	private static final String ERN_OFFER = "ern:offer";
 	private static final String ERN_DEALER = "ern:dealer";
@@ -94,8 +94,7 @@ public class EtaErnObject extends EtaObject {
 					item = Shoppinglist.fromJSON(object);
 				} else if (ern.startsWith(ERN_SHOPPINGLISTITEM)) {
 					item = ShoppinglistItem.fromJSON(object);
-				} 
-					
+				}
 				
 			} else {
 				EtaLog.d(TAG, "JSONObject does not contain an ERN");

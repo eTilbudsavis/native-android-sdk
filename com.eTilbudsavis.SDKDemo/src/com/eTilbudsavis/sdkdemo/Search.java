@@ -72,7 +72,7 @@ public class Search extends Activity {
 				Listener<JSONArray> offerListener = new Listener<JSONArray>() {
 
 					@Override
-					public void onComplete(boolean isCache, JSONArray response, EtaError error) {
+					public void onComplete(JSONArray response, EtaError error) {
 
 						mPd.dismiss();
 						

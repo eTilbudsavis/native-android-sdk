@@ -3,54 +3,57 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
+
 public class EtaObject {
 	
 	public static final String TAG = "EtaObject";
 	
-	private JSONObject serverData;
-	
 	public EtaObject() { }
 	
-	protected static String getJsonString(JSONObject object, String name) {
-		if (object == null || name == null) 
+	protected static String jsonToString(JSONObject object, String key) {
+		if (object == null || key == null) 
 			return null;
 		
 		try {
-			if (!object.has(name))
+			if (!object.has(key))
 				return null;
-			return object.isNull(name) ? null : object.getString(name);
-		} catch (JSONException e) { }
+			return object.isNull(key) ? null : object.getString(key);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
 		return null;
+	}
+	
+	protected static int jsonToInt(JSONObject object, String key, int defValue) {
+		try {
+			return object.isNull(key) ? defValue : object.getInt(key);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return defValue;
+	}
+	
+	protected static double jsonToDouble(JSONObject object, String key, double defValue) {
+		try {
+			return object.isNull(key) ? defValue : object.getDouble(key);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return defValue;
+	}
+	
+	protected static boolean jsonToBoolean(JSONObject object, String key, boolean defValue) {
+		try {
+			return object.isNull(key) ? defValue : object.getBoolean(key);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return defValue;
 	}
 	
 	protected static boolean stringCompare(String first, String second) {
 		return first == null ? second == null : first.equals(second);
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((serverData == null) ? 0 : serverData.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		EtaObject other = (EtaObject) obj;
-		if (serverData == null) {
-			if (other.serverData != null)
-				return false;
-		} else if (!serverData.equals(other.serverData))
-			return false;
-		return true;
 	}
 	
 	/**
@@ -138,6 +141,10 @@ public class EtaObject {
 		public static final String TOKEN = "token";
 		public static final String EXPIRES = "expires";
 		public static final String PROVIDER = "provider";
+		public static final String PRICE = "price";
+		public static final String PREPRICE = "pre_price";
+		public static final String CURRENCY = "currency";
+		
 		
 	}
 }

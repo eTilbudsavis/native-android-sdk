@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import android.graphics.Color;
 
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Dealer extends EtaObject implements Serializable {
@@ -17,34 +16,7 @@ public class Dealer extends EtaObject implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String TAG = "Dealer";
-
-	/** Sort a list by name in ascending order. (smallest to largest) */
-	public static final String SORT_NAME = Request.Sort.NAME;
-
-	/** Sort a list by name in descending order. (largest to smallest)*/
-	public static final String SORT_NAME_DESC = Request.Sort.NAME_DESC;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Request.Sort.CREATED;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
-
-	/** Parameter for getting a list of specific dealer id's */
-	public static final String FILTER_DEALER_IDS = Request.Param.FILTER_DEALER_IDS;
-
-	/** String identifying the query parameter */
-	public static final String PARAM_QUERY = Request.Param.QUERY;
 	
-	/** Endpoint for dealer list resource */
-	public static final String ENDPOINT_LIST = Request.Endpoint.DEALER_LIST;
-	
-	/** Endpoint for a single dealer resource */
-	public static final String ENDPOINT_ID = Request.Endpoint.DEALER_ID;
-	
-	/** Endpoint for searching dealers */
-	public static final String ENDPOINT_SEARCH = Request.Endpoint.DEALER_SEARCH;
-
 	private String mId;
 	private String mErn;
 	private String mName;
@@ -77,13 +49,13 @@ public class Dealer extends EtaObject implements Serializable {
 		if (dealer == null) return d;
 
 		try {
-			d.setId(getJsonString(dealer, ServerKey.ID));
-			d.setErn(getJsonString(dealer, ServerKey.ERN));
-			d.setName(getJsonString(dealer, ServerKey.NAME));
-			d.setUrlName(getJsonString(dealer, ServerKey.URL_NAME));
-			d.setWebsite(getJsonString(dealer, ServerKey.WEBSITE));
-			d.setLogo(getJsonString(dealer, ServerKey.LOGO));
-			d.setColor(Color.parseColor("#"+getJsonString(dealer, ServerKey.COLOR)));
+			d.setId(jsonToString(dealer, ServerKey.ID));
+			d.setErn(jsonToString(dealer, ServerKey.ERN));
+			d.setName(jsonToString(dealer, ServerKey.NAME));
+			d.setUrlName(jsonToString(dealer, ServerKey.URL_NAME));
+			d.setWebsite(jsonToString(dealer, ServerKey.WEBSITE));
+			d.setLogo(jsonToString(dealer, ServerKey.LOGO));
+			d.setColor(Color.parseColor("#"+jsonToString(dealer, ServerKey.COLOR)));
 			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(ServerKey.PAGEFLIP)));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);

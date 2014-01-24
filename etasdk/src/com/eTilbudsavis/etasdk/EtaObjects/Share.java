@@ -70,11 +70,11 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 		try {
 			
 			JSONObject o = share.getJSONObject(ServerKey.USER);
-			s.setEmail(getJsonString(o, ServerKey.EMAIL));
-			s.setName(getJsonString(o, ServerKey.NAME));
+			s.setEmail(jsonToString(o, ServerKey.EMAIL));
+			s.setName(jsonToString(o, ServerKey.NAME));
 			
-			s.setAccess(getJsonString(share, ServerKey.ACCESS));
-			s.setAccepted(share.getBoolean(ServerKey.ACCEPTED));
+			s.setAccess(jsonToString(share, ServerKey.ACCESS));
+			s.setAccepted(jsonToBoolean(share, ServerKey.ACCEPTED, false));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

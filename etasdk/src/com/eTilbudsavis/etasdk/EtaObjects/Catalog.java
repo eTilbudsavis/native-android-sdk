@@ -8,7 +8,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -18,39 +17,6 @@ public class Catalog extends EtaErnObject implements Serializable {
 
 	public static final String TAG = "Catalog";
 	
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
-
-	/** Parameter for getting a list of specific catalog id's */
-	public static final String FILTER_CATALOG_IDS = Request.Param.FILTER_CATALOG_IDS;
-
-	/** Parameter for posting a list of store id's to publish the catalog in */
-	public static final String FILTER_STORE_IDS = Request.Param.FILTER_STORE_IDS;
-
-	/** Parameter for posting a list of area id's to publish the catalog in */
-	public static final String FILTER_AREA_IDS = Request.Param.FILTER_AREA_IDS;
-
-	/** Parameter for the location of the PDF to post */
-	public static final String PARAM_PDF = Request.Param.PDF;
-
-	/** String identifying the offset parameter for all list calls to the API */
-	public static final String PARAM_OFFSET = Request.Param.OFFSET;
-
-	/** String identifying the offset parameter for all list calls to the API */
-	public static final String PARAM_LIMIT = Request.Param.LIMIT;
-
-	/** String identifying the query parameter */
-	public static final String PARAM_QUERY = Request.Param.QUERY;
-	
-	/** Endpoint for catalog list resource */
-	public static final String ENDPOINT_LIST = Request.Endpoint.CATALOG_LIST;
-
-	/** Endpoint for a single catalog resource */
-	public static final String ENDPOINT_ID = Request.Endpoint.CATALOG_ID;
-
-	/** Endpoint for searching catalogs */
-	public static final String ENDPOINT_SEARCH = Request.Endpoint.CATALOG_SEARCH;
-
 	// From JSON blob
 	private String mId;
 	private String mErn;
@@ -109,21 +75,21 @@ public class Catalog extends EtaErnObject implements Serializable {
 		if (catalog.has(ServerKey.STORE_ID) && catalog.has(ServerKey.OFFER_COUNT)) {
 			// if we have a full catalog
 			try {
-				c.setId(getJsonString(catalog, ServerKey.ID));
-				c.setErn(getJsonString(catalog, ServerKey.ERN));
-				c.setLabel(getJsonString(catalog, ServerKey.LABEL));
-				c.setBackground(getJsonString(catalog, ServerKey.BACKGROUND));
-				Date runFrom = Utils.parseDate(getJsonString(catalog, ServerKey.RUN_FROM));
+				c.setId(jsonToString(catalog, ServerKey.ID));
+				c.setErn(jsonToString(catalog, ServerKey.ERN));
+				c.setLabel(jsonToString(catalog, ServerKey.LABEL));
+				c.setBackground(jsonToString(catalog, ServerKey.BACKGROUND));
+				Date runFrom = Utils.parseDate(jsonToString(catalog, ServerKey.RUN_FROM));
 				c.setRunFrom(runFrom);
-				Date runTill = Utils.parseDate(getJsonString(catalog, ServerKey.RUN_TILL));
+				Date runTill = Utils.parseDate(jsonToString(catalog, ServerKey.RUN_TILL));
 				c.setRunTill(runTill);
 				c.setPageCount(catalog.getInt(ServerKey.PAGE_COUNT));
 				c.setOfferCount(catalog.getInt(ServerKey.OFFER_COUNT));
 				c.setBranding(Branding.fromJSON(catalog.getJSONObject(ServerKey.BRANDING)));
-				c.setDealerId(getJsonString(catalog, ServerKey.DEALER_ID));
-				c.setDealerUrl(getJsonString(catalog, ServerKey.DEALER_URL));
-				c.setStoreId(getJsonString(catalog, ServerKey.STORE_ID));
-				c.setStoreUrl(getJsonString(catalog, ServerKey.STORE_URL));
+				c.setDealerId(jsonToString(catalog, ServerKey.DEALER_ID));
+				c.setDealerUrl(jsonToString(catalog, ServerKey.DEALER_URL));
+				c.setStoreId(jsonToString(catalog, ServerKey.STORE_ID));
+				c.setStoreUrl(jsonToString(catalog, ServerKey.STORE_URL));
 				c.setDimension(Dimension.fromJSON(catalog.getJSONObject(ServerKey.DIMENSIONS)));
 				c.setImages(Images.fromJSON(catalog.getJSONObject(ServerKey.IMAGES)));
 				c.setPages(Pages.fromJSON(catalog.getJSONObject(ServerKey.PAGES)));
@@ -133,7 +99,7 @@ public class Catalog extends EtaErnObject implements Serializable {
 		} else if (catalog.has(ServerKey.ID) && catalog.has(ServerKey.PAGE)) {
 			// If it is a partial catalog
 			try {
-				c.setId(getJsonString(catalog, ServerKey.ID));
+				c.setId(jsonToString(catalog, ServerKey.ID));
 				c.setOfferOnPage(catalog.getInt(ServerKey.PAGE));
 			} catch (JSONException e) {
 				EtaLog.d(TAG, e);

@@ -20,6 +20,7 @@ import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Priority;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class SessionManager {
@@ -47,6 +48,8 @@ public class SessionManager {
 	
 	private ArrayList<OnSessionChangeListener> mSubscribers = new ArrayList<OnSessionChangeListener>();
 	
+	public EventLog mLog = new EventLog();
+	
 	public SessionManager(Eta eta) {
 		mEta = eta;
 		JSONObject session = mEta.getSettings().getSessionJson();
@@ -67,8 +70,12 @@ public class SessionManager {
 		Listener<JSONObject> sessionListener = new Listener<JSONObject>() {
 
 			public void onComplete(JSONObject response, EtaError error) {
-
-				EtaLog.d(TAG, "sessionListener.onComplete()", response, error);
+				
+				if (response != null) {
+					EtaLog.d(TAG, "SessionResponse: " + response.toString());
+				} else {
+					EtaLog.d(TAG, "SessionError: " + error.toString());
+				}
 				
 				synchronized (LOCK) {
 					mReqInFlight = null;

@@ -37,9 +37,9 @@ public class Images extends EtaObject implements Serializable {
 		if (i == null) i = new Images();
 		if (image == null) return i;
 		
-		i.setView(getJsonString(image, ServerKey.VIEW));
-		i.setZoom(getJsonString(image, ServerKey.ZOOM));
-		i.setThumb(getJsonString(image, ServerKey.THUMB));
+		i.setView(jsonToString(image, ServerKey.VIEW));
+		i.setZoom(jsonToString(image, ServerKey.ZOOM));
+		i.setThumb(jsonToString(image, ServerKey.THUMB));
 		
     	return i;
 	}

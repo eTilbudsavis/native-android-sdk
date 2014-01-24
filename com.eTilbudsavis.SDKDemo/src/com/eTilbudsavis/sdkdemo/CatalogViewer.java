@@ -67,7 +67,7 @@ public class CatalogViewer extends Activity {
     Listener<JSONArray> catalogListener = new Listener<JSONArray>() {
 
 		@Override
-		public void onComplete(boolean isCache, JSONArray response, EtaError error) {
+		public void onComplete(JSONArray response, EtaError error) {
 			
 			mPd.dismiss();
 
