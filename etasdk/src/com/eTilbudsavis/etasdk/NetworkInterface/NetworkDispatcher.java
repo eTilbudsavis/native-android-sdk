@@ -108,7 +108,6 @@ public class NetworkDispatcher extends Thread {
                         mDelivery.postResponse(request, response);
                     }
                     
-    				
     			} else {
 
     				EtaError e = new EtaError(request, networkResponse);

@@ -25,12 +25,12 @@ public class EtaLog {
 		if (!Eta.DEBUG_LOGD) return;
 		e.printStackTrace(); 
 	}
-
+	
 	public static void d(String tag, Throwable t) {
 		if (!Eta.DEBUG_LOGD) return;
 		t.printStackTrace(); 
 	}
-
+	
 	public static void dAll(String tag, String message) {
 		if (!Eta.DEBUG_LOGD) return;
 		
@@ -49,7 +49,7 @@ public class EtaLog {
 		}
 		
 	}
-
+	
 	public static void d(String tag, String name, JSONObject response, EtaError error) {
 		if (!Eta.DEBUG_LOGD) return;
 		Log.d(tag, name + ": Response: " + (response == null ? "null" : "Success") + ", Error: " + (error == null ? "null" : error.toJSON().toString()));
@@ -69,7 +69,7 @@ public class EtaLog {
 	public static class EventLog {
 
 		public static final String TAG = "EventLog";
-
+		
 		List<Event> mEvents = new ArrayList<Event>(0);
 
 		public void add(String name) {
@@ -79,7 +79,7 @@ public class EtaLog {
 		public void add(Event e) {
 			mEvents.add(e);
 		}
-
+		
 		public void print(String name) {
 			d(TAG, getString(name));
 		}
