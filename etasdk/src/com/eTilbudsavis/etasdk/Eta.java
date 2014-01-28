@@ -277,6 +277,7 @@ public class Eta implements Serializable {
 			mResumed = false;
 			mLocation.saveState();
 			mListManager.onPause();
+			mSessionManager.onPause();
 			for (PageflipWebview p : PageflipWebview.pageflips)
 				p.onPause();
 		}
@@ -287,8 +288,8 @@ public class Eta implements Serializable {
 		if (!mResumed) {
 			mResumed = true;
 			mLocation.restoreState();
-			mListManager.onResume();
 			mSessionManager.onResume();
+			mListManager.onResume();
 			for (PageflipWebview p : PageflipWebview.pageflips)
 				p.onResume();
 		}

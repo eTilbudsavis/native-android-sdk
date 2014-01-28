@@ -4,8 +4,6 @@ import java.util.concurrent.Executor;
 
 import android.os.Handler;
 
-import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
-
 public class Delivery {
 	
 	/** Used for posting responses, typically to the main thread. */
@@ -28,16 +26,6 @@ public class Delivery {
     
     public void postResponse(Request<?> request, Response<?> response) {
     	request.addEvent("post-response");
-    	post(request, response);
-    }
-
-    public void postError(Request<?> request, EtaError error) {
-    	request.addEvent("post-error");
-        Response<?> response = Response.fromError(error);
-    	post(request, response);
-    }
-    
-    private void post(Request<?> request, Response<?> response) {
     	
     	if (mRequestQueue != null) {
         	mRequestQueue.finish(request, response);
@@ -48,6 +36,7 @@ public class Delivery {
     	} else {
             mResponsePoster.execute(new DeliveryRunnable(request, response));
     	}
+    	
     	
     }
     
@@ -77,8 +66,8 @@ public class Delivery {
             
             mRequest.addEvent("request-on-new-thread");
             
-            mRequest.debugPrint();
         	mRequest.finish();
+        	mRequest.debugPrint();
             mRequest.deliverResponse(mResponse.result, mResponse.error);
             
        }

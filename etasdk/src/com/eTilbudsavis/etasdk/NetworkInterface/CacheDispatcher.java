@@ -59,38 +59,29 @@ public class CacheDispatcher extends Thread {
 				continue;
 			}
 			
-			try {
-				
-				request.addEvent("cache-dispatcher");
-				
-				// If the request was cancelled already, do not perform the network request.
-				if (request.isCanceled()) {
-					request.addEvent("request-cancelled");
+			request.addEvent("cache-dispatcher");
+			
+			// If the request was cancelled already, do not perform the network request.
+			if (request.isCanceled()) {
+				request.addEvent("request-cancelled");
+				continue;
+			}
+			
+			if (!request.ignoreCache()) {
+				Response response = request.parseCache(mCache);
+				// if the cache is valid, then return it
+				if ( response != null  ) {
+					request.addEvent("post-cache-item");
+					// Parse the response here on the worker thread.
+					request.setCacheHit(true);
+					mDelivery.postResponse(request, response);
 					continue;
 				}
-				
-				if (!request.ignoreCache()) {
-					Response response = request.parseCache(mCache);
-					// if the cache is valid, then return it
-					if ( response != null  ) {
-						request.addEvent("post-cache-item");
-						// Parse the response here on the worker thread.
-						request.setCacheHit(true);
-						mDelivery.postResponse(request, response);
-						continue;
-					}
-				}
-				
-				request.addEvent("add-to-network-queue");
-				mNetworkQueue.add(request);
-				
-			} catch (Exception e) {
-				EtaLog.d(TAG, e);
-				
-				request.addEvent(String.format("request-failed-%s", e.getMessage()));
-				// What kind of errors do we expect?
-				mDelivery.postError(request, new EtaError());
 			}
+			
+			request.addEvent("add-to-network-queue");
+			mNetworkQueue.add(request);
+			
 		}
 	}
 

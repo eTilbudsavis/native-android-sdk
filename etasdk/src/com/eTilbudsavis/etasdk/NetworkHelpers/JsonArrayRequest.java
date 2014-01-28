@@ -1,5 +1,6 @@
 package com.eTilbudsavis.etasdk.NetworkHelpers;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -12,6 +13,7 @@ import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
 import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -49,20 +51,33 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 		
 		try {
             String jsonString = new String(response.data);
-    		JSONArray jArray = new JSONArray(jsonString);
-    		putJSON(jArray);
-    		
-            return Response.fromSuccess(jArray, getCache());
+            
+			Response<JSONArray> r = null;
+            if (Utils.isSuccess(response.statusCode)) {
+
+                r = Response.fromSuccess(new JSONArray(jsonString), getCache());
+        		putJSON(r.result);
+        		
+            } else {
+            	r = Response.fromError(EtaError.fromJSON(new JSONObject(jsonString)));
+            }
+            
+            log(response.statusCode, response.headers, r.result, r.error);
+            
+            return r;
+            
         } catch (Exception e) {
-        	EtaLog.d(TAG, e);
-        	
-            return Response.fromError(new ParseError(this, response));
+            return Response.fromError(new ParseError(e));
         }
 	}
 	
 	@Override
 	public Response<JSONArray> parseCache(Cache c) {
-		return getJSONArray(c);
+		Response<JSONArray> cache = getJSONArray(c);
+		if (cache != null) {
+			log(0, new HashMap<String, String>(), cache.result, cache.error);
+		}
+		return cache;
 	}
 	
 	@Override

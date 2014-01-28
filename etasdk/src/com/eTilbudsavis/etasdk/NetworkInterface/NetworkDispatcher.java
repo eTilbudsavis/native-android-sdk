@@ -4,11 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
+import org.json.JSONObject;
+
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.SessionManager;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
+import com.eTilbudsavis.etasdk.NetworkHelpers.NetworkError;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
@@ -91,42 +94,33 @@ public class NetworkDispatcher extends Thread {
                 
                 // Perform the network request.
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
+
+                request.addEvent("parsing-network-response");
+                Response<?> response = request.parseNetworkResponse(networkResponse);
                 
-                request.debugNetworkResponse(networkResponse);
-                
-    			if (Utils.isSuccess(networkResponse.statusCode)) {
+    			if (response.isSuccess()) {
     				
     				updateSessionInfo(networkResponse.headers);
-    				
-                    request.addEvent("parsing-network-response");
-                    Response<?> response = request.parseNetworkResponse(networkResponse);
-                    
                     mCache.put(request, response);
-                    
-                    // Only deliver network response if cache haven't been delivered
-                    if(!request.isCacheHit()) {
-                        mDelivery.postResponse(request, response);
-                    }
+                    mDelivery.postResponse(request, response);
                     
     			} else {
-
-    				EtaError e = new EtaError(request, networkResponse);
     				
-                	if (SessionManager.recoverableError(e)) {
+                	if (SessionManager.recoverableError(response.error)) {
                 		
                     	request.addEvent("recoverable-session-error");
                     	
                 		if (request.isSessionEndpoint()) {
                 			
-                			mDelivery.postError(request, e);
+                			mDelivery.postResponse(request, response);
                 			
                 		} else {
                 			
                     		// Query the session manager to perform an update
-                			if (mEta.getSessionManager().recover(e)) {
+                			if (mEta.getSessionManager().recover(response.error)) {
                     			mRequestQueue.add(request);
                 			} else {
-                        		mDelivery.postError(request, e);
+                    			mDelivery.postResponse(request, response);
                 			}
                     		
                 		}
@@ -134,18 +128,19 @@ public class NetworkDispatcher extends Thread {
                 	} else {
                 		
                     	request.addEvent("non-recoverable-error");
-                    	mDelivery.postError(request, e);
-                    	
+            			
+                    	mDelivery.postResponse(request, response);
+            			
                 	}
                 	
     			}
     			
                 
-            } catch (Exception e) {
+            } catch (EtaError e) {
             	
             	request.addEvent("network-error");
             	EtaLog.d(TAG, e);
-                mDelivery.postError(request, new EtaError());
+                mDelivery.postResponse(request, Response.fromError(e));
                 
             }
         }

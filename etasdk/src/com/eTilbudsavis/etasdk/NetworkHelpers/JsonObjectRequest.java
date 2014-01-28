@@ -1,5 +1,9 @@
 package com.eTilbudsavis.etasdk.NetworkHelpers;
 
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
@@ -23,13 +27,32 @@ public class JsonObjectRequest extends JsonRequest<JSONObject>{
 	@Override
 	protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
 		try {
-            String jsonString = new String(response.data);
-            JSONObject item = new JSONObject(jsonString);
-            putJSON(item);
-            return Response.fromSuccess(item, mCache);
-        } catch (Exception e) {
-            return Response.fromError(new ParseError(this, response));
+			
+            JSONObject item = null;
+			try {
+				String jsonString = new String(response.data, getParamsEncoding());
+	            item = new JSONObject(jsonString);
+			} catch (UnsupportedEncodingException e) {
+				String jsonString = new String(response.data);
+	            item = new JSONObject(jsonString);
+			}
+			
+			Response<JSONObject> r = null;
+            if (Utils.isSuccess(response.statusCode)) {
+                putJSON(item);
+                r = Response.fromSuccess(item, mCache);
+            } else {
+            	r = Response.fromError(EtaError.fromJSON(item));
+            }
+            
+            log(response.statusCode, response.headers, r.result, r.error);
+            
+            return r;
+            
+        } catch (JSONException e) {
+            return Response.fromError(new ParseError(e));
         }
+		
 	}
 
 	@Override
@@ -39,7 +62,11 @@ public class JsonObjectRequest extends JsonRequest<JSONObject>{
 	
 	@Override
 	public Response<JSONObject> parseCache(Cache c) {
-		return getJSONObject(c);
+		Response<JSONObject> cache = getJSONObject(c);
+		if (cache != null) {
+			log(0, new HashMap<String, String>(), cache.result, cache.error);
+		}
+		return cache;
 	}
 	
 }

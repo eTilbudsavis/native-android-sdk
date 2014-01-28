@@ -2,6 +2,7 @@ package com.eTilbudsavis.etasdk.Utils;
 
 import java.util.LinkedList;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -18,18 +19,17 @@ import com.eTilbudsavis.etasdk.Eta;
  * @author Danny Hvam
  *
  */
-public class DebugDump extends AsyncTask<Void, Void, Void> {
+public class DebugDump extends AsyncTask<Void, Void, Integer> {
 
 	public static final String TAG = "DebugDump";
 	
-	public static String DEBUG_URL = null;
+	private String mUrl;
 	private LinkedList<NameValuePair> mQuery = new LinkedList<NameValuePair>();
+	private OnCompleteListener mListener;
 	
-	public DebugDump(String exception, String data) {
+	public DebugDump(String url, String exception, String data) {
 		
-		if (DEBUG_URL == null) {
-			return;
-		}
+		mUrl = url;
 		
 		try {
 			String appVersion = Eta.getInstance().getAppVersion();
@@ -41,33 +41,43 @@ public class DebugDump extends AsyncTask<Void, Void, Void> {
 			mQuery.add(new BasicNameValuePair("kernel", Device.getKernel()));
 			mQuery.add(new BasicNameValuePair("data", data));
 		} catch (Exception e) {
-			
+			e.printStackTrace();
 		}
 		
 	}
-
+	
+	public DebugDump(String url, String exception, String data, OnCompleteListener l) {
+		this(url, exception, data);
+		mListener = l;
+	}
+	
 	@Override
-	protected Void doInBackground(Void... params) {
-
-		if (DEBUG_URL == null) {
-			return null;
-		}
+	protected Integer doInBackground(Void... urls) {
 		
 		DefaultHttpClient httpClient = new DefaultHttpClient();
+		Integer sc = null;
 		try {
-			HttpPost post = new HttpPost(DEBUG_URL);
+			HttpPost post = new HttpPost(mUrl);
 			post.setEntity(new UrlEncodedFormEntity(mQuery, HTTP.UTF_8));
-			httpClient.execute(post);
+			HttpResponse resp = httpClient.execute(post);
+			sc = resp.getStatusLine().getStatusCode();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return null;
+		return sc;
 	}
 	
 	@Override
-	protected void onPostExecute(Void result) {
-		
+	protected void onPostExecute(Integer result) {
+		if (mListener != null) {
+			int sc = result == null ? -1 : result;
+			mListener.onComplete(sc);
+		}
+	}
+	
+	public interface OnCompleteListener {
+		public void onComplete(int statusCode);
 	}
 	
 }

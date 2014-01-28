@@ -1,13 +1,18 @@
 package com.eTilbudsavis.etasdk.NetworkHelpers;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -279,5 +284,96 @@ public abstract class JsonRequest<T> extends Request<T> {
 		return type;
 	}
 	
+
+	protected void log(int statusCode, Map<String, String> headers, JSONObject jObject, EtaError error) {
+
+		ArrayList<String> erns = null;
+		
+		if (jObject != null) {
+			
+			erns = new ArrayList<String>();
+			
+			if (jObject.has(Param.ERN)) {
+				
+				try {
+					erns.add(jObject.getString(Param.ERN));
+				} catch (JSONException e) {
+					EtaLog.d(TAG, e);
+				}
+				
+			} else {
+				// TODO: Find better solution
+				erns.add("Non ern object");
+			}
+			
+		}
+		
+		setLogDebug(statusCode, headers, erns, error);
+		
+	}
+	
+	protected void log(int statusCode, Map<String, String> headers, JSONArray jArray, EtaError error) {
+		
+		ArrayList<String> erns = null;
+		
+		if (jArray != null) {
+			
+			erns = new ArrayList<String>();
+			
+			try {
+				
+				if (0 < jArray.length() && jArray.get(0) instanceof JSONObject && jArray.getJSONObject(0).has(Param.ERN) ) {
+					
+					for (int i = 0 ; i < jArray.length() ; i++ ) {
+						JSONObject o = jArray.getJSONObject(i);
+						if (o.has(Param.ERN)) {
+							erns.add(o.getString(Param.ERN));
+						} else {
+							erns.add("A mixed set of objects... do we support that?");
+						}
+					}
+					
+				} else {
+					// TODO: Find better solution
+					erns.add("Non ern object");
+				}
+				
+			} catch (JSONException e) {
+				EtaLog.d(TAG, e);
+			}
+			
+		}
+		
+		setLogDebug(statusCode, headers, erns, error);
+		
+	}
+	
+	private void setLogDebug(int statusCode, Map<String, String> headers, List<String> erns, EtaError error) {
+		
+		try {
+			
+			// Server Response
+			JSONObject response = new JSONObject();
+			response.put("code", statusCode);
+			response.put("resources", erns == null ? null : new JSONArray(erns));
+			response.put("error", error == null ? null : error.toJSON());
+			response.put("headers", headers == null ? new JSONObject() : new JSONObject(headers));
+			
+			// Client request
+			JSONObject request = new JSONObject();
+			request.put("method", getMethodString());
+			request.put("url", Utils.buildQueryString(this));
+			request.put(HTTP.CONTENT_TYPE, getBodyContentType());
+			request.put("headers", new JSONObject(getHeaders()));
+			request.put("time", Utils.formatDate(new Date()));
+			request.put("response", response);
+			
+			getLog().setSummary(request);
+			
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		
+	}
 	
 }

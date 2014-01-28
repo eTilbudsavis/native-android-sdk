@@ -9,7 +9,6 @@ import android.os.Handler;
 
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -64,18 +63,18 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	private final EventLog mLog;
 	
 	private boolean mCacheHit = false;
-	
-	/** Allows for the network reponse printed */
+
+	/** Allows for the network response printed */
     private boolean mDebugNetwork = false;
 
-	/** Allows for log to be printed */
-    private boolean mDebugLog = false;
-    
-    /** String containing network debug info */
-    private String mDebugNetworkString = "Networkwork not complete yet";
+	/** Allows for the network response printed */
+    private boolean mDebugPerformance = false;
     
 	/** Handler, for returning requests on correct queue */
 	private Handler mHandler;
+	
+	/** Boolean deciding if the summary should be added to RequestQueue log entries */
+	private boolean mLogSummary = true;
 	
 	public enum Priority {
 		LOW, MEDIUM, HIGH
@@ -107,8 +106,28 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		mLog.add(event);
 	}
 	
+	/**
+	 * Get the log for this request, log contains actions, and timings that have been performed on this request
+	 * @return
+	 */
 	public EventLog getLog() {
 		return mLog;
+	}
+	
+	/**
+	 * If true, this requests summary (found in the EventLog with getLog()) will be saved in
+	 * the RequestQueue's log history. This is true by default.<br><br>
+	 * This can be set to false, if you e.g. want to avoid flooding the log. As seen in the ListSyncManager.
+	 * @param saveSummaryToLog true is logging should be enabled for this request.
+	 * @return this object
+	 */
+	public Request logSummary(boolean saveSummaryToLog) {
+		mLogSummary = saveSummaryToLog;
+		return this;
+	}
+	
+	public boolean logSummary() {
+		return mLogSummary;
 	}
 	
 	/** Mark this request as canceled.  No callback will be delivered. */
@@ -251,7 +270,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return mCache;
 	}
 	
-	public Request setCache(Map<String, Cache.Item> cache) {
+	public Request putCache(Map<String, Cache.Item> cache) {
 		mCache.putAll(cache);
 		return this;
 	}
@@ -348,74 +367,34 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return left == right ? this.mSequence - other.mSequence : right.ordinal() - left.ordinal();
 	}
 	
-    public boolean mayCache(NetworkResponse response) {
-    	return true;
-    }
-    
-	public Request debugPrintNetwork(boolean debug) {
-		mDebugNetwork = debug;
+	public Request debugPerformance(boolean printRequestTimings) {
+		mDebugPerformance = printRequestTimings;
 		return this;
 	}
 	
-	public Request debugPrintLog(boolean debug) {
-		mDebugLog = debug;
+	public Request debugNetwork(boolean printNetworkInfo) {
+		mDebugNetwork = printNetworkInfo;
 		return this;
 	}
 	
-	/**
-	 * Prints the debug info stores for this request
-	 */
-    public void debugPrint() {
-
-    	if (mDebugLog) {
-    		EtaLog.d(TAG, mLog.getString(getClass().getSimpleName()));
-    	}
-    	if (mDebugNetwork) {
-        	EtaLog.d(TAG, mDebugNetworkString);
-    	}
-
-    }
-    
-	public void debugNetworkResponse(NetworkResponse r) {
+	public void debugPrint() {
 		
-		String newLine = System.getProperty("line.separator");
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append("--- Begin debug - Request -----------------------------------").append(newLine);
-		sb.append(getMethodString()).append(" ").append(getUrl()).append(newLine);
-		sb.append("Query:        ").append(mQuery.toString()).append(newLine);
-		sb.append("Content-Type: ").append(getBodyContentType()).append(newLine);
-		if (getBody() != null) {
-		sb.append("Body:         ").append(new String(getBody())).append(newLine);
-		}
-		sb.append("Headers:      ").append(getHeaders().toString()).append(newLine);
-    	sb.append("--- Network Response ----------------------------------------").append(newLine);
-		sb.append("HTTP-SC:      ").append(r.statusCode).append(newLine);
-		sb.append("Headers:      ").append(r.headers.toString()).append(newLine);
-		
-		String data = new String(r.data);
-		
-		int l = data.length();
-		if (data != null && 400 < l ) {
-			data = data.substring(0, 200) + " ( TOO MUCH DATA FOR LOGCAT, ONLY DISPLAYING A SUBSTRING ) " + data.substring(l-100, l-1);
+		if (mDebugNetwork) {
+			mLog.printSummary();
 		}
 		
-		sb.append("Data:         ").append(data).append(newLine);
-		sb.append("--- End debug - Request -------------------------------------");
-		
-		mDebugNetworkString = sb.toString();
+		if (mDebugPerformance) {
+			mLog.printEventLog(getClass().getSimpleName());
+		}
 		
 	}
-	
 	
 	public class Endpoint extends com.eTilbudsavis.etasdk.Utils.Endpoint { }
-
+	
 	public class Param extends com.eTilbudsavis.etasdk.Utils.Param { }
-
+	
 	public class Sort extends com.eTilbudsavis.etasdk.Utils.Sort { }
-
+	
 	public class Header extends com.eTilbudsavis.etasdk.Utils.Header { }
-	
-	
 	
 }

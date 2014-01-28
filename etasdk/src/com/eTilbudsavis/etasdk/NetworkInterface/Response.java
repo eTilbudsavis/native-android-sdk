@@ -5,13 +5,7 @@ import java.util.Map;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 
 public class Response<T> {
-
-    /** Callback interface for delivering parsed responses. */
-    public interface Listener<T> {
-        /** Called when a response is received. */
-        public void onComplete(T response, EtaError error);
-    }
-    
+	
     /** Parsed response, or null in the case of error. */
     public final T result;
     
@@ -42,6 +36,12 @@ public class Response<T> {
     
     public boolean isSuccess() {
     	return error == null;
+    }
+
+    /** Callback interface for delivering parsed responses. */
+    public interface Listener<T> {
+        /** Called when a response is received. */
+        public void onComplete(T response, EtaError error);
     }
     
 }

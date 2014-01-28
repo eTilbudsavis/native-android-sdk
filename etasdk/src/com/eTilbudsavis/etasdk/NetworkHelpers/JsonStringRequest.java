@@ -1,5 +1,7 @@
 package com.eTilbudsavis.etasdk.NetworkHelpers;
 
+import java.util.HashMap;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,6 +11,7 @@ import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class JsonStringRequest extends JsonRequest<String>{
 	
@@ -25,20 +28,28 @@ public class JsonStringRequest extends JsonRequest<String>{
 		try {
 			String json = new String(response.data);
 			
-			try {
-				if (json.startsWith("{") && json.endsWith("}")) {
-					putJSON(new JSONObject(json));
-				} else if (json.startsWith("[") && json.endsWith("]")) {
-					putJSON(new JSONArray(json));
-				}
+			if (Utils.isSuccess(response.statusCode)) {
 				
-			} catch (JSONException e) {
-				EtaLog.d(TAG, e);
+				try {
+					if (json.startsWith("{") && json.endsWith("}")) {
+						putJSON(new JSONObject(json));
+					} else if (json.startsWith("[") && json.endsWith("]")) {
+						putJSON(new JSONArray(json));
+					}
+					
+				} catch (JSONException e) {
+					EtaLog.d(TAG, e);
+				}
+	            return Response.fromSuccess(json, getCache());
+	            
+			} else {
+				
+				return Response.fromError(EtaError.fromJSON(new JSONObject(json)));
+				
 			}
 			
-            return Response.fromSuccess(json, getCache());
         } catch (Exception e) {
-            return Response.fromError(new ParseError(this, response));
+            return Response.fromError(new ParseError(e));
         }
 	}
 
@@ -61,7 +72,11 @@ public class JsonStringRequest extends JsonRequest<String>{
         }
         
         if (cacheString != null) {
-        	return Response.fromSuccess(cacheString, null);
+
+    		Response<String> cache = Response.fromSuccess(cacheString, null);
+    		
+    		return cache;
+    		
         }
 		return null;
 	}

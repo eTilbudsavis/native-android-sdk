@@ -154,6 +154,9 @@ public class ListSyncManager {
 		synchronized (mCurrentRequests) {
 			mCurrentRequests.add(r);
 		}
+		// Make sure, that requests will return to this thread
+		r.setHandler(mHandler);
+		mEta.add(r);
 	}
 	
 	private void popRequest() {
@@ -240,7 +243,7 @@ public class ListSyncManager {
 		};
 		
 		JsonArrayRequest listRequest = new JsonArrayRequest(Method.GET, Request.Endpoint.lists(mEta.getUser().getId()), listListener);
-
+		listRequest.logSummary(false);
 		addRequest(listRequest);
 		
 	}
@@ -383,7 +386,7 @@ public class ListSyncManager {
 			};
 			
 			JsonObjectRequest modifiedRequest = new JsonObjectRequest(Request.Endpoint.listModified(mEta.getUser().getId(), sl.getId()), modifiedListener);
-
+			modifiedRequest.logSummary(false);
 			addRequest(modifiedRequest);
 			
 		}
@@ -445,7 +448,7 @@ public class ListSyncManager {
 		};
 		
 		JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Request.Endpoint.listitems(mEta.getUser().getId(), sl.getId()), itemListener);
-
+		itemRequest.logSummary(false);
 		addRequest(itemRequest);
 		
 	}

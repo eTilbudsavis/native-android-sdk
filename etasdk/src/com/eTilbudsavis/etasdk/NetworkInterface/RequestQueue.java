@@ -1,8 +1,13 @@
 package com.eTilbudsavis.etasdk.NetworkInterface;
 
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.os.Bundle;
 
@@ -10,15 +15,17 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
-import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressWarnings("rawtypes")
 public class RequestQueue {
 	
 	public static final String TAG = "RequestQueue";
-	
+
     /** Number of network request dispatcher threads to start. */
     private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;
+
+    /** Number of log entries the RequestQueue should save. */
+    private static final int DEFAULT_LOG_SIZE = 20;
     
     /** Eta object controlling the whole lot */
     private final Eta mEta;
@@ -50,26 +57,33 @@ public class RequestQueue {
     /** Atomic number generator for sequencing requests in the queues */
     private AtomicInteger mSequenceGenerator = new AtomicInteger();
     
+    private List<JSONObject> mLog;
+    
+    private int mLogSize;
+    
     /**
      * 
-     * @param eta
-     * @param cache
-     * @param network
-     * @param poolSize
-     * @param delivery
+     * @param eta, the eTilbudsavis SDK object to use for requests
+     * @param cache to use for this RequestQueue
+     * @param network the implementation you want to use for this RequestQueue
+     * @param poolSize, number of threads to do requests
+     * @param delivery object for returning objects to UI thread
+     * @param logSize the number of logs to save. use 0 to skip logging.
      */
-    public RequestQueue(Eta eta, Cache cache, Network network, int poolSize, Delivery delivery) {
+    public RequestQueue(Eta eta, Cache cache, Network network, int poolSize, Delivery delivery, int logSize) {
     	mEta = eta;
 		mCache = cache;
 		mNetwork = network;
 		mDelivery = delivery;
 		mNetworkDispatchers = new NetworkDispatcher[poolSize];
 		mDelivery.mRequestQueue = this;
+		mLogSize = logSize;
+		mLog = Collections.synchronizedList(new LinkedList<JSONObject>());
 	}
     
 	/** Construct with default poolsize, and the eta handler running on main thread */
     public RequestQueue(Eta eta, Cache cache, Network network) {
-    	this(eta, cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE, new Delivery(eta.getHandler()));
+    	this(eta, cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE, new Delivery(eta.getHandler()), DEFAULT_LOG_SIZE);
     }
     
 	/** Initialize all mechanisms required to dispatch requests */
@@ -133,17 +147,42 @@ public class RequestQueue {
 	 * @param req - request, that finished
 	 * @param resp - the server response
 	 */
-	public void finish(Request req, Response resp) {
+	public synchronized void finish(Request req, Response resp) {
 		
-    	EtaLog.d(TAG, "( " + req.getLog().getTotalDuration() + "ms ) " + req.getMethodString() + " " + Utils.buildQueryString(req));
+		// If the log is enabled, add the request summary
+		if (mLogSize > 0 && req.logSummary()) {
+			
+			JSONObject s = req.getLog().getSummary();
+			try {
+				s.put("duration", req.getLog().getTotalDuration());
+			} catch (JSONException e) {
+				EtaLog.d(TAG, e);
+			}
+			
+			synchronized (mLog) {
+				
+				if (mLog.size() == mLogSize) {
+					mLog.remove(0);
+				}
+				mLog.add(s);
+				
+			}
+			
+		}
 		
+	}
+	
+	/**
+	 * Returns the log entries for the last <i>logSize</i> requests
+	 * @return
+	 */
+	public List<JSONObject> getRequestLogs() {
+		return mLog;
 	}
 	
 	/** Add a new request to this RequestQueue, everything from this point onward will be performed on separate threads */
     public Request add(Request r) {
     	
-    	EtaLog.d(TAG, r.getMethodString() + " " + r.getUrl());
-		
     	r.setSequence(mSequenceGenerator.incrementAndGet());
     	
 		prepareRequest(r);

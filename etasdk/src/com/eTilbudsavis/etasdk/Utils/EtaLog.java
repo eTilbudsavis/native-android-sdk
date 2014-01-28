@@ -1,9 +1,13 @@
 package com.eTilbudsavis.etasdk.Utils;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.SystemClock;
@@ -16,19 +20,43 @@ public class EtaLog {
 
 	public static final String TAG = "EtaLog";
 	
+	private static boolean mEnableLogHistory = false;
+	private static final List<JSONObject> mExceptionHistory = Collections.synchronizedList(new ArrayList<JSONObject>());
+	
 	public static void d(String tag, String message) {
 		if (!Eta.DEBUG_LOGD) return;
 		Log.d(tag, message);
 	}
 
 	public static void d(String tag, Exception e) {
-		if (!Eta.DEBUG_LOGD) return;
-		e.printStackTrace(); 
+		d(tag, (Throwable)e);
 	}
 	
 	public static void d(String tag, Throwable t) {
 		if (!Eta.DEBUG_LOGD) return;
+		addLog(t);
 		t.printStackTrace(); 
+	}
+	
+	private static void addLog(Throwable t) {
+		
+		if (!mEnableLogHistory) {
+			return;
+		}
+		
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		t.printStackTrace(pw);
+		String stacktrace = sw.toString();
+		JSONObject log = new JSONObject();
+		try {
+			log.put("exception", t.getClass().getName());
+			log.put("stacktrace", stacktrace);
+			mExceptionHistory.add(log);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public static void dAll(String tag, String message) {
@@ -60,6 +88,14 @@ public class EtaLog {
 		Log.d(tag, name + ": Response: " + (response == null ? "null" : "Success") + ", Error: " + (error == null ? "null" : error.toJSON().toString()));
 	}
 	
+	public static void enableExceptionHistory(boolean enable) {
+		mEnableLogHistory = enable;
+	}
+	
+	public static List<JSONObject> getExceptionHistory() {
+		return mExceptionHistory;
+	}
+	
 	public static void printStackTrace() {
 		if (!Eta.DEBUG_LOGD) return;
 			for (StackTraceElement ste : Thread.currentThread().getStackTrace())
@@ -71,7 +107,8 @@ public class EtaLog {
 		public static final String TAG = "EventLog";
 		
 		List<Event> mEvents = new ArrayList<Event>(0);
-
+		JSONObject mSummary;
+		
 		public void add(String name) {
 			add(new Event(name, SystemClock.elapsedRealtime(), Thread.currentThread().getName()));
 		}
@@ -80,7 +117,27 @@ public class EtaLog {
 			mEvents.add(e);
 		}
 		
-		public void print(String name) {
+		/**
+		 * Summary can be any information you want.
+		 * @param summary
+		 */
+		public void setSummary(JSONObject summary) {
+			mSummary = summary;
+		}
+		
+		/**
+		 * Returns the EventLog summary, there are no specifics on what a summary can or may contain.
+		 * @return
+		 */
+		public JSONObject getSummary() {
+			return mSummary == null ? new JSONObject() : mSummary;
+		}
+		
+		public void printSummary() {
+			d(TAG, getSummary().toString());
+		}
+		
+		public void printEventLog(String name) {
 			d(TAG, getString(name));
 		}
 		
