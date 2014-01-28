@@ -32,10 +32,12 @@ import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ListSyncManager {
-
+	
 	public static final String TAG = "ListSyncManager";
-
+	
 	private static final String THREAD_NAME = "ListSyncManager";
+	
+	private static final boolean USE_LOG_SUMMARY = false;
 	
 	private int mSyncSpeed = 3000;
 	
@@ -243,11 +245,11 @@ public class ListSyncManager {
 		};
 		
 		JsonArrayRequest listRequest = new JsonArrayRequest(Method.GET, Request.Endpoint.lists(mEta.getUser().getId()), listListener);
-		listRequest.logSummary(false);
+		listRequest.logSummary(USE_LOG_SUMMARY);
 		addRequest(listRequest);
 		
 	}
-
+	
 	private void mergeShoppinglists(List<Shoppinglist> serverList, List<Shoppinglist> localList, User user) {
 		
 		if (serverList.isEmpty() && localList.isEmpty())
@@ -386,7 +388,7 @@ public class ListSyncManager {
 			};
 			
 			JsonObjectRequest modifiedRequest = new JsonObjectRequest(Request.Endpoint.listModified(mEta.getUser().getId(), sl.getId()), modifiedListener);
-			modifiedRequest.logSummary(false);
+			modifiedRequest.logSummary(USE_LOG_SUMMARY);
 			addRequest(modifiedRequest);
 			
 		}
@@ -448,7 +450,7 @@ public class ListSyncManager {
 		};
 		
 		JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Request.Endpoint.listitems(mEta.getUser().getId(), sl.getId()), itemListener);
-		itemRequest.logSummary(false);
+		itemRequest.logSummary(USE_LOG_SUMMARY);
 		addRequest(itemRequest);
 		
 	}

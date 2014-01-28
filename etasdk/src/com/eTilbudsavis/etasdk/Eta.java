@@ -13,10 +13,6 @@ package com.eTilbudsavis.etasdk;
 
 import java.io.Serializable;
 
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -31,9 +27,7 @@ import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
 import com.eTilbudsavis.etasdk.NetworkInterface.Network;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue;
-import com.eTilbudsavis.etasdk.Utils.Device;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 // Main object for interacting with the SDK.
@@ -61,22 +55,8 @@ public class Eta implements Serializable {
 	private RequestQueue mRequestQueue;
 	private Cache mCache = new Cache();
 	private ConnectivityManager mConnectivityManager;
-//	private EventLog mGlobalLog;
 	
 	private Eta() {
-		
-//		JSONObject o = new JSONObject();
-//		try {
-//			o.put("version", (getAppVersion() == null ? "null" : getAppVersion()));
-//			o.put("model", Device.getModel());
-//			o.put("android", Device.getBuildVersion());
-//			o.put("baseband", Device.getRadio());
-//			o.put("kernel", Device.getKernel());
-//		} catch (JSONException e) {
-//			EtaLog.d(TAG, e);
-//		}
-//		mGlobalLog.add(o.toString());
-		
 		Cache c = new Cache();
 		Network n = new HttpNetwork();
 		mRequestQueue = new RequestQueue(this, c, n);
@@ -124,13 +104,13 @@ public class Eta implements Serializable {
 		} else {
 			EtaLog.d(TAG, "Eta already set. apiKey, apiSecret and context has been switched");
 		}
-
+		
 	}
 	
 	public boolean isSet() {
 		return mApiKey != null && mApiSecret == null;
 	}
-
+	
 	public boolean isOnline() {
 		NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
 		return netInfo != null && netInfo.isConnected();

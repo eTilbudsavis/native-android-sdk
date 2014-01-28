@@ -13,9 +13,7 @@ import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
 import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Endpoint;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class JsonArrayRequest extends JsonRequest<JSONArray> {

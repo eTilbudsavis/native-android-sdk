@@ -1,6 +1,5 @@
 package com.eTilbudsavis.etasdk;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -21,7 +20,6 @@ import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Priority;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class SessionManager {
@@ -48,15 +46,6 @@ public class SessionManager {
 	private Request<?> mReqInFlight;
 	
 	private ArrayList<OnSessionChangeListener> mSubscribers = new ArrayList<OnSessionChangeListener>();
-	SntpClient s = new SntpClient();
-	private Runnable mSessionPutter = new Runnable() {
-		
-		public void run() {
-			
-			putSession(getSessionListener(null));
-			
-		}
-	};
 	
 	public SessionManager(Eta eta) {
 		mEta = eta;
@@ -229,38 +218,6 @@ public class SessionManager {
 		} else {
 			putSession(null);
 		}
-		
-		
-		Thread t = new Thread(new Runnable() {
-			
-			public void run() {
-				
-				s.requestTime("0.pool.ntp.org", 15000);
-				long ntp = s.getNtpTime();
-				long sys = System.currentTimeMillis();
-				long delta = ntp - sys;
-				long abdDelta = Math.abs(delta);
-				
-				if (abdDelta < Utils.MINUTE_IN_MILLIS) {
-					EtaLog.d(TAG, "Nothing to worry about, time seems fine.");
-				} else {
-					EtaLog.d(TAG, "NPT: " + new Date(ntp).toGMTString());
-					EtaLog.d(TAG, "SYS: " + new Date(sys).toGMTString());
-				}
-				
-				String message;
-				if (delta < 0) {
-					message = String.format("System time is ahead of NTP by %s seconds", abdDelta / 1000);
-				} else if (delta > 0) {
-					message = String.format("System time is behind of NTP by %s seconds", abdDelta / 1000);
-				} else {
-					message = "System time is exactly the same as NTP";
-				}
-				EtaLog.d(TAG, message);
-				
-			}
-		});
-		t.start();
 		
 	}
 	

@@ -57,9 +57,8 @@ public class RequestQueue {
     /** Atomic number generator for sequencing requests in the queues */
     private AtomicInteger mSequenceGenerator = new AtomicInteger();
     
+    /** Logging mechanism that allows for the summary of requests to be stored */
     private List<JSONObject> mLog;
-    
-    private int mLogSize;
     
     /**
      * 
@@ -77,8 +76,7 @@ public class RequestQueue {
 		mDelivery = delivery;
 		mNetworkDispatchers = new NetworkDispatcher[poolSize];
 		mDelivery.mRequestQueue = this;
-		mLogSize = logSize;
-		mLog = Collections.synchronizedList(new LinkedList<JSONObject>());
+		mLog = Collections.synchronizedList(new LinkedListFixedLength<JSONObject>(logSize));
 	}
     
 	/** Construct with default poolsize, and the eta handler running on main thread */
@@ -150,23 +148,15 @@ public class RequestQueue {
 	public synchronized void finish(Request req, Response resp) {
 		
 		// If the log is enabled, add the request summary
-		if (mLogSize > 0 && req.logSummary()) {
+		if (req.logSummary()) {
 			
-			JSONObject s = req.getLog().getSummary();
+			JSONObject summary = req.getLog().getSummary();
 			try {
-				s.put("duration", req.getLog().getTotalDuration());
+				summary.put("duration", req.getLog().getTotalDuration());
 			} catch (JSONException e) {
 				EtaLog.d(TAG, e);
 			}
-			
-			synchronized (mLog) {
-				
-				if (mLog.size() == mLogSize) {
-					mLog.remove(0);
-				}
-				mLog.add(s);
-				
-			}
+			mLog.add(summary);
 			
 		}
 		

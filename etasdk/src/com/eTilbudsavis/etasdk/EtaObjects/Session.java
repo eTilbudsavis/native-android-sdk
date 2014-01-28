@@ -15,7 +15,7 @@ public class Session extends EtaObject implements Serializable {
 	public static final String TAG = "Session";
 	
 	private static final long serialVersionUID = 1L;
-
+	
 	private String mToken = null;
 	private Date mExpires = new Date(1000);
 	private User mUser = new User();
@@ -60,11 +60,7 @@ public class Session extends EtaObject implements Serializable {
 		}
 		return o;
 	}
-
-	public boolean isExpired() {
-		return mExpires == null ? true : mExpires.getTime() < System.currentTimeMillis();
-	}
-
+	
 	/**
 	 * Get this Sessions token. Used for headers in API calls
 	 * @return token as String if session is active, otherwise null.
@@ -77,48 +73,48 @@ public class Session extends EtaObject implements Serializable {
 		mToken = token;
 		return this;
 	}
-
+	
 	public User getUser() {
 		return mUser;
 	}
-
+	
 	public Session setUser(User user) {
 		mUser = user == null ? new User() : user;
 		return this;
 	}
-
+	
 	public Session setPermission(Permission permission) {
 		mPermission = permission;
 		return this;
 	}
-
+	
 	public Permission getPermission() {
 		return mPermission;
 	}
-
+	
 	public Session setProvider(String provider) {
 		mProvider = provider;
 		return this;
 	}
-
+	
 	public String getProvider() {
 		return mProvider;
 	}
-
+	
 	public Session setExpires(String time) {
 	    mExpires = Utils.parseDate(time);
 	    return this;
 	}
-
+	
 	public Session setExpires(Date time) {
 	    mExpires = time;
 	    return this;
 	}
-
+	
 	public Date getExpire() {
 		return mExpires;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -133,7 +129,7 @@ public class Session extends EtaObject implements Serializable {
 		result = prime * result + ((mUser == null) ? 0 : mUser.hashCode());
 		return result;
 	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -170,7 +166,5 @@ public class Session extends EtaObject implements Serializable {
 			return false;
 		return true;
 	}
-	
-	
 	
 }

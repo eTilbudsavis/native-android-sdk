@@ -5,8 +5,6 @@ import java.util.concurrent.BlockingQueue;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 @SuppressWarnings("rawtypes")
 public class CacheDispatcher extends Thread {

@@ -3,8 +3,6 @@ package com.eTilbudsavis.etasdk.NetworkHelpers;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
-
 public class EtaError extends Exception {
 	
 	private static final long serialVersionUID = 1L;

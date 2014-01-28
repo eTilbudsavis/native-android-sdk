@@ -32,9 +32,13 @@ public class JsonStringRequest extends JsonRequest<String>{
 				
 				try {
 					if (json.startsWith("{") && json.endsWith("}")) {
-						putJSON(new JSONObject(json));
+						JSONObject jObject = new JSONObject(json);
+						log(response.statusCode, response.headers, jObject, null);
+						putJSON(jObject);
 					} else if (json.startsWith("[") && json.endsWith("]")) {
-						putJSON(new JSONArray(json));
+						JSONArray jArray = new JSONArray(json);
+						log(response.statusCode, response.headers, jArray, null);
+						putJSON(jArray);
 					}
 					
 				} catch (JSONException e) {
@@ -44,7 +48,9 @@ public class JsonStringRequest extends JsonRequest<String>{
 	            
 			} else {
 				
-				return Response.fromError(EtaError.fromJSON(new JSONObject(json)));
+				Response<String> r = Response.fromError(EtaError.fromJSON(new JSONObject(json)));
+				log(response.statusCode, response.headers, new JSONObject(), r.error);
+				return r;
 				
 			}
 			
@@ -74,6 +80,19 @@ public class JsonStringRequest extends JsonRequest<String>{
         if (cacheString != null) {
 
     		Response<String> cache = Response.fromSuccess(cacheString, null);
+    		
+
+			try {
+				
+				if (cache.result.startsWith("{") && cache.result.endsWith("}")) {
+					log(0, new HashMap<String, String>(), new JSONObject(cache.result), null);
+				} else if (cache.result.startsWith("[") && cache.result.endsWith("]")) {
+					log(0, new HashMap<String, String>(), new JSONArray(cache.result), null);
+				}
+				
+			} catch (JSONException e) {
+				EtaLog.d(TAG, e);
+			}
     		
     		return cache;
     		

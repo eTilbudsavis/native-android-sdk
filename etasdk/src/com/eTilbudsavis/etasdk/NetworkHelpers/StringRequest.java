@@ -80,7 +80,7 @@ public class StringRequest extends Request<String> {
         }
         
 		mCache.put(Utils.buildQueryString(this), new Cache.Item(string, getCacheTTL()));
-		        
+		
         return Response.fromSuccess(string, mCache);
 	}
 
