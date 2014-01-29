@@ -53,7 +53,7 @@ public class Eta implements Serializable {
 	private static Handler mHandler;
 	private boolean mResumed = false;
 	private RequestQueue mRequestQueue;
-	private Cache mCache = new Cache();
+	private Cache mCache;
 	private ConnectivityManager mConnectivityManager;
 	
 	private Eta() {
@@ -175,11 +175,11 @@ public class Eta implements Serializable {
 		mRequestQueue.add(r);
 		return r;
 	}
-
+	
 	public RequestQueue getRequestQueue() {
 		return mRequestQueue;
 	}
-
+	
 	/**
 	 * Get the currently active session.
 	 * @return a session
@@ -242,11 +242,16 @@ public class Eta implements Serializable {
 	 * This includes the session and user.
 	 * @return Returns true if the new values were successfully written to persistent storage.
 	 */
-	public boolean clearPreferences() {
+	public void clearPreferences() {
 		mSessionManager.invalidate();
-		return mSettings.clear();
+		mSettings.clear();
 	}
-
+	
+	public void clearLogs() {
+		mRequestQueue.getLog().clear();
+		EtaLog.getExceptionLog().clear();
+	}
+	
 	public boolean isResumed() {
 		return mResumed;
 	}

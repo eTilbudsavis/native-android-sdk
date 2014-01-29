@@ -2,6 +2,7 @@ package com.eTilbudsavis.etasdk.Utils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,10 +11,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.SystemClock;
 import android.util.Log;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.FixedArrayList;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 
 public class EtaLog {
@@ -21,7 +22,7 @@ public class EtaLog {
 	public static final String TAG = "EtaLog";
 	
 	private static boolean mEnableLogHistory = false;
-	private static final List<JSONObject> mExceptionHistory = Collections.synchronizedList(new ArrayList<JSONObject>());
+	private static final EventLog mExceptionLog = new EventLog(64);
 	
 	public static void d(String tag, String message) {
 		if (!Eta.DEBUG_LOGD) return;
@@ -52,7 +53,7 @@ public class EtaLog {
 		try {
 			log.put("exception", t.getClass().getName());
 			log.put("stacktrace", stacktrace);
-			mExceptionHistory.add(log);
+			mExceptionLog.add(EventLog.TYPE_EXCEPTION, log);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -92,8 +93,8 @@ public class EtaLog {
 		mEnableLogHistory = enable;
 	}
 	
-	public static List<JSONObject> getExceptionHistory() {
-		return mExceptionHistory;
+	public static EventLog getExceptionLog() {
+		return mExceptionLog;
 	}
 	
 	public static void printStackTrace() {
@@ -103,18 +104,56 @@ public class EtaLog {
 	}
 	
 	public static class EventLog {
-
+		
+		public static final String TYPE_REQUEST = "request";
+		public static final String TYPE_EXCEPTION = "exception";
+		public static final String TYPE_VIEW = "view";
+		public static final String TYPE_LOG = "log";
+		
 		public static final String TAG = "EventLog";
 		
-		List<Event> mEvents = new ArrayList<Event>(0);
+		List<Event> mEvents;
 		JSONObject mSummary;
 		
+		public EventLog() {
+			mEvents = Collections.synchronizedList(new ArrayList<EtaLog.EventLog.Event>());
+		}
+		
+		public EventLog(int logSize) {
+			mEvents = Collections.synchronizedList(new FixedArrayList<EtaLog.EventLog.Event>(logSize));
+		}
+		
 		public void add(String name) {
-			add(new Event(name, SystemClock.elapsedRealtime(), Thread.currentThread().getName()));
+			add(name, null, null);
+		}
+		
+		public void add(String type, JSONObject data) {
+			add(type, type, data);
+		}
+		
+		private void add(String name, String type, JSONObject data) {
+			long time = System.currentTimeMillis();
+			String user = Eta.getInstance().getUser().getErn();
+			String token = Eta.getInstance().getSessionManager().getSession().getToken();
+			add(new Event(name, time, type, user, token, data));
 		}
 		
 		public void add(Event e) {
 			mEvents.add(e);
+		}
+		
+		public void clear() {
+			mEvents.clear();
+		}
+		
+		public List<Event> getType(String type) {
+			List<Event> tmp = new ArrayList<EtaLog.EventLog.Event>();
+			for (Event e : mEvents) {
+				if (e.type.equals(type)) {
+					tmp.add(e);
+				}
+			}
+			return null;
 		}
 		
 		/**
@@ -137,46 +176,85 @@ public class EtaLog {
 			d(TAG, getSummary().toString());
 		}
 		
+		/**
+		 * Prints the timing of events.<br>
+		 * This is 
+		 * @param name
+		 */
 		public void printEventLog(String name) {
-			d(TAG, getString(name));
-		}
-		
-		public String getString(String name) {
-			if (mEvents.isEmpty())
-				return String.format("[%+6d ms] %s", 0, name);
+			
+			if (mEvents.isEmpty()) {
+				d(TAG, String.format("[%+6d ms] %s", 0, name));
+			}
 			
 			StringBuilder sb = new StringBuilder();
 			long prevTime = mEvents.get(0).time;
 			sb.append(String.format("     [%+6d ms] %s", getTotalDuration(), name)).append("\n");
 			for (int i = 0; i < mEvents.size() ; i++) {
 				Event e = mEvents.get(i);
-				long thisTime = e.time;
-				sb.append(String.format("[%2d] [%+6d ms] %s", i,(thisTime - prevTime), e.name)).append("\n");
-				prevTime = thisTime;
+				sb.append(String.format("[%2d] [%+6d ms] %s", i,(e.time - prevTime), e.name)).append("\n");
+				prevTime = e.time;
 			}
-			return sb.toString();
+			
+			d(TAG, sb.toString());
+		}
+		
+		public JSONArray toJSON() {
+			JSONArray jArray = new JSONArray();
+			if (mEvents.isEmpty()) {
+				return jArray;
+			}
+			
+			for (Event e : mEvents) {
+				jArray.put(e.toJSON());
+			}
+			
+			return jArray;
 		}
 		
 		public long getTotalDuration() {
-			if (mEvents.size() == 0) {
+			if (mEvents.isEmpty()) {
 				return 0;
 			}
-
+			
 			long first = mEvents.get(0).time;
 			long last = mEvents.get(mEvents.size() - 1).time;
 			return last - first;
+			
 		}
 		
 		public class Event {
-
-			public final String name;
+			
 			public final long time;
-			public final String thread;
-
-			public Event(String name, long time, String thread) {
-				this.name = name;
+			public final String type;
+			public final String token;
+			public final String user;
+			public final String name;
+			public final JSONObject data;
+			
+			public Event(String name, long time, String type, String user, String token, JSONObject data) {
+				this.name = name == null ? (type == null ? "unknown" : type) : name;
 				this.time = time;
-				this.thread = thread;
+				this.type = type;
+				this.user = user;
+				this.token = token;
+				this.data = data;
+			}
+			
+			public JSONObject toJSON() {
+				JSONObject o = new JSONObject();
+				try {
+					o.put("timestamp", Utils.formatDate(new Date(time)));
+					o.put("type", type);
+					o.put("token", token);
+					o.put("userid", user);
+					o.put("name", name);
+					o.put("data", data);
+				} catch (JSONException e) {
+					d(TAG, e);
+					
+				}
+				return o;
 			}
 
 		}

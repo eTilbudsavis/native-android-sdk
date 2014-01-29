@@ -1,8 +1,6 @@
 package com.eTilbudsavis.etasdk.NetworkInterface;
 
-import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,6 +12,7 @@ import android.os.Bundle;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
 
 @SuppressWarnings("rawtypes")
@@ -57,8 +56,7 @@ public class RequestQueue {
     /** Atomic number generator for sequencing requests in the queues */
     private AtomicInteger mSequenceGenerator = new AtomicInteger();
     
-    /** Logging mechanism that allows for the summary of requests to be stored */
-    private List<JSONObject> mLog;
+    private EventLog mLog;
     
     /**
      * 
@@ -76,7 +74,7 @@ public class RequestQueue {
 		mDelivery = delivery;
 		mNetworkDispatchers = new NetworkDispatcher[poolSize];
 		mDelivery.mRequestQueue = this;
-		mLog = Collections.synchronizedList(new LinkedListFixedLength<JSONObject>(logSize));
+		mLog = new EventLog(poolSize);
 	}
     
 	/** Construct with default poolsize, and the eta handler running on main thread */
@@ -97,7 +95,6 @@ public class RequestQueue {
             mNetworkDispatchers[i] = networkDispatcher;
             networkDispatcher.start();
         }
-        
     }
     
     /** Stop all currently running dispatchers (Staging, caching and network) */
@@ -149,24 +146,21 @@ public class RequestQueue {
 		
 		// If the log is enabled, add the request summary
 		if (req.logSummary()) {
-			
-			JSONObject summary = req.getLog().getSummary();
+
+			JSONObject data = req.getLog().getSummary();
 			try {
-				summary.put("duration", req.getLog().getTotalDuration());
+				data.put("duration", req.getLog().getTotalDuration());
 			} catch (JSONException e) {
 				EtaLog.d(TAG, e);
 			}
-			mLog.add(summary);
+			
+			mLog.add(EventLog.TYPE_REQUEST, data);
 			
 		}
 		
 	}
 	
-	/**
-	 * Returns the log entries for the last <i>logSize</i> requests
-	 * @return
-	 */
-	public List<JSONObject> getRequestLogs() {
+	public EventLog getLog() {
 		return mLog;
 	}
 	
