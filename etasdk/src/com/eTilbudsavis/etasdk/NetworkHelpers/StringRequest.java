@@ -1,6 +1,13 @@
 package com.eTilbudsavis.etasdk.NetworkHelpers;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.http.protocol.HTTP;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
 import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
@@ -81,7 +88,11 @@ public class StringRequest extends Request<String> {
         
 		mCache.put(Utils.buildQueryString(this), new Cache.Item(string, getCacheTTL()));
 		
-        return Response.fromSuccess(string, mCache);
+        Response<String> r = Response.fromSuccess(string, mCache);
+        
+        log(response.statusCode, response.headers, r.result, r.error);
+        
+        return r;
 	}
 
 	@Override
@@ -89,10 +100,42 @@ public class StringRequest extends Request<String> {
 		
 		String url = Utils.buildQueryString(this);
 		Cache.Item ci = c.get(url);
+		Response<String> r = null;
 		if (ci != null && ci.object instanceof String ) {
-			return Response.fromSuccess((String)ci.object, null);
+			r = Response.fromSuccess((String)ci.object, null);
+			log(0, new HashMap<String, String>(), r.result, r.error);
 		}
-		return null;
+		
+		return r;
 	}
+
+	protected void log(int statusCode, Map<String, String> headers, String successData, EtaError error) {
+		
+		try {
+			
+			// Server Response
+			JSONObject response = new JSONObject();
+			response.put("statuscode", statusCode);
+			response.put("success", successData);
+			response.put("error", error == null ? null : error.toJSON());
+			response.put("headers", headers == null ? new JSONObject() : new JSONObject(headers));
+			
+			// Client request
+			JSONObject request = new JSONObject();
+			request.put("method", getMethodString());
+			request.put("url", Utils.buildQueryString(this));
+			request.put(HTTP.CONTENT_TYPE, getBodyContentType());
+			request.put("headers", new JSONObject(getHeaders()));
+			request.put("time", Utils.formatDate(new Date()));
+			request.put("response", response);
+			
+			getLog().setSummary(request);
+			
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		
+	}
+	
 	
 }

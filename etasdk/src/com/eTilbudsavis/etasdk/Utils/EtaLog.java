@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -16,13 +17,16 @@ import android.util.Log;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.FixedArrayList;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request.Param;
 
 public class EtaLog {
 
 	public static final String TAG = "EtaLog";
 	
+	public static final int DEFAULT_EXCEPTION_LOG_SIZE = 64;
+	
 	private static boolean mEnableLogHistory = false;
-	private static final EventLog mExceptionLog = new EventLog(64);
+	private static final EventLog mExceptionLog = new EventLog(DEFAULT_EXCEPTION_LOG_SIZE);
 	
 	public static void d(String tag, String message) {
 		if (!Eta.DEBUG_LOGD) return;
@@ -80,13 +84,56 @@ public class EtaLog {
 	}
 	
 	public static void d(String tag, String name, JSONObject response, EtaError error) {
-		if (!Eta.DEBUG_LOGD) return;
-		Log.d(tag, name + ": Response: " + (response == null ? "null" : "Success") + ", Error: " + (error == null ? "null" : error.toJSON().toString()));
+		d(tag, name, (response == null ? "null" : response.toString()), error);
 	}
 
 	public static void d(String tag, String name, JSONArray response, EtaError error) {
+		
+		if (response == null) {
+			d(tag, name, "null", error);
+			return;
+		}
+		
+		if (response.length() == 0) {
+			d(tag, name, response.toString(), error);
+			return;
+		}
+		
+		String data = null;
+
+		try {
+			
+			if (response.get(0) instanceof JSONObject && response.getJSONObject(0).has(Param.ERN) ) {
+	
+				JSONArray tmp = new JSONArray();
+				for (int i = 0 ; i < response.length() ; i++ ) {
+					JSONObject o = response.getJSONObject(i);
+					if (o.has(Param.ERN)) {
+						tmp.put(o.getString(Param.ERN));
+					} else {
+						tmp.put("non-ern-object-in-list");
+					}
+				}
+				data = tmp.toString();
+	
+			} else {
+				data = response.toString();
+			}
+		
+
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		
+		d(tag, name, data, error);
+		
+	}
+	
+	public static void d(String tag, String name, String response, EtaError error) {
 		if (!Eta.DEBUG_LOGD) return;
-		Log.d(tag, name + ": Response: " + (response == null ? "null" : "Success") + ", Error: " + (error == null ? "null" : error.toJSON().toString()));
+		String e = error == null ? "null" : error.toJSON().toString();
+		String s = response == null ? "null" : response;
+		Log.d(tag, name + ": Response: " + s + ", Error: " + e );
 	}
 	
 	public static void enableExceptionHistory(boolean enable) {
@@ -140,6 +187,10 @@ public class EtaLog {
 		
 		public void add(Event e) {
 			mEvents.add(e);
+		}
+		
+		public List<Event> getEvents() {
+			return mEvents;
 		}
 		
 		public void clear() {
@@ -200,15 +251,16 @@ public class EtaLog {
 		}
 		
 		public JSONArray toJSON() {
+			return toJSON(mEvents);
+		}
+		
+		public static JSONArray toJSON(List<Event> events) {
 			JSONArray jArray = new JSONArray();
-			if (mEvents.isEmpty()) {
-				return jArray;
+			if (events != null && !events.isEmpty()) {
+				for (Event e : events) {
+					jArray.put(e.toJSON());
+				}
 			}
-			
-			for (Event e : mEvents) {
-				jArray.put(e.toJSON());
-			}
-			
 			return jArray;
 		}
 		
@@ -222,6 +274,20 @@ public class EtaLog {
 			return last - first;
 			
 		}
+
+		public static Comparator<Event> timestamp  = new Comparator<Event>() {
+			
+			public int compare(Event e1, Event e2) {
+				
+				if (e1 == null || e2 == null) {
+					return e1 == null ? (e2 == null ? 0 : 1) : -1;
+				} else {
+					return e1.time < e2.time ? -1 : 1;
+				}
+				
+			}
+
+		};
 		
 		public class Event {
 			
@@ -256,7 +322,7 @@ public class EtaLog {
 				}
 				return o;
 			}
-
+			
 		}
 
 	}

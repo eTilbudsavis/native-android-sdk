@@ -37,7 +37,7 @@ public class ListSyncManager {
 	
 	private static final String THREAD_NAME = "ListSyncManager";
 	
-	private static final boolean USE_LOG_SUMMARY = false;
+	private static final boolean USE_LOG_SUMMARY = true;
 	
 	private int mSyncSpeed = 3000;
 	
@@ -113,6 +113,7 @@ public class ListSyncManager {
 	
 	public ListSyncManager(Eta eta) {
 		mEta = eta;
+		//TODO: Why do i create a new thread for a Handler?
 		HandlerThread mThread = new HandlerThread(THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
 		mThread.start();
 		mHandler = new Handler(mThread.getLooper());

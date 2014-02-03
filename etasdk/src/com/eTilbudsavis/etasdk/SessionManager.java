@@ -227,9 +227,10 @@ public class SessionManager {
 	
 	private void postSession(final Listener<JSONObject> l) {
 		
-		Bundle args = new Bundle();
-		args.putInt(Request.Param.TOKEN_TTL, TTL);
-	    args.putString(Request.Param.API_KEY, mEta.getApiKey());
+		Map<String, Object> args = new HashMap<String, Object>();
+		
+		args.put(Request.Param.TOKEN_TTL, TTL);
+		args.put(Request.Param.API_KEY, mEta.getApiKey());
     	
 	    CookieSyncManager.createInstance(mEta.getContext());
 	    CookieManager cm = CookieManager.getInstance();
@@ -265,9 +266,9 @@ public class SessionManager {
 	        
 	        // If all three fields are set, then try to migrate
 	        if (authId != null && authHash != null && authTime != null) {
-	        	args.putString(Request.Param.V1_AUTH_ID, authId);
-	        	args.putString(Request.Param.V1_AUTH_HASH, authHash);
-	        	args.putString(Request.Param.V1_AUTH_TIME, authTime);
+	        	args.put(Request.Param.V1_AUTH_ID, authId);
+	        	args.put(Request.Param.V1_AUTH_HASH, authHash);
+	        	args.put(Request.Param.V1_AUTH_TIME, authTime);
 	        }
 	        
 	        // Clear all cookie data, just to make sure
@@ -275,7 +276,7 @@ public class SessionManager {
 	        
 	    }
 	    
-	    JsonObjectRequest req = new JsonObjectRequest(Method.POST, Request.Endpoint.SESSIONS, Utils.createJSON(args), getSessionListener(l));
+	    JsonObjectRequest req = new JsonObjectRequest(Method.POST, Request.Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
 	    addRequest(req);
 	    
 	}
@@ -292,12 +293,12 @@ public class SessionManager {
 	 * @param l for callback on complete
 	 */
 	public void login(String email, String password, Listener<JSONObject> l) {
-
-		Bundle args = new Bundle();
-		args.putString(Request.Param.EMAIL, email);
-		args.putString(Request.Param.PASSWORD, password);
+		
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put(Request.Param.EMAIL, email);
+		args.put(Request.Param.PASSWORD, password);
 		mEta.getSettings().setSessionUser(email);
-		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, Utils.createJSON(args), getSessionListener(l));
+		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
 		addRequest(req);
 		
 	}

@@ -5,6 +5,8 @@
  */
 package com.eTilbudsavis.etasdk.Utils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -19,8 +21,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
-
-import org.json.JSONObject;
 
 import android.os.Bundle;
 
@@ -102,7 +102,7 @@ public final class Utils {
 	 * @return
 	 */
 	public static String buildQueryString(Request<?> r) {
-		return r.getQueryParameters().isEmpty() ? r.getUrl() : r.getUrl() + "?" + Utils.buildQueryString(r.getQueryParameters());
+		return r.getQueryParameters().isEmpty() ? r.getUrl() : r.getUrl() + "?" + buildQueryString(r.getQueryParameters(), r.getParamsEncoding());
 	}
 	
 	/**
@@ -110,21 +110,32 @@ public final class Utils {
 	 * @param apiParams to convert into query parameters
 	 * @return a string of parameters
 	 */
-	public static String buildQueryString(Bundle apiParams) {
+	public static String buildQueryString(Bundle apiParams, String encoding) {
 		StringBuilder sb = new StringBuilder();
 		List<String> keys = new ArrayList<String>();
 		keys.addAll(apiParams.keySet());
 		Collections.sort(keys);
 		for (String key : keys) {
 			Object o = apiParams.get(key);
-			if (o instanceof Bundle) {
-				EtaLog.d(TAG, "Nested parameters not allowed. Ignoring parameter: " + key);
-			} else {
+			if (isAllowed(o)) {
 				if (sb.length() > 0) sb.append("&");
-				sb.append(key).append("=").append(valueIsNull(o));
+				String value = valueIsNull(o);
+				sb.append(encode(key, encoding)).append("=").append(encode(value, encoding));
+			} else {
+				EtaLog.d(TAG, String.format("Key: %s with value-type: %s is not allowed", 
+						key, o.getClass().getSimpleName()));
 			}
 		}
-		return sb.toString();
+		
+		String query = sb.toString();
+		
+		return query;
+	}
+	
+	private static boolean isAllowed(Object o) {
+		return o == null || o instanceof Integer || o instanceof Long 
+				|| o instanceof Double || o instanceof String||o instanceof Boolean
+				|| o instanceof Float || o instanceof Short || o instanceof Character;
 	}
 	
 	private static String valueIsNull(Object value) {
@@ -132,36 +143,14 @@ public final class Utils {
 		return s;
 	}
 	
-	/**
-	 * Builds JSONObject from a given Bundle.
-	 *
-	 * @param b - the Bundle to convert
-	 * @return A JSONObject containing all key-value pairs from the bundle.
-	 */
-	public static JSONObject createJSON(Bundle b) {
-		return (b == null) ? null : new JSONObject(createMap(b));
-	}
-	
-	/**
-	 * Builds Map<String, Object> from a given Bundle.
-	 * 
-	 * @param b - the Bundle to convert
-	 * @return A Map<String, Object> containing all key-value pairs from the bundle.
-	 */
-	public static Map<String, Object> createMap(Bundle b) {
-		if (b == null) 
-			return null;
-		
-		Map<String, Object> map = new HashMap<String, Object>();
-		
-		if (b.isEmpty()) 
-			return map;
-		
-		for (String s : b.keySet()) {
-			Object o = b.get(s);
-			map.put(s, (o instanceof Bundle) ? createMap((Bundle)o) : o);
+	private static String encode(String value, String encoding) {
+		try {
+			value = URLEncoder.encode(value, encoding);
+		} catch (UnsupportedEncodingException e) {
+			EtaLog.d(TAG, e);
+			value = URLEncoder.encode(value);
 		}
-		return map;
+		return value;
 	}
 	
 	/**

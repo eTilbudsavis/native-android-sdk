@@ -286,55 +286,55 @@ public abstract class JsonRequest<T> extends Request<T> {
 
 	protected void log(int statusCode, Map<String, String> headers, JSONObject jObject, EtaError error) {
 
-		ArrayList<String> erns = null;
+		String data = null;
 		
 		if (jObject != null) {
 			
-			erns = new ArrayList<String>();
+			JSONArray tmp = new JSONArray();
 			
 			if (jObject.has(Param.ERN)) {
 				
 				try {
-					erns.add(jObject.getString(Param.ERN));
+					tmp.put(jObject.getString(Param.ERN));
 				} catch (JSONException e) {
 					EtaLog.d(TAG, e);
 				}
 				
 			} else {
-				// TODO: Find better solution
-				erns.add("Non ern object");
+				data = jObject.toString();
 			}
+			
+			data = tmp.toString();
 			
 		}
 		
-		setLogDebug(statusCode, headers, erns, error);
+		setLogDebug(statusCode, headers, data, error);
 		
 	}
 	
 	protected void log(int statusCode, Map<String, String> headers, JSONArray jArray, EtaError error) {
 		
-		ArrayList<String> erns = null;
+		String data = null;
 		
 		if (jArray != null) {
-			
-			erns = new ArrayList<String>();
 			
 			try {
 				
 				if (0 < jArray.length() && jArray.get(0) instanceof JSONObject && jArray.getJSONObject(0).has(Param.ERN) ) {
 					
+					JSONArray tmp = new JSONArray();
 					for (int i = 0 ; i < jArray.length() ; i++ ) {
 						JSONObject o = jArray.getJSONObject(i);
 						if (o.has(Param.ERN)) {
-							erns.add(o.getString(Param.ERN));
+							tmp.put(o.getString(Param.ERN));
 						} else {
-							erns.add("A mixed set of objects... do we support that?");
+							tmp.put("non-ern-object-in-list");
 						}
 					}
+					data = tmp.toString();
 					
 				} else {
-					// TODO: Find better solution
-					erns.add("Non ern object");
+					data = jArray.toString();
 				}
 				
 			} catch (JSONException e) {
@@ -343,18 +343,18 @@ public abstract class JsonRequest<T> extends Request<T> {
 			
 		}
 		
-		setLogDebug(statusCode, headers, erns, error);
+		setLogDebug(statusCode, headers, data, error);
 		
 	}
 	
-	private void setLogDebug(int statusCode, Map<String, String> headers, List<String> erns, EtaError error) {
+	private void setLogDebug(int statusCode, Map<String, String> headers, String successData, EtaError error) {
 		
 		try {
 			
 			// Server Response
 			JSONObject response = new JSONObject();
-			response.put("code", statusCode);
-			response.put("resources", erns == null ? null : new JSONArray(erns));
+			response.put("statuscode", statusCode);
+			response.put("success", successData);
 			response.put("error", error == null ? null : error.toJSON());
 			response.put("headers", headers == null ? new JSONObject() : new JSONObject(headers));
 			

@@ -24,7 +24,7 @@ public class RequestQueue {
     private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;
 
     /** Number of log entries the RequestQueue should save. */
-    private static final int DEFAULT_LOG_SIZE = 20;
+    private static final int DEFAULT_LOG_SIZE = 64;
     
     /** Eta object controlling the whole lot */
     private final Eta mEta;
