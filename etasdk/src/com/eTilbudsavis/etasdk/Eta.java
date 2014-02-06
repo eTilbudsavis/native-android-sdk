@@ -57,9 +57,9 @@ public class Eta implements Serializable {
 	private ConnectivityManager mConnectivityManager;
 	
 	private Eta() {
-		Cache c = new Cache();
+		mCache = new Cache();
 		Network n = new HttpNetwork();
-		mRequestQueue = new RequestQueue(this, c, n);
+		mRequestQueue = new RequestQueue(this, mCache, n);
 		mRequestQueue.start();
 	}
 	

@@ -645,6 +645,7 @@ public final class PageflipWebview extends WebView {
 							
 						}
 					});
+					req.debugNetwork(true);
 					mEta.add(req);
 					
 				} catch (JSONException e) {

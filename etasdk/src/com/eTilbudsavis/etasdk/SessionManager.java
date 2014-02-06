@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
-import android.os.Bundle;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
@@ -20,7 +19,6 @@ import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Priority;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class SessionManager {
 	
