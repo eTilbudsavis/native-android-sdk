@@ -115,8 +115,8 @@ public class Catalog extends EtaErnObject implements Serializable {
 				c.setRunFrom(runFrom);
 				Date runTill = Utils.parseDate(getJsonString(catalog, S_RUN_TILL));
 				c.setRunTill(runTill);
-				c.setPageCount(catalog.getInt(S_PAGE_COUNT));
-				c.setOfferCount(catalog.getInt(S_OFFER_COUNT));
+				c.setPageCount(jsonToInt(catalog, S_PAGE_COUNT, 0));
+				c.setOfferCount(jsonToInt(catalog, S_OFFER_COUNT, 0));
 				c.setBranding(Branding.fromJSON(catalog.getJSONObject(S_BRANDING)));
 				c.setDealerId(getJsonString(catalog, S_DEALER_ID));
 				c.setDealerUrl(getJsonString(catalog, S_DEALER_URL));

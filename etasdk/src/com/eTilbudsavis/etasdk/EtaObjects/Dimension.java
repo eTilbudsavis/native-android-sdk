@@ -41,12 +41,9 @@ public class Dimension extends EtaObject implements Serializable {
 		if (d == null) d = new Dimension();
 		if (dimension == null) return d;
 		
-		try {
-			d.setWidth(dimension.getDouble(S_WIDTH));
-			d.setHeight(dimension.getDouble(S_HEIGHT));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
+		d.setWidth(jsonToDouble(dimension, S_WIDTH, 0.0));
+		d.setHeight(jsonToDouble(dimension, S_HEIGHT, 0.0));
+		
 		return d;
 	}
 	

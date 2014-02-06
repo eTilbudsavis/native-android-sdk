@@ -38,12 +38,9 @@ public class Size extends EtaObject implements Serializable {
 		if (s == null) s = new Size();
 		if (size == null) return s;
 		
-		try {
-			s.setFrom(size.getDouble(S_FROM));
-			s.setTo(size.getDouble(S_TO));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
+		s.setFrom(jsonToDouble(size, S_FROM, 1));
+		s.setTo(jsonToDouble(size, S_TO, 1));
+		
 		return s;
 	}
 	

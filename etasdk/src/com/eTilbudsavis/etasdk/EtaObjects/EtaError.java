@@ -45,7 +45,7 @@ public class EtaError extends EtaObject implements Serializable {
 		
 		try {
 			er.setId(getJsonString(error, S_ID));
-			er.setCode(error.getInt(S_CODE));
+			er.setCode(jsonToInt(error, S_CODE, 0));
 			er.setMessage(getJsonString(error, S_MESSAGE));
 			er.setDetails(getJsonString(error, S_DETAILS));
 			if (error.has("failed_on_field")) {

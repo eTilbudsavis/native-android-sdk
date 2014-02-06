@@ -29,7 +29,7 @@ public class Images extends EtaObject implements Serializable {
 		}
 		return i;
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	public static Images fromJSON(JSONObject images) {
 		return fromJSON(new Images(), images);

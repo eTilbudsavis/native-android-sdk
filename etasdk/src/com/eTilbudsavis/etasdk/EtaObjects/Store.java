@@ -89,8 +89,8 @@ public class Store extends EtaErnObject implements Serializable {
 			s.setCity(getJsonString(store, S_CITY));
 			s.setZipcode(getJsonString(store, S_ZIP_CODE));
 			s.setCountry(Country.fromJSON(store.getJSONObject(S_COUNTRY)));
-			s.setLatitude(store.getDouble(S_LATITUDE));
-			s.setLongitude(store.getDouble(S_LONGITUDE));
+			s.setLatitude(jsonToDouble(store, S_LATITUDE, 0.0));
+			s.setLongitude(jsonToDouble(store, S_LONGITUDE, 0.0));
 			s.setDealerUrl(getJsonString(store, S_DEALER_URL));
 			s.setDealerId(getJsonString(store, S_DEALER_ID));
 			s.setBranding(Branding.fromJSON(store.getJSONObject(S_BRANDING)));

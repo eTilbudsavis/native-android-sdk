@@ -38,12 +38,9 @@ public class Pieces extends EtaObject implements Serializable {
 		if (p == null) p = new Pieces();
 		if (pieces == null) return p;
 		
-		try {
-			p.setFrom(pieces.getInt(S_FROM));
-			p.setTo(pieces.getInt(S_TO));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
+		p.setFrom(jsonToInt(pieces, S_FROM, 1));
+		p.setTo(jsonToInt(pieces, S_TO, 1));
+		
 		return p;
 	}
 	

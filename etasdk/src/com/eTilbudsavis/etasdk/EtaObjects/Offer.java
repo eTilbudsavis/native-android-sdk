@@ -116,7 +116,7 @@ public class Offer extends EtaErnObject implements Serializable {
 			o.setErn(offer.getString(S_ERN));
 			o.setHeading(offer.getString(S_HEADING));
 			o.setDescription(getJsonString(offer, S_DESCRIPTION));
-			o.setCatalogPage(offer.getInt(S_CATALOG_PAGE));
+			o.setCatalogPage(jsonToInt(offer, S_CATALOG_PAGE, 0));
 			o.setPricing(Pricing.fromJSON(offer.getJSONObject(S_PRICING)));
 			o.setQuantity(Quantity.fromJSON(offer.getJSONObject(S_QUANTITY)));
 			o.setImages(Images.fromJSON(offer.getJSONObject(S_IMAGES)));

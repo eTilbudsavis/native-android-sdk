@@ -44,7 +44,7 @@ public class Pricing extends EtaObject implements Serializable {
 		if (pricing == null) return p;
 		
 		try {
-			p.setPrice(pricing.getDouble(S_PRICE));
+			p.setPrice(jsonToDouble(pricing, S_PRICE, 0.0));
 			p.setPrePrice(pricing.isNull(S_PREPRICE) ? null : pricing.getDouble(S_PREPRICE));
 			p.setCurrency(getJsonString(pricing, S_CURRENCY));
 		} catch (JSONException e) {
