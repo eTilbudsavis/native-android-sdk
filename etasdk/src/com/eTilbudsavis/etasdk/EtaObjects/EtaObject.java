@@ -7,6 +7,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
+
 
 
 public class EtaObject {
@@ -136,8 +138,37 @@ public class EtaObject {
 			if (!object.has(name))
 				return null;
 			return object.isNull(name) ? null : object.getString(name);
-		} catch (JSONException e) { }
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
 		return null;
+	}
+
+	protected static int jsonToInt(JSONObject object, String key, int defValue) {
+		try {
+			return object.isNull(key) ? defValue : object.getInt(key);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return defValue;
+	}
+
+	protected static double jsonToDouble(JSONObject object, String key, double defValue) {
+		try {
+			return object.isNull(key) ? defValue : object.getDouble(key);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return defValue;
+	}
+
+	protected static boolean jsonToBoolean(JSONObject object, String key, boolean defValue) {
+		try {
+			return object.isNull(key) ? defValue : object.getBoolean(key);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return defValue;
 	}
 
 	protected static boolean stringCompare(String first, String second) {

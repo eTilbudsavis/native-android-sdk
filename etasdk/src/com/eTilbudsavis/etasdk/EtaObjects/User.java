@@ -75,10 +75,10 @@ public class User extends EtaObject implements Serializable {
 		if (user == null) return u;
 		
 		try {
-			u.setId(user.getInt(S_ID));
+			u.setId(jsonToInt(user, S_ID, NO_USER));
 			u.setErn(getJsonString(user, S_ERN));
 			u.setGender(getJsonString(user, S_GENDER));
-			u.setBirthYear(user.getInt(S_BIRTH_YEAR));
+			u.setBirthYear(jsonToInt(user, S_BIRTH_YEAR, 0));
 			u.setName(getJsonString(user, S_NAME));
 			u.setEmail(getJsonString(user, S_EMAIL));
 			u.setPermissions(Permission.fromJSON(user.getJSONObject(S_PERMISSIONS)));

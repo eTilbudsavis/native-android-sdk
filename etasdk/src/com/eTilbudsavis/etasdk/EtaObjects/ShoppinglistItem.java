@@ -87,9 +87,9 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		
 		try {
 			sli.setId(getJsonString(shoppinglistItem, ServerKey.ID));
-			sli.setTick(shoppinglistItem.getBoolean(ServerKey.TICK));
+			sli.setTick(jsonToBoolean(shoppinglistItem, ServerKey.TICK, false));
 			sli.setOfferId(getJsonString(shoppinglistItem, ServerKey.OFFER_ID));
-			sli.setCount(shoppinglistItem.getInt(ServerKey.COUNT));
+			sli.setCount(jsonToInt(shoppinglistItem, ServerKey.COUNT, 1));
 			sli.setDescription(getJsonString(shoppinglistItem, ServerKey.DESCRIPTION));
 			sli.setShoppinglistId(getJsonString(shoppinglistItem, ServerKey.SHOPPINGLIST_ID));
 			sli.setErn(getJsonString(shoppinglistItem, ServerKey.ERN));

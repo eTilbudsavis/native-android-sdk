@@ -35,7 +35,7 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 	private String mEmail;
 	private String mAccess;
 	private String mShoppinglistId;
-	private boolean mAccepted;
+	private boolean mAccepted = false;
 	private String mAcceptUrl;
 	private int mState = State.SYNCED;
 	
@@ -79,7 +79,7 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 			s.setName(getJsonString(o, ServerKey.NAME));
 			
 			s.setAccess(getJsonString(share, ServerKey.ACCESS));
-			s.setAccepted(share.getBoolean(ServerKey.ACCEPTED));
+			s.setAccepted(jsonToBoolean(share, ServerKey.ACCEPTED, false));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
