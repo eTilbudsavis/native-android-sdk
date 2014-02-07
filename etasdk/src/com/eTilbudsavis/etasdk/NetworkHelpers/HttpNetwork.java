@@ -96,7 +96,7 @@ public class HttpNetwork implements Network {
 		// Get the right request type, and set body if necessary
 		HttpRequestBase httpRequest = createRequest(request);
 		setHeaders(request, httpRequest);
-
+		
 		request.addEvent("performing-http-request");
 		return httpClient.execute(httpRequest);
 	}

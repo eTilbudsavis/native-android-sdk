@@ -19,12 +19,12 @@ import com.eTilbudsavis.etasdk.Utils.Param;
 public class RequestQueue {
 	
 	public static final String TAG = "RequestQueue";
-
+	
     /** Number of network request dispatcher threads to start. */
     private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;
 
     /** Number of log entries the RequestQueue should save. */
-    private static final int DEFAULT_LOG_SIZE = 64;
+    private static final int DEFAULT_LOG_SIZE = 32;
     
     /** Eta object controlling the whole lot */
     private final Eta mEta;
@@ -54,11 +54,14 @@ public class RequestQueue {
     private final Delivery mDelivery;
     
     /** Atomic number generator for sequencing requests in the queues */
-    private AtomicInteger mSequenceGenerator = new AtomicInteger();
+    private final AtomicInteger mSequenceGenerator = new AtomicInteger();
     
+    /** The EventLog containing condensed information about requests and their responses */
     private EventLog mLog;
     
     /**
+     * Construct a new RequestQueue for processing requests.
+     * This RequestQueue is primarily aimed at fetching data from the eTilbudsavis API.
      * 
      * @param eta, the eTilbudsavis SDK object to use for requests
      * @param cache to use for this RequestQueue
@@ -71,18 +74,25 @@ public class RequestQueue {
     	mEta = eta;
 		mCache = cache;
 		mNetwork = network;
-		mDelivery = delivery;
 		mNetworkDispatchers = new NetworkDispatcher[poolSize];
+		mDelivery = delivery;
 		mDelivery.mRequestQueue = this;
-		mLog = new EventLog(poolSize);
+		mLog = new EventLog(logSize);
 	}
     
-	/** Construct with default poolsize, and the eta handler running on main thread */
+	/**
+	 * Construct with default poolsize, and the eta handler running on main thread
+     * @param eta - the eTilbudsavis SDK object to use for requests
+     * @param cache - to use for this RequestQueue
+     * @param network - the implementation you want to use for this RequestQueue
+	 */
     public RequestQueue(Eta eta, Cache cache, Network network) {
     	this(eta, cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE, new Delivery(eta.getHandler()), DEFAULT_LOG_SIZE);
     }
     
-	/** Initialize all mechanisms required to dispatch requests */
+	/**
+	 * Initialize all mechanisms required to dispatch requests
+	 */
 	public void start() {
 		
 		// Creates new CacheDispatcher
@@ -95,9 +105,12 @@ public class RequestQueue {
             mNetworkDispatchers[i] = networkDispatcher;
             networkDispatcher.start();
         }
+        
     }
     
-    /** Stop all currently running dispatchers (Staging, caching and network) */
+    /**
+     * Stop all currently running dispatchers (Staging, caching and network)
+     */
     public void stop() {
     	
     	if (mCacheDispatcher != null)
@@ -139,17 +152,17 @@ public class RequestQueue {
 	 * ends that might be in a request. In the future, this can be used for better SDK cache control
 	 * as multiple requests to the same endpoint, can be queued, and only one may be dispatched.
 	 * On complete the others can be triggered, and instantly hitting local cache.
-	 * @param req - request, that finished
-	 * @param resp - the server response
+	 * @param request - request, that finished
+	 * @param response - the server response
 	 */
-	public synchronized void finish(Request req, Response resp) {
+	public synchronized void finish(Request request, Response response) {
 		
 		// If the log is enabled, add the request summary
-		if (req.logSummary()) {
+		if (request.logSummary()) {
 
-			JSONObject data = req.getLog().getSummary();
+			JSONObject data = request.getLog().getSummary();
 			try {
-				data.put("duration", req.getLog().getTotalDuration());
+				data.put("duration", request.getLog().getTotalDuration());
 			} catch (JSONException e) {
 				EtaLog.d(TAG, e);
 			}
@@ -160,38 +173,50 @@ public class RequestQueue {
 		
 	}
 	
+	/**
+	 * Get the log of all requests that have passed through this RequestQueue.<br><br>
+	 * 
+	 * The log contains a summary of the request it self, and the response given by the API.
+	 * This can be very useful for debugging.
+	 * @return the EventLog from this RequestQueue
+	 */
 	public EventLog getLog() {
 		return mLog;
 	}
 	
-	/** Add a new request to this RequestQueue, everything from this point onward will be performed on separate threads */
-    public Request add(Request r) {
+	/**
+	 * Add a new request to this RequestQueue, everything from this point onward will be performed on separate threads
+	 * @param request
+	 * 			the request to add
+	 * @return the request object
+	 */
+    public Request add(Request request) {
     	
-    	r.setSequence(mSequenceGenerator.incrementAndGet());
+    	request.setSequence(mSequenceGenerator.incrementAndGet());
     	
-		prepareRequest(r);
+		prepareRequest(request);
 		
-    	if (mEta.getSessionManager().isRequestInFlight() && !r.isSessionEndpoint()) {
+    	if (mEta.getSessionManager().isRequestInFlight() && !request.isSessionEndpoint()) {
     		
-    		r.addEvent("added-to-parking-queue");
+    		request.addEvent("added-to-parking-queue");
     		
     		synchronized (mParking) {
-        		mParking.add(r);
+        		mParking.add(request);
 			}
     		
     	} else {
     		
-        	r.addEvent("added-to-queue");
+        	request.addEvent("added-to-queue");
         	
-    		if (r.isSessionEndpoint() && r != mEta.getSessionManager().getRequestInFlight()) {
+    		if (request.isSessionEndpoint() && request != mEta.getSessionManager().getRequestInFlight()) {
     			EtaLog.d(TAG, "Session changes should be handled by SessionManager. This request might cause problems");
     		}
     		
-    		mCacheQueue.add(r);
+    		mCacheQueue.add(request);
     		
     	}
     	
-    	return r;
+    	return request;
     	
     }
     
@@ -220,7 +245,7 @@ public class RequestQueue {
 		if (request.useLocation() && mEta.getLocation().isSet()) {
 			params.putAll(mEta.getLocation().getQuery());
 		}
-
+		
 		request.putQueryParameters(params);
 
 	}
