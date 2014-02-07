@@ -21,7 +21,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	/**  
 	 * The default limit for API calls.<br>
 	 * By using this limit, queries are more likely to hit a cache on the server, hence making queries faster */
-    public static final int DEFAULT_LIMIT = 25;
+    public static final int DEFAULT_LIMIT = 24;
     
     private static final long CACHE_TTL = 3 * Utils.MINUTE_IN_MILLIS;
     
