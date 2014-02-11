@@ -1,15 +1,21 @@
 package com.eTilbudsavis.etasdk.Utils;
 
-import com.eTilbudsavis.etasdk.Eta;
 
 /**
  * @author Danny Hvam - danny@etilbudsavis.dk
  */
 public class Endpoint {
 
-	public static final String PRODUCTION = "https://api.etilbudsavis.dk";
-	public static final String EDGE = "https://edge.etilbudsavis.dk";
-	public static final String STAGING = "https://staging.etilbudsavis.dk";
+	/** Variable controlling whether messages are printed. Set to true to print messages */
+	public static boolean DEBUG_HOST = false;
+
+	/** Set to true to enable usage of staging endpoint for pageflip-html. */
+	public static boolean DEBUG_PAGEFLIP = false;
+	
+	public static String HOST_PREFIX = "api";
+	
+	public static final String HOST_PREFIX_PRODUCTION = "api";
+	public static final String HOST_PREFIX_EDGE = "edge";
 
 	public static final String CATALOG_LIST = "/v2/catalogs";
 	public static final String CATALOG_ID = "/v2/catalogs/";
@@ -38,12 +44,16 @@ public class Endpoint {
 	public static final String CATEGORIES	= "/v2/categories";
 
 	public static final String COUNTRIES = "/v2/countries";
-
-	/** https://api.etilbudsavis.dk, or https://edge.etilbudsavis.dk if DEBUG_ENDPOINT*/
+	
+	/**
+	 * Get the current host to use. This can be changed by editing Endpoint.HOST_PREFIX.
+	 * https://{prefix}.etilbudsavis.dk
+	 * @return
+	 */
 	public static String getHost() {
-		return Eta.DEBUG_ENDPOINT ? EDGE : PRODUCTION;
+		return String.format("https://%s.etilbudsavis.dk", HOST_PREFIX);
 	}
-
+	
 	/** /v2/offers/{offer_id} */
 	public static String offerId(String offerId) {
 		return String.format("/v2/offers/%s", offerId);
@@ -85,7 +95,7 @@ public class Endpoint {
 	public static String pageflipProxy(String id) {
 		String production = "https://etilbudsavis.dk/proxy/%s/";
 		String staging = "https://staging.etilbudsavis.dk/proxy/%s/";
-		return String.format( Eta.DEBUG_ENDPOINT ? staging : production, id);
+		return String.format( DEBUG_PAGEFLIP ? staging : production, id);
 	}
 
 	/** https://staging.etilbudsavis.dk/utils/ajax/lists/themes/ */

@@ -46,6 +46,12 @@ public final class PageflipWebview extends WebView {
 
 	private static final String TAG = "PageflipWebview";
 
+	/**
+	 * Variable controlling debugging mode for PageflipWebview.<br>
+	 * If set to true, a WebChromeClient will be enabled.
+	 */
+	public static boolean DEBUG = false;
+	
 	private static final String PAGEFLIP_PROXY_NAME = "AndroidInterface";
 
 	private static final String EVENT_PROXY_READY = "eta-proxy-ready";
@@ -219,12 +225,12 @@ public final class PageflipWebview extends WebView {
 		
 		addJavascriptInterface(mPFInterface, PAGEFLIP_PROXY_NAME);
 		
-		if (Eta.DEBUG_PAGEFLIP) {
+		if (DEBUG) {
 			setWebChromeClient(wcc);
 		}
 		
 		String url = Request.Endpoint.pageflipProxy(mUuid);
-		EtaLog.d(TAG, url);
+		
 		StringRequest req = new StringRequest(url, new Listener<String>() {
 
 			public void onComplete(String response, EtaError error) {

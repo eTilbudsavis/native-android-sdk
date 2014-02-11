@@ -35,10 +35,6 @@ public class Eta implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	public static final String TAG = "ETA";
-
-	public static boolean DEBUG_ENDPOINT = false;
-	public static boolean DEBUG_LOGD = false;
-	public static boolean DEBUG_PAGEFLIP = false;
 	
 	private static Eta mEta;
 	

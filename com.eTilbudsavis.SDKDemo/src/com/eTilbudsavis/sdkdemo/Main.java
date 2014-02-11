@@ -9,6 +9,7 @@ import android.widget.Button;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaLocation;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.etilbudsavis.sdkdemo.R;
 
 public class Main extends Activity {
@@ -36,7 +37,7 @@ public class Main extends Activity {
         
         /* Enable debug mode, so debug info will show in LogCat
          * You might not want to have this set to true in a release version. */
-        Eta.DEBUG_LOGD = true;
+        EtaLog.enableLogd(true);
         
         // Set the location (This could also be set via LocationManager)
         EtaLocation loc = Eta.getInstance().getLocation();

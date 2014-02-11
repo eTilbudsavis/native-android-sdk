@@ -23,13 +23,17 @@ public class EtaLog {
 
 	public static final String TAG = "EtaLog";
 	
+	/** Variable controlling whether messages are printed. Set to true to print messages */
+	public static boolean DEBUG = false;
+	
+	/** Variable to control the size of the exception log */
 	public static final int DEFAULT_EXCEPTION_LOG_SIZE = 64;
 	
 	private static boolean mEnableLogHistory = false;
 	private static final EventLog mExceptionLog = new EventLog(DEFAULT_EXCEPTION_LOG_SIZE);
 	
 	public static void d(String tag, String message) {
-		if (!Eta.DEBUG_LOGD) return;
+		if (!DEBUG) return;
 		Log.d(tag, message);
 	}
 
@@ -38,7 +42,7 @@ public class EtaLog {
 	}
 	
 	public static void d(String tag, Throwable t) {
-		if (!Eta.DEBUG_LOGD) return;
+		if (!DEBUG) return;
 		addLog(t);
 		t.printStackTrace(); 
 	}
@@ -65,7 +69,7 @@ public class EtaLog {
 	}
 	
 	public static void dAll(String tag, String message) {
-		if (!Eta.DEBUG_LOGD) return;
+		if (!DEBUG) return;
 		
 		if (message.length() > 4000) {
 		    int chunkCount = message.length() / 4000;     // integer division
@@ -130,10 +134,14 @@ public class EtaLog {
 	}
 	
 	public static void d(String tag, String name, String response, EtaError error) {
-		if (!Eta.DEBUG_LOGD) return;
+		if (!DEBUG) return;
 		String e = error == null ? "null" : error.toJSON().toString();
 		String s = response == null ? "null" : response;
 		Log.d(tag, name + ": Response: " + s + ", Error: " + e );
+	}
+
+	public static void enableLogd(boolean enable) {
+		DEBUG = enable;
 	}
 	
 	public static void enableExceptionHistory(boolean enable) {
@@ -145,7 +153,7 @@ public class EtaLog {
 	}
 	
 	public static void printStackTrace() {
-		if (!Eta.DEBUG_LOGD) return;
+		if (!DEBUG) return;
 			for (StackTraceElement ste : Thread.currentThread().getStackTrace())
 				System.out.println(ste);
 	}
