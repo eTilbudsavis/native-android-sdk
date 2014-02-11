@@ -52,10 +52,6 @@ public class EtaObject {
 		return defValue;
 	}
 	
-	protected static boolean stringCompare(String first, String second) {
-		return first == null ? second == null : first.equals(second);
-	}
-	
 	/**
 	 * This class contains all strings, that eTilbudsavis API v2 can return as keys in any JSONObject.
 	 * <br><br>
@@ -144,7 +140,5 @@ public class EtaObject {
 		public static final String PRICE = "price";
 		public static final String PREPRICE = "pre_price";
 		public static final String CURRENCY = "currency";
-		
-		
 	}
 }
