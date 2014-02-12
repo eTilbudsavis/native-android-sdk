@@ -300,7 +300,7 @@ public final class PageflipWebview extends WebView {
 
 	private LocationListener ll = new LocationListener() {
 		
-		public void onChange() {
+		public void onLocationChange() {
 			mPFInterface.etaProxy(GEOLOCATION_CHANGE, location());
 		}
 		

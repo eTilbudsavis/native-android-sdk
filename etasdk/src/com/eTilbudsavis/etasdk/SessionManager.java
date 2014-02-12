@@ -66,7 +66,7 @@ public class SessionManager {
 
 			public void onComplete(JSONObject response, EtaError error) {
 				
-				EtaLog.d(TAG, "Session", response, error);
+//				EtaLog.d(TAG, "Session", response, error);
 				
 				synchronized (LOCK) {
 					mReqInFlight = null;

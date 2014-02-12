@@ -27,13 +27,13 @@ public class JsonObjectRequest extends JsonRequest<JSONObject>{
 	@Override
 	protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
 		try {
-			
+			String jsonString = null;
             JSONObject item = null;
 			try {
-				String jsonString = new String(response.data, getParamsEncoding());
+				jsonString = new String(response.data, getParamsEncoding());
 	            item = new JSONObject(jsonString);
 			} catch (UnsupportedEncodingException e) {
-				String jsonString = new String(response.data);
+				jsonString = new String(response.data);
 	            item = new JSONObject(jsonString);
 			}
 			

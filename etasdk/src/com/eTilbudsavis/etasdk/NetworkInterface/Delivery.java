@@ -58,7 +58,7 @@ public class Delivery {
         @SuppressWarnings("unchecked")
         public void run() {
         	
-            mRequest.addEvent("request-on-new-thread");
+            mRequest.addEvent("request-on-main-thread");
             
             // If this request has canceled, finish it and don't deliver.
             if (mRequest.isCanceled()) {
