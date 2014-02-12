@@ -647,6 +647,7 @@ public class ListManager {
 	 */
 	public void clear() {
 		DbHelper.getInstance().clear();
+		mSyncManager.onPause();
 	}
 
 	/**

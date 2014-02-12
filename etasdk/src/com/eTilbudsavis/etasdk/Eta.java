@@ -11,8 +11,6 @@
  */
 package com.eTilbudsavis.etasdk;
 
-import java.io.Serializable;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -31,9 +29,8 @@ import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 // Main object for interacting with the SDK.
-public class Eta implements Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class Eta {
+	
 	public static final String TAG = "ETA";
 	
 	private static Eta mEta;
@@ -76,6 +73,13 @@ public class Eta implements Serializable {
 		return mEta;
 	}
 	
+	/**
+	 * This method must be called before performing any requests.<br><br>
+	 * It's given that the SDK cannot perform any requests without an apiKey and apiSecret.
+	 * @param apiKey for eTilbudsavis API v2
+	 * @param apiSecret for eTilbudsavis API v2
+	 * @param context of your application
+	 */
 	public void set(String apiKey, String apiSecret, Context context) {
 		
 		mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -166,12 +170,21 @@ public class Eta implements Serializable {
 	public String getApiSecret() {
 		return mApiSecret;
 	}
-
-	public <T> Request<T> add(Request<T> r) {
-		mRequestQueue.add(r);
-		return r;
+	
+	/**
+	 * Shortcut method for adding requests to the RequestQueue.
+	 * @param request to be performed
+	 * @return the request
+	 */
+	public <T> Request<T> add(Request<T> request) {
+		return mRequestQueue.add(request);
 	}
 	
+	/**
+	 * Get the current instance of request queue. This is the queue 
+	 * responsible for any API request passed into the SDK.
+	 * @return
+	 */
 	public RequestQueue getRequestQueue() {
 		return mRequestQueue;
 	}
@@ -231,27 +244,45 @@ public class Eta implements Serializable {
 		}
 		return mHandler;
 	}
-
+	
 	/**
-	 * Clears ALL preferences that the SDK has created.<br><br>
-	 * 
-	 * This includes the session and user.
-	 * @return Returns true if the new values were successfully written to persistent storage.
+	 * First clears all preferences with {@link #clear() clear()}, and then null's this instance of Eta.<br>
+	 * Therefore you must get a new instance and then {@link #set(String, String, Context) set()} it again.
+	 * if you want to continue using the SDK. 
 	 */
-	public void clearPreferences() {
-		mSessionManager.invalidate();
-		mSettings.clear();
+	public void reset() {
+		clear();
+		mCache.clear();
+		mListManager.clear();
+		mEta = null;
 	}
 	
-	public void clearLogs() {
+	/**
+	 * Clears all preferences that the SDK has created.<br><br>
+	 * 
+	 * This includes invalidating the current session and user, clearing all rows in DB, clearing preferences,
+	 * resetting location info, clearing API cache, e.t.c.
+	 */
+	public void clear() {
+		mSessionManager.invalidate();
+		mSettings.clear();
+		mLocation = new EtaLocation(mEta);
 		mRequestQueue.getLog().clear();
 		EtaLog.getExceptionLog().clear();
 	}
 	
+	/**
+	 * Get the current state of the Eta instance
+	 * @return if it's resumed.
+	 */
 	public boolean isResumed() {
 		return mResumed;
 	}
 
+	/**
+	 * Method must be called when the current activity is put to background.<br>
+	 * This amongst other stops any sync services.
+	 */
 	@SuppressLint("NewApi")
 	public void onPause() {
 		if (mResumed) {
@@ -263,7 +294,11 @@ public class Eta implements Serializable {
 				p.onPause();
 		}
 	}
-
+	
+	/**
+	 * Method must be called when the activity is resuming from background.<br>
+	 * This will amongst other start any sync services.
+	 */
 	@SuppressLint("NewApi")
 	public void onResume() {
 		if (!mResumed) {

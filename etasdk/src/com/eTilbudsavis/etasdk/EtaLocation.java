@@ -22,23 +22,24 @@ public class EtaLocation extends Location {
 
 	public static final String TAG = "EtaLocation";
 	
-	private static final String ETA_PROVIDER	= "etasdk";
+	private static final String ETA_PROVIDER = "etasdk";
 	
 	private static final int RADIUS_MIN = 0;
 	private static final int RADIUS_MAX = 700000;
-	private static final double BOUND_DEFAULT = 0.0;
+	private static final int DEFAULT_RADIUS = 100000;
+	private static final double DEFAULT_BOUND = 0.0;
+	private static final double DEFAULT_LAT_LNG = 0.0;
 	
-	// Location.
-	private double mLatitude = 0.0;
-	private double mLongitude = 0.0;
+	private double mLatitude = DEFAULT_LAT_LNG;
+	private double mLongitude = DEFAULT_LAT_LNG;
 	private long mTime = 0;
-	private int mRadius = RADIUS_MAX;
+	private int mRadius = DEFAULT_RADIUS;
 	private boolean mSensor = false;
 	private String mAddress = null;
-	private double mBoundNorth = BOUND_DEFAULT;
-	private double mBoundEast = BOUND_DEFAULT;
-	private double mBoundSouth = BOUND_DEFAULT;
-	private double mBoundWest = BOUND_DEFAULT;
+	private double mBoundNorth = DEFAULT_BOUND;
+	private double mBoundEast = DEFAULT_BOUND;
+	private double mBoundSouth = DEFAULT_BOUND;
+	private double mBoundWest = DEFAULT_BOUND;
 	private Eta mEta;
 	private ArrayList<LocationListener> mSubscribers = new ArrayList<LocationListener>();
 	
@@ -53,7 +54,22 @@ public class EtaLocation extends Location {
 		mLatitude = l.getLatitude();
 		mLongitude = l.getLongitude();
 		mTime = l.getTime();
-		mSensor = (getProvider().equals(LocationManager.GPS_PROVIDER) || getProvider().equals(LocationManager.NETWORK_PROVIDER) );
+		mSensor = (l.getProvider().equals(LocationManager.GPS_PROVIDER) || l.getProvider().equals(LocationManager.NETWORK_PROVIDER) );
+		
+		// Propagate the rest of location stuff, though it will be ignored
+		if (l.hasAccuracy()) {
+			super.setAccuracy(l.getAccuracy());
+		}
+		if (l.hasAltitude()) {
+			super.setAltitude(l.getAltitude());
+		}
+		if (l.hasBearing()) {
+			super.setBearing(l.getBearing());
+		}
+		if (l.hasSpeed()) {
+			super.setSpeed(l.getSpeed());
+		}
+		super.setProvider(l.getProvider());
 		notifySubscribers();
 	}
 	
@@ -72,6 +88,7 @@ public class EtaLocation extends Location {
 		mLatitude = latitude;
 		mLongitude = longitude;
 		mSensor = false;
+		mTime = System.currentTimeMillis();
 		notifySubscribers();
 	}
 	
@@ -86,6 +103,7 @@ public class EtaLocation extends Location {
 			return;
 		}
 		mRadius = radius;
+		mTime = System.currentTimeMillis();
 		notifySubscribers();
 	}
 
@@ -100,6 +118,7 @@ public class EtaLocation extends Location {
 	@Override
 	public void setLatitude(double latitude) {
 		mLatitude = latitude;
+		mTime = System.currentTimeMillis();
 		notifySubscribers();
 	}
 	
@@ -111,6 +130,7 @@ public class EtaLocation extends Location {
 	@Override
 	public void setLongitude(double longitude) {
 		mLongitude = longitude;
+		mTime = System.currentTimeMillis();
 		notifySubscribers();
 	}
 
@@ -126,7 +146,6 @@ public class EtaLocation extends Location {
 	
 	@Override
 	public void setTime(long time) {
-		EtaLog.d(TAG, "setTime: " + time);
 		mTime = time;
 		notifySubscribers();
 	}
@@ -139,6 +158,7 @@ public class EtaLocation extends Location {
 	 */
 	public void setSensor(boolean sensor) {
 		mSensor = sensor;
+		mTime = System.currentTimeMillis();
 		notifySubscribers();
 	}
 	
@@ -151,20 +171,8 @@ public class EtaLocation extends Location {
 	}
 	
 	/**
-	 * Set an postal address of a location.<br /><br />
-	 * <b>NOTICE</b> The address is purely a convenience for the developers.<br />
-	 * The SDK does NOT USE the data for anything, only latitude, longitude, radius and sensor are used, and hence they must be set.
-	 * @param address
-	 * @return This EtaLocation object
-	 */
-	public EtaLocation setAddress(String address) {
-		mAddress = address;
-		notifySubscribers();
-		return this;
-	}
-	
-	/**
-	 * Returns an address, of this location if the address have previously been set.
+	 * Returns an address, of this location if the address have previously been set 
+	 * with {@link #set(String, double, double) set(String address, double latitude, double longitude)}.
 	 * @return an address if one was given, else null
 	 */
 	public String getAddress() {
@@ -199,10 +207,10 @@ public class EtaLocation extends Location {
 	}
 	
 	public boolean isBoundsSet() {
-		return (mBoundNorth != BOUND_DEFAULT && 
-				mBoundSouth != BOUND_DEFAULT && 
-				mBoundEast != BOUND_DEFAULT && 
-				mBoundWest != BOUND_DEFAULT);
+		return (mBoundNorth != DEFAULT_BOUND && 
+				mBoundSouth != DEFAULT_BOUND && 
+				mBoundEast != DEFAULT_BOUND && 
+				mBoundWest != DEFAULT_BOUND);
 	}
 
 	/**
@@ -253,6 +261,7 @@ public class EtaLocation extends Location {
 		mBoundNorth = boundNorth;
 		mBoundSouth = boundSouth;
 		mBoundWest = boundWest;
+		mTime = System.currentTimeMillis();
 		notifySubscribers();
 	}
 
@@ -301,8 +310,7 @@ public class EtaLocation extends Location {
 	 */
 	public void saveState() {
 		SharedPreferences.Editor editor = mEta.getSettings().getPrefs().edit();
-    	editor
-		.putBoolean(Settings.LOC_SENSOR, mSensor)
+    	editor.putBoolean(Settings.LOC_SENSOR, mSensor)
 		.putInt(Settings.LOC_RADIUS, mRadius)
 		.putFloat(Settings.LOC_LATITUDE, (float)mLatitude)
 		.putFloat(Settings.LOC_LONGITUDE, (float)mLongitude)
