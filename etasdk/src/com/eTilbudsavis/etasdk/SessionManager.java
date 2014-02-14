@@ -18,7 +18,9 @@ import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Priority;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Param;
 
 public class SessionManager {
 	
@@ -227,8 +229,8 @@ public class SessionManager {
 		
 		Map<String, Object> args = new HashMap<String, Object>();
 		
-		args.put(Request.Param.TOKEN_TTL, TTL);
-		args.put(Request.Param.API_KEY, mEta.getApiKey());
+		args.put(Param.TOKEN_TTL, TTL);
+		args.put(Param.API_KEY, mEta.getApiKey());
     	
 	    CookieSyncManager.createInstance(mEta.getContext());
 	    CookieManager cm = CookieManager.getInstance();
@@ -264,9 +266,9 @@ public class SessionManager {
 	        
 	        // If all three fields are set, then try to migrate
 	        if (authId != null && authHash != null && authTime != null) {
-	        	args.put(Request.Param.V1_AUTH_ID, authId);
-	        	args.put(Request.Param.V1_AUTH_HASH, authHash);
-	        	args.put(Request.Param.V1_AUTH_TIME, authTime);
+	        	args.put(Param.V1_AUTH_ID, authId);
+	        	args.put(Param.V1_AUTH_HASH, authHash);
+	        	args.put(Param.V1_AUTH_TIME, authTime);
 	        }
 	        
 	        // Clear all cookie data, just to make sure
@@ -274,13 +276,13 @@ public class SessionManager {
 	        
 	    }
 	    
-	    JsonObjectRequest req = new JsonObjectRequest(Method.POST, Request.Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
+	    JsonObjectRequest req = new JsonObjectRequest(Method.POST, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
 	    addRequest(req);
 	    
 	}
 	
 	private void putSession(final Listener<JSONObject> l){
-		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, null, getSessionListener(l));
+		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, null, getSessionListener(l));
 		addRequest(req);
 	}
 	
@@ -293,10 +295,10 @@ public class SessionManager {
 	public void login(String email, String password, Listener<JSONObject> l) {
 		
 		Map<String, Object> args = new HashMap<String, Object>();
-		args.put(Request.Param.EMAIL, email);
-		args.put(Request.Param.PASSWORD, password);
+		args.put(Param.EMAIL, email);
+		args.put(Param.PASSWORD, password);
 		mEta.getSettings().setSessionUser(email);
-		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
+		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
 		addRequest(req);
 		
 	}
@@ -310,9 +312,9 @@ public class SessionManager {
 	public void loginFacebook(String facebookAccessToken, Listener<JSONObject> l) {
 		
 		Map<String, String> args = new HashMap<String, String>();
-		args.put(Request.Param.FACEBOOK_TOKEN, facebookAccessToken);
+		args.put(Param.FACEBOOK_TOKEN, facebookAccessToken);
 		mEta.getSettings().setSessionFacebook(facebookAccessToken);
-		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
+		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
 		addRequest(req);
 		
 	}
@@ -326,8 +328,8 @@ public class SessionManager {
 		final User u = mSession.getUser();
         mEta.getListManager().clear(u.getId());
         Map<String, String> args = new HashMap<String, String>();
-        args.put(Request.Param.EMAIL, "");
-        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Request.Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
+        args.put(Param.EMAIL, "");
+        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
         addRequest(req);
         
 	}
@@ -345,15 +347,15 @@ public class SessionManager {
 	public void createUser(String email, String password, String name, int birthYear, String gender, String locale, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
 		
 		Map<String, String> args = new HashMap<String, String>();
-		args.put(Request.Param.EMAIL, email);
-		args.put(Request.Param.PASSWORD, password);
-		args.put(Request.Param.NAME, name);
-		args.put(Request.Param.BIRTH_YEAR, String.valueOf(birthYear));
-		args.put(Request.Param.GENDER, gender);
-		args.put(Request.Param.SUCCESS_REDIRECT, successRedirect);
-		args.put(Request.Param.ERROR_REDIRECT, errorRedirect);
-		args.put(Request.Param.LOCALE, locale);
-		JsonObjectRequest req = new JsonObjectRequest(Method.POST, Request.Endpoint.USER, new JSONObject(args), l);
+		args.put(Param.EMAIL, email);
+		args.put(Param.PASSWORD, password);
+		args.put(Param.NAME, name);
+		args.put(Param.BIRTH_YEAR, String.valueOf(birthYear));
+		args.put(Param.GENDER, gender);
+		args.put(Param.SUCCESS_REDIRECT, successRedirect);
+		args.put(Param.ERROR_REDIRECT, errorRedirect);
+		args.put(Param.LOCALE, locale);
+		JsonObjectRequest req = new JsonObjectRequest(Method.POST, Endpoint.USER, new JSONObject(args), l);
 		mEta.add(req);
 		
 	}
@@ -368,10 +370,10 @@ public class SessionManager {
 	public void forgotPassword(String email, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
 		
 		Map<String, String> args = new HashMap<String, String>();
-		args.put(Request.Param.EMAIL, email);
-		args.put(Request.Param.SUCCESS_REDIRECT, successRedirect);
-		args.put(Request.Param.ERROR_REDIRECT, errorRedirect);
-		JsonObjectRequest req = new JsonObjectRequest(Method.POST, Request.Endpoint.USER_RESET, new JSONObject(args), l);
+		args.put(Param.EMAIL, email);
+		args.put(Param.SUCCESS_REDIRECT, successRedirect);
+		args.put(Param.ERROR_REDIRECT, errorRedirect);
+		JsonObjectRequest req = new JsonObjectRequest(Method.POST, Endpoint.USER_RESET, new JSONObject(args), l);
 		mEta.add(req);
 		
 	}

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class User extends EtaObject implements Serializable {
@@ -153,10 +152,6 @@ public class User extends EtaObject implements Serializable {
 
 	public void setPermissions(Permission permissions) {
 		this.mPermissions = permissions;
-	}
-
-	public String getFacebookEndpoint() {
-		return Request.Endpoint.facebook(mId);
 	}
 	
 	public void subscribe(UserStatusListener statusListener) {

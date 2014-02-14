@@ -20,9 +20,10 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkHelpers.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Param;
 import com.etilbudsavis.sdkdemo.R;
 
 public class Search extends Activity {
@@ -85,10 +86,10 @@ public class Search extends Activity {
 				};
 				
 				Bundle args = new Bundle();
-				args.putString(Request.Param.QUERY, q);
+				args.putString(Param.QUERY, q);
 				
 				// Create the request
-				JsonArrayRequest offerRequest = new JsonArrayRequest(Request.Endpoint.OFFER_SEARCH, offerListener);
+				JsonArrayRequest offerRequest = new JsonArrayRequest(Endpoint.OFFER_SEARCH, offerListener);
 				offerRequest.putQueryParameters(args);
 				
 				// Send the request to the SDK for execution

@@ -28,6 +28,7 @@ import com.eTilbudsavis.etasdk.NetworkHelpers.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -245,7 +246,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		JsonArrayRequest listRequest = new JsonArrayRequest(Method.GET, Request.Endpoint.lists(mEta.getUser().getId()), listListener);
+		JsonArrayRequest listRequest = new JsonArrayRequest(Method.GET, Endpoint.lists(mEta.getUser().getId()), listListener);
 		listRequest.logSummary(USE_LOG_SUMMARY);
 		addRequest(listRequest);
 		
@@ -388,7 +389,7 @@ public class ListSyncManager {
 				}
 			};
 			
-			JsonObjectRequest modifiedRequest = new JsonObjectRequest(Request.Endpoint.listModified(mEta.getUser().getId(), sl.getId()), modifiedListener);
+			JsonObjectRequest modifiedRequest = new JsonObjectRequest(Endpoint.listModified(mEta.getUser().getId(), sl.getId()), modifiedListener);
 			modifiedRequest.logSummary(USE_LOG_SUMMARY);
 			addRequest(modifiedRequest);
 			
@@ -450,7 +451,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Request.Endpoint.listitems(mEta.getUser().getId(), sl.getId()), itemListener);
+		JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Endpoint.listitems(mEta.getUser().getId(), sl.getId()), itemListener);
 		itemRequest.logSummary(USE_LOG_SUMMARY);
 		addRequest(itemRequest);
 		
@@ -634,7 +635,7 @@ public class ListSyncManager {
 			}
 		};
 
-		String url = Request.Endpoint.list(user.getId(), sl.getId());
+		String url = Endpoint.list(user.getId(), sl.getId());
 		JsonObjectRequest listReq = new JsonObjectRequest(Method.PUT, url, sl.toJSON(), listListener);
 		
 		addRequest(listReq);
@@ -668,7 +669,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		String url = Request.Endpoint.list(user.getId(), sl.getId());
+		String url = Endpoint.list(user.getId(), sl.getId());
 		
 		JsonObjectRequest listReq = new JsonObjectRequest(Method.DELETE, url, null, listListener);
 		
@@ -705,7 +706,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		String url = Request.Endpoint.list(user.getId(), sl.getId());
+		String url = Endpoint.list(user.getId(), sl.getId());
 		JsonObjectRequest listReq = new JsonObjectRequest(url, listListener);
 
 		addRequest(listReq);
@@ -747,7 +748,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		String url = Request.Endpoint.listitem(user.getId(), sli.getShoppinglistId(), sli.getId());
+		String url = Endpoint.listitem(user.getId(), sli.getShoppinglistId(), sli.getId());
 		JsonObjectRequest itemReq = new JsonObjectRequest(Method.PUT, url, sli.toJSON(), itemListener);
 		addRequest(itemReq);
 		
@@ -780,7 +781,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		String url = Request.Endpoint.listitem(user.getId(), sli.getShoppinglistId(), sli.getId());
+		String url = Endpoint.listitem(user.getId(), sli.getShoppinglistId(), sli.getId());
 		JsonObjectRequest itemReq = new JsonObjectRequest(Method.DELETE, url, null, itemListener);
 		addRequest(itemReq);
 		
@@ -814,7 +815,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		String url = Request.Endpoint.listitem(user.getId(), sli.getShoppinglistId(), sli.getId());
+		String url = Endpoint.listitem(user.getId(), sli.getShoppinglistId(), sli.getId());
 		JsonObjectRequest itemReq = new JsonObjectRequest(url, itemListener);
 
 		addRequest(itemReq);
@@ -885,7 +886,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
+		String url = Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
 		JsonObjectRequest shareReq = new JsonObjectRequest(Method.PUT, url, s.toJSON(), shareListener);
 		addRequest(shareReq);
 		
@@ -926,7 +927,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
+		String url = Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
 		JsonObjectRequest shareReq = new JsonObjectRequest(Method.DELETE, url, null, shareListener);
 		addRequest(shareReq);
 		
@@ -958,7 +959,7 @@ public class ListSyncManager {
 			}
 		};
 		
-		String url = Request.Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
+		String url = Endpoint.listShareEmail(user.getId(), s.getShoppinglistId(), s.getEmail());
 		JsonObjectRequest shareReq = new JsonObjectRequest(url, shareListener);
 
 		addRequest(shareReq);

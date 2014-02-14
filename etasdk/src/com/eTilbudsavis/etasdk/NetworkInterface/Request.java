@@ -9,6 +9,7 @@ import android.os.Handler;
 
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -388,13 +389,5 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		}
 		
 	}
-	
-	public class Endpoint extends com.eTilbudsavis.etasdk.Utils.Endpoint { }
-	
-	public class Param extends com.eTilbudsavis.etasdk.Utils.Param { }
-	
-	public class Sort extends com.eTilbudsavis.etasdk.Utils.Sort { }
-	
-	public class Header extends com.eTilbudsavis.etasdk.Utils.Header { }
 	
 }

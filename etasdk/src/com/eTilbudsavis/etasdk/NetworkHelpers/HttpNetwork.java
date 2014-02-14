@@ -33,6 +33,7 @@ import com.eTilbudsavis.etasdk.NetworkInterface.Network;
 import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Header;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class HttpNetwork implements Network {
@@ -158,7 +159,7 @@ public class HttpNetwork implements Network {
 		if (body != null) {
 			HttpEntity entity = new ByteArrayEntity(body);
 			httpRequest.setEntity(entity);
-			httpRequest.setHeader(Request.Header.CONTENT_TYPE, request.getBodyContentType());
+			httpRequest.setHeader(Header.CONTENT_TYPE, request.getBodyContentType());
 		}
 	}
 	

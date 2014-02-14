@@ -35,9 +35,9 @@ import com.eTilbudsavis.etasdk.EtaObjects.Session;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkHelpers.JsonStringRequest;
 import com.eTilbudsavis.etasdk.NetworkHelpers.StringRequest;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -229,7 +229,7 @@ public final class PageflipWebview extends WebView {
 			setWebChromeClient(wcc);
 		}
 		
-		String url = Request.Endpoint.pageflipProxy(mUuid);
+		String url = Endpoint.pageflipProxy(mUuid);
 		
 		StringRequest req = new StringRequest(url, new Listener<String>() {
 

@@ -18,8 +18,8 @@ import com.eTilbudsavis.etasdk.PageflipWebview.PageflipListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkHelpers.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.etilbudsavis.sdkdemo.R;
 
@@ -51,7 +51,7 @@ public class CatalogViewer extends Activity {
     	super.onResume();
     	Eta.getInstance().onResume();
     	mPd = ProgressDialog.show(CatalogViewer.this, "", "Getting catalogs...", true, true);
-    	JsonArrayRequest catalogReq = new JsonArrayRequest(Request.Endpoint.CATALOG_LIST, catalogListener);
+    	JsonArrayRequest catalogReq = new JsonArrayRequest(Endpoint.CATALOG_LIST, catalogListener);
     	Eta.getInstance().add(catalogReq);
     }
     

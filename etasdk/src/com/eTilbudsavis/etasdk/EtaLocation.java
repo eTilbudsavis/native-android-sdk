@@ -15,8 +15,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Param;
 
 public class EtaLocation extends Location {
 
@@ -28,11 +28,7 @@ public class EtaLocation extends Location {
 	private static final int RADIUS_MAX = 700000;
 	private static final int DEFAULT_RADIUS = 100000;
 	private static final double DEFAULT_BOUND = 0.0;
-	private static final double DEFAULT_LAT_LNG = 0.0;
 	
-	private double mLatitude = DEFAULT_LAT_LNG;
-	private double mLongitude = DEFAULT_LAT_LNG;
-	private long mTime = 0;
 	private int mRadius = DEFAULT_RADIUS;
 	private boolean mSensor = false;
 	private String mAddress = null;
@@ -48,28 +44,11 @@ public class EtaLocation extends Location {
 		mEta = eta;
 		restoreState();
 	}
-
+	
 	@Override
 	public void set(Location l) {
-		mLatitude = l.getLatitude();
-		mLongitude = l.getLongitude();
-		mTime = l.getTime();
+		set(l);
 		mSensor = (l.getProvider().equals(LocationManager.GPS_PROVIDER) || l.getProvider().equals(LocationManager.NETWORK_PROVIDER) );
-		
-		// Propagate the rest of location stuff, though it will be ignored
-		if (l.hasAccuracy()) {
-			super.setAccuracy(l.getAccuracy());
-		}
-		if (l.hasAltitude()) {
-			super.setAltitude(l.getAltitude());
-		}
-		if (l.hasBearing()) {
-			super.setBearing(l.getBearing());
-		}
-		if (l.hasSpeed()) {
-			super.setSpeed(l.getSpeed());
-		}
-		super.setProvider(l.getProvider());
 		notifySubscribers();
 	}
 	
@@ -85,10 +64,10 @@ public class EtaLocation extends Location {
 	 */
 	public void set(String address, double latitude, double longitude) {
 		mAddress = address;
-		mLatitude = latitude;
-		mLongitude = longitude;
+		super.setLatitude(latitude);
+		super.setLongitude(longitude);
 		mSensor = false;
-		mTime = System.currentTimeMillis();
+		setTimeNow();
 		notifySubscribers();
 	}
 	
@@ -103,7 +82,7 @@ public class EtaLocation extends Location {
 			return;
 		}
 		mRadius = radius;
-		mTime = System.currentTimeMillis();
+		setTimeNow();
 		notifySubscribers();
 	}
 
@@ -117,48 +96,48 @@ public class EtaLocation extends Location {
 
 	@Override
 	public void setLatitude(double latitude) {
-		mLatitude = latitude;
-		mTime = System.currentTimeMillis();
+		super.setLatitude(latitude);
+		setTimeNow();
 		notifySubscribers();
 	}
 	
 	@Override
 	public double getLatitude() {
-		return mLatitude;
+		return super.getLatitude();
 	}
 	
 	@Override
 	public void setLongitude(double longitude) {
-		mLongitude = longitude;
-		mTime = System.currentTimeMillis();
+		super.setLongitude(longitude);
+		setTimeNow();
 		notifySubscribers();
 	}
 
 	@Override
 	public double getLongitude() {
-		return mLongitude;
+		return super.getLongitude();
 	}
 	
 	@Override
 	public long getTime() {
-		return mTime;
+		return super.getTime();
 	}
 	
 	@Override
 	public void setTime(long time) {
-		mTime = time;
+		super.setTime(time);
 		notifySubscribers();
 	}
 	
 	/**
 	 * Set whether the location has been set by sensor.<br>
-	 * Senser is automatically set to true if location is set via {@link #set(Location) setLocation(Location l)}
-	 * and the given location is from a sensor (network, or gps).
+	 * Sensor is automatically set to true if location is set via {@link #set(Location) setLocation(Location l)}
+	 * and the given location is from a sensor (network, or GPS).
 	 * @param sensor
 	 */
 	public void setSensor(boolean sensor) {
 		mSensor = sensor;
-		mTime = System.currentTimeMillis();
+		setTimeNow();
 		notifySubscribers();
 	}
 	
@@ -224,10 +203,10 @@ public class EtaLocation extends Location {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Request.Param.LATITUDE, getLatitude());
-			o.put(Request.Param.LONGITUDE, getLongitude());
-			o.put(Request.Param.SENSOR, isSensor());
-			o.put(Request.Param.RADIUS, getRadius());
+			o.put(Param.LATITUDE, getLatitude());
+			o.put(Param.LONGITUDE, getLongitude());
+			o.put(Param.SENSOR, isSensor());
+			o.put(Param.RADIUS, getRadius());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -261,7 +240,7 @@ public class EtaLocation extends Location {
 		mBoundNorth = boundNorth;
 		mBoundSouth = boundSouth;
 		mBoundWest = boundWest;
-		mTime = System.currentTimeMillis();
+		setTimeNow();
 		notifySubscribers();
 	}
 
@@ -281,6 +260,10 @@ public class EtaLocation extends Location {
 		return mBoundWest;
 	}
 	
+	private void setTimeNow() {
+		super.setTime(System.currentTimeMillis());
+	}
+	
 	/**
 	 * Generates a set of parameters that can be used as query parameters, when making requests to API v2.
 	 * @return a bundle containing query parameters
@@ -289,17 +272,17 @@ public class EtaLocation extends Location {
 		
 		Bundle b = new Bundle();
 
-		b.putDouble(Request.Param.LATITUDE, getLatitude());
-		b.putDouble(Request.Param.LONGITUDE, getLongitude());
-		b.putBoolean(Request.Param.SENSOR, isSensor());
-		b.putInt(Request.Param.RADIUS, getRadius());
+		b.putDouble(Param.LATITUDE, getLatitude());
+		b.putDouble(Param.LONGITUDE, getLongitude());
+		b.putBoolean(Param.SENSOR, isSensor());
+		b.putInt(Param.RADIUS, getRadius());
 
 		// Determine whether to include bounds.
 		if (isBoundsSet()) {
-			b.putDouble(Request.Param.BOUND_EAST, getBoundEast());
-			b.putDouble(Request.Param.BOUND_NORTH, getBoundNorth());
-			b.putDouble(Request.Param.BOUND_SOUTH, getBoundSouth());
-			b.putDouble(Request.Param.BOUND_WEST, getBoundWest());
+			b.putDouble(Param.BOUND_EAST, getBoundEast());
+			b.putDouble(Param.BOUND_NORTH, getBoundNorth());
+			b.putDouble(Param.BOUND_SOUTH, getBoundSouth());
+			b.putDouble(Param.BOUND_WEST, getBoundWest());
 		}
 		return b;
 		
@@ -309,18 +292,19 @@ public class EtaLocation extends Location {
 	 * Saves this locations state to SharedPreferences. This method is called on all onPause events.
 	 */
 	public void saveState() {
-		SharedPreferences.Editor editor = mEta.getSettings().getPrefs().edit();
-    	editor.putBoolean(Settings.LOC_SENSOR, mSensor)
-		.putInt(Settings.LOC_RADIUS, mRadius)
-		.putFloat(Settings.LOC_LATITUDE, (float)mLatitude)
-		.putFloat(Settings.LOC_LONGITUDE, (float)mLongitude)
-		.putFloat(Settings.LOC_BOUND_EAST, (float)mBoundEast)
-		.putFloat(Settings.LOC_BOUND_WEST, (float)mBoundWest)
-		.putFloat(Settings.LOC_BOUND_NORTH, (float)mBoundNorth)
-		.putFloat(Settings.LOC_BOUND_SOUTH, (float)mBoundSouth)
-		.putString(Settings.LOC_ADDRESS, mAddress)
-		.putLong(Settings.LOC_TIME, mTime)
-		.commit();
+		SharedPreferences.Editor e = mEta.getSettings().getPrefs().edit();
+    	e.putBoolean(Settings.LOC_SENSOR, mSensor);
+		e.putInt(Settings.LOC_RADIUS, mRadius);
+		e.putFloat(Settings.LOC_LATITUDE, (float)getLatitude());
+		e.putFloat(Settings.LOC_LONGITUDE, (float)getLongitude());
+		
+		e.putFloat(Settings.LOC_BOUND_EAST, (float)mBoundEast);
+		e.putFloat(Settings.LOC_BOUND_WEST, (float)mBoundWest);
+		e.putFloat(Settings.LOC_BOUND_NORTH, (float)mBoundNorth);
+		e.putFloat(Settings.LOC_BOUND_SOUTH, (float)mBoundSouth);
+		e.putString(Settings.LOC_ADDRESS, mAddress);
+		e.putLong(Settings.LOC_TIME, getTime());
+		e.commit();
 	}
 	
 	public boolean restoreState() {
@@ -331,14 +315,14 @@ public class EtaLocation extends Location {
 			
 			mSensor = prefs.getBoolean(Settings.LOC_SENSOR, false);
 			mRadius = prefs.getInt(Settings.LOC_RADIUS, Integer.MAX_VALUE);
-			mLatitude = prefs.getFloat(Settings.LOC_LATITUDE, 0.0f);
-			mLongitude = prefs.getFloat(Settings.LOC_LONGITUDE, 0.0f);
+			super.setLatitude(prefs.getFloat(Settings.LOC_LATITUDE, 0.0f));
+			super.setLongitude(prefs.getFloat(Settings.LOC_LONGITUDE, 0.0f));
 			mBoundEast = prefs.getFloat(Settings.LOC_BOUND_EAST, 0.0f);
 			mBoundWest = prefs.getFloat(Settings.LOC_BOUND_WEST, 0.0f);
 			mBoundNorth = prefs.getFloat(Settings.LOC_BOUND_NORTH, 0.0f);
 			mBoundSouth = prefs.getFloat(Settings.LOC_BOUND_SOUTH, 0.0f);
 			mAddress = prefs.getString(Settings.LOC_ADDRESS, null);
-			mTime = prefs.getLong(Settings.LOC_TIME, System.currentTimeMillis());
+			super.setTime(prefs.getLong(Settings.LOC_TIME, System.currentTimeMillis()));
 			return true;
 		} 
 		return false;
