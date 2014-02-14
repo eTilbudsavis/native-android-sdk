@@ -38,6 +38,12 @@ public class Sort {
 	/** Sort a list by page (in catalog) in ascending order. (smallest to largest) */
 	public static final String PAGE = "page";
 
+	/** Sort a list by page (in catalog) in ascending order. (smallest to largest) */
+	public static final String SCORE = "score";
+
+	/** Sort a list by page (in catalog) in ascending order. (smallest to largest) */
+	public static final String SCORE_DESC = DESC + SCORE;
+
 	/** Sort a list by price in ascending order. (smallest to largest) */
 	public static final String PRICE = "price";
 
