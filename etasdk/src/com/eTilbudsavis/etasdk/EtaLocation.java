@@ -47,7 +47,7 @@ public class EtaLocation extends Location {
 	
 	@Override
 	public void set(Location l) {
-		set(l);
+		super.set(l);
 		mSensor = (l.getProvider().equals(LocationManager.GPS_PROVIDER) || l.getProvider().equals(LocationManager.NETWORK_PROVIDER) );
 		notifySubscribers();
 	}
