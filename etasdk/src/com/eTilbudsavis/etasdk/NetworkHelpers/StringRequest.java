@@ -26,23 +26,10 @@ public class StringRequest extends Request<String> {
     
     private Priority mPriority = Priority.MEDIUM;
     
-    /**
-     * 
-     * @param url
-     * @param listener
-     */
 	public StringRequest(String url, Listener<String> listener) {
-		super(Method.GET, url, listener);	
-		
+		super(Method.GET, url, listener);
 	}
 	
-	/**
-	 * 
-	 * @param method
-	 * @param url
-	 * @param params
-	 * @param listener
-	 */
 	public StringRequest(int method, String url, String requestBody, Listener<String> listener) {
 		super(method, url, listener);
 		boolean nonBodyRequest = (method == Method.GET || method == Method.DELETE);
@@ -52,7 +39,7 @@ public class StringRequest extends Request<String> {
 		}
 		mRequestBody = requestBody;
 	}
-
+	
     @Override
     public String getBodyContentType() {
         return PROTOCOL_CONTENT_TYPE;

@@ -29,21 +29,27 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
     
 	public JsonArrayRequest(String url, Listener<JSONArray> listener) {
 		super(Method.GET, url, null, listener);
+		init();
 	}
 
 	public JsonArrayRequest(int method, String url, Listener<JSONArray> listener) {
 		super(method, url, null, listener);
-		
+		init();
 	}
 	
 	public JsonArrayRequest(int method, String url, JSONArray requestBody, Listener<JSONArray> listener) {
 		super(method, url, requestBody == null ? null : requestBody.toString(), listener);
-		
+		init();
 	}
 	
 	public JsonArrayRequest(int method, String url, JSONObject requestBody, Listener<JSONArray> listener) {
 		super(method, url, requestBody == null ? null : requestBody.toString(), listener);
-		
+		init();
+	}
+	
+	private void init() {
+		setOffset(0);
+		setLimit(DEFAULT_LIMIT);
 	}
 	
 	@Override
@@ -85,35 +91,71 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 		return CACHE_TTL;
 	}
 	
+	/**
+	 * Set the order the API should order the data by
+	 * @param order parameter to order data by
+	 * @return this object
+	 */
 	public Request<?> setOrderBy(String order) {
 		getQueryParameters().putString(Sort.ORDER_BY, order);
 		return this;
 	}
 	
+	/**
+	 * Set a list of "order_by" parameters that the API should order the data by.
+	 * @param order parameters to order data by
+	 * @return
+	 */
 	public Request<?> setOrderBy(List<String> order) {
 		String tmp = TextUtils.join(",",order);
 		getQueryParameters().putString(Sort.ORDER_BY, tmp);
 		return this;
 	}
 	
+	/**
+	 * Get the order the API should order data by
+	 * @return the order as a String, or null if no order have been given.
+	 */
 	public String getOrderBy() {
 		return getQueryParameters().getString(Sort.ORDER_BY);
 	}
-
+	
+	/**
+	 * The API relies on pagination for retrieving data. Therefore you need to
+	 * define the offset to the first item in the requested list, when querying for data.
+	 * If no offset is set it will default to 0.
+	 * @param offset to first item in list
+	 * @return this object
+	 */
 	public Request<?> setOffset(int offset) {
 		getQueryParameters().putInt(Param.OFFSET, offset);
 		return this;
 	}
 	
+	/**
+	 * Get the offset parameter used for the query.
+	 * @return offset
+	 */
 	public int getOffset() {
 		return getQueryParameters().getInt(Param.OFFSET);
 	}
-
+	
+	/**
+	 * The API relies on pagination for retrieving data. Therefore you need to
+	 * define a limit for the data you want to retrieve. If no limit is set
+	 * this will default to {@link #DEFAULT_LIMIT DEFAULT_LIMIT} if no limit is set.
+	 * @param limit
+	 * @return
+	 */
 	public Request<?> setLimit(int limit) {
 		getQueryParameters().putInt(Param.LIMIT, limit);
 		return this;
 	}
 	
+	/**
+	 * Get the upper limit on how many items the API should return.
+	 * @return max number of items API should return
+	 */
 	public int getLimit() {
 		return getQueryParameters().getInt(Param.LIMIT);
 	}
