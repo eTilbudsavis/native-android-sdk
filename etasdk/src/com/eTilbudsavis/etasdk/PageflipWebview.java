@@ -41,57 +41,81 @@ import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
+/**
+ * PageflipWebview class documentation is to be extended
+ * 
+ * <br><br>
+ * 
+ * There are a couple of definitions to keep in mind when reading documentation about
+ * {@link #com.eTilbudsavis.etasdk.PageflipWebview PageflipWebview}.
+ * <li>PageflipWebview is defined as this object, which a developer should interact with.</li>
+ * <li>Pageflip is defined as the JavaScript running inside the PageflipWebview.</li>
+ * 
+ * <br><br>
+ * For further information, please refer to the Pageflip documentation found in the
+ * <a href="http://engineering.etilbudsavis.dk/eta-javascript-sdk/">JavaScript Documentation</a>
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ *
+ */
 @SuppressLint("SetJavaScriptEnabled")
 public final class PageflipWebview extends WebView {
-
+	
 	private static final String TAG = "PageflipWebview";
 
 	/**
-	 * Variable controlling debugging mode for PageflipWebview.<br>
-	 * If set to true, a WebChromeClient will be enabled.
+	 * Variable controlling debugging mode for PageflipWebview. If set to true, a WebChromeClient will be enabled.
 	 */
 	public static boolean DEBUG = false;
-
+	
 	private static final String PAGEFLIP_PROXY_NAME = "AndroidInterface";
-
+	
 	/**
 	 * Various standard events that the Pageflip JavaScript dispaches via
-	 * {@link #com.eTilbudsavis.etasdk.PageflipWebview.PageflipJavaScriptInterface PageflipJavaScriptInterface}
+	 * {@link #com.eTilbudsavis.etasdk.PageflipWebview.PageflipJavaScriptInterface PageflipJavaScriptInterface}.
+	 * <br><br>
+	 * For further information, please refer to the Pageflip documentation found in the
+	 * <a href="http://engineering.etilbudsavis.dk/eta-javascript-sdk/">JavaScript Documentation</a>
 	 * @author Danny Hvam - danny@etilbudsavis.dk
 	 */
 	public static class Event {
-
+		
+		/** Event identifying that Pageflip JavaScript is ready for user interaction */
 		private static final String PROXY_READY = "eta-proxy-ready";
 		
+		/** Event identifying session changes */
 		private static final String SESSION_CHANGE = "eta-session-change";
-		
+
+		/** Event identifying Pageflip requesting data from the API */
 		private static final String API_REQUEST = "eta-api-request";
 
-		/** String identifying the pagechange pageflip event. See pageflip documentation for more details */
+		/** Event identifying a page change in Pageflip */
 		public static final String PAGECHANGE = "eta-catalog-view-pagechange";
-		
-		/** String identifying the outofbounds pageflip event. See pageflip documentation for more details */
+
+		/** Event identifying that pageflip is out-of-bounds */
 		public static final String OUTOFBOUNDS = "eta-catalog-view-outofbounds";
 		
-		/** String identifying the hotspot pageflip event. See pageflip documentation for more details */
+		/** Event identifying that a hotspot have been clicked in Pageflip */
 		public static final String HOTSPOT = "eta-catalog-view-hotspot";
-		
-		/** String identifying the singletap pageflip event. See pageflip documentation for more details */
+
+		/** Event identifying a single tap in Pageflip */
 		public static final String SINGLETAP = "eta-catalog-view-singletap";
-		
-		/** String identifying the doubletap pageflip event. See pageflip documentation for more details */
+
+		/** Event identifying a double tap in Pageflip */
 		public static final String DOUBLETAP = "eta-catalog-view-doubletap";
-		
-		/** String identifying the dragstart pageflip event. See pageflip documentation for more details */
+
+		/** Event identifying dragging in Pageflip */
 		public static final String DRAGSTART = "eta-catalog-view-dragstart";
-		
-		/** String identifying an error event. */
+
+		/** Event identifying an error in Pageflip */
 		public static final String ERROR = "eta-catalog-view-error";
 		
 	}
 
 	/**
 	 * Various standard variables used as options to feed the Pageflip JavaScript
+	 * <br><br>
+	 * For further information, please refer to the Pageflip documentation found in the
+	 * <a href="http://engineering.etilbudsavis.dk/eta-javascript-sdk/">JavaScript Documentation</a>
 	 * @author Danny Hvam - danny@etilbudsavis.dk
 	 */
 	public static class Option {
@@ -131,6 +155,9 @@ public final class PageflipWebview extends WebView {
 	
 	/**
 	 * Various variables used to inititlize Pageflip JavaScript.
+	 * <br><br>
+	 * For further information, please refer to the Pageflip documentation found in the
+	 * <a href="http://engineering.etilbudsavis.dk/eta-javascript-sdk/">JavaScript Documentation</a>
 	 * @author Danny Hvam - danny@etilbudsavis.dk
 	 */
 	public static class Init {
@@ -152,6 +179,9 @@ public final class PageflipWebview extends WebView {
 
 	/**
 	 * Various commands that may be used for controlling Pageflip JavaScript
+	 * <br><br>
+	 * For further information, please refer to the Pageflip documentation found in the
+	 * <a href="http://engineering.etilbudsavis.dk/eta-javascript-sdk/">JavaScript Documentation</a>
 	 * @author Danny Hvam - danny@etilbudsavis.dk
 	 */
 	public static class Command {
@@ -183,17 +213,17 @@ public final class PageflipWebview extends WebView {
 	}
 	
 	/**
-	 * The Eta object to interact with
+	 * The {@link #com.eTilbdusavis.etasdk.Eta Eta} object to interact with
 	 */
 	private Eta mEta;
 	
 	/**
-	 * A randomly generated UUID to use for the pageflip html
+	 * A randomly generated UUID to use for the Pageflip HTML
 	 */
 	private String mUuid;
 	
 	/**
-	 * Pageflip listener for callbacks
+	 * {@link #com.eTilbdusavis.etasdk.PageflipWebview.PageflipListener Pageflip listener} for callbacks
 	 */
 	private PageflipListener mListener;
 	
@@ -218,7 +248,7 @@ public final class PageflipWebview extends WebView {
 	private boolean mReady = false;
 	
 	/** 
-	 * The interface between Webview And Pageflip
+	 * The interface between PageflipWebview And Pageflip
 	 */
 	private PageflipJavaScriptInterface mPFInterface;
 	
@@ -479,8 +509,8 @@ public final class PageflipWebview extends WebView {
 	}
 
 	/**
-	 * Method for determining if the pageflip is ready.
-	 * @return true if the catalog is ready
+	 * Method for determining if the Pageflip is ready.
+	 * @return true if Pageflip JavaScript is ready for user-input
 	 */
 	public boolean isReady() {
 		return mReady;
