@@ -132,17 +132,33 @@ public final class Utils {
 		return query;
 	}
 	
+	/**
+	 * Checks the type of an object, to see if it fits the requirement of a query bundle
+	 * @param o Object to check
+	 * @return true if type is allowed
+	 */
 	private static boolean isAllowed(Object o) {
 		return o == null || o instanceof Integer || o instanceof Long 
 				|| o instanceof Double || o instanceof String||o instanceof Boolean
 				|| o instanceof Float || o instanceof Short || o instanceof Character;
 	}
 	
+	/**
+	 * Method for handling null-values
+	 * @param value to check
+	 * @return s string where the empty string "" represents null
+	 */
 	private static String valueIsNull(Object value) {
 		String s = value == null ? "" : value.toString();
 		return s;
 	}
 	
+	/**
+	 * URL encoding of strings
+	 * @param value to encode
+	 * @param encoding encoding to use
+	 * @return an URL-encoded string
+	 */
 	private static String encode(String value, String encoding) {
 		try {
 			value = URLEncoder.encode(value, encoding);
@@ -185,29 +201,27 @@ public final class Utils {
 	
 	/**
 	 * Checks if a given integer is a valid birth year.<br>
-	 * 
-	 * Requirements: birth year from 1901 through 2011.
+	 * Requirements: birth year is in the span 1900 - 2013.
 	 * @param birthyear
 	 * @return
 	 */
 	public static boolean isBirthyearValid(Integer birthyear) {
-		return birthyear > 1900 ? (birthyear < 2013 ? true : false ) : false ;
+		return birthyear > 1900 ? (birthyear < 2013) : false ;
 	}
 	
 	/**
 	 * A very naive implementation of email validation.<br>
-	 * 
-	 * @param email
-	 * @return
+	 * Requirement: String must contains a '@', and that there is at least one char before and after the '@'
+	 * @param email to check
+	 * @return true if email is valid, else false
 	 */
 	public static boolean isEmailValid(String email) {
 		return email.contains("@") && email.split("@").length > 1; 
 	}
 
 	/**
-	 * Checks if a given integer is a valid birth year.<br>
-	 * 
-	 * Requirements: birth year from 1901 through 2011.
+	 * Checks if a given string is a valid gender.<br>
+	 * Requirements: String is either 'male' or 'female' (not case sensitive).
 	 * @param birthyear
 	 * @return
 	 */
@@ -216,21 +230,36 @@ public final class Utils {
 		return (gender.equals("male") || gender.equals("female") );
 	}
 	
+	/**
+	 * Convert an API date of the format "2013-03-03T13:37:00+0000" into a Date object.
+	 * @param date to convert
+	 * @return a Date object
+	 */
 	public static Date parseDate(String date) {
 		Date d = null;
 		try {
 			d = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(date);
 		} catch (ParseException e) {
-			e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return d;
 	}
-
-	public static String formatDate(Date date) {
+	
+	/**
+	 * Convert a Date object into a date string, that will be accepted by the API
+	 * @param date to convert
+	 * @return a string
+	 */
+	public static String parseDate(Date date) {
 		return new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(date);
 	}
 	
-
+	/**
+	 * A sorting method, that sorts shopping list items, according what eTilbudsavis
+	 * wants a list to look like. There is no candidness requiring you to use this sorting method.
+	 * This is only meant as a nice to have.
+	 * @param items to sort
+	 */
 	public static void sortItems(List<ShoppinglistItem> items) {
 		int size = items.size();
 		
@@ -288,11 +317,21 @@ public final class Utils {
 			items.add(s);
 		
 	}
-
+	
+	/**
+	 * Checks a given status code, is in the range from (including) 200 to (not including) 300, or 304
+	 * @param statusCode to check
+	 * @return true is is success, else false
+	 */
 	public static boolean isSuccess(int statusCode) {
 		return 200 <= statusCode && statusCode < 300 || statusCode == 304;
 	}
 	
+	/**
+	 * A simple regular expression to check if the app-version string can be accepted by the API
+	 * @param version to check
+	 * @return true, if the version matched the regex
+	 */
 	public static boolean validVersion(String version) {
 		
 	    String FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([+-][0-9A-Za-z-.]*)?";

@@ -34,6 +34,10 @@ public class Response<T> {
         return new Response<T>(null, null, error);
     }
     
+    /**
+     * Check is this response is a success
+     * @return true if Request succeeded, else false.
+     */
     public boolean isSuccess() {
     	return error == null;
     }

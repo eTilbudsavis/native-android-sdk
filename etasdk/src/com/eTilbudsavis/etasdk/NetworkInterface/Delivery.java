@@ -24,6 +24,11 @@ public class Delivery {
         };
     }
     
+    /**
+     * Post the Response to a Request, back to the UI-thread, and then trigger the listener waiting for the callback.
+     * @param request made by the user
+     * @param a response response from the API fulfilling the Request
+     */
     public void postResponse(Request<?> request, Response<?> response) {
     	request.addEvent("post-response");
     	
@@ -41,8 +46,7 @@ public class Delivery {
     }
     
     /**
-     * A Runnable used for delivering network responses to a listener on the
-     * main thread.
+     * A Runnable used for delivering network responses to a listener on the UI-thread.
      */
     @SuppressWarnings("rawtypes")
     private class DeliveryRunnable implements Runnable {

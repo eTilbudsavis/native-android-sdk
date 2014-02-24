@@ -5,7 +5,8 @@ package com.eTilbudsavis.etasdk.Utils;
  * These are typically used for requests to any list endpoint.<br>
  * Note that not all parameters are necessarily in this set.<br><br>
  * 
- * For more information on parameters, please read the API documentation at engineering.etilbudsavis.dk/eta-api/
+ * For more information on parameters, please read the API documentation at our 
+ * <a href="http://engineering.etilbudsavis.dk/">Engineering Blog</a>
  * 
  * @author Danny Hvam - danny@etilbudsavis.dk
  */

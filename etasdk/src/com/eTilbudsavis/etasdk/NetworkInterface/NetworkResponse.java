@@ -14,7 +14,7 @@ public class NetworkResponse {
     public final Map<String, String> headers;
     
     /**
-     * Creates a new network response.
+     * Creates a new network response. From data received from a data source
      * @param statusCode the HTTP status code
      * @param data Response body
      * @param headers Headers returned with this response, or null for none

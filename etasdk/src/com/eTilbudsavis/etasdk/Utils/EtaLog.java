@@ -28,29 +28,50 @@ public class EtaLog {
 	/** Variable to control the size of the exception log */
 	public static final int DEFAULT_EXCEPTION_LOG_SIZE = 64;
 	
+	/** Variable determining the state of logging */
 	private static boolean mEnableLogHistory = false;
+	
+	/** The log containing all exceptions, that have been printed via {@link #d(String, Exception) } */
 	private static final EventLog mExceptionLog = new EventLog(DEFAULT_EXCEPTION_LOG_SIZE);
 	
+	/**
+	 * Send a DEBUG log message.
+	 * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
+	 * @param message The message you would like logged.
+	 */
 	public static void d(String tag, String message) {
 		if (!DEBUG) return;
 		Log.d(tag, message);
 	}
 
+	/**
+	 * Send a DEBUG log message.
+	 * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
+	 * @param e The exception you would like logged.
+	 */
 	public static void d(String tag, Exception e) {
 		d(tag, (Throwable)e);
 	}
-	
+
+	/**
+	 * Send a DEBUG log message.
+	 * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
+	 * @param t The throwable you would like logged.
+	 */
 	public static void d(String tag, Throwable t) {
 		if (!DEBUG) return;
+		if (mEnableLogHistory) {
+			addLog(t);
+		}
 		addLog(t);
 		t.printStackTrace(); 
 	}
 	
+	/**
+	 * Adds the throwable to the {@link #mExceptionLog Exception Log}.
+	 * @param t The throwable to add
+	 */
 	private static void addLog(Throwable t) {
-		
-		if (!mEnableLogHistory) {
-			return;
-		}
 		
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -66,7 +87,12 @@ public class EtaLog {
 		}
 		
 	}
-	
+
+	/**
+	 * Send a DEBUG log message. This method will allow messages above the usual Log.d() limit of 4000 chars.
+	 * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
+	 * @param message The message you would like logged.
+	 */
 	public static void dAll(String tag, String message) {
 		if (!DEBUG) return;
 		
@@ -138,53 +164,110 @@ public class EtaLog {
 		String s = response == null ? "null" : response;
 		Log.d(tag, name + ": Response: " + s + ", Error: " + e );
 	}
-
+	
+	/**
+	 * Enabling of log messages to Log.d(). All SDK error messages will be
+	 * printed via {@link #com.eTilbudsavis.etasdk.Utils.EtaLog EtaLog}
+	 * and you must therefore enable logging manually under development, to
+	 * get relevant messages, and errors. <br><br>
+	 * But please be aware to disable this in production, as there is no
+	 * guarantee as to what may be printed in this log (e.g.: usernames and passwords)
+	 * 
+	 * @param enable true to have messages printed to Log.d()
+	 */
 	public static void enableLogd(boolean enable) {
 		DEBUG = enable;
 	}
 	
+	/**
+	 * If exception log is enables, all exceptions will be saved, and can be used later for debugging purposes.
+	 * This is especially useful under development, as all errors from the SDK can be logged to this log.
+	 * @param enable true to save exceptions, else false
+	 */
 	public static void enableExceptionHistory(boolean enable) {
 		mEnableLogHistory = enable;
 	}
 	
+	/**
+	 * Get all exceptions posted to the log.
+	 * @return the exception log
+	 */
 	public static EventLog getExceptionLog() {
 		return mExceptionLog;
 	}
 	
+	/**
+	 * Print a StackTrace from any given point of your source code.
+	 */
 	public static void printStackTrace() {
 		if (!DEBUG) return;
 			for (StackTraceElement ste : Thread.currentThread().getStackTrace())
 				System.out.println(ste);
 	}
 	
+	/**
+	 * EventLog class have been created to simplify logging within the ETA SDK.
+	 * You will notice that this class is being used extensively throughout the SDK.
+	 * And have been especially useful, while debugging networking issues.
+	 * 
+	 * @author Danny Hvam - danny@etilbudsavis.dk
+	 *
+	 */
 	public static class EventLog {
+
+		public static final String TAG = "EventLog";
 		
 		public static final String TYPE_REQUEST = "request";
 		public static final String TYPE_EXCEPTION = "exception";
 		public static final String TYPE_VIEW = "view";
 		public static final String TYPE_LOG = "log";
 		
-		public static final String TAG = "EventLog";
-		
 		List<Event> mEvents;
 		JSONObject mSummary;
 		
+		/**
+		 * Create a new EventLog, with no size limitations. Please be aware that
+		 * these logs can grow to a considerable size, and may use an unreasonable
+		 * amount of memory, and is therefore only recommended under development.
+		 */
 		public EventLog() {
 			mEvents = Collections.synchronizedList(new ArrayList<EtaLog.EventLog.Event>());
 		}
 		
+		/**
+		 * Create a new log with a fixed size. The EventLig will be using FIFO ordering of events.
+		 * @param logSize the desired size of the log
+		 */
 		public EventLog(int logSize) {
 			mEvents = Collections.synchronizedList(new FixedArrayList<EtaLog.EventLog.Event>(logSize));
 		}
 		
+		/**
+		 * Add a new Event to the log, based simply on a name. This is nice for tracing
+		 * when, where and in what order the events have occurred.
+		 * @param name of the log entry
+		 */
 		public void add(String name) {
 			add(name, null, null);
 		}
 		
+		/**
+		 * Add a new Event to the log. Adding a special type, is nice for saving generic error correcting data
+		 * to a log. This can be {@link #TYPE_VIEW view}, {@link #TYPE_EXCEPTION exception}, or {@link #TYPE_REQUEST request} events.
+		 * but essentially any string will do.
+		 * @param type of event to add
+		 * @param data data accompanying the event
+		 */
 		public void add(String type, JSONObject data) {
 			add(type, type, data);
 		}
 		
+		/**
+		 * 
+		 * @param name
+		 * @param type
+		 * @param data
+		 */
 		private void add(String name, String type, JSONObject data) {
 			long time = System.currentTimeMillis();
 			String user = Eta.getInstance().getUser().getErn();
@@ -192,18 +275,34 @@ public class EtaLog {
 			add(new Event(name, time, type, user, token, data));
 		}
 		
+		/**
+		 * Add a new Event to the log.
+		 * @param e event to add
+		 */
 		public void add(Event e) {
 			mEvents.add(e);
 		}
 		
+		/**
+		 * Get the current list of events
+		 * @return
+		 */
 		public List<Event> getEvents() {
 			return mEvents;
 		}
 		
+		/**
+		 * Clear the current list of events in the EventLog
+		 */
 		public void clear() {
 			mEvents.clear();
 		}
 		
+		/**
+		 * Get all logs of a given type
+		 * @param type of event to get
+		 * @return a list of events
+		 */
 		public List<Event> getType(String type) {
 			List<Event> tmp = new ArrayList<EtaLog.EventLog.Event>();
 			for (Event e : mEvents) {
@@ -230,14 +329,16 @@ public class EtaLog {
 			return mSummary == null ? new JSONObject() : mSummary;
 		}
 		
+		/**
+		 * Print the summary data for this EventLog
+		 */
 		public void printSummary() {
 			d(TAG, getSummary().toString());
 		}
 		
 		/**
-		 * Prints the timing of events.<br>
-		 * This is 
-		 * @param name
+		 * Prints the timing of events in this EventLog
+		 * @param name to use as print prefix
 		 */
 		public void printEventLog(String name) {
 			
@@ -261,6 +362,11 @@ public class EtaLog {
 			return toJSON(mEvents);
 		}
 		
+		/**
+		 * Create a JSONArray of the currents events
+		 * @param events to torn into a JSONArray
+		 * @return a JSONArray
+		 */
 		public static JSONArray toJSON(List<Event> events) {
 			JSONArray jArray = new JSONArray();
 			if (events != null && !events.isEmpty()) {
@@ -271,6 +377,10 @@ public class EtaLog {
 			return jArray;
 		}
 		
+		/**
+		 * Get the total duration from the first Event were recorded till the last one.
+		 * @return a non-negative number
+		 */
 		public long getTotalDuration() {
 			if (mEvents.isEmpty()) {
 				return 0;
@@ -296,6 +406,11 @@ public class EtaLog {
 
 		};
 		
+		/**
+		 * Simple helper class, for usage in EventLog
+		 * @author Danny Hvam - danny@etilbudsavis.dk
+		 *
+		 */
 		public class Event {
 			
 			public final long time;
@@ -317,7 +432,7 @@ public class EtaLog {
 			public JSONObject toJSON() {
 				JSONObject o = new JSONObject();
 				try {
-					o.put("timestamp", Utils.formatDate(new Date(time)));
+					o.put("timestamp", Utils.parseDate(new Date(time)));
 					o.put("type", type);
 					o.put("token", token);
 					o.put("userid", user);

@@ -36,7 +36,10 @@ public class CacheDispatcher extends Thread {
 		mDelivery = delivery;
 		mEta = eta;
 	}
-
+	
+	/**
+	 * Terminate this CacheDispatcher. Once terminated, requests will no longer be passed to the NetworkDispatcher. 
+	 */
 	public void quit() {
 		mQuit = true;
 	}

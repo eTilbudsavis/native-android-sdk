@@ -104,8 +104,8 @@ public class Offer extends EtaObject implements Serializable {
 			o.put(ServerKey.QUANTITY, offer.getQuantity() == null ? null : offer.getQuantity().toJSON());
 			o.put(ServerKey.IMAGES, offer.getImages() == null ? null : offer.getImages().toJSON());
 			o.put(ServerKey.LINKS, offer.getLinks() == null ? null : offer.getLinks().toJSON());
-			o.put(ServerKey.RUN_FROM, Utils.formatDate(offer.getRunFrom()));
-			o.put(ServerKey.RUN_TILL, Utils.formatDate(offer.getRunTill()));
+			o.put(ServerKey.RUN_FROM, Utils.parseDate(offer.getRunFrom()));
+			o.put(ServerKey.RUN_TILL, Utils.parseDate(offer.getRunTill()));
 			o.put(ServerKey.DEALER_URL, offer.getDealerUrl());
 			o.put(ServerKey.DEALER_ID, offer.getDealerId());
 			o.put(ServerKey.STORE_URL, offer.getStoreUrl());

@@ -119,8 +119,8 @@ public class Catalog extends EtaErnObject implements Serializable {
 			o.put(ServerKey.ERN, c.getErn());
 			o.put(ServerKey.LABEL, c.getLabel());
 			o.put(ServerKey.BACKGROUND, c.getBackground());
-			o.put(ServerKey.RUN_FROM, Utils.formatDate(c.getRunFrom()));
-			o.put(ServerKey.RUN_TILL, Utils.formatDate(c.getRunTill()));
+			o.put(ServerKey.RUN_FROM, Utils.parseDate(c.getRunFrom()));
+			o.put(ServerKey.RUN_TILL, Utils.parseDate(c.getRunTill()));
 			o.put(ServerKey.PAGE_COUNT, c.getPageCount());
 			o.put(ServerKey.OFFER_COUNT, c.getOfferCount());
 			o.put(ServerKey.BRANDING, c.getBranding().toJSON());

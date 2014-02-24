@@ -113,7 +113,7 @@ public class StringRequest extends Request<String> {
 			request.put("url", Utils.buildQueryString(this));
 			request.put(HTTP.CONTENT_TYPE, getBodyContentType());
 			request.put("headers", new JSONObject(getHeaders()));
-			request.put("time", Utils.formatDate(new Date()));
+			request.put("time", Utils.parseDate(new Date()));
 			request.put("response", response);
 			
 			getLog().setSummary(request);

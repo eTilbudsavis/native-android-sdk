@@ -51,7 +51,7 @@ public class Session extends EtaObject implements Serializable {
 		
 		try {
 			o.put(ServerKey.TOKEN, s.getToken());
-			o.put(ServerKey.EXPIRES, Utils.formatDate(s.getExpire()));
+			o.put(ServerKey.EXPIRES, Utils.parseDate(s.getExpire()));
 			o.put(ServerKey.USER, s.getUser().getId() == User.NO_USER ? null : s.getUser().toJSON());
 			o.put(ServerKey.PERMISSIONS, s.getPermission() == null ? null : s.getPermission().toJSON());
 			o.put(ServerKey.PROVIDER, s.getProvider());

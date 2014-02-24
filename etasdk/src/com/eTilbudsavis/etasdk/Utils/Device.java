@@ -13,15 +13,29 @@ public class Device {
 		} catch (Exception e) { }
 		return radio;
 	}
-
+	
+	/**
+	 * Get the build version of the device.<br>
+	 * @see {@link #Build.VERSION.RELEASE Build.VERSION.RELEASE}
+	 * @return build version
+	 */
 	public static String getBuildVersion() {
 		return Build.VERSION.RELEASE;
 	}
 	
+	/**
+	 * Get the kernel version of this device.<br>
+	 * @see {@link #System.getProperty() System.getProperty("os.version")}
+	 * @return kernel version
+	 */
 	public static String getKernel() {
 		return System.getProperty("os.version");
 	}
 	
+	/**
+	 * Get the device model. e.g.: "Samsung GT-P3110"
+	 * @return phone model
+	 */
 	public static String getModel() {
 		String manufacturer = Build.MANUFACTURER;
 		String model = Build.MODEL;
@@ -45,13 +59,18 @@ public class Device {
 		}
 	}
 	
+	/**
+	 * Get a concatenated version of:
+	 * {@link #getModel() getModel()}, {@link #getBuildVersion() getBuildVersion()}, {@link #getRadio() getRadio()}, {@link #getKernel() getKernel()}
+	 * @return a readable string with device info
+	 */
 	public static String getDeviceInfo() {
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("Model: ").append(getModel())
-		.append(", Android: ").append(getBuildVersion())
-		.append(", BaseBand: ").append(getRadio())
-		.append(", Kernel: ").append(getKernel());
+		sb.append("model[").append(getModel()).append("]")
+		.append(", android[").append(getBuildVersion()).append("]")
+		.append(", baseBand[").append(getRadio()).append("]")
+		.append(", kernel[").append(getKernel()).append("]");
 		return sb.toString();
 	}
 	

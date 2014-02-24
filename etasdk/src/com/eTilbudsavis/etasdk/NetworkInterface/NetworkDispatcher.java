@@ -26,7 +26,7 @@ public class NetworkDispatcher extends Thread {
     /** The queue of requests to service. */
 	private final BlockingQueue<Request> mQueue;
 	
-	/**  */
+	/** The RequestQueue this NetworkDispatcher receives Requests from */
 	private final RequestQueue mRequestQueue;
 	
     /** The network interface for processing requests. */
@@ -49,7 +49,10 @@ public class NetworkDispatcher extends Thread {
         mRequestQueue = requestQueue;
         mEta = eta;
     }
-    
+
+	/**
+	 * Terminate this NetworkDispatcher. Once terminated, no further requests will be processed. 
+	 */
     public void quit() {
     	mQuit = true;
     }
@@ -143,8 +146,13 @@ public class NetworkDispatcher extends Thread {
         }
     }
 	
-	private boolean isSessionEndpoint(Request r) {
-		return r.getUrl().contains(Endpoint.SESSIONS);
+	/**
+	 * Wrapper to check for session endpoint
+	 * @param request to check
+	 * @return true if session-endpoint, eler false 
+	 */
+	private boolean isSessionEndpoint(Request request) {
+		return request.getUrl().contains(Endpoint.SESSIONS);
 	}
 	
 	/**

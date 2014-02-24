@@ -118,7 +118,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 			o.put(ServerKey.SHOPPINGLIST_ID, s.getShoppinglistId());
 			o.put(ServerKey.ERN, s.getErn());
 			o.put(ServerKey.CREATOR, s.getCreator());
-			o.put(ServerKey.MODIFIED, Utils.formatDate(s.getModified()));
+			o.put(ServerKey.MODIFIED, Utils.parseDate(s.getModified()));
 			o.put(ServerKey.PREVIOUS_ID, s.getPreviousId());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);

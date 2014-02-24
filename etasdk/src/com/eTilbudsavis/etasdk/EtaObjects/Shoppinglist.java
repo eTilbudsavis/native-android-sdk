@@ -121,7 +121,7 @@ public class Shoppinglist extends EtaObject implements Serializable, Comparable<
 			o.put(ServerKey.ERN, s.getErn());
 			o.put(ServerKey.NAME, s.getName());
 			o.put(ServerKey.ACCESS, s.getAccess());
-			o.put(ServerKey.MODIFIED, Utils.formatDate(s.getModified()));
+			o.put(ServerKey.MODIFIED, Utils.parseDate(s.getModified()));
 			o.put(ServerKey.PREVIOUS_ID, s.getPreviousId());
 			o.put(ServerKey.TYPE, s.getType());
 			o.put(ServerKey.META, s.getMeta());
