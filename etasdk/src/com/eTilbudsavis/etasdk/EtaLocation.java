@@ -5,6 +5,7 @@
 package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,10 +25,10 @@ public class EtaLocation extends Location {
 	
 	private static final String ETA_PROVIDER = "etasdk";
 	
-	private static final int RADIUS_MIN = 0;
-	private static final int RADIUS_MAX = 700000;
-	private static final int DEFAULT_RADIUS = 100000;
-	private static final double DEFAULT_BOUND = 0.0;
+	public static final int RADIUS_MIN = 0;
+	public static final int RADIUS_MAX = 700000;
+	public static final int DEFAULT_RADIUS = 100000;
+	public static final double DEFAULT_BOUND = 0.0;
 	
 	private int mRadius = DEFAULT_RADIUS;
 	private boolean mSensor = false;
@@ -37,7 +38,7 @@ public class EtaLocation extends Location {
 	private double mBoundSouth = DEFAULT_BOUND;
 	private double mBoundWest = DEFAULT_BOUND;
 	private Eta mEta;
-	private ArrayList<LocationListener> mSubscribers = new ArrayList<LocationListener>();
+	private List<LocationListener> mSubscribers = new ArrayList<LocationListener>();
 	
 	public EtaLocation(Eta eta) {
 		super(ETA_PROVIDER);
@@ -78,14 +79,15 @@ public class EtaLocation extends Location {
 	 */
 	public void setRadius(int radius) {
 		if (radius < RADIUS_MIN || radius > RADIUS_MAX) {
-			EtaLog.d(TAG, "Radius must be within range " + RADIUS_MIN + " to " + RADIUS_MAX + ", provided radius: " + radius);
+			String distError = "Radius must be within range %s to %s, provided radius: %s";
+			EtaLog.d(TAG, String.format(distError, RADIUS_MIN, RADIUS_MAX, radius));
 			return;
 		}
 		mRadius = radius;
 		setTimeNow();
 		notifySubscribers();
 	}
-
+	
 	/**
 	 * Get current radius
 	 * @return radius in meters.
@@ -93,7 +95,7 @@ public class EtaLocation extends Location {
 	public int getRadius() {
 		return mRadius;
 	}
-
+	
 	@Override
 	public void setLatitude(double latitude) {
 		super.setLatitude(latitude);
@@ -102,25 +104,10 @@ public class EtaLocation extends Location {
 	}
 	
 	@Override
-	public double getLatitude() {
-		return super.getLatitude();
-	}
-	
-	@Override
 	public void setLongitude(double longitude) {
 		super.setLongitude(longitude);
 		setTimeNow();
 		notifySubscribers();
-	}
-
-	@Override
-	public double getLongitude() {
-		return super.getLongitude();
-	}
-	
-	@Override
-	public long getTime() {
-		return super.getTime();
 	}
 	
 	@Override
@@ -175,8 +162,6 @@ public class EtaLocation extends Location {
 	public static boolean isValidLocation(double lat, double lng) {
 		return isValid(lat) && isValid(lng);
 	}
-	
-	
 	
 	/*
 	 * A coordinate is valid is it's not in the range of -0.1 to 0.1
@@ -243,7 +228,7 @@ public class EtaLocation extends Location {
 		setTimeNow();
 		notifySubscribers();
 	}
-
+	
 	public double getBoundEast() {
 		return mBoundEast;
 	}
@@ -297,7 +282,6 @@ public class EtaLocation extends Location {
 		e.putInt(Settings.LOC_RADIUS, mRadius);
 		e.putFloat(Settings.LOC_LATITUDE, (float)getLatitude());
 		e.putFloat(Settings.LOC_LONGITUDE, (float)getLongitude());
-		
 		e.putFloat(Settings.LOC_BOUND_EAST, (float)mBoundEast);
 		e.putFloat(Settings.LOC_BOUND_WEST, (float)mBoundWest);
 		e.putFloat(Settings.LOC_BOUND_NORTH, (float)mBoundNorth);
