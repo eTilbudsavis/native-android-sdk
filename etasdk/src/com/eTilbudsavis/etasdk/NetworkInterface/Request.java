@@ -21,7 +21,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	/** Default encoding for POST or PUT parameters. See {@link #getParamsEncoding()}. */
 	protected static final String DEFAULT_PARAMS_ENCODING = "utf-8";
 	
-	/** Default cache time */
+	/** Default cache time in milliseconds */
 	protected static final long DEFAULT_CACHE_TTL = 3 * Utils.MINUTE_IN_MILLIS;
 	
 	/** Listener interface, for responses */
@@ -109,7 +109,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	
 	/**
 	 * Get the log for this request, log contains actions, and timings that have been performed on this request
-	 * @return
+	 * @return the EventLog for this request
 	 */
 	public EventLog getLog() {
 		return mLog;
@@ -142,8 +142,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	}
 	
 	/**
-	 * Method for determining if the request is finished
-	 * @return
+	 * Method for determining if the request is finished.
+	 * Whether the request was successful or not, it <b>NOT</b> reflected here.
+	 * @return true if the SDK, has finished this request
 	 */
     public boolean isFinished() {
             return mFinished;
@@ -151,7 +152,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     
     /**
      * Method for marking a request as finished
-     * @return
+     * @return this object
      */
     public Request finish() {
             mLog.add("finished");
@@ -166,7 +167,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	
 	/**
 	 * Set any headers wanted in the request
-	 * @param headers
+	 * @param headers to include
 	 */
 	public void setHeaders(Map<String, String> headers) {
 		mHeaders.putAll(headers);
@@ -190,15 +191,15 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	}
 	/**
 	 * Returns the response listener for this request
-	 * @return
+	 * @return a listener of type T
 	 */
 	public Listener getListener() {
 		return mListener;
 	}
 
 	/**
-	 * returns wether this request is cachable or not
-	 * @return
+	 * returns whether this request is cachable or not
+	 * @return true if the request is cachable
 	 */
 	public boolean isCachable() {
 		return mIsCachable;
@@ -212,26 +213,35 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		mIsCachable = isResponseCachable;
 	}
 	
+	/**
+	 * Find out if the response from this request is from cache or not.
+	 * @return true if response is from cache, else false
+	 */
 	public boolean isCacheHit() {
 		return mCacheHit;
 	}
 	
+	/**
+	 * Set whether this was from cache
+	 * @param cacheHit true is response is cache hit, else false
+	 * @return this object
+	 */
 	public Request setCacheHit(boolean cacheHit) {
 		mCacheHit = cacheHit;
 		return this;
 	}
 	
 	/**
-	 * The Time To Live for any given Cache.Item this request may create
-	 * @return
+	 * The time-to-live for a given Cache.Item this request may create
+	 * @return request time-to-live in milliseconds
 	 */
 	public long getCacheTTL() {
 		return DEFAULT_CACHE_TTL;
 	}
 	
 	/**
-	 * Returns true, if this request should query the cache for data
-	 * @return
+	 * Method determining is cache should be ignored
+	 * @return true, if this request should query the cache for data
 	 */
 	public boolean ignoreCache() {
 		return mIgnoreCache;
@@ -239,8 +249,8 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
 	/**
 	 * Set whether this request may use data from cache or not
-	 * @param useCache
-	 * @return
+	 * @param skip true if cache should not be used
+	 * @return this object
 	 */
 	public Request setIgnoreCache(boolean skip) {
 		mIgnoreCache = skip;
@@ -248,49 +258,74 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	}
 	
 	/**
-	 * This method enables you to have the response returned on any handler.
-	 * This is handy, if you want to have the reaponse returned on a non-ui thread
-	 * @param h
-	 * @return
+	 * This method enables you to have the response posted via any given handler.
+	 * Thereby returning on any (also non-UI) thread, for further processing.
+	 * @param handler that will receive the callback
+	 * @return this object
 	 */
-	public Request setHandler(Handler h) {
-		mHandler = h;
+	public Request setHandler(Handler handler) {
+		mHandler = handler;
 		return Request.this;
 	}
 	
 	/**
-	 * Get the custom handler for this request. <br>
-	 * Null will be returned if the default handler will be used.
+	 * Get the custom handler for this request.
 	 * @return a handler or null, if using default handler
 	 */
 	public Handler getHandler() {
 		return mHandler;
 	}
 	
+	/**
+	 * Get the cache item that this request have generated
+	 * @return an Cache.Item, or null is no Cache.Item have been generated
+	 */
 	public Map<String, Cache.Item> getCache() {
 		return mCache;
 	}
 	
+	/**
+	 * Set the Cache.Item that have been generated from this request.
+	 * @param cache the generated Cache.Item
+	 * @return this object
+	 */
 	public Request putCache(Map<String, Cache.Item> cache) {
 		mCache.putAll(cache);
 		return this;
 	}
 	
+	/**
+	 * Determining if this request should include location data.
+	 * @return true if location data should be used in this request, else false.
+	 */
 	public boolean useLocation() {
 		return mUseLocation;
 	}
 	
+	/**
+	 * Enable or disable the usage of location data in this request.<br>
+	 * Please use with care, <b>most API v2 endpoints require location data</b>
+	 * @param useLocation true to include, and false exclude location data in request parameters
+	 * @return
+	 */
 	public Request setUseLocation(boolean useLocation) {
 		mUseLocation = useLocation;
 		return Request.this;
 	}
 	
-	/** Return the url for this request. */
+	/** 
+	 * Get the url for this request
+	 * @return the url for this request
+	 */
 	public String getUrl() {
 		return mUrl;
 	}
 
-	/** Set the url of this request. */
+	/** 
+	 * Set the url of this request
+	 * @param url to use in this request
+	 * @return this object
+	 */
 	public Request setUrl(String url) {
 		mUrl = url;
 		return Request.this;
@@ -298,16 +333,17 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	
 	/**
 	 * Get the query parameters that will be used to perform this query.<br>
-	 * NOTE that this is NOT the same as appending a body to the request, 
-	 * when doing a PUT or POST request.
-	 * @return
+	 * @return the query parameters
 	 */
 	public Bundle getQueryParameters() {
 		return mQuery;
 	}
 	
 	/**
-	 * Add parameters to this request.
+	 * Add request parameters to this request. The parameters will be appended 
+	 * as HTTP query parameters to the URL, when the SDK executes the request. 
+	 * Therefore you should <b>not</b> do nested structures, only simple key-value-pairs.
+	 * This is <b>not the same as appending a body</b> to the request, when doing a PUT or POST request.
 	 * @param query
 	 * @return
 	 */
@@ -315,47 +351,81 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		mQuery.putAll(query);
 		return Request.this;
 	}
-
+	
+	/**
+	 * Get the priority of which this request has.
+	 * @return the request priority
+	 */
 	protected Priority getPriority() {
 		return Priority.MEDIUM;
 	}
-
+	
+	/**
+	 * Get the sequence number that this request have been given. 
+	 * The sequence number reflects the order of which the request was handed to the
+	 * {@link #com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue RequestQueue}.
+	 * and can partially be used to determine the order of execution.
+	 * @return the sequence number (a non-negative number)
+	 */
 	protected int getSequence() {
 		return mSequence;
 	}
-
+	
+	/**
+	 * Set a sequence number for when the request was received by
+	 * {@link #com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue RequestQueue}
+	 * in order to partially determine the order of execution of requests.
+	 * @param seq
+	 */
 	protected void setSequence(int seq) {
 		mSequence = seq;
 	}
 	
-	public boolean isSessionEndpoint() {
-		return mUrl.contains(Endpoint.SESSIONS);
-	}
-	
+	/**
+	 * Get parameter encoding of the request. Useful for decoding data.
+	 * @return the encoding
+	 */
 	public String getParamsEncoding() {
 		return DEFAULT_PARAMS_ENCODING;
 	}
-
+	
+	/**
+	 * Get content type of the body. Useful for setting headers.
+	 * @return
+	 */
 	public String getBodyContentType() {
 		return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
 	}
 	
+	/**
+	 * Get the body of this request. 
+	 * @return body, if body have been set, else null
+	 */
 	public byte[] getBody() {
-		Bundle params = getQueryParameters();
-		if (params != null && params.size() > 0) {
-			try {
-				return Utils.buildQueryString(params, getParamsEncoding()).getBytes(getParamsEncoding());
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		}
 		return null;
 	}
-
+	
+	/**
+	 * Method to be implemented, should handle parsing of network data, and simultaneously create
+	 * a Cache.Item (or several Cache.Item) if such a item(s) can and shall be created.
+	 * @param response NetworkResponse to parse into <b>both</b> a Response, and Cache.Item
+	 * @return a valid Response is possible, or null
+	 */
 	abstract protected Response<T> parseNetworkResponse(NetworkResponse response);
-
+	
+	/**
+	 * Method to be implemented in subclasses, which will be able to parse a Cache.Item,
+	 * previously generated by this request in {@link #parseNetworkResponse(NetworkResponse) parseNetworkResponse()}.
+	 * @param c item to parse
+	 * @return a valid Response is possible, or null
+	 */
 	abstract protected Response<T> parseCache(Cache c);
 	
+	/**
+	 * Method for easily delivering the response to the user, via the given callback-listener.
+	 * @param response to deliver, may be null
+	 * @param error to deliver, may be null
+	 */
 	protected void deliverResponse(T response, EtaError error) {
 		if (mListener != null) {
 			mListener.onComplete(response, error);
@@ -368,16 +438,31 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return left == right ? this.mSequence - other.mSequence : right.ordinal() - left.ordinal();
 	}
 	
+	/**
+	 * Set to true, to enable printing of the request timings via LogCat.
+	 * @see {@link #com.eTilbudsavis.etasdk.Utils.EtaLog EtaLog} for detalis about SDK Log.d output
+	 * @param printRequestTimings true to print timings of the request
+	 * @return this object
+	 */
 	public Request debugPerformance(boolean printRequestTimings) {
 		mDebugPerformance = printRequestTimings;
 		return this;
 	}
-	
+
+	/**
+	 * Set to true, to enable printing of network debugging information via LogCat.
+	 * @see {@link #com.eTilbudsavis.etasdk.Utils.EtaLog EtaLog} for detalis about SDK Log.d output
+	 * @param printNetworkInfo true to print a complete network debug log
+	 * @return this object
+	 */
 	public Request debugNetwork(boolean printNetworkInfo) {
 		mDebugNetwork = printNetworkInfo;
 		return this;
 	}
 	
+	/**
+	 * Method for triggering print of log information, if logging was enabled.
+	 */
 	public void debugPrint() {
 		
 		if (mDebugNetwork) {

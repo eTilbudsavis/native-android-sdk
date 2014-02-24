@@ -107,7 +107,7 @@ public class NetworkDispatcher extends Thread {
                 		
                     	request.addEvent("recoverable-session-error");
                     	
-                		if (request.isSessionEndpoint()) {
+                		if (isSessionEndpoint(request)) {
                 			
                 			mDelivery.postResponse(request, response);
                 			
@@ -142,6 +142,10 @@ public class NetworkDispatcher extends Thread {
             }
         }
     }
+	
+	private boolean isSessionEndpoint(Request r) {
+		return r.getUrl().contains(Endpoint.SESSIONS);
+	}
 	
 	/**
 	 *  If it's a post to sessions, it's to create a new Session, then the API key is needed.

@@ -196,7 +196,7 @@ public class RequestQueue {
     	
 		prepareRequest(request);
 		
-    	if (mEta.getSessionManager().isRequestInFlight() && !request.isSessionEndpoint()) {
+    	if (mEta.getSessionManager().isRequestInFlight() && !isSessionEndpoint(request)) {
     		
     		request.addEvent("added-to-parking-queue");
     		
@@ -208,7 +208,7 @@ public class RequestQueue {
     		
         	request.addEvent("added-to-queue");
         	
-    		if (request.isSessionEndpoint() && request != mEta.getSessionManager().getRequestInFlight()) {
+    		if (isSessionEndpoint(request) && request != mEta.getSessionManager().getRequestInFlight()) {
     			EtaLog.d(TAG, "Session changes should be handled by SessionManager. This request might cause problems");
     		}
     		
@@ -219,7 +219,11 @@ public class RequestQueue {
     	return request;
     	
     }
-    
+
+	private boolean isSessionEndpoint(Request r) {
+		return r.getUrl().contains(Endpoint.SESSIONS);
+	}
+	
 	/**
 	 * Method for adding required parameters for calling the eTilbudsavis.<br>
 	 * @param request
