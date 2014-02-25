@@ -137,6 +137,14 @@ public class EtaLocation extends Location {
 	}
 	
 	/**
+	 * 
+	 * @param address
+	 */
+	public void setAddress(String address) {
+		mAddress = address;
+	}
+	
+	/**
 	 * Returns an address, of this location if the address have previously been set 
 	 * with {@link #set(String, double, double) set(String address, double latitude, double longitude)}.
 	 * @return an address if one was given, else null

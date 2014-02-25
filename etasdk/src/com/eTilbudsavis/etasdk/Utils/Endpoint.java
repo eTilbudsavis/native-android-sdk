@@ -95,8 +95,7 @@ public class Endpoint {
 	public static String pageflipProxy(String id) {
 		String production = "https://etilbudsavis.dk/proxy/%s/";
 		String staging = "https://staging.etilbudsavis.dk/proxy/%s/";
-		String dev = "http://10.0.1.41:3000/proxy/%s/";
-		return String.format( DEBUG_PAGEFLIP ? dev : production, id);
+		return String.format( DEBUG_PAGEFLIP ? staging : production, id);
 	}
 
 	/** https://staging.etilbudsavis.dk/utils/ajax/lists/themes/ */

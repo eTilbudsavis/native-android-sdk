@@ -120,32 +120,31 @@ public final class PageflipWebview extends WebView {
 	 */
 	public static class Option {
 
-		/** String identifying the catalog option, used when setting options with the parameter {@link PageflipWebview#COMMAND_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+		/** Identifier for catalog id to load into Pageflip */
 		public static final String CATALOG = "catalog";
 		
-		/** String identifying the page option, used when setting options with the parameter {@link PageflipWebview#COMMAND_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+		/** Identifier for the initial page to load */
 		public static final String PAGE = "page";
 		
-		/** String identifying the hotspots option, used when setting options with the parameter {@link PageflipWebview#COMMAND_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+		/** Identifier for enabling/disabling hotspots */
 		public static final String HOTSPOTS = "hotspots";
 		
-		/** String identifying the hotspot overlay option, used when setting options with the parameter {@link PageflipWebview#COMMAND_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+		/** Identifier for enabling/disabling the hotspots overlay */
 		public static final String HOTSPOT_OVERLAY = "hotspotOverlay";
 		
-		/** String identifying the can close option, used when setting options with the parameter {@link PageflipWebview#COMMAND_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+		/** String identifying the option to have a close option in Pageflip */
 		public static final String CAN_CLOSE = "canClose";
 		
-		/** String identifying the headless option, used when setting options with the parameter {@link PageflipWebview#COMMAND_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+		/** String identifying the option to enabling/disabling the header */
 		public static final String HEADLESS = "headless";
 		
-		/** String identifier for the put of bounds option, used when setting options with the parameter {@link PageflipWebview#COMMAND_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details */
+		/** String identifier for the put of bounds option*/
 		public static final String OUT_OF_BOUNDS = "outOfBounds";
 		
-		/** String identifying the white lable option, used when setting options with the parameter {@link PageflipWebview#COMMAND_CATALOG_VIEW PARAM_CATALOG_VIEW}. See pageflip documentation for more details<br>
-		 * <b>NOTE</b> Using WHITE_LABLE  violate the terms of use. */
+		/** String identifying the white lable (no eTilbudsavis branding) option. <b>Using this option may violate the terms of use.</b> */
 		public static final String WHITE_LABLE = "whiteLabel";
 		
-		/** String identifier for session change option */
+		/** String identifier for session changes */
 		public static final String SESSION_CHANGE = "session-change";
 		
 		/** Identifier for enabling overide of API requests. You shouldn't be using this unless you know what you are doing. */
@@ -381,6 +380,7 @@ public final class PageflipWebview extends WebView {
 		
 		// Get the HTML, and get Pageflip running
 		String url = Endpoint.pageflipProxy(mUuid);
+//		url = "http://10.0.1.41:3000/proxy/%s/";
 		StringRequest req = new StringRequest(url, htmlListener);
 		mEta.add(req);
 		
@@ -588,7 +588,8 @@ public final class PageflipWebview extends WebView {
 	 * @param value the value of the option
 	 */
 	public void setOption(String key, String value) {
-		if (mCatalogViewOptions != null) {
+		if (mCatalogViewOptions == null) {
+			EtaLog.printStackTrace();
 			EtaLog.d(TAG, "Calling setOption() efter invoking execute() isn't allowed");
 		} else {
 			try {
@@ -710,6 +711,10 @@ public final class PageflipWebview extends WebView {
 		 */
 		private void injectJS(String jsCommand) {
 			
+			if (isReady()) {
+				EtaLog.d(TAG, jsCommand);
+			}
+			
 			final String s = String.format("javascript:(function() { %s })()", jsCommand);
 			
 			mEta.getHandler().post(new Runnable() {
@@ -792,7 +797,7 @@ public final class PageflipWebview extends WebView {
 							
 						}
 					});
-					req.debugNetwork(true);
+//					req.debugNetwork(true);
 					mEta.add(req);
 					
 				} catch (JSONException e) {

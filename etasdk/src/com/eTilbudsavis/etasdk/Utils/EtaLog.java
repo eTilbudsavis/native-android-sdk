@@ -333,7 +333,11 @@ public class EtaLog {
 		 * Print the summary data for this EventLog
 		 */
 		public void printSummary() {
-			d(TAG, getSummary().toString());
+			try {
+				d(TAG, getSummary().toString(2));
+			} catch (JSONException e) {
+				d(TAG, e);
+			}
 		}
 		
 		/**
