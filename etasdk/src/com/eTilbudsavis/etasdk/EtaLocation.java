@@ -6,6 +6,8 @@ package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,7 +22,7 @@ import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
 
 public class EtaLocation extends Location {
-
+	
 	public static final String TAG = "EtaLocation";
 	
 	private static final String ETA_PROVIDER = "etasdk";
@@ -28,16 +30,17 @@ public class EtaLocation extends Location {
 	public static final int RADIUS_MIN = 0;
 	public static final int RADIUS_MAX = 700000;
 	public static final int DEFAULT_RADIUS = 100000;
-	public static final double DEFAULT_BOUND = 0.0;
+	public static final double DEFAULT_COORDINATE = 0.0d;
 	
 	private int mRadius = DEFAULT_RADIUS;
 	private boolean mSensor = false;
 	private String mAddress = null;
-	private double mBoundNorth = DEFAULT_BOUND;
-	private double mBoundEast = DEFAULT_BOUND;
-	private double mBoundSouth = DEFAULT_BOUND;
-	private double mBoundWest = DEFAULT_BOUND;
+	private double mBoundNorth = DEFAULT_COORDINATE;
+	private double mBoundEast = DEFAULT_COORDINATE;
+	private double mBoundSouth = DEFAULT_COORDINATE;
+	private double mBoundWest = DEFAULT_COORDINATE;
 	private Eta mEta;
+	private Observable mObservers = new Observable();
 	private List<LocationListener> mSubscribers = new ArrayList<LocationListener>();
 	
 	public EtaLocation(Eta eta) {
@@ -50,6 +53,7 @@ public class EtaLocation extends Location {
 	public void set(Location l) {
 		super.set(l);
 		mSensor = (l.getProvider().equals(LocationManager.GPS_PROVIDER) || l.getProvider().equals(LocationManager.NETWORK_PROVIDER) );
+		saveState();
 		notifySubscribers();
 	}
 	
@@ -68,7 +72,8 @@ public class EtaLocation extends Location {
 		super.setLatitude(latitude);
 		super.setLongitude(longitude);
 		mSensor = false;
-		setTimeNow();
+		super.setTime(System.currentTimeMillis());
+		saveState();
 		notifySubscribers();
 	}
 	
@@ -84,7 +89,8 @@ public class EtaLocation extends Location {
 			return;
 		}
 		mRadius = radius;
-		setTimeNow();
+		super.setTime(System.currentTimeMillis());
+		saveState();
 		notifySubscribers();
 	}
 	
@@ -99,20 +105,23 @@ public class EtaLocation extends Location {
 	@Override
 	public void setLatitude(double latitude) {
 		super.setLatitude(latitude);
-		setTimeNow();
+		super.setTime(System.currentTimeMillis());
+		saveState();
 		notifySubscribers();
 	}
 	
 	@Override
 	public void setLongitude(double longitude) {
 		super.setLongitude(longitude);
-		setTimeNow();
+		super.setTime(System.currentTimeMillis());
+		saveState();
 		notifySubscribers();
 	}
 	
 	@Override
 	public void setTime(long time) {
 		super.setTime(time);
+		saveState();
 		notifySubscribers();
 	}
 	
@@ -124,7 +133,8 @@ public class EtaLocation extends Location {
 	 */
 	public void setSensor(boolean sensor) {
 		mSensor = sensor;
-		setTimeNow();
+		super.setTime(System.currentTimeMillis());
+		saveState();
 		notifySubscribers();
 	}
 	
@@ -142,6 +152,9 @@ public class EtaLocation extends Location {
 	 */
 	public void setAddress(String address) {
 		mAddress = address;
+		super.setTime(System.currentTimeMillis());
+		saveState();
+		notifySubscribers();
 	}
 	
 	/**
@@ -179,10 +192,10 @@ public class EtaLocation extends Location {
 	}
 	
 	public boolean isBoundsSet() {
-		return (mBoundNorth != DEFAULT_BOUND && 
-				mBoundSouth != DEFAULT_BOUND && 
-				mBoundEast != DEFAULT_BOUND && 
-				mBoundWest != DEFAULT_BOUND);
+		return (mBoundNorth != DEFAULT_COORDINATE && 
+				mBoundSouth != DEFAULT_COORDINATE && 
+				mBoundEast != DEFAULT_COORDINATE && 
+				mBoundWest != DEFAULT_COORDINATE);
 	}
 
 	/**
@@ -200,8 +213,14 @@ public class EtaLocation extends Location {
 			o.put(Param.LONGITUDE, getLongitude());
 			o.put(Param.SENSOR, isSensor());
 			o.put(Param.RADIUS, getRadius());
+			if (isBoundsSet()) {
+				o.put(Param.BOUND_EAST, getBoundEast());
+				o.put(Param.BOUND_NORTH, getBoundNorth());
+				o.put(Param.BOUND_SOUTH, getBoundSouth());
+				o.put(Param.BOUND_WEST, getBoundWest());
+			}
 		} catch (JSONException e) {
-			e.printStackTrace();
+			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
@@ -233,7 +252,8 @@ public class EtaLocation extends Location {
 		mBoundNorth = boundNorth;
 		mBoundSouth = boundSouth;
 		mBoundWest = boundWest;
-		setTimeNow();
+		super.setTime(System.currentTimeMillis());
+		saveState();
 		notifySubscribers();
 	}
 	
@@ -251,10 +271,6 @@ public class EtaLocation extends Location {
 	
 	public double getBoundWest() {
 		return mBoundWest;
-	}
-	
-	private void setTimeNow() {
-		super.setTime(System.currentTimeMillis());
 	}
 	
 	/**
@@ -284,7 +300,7 @@ public class EtaLocation extends Location {
 	/**
 	 * Saves this locations state to SharedPreferences. This method is called on all onPause events.
 	 */
-	public void saveState() {
+	private void saveState() {
 		SharedPreferences.Editor e = mEta.getSettings().getPrefs().edit();
     	e.putBoolean(Settings.LOC_SENSOR, mSensor);
 		e.putInt(Settings.LOC_RADIUS, mRadius);
@@ -299,7 +315,7 @@ public class EtaLocation extends Location {
 		e.commit();
 	}
 	
-	public boolean restoreState() {
+	private boolean restoreState() {
 		
 		SharedPreferences prefs = mEta.getSettings().getPrefs();
 		if (prefs.contains(Settings.LOC_SENSOR) && prefs.contains(Settings.LOC_RADIUS) && prefs.contains(Settings.LOC_LATITUDE) && 
@@ -322,10 +338,36 @@ public class EtaLocation extends Location {
 	}
 	
 	/**
+	 * Method clears all location variables, and saves the new state to preferences.
+	 */
+	public void clear() {
+		super.setAccuracy(0.0f);
+		super.setAltitude(0.0d);
+		super.setBearing(0.0f);
+		super.setExtras(null);
+		super.setLatitude(DEFAULT_COORDINATE);
+		super.setLongitude(DEFAULT_COORDINATE);
+		super.setProvider(ETA_PROVIDER);
+		super.setSpeed(0.0f);
+		super.setTime(System.currentTimeMillis());
+		mAddress = null;
+		mBoundEast = DEFAULT_COORDINATE;
+		mBoundNorth = DEFAULT_COORDINATE;
+		mBoundSouth = DEFAULT_COORDINATE;
+		mBoundWest = DEFAULT_COORDINATE;
+		mRadius = DEFAULT_RADIUS;
+		mSensor = false;
+		saveState();
+		notifySubscribers();
+	}
+	
+	/**
 	 * Invoke notifications to subscribers of this location object.<br><br>
 	 * This object automatically notifies all subscribers on changes.
 	 */
 	public void notifySubscribers() {
+		
+		mObservers.notifyObservers();
 		
 		for (LocationListener l : mSubscribers) {
 			try {
@@ -341,6 +383,13 @@ public class EtaLocation extends Location {
 	 * @param listener for callbacks
 	 */
 	public void subscribe(LocationListener listener) {
+		mObservers.addObserver(new Observer() {
+			
+			public void update(Observable observable, Object data) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		if (!mSubscribers.contains(listener))
 			mSubscribers.add(listener);
 	}
@@ -360,13 +409,13 @@ public class EtaLocation extends Location {
                 ",time=" + getTime() +
                 ",latitude=" + getLatitude() +
                 ",longitude=" + getLongitude() +
-                ",address=" + getAddress() + 
+                ",address=[" + getAddress() + "]" + 
                 ",radius=" + mRadius +
                 ",sensor=" + mSensor + 
                 ",bounds=[west=" + getBoundWest() + 
-                ",north" + getBoundNorth() + 
+                ",north=" + getBoundNorth() + 
                 ",east=" + getBoundEast() + 
-                ",south" + getBoundSouth() + "]" +
+                ",south=" + getBoundSouth() + "]" +
                 "]";
 	}
 	

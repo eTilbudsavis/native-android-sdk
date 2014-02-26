@@ -630,6 +630,8 @@ public final class PageflipWebview extends WebView {
 		@JavascriptInterface
 		public void dispatch(String payload) {
 			
+			EtaLog.d(TAG, payload);
+			
 			try {
 				
 				JSONObject tmp = new JSONObject(payload);
@@ -797,7 +799,7 @@ public final class PageflipWebview extends WebView {
 							
 						}
 					});
-//					req.debugNetwork(true);
+					req.debugNetwork(true);
 					mEta.add(req);
 					
 				} catch (JSONException e) {

@@ -266,7 +266,7 @@ public class Eta {
 	public void clear() {
 		mSessionManager.invalidate();
 		mSettings.clear();
-		mLocation = new EtaLocation(mEta);
+		mLocation.clear();
 		mRequestQueue.getLog().clear();
 		EtaLog.getExceptionLog().clear();
 	}
@@ -287,7 +287,6 @@ public class Eta {
 	public void onPause() {
 		if (mResumed) {
 			mResumed = false;
-			mLocation.saveState();
 			mListManager.onPause();
 			mSessionManager.onPause();
 			for (PageflipWebview p : PageflipWebview.pageflips)
@@ -303,7 +302,6 @@ public class Eta {
 	public void onResume() {
 		if (!mResumed) {
 			mResumed = true;
-			mLocation.restoreState();
 			mSessionManager.onResume();
 			mListManager.onResume();
 			for (PageflipWebview p : PageflipWebview.pageflips)
