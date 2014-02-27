@@ -328,13 +328,21 @@ public class EtaLog {
 		public JSONObject getSummary() {
 			return mSummary == null ? new JSONObject() : mSummary;
 		}
-		
+
 		/**
 		 * Print the summary data for this EventLog
 		 */
 		public void printSummary() {
+			d(TAG, getSummary().toString());
+		}
+		
+		/**
+		 * Print the summary data for this EventLog
+		 * @param indentSpaces the number of spaces to indent for each level of nesting.
+		 */
+		public void printSummary(int indentSpaces) {
 			try {
-				d(TAG, getSummary().toString(2));
+				d(TAG, getSummary().toString(indentSpaces));
 			} catch (JSONException e) {
 				d(TAG, e);
 			}

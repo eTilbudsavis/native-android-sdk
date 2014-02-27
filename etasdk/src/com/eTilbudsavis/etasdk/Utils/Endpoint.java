@@ -20,7 +20,8 @@ public class Endpoint {
 	public static final String CATALOG_LIST = "/v2/catalogs";
 	public static final String CATALOG_ID = "/v2/catalogs/";
 	public static final String CATALOG_SEARCH = "/v2/catalogs/search";
-
+	public static final String CATALOG_TYPEAHEAD = "/v2/catalogs/typeahead";
+	
 	public static final String DEALER_LIST = "/v2/dealers";
 	public static final String DEALER_ID = "/v2/dealers/";
 	public static final String DEALER_SEARCH = "/v2/dealers/search";
