@@ -18,7 +18,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
 	/** Default encoding for POST or PUT parameters. See {@link #getParamsEncoding()}. */
 	protected static final String DEFAULT_PARAMS_ENCODING = "utf-8";
-	
+
 	/** Default cache time in milliseconds */
 	protected static final long DEFAULT_CACHE_TTL = 3 * Utils.MINUTE_IN_MILLIS;
 	
@@ -75,10 +75,16 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	/** Boolean deciding if the summary should be added to RequestQueue log entries */
 	private boolean mLogSummary = true;
 	
+	/**  */
+	private RequestQueue mRequestQueue;
+	
+	/** A tag to identify the request, useful for bulk operations */
+	private Object mTag;
+	
 	public enum Priority {
 		LOW, MEDIUM, HIGH
 	}
-
+	
 	/** Supported request methods. */
 	public interface Method {
 		int GET = 0;
@@ -152,10 +158,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Method for marking a request as finished
      * @return this object
      */
-    public Request finish() {
-            mLog.add("finished");
-            mFinished = true;
-            return Request.this;
+    public Request finish(String reason) {
+    	mLog.add(reason);
+    	mFinished = true;
+    	mRequestQueue.finish(this, null);
+    	return Request.this;
     }
     
 	/** Returns a list of headers for this request. */
@@ -209,6 +216,35 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 */
 	protected void setCachable(boolean isResponseCachable) {
 		mIsCachable = isResponseCachable;
+	}
+	
+	/**
+	 * Set a tag on this request. This can later be used for bulk operations.
+	 * @param tag An object to identify this request buy
+	 * @return This object
+	 */
+	public Request setTag(Object tag) {
+		mTag = tag;
+		return this;
+	}
+	
+	/**
+	 * A tag to identify this request (or its origin) for performing batch operations.
+	 * @return An object. This requests tag or null.
+	 */
+	public Object getTag() {
+		return mTag;
+	}
+	
+	/**
+	 * Set the executing request queue, in order to later inform the RequestQueue
+	 * if this requests finished execution.
+	 * @param requestQueue The RequestQueue that is performing this Request
+	 * @return This object
+	 */
+	public Request setRequestQueue(RequestQueue requestQueue) {
+		mRequestQueue = requestQueue;
+		return this;
 	}
 	
 	/**

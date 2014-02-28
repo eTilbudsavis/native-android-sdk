@@ -66,11 +66,11 @@ public class Delivery {
             
             // If this request has canceled, finish it and don't deliver.
             if (mRequest.isCanceled()) {
-            	mRequest.addEvent("canceled-at-delivery");
+            	mRequest.finish("canceled-at-delivery");
                 return;
             }
             
-        	mRequest.finish();
+        	mRequest.finish("execution-finished-succesfully");
         	mRequest.debugPrint();
             mRequest.deliverResponse(mResponse.result, mResponse.error);
             

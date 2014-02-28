@@ -78,7 +78,7 @@ public class NetworkDispatcher extends Thread {
             	request.addEvent("network-dispatcher");
                 // If the request was cancelled already, do not perform the network request.
                 if (request.isCanceled()) {
-                	request.addEvent("request-cancelled");
+                	request.finish("network-dispatcher-cancelled");
                     continue;
                 }
                 

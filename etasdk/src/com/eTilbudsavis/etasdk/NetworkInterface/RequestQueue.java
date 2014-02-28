@@ -1,6 +1,8 @@
 package com.eTilbudsavis.etasdk.NetworkInterface;
 
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,6 +30,9 @@ public class RequestQueue {
     
     /** Eta object controlling the whole lot */
     private final Eta mEta;
+    
+    /** All requests currently being handled by this request queue */
+    private final Set<Request> mCurrentRequests = new HashSet<Request>();
     
     /** Queue for preparation, and cache checks */
     private final PriorityBlockingQueue<Request> mCacheQueue = new PriorityBlockingQueue<Request>();
@@ -157,9 +162,13 @@ public class RequestQueue {
 	 */
 	public synchronized void finish(Request request, Response response) {
 		
+		synchronized (mCurrentRequests) {
+			mCurrentRequests.remove(request);
+		}
+		
 		// If the log is enabled, add the request summary
 		if (request.logSummary()) {
-
+			
 			JSONObject data = request.getLog().getSummary();
 			try {
 				data.put("duration", request.getLog().getTotalDuration());
@@ -192,6 +201,10 @@ public class RequestQueue {
 	 */
     public Request add(Request request) {
     	
+    	synchronized (mCurrentRequests) {
+			mCurrentRequests.add(request);
+		}
+    	
     	request.setSequence(mSequenceGenerator.incrementAndGet());
     	
 		prepareRequest(request);
@@ -219,7 +232,23 @@ public class RequestQueue {
     	return request;
     	
     }
-
+    
+    public void cancelAll(Object tag) {
+    	
+    	if (tag == null) {
+    		// tag == null is no dice, it'll cancel all requests...
+    		return;
+    	}
+    	
+    	synchronized (mCurrentRequests) {
+			for (Request r : mCurrentRequests) {
+				if (r.getTag() == tag) {
+					r.cancel();
+				}
+			}
+		}
+    }
+    
 	private boolean isSessionEndpoint(Request r) {
 		return r.getUrl().contains(Endpoint.SESSIONS);
 	}
