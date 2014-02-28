@@ -205,6 +205,8 @@ public class RequestQueue {
 			mCurrentRequests.add(request);
 		}
     	
+    	request.setRequestQueue(this);
+    	
     	request.setSequence(mSequenceGenerator.incrementAndGet());
     	
 		prepareRequest(request);
