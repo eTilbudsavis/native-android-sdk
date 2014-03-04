@@ -4,10 +4,23 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 
+/**
+ * Helper class designed to simplify working with JSON in Android - specifically the eTilbudsavis Android SDK.
+ * The class holds some static methods for converting data, and ensuring that valid data returns.
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ *
+ */
 public class Json {
 
-	public static final String TAG = "JsonUtils";
+	public static final String TAG = "Json";
 	
+	/**
+	 * Searches the JSONObject for the key and returns the matching value if it exists.
+	 * @param object An object to get data from
+	 * @param key A key to map to a value
+	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else null.
+	 */
 	public static String valueOf(JSONObject object, String key) {
 		if (object == null || key == null) {
 			return null;
@@ -15,6 +28,13 @@ public class Json {
 		return valueOf(object, key, null);
 	}
 	
+	/**
+	 * Searches the JSONObject for the key and returns the matching value if it exists.
+	 * @param object An object to get data from
+	 * @param key A key to map to a value
+	 * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
+	 */
 	public static String valueOf(JSONObject object, String key, String defValue) {
 		try {
 			return object.isNull(key) ? defValue : object.getString(key);
@@ -23,7 +43,14 @@ public class Json {
 		}
 		return defValue;
 	}
-	
+
+	/**
+	 * Searches the JSONObject for the key and returns the matching value if it exists.
+	 * @param object An object to get data from
+	 * @param key A key to map to a value
+	 * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
+	 */
 	public static int valueOf(JSONObject object, String key, int defValue) {
 		try {
 			return object.isNull(key) ? defValue : object.getInt(key);
@@ -33,6 +60,13 @@ public class Json {
 		return defValue;
 	}
 
+	/**
+	 * Searches the JSONObject for the key and returns the matching value if it exists.
+	 * @param object An object to get data from
+	 * @param key A key to map to a value
+	 * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
+	 */
 	public static double valueOf(JSONObject object, String key, double defValue) {
 		try {
 			return object.isNull(key) ? defValue : object.getDouble(key);
@@ -41,7 +75,14 @@ public class Json {
 		}
 		return defValue;
 	}
-	
+
+	/**
+	 * Searches the JSONObject for the key and returns the matching value if it exists.
+	 * @param object An object to get data from
+	 * @param key A key to map to a value
+	 * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
+	 */
 	public static long valueOf(JSONObject object, String key, long defValue) {
 		try {
 			return object.isNull(key) ? defValue : object.getLong(key);
@@ -50,7 +91,14 @@ public class Json {
 		}
 		return defValue;
 	}
-	
+
+	/**
+	 * Searches the JSONObject for the key and returns the matching value if it exists.
+	 * @param object An object to get data from
+	 * @param key A key to map to a value
+	 * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
+	 */
 	public static boolean valueOf(JSONObject object, String key, boolean defValue) {
 		try {
 			return object.isNull(key) ? defValue : object.getBoolean(key);
@@ -59,13 +107,37 @@ public class Json {
 		}
 		return defValue;
 	}
+	
+	/**
+	 * Method for safely converting an EtaObject to JSON.
+	 * @param object The EtaObject to convert
+	 * @param defValue The default value to return in case of errors. 
+	 * Typically {@link #JSOBObject.NULL JSOBObject.NULL} or null is used for this purpose
+	 * @return A JSONObject, or defValue
+	 */
+	public static JSONObject toJson(EtaObject object, Object defValue) {
+		return (JSONObject) (object == null ? defValue : object.toJSON());
+	}
 
-	public static JSONObject toJson(EtaObject etaObject) {
-		return (JSONObject) (etaObject == null ? JSONObject.NULL : etaObject.toJSON());
+	/**
+	 * Method for safely converting an EtaObject to JSON.
+	 * @param object The EtaObject to convert
+	 * @return A JSONObject, or JSONObject.NULL
+	 */
+	public static JSONObject toJson(EtaObject object) {
+		return toJson(object, JSONObject.NULL);
 	}
 	
-	public static <T> Object nullCheck(T o) {
-		return o == null ? JSONObject.NULL : o;
+	/**
+	 * If an object is null, method will return JSONObject.NULL, else the object it self.
+	 * This is useful, when sending data to the eTilbudsavis API v2 as some keys are required
+	 * by the API and they will be removed, when performing toString() on the object, if the value 
+	 * mapped to the key is null. 
+	 * @param object An object to check for null
+	 * @return The object, or JSONObject.NULL
+	 */
+	public static <T> Object nullCheck(T object) {
+		return object == null ? JSONObject.NULL : object;
 	}
 	
 }

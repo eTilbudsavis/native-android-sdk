@@ -161,10 +161,6 @@ public class ListSyncManager {
 		// Make sure, that requests will return to this thread
 		r.setHandler(mHandler);
 		
-		if (r.getMethod() != Method.GET) {
-			r.debugNetwork(true);
-		}
-		
 		mEta.add(r);
 	}
 	
