@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Pricing extends EtaObject implements Serializable {
 	
@@ -39,15 +40,16 @@ public class Pricing extends EtaObject implements Serializable {
 		if (pricing == null) return p;
 		
 		try {
-			p.setPrice(jsonToDouble(pricing, ServerKey.PRICE, 0.0));
+			p.setPrice(Json.valueOf(pricing, ServerKey.PRICE, 0.0));
 			p.setPrePrice(pricing.isNull(ServerKey.PREPRICE) ? null : pricing.getDouble(ServerKey.PREPRICE));
-			p.setCurrency(jsonToString(pricing, ServerKey.CURRENCY));
+			p.setCurrency(Json.valueOf(pricing, ServerKey.CURRENCY));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return p;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -56,8 +58,8 @@ public class Pricing extends EtaObject implements Serializable {
 		JSONObject o = new JSONObject();
 		try {
 			o.put(ServerKey.PRICE, p.getPrice());
-			o.put(ServerKey.PREPRICE, p.getPrePrice());
-			o.put(ServerKey.CURRENCY, p.getCurrency());
+			o.put(ServerKey.PREPRICE, Json.nullCheck(p.getPrePrice()));
+			o.put(ServerKey.CURRENCY, Json.nullCheck(p.getCurrency()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

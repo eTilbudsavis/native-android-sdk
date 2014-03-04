@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Branding extends EtaObject  implements Serializable {
 	
@@ -33,10 +34,10 @@ public class Branding extends EtaObject  implements Serializable {
 		if (branding == null) return b;
 		
 		try {
-			b.setName(jsonToString(branding, ServerKey.NAME));
-			b.setUrlName(jsonToString(branding, ServerKey.URL_NAME));
-			b.setWebsite(jsonToString(branding, ServerKey.WEBSITE));
-			b.setLogo(jsonToString(branding, ServerKey.LOGO));
+			b.setName(Json.valueOf(branding, ServerKey.NAME));
+			b.setUrlName(Json.valueOf(branding, ServerKey.URL_NAME));
+			b.setWebsite(Json.valueOf(branding, ServerKey.WEBSITE));
+			b.setLogo(Json.valueOf(branding, ServerKey.LOGO));
 			b.setColor(Color.parseColor("#"+branding.getString(EtaObject.ServerKey.COLOR)));
 			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(EtaObject.ServerKey.PAGEFLIP)));
 		} catch (JSONException e) {
@@ -45,6 +46,7 @@ public class Branding extends EtaObject  implements Serializable {
 		return b;
 	}
 	
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -52,12 +54,12 @@ public class Branding extends EtaObject  implements Serializable {
 	public static JSONObject toJSON(Branding b) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.NAME, b.getName());
-			o.put(ServerKey.URL_NAME, b.getUrlName());
-			o.put(ServerKey.WEBSITE, b.getWebsite());
-			o.put(ServerKey.LOGO, b.getLogo());
-			o.put(ServerKey.COLOR, b.getColorString());
-			o.put(ServerKey.PAGEFLIP, b.getPageflip().toJSON());
+			o.put(ServerKey.NAME, Json.nullCheck(b.getName()));
+			o.put(ServerKey.URL_NAME, Json.nullCheck(b.getUrlName()));
+			o.put(ServerKey.WEBSITE, Json.nullCheck(b.getWebsite()));
+			o.put(ServerKey.LOGO, Json.nullCheck(b.getLogo()));
+			o.put(ServerKey.COLOR, Json.nullCheck(b.getColorString()));
+			o.put(ServerKey.PAGEFLIP, Json.nullCheck(b.getPageflip().toJSON()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

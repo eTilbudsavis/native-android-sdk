@@ -160,6 +160,11 @@ public class ListSyncManager {
 		}
 		// Make sure, that requests will return to this thread
 		r.setHandler(mHandler);
+		
+		if (r.getMethod() != Method.GET) {
+			r.debugNetwork(true);
+		}
+		
 		mEta.add(r);
 	}
 	
@@ -747,6 +752,11 @@ public class ListSyncManager {
 
 			}
 		};
+		
+		try {
+			EtaLog.d(TAG, sli.toJSON().toString(4));
+		} catch (JSONException e) {
+		}
 		
 		String url = Endpoint.listitem(user.getId(), sli.getShoppinglistId(), sli.getId());
 		JsonObjectRequest itemReq = new JsonObjectRequest(Method.PUT, url, sli.toJSON(), itemListener);

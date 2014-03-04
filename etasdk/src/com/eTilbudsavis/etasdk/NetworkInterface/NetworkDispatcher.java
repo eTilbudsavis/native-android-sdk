@@ -75,20 +75,13 @@ public class NetworkDispatcher extends Thread {
 
             try {
             	
-            	request.addEvent("network-dispatcher");
                 // If the request was cancelled already, do not perform the network request.
                 if (request.isCanceled()) {
-                	request.finish("network-dispatcher-cancelled");
+                	request.finish("network-dispatcher-cancelled-on-recieved");
                     continue;
+                } else {
+                	request.addEvent("recieved-by-network-dispatcher");
                 }
-                
-                // If session is expired, add request to a OnSessionUpdate retry queue
-                // TODO: This check isn't possible, as it's timebased
-//                if (mEta.getSessionManager().getSession().isExpired() && !request.getUrl().contains(Endpoint.SESSIONS)) {
-//                	request.addEvent("session-expired");
-//                	mRequestQueue.badSession(request);
-//                	continue;
-//                }
                 
                 prepare(request);
                 

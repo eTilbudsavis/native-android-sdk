@@ -59,7 +59,8 @@ public class Pages extends EtaObject implements Serializable {
 		}
 		return p;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}

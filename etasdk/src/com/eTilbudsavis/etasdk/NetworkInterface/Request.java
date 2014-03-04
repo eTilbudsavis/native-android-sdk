@@ -3,12 +3,16 @@ package com.eTilbudsavis.etasdk.NetworkInterface;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.os.Bundle;
 import android.os.Handler;
 
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressWarnings("rawtypes")
@@ -160,8 +164,15 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      */
     public Request finish(String reason) {
     	mLog.add(reason);
+    	
+		try {
+			mLog.getSummary().put("duration", getLog().getTotalDuration());
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		
     	mFinished = true;
-    	mRequestQueue.finish(this, null);
+    	mRequestQueue.finish(this);
     	return Request.this;
     }
     

@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Images extends EtaObject implements Serializable {
 	
@@ -37,13 +38,14 @@ public class Images extends EtaObject implements Serializable {
 		if (i == null) i = new Images();
 		if (image == null) return i;
 		
-		i.setView(jsonToString(image, ServerKey.VIEW));
-		i.setZoom(jsonToString(image, ServerKey.ZOOM));
-		i.setThumb(jsonToString(image, ServerKey.THUMB));
+		i.setView(Json.valueOf(image, ServerKey.VIEW));
+		i.setZoom(Json.valueOf(image, ServerKey.ZOOM));
+		i.setThumb(Json.valueOf(image, ServerKey.THUMB));
 		
     	return i;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -51,9 +53,9 @@ public class Images extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Images i) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.VIEW, i.getView());
-			o.put(ServerKey.ZOOM, i.getZoom());
-			o.put(ServerKey.THUMB, i.getThumb());
+			o.put(ServerKey.VIEW, Json.nullCheck(i.getView()));
+			o.put(ServerKey.ZOOM, Json.nullCheck(i.getZoom()));
+			o.put(ServerKey.THUMB, Json.nullCheck(i.getThumb()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

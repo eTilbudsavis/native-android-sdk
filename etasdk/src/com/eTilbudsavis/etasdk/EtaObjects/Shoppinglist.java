@@ -13,9 +13,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Shoppinglist extends EtaObject implements Serializable, Comparable<Shoppinglist> {
+public class Shoppinglist extends EtaErnObject<Shoppinglist> implements Serializable, Comparable<Shoppinglist> {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -93,14 +94,14 @@ public class Shoppinglist extends EtaObject implements Serializable, Comparable<
 		
 		try {
 			// We've don't use OWNER anymore, since we now get all share info.
-			sl.setId(jsonToString(shoppinglist, ServerKey.ID));
-			sl.setErn(jsonToString(shoppinglist, ServerKey.ERN));
-			sl.setName(jsonToString(shoppinglist, ServerKey.NAME));
-			sl.setAccess(jsonToString(shoppinglist, ServerKey.ACCESS));
-			sl.setModified(jsonToString(shoppinglist, ServerKey.MODIFIED));
-			sl.setPreviousId(jsonToString(shoppinglist, ServerKey.PREVIOUS_ID));
-			sl.setType(jsonToString(shoppinglist, ServerKey.TYPE));
-			String meta = jsonToString(shoppinglist, ServerKey.META);
+			sl.setId(Json.valueOf(shoppinglist, ServerKey.ID));
+			sl.setErn(Json.valueOf(shoppinglist, ServerKey.ERN));
+			sl.setName(Json.valueOf(shoppinglist, ServerKey.NAME));
+			sl.setAccess(Json.valueOf(shoppinglist, ServerKey.ACCESS));
+			sl.setModified(Json.valueOf(shoppinglist, ServerKey.MODIFIED));
+			sl.setPreviousId(Json.valueOf(shoppinglist, ServerKey.PREVIOUS_ID));
+			sl.setType(Json.valueOf(shoppinglist, ServerKey.TYPE));
+			String meta = Json.valueOf(shoppinglist, ServerKey.META);
 			sl.setMeta(shoppinglist.isNull(ServerKey.META) ? null : (meta.equals("") ? null : new JSONObject(meta)));
 			sl.putShares(Share.fromJSON(shoppinglist.getJSONArray(ServerKey.SHARES)));
 		} catch (JSONException e) {
@@ -110,6 +111,7 @@ public class Shoppinglist extends EtaObject implements Serializable, Comparable<
 		return sl;
 	}
 
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -117,14 +119,14 @@ public class Shoppinglist extends EtaObject implements Serializable, Comparable<
 	public static JSONObject toJSON(Shoppinglist s) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.ID, s.getId());
-			o.put(ServerKey.ERN, s.getErn());
-			o.put(ServerKey.NAME, s.getName());
-			o.put(ServerKey.ACCESS, s.getAccess());
-			o.put(ServerKey.MODIFIED, Utils.parseDate(s.getModified()));
-			o.put(ServerKey.PREVIOUS_ID, s.getPreviousId());
-			o.put(ServerKey.TYPE, s.getType());
-			o.put(ServerKey.META, s.getMeta());
+			o.put(ServerKey.ID, Json.nullCheck(s.getId()));
+			o.put(ServerKey.ERN, Json.nullCheck(s.getErn()));
+			o.put(ServerKey.NAME, Json.nullCheck(s.getName()));
+			o.put(ServerKey.ACCESS, Json.nullCheck(s.getAccess()));
+			o.put(ServerKey.MODIFIED, Json.nullCheck(Utils.parseDate(s.getModified())));
+			o.put(ServerKey.PREVIOUS_ID, Json.nullCheck(s.getPreviousId()));
+			o.put(ServerKey.TYPE, Json.nullCheck(s.getType()));
+			o.put(ServerKey.META, Json.nullCheck(s.getMeta()));
 			JSONArray shares = new JSONArray();
 			for (Share share : s.getShares().values()) {
 				shares.put(Share.toJSON(share));
@@ -134,6 +136,11 @@ public class Shoppinglist extends EtaObject implements Serializable, Comparable<
 			EtaLog.d(TAG, e);
 		}
 		return o;
+	}
+
+	@Override
+	public String getErnPrefix() {
+		return ERN_SHOPPINGLIST;
 	}
 	
 	public Shoppinglist setId(String id) {

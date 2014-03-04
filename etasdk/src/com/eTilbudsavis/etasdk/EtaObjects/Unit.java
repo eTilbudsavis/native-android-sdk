@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Unit extends EtaObject implements Serializable {
 
@@ -37,7 +38,7 @@ public class Unit extends EtaObject implements Serializable {
 		if (unit == null) return u;
 		
 		try {
-			u.setSymbol(jsonToString(unit, ServerKey.SYMBOL));
+			u.setSymbol(Json.valueOf(unit, ServerKey.SYMBOL));
 			u.setSi(Si.fromJSON(unit.getJSONObject(ServerKey.SI)));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
@@ -45,7 +46,8 @@ public class Unit extends EtaObject implements Serializable {
 		
 		return u;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -53,8 +55,8 @@ public class Unit extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Unit u) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.SYMBOL, u.getSymbol());
-			o.put(ServerKey.SI, u.getSi() == null ? null : u.getSi().toJSON());
+			o.put(ServerKey.SYMBOL, Json.nullCheck(u.getSymbol()));
+			o.put(ServerKey.SI, Json.toJson(u.getSi()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

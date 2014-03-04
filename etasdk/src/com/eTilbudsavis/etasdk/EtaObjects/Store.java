@@ -8,16 +8,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 
-public class Store extends EtaObject implements Serializable {
+public class Store extends EtaErnObject<Store> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Store";
 	
-	private String mId;
-	private String mErn;
 	private String mStreet;
 	private String mCity;
 	private String mZipcode;
@@ -54,24 +53,25 @@ public class Store extends EtaObject implements Serializable {
 		if (store == null) return s;
 		
 		try {
-			s.setId(jsonToString(store, ServerKey.ID));
-			s.setErn(jsonToString(store, ServerKey.ERN));
-			s.setStreet(jsonToString(store, ServerKey.STREET));
-			s.setCity(jsonToString(store, ServerKey.CITY));
-			s.setZipcode(jsonToString(store, ServerKey.ZIP_CODE));
+			s.setId(Json.valueOf(store, ServerKey.ID));
+			s.setErn(Json.valueOf(store, ServerKey.ERN));
+			s.setStreet(Json.valueOf(store, ServerKey.STREET));
+			s.setCity(Json.valueOf(store, ServerKey.CITY));
+			s.setZipcode(Json.valueOf(store, ServerKey.ZIP_CODE));
 			s.setCountry(Country.fromJSON(store.getJSONObject(ServerKey.COUNTRY)));
-			s.setLatitude(jsonToDouble(store, ServerKey.LATITUDE, 56.4067));
-			s.setLongitude(jsonToDouble(store, ServerKey.LONGITUDE, 8.9189));
-			s.setDealerUrl(jsonToString(store, ServerKey.DEALER_URL));
-			s.setDealerId(jsonToString(store, ServerKey.DEALER_ID));
+			s.setLatitude(Json.valueOf(store, ServerKey.LATITUDE, 0.0d));
+			s.setLongitude(Json.valueOf(store, ServerKey.LONGITUDE, 0.0d));
+			s.setDealerUrl(Json.valueOf(store, ServerKey.DEALER_URL));
+			s.setDealerId(Json.valueOf(store, ServerKey.DEALER_ID));
 			s.setBranding(Branding.fromJSON(store.getJSONObject(ServerKey.BRANDING)));
-			s.setContact(jsonToString(store, ServerKey.CONTACT));
+			s.setContact(Json.valueOf(store, ServerKey.CONTACT));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return s;
 	}
 
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -79,42 +79,29 @@ public class Store extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Store s) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.ID, s.getId());
-			o.put(ServerKey.ERN, s.getErn());
-			o.put(ServerKey.STREET, s.getStreet());
-			o.put(ServerKey.CITY, s.getCity());
-			o.put(ServerKey.ZIP_CODE, s.getZipcode());
-			o.put(ServerKey.COUNTRY, s.getCountry().toJSON());
+			o.put(ServerKey.ID, Json.nullCheck(s.getId()));
+			o.put(ServerKey.ERN, Json.nullCheck(s.getErn()));
+			o.put(ServerKey.STREET, Json.nullCheck(s.getStreet()));
+			o.put(ServerKey.CITY, Json.nullCheck(s.getCity()));
+			o.put(ServerKey.ZIP_CODE, Json.nullCheck(s.getZipcode()));
+			o.put(ServerKey.COUNTRY, Json.nullCheck(s.getCountry().toJSON()));
 			o.put(ServerKey.LATITUDE, s.getLatitude());
 			o.put(ServerKey.LONGITUDE, s.getLongitude());
-			o.put(ServerKey.DEALER_URL, s.getDealerUrl());
-			o.put(ServerKey.DEALER_ID, s.getDealerId());
-			o.put(ServerKey.BRANDING, s.getBranding().toJSON());
-			o.put(ServerKey.CONTACT, s.getContact());
+			o.put(ServerKey.DEALER_URL, Json.nullCheck(s.getDealerUrl()));
+			o.put(ServerKey.DEALER_ID, Json.nullCheck(s.getDealerId()));
+			o.put(ServerKey.BRANDING, Json.nullCheck(s.getBranding().toJSON()));
+			o.put(ServerKey.CONTACT, Json.nullCheck(s.getContact()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
 
-	public Store setId(String id) {
-		this.mId = id;
-		return this;
-	}
-
-	public String getId() {
-		return mId;
+	@Override
+	public String getErnPrefix() {
+		return ERN_STORE;
 	}
 	
-	public Store setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-	
-	public String getErn() {
-		return mErn;
-	}
-
 	public Store setStreet(String street) {
 		mStreet = street;
 		return this;
@@ -229,8 +216,6 @@ public class Store extends EtaObject implements Serializable {
 				+ ((mDealerId == null) ? 0 : mDealerId.hashCode());
 		result = prime * result
 				+ ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
-		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		long temp;
 		temp = Double.doubleToLongBits(mLatitude);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
@@ -281,16 +266,6 @@ public class Store extends EtaObject implements Serializable {
 				return false;
 		} else if (!mDealerUrl.equals(other.mDealerUrl))
 			return false;
-		if (mErn == null) {
-			if (other.mErn != null)
-				return false;
-		} else if (!mErn.equals(other.mErn))
-			return false;
-		if (mId == null) {
-			if (other.mId != null)
-				return false;
-		} else if (!mId.equals(other.mId))
-			return false;
 		if (Double.doubleToLongBits(mLatitude) != Double
 				.doubleToLongBits(other.mLatitude))
 			return false;
@@ -309,7 +284,5 @@ public class Store extends EtaObject implements Serializable {
 			return false;
 		return true;
 	}
-	
-	
 	
 }

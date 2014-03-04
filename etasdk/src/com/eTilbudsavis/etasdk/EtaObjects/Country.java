@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Country extends EtaObject implements Serializable {
 	
@@ -27,12 +28,13 @@ public class Country extends EtaObject implements Serializable {
 		if (c == null) c = new Country();
 		if (country == null) return c;
 		
-		c.setId(jsonToString(country, ServerKey.ID));
-		c.setUnsubscribePrintUrl(jsonToString(country, ServerKey.UNSUBSCRIBE_PRINT_URL));
+		c.setId(Json.valueOf(country, ServerKey.ID));
+		c.setUnsubscribePrintUrl(Json.valueOf(country, ServerKey.UNSUBSCRIBE_PRINT_URL));
 		
 		return c;
 	}
 	
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -40,8 +42,8 @@ public class Country extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Country c) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.ID, c.getId());
-			o.put(ServerKey.UNSUBSCRIBE_PRINT_URL, c.getUnsubscribePrintUrl());
+			o.put(ServerKey.ID, Json.nullCheck(c.getId()));
+			o.put(ServerKey.UNSUBSCRIBE_PRINT_URL, Json.nullCheck(c.getUnsubscribePrintUrl()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

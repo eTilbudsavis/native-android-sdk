@@ -12,11 +12,24 @@ public class Endpoint {
 	/** Set to true to enable usage of staging endpoint for pageflip-html. */
 	public static boolean DEBUG_PAGEFLIP = false;
 	
-	public static String HOST_PREFIX = "api";
+	public class Prefix {
+		
+		public static final String API_PRODUCTION = "https://api.etilbudsavis.dk";
+		public static final String API_EDGE = "https://edge.etilbudsavis.dk";
+		
+		public static final String PAGEFLIP_PRODUCTION = "https://etilbudsavis.dk";
+		public static final String PAGEFLIP_STAGING = "https://staging.etilbudsavis.dk";
+		public static final String PAGEFLIP_DEV = "http://10.0.1.41:3000";
+		
+		public static final String THEMES_PRODUCTION = "https://etilbudsavis.dk";
+		public static final String THEMES_STAGING = "https://staging.etilbudsavis.dk";
+		
+	}
 	
-	public static final String HOST_PREFIX_PRODUCTION = "api";
-	public static final String HOST_PREFIX_EDGE = "edge";
-
+	public static String API_HOST_PREFIX = Prefix.API_PRODUCTION;
+	public static String PAGEFLIP_HOST_PREFIX = Prefix.PAGEFLIP_PRODUCTION;
+	public static String THEMES_HOST_PREFIX = Prefix.THEMES_PRODUCTION;
+	
 	public static final String CATALOG_LIST = "/v2/catalogs";
 	public static final String CATALOG_ID = "/v2/catalogs/";
 	public static final String CATALOG_SEARCH = "/v2/catalogs/search";
@@ -47,12 +60,22 @@ public class Endpoint {
 	public static final String COUNTRIES = "/v2/countries";
 	
 	/**
-	 * Get the current host to use. This can be changed by editing Endpoint.HOST_PREFIX.
+	 * Get the current host to use. This can be changed by editing Endpoint.API_HOST_PREFIX.
 	 * https://{prefix}.etilbudsavis.dk
-	 * @return
+	 * @return A string
 	 */
 	public static String getHost() {
-		return String.format("https://%s.etilbudsavis.dk", HOST_PREFIX);
+		return API_HOST_PREFIX;
+	}
+	
+	/** {pageflip_host_prefix}/proxy/{id}/ */
+	public static String pageflipProxy(String id) {
+		return String.format("%s/proxy/%s/", PAGEFLIP_HOST_PREFIX, id);
+	}
+	
+	/** {theme_host_prefix}/utils/ajax/lists/themes/ */
+	public static String themes() {
+		return String.format("%s/utils/ajax/lists/themes/", THEMES_HOST_PREFIX);
 	}
 	
 	/** /v2/offers/{offer_id} */
@@ -90,20 +113,6 @@ public class Endpoint {
 	 */
 	public static String storeCollect(String storeId) {
 		return String.format("/v2/stores/%s/collect", storeId);
-	}
-
-	/** https://etilbudsavis.dk/proxy/{id}/ */
-	public static String pageflipProxy(String id) {
-		String production = "https://etilbudsavis.dk/proxy/%s/";
-		String staging = "https://staging.etilbudsavis.dk/proxy/%s/";
-		return String.format( DEBUG_PAGEFLIP ? staging : production, id);
-	}
-
-	/** https://staging.etilbudsavis.dk/utils/ajax/lists/themes/ */
-	public static String themes() {
-		String production = "https://etilbudsavis.dk/utils/ajax/lists/themes/";
-		String staging = "https://staging.etilbudsavis.dk/utils/ajax/lists/themes/";
-		return production;
 	}
 
 	/** /v2/users/{user_id}/facebook */

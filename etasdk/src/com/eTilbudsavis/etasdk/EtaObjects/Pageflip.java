@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Pageflip extends EtaObject implements Serializable {
 	
@@ -43,15 +44,14 @@ public class Pageflip extends EtaObject implements Serializable {
 		if (p == null) p = new Pageflip();
 		if (pageflip == null) return p;
 		
-		p.setLogo(jsonToString(pageflip, ServerKey.LOGO));
-		String color = jsonToString(pageflip, ServerKey.COLOR);
-		if (color != null) {
-			p.setColor(Color.parseColor(String.format("#%s", color)));
-		}
+		p.setLogo(Json.valueOf(pageflip, ServerKey.LOGO));
+		String color = Json.valueOf(pageflip, ServerKey.COLOR, "7b9119");
+		p.setColor(Color.parseColor(String.format("#%s", color)));
 		
 		return p;
 	}
 
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -59,8 +59,8 @@ public class Pageflip extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Pageflip p) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.LOGO, p.getLogo());
-			o.put(ServerKey.COLOR, p.getColorString());
+			o.put(ServerKey.LOGO, Json.nullCheck(p.getLogo()));
+			o.put(ServerKey.COLOR, Json.nullCheck(p.getColorString()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

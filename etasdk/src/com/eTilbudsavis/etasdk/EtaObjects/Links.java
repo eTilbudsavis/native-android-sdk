@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Links extends EtaObject implements Serializable {
 
@@ -35,11 +36,12 @@ public class Links extends EtaObject implements Serializable {
 		if (l == null) l = new Links();
 		if (links == null) return l;
 		
-		l.setWebshop(jsonToString(links, ServerKey.WEBSHOP));
+		l.setWebshop(Json.valueOf(links, ServerKey.WEBSHOP));
 		
 		return l;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -47,7 +49,7 @@ public class Links extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Links l) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.WEBSHOP, l.getWebshop());
+			o.put(ServerKey.WEBSHOP, Json.nullCheck(l.getWebshop()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

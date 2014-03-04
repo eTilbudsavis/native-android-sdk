@@ -10,9 +10,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class ShoppinglistItem extends EtaErnObject implements Comparable<ShoppinglistItem>, Serializable {
+public class ShoppinglistItem extends EtaErnObject<ShoppinglistItem> implements Comparable<ShoppinglistItem>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -28,9 +29,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	}
 	
 	public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
-
-	private String mId;
-	private String mErn;
+	
 	private boolean mTick = false;
 	private String mOfferId = null;
 	private int mCount = 1;
@@ -43,7 +42,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	private String mPrevId;
 	private String mMeta;
 	private int mUserId = -1;
-
+	
 	public ShoppinglistItem() {
         String id = Utils.createUUID();
 		setId(id);
@@ -62,8 +61,7 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		setOffer(offer);
 		setDescription(offer.getHeading());
 	}
-
-	@SuppressWarnings("unchecked")
+	
 	public static ArrayList<ShoppinglistItem> fromJSON(JSONArray shoppinglistItems) {
 		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
 		
@@ -78,31 +76,28 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 		return list;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static ShoppinglistItem fromJSON(JSONObject shoppinglistItem) {
 		return fromJSON(new ShoppinglistItem(), shoppinglistItem);
 	}
 	
 	private static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem) {
 		
-		try {
-			sli.setId(jsonToString(shoppinglistItem, ServerKey.ID));
-			sli.setTick(jsonToBoolean(shoppinglistItem, ServerKey.TICK, false));
-			sli.setOfferId(jsonToString(shoppinglistItem, ServerKey.OFFER_ID));
-			sli.setCount(jsonToInt(shoppinglistItem, ServerKey.COUNT, 1));
-			sli.setDescription(jsonToString(shoppinglistItem, ServerKey.DESCRIPTION));
-			sli.setShoppinglistId(jsonToString(shoppinglistItem, ServerKey.SHOPPINGLIST_ID));
-			sli.setErn(jsonToString(shoppinglistItem, ServerKey.ERN));
-			sli.setCreator(jsonToString(shoppinglistItem, ServerKey.CREATOR));
-			sli.setModified(Utils.parseDate(shoppinglistItem.isNull(ServerKey.MODIFIED) ? "1970-01-01T00:00:00+0000" : shoppinglistItem.getString(ServerKey.MODIFIED)));
-			sli.setPreviousId(jsonToString(shoppinglistItem, ServerKey.PREVIOUS_ID));
-			
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
+		sli.setId(Json.valueOf(shoppinglistItem, ServerKey.ID));
+		sli.setTick(Json.valueOf(shoppinglistItem, ServerKey.TICK, false));
+		sli.setOfferId(Json.valueOf(shoppinglistItem, ServerKey.OFFER_ID));
+		sli.setCount(Json.valueOf(shoppinglistItem, ServerKey.COUNT, 1));
+		sli.setDescription(Json.valueOf(shoppinglistItem, ServerKey.DESCRIPTION));
+		sli.setShoppinglistId(Json.valueOf(shoppinglistItem, ServerKey.SHOPPINGLIST_ID));
+		sli.setErn(Json.valueOf(shoppinglistItem, ServerKey.ERN));
+		sli.setCreator(Json.valueOf(shoppinglistItem, ServerKey.CREATOR));
+		String date = Json.valueOf(shoppinglistItem, ServerKey.MODIFIED, "1970-01-01T00:00:00+0000");
+		sli.setModified( Utils.parseDate(date) );
+		sli.setPreviousId(Json.valueOf(shoppinglistItem, ServerKey.PREVIOUS_ID));
+		
 		return sli;
 	}
 
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -110,40 +105,27 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 	public static JSONObject toJSON(ShoppinglistItem s) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.ID, s.getId());
-			o.put(ServerKey.TICK, s.isTicked());
-			o.put(ServerKey.OFFER_ID, s.getOfferId());
+			o.put(ServerKey.ID, Json.nullCheck(s.getId()));
+			o.put(ServerKey.TICK, Json.nullCheck(s.isTicked()));
+			o.put(ServerKey.OFFER_ID, Json.nullCheck(s.getOfferId()));
 			o.put(ServerKey.COUNT, s.getCount());
-			o.put(ServerKey.DESCRIPTION, s.getDescription());
-			o.put(ServerKey.SHOPPINGLIST_ID, s.getShoppinglistId());
-			o.put(ServerKey.ERN, s.getErn());
-			o.put(ServerKey.CREATOR, s.getCreator());
-			o.put(ServerKey.MODIFIED, Utils.parseDate(s.getModified()));
-			o.put(ServerKey.PREVIOUS_ID, s.getPreviousId());
+			o.put(ServerKey.DESCRIPTION, Json.nullCheck(s.getDescription()));
+			o.put(ServerKey.SHOPPINGLIST_ID, Json.nullCheck(s.getShoppinglistId()));
+			o.put(ServerKey.ERN, Json.nullCheck(s.getErn()));
+			o.put(ServerKey.CREATOR, Json.nullCheck(s.getCreator()));
+			o.put(ServerKey.MODIFIED, Json.nullCheck(Utils.parseDate(s.getModified())));
+			o.put(ServerKey.PREVIOUS_ID, Json.nullCheck(s.getPreviousId()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
-	
-	public ShoppinglistItem setId(String id) {
-		this.mId = id;
-		return this;
-	}
 
-	public String getId() {
-		return mId;
+	@Override
+	public String getErnPrefix() {
+		return ERN_SHOPPINGLISTITEM;
 	}
 	
-	public ShoppinglistItem setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-	
-	public String getErn() {
-		return mErn;
-	}
-
 	public String getTitle() {
 		return (mDescription == null || mDescription.length() == 0) ? (mOffer == null ? "" : mOffer.getHeading()) : mDescription;
 	}
@@ -386,5 +368,5 @@ public class ShoppinglistItem extends EtaErnObject implements Comparable<Shoppin
 			return false;
 		return true;
 	}
-	
+
 }

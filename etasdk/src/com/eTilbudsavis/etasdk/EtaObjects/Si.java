@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Si  extends EtaObject implements Serializable {
 
@@ -38,12 +39,13 @@ public class Si  extends EtaObject implements Serializable {
 		if (s == null) s = new Si();
 		if (si == null) return s;
 		
-		s.setSymbol(jsonToString(si, ServerKey.SYMBOL));
-		s.setFactor(jsonToDouble(si, ServerKey.FACTOR, 1));
+		s.setSymbol(Json.valueOf(si, ServerKey.SYMBOL));
+		s.setFactor(Json.valueOf(si, ServerKey.FACTOR, 1d));
 		
 		return s;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -51,8 +53,8 @@ public class Si  extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Si s) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.SYMBOL, s.getSymbol());
-			o.put(ServerKey.FACTOR, s.getFactor());
+			o.put(ServerKey.SYMBOL, Json.nullCheck(s.getSymbol()));
+			o.put(ServerKey.FACTOR, Json.nullCheck(s.getFactor()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -68,12 +70,12 @@ public class Si  extends EtaObject implements Serializable {
 		return this;
 	}
 
-	public Double getFactor() {
+	public double getFactor() {
 		return mFactor;
 	}
-
-	public Si setFactor(Double factor) {
-		mFactor = factor == null ? 1 : factor;
+	
+	public Si setFactor(double factor) {
+		mFactor = factor;
 		return this;
 	}
 

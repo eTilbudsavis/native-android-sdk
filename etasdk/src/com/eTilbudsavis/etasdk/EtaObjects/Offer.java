@@ -9,16 +9,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Offer extends EtaObject implements Serializable {
+public class Offer extends EtaErnObject<Offer> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Offer";
 	
-	private String mId;
-	private String mErn;
 	private String mHeading;
 	private String mDescription;
 	private int mCatalogPage = 0;
@@ -63,55 +62,56 @@ public class Offer extends EtaObject implements Serializable {
 		if (offer == null) return o;
 
 		try {
-			o.setId(offer.getString(ServerKey.ID));
-			o.setErn(offer.getString(ServerKey.ERN));
-			o.setHeading(offer.getString(ServerKey.HEADING));
-			o.setDescription(jsonToString(offer, ServerKey.DESCRIPTION));
-			o.setCatalogPage(jsonToInt(offer, ServerKey.CATALOG_PAGE, 0));
+			o.setId(Json.valueOf(offer, ServerKey.ID));
+			o.setErn(Json.valueOf(offer, ServerKey.ERN));
+			o.setHeading(Json.valueOf(offer, ServerKey.HEADING));
+			o.setDescription(Json.valueOf(offer, ServerKey.DESCRIPTION));
+			o.setCatalogPage(Json.valueOf(offer, ServerKey.CATALOG_PAGE, 0));
 			o.setPricing(Pricing.fromJSON(offer.getJSONObject(ServerKey.PRICING)));
 			o.setQuantity(Quantity.fromJSON(offer.getJSONObject(ServerKey.QUANTITY)));
 			o.setImages(Images.fromJSON(offer.getJSONObject(ServerKey.IMAGES)));
 			o.setLinks(Links.fromJSON(offer.getJSONObject(ServerKey.LINKS)));
-			Date runFrom = Utils.parseDate(jsonToString(offer, ServerKey.RUN_FROM));
+			Date runFrom = Utils.parseDate(Json.valueOf(offer, ServerKey.RUN_FROM));
 			o.setRunFrom(runFrom);
-			Date runTill = Utils.parseDate(jsonToString(offer, ServerKey.RUN_TILL));
+			Date runTill = Utils.parseDate(Json.valueOf(offer, ServerKey.RUN_TILL));
 			o.setRunTill(runTill);
-			o.setDealerUrl(jsonToString(offer, ServerKey.DEALER_URL));
-			o.setDealerId(jsonToString(offer, ServerKey.DEALER_ID));
-			o.setStoreUrl(jsonToString(offer, ServerKey.STORE_URL));
-			o.setStoreId(jsonToString(offer, ServerKey.STORE_ID));
-			o.setCatalogUrl(jsonToString(offer, ServerKey.CATALOG_URL));
-			o.setCatalogId(jsonToString(offer, ServerKey.CATALOG_ID));
+			o.setDealerUrl(Json.valueOf(offer, ServerKey.DEALER_URL));
+			o.setDealerId(Json.valueOf(offer, ServerKey.DEALER_ID));
+			o.setStoreUrl(Json.valueOf(offer, ServerKey.STORE_URL));
+			o.setStoreId(Json.valueOf(offer, ServerKey.STORE_ID));
+			o.setCatalogUrl(Json.valueOf(offer, ServerKey.CATALOG_URL));
+			o.setCatalogId(Json.valueOf(offer, ServerKey.CATALOG_ID));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
 
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
-
+	
 	public static JSONObject toJSON(Offer offer) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.ID, offer.getId());
-			o.put(ServerKey.ERN, offer.getErn());
-			o.put(ServerKey.HEADING, offer.getHeading());
-			o.put(ServerKey.DESCRIPTION, offer.getDescription());
+			o.put(ServerKey.ID, Json.nullCheck(offer.getId()));
+			o.put(ServerKey.ERN, Json.nullCheck(offer.getErn()));
+			o.put(ServerKey.HEADING, Json.nullCheck(offer.getHeading()));
+			o.put(ServerKey.DESCRIPTION, Json.nullCheck(offer.getDescription()));
 			o.put(ServerKey.CATALOG_PAGE, offer.getCatalogPage());
-			o.put(ServerKey.PRICING, offer.getPricing() == null ? null : offer.getPricing().toJSON());
-			o.put(ServerKey.QUANTITY, offer.getQuantity() == null ? null : offer.getQuantity().toJSON());
-			o.put(ServerKey.IMAGES, offer.getImages() == null ? null : offer.getImages().toJSON());
-			o.put(ServerKey.LINKS, offer.getLinks() == null ? null : offer.getLinks().toJSON());
-			o.put(ServerKey.RUN_FROM, Utils.parseDate(offer.getRunFrom()));
-			o.put(ServerKey.RUN_TILL, Utils.parseDate(offer.getRunTill()));
-			o.put(ServerKey.DEALER_URL, offer.getDealerUrl());
-			o.put(ServerKey.DEALER_ID, offer.getDealerId());
-			o.put(ServerKey.STORE_URL, offer.getStoreUrl());
-			o.put(ServerKey.STORE_ID, offer.getStoreId());
-			o.put(ServerKey.CATALOG_URL, offer.getCatalogUrl());
-			o.put(ServerKey.CATALOG_ID, offer.getCatalogId());
+			o.put(ServerKey.PRICING, Json.toJson(offer.getPricing()));
+			o.put(ServerKey.QUANTITY, Json.toJson(offer.getQuantity()));
+			o.put(ServerKey.IMAGES, Json.toJson(offer.getImages()));
+			o.put(ServerKey.LINKS, Json.toJson(offer.getLinks()));
+			o.put(ServerKey.RUN_FROM, Json.nullCheck(Utils.parseDate(offer.getRunFrom())));
+			o.put(ServerKey.RUN_TILL, Json.nullCheck(Utils.parseDate(offer.getRunTill())));
+			o.put(ServerKey.DEALER_URL, Json.nullCheck(offer.getDealerUrl()));
+			o.put(ServerKey.DEALER_ID, Json.nullCheck(offer.getDealerId()));
+			o.put(ServerKey.STORE_URL, Json.nullCheck(offer.getStoreUrl()));
+			o.put(ServerKey.STORE_ID, Json.nullCheck(offer.getStoreId()));
+			o.put(ServerKey.CATALOG_URL, Json.nullCheck(offer.getCatalogUrl()));
+			o.put(ServerKey.CATALOG_ID, Json.nullCheck(offer.getCatalogId()));
 			
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -119,22 +119,9 @@ public class Offer extends EtaObject implements Serializable {
 		return o;
 	}
 
-	public Offer setId(String id) {
-		this.mId = id;
-		return this;
-	}
-
-	public String getId() {
-		return mId;
-	}
-	
-	public Offer setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-	
-	public String getErn() {
-		return mErn;
+	@Override
+	public String getErnPrefix() {
+		return ERN_OFFER;
 	}
 	
 	public String getHeading() {
@@ -316,10 +303,8 @@ public class Offer extends EtaObject implements Serializable {
 				+ ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
 		result = prime * result
 				+ ((mDescription == null) ? 0 : mDescription.hashCode());
-		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
 		result = prime * result
 				+ ((mHeading == null) ? 0 : mHeading.hashCode());
-		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mImages == null) ? 0 : mImages.hashCode());
 		result = prime * result + ((mLinks == null) ? 0 : mLinks.hashCode());
 		result = prime * result
@@ -373,20 +358,10 @@ public class Offer extends EtaObject implements Serializable {
 				return false;
 		} else if (!mDescription.equals(other.mDescription))
 			return false;
-		if (mErn == null) {
-			if (other.mErn != null)
-				return false;
-		} else if (!mErn.equals(other.mErn))
-			return false;
 		if (mHeading == null) {
 			if (other.mHeading != null)
 				return false;
 		} else if (!mHeading.equals(other.mHeading))
-			return false;
-		if (mId == null) {
-			if (other.mId != null)
-				return false;
-		} else if (!mId.equals(other.mId))
 			return false;
 		if (mImages == null) {
 			if (other.mImages != null)
@@ -430,7 +405,5 @@ public class Offer extends EtaObject implements Serializable {
 			return false;
 		return true;
 	}
-	
-	
 	
 }

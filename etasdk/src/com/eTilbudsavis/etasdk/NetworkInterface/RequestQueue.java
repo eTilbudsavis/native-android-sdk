@@ -81,7 +81,6 @@ public class RequestQueue {
 		mNetwork = network;
 		mNetworkDispatchers = new NetworkDispatcher[poolSize];
 		mDelivery = delivery;
-		mDelivery.mRequestQueue = this;
 		mLog = new EventLog(logSize);
 	}
     
@@ -134,7 +133,7 @@ public class RequestQueue {
 	public void runParkedQueue() {
 		
 		if (mEta.getSessionManager().isRequestInFlight()) {
-			EtaLog.d(TAG, "Cannot resume yet, session still in flight.");
+			EtaLog.d(TAG, "Cannot resume yet, session request still in flight.");
 			return;
 		}
 		
@@ -158,27 +157,15 @@ public class RequestQueue {
 	 * as multiple requests to the same endpoint, can be queued, and only one may be dispatched.
 	 * On complete the others can be triggered, and instantly hitting local cache.
 	 * @param request - request, that finished
-	 * @param response - the server response
 	 */
-	public synchronized void finish(Request request, Response response) {
+	public synchronized void finish(Request request) {
 		
 		synchronized (mCurrentRequests) {
 			mCurrentRequests.remove(request);
 		}
 		
-		// If the log is enabled, add the request summary
-		if (request.logSummary()) {
-			
-			JSONObject data = request.getLog().getSummary();
-			try {
-				data.put("duration", request.getLog().getTotalDuration());
-			} catch (JSONException e) {
-				EtaLog.d(TAG, e);
-			}
-			
-			mLog.add(EventLog.TYPE_REQUEST, data);
-			
-		}
+		// Append the request summary to the debugging log
+		mLog.add(EventLog.TYPE_REQUEST, request.getLog().getSummary());
 		
 	}
 	
@@ -204,6 +191,8 @@ public class RequestQueue {
     	synchronized (mCurrentRequests) {
 			mCurrentRequests.add(request);
 		}
+    	
+//    	request.debugNetwork(true);
     	
     	request.setRequestQueue(this);
     	
@@ -235,20 +224,23 @@ public class RequestQueue {
     	
     }
     
-    public void cancelAll(Object tag) {
-    	
+    public int cancelAll(Object tag) {
+
+    	int count = 0;
     	if (tag == null) {
     		// tag == null is no dice, it'll cancel all requests...
-    		return;
+    		return count;
     	}
     	
     	synchronized (mCurrentRequests) {
 			for (Request r : mCurrentRequests) {
 				if (r.getTag() == tag) {
+					count++;
 					r.cancel();
 				}
 			}
 		}
+    	return count;
     }
     
 	private boolean isSessionEndpoint(Request r) {
@@ -284,6 +276,14 @@ public class RequestQueue {
 		request.putQueryParameters(params);
 
 	}
-
+	
+	/**
+	 * Get the current count of requests performed by this RequestQueue.
+	 * All requests are counted, including successful, errors, cancelled e.t.c.
+	 * @return The number of requests received
+	 */
+	public int getRequestCount() {
+		return mSequenceGenerator.get();
+	}
     
 }

@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Size extends EtaObject implements Serializable {
 
@@ -37,12 +38,13 @@ public class Size extends EtaObject implements Serializable {
 		if (s == null) s = new Size();
 		if (size == null) return s;
 		
-		s.setFrom(jsonToDouble(size, ServerKey.FROM, 1));
-		s.setTo(jsonToDouble(size, ServerKey.TO, 1));
+		s.setFrom(Json.valueOf(size, ServerKey.FROM, 1));
+		s.setTo(Json.valueOf(size, ServerKey.TO, 1));
 		
 		return s;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}

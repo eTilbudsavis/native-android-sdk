@@ -1,13 +1,5 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 
 /**
@@ -16,94 +8,78 @@ import com.eTilbudsavis.etasdk.Utils.EtaLog;
  * @author oizo
  *
  */
-public class EtaErnObject extends EtaObject {
+public abstract class EtaErnObject<T> extends EtaObject {
 
 	public static final String TAG = "EtaErnObject";
+
+	protected static final String ERN_CATALOG = "ern:catalog";
+	protected static final String ERN_DEALER = "ern:dealer";
+	protected static final String ERN_OFFER = "ern:offer";
+	protected static final String ERN_SHOPPINGLIST = "ern:shopping:list";
+	protected static final String ERN_SHOPPINGLISTITEM = "ern:shoppinglist:item";
+	protected static final String ERN_STORE = "ern:store";
 	
-	private static final String ERN_CATALOG = "ern:catalog";
-	private static final String ERN_OFFER = "ern:offer";
-	private static final String ERN_DEALER = "ern:dealer";
-	private static final String ERN_STORE = "ern:store";
-	private static final String ERN_SHOPPINGLIST = "ern:shopping:list";
-	private static final String ERN_SHOPPINGLISTITEM = "ern:shoppinglist:item";
+	private String mId;
+	private String mErn;
 	
-	/**
-	 * More or less a static factory method, for ease of creating lists of objects, in situations where
-	 * the type is irrelevant, like conversion of objects in the shoppinglist manager.
-	 * @param objects to be converted
-	 * @return List of something that extends EtaBaseObjects
-	 */
+	public EtaErnObject() {
+		
+	}
+	
+	public abstract String getErnPrefix();
+	
 	@SuppressWarnings("unchecked")
-	public static <T extends List<? extends EtaObject>> T fromJSON(JSONArray objects) {
-		
-		List<? extends EtaObject> list = new ArrayList<EtaObject>(0);
-		
-		if (objects == null || objects.length() == 0) {
-			return (T) list;
-		}
-		
-		try {
-			JSONObject o = objects.getJSONObject(0);
-			if (o.has(ServerKey.ERN)) {
-				
-				String ern = o.getString(ServerKey.ERN);
-				
-				if (ern.startsWith(ERN_CATALOG)) {
-					list = Catalog.fromJSON(objects);
-				} else if (ern.startsWith(ERN_DEALER)) {
-					list = Dealer.fromJSON(objects);
-				} else if (ern.startsWith(ERN_OFFER)) {
-					list = Offer.fromJSON(objects);
-				} else if (ern.startsWith(ERN_STORE)) {
-					list = Store.fromJSON(objects);
-				} else if (ern.startsWith(ERN_SHOPPINGLIST)) {
-					list = Shoppinglist.fromJSON(objects);
-				} else if (ern.startsWith(ERN_SHOPPINGLISTITEM)) {
-					list = ShoppinglistItem.fromJSON(objects);
-				}
-				
-			} else {
-				EtaLog.d(TAG, "ArrayElements does not contain an ERN");
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return (T) list;
+	public T setId(String id) {
+		mId = id;
+		mErn = getErnPrefix() + ":" + id;
+		return (T)this;
+	}
+	
+	public String getId() {
+		return mId;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T extends EtaObject> T fromJSON(JSONObject object) {
-		if (object == null)
-			return null;
-		
-		EtaObject item = new EtaObject();
-		try {
-			if (object.has(ServerKey.ERN)) {
-				
-				String ern = object.getString(ServerKey.ERN);
-					
-				if (ern.startsWith(ERN_CATALOG)) {
-					item = Catalog.fromJSON(object);
-				} else if (ern.startsWith(ERN_DEALER)) {
-					item = Dealer.fromJSON(object);
-				} else if (ern.startsWith(ERN_OFFER)) {
-					item = Offer.fromJSON(object);
-				} else if (ern.startsWith(ERN_STORE)) {
-					item = Store.fromJSON(object);
-				} else if (ern.startsWith(ERN_SHOPPINGLIST)) {
-					item = Shoppinglist.fromJSON(object);
-				} else if (ern.startsWith(ERN_SHOPPINGLISTITEM)) {
-					item = ShoppinglistItem.fromJSON(object);
-				}
-				
-			} else {
-				EtaLog.d(TAG, "JSONObject does not contain an ERN");
-			}
-					
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return (T) item;
+	public T setErn(String ern) {
+		mErn = ern;
+		String[] parts = mErn.split(":");
+		mId = parts[parts.length-1];
+		return (T)this;
+	}
+	
+	public String getErn() {
+		return mErn;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		EtaErnObject<?> other = (EtaErnObject<?>) obj;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
+			return false;
+		return true;
 	}
 	
 }

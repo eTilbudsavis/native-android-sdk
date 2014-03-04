@@ -60,12 +60,12 @@ public class CacheDispatcher extends Thread {
 				continue;
 			}
 			
-			request.addEvent("cache-dispatcher");
-			
 			// If the request was cancelled already, do not perform the network request.
 			if (request.isCanceled()) {
-				request.finish("cache-dispatcher-cancelled");
+				request.finish("cache-dispatcher-cancelled-on-recieved");
 				continue;
+			} else {
+				request.addEvent("recieved-by-cache-dispatcher");
 			}
 			
 			if (!request.ignoreCache()) {

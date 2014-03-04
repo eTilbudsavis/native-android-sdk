@@ -43,7 +43,7 @@ public class HttpNetwork implements Network {
 	/**
 	 * Default connection timeout, this is for both connection and socket
 	 */
-	private static final int CONNECTION_TIME_OUT = 10000;
+	private static final int CONNECTION_TIME_OUT = (int) (35 * Utils.SECOND_IN_MILLIS);
 	private static final int BUFFER_SIZE = 0x1000; // 4K
 	
 	public NetworkResponse performRequest(Request<?> request) throws EtaError {
@@ -88,7 +88,7 @@ public class HttpNetwork implements Network {
 
 		request.addEvent("set-apache-routeplanner");
 		setHostNameVerifierAndRoutePlanner(httpClient);
-
+		
 		// Set timeouts
 		request.addEvent(String.format("set-connection-timeout-%s", CONNECTION_TIME_OUT*2));
 		HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), CONNECTION_TIME_OUT);
@@ -114,17 +114,17 @@ public class HttpNetwork implements Network {
 		registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 		registry.register(new Scheme("https", socketFactory, 443));
 		SingleClientConnManager mgr = new SingleClientConnManager(httpClient.getParams(), registry);
-
+		
 		httpClient = new DefaultHttpClient(mgr, httpClient.getParams());
-
+		
 		// Change RoutePlanner to avoid SchemeRegistry causing IllegalStateException.
 		// Some devices with faults in their default route planner
 		httpClient.setRoutePlanner(new DefaultHttpRoutePlanner(registry));
-
+		
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-
+		
 	}
-
+	
 	private HttpRequestBase createRequest(Request<?> request) {
 		
 		String url = Utils.buildQueryString(request);

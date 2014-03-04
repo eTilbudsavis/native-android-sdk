@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Share extends EtaObject implements Comparable<Share>, Serializable {
 	private static final long serialVersionUID = 1L;
@@ -70,33 +71,34 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 		try {
 			
 			JSONObject o = share.getJSONObject(ServerKey.USER);
-			s.setEmail(jsonToString(o, ServerKey.EMAIL));
-			s.setName(jsonToString(o, ServerKey.NAME));
+			s.setEmail(Json.valueOf(o, ServerKey.EMAIL));
+			s.setName(Json.valueOf(o, ServerKey.NAME));
 			
-			s.setAccess(jsonToString(share, ServerKey.ACCESS));
-			s.setAccepted(jsonToBoolean(share, ServerKey.ACCEPTED, false));
+			s.setAccess(Json.valueOf(share, ServerKey.ACCESS));
+			s.setAccepted(Json.valueOf(share, ServerKey.ACCEPTED, false));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		
 		return s;
 	}
-	
-	public JSONObject toJSON() {
-		return toJSON(this); 
-	}
 
+	@Override
+	public JSONObject toJSON() {
+		return toJSON(this);
+	}
+	
 	public static JSONObject toJSON(Share s) {
 		JSONObject o = new JSONObject();
 		try {
 			
 			JSONObject user = new JSONObject();
-			user.put(ServerKey.EMAIL, s.getEmail());
-			user.put(ServerKey.NAME, s.getName());
+			user.put(ServerKey.EMAIL, Json.nullCheck(s.getEmail()));
+			user.put(ServerKey.NAME, Json.nullCheck(s.getName()));
 			
-			o.put(ServerKey.USER, user);
-			o.put(ServerKey.ACCEPTED, s.getAccepted());
-			o.put(ServerKey.ACCESS, s.getAccess());
+			o.put(ServerKey.USER, Json.nullCheck(user));
+			o.put(ServerKey.ACCEPTED, Json.nullCheck(s.getAccepted()));
+			o.put(ServerKey.ACCESS, Json.nullCheck(s.getAccess()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

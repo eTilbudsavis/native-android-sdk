@@ -1,56 +1,17 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
-public class EtaObject {
+public abstract class EtaObject {
 	
 	public static final String TAG = "EtaObject";
 	
-	public EtaObject() { }
-	
-	protected static String jsonToString(JSONObject object, String key) {
-		if (object == null || key == null) 
-			return null;
+	public EtaObject() {
 		
-		try {
-			if (!object.has(key))
-				return null;
-			return object.isNull(key) ? null : object.getString(key);
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return null;
 	}
 	
-	protected static int jsonToInt(JSONObject object, String key, int defValue) {
-		try {
-			return object.isNull(key) ? defValue : object.getInt(key);
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return defValue;
-	}
-	
-	protected static double jsonToDouble(JSONObject object, String key, double defValue) {
-		try {
-			return object.isNull(key) ? defValue : object.getDouble(key);
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return defValue;
-	}
-	
-	protected static boolean jsonToBoolean(JSONObject object, String key, boolean defValue) {
-		try {
-			return object.isNull(key) ? defValue : object.getBoolean(key);
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return defValue;
-	}
+	public abstract JSONObject toJSON();
 	
 	/**
 	 * This class contains all strings, that eTilbudsavis API v2 can return as keys in any JSONObject.
@@ -141,4 +102,7 @@ public class EtaObject {
 		public static final String PREPRICE = "pre_price";
 		public static final String CURRENCY = "currency";
 	}
+	
+	
+	
 }

@@ -8,7 +8,6 @@ public class Delivery {
 	
 	/** Used for posting responses, typically to the main thread. */
     private final Executor mResponsePoster;
-    public RequestQueue mRequestQueue;
 
     /**
      * Creates a new response delivery interface.
@@ -31,10 +30,6 @@ public class Delivery {
      */
     public void postResponse(Request<?> request, Response<?> response) {
     	request.addEvent("post-response");
-    	
-    	if (mRequestQueue != null) {
-        	mRequestQueue.finish(request, response);
-    	}
     	
     	if (request.getHandler() != null) {
     		request.getHandler().post(new DeliveryRunnable(request, response));
@@ -66,7 +61,7 @@ public class Delivery {
             
             // If this request has canceled, finish it and don't deliver.
             if (mRequest.isCanceled()) {
-            	mRequest.finish("canceled-at-delivery");
+            	mRequest.finish("cancelled-at-delivery");
                 return;
             }
             

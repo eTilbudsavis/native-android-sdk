@@ -380,7 +380,6 @@ public final class PageflipWebview extends WebView {
 		
 		// Get the HTML, and get Pageflip running
 		String url = Endpoint.pageflipProxy(mUuid);
-//		url = "http://10.0.1.41:3000/proxy/%s/";
 		StringRequest req = new StringRequest(url, htmlListener);
 		mEta.add(req);
 		

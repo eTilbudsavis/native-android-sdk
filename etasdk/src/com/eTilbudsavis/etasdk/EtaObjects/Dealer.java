@@ -10,15 +10,14 @@ import org.json.JSONObject;
 import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Dealer extends EtaObject implements Serializable {
+public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	public static final String TAG = "Dealer";
 	
-	private String mId;
-	private String mErn;
 	private String mName;
 	private String mUrlName;
 	private String mWebsite;
@@ -49,59 +48,47 @@ public class Dealer extends EtaObject implements Serializable {
 		if (dealer == null) return d;
 
 		try {
-			d.setId(jsonToString(dealer, ServerKey.ID));
-			d.setErn(jsonToString(dealer, ServerKey.ERN));
-			d.setName(jsonToString(dealer, ServerKey.NAME));
-			d.setUrlName(jsonToString(dealer, ServerKey.URL_NAME));
-			d.setWebsite(jsonToString(dealer, ServerKey.WEBSITE));
-			d.setLogo(jsonToString(dealer, ServerKey.LOGO));
-			d.setColor(Color.parseColor("#"+jsonToString(dealer, ServerKey.COLOR)));
+			d.setId(Json.valueOf(dealer, ServerKey.ID));
+			d.setErn(Json.valueOf(dealer, ServerKey.ERN));
+			d.setName(Json.valueOf(dealer, ServerKey.NAME));
+			d.setUrlName(Json.valueOf(dealer, ServerKey.URL_NAME));
+			d.setWebsite(Json.valueOf(dealer, ServerKey.WEBSITE));
+			d.setLogo(Json.valueOf(dealer, ServerKey.LOGO));
+			d.setColor(Color.parseColor("#"+Json.valueOf(dealer, ServerKey.COLOR)));
 			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(ServerKey.PAGEFLIP)));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return d;
 	}
-	
-	public JSONObject toJSON(){
+
+	@Override
+	public JSONObject toJSON() {
 		return toJSON(this);
 	}
 	
 	public static JSONObject toJSON(Dealer d) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.ID, d.getId());
-			o.put(ServerKey.ERN, d.getErn());
-			o.put(ServerKey.NAME, d.getName());
-			o.put(ServerKey.URL_NAME, d.getUrlName());
-			o.put(ServerKey.WEBSITE, d.getWebsite());
-			o.put(ServerKey.LOGO, d.getLogo());
-			o.put(ServerKey.COLOR, d.getColorString());
-			o.put(ServerKey.PAGEFLIP, d.getPageflip().toJSON());
+			o.put(ServerKey.ID, Json.nullCheck(d.getId()));
+			o.put(ServerKey.ERN, Json.nullCheck(d.getErn()));
+			o.put(ServerKey.NAME, Json.nullCheck(d.getName()));
+			o.put(ServerKey.URL_NAME, Json.nullCheck(d.getUrlName()));
+			o.put(ServerKey.WEBSITE, Json.nullCheck(d.getWebsite()));
+			o.put(ServerKey.LOGO, Json.nullCheck(d.getLogo()));
+			o.put(ServerKey.COLOR, Json.nullCheck(d.getColorString()));
+			o.put(ServerKey.PAGEFLIP, Json.nullCheck(d.getPageflip().toJSON()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o; 
 	}
-	
-	public Dealer setId(String id) {
-		this.mId = id;
-		return this;
-	}
 
-	public String getId() {
-		return mId;
+	@Override
+	public String getErnPrefix() {
+		return ERN_DEALER;
 	}
 	
-	public Dealer setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-	
-	public String getErn() {
-		return mErn;
-	}
-
 	public Dealer setName(String name) {
 		mName = name;
 		return this;
@@ -165,8 +152,6 @@ public class Dealer extends EtaObject implements Serializable {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((mColor == null) ? 0 : mColor.hashCode());
-		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
 		result = prime * result
@@ -191,16 +176,6 @@ public class Dealer extends EtaObject implements Serializable {
 			if (other.mColor != null)
 				return false;
 		} else if (!mColor.equals(other.mColor))
-			return false;
-		if (mErn == null) {
-			if (other.mErn != null)
-				return false;
-		} else if (!mErn.equals(other.mErn))
-			return false;
-		if (mId == null) {
-			if (other.mId != null)
-				return false;
-		} else if (!mId.equals(other.mId))
 			return false;
 		if (mLogo == null) {
 			if (other.mLogo != null)
@@ -229,7 +204,5 @@ public class Dealer extends EtaObject implements Serializable {
 			return false;
 		return true;
 	}
-	
-	
 	
 }

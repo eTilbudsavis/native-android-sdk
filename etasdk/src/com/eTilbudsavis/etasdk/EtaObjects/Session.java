@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Session extends EtaObject implements Serializable {
@@ -32,16 +33,17 @@ public class Session extends EtaObject implements Serializable {
 		if (s == null) s = new Session();
 		if (session == null) return s;
 		
-		s.setToken(jsonToString(session, ServerKey.TOKEN));
-		s.setExpires(jsonToString(session, ServerKey.EXPIRES));
-		String user = jsonToString(session, ServerKey.USER);
+		s.setToken(Json.valueOf(session, ServerKey.TOKEN));
+		s.setExpires(Json.valueOf(session, ServerKey.EXPIRES));
+		String user = Json.valueOf(session, ServerKey.USER);
 		s.setUser(user == null ? new User() : User.fromJSON(user));
-		s.setPermission(Permission.fromJSON(jsonToString(session, ServerKey.PERMISSIONS))) ;
-		s.setProvider(jsonToString(session, ServerKey.PROVIDER));
+		s.setPermission(Permission.fromJSON(Json.valueOf(session, ServerKey.PERMISSIONS))) ;
+		s.setProvider(Json.valueOf(session, ServerKey.PROVIDER));
 		
 		return s;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -50,11 +52,11 @@ public class Session extends EtaObject implements Serializable {
 		JSONObject o = new JSONObject();
 		
 		try {
-			o.put(ServerKey.TOKEN, s.getToken());
-			o.put(ServerKey.EXPIRES, Utils.parseDate(s.getExpire()));
-			o.put(ServerKey.USER, s.getUser().getId() == User.NO_USER ? null : s.getUser().toJSON());
-			o.put(ServerKey.PERMISSIONS, s.getPermission() == null ? null : s.getPermission().toJSON());
-			o.put(ServerKey.PROVIDER, s.getProvider());
+			o.put(ServerKey.TOKEN, Json.nullCheck(s.getToken()));
+			o.put(ServerKey.EXPIRES, Json.nullCheck(Utils.parseDate(s.getExpire())));
+			o.put(ServerKey.USER, s.getUser().getId() == User.NO_USER ? JSONObject.NULL : s.getUser().toJSON());
+			o.put(ServerKey.PERMISSIONS, Json.toJson(s.getPermission()));
+			o.put(ServerKey.PROVIDER, Json.nullCheck(s.getProvider()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

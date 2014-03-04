@@ -6,7 +6,10 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
+
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class User extends EtaObject implements Serializable {
 	
@@ -46,19 +49,20 @@ public class User extends EtaObject implements Serializable {
 		if (user == null) return u;
 		
 		try {
-			u.setId(user.getInt(ServerKey.ID));
-			u.setErn(jsonToString(user, ServerKey.ERN));
-			u.setGender(jsonToString(user, ServerKey.GENDER));
-			u.setBirthYear(jsonToInt(user, ServerKey.BIRTH_YEAR, 0));
-			u.setName(jsonToString(user, ServerKey.NAME));
-			u.setEmail(jsonToString(user, ServerKey.EMAIL));
+			u.setId(Json.valueOf(user, ServerKey.ID, User.NO_USER));
+			u.setErn(Json.valueOf(user, ServerKey.ERN));
+			u.setGender(Json.valueOf(user, ServerKey.GENDER));
+			u.setBirthYear(Json.valueOf(user, ServerKey.BIRTH_YEAR, 0));
+			u.setName(Json.valueOf(user, ServerKey.NAME));
+			u.setEmail(Json.valueOf(user, ServerKey.EMAIL));
 			u.setPermissions(Permission.fromJSON(user.getJSONObject(ServerKey.PERMISSIONS)));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return u;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -67,12 +71,12 @@ public class User extends EtaObject implements Serializable {
 		JSONObject o = new JSONObject();
 		try {
 			o.put(ServerKey.ID, u.getId());
-			o.put(ServerKey.ERN, u.getErn());
-			o.put(ServerKey.GENDER, u.getGender());
-			o.put(ServerKey.BIRTH_YEAR, u.getBirthYear());
-			o.put(ServerKey.NAME, u.getName());
-			o.put(ServerKey.EMAIL, u.getEmail());
-			o.put(ServerKey.PERMISSIONS, u.getPermissions() == null ? null : u.getPermissions().toJSON());
+			o.put(ServerKey.ERN, Json.nullCheck(u.getErn()));
+			o.put(ServerKey.GENDER, Json.nullCheck(u.getGender()));
+			o.put(ServerKey.BIRTH_YEAR, Json.nullCheck(u.getBirthYear()));
+			o.put(ServerKey.NAME, Json.nullCheck(u.getName()));
+			o.put(ServerKey.EMAIL, Json.nullCheck(u.getEmail()));
+			o.put(ServerKey.PERMISSIONS, Json.toJson(u.getPermissions()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -80,7 +84,7 @@ public class User extends EtaObject implements Serializable {
 	}
 	
 	public boolean isLoggedIn() {
-		return mEmail != null && mId > -1;
+		return mEmail != null && mId > NO_USER;
 	}
 	
 	public int getId() {

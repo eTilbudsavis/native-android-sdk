@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Quantity extends EtaObject implements Serializable {
 
@@ -47,7 +48,8 @@ public class Quantity extends EtaObject implements Serializable {
 		}
 		return q;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -55,9 +57,9 @@ public class Quantity extends EtaObject implements Serializable {
 	public static JSONObject toJSON(Quantity q) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.UNIT, q.getUnit() == null ? null : q.getUnit().toJSON());
-			o.put(ServerKey.SIZE, q.getSize() == null ? null : q.getSize().toJSON());
-			o.put(ServerKey.PIECES, q.getPieces() == null ? null : q.getPieces().toJSON());
+			o.put(ServerKey.UNIT, Json.toJson(q.getUnit()));
+			o.put(ServerKey.SIZE, Json.toJson(q.getSize()));
+			o.put(ServerKey.PIECES, Json.toJson(q.getPieces()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

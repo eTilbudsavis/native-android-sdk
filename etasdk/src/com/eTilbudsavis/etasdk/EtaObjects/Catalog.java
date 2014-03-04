@@ -9,17 +9,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Catalog extends EtaErnObject implements Serializable {
+public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Catalog";
 	
 	// From JSON blob
-	private String mId;
-	private String mErn;
 	private String mLabel;
 	private String mBackground;
 	private Date mRunFrom;
@@ -47,7 +46,6 @@ public class Catalog extends EtaErnObject implements Serializable {
 		set(c);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static ArrayList<Catalog> fromJSON(JSONArray catalogs) {
 		ArrayList<Catalog> list = new ArrayList<Catalog>();
 		try {
@@ -60,7 +58,6 @@ public class Catalog extends EtaErnObject implements Serializable {
 		return list;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Catalog fromJSON(JSONObject catalog) {
 		return fromJSON(new Catalog(), catalog);
 	}
@@ -75,21 +72,21 @@ public class Catalog extends EtaErnObject implements Serializable {
 		if (catalog.has(ServerKey.STORE_ID) && catalog.has(ServerKey.OFFER_COUNT)) {
 			// if we have a full catalog
 			try {
-				c.setId(jsonToString(catalog, ServerKey.ID));
-				c.setErn(jsonToString(catalog, ServerKey.ERN));
-				c.setLabel(jsonToString(catalog, ServerKey.LABEL));
-				c.setBackground(jsonToString(catalog, ServerKey.BACKGROUND));
-				Date runFrom = Utils.parseDate(jsonToString(catalog, ServerKey.RUN_FROM));
+				c.setId(Json.valueOf(catalog, ServerKey.ID));
+				c.setErn(Json.valueOf(catalog, ServerKey.ERN));
+				c.setLabel(Json.valueOf(catalog, ServerKey.LABEL));
+				c.setBackground(Json.valueOf(catalog, ServerKey.BACKGROUND));
+				Date runFrom = Utils.parseDate(Json.valueOf(catalog, ServerKey.RUN_FROM));
 				c.setRunFrom(runFrom);
-				Date runTill = Utils.parseDate(jsonToString(catalog, ServerKey.RUN_TILL));
+				Date runTill = Utils.parseDate(Json.valueOf(catalog, ServerKey.RUN_TILL));
 				c.setRunTill(runTill);
-				c.setPageCount(catalog.getInt(ServerKey.PAGE_COUNT));
-				c.setOfferCount(catalog.getInt(ServerKey.OFFER_COUNT));
+				c.setPageCount(Json.valueOf(catalog, ServerKey.PAGE_COUNT, 0));
+				c.setOfferCount(Json.valueOf(catalog, ServerKey.OFFER_COUNT, 0));
 				c.setBranding(Branding.fromJSON(catalog.getJSONObject(ServerKey.BRANDING)));
-				c.setDealerId(jsonToString(catalog, ServerKey.DEALER_ID));
-				c.setDealerUrl(jsonToString(catalog, ServerKey.DEALER_URL));
-				c.setStoreId(jsonToString(catalog, ServerKey.STORE_ID));
-				c.setStoreUrl(jsonToString(catalog, ServerKey.STORE_URL));
+				c.setDealerId(Json.valueOf(catalog, ServerKey.DEALER_ID));
+				c.setDealerUrl(Json.valueOf(catalog, ServerKey.DEALER_URL));
+				c.setStoreId(Json.valueOf(catalog, ServerKey.STORE_ID));
+				c.setStoreUrl(Json.valueOf(catalog, ServerKey.STORE_URL));
 				c.setDimension(Dimension.fromJSON(catalog.getJSONObject(ServerKey.DIMENSIONS)));
 				c.setImages(Images.fromJSON(catalog.getJSONObject(ServerKey.IMAGES)));
 				c.setPages(Pages.fromJSON(catalog.getJSONObject(ServerKey.PAGES)));
@@ -98,16 +95,14 @@ public class Catalog extends EtaErnObject implements Serializable {
 			}
 		} else if (catalog.has(ServerKey.ID) && catalog.has(ServerKey.PAGE)) {
 			// If it is a partial catalog
-			try {
-				c.setId(jsonToString(catalog, ServerKey.ID));
-				c.setOfferOnPage(catalog.getInt(ServerKey.PAGE));
-			} catch (JSONException e) {
-				EtaLog.d(TAG, e);
-			}
+			c.setId(Json.valueOf(catalog, ServerKey.ID));
+			c.setOfferOnPage(Json.valueOf(catalog, ServerKey.PAGE, 1));
+			
 		}
 		return c;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
@@ -115,22 +110,22 @@ public class Catalog extends EtaErnObject implements Serializable {
 	public static JSONObject toJSON(Catalog c) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.ID, c.getId());
-			o.put(ServerKey.ERN, c.getErn());
-			o.put(ServerKey.LABEL, c.getLabel());
-			o.put(ServerKey.BACKGROUND, c.getBackground());
-			o.put(ServerKey.RUN_FROM, Utils.parseDate(c.getRunFrom()));
-			o.put(ServerKey.RUN_TILL, Utils.parseDate(c.getRunTill()));
+			o.put(ServerKey.ID, Json.nullCheck(c.getId()));
+			o.put(ServerKey.ERN, Json.nullCheck(c.getErn()));
+			o.put(ServerKey.LABEL, Json.nullCheck(c.getLabel()));
+			o.put(ServerKey.BACKGROUND, Json.nullCheck(c.getBackground()));
+			o.put(ServerKey.RUN_FROM, Json.nullCheck(Utils.parseDate(c.getRunFrom())));
+			o.put(ServerKey.RUN_TILL, Json.nullCheck(Utils.parseDate(c.getRunTill())));
 			o.put(ServerKey.PAGE_COUNT, c.getPageCount());
 			o.put(ServerKey.OFFER_COUNT, c.getOfferCount());
-			o.put(ServerKey.BRANDING, c.getBranding().toJSON());
-			o.put(ServerKey.DEALER_ID, c.getDealerId());
-			o.put(ServerKey.DEALER_URL, c.getDealerUrl());
-			o.put(ServerKey.STORE_ID, c.getStoreId());
-			o.put(ServerKey.STORE_URL, c.getStoreUrl());
-			o.put(ServerKey.DIMENSIONS, c.getDimension().toJSON());
-			o.put(ServerKey.IMAGES, c.getImages().toJSON());
-			o.put(ServerKey.PAGES, c.getPages().toJSON());
+			o.put(ServerKey.BRANDING, Json.nullCheck(c.getBranding().toJSON()));
+			o.put(ServerKey.DEALER_ID, Json.nullCheck(c.getDealerId()));
+			o.put(ServerKey.DEALER_URL, Json.nullCheck(c.getDealerUrl()));
+			o.put(ServerKey.STORE_ID, Json.nullCheck(c.getStoreId()));
+			o.put(ServerKey.STORE_URL, Json.nullCheck(c.getStoreUrl()));
+			o.put(ServerKey.DIMENSIONS, Json.nullCheck(c.getDimension().toJSON()));
+			o.put(ServerKey.IMAGES, Json.nullCheck(c.getImages().toJSON()));
+			o.put(ServerKey.PAGES, Json.nullCheck(c.getPages().toJSON()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -138,8 +133,8 @@ public class Catalog extends EtaErnObject implements Serializable {
 	}
 	
 	public void set(Catalog c) {
-		mId = c.getId();
-		mErn = c.getErn();
+		super.setId(c.getId());
+		super.setErn(c.getErn());
 		mLabel = c.getLabel();
 		mBackground = c.getBackground();
 		mRunFrom = c.getRunFrom();
@@ -155,25 +150,12 @@ public class Catalog extends EtaErnObject implements Serializable {
 		mImages = c.getImages();
 		mPages = c.getPages();
 	}
-
-	public Catalog setId(String id) {
-		this.mId = id;
-		return this;
-	}
-
-	public String getId() {
-		return mId;
+	
+	@Override
+	public String getErnPrefix() {
+		return ERN_CATALOG;
 	}
 	
-	public Catalog setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-	
-	public String getErn() {
-		return mErn;
-	}
-
 	public String getLabel() {
 		return mLabel;
 	}
@@ -342,8 +324,6 @@ public class Catalog extends EtaErnObject implements Serializable {
 				+ ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
 		result = prime * result
 				+ ((mDimension == null) ? 0 : mDimension.hashCode());
-		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mImages == null) ? 0 : mImages.hashCode());
 		result = prime * result + ((mLabel == null) ? 0 : mLabel.hashCode());
 		result = prime * result + mOfferCount;
@@ -394,16 +374,6 @@ public class Catalog extends EtaErnObject implements Serializable {
 			if (other.mDimension != null)
 				return false;
 		} else if (!mDimension.equals(other.mDimension))
-			return false;
-		if (mErn == null) {
-			if (other.mErn != null)
-				return false;
-		} else if (!mErn.equals(other.mErn))
-			return false;
-		if (mId == null) {
-			if (other.mId != null)
-				return false;
-		} else if (!mId.equals(other.mId))
 			return false;
 		if (mImages == null) {
 			if (other.mImages != null)
