@@ -1,6 +1,5 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -16,23 +15,12 @@ import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Shoppinglist extends EtaErnObject<Shoppinglist> implements Serializable, Comparable<Shoppinglist> {
-	
-	private static final long serialVersionUID = 1L;
-	
+public class Shoppinglist extends EtaListObject< Shoppinglist> {
+
 	public static final String TAG = "Shoppinglist";
 	
-	/** States a shoppping list can be in */
-	public interface State {
-		int TO_SYNC	= 0;
-		int SYNCING	= 1;
-		int SYNCED	= 2;
-		int DELETE	= 4;
-		int ERROR	= 5;
-	}
-	
-	public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
-	
+	private static final long serialVersionUID = 5718447151312028262L;
+
 	public static final String TYPE_SHOPPING_LIST = null;
 	public static final String TYPE_WISH_LIST = "wish_list";
 	
@@ -43,13 +31,10 @@ public class Shoppinglist extends EtaErnObject<Shoppinglist> implements Serializ
 	public static final String EMPTY_ALL = "all";
 	public static final String EMPTY_TICKED = "ticked";
 	public static final String EMPTY_UNTICKED = "unticked";
-
-	private String mId;
-	private String mErn;
+	
 	private String mName = "";
 	private String mAccess = ACCESS_PRIVATE;
 	private Date mModified = new Date();
-	private int mState = State.TO_SYNC;
 	private String mPrevId;
 	private String mType;
 	private String mMeta;
@@ -59,7 +44,6 @@ public class Shoppinglist extends EtaErnObject<Shoppinglist> implements Serializ
 	private Shoppinglist() {
         String id = Utils.createUUID();
 		setId(id);
-        setErn("ern:shopping:list:" + id);
 	}
 
 	public static Shoppinglist fromName(String name) {
@@ -143,24 +127,6 @@ public class Shoppinglist extends EtaErnObject<Shoppinglist> implements Serializ
 		return ERN_SHOPPINGLIST;
 	}
 	
-	public Shoppinglist setId(String id) {
-		this.mId = id;
-		return this;
-	}
-
-	public String getId() {
-		return mId;
-	}
-	
-	public Shoppinglist setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-	
-	public String getErn() {
-		return mErn;
-	}
-
 	public String getName() {
 		return mName;
 	}
@@ -189,16 +155,6 @@ public class Shoppinglist extends EtaErnObject<Shoppinglist> implements Serializ
 		return this;
 	}
 	
-	public int getState() {
-		return mState;
-	}
-	
-	public Shoppinglist setState(int state) {
-		if (State.TO_SYNC <= state && state <= State.ERROR)
-			mState = state;
-		return this;
-	}
-
 	public String getPreviousId() {
 		return mPrevId;
 	}
@@ -229,7 +185,7 @@ public class Shoppinglist extends EtaErnObject<Shoppinglist> implements Serializ
 	public Shoppinglist setShares(List<Share> shares) {
 		mShares.clear();
 		for (Share s : shares) {
-			s.setShoppinglistId(mId);
+			s.setShoppinglistId(getId());
 			mShares.put(s.getEmail(), s);
 		}
 		return this;
@@ -239,7 +195,7 @@ public class Shoppinglist extends EtaErnObject<Shoppinglist> implements Serializ
 		if (shares == null) return this;
 		
 		for (Share s : shares) {
-			s.setShoppinglistId(mId);
+			s.setShoppinglistId(getId());
 			mShares.put(s.getEmail(), s);
 		}
 		return this;
@@ -247,7 +203,7 @@ public class Shoppinglist extends EtaErnObject<Shoppinglist> implements Serializ
 	
 	public Shoppinglist putShare(Share s) {
 		if (s == null) return this;
-		s.setShoppinglistId(mId);
+		s.setShoppinglistId(getId());
 		mShares.put(s.getEmail(), s);
 		return this;
 	}
@@ -341,7 +297,6 @@ public class Shoppinglist extends EtaErnObject<Shoppinglist> implements Serializ
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
 		result = prime * result + ((mPrevId == null) ? 0 : mPrevId.hashCode());
 		result = prime * result + ((mShares == null) ? 0 : mShares.hashCode());
-		result = prime * result + mState;
 		result = prime * result + ((mType == null) ? 0 : mType.hashCode());
 		result = prime * result + mUserId;
 		return result;
@@ -385,8 +340,6 @@ public class Shoppinglist extends EtaErnObject<Shoppinglist> implements Serializ
 			if (other.mShares != null)
 				return false;
 		} else if (!mShares.equals(other.mShares))
-			return false;
-		if (mState != other.mState)
 			return false;
 		if (mType == null) {
 			if (other.mType != null)

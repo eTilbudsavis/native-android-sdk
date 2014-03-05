@@ -1,16 +1,27 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+import com.eTilbudsavis.etasdk.NetworkHelpers.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.NetworkHelpers.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 
 
 public abstract class EtaObject {
 	
 	public static final String TAG = "EtaObject";
 	
-	public EtaObject() {
-		
-	}
+	public EtaObject() { }
 	
+	/**
+	 * <p>Method for converting this object into a JSONObject.</p>
+	 * 
+	 * <p>This is especially usable when {@link Request.Method.PUT PUT}- and {@link Request.Method.POST POST}ing data
+	 * to API v2 with {@link JsonObjectRequest} and {@link JsonArrayRequest}, which ( not by coincidence ^_^ ) takes 
+	 * {@link JSONObject} and {@link JSONArray} respectively as body.</p>
+	 * @return A {@link JSONObject} representation of the object (same structure as API v2)
+	 */
 	public abstract JSONObject toJSON();
 	
 	/**
@@ -101,6 +112,10 @@ public abstract class EtaObject {
 		public static final String PRICE = "price";
 		public static final String PREPRICE = "pre_price";
 		public static final String CURRENCY = "currency";
+		public static final String LENGTH = "length";
+		public static final String OFFSET = "offset";
+		public static final String SUBJECT = "subject";
+		
 	}
 	
 	

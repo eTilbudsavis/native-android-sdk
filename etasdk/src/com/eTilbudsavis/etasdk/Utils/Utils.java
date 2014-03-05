@@ -333,11 +333,9 @@ public final class Utils {
 	 * @return true, if the version matched the regex
 	 */
 	public static boolean validVersion(String version) {
-		
-	    String FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([+-][0-9A-Za-z-.]*)?";
-	    Pattern PATTERN = Pattern.compile(FORMAT);
+	    String APP_VERSION_FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([+-][0-9A-Za-z-.]*)?";
+	    Pattern PATTERN = Pattern.compile(APP_VERSION_FORMAT);
 	    return PATTERN.matcher(version).matches();
-		
 	}
 	
 }

@@ -1,6 +1,5 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -11,23 +10,15 @@ import org.json.JSONObject;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Share extends EtaObject implements Comparable<Share>, Serializable {
-	private static final long serialVersionUID = 1L;
+public class Share extends EtaListObject<Share> {
 
+	public static final String TAG = "Share";
+	
+	private static final long serialVersionUID = -9184865445908448266L;
+	
 	public static final String ACCESS_OWNER = "owner";
 	public static final String ACCESS_READWRITE = "rw";
 	public static final String ACCESS_READONLY = "r";
-	
-	public static final String TAG = "Share";
-
-	/** States a shoppping list can be in */
-	public interface State {
-		int TO_SYNC	= 0;
-		int SYNCING	= 1;
-		int SYNCED	= 2;
-		int DELETE	= 4;
-		int ERROR	= 5;
-	}
 	
 	private String mName;
 	private String mEmail;
@@ -35,14 +26,12 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 	private String mShoppinglistId;
 	private boolean mAccepted;
 	private String mAcceptUrl;
-	private int mState = State.SYNCED;
 	
 	public Share(String email, String access, String acceptUrl) {
+		mName = email;
 		mEmail = email;
 		mAccess = access;
 		mAcceptUrl = acceptUrl;
-		mState = State.TO_SYNC;
-		mName = email;
 	}
 	
 	private Share() { }
@@ -104,6 +93,49 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 		}
 		return o;
 	}
+
+	@Override
+	public String getErnPrefix() {
+		return "ern:share";
+	}
+	
+	/**
+     * This method is not supported and throws an UnsupportedOperationException when called.
+	 * @param id Ignored
+	 * @throws UnsupportedOperationException Every time this method is invoked.
+	 */
+	@Override
+	public Share setId(String id) {
+		throw new UnsupportedOperationException("Share does not support setId(String)");
+	}
+
+	/**
+     * This method is not supported and throws an UnsupportedOperationException when called.
+	 * @throws UnsupportedOperationException Every time this method is invoked.
+	 */
+	@Override
+	public String getId() {
+		throw new UnsupportedOperationException("Share does not support getId()");
+	}
+
+	/**
+     * This method is not supported and throws an UnsupportedOperationException when called.
+	 * @param id Ignored
+	 * @throws UnsupportedOperationException Every time this method is invoked.
+	 */
+	@Override
+	public Share setErn(String ern) {
+		throw new UnsupportedOperationException("Share does not support setErn(String)");
+	}
+
+	/**
+     * This method is not supported and throws an UnsupportedOperationException when called.
+	 * @throws UnsupportedOperationException Every time this method is invoked.
+	 */
+	@Override
+	public String getErn() {
+		throw new UnsupportedOperationException("Share does not support getErn()");
+	}
 	
 	public String getEmail() {
 		return mEmail;
@@ -150,16 +182,6 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 		return mAcceptUrl;
 	}
 	
-	public int getState() {
-		return mState;
-	}
-	
-	public Share setState(int state) {
-		if (State.TO_SYNC <= state && state <= State.ERROR)
-			mState = state;
-		return this;
-	}
-
 	public String getShoppinglistId() {
 		return mShoppinglistId;
 	}
@@ -198,7 +220,6 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
 		result = prime * result
 				+ ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
-		result = prime * result + mState;
 		return result;
 	}
 
@@ -238,12 +259,8 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 				return false;
 		} else if (!mShoppinglistId.equals(other.mShoppinglistId))
 			return false;
-		if (mState != other.mState)
-			return false;
 		return true;
 	}
-	
-	
 	
 }
 

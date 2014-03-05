@@ -5,7 +5,7 @@ package com.eTilbudsavis.etasdk.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  */
 public class Header {
-
+	
 	/** Header name for the session token */
 	public static final String X_TOKEN = "X-Token";
 

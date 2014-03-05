@@ -1,6 +1,5 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -13,30 +12,18 @@ import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class ShoppinglistItem extends EtaErnObject<ShoppinglistItem> implements Comparable<ShoppinglistItem>, Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 
 	public static final String TAG = "ShoppinglistItem";
 	
-	/** States a shopppingItem list can be in */
-	public interface State {
-		int TO_SYNC	= 0;
-		int SYNCING	= 1;
-		int SYNCED	= 2;
-		int DELETE	= 4;
-		int ERROR	= 5;
-	}
-	
-	public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
-	
+	private static final long serialVersionUID = -8186715532715467496L;
+
 	private boolean mTick = false;
 	private String mOfferId = null;
 	private int mCount = 1;
 	private String mDescription = null;
 	private String mCreator;
 	private Date mModified = new Date();
-	private int mState = State.TO_SYNC;
 	private Offer mOffer = null;
 	private String mShoppinglistId;
 	private String mPrevId;
@@ -46,7 +33,6 @@ public class ShoppinglistItem extends EtaErnObject<ShoppinglistItem> implements 
 	public ShoppinglistItem() {
         String id = Utils.createUUID();
 		setId(id);
-        setErn("ern:shopping:item:" + id);
 	}
 	
 	public ShoppinglistItem(Shoppinglist shoppinglist, String description) {
@@ -220,17 +206,7 @@ public class ShoppinglistItem extends EtaErnObject<ShoppinglistItem> implements 
 		mModified = time;
 		return this;
 	}
-
-	public int getState() {
-		return mState;
-	}
 	
-	public ShoppinglistItem setState(int state) {
-		if (State.TO_SYNC <= state && state <= State.ERROR)
-			mState = state;
-		return this;
-	}
-
 	public JSONObject getMeta() {
 		JSONObject meta = null;
 		try {
@@ -303,7 +279,6 @@ public class ShoppinglistItem extends EtaErnObject<ShoppinglistItem> implements 
 		result = prime * result + ((mOfferId == null) ? 0 : mOfferId.hashCode());
 		result = prime * result + ((mPrevId == null) ? 0 : mPrevId.hashCode());
 		result = prime * result + ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
-		result = prime * result + mState;
 		result = prime * result + (mTick ? 1231 : 1237);
 		result = prime * result + mUserId;
 		return result;
@@ -359,8 +334,6 @@ public class ShoppinglistItem extends EtaErnObject<ShoppinglistItem> implements 
 			if (other.mShoppinglistId != null)
 				return false;
 		} else if (!mShoppinglistId.equals(other.mShoppinglistId))
-			return false;
-		if (mState != other.mState)
 			return false;
 		if (mTick != other.mTick)
 			return false;

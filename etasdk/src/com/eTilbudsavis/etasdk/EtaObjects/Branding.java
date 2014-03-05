@@ -23,12 +23,14 @@ public class Branding extends EtaObject  implements Serializable {
 	private Integer mColor;
 	private Pageflip mPageflip;
 	
-	public Branding() { }
+	public Branding() {
+		
+	}
 	
 	public static Branding fromJSON(JSONObject branding) {
 		return fromJSON(new Branding(), branding);
 	}
-
+	
 	private static Branding fromJSON(Branding b, JSONObject branding) {
 		if (b == null) b = new Branding();
 		if (branding == null) return b;

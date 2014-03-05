@@ -2,6 +2,7 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 
 
 
+
 /**
  * EtaErnObject is an object, is one of the objects which can which JSON representation can be easily 
  * identified by the 'ern' key. 
@@ -9,10 +10,12 @@ package com.eTilbudsavis.etasdk.EtaObjects;
  *
  */
 public abstract class EtaErnObject<T> extends EtaObject {
-
+	
 	public static final String TAG = "EtaErnObject";
-
-	protected static final String ERN_CATALOG = "ern:catalog";
+	
+	private static final String ERN = "ern:";
+	
+	protected static final String ERN_CATALOG = ERN + "catalog";
 	protected static final String ERN_DEALER = "ern:dealer";
 	protected static final String ERN_OFFER = "ern:offer";
 	protected static final String ERN_SHOPPINGLIST = "ern:shopping:list";
