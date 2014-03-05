@@ -338,4 +338,18 @@ public final class Utils {
 	    return PATTERN.matcher(version).matches();
 	}
 	
+	/**
+	 * <p>Method for rounding the time (date in milliseconds) down to the nearest second. This is necessary when 
+	 * comparing timestamps between the server and client, as the server uses seconds, and timestamps will rarely match
+	 * as expected otherwise.<p>
+	 * 
+	 * 1394021345625 -> 1394021345000
+	 * @param date
+	 */
+	public static void roundTime(Date date) {
+		if (date != null) {
+			date.setTime( 1000 * (date.getTime()/1000) );
+		}
+	}
+	
 }

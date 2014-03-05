@@ -10,7 +10,7 @@ public abstract class EtaListObject<T> extends EtaErnObject<T> implements Compar
 	
 	/**
 	 * The state an EtaListObject can be in, this is an indication of
-	 * whether the item needs synchronization or not.
+	 * whether the item needs synchronization with the API or not.
 	 */
 	public interface State {
 		int TO_SYNC	= 0;
@@ -25,14 +25,25 @@ public abstract class EtaListObject<T> extends EtaErnObject<T> implements Compar
 	
 	private int mState = State.TO_SYNC;
 	
+	/**
+	 * Get the current state of this object. The state is <i>not</i> a feature of the API, and only for usage client-side.
+	 * This is used throughout the SDK, to handle synchronization of e.g. lists, and their items.
+	 * @return A {@link State}
+	 */
 	public int getState() {
 		return mState;
 	}
 	
+	/**
+	 * Set a new {@link State} for this object.
+	 * @param state A {@link State} (where state >= {@link State#TO_SYNC} && state <= {@link State#ERROR})
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public T setState(int state) {
-		if (State.TO_SYNC <= state && state <= State.ERROR)
+		if (State.TO_SYNC <= state && state <= State.ERROR) {
 			mState = state;
+		}
 		return (T)this;
 	}
 	

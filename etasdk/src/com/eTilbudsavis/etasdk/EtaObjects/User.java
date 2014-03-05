@@ -6,12 +6,22 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.annotation.SuppressLint;
-
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class User extends EtaObject implements Serializable {
+
+/**
+ * <p>This class is a representation of a user as the API v2 exposes it</p>
+ * 
+ * <p>More documentation available on via our
+ * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/users.html">User Reference</a>
+ * documentation, on the engineering blog.
+ * </p>
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ *
+ */
+public class User extends EtaErnObject<User> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -19,8 +29,6 @@ public class User extends EtaObject implements Serializable {
 	
 	public static final int NO_USER = -1;
 	
-	private int mId = NO_USER;
-	private String mErn;
 	private String mGender;
 	private int mBirthYear = 0;
 	private String mName;
@@ -28,7 +36,9 @@ public class User extends EtaObject implements Serializable {
 	private Permission mPermissions;
 	private ArrayList<User.UserStatusListener> mSubscribers = new ArrayList<User.UserStatusListener>();
 
-	public User() { }
+	public User() {
+		setUserId(NO_USER);
+	}
 
 	public static User fromJSON(String user) {	
 		User u = new User();
@@ -49,7 +59,7 @@ public class User extends EtaObject implements Serializable {
 		if (user == null) return u;
 		
 		try {
-			u.setId(Json.valueOf(user, ServerKey.ID, User.NO_USER));
+			u.setUserId(Json.valueOf(user, ServerKey.ID, User.NO_USER));
 			u.setErn(Json.valueOf(user, ServerKey.ERN));
 			u.setGender(Json.valueOf(user, ServerKey.GENDER));
 			u.setBirthYear(Json.valueOf(user, ServerKey.BIRTH_YEAR, 0));
@@ -82,96 +92,218 @@ public class User extends EtaObject implements Serializable {
 		}
 		return o;
 	}
+
+	@Override
+	public String getErnPrefix() {
+		return ERN_USER;
+	}
 	
 	public boolean isLoggedIn() {
-		return mEmail != null && mId > NO_USER;
+		return mEmail != null && getUserId() > NO_USER;
 	}
 	
-	public int getId() {
-		return mId;
+	/**
+	 * Method returns the user id as a String, though user id is an Integer.
+	 * @deprecated Please use {@link #getUserId()} instead
+	 */
+	@Override
+	public String getId() {
+		return String.valueOf(super.getId());
 	}
-
-	public User setId(int id) {
-		mId = id;
+	
+	/**
+     * This method is not supported and throws an UnsupportedOperationException when called.
+     * <p>To set the user id, use {@link #setUserId(int)} instead</p>
+     * @see #setUserId(int)
+	 * @param id Ignored
+	 * @throws UnsupportedOperationException Every time this method is invoked.
+	 */
+	@Override
+	public User setId(String id) {
+		throw new UnsupportedOperationException("Share does not support setId(String)");
+	}
+	
+	/**
+	 * Get the user id
+	 * @return A user id
+	 */
+	public int getUserId() {
+		return Integer.valueOf(super.getId());
+	}
+	
+	/**
+	 * Set the user id
+	 * @param id A positive integer
+	 * @return This object
+	 */
+	public User setUserId(int id) {
+		super.setId(String.valueOf(id));
 		return this;
 	}
-
-	public String getErn() {
-		return mErn;
-	}
-
-	public User setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-
+	
+	/**
+	 * Get the gender of this user. Gender can be either:
+	 * 
+	 * <table border=1>
+	 * <tr>
+	 * <td>male</td>
+	 * 		<td>{@link String} "male"</td>
+	 * </tr>
+	 * <tr>
+	 * 		<td>female</td>
+	 * 		<td>{@link String} "female"</td>
+	 * </tr>
+	 * <tr>
+	 * 		<td>unknown</td>
+	 * 		<td><code>null</code></td>
+	 * </tr>
+	 * </table>
+	 * 
+	 * @return The gender, or <code>null</code>
+	 */
 	public String getGender() {
 		return mGender;
 	}
 
 	/**
-	 * Gender can be either <code>male</code> or <code>female</code>
+	 * Set the gender of the user. Gender can be set to:
+	 * <table border=1>
+	 * <tr>
+	 * <td>male</td>
+	 * 		<td>{@link String} "male"</td>
+	 * </tr>
+	 * <tr>
+	 * 		<td>female</td>
+	 * 		<td>{@link String} "female"</td>
+	 * </tr>
+	 * </table>
+	 * 
+	 * It is not allowed to 'reset' gender, to unknown by passing <code>null</code> as argument
+	 * 
 	 * @param gender of either male or female
-	 * @return
+	 * @return This object
 	 */
 	public User setGender(String gender) {
 		if (gender != null) {
 			gender = gender.toLowerCase();
-			if (gender.equals("male") || gender.equals("female") )
+			if (gender.equals("male") || gender.equals("female") ) {
 				mGender = gender;
+			}
 		}		
 		return this;
 	}
-
+	
+	/**
+	 * Get the birth year of the user
+	 * @return Birth year as an {@link Integer}
+	 */
 	public int getBirthYear() {
 		return mBirthYear;
 	}
-
+	
+	/**
+	 * Set the birth year of the user.
+	 * <p>Not setting a birth year is preferred, over setting a fake birth year.</p>
+	 * @param birthYear An {@link Integer}
+	 * @return This object
+	 */
 	public User setBirthYear(int birthYear) {
 		mBirthYear = birthYear;
 		return this;
 	}
-
+	
+	/**
+	 * Get the name of the user.
+	 * @return A name, or <code>null</code>
+	 */
 	public String getName() {
 		return mName;
 	}
-
+	
+	/**
+	 * Set the name of a user.
+	 * @param name A non-<code>null</code> {@link String} 
+	 * @return This object
+	 */
 	public User setName(String name) {
-		mName = name;
+		if (name != null) {
+			mName = name;
+		}
 		return this;
 	}
-
+	
+	/**
+	 * Get the e-mail address of the user.
+	 * @return An email, or <code>null</code>
+	 */
 	public String getEmail() {
 		return mEmail;
 	}
-
+	
+	/**
+	 * Set the email of the user.
+	 * @param email A non-<code>null</code> {@link String} 
+	 * @return This object
+	 */
 	public User setEmail(String email) {
 		mEmail = email;
 		return this;
 	}
-
+	
+	/**
+	 * Get this users {@link Permission}. Permissions determine what access levelse the user has in the API.
+	 * @return A set of permissions, or <code>null</code>
+	 */
 	public Permission getPermissions() {
 		return mPermissions;
 	}
-
-	public void setPermissions(Permission permissions) {
-		this.mPermissions = permissions;
+	
+	/**
+	 * Set {@link Permission}s for this user.
+	 * 
+	 * <p>Note that, permissions isn't decided client-side, but should rather be handled by the API/SDK.</p>
+	 * @param permissions The new set of permissions
+	 * @return This object
+	 */
+	public User setPermissions(Permission permissions) {
+		mPermissions = permissions;
+		return this;
 	}
 	
+	/**
+	 * TODO: WTF! Move this to Session/SessionManager - when a new user is introduced this will fail
+	 * Subscribe to changes in the user that is currently being handled by the SDK.
+	 * @param statusListener
+	 */
 	public void subscribe(UserStatusListener statusListener) {
 		mSubscribers.add(statusListener);
 	}
-
+	
+	/**
+	 * TODO: WTF! Move this to Session/SessionManager - when a new user is introduced this will fail
+	 * Unsubscribe from receiving changes in the user state.
+	 * @param statusListener
+	 */
 	public void unsubscribe(UserStatusListener statusListener) {
 		mSubscribers.remove(statusListener);
 	}
 	
+	/**
+	 * TODO: WTF! Move this to Session/SessionManager - when a new user is introduced this will fail
+	 * @param response
+	 * @param object
+	 */
 	public void notifySubscribers(Integer response, Object object) {
 		for (UserStatusListener s : mSubscribers) {
 			s.onStatusChange(response, object);
 		}
 	}
 	
+	/**
+	 * TODO: WTF! Move this to Session/SessionManager - when a new user is introduced this will fail
+	 * @author Danny Hvam - danny@etilbudsavis.dk
+	 *
+	 */
 	public interface UserStatusListener {
 		public void onStatusChange(Integer response, Object object);
 	}
@@ -182,9 +314,7 @@ public class User extends EtaObject implements Serializable {
 		int result = super.hashCode();
 		result = prime * result + mBirthYear;
 		result = prime * result + ((mEmail == null) ? 0 : mEmail.hashCode());
-		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
 		result = prime * result + ((mGender == null) ? 0 : mGender.hashCode());
-		result = prime * result + mId;
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
 		result = prime * result
 				+ ((mPermissions == null) ? 0 : mPermissions.hashCode());
@@ -209,17 +339,10 @@ public class User extends EtaObject implements Serializable {
 				return false;
 		} else if (!mEmail.equals(other.mEmail))
 			return false;
-		if (mErn == null) {
-			if (other.mErn != null)
-				return false;
-		} else if (!mErn.equals(other.mErn))
-			return false;
 		if (mGender == null) {
 			if (other.mGender != null)
 				return false;
 		} else if (!mGender.equals(other.mGender))
-			return false;
-		if (mId != other.mId)
 			return false;
 		if (mName == null) {
 			if (other.mName != null)
@@ -238,5 +361,5 @@ public class User extends EtaObject implements Serializable {
 			return false;
 		return true;
 	}
-	
+
 }

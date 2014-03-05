@@ -23,15 +23,14 @@ public abstract class EtaObject {
 	
 	public static final String TAG = "EtaObject";
 	
-	public EtaObject() { }
-	
 	/**
 	 * <p>Method for converting this object into a JSONObject.</p>
 	 * 
 	 * <p>This is especially usable when {@link Request.Method.PUT PUT}- and {@link Request.Method.POST POST}ing data
 	 * to API v2 with {@link JsonObjectRequest} and {@link JsonArrayRequest}, which ( not by coincidence ^_^ ) takes 
 	 * {@link JSONObject} and {@link JSONArray} respectively as body.</p>
-	 * @return A {@link JSONObject} representation of the object (same structure as API v2)
+	 * @return A {@link JSONObject} representation of the object. Same structure as API v2, including any extra
+	 * 			variables needed for successful requests)
 	 */
 	public abstract JSONObject toJSON();
 	
@@ -130,6 +129,7 @@ public abstract class EtaObject {
 		public static final String LENGTH = "length";
 		public static final String OFFSET = "offset";
 		public static final String SUBJECT = "subject";
+		public static final String ACCEPT_URL = "accept_url";
 		
 	}
 	

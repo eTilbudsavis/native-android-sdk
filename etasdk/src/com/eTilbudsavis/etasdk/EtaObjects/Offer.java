@@ -3,6 +3,7 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,6 +13,17 @@ import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
+/**
+ * <p>This class is a representation of an offer as the API v2 exposes it</p>
+ * 
+ * <p>More documentation available on via our
+ * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/offers.html">Offer Reference</a>
+ * documentation, on the engineering blog.
+ * </p>
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ *
+ */
 public class Offer extends EtaErnObject<Offer> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -25,8 +37,8 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 	private Quantity mQuantity;
 	private Images mImages;
 	private Links mLinks;
-	private Date mRunFrom = null;
-	private Date mRunTill = null;
+	private Date mRunFrom;
+	private Date mRunTill;
 	private String mDealerUrl;
 	private String mDealerId;
 	private String mStoreUrl;
@@ -38,9 +50,19 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 	private Catalog mCatalog;
 	private Dealer mDealer;
 	private Store mStore;
-
-	public Offer() { }
 	
+	/**
+	 * Default constructor
+	 */
+	public Offer() {
+		
+	}
+
+	/**
+	 * Convert a {@link JSONArray} into a {@link List} of Offer.
+	 * @param list A {@link JSONArray} containing API v2 Offer objects
+	 * @return A {@link List} of Offer
+	 */
 	public static ArrayList<Offer> fromJSON(JSONArray offers) {
 		ArrayList<Offer> list = new ArrayList<Offer>();
 		try {
@@ -52,7 +74,12 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 		}
 		return list;
 	}
-	
+
+	/**
+	 * A factory method for converting JSON into POJO.
+	 * @param offer A {@link JSONArray} containing API v2 offer objects
+	 * @return A {@link List}
+	 */
 	public static Offer fromJSON(JSONObject offer) {
 		return fromJSON(new Offer(), offer);
 	}
@@ -91,7 +118,14 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 	public JSONObject toJSON() {
 		return toJSON(this);
 	}
-	
+
+	/**
+	 * Static method for converting object into {@link JSONObject}, same as
+	 * {@link EtaObject#toJSON() toJson()}
+	 * @see EtaObject#toJSON()
+	 * @param offer A object to convert
+	 * @return A {@link JSONObject} representation of the Offer
+	 */
 	public static JSONObject toJSON(Offer offer) {
 		JSONObject o = new JSONObject();
 		try {
@@ -118,171 +152,375 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 		}
 		return o;
 	}
-
+	
 	@Override
 	public String getErnPrefix() {
 		return ERN_OFFER;
 	}
 	
+	/**
+	 * Get the offer heading
+	 * @return A {@link String}, or null
+	 */
 	public String getHeading() {
 		return mHeading;
 	}
-
+	
+	/**
+	 * Set the heading of this offer.
+	 * @param heading A string describing the offer
+	 * @return This object
+	 */
 	public Offer setHeading(String heading) {
 		mHeading = heading;
 		return this;
 	}
-
+	
+	/**
+	 * Get the description of this object. Description isn't required and may
+	 * therefore be <code>null</code>.
+	 * @return A {@link String}, or null
+	 */
 	public String getDescription() {
 		return mDescription;
 	}
-
+	
+	/**
+	 * Set the description of this offer.
+	 * @param description A string describing the offer
+	 * @return This object
+	 */
 	public Offer setDescription(String description) {
 		mDescription = description;
 		return this;
 	}
-
+	
+	/**
+	 * Get the page number of the catalog where this offer was indexed from.
+	 * @return A page number, or 0 if a page number is not set.
+	 */
 	public int getCatalogPage() {
 		return mCatalogPage;
 	}
-
+	
+	/**
+	 * Set the page number where this offer was found in the catalog.
+	 * @param catalogPage A integer representing the page
+	 * @return This object
+	 */
 	public Offer setCatalogPage(int catalogPage) {
 		mCatalogPage = catalogPage;
 		return this;
 	}
-
+	
+	/**
+	 * Returns a {@link Pricing} object, where additional information of price,
+	 * discount e.t.c. can be found.
+	 * @return {@link Pricing} object, or null 
+	 */
 	public Pricing getPricing() {
 		return mPricing;
 	}
-
+	
+	/**
+	 * Set {@link Pricing} for this offer.
+	 * @param pricing {@link Pricing} for this offer
+	 * @return This object
+	 */
 	public Offer setPricing(Pricing pricing) {
 		mPricing = pricing;
 		return this;
 	}
-
+	
+	/**
+	 * Get the {@link Quantity} for this offer, where additional information
+	 * can be gathered, about weight, dimensions e.t.c.
+	 * @return {@link Quantity} object, or <code>null</code>
+	 */
 	public Quantity getQuantity() {
 		return mQuantity;
 	}
-
+	
+	/**
+	 * Set the {@link Quantity} model for this offer
+	 * @param quantity {@link Quantity} containing relevant information about this offer.
+	 * @return This object
+	 */
 	public Offer setQuantity(Quantity quantity) {
 		mQuantity = quantity;
 		return this;
 	}
-
+	
+	/**
+	 * Get the {@link Images} object for this offer, where graphics for the offer is found.
+	 * @return {@link Images}, or null
+	 */
 	public Images getImages() {
 		return mImages;
 	}
-
+	
+	/**
+	 * Set {@link Images} relevant for this offer.
+	 * @param images {@link Images} object with relevant graphics for this offer
+	 * @return This object
+	 */
 	public Offer setImages(Images images) {
 		mImages = images;
 		return this;
 	}
-
+	
+	/**
+	 * Get {@link Links} that this offer has, including webshop links e.t.c.
+	 * @return {@link Links} object, or <code>null</code>
+	 */
 	public Links getLinks() {
 		return mLinks;
 	}
-
+	
+	/**
+	 * Set {@link Links} relevant for this offer
+	 * @param links {@link Links} relevant for this offer
+	 * @return
+	 */
 	public Offer setLinks(Links links) {
 		mLinks = links;
 		return this;
 	}
-
+	
+	/**
+	 * Returns the {@link Date} this offer will be valid from.
+	 * @return A {@link Date}, or <code>null</code>
+	 */
 	public Date getRunFrom() {
 		return mRunFrom;
 	}
-
-	public Offer setRunFrom(Date time) {
-		time.setTime(1000 * (time.getTime()/ 1000));
-		mRunFrom = time;
+	
+	/**
+	 * Set the {@link Date} this offer will be valid from.
+	 * 
+	 * <p>The {@link Date#getTime() time} of the date will be floored to the
+	 * nearest second (i.e. milliseconds will be removed) as the server responds 
+	 * in seconds and comparison of {@link Date}s will other wise be 
+	 * unpredictable/impossible.</p>
+	 * 
+	 * @param date A {@link Date}
+	 * @return This object
+	 */
+	public Offer setRunFrom(Date date) {
+		Utils.roundTime(date);
+		mRunFrom = date;
 		return this;
 	}
-
+	
+	/**
+	 * Returns the {@link Date} this offer will be valid till.
+	 * @return A {@link Date}, or <code>null</code>
+	 */
 	public Date getRunTill() {
 		return mRunTill;
 	}
 
-	public Offer setRunTill(Date time) {
-		time.setTime(1000 * (time.getTime()/ 1000));
-		mRunTill = time;
+	/**
+	 * Set the {@link Date} this offer will be valid till.
+	 * 
+	 * <p>The {@link Date#getTime() time} of the date will be floored to the
+	 * nearest second (i.e. milliseconds will be removed) as the server responds 
+	 * in seconds and comparison of {@link Date}s will other wise be 
+	 * unpredictable/impossible.</p>
+	 * 
+	 * @param date A {@link Date}
+	 * @return This object
+	 */
+	public Offer setRunTill(Date date) {
+		Utils.roundTime(date);
+		mRunTill = date;
 		return this;
 	}
-
+	
+	/**
+	 * Get the URL that points directly to the {@link Dealer} resource of this
+	 * offer, this is for convenience only.
+	 * <p>e.g.: "https://api.etilbudsavis.dk/v2/dealers/9bc61"</p>
+	 * @return A {@link String}, or <code>null</code>
+	 */
 	public String getDealerUrl() {
 		return mDealerUrl;
 	}
-
+	
+	/**
+	 * Set an URL of the {@link Dealer} resource of this offer.
+	 * <p>This is most likely decided by the API</p>
+	 * @param url An URL to a dealer resource
+	 * @return This object
+	 */
 	public Offer setDealerUrl(String url) {
 		mDealerUrl = url;
 		return this;
 	}
-
+	
+	/**
+	 * Get the id for a {@link Dealer} resource related to this offer. 
+	 * @return An id, or <code>null</code>
+	 */
 	public String getDealerId() {
 		return mDealerId;
 	}
-
+	
+	/**
+	 * Set the id for a {@link Dealer} resource related to this offer.
+	 * <p>This is most likely to be set by the API, not the client</p>
+	 * @param dealerId An id
+	 * @return This object
+	 */
 	public Offer setDealerId(String dealerId) {
 		mDealerId = dealerId;
 		return this;
 	}
 
+	/**
+	 * Get the URL that points directly to the {@link Store} resource of this
+	 * offer, this is for convenience only.
+	 * <p>e.g.: "https://api.etilbudsavis.dk/v2/stores/6d36wXI"</p>
+	 * @return A {@link String}, or <code>null</code>
+	 */
 	public String getStoreUrl() {
 		return mStoreUrl;
 	}
 
+	/**
+	 * Set an URL of the {@link Store} resource of this offer.
+	 * <p>This is most likely to be set by the API, not the client</p>
+	 * @param url An URL to a store resource
+	 * @return This object
+	 */
 	public Offer setStoreUrl(String url) {
 		mStoreUrl = url;
 		return this;
 	}
 
+	/**
+	 * Get the id for a {@link Store} resource related to this offer. 
+	 * @return An id, or <code>null</code>
+	 */
 	public String getStoreId() {
 		return mStoreId;
 	}
 
+	/**
+	 * Set the id for a {@link Store} resource related to this offer.
+	 * <p>This is most likely to be set by the API, not the client</p>
+	 * @param dealerId An id
+	 * @return This object
+	 */
 	public Offer setStoreId(String storeId) {
 		mStoreId = storeId;
 		return this;
 	}
-
+	
+	/**
+	 * Get the URL that points directly to the {@link Catalog} resource of this
+	 * offer, this is for convenience only.
+	 * <p>e.g.: "https://api.etilbudsavis.dk/v2/catalogs/56e37cL"</p>
+	 * @return A {@link String}, or <code>null</code>
+	 */
 	public String getCatalogUrl() {
 		return mCatalogUrl;
 	}
 
+	/**
+	 * Set an URL of the {@link Catalog} resource of this offer.
+	 * <p>This is most likely to be set by the API, not the client</p>
+	 * @param url An URL to a store resource
+	 * @return This object
+	 */
 	public Offer setCatalogUrl(String url) {
 		mCatalogUrl = url;
 		return this;
 	}
 
+	/**
+	 * Get the id for a {@link Catalog} resource related to this offer. 
+	 * @return An id, or <code>null</code>
+	 */
 	public String getCatalogId() {
 		return mCatalogId;
 	}
 
+	/**
+	 * Set the id for a {@link Catalog} resource related to this offer.
+	 * <p>This is most likely to be set by the API, not the client</p>
+	 * @param dealerId An id
+	 * @return This object
+	 */
 	public Offer setCatalogId(String catalogId) {
 		mCatalogId = catalogId;
 		return this;
 	}
-
+	
+	/**
+	 * Get the {@link Catalog} which is (or rather should be, but this is not
+	 * guaranteed) related to this offer.
+	 * 
+	 * <p>The catalog-object <b>is not</b> automatically set by the SDK.
+	 * The developer, needs to get the catalog resource from {@link #getCatalogUrl()},
+	 * and then add it with {@link #setCatalog(Catalog)}.</p>
+	 * @return A {@link Catalog}, or null if developer have not set the resource
+	 */
 	public Catalog getCatalog() {
 		return mCatalog;
 	}
-
+	
+	/**
+	 * Set a {@link Catalog} on this offer
+	 * @param catalog A {@link Catalog} (preferably related to this offer)
+	 * @return This object
+	 */
 	public Offer setCatalog(Catalog catalog) {
 		mCatalog = catalog;
 		return this;
 	}
 
+	/**
+	 * Get the {@link Dealer} which is (or rather should be, but this is not
+	 * guaranteed) related to this offer.
+	 * 
+	 * <p>The dealer-object <b>is not</b> automatically set by the SDK.
+	 * The developer, needs to get the dealer resource from {@link #getDealerUrl()},
+	 * and then add it with {@link #setDealer(Dealer)}.</p>
+	 * @return A {@link Dealer}, or null if developer have not set the resource
+	 */
 	public Dealer getDealer() {
 		return mDealer;
 	}
 
+	/**
+	 * Set a {@link Dealer} on this offer
+	 * @param dealer A {@link Dealer} (preferably related to this offer)
+	 * @return This object
+	 */
 	public Offer setDealer(Dealer dealer) {
 		mDealer = dealer;
 		return this;
 	}
 
+	/**
+	 * Get the {@link Store} which is (or rather should be, but this is not
+	 * guaranteed) related to this offer.
+	 * 
+	 * <p>The store-object <b>is not</b> automatically set by the SDK.
+	 * The developer, needs to get the store resource from {@link #getStoreUrl()},
+	 * and then add it with {@link #setStore(Store)}.</p>
+	 * @return A {@link Store}, or null if developer have not set the resource
+	 */
 	public Store getStore() {
 		return mStore;
 	}
 
+	/**
+	 * Set a {@link Store} on this offer
+	 * @param store A {@link Store} (preferably related to this offer)
+	 * @return This object
+	 */
 	public Offer setStore(Store store) {
 		mStore = store;
 		return this;

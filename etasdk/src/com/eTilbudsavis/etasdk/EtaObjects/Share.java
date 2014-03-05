@@ -7,6 +7,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
+
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
@@ -88,6 +90,9 @@ public class Share extends EtaListObject<Share> {
 			o.put(ServerKey.USER, Json.nullCheck(user));
 			o.put(ServerKey.ACCEPTED, Json.nullCheck(s.getAccepted()));
 			o.put(ServerKey.ACCESS, Json.nullCheck(s.getAccess()));
+			if (s.getAcceptUrl() != null) {
+				o.put(ServerKey.ACCEPT_URL, s.getAcceptUrl());
+			}
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -96,7 +101,7 @@ public class Share extends EtaListObject<Share> {
 
 	@Override
 	public String getErnPrefix() {
-		return "ern:share";
+		return ERN_SHARE;
 	}
 	
 	/**
@@ -194,7 +199,7 @@ public class Share extends EtaListObject<Share> {
 	public int compareTo(Share another) {
 		return 0;
 	}
-
+	
 	public static Comparator<Share> EmailComparator  = new Comparator<Share>() {
 		
 		public int compare(Share item1, Share item2) {

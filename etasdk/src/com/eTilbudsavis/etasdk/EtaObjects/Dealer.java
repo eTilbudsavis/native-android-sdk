@@ -12,6 +12,17 @@ import android.graphics.Color;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
+/**
+ * <p>This class is a representation of a dealer as the API v2 exposes it</p>
+ * 
+ * <p>More documentation available on via our
+ * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/dealers.html">Dealer Reference</a>
+ * documentation, on the engineering blog.
+ * </p>
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ *
+ */
 public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

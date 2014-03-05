@@ -49,31 +49,30 @@ public class Typeahead extends EtaObject {
 	}
 	
 	/**
-	 * A factory method for converting {@link JSONArray} into a {@link List} of Typeahead.
-	 * 
-	 * @param typeaheads A {@link JSONArray} containing API v2 typeahead objects
-	 * @return A {@link List} of Typeahead converted from the {@link JSONArray}
+	 * Convert a {@link JSONArray} into a {@link List} of Typeahead.
+	 * @param list A {@link JSONArray} containing API v2 typeahead objects
+	 * @return A {@link List} of Typeahead
 	 */
-	public static List<Typeahead> fromJSON(JSONArray typeaheads) {
-		List<Typeahead> list = new ArrayList<Typeahead>();
+	public static List<Typeahead> fromJSON(JSONArray list) {
+		List<Typeahead> resp = new ArrayList<Typeahead>();
 		try {
-			for (int i = 0 ; i < typeaheads.length() ; i++ ) {
-				list.add(Typeahead.fromJSON((JSONObject)typeaheads.get(i)));
+			for (int i = 0 ; i < list.length() ; i++ ) {
+				resp.add(Typeahead.fromJSON((JSONObject)list.get(i)));
 			}
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
-		return list;
+		return resp;
 	}
-
+	
 	/**
 	 * A factory method for converting JSON into POJO.
 	 * 
-	 * @param typeaheads A {@link JSONArray} containing API v2 typeahead objects
-	 * @return A {@link List} of {@link Typeahead} converted from the {@link JSONArray}
+	 * @param typeahead A {@link JSONObject}
+	 * @return A {@link Typeahead} object
 	 */
-	public static Typeahead fromJSON(JSONObject storeTypeahead) {
-		return fromJSON(new Typeahead(), storeTypeahead );
+	public static Typeahead fromJSON(JSONObject item) {
+		return fromJSON(new Typeahead(), item );
 	}
 	
 	private static Typeahead fromJSON(Typeahead typeahead, JSONObject t) {

@@ -333,7 +333,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return number of affected rows
 	 */
 	public int insertList(Shoppinglist sl, User user) {
-		String q = String.format("INSERT OR REPLACE INTO %s %s", LIST_TABLE, listToValues(sl, user.getId()));
+		String q = String.format("INSERT OR REPLACE INTO %s %s", LIST_TABLE, listToValues(sl, user.getUserId()));
 		int count = execQueryWithChangesCount(q);
 		if (0<count) {
 			cleanShares(sl, user);
@@ -442,7 +442,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public int deleteList(String shoppinglistId, User user) {
 		String id = escape(shoppinglistId);
-		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", LIST_TABLE, ID, id, USER, user.getId());
+		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", LIST_TABLE, ID, id, USER, user.getUserId());
 		return execQueryWithChangesCount(q);
 	}
 
@@ -452,7 +452,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return number of affected rows
 	 */
 	public int editList(Shoppinglist sl, User user) {
-		String q = String.format("REPLACE INTO %s %s", LIST_TABLE, listToValues(sl, user.getId()));
+		String q = String.format("REPLACE INTO %s %s", LIST_TABLE, listToValues(sl, user.getUserId()));
 		int count = execQueryWithChangesCount(q);
 		return count;
 	}
@@ -463,7 +463,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return number of affected rows
 	 */
 	public int insertItem(ShoppinglistItem sli, User user) {
-		String q = String.format("INSERT OR REPLACE INTO %s %s", ITEM_TABLE, itemToValues(sli, user.getId()));
+		String q = String.format("INSERT OR REPLACE INTO %s %s", ITEM_TABLE, itemToValues(sli, user.getUserId()));
 		return execQueryWithChangesCount(q);
 	}
 	
@@ -618,7 +618,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return number of affected rows
 	 */
 	public int editItem(ShoppinglistItem sli, User user) {
-		String q = String.format("REPLACE INTO %s %s", ITEM_TABLE,  itemToValues(sli, user.getId()));
+		String q = String.format("REPLACE INTO %s %s", ITEM_TABLE,  itemToValues(sli, user.getUserId()));
 		return execQueryWithChangesCount(q);
 	}
 	
@@ -658,9 +658,9 @@ public class DbHelper extends SQLiteOpenHelper {
 		String slId = escape(sl.getId());
 		String q = null;
 		if (includeDeleted) {
-				q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, USER, user.getId());
+				q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, USER, user.getUserId());
 			} else {
-				q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, STATE, Share.State.DELETE, USER, user.getId());
+				q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, STATE, Share.State.DELETE, USER, user.getUserId());
 			}
 		Cursor c = execQuery(q);
 		List<Share> shares = new ArrayList<Share>(c.getCount());
@@ -682,7 +682,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 	
 	public int insertShare(Share s, User user) {
-		String q = String.format("INSERT OR REPLACE INTO %s %s", SHARE_TABLE, shareToValues(s, user.getId()));
+		String q = String.format("INSERT OR REPLACE INTO %s %s", SHARE_TABLE, shareToValues(s, user.getUserId()));
 		return execQueryWithChangesCount(q);
 	}
 
@@ -694,7 +694,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	public int deleteShare(Share s, User user) {
 		String email = escape(s.getEmail());
 		String slId = escape(s.getShoppinglistId());
-		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, EMAIL, email, USER, user.getId());
+		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, EMAIL, email, USER, user.getUserId());
 		return execQueryWithChangesCount(q);
 	}
 

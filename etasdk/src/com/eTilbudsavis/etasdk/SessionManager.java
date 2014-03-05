@@ -326,7 +326,7 @@ public class SessionManager {
 	public void signout(final Listener<JSONObject> l) {
 		
 		final User u = mSession.getUser();
-        mEta.getListManager().clear(u.getId());
+        mEta.getListManager().clear(u.getUserId());
         Map<String, String> args = new HashMap<String, String>();
         args.put(Param.EMAIL, "");
         JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));

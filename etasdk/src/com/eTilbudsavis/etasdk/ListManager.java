@@ -576,7 +576,7 @@ public class ListManager {
 		}
 		
 		int count = 0;
-		if (user.getId() != User.NO_USER) {
+		if (user.getUserId() != User.NO_USER) {
 			sli.setState(ShoppinglistItem.State.DELETE);
 			count = db.editItem(sli, user);
 		} else {
