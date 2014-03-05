@@ -7,7 +7,18 @@ import com.eTilbudsavis.etasdk.NetworkHelpers.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.NetworkHelpers.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 
-
+/**
+ * <p>The super-class for all eTilbudsavis objects.<p>
+ * 
+ * <p>The object ensures the existens of a {@link #toJSON()} method on all objects, which proves useful when
+ * communication with the API</p>
+ * 
+ * <p>The object also contains {@link ServerKey}, a class containing a set of Strings that is meant as help when 
+ * converting JSON-data received from the API.</p>
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ *
+ */
 public abstract class EtaObject {
 	
 	public static final String TAG = "EtaObject";
@@ -25,13 +36,17 @@ public abstract class EtaObject {
 	public abstract JSONObject toJSON();
 	
 	/**
-	 * This class contains all strings, that eTilbudsavis API v2 can return as keys in any JSONObject.
-	 * <br><br>
-	 * Note, that this is a convenience class, and that the keys aren't necessarily a full
-	 * set of the available keys in the API v2, but covers all keys used for creation of any Android SDK object.
+	 * <p>This class contains most (but probably not all) strings, that eTilbudsavis API v2 can return as keys, in
+	 * responses of the types {@link JSONObject} and {@link JSONArray}.
+	 * </p>
+	 * 
+	 * <p><b>Note</b> not all keys are contained in this set, and for detailed documentation of each key, in a given
+	 * context, we will refer you to the <a href="http://engineering.etilbudsavis.dk/eta-api/">API documentation</a></p>
+	 * 
 	 * @author Danny Hvam - danny@etilbudsavis.dk
 	 */
 	public class ServerKey {
+		
 		public static final String ID = "id";
 		public static final String ERN = "ern";
 		public static final String NAME = "name";
@@ -117,7 +132,5 @@ public abstract class EtaObject {
 		public static final String SUBJECT = "subject";
 		
 	}
-	
-	
 	
 }
