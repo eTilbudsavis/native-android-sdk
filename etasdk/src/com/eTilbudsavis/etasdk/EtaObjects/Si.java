@@ -21,16 +21,6 @@ public class Si  extends EtaObject implements Serializable {
 		
 	}
 	
-	public static Si fromJSON(String si) {
-		Si s = new Si();
-		try {
-			s = fromJSON(s, new JSONObject(si));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return s;
-	}
-	
 	public static Si fromJSON(JSONObject si) {
 		return fromJSON(new Si(), si);
 	}
@@ -47,20 +37,16 @@ public class Si  extends EtaObject implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Si s) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.SYMBOL, Json.nullCheck(s.getSymbol()));
-			o.put(ServerKey.FACTOR, Json.nullCheck(s.getFactor()));
+			o.put(ServerKey.SYMBOL, Json.nullCheck(getSymbol()));
+			o.put(ServerKey.FACTOR, Json.nullCheck(getFactor()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
-
+	
 	public String getSymbol() {
 		return mSymbol;
 	}

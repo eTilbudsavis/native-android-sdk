@@ -5,10 +5,8 @@ import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.EtaObjects.EtaObject.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
-import com.eTilbudsavis.etasdk.Utils.Utils;
 
 /**
  * EtaErnObject has the advantage of having an Etilbudsavis Resource Name (ERN), that is a <i>unique</i> identifier 
@@ -37,6 +35,18 @@ public abstract class EtaErnObject<T> extends EtaObject {
 	
 	private String mId;
 	private String mErn;
+
+	@Override
+	public JSONObject toJSON() {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(ServerKey.ID, Json.nullCheck(getId()));
+			o.put(ServerKey.ERN, Json.nullCheck(getErn()));
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return o;
+	}
 	
 	/**
 	 * Method for getting the preferred Etilbudsavis Resource Name (ERN) prefix for the given object 

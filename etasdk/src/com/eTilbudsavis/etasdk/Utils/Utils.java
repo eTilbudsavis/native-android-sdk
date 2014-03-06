@@ -346,10 +346,11 @@ public final class Utils {
 	 * 1394021345625 -> 1394021345000
 	 * @param date
 	 */
-	public static void roundTime(Date date) {
+	public static Date roundTime(Date date) {
 		if (date != null) {
 			date.setTime( 1000 * (date.getTime()/1000) );
 		}
+		return date;
 	}
 	
 }

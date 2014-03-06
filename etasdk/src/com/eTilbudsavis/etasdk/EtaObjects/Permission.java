@@ -20,18 +20,7 @@ public class Permission extends EtaObject implements Serializable {
 	private HashMap<String, ArrayList<String>> perm = new HashMap<String, ArrayList<String>>();
 	
 	public Permission() {
-	}
-
-	public static Permission fromJSON(String permission) {
-		Permission p = new Permission();
-		if (permission == null)
-			return p;
-		try {
-			p = fromJSON(p, new JSONObject(permission));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return p;
+		
 	}
 	
 	public static Permission fromJSON(JSONObject permission) {
@@ -72,19 +61,15 @@ public class Permission extends EtaObject implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Permission p) {
 		JSONObject o = new JSONObject();
 		try {
-			Iterator<String> it = p.getAll().keySet().iterator();
+			Iterator<String> it = getAll().keySet().iterator();
 			while (it.hasNext()) {
 				JSONArray jArray = new JSONArray();
 				String name = (String) it.next();
-				for (String value : p.getAll().get(name))
+				for (String value : getAll().get(name)) {
 					jArray.put(value);
-				
+				}				
 				o.put(name, jArray);
 			}
 		} catch (JSONException e) {
@@ -92,7 +77,7 @@ public class Permission extends EtaObject implements Serializable {
 		}
 		return o;
 	}
-
+	
 	public ArrayList<String> get(String key) {
 		return perm.get(key);
 	}

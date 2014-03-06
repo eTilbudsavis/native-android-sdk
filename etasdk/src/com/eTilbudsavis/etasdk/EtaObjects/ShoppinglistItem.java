@@ -23,7 +23,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	private int mCount = 1;
 	private String mDescription = null;
 	private String mCreator;
-	private Date mModified = new Date();
+	private Date mModified;
 	private Offer mOffer = null;
 	private String mShoppinglistId;
 	private String mPrevId;
@@ -31,8 +31,8 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	private int mUserId = -1;
 	
 	public ShoppinglistItem() {
-        String id = Utils.createUUID();
-		setId(id);
+		setId(Utils.createUUID());
+		mModified = Utils.roundTime(new Date());
 	}
 	
 	public ShoppinglistItem(Shoppinglist shoppinglist, String description) {
@@ -85,28 +85,24 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(ShoppinglistItem s) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.ID, Json.nullCheck(s.getId()));
-			o.put(ServerKey.TICK, Json.nullCheck(s.isTicked()));
-			o.put(ServerKey.OFFER_ID, Json.nullCheck(s.getOfferId()));
-			o.put(ServerKey.COUNT, s.getCount());
-			o.put(ServerKey.DESCRIPTION, Json.nullCheck(s.getDescription()));
-			o.put(ServerKey.SHOPPINGLIST_ID, Json.nullCheck(s.getShoppinglistId()));
-			o.put(ServerKey.ERN, Json.nullCheck(s.getErn()));
-			o.put(ServerKey.CREATOR, Json.nullCheck(s.getCreator()));
-			o.put(ServerKey.MODIFIED, Json.nullCheck(Utils.parseDate(s.getModified())));
-			o.put(ServerKey.PREVIOUS_ID, Json.nullCheck(s.getPreviousId()));
+			o.put(ServerKey.ID, Json.nullCheck(getId()));
+			o.put(ServerKey.TICK, Json.nullCheck(isTicked()));
+			o.put(ServerKey.OFFER_ID, Json.nullCheck(getOfferId()));
+			o.put(ServerKey.COUNT, getCount());
+			o.put(ServerKey.DESCRIPTION, Json.nullCheck(getDescription()));
+			o.put(ServerKey.SHOPPINGLIST_ID, Json.nullCheck(getShoppinglistId()));
+			o.put(ServerKey.ERN, Json.nullCheck(getErn()));
+			o.put(ServerKey.CREATOR, Json.nullCheck(getCreator()));
+			o.put(ServerKey.MODIFIED, Json.nullCheck(Utils.parseDate(getModified())));
+			o.put(ServerKey.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
-
+	
 	@Override
 	public String getErnPrefix() {
 		return ERN_SHOPPINGLISTITEM;
@@ -202,8 +198,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	}
 	
 	public ShoppinglistItem setModified(Date time) {
-		time.setTime(1000 * (time.getTime()/ 1000));
-		mModified = time;
+		mModified = Utils.roundTime(time);
 		return this;
 	}
 	

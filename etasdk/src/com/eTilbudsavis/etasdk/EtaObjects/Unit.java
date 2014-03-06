@@ -17,16 +17,8 @@ public class Unit extends EtaObject implements Serializable {
 	private String mSymbol;
 	private Si mSi;
 	
-	public Unit() { }
-	
-	public static Unit fromJSON(String unit) {
-		Unit u = new Unit();
-		try {
-			u = fromJSON(u, new JSONObject(unit));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return u;
+	public Unit() {
+		
 	}
 	
 	public static Unit fromJSON(JSONObject unit) {
@@ -49,20 +41,16 @@ public class Unit extends EtaObject implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Unit u) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.SYMBOL, Json.nullCheck(u.getSymbol()));
-			o.put(ServerKey.SI, Json.toJson(u.getSi()));
+			o.put(ServerKey.SYMBOL, Json.nullCheck(getSymbol()));
+			o.put(ServerKey.SI, Json.toJson(getSi()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
-
+	
 	public String getSymbol() {
 		return mSymbol;
 	}

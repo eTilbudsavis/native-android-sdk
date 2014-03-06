@@ -18,16 +18,8 @@ public class Images extends EtaObject implements Serializable {
 	private String mZoom;
 	private String mThumb;
 
-	public Images() { }
-	
-	public static Images fromJSON(String images) {
-		Images i = new Images();
-		try {
-			i = fromJSON(i, new JSONObject(images));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return i;
+	public Images() {
+		
 	}
 	
 	public static Images fromJSON(JSONObject images) {
@@ -47,15 +39,11 @@ public class Images extends EtaObject implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Images i) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.VIEW, Json.nullCheck(i.getView()));
-			o.put(ServerKey.ZOOM, Json.nullCheck(i.getZoom()));
-			o.put(ServerKey.THUMB, Json.nullCheck(i.getThumb()));
+			o.put(ServerKey.VIEW, Json.nullCheck(getView()));
+			o.put(ServerKey.ZOOM, Json.nullCheck(getZoom()));
+			o.put(ServerKey.THUMB, Json.nullCheck(getThumb()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

@@ -20,16 +20,7 @@ public class Pages extends EtaObject implements Serializable {
 	private ArrayList<String> mZoom = new ArrayList<String>();
 	
 	public Pages() {
-	}
-	
-	public static Pages fromJSON(String pages) {
-		Pages p = new Pages();
-		try {
-			p = fromJSON(p, new JSONObject(pages));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return p;
+		
 	}
 	
 	public static Pages fromJSON(JSONObject pages) {
@@ -62,22 +53,18 @@ public class Pages extends EtaObject implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Pages p) {
 		JSONObject o = new JSONObject();
 		try {
 			JSONArray aThumb = new JSONArray();
 			JSONArray aView = new JSONArray();
 			JSONArray aZoom = new JSONArray();
-			for (String s : p.getThumb())
+			for (String s : getThumb())
 				aThumb.put(s);
 			
-			for (String s : p.getView())
+			for (String s : getView())
 				aView.put(s);
 			
-			for (String s : p.getZoom())
+			for (String s : getZoom())
 				aZoom.put(s);
 
 			o.put(ServerKey.THUMB, aThumb);

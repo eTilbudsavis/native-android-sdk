@@ -88,21 +88,11 @@ public class Typeahead extends EtaObject {
 	
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	/**
-	 * Static method for converting object into {@link JSONObject}, same as {@link EtaObject#toJSON() toJson()}
-	 * @see EtaObject#toJSON()
-	 * @param typeahead A object to convert
-	 * @return A {@link JSONObject} representation of the typeahead
-	 */
-	public static JSONObject toJSON(Typeahead typeahead) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.SUBJECT, Json.nullCheck(typeahead.getSubject()));
-			o.put(ServerKey.LENGTH, typeahead.getLength());
-			o.put(ServerKey.OFFSET, typeahead.getOffset());
+			o.put(ServerKey.SUBJECT, Json.nullCheck(getSubject()));
+			o.put(ServerKey.LENGTH, getLength());
+			o.put(ServerKey.OFFSET, getOffset());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

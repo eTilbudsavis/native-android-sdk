@@ -26,16 +26,6 @@ public class Pageflip extends EtaObject implements Serializable {
 		mColor = color;
 	}
 	
-	public static Pageflip fromJSON(String pageflip) {
-		Pageflip p = new Pageflip();
-		try {
-			p = fromJSON(p, new JSONObject(pageflip));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return p;
-	}
-	
 	public static Pageflip fromJSON(JSONObject pageflip) {
 		return fromJSON(new Pageflip(), pageflip);
 	}
@@ -53,14 +43,10 @@ public class Pageflip extends EtaObject implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Pageflip p) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.LOGO, Json.nullCheck(p.getLogo()));
-			o.put(ServerKey.COLOR, Json.nullCheck(p.getColorString()));
+			o.put(ServerKey.LOGO, Json.nullCheck(getLogo()));
+			o.put(ServerKey.COLOR, Json.nullCheck(getColorString()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

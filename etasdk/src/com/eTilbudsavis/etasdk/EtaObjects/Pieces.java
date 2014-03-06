@@ -18,16 +18,7 @@ public class Pieces extends EtaObject implements Serializable {
 	private int mTo = 1;
 	
 	public Pieces() {
-	}
-	
-	public static Pieces fromJSON(String pieces) {
-		Pieces p = new Pieces();
-		try {
-			p = fromJSON(p, new JSONObject(pieces));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return p;
+		
 	}
 	
 	public static Pieces fromJSON(JSONObject pieces) {
@@ -46,14 +37,10 @@ public class Pieces extends EtaObject implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Pieces p) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.FROM, Json.nullCheck(p.getFrom()));
-			o.put(ServerKey.TO, Json.nullCheck(p.getTo()));
+			o.put(ServerKey.FROM, Json.nullCheck(getFrom()));
+			o.put(ServerKey.TO, Json.nullCheck(getTo()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -63,8 +50,7 @@ public class Pieces extends EtaObject implements Serializable {
 	public int getFrom() {
 		return mFrom;
 	}
-
-
+	
 	public Pieces setFrom(int from) {
 		mFrom = from;
 		return this;

@@ -57,7 +57,7 @@ public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 	private static Dealer fromJSON(Dealer d, JSONObject dealer) {
 		if (d == null) d = new Dealer();
 		if (dealer == null) return d;
-
+		
 		try {
 			d.setId(Json.valueOf(dealer, ServerKey.ID));
 			d.setErn(Json.valueOf(dealer, ServerKey.ERN));
@@ -75,26 +75,20 @@ public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Dealer d) {
-		JSONObject o = new JSONObject();
+		JSONObject o = super.toJSON();
 		try {
-			o.put(ServerKey.ID, Json.nullCheck(d.getId()));
-			o.put(ServerKey.ERN, Json.nullCheck(d.getErn()));
-			o.put(ServerKey.NAME, Json.nullCheck(d.getName()));
-			o.put(ServerKey.URL_NAME, Json.nullCheck(d.getUrlName()));
-			o.put(ServerKey.WEBSITE, Json.nullCheck(d.getWebsite()));
-			o.put(ServerKey.LOGO, Json.nullCheck(d.getLogo()));
-			o.put(ServerKey.COLOR, Json.nullCheck(d.getColorString()));
-			o.put(ServerKey.PAGEFLIP, Json.nullCheck(d.getPageflip().toJSON()));
+			o.put(ServerKey.NAME, Json.nullCheck(getName()));
+			o.put(ServerKey.URL_NAME, Json.nullCheck(getUrlName()));
+			o.put(ServerKey.WEBSITE, Json.nullCheck(getWebsite()));
+			o.put(ServerKey.LOGO, Json.nullCheck(getLogo()));
+			o.put(ServerKey.COLOR, Json.nullCheck(getColorString()));
+			o.put(ServerKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o; 
 	}
-
+	
 	@Override
 	public String getErnPrefix() {
 		return ERN_DEALER;

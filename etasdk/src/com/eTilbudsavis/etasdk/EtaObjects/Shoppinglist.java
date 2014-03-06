@@ -20,7 +20,7 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 	public static final String TAG = "Shoppinglist";
 	
 	private static final long serialVersionUID = 5718447151312028262L;
-
+	
 	public static final String TYPE_SHOPPING_LIST = null;
 	public static final String TYPE_WISH_LIST = "wish_list";
 	
@@ -34,7 +34,7 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 	
 	private String mName = "";
 	private String mAccess = ACCESS_PRIVATE;
-	private Date mModified = new Date();
+	private Date mModified;
 	private String mPrevId;
 	private String mType;
 	private String mMeta;
@@ -42,8 +42,8 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 	private int mUserId = -1;
 	
 	private Shoppinglist() {
-        String id = Utils.createUUID();
-		setId(id);
+		setId(Utils.createUUID());
+		mModified = Utils.roundTime(new Date());
 	}
 
 	public static Shoppinglist fromName(String name) {
@@ -113,7 +113,7 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 			o.put(ServerKey.META, Json.nullCheck(s.getMeta()));
 			JSONArray shares = new JSONArray();
 			for (Share share : s.getShares().values()) {
-				shares.put(Share.toJSON(share));
+				shares.put(share.toJSON());
 			}
 			o.put(ServerKey.SHARES, shares);
 		} catch (JSONException e) {
@@ -150,8 +150,7 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 	}
 
 	public Shoppinglist setModified(Date time) {
-		time.setTime(1000 * (time.getTime()/ 1000));
-		mModified = time;
+		mModified = Utils.roundTime(time);
 		return this;
 	}
 	

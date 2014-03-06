@@ -35,6 +35,7 @@ public class Session extends EtaObject implements Serializable {
 		
 		s.setToken(Json.valueOf(session, ServerKey.TOKEN));
 		s.setExpires(Json.valueOf(session, ServerKey.EXPIRES));
+		
 		JSONObject user = null;
 		if (session.has(ServerKey.USER)) {
 			try {
@@ -44,7 +45,17 @@ public class Session extends EtaObject implements Serializable {
 			}
 		}
 		s.setUser(user == null ? new User() : User.fromJSON(user));
-		s.setPermission(Permission.fromJSON(Json.valueOf(session, ServerKey.PERMISSIONS))) ;
+
+		JSONObject perm = null;
+		if (session.has(ServerKey.PERMISSIONS)) {
+			try {
+				perm = session.getJSONObject(ServerKey.PERMISSIONS);
+			} catch (JSONException e) {
+				EtaLog.d(TAG, e);
+			}
+		}
+		s.setPermission(perm == null ? new Permission() : Permission.fromJSON(perm)) ;
+		 
 		s.setProvider(Json.valueOf(session, ServerKey.PROVIDER));
 		
 		return s;
@@ -52,18 +63,13 @@ public class Session extends EtaObject implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Session s) {
 		JSONObject o = new JSONObject();
-		
 		try {
-			o.put(ServerKey.TOKEN, Json.nullCheck(s.getToken()));
-			o.put(ServerKey.EXPIRES, Json.nullCheck(Utils.parseDate(s.getExpire())));
-			o.put(ServerKey.USER, s.getUser().getUserId() == User.NO_USER ? JSONObject.NULL : s.getUser().toJSON());
-			o.put(ServerKey.PERMISSIONS, Json.toJson(s.getPermission()));
-			o.put(ServerKey.PROVIDER, Json.nullCheck(s.getProvider()));
+			o.put(ServerKey.TOKEN, Json.nullCheck(getToken()));
+			o.put(ServerKey.EXPIRES, Json.nullCheck(Utils.parseDate(getExpire())));
+			o.put(ServerKey.USER, getUser().getUserId() == User.NO_USER ? JSONObject.NULL : getUser().toJSON());
+			o.put(ServerKey.PERMISSIONS, Json.toJson(getPermission()));
+			o.put(ServerKey.PROVIDER, Json.nullCheck(getProvider()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

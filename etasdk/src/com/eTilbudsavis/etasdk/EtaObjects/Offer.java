@@ -116,36 +116,23 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-
-	/**
-	 * Static method for converting object into {@link JSONObject}, same as
-	 * {@link EtaObject#toJSON() toJson()}
-	 * @see EtaObject#toJSON()
-	 * @param offer A object to convert
-	 * @return A {@link JSONObject} representation of the Offer
-	 */
-	public static JSONObject toJSON(Offer offer) {
-		JSONObject o = new JSONObject();
+		JSONObject o = super.toJSON();
 		try {
-			o.put(ServerKey.ID, Json.nullCheck(offer.getId()));
-			o.put(ServerKey.ERN, Json.nullCheck(offer.getErn()));
-			o.put(ServerKey.HEADING, Json.nullCheck(offer.getHeading()));
-			o.put(ServerKey.DESCRIPTION, Json.nullCheck(offer.getDescription()));
-			o.put(ServerKey.CATALOG_PAGE, offer.getCatalogPage());
-			o.put(ServerKey.PRICING, Json.toJson(offer.getPricing()));
-			o.put(ServerKey.QUANTITY, Json.toJson(offer.getQuantity()));
-			o.put(ServerKey.IMAGES, Json.toJson(offer.getImages()));
-			o.put(ServerKey.LINKS, Json.toJson(offer.getLinks()));
-			o.put(ServerKey.RUN_FROM, Json.nullCheck(Utils.parseDate(offer.getRunFrom())));
-			o.put(ServerKey.RUN_TILL, Json.nullCheck(Utils.parseDate(offer.getRunTill())));
-			o.put(ServerKey.DEALER_URL, Json.nullCheck(offer.getDealerUrl()));
-			o.put(ServerKey.DEALER_ID, Json.nullCheck(offer.getDealerId()));
-			o.put(ServerKey.STORE_URL, Json.nullCheck(offer.getStoreUrl()));
-			o.put(ServerKey.STORE_ID, Json.nullCheck(offer.getStoreId()));
-			o.put(ServerKey.CATALOG_URL, Json.nullCheck(offer.getCatalogUrl()));
-			o.put(ServerKey.CATALOG_ID, Json.nullCheck(offer.getCatalogId()));
+			o.put(ServerKey.HEADING, Json.nullCheck(getHeading()));
+			o.put(ServerKey.DESCRIPTION, Json.nullCheck(getDescription()));
+			o.put(ServerKey.CATALOG_PAGE, getCatalogPage());
+			o.put(ServerKey.PRICING, Json.toJson(getPricing()));
+			o.put(ServerKey.QUANTITY, Json.toJson(getQuantity()));
+			o.put(ServerKey.IMAGES, Json.toJson(getImages()));
+			o.put(ServerKey.LINKS, Json.toJson(getLinks()));
+			o.put(ServerKey.RUN_FROM, Json.nullCheck(Utils.parseDate(getRunFrom())));
+			o.put(ServerKey.RUN_TILL, Json.nullCheck(Utils.parseDate(getRunTill())));
+			o.put(ServerKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
+			o.put(ServerKey.DEALER_ID, Json.nullCheck(getDealerId()));
+			o.put(ServerKey.STORE_URL, Json.nullCheck(getStoreUrl()));
+			o.put(ServerKey.STORE_ID, Json.nullCheck(getStoreId()));
+			o.put(ServerKey.CATALOG_URL, Json.nullCheck(getCatalogUrl()));
+			o.put(ServerKey.CATALOG_ID, Json.nullCheck(getCatalogId()));
 			
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -307,8 +294,7 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 	 * @return This object
 	 */
 	public Offer setRunFrom(Date date) {
-		Utils.roundTime(date);
-		mRunFrom = date;
+		mRunFrom = Utils.roundTime(date);
 		return this;
 	}
 	
@@ -332,8 +318,7 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 	 * @return This object
 	 */
 	public Offer setRunTill(Date date) {
-		Utils.roundTime(date);
-		mRunTill = date;
+		mRunTill = Utils.roundTime(date);
 		return this;
 	}
 	

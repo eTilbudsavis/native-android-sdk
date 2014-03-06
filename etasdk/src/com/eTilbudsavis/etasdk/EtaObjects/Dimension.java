@@ -18,16 +18,7 @@ public class Dimension extends EtaObject implements Serializable {
 	private Double mHeight = null;
 	
 	public Dimension() {
-	}
-	
-	public static Dimension fromJSON(String dimension) {
-		Dimension d = new Dimension();
-		try {
-			d = fromJSON(d, new JSONObject(dimension));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return d;
+		
 	}
 	
 	public static Dimension fromJSON(JSONObject dimension) {
@@ -53,14 +44,10 @@ public class Dimension extends EtaObject implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Dimension d) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.HEIGHT, Json.nullCheck(d.getHeight()));
-			o.put(ServerKey.WIDTH, Json.nullCheck(d.getWidth()));
+			o.put(ServerKey.HEIGHT, Json.nullCheck(getHeight()));
+			o.put(ServerKey.WIDTH, Json.nullCheck(getWidth()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

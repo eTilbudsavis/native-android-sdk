@@ -7,8 +7,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.annotation.SuppressLint;
-
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
@@ -76,29 +74,29 @@ public class Share extends EtaListObject<Share> {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Share s) {
+		
+		/* Do not call super class to create JSON, as we server does not support
+		 * id and ern keys.
+		 */
+		
 		JSONObject o = new JSONObject();
 		try {
-			
 			JSONObject user = new JSONObject();
-			user.put(ServerKey.EMAIL, Json.nullCheck(s.getEmail()));
-			user.put(ServerKey.NAME, Json.nullCheck(s.getName()));
+			user.put(ServerKey.EMAIL, Json.nullCheck(getEmail()));
+			user.put(ServerKey.NAME, Json.nullCheck(getName()));
 			
 			o.put(ServerKey.USER, Json.nullCheck(user));
-			o.put(ServerKey.ACCEPTED, Json.nullCheck(s.getAccepted()));
-			o.put(ServerKey.ACCESS, Json.nullCheck(s.getAccess()));
-			if (s.getAcceptUrl() != null) {
-				o.put(ServerKey.ACCEPT_URL, s.getAcceptUrl());
+			o.put(ServerKey.ACCEPTED, Json.nullCheck(getAccepted()));
+			o.put(ServerKey.ACCESS, Json.nullCheck(getAccess()));
+			if (getAcceptUrl() != null) {
+				o.put(ServerKey.ACCEPT_URL, getAcceptUrl());
 			}
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
-
+	
 	@Override
 	public String getErnPrefix() {
 		return ERN_SHARE;

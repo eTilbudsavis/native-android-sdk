@@ -16,16 +16,8 @@ public class Links extends EtaObject implements Serializable {
 
 	private String mWebshop;
 	
-	public Links() { }
-	
-	public static Links fromJSON(String links) {
-		Links l = new Links();
-		try {
-			l = fromJSON(l, new JSONObject(links));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return l;
+	public Links() {
+		
 	}
 	
 	public static Links fromJSON(JSONObject links) {
@@ -43,13 +35,9 @@ public class Links extends EtaObject implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Links l) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.WEBSHOP, Json.nullCheck(l.getWebshop()));
+			o.put(ServerKey.WEBSHOP, Json.nullCheck(getWebshop()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

@@ -64,26 +64,20 @@ public class Country extends EtaErnObject<Country> implements Serializable {
 	
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	/**
-	 * Static method for converting object into {@link JSONObject}, same as {@link EtaObject#toJSON() toJson()}
-	 * @see EtaObject#toJSON()
-	 * @param country A object to convert
-	 * @return A {@link JSONObject} representation of the Country
-	 */
-	public static JSONObject toJSON(Country country) {
-		JSONObject o = new JSONObject();
+		JSONObject o = super.toJSON();
 		try {
-			o.put(ServerKey.ID, Json.nullCheck(country.getId()));
-			o.put(ServerKey.UNSUBSCRIBE_PRINT_URL, Json.nullCheck(country.getUnsubscribePrintUrl()));
+			// Server-side havent implemented ERN for Country yet, so we'll remove it for now
+			if (o.has(ServerKey.ERN)) {
+				o.remove(ServerKey.ERN);
+			}
+			
+			o.put(ServerKey.UNSUBSCRIBE_PRINT_URL, Json.nullCheck(getUnsubscribePrintUrl()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
-
+	
 	@Override
 	public String getErnPrefix() {
 		return ERN_COUNTRY;

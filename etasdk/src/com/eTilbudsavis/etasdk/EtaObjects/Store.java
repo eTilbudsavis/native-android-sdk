@@ -84,30 +84,24 @@ public class Store extends EtaErnObject<Store> implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Store s) {
-		JSONObject o = new JSONObject();
+		JSONObject o = super.toJSON();
 		try {
-			o.put(ServerKey.ID, Json.nullCheck(s.getId()));
-			o.put(ServerKey.ERN, Json.nullCheck(s.getErn()));
-			o.put(ServerKey.STREET, Json.nullCheck(s.getStreet()));
-			o.put(ServerKey.CITY, Json.nullCheck(s.getCity()));
-			o.put(ServerKey.ZIP_CODE, Json.nullCheck(s.getZipcode()));
-			o.put(ServerKey.COUNTRY, Json.nullCheck(s.getCountry().toJSON()));
-			o.put(ServerKey.LATITUDE, s.getLatitude());
-			o.put(ServerKey.LONGITUDE, s.getLongitude());
-			o.put(ServerKey.DEALER_URL, Json.nullCheck(s.getDealerUrl()));
-			o.put(ServerKey.DEALER_ID, Json.nullCheck(s.getDealerId()));
-			o.put(ServerKey.BRANDING, Json.nullCheck(s.getBranding().toJSON()));
-			o.put(ServerKey.CONTACT, Json.nullCheck(s.getContact()));
+			o.put(ServerKey.STREET, Json.nullCheck(getStreet()));
+			o.put(ServerKey.CITY, Json.nullCheck(getCity()));
+			o.put(ServerKey.ZIP_CODE, Json.nullCheck(getZipcode()));
+			o.put(ServerKey.COUNTRY, Json.nullCheck(getCountry().toJSON()));
+			o.put(ServerKey.LATITUDE, getLatitude());
+			o.put(ServerKey.LONGITUDE, getLongitude());
+			o.put(ServerKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
+			o.put(ServerKey.DEALER_ID, Json.nullCheck(getDealerId()));
+			o.put(ServerKey.BRANDING, Json.nullCheck(getBranding().toJSON()));
+			o.put(ServerKey.CONTACT, Json.nullCheck(getContact()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
-
+	
 	@Override
 	public String getErnPrefix() {
 		return ERN_STORE;

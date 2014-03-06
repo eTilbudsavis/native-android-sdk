@@ -18,16 +18,7 @@ public class Size extends EtaObject implements Serializable {
 	private double mTo = 1;
 	
 	public Size() {
-	}
-	
-	public static Size fromJSON(String size) {
-		Size s = new Size();
-		try {
-			s = fromJSON(s, new JSONObject(size));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return s;
+		
 	}
 	
 	public static Size fromJSON(JSONObject size) {
@@ -46,14 +37,10 @@ public class Size extends EtaObject implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Size s) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.FROM, s.getFrom());
-			o.put(ServerKey.TO, s.getTo());
+			o.put(ServerKey.FROM, getFrom());
+			o.put(ServerKey.TO, getTo());
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

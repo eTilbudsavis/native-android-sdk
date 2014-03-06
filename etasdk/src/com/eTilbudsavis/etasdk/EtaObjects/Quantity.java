@@ -19,16 +19,7 @@ public class Quantity extends EtaObject implements Serializable {
 	private Pieces mPieces;
 	
 	public Quantity() {
-	}
-	
-	public static Quantity fromJSON(String quantity) {
-		Quantity q = new Quantity();
-		try {
-			q = fromJSON(q, new JSONObject(quantity));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return q;
+		
 	}
 	
 	public static Quantity fromJSON(JSONObject quantity) {
@@ -51,15 +42,11 @@ public class Quantity extends EtaObject implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Quantity q) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.UNIT, Json.toJson(q.getUnit()));
-			o.put(ServerKey.SIZE, Json.toJson(q.getSize()));
-			o.put(ServerKey.PIECES, Json.toJson(q.getPieces()));
+			o.put(ServerKey.UNIT, Json.toJson(getUnit()));
+			o.put(ServerKey.SIZE, Json.toJson(getSize()));
+			o.put(ServerKey.PIECES, Json.toJson(getPieces()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

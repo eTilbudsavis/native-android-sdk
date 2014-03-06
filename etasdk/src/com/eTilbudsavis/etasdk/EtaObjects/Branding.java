@@ -50,18 +50,14 @@ public class Branding extends EtaObject  implements Serializable {
 	
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Branding b) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.NAME, Json.nullCheck(b.getName()));
-			o.put(ServerKey.URL_NAME, Json.nullCheck(b.getUrlName()));
-			o.put(ServerKey.WEBSITE, Json.nullCheck(b.getWebsite()));
-			o.put(ServerKey.LOGO, Json.nullCheck(b.getLogo()));
-			o.put(ServerKey.COLOR, Json.nullCheck(b.getColorString()));
-			o.put(ServerKey.PAGEFLIP, Json.nullCheck(b.getPageflip().toJSON()));
+			o.put(ServerKey.NAME, Json.nullCheck(getName()));
+			o.put(ServerKey.URL_NAME, Json.nullCheck(getUrlName()));
+			o.put(ServerKey.WEBSITE, Json.nullCheck(getWebsite()));
+			o.put(ServerKey.LOGO, Json.nullCheck(getLogo()));
+			o.put(ServerKey.COLOR, Json.nullCheck(getColorString()));
+			o.put(ServerKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}

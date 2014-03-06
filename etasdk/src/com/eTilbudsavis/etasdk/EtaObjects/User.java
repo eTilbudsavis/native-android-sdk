@@ -67,34 +67,22 @@ public class User extends EtaErnObject<User> implements Serializable {
 		}
 		return u;
 	}
-
+	
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	/**
-	 * Static method for converting object into {@link JSONObject}, same as {@link EtaObject#toJSON() toJson()}
-	 * @see EtaObject#toJSON()
-	 * @param user A object to convert
-	 * @return A {@link JSONObject} representation of the User
-	 */
-	public static JSONObject toJSON(User user) {
-		JSONObject o = new JSONObject();
+		JSONObject o = super.toJSON();
 		try {
-			o.put(ServerKey.ID, user.getId());
-			o.put(ServerKey.ERN, Json.nullCheck(user.getErn()));
-			o.put(ServerKey.GENDER, Json.nullCheck(user.getGender()));
-			o.put(ServerKey.BIRTH_YEAR, Json.nullCheck(user.getBirthYear()));
-			o.put(ServerKey.NAME, Json.nullCheck(user.getName()));
-			o.put(ServerKey.EMAIL, Json.nullCheck(user.getEmail()));
-			o.put(ServerKey.PERMISSIONS, Json.toJson(user.getPermissions()));
+			o.put(ServerKey.GENDER, Json.nullCheck(getGender()));
+			o.put(ServerKey.BIRTH_YEAR, Json.nullCheck(getBirthYear()));
+			o.put(ServerKey.NAME, Json.nullCheck(getName()));
+			o.put(ServerKey.EMAIL, Json.nullCheck(getEmail()));
+			o.put(ServerKey.PERMISSIONS, Json.toJson(getPermissions()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return o;
 	}
-
+	
 	@Override
 	public String getErnPrefix() {
 		return ERN_USER;
@@ -114,8 +102,9 @@ public class User extends EtaErnObject<User> implements Serializable {
 	}
 	
 	/**
-	 * Method returns the user id as a String, though user id is an Integer.
-	 * @deprecated Please use {@link #getUserId()} instead
+	 * Method returns the user id as a String.
+	 * <p>This method is inherited from </p>
+	 * @deprecated Use {@link #getUserId()} to get the id an an {@link Integer}
 	 */
 	@Override
 	public String getId() {

@@ -19,16 +19,7 @@ public class Pricing extends EtaObject implements Serializable {
 	private String mCurrency;
 	
 	public Pricing() {
-	}
-	
-	public static Pricing fromJSON(String pricing) {
-		Pricing p = new Pricing();
-		try {
-			p = fromJSON(p, new JSONObject(pricing));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return p;
+		
 	}
 	
 	public static Pricing fromJSON(JSONObject pricing) {
@@ -51,15 +42,11 @@ public class Pricing extends EtaObject implements Serializable {
 
 	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Pricing p) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.PRICE, p.getPrice());
-			o.put(ServerKey.PREPRICE, Json.nullCheck(p.getPrePrice()));
-			o.put(ServerKey.CURRENCY, Json.nullCheck(p.getCurrency()));
+			o.put(ServerKey.PRICE, getPrice());
+			o.put(ServerKey.PREPRICE, Json.nullCheck(getPrePrice()));
+			o.put(ServerKey.CURRENCY, Json.nullCheck(getCurrency()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
