@@ -10,6 +10,7 @@ import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
 import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class JsonObjectRequest extends JsonRequest<JSONObject>{
@@ -36,13 +37,13 @@ public class JsonObjectRequest extends JsonRequest<JSONObject>{
 				jsonString = new String(response.data);
 	            item = new JSONObject(jsonString);
 			}
-			
 			Response<JSONObject> r = null;
             if (Utils.isSuccess(response.statusCode)) {
                 putJSON(item);
                 r = Response.fromSuccess(item, mCache);
             } else {
-            	r = Response.fromError(EtaError.fromJSON(item));
+            	EtaError e = EtaError.fromJSON(item);
+            	r = Response.fromError(e);
             }
             
             log(response.statusCode, response.headers, r.result, r.error);

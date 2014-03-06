@@ -1,7 +1,6 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,10 +21,10 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  *
  */
 public class User extends EtaErnObject<User> implements Serializable {
+
+	public static final String TAG = "User";
 	
 	private static final long serialVersionUID = 1L;
-	
-	public static final String TAG = "User";
 	
 	public static final int NO_USER = -1;
 	
@@ -34,22 +33,19 @@ public class User extends EtaErnObject<User> implements Serializable {
 	private String mName;
 	private String mEmail;
 	private Permission mPermissions;
-	private ArrayList<User.UserStatusListener> mSubscribers = new ArrayList<User.UserStatusListener>();
-
+	
+	/**
+	 * Default constructor
+	 */
 	public User() {
 		setUserId(NO_USER);
 	}
 
-	public static User fromJSON(String user) {	
-		User u = new User();
-		try {
-			u = fromJSON(u, new JSONObject(user));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return u;
-	}
-	
+	/**
+	 * A factory method for converting JSON into POJO.
+	 * @param user A {@link JSONObject} containing API v2 user object
+	 * @return A User object
+	 */
 	public static User fromJSON(JSONObject user) {	
 		return fromJSON(new User(), user);
 	}
@@ -77,16 +73,22 @@ public class User extends EtaErnObject<User> implements Serializable {
 		return toJSON(this);
 	}
 	
-	public static JSONObject toJSON(User u) {
+	/**
+	 * Static method for converting object into {@link JSONObject}, same as {@link EtaObject#toJSON() toJson()}
+	 * @see EtaObject#toJSON()
+	 * @param user A object to convert
+	 * @return A {@link JSONObject} representation of the User
+	 */
+	public static JSONObject toJSON(User user) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.ID, u.getId());
-			o.put(ServerKey.ERN, Json.nullCheck(u.getErn()));
-			o.put(ServerKey.GENDER, Json.nullCheck(u.getGender()));
-			o.put(ServerKey.BIRTH_YEAR, Json.nullCheck(u.getBirthYear()));
-			o.put(ServerKey.NAME, Json.nullCheck(u.getName()));
-			o.put(ServerKey.EMAIL, Json.nullCheck(u.getEmail()));
-			o.put(ServerKey.PERMISSIONS, Json.toJson(u.getPermissions()));
+			o.put(ServerKey.ID, user.getId());
+			o.put(ServerKey.ERN, Json.nullCheck(user.getErn()));
+			o.put(ServerKey.GENDER, Json.nullCheck(user.getGender()));
+			o.put(ServerKey.BIRTH_YEAR, Json.nullCheck(user.getBirthYear()));
+			o.put(ServerKey.NAME, Json.nullCheck(user.getName()));
+			o.put(ServerKey.EMAIL, Json.nullCheck(user.getEmail()));
+			o.put(ServerKey.PERMISSIONS, Json.toJson(user.getPermissions()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -98,6 +100,15 @@ public class User extends EtaErnObject<User> implements Serializable {
 		return ERN_USER;
 	}
 	
+	/**
+	 * Method for finding out if the user is logged in via the API. It is determined
+	 * on the basis that the {@link #getEmail() email} != null and the
+	 * {@link #getUserId() user id} > {@link #NO_USER -1}.
+	 * 
+	 * <p>It is not a requirement to be logged in, but it does offer some
+	 * advantages, such as online lists</p> 
+	 * @return
+	 */
 	public boolean isLoggedIn() {
 		return mEmail != null && getUserId() > NO_USER;
 	}
@@ -270,44 +281,6 @@ public class User extends EtaErnObject<User> implements Serializable {
 		return this;
 	}
 	
-	/**
-	 * TODO: WTF! Move this to Session/SessionManager - when a new user is introduced this will fail
-	 * Subscribe to changes in the user that is currently being handled by the SDK.
-	 * @param statusListener
-	 */
-	public void subscribe(UserStatusListener statusListener) {
-		mSubscribers.add(statusListener);
-	}
-	
-	/**
-	 * TODO: WTF! Move this to Session/SessionManager - when a new user is introduced this will fail
-	 * Unsubscribe from receiving changes in the user state.
-	 * @param statusListener
-	 */
-	public void unsubscribe(UserStatusListener statusListener) {
-		mSubscribers.remove(statusListener);
-	}
-	
-	/**
-	 * TODO: WTF! Move this to Session/SessionManager - when a new user is introduced this will fail
-	 * @param response
-	 * @param object
-	 */
-	public void notifySubscribers(Integer response, Object object) {
-		for (UserStatusListener s : mSubscribers) {
-			s.onStatusChange(response, object);
-		}
-	}
-	
-	/**
-	 * TODO: WTF! Move this to Session/SessionManager - when a new user is introduced this will fail
-	 * @author Danny Hvam - danny@etilbudsavis.dk
-	 *
-	 */
-	public interface UserStatusListener {
-		public void onStatusChange(Integer response, Object object);
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -318,8 +291,6 @@ public class User extends EtaErnObject<User> implements Serializable {
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
 		result = prime * result
 				+ ((mPermissions == null) ? 0 : mPermissions.hashCode());
-		result = prime * result
-				+ ((mSubscribers == null) ? 0 : mSubscribers.hashCode());
 		return result;
 	}
 
@@ -353,11 +324,6 @@ public class User extends EtaErnObject<User> implements Serializable {
 			if (other.mPermissions != null)
 				return false;
 		} else if (!mPermissions.equals(other.mPermissions))
-			return false;
-		if (mSubscribers == null) {
-			if (other.mSubscribers != null)
-				return false;
-		} else if (!mSubscribers.equals(other.mSubscribers))
 			return false;
 		return true;
 	}

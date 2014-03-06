@@ -35,7 +35,14 @@ public class Session extends EtaObject implements Serializable {
 		
 		s.setToken(Json.valueOf(session, ServerKey.TOKEN));
 		s.setExpires(Json.valueOf(session, ServerKey.EXPIRES));
-		String user = Json.valueOf(session, ServerKey.USER);
+		JSONObject user = null;
+		if (session.has(ServerKey.USER)) {
+			try {
+				user = session.getJSONObject(ServerKey.USER);
+			} catch (JSONException e) {
+				EtaLog.d(TAG, e);
+			}
+		}
 		s.setUser(user == null ? new User() : User.fromJSON(user));
 		s.setPermission(Permission.fromJSON(Json.valueOf(session, ServerKey.PERMISSIONS))) ;
 		s.setProvider(Json.valueOf(session, ServerKey.PROVIDER));

@@ -70,7 +70,7 @@ public class Country extends EtaErnObject<Country> implements Serializable {
 	/**
 	 * Static method for converting object into {@link JSONObject}, same as {@link EtaObject#toJSON() toJson()}
 	 * @see EtaObject#toJSON()
-	 * @param typeahead A object to convert
+	 * @param country A object to convert
 	 * @return A {@link JSONObject} representation of the Country
 	 */
 	public static JSONObject toJSON(Country country) {

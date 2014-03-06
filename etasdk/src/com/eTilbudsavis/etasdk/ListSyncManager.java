@@ -30,6 +30,7 @@ import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ListSyncManager {
@@ -60,7 +61,7 @@ public class ListSyncManager {
 	/** Listening for session changes, starting and stopping sync as needed */
 	private OnSessionChangeListener sessionListener = new OnSessionChangeListener() {
 
-		public void onUpdate() {
+		public void onChange() {
 			if (mUser == null || mUser.getId() != mEta.getUser().getId()) {
 				mSyncCount = 0;
 				runSyncLoop();
@@ -164,6 +165,11 @@ public class ListSyncManager {
 		r.setHandler(mHandler);
 		
 		r.setTag(mRequestTag);
+		
+		if (r.getMethod() == Method.DELETE) {
+			r.debugNetwork(true);
+			r.debugPerformance(true);
+		}
 		
 		mEta.add(r);
 	}
@@ -677,7 +683,7 @@ public class ListSyncManager {
 		String url = Endpoint.list(user.getUserId(), sl.getId());
 		
 		JsonObjectRequest listReq = new JsonObjectRequest(Method.DELETE, url, null, listListener);
-		
+		listReq.putQueryParam(Param.MODIFIED, Utils.parseDate(sl.getModified()));
 		addRequest(listReq);
 		
 	}
@@ -788,6 +794,7 @@ public class ListSyncManager {
 		
 		String url = Endpoint.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
 		JsonObjectRequest itemReq = new JsonObjectRequest(Method.DELETE, url, null, itemListener);
+		itemReq.putQueryParam(Param.MODIFIED, Utils.parseDate(sli.getModified()));
 		addRequest(itemReq);
 		
 	}
@@ -966,7 +973,6 @@ public class ListSyncManager {
 		
 		String url = Endpoint.listShareEmail(user.getUserId(), s.getShoppinglistId(), s.getEmail());
 		JsonObjectRequest shareReq = new JsonObjectRequest(url, shareListener);
-
 		addRequest(shareReq);
 		
 	}

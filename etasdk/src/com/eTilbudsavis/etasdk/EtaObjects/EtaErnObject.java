@@ -2,6 +2,14 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.util.UUID;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
+import com.eTilbudsavis.etasdk.Utils.Utils;
+
 /**
  * EtaErnObject has the advantage of having an Etilbudsavis Resource Name (ERN), that is a <i>unique</i> identifier 
  * for this object in the API v2.
@@ -13,6 +21,10 @@ public abstract class EtaErnObject<T> extends EtaObject {
 	
 	public static final String TAG = "EtaErnObject";
 	
+	/* 
+	 * A list of nice to have strings, ready to use in subclasses
+	 * Also gives a hint as to which classes extend this class
+	 */
 	protected static final String ERN_CATALOG = "ern:catalog";
 	protected static final String ERN_DEALER = "ern:dealer";
 	protected static final String ERN_OFFER = "ern:offer";
@@ -94,7 +106,7 @@ public abstract class EtaErnObject<T> extends EtaObject {
 		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		return result;
 	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

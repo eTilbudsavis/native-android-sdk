@@ -121,7 +121,7 @@ public class NetworkDispatcher extends Thread {
                 	} else {
                 		
                     	request.addEvent("non-recoverable-error");
-            			
+                    	EtaLog.d(TAG, response.error.toJSON().toString());
                     	mDelivery.postResponse(request, response);
             			
                 	}

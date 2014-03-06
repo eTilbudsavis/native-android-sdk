@@ -3,6 +3,7 @@ package com.eTilbudsavis.etasdk.NetworkInterface;
 import java.util.Map;
 
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class Response<T> {
 	

@@ -52,10 +52,6 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 
 	public Catalog() {
 	}
-
-	public Catalog(Catalog c) {
-		set(c);
-	}
 	
 	public static ArrayList<Catalog> fromJSON(JSONArray catalogs) {
 		ArrayList<Catalog> list = new ArrayList<Catalog>();
@@ -141,25 +137,6 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 			EtaLog.d(TAG, e);
 		}
 		return o;
-	}
-	
-	public void set(Catalog c) {
-		super.setId(c.getId());
-		super.setErn(c.getErn());
-		mLabel = c.getLabel();
-		mBackground = c.getBackground();
-		mRunFrom = c.getRunFrom();
-		mRunTill = c.getRunTill();
-		mPageCount = c.getPageCount();
-		mOfferCount = c.getOfferCount();
-		mBranding = c.getBranding();
-		mDealerId = c.getDealerId();
-		mDealerUrl = c.getDealerUrl();
-		mStoreId = c.getStoreId();
-		mStoreUrl = c.getStoreUrl();
-		mDimension = c.getDimension();
-		mImages = c.getImages();
-		mPages = c.getPages();
 	}
 	
 	@Override

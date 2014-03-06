@@ -59,8 +59,18 @@ public class EtaError extends Exception {
      */
     public static EtaError fromJSON(JSONObject apiError) {
     	
+//    	{
+//    		"api_details":"Request invalid due to missing information.",
+//    		"id":"00hsetu9doi6ngispqccyrpscgru912y",
+//    		"api_message":"Missing \"modified\"",
+//    		"code":1400,
+//    		"@note.1":"Hey! It looks like you found an error. If you have any questions about this error, feel free to contact support with the above error id.",
+//    		"previous":null
+//    	}
+    	
 		try {
 			
+
 			String id = apiError.getString(ID);
 			int code = apiError.getInt(CODE);
 			String message = apiError.getString(MESSAGE);

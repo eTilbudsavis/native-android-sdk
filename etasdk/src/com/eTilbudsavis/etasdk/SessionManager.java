@@ -446,7 +446,7 @@ public class SessionManager {
 					mEta.getHandler().post(new Runnable() {
 						
 						public void run() {
-							sl.onUpdate();
+							sl.onChange();
 						}
 					});
 				} catch (Exception e) {
@@ -463,7 +463,7 @@ public class SessionManager {
 	}
 
 	public interface OnSessionChangeListener {
-		public void onUpdate();
+		public void onChange();
 	}
 	
 }
