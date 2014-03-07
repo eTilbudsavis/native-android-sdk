@@ -3,6 +3,7 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,9 +48,14 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 		setOffer(offer);
 		setDescription(offer.getHeading());
 	}
-	
-	public static ArrayList<ShoppinglistItem> fromJSON(JSONArray shoppinglistItems) {
-		ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
+
+	/**
+	 * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
+	 * @param shoppinglistItems A {@link JSONArray} in the format of a valid API v2 shoppinglistItem response
+	 * @return A {@link List} of POJO;
+	 */
+	public static List<ShoppinglistItem> fromJSON(JSONArray shoppinglistItems) {
+		List<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
 		
 		try {
 			for (int i = 0 ; i < shoppinglistItems.length() ; i++ ) {
@@ -61,24 +67,39 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 		}
 		return list;
 	}
-	
+
+	/**
+	 * A factory method for converting {@link JSONObject} into a POJO.
+	 * @param shoppinglistItem A {@link JSONObject} in the format of a valid API v2 shoppinglistItem response
+	 * @return An ShoppinglistItem object
+	 */
 	public static ShoppinglistItem fromJSON(JSONObject shoppinglistItem) {
 		return fromJSON(new ShoppinglistItem(), shoppinglistItem);
 	}
-	
-	private static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject shoppinglistItem) {
+
+	/**
+	 * A factory method for converting {@link JSONObject} into POJO.
+	 * <p>This method exposes a way, of updating/setting an objects properties</p>
+	 * @param sli An object to set/update
+	 * @param jOffer A {@link JSONObject} in the format of a valid API v2 offer response
+	 * @return A {@link List} of POJO
+	 */
+	public static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject jSli) {
 		
-		sli.setId(Json.valueOf(shoppinglistItem, ServerKey.ID));
-		sli.setTick(Json.valueOf(shoppinglistItem, ServerKey.TICK, false));
-		sli.setOfferId(Json.valueOf(shoppinglistItem, ServerKey.OFFER_ID));
-		sli.setCount(Json.valueOf(shoppinglistItem, ServerKey.COUNT, 1));
-		sli.setDescription(Json.valueOf(shoppinglistItem, ServerKey.DESCRIPTION));
-		sli.setShoppinglistId(Json.valueOf(shoppinglistItem, ServerKey.SHOPPINGLIST_ID));
-		sli.setErn(Json.valueOf(shoppinglistItem, ServerKey.ERN));
-		sli.setCreator(Json.valueOf(shoppinglistItem, ServerKey.CREATOR));
-		String date = Json.valueOf(shoppinglistItem, ServerKey.MODIFIED, "1970-01-01T00:00:00+0000");
+		sli.setId(Json.valueOf(jSli, ServerKey.ID));
+		sli.setTick(Json.valueOf(jSli, ServerKey.TICK, false));
+		sli.setOfferId(Json.valueOf(jSli, ServerKey.OFFER_ID));
+		sli.setCount(Json.valueOf(jSli, ServerKey.COUNT, 1));
+		sli.setDescription(Json.valueOf(jSli, ServerKey.DESCRIPTION));
+		sli.setShoppinglistId(Json.valueOf(jSli, ServerKey.SHOPPINGLIST_ID));
+		sli.setErn(Json.valueOf(jSli, ServerKey.ERN));
+		sli.setCreator(Json.valueOf(jSli, ServerKey.CREATOR));
+		String date = Json.valueOf(jSli, ServerKey.MODIFIED, "1970-01-01T00:00:00+0000");
+		if (sli.getTitle().contains("lagkage")) {
+			EtaLog.d(TAG, sli.getTitle() + " " + date);
+		}
 		sli.setModified( Utils.parseDate(date) );
-		sli.setPreviousId(Json.valueOf(shoppinglistItem, ServerKey.PREVIOUS_ID));
+		sli.setPreviousId(Json.valueOf(jSli, ServerKey.PREVIOUS_ID, FIRST_ITEM));
 		
 		return sli;
 	}
@@ -108,6 +129,14 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 		return ERN_SHOPPINGLISTITEM;
 	}
 	
+	/**
+	 * Returns a human readable title for this ShoppinglistItem.
+	 * <p>The title is either the description, or heading of the related offer.
+	 * If the description isn't <code>null</code>, this will be used, else if
+	 * offer isn't <code>null</code>, the heading will be used, and finally,
+	 * if non-exist it will be an empty string.</p>
+	 * @return A human readable title
+	 */
 	public String getTitle() {
 		return (mDescription == null || mDescription.length() == 0) ? (mOffer == null ? "" : mOffer.getHeading()) : mDescription;
 	}

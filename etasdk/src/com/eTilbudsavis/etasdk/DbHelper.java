@@ -513,7 +513,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		close(c);
 		return list;
 	}
-
+	
 	/**
 	 * Get all Shoppinglistitems from a shoppinglist.
 	 * @param sl from which to get items

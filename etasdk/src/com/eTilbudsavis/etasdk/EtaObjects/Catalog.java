@@ -3,11 +3,13 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.PageflipWebview;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -52,9 +54,14 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 
 	public Catalog() {
 	}
-	
-	public static ArrayList<Catalog> fromJSON(JSONArray catalogs) {
-		ArrayList<Catalog> list = new ArrayList<Catalog>();
+
+	/**
+	 * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
+	 * @param catalogs A {@link JSONArray} in the format of a valid API v2 catalog response
+	 * @return A {@link List} of POJO
+	 */
+	public static List<Catalog> fromJSON(JSONArray catalogs) {
+		List<Catalog> list = new ArrayList<Catalog>();
 		try {
 			for (int i = 0 ; i < catalogs.length() ; i++ ) {
 				list.add(Catalog.fromJSON((JSONObject)catalogs.get(i)));
@@ -64,49 +71,62 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 		}
 		return list;
 	}
-	
+
+	/**
+	 * A factory method for converting {@link JSONObject} into a POJO.
+	 * @param catalog A {@link JSONObject} in the format of a valid API v2 catalog response
+	 * @return A Catalog object
+	 */
 	public static Catalog fromJSON(JSONObject catalog) {
 		return fromJSON(new Catalog(), catalog);
 	}
 
-	public static Catalog fromJSON(Catalog c, JSONObject catalog) {
-		if(c == null)
-			c = new Catalog();
-
-		if (catalog == null)
-			return c;
-
-		if (catalog.has(ServerKey.STORE_ID) && catalog.has(ServerKey.OFFER_COUNT)) {
+	/**
+	 * A factory method for converting {@link JSONObject} into POJO.
+	 * <p>This method exposes a way, of updating/setting an objects properties</p>
+	 * @param catalog An object to set/update
+	 * @param jCatalog A {@link JSONObject} in the format of a valid API v2 catalog response.
+	 * 		But a special case exists where, {@link PageflipWebview} only exposes
+	 * 		the keys "{@link ServerKey#ID id}", and "{@link ServerKey#PAGE page}", this is
+	 * 		valid too, but not a complete/workable catalog object.
+	 * @return A {@link List} of POJO
+	 */
+	public static Catalog fromJSON(Catalog catalog, JSONObject jCatalog) {
+		if (catalog == null) catalog = new Catalog();
+		if (jCatalog == null) return catalog;
+		
+		if (jCatalog.has(ServerKey.STORE_ID) && jCatalog.has(ServerKey.OFFER_COUNT)) {
 			// if we have a full catalog
 			try {
-				c.setId(Json.valueOf(catalog, ServerKey.ID));
-				c.setErn(Json.valueOf(catalog, ServerKey.ERN));
-				c.setLabel(Json.valueOf(catalog, ServerKey.LABEL));
-				c.setBackground(Json.valueOf(catalog, ServerKey.BACKGROUND));
-				Date runFrom = Utils.parseDate(Json.valueOf(catalog, ServerKey.RUN_FROM));
-				c.setRunFrom(runFrom);
-				Date runTill = Utils.parseDate(Json.valueOf(catalog, ServerKey.RUN_TILL));
-				c.setRunTill(runTill);
-				c.setPageCount(Json.valueOf(catalog, ServerKey.PAGE_COUNT, 0));
-				c.setOfferCount(Json.valueOf(catalog, ServerKey.OFFER_COUNT, 0));
-				c.setBranding(Branding.fromJSON(catalog.getJSONObject(ServerKey.BRANDING)));
-				c.setDealerId(Json.valueOf(catalog, ServerKey.DEALER_ID));
-				c.setDealerUrl(Json.valueOf(catalog, ServerKey.DEALER_URL));
-				c.setStoreId(Json.valueOf(catalog, ServerKey.STORE_ID));
-				c.setStoreUrl(Json.valueOf(catalog, ServerKey.STORE_URL));
-				c.setDimension(Dimension.fromJSON(catalog.getJSONObject(ServerKey.DIMENSIONS)));
-				c.setImages(Images.fromJSON(catalog.getJSONObject(ServerKey.IMAGES)));
-				c.setPages(Pages.fromJSON(catalog.getJSONObject(ServerKey.PAGES)));
+				catalog.setId(Json.valueOf(jCatalog, ServerKey.ID));
+				catalog.setErn(Json.valueOf(jCatalog, ServerKey.ERN));
+				catalog.setLabel(Json.valueOf(jCatalog, ServerKey.LABEL));
+				catalog.setBackground(Json.valueOf(jCatalog, ServerKey.BACKGROUND));
+				Date runFrom = Utils.parseDate(Json.valueOf(jCatalog, ServerKey.RUN_FROM));
+				catalog.setRunFrom(runFrom);
+				Date runTill = Utils.parseDate(Json.valueOf(jCatalog, ServerKey.RUN_TILL));
+				catalog.setRunTill(runTill);
+				catalog.setPageCount(Json.valueOf(jCatalog, ServerKey.PAGE_COUNT, 0));
+				catalog.setOfferCount(Json.valueOf(jCatalog, ServerKey.OFFER_COUNT, 0));
+				catalog.setBranding(Branding.fromJSON(jCatalog.getJSONObject(ServerKey.BRANDING)));
+				catalog.setDealerId(Json.valueOf(jCatalog, ServerKey.DEALER_ID));
+				catalog.setDealerUrl(Json.valueOf(jCatalog, ServerKey.DEALER_URL));
+				catalog.setStoreId(Json.valueOf(jCatalog, ServerKey.STORE_ID));
+				catalog.setStoreUrl(Json.valueOf(jCatalog, ServerKey.STORE_URL));
+				catalog.setDimension(Dimension.fromJSON(jCatalog.getJSONObject(ServerKey.DIMENSIONS)));
+				catalog.setImages(Images.fromJSON(jCatalog.getJSONObject(ServerKey.IMAGES)));
+				catalog.setPages(Pages.fromJSON(jCatalog.getJSONObject(ServerKey.PAGES)));
 			} catch (JSONException e) {
 				EtaLog.d(TAG, e);
 			}
-		} else if (catalog.has(ServerKey.ID) && catalog.has(ServerKey.PAGE)) {
+			
+		} else if (jCatalog.has(ServerKey.ID) && jCatalog.has(ServerKey.PAGE)) {
 			// If it is a partial catalog
-			c.setId(Json.valueOf(catalog, ServerKey.ID));
-			c.setOfferOnPage(Json.valueOf(catalog, ServerKey.PAGE, 1));
+			catalog.setId(Json.valueOf(jCatalog, ServerKey.ID));
+			catalog.setOfferOnPage(Json.valueOf(jCatalog, ServerKey.PAGE, 1));
 			
 		}
-		return c;
+		return catalog;
 	}
 
 	@Override
@@ -262,7 +282,7 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 	public void setPages(Pages pages) {
 		mPages = pages;
 	}
-
+	
 	public Catalog setOfferOnPage(Integer offerOnPage) {
 		this.mOfferOnPage = offerOnPage;
 		return this;

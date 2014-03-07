@@ -25,11 +25,11 @@ public class Country extends EtaErnObject<Country> implements Serializable {
 	 * Default constructor
 	 */
 	public Country() { }
-
+	
 	/**
-	 * Convert a {@link JSONArray} into a {@link List} of Country.
-	 * @param list A {@link JSONArray} containing API v2 Country objects
-	 * @return A {@link List} of Country
+	 * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
+	 * @param countries A {@link JSONArray} in the format of a valid API v2 country response
+	 * @return A {@link List}&lt;T&gt;
 	 */
 	public static List<Country> fromJSON(JSONArray countries) {
 		List<Country> list = new ArrayList<Country>();
@@ -44,29 +44,36 @@ public class Country extends EtaErnObject<Country> implements Serializable {
 	}
 	
 	/**
-	 * A factory method for converting JSON into POJO.
-	 * @param country A {@link JSONArray} containing API v2 country objects
+	 * A factory method for converting {@link JSONObject} into a POJO.
+	 * @param country A {@link JSONObject} in the format of a valid API v2 country response
 	 * @return A Country object
 	 */
 	public static Country fromJSON(JSONObject country) {
 		return fromJSON(new Country(), country);
 	}
 	
-	private static Country fromJSON(Country c, JSONObject country) {
-		if (c == null) c = new Country();
-		if (country == null) return c;
+	/**
+	 * A factory method for converting {@link JSONObject} into POJO.
+	 * <p>This method exposes a way, of updating/setting an objects properties</p>
+	 * @param country An object to set/update
+	 * @param jCountry A {@link JSONObject} in the format of a valid API v2 country response
+	 * @return A {@link List} of POJO
+	 */
+	public static Country fromJSON(Country country, JSONObject jCountry) {
+		if (country == null) country = new Country();
+		if (jCountry == null) return country;
 		
-		c.setId(Json.valueOf(country, ServerKey.ID));
-		c.setUnsubscribePrintUrl(Json.valueOf(country, ServerKey.UNSUBSCRIBE_PRINT_URL));
+		country.setId(Json.valueOf(jCountry, ServerKey.ID));
+		country.setUnsubscribePrintUrl(Json.valueOf(jCountry, ServerKey.UNSUBSCRIBE_PRINT_URL));
 		
-		return c;
+		return country;
 	}
 	
 	@Override
 	public JSONObject toJSON() {
 		JSONObject o = super.toJSON();
 		try {
-			// Server-side havent implemented ERN for Country yet, so we'll remove it for now
+			// API haven't implemented ERN for Country yet, so we'll remove it for now
 			if (o.has(ServerKey.ERN)) {
 				o.remove(ServerKey.ERN);
 			}

@@ -47,41 +47,47 @@ public class Typeahead extends EtaObject {
 	public Typeahead(String typeahead) {
 		mSubject = typeahead;
 	}
-	
+
 	/**
-	 * Convert a {@link JSONArray} into a {@link List} of Typeahead.
-	 * @param list A {@link JSONArray} containing API v2 typeahead objects
-	 * @return A {@link List} of Typeahead
+	 * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
+	 * @param typeaheads A {@link JSONArray} in the format of a valid API v2 typeahead response
+	 * @return A {@link List} of POJO
 	 */
-	public static List<Typeahead> fromJSON(JSONArray list) {
+	public static List<Typeahead> fromJSON(JSONArray typeaheads) {
 		List<Typeahead> resp = new ArrayList<Typeahead>();
 		try {
-			for (int i = 0 ; i < list.length() ; i++ ) {
-				resp.add(Typeahead.fromJSON((JSONObject)list.get(i)));
+			for (int i = 0 ; i < typeaheads.length() ; i++ ) {
+				resp.add(Typeahead.fromJSON((JSONObject)typeaheads.get(i)));
 			}
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
 		return resp;
 	}
-	
+
 	/**
-	 * A factory method for converting JSON into POJO.
-	 * 
-	 * @param typeahead A {@link JSONObject}
-	 * @return A {@link Typeahead} object
+	 * A factory method for converting {@link JSONObject} into a POJO.
+	 * @param typeahead A {@link JSONObject} in the format of a valid API v2 typeahead response
+	 * @return A Typeahead object
 	 */
-	public static Typeahead fromJSON(JSONObject item) {
-		return fromJSON(new Typeahead(), item );
+	public static Typeahead fromJSON(JSONObject typeahead) {
+		return fromJSON(new Typeahead(), typeahead );
 	}
-	
-	private static Typeahead fromJSON(Typeahead typeahead, JSONObject t) {
+
+	/**
+	 * A factory method for converting {@link JSONObject} into POJO.
+	 * <p>This method exposes a way, of updating/setting an objects properties</p>
+	 * @param typeahead An object to set/update
+	 * @param jTypeahead A {@link JSONObject} in the format of a valid API v2 typeahead response
+	 * @return A {@link List} of POJO
+	 */
+	public static Typeahead fromJSON(Typeahead typeahead, JSONObject jTypeahead) {
 		if (typeahead == null) typeahead = new Typeahead();
-		if (t == null) return typeahead;
+		if (jTypeahead == null) return typeahead;
 		
-		typeahead.setSubject(Json.valueOf(t, ServerKey.SUBJECT));
-		typeahead.setOffset(Json.valueOf(t, ServerKey.OFFSET, 0));
-		typeahead.setLength(Json.valueOf(t, ServerKey.LENGTH, 0));
+		typeahead.setSubject(Json.valueOf(jTypeahead, ServerKey.SUBJECT));
+		typeahead.setOffset(Json.valueOf(jTypeahead, ServerKey.OFFSET, 0));
+		typeahead.setLength(Json.valueOf(jTypeahead, ServerKey.LENGTH, 0));
 		
 		return typeahead;
 	}

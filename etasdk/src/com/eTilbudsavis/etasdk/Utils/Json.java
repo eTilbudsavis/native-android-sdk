@@ -56,6 +56,7 @@ public class Json {
 			return object.isNull(key) ? defValue : object.getInt(key);
 		} catch (Exception e) {
 			EtaLog.d(TAG, e);
+			EtaLog.d(TAG, object.toString());
 		}
 		return defValue;
 	}
@@ -115,8 +116,8 @@ public class Json {
 	 * Typically {@link #JSOBObject.NULL JSOBObject.NULL} or null is used for this purpose
 	 * @return A JSONObject, or defValue
 	 */
-	public static JSONObject toJson(EtaObject object, Object defValue) {
-		return (JSONObject) (object == null ? defValue : object.toJSON());
+	public static Object toJson(EtaObject object, Object defValue) {
+		return object == null ? defValue : object.toJSON();
 	}
 
 	/**
@@ -124,7 +125,7 @@ public class Json {
 	 * @param object The EtaObject to convert
 	 * @return A JSONObject, or JSONObject.NULL
 	 */
-	public static JSONObject toJson(EtaObject object) {
+	public static Object toJson(EtaObject object) {
 		return toJson(object, JSONObject.NULL);
 	}
 	

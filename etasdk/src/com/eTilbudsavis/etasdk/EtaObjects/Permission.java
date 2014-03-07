@@ -17,7 +17,7 @@ public class Permission extends EtaObject implements Serializable {
 
 	public static final String TAG = "Permission";
 	
-	private HashMap<String, ArrayList<String>> perm = new HashMap<String, ArrayList<String>>();
+	private HashMap<String, ArrayList<String>> mPermissions = new HashMap<String, ArrayList<String>>();
 	
 	public Permission() {
 		
@@ -48,7 +48,7 @@ public class Permission extends EtaObject implements Serializable {
 					permissions.add(jArray.get(j).toString());
 				}
 				
-				p.getAll().put(group, permissions);
+				p.getPermissions().put(group, permissions);
 				
 			}
 			
@@ -63,11 +63,11 @@ public class Permission extends EtaObject implements Serializable {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			Iterator<String> it = getAll().keySet().iterator();
+			Iterator<String> it = getPermissions().keySet().iterator();
 			while (it.hasNext()) {
 				JSONArray jArray = new JSONArray();
 				String name = (String) it.next();
-				for (String value : getAll().get(name)) {
+				for (String value : getPermissions().get(name)) {
 					jArray.put(value);
 				}				
 				o.put(name, jArray);
@@ -78,21 +78,25 @@ public class Permission extends EtaObject implements Serializable {
 		return o;
 	}
 	
-	public ArrayList<String> get(String key) {
-		return perm.get(key);
+	public ArrayList<String> getGroupPermissions(String group) {
+		return mPermissions.get(group);
 	}
-
-	public Permission put(String key, ArrayList<String> permission) {
-		perm.put(key, permission);
+	
+	public Permission put(String group, ArrayList<String> permissions) {
+		if (mPermissions.containsKey(group)) {
+			mPermissions.get(group).addAll(permissions);
+		} else {
+			mPermissions.put(group, permissions);
+		}
 		return this;
 	}
 	
-	public HashMap<String, ArrayList<String>> getAll() {
-		return perm;
+	public HashMap<String, ArrayList<String>> getPermissions() {
+		return mPermissions;
 	}
 	
 	public Permission putAll(HashMap<String, ArrayList<String>> permissions) {
-		perm.putAll(permissions);
+		mPermissions.putAll(permissions);
 		return this;
 	}
 	

@@ -1,6 +1,7 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,30 +43,37 @@ public class User extends EtaErnObject<User> implements Serializable {
 	}
 
 	/**
-	 * A factory method for converting JSON into POJO.
-	 * @param user A {@link JSONObject} containing API v2 user object
+	 * A factory method for converting {@link JSONObject} into a POJO.
+	 * @param user A {@link JSONObject} in the format of a valid API v2 user response
 	 * @return A User object
 	 */
 	public static User fromJSON(JSONObject user) {	
 		return fromJSON(new User(), user);
 	}
-	
-	private static User fromJSON(User u, JSONObject user) {
-		if (u == null) u = new User();
-		if (user == null) return u;
+
+	/**
+	 * A factory method for converting {@link JSONObject} into POJO.
+	 * <p>This method exposes a way, of updating/setting an objects properties</p>
+	 * @param user An object to set/update
+	 * @param jUser A {@link JSONObject} in the format of a valid API v2 user response
+	 * @return A {@link List} of POJO
+	 */
+	public static User fromJSON(User user, JSONObject jUser) {
+		if (user == null) user = new User();
+		if (jUser == null) return user;
 		
 		try {
-			u.setUserId(Json.valueOf(user, ServerKey.ID, User.NO_USER));
-			u.setErn(Json.valueOf(user, ServerKey.ERN));
-			u.setGender(Json.valueOf(user, ServerKey.GENDER));
-			u.setBirthYear(Json.valueOf(user, ServerKey.BIRTH_YEAR, 0));
-			u.setName(Json.valueOf(user, ServerKey.NAME));
-			u.setEmail(Json.valueOf(user, ServerKey.EMAIL));
-			u.setPermissions(Permission.fromJSON(user.getJSONObject(ServerKey.PERMISSIONS)));
+			user.setUserId(Json.valueOf(jUser, ServerKey.ID, User.NO_USER));
+			user.setErn(Json.valueOf(jUser, ServerKey.ERN));
+			user.setGender(Json.valueOf(jUser, ServerKey.GENDER));
+			user.setBirthYear(Json.valueOf(jUser, ServerKey.BIRTH_YEAR, 0));
+			user.setName(Json.valueOf(jUser, ServerKey.NAME));
+			user.setEmail(Json.valueOf(jUser, ServerKey.EMAIL));
+			user.setPermissions(Permission.fromJSON(jUser.getJSONObject(ServerKey.PERMISSIONS)));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
-		return u;
+		return user;
 	}
 	
 	@Override

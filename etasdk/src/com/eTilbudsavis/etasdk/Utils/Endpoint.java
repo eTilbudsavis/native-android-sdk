@@ -2,6 +2,15 @@ package com.eTilbudsavis.etasdk.Utils;
 
 
 /**
+ * This class contains a basic list of endpoints, and some methods to generate
+ * various URL's to request API data.
+ * 
+ * <p>This list of endpoints is fra from complete, but a full list of endpoints
+ * and their capabilities can be found via the 
+ * <a href="https://edge.etilbudsavis.dk/v2/help">Endpoint Documentation</a>.
+ * The documentation isn't complete but, if questions arise please feel free to
+ * contact us :-)</p>
+ * 
  * @author Danny Hvam - danny@etilbudsavis.dk
  */
 public class Endpoint {

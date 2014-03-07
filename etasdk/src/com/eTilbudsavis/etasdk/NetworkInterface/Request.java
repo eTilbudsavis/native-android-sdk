@@ -125,7 +125,8 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	/**
 	 * If true, this requests summary (found in the EventLog with getLog()) will be saved in
 	 * the RequestQueue's log history. This is true by default.<br><br>
-	 * This can be set to false, if you e.g. want to avoid flooding the log. As seen in the ListSyncManager.
+	 * This can be set to false, if you e.g. want to avoid flooding the log, with 
+	 * unnecessary messages.
 	 * @param saveSummaryToLog true is logging should be enabled for this request.
 	 * @return this object
 	 */

@@ -59,12 +59,12 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 	}
 
 	/**
-	 * Convert a {@link JSONArray} into a {@link List} of Offer.
-	 * @param list A {@link JSONArray} containing API v2 Offer objects
-	 * @return A {@link List} of Offer
+	 * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
+	 * @param offers A {@link JSONArray} in the format of a valid API v2 offer response
+	 * @return A {@link List} of POJO;
 	 */
-	public static ArrayList<Offer> fromJSON(JSONArray offers) {
-		ArrayList<Offer> list = new ArrayList<Offer>();
+	public static List<Offer> fromJSON(JSONArray offers) {
+		List<Offer> list = new ArrayList<Offer>();
 		try {
 			for (int i = 0 ; i < offers.length() ; i++ )
 				list.add(Offer.fromJSON((JSONObject) offers.get(i)));
@@ -76,42 +76,49 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 	}
 
 	/**
-	 * A factory method for converting JSON into POJO.
-	 * @param offer A {@link JSONArray} containing API v2 offer objects
-	 * @return A {@link List}
+	 * A factory method for converting {@link JSONObject} into a POJO.
+	 * @param offer A {@link JSONObject} in the format of a valid API v2 offer response
+	 * @return An Offer object
 	 */
 	public static Offer fromJSON(JSONObject offer) {
 		return fromJSON(new Offer(), offer);
 	}
 
-	private static Offer fromJSON(Offer o, JSONObject offer) {
-		if (o == null) o = new Offer();
-		if (offer == null) return o;
+	/**
+	 * A factory method for converting {@link JSONObject} into POJO.
+	 * <p>This method exposes a way, of updating/setting an objects properties</p>
+	 * @param offer An object to set/update
+	 * @param jOffer A {@link JSONObject} in the format of a valid API v2 offer response
+	 * @return A {@link List} of POJO
+	 */
+	public static Offer fromJSON(Offer offer, JSONObject jOffer) {
+		if (offer == null) offer = new Offer();
+		if (jOffer == null) return offer;
 
 		try {
-			o.setId(Json.valueOf(offer, ServerKey.ID));
-			o.setErn(Json.valueOf(offer, ServerKey.ERN));
-			o.setHeading(Json.valueOf(offer, ServerKey.HEADING));
-			o.setDescription(Json.valueOf(offer, ServerKey.DESCRIPTION));
-			o.setCatalogPage(Json.valueOf(offer, ServerKey.CATALOG_PAGE, 0));
-			o.setPricing(Pricing.fromJSON(offer.getJSONObject(ServerKey.PRICING)));
-			o.setQuantity(Quantity.fromJSON(offer.getJSONObject(ServerKey.QUANTITY)));
-			o.setImages(Images.fromJSON(offer.getJSONObject(ServerKey.IMAGES)));
-			o.setLinks(Links.fromJSON(offer.getJSONObject(ServerKey.LINKS)));
-			Date runFrom = Utils.parseDate(Json.valueOf(offer, ServerKey.RUN_FROM));
-			o.setRunFrom(runFrom);
-			Date runTill = Utils.parseDate(Json.valueOf(offer, ServerKey.RUN_TILL));
-			o.setRunTill(runTill);
-			o.setDealerUrl(Json.valueOf(offer, ServerKey.DEALER_URL));
-			o.setDealerId(Json.valueOf(offer, ServerKey.DEALER_ID));
-			o.setStoreUrl(Json.valueOf(offer, ServerKey.STORE_URL));
-			o.setStoreId(Json.valueOf(offer, ServerKey.STORE_ID));
-			o.setCatalogUrl(Json.valueOf(offer, ServerKey.CATALOG_URL));
-			o.setCatalogId(Json.valueOf(offer, ServerKey.CATALOG_ID));
+			offer.setId(Json.valueOf(jOffer, ServerKey.ID));
+			offer.setErn(Json.valueOf(jOffer, ServerKey.ERN));
+			offer.setHeading(Json.valueOf(jOffer, ServerKey.HEADING));
+			offer.setDescription(Json.valueOf(jOffer, ServerKey.DESCRIPTION));
+			offer.setCatalogPage(Json.valueOf(jOffer, ServerKey.CATALOG_PAGE, 0));
+			offer.setPricing(Pricing.fromJSON(jOffer.getJSONObject(ServerKey.PRICING)));
+			offer.setQuantity(Quantity.fromJSON(jOffer.getJSONObject(ServerKey.QUANTITY)));
+			offer.setImages(Images.fromJSON(jOffer.getJSONObject(ServerKey.IMAGES)));
+			offer.setLinks(Links.fromJSON(jOffer.getJSONObject(ServerKey.LINKS)));
+			Date runFrom = Utils.parseDate(Json.valueOf(jOffer, ServerKey.RUN_FROM));
+			offer.setRunFrom(runFrom);
+			Date runTill = Utils.parseDate(Json.valueOf(jOffer, ServerKey.RUN_TILL));
+			offer.setRunTill(runTill);
+			offer.setDealerUrl(Json.valueOf(jOffer, ServerKey.DEALER_URL));
+			offer.setDealerId(Json.valueOf(jOffer, ServerKey.DEALER_ID));
+			offer.setStoreUrl(Json.valueOf(jOffer, ServerKey.STORE_URL));
+			offer.setStoreId(Json.valueOf(jOffer, ServerKey.STORE_ID));
+			offer.setCatalogUrl(Json.valueOf(jOffer, ServerKey.CATALOG_URL));
+			offer.setCatalogId(Json.valueOf(jOffer, ServerKey.CATALOG_ID));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
-		return o;
+		return offer;
 	}
 
 	@Override

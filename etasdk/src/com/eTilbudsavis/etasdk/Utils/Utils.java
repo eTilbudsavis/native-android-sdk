@@ -255,10 +255,14 @@ public final class Utils {
 	}
 	
 	/**
-	 * A sorting method, that sorts shopping list items, according what eTilbudsavis
-	 * wants a list to look like. There is no candidness requiring you to use this sorting method.
-	 * This is only meant as a nice to have.
-	 * @param items to sort
+	 * Sorts {@link ShoppinglistItem}, according to what eTilbudsavis have defined
+	 * the order of a list should look be. This method does <b>not</b> update
+	 * the objects (as in {@link ShoppinglistItem#getPreviousId() previous_id}
+	 * isn't updated automatically).
+	 * 
+	 * <p>There is no requirement to use this sorting method. This is only meant
+	 * as a nice to have.</p>
+	 * @param items A {@link List} to sort
 	 */
 	public static void sortItems(List<ShoppinglistItem> items) {
 		int size = items.size();
@@ -313,8 +317,9 @@ public final class Utils {
 			}
 		}
 		
-		for (ShoppinglistItem s : prevItems.values())
+		for (ShoppinglistItem s : prevItems.values()) {
 			items.add(s);
+		}
 		
 	}
 	

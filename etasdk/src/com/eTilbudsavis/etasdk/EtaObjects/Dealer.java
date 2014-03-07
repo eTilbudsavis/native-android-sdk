@@ -54,7 +54,7 @@ public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 		return fromJSON(new Dealer(), dealer);
 	}
 	
-	private static Dealer fromJSON(Dealer d, JSONObject dealer) {
+	public static Dealer fromJSON(Dealer d, JSONObject dealer) {
 		if (d == null) d = new Dealer();
 		if (dealer == null) return d;
 		

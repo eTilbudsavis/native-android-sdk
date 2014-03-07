@@ -365,6 +365,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 			request.put("headers", new JSONObject(getHeaders()));
 			request.put("time", Utils.parseDate(new Date()));
 			request.put("response", response);
+			request.put("body", mRequestBody);
 			
 			getLog().setSummary(request);
 			

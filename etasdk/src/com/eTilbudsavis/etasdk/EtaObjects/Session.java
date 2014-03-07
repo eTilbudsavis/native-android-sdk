@@ -37,7 +37,7 @@ public class Session extends EtaObject implements Serializable {
 		s.setExpires(Json.valueOf(session, ServerKey.EXPIRES));
 		
 		JSONObject user = null;
-		if (session.has(ServerKey.USER)) {
+		if (!session.isNull(ServerKey.USER)) {
 			try {
 				user = session.getJSONObject(ServerKey.USER);
 			} catch (JSONException e) {
@@ -47,7 +47,7 @@ public class Session extends EtaObject implements Serializable {
 		s.setUser(user == null ? new User() : User.fromJSON(user));
 
 		JSONObject perm = null;
-		if (session.has(ServerKey.PERMISSIONS)) {
+		if (session.isNull(ServerKey.PERMISSIONS)) {
 			try {
 				perm = session.getJSONObject(ServerKey.PERMISSIONS);
 			} catch (JSONException e) {

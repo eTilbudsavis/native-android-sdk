@@ -17,6 +17,7 @@ import android.os.HandlerThread;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.SessionManager.OnSessionChangeListener;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject.State;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
@@ -62,7 +63,7 @@ public class ListSyncManager {
 	private OnSessionChangeListener sessionListener = new OnSessionChangeListener() {
 
 		public void onChange() {
-			if (mUser == null || mUser.getId() != mEta.getUser().getId()) {
+			if (mUser == null || mUser.getUserId() != mEta.getUser().getUserId()) {
 				mSyncCount = 0;
 				runSyncLoop();
 			}
@@ -154,7 +155,7 @@ public class ListSyncManager {
 	public void setSyncSpeed(int time) {
 		mSyncSpeed = time < 3000 ? 3000 : time;
 	}
-
+	
 	private void addRequest(Request<?> r) {
 		// No request from here should return a result from cache
 		r.setIgnoreCache(true);
@@ -165,11 +166,6 @@ public class ListSyncManager {
 		r.setHandler(mHandler);
 		
 		r.setTag(mRequestTag);
-		
-		if (r.getMethod() == Method.DELETE) {
-			r.debugNetwork(true);
-			r.debugPerformance(true);
-		}
 		
 		mEta.add(r);
 	}
@@ -274,12 +270,18 @@ public class ListSyncManager {
 		HashMap<String, Shoppinglist> serverset = new HashMap<String, Shoppinglist>();
 		HashSet<String> union = new HashSet<String>();
 		
-		for (Shoppinglist o : localList) {
-			localset.put(o.getId(), o);
+		for (Shoppinglist sl : localList) {
+			localset.put(sl.getId(), sl);
 		}
 
-		for (Shoppinglist o : serverList) {
-			serverset.put(o.getId(), o);
+		for (Shoppinglist sl : serverList) {
+			/* Set the state of all shares in the serverList to SYNCED, 
+			 * before inserting into the DB, as this is actually correct
+			 */
+			for (Share share : sl.getShares().values()) {
+				share.setState(State.SYNCED);
+			}
+			serverset.put(sl.getId(), sl);
 		}
 		
 		union.addAll(serverset.keySet());
@@ -431,12 +433,13 @@ public class ListSyncManager {
 					db.editList(sl, user);
 					
 					List<ShoppinglistItem> localItems = db.getItems(sl, user);
+					EtaLog.d(TAG, "LocalTime: " + new Date().toGMTString());
 					List<ShoppinglistItem> serverItems = ShoppinglistItem.fromJSON(response);
 					
 					// So far, we get items in reverse order, well just keep reversing it for now.
 					Collections.reverse(serverItems);
 					
-					// Sort items according to our definition of correct ordering
+					/* Sort items according to our definition of correct ordering */
 					Utils.sortItems(localItems);
 					Utils.sortItems(serverItems);
 					
@@ -444,6 +447,7 @@ public class ListSyncManager {
 					String id = ShoppinglistItem.FIRST_ITEM;
 					for (ShoppinglistItem sli : serverItems) {
 						if (!id.equals(sli.getPreviousId())) {
+							EtaLog.d(TAG, String.format("%s, prev: %s", sli.getTitle(), sli.getPreviousId()));
 							sli.setPreviousId(id);
 							sli.setModified(new Date());
 						}
@@ -468,9 +472,9 @@ public class ListSyncManager {
 		
 	}
 	
-	private void diffItems(List<ShoppinglistItem> newList, List<ShoppinglistItem> oldList, User user) {
+	private void diffItems(List<ShoppinglistItem> serverList, List<ShoppinglistItem> localList, User user) {
 		
-		if (newList.isEmpty() && oldList.isEmpty())
+		if (serverList.isEmpty() && localList.isEmpty())
 			return;
 		
 		DbHelper db = DbHelper.getInstance();
@@ -479,11 +483,11 @@ public class ListSyncManager {
 		HashMap<String, ShoppinglistItem> serverSet = new HashMap<String, ShoppinglistItem>();
 		HashSet<String> union = new HashSet<String>();
 		
-		for (ShoppinglistItem sli : oldList) {
+		for (ShoppinglistItem sli : localList) {
 			localSet.put(sli.getId(), sli);
 		}
 
-		for (ShoppinglistItem sli : newList) {
+		for (ShoppinglistItem sli : serverList) {
 			sli.setState(ShoppinglistItem.State.SYNCED);
 			serverSet.put(sli.getId(), sli);
 		}
@@ -506,6 +510,12 @@ public class ListSyncManager {
 					ShoppinglistItem serverSli = serverSet.get(key);
 					
 					if (localSli.getModified().before(serverSli.getModified())) {
+
+						if (localSli.getTitle().contains("lagkage")) {
+							EtaLog.d(TAG, String.format("Local: %s, mod: %s", localSli.getTitle(), (Utils.parseDate(localSli.getModified())) ));
+							EtaLog.d(TAG, String.format("Servr: %s, mod: %s", serverSli.getTitle(), (Utils.parseDate(serverSli.getModified())) ));
+						}
+						
 						edited.add(serverSli);
 						db.editItem(serverSli, user);
 					} else if (!localSli.getPreviousId().equals(serverSli.getPreviousId())) {
@@ -735,24 +745,24 @@ public class ListSyncManager {
 			
 			public void onComplete(JSONObject response, EtaError error) {
 				
-				ShoppinglistItem s = sli;
-				
 				if (response != null) {
 					
-					s = ShoppinglistItem.fromJSON(response);
+					ShoppinglistItem server = ShoppinglistItem.fromJSON(response);
 					ShoppinglistItem local = db.getItem(sli.getId(), user);
-					if (local != null && local.getModified().after(s.getModified()) ) {
-						s.setState(ShoppinglistItem.State.SYNCED);
+					if (local != null && local.getModified().after(server.getModified()) ) {
+						server.setState(ShoppinglistItem.State.SYNCED);
 						// If server havent delivered an prev_id, then use old id
-						s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
-						db.editItem(s, user);
+						if (server.getPreviousId() == null) {
+							server.setPreviousId(sli.getPreviousId());
+						}
+						db.editItem(server, user);
 					}
 					popRequest();
 					
 				} else {
 					popRequest();
 					if (error.getCode() != -1) {
-						revertItem(s, user);
+						revertItem(sli, user);
 					}
 				}
 

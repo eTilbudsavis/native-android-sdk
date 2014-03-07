@@ -59,7 +59,7 @@ public class Store extends EtaErnObject<Store> implements Serializable {
 		return fromJSON(new Store(), store);
 	}
 	
-	private static Store fromJSON(Store s, JSONObject store) {
+	public static Store fromJSON(Store s, JSONObject store) {
 		if (s == null) s = new Store();
 		if (store == null) return s;
 		
