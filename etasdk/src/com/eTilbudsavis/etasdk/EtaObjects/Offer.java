@@ -282,7 +282,7 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 	}
 	
 	/**
-	 * Returns the {@link Date} this offer will be valid from.
+	 * Returns the {@link Date} this offer is be valid from.
 	 * @return A {@link Date}, or <code>null</code>
 	 */
 	public Date getRunFrom() {
@@ -290,7 +290,7 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 	}
 	
 	/**
-	 * Set the {@link Date} this offer will be valid from.
+	 * Set the {@link Date} this offer is be valid from.
 	 * 
 	 * <p>The {@link Date#getTime() time} of the date will be floored to the
 	 * nearest second (i.e. milliseconds will be removed) as the server responds 
@@ -306,7 +306,7 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 	}
 	
 	/**
-	 * Returns the {@link Date} this offer will be valid till.
+	 * Returns the {@link Date} this offer is be valid till.
 	 * @return A {@link Date}, or <code>null</code>
 	 */
 	public Date getRunTill() {
@@ -314,7 +314,7 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 	}
 
 	/**
-	 * Set the {@link Date} this offer will be valid till.
+	 * Set the {@link Date} this offer is be valid till.
 	 * 
 	 * <p>The {@link Date#getTime() time} of the date will be floored to the
 	 * nearest second (i.e. milliseconds will be removed) as the server responds 

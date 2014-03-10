@@ -2,6 +2,11 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
+
 public abstract class EtaListObject<T> extends EtaErnObject<T> implements Comparable<T>, Serializable {
 	
 	public static final String TAG = "EtaListObject";
@@ -46,7 +51,41 @@ public abstract class EtaListObject<T> extends EtaErnObject<T> implements Compar
 		}
 		return (T)this;
 	}
+	
+	public String getStateString() {
+		
+		switch (mState) {
+		case State.TO_SYNC:
+			return "TO_SYNC";
 
+		case State.SYNCING:
+			return "SYNCING";
+
+		case State.SYNCED:
+			return "SYNCED";
+
+		case State.DELETE:
+			return "DELETE";
+			
+		case State.ERROR:
+			return "ERROR";
+
+		default:
+			break;
+		}
+		return null;
+	}
+	
+	public JSONObject toJSON() {
+		JSONObject o = super.toJSON();
+		try {
+			o.put("state", getStateString());
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
+		return o;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

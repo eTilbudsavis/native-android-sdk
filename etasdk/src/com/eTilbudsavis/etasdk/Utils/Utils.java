@@ -24,6 +24,8 @@ import java.util.regex.Pattern;
 
 import android.os.Bundle;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject.State;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 
@@ -264,7 +266,7 @@ public final class Utils {
 	 * as a nice to have.</p>
 	 * @param items A {@link List} to sort
 	 */
-	public static void sortItems(List<ShoppinglistItem> items) {
+	public static void sortItems(List<ShoppinglistItem> items, boolean updatePrevIds) {
 		int size = items.size();
 		
 		HashSet<String> allId = new HashSet<String>(size);
@@ -321,6 +323,23 @@ public final class Utils {
 			items.add(s);
 		}
 		
+		if (updatePrevIds) {
+			// Update previous_id's (and modified) if needed
+			String tmp = EtaListObject.FIRST_ITEM;
+			for (ShoppinglistItem sli : items) {
+				
+				if (!tmp.equals(sli.getPreviousId())) {
+					EtaLog.d(TAG, "BAAADDD");
+					EtaLog.d(TAG, sli.toJSON().toString());
+					sli.setPreviousId(tmp);
+					sli.setModified(new Date());
+					sli.setState(State.TO_SYNC);
+					EtaLog.d(TAG, sli.toJSON().toString());
+				}
+				tmp = sli.getId();
+			}
+		}
+		
 	}
 	
 	/**
@@ -356,6 +375,18 @@ public final class Utils {
 			date.setTime( 1000 * (date.getTime()/1000) );
 		}
 		return date;
+	}
+	
+	public static void printPrevId(String name, List<ShoppinglistItem> items) {
+		
+		StringBuilder sb = new StringBuilder();
+		for (ShoppinglistItem sli : items) {
+			sb.append(sli.getTitle()).append(" prev[").append(sli.getPreviousId()).append("]");
+			sb.append(" id[").append(sli.getId()).append("]");
+			sb.append(" -> ").append("\n");
+		}
+		EtaLog.d(TAG, name + "\n" + sb.toString());
+		
 	}
 	
 }

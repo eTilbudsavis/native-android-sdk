@@ -332,7 +332,7 @@ public class ListManager {
 	 */
 	public List<ShoppinglistItem> getItems(Shoppinglist sl) {
 		List<ShoppinglistItem> items = DbHelper.getInstance().getItems(sl, user());
-		Utils.sortItems(items);
+		Utils.sortItems(items, false);
 		return items;
 	}
 	

@@ -99,7 +99,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 			EtaLog.d(TAG, sli.getTitle() + " " + date);
 		}
 		sli.setModified( Utils.parseDate(date) );
-		sli.setPreviousId(Json.valueOf(jSli, ServerKey.PREVIOUS_ID, FIRST_ITEM));
+		sli.setPreviousId(Json.valueOf(jSli, ServerKey.PREVIOUS_ID, null));
 		
 		return sli;
 	}

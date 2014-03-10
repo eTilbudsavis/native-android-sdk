@@ -387,7 +387,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * Get all shoppinglists
+	 * Get all shoppinglists, deleted lists are not included
 	 * @return A list of shoppinglists
 	 */
 	public List<Shoppinglist> getLists(User user) {

@@ -158,6 +158,10 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 		return ERN_CATALOG;
 	}
 	
+	/**
+	 * TODO what is label?
+	 * @return
+	 */
 	public String getLabel() {
 		return mLabel;
 	}
@@ -166,7 +170,7 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 		mLabel = label;
 		return this;
 	}
-
+	
 	public String getBackground() {
 		return mBackground;
 	}
@@ -176,47 +180,104 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 		return this;
 	}
 
+	/**
+	 * Set the {@link Date} this catalog is be valid from.
+	 * 
+	 * <p>The {@link Date#getTime() time} of the date will be floored to the
+	 * nearest second (i.e. milliseconds will be removed) as the server responds 
+	 * in seconds and comparison of {@link Date}s will other wise be 
+	 * unpredictable/impossible.</p>
+	 * 
+	 * @param date A {@link Date}
+	 * @return This object
+	 */
 	public Catalog setRunFrom(Date time) {
 		mRunFrom = Utils.roundTime(time);
 		return this;
 	}
 
+	/**
+	 * Returns the {@link Date} this catalog is be valid from.
+	 * @return A {@link Date}, or <code>null</code>
+	 */
 	public Date getRunFrom() {
 		return mRunFrom;
 	}
 
+	/**
+	 * Set the {@link Date} this catalog is be valid till.
+	 * 
+	 * <p>The {@link Date#getTime() time} of the date will be floored to the
+	 * nearest second (i.e. milliseconds will be removed) as the server responds 
+	 * in seconds and comparison of {@link Date}s will other wise be 
+	 * unpredictable/impossible.</p>
+	 * 
+	 * @param date A {@link Date}
+	 * @return This object
+	 */
 	public Catalog setRunTill(Date time) {
 		mRunTill = Utils.roundTime(time);
 		return this;
 	}
 
+	/**
+	 * Returns the {@link Date} this catalog is be valid till.
+	 * @return A {@link Date}, or <code>null</code>
+	 */
 	public Date getRunTill() {
 		return mRunTill;
 	}
-
-	public Catalog setPageCount(Integer mPageCount) {
-		this.mPageCount = mPageCount;
+	
+	/**
+	 * Set the number of pages this catalog has.
+	 * @param pageCount Number of pages in this catalog
+	 * @return This object
+	 */
+	public Catalog setPageCount(Integer pageCount) {
+		mPageCount = pageCount;
 		return this;
 	}
-
+	
+	/**
+	 * Get the number of pages in this catalog
+	 * @return The number of pages
+	 */
 	public int getPageCount() {
 		return mPageCount;
 	}
-
-	public Catalog setOfferCount(Integer mOfferCount) {
-		this.mOfferCount = mOfferCount;
+	
+	/**
+	 * Set the number of {@link Offer} in this catalog.
+	 * @param offerCount The number of offers
+	 * @return This object
+	 */
+	public Catalog setOfferCount(Integer offerCount) {
+		this.mOfferCount = offerCount;
 		return this;
 	}
-
+	
+	/**
+	 * Get the number of {@link Offer}s in this catalog.
+	 * @return The number of catalogs
+	 */
 	public int getOfferCount() {
 		return mOfferCount;
 	}
-
+	
+	/**
+	 * Set the {@link Branding} to apply to this catalog.
+	 * @param branding
+	 * @return
+	 */
 	public Catalog setBranding(Branding branding) {
 		this.mBranding = branding;
 		return this;
 	}
-
+	
+	/**
+	 * Get the branding, that is applied to this catalog.
+	 * @return A {@link Branding} object
+	 */
 	public Branding getBranding() {
 		return mBranding;
 	}

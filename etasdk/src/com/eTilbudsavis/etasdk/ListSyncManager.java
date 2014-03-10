@@ -17,6 +17,7 @@ import android.os.HandlerThread;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.SessionManager.OnSessionChangeListener;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject.State;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
@@ -106,8 +107,10 @@ public class ListSyncManager {
 			
 			// Now finally we can query the server for any remote changes
             if (mSyncCount%3 == 0) {
+    			EtaLog.d(TAG, "AutoSyncLists");
                 syncLists(user);
             } else {
+    			EtaLog.d(TAG, "AutoSyncModified");
                 syncListsModified(user);
             }
             mSyncCount++;
@@ -118,7 +121,7 @@ public class ListSyncManager {
 	
 	public ListSyncManager(Eta eta) {
 		mEta = eta;
-		//TODO: Why do i create a new thread for a Handler?
+		// Create a new thread for a handler, so that i can later post content to that thread.
 		HandlerThread mThread = new HandlerThread(THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
 		mThread.start();
 		mHandler = new Handler(mThread.getLooper());
@@ -162,6 +165,7 @@ public class ListSyncManager {
 		synchronized (mCurrentRequests) {
 			mCurrentRequests.add(r);
 		}
+		
 		// Make sure, that requests will return to this thread
 		r.setHandler(mHandler);
 		
@@ -190,55 +194,26 @@ public class ListSyncManager {
 		Listener<JSONArray> listListener = new Listener<JSONArray>() {
 			
 			public void onComplete(JSONArray response, EtaError error) {
-
+				
 				if (response != null) {
 					
+					DbHelper db = DbHelper.getInstance();
+					List<Shoppinglist> localList = db.getLists(user);
 					List<Shoppinglist> serverList = Shoppinglist.fromJSON(response);
 					
 					// Server usually returns items in the order oldest to newest (not guaranteed)
 					// We want them to be reversed
 					Collections.reverse(serverList);
 					
-					for (Shoppinglist sl : serverList) {
-						if (sl.getPreviousId() == null)
-						sl.setPreviousId(Shoppinglist.FIRST_ITEM);
-					}
+					prepareServerList(serverList);
 					
-					DbHelper db = DbHelper.getInstance();
-					List<Shoppinglist> localList = db.getLists(user);
 					mergeShoppinglists(serverList, localList, user);
 					
 					// On first iteration, check and merge lists plus notify subscribers of first sync event
 					if (mSyncCount == 1) {
 						
 						if (serverList.isEmpty() && localList.isEmpty()) {
-							
-							User nou = new User();
-							List<Shoppinglist> noUserLists = db.getLists(nou);
-							
-							if (noUserLists.isEmpty()) {
-								return; 
-							}
-							
-							for (Shoppinglist sl : noUserLists) {
-								
-								List<ShoppinglistItem> noUserItems = db.getItems(sl, nou);
-								if (noUserItems.isEmpty()) {
-									continue;
-								}
-								
-								Shoppinglist tmpSl = Shoppinglist.fromName(sl.getName());
-								tmpSl.setType(sl.getType());
-								
-								mEta.getListManager().addList(tmpSl);
-								
-								for (ShoppinglistItem sli : noUserItems) {
-									sli.setShoppinglistId(tmpSl.getId());
-									sli.setId(Utils.createUUID());
-									sli.setErn("ern:shopping:item:" + sli.getId());
-									mEta.getListManager().addItem(sli);
-								}
-							}
+							migrateOfflineLists();
 						}
 						
 						mEta.getListManager().notifyFirstSync();
@@ -259,20 +234,7 @@ public class ListSyncManager {
 		
 	}
 	
-	private void mergeShoppinglists(List<Shoppinglist> serverList, List<Shoppinglist> localList, User user) {
-		
-		if (serverList.isEmpty() && localList.isEmpty())
-			return;
-		
-		DbHelper db = DbHelper.getInstance();
-		
-		HashMap<String, Shoppinglist> localset = new HashMap<String, Shoppinglist>();
-		HashMap<String, Shoppinglist> serverset = new HashMap<String, Shoppinglist>();
-		HashSet<String> union = new HashSet<String>();
-		
-		for (Shoppinglist sl : localList) {
-			localset.put(sl.getId(), sl);
-		}
+	private void prepareServerList(List<Shoppinglist> serverList) {
 
 		for (Shoppinglist sl : serverList) {
 			/* Set the state of all shares in the serverList to SYNCED, 
@@ -281,71 +243,120 @@ public class ListSyncManager {
 			for (Share share : sl.getShares().values()) {
 				share.setState(State.SYNCED);
 			}
-			serverset.put(sl.getId(), sl);
-		}
-		
-		union.addAll(serverset.keySet());
-		union.addAll(localset.keySet());
-
-		List<Shoppinglist> added = new ArrayList<Shoppinglist>();
-		List<Shoppinglist> deleted = new ArrayList<Shoppinglist>();
-		List<Shoppinglist> edited = new ArrayList<Shoppinglist>();
-
-		for (String key : union) {
-			
-			if (localset.containsKey(key)) {
-				
-				if (serverset.containsKey(key)) {
-					
-					Shoppinglist serverSl = serverset.get(key);
-					Shoppinglist localSl = localset.get(key);
-					
-					if (localSl.getModified().before(serverSl.getModified())) {
-						serverSl.setState(Shoppinglist.State.SYNCED);
-						edited.add(serverSl);
-						db.editList(serverSl, user);
-						db.cleanShares(serverSl, user);
-					}
-					
-				} else {
-					deleted.add(localset.get(key));
-					db.deleteList(localset.get(key), user);
-				}
-			} else {
-				Shoppinglist sl = serverset.get(key);
-				sl.setState(Shoppinglist.State.TO_SYNC);
-				added.add(sl);
-				db.insertList(sl, user);
-			}
-			
-		}
-		
-		// If no changes has been registeres, ship the rest
-		if (!added.isEmpty() || !deleted.isEmpty() || !edited.isEmpty()) {
-
-			List<ShoppinglistItem> delItems = new ArrayList<ShoppinglistItem>();
-			for (Shoppinglist sl : deleted) {
-				delItems.addAll(db.getItems(sl, user));
-				db.deleteItems(sl.getId(), null, user);
-			}
-			
-			addItemNotification(null, delItems, null);
-
-			// Bundle all this so items, lists e.t.c. is done syncing and in DB, before notifying anyone
-			addListNotification(added, deleted, edited);
-			
-			for (Shoppinglist sl : added) {
-				syncItems(sl, user);
-			}
-			
-			for (Shoppinglist sl : edited) {
-				syncItems(sl, user);
-			}
 			
 		}
 		
 	}
 	
+	private void mergeShoppinglists(List<Shoppinglist> serverList, List<Shoppinglist> localList, User user) {
+		
+		if (serverList.isEmpty() && localList.isEmpty()) {
+			return;
+		}
+		
+		DbHelper db = DbHelper.getInstance();
+		
+		HashMap<String, Shoppinglist> localMap = new HashMap<String, Shoppinglist>();
+		HashMap<String, Shoppinglist> serverMap = new HashMap<String, Shoppinglist>();
+		HashSet<String> union = new HashSet<String>();
+		
+		for (Shoppinglist sl : localList) {
+			localMap.put(sl.getId(), sl);
+		}
+		
+		for (Shoppinglist sl : serverList) {
+			serverMap.put(sl.getId(), sl);
+		}
+		
+		union.addAll(serverMap.keySet());
+		union.addAll(localMap.keySet());
+		
+		for (String key : union) {
+			
+			if (localMap.containsKey(key)) {
+
+				Shoppinglist localSl = localMap.get(key);
+				
+				if (serverMap.containsKey(key)) {
+					
+					Shoppinglist serverSl = serverMap.get(key);
+					
+					if (localSl.getModified().before(serverSl.getModified())) {
+						serverSl.setState(State.SYNCED);
+						mListEdited.add(serverSl);
+						db.editList(serverSl, user);
+						db.cleanShares(serverSl, user);
+					} else {
+						// Don't do anything, next iteration will put local changes to API
+					}
+					
+				} else {
+					
+					mListDeleted.add(localSl);
+					for (ShoppinglistItem sli : db.getItems(localSl, user)) {
+						mItemDeleted.add(sli);
+					}
+					db.deleteItems(localSl.getId(), null, user);
+					db.deleteList(localSl, user);
+				}
+				
+			} else {
+				
+				Shoppinglist add = serverMap.get(key);
+				add.setState(State.TO_SYNC);
+				mListAdded.add(add);
+				db.insertList(add, user);
+				
+			}
+			
+		}
+		
+		for (Shoppinglist sl : mListAdded) {
+			syncItems(sl, user);
+		}
+			
+		for (Shoppinglist sl : mListEdited) {
+			syncItems(sl, user);
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * @param serverList
+	 * @param localList
+	 */
+	private void migrateOfflineLists() {
+		
+		DbHelper db = DbHelper.getInstance();
+		
+		User offlineUser = new User();
+		List<Shoppinglist> offlineUserLists = db.getLists(offlineUser);
+		
+		if (offlineUserLists.isEmpty()) {
+			return;
+		}
+		
+		for (Shoppinglist sl : offlineUserLists) {
+			
+			List<ShoppinglistItem> noUserItems = db.getItems(sl, offlineUser);
+			if (noUserItems.isEmpty()) {
+				continue;
+			}
+			
+			Shoppinglist tmpSl = Shoppinglist.fromName(sl.getName());
+			tmpSl.setType(sl.getType());
+			
+			mEta.getListManager().addList(tmpSl);
+			
+			for (ShoppinglistItem sli : noUserItems) {
+				sli.setShoppinglistId(tmpSl.getId());
+				sli.setId(Utils.createUUID());
+				mEta.getListManager().addItem(sli);
+			}
+		}
+			
+	}
 	
 	/**
 	 * Sync all shopping list items, in all shopping lists.<br>
@@ -355,23 +366,23 @@ public class ListSyncManager {
 	public void syncListsModified(final User user) {
 
 		final DbHelper db = DbHelper.getInstance();
-		List<Shoppinglist> currentList = db.getLists(user);
+		List<Shoppinglist> localLists = db.getLists(user);
 		
-		for (final Shoppinglist sl : currentList) {
+		for (final Shoppinglist sl : localLists) {
 			
 			// If they are in the state of processing, then skip
-			if (sl.getState() == Shoppinglist.State.SYNCING || sl.getState() == Shoppinglist.State.DELETE) 
+			if (sl.getState() == State.SYNCING) 
 				continue;
 			
 			// If it obviously needs to sync, then just do it
-			if (sl.getState() == Shoppinglist.State.TO_SYNC) {
+			if (sl.getState() == State.TO_SYNC) {
 				// New shopping lists must always sync
 				syncItems(sl, user);
 				continue;
 			} 
 			
 			// Run the check 
-			sl.setState(Shoppinglist.State.SYNCING);
+			sl.setState(State.SYNCING);
 			db.editList(sl, user);
 			
 			Listener<JSONObject> modifiedListener = new Listener<JSONObject>() {
@@ -381,21 +392,29 @@ public class ListSyncManager {
 
 					if (response != null) {
 						
-						sl.setState(Shoppinglist.State.SYNCED);
+						sl.setState(State.SYNCED);
 						try {
 							String modified = response.getString(EtaObject.ServerKey.MODIFIED);
-							Date date = Utils.parseDate(modified);
-							if (sl.getModified().before(date)) {
+							// If local list has been modified before the server list, then sync items
+							if (sl.getModified().before(Utils.parseDate(modified))) {
+								// If there are changes, update items (this will update list-state in DB)
 								syncItems(sl, user);
+							} else {
+								// if no changes, just write new state to DB
+								db.editList(sl, user);
 							}
 						} catch (JSONException e) {
 							EtaLog.d(TAG, e);
+							// error? just write new state to DB, next iteration will fix it
+							db.editList(sl, user);
 						}
-						db.editList(sl, user);
 						pushNotifications();
+						
 					} else {
+						
 						popRequest();
 						revertList(sl, user);
+						
 					}
 					
 					
@@ -420,7 +439,7 @@ public class ListSyncManager {
 
 		final DbHelper db = DbHelper.getInstance();
 		
-		sl.setState(Shoppinglist.State.SYNCING);
+		sl.setState(State.SYNCING);
 		db.editList(sl, user);
 		
 		Listener<JSONArray> itemListener = new Listener<JSONArray>() {
@@ -429,30 +448,22 @@ public class ListSyncManager {
 
 				if (response != null) {
 					
-					sl.setState(Shoppinglist.State.SYNCED);
+					sl.setState(State.SYNCED);
 					db.editList(sl, user);
 					
 					List<ShoppinglistItem> localItems = db.getItems(sl, user);
-					EtaLog.d(TAG, "LocalTime: " + new Date().toGMTString());
 					List<ShoppinglistItem> serverItems = ShoppinglistItem.fromJSON(response);
 					
 					// So far, we get items in reverse order, well just keep reversing it for now.
 					Collections.reverse(serverItems);
+
+					for (ShoppinglistItem sli : serverItems) {
+						sli.setState(State.SYNCED);
+					}
 					
 					/* Sort items according to our definition of correct ordering */
-					Utils.sortItems(localItems);
-					Utils.sortItems(serverItems);
-					
-					// Update previous_id's (and modified) if needed
-					String id = ShoppinglistItem.FIRST_ITEM;
-					for (ShoppinglistItem sli : serverItems) {
-						if (!id.equals(sli.getPreviousId())) {
-							EtaLog.d(TAG, String.format("%s, prev: %s", sli.getTitle(), sli.getPreviousId()));
-							sli.setPreviousId(id);
-							sli.setModified(new Date());
-						}
-						id = sli.getId();
-					}
+					Utils.sortItems(localItems, false);
+					Utils.sortItems(serverItems, true);
 					
 					diffItems(serverItems, localItems, user);
 					
@@ -472,53 +483,46 @@ public class ListSyncManager {
 		
 	}
 	
-	private void diffItems(List<ShoppinglistItem> serverList, List<ShoppinglistItem> localList, User user) {
+	private void diffItems(List<ShoppinglistItem> serverItems, List<ShoppinglistItem> localItems, User user) {
 		
-		if (serverList.isEmpty() && localList.isEmpty())
+		if (serverItems.isEmpty() && localItems.isEmpty()) {
 			return;
+		}
 		
 		DbHelper db = DbHelper.getInstance();
 		
-		HashMap<String, ShoppinglistItem> localSet = new HashMap<String, ShoppinglistItem>();
-		HashMap<String, ShoppinglistItem> serverSet = new HashMap<String, ShoppinglistItem>();
+		HashMap<String, ShoppinglistItem> localMap = new HashMap<String, ShoppinglistItem>();
+		HashMap<String, ShoppinglistItem> serverMap = new HashMap<String, ShoppinglistItem>();
 		HashSet<String> union = new HashSet<String>();
 		
-		for (ShoppinglistItem sli : localList) {
-			localSet.put(sli.getId(), sli);
+		for (ShoppinglistItem sli : localItems) {
+			localMap.put(sli.getId(), sli);
 		}
 
-		for (ShoppinglistItem sli : serverList) {
-			sli.setState(ShoppinglistItem.State.SYNCED);
-			serverSet.put(sli.getId(), sli);
+		for (ShoppinglistItem sli : serverItems) {
+			serverMap.put(sli.getId(), sli);
 		}
 		
-		union.addAll(serverSet.keySet());
-		union.addAll(localSet.keySet());
-
-		List<ShoppinglistItem> added = new ArrayList<ShoppinglistItem>();
-		List<ShoppinglistItem> deleted = new ArrayList<ShoppinglistItem>();
-		List<ShoppinglistItem> edited = new ArrayList<ShoppinglistItem>();
+		union.addAll(serverMap.keySet());
+		union.addAll(localMap.keySet());
 		
 		for (String key : union) {
 			
-			if (localSet.containsKey(key)) {
+			if (localMap.containsKey(key)) {
 
-				ShoppinglistItem localSli = localSet.get(key);
+				ShoppinglistItem localSli = localMap.get(key);
 				
-				if (serverSet.containsKey(key)) {
+				if (serverMap.containsKey(key)) {
 					
-					ShoppinglistItem serverSli = serverSet.get(key);
+					ShoppinglistItem serverSli = serverMap.get(key);
 					
 					if (localSli.getModified().before(serverSli.getModified())) {
-
-						if (localSli.getTitle().contains("lagkage")) {
-							EtaLog.d(TAG, String.format("Local: %s, mod: %s", localSli.getTitle(), (Utils.parseDate(localSli.getModified())) ));
-							EtaLog.d(TAG, String.format("Servr: %s, mod: %s", serverSli.getTitle(), (Utils.parseDate(serverSli.getModified())) ));
-						}
-						
-						edited.add(serverSli);
+						mItemEdited.add(serverSli);
 						db.editItem(serverSli, user);
+						
 					} else if (!localSli.getPreviousId().equals(serverSli.getPreviousId())) {
+						
+						EtaLog.d(TAG, "How often does this happen?");
 						
 						// This is a special case, thats only relevant as long as the
 						// server isn't sending previous_id's
@@ -526,20 +530,18 @@ public class ListSyncManager {
 						db.editItem(localSli, user);
 						
 					}
+					
 				} else {
-					deleted.add(localSet.get(key));
-					db.deleteItem(localSet.get(key), user);
+					ShoppinglistItem delSli = localMap.get(key);
+					mItemDeleted.add(delSli);
+					db.deleteItem(delSli, user);
 				}
+				
 			} else {
-				ShoppinglistItem serverSli = serverSet.get(key);
-				added.add(serverSli);
+				ShoppinglistItem serverSli = serverMap.get(key);
+				mItemAdded.add(serverSli);
 				db.insertItem(serverSli, user);
 			}
-		}
-		
-		// If no changes has been registeres, ship the rest
-		if (!added.isEmpty() || !deleted.isEmpty() || !edited.isEmpty()) {
-			addItemNotification(added, deleted, edited);
 		}
 		
 	}
@@ -556,15 +558,15 @@ public class ListSyncManager {
 
 			switch (sl.getState()) {
 
-			case Shoppinglist.State.TO_SYNC:
+			case State.TO_SYNC:
 				putList(sl, user);
 				break;
 
-			case Shoppinglist.State.DELETE:
+			case State.DELETE:
 				delList(sl, user);
 				break;
 
-			case Shoppinglist.State.ERROR:
+			case State.ERROR:
 				revertList(sl, user);
 				break;
 
@@ -593,15 +595,15 @@ public class ListSyncManager {
 		for (ShoppinglistItem sli : items) {
 
 			switch (sli.getState()) {
-			case ShoppinglistItem.State.TO_SYNC:
+			case State.TO_SYNC:
 				putItem(sli, user);
 				break;
 
-			case ShoppinglistItem.State.DELETE:
+			case State.DELETE:
 				delItem(sli, user);
 				break;
 
-			case ShoppinglistItem.State.ERROR:
+			case State.ERROR:
 				revertItem(sli, user);
 				break;
 
@@ -620,7 +622,7 @@ public class ListSyncManager {
 
 		final DbHelper db = DbHelper.getInstance();
 		
-		sl.setState(Shoppinglist.State.SYNCING);
+		sl.setState(State.SYNCING);
 		db.editList(sl, user);
 		
 		Listener<JSONObject> listListener = new Listener<JSONObject>() {
@@ -633,7 +635,7 @@ public class ListSyncManager {
 					s = Shoppinglist.fromJSON(response);
 					Shoppinglist dbList = db.getList(s.getId(), user);
 					if (dbList != null && !s.getModified().before(dbList.getModified()) ) {
-						s.setState(Shoppinglist.State.SYNCED);
+						s.setState(State.SYNCED);
 						// If server haven't delivered an prev_id, then use old id
 						s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
 						db.editList(s, user);
@@ -702,8 +704,8 @@ public class ListSyncManager {
 		
 		final DbHelper db = DbHelper.getInstance();
 		
-		if (sl.getState() != Shoppinglist.State.ERROR) {
-			sl.setState(Shoppinglist.State.ERROR);
+		if (sl.getState() != State.ERROR) {
+			sl.setState(State.ERROR);
 			db.editList(sl, user);
 		}
 		
@@ -714,14 +716,14 @@ public class ListSyncManager {
 				Shoppinglist s = null;
 				if (response != null) {
 					s = Shoppinglist.fromJSON(response);
-					s.setState(Shoppinglist.State.SYNCED);
+					s.setState(State.SYNCED);
 					s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
 					db.editList(s, user);
-					addListNotification(null, null, idToList(s));
+					mListAdded.add(s);
 					syncLocalItemChanges(sl, user);
 				} else {
 					db.deleteList(sl, user);
-					addListNotification(null, idToList(s), null);
+					mListAdded.add(s);
 				}
 				pushNotifications();
 			}
@@ -738,7 +740,7 @@ public class ListSyncManager {
 
 		final DbHelper db = DbHelper.getInstance();
 		
-		sli.setState(ShoppinglistItem.State.SYNCING);
+		sli.setState(State.SYNCING);
 		db.editItem(sli, user);
 		
 		Listener<JSONObject> itemListener = new Listener<JSONObject>() {
@@ -750,7 +752,7 @@ public class ListSyncManager {
 					ShoppinglistItem server = ShoppinglistItem.fromJSON(response);
 					ShoppinglistItem local = db.getItem(sli.getId(), user);
 					if (local != null && local.getModified().after(server.getModified()) ) {
-						server.setState(ShoppinglistItem.State.SYNCED);
+						server.setState(State.SYNCED);
 						// If server havent delivered an prev_id, then use old id
 						if (server.getPreviousId() == null) {
 							server.setPreviousId(sli.getPreviousId());
@@ -813,8 +815,8 @@ public class ListSyncManager {
 		
 		final DbHelper db = DbHelper.getInstance();
 		
-		if (sli.getState() != ShoppinglistItem.State.ERROR) {
-			sli.setState(ShoppinglistItem.State.ERROR);
+		if (sli.getState() != State.ERROR) {
+			sli.setState(State.ERROR);
 			db.editItem(sli, user);
 		}
 		
@@ -825,13 +827,13 @@ public class ListSyncManager {
 				ShoppinglistItem s = null;
 				if (response != null) {
 					s = ShoppinglistItem.fromJSON(response);
-					s.setState(ShoppinglistItem.State.SYNCED);
+					s.setState(State.SYNCED);
 					s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
 					db.editItem(s, user);
-					addItemNotification(null, null, idToList(s));
+					mItemEdited.add(s);
 				} else {
 					db.deleteItem(sli, user);
-					addItemNotification(null, idToList(s), null);
+					mItemDeleted.add(s);
 				}
 				pushNotifications();
 			}
@@ -854,15 +856,15 @@ public class ListSyncManager {
 		for (Share s : shares) {
 			
 			switch (s.getState()) {
-			case Share.State.TO_SYNC:
+			case State.TO_SYNC:
 				putShare(sl, s, user);
 				break;
 
-			case Share.State.DELETE:
+			case State.DELETE:
 				delShare(s, user);
 				break;
 				
-			case Share.State.ERROR:
+			case State.ERROR:
 				revertShare(s, user);
 				break;
 				
@@ -881,7 +883,7 @@ public class ListSyncManager {
 
 		final DbHelper db = DbHelper.getInstance();
 		
-		s.setState(Share.State.SYNCING);
+		s.setState(State.SYNCING);
 		db.editShare(s, user);
 		
 		Listener<JSONObject> shareListener = new Listener<JSONObject>() {
@@ -890,7 +892,7 @@ public class ListSyncManager {
 
 				if (response != null) {
 					Share tmp = Share.fromJSON(response);
-					tmp.setState(Share.State.SYNCED);
+					tmp.setState(State.SYNCED);
 					tmp.setShoppinglistId(s.getShoppinglistId());
 					popRequest();
 				} else {
@@ -959,8 +961,8 @@ public class ListSyncManager {
 		
 		final DbHelper db = DbHelper.getInstance();
 		
-		if (s.getState() != Share.State.ERROR) {
-			s.setState(Share.State.ERROR);
+		if (s.getState() != State.ERROR) {
+			s.setState(State.ERROR);
 			db.editShare(s, user);
 		}
 		
@@ -971,7 +973,7 @@ public class ListSyncManager {
 				Share tmp = null;
 				if (response != null) {
 					tmp = Share.fromJSON(response);
-					tmp.setState(ShoppinglistItem.State.SYNCED);
+					tmp.setState(State.SYNCED);
 					tmp.setShoppinglistId(s.getShoppinglistId());
 					db.editShare(tmp, user);
 				} else {
@@ -1001,39 +1003,29 @@ public class ListSyncManager {
 		return list;
 	}
 
-	List<ShoppinglistItem> mItemAdded = new ArrayList<ShoppinglistItem>(0);
-	List<ShoppinglistItem> mItemDeleted = new ArrayList<ShoppinglistItem>(0);
-	List<ShoppinglistItem> mItemEdited = new ArrayList<ShoppinglistItem>(0);
+	List<ShoppinglistItem> mItemAdded = Collections.synchronizedList(new ArrayList<ShoppinglistItem>());
+	List<ShoppinglistItem> mItemDeleted = Collections.synchronizedList(new ArrayList<ShoppinglistItem>());
+	List<ShoppinglistItem> mItemEdited = Collections.synchronizedList(new ArrayList<ShoppinglistItem>());
 
-	List<Shoppinglist> mListAdded = new ArrayList<Shoppinglist>(0);
-	List<Shoppinglist> mListDeleted = new ArrayList<Shoppinglist>(0);
-	List<Shoppinglist> mListEdited = new ArrayList<Shoppinglist>(0);
-	
-	private void addItemNotification(List<ShoppinglistItem> added, List<ShoppinglistItem> deleted, List<ShoppinglistItem> edited) {
-		mItemAdded.addAll(added == null ? new ArrayList<ShoppinglistItem>(0) : added);
-		mItemDeleted.addAll(deleted == null ? new ArrayList<ShoppinglistItem>(0) : deleted);
-		mItemEdited.addAll(edited == null ? new ArrayList<ShoppinglistItem>(0) : edited);
-	}
-	
-	private void addListNotification(List<Shoppinglist> added, List<Shoppinglist> deleted, List<Shoppinglist> edited) {
-		mListAdded.addAll(added == null ? new ArrayList<Shoppinglist>(0) : added);
-		mListDeleted.addAll(deleted == null ? new ArrayList<Shoppinglist>(0) : deleted);
-		mListEdited.addAll(edited == null ? new ArrayList<Shoppinglist>(0) : edited);
-	}
+	List<Shoppinglist> mListAdded = Collections.synchronizedList(new ArrayList<Shoppinglist>());
+	List<Shoppinglist> mListDeleted = Collections.synchronizedList(new ArrayList<Shoppinglist>());
+	List<Shoppinglist> mListEdited = Collections.synchronizedList(new ArrayList<Shoppinglist>());
 	
 	private void pushNotifications() {
 		
 		popRequest();
 		if (mCurrentRequests.isEmpty()) {
 			
-			if (!mListAdded.isEmpty() || !mListDeleted.isEmpty() || !mListEdited.isEmpty()) {
+			boolean listsEmpty = mListAdded.isEmpty() && mListDeleted.isEmpty() && mListEdited.isEmpty();
+			if (!listsEmpty) {
 				Eta.getInstance().getListManager().notifyListSubscribers(true, mListAdded, mListDeleted, mListEdited);
 				mListAdded.clear();
 				mListDeleted.clear();
 				mListEdited.clear();
 			}
-			
-			if (!mItemAdded.isEmpty() || !mItemDeleted.isEmpty() || !mItemEdited.isEmpty()) {
+
+			boolean itemssEmpty = mItemAdded.isEmpty() && mItemDeleted.isEmpty() && mItemEdited.isEmpty();
+			if (!itemssEmpty) {
 				Eta.getInstance().getListManager().notifyItemSubscribers(true, mItemAdded, mItemDeleted, mItemEdited);
 				mItemAdded.clear();
 				mItemDeleted.clear();
