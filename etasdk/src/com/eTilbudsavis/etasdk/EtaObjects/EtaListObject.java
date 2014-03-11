@@ -69,7 +69,7 @@ public abstract class EtaListObject<T> extends EtaErnObject<T> implements Compar
 			
 		case State.ERROR:
 			return "ERROR";
-
+			
 		default:
 			break;
 		}

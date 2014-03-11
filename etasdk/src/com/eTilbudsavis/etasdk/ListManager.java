@@ -230,7 +230,7 @@ public class ListManager {
 			return false;
 		}
 		
-		if (!oldList.getPreviousId().equals(sl.getPreviousId())) {
+		if (oldList.getPreviousId() != null && !oldList.getPreviousId().equals(sl.getPreviousId())) {
 			
 			// If there is an item pointing at sl, it needs to point at the oldList.prev
 			Shoppinglist sliAfter = db.getListPrevious(sl.getId(), user);
@@ -332,7 +332,7 @@ public class ListManager {
 	 */
 	public List<ShoppinglistItem> getItems(Shoppinglist sl) {
 		List<ShoppinglistItem> items = DbHelper.getInstance().getItems(sl, user());
-		Utils.sortItems(items, false);
+		Utils.sortItems(items);
 		return items;
 	}
 	

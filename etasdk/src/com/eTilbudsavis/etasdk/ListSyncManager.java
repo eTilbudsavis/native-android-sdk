@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import org.json.JSONArray;
@@ -17,8 +18,8 @@ import android.os.HandlerThread;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.SessionManager.OnSessionChangeListener;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject.State;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
@@ -107,10 +108,8 @@ public class ListSyncManager {
 			
 			// Now finally we can query the server for any remote changes
             if (mSyncCount%3 == 0) {
-    			EtaLog.d(TAG, "AutoSyncLists");
                 syncLists(user);
             } else {
-    			EtaLog.d(TAG, "AutoSyncModified");
                 syncListsModified(user);
             }
             mSyncCount++;
@@ -171,6 +170,11 @@ public class ListSyncManager {
 		
 		r.setTag(mRequestTag);
 		
+		boolean isPullRequest = r.getUrl().contains("modified") || r.getUrl().endsWith("shoppinglists") || r.getUrl().endsWith("items");
+		if (!isPullRequest) {
+			EtaLog.d(TAG, r.getMethodString() + ": " + r.getUrl());
+		}
+		
 		mEta.add(r);
 	}
 	
@@ -207,7 +211,7 @@ public class ListSyncManager {
 					
 					prepareServerList(serverList);
 					
-					mergeShoppinglists(serverList, localList, user);
+					mergeListsToDb(serverList, localList, user);
 					
 					// On first iteration, check and merge lists plus notify subscribers of first sync event
 					if (mSyncCount == 1) {
@@ -248,7 +252,7 @@ public class ListSyncManager {
 		
 	}
 	
-	private void mergeShoppinglists(List<Shoppinglist> serverList, List<Shoppinglist> localList, User user) {
+	private void mergeListsToDb(List<Shoppinglist> serverList, List<Shoppinglist> localList, User user) {
 		
 		if (serverList.isEmpty() && localList.isEmpty()) {
 			return;
@@ -283,7 +287,7 @@ public class ListSyncManager {
 					
 					if (localSl.getModified().before(serverSl.getModified())) {
 						serverSl.setState(State.SYNCED);
-						mListEdited.add(serverSl);
+						mListEdited.put(serverSl.getId(), serverSl);
 						db.editList(serverSl, user);
 						db.cleanShares(serverSl, user);
 					} else {
@@ -292,9 +296,9 @@ public class ListSyncManager {
 					
 				} else {
 					
-					mListDeleted.add(localSl);
+					mListDeleted.put(localSl.getId(), localSl);
 					for (ShoppinglistItem sli : db.getItems(localSl, user)) {
-						mItemDeleted.add(sli);
+						mItemDeleted.put(sli.getId(), sli);
 					}
 					db.deleteItems(localSl.getId(), null, user);
 					db.deleteList(localSl, user);
@@ -304,18 +308,18 @@ public class ListSyncManager {
 				
 				Shoppinglist add = serverMap.get(key);
 				add.setState(State.TO_SYNC);
-				mListAdded.add(add);
+				mListAdded.put(add.getId(), add);
 				db.insertList(add, user);
 				
 			}
 			
 		}
 		
-		for (Shoppinglist sl : mListAdded) {
+		for (Shoppinglist sl : mListAdded.values()) {
 			syncItems(sl, user);
 		}
 			
-		for (Shoppinglist sl : mListEdited) {
+		for (Shoppinglist sl : mListEdited.values()) {
 			syncItems(sl, user);
 		}
 		
@@ -461,11 +465,35 @@ public class ListSyncManager {
 						sli.setState(State.SYNCED);
 					}
 					
-					/* Sort items according to our definition of correct ordering */
-					Utils.sortItems(localItems, false);
-					Utils.sortItems(serverItems, true);
+					mergeItemsToDb(serverItems, localItems, user);
 					
-					diffItems(serverItems, localItems, user);
+					/* fetch updated items from DB, as the state might be a bit
+					 * whack after the merging of items */
+					localItems = db.getItems(sl, user);
+					Utils.sortItems(localItems);
+					
+					/* Update previous_id's, modified and state if needed */
+					String tmp = EtaListObject.FIRST_ITEM;
+					for (ShoppinglistItem sli : localItems) {
+						
+						if (!tmp.equals(sli.getPreviousId())) {
+							sli.setPreviousId(tmp);
+							sli.setModified(new Date());
+							sli.setState(State.TO_SYNC);
+							
+							/* If it's a new item, it's already in the added list,
+							 * then we'll override it else add it to the edited
+							 * as a new item to the edited list */
+							if (mItemAdded.containsKey(sli.getId())) {
+								mItemAdded.put(sli.getId(), sli);
+							} else {
+								mItemEdited.put(sli.getId(), sli);
+							}
+							
+							db.editItem(sli, user);
+						}
+						tmp = sli.getId();
+					}
 					
 					pushNotifications();
 					
@@ -483,7 +511,7 @@ public class ListSyncManager {
 		
 	}
 	
-	private void diffItems(List<ShoppinglistItem> serverItems, List<ShoppinglistItem> localItems, User user) {
+	private void mergeItemsToDb(List<ShoppinglistItem> serverItems, List<ShoppinglistItem> localItems, User user) {
 		
 		if (serverItems.isEmpty() && localItems.isEmpty()) {
 			return;
@@ -517,29 +545,20 @@ public class ListSyncManager {
 					ShoppinglistItem serverSli = serverMap.get(key);
 					
 					if (localSli.getModified().before(serverSli.getModified())) {
-						mItemEdited.add(serverSli);
+						mItemEdited.put(serverSli.getId(), serverSli);
 						db.editItem(serverSli, user);
-						
-					} else if (!localSli.getPreviousId().equals(serverSli.getPreviousId())) {
-						
-						EtaLog.d(TAG, "How often does this happen?");
-						
-						// This is a special case, thats only relevant as long as the
-						// server isn't sending previous_id's
-						localSli.setPreviousId(serverSli.getPreviousId());
-						db.editItem(localSli, user);
 						
 					}
 					
 				} else {
 					ShoppinglistItem delSli = localMap.get(key);
-					mItemDeleted.add(delSli);
+					mItemDeleted.put(delSli.getId(), delSli);
 					db.deleteItem(delSli, user);
 				}
 				
 			} else {
 				ShoppinglistItem serverSli = serverMap.get(key);
-				mItemAdded.add(serverSli);
+				mItemAdded.put(serverSli.getId(), serverSli);
 				db.insertItem(serverSli, user);
 			}
 		}
@@ -719,11 +738,11 @@ public class ListSyncManager {
 					s.setState(State.SYNCED);
 					s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
 					db.editList(s, user);
-					mListAdded.add(s);
+					mListAdded.put(s.getId(), s);
 					syncLocalItemChanges(sl, user);
 				} else {
 					db.deleteList(sl, user);
-					mListAdded.add(s);
+					mListAdded.put(s.getId(), s);
 				}
 				pushNotifications();
 			}
@@ -830,10 +849,10 @@ public class ListSyncManager {
 					s.setState(State.SYNCED);
 					s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
 					db.editItem(s, user);
-					mItemEdited.add(s);
+					mItemEdited.put(s.getId(), s);
 				} else {
 					db.deleteItem(sli, user);
-					mItemDeleted.add(s);
+					mItemDeleted.put(s.getId(), s);
 				}
 				pushNotifications();
 			}
@@ -1002,37 +1021,46 @@ public class ListSyncManager {
 		list.add(object);
 		return list;
 	}
-
-	List<ShoppinglistItem> mItemAdded = Collections.synchronizedList(new ArrayList<ShoppinglistItem>());
-	List<ShoppinglistItem> mItemDeleted = Collections.synchronizedList(new ArrayList<ShoppinglistItem>());
-	List<ShoppinglistItem> mItemEdited = Collections.synchronizedList(new ArrayList<ShoppinglistItem>());
-
-	List<Shoppinglist> mListAdded = Collections.synchronizedList(new ArrayList<Shoppinglist>());
-	List<Shoppinglist> mListDeleted = Collections.synchronizedList(new ArrayList<Shoppinglist>());
-	List<Shoppinglist> mListEdited = Collections.synchronizedList(new ArrayList<Shoppinglist>());
+	
+	Map<String, ShoppinglistItem> mItemAdded = Collections.synchronizedMap(new HashMap<String, ShoppinglistItem>());
+	Map<String, ShoppinglistItem> mItemDeleted = Collections.synchronizedMap(new HashMap<String, ShoppinglistItem>());
+	Map<String, ShoppinglistItem> mItemEdited = Collections.synchronizedMap(new HashMap<String, ShoppinglistItem>());
+	
+	Map<String, Shoppinglist> mListAdded = Collections.synchronizedMap(new HashMap<String, Shoppinglist>());
+	Map<String, Shoppinglist> mListDeleted = Collections.synchronizedMap(new HashMap<String, Shoppinglist>());
+	Map<String, Shoppinglist> mListEdited = Collections.synchronizedMap(new HashMap<String, Shoppinglist>());
 	
 	private void pushNotifications() {
 		
 		popRequest();
-		if (mCurrentRequests.isEmpty()) {
-			
-			boolean listsEmpty = mListAdded.isEmpty() && mListDeleted.isEmpty() && mListEdited.isEmpty();
-			if (!listsEmpty) {
-				Eta.getInstance().getListManager().notifyListSubscribers(true, mListAdded, mListDeleted, mListEdited);
-				mListAdded.clear();
-				mListDeleted.clear();
-				mListEdited.clear();
-			}
-
-			boolean itemssEmpty = mItemAdded.isEmpty() && mItemDeleted.isEmpty() && mItemEdited.isEmpty();
-			if (!itemssEmpty) {
-				Eta.getInstance().getListManager().notifyItemSubscribers(true, mItemAdded, mItemDeleted, mItemEdited);
-				mItemAdded.clear();
-				mItemDeleted.clear();
-				mItemEdited.clear();
-			}
-			
+		if (!mCurrentRequests.isEmpty()) {
+			return;
 		}
+			
+		ListManager lm = Eta.getInstance().getListManager();
+		boolean listsEmpty = mListAdded.isEmpty() && mListDeleted.isEmpty() && mListEdited.isEmpty();
+		if (!listsEmpty) {
+			lm.notifyListSubscribers(
+					true, 
+					new ArrayList<Shoppinglist>(mListAdded.values()), 
+					new ArrayList<Shoppinglist>(mListDeleted.values()),
+					new ArrayList<Shoppinglist>(mListEdited.values()));
+			mListAdded.clear();
+			mListDeleted.clear();
+			mListEdited.clear();
+		}
+		
+		boolean itemssEmpty = mItemAdded.isEmpty() && mItemDeleted.isEmpty() && mItemEdited.isEmpty();
+		if (!itemssEmpty) {
+			lm.notifyItemSubscribers(true, 
+					new ArrayList<ShoppinglistItem>(mItemAdded.values()), 
+					new ArrayList<ShoppinglistItem>(mItemDeleted.values()),
+					new ArrayList<ShoppinglistItem>(mItemEdited.values()));
+			mItemAdded.clear();
+			mItemDeleted.clear();
+			mItemEdited.clear();
+		}
+		
 	}
 	
 }

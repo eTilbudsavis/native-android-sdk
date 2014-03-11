@@ -41,7 +41,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 		setShoppinglistId(shoppinglist.getId());
 		setDescription(description);
 	}
-
+	
 	public ShoppinglistItem(Shoppinglist shoppinglist, Offer offer) {
 		this();
 		setShoppinglistId(shoppinglist.getId());

@@ -248,7 +248,8 @@ public final class Utils {
 	}
 	
 	/**
-	 * Convert a Date object into a date string, that will be accepted by the API
+	 * Convert a Date object into a date string, that will be accepted by the API.
+	 * <p>The format for an API date is {@link #DATE_FORMAT}</p>
 	 * @param date to convert
 	 * @return a string
 	 */
@@ -266,7 +267,7 @@ public final class Utils {
 	 * as a nice to have.</p>
 	 * @param items A {@link List} to sort
 	 */
-	public static void sortItems(List<ShoppinglistItem> items, boolean updatePrevIds) {
+	public static void sortItems(List<ShoppinglistItem> items) {
 		int size = items.size();
 		
 		HashSet<String> allId = new HashSet<String>(size);
@@ -274,21 +275,34 @@ public final class Utils {
 			allId.add(sli.getId());
 		}
 		
-		List<ShoppinglistItem> first = new ArrayList<ShoppinglistItem>(size);
+		/* List of items that have not been given a previous id yet (e.g. items
+		 * from website). These are the ones we assume have been added last, and
+		 * thereby must be first in the final list*/
 		List<ShoppinglistItem> nil = new ArrayList<ShoppinglistItem>(size);
+
+		/* List of 'first' items, these are or have been first items in our list
+		 * These are prioritized to be appended after all nil items*/
+		List<ShoppinglistItem> first = new ArrayList<ShoppinglistItem>(size);
+		
+		/* Items that have for some reason been orphaned, e.g. their previous is
+		 * have been removed, but they haven't been updated) these will be
+		 * appended last*/
 		List<ShoppinglistItem> orphan = new ArrayList<ShoppinglistItem>(size);
+		
+		/* Items that seems to be fine, in the way that they have a valid prevId */
 		HashMap<String, ShoppinglistItem> prevItems = new HashMap<String, ShoppinglistItem>(size);
 		
+		/* Looping over all items, and categorizing them into the lists above */
 		for (ShoppinglistItem sli : items) {
 			
-			String prev = sli.getPreviousId();
+			String prevId = sli.getPreviousId();
 			
-			if (prev == null) {
+			if (prevId == null) {
 				nil.add(sli);
-			} else if (prev.equals(ShoppinglistItem.FIRST_ITEM)) {
+			} else if (prevId.equals(ShoppinglistItem.FIRST_ITEM)) {
 				first.add(sli);
-			} else if ( !prevItems.containsKey(prev) && allId.contains(prev)) {
-				prevItems.put(prev, sli);
+			} else if ( !prevItems.containsKey(prevId) && allId.contains(prevId)) {
+				prevItems.put(prevId, sli);
 			} else {
 				orphan.add(sli);
 			}
@@ -298,19 +312,24 @@ public final class Utils {
 		// Clear the original items list, items in this list is to be restored shortly
 		items.clear();
 		
+		/* Sort the lists we're uncertain about by their title (this is as good as any sort) */
 		Collections.sort(first, ShoppinglistItem.TitleComparator);
 		Collections.sort(nil, ShoppinglistItem.TitleComparator);
 		Collections.sort(orphan, ShoppinglistItem.TitleComparator);
 		
+		/* All items that need to have their  */
 		List<ShoppinglistItem> newItems = new ArrayList<ShoppinglistItem>(size);
 		newItems.addAll(nil);
 		newItems.addAll(first);
 		newItems.addAll(orphan);
 		
+		/* Next item to check */
 		ShoppinglistItem next;
+		/* Id of 'next' item */
 		String id;
 		for (ShoppinglistItem sli : newItems) {
 			next = sli;
+			// If we still have items
 			while (next != null) {
 				id = next.getId();
 				items.add(next);
@@ -321,23 +340,6 @@ public final class Utils {
 		
 		for (ShoppinglistItem s : prevItems.values()) {
 			items.add(s);
-		}
-		
-		if (updatePrevIds) {
-			// Update previous_id's (and modified) if needed
-			String tmp = EtaListObject.FIRST_ITEM;
-			for (ShoppinglistItem sli : items) {
-				
-				if (!tmp.equals(sli.getPreviousId())) {
-					EtaLog.d(TAG, "BAAADDD");
-					EtaLog.d(TAG, sli.toJSON().toString());
-					sli.setPreviousId(tmp);
-					sli.setModified(new Date());
-					sli.setState(State.TO_SYNC);
-					EtaLog.d(TAG, sli.toJSON().toString());
-				}
-				tmp = sli.getId();
-			}
 		}
 		
 	}
@@ -375,18 +377,6 @@ public final class Utils {
 			date.setTime( 1000 * (date.getTime()/1000) );
 		}
 		return date;
-	}
-	
-	public static void printPrevId(String name, List<ShoppinglistItem> items) {
-		
-		StringBuilder sb = new StringBuilder();
-		for (ShoppinglistItem sli : items) {
-			sb.append(sli.getTitle()).append(" prev[").append(sli.getPreviousId()).append("]");
-			sb.append(" id[").append(sli.getId()).append("]");
-			sb.append(" -> ").append("\n");
-		}
-		EtaLog.d(TAG, name + "\n" + sb.toString());
-		
 	}
 	
 }
