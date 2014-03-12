@@ -1,12 +1,10 @@
 package com.eTilbudsavis.etasdk;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 
 import org.json.JSONArray;
@@ -18,8 +16,8 @@ import android.os.HandlerThread;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.SessionManager.OnSessionChangeListener;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject.State;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject.State;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
@@ -30,6 +28,7 @@ import com.eTilbudsavis.etasdk.NetworkHelpers.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.NetworkHelpers.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
+import com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
@@ -39,8 +38,6 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 public class ListSyncManager {
 	
 	public static final String TAG = "ListSyncManager";
-	
-	private static final String THREAD_NAME = "ListSyncManager";
 	
 	private static final boolean USE_LOG_SUMMARY = true;
 	
@@ -57,9 +54,16 @@ public class ListSyncManager {
 	/** The Handler instantiated on the sync Thread */
 	private Handler mHandler;
 	
+	/** A user object, for identifying the current user during a request cycle */
 	private User mUser;
 	
+	/** 
+	 * A tag for identifying all requests originating from this ListSyncManager
+	 * in the {@link RequestQueue}
+	 */
 	private Object mRequestTag = new Object();
+	
+	private ListNotification mNotification = new ListNotification(true);
 	
 	/** Listening for session changes, starting and stopping sync as needed */
 	private OnSessionChangeListener sessionListener = new OnSessionChangeListener() {
@@ -79,22 +83,26 @@ public class ListSyncManager {
 			
 			mUser = mEta.getUser();
 			
-			if (!mEta.getUser().isLoggedIn() || !mEta.isResumed() )
+			// Stop the sync manager if it's an offline user or the app isn't resumed
+			if (!mEta.getUser().isLoggedIn() || !mEta.isResumed() ) {
 				return;
+			}
 			
 			User user = mEta.getUser();
 			
+			// Prepare for next iteration
 			mHandler.postDelayed(mSyncLoop, mSyncSpeed);
 			
 			// Only do an update, if there are no pending transactions, and we are online
-			if (!mCurrentRequests.isEmpty() || !mEta.isOnline()) 
+			if (!mCurrentRequests.isEmpty() || !mEta.isOnline()) {
 				return;
+			}
 			
 			// If there are local changes to a list, then syncLocalListChanges will handle it: return
 			List<Shoppinglist> lists = DbHelper.getInstance().getLists(mEta.getUser(), true);
-
-			if (syncLocalListChanges(lists, user))
+			if (syncLocalListChanges(lists, user)) {
 				return;
+			}
 			
 			// If there are changes to any items, then syncLocalItemChanges will handle it: return
 			boolean hasLocalChanges = false;
@@ -103,8 +111,9 @@ public class ListSyncManager {
 				hasLocalChanges = syncLocalShareChanges(sl, user) || hasLocalChanges;
 			}
 			
-			if (hasLocalChanges)
+			if (hasLocalChanges) {
 				return;
+			}
 			
 			// Now finally we can query the server for any remote changes
             if (mSyncCount%3 == 0) {
@@ -121,9 +130,9 @@ public class ListSyncManager {
 	public ListSyncManager(Eta eta) {
 		mEta = eta;
 		// Create a new thread for a handler, so that i can later post content to that thread.
-		HandlerThread mThread = new HandlerThread(THREAD_NAME, Process.THREAD_PRIORITY_BACKGROUND);
-		mThread.start();
-		mHandler = new Handler(mThread.getLooper());
+		HandlerThread t = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
+		t.start();
+		mHandler = new Handler(t.getLooper());
 	}
 	
 	public boolean hasFirstSync() {
@@ -171,6 +180,7 @@ public class ListSyncManager {
 		r.setTag(mRequestTag);
 		
 		boolean isPullRequest = r.getUrl().contains("modified") || r.getUrl().endsWith("shoppinglists") || r.getUrl().endsWith("items");
+		
 		if (!isPullRequest) {
 			EtaLog.d(TAG, r.getMethodString() + ": " + r.getUrl());
 		}
@@ -202,25 +212,26 @@ public class ListSyncManager {
 				if (response != null) {
 					
 					DbHelper db = DbHelper.getInstance();
-					List<Shoppinglist> localList = db.getLists(user);
-					List<Shoppinglist> serverList = Shoppinglist.fromJSON(response);
+					// Get ALL lists including deleted, to avoid adding them again
+					List<Shoppinglist> localLists = db.getLists(user, true);
+					List<Shoppinglist> serverLists = Shoppinglist.fromJSON(response);
 					
 					// Server usually returns items in the order oldest to newest (not guaranteed)
 					// We want them to be reversed
-					Collections.reverse(serverList);
+					Collections.reverse(serverLists);
 					
-					prepareServerList(serverList);
+					prepareServerList(serverLists);
 					
-					mergeListsToDb(serverList, localList, user);
+					mergeListsToDb(serverLists, localLists, user);
 					
 					// On first iteration, check and merge lists plus notify subscribers of first sync event
 					if (mSyncCount == 1) {
 						
-						if (serverList.isEmpty() && localList.isEmpty()) {
+						if (serverLists.isEmpty() && localLists.isEmpty()) {
 							migrateOfflineLists();
 						}
 						
-						mEta.getListManager().notifyFirstSync();
+						mNotification.setFirstSync(true);
 						
 					}
 					
@@ -233,6 +244,9 @@ public class ListSyncManager {
 		};
 		
 		JsonArrayRequest listRequest = new JsonArrayRequest(Method.GET, Endpoint.lists(mEta.getUser().getUserId()), listListener);
+		// Offset and limit are set to default values, we want to ignore this.
+		listRequest.getQueryParameters().remove(Param.OFFSET);
+		listRequest.getQueryParameters().remove(Param.LIMIT);
 		listRequest.logSummary(USE_LOG_SUMMARY);
 		addRequest(listRequest);
 		
@@ -287,7 +301,7 @@ public class ListSyncManager {
 					
 					if (localSl.getModified().before(serverSl.getModified())) {
 						serverSl.setState(State.SYNCED);
-						mListEdited.put(serverSl.getId(), serverSl);
+						mNotification.edit(serverSl);
 						db.editList(serverSl, user);
 						db.cleanShares(serverSl, user);
 					} else {
@@ -295,10 +309,9 @@ public class ListSyncManager {
 					}
 					
 				} else {
-					
-					mListDeleted.put(localSl.getId(), localSl);
+					mNotification.del(localSl);
 					for (ShoppinglistItem sli : db.getItems(localSl, user)) {
-						mItemDeleted.put(sli.getId(), sli);
+						mNotification.del(sli);
 					}
 					db.deleteItems(localSl.getId(), null, user);
 					db.deleteList(localSl, user);
@@ -308,18 +321,18 @@ public class ListSyncManager {
 				
 				Shoppinglist add = serverMap.get(key);
 				add.setState(State.TO_SYNC);
-				mListAdded.put(add.getId(), add);
+				mNotification.add(add);
 				db.insertList(add, user);
 				
 			}
 			
 		}
 		
-		for (Shoppinglist sl : mListAdded.values()) {
+		for (Shoppinglist sl : mNotification.getAddedLists()) {
 			syncItems(sl, user);
 		}
 			
-		for (Shoppinglist sl : mListEdited.values()) {
+		for (Shoppinglist sl : mNotification.getEditedLists()) {
 			syncItems(sl, user);
 		}
 		
@@ -449,13 +462,14 @@ public class ListSyncManager {
 		Listener<JSONArray> itemListener = new Listener<JSONArray>() {
 
 			public void onComplete( JSONArray response, EtaError error) {
-
+				
 				if (response != null) {
 					
 					sl.setState(State.SYNCED);
 					db.editList(sl, user);
 					
-					List<ShoppinglistItem> localItems = db.getItems(sl, user);
+					// Get ALL items including deleted, to avoid adding them again
+					List<ShoppinglistItem> localItems = db.getItems(sl, user, true);
 					List<ShoppinglistItem> serverItems = ShoppinglistItem.fromJSON(response);
 					
 					// So far, we get items in reverse order, well just keep reversing it for now.
@@ -484,10 +498,10 @@ public class ListSyncManager {
 							/* If it's a new item, it's already in the added list,
 							 * then we'll override it else add it to the edited
 							 * as a new item to the edited list */
-							if (mItemAdded.containsKey(sli.getId())) {
-								mItemAdded.put(sli.getId(), sli);
+							if (mNotification.mItemAdded.containsKey(sli.getId())) {
+								mNotification.add(sli);
 							} else {
-								mItemEdited.put(sli.getId(), sli);
+								mNotification.edit(sli);
 							}
 							
 							db.editItem(sli, user);
@@ -506,6 +520,9 @@ public class ListSyncManager {
 		};
 		
 		JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Endpoint.listitems(mEta.getUser().getUserId(), sl.getId()), itemListener);
+		// Offset and limit are set to default values, we want to ignore this.
+		itemRequest.getQueryParameters().remove(Param.OFFSET);
+		itemRequest.getQueryParameters().remove(Param.LIMIT);
 		itemRequest.logSummary(USE_LOG_SUMMARY);
 		addRequest(itemRequest);
 		
@@ -545,20 +562,20 @@ public class ListSyncManager {
 					ShoppinglistItem serverSli = serverMap.get(key);
 					
 					if (localSli.getModified().before(serverSli.getModified())) {
-						mItemEdited.put(serverSli.getId(), serverSli);
+						mNotification.edit(serverSli);
 						db.editItem(serverSli, user);
 						
 					}
 					
 				} else {
 					ShoppinglistItem delSli = localMap.get(key);
-					mItemDeleted.put(delSli.getId(), delSli);
+					mNotification.del(delSli);
 					db.deleteItem(delSli, user);
 				}
 				
 			} else {
 				ShoppinglistItem serverSli = serverMap.get(key);
-				mItemAdded.put(serverSli.getId(), serverSli);
+				mNotification.add(serverSli);
 				db.insertItem(serverSli, user);
 			}
 		}
@@ -731,18 +748,18 @@ public class ListSyncManager {
 		Listener<JSONObject> listListener = new Listener<JSONObject>() {
 
 			public void onComplete(JSONObject response, EtaError error) {
-
+				
 				Shoppinglist s = null;
 				if (response != null) {
 					s = Shoppinglist.fromJSON(response);
 					s.setState(State.SYNCED);
 					s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
 					db.editList(s, user);
-					mListAdded.put(s.getId(), s);
+					mNotification.add(s);
 					syncLocalItemChanges(sl, user);
 				} else {
 					db.deleteList(sl, user);
-					mListAdded.put(s.getId(), s);
+					mNotification.del(sl);
 				}
 				pushNotifications();
 			}
@@ -750,7 +767,7 @@ public class ListSyncManager {
 		
 		String url = Endpoint.list(user.getUserId(), sl.getId());
 		JsonObjectRequest listReq = new JsonObjectRequest(url, listListener);
-
+		
 		addRequest(listReq);
 		
 	}
@@ -849,10 +866,10 @@ public class ListSyncManager {
 					s.setState(State.SYNCED);
 					s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
 					db.editItem(s, user);
-					mItemEdited.put(s.getId(), s);
+					mNotification.edit(s);
 				} else {
 					db.deleteItem(sli, user);
-					mItemDeleted.put(s.getId(), s);
+					mNotification.del(sli);
 				}
 				pushNotifications();
 			}
@@ -920,11 +937,12 @@ public class ListSyncManager {
 						// If the request failed on a field, then we cannot really do anything, but delete
 						db.deleteShare(s, user);
 						sl.removeShare(s);
-						Eta.getInstance().getListManager().notifyListSubscribers(true, null, null, idToList(sl));
+						mNotification.edit(sl);
 					} else {
 						revertShare(s, user);
 					}
 				}
+				pushNotifications();
 
 			}
 		};
@@ -1008,58 +1026,15 @@ public class ListSyncManager {
 		
 	}
 	
-	/**
-	 * Helper method, adding the Object<T> into a new List<T>.
-	 * @param object to add
-	 * @return List<T> containing only the object 
-	 */
-	private <T> List<T> idToList(T object) {
-		if (object == null)
-			return null;
-		
-		List<T> list = new ArrayList<T>(1);
-		list.add(object);
-		return list;
-	}
-	
-	Map<String, ShoppinglistItem> mItemAdded = Collections.synchronizedMap(new HashMap<String, ShoppinglistItem>());
-	Map<String, ShoppinglistItem> mItemDeleted = Collections.synchronizedMap(new HashMap<String, ShoppinglistItem>());
-	Map<String, ShoppinglistItem> mItemEdited = Collections.synchronizedMap(new HashMap<String, ShoppinglistItem>());
-	
-	Map<String, Shoppinglist> mListAdded = Collections.synchronizedMap(new HashMap<String, Shoppinglist>());
-	Map<String, Shoppinglist> mListDeleted = Collections.synchronizedMap(new HashMap<String, Shoppinglist>());
-	Map<String, Shoppinglist> mListEdited = Collections.synchronizedMap(new HashMap<String, Shoppinglist>());
-	
 	private void pushNotifications() {
 		
 		popRequest();
+		
 		if (!mCurrentRequests.isEmpty()) {
 			return;
 		}
-			
-		ListManager lm = Eta.getInstance().getListManager();
-		boolean listsEmpty = mListAdded.isEmpty() && mListDeleted.isEmpty() && mListEdited.isEmpty();
-		if (!listsEmpty) {
-			lm.notifyListSubscribers(
-					true, 
-					new ArrayList<Shoppinglist>(mListAdded.values()), 
-					new ArrayList<Shoppinglist>(mListDeleted.values()),
-					new ArrayList<Shoppinglist>(mListEdited.values()));
-			mListAdded.clear();
-			mListDeleted.clear();
-			mListEdited.clear();
-		}
 		
-		boolean itemssEmpty = mItemAdded.isEmpty() && mItemDeleted.isEmpty() && mItemEdited.isEmpty();
-		if (!itemssEmpty) {
-			lm.notifyItemSubscribers(true, 
-					new ArrayList<ShoppinglistItem>(mItemAdded.values()), 
-					new ArrayList<ShoppinglistItem>(mItemDeleted.values()),
-					new ArrayList<ShoppinglistItem>(mItemEdited.values()));
-			mItemAdded.clear();
-			mItemDeleted.clear();
-			mItemEdited.clear();
-		}
+		Eta.getInstance().getListManager().notifySubscribers(mNotification);
 		
 	}
 	

@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -31,22 +32,37 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	private String mMeta;
 	private int mUserId = -1;
 	
+	/**
+	 * Default constructor, this will create a new UUID as this objects id, and
+	 * update modified to the creation time of this object (now).
+	 */
 	public ShoppinglistItem() {
 		setId(Utils.createUUID());
 		mModified = Utils.roundTime(new Date());
 	}
 	
+	/**
+	 * Constructor for creating a new ShoppinglistItem from a plain text description
+	 * and attach it to a {@link Shoppinglist}.
+	 * @param shoppinglist A list to associate this item with
+	 * @param description A plain text description
+	 */
 	public ShoppinglistItem(Shoppinglist shoppinglist, String description) {
 		this();
 		setShoppinglistId(shoppinglist.getId());
 		setDescription(description);
 	}
 	
+	/**
+	 * Constructor for creating a new ShoppinglistItem from an offer, and attach
+	 * it to a {@link Shoppinglist}.
+	 * @param shoppinglist A list to assiciate this item with
+	 * @param offer An offer to attach to this item
+	 */
 	public ShoppinglistItem(Shoppinglist shoppinglist, Offer offer) {
 		this();
 		setShoppinglistId(shoppinglist.getId());
 		setOffer(offer);
-		setDescription(offer.getHeading());
 	}
 
 	/**
@@ -132,46 +148,101 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	/**
 	 * Returns a human readable title for this ShoppinglistItem.
 	 * <p>The title is either the description, or heading of the related offer.
-	 * If the description isn't <code>null</code>, this will be used, else if
-	 * offer isn't <code>null</code>, the heading will be used, and finally,
+	 * If the description isn't {@code null}, this will be used, else if
+	 * offer isn't {@code null}, the heading will be used, and finally,
 	 * if non-exist it will be an empty string.</p>
 	 * @return A human readable title
 	 */
 	public String getTitle() {
-		return (mDescription == null || mDescription.length() == 0) ? (mOffer == null ? "" : mOffer.getHeading()) : mDescription;
+		if (mDescription == null || mDescription.length() == 0) {
+			return mOffer == null ? "" : mOffer.getHeading();
+		} else {
+			return mDescription;
+		}
 	}
-
+	
+	/**
+	 * Get the description for this object
+	 * @return A description, or null
+	 */
 	public String getDescription() {
 		return mDescription;
 	}
-
+	
+	/**
+	 * Set the description for this ShoppinglistItem
+	 * @param description A description
+	 * @return This object
+	 */
 	public ShoppinglistItem setDescription(String description) {
 		mDescription = description;
 		return this;
 	}
-
+	
+	/**
+	 * Get the count.
+	 * <p>Count represents the physical amount or number of items to get of this
+	 * ShoppinglistItem, (such as 6 eggs or 500g of flour)</p>
+	 * @return
+	 */
 	public int getCount() {
 		return mCount;
 	}
-
+	
+	/**
+	 * Set the count
+	 * <p>Count represents the physical amount or number of items to get of this
+	 * ShoppinglistItem, (such as 6 eggs or 500g of flour)</p>
+	 * @param count A number representing some type of 'amount'
+	 * @return This object
+	 */
 	public ShoppinglistItem setCount(int count) {
 		mCount = count;
 		return this;
 	}
-
+	
+	/**
+	 * Whether this item it ticked, or not
+	 * <p>Tick represents a notation of whether the item have been purchased or 
+	 * is in the shopping basket</p>
+	 * @return true if item have been ticked, else false
+	 */
 	public boolean isTicked() {
 		return mTick;
 	}
-
-	public ShoppinglistItem setTick(Boolean tick) {
+	
+	/**
+	 * Set the tick state of this item.
+	 * <p>Tick represents a notation of whether the item have been purchased or 
+	 * is in the shopping basket</p>
+	 * @param tick The ticked state
+	 * @return This object
+	 */
+	public ShoppinglistItem setTick(boolean tick) {
 		mTick = tick;
 		return this;
 	}
-
+	
+	/**
+	 * Get the offer associated with this object.
+	 * @return An offer, or null
+	 */
 	public Offer getOffer() {
 		return mOffer;
 	}
 	
+	/**
+	 * Attach an offer with this ShoppinglistItem.
+	 * <p>To keep the object 'sane', this will also trigger
+	 * {@link ShoppinglistItem#setOfferId(String) setOfferId(String)}, and if
+	 * necessary {@link ShoppinglistItem#setDescription(String) setDescription(String)}
+	 * </p> <p>
+	 * (updating description is considered necessary if it's current value is
+	 * {@code null}, or {@link Offer#getId() offer.getId()} is not equal to
+	 * {@link #getOfferId() getOfferId()})</p>
+	 * @param offer An offer to attach to this item
+	 * @return This object
+	 */
 	public ShoppinglistItem setOffer(Offer offer) {
 		mOffer = offer;
 		if (mOffer != null) {
@@ -185,52 +256,120 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 		
 		return this;
 	}
-
+	
+	/**
+	 * Get the creator of this list (an e-mail address).
+	 * @return The creator, or null
+	 */
 	public String getCreator() {
 		return mCreator;
 	}
-
+	
+	/**
+	 * Set the creator of this list.
+	 * <p>Creator must be an e-mail address, and must be a valid eTilbudsavis user</p>
+	 * @param creator The creator of this list
+	 * @return This object
+	 */
 	public ShoppinglistItem setCreator(String creator) {
 		mCreator = creator;
 		return this;
 	}
-
+	
+	/**
+	 * Get the id of the {@link Shoppinglist} that this item is attached to.
+	 * @return A shoppinglist id, or null
+	 */
 	public String getShoppinglistId() {
 		return mShoppinglistId;
 	}
-
+	
+	/**
+	 * Set the id of the {@link Shoppinglist} that should have an association
+	 * to this item.
+	 * @param id The shoppinglist id
+	 * @return This object
+	 */
 	public ShoppinglistItem setShoppinglistId(String id) {
 		mShoppinglistId = id;
 		return this;
 	}
-
+	
+	/**
+	 * Get the id of the previous {@link ShoppinglistItem}.
+	 * <p>{@code previous_id} is used primarily for drawing the ShoppinglistItems
+	 * in the correct order when presenting the items for the user.
+	 * The first item to draw will have the {@code previous_id} 
+	 * {@link EtaListObject#FIRST_ITEM FIRST_ITEM}, the next item should then
+	 * point at this items {@link #getId() id}, and so on</p>
+	 * @return The previous id, or {@code null}
+	 */
 	public String getPreviousId() {
 		return mPrevId;
 	}
-
+	
+	/**
+	 * Set the previous id of this item.
+	 * <p>When updating one {@code prevoius_id} you would probably have to update
+	 * several other {@link ShoppinglistItem} {@code previous_id}, if you are
+	 * using the SDK's {@link ListManager}, this should be handled automatically.</p>
+	 * <p>{@code previous_id} is used primarily for drawing the ShoppinglistItems
+	 * in the correct order when presenting the items for the user.
+	 * The first item to draw will have the {@code previous_id} 
+	 * {@link EtaListObject#FIRST_ITEM FIRST_ITEM}, the next item should then
+	 * point at this items {@link #getId() id}, and so on</p>
+	 * @param id
+	 * @return
+	 */
 	public ShoppinglistItem setPreviousId(String id) {
 		mPrevId = id;
 		return this;
 	}
-
+	
+	/**
+	 * Get the id of the offer associated with this item.
+	 * @return A offer id, or null if no offer is associated
+	 */
 	public String getOfferId() {
 		return mOfferId;
 	}
 
+	/**
+	 * Set the offer id associated with this item
+	 * @return This object
+	 */
 	public ShoppinglistItem setOfferId(String offerId) {
 		mOfferId = offerId;
 		return this;
 	}
-
+	
+	/**
+	 * Get the last-modified date
+	 * @return A last-modified date
+	 */
 	public Date getModified() {
 		return mModified;
 	}
 	
+	/**
+	 * Set the {@link Date} for when this object was last modified.
+	 * <p>When using the SDK's {@link ListManager} this value is automatically
+	 * set when using it's methods for ShoppinglistItem operations</p>
+	 * @param time A date
+	 * @return This object
+	 */
 	public ShoppinglistItem setModified(Date time) {
 		mModified = Utils.roundTime(time);
 		return this;
 	}
 	
+	/**
+	 * Get any meta data associated with this item.
+	 * <p>Meta can be used for any kind of information, that is needed to
+	 * describe any kind of information regarding this item. It's kind of a
+	 * 'anything goes' item.</p>
+	 * @return A meta object, or null
+	 */
 	public JSONObject getMeta() {
 		JSONObject meta = null;
 		try {
@@ -240,21 +379,48 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 		}
 		return meta;
 	}
-
+	
+	/**
+	 * Set any meta information needed for this object.
+	 * <p>Please ensure that you <b>do not accidentally override</b> information written by
+	 * other apps, by reusing {@link #getMeta() meta} if it's present.</p>
+	 * <p>Meta can be used for any kind of information, that is needed to
+	 * describe any kind of information regarding this item. It's kind of a
+	 * 'anything goes' item.</p>
+	 * @param meta
+	 * @return
+	 */
 	public ShoppinglistItem setMeta(JSONObject meta) {
 		mMeta = meta == null ? null : meta.toString();
 		return this;
 	}
-
+	
+	/**
+	 * Get the id, of the user that has this item.
+	 * <p>This is mostly a use case when storing the item in a DB, where several
+	 * users can have access to the same item (same {@link ShoppinglistItem#getId()}.</p>
+	 * @return A user id
+	 */
 	public int getUserId() {
 		return mUserId;
 	}
-
+	
+	/**
+	 * Set the id of the user, that this item is associated with.
+	 * <p>This is mostly a use case when storing the item in a DB, where several
+	 * users can have access to the same item (same {@link ShoppinglistItem#getId()}.</p>
+	 * @param userId An id of a user
+	 * @return This object
+	 */
 	public ShoppinglistItem setUserId(int userId) {
 		mUserId = userId;
 		return this;
 	}
 	
+	/**
+	 * Compare method, that uses the {@link ShoppinglistItem#getTitle() title}
+	 * to compare two items.
+	 */
 	public int compareTo(ShoppinglistItem another) {
 		if (another == null)
 			return -1;
@@ -269,10 +435,14 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 		return t1.compareToIgnoreCase(t2);
 	}
 	
+	/**
+	 * Compare object, that uses the {@link ShoppinglistItem#getTitle() title}
+	 * to compare two items.
+	 */
 	public static Comparator<ShoppinglistItem> TitleComparator  = new Comparator<ShoppinglistItem>() {
 
 		public int compare(ShoppinglistItem item1, ShoppinglistItem item2) {
-
+			
 			if (item1 == null || item2 == null) {
 				return item1 == null ? (item2 == null ? 0 : 1) : -1;
 			} else {
