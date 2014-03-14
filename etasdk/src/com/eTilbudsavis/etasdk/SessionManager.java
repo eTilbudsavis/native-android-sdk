@@ -31,7 +31,7 @@ public class SessionManager {
     public static final String COOKIE_AUTH_TIME = "auth[time]";
     public static final String COOKIE_AUTH_HASH = "auth[hash]";
     
-	/** Token time to live. I'm requesting 45days */
+	/** Token time to live in seconds. Default for Android SDK is 45 days */
     public static int TTL = 3888000;
     
 	private Eta mEta;

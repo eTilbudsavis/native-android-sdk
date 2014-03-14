@@ -37,7 +37,7 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 	private Date mModified;
 	private String mPrevId;
 	private String mType;
-	private String mMeta;
+	private JSONObject mMeta;
 	private Map<String, Share> mShares = new HashMap<String, Share>(1);
 	private int mUserId = -1;
 	
@@ -74,20 +74,37 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 		return fromJSON(new Shoppinglist(), shoppinglist);
 	}
 	
-	private static Shoppinglist fromJSON(Shoppinglist sl, JSONObject shoppinglist) {
+	private static Shoppinglist fromJSON(Shoppinglist sl, JSONObject jSl) {
 		
 		try {
 			// We've don't use OWNER anymore, since we now get all share info.
-			sl.setId(Json.valueOf(shoppinglist, ServerKey.ID));
-			sl.setErn(Json.valueOf(shoppinglist, ServerKey.ERN));
-			sl.setName(Json.valueOf(shoppinglist, ServerKey.NAME));
-			sl.setAccess(Json.valueOf(shoppinglist, ServerKey.ACCESS));
-			sl.setModified(Json.valueOf(shoppinglist, ServerKey.MODIFIED));
-			sl.setPreviousId(Json.valueOf(shoppinglist, ServerKey.PREVIOUS_ID));
-			sl.setType(Json.valueOf(shoppinglist, ServerKey.TYPE));
-			String meta = Json.valueOf(shoppinglist, ServerKey.META);
-			sl.setMeta(shoppinglist.isNull(ServerKey.META) ? null : (meta.equals("") ? null : new JSONObject(meta)));
-			sl.putShares(Share.fromJSON(shoppinglist.getJSONArray(ServerKey.SHARES)));
+			sl.setId(Json.valueOf(jSl, ServerKey.ID));
+			sl.setErn(Json.valueOf(jSl, ServerKey.ERN));
+			sl.setName(Json.valueOf(jSl, ServerKey.NAME));
+			sl.setAccess(Json.valueOf(jSl, ServerKey.ACCESS));
+			sl.setModified(Json.valueOf(jSl, ServerKey.MODIFIED));
+			sl.setPreviousId(Json.valueOf(jSl, ServerKey.PREVIOUS_ID));
+			sl.setType(Json.valueOf(jSl, ServerKey.TYPE));
+			
+			// A whole lot of 'saving my ass from exceptions' for meta
+			String metaString = Json.valueOf(jSl, ServerKey.META, "{}").trim();
+			// If it looks like a JSONObject, try parsing it
+			if (metaString.startsWith("{") && metaString.endsWith("}")) {
+				
+				try {
+					sl.setMeta(new JSONObject(metaString));
+				} catch (JSONException e) {
+					EtaLog.d(TAG, e);
+					sl.setMeta(new JSONObject());
+					sl.setModified(new Date());
+				}
+				
+			} else {
+				sl.setMeta(new JSONObject());
+				sl.setModified(new Date());
+			}
+			
+			sl.putShares(Share.fromJSON(jSl.getJSONArray(ServerKey.SHARES)));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -214,17 +231,11 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 	}
 	
 	public JSONObject getMeta() {
-		JSONObject meta = null;
-		try {
-			meta = mMeta == null ? null : new JSONObject(mMeta);
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return meta;
+		return mMeta == null ? new JSONObject() : mMeta;
 	}
-
+	
 	public Shoppinglist setMeta(JSONObject meta) {
-		mMeta = meta == null ? null : meta.toString();
+		mMeta = meta == null ? new JSONObject() : meta;
 		return this;
 	}
 

@@ -35,7 +35,7 @@ public class EtaLog {
 	private static final EventLog mExceptionLog = new EventLog(DEFAULT_EXCEPTION_LOG_SIZE);
 	
 	/**
-	 * Send a DEBUG log message.
+	 * Print a debug log message to LogCat.
 	 * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
 	 * @param message The message you would like logged.
 	 */
@@ -45,7 +45,7 @@ public class EtaLog {
 	}
 
 	/**
-	 * Send a DEBUG log message.
+	 * Print a debug log message to LogCat.
 	 * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
 	 * @param e The exception you would like logged.
 	 */
@@ -54,7 +54,7 @@ public class EtaLog {
 	}
 
 	/**
-	 * Send a DEBUG log message.
+	 * Print a debug log message to LogCat.
 	 * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
 	 * @param t The throwable you would like logged.
 	 */
@@ -112,57 +112,42 @@ public class EtaLog {
 		
 	}
 	
+	/**
+	 * Print a debug log message to LogCat.
+	 * @param tag A tag
+	 * @param name A name identifying this print
+	 * @param response A {@link JSONObject} (Eta SDK response), this may be {@code null}
+	 * @param error An {@link EtaError}, this may be {@code null}
+	 */
 	public static void d(String tag, String name, JSONObject response, EtaError error) {
-		d(tag, name, (response == null ? "null" : response.toString()), error);
+		String resp = response == null ? "null" : response.toString();
+		d(tag, name, resp, error);
 	}
 
+	/**
+	 * Print a debug log message to LogCat.
+	 * @param tag A tag
+	 * @param name A name identifying this print
+	 * @param response A {@link JSONArray} (Eta SDK response), this may be {@code null}
+	 * @param error An {@link EtaError}, this may be {@code null}
+	 */
 	public static void d(String tag, String name, JSONArray response, EtaError error) {
-		
-		if (response == null) {
-			d(tag, name, "null", error);
-			return;
-		}
-		
-		if (response.length() == 0) {
-			d(tag, name, response.toString(), error);
-			return;
-		}
-		
-		String data = null;
-
-		try {
-			
-			if (response.get(0) instanceof JSONObject && response.getJSONObject(0).has(Param.ERN) ) {
-	
-				JSONArray tmp = new JSONArray();
-				for (int i = 0 ; i < response.length() ; i++ ) {
-					JSONObject o = response.getJSONObject(i);
-					if (o.has(Param.ERN)) {
-						tmp.put(o.getString(Param.ERN));
-					} else {
-						tmp.put("non-ern-object-in-list");
-					}
-				}
-				data = tmp.toString();
-	
-			} else {
-				data = response.toString();
-			}
-		
-
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		
-		d(tag, name, data, error);
-		
+		String resp = response == null ? "null" : ("size:" + response.length());
+		d(tag, name, resp, error);
 	}
-	
+
+	/**
+	 * Print a debug log message to LogCat.
+	 * @param tag A tag
+	 * @param name A name identifying this print
+	 * @param response A {@link String} (Eta SDK response), this may be {@code null}
+	 * @param error An {@link EtaError}, this may be {@code null}
+	 */
 	public static void d(String tag, String name, String response, EtaError error) {
 		if (!DEBUG) return;
 		String e = error == null ? "null" : error.toJSON().toString();
 		String s = response == null ? "null" : response;
-		Log.d(tag, name + ": Response: " + s + ", Error: " + e );
+		Log.d(tag, name + ": Response[" + s + "], Error[" + e + "]");
 	}
 	
 	/**

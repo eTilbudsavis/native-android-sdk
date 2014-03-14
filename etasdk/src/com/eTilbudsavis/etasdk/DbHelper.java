@@ -277,7 +277,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(escape(sli.getShoppinglistId())).append(",")
 		.append(escape(sli.getState())).append(",")
 		.append(escape(sli.getPreviousId())).append(",")
-		.append(escape(sli.getMeta() == null ? null : sli.getMeta().toString())).append(",")
+		.append(escape(sli.getMeta().toString())).append(",")
 		.append(escape(userId)).append(")");
 		return sb.toString();
 	}

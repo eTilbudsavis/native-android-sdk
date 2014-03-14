@@ -132,5 +132,19 @@ public abstract class EtaObject {
 		public static final String ACCEPT_URL = "accept_url";
 		
 	}
+
+	/**
+	 * <p>This class contains a set of {@link String}s that eTilbudsavis uses
+	 * as keys for the meta-{@link JSONObject}, found on {@link Shoppinglist},
+	 * and {@link ShoppinglistItem}.</p>
+	 * 
+	 * <p>It's not guaranteed, that all keys are given in this class</p>
+	 * 
+	 * @author Danny Hvam - danny@etilbudsavis.dk
+	 */
+	public class MetaKey {
+		public static final String COMMENT = "eta_comment";
+		public static final String THEME = "eta_theme";
+	}
 	
 }

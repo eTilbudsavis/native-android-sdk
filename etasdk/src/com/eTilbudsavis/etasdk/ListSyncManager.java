@@ -115,11 +115,28 @@ public class ListSyncManager {
 				return;
 			}
 			
-			// Now finally we can query the server for any remote changes
+			// Finally ready to get server changes
             if (mSyncCount%3 == 0) {
+            	
+            	// Get a new set of lists
                 syncLists(user);
+                
+            } else if (mSyncCount%10 == 0) {
+            	
+            	/* Because we update modified on lists, on all changes, we might
+            	 * have a situation where two devices have set the same modified
+            	 * on a list, and therefore won't try to get a new list of items
+            	 * So we force the SDK to get a new set once in a while */
+        		List<Shoppinglist> localLists = DbHelper.getInstance().getLists(user);
+        		for (Shoppinglist sl : localLists) {
+        			syncItems(sl, user);
+        		}
+        		
             } else {
+            	
+            	// Base case, just check if there is changes
                 syncListsModified(user);
+                
             }
             mSyncCount++;
             
@@ -179,11 +196,10 @@ public class ListSyncManager {
 		
 		r.setTag(mRequestTag);
 		
-		boolean isPullRequest = r.getUrl().contains("modified") || r.getUrl().endsWith("shoppinglists") || r.getUrl().endsWith("items");
-		
-		if (!isPullRequest) {
-			EtaLog.d(TAG, r.getMethodString() + ": " + r.getUrl());
-		}
+//		boolean isPullRequest = r.getUrl().contains("modified") || r.getUrl().endsWith("shoppinglists") || r.getUrl().endsWith("items");
+//		if (!isPullRequest) {
+//			EtaLog.d(TAG, r.getMethodString() + ": " + r.getUrl());
+//		}
 		
 		mEta.add(r);
 	}
@@ -376,9 +392,8 @@ public class ListSyncManager {
 	}
 	
 	/**
-	 * Sync all shopping list items, in all shopping lists.<br>
-	 * This is run at certain intervals if startSync() has been called.<br>
-	 * startSync() is called if Eta.onResume() is called.
+	 * 
+	 * @param user
 	 */
 	public void syncListsModified(final User user) {
 
@@ -388,15 +403,16 @@ public class ListSyncManager {
 		for (final Shoppinglist sl : localLists) {
 			
 			// If they are in the state of processing, then skip
-			if (sl.getState() == State.SYNCING) 
+			if (sl.getState() == State.SYNCING) {
 				continue;
+			}
 			
 			// If it obviously needs to sync, then just do it
 			if (sl.getState() == State.TO_SYNC) {
 				// New shopping lists must always sync
 				syncItems(sl, user);
 				continue;
-			} 
+			}
 			
 			// Run the check 
 			sl.setState(State.SYNCING);
@@ -565,6 +581,10 @@ public class ListSyncManager {
 						mNotification.edit(serverSli);
 						db.editItem(serverSli, user);
 						
+					} else if (!localSli.getMeta().toString().equals(serverSli.getMeta().toString())) {
+						// Migration code, to get comments into the DB
+						mNotification.edit(serverSli);
+						db.editItem(serverSli, user);
 					}
 					
 				} else {

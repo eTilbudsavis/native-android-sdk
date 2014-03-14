@@ -9,9 +9,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.R.string;
+
 import com.eTilbudsavis.etasdk.ListManager;
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
+import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
@@ -29,7 +33,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	private Offer mOffer = null;
 	private String mShoppinglistId;
 	private String mPrevId;
-	private String mMeta;
+	private JSONObject mMeta;
 	private int mUserId = -1;
 	
 	/**
@@ -102,6 +106,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	 */
 	public static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject jSli) {
 		
+		
 		sli.setId(Json.valueOf(jSli, ServerKey.ID));
 		sli.setTick(Json.valueOf(jSli, ServerKey.TICK, false));
 		sli.setOfferId(Json.valueOf(jSli, ServerKey.OFFER_ID));
@@ -111,11 +116,26 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 		sli.setErn(Json.valueOf(jSli, ServerKey.ERN));
 		sli.setCreator(Json.valueOf(jSli, ServerKey.CREATOR));
 		String date = Json.valueOf(jSli, ServerKey.MODIFIED, "1970-01-01T00:00:00+0000");
-		if (sli.getTitle().contains("lagkage")) {
-			EtaLog.d(TAG, sli.getTitle() + " " + date);
-		}
 		sli.setModified( Utils.parseDate(date) );
 		sli.setPreviousId(Json.valueOf(jSli, ServerKey.PREVIOUS_ID, null));
+
+		// A whole lot of 'saving my ass from exceptions' for meta
+		String metaString = Json.valueOf(jSli, ServerKey.META, "{}").trim();
+		// If it looks like a JSONObject, try parsing it
+		if (metaString.startsWith("{") && metaString.endsWith("}")) {
+			
+			try {
+				sli.setMeta(new JSONObject(metaString));
+			} catch (JSONException e) {
+				EtaLog.d(TAG, e);
+				sli.setMeta(new JSONObject());
+				sli.setModified(new Date());
+			}
+			
+		} else {
+			sli.setMeta(new JSONObject());
+			sli.setModified(new Date());
+		}
 		
 		return sli;
 	}
@@ -134,6 +154,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 			o.put(ServerKey.CREATOR, Json.nullCheck(getCreator()));
 			o.put(ServerKey.MODIFIED, Json.nullCheck(Utils.parseDate(getModified())));
 			o.put(ServerKey.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
+			o.put(ServerKey.META, Json.nullCheck(getMeta()));
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -368,16 +389,10 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	 * <p>Meta can be used for any kind of information, that is needed to
 	 * describe any kind of information regarding this item. It's kind of a
 	 * 'anything goes' item.</p>
-	 * @return A meta object, or null
+	 * @return A meta object
 	 */
 	public JSONObject getMeta() {
-		JSONObject meta = null;
-		try {
-			meta = mMeta == null ? null : new JSONObject(mMeta);
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return meta;
+		return mMeta == null ? new JSONObject() : mMeta;
 	}
 	
 	/**
@@ -391,7 +406,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	 * @return
 	 */
 	public ShoppinglistItem setMeta(JSONObject meta) {
-		mMeta = meta == null ? null : meta.toString();
+		mMeta = (meta == null ? new JSONObject() : meta);
 		return this;
 	}
 	
@@ -414,6 +429,35 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	 */
 	public ShoppinglistItem setUserId(int userId) {
 		mUserId = userId;
+		return this;
+	}
+	
+	/**
+	 * Get the comment set on this shoppinglistitem.
+	 * <p>The comment is part of the {@link #getMeta() meta}-blob, and therefore
+	 * has very few restrictions</p>
+	 * @return A comment, or {@code null}
+	 */
+	public String getComment() {
+		String comment = Json.valueOf(getMeta(), EtaObject.MetaKey.COMMENT);
+		comment = (comment != null && comment.length() > 0) ? comment : null;
+		return comment;
+	}
+	
+	/**
+	 * Set a comment on the shoppinglistitem. Setting comment to {@code null}
+	 * will delete the {@link MetaKey#COMMENT comment}-key altogether.
+	 * <p>The comment is part of the {@link #getMeta() meta}-blob, and therefore
+	 * has very few restrictions</p>
+	 * @param comment The comment to set on the shoppinglistitem, {@code null} to delete
+	 * @return This object
+	 */
+	public ShoppinglistItem setComment(String comment) {
+		try {
+			getMeta().put(MetaKey.COMMENT, comment);
+		} catch (JSONException e) {
+			EtaLog.d(TAG, e);
+		}
 		return this;
 	}
 	

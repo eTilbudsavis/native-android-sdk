@@ -35,11 +35,8 @@ public class ListManager {
 	/** The global eta object */
 	private Eta mEta;
 	
-	/** Subscriber queue for shopping list item changes */
-	private List<OnChangeListener<ShoppinglistItem>> mItemSubscribers = new ArrayList<OnChangeListener<ShoppinglistItem>>();
-
 	/** Subscriber queue for shopping list changes */
-	private List<OnChangeListener<Shoppinglist>> mListSubscribers = new ArrayList<OnChangeListener<Shoppinglist>>();
+	private List<OnChangeListener> mListSubscribers = new ArrayList<OnChangeListener>();
 	
 	/** Manager for doing asynchronous sync */
 	private ListSyncManager mSyncManager;
@@ -283,15 +280,18 @@ public class ListManager {
 	}
 	
 	/**
-	 * Delete a shopping list.<br>
-	 * shopping list is deleted from the database, and changes is synchronized to the server if possible.<br>
-	 * All shopping list items associated with the shopping list are also deleted.
+	 * Delete a shopping list
+	 * <p>The {@link Shoppinglist shoppinglist} is deleted from the local database, and
+	 * changes are synchronized to the server, when and if possible. All
+	 * {@link ShoppinglistItem shoppinglistitems} associated with the
+	 * {@link Shoppinglist shoppinglist} are also deleted.</p>
 	 * @param sl - Shopping list to delete
 	 */
 	public void deleteList(Shoppinglist sl) {
 		User u = user();
-		if (canEdit(sl, u)) 
+		if (canEdit(sl, u)) {
 			deleteList(sl, u);
+		}
 	}
 	
 	private boolean deleteList(Shoppinglist sl, User user) {
@@ -384,9 +384,11 @@ public class ListManager {
 	}
 	
 	/**
-	 * Add an item to a shopping list.<br>
-	 * shopping list items is inserted into the database, and changes is synchronized to the server if possible.
-	 * If the shopping list does not exist in the database or the server, a new one is created and synchronized if possible
+	 * Add a {@link ShoppinglistItem} to a {@link Shoppinglist}
+	 * <p>{@link ShoppinglistItem}s are inserted into the local database, and
+	 * changes are synchronized to the server when and if possible. If the 
+	 * {@link Shoppinglist} does not exist in the database or the server, the SDK
+	 * will try to create a new {@link Shoppinglist}</p>
 	 * @param sli - shopping list item that should be added.
 	 */
 	public boolean addItem(ShoppinglistItem sli) {
@@ -758,19 +760,13 @@ public class ListManager {
 		mSyncManager.runSyncLoop();
 	}
 	
-	public void setOnItemChangeListener(OnChangeListener<ShoppinglistItem> l) {
-		if (!mItemSubscribers.contains(l)) mItemSubscribers.add(l);
+	public void setOnChangeListener(OnChangeListener l) {
+		if (!mListSubscribers.contains(l)) {
+			mListSubscribers.add(l);
+		}
 	}
 
-	public void removeOnItemChangeListener(OnChangeListener<ShoppinglistItem> l) {
-		mItemSubscribers.remove(l);
-	}
-
-	public void setOnListChangeListener(OnChangeListener<Shoppinglist> l) {
-		if (!mListSubscribers.contains(l)) mListSubscribers.add(l);
-	}
-
-	public void removeOnListChangeListener(OnChangeListener<Shoppinglist> l) {
+	public void removeOnChangeListener(OnChangeListener l) {
 		mListSubscribers.remove(l);
 	}
 	
@@ -783,52 +779,82 @@ public class ListManager {
 				
 				if (n.isFirstSync()) {
 					
-					for (OnChangeListener<Shoppinglist> s : mListSubscribers) {
-						s.onFirstSync();
-					}
-					
-					for (OnChangeListener<ShoppinglistItem> s : mItemSubscribers) {
+					for (OnChangeListener s : mListSubscribers) {
 						s.onFirstSync();
 					}
 					
 				}
 				
 				boolean list = n.hasListNotifications();
-				if (list) {
+				boolean item = n.hasItemNotifications();
+				
+				if (list || item) {
 					
-					for (final OnChangeListener<Shoppinglist> s : mListSubscribers) {
-						s.onUpdate(n.isServer(), n.getAddedLists(), n.getDeletedLists(), n.getEditedLists());
+					for (final OnChangeListener s : mListSubscribers) {
+						if (list) {
+							s.onListUpdate(n.isServer(), n.getAddedLists(), n.getDeletedLists(), n.getEditedLists());
+						}
+						if (item) {
+							s.onItemUpdate(n.isServer(), n.getAddedItems(), n.getDeletedItems(), n.getEditedItems());
+						}
 					}
-					n.clearListNotifications();
+					n.clear();
 					
 				}
 
-				boolean item = n.hasItemNotifications();
-				if (item) {
-					
-					for (OnChangeListener<ShoppinglistItem> s : mItemSubscribers) {
-						s.onUpdate(n.isServer(), n.getAddedItems(), n.getDeletedItems(), n.getEditedItems());
-					}
-					n.clearItemNotifications();
-				}
-				
 			}
 		});
 		
 	}
 	
-	public interface OnChangeListener<T> {
+	/**
+	 * Interface for receiving notifications on list, and item changes.
+	 * 
+	 * @author Danny Hvam - danny@etilbudsavis.dk
+	 */
+	public interface OnChangeListener {
+		
         /**
-         * The interface for receiving updates from the shoppinglist manager, given that you have subscribed to updates.
-         *
-         * @param isServer true if server response
-         * @param added the id's thats been added
-         * @param deleted the id's thats been deleted
-         * @param edited the id's thats been edited
+         * Callback method for receiving updates on {@link Shoppinglist} updates.
+         * 
+         * @param isServer 
+         * 			True if changes are from the API, else false
+         * @param added 
+         * 			A list of added {@link Shoppinglist}
+         * @param deleted
+         * 			A list of deleted {@link Shoppinglist}
+         * @param edited 
+         * 			A list of edited {@link Shoppinglist}. Edits might not be
+         * significant (e.g. name or share changes), but can happen when an item
+         * it has a reference to changes (so tick/untick on an item, also forces
+         * modified on the containing {@link Shoppinglist} to update, hence an
+         * edited list).
          */
-		public void onUpdate(boolean isServer, List<T> added, List<T> deleted, List<T> edited);
+		public void onListUpdate(boolean isServer, List<Shoppinglist> added, List<Shoppinglist> deleted, List<Shoppinglist> edited);
 		
+		/**
+         * Callback method for receiving updates on {@link ShoppinglistItem} updates.
+         * Updates to items, will also be reflected in the callback
+         * {{@link #onListUpdate(boolean, List, List, List)} where the
+         * {@link Shoppinglist}(s) containing any of the added/deleted/edited
+         * {@link ShoppinglistItem} will also have been edited.
+         * 
+		 * @param isServer
+		 * 			True if changes are from the API, else false
+		 * @param added
+         * 			A list of the added {@link ShoppinglistItem}
+		 * @param deleted
+         * 			A list of the deleted {@link ShoppinglistItem}
+		 * @param edited
+         * 			A list of the edited {@link ShoppinglistItem}
+		 */
+		public void onItemUpdate(boolean isServer, List<ShoppinglistItem> added, List<ShoppinglistItem> deleted, List<ShoppinglistItem> edited);
 		
+		/**
+		 * Callback method notifying of the first successful synchronization
+		 * iteration. And only if the {@link OnChangeListener} was subscribed
+		 * prior to the first successful iteration.
+		 */
 		public void onFirstSync();
 			
 	}

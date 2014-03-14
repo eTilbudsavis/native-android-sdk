@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class ListNotification {
 	
