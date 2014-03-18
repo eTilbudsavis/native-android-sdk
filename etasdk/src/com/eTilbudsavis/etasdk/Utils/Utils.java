@@ -311,9 +311,9 @@ public final class Utils {
 		items.clear();
 		
 		/* Sort the lists we're uncertain about by their title (this is as good as any sort) */
-		Collections.sort(first, ShoppinglistItem.TitleComparator);
-		Collections.sort(nil, ShoppinglistItem.TitleComparator);
-		Collections.sort(orphan, ShoppinglistItem.TitleComparator);
+		Collections.sort(first, ShoppinglistItem.TitleAscending);
+		Collections.sort(nil, ShoppinglistItem.TitleAscending);
+		Collections.sort(orphan, ShoppinglistItem.TitleAscending);
 		
 		/* All items that need to have their  */
 		List<ShoppinglistItem> newItems = new ArrayList<ShoppinglistItem>(size);
@@ -375,6 +375,29 @@ public final class Utils {
 			date.setTime( 1000 * (date.getTime()/1000) );
 		}
 		return date;
+	}
+	
+	/**
+	 * <p>Method for converting a size (in bytes) into a human readable format.</p>
+	 * 
+	 * <table style="text-align: right; border: #000000 solid 1px ">
+	 * <tr><th>input</th>	<th>SI</th>			<th>BINARY</th></tr>
+	 * <tr><td>0</td>		<td>0 B</td>		<td>0 B</td></tr>
+	 * <tr><td>27</td>		<td>27 B</td>		<td>27 B</td></tr>
+	 * <tr><td>1023</td>	<td>1.0 kB</td>		<td>1023 B</td></tr>
+	 * <tr><td>1024</td>	<td>1.0 kB</td>		<td>1.0 KiB</td></tr>
+	 * </table>
+	 * <p>Same system as above for larger values.</p>
+	 * @param bytes A number of bytes to convert
+	 * @param si Use SI units, or binary form
+	 * @return A human readable string of the byte-size
+	 */
+	public static String humanReadableByteCount(long bytes, boolean si) {
+	    int unit = si ? 1000 : 1024;
+	    if (bytes < unit) return bytes + " B";
+	    int exp = (int) (Math.log(bytes) / Math.log(unit));
+	    String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+	    return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 	}
 	
 }

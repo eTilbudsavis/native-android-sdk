@@ -7,6 +7,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
+
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
@@ -51,8 +53,7 @@ public class Share extends EtaListObject<Share> {
 	}
 	
 	public static Share fromJSON(JSONObject share) {
-		Share s = new Share();
-		return fromJSON(s, share);
+		return fromJSON(new Share(), share);
 	}
 	
 	public static Share fromJSON(Share s, JSONObject share) {
@@ -140,55 +141,128 @@ public class Share extends EtaListObject<Share> {
 		throw new UnsupportedOperationException("Share does not support getErn()");
 	}
 	
+	/**
+	 * Get the e-mail of this share
+	 * @return An e-mail, or {@code null}
+	 */
 	public String getEmail() {
 		return mEmail;
 	}
 	
+	/**
+	 * Set the e-mail of this share
+	 * @param email An e-mail, not {@code null}
+	 * @return This object
+	 */
 	public Share setEmail(String email) {
-		mEmail = email;
+		if (email != null) {
+			mEmail = email;
+		}
 		return this;
 	}
-
+	
+	/**
+	 * Get the name of this share
+	 * @return A name, or {@code null}
+	 */
 	public String getName() {
 		return mName;
 	}
 	
+	/**
+	 * Set the name of this share
+	 * @param name A name, not {@code null}
+	 * @return
+	 */
 	public Share setName(String name) {
-		mName = name;
+		if (name != null) {
+			mName = name;
+		}
 		return this;
 	}
-
+	
+	/**
+	 * Get the access parmission for this share
+	 * <p>Current valid access permissions are {@link Share#ACCESS_OWNER},
+	 * {@link Share#ACCESS_READONLY}, and {@link Share#ACCESS_READWRITE}.
+	 * Other strings will be ignored by the API.</p>
+	 * @return An access permission
+	 */
 	public String getAccess() {
 		return mAccess;
 	}
 
 	/**
-	 * 
-	 * @param readwrite true for 'read and write' access, false for 'read only'
-	 * @return this share
+	 * Set the access level for this share.
+	 * <p>Current valid access permissions are {@link Share#ACCESS_OWNER},
+	 * {@link Share#ACCESS_READONLY}, and {@link Share#ACCESS_READWRITE}.
+	 * Other strings will be ignored by the API.</p>
+	 * @param permission An permission for this share
+	 * @return This object
 	 */
 	public Share setAccess(String permission) {
-		mAccess = permission;
-		return Share.this;
+		if (permission != null) {
+			mAccess = permission;
+		}
+		return this;
 	}
-
+	
+	/**
+	 * Whether or not the share/user have accepted the invitation to the
+	 * {@link Shoppinglist}, and are currently receiving updates about the
+	 * {@link Shoppinglist}
+	 * @return {@code true} if user have accepted, else {@code false}
+	 */
 	public boolean getAccepted() {
 		return mAccepted;
 	}
 	
+	/**
+	 * Whether or not the share/user have accepted the invitation.
+	 * <p>This shouldn't be handled by the app, or SDK, as this is something
+	 * being determined by the API</p>
+	 * @param accepted {@code true} if user have accepted the invitation, else {@code false}
+	 * @return This object
+	 */
 	public Share setAccepted(boolean accepted) {
 		mAccepted = accepted;
 		return this;
 	}
 	
+	/**
+	 * Set the absolute URL to redirect the user to when he/she accepts to
+	 * share the {@link Shoppinglist}.
+	 * @param url The URL
+	 * @return This object
+	 */
+	public Share setAcceptUrl(String url) {
+		mAcceptUrl = url;
+		return this;
+	}
+	
+	/**
+	 * Get the absolute URL to redirect the user to when he/she accepts to
+	 * share the {@link Shoppinglist}.
+	 * @return An URL
+	 */
 	public String getAcceptUrl() {
 		return mAcceptUrl;
 	}
 	
+	/**
+	 * The {@link Shoppinglist#getId() id} of the shopping list associated with
+	 * this share.
+	 * @return The shopping list id, or {@code null}
+	 */
 	public String getShoppinglistId() {
 		return mShoppinglistId;
 	}
 	
+	/**
+	 * Set the {@link Shoppinglist#getId() id} if the associated shoppinglist
+	 * @param id An id of a {@link Shoppinglist}
+	 * @return This object
+	 */
 	public Share setShoppinglistId(String id) {
 		mShoppinglistId = id;
 		return this;
@@ -198,17 +272,19 @@ public class Share extends EtaListObject<Share> {
 		return 0;
 	}
 	
-	public static Comparator<Share> EmailComparator  = new Comparator<Share>() {
+	public static Comparator<Share> EmailAscending  = new Comparator<Share>() {
 		
+		@SuppressLint("DefaultLocale")
 		public int compare(Share item1, Share item2) {
-
-			String itemName1 = item1.getEmail().toUpperCase();
-			String itemName2 = item2.getEmail().toUpperCase();
+			
+			String e1 = item1.getEmail().toLowerCase();
+			String e2 = item2.getEmail().toLowerCase();
 			
 			//ascending order
-			return itemName1.compareTo(itemName2);
+			return e1.compareTo(e2);
+			
 		}
-
+		
 	};
 
 	@Override

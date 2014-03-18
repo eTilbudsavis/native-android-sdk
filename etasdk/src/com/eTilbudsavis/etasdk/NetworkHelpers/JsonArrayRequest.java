@@ -1,5 +1,6 @@
 package com.eTilbudsavis.etasdk.NetworkHelpers;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -54,18 +55,26 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	
 	@Override
 	protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
-		
+
+        String jsonString = new String(response.data);
 		try {
-            String jsonString = new String(response.data);
-            
+			try {
+				jsonString = new String(response.data, getParamsEncoding());
+			} catch (UnsupportedEncodingException e) {
+				jsonString = new String(response.data);
+			}
+			
 			Response<JSONArray> r = null;
             if (Utils.isSuccess(response.statusCode)) {
-
+            	// Parse into array if it's successful
                 r = Response.fromSuccess(new JSONArray(jsonString), getCache());
         		putJSON(r.result);
         		
             } else {
-            	r = Response.fromError(EtaError.fromJSON(new JSONObject(jsonString)));
+            	// Parse into object if it failed.
+            	JSONObject jObject = new JSONObject(jsonString);
+            	EtaError e = EtaError.fromJSON(jObject);
+            	r = Response.fromError(e);
             }
             
             log(response.statusCode, response.headers, r.result, r.error);
@@ -73,7 +82,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
             return r;
             
         } catch (Exception e) {
-            return Response.fromError(new ParseError(e));
+            return Response.fromError(new ParseError(e, JSONArray.class));
         }
 	}
 	

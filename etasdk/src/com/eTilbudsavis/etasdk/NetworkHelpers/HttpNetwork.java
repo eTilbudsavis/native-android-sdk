@@ -48,15 +48,13 @@ public class HttpNetwork implements Network {
 	
 	public NetworkResponse performRequest(Request<?> request) throws EtaError {
 		
-		HttpResponse resp = null;
-		int sc = 0;
 		byte[] content = null;
 		Map<String, String> responseHeaders = new HashMap<String, String>();
 		try {
 			
-			resp = performHttpRequest(request);
+			HttpResponse resp = performHttpRequest(request);
 			
-			sc = resp.getStatusLine().getStatusCode();
+			int sc = resp.getStatusLine().getStatusCode();
 			
 			if (resp.getEntity() == null) {
 				// add 0-byte for to mock no-content
@@ -65,6 +63,14 @@ public class HttpNetwork implements Network {
 				request.addEvent("reading-input");
 				content = entityToBytes(resp.getEntity());
 			}
+			
+			/* TODO report back content and body length, to collect stats on
+			 * transferred data, to compare with MsgPack later.
+			 */
+			int respLength = content.length;
+			int bodyLength = (request.getBody() == null ? 0 : request.getBody().length);
+			
+			request.stats(respLength, bodyLength);
 			
 			for (org.apache.http.Header h : resp.getAllHeaders()) {
 				responseHeaders.put(h.getName(), h.getValue());

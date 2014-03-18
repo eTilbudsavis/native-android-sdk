@@ -9,13 +9,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.R.string;
-
 import com.eTilbudsavis.etasdk.ListManager;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaObject.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
-import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
@@ -33,7 +29,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	private Offer mOffer = null;
 	private String mShoppinglistId;
 	private String mPrevId;
-	private JSONObject mMeta;
+	private String mMeta;
 	private int mUserId = -1;
 	
 	/**
@@ -392,7 +388,16 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	 * @return A meta object
 	 */
 	public JSONObject getMeta() {
-		return mMeta == null ? new JSONObject() : mMeta;
+		if (mMeta == null) {
+			return new JSONObject();
+		} else {
+			try {
+				return new JSONObject(mMeta);
+			} catch (JSONException e) {
+				EtaLog.d(TAG, e);
+			}
+		}
+		return new JSONObject();
 	}
 	
 	/**
@@ -406,7 +411,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	 * @return
 	 */
 	public ShoppinglistItem setMeta(JSONObject meta) {
-		mMeta = (meta == null ? new JSONObject() : meta);
+		mMeta = meta == null ? "{}" : meta.toString();
 		return this;
 	}
 	
@@ -454,7 +459,9 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	 */
 	public ShoppinglistItem setComment(String comment) {
 		try {
-			getMeta().put(MetaKey.COMMENT, comment);
+			JSONObject meta = getMeta();
+			meta.put(MetaKey.COMMENT, comment);
+			setMeta(meta);
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
@@ -466,24 +473,14 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	 * to compare two items.
 	 */
 	public int compareTo(ShoppinglistItem another) {
-		if (another == null)
-			return -1;
-		
-		String t1 = getTitle();
-		String t2 = another.getTitle();
-		if (t1 == null || t2 == null) {
-			return t1 == null ? (t2 == null ? 0 : 1) : -1;
-		}
-		
-		//ascending order
-		return t1.compareToIgnoreCase(t2);
+		return TitleAscending.compare(this, another);
 	}
-	
+
 	/**
 	 * Compare object, that uses the {@link ShoppinglistItem#getTitle() title}
 	 * to compare two items.
 	 */
-	public static Comparator<ShoppinglistItem> TitleComparator  = new Comparator<ShoppinglistItem>() {
+	public static Comparator<ShoppinglistItem> TitleAscending  = new Comparator<ShoppinglistItem>() {
 
 		public int compare(ShoppinglistItem item1, ShoppinglistItem item2) {
 			
@@ -498,6 +495,31 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 				
 				//ascending order
 				return t1.compareToIgnoreCase(t2);
+			}
+			
+		}
+
+	};
+
+	/**
+	 * Compare object, that uses {@link ShoppinglistItem#getModified() modified}
+	 * to compare two items.
+	 */
+	public static Comparator<ShoppinglistItem> ModifiedDescending  = new Comparator<ShoppinglistItem>() {
+
+		public int compare(ShoppinglistItem item1, ShoppinglistItem item2) {
+			
+			if (item1 == null || item2 == null) {
+				return item1 == null ? (item2 == null ? 0 : 1) : -1;
+			} else {
+				Date d1 = item1.getModified();
+				Date d2 = item2.getModified();
+				if (d1 == null || d2 == null) {
+					return d1 == null ? (d2 == null ? 0 : 1) : -1;
+				}
+				
+				// Descending order
+				return d2.compareTo(d1);
 			}
 			
 		}

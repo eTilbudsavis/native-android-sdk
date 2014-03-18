@@ -176,6 +176,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     	return Request.this;
     }
     
+    public void stats(int in, int out) {
+    	mRequestQueue.dataIn += in;
+    	mRequestQueue.dataOut += out;
+    }
+    
 	/** Returns a list of headers for this request. */
 	public Map<String, String> getHeaders() {
 		return mHeaders;
@@ -518,6 +523,24 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 			mLog.printEventLog(getClass().getSimpleName());
 		}
 		
+	}
+
+	/**
+	 * Returns a complete printable representation of this Request, e.g:
+	 * 
+	 * <li>GET: https://api.etilbudsavis.dk/v2/catalogs/{catalog_id}?param1=value1&amp;param2=value2</li>
+	 * 
+	 * <p>The SDK/API parameters are not added to the 
+	 * {@link Request#getQueryParameters() query parameters}, before the request
+	 * is handed to the {@link RequestQueue}. So if you want to have the SDK/API
+	 * parameters appended as well in the string do:</p>
+	 * <li>Eta.getInstance().add(Request)</li>
+	 * <p>and then call: </p>
+	 * <li>toString()</li>
+	 */
+	@Override
+	public String toString() {
+		return getMethodString() + ": " + Utils.buildQueryString(this);
 	}
 	
 }

@@ -24,6 +24,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
+import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError.Code;
 import com.eTilbudsavis.etasdk.NetworkHelpers.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.NetworkHelpers.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
@@ -196,12 +197,13 @@ public class ListSyncManager {
 		
 		r.setTag(mRequestTag);
 		
+		mEta.add(r);
+		
 //		boolean isPullRequest = r.getUrl().contains("modified") || r.getUrl().endsWith("shoppinglists") || r.getUrl().endsWith("items");
 //		if (!isPullRequest) {
-//			EtaLog.d(TAG, r.getMethodString() + ": " + r.getUrl());
+//			EtaLog.d(TAG, r.toString());
 //		}
 		
-		mEta.add(r);
 	}
 	
 	private void popRequest() {
@@ -251,7 +253,7 @@ public class ListSyncManager {
 						
 					}
 					
-					pushNotifications();
+					popRequestAndPushNotifications();
 					
 				} else {
 					popRequest();
@@ -441,7 +443,7 @@ public class ListSyncManager {
 							// error? just write new state to DB, next iteration will fix it
 							db.editList(sl, user);
 						}
-						pushNotifications();
+						popRequestAndPushNotifications();
 						
 					} else {
 						
@@ -525,7 +527,7 @@ public class ListSyncManager {
 						tmp = sli.getId();
 					}
 					
-					pushNotifications();
+					popRequestAndPushNotifications();
 					
 				} else {
 					popRequest();
@@ -685,25 +687,30 @@ public class ListSyncManager {
 
 			public void onComplete(JSONObject response, EtaError error) {
 				
-				Shoppinglist s = sl;
 				if (response != null) {
+
+					/* 
+					 * If local isn't equal to server version, take server version.
+					 * Don't push changes yet, we want to check item state too.
+					 */
 					
-					s = Shoppinglist.fromJSON(response);
-					Shoppinglist dbList = db.getList(s.getId(), user);
-					if (dbList != null && !s.getModified().before(dbList.getModified()) ) {
-						s.setState(State.SYNCED);
+					Shoppinglist serverSl = Shoppinglist.fromJSON(response);
+					Shoppinglist localSl = db.getList(serverSl.getId(), user);
+					if (localSl != null && !serverSl.getModified().equals(localSl.getModified()) ) {
+						serverSl.setState(State.SYNCED);
 						// If server haven't delivered an prev_id, then use old id
-						s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
-						db.editList(s, user);
+						serverSl.setPreviousId(serverSl.getPreviousId() == null ? sl.getPreviousId() : serverSl.getPreviousId());
+						db.editList(serverSl, user);
+						mNotification.edit(serverSl);
 					}
 					popRequest();
 					syncLocalItemChanges(sl, user);
 					
 				} else {
-					popRequest();
 					
-					if (error.getCode() == -1) {
-						// TODO: Need better error code definitions, are they going to be types?
+					popRequest();
+					if (error.getCode() == Code.NETWORK_ERROR) {
+						/* Ignore missing network, wait for next iteration */
 					} else {
 						revertList(sl, user);
 					}
@@ -730,19 +737,34 @@ public class ListSyncManager {
 			public void onComplete(JSONObject response, EtaError error) {
 
 				if (response != null) {
+					
 					db.deleteList(sl, user);
 					db.deleteShares(sl, user);
 					db.deleteItems(sl.getId(), null, user);
 					popRequest();
+					
 				} else {
+					
 					popRequest();
-					if (error.getCode() != 1501) {
-						db.deleteList(sl, user);
-					} else if (error.getCode() == -1) {
-						// TODO: Need better error code definitions, are they going to be types?
-					} else {
-						revertList(sl, user);
+					
+					switch (error.getCode()) {
+					
+						case Code.INVALID_RESOURCE_ID:
+							/* Resource already gone (or have never been synchronized)
+							 * delete local version and ignore */
+							db.deleteList(sl, user);
+							break;
+							
+						case Code.NETWORK_ERROR:
+							/* Ignore missing network, wait for next iteration */
+							break;
+							
+						default:
+							revertList(sl, user);
+							break;
+							
 					}
+					
 				}
 
 			}
@@ -769,19 +791,18 @@ public class ListSyncManager {
 
 			public void onComplete(JSONObject response, EtaError error) {
 				
-				Shoppinglist s = null;
 				if (response != null) {
-					s = Shoppinglist.fromJSON(response);
-					s.setState(State.SYNCED);
-					s.setPreviousId(s.getPreviousId() == null ? sl.getPreviousId() : s.getPreviousId());
-					db.editList(s, user);
-					mNotification.add(s);
+					Shoppinglist serverSl = Shoppinglist.fromJSON(response);
+					serverSl.setState(State.SYNCED);
+					serverSl.setPreviousId(serverSl.getPreviousId() == null ? sl.getPreviousId() : serverSl.getPreviousId());
+					db.editList(serverSl, user);
+					mNotification.add(serverSl);
 					syncLocalItemChanges(sl, user);
 				} else {
 					db.deleteList(sl, user);
 					mNotification.del(sl);
 				}
-				pushNotifications();
+				popRequestAndPushNotifications();
 			}
 		};
 		
@@ -803,25 +824,44 @@ public class ListSyncManager {
 			
 			public void onComplete(JSONObject response, EtaError error) {
 				
+				EtaLog.d(TAG, "itemListener", response, error);
+				
 				if (response != null) {
 					
 					ShoppinglistItem server = ShoppinglistItem.fromJSON(response);
 					ShoppinglistItem local = db.getItem(sli.getId(), user);
-					if (local != null && local.getModified().after(server.getModified()) ) {
+					
+					if (local != null && !local.getModified().equals(server.getModified()) ) {
+						
+						// The server has a 'better' state, we should use this
 						server.setState(State.SYNCED);
 						// If server havent delivered an prev_id, then use old id
 						if (server.getPreviousId() == null) {
 							server.setPreviousId(sli.getPreviousId());
 						}
 						db.editItem(server, user);
+						mNotification.edit(server);
+						
 					}
-					popRequest();
+					
+					popRequestAndPushNotifications();
 					
 				} else {
+					
 					popRequest();
-					if (error.getCode() != -1) {
-						revertItem(sli, user);
+					
+					switch (error.getCode()) {
+					
+						case Code.NETWORK_ERROR:
+							/* Ignore missing network, wait for next iteration */
+							break;
+							
+						default:
+							revertItem(sli, user);
+							break;
+							
 					}
+					
 				}
 
 			}
@@ -847,12 +887,22 @@ public class ListSyncManager {
 				} else {
 					popRequest();
 					
-					if(error.getCode() == 1501) {
+					switch (error.getCode()) {
+
+					case Code.INVALID_RESOURCE_ID:
+						/* Resource already gone (or have never been synchronized)
+						 * delete local version and ignore */
 						db.deleteItem(sli, user);
-					} else if (error.getCode() == -1) {
-						// Nothing
-					} else {
+						break;
+						
+					case Code.NETWORK_ERROR:
+						/* Ignore missing network, wait for next iteration */
+						break;
+						
+					default:
 						revertItem(sli, user);
+						break;
+						
 					}
 					
 				}
@@ -879,25 +929,49 @@ public class ListSyncManager {
 		Listener<JSONObject> itemListener = new Listener<JSONObject>() {
 
 			public void onComplete(JSONObject response, EtaError error) {
-
-				ShoppinglistItem s = null;
+				
 				if (response != null) {
-					s = ShoppinglistItem.fromJSON(response);
-					s.setState(State.SYNCED);
-					s.setPreviousId(s.getPreviousId() == null ? sli.getPreviousId() : s.getPreviousId());
-					db.editItem(s, user);
-					mNotification.edit(s);
+					
+					// Take server response, insert it into DB, post notification
+					ShoppinglistItem serverSli = ShoppinglistItem.fromJSON(response);
+					serverSli.setState(State.SYNCED);
+					serverSli.setPreviousId(serverSli.getPreviousId() == null ? sli.getPreviousId() : serverSli.getPreviousId());
+					db.editItem(serverSli, user);
+					mNotification.edit(serverSli);
+					
 				} else {
+					
+					// Something bad happened, delete item to keep DB sane
 					db.deleteItem(sli, user);
 					mNotification.del(sli);
+					
 				}
-				pushNotifications();
+				
+				/* 
+				 * Update shopping list modified to match the latest date of the
+				 * items, so that we get as close to API state as possible
+				 */
+				Shoppinglist sl = db.getList(sli.getShoppinglistId(), user);
+				if (sl != null) {
+					
+					List<ShoppinglistItem> items = db.getItems(sl, user, true);
+					if (!items.isEmpty()) {
+						Collections.sort(items, ShoppinglistItem.ModifiedDescending);
+						ShoppinglistItem newestItem = items.get(0);
+						sl.setModified(newestItem.getModified());
+						db.editList(sl, user);
+						mNotification.edit(sl);
+					}
+					
+				}
+				
+				popRequestAndPushNotifications();
+				
 			}
 		};
 		
 		String url = Endpoint.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
 		JsonObjectRequest itemReq = new JsonObjectRequest(url, itemListener);
-
 		addRequest(itemReq);
 		
 	}
@@ -912,21 +986,23 @@ public class ListSyncManager {
 		for (Share s : shares) {
 			
 			switch (s.getState()) {
-			case State.TO_SYNC:
-				putShare(sl, s, user);
-				break;
-
-			case State.DELETE:
-				delShare(s, user);
-				break;
+			
+				case State.TO_SYNC:
+					putShare(s, user);
+					break;
+					
+				case State.DELETE:
+					delShare(s, user);
+					break;
+					
+				case State.ERROR:
+					revertShare(s, user);
+					break;
+					
+				default:
+					count--;
+					break;
 				
-			case State.ERROR:
-				revertShare(s, user);
-				break;
-				
-			default:
-				count--;
-				break;
 			}
 			
 		}
@@ -935,7 +1011,7 @@ public class ListSyncManager {
 		
 	}
 
-	private void putShare(final Shoppinglist sl, final Share s, final User user) {
+	private void putShare(final Share s, final User user) {
 
 		final DbHelper db = DbHelper.getInstance();
 		
@@ -947,62 +1023,100 @@ public class ListSyncManager {
 			public void onComplete(JSONObject response, EtaError error) {
 
 				if (response != null) {
-					Share tmp = Share.fromJSON(response);
-					tmp.setState(State.SYNCED);
-					tmp.setShoppinglistId(s.getShoppinglistId());
+					Share serverShare = Share.fromJSON(response);
+					serverShare.setState(State.SYNCED);
+					serverShare.setShoppinglistId(s.getShoppinglistId());
+					db.editShare(serverShare, user);
 					popRequest();
 				} else {
-					popRequest();
 					if (error.getFailedOnField() != null) {
-						// If the request failed on a field, then we cannot really do anything, but delete
+						
+						/* If it's a FailedOnField, we can't do anything, yet.
+						 * Remove the share to keep the DB sane.
+						 */
 						db.deleteShare(s, user);
-						sl.removeShare(s);
-						mNotification.edit(sl);
+						// No need to edit the SL in DB, as shares are disconnected
+						Shoppinglist sl = db.getList(s.getShoppinglistId(), user);
+						if (sl != null) {
+							sl.removeShare(s);
+							mNotification.edit(sl);
+							popRequestAndPushNotifications();
+						} else {
+							popRequest();
+							/* Nothing, shoppinglist might have been deleted */
+						}
+						
 					} else {
+						popRequest();
 						revertShare(s, user);
 					}
 				}
-				pushNotifications();
 
 			}
 		};
 		
+		/* Hack for edge, where accept URL is required */
+		if (s.getAcceptUrl() == null) {
+			s.setAcceptUrl("https://www.etilbudsavis.dk/");
+		}
+		
 		String url = Endpoint.listShareEmail(user.getUserId(), s.getShoppinglistId(), s.getEmail());
 		JsonObjectRequest shareReq = new JsonObjectRequest(Method.PUT, url, s.toJSON(), shareListener);
+		shareReq.debugNetwork(true);
 		addRequest(shareReq);
 		
 	}
 
 	private void delShare(final Share s, final User user) {
-
-		final DbHelper db = DbHelper.getInstance();
-
+		
 		Listener<JSONObject> shareListener = new Listener<JSONObject>() {
 
 			public void onComplete(JSONObject response, EtaError error) {
-
+				
+				DbHelper db = DbHelper.getInstance();
+				
 				if (response != null) {
 					
 					if (user.getEmail().equals(s.getEmail())) {
-						// If the share.email == user.email, then we want to remove list, items and shares
-						// As the user no longer has access (have removed him self from shares)
+						
+						/* 
+						 * if share.email == user.email, the user have been
+						 * removed from the list, delete list, items, and shares
+						 */
 						db.deleteList(s.getShoppinglistId(), user);
 						db.deleteItems(s.getShoppinglistId(), null, user);
 						db.deleteShares(s.getShoppinglistId(), user);
+						
 					} else {
-						// Else just remove the share in question
+						
+						/* Else just remove the share in question */
 						db.deleteShare(s, user);
+						
 					}
 					popRequest();
+					
 				} else {
+					
 					popRequest();
-					if (error.getCode() == -1) {
-						// Nothing
-					} else if (error.getCode() == 1501) {
-						db.deleteShare(s, user);
-					} else {
-						revertShare(s, user);
+					
+					switch (error.getCode()) {
+
+						case Code.NETWORK_ERROR:
+							/* Ignore missing network, wait for next iteration */
+							break;
+	
+						case Code.INVALID_RESOURCE_ID:
+							/* Resource  gone (or have never been synchronized)
+							 * delete local version and ignore */
+							db.deleteShare(s, user);
+							break;
+							
+						default:
+							revertShare(s, user);
+							break;
+						
 					}
+					
 				}
 				
 			}
@@ -1026,17 +1140,36 @@ public class ListSyncManager {
 		Listener<JSONObject> shareListener = new Listener<JSONObject>() {
 
 			public void onComplete(JSONObject response, EtaError error) {
-
-				Share tmp = null;
+				
 				if (response != null) {
-					tmp = Share.fromJSON(response);
-					tmp.setState(State.SYNCED);
-					tmp.setShoppinglistId(s.getShoppinglistId());
-					db.editShare(tmp, user);
+					
+					Share serverShare = Share.fromJSON(response);
+					serverShare.setState(State.SYNCED);
+					serverShare.setShoppinglistId(s.getShoppinglistId());
+					db.editShare(serverShare, user);
+
+					// No need to edit the SL in DB, as shares are disconnected
+					Shoppinglist sl = db.getList(s.getShoppinglistId(), user);
+					if (sl != null) {
+						
+						sl.removeShare(s);
+						mNotification.edit(sl);
+						popRequestAndPushNotifications();
+						
+					} else {
+						
+						/* Nothing, shoppinglist might have been deleted */
+						popRequest();
+						
+					}
+					
 				} else {
+					
 					db.deleteShare(s, user);
+					popRequest();
+					
 				}
-				popRequest();
+				
 			}
 		};
 		
@@ -1046,15 +1179,16 @@ public class ListSyncManager {
 		
 	}
 	
-	private void pushNotifications() {
+	/**
+	 * Pops one request off the request-stack, and sends out a notification if 
+	 * the stack is empty (all requests are done, and all notifications are ready)
+	 */
+	private void popRequestAndPushNotifications() {
 		
 		popRequest();
-		
-		if (!mCurrentRequests.isEmpty()) {
-			return;
+		if (mCurrentRequests.isEmpty()) {
+			Eta.getInstance().getListManager().notifySubscribers(mNotification);
 		}
-		
-		Eta.getInstance().getListManager().notifySubscribers(mNotification);
 		
 	}
 	

@@ -26,16 +26,18 @@ public class JsonObjectRequest extends JsonRequest<JSONObject>{
 	
 	@Override
 	protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+		
+		String jsonString = null;
+		
 		try {
-			String jsonString = null;
-            JSONObject item = null;
+			
 			try {
 				jsonString = new String(response.data, getParamsEncoding());
-	            item = new JSONObject(jsonString);
 			} catch (UnsupportedEncodingException e) {
 				jsonString = new String(response.data);
-	            item = new JSONObject(jsonString);
 			}
+			
+            JSONObject item = new JSONObject(jsonString);
 			Response<JSONObject> r = null;
             if (Utils.isSuccess(response.statusCode)) {
                 putJSON(item);
@@ -50,7 +52,7 @@ public class JsonObjectRequest extends JsonRequest<JSONObject>{
             return r;
             
         } catch (JSONException e) {
-            return Response.fromError(new ParseError(e));
+            return Response.fromError(new ParseError(e, JSONObject.class));
         }
 		
 	}

@@ -348,7 +348,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public Shoppinglist getList(String id, User user) {
 		id = escape(id);
-		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s!=%s", LIST_TABLE, ID, id, USER, user.getId(), STATE, Shoppinglist.State.DELETE);
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s!=%s", LIST_TABLE, ID, id, USER, user.getUserId(), STATE, Shoppinglist.State.DELETE);
 		Cursor c = execQuery(q);
 		Shoppinglist sl = null;
 		sl = c.moveToFirst() ? cursorToSl(c) : null;
@@ -367,7 +367,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public List<Shoppinglist> getListFromName(String name, User user) {
 		name = escape(name);
-		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s!=%s", LIST_TABLE, NAME, name, USER, user.getId(), STATE, Shoppinglist.State.DELETE);
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s!=%s", LIST_TABLE, NAME, name, USER, user.getUserId(), STATE, Shoppinglist.State.DELETE);
 		Cursor c = execQuery(q);
 		List<Shoppinglist> tmp = new ArrayList<Shoppinglist>();
 		if (c.moveToFirst() ) {
@@ -403,9 +403,9 @@ public class DbHelper extends SQLiteOpenHelper {
 	public List<Shoppinglist> getLists(User user, boolean includeDeleted) {
 		String q = null;
 		if (includeDeleted) {
-			q = String.format("SELECT * FROM %s WHERE %s=%s", LIST_TABLE, USER, user.getId());
+			q = String.format("SELECT * FROM %s WHERE %s=%s", LIST_TABLE, USER, user.getUserId());
 		} else {
-			q = String.format("SELECT * FROM %s WHERE %s!=%s AND %s=%s", LIST_TABLE, STATE, Shoppinglist.State.DELETE, USER, user.getId());
+			q = String.format("SELECT * FROM %s WHERE %s!=%s AND %s=%s", LIST_TABLE, STATE, Shoppinglist.State.DELETE, USER, user.getUserId());
 		}
 		Cursor c = execQuery(q);
 		List<Shoppinglist> tmp = new ArrayList<Shoppinglist>(c.getCount());
@@ -487,7 +487,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public ShoppinglistItem getItem(String itemId, User user) {
 		itemId = escape(itemId);
-		String q = String.format("SELECT * FROM %s WHERE %s=%s AND  %s=%s", ITEM_TABLE, ID, itemId, USER , user.getId());
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND  %s=%s", ITEM_TABLE, ID, itemId, USER , user.getUserId());
 		Cursor c = execQuery(q);
 		ShoppinglistItem sli = null;
 		sli = c.moveToFirst() ? cursorToSli(c) : null;
@@ -502,7 +502,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public List<ShoppinglistItem> getItemFromDescription(String description, User user) {
 		description = escape(description);
-		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, DESCRIPTION, description, USER, user.getId());
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, DESCRIPTION, description, USER, user.getUserId());
 		Cursor c = execQuery(q);
 		List<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
 		if (c.moveToFirst() ) {
@@ -541,9 +541,9 @@ public class DbHelper extends SQLiteOpenHelper {
 		String id = escape(slId);
 		String q = null;
 		if (includeDeleted) {
-			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, USER, user.getId());
+			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, USER, user.getUserId());
 		} else {
-			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, STATE, ShoppinglistItem.State.DELETE, USER, user.getId());
+			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, STATE, ShoppinglistItem.State.DELETE, USER, user.getUserId());
 		}
 		Cursor c = execQuery(q);
 		List<ShoppinglistItem> items = new ArrayList<ShoppinglistItem>();
@@ -563,7 +563,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	public ShoppinglistItem getItemPrevious(String shoppinglistId, String previousId, User user) {
 		String id = escape(shoppinglistId);
 		String prev = escape(previousId);
-		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, PREVIOUS_ID, prev, USER, user.getId());
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, PREVIOUS_ID, prev, USER, user.getUserId());
 		Cursor c = execQuery(q);
 		ShoppinglistItem sli = c.moveToFirst() ? cursorToSli(c) : null;
 		close(c);
@@ -576,7 +576,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	
 	public Shoppinglist getListPrevious(String previousId, User user) {
 		String prev = escape(previousId);
-		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", LIST_TABLE, PREVIOUS_ID, prev, USER, user.getId());
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", LIST_TABLE, PREVIOUS_ID, prev, USER, user.getUserId());
 		Cursor c = execQuery(q);
 		Shoppinglist sl = c.moveToFirst() ? cursorToSl(c) : null;
 		close(c);
@@ -584,28 +584,32 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 	
 	/**
-	 * Deletes an item from db
+	 * Deletes an {@link ShoppinglistItem} from db
 	 * @param id of the item to delete
 	 * @return the number of rows affected
 	 */
 	public int deleteItem(ShoppinglistItem sli, User user) {
 		String id = escape(sli.getId());
-		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, ID, id, USER, user.getId());
+		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, ID, id, USER, user.getUserId());
 		return execQueryWithChangesCount(q);
 	}
 
 	/**
-	 * Deletes all items from a specific shopping list<br>
-	 * true = Ticked<br>
-	 * false = Unticked<br>
-	 * null = All items<br>
+	 * Deletes all items, in a given state, from a {@link Shoppinglist}
+	 * 
+	 * <ul>
+	 * <li>{@code true} - delete ticked items</li>
+	 * <li>{@code false} - delete unticked items</li>
+	 * <li>{@code null} - delete all items</li>
+	 * </ul>
+	 * 
 	 * @param shoppinglistId to remove items from
 	 * @param state that items must have to be removed
 	 * @return number of affected rows
 	 */
 	public int deleteItems(String shoppinglistId, Boolean state, User user) {
 		shoppinglistId = escape(shoppinglistId);
-		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, shoppinglistId, USER, user.getId());
+		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, shoppinglistId, USER, user.getUserId());
 		if (state != null) {
 			q += String.format(" AND %s=%s", TICK, escape(state));
 		}
@@ -704,7 +708,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	
 	public int deleteShares(String shoppinglistId, User user) {
 		String slId = escape(shoppinglistId);
-		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, USER, user.getId());
+		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, USER, user.getUserId());
 		return execQueryWithChangesCount(q);
 	}
 	

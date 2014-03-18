@@ -60,7 +60,12 @@ public class RequestQueue {
     
     /** The EventLog containing condensed information about requests and their responses */
     private EventLog mLog;
-    
+
+    /* tmp var for testing */
+	public int dataIn = 0;
+    /* tmp var for testing */
+	public int dataOut = 0;
+	
     /**
      * Construct a new RequestQueue for processing requests.
      * This RequestQueue is primarily aimed at fetching data from the eTilbudsavis API.

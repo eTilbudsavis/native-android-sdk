@@ -21,6 +21,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
 import com.eTilbudsavis.etasdk.NetworkInterface.Cache.Item;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
+import com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
@@ -373,6 +374,30 @@ public abstract class JsonRequest<T> extends Request<T> {
 			EtaLog.d(TAG, e);
 		}
 		
+	}
+	
+	/**
+	 * Returns a complete printable representation of this Request, e.g:
+	 * 
+	 * <li>GET: https://api.etilbudsavis.dk/v2/catalogs/{catalog_id}?param1=value1&amp;param2=value2</li>
+	 * <li>PUT: https://api.etilbudsavis.dk/v2/catalogs/{catalog_id}?param1=value1&amp;param2=value2&amp;body=[json_string]</li>
+	 * 
+	 * <p>Body data is appended as the last query parameter for convenience, as
+	 * seen in the examples above. The SDK/API parameters are not added to the 
+	 * {@link Request#getQueryParameters() query parameters}, before the request
+	 * is handed to the {@link RequestQueue}. So if you want to have the SDK/API
+	 * parameters appended as well in the string do:</p>
+	 * <li>Eta.getInstance().add(Request)</li>
+	 * <p>and then call: </p>
+	 * <li>toString()</li>
+	 */
+	@Override
+	public String toString() {
+		if (mRequestBody != null) {
+			return super.toString() + "&body=[" + mRequestBody + "]";
+		} else {
+			return super.toString();
+		}
 	}
 	
 }

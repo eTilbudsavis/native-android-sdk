@@ -1,5 +1,6 @@
 package com.eTilbudsavis.etasdk.NetworkHelpers;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 import org.json.JSONArray;
@@ -25,38 +26,55 @@ public class JsonStringRequest extends JsonRequest<String>{
 	
 	@Override
 	protected Response<String> parseNetworkResponse(NetworkResponse response) {
+		
+		String jsonString = null;
 		try {
-			String json = new String(response.data);
+			jsonString = new String(response.data, getParamsEncoding()).trim();
+		} catch (UnsupportedEncodingException e) {
+			jsonString = new String(response.data).trim();
+		}
+		
+		if (Utils.isSuccess(response.statusCode)) {
 			
-			if (Utils.isSuccess(response.statusCode)) {
+			if (jsonString.startsWith("{") && jsonString.endsWith("}")) {
 				
 				try {
-					if (json.startsWith("{") && json.endsWith("}")) {
-						JSONObject jObject = new JSONObject(json);
-						log(response.statusCode, response.headers, jObject, null);
-						putJSON(jObject);
-					} else if (json.startsWith("[") && json.endsWith("]")) {
-						JSONArray jArray = new JSONArray(json);
-						log(response.statusCode, response.headers, jArray, null);
-						putJSON(jArray);
-					}
-					
+					JSONObject jObject = new JSONObject(jsonString);
+					log(response.statusCode, response.headers, jObject, null);
+					putJSON(jObject);
 				} catch (JSONException e) {
 					EtaLog.d(TAG, e);
+		            return Response.fromError(new ParseError(e, JSONObject.class));
 				}
-	            return Response.fromSuccess(json, getCache());
-	            
-			} else {
 				
-				Response<String> r = Response.fromError(EtaError.fromJSON(new JSONObject(json)));
-				log(response.statusCode, response.headers, new JSONObject(), r.error);
-				return r;
-				
+			} else if (jsonString.startsWith("[") && jsonString.endsWith("]")) {
+
+				try {
+					JSONArray jArray = new JSONArray(jsonString);
+					log(response.statusCode, response.headers, jArray, null);
+					putJSON(jArray);
+				} catch (JSONException e) {
+					EtaLog.d(TAG, e);
+		            return Response.fromError(new ParseError(e, JSONArray.class));
+				}
 			}
 			
-        } catch (Exception e) {
-            return Response.fromError(new ParseError(e));
-        }
+            return Response.fromSuccess(jsonString, getCache());
+            
+		} else {
+			
+			try {
+				JSONObject jObject = new JSONObject(jsonString);
+				EtaError e = EtaError.fromJSON(jObject);
+				Response<String> r = Response.fromError(e);
+				log(response.statusCode, response.headers, new JSONObject(), r.error);
+				return r;
+	        } catch (Exception e) {
+	            return Response.fromError(new ParseError(e, JSONObject.class));
+	        }
+			
+		}
+			
 	}
 
 	@Override

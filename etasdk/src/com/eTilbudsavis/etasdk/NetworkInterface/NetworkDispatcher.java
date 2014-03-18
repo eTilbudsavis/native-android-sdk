@@ -11,7 +11,6 @@ import com.eTilbudsavis.etasdk.SessionManager;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Header;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -121,7 +120,6 @@ public class NetworkDispatcher extends Thread {
                 	} else {
                 		
                     	request.addEvent("non-recoverable-error");
-                    	EtaLog.d(TAG, response.error.toJSON().toString());
                     	mDelivery.postResponse(request, response);
             			
                 	}
@@ -132,7 +130,6 @@ public class NetworkDispatcher extends Thread {
             } catch (EtaError e) {
             	
             	request.addEvent("network-error");
-            	EtaLog.d(TAG, e);
                 mDelivery.postResponse(request, Response.fromError(e));
                 
             }

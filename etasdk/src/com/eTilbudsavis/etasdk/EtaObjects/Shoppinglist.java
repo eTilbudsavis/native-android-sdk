@@ -37,7 +37,7 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 	private Date mModified;
 	private String mPrevId;
 	private String mType;
-	private JSONObject mMeta;
+	private String mMeta;
 	private Map<String, Share> mShares = new HashMap<String, Share>(1);
 	private int mUserId = -1;
 	
@@ -92,14 +92,17 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 			if (metaString.startsWith("{") && metaString.endsWith("}")) {
 				
 				try {
+					// Try to parse the json string
 					sl.setMeta(new JSONObject(metaString));
 				} catch (JSONException e) {
 					EtaLog.d(TAG, e);
+					// Meta parsing failed, so we'll do a recovery
 					sl.setMeta(new JSONObject());
 					sl.setModified(new Date());
 				}
 				
 			} else {
+				// String doesn't look like json, so we'll do a recovery
 				sl.setMeta(new JSONObject());
 				sl.setModified(new Date());
 			}
@@ -231,11 +234,20 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 	}
 	
 	public JSONObject getMeta() {
-		return mMeta == null ? new JSONObject() : mMeta;
+		if (mMeta == null) {
+			return new JSONObject();
+		} else {
+			try {
+				return new JSONObject(mMeta);
+			} catch (JSONException e) {
+				EtaLog.d(TAG, e);
+			}
+		}
+		return new JSONObject();
 	}
 	
 	public Shoppinglist setMeta(JSONObject meta) {
-		mMeta = meta == null ? new JSONObject() : meta;
+		mMeta = meta == null ? "{}" : meta.toString();
 		return this;
 	}
 

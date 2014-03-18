@@ -3,30 +3,33 @@ package com.eTilbudsavis.etasdk.NetworkHelpers;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.NetworkInterface.Request;
+
 public class EtaError extends Exception {
-	
-	private static final long serialVersionUID = 1L;
-	
-    public static final String ID = "id";
-    public static final String CODE = "code";
-    public static final String MESSAGE = "message";
-    public static final String DETAILS = "details";
-    public static final String FAILED_ON_FIELD = "failed_on_field";
-    
+
 	public static final String TAG = "EtaError";
 	
+	private static final long serialVersionUID = 1L;
+
+    protected static final String ID = "id";
+    protected static final String CODE = "code";
+    protected static final String MESSAGE = "message";
+    protected static final String DETAILS = "details";
+    protected static final String FAILED_ON_FIELD = "failed_on_field";
+    
     private final String mId;
     private final int mCode;
     private final String mMessage;
     private final String mDetails;
     private final String mFailedOnField;
-
+    
     public EtaError() {
-    	this(Code.SDK_UNKNOWN, "Unknown error");
+    	this(Code.UNKNOWN, "Unknown error","Unknown error, there is no "
+    			+ "information available. Please contact support.");
 	}
     
-    public EtaError(int code, String message) {
-    	this(code, message, "None", "None", null);
+    public EtaError(int code, String message, String details) {
+    	this(code, message, "null", details, null);
 	}
     
     public EtaError(int code, String message, String id, String details, String failedOnField) {
@@ -38,8 +41,8 @@ public class EtaError extends Exception {
     	mFailedOnField = failedOnField;
 	}
     
-    public EtaError(Throwable t, int code, String message) {
-    	this(t, code, message, "None", "None", null);
+    public EtaError(Throwable t, int code, String message, String details) {
+    	this(t, code, message, "null", details, null);
 	}
     
     public EtaError(Throwable t, int code, String message, String id, String details, String failedOnField) {
@@ -59,27 +62,17 @@ public class EtaError extends Exception {
      */
     public static EtaError fromJSON(JSONObject apiError) {
     	
-//    	{
-//    		"api_details":"Request invalid due to missing information.",
-//    		"id":"00hsetu9doi6ngispqccyrpscgru912y",
-//    		"api_message":"Missing \"modified\"",
-//    		"code":1400,
-//    		"@note.1":"Hey! It looks like you found an error. If you have any questions about this error, feel free to contact support with the above error id.",
-//    		"previous":null
-//    	}
-    	
 		try {
-			
-
+			// Not using Json-class to parse data, as we'd rather want it to fail
 			String id = apiError.getString(ID);
 			int code = apiError.getInt(CODE);
 			String message = apiError.getString(MESSAGE);
 			String details = apiError.getString(DETAILS);
-			String failedOnField = apiError.has("FAILED_ON_FIELD") ? apiError.getString("FAILED_ON_FIELD") : null;
+			String failedOnField = apiError.has(FAILED_ON_FIELD) ? apiError.getString(FAILED_ON_FIELD) : null;
             return new ApiError(code, message, id, details, failedOnField);
             
-		} catch (JSONException e) {
-			return new ParseError(e);
+		} catch (Exception e) {
+			return new ParseError(e, ApiError.class);
 		}
 		
     }
@@ -132,20 +125,107 @@ public class EtaError extends Exception {
 	
 	public class Code {
 		
-	    public static final int SDK_UNKNOWN					= 10000;
-	    public static final int SDK_PARSE					= 10100;
-	    public static final int SDK_NETWORK					= 10200;
-	    public static final int SDK_SESSION					= 10200;
+		/** The error could not be identified */
+	    public static final int UNKNOWN						= 10000;
+
+		/** 
+		 * There was an error trying to parse the data from the API. If it's
+		 * JSON data, check the keys, and that the endpoint-return-format,
+		 * matches the {@link Request} type, e.g. when using
+		 * {@link JsonObjectRequest} it is a requirement that the endpoint
+		 * returns valid JSOBObject-data.
+		 */
+	    public static final int PARSE_ERROR					= 10100;
 	    
-	    public static final int API_SESSION_ERROR			= 1100;
-	    public static final int API_TOKEN_EXPIRED			= 1101;
-	    public static final int API_INVALID_API_KEY			= 1102;
-	    public static final int API_MISSING_SIGNATURE		= 1103;
-	    public static final int API_INVALID_SIGNATURE		= 1104;
-	    public static final int API_TOKEN_NOT_ALLOWED		= 1105;
-	    public static final int API_MISSING_ORIGIN_HEADER	= 1106;
-	    public static final int API_MISSING_TOKEN			= 1107;
-	    public static final int API_INVALID_TOKEN			= 1108;
+		/**
+		 * There was an error establishing a connection to the API. Please check
+		 * that the device has a working internet connection.
+		 */
+	    public static final int NETWORK_ERROR				= 10200;
+	    
+		/** Session error */
+	    public static final int SESSION_ERROR				= 1100;
+	    
+		/** You must create a new one to continue. */
+	    public static final int TOKEN_EXPIRED				= 1101;
+	    
+		/** Could not find app matching your api key. */
+	    public static final int INVALID_API_KEY				= 1102;
+	    
+		/** Only webpages are allowed to rely on domain name
+		 * matching. Your request did not send the HTTP_HOST header, so you
+		 * would have to supply a signature. See docs.
+		 */
+	    public static final int MISSING_SIGNATURE			= 1103;
+	    
+		/** Signature given but did not match. */
+	    public static final int INVALID_SIGNATURE			= 1104;
+	    
+		/** This token can not be used with this app. Ensure correct domain
+		 * rules in app settings.
+		 */
+	    public static final int TOKEN_NOT_ALLOWED			= 1105;
+	    
+		/** This token can not be used without a valid Origin header. */
+	    public static final int MISSING_ORIGIN_HEADER		= 1106;
+	    
+		/** No token found in request to an endpoint that requires a valid token. */
+	    public static final int MISSING_TOKEN				= 1107;
+	    
+		/** Token is not valid. */
+	    public static final int INVALID_TOKEN				= 1108;
+	    
+	    /** Authentication error */
+	    public static final int AUTENTICATION_ERROR			= 1200;
+
+	    /** Did you supply the correct user credentials? */
+	    public static final int USER_AUTENTICATION_FAILED	= 1201;
+
+	    /** User not verified. */
+	    public static final int USER_NOT_VERIFIED			= 1202;
+
+	    /** Authorization error. */
+	    public static final int AUTHORIZATION_ERROR			= 1300;
+
+	    /** Action not allowed in within current session (permission error) */
+	    public static final int PERMISSION_ERROR			= 1301;
+
+	    /** Request invalid due to missing information. */
+	    public static final int MISSING_INFORMATION			= 1400;
+
+	    /** This call requires a request location. See documentation. */
+	    public static final int MISSING_LOCATION			= 1401;
+
+	    /** This call requires a request radius. See documentation. */
+	    public static final int MISSING_RADIUS				= 1402;
+
+	    /** Invalid information */
+	    public static final int INVALID_INFORMATION			= 1500;
+
+	    /** Invalid resource id */
+	    public static final int INVALID_RESOURCE_ID			= 1501;
+
+	    /** Dublication of resource */
+	    public static final int DUBLICATION_OF_RESOURCE		= 1530;
+
+	    /** 
+	     * Ensure body data is of valid syntax, and that you send a correct
+	     * Content-Type header
+	     */
+	    public static final int INVALID_BODY_DATA			= 1566;
+
+	    /** Please contact support with error id. */
+	    public static final int INTERNAL_INTEGRITY_ERROR	= 2000;
+
+	    /** Please contact support with error id. */
+	    public static final int INTERNAL_SEARCH_ERROR		= 2010;
+
+	    /** System trying to autofix. Please repeat request. */
+	    public static final int NON_CRITICAL_INTERNAL_ERROR	= 1201;
+	    
+	    /** Error message describes problem */
+	    public static final int ACTION_DOES_NOT_EXIST		= 4000;
+	    
 	    
 	}
 	
