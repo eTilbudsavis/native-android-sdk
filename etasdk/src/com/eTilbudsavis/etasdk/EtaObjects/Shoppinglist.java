@@ -28,10 +28,6 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 	public static final String ACCESS_SHARED = "shared";
 	public static final String ACCESS_PUBLIC = "public";
 	
-	public static final String EMPTY_ALL = "all";
-	public static final String EMPTY_TICKED = "ticked";
-	public static final String EMPTY_UNTICKED = "unticked";
-	
 	private String mName = "";
 	private String mAccess = ACCESS_PRIVATE;
 	private Date mModified;

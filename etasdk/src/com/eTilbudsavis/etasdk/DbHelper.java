@@ -598,9 +598,9 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * Deletes all items, in a given state, from a {@link Shoppinglist}
 	 * 
 	 * <ul>
-	 * <li>{@code true} - delete ticked items</li>
-	 * <li>{@code false} - delete unticked items</li>
-	 * <li>{@code null} - delete all items</li>
+	 * 		<li>{@code true} - delete ticked items</li>
+	 * 		<li>{@code false} - delete unticked items</li>
+	 * 		<li>{@code null} - delete all items</li>
 	 * </ul>
 	 * 
 	 * @param shoppinglistId to remove items from

@@ -52,8 +52,10 @@ public class ListManager {
 	
 	/**
 	 * Method for determining if the first sync cycle is done.
-	 * This is dependent on, both the ShoppinglistSyncManager having a first sync, and whether or not a user
-	 * is actually logged in. If no user is logged in, the method will return true (as no sync can occour).
+	 * 
+	 * <p>This is dependent on, both the {@link ListSyncManager} having a first
+	 * sync, and whether a {@link User} is {@link User#isLoggedIn() logged in}.
+	 * If no user is logged in, the method will return true (as no sync can occur).</p>
 	 * @return True if the first sync is complete, or there is no user to sync.
 	 */
 	public boolean hasFirstSync() {
@@ -61,33 +63,25 @@ public class ListManager {
 	}
 	
 	/**
-	 * Get a shoppinglist from it's ID.
-	 * @param id of the shoppinglist to get
-	 * @return A shopping list, or <code>null</code> if no shopping list exists
+	 * Get a {@link Shoppinglist} from it's ID.
+	 * @param id A {@link Shoppinglist} id
+	 * @return A shopping list, or {@code null}
 	 */
 	public Shoppinglist getList(String id) {
 		return DbHelper.getInstance().getList(id, user());
 	}
 	
 	/**
-	 * The complete set of shopping lists
-	 * @return <li>All shopping lists
+	 * The complete set of {@link Shoppinglist Shoppinglists}, that the current
+	 * user has.
+	 * @return A {@link List} of {@link Shoppinglist}, for current {@link User}
 	 */
 	public List<Shoppinglist> getLists() {
 		return DbHelper.getInstance().getLists(user()); 
 	}
 	
 	/**
-	 * Get a shopping list from it's human readable name
-	 * @param name of the shopping list to get
-	 * @return <li>Shopping list or null if no shopping list exists
-	 */
-	public List<Shoppinglist> getListFromName(String name) {
-		return DbHelper.getInstance().getListFromName(name,user());
-	}
-
-	/**
-	 * Add a new shopping list.<br>
+	 * Add a new {@link Shoppinglist} to the current {@link User}
 	 * If owner haven't been set, we will assume that it is the user who is currently logged in.
 	 * if no user is logged inn, then we assume it is a offline list.<br>
 	 * shopping list added to the database, and changes is synchronized to the server if possible.<br>
@@ -146,9 +140,12 @@ public class ListManager {
 	}
 	
 	/**
-	 * Edit a shopping list already in the database.<br>
-	 * shopping list is replaced in the database, and changes is synchronized to the server if possible.<br>
-	 * @param sl - Shopping list to be replaced
+	 * Edit a shopping list already in the database.
+	 * 
+	 * <p>The {@link Shoppinglist} will replace data already in the
+	 * {@link DbHelper database}, and changes will later be synchronized to the
+	 * API if possible.</p>
+	 * @param sl A shoppinglist
 	 */
 	public boolean editList(Shoppinglist sl) {
 		return editList(sl, user());
@@ -281,11 +278,11 @@ public class ListManager {
 	
 	/**
 	 * Delete a shopping list
-	 * <p>The {@link Shoppinglist shoppinglist} is deleted from the local database, and
-	 * changes are synchronized to the server, when and if possible. All
-	 * {@link ShoppinglistItem shoppinglistitems} associated with the
+	 * <p>The {@link Shoppinglist shoppinglist} is deleted from the local database,
+	 * and changes are later synchronized to the server, when and if possible.</p>
+	 * <p>All {@link ShoppinglistItem shoppinglistitems} associated with the
 	 * {@link Shoppinglist shoppinglist} are also deleted.</p>
-	 * @param sl - Shopping list to delete
+	 * @param sl A shoppinglist to delete
 	 */
 	public void deleteList(Shoppinglist sl) {
 		User u = user();
@@ -353,29 +350,19 @@ public class ListManager {
 	}
 
 	/**
-	 * Get a shopping list item by it's ID
-	 * @param id of the shopping list item
-	 * @return A shopping list item, or <code>null</code> if no item can be found.
+	 * Get a {@link ShoppinglistItem} item by it's ID
+	 * @param id A {@link ShoppinglistItem} id
+	 * @return A shopping list item, or {@code null}
 	 */
 	public ShoppinglistItem getItem(String id) {
 		return DbHelper.getInstance().getItem(id, user());
 	}
-
-	/**
-	 * Get a shopping list from it's human readable name
-	 * (well actually an List, as we cannot guarantee duplicate names)
-	 * @param description of the shopping list to get
-	 * @return <li>Shopping list or null if no shopping list exists
-	 */
-	public List<ShoppinglistItem> getItemFromDescription(String description) {
-		return DbHelper.getInstance().getItemFromDescription(description, user());
-	}
-	
 	
 	/**
-	 * Get a shopping list item by it's ID
-	 * @param sl of the shopping list item
-	 * @return A list of shoppinglistitem.
+	 * Get all {@link ShoppinglistItem ShoppinglistItems} associated with a
+	 * {@link Shoppinglist}.
+	 * @param sl A {@link Shoppinglist} to get {@link ShoppinglistItem ShoppinglistItems} from
+	 * @return A list of {@link ShoppinglistItem ShoppinglistItems}
 	 */
 	public List<ShoppinglistItem> getItems(Shoppinglist sl) {
 		List<ShoppinglistItem> items = DbHelper.getInstance().getItems(sl, user());
@@ -385,36 +372,36 @@ public class ListManager {
 	
 	/**
 	 * Add a {@link ShoppinglistItem} to a {@link Shoppinglist}
-	 * <p>{@link ShoppinglistItem}s are inserted into the local database, and
-	 * changes are synchronized to the server when and if possible. If the 
-	 * {@link Shoppinglist} does not exist in the database or the server, the SDK
-	 * will try to create a new {@link Shoppinglist}</p>
-	 * @param sli - shopping list item that should be added.
+	 * 
+	 * <p>{@link ShoppinglistItem ShoppinglistItems} are inserted into the
+	 * database, and changes are synchronized to the server when and if possible.</p>
+	 * @param sli A {@link ShoppinglistItem} to add to a {@link Shoppinglist}
 	 */
 	public boolean addItem(ShoppinglistItem sli) {
 		return addItem(sli, true, user());
 	}
 	
 	/**
-	 * Add an item to a shopping list.<br>
-	 * shopping list items is inserted into the database, and changes is synchronized to the server if possible.
-	 * If the shopping list does not exist in the database or the server, a new one is created and synchronized if possible
-	 * @param sli - shoppinglist item to add
-	 * @param incrementCountItemExists - 
-	 * 			increment the count on the shoppinglistitem if an item like it exists, 
-	 * 			instead of adding new item.
-	 * @param listener for completion callback
+	 * Add a {@link ShoppinglistItem} to a {@link Shoppinglist}
+	 * 
+	 * <p>{@link ShoppinglistItem ShoppinglistItems} are inserted into the
+	 * database, and changes are synchronized to the server when and if possible.</p>
+	 * @param sli A {@link ShoppinglistItem} to add to a {@link Shoppinglist}
+	 * @param incrementCount Increment the count on the {@link ShoppinglistItem}
+	 * if an item like it exists, instead of adding new item.
+	 * @param user A user that owns the {@link ShoppinglistItem}
 	 */
 	@SuppressLint("DefaultLocale") 
-	public boolean addItem(ShoppinglistItem sli, boolean incrementCountItemExists, User user) {
+	public boolean addItem(ShoppinglistItem sli, boolean incrementCount, User user) {
 		
 		if (!canEdit(sli.getShoppinglistId(), user)) {
-			EtaLog.d(TAG, "Current user only has read-rights to the list");
+			EtaLog.d(TAG, "The user cannot edit the given ShoppinglistItem");
 			return false;
 		}
 
 		if (sli.getOfferId() == null && sli.getDescription() == null) {
-			EtaLog.d(TAG, "Shoppinglist item seems to be empty, please add stuff");
+			EtaLog.d(TAG, "The ShoppinglistItem neither has offerId, or"
+					+ "description, one or the other this is required by the API");
 			return false;
 		}
 		
@@ -425,7 +412,7 @@ public class ListManager {
 		sli.setState(ShoppinglistItem.State.TO_SYNC);
 		
 		// If the item exists in DB, then just increase count and edit the item
-		if (incrementCountItemExists) {
+		if (incrementCount) {
 			
 			List<ShoppinglistItem> items = db.getItems(sli.getShoppinglistId(), user, false);
 			
@@ -447,6 +434,14 @@ public class ListManager {
 				}
 			}
 		}
+
+		Shoppinglist sl = getList(sli.getShoppinglistId());
+
+		if (sl == null) {
+			EtaLog.d(TAG, "The shoppinglist id on the shoppinglist item, could"
+					+ "not be found, please add a shoppinglist before adding items");
+			return false;
+		}
 		
 		sli.setPreviousId(ShoppinglistItem.FIRST_ITEM);
 		ShoppinglistItem first = db.getFirstItem(sli.getShoppinglistId(), user);
@@ -463,7 +458,6 @@ public class ListManager {
 		if (success) {
 			/* Update SL info, but not state. This will prevent sync, and API
 			 * will auto update the modified tag, nice! */
-			Shoppinglist sl = getList(sli.getShoppinglistId());
 			sl.setModified(now);
 			db.editList(sl, user);
 			mNotification.edit(sl);
@@ -474,19 +468,20 @@ public class ListManager {
 	}
 	
 	/**
-	 * Insert an updated shopping list item into the db.<br>
-	 * shopping list items is replaced in the database, and changes is synchronized to the server if possible.
-	 * @param sli shopping list item to edit
+	 * Insert an updated {@link ShoppinglistItem} into the database.
+	 * <p>The {@link ShoppinglistItem} is replaced in the database, and changes
+	 * is synchronized to the server when, and if possible.</p>
+	 * @param sli An edited {@link ShoppinglistItem}
 	 */
 	public boolean editItem(ShoppinglistItem sli) {
 		User u = user();
 		if (!canEdit(sli.getShoppinglistId(), u)) {
-			EtaLog.d(TAG, "Current user only has read-rights to the list");
+			EtaLog.d(TAG, "The user cannot edit the given ShoppinglistItem");
 			return false;
 		}
 		return editItem(sli, u);
 	}
-
+	
 	private boolean editItem(final ShoppinglistItem sli, User user) {
 		
 		
@@ -544,39 +539,58 @@ public class ListManager {
 	}
 
 	/**
-	 * Delete all items from a shoppinglist where <code>isTicked() == true.</code><br>
-	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
-	 * @param sl - shoppinglist to delete items from
+	 * Delete all {@link ShoppinglistItem ShoppinglistItems} from a
+	 * {@link Shoppinglist} where {@link ShoppinglistItem#isTicked() isTicked()}
+	 * is {@code true}.
+	 * <P>Changes are synchronized to the server when, and if possible.</p>
+	 * @param sl A {@link Shoppinglist} to delete the
+	 * 			{@link ShoppinglistItem ShoppinglistItems} from
 	 */
 	public void deleteItemsTicked(Shoppinglist sl) {
-		deleteItems(sl, Shoppinglist.EMPTY_TICKED, user());
+		deleteItems(sl, true, user());
 	}
 
 	/**
-	 * Delete all items from a shoppinglist where <code>isTicked() == false.</code><br>
-	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
-	 * @param sl - shoppinglist to delete items from
+	 * Delete all {@link ShoppinglistItem ShoppinglistItems} from a
+	 * {@link Shoppinglist} where {@link ShoppinglistItem#isTicked() isTicked()}
+	 * is {@code false}.
+	 * <P>Changes are synchronized to the server when, and if possible.</p>
+	 * @param sl A {@link Shoppinglist} to delete the
+	 * 			{@link ShoppinglistItem ShoppinglistItems} from
 	 */
 	public void deleteItemsUnticked(Shoppinglist sl) {
-		deleteItems(sl, Shoppinglist.EMPTY_UNTICKED, user());
+		deleteItems(sl, false, user());
 	}
 
 	/**
-	 * Delete ALL items from a given shoppinglist.<br>
-	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
-	 * @param sl - shoppinglist to delete items from
+	 * Delete all {@link ShoppinglistItem ShoppinglistItems} from a {@link Shoppinglist}
+	 * 
+	 * <p>Changes are synchronized to the server when, and if possible.</p>
+	 * @param sl A {@link Shoppinglist} to delete the
+	 * 				{@link ShoppinglistItem ShoppinglistItems} from
 	 */
 	public void deleteItemsAll(Shoppinglist sl) {
-		deleteItems(sl, Shoppinglist.EMPTY_ALL, user());
+		deleteItems(sl, null, user());
 	}
 	
 	/**
-	 * Generic method to delete all items that matches any clauses given in the <code>apiParams</code><br>
-	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
-	 * @param sl to remove items from
-	 * @param whatToDelete describes what needs to be deleted
+	 * Method to delete all {@link ShoppinglistItem} that matches a given state.
+	 * 
+	 * <p>The possible states are:</p>
+	 * <ul>
+	 * 		<li>{@code true} - delete ticked items</li>
+	 * 		<li>{@code false} - delete unticked items</li>
+	 * 		<li>{@code null} - delete all items</li>
+	 * </ul>
+	 * 
+	 * <p>Changes are synchronized to the server when, and if possible.</p>
+	 * 
+	 * @param sl A {@link Shoppinglist} to delete
+	 * 				{@link ShoppinglistItem ShoppinglistItems} from
+	 * @param stateToDelete A state that describes what to delete
+	 * @param user the user that owns the {@link ShoppinglistItem ShoppinglistItems}
 	 */
-	private boolean deleteItems(final Shoppinglist sl, String whatToDelete, User user) {
+	private boolean deleteItems(final Shoppinglist sl, Boolean stateToDelete, User user) {
 		
 		if (!canEdit(sl, user))
 			return false;
@@ -585,19 +599,16 @@ public class ListManager {
 		
 		Date now = new Date();
 		
-		// Ticked = true, unticked = false, all = null.. all in a nice ternary
-		final Boolean state = whatToDelete.equals(Shoppinglist.EMPTY_ALL) ? null : whatToDelete.equals(Shoppinglist.EMPTY_TICKED) ? true : false;
-		
         List<ShoppinglistItem> list = getItems(sl);
         int count = 0;
 
 		String preGoodId = ShoppinglistItem.FIRST_ITEM;
 		
 		for (ShoppinglistItem sli : list) {
-			if (state == null) {
+			if (stateToDelete == null) {
 				// Delete all items
 				mNotification.del(sli);
-			} else if (sli.isTicked() == state) {
+			} else if (sli.isTicked() == stateToDelete) {
 				// Delete if ticked matches the requested state
 				mNotification.del(sli);
 			} else {
@@ -618,7 +629,7 @@ public class ListManager {
 				count += db.editItem(sli, user);
 			}
 		} else {
-			count = db.deleteItems(sl.getId(), state, user) ;
+			count = db.deleteItems(sl.getId(), stateToDelete, user) ;
 		}
 		
 		boolean success = count == mNotification.getDeletedItems().size();
@@ -638,14 +649,15 @@ public class ListManager {
 	}
 	
 	/**
-	 * Deletes a given shopping list item<br>
-	 * shopping list items is removed from database, and changes is synchronized to the server if possible.
-	 * @param sli to delete from the db
+	 * Deletes a {@link ShoppinglistItem}
+	 * <p>The {@link ShoppinglistItem} is removed from the database, and later
+	 * changes is synchronized to the server when and if possible</p>
+	 * @param sli A {@link ShoppinglistItem} to delete
 	 */
 	public boolean deleteItem(ShoppinglistItem sli) {
 		User u = user();
 		if (!canEdit(sli.getShoppinglistId(), u)){
-			EtaLog.d(TAG, "Current user only has read-rights to the list");
+			EtaLog.d(TAG, "The user cannot edit the given ShoppinglistItem");
 			return false;
 		}
 		return deleteItem(sli, u);
@@ -693,39 +705,66 @@ public class ListManager {
 	}
 	
 	/**
-	 * Get the userId of the current user logged in.
-	 * @return the user id
+	 * Get the current user.
+	 * <p>wrapper method for: Eta.getInstance().getUser()</p>
+	 * @return A {@link User}
 	 */
 	private User user() {
 		return Eta.getInstance().getUser();
 	}
-
+	
+	/**
+	 * Method that determines if a {@link User} can edit a {@link Shoppinglist}
+	 * @param shoppinglistId A {@link Shoppinglist Shoppinglist id} to check edit rights on
+	 * @param user The {@link User} that wants to edit the {@link Shoppinglist} 
+	 * @return {@code true} if the {@link User} can edit the list, else {@code false}
+	 */
 	public boolean canEdit(String shoppinglistId, User user) {
+		if (shoppinglistId == null || user == null) {
+			return false;
+		}
 		Shoppinglist sl = DbHelper.getInstance().getList(shoppinglistId, user());
 		return sl == null ? false : canEdit(sl, user);
 	}
-
+	
+	/**
+	 * Method that determines if a {@link User} can edit a {@link Shoppinglist}
+	 * @param sl A {@link Shoppinglist} to check edit rights on
+	 * @param user The {@link User} that wants to edit the {@link Shoppinglist} 
+	 * @return {@code true} if the {@link User} can edit the list, else {@code false}
+	 */
 	public boolean canEdit(Shoppinglist sl, User user) {
-		if (sl == null) {
+		if (sl == null || user == null) {
 			return false;
 		}
 		Share s = sl.getShares().get(user.getEmail());
 		return s == null ? false : canEdit(sl, s);
 	}
-	
-	public boolean canEdit(Shoppinglist sl, Share s) {
-		if (s==null||sl==null) {
+
+	/**
+	 * Method that determines if a {@link Share} has sufficient rights to edit
+	 * a {@link Shoppinglist}
+	 * @param sl A {@link Shoppinglist} to check edit rights on
+	 * @param share The {@link Share} that wants to edit the {@link Shoppinglist} 
+	 * @return {@code true} if the {@link Share} can edit the list, else {@code false}
+	 */
+	public boolean canEdit(Shoppinglist sl, Share share) {
+		if (share==null||sl==null) {
 			return false;
 		}
-		boolean isInList = s.getShoppinglistId().equals(sl.getId());
-		return isInList && ( s.getAccess().equals(Share.ACCESS_OWNER) || s.getAccess().equals(Share.ACCESS_READWRITE) );
+		boolean isInList = share.getShoppinglistId().equals(sl.getId());
+		return isInList && ( share.getAccess().equals(Share.ACCESS_OWNER) || share.getAccess().equals(Share.ACCESS_READWRITE) );
 	}
 
 	/**
-	 * Set the synchronization intervals for the shoppinglists, and their items.<br>
-	 * The synchronization of items will be the time specified, and the list
-	 * synchronization will be a factor three of that time, as the lists themselves
-	 * are less subjected to change. Also time must be 3000 milliseconds or more.
+	 * Set the synchronization intervals for the shoppinglists, and their items.
+	 * 
+	 * <p>The synchronization of {@link ShoppinglistItem} will be the time
+	 * specified. The {@link Shoppinglist} synchronization will be a factor
+	 * three of that time, as the {@link Shoppinglist} are less subjected to
+	 * change.</p>
+	 * 
+	 * <p>Also time must be greater than or equal to 3000 (milliseconds)</p>
 	 * @param time in milliseconds
 	 */
 	public void setSyncSpeed(int time) {
@@ -734,7 +773,7 @@ public class ListManager {
 	}
 	
 	/**
-	 * Deletes all rows in DB.
+	 * Deletes all rows in the {@link DbHelper database}.
 	 */
 	public void clear() {
 		DbHelper.getInstance().clear();
@@ -742,34 +781,65 @@ public class ListManager {
 	}
 
 	/**
-	 * Deletes all rows belonging to a logged in user
+	 * Deletes all rows in the {@link DbHelper database} associated with a
+	 * given{@link User}.
 	 */
 	public void clear(int userId) {
 		DbHelper.getInstance().clear(userId);
 	}
 	
+	/**
+	 * Method to call on all onResume events.
+	 * <p>This is implicitly handled by the {@link Eta} instance</p>
+	 */
 	public void onResume() {
 		mSyncManager.onResume();
 	}
-	
+
+	/**
+	 * Method to call on all onPause events.
+	 * <p>This is implicitly handled by the {@link Eta} instance</p>
+	 */
 	public void onPause() {
 		mSyncManager.onPause();
 	}
 	
+	/**
+	 * Method for forcing a synchronization event on the {@link ListSyncManager}
+	 * 
+	 * <p>This method should only be used in special cases, as the
+	 * synchronization is (within reasonably time intervals) being handled
+	 * automatically by the {@link ListSyncManager}</p>
+	 */
 	public void forceSync() {
 		mSyncManager.runSyncLoop();
 	}
 	
+	/**
+	 * Method for subscribing to changes in {@link Shoppinglist Shoppinglists}
+	 * and {@link ShoppinglistItem ShoppinglistItems}.
+	 * @param l A {@link OnChangeListener} for receiving events
+	 */
 	public void setOnChangeListener(OnChangeListener l) {
 		if (!mListSubscribers.contains(l)) {
 			mListSubscribers.add(l);
 		}
 	}
-
+	
+	/**
+	 * Unsubscribe from changes in {@link Shoppinglist} and {@link ShoppinglistItem}
+	 * states.
+	 * @param l The {@link OnChangeListener} to remove
+	 */
 	public void removeOnChangeListener(OnChangeListener l) {
 		mListSubscribers.remove(l);
 	}
 	
+	/**
+	 * Method for notifying all {@link OnChangeListener subscribers} on a given
+	 * set of events.
+	 * @param n A set of changes in {@link Shoppinglist} and {@link ShoppinglistItem}
+	 */
 	public void notifySubscribers(final ListNotification n) {
 		
 		// Make sure that messages are passed on to the UI thread
