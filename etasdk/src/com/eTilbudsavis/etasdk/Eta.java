@@ -1,14 +1,18 @@
-/*!
- * eTilbudsavis ApS
- * (c) 2012, eTilbudsavis ApS
- * http://etilbudsavis.dk
- */
-/**
- * @fileoverview	Main class.
- * @author			Morten Bo <morten@etilbudsavis.dk>
- * 					Danny Hvam <danny@etilbudsavid.dk>
- * @version			0.3.0
- */
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk;
 
 import android.annotation.SuppressLint;
@@ -28,7 +32,14 @@ import com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-// Main object for interacting with the SDK.
+/**
+ * 
+ * The main class for interacting with the eTilbudsavis SDK / API
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ * @version 2.1.0
+ *
+ */
 public class Eta {
 	
 	public static final String TAG = "ETA";
