@@ -21,6 +21,16 @@ import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
+/**
+ * This class provides methods, for easily handling of
+ * {@link Shoppinglist Shoppinglists}, {@link ShoppinglistItem ShoppinglistItems},
+ * and {@link Share Shares}, without having to worry about keeping a sane, and
+ * synchronizing state with both the {@link DbHelper database} and, the
+ * eTilbudsavis API.
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ *
+ */
 public class ListManager {
 
 	public static final String TAG = "ListManager";
@@ -45,6 +55,10 @@ public class ListManager {
 	 * list and item notifications, to avoid multiple updates for a single operation */
 	private ListNotification mNotification = new ListNotification(false);
 	
+	/**
+	 * Default constructor for ListManager.
+	 * @param eta The {@link Eta} instance to use
+	 */
 	public ListManager(Eta eta) {
 		mEta = eta;
 		mSyncManager = new ListSyncManager(eta);
@@ -82,11 +96,13 @@ public class ListManager {
 	
 	/**
 	 * Add a new {@link Shoppinglist} to the current {@link User}
-	 * If owner haven't been set, we will assume that it is the user who is currently logged in.
-	 * if no user is logged inn, then we assume it is a offline list.<br>
-	 * shopping list added to the database, and changes is synchronized to the server if possible.<br>
 	 * 
-	 * @param sl - the new shoppinglist to add to the database, and server
+	 * <p>If owner haven't been set, we will assume that it is the current
+	 * {@link User} being used by the SDK, is the owner.</p>
+	 * 
+	 * <p>Changes are synchronized to the API when and if possible.<br>
+	 * 
+	 * @param sl A shoppinglist to add to the database
 	 */
 	public boolean addList(final Shoppinglist sl) {
 		
@@ -145,7 +161,7 @@ public class ListManager {
 	 * <p>The {@link Shoppinglist} will replace data already in the
 	 * {@link DbHelper database}, and changes will later be synchronized to the
 	 * API if possible.</p>
-	 * @param sl A shoppinglist
+	 * @param sl A shoppinglist that have been edited
 	 */
 	public boolean editList(Shoppinglist sl) {
 		return editList(sl, user());
@@ -398,7 +414,7 @@ public class ListManager {
 			EtaLog.d(TAG, "The user cannot edit the given ShoppinglistItem");
 			return false;
 		}
-
+		
 		if (sli.getOfferId() == null && sli.getDescription() == null) {
 			EtaLog.d(TAG, "The ShoppinglistItem neither has offerId, or"
 					+ "description, one or the other this is required by the API");

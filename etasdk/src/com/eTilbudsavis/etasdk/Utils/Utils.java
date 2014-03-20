@@ -387,6 +387,7 @@ public final class Utils {
 	 * <tr><td>1023</td>	<td>1.0 kB</td>		<td>1023 B</td></tr>
 	 * <tr><td>1024</td>	<td>1.0 kB</td>		<td>1.0 KiB</td></tr>
 	 * </table>
+	 * 
 	 * <p>Same system as above for larger values.</p>
 	 * @param bytes A number of bytes to convert
 	 * @param si Use SI units, or binary form

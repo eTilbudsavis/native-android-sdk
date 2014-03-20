@@ -360,31 +360,31 @@ public class DbHelper extends SQLiteOpenHelper {
 		return sl;
 	}
 	
-	/**
-	 * Get all Shoppinglists that match the given name.
-	 * @param name to match up against
-	 * @return A list of shoppinglists
-	 */
-	public List<Shoppinglist> getListFromName(String name, User user) {
-		name = escape(name);
-		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s!=%s", LIST_TABLE, NAME, name, USER, user.getUserId(), STATE, Shoppinglist.State.DELETE);
-		Cursor c = execQuery(q);
-		List<Shoppinglist> tmp = new ArrayList<Shoppinglist>();
-		if (c.moveToFirst() ) {
-			do { 
-				tmp.add(cursorToSl(c));
-			} while (c.moveToNext());
-		}
-		close(c);
-		List<Shoppinglist> lists = new ArrayList<Shoppinglist>(c.getCount());
-		for (Shoppinglist sl : tmp) {
-			sl.putShares(getShares(sl, user, false));
-			// Only add list, if list has user as share
-			if (sl.getShares().containsKey(user.getEmail()))
-				lists.add(sl);
-		}
-		return lists;
-	}
+//	/**
+//	 * Get all Shoppinglists that match the given name.
+//	 * @param name to match up against
+//	 * @return A list of shoppinglists
+//	 */
+//	public List<Shoppinglist> getListFromName(String name, User user) {
+//		name = escape(name);
+//		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s!=%s", LIST_TABLE, NAME, name, USER, user.getUserId(), STATE, Shoppinglist.State.DELETE);
+//		Cursor c = execQuery(q);
+//		List<Shoppinglist> tmp = new ArrayList<Shoppinglist>();
+//		if (c.moveToFirst() ) {
+//			do { 
+//				tmp.add(cursorToSl(c));
+//			} while (c.moveToNext());
+//		}
+//		close(c);
+//		List<Shoppinglist> lists = new ArrayList<Shoppinglist>(c.getCount());
+//		for (Shoppinglist sl : tmp) {
+//			sl.putShares(getShares(sl, user, false));
+//			// Only add list, if list has user as share
+//			if (sl.getShares().containsKey(user.getEmail()))
+//				lists.add(sl);
+//		}
+//		return lists;
+//	}
 
 	/**
 	 * Get all shoppinglists, deleted lists are not included
@@ -495,24 +495,24 @@ public class DbHelper extends SQLiteOpenHelper {
 		return sli;
 	}
 	
-	/**
-	 * Get all Shoppinglistitems that match the given description.
-	 * @param description from which to get items
-	 * @return A list of shoppinglistitems
-	 */
-	public List<ShoppinglistItem> getItemFromDescription(String description, User user) {
-		description = escape(description);
-		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, DESCRIPTION, description, USER, user.getUserId());
-		Cursor c = execQuery(q);
-		List<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
-		if (c.moveToFirst() ) {
-			do { 
-				list.add(cursorToSli(c));
-			} while (c.moveToNext());
-		}
-		close(c);
-		return list;
-	}
+//	/**
+//	 * Get all Shoppinglistitems that match the given description.
+//	 * @param description from which to get items
+//	 * @return A list of shoppinglistitems
+//	 */
+//	public List<ShoppinglistItem> getItemFromDescription(String description, User user) {
+//		description = escape(description);
+//		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, DESCRIPTION, description, USER, user.getUserId());
+//		Cursor c = execQuery(q);
+//		List<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
+//		if (c.moveToFirst() ) {
+//			do { 
+//				list.add(cursorToSli(c));
+//			} while (c.moveToNext());
+//		}
+//		close(c);
+//		return list;
+//	}
 	
 	/**
 	 * Get all Shoppinglistitems from a shoppinglist.
@@ -533,12 +533,12 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 	
 	/**
-	 * Get all Shoppinglistitems from a shoppinglist.
-	 * @param sl from which to get items
+	 * Get all {@link ShoppinglistItem} from a {@link Shoppinglist}.
+	 * @param shoppinglistId from which to get items
 	 * @return A list of shoppinglistitems
 	 */
-	public List<ShoppinglistItem> getItems(String slId, User user, boolean includeDeleted) {
-		String id = escape(slId);
+	public List<ShoppinglistItem> getItems(String shoppinglistId, User user, boolean includeDeleted) {
+		String id = escape(shoppinglistId);
 		String q = null;
 		if (includeDeleted) {
 			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, USER, user.getUserId());

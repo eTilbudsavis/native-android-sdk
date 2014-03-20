@@ -32,20 +32,31 @@ public class Main extends Activity {
          */
         Eta eta = Eta.getInstance();
         
-        // We MUST set the Eta, in order for it to work
+        /* 
+         * You MUST set the Eta object, in order for it to work
+         * ApiKey and ApiSecret are not included in the demo/SDK, but you can
+         * get your own at https://etilbudsavis.dk/developers/ :-)
+         */
         eta.set(Keys.API_KEY, Keys.API_SECRET, this);
         
-        /* Enable debug mode, so debug info will show in LogCat
-         * You might not want to have this set to true in a release version. */
+        /* 
+         * Enable debug mode, so debug info will show in LogCat
+         * You might not want to have this set to true in a release version.
+         */
         EtaLog.enableLogd(true);
         
-        // Set the location (This could also be set via LocationManager)
+        /*
+         * Set the location (This could also be set via LocationManager)
+         */
         EtaLocation loc = Eta.getInstance().getLocation();
         loc.setLatitude(55.63105);
         loc.setLongitude(12.5766);
         loc.setRadius(700000);
         loc.setSensor(false);
         
+        /*
+         * You are now done setting up the SDK, the rest is just Android stuff
+         */
         btnCatalogs= (Button)findViewById(R.id.btnCatalogs);
         btnCatalogs.setOnClickListener(new OnClickListener() {
 			
