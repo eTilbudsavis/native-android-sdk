@@ -29,8 +29,8 @@ public class Size extends EtaObject implements Serializable {
 
 	public static final String TAG = "Size";
 	
-	private double mFrom = 1;
-	private double mTo = 1;
+	private double mFrom = 1.0d;
+	private double mTo = 1.0d;
 	
 	public Size() {
 		
@@ -44,8 +44,8 @@ public class Size extends EtaObject implements Serializable {
 		if (s == null) s = new Size();
 		if (size == null) return s;
 		
-		s.setFrom(Json.valueOf(size, ServerKey.FROM, 1));
-		s.setTo(Json.valueOf(size, ServerKey.TO, 1));
+		s.setFrom(Json.valueOf(size, ServerKey.FROM, 1.0d));
+		s.setTo(Json.valueOf(size, ServerKey.TO, 1.0d));
 		
 		return s;
 	}

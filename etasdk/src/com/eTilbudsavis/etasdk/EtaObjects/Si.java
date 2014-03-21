@@ -30,7 +30,7 @@ public class Si  extends EtaObject implements Serializable {
 	public static final String TAG = "Unit";
 	
 	private String mSymbol;
-	private double mFactor = 1;
+	private double mFactor = 1.0d;
 	
 	public Si() {
 		
@@ -45,7 +45,7 @@ public class Si  extends EtaObject implements Serializable {
 		if (si == null) return s;
 		
 		s.setSymbol(Json.valueOf(si, ServerKey.SYMBOL));
-		s.setFactor(Json.valueOf(si, ServerKey.FACTOR, 1d));
+		s.setFactor(Json.valueOf(si, ServerKey.FACTOR, 1.0d));
 		
 		return s;
 	}

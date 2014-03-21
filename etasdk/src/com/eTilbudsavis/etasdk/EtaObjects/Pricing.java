@@ -29,7 +29,7 @@ public class Pricing extends EtaObject implements Serializable {
 
 	public static final String TAG = "Pricing";
 	
-	private double mPrice = 0.0;
+	private double mPrice = 1.0d;
 	private Double mPrePrice;
 	private String mCurrency;
 	
@@ -46,7 +46,7 @@ public class Pricing extends EtaObject implements Serializable {
 		if (pricing == null) return p;
 		
 		try {
-			p.setPrice(Json.valueOf(pricing, ServerKey.PRICE, 0.0));
+			p.setPrice(Json.valueOf(pricing, ServerKey.PRICE, 1.0d));
 			p.setPrePrice(pricing.isNull(ServerKey.PREPRICE) ? null : pricing.getDouble(ServerKey.PREPRICE));
 			p.setCurrency(Json.valueOf(pricing, ServerKey.CURRENCY));
 		} catch (JSONException e) {

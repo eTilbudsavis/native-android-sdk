@@ -133,6 +133,7 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
+		
 		return offer;
 	}
 
