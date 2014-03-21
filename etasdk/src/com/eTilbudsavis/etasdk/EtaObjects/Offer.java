@@ -81,9 +81,9 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 	public static List<Offer> fromJSON(JSONArray offers) {
 		List<Offer> list = new ArrayList<Offer>();
 		try {
-			for (int i = 0 ; i < offers.length() ; i++ )
+			for (int i = 0 ; i < offers.length() ; i++ ) {
 				list.add(Offer.fromJSON((JSONObject) offers.get(i)));
-			
+			}
 		} catch (JSONException e) {
 			EtaLog.d(TAG, e);
 		}
