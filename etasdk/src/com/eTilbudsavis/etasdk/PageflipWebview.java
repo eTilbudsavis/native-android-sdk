@@ -629,8 +629,6 @@ public final class PageflipWebview extends WebView {
 		@JavascriptInterface
 		public void dispatch(String payload) {
 			
-			EtaLog.d(TAG, payload);
-			
 			try {
 				
 				JSONObject tmp = new JSONObject(payload);
@@ -711,10 +709,6 @@ public final class PageflipWebview extends WebView {
 		 * @param option a snippet of JavaScript
 		 */
 		private void injectJS(String jsCommand) {
-			
-			if (isReady()) {
-				EtaLog.d(TAG, jsCommand);
-			}
 			
 			final String s = String.format("javascript:(function() { %s })()", jsCommand);
 			
@@ -798,7 +792,7 @@ public final class PageflipWebview extends WebView {
 							
 						}
 					});
-					req.debugNetwork(true);
+					
 					mEta.add(req);
 					
 				} catch (JSONException e) {

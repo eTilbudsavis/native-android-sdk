@@ -606,8 +606,16 @@ public class ListSyncManager {
 					
 				} else {
 					ShoppinglistItem delSli = localMap.get(key);
-					mNotification.del(delSli);
-					db.deleteItem(delSli, user);
+					if (delSli.getState() == State.TO_SYNC) {
+						/* 
+						 * Item have been added while request was in flight
+						 * ignore it for now
+						 */
+					} else {
+						/* Else delete the item */
+						mNotification.del(delSli);
+						db.deleteItem(delSli, user);
+					}
 				}
 				
 			} else {

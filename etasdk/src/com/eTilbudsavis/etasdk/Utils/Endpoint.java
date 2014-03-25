@@ -29,12 +29,6 @@ package com.eTilbudsavis.etasdk.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  */
 public class Endpoint {
-
-	/** Variable controlling whether messages are printed. Set to true to print messages */
-	public static boolean DEBUG_HOST = false;
-
-	/** Set to true to enable usage of staging endpoint for pageflip-html. */
-	public static boolean DEBUG_PAGEFLIP = false;
 	
 	public class Prefix {
 		
