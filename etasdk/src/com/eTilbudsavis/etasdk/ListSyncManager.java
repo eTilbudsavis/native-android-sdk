@@ -847,8 +847,6 @@ public class ListSyncManager {
 			
 			public void onComplete(JSONObject response, EtaError error) {
 				
-				EtaLog.d(TAG, "itemListener", response, error);
-				
 				if (response != null) {
 					
 					ShoppinglistItem server = ShoppinglistItem.fromJSON(response);

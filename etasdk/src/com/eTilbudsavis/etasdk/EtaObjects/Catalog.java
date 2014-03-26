@@ -25,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.PageflipWebview;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -60,12 +61,12 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 	private String mStoreUrl;
 	private Dimension mDimension;
 	private Images mImages;
-	private Pages mPages;
 	
-	// From seperate queries
+	// From separate queries
+	private Pages mPages;
 	private Dealer mDealer;
 	private Store mStore;
-	private int mOfferOnPage;
+	private int mOfferOnPage = 1;
 
 	public Catalog() {
 	}
@@ -280,8 +281,8 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 	
 	/**
 	 * Set the {@link Branding} to apply to this catalog.
-	 * @param branding
-	 * @return
+	 * @param branding A branding object
+	 * @return This object
 	 */
 	public Catalog setBranding(Branding branding) {
 		this.mBranding = branding;
@@ -290,97 +291,195 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 	
 	/**
 	 * Get the branding, that is applied to this catalog.
-	 * @return A {@link Branding} object
+	 * @return A {@link Branding} object, or {@code null}
 	 */
 	public Branding getBranding() {
 		return mBranding;
 	}
-
-	public Catalog setDealerId(String dealer) {
-		this.mDealerId = dealer;
+	
+	/**
+	 * Set the dealer id associated with this catalog
+	 * @param dealerId A dealer id to set
+	 * @return This object
+	 */
+	public Catalog setDealerId(String dealerId) {
+		this.mDealerId = dealerId;
 		return this;
 	}
-
+	
+	/**
+	 * Get the dealer id associated with this object
+	 * @return A dealer id, or {@code null}
+	 */
 	public String getDealerId() {
 		return mDealerId;
 	}
-
+	
+	/**
+	 * Get the URL to the {@link Dealer} resource for this {@link Catalog}
+	 * @return A {@link Dealer} resource URL, or {@code null}
+	 */
 	public String getDealerUrl() {
 		return mDealerUrl;
 	}
-
+	
+	/**
+	 * Set the URL to the {@link Dealer} resource for this {@link Catalog}
+	 * @param url An URL pointing to a {@link Dealer} resource for this catalog
+	 * @return This object
+	 */
 	public Catalog setDealerUrl(String url) {
 		mDealerUrl = url;
 		return this;
 	}
 
+	/**
+	 * Set the {@link Store#getId() store.id} associated with this catalog
+	 * @param storeId A store id to set
+	 * @return This object
+	 */
 	public Catalog setStoreId(String storeId) {
 		mStoreId = storeId;
 		return this;
 	}
 
+	/**
+	 * Get the {@link Store#getId() store.id} id associated with this object
+	 * @return A store id, or {@code null}
+	 */
 	public String getStoreId() {
 		return mStoreId;
 	}
 
+	/**
+	 * Get the URL to the {@link Store} resource for this {@link Catalog}
+	 * @return A {@link Store} resource URL, or {@code null}
+	 */
 	public String getStoreUrl() {
 		return mStoreUrl;
 	}
 
+	/**
+	 * Set the URL to the {@link Store} resource for this {@link Catalog}
+	 * @param url An URL pointing to a {@link Store} resource for this catalog
+	 * @return This object
+	 */
 	public Catalog setStoreUrl(String url) {
 		mStoreUrl = url;
 		return this;
 	}
-
+	
+	/**
+	 * Get the dimensions for this catalog.
+	 * @return A dimensions object, or {@code null}
+	 */
 	public Dimension getDimension() {
 		return mDimension;
 	}
-
+	
+	/**
+	 * Set the dimensions for this catalog
+	 * @param dimension A dimension
+	 * @return This object
+	 */
 	public Catalog setDimension(Dimension dimension) {
 		mDimension = dimension;
 		return this;
 	}
-
+	
+	/**
+	 * Set the images associated with this object
+	 * @param images An image object
+	 * @return This object
+	 */
 	public Catalog setImages(Images images) {
 		mImages = images;
 		return this;
 	}
-
+	
+	/**
+	 * Get the images associated with this catalog
+	 * @return An images object, or {@code null}
+	 */
 	public Images getImages() {
 		return mImages;
 	}
-
+	
+	/**
+	 * Get the pages in this catalog.
+	 * <p>Pages isn't bundled in the catalog object by default. But should be
+	 * downloaded separately via the pages endpoint, and
+	 * {@link Catalog#setPages(Pages) set} manually by the developer. </p>
+	 * @return
+	 */
 	public Pages getPages() {
 		return mPages;
 	}
-
+	
+	/**
+	 * Method for setting the {@link Pages} associated with this catalog
+	 * @param pages A pages object
+	 */
 	public void setPages(Pages pages) {
 		mPages = pages;
 	}
 	
+	/**
+	 * Set the page number of a specific {@link Offer}.
+	 * <p>This is a use case for e.g. {@link PageflipWebview}</p>
+	 * @param offerOnPage A page number of an offer
+	 * @return This object
+	 */
 	public Catalog setOfferOnPage(Integer offerOnPage) {
 		this.mOfferOnPage = offerOnPage;
 		return this;
 	}
 
+	/**
+	 * Get the page number of a specific {@link Offer}.
+	 * <p>This is a use case for e.g. {@link PageflipWebview}</p>
+	 * @return A page number of a specific {@link Offer} to display
+	 */
 	public int getOfferOnPage() {
 		return mOfferOnPage;
 	}
 
+	/**
+	 * Method for setting the {@link Store} associated with this catalog
+	 * @param store A Store object
+	 */
 	public Catalog setStore(Store store) {
 		mStore = store;
 		return this;
 	}
 
+	/**
+	 * Get the {@link Store} associated with this catalog.
+	 * <p>Store isn't bundled in the catalog object by default. But should be
+	 * downloaded separately via the store {@link Endpoint#storeId(String) endpoint},
+	 * and  {@link Catalog#setStore(Store) set} manually by the developer. </p>
+	 * @return A Store, or {@code null}
+	 */
 	public Store getStore() {
 		return mStore;
 	}
 
+	/**
+	 * Method for setting the {@link Dealer} associated with this catalog
+	 * @param store A Dealer object
+	 */
 	public Catalog setDealer(Dealer dealer) {
 		this.mDealer = dealer;
 		return this;
 	}
 
+	/**
+	 * Get the {@link Dealer} associated with this catalog.
+	 * <p>Dealer isn't bundled in the catalog object by default. But should be
+	 * downloaded separately via the dealer {@link Endpoint#dealerId(String) endpoint},
+	 * and  {@link Catalog#setDealer(Dealer) set} manually by the developer. </p>
+	 * @return A Dealer, or {@code null}
+	 */
 	public Dealer getDealer() {
 		return mDealer;
 	}
