@@ -544,16 +544,21 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + mCount;
-		result = prime * result + ((mCreator == null) ? 0 : mCreator.hashCode());
-		result = prime * result + ((mDescription == null) ? 0 : mDescription.hashCode());
+		result = prime * result
+				+ ((mCreator == null) ? 0 : mCreator.hashCode());
+		result = prime * result
+				+ ((mDescription == null) ? 0 : mDescription.hashCode());
 		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
-		result = prime * result + ((mModified == null) ? 0 : mModified.hashCode());
+		result = prime * result
+				+ ((mModified == null) ? 0 : mModified.hashCode());
 		result = prime * result + ((mOffer == null) ? 0 : mOffer.hashCode());
-		result = prime * result + ((mOfferId == null) ? 0 : mOfferId.hashCode());
+		result = prime * result
+				+ ((mOfferId == null) ? 0 : mOfferId.hashCode());
 		result = prime * result + ((mPrevId == null) ? 0 : mPrevId.hashCode());
-		result = prime * result + ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
+		result = prime * result
+				+ ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
 		result = prime * result + (mTick ? 1231 : 1237);
 		result = prime * result + mUserId;
 		return result;
@@ -563,7 +568,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -616,5 +621,5 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 			return false;
 		return true;
 	}
-
+	
 }

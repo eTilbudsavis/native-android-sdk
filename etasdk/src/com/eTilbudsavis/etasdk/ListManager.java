@@ -474,6 +474,15 @@ public class ListManager {
 			return false;
 		}
 		
+		// Set the creator of not done yet
+		if (sli.getCreator() == null) {
+			if (user.getName() != null && user.getName().length() > 0) {
+				sli.setCreator(user.getName());
+			} else {
+				sli.setCreator(user.getEmail());
+			}
+		}
+		
 		sli.setPreviousId(ShoppinglistItem.FIRST_ITEM);
 		ShoppinglistItem first = db.getFirstItem(sli.getShoppinglistId(), user);
 		if (first != null) {

@@ -117,9 +117,6 @@ public abstract class EtaListObject<T> extends EtaErnObject<T> implements Compar
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		EtaListObject other = (EtaListObject) obj;
-//		if (mState != other.mState)
-//			return false;
 		return true;
 	}
 	

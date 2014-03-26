@@ -130,7 +130,6 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 				catalog.setStoreUrl(Json.valueOf(jCatalog, ServerKey.STORE_URL));
 				catalog.setDimension(Dimension.fromJSON(jCatalog.getJSONObject(ServerKey.DIMENSIONS)));
 				catalog.setImages(Images.fromJSON(jCatalog.getJSONObject(ServerKey.IMAGES)));
-				catalog.setPages(Pages.fromJSON(jCatalog.getJSONObject(ServerKey.PAGES)));
 			} catch (JSONException e) {
 				EtaLog.d(TAG, e);
 			}
