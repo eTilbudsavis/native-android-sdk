@@ -69,8 +69,6 @@ public class HttpNetwork implements Network {
 			
 			HttpResponse resp = performHttpRequest(request);
 			
-			int sc = resp.getStatusLine().getStatusCode();
-			
 			if (resp.getEntity() == null) {
 				// add 0-byte for to mock no-content
 				content = new byte[0];

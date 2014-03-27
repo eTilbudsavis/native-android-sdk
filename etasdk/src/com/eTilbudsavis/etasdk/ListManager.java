@@ -47,24 +47,14 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  *
  */
 public class ListManager {
-
-	public static final String TAG = "ListManager";
-
-	/** Supported sync speeds for shopping list manager */
-	public interface SyncSpeed {
-		int SLOW = 10000;
-		int MEDIUM = 6000;
-		int FAST = 3000;
-	}
 	
-	/** The global eta object */
+	public static final String TAG = "ListManager";
+	
+	/** The global {@link Eta} object */
 	private Eta mEta;
 	
 	/** Subscriber queue for shopping list changes */
 	private List<OnChangeListener> mListSubscribers = new ArrayList<OnChangeListener>();
-	
-	/** Manager for doing asynchronous sync */
-	private ListSyncManager mSyncManager;
 	
 	/** The notification service for ListManager, this allows for bundling
 	 * list and item notifications, to avoid multiple updates for a single operation */
@@ -76,19 +66,6 @@ public class ListManager {
 	 */
 	public ListManager(Eta eta) {
 		mEta = eta;
-		mSyncManager = new ListSyncManager(eta);
-	}
-	
-	/**
-	 * Method for determining if the first sync cycle is done.
-	 * 
-	 * <p>This is dependent on, both the {@link ListSyncManager} having a first
-	 * sync, and whether a {@link User} is {@link User#isLoggedIn() logged in}.
-	 * If no user is logged in, the method will return true (as no sync can occur).</p>
-	 * @return True if the first sync is complete, or there is no user to sync.
-	 */
-	public boolean hasFirstSync() {
-		return !mEta.getUser().isLoggedIn() || mSyncManager.hasFirstSync();
 	}
 	
 	/**
@@ -795,29 +772,12 @@ public class ListManager {
 		boolean isInList = share.getShoppinglistId().equals(sl.getId());
 		return isInList && ( share.getAccess().equals(Share.ACCESS_OWNER) || share.getAccess().equals(Share.ACCESS_READWRITE) );
 	}
-
-	/**
-	 * Set the synchronization intervals for the shoppinglists, and their items.
-	 * 
-	 * <p>The synchronization of {@link ShoppinglistItem} will be the time
-	 * specified. The {@link Shoppinglist} synchronization will be a factor
-	 * three of that time, as the {@link Shoppinglist} are less subjected to
-	 * change.</p>
-	 * 
-	 * <p>Also time must be greater than or equal to 3000 (milliseconds)</p>
-	 * @param time in milliseconds
-	 */
-	public void setSyncSpeed(int time) {
-		if (time == SyncSpeed.SLOW || time == SyncSpeed.MEDIUM || time == SyncSpeed.FAST )
-			mSyncManager.setSyncSpeed(time);
-	}
 	
 	/**
 	 * Deletes all rows in the {@link DbHelper database}.
 	 */
 	public void clear() {
 		DbHelper.getInstance().clear();
-		mSyncManager.onPause();
 	}
 
 	/**
@@ -833,26 +793,13 @@ public class ListManager {
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
 	public void onResume() {
-		mSyncManager.onResume();
 	}
-
+	
 	/**
 	 * Method to call on all onPause events.
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
 	public void onPause() {
-		mSyncManager.onPause();
-	}
-	
-	/**
-	 * Method for forcing a synchronization event on the {@link ListSyncManager}
-	 * 
-	 * <p>This method should only be used in special cases, as the
-	 * synchronization is (within reasonably time intervals) being handled
-	 * automatically by the {@link ListSyncManager}</p>
-	 */
-	public void forceSync() {
-		mSyncManager.runSyncLoop();
 	}
 	
 	/**

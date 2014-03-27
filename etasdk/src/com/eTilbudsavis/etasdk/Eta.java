@@ -54,6 +54,10 @@ public class Eta {
 	private SessionManager mSessionManager;
 	private EtaLocation mLocation;
 	private ListManager mListManager;
+	
+	/** Manager for doing asynchronous sync */
+	private SyncManager mSyncManager;
+	
 	private static Handler mHandler;
 	private boolean mResumed = false;
 	private RequestQueue mRequestQueue;
@@ -110,8 +114,9 @@ public class Eta {
 		if (!isSet()) {
 			mSettings = new Settings(mContext);
 			mLocation = new EtaLocation(this);
-			mListManager = new ListManager(Eta.this);
-			mSessionManager = new SessionManager(Eta.this);
+			mListManager = new ListManager(this);
+			mSyncManager = new SyncManager(this);
+			mSessionManager = new SessionManager(this);
 		} else {
 			EtaLog.d(TAG, "Eta already set. apiKey, apiSecret and context has been switched");
 		}
@@ -239,11 +244,23 @@ public class Eta {
     public Cache getCache() {
             return mCache;
     }
-    
+
+    /**
+     * Get the current instance of {@link ListManager}.
+     * @return A ListManager
+     */
 	public ListManager getListManager() {
 		return mListManager;
 	}
-
+	
+    /**
+     * Get the current instance of {@link SyncManager}.
+     * @return A SyncManager
+     */
+	public SyncManager getSyncManager() {
+		return mSyncManager;
+	}
+	
 	/**
 	 * Get a static handler, created on the main looper. <br>
 	 * Use this to avoid memory leaks.
@@ -299,6 +316,7 @@ public class Eta {
 		if (mResumed) {
 			mResumed = false;
 			mListManager.onPause();
+			mSyncManager.onPause();
 			mSessionManager.onPause();
 			for (PageflipWebview p : PageflipWebview.pageflips)
 				p.onPause();
@@ -315,6 +333,7 @@ public class Eta {
 			mResumed = true;
 			mSessionManager.onResume();
 			mListManager.onResume();
+			mSyncManager.onResume();
 			for (PageflipWebview p : PageflipWebview.pageflips)
 				p.onResume();
 		}

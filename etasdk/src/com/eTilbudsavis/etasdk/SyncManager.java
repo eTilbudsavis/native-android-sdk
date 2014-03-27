@@ -51,12 +51,74 @@ import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class ListSyncManager {
+/**
+ * The {@link SyncManager} class performs asynchronous synchronization with the
+ * eTilbudsavis API, to propagate all {@link Shoppinglist} and {@link ShoppinglistItem}
+ * changes that a user may have done in the {@link DbHelper database}.
+ * 
+ * <p>
+ * Notifications about {@link Shoppinglist} and {@link ShoppinglistItem}
+ * changes, are relayed through the subscriber system in the {@link ListManager}.
+ * </p>
+ * 
+ * <p>
+ * There are four types of synchronization that will be performed:
+ * 
+ * <ul>
+ * <li>
+ * Local changes - Sending local changes to the API has precedence over the other
+ * types of synchronization.
+ * </li>
+ * 
+ * <li>
+ * {@link Shoppinglist#getModified()} - This is the default action, this will be
+ * performed if no other type of synchronization is chosen. This in practice
+ * means that this will be performed on almost every iteration. If there is any
+ * changes in the modified, both the {@link Shoppinglist} and it's
+ * {@link ShoppinglistItem ShoppinglistItems} will be synchronized.
+ * </li>
+ * 
+ * <li>
+ * {@link Shoppinglist} - Shoppinglists will be performed on every 3rd
+ * iteration the {@link SyncManager} does. As there are less chance of adding,
+ * and removing {@link Shoppinglist Shoppinglists} than that of having a change
+ * to an existing {@link Shoppinglist} (which will be handled by the synchronization
+ * option above.
+ * </li>
+ * 
+ * <li>
+ * Full sync loop - The full sync loop is performed on every 10th iteration, and
+ * ensures that the state is completely up to date. The local state can become
+ * decoupled from the server state in certain situations, where we are not able
+ * to determine and fix the situation in any other way, e.g.: If two devices
+ * makes a change to a list at the exact same second, and both devices therefore
+ * has a valid/correct {@link Shoppinglist#getModified() modified}.
+ * </li>
+ * </ul>
+ * 
+ * </p>
+ * 
+ * <p>
+ * When {@link #onPause()} is triggered, all local pending changes are pushed to
+ * the API if possible to ensure a correct state on the server (and other devices).
+ * </p>
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ *
+ */
+public class SyncManager {
 	
-	public static final String TAG = "ListSyncManager";
+	public static final String TAG = "SyncManager";
 	
-	private static final boolean USE_LOG_SUMMARY = true;
+	private static final boolean USE_LOG_SUMMARY = false;
+
+	/** Supported sync speeds for {@link SyncManager} */
+	public interface SyncSpeed {
+		int SLOW = 10000;
+		int MEDIUM = 6000;
+		int FAST = 3000;
+	}
 	
+	/** The current sync speed */
 	private int mSyncSpeed = 3000;
 	
 	/** Simple counter keeping track of sync loop */
@@ -64,7 +126,7 @@ public class ListSyncManager {
 	
 	private Stack<Request<?>> mCurrentRequests = new Stack<Request<?>>();
 	
-	/** Reference to the main Eta object, for Api calls, and Shoppinglistmanager */
+	/** Reference to the {@link Eta} object */
 	private Eta mEta;
 	
 	/** The Handler instantiated on the sync Thread */
@@ -74,11 +136,12 @@ public class ListSyncManager {
 	private User mUser;
 	
 	/** 
-	 * A tag for identifying all requests originating from this ListSyncManager
+	 * A tag for identifying all requests originating from this {@link SyncManager}
 	 * in the {@link RequestQueue}
 	 */
 	private Object mRequestTag = new Object();
 	
+	/** The notification object, used to combine and collect notifications */
 	private ListNotification mNotification = new ListNotification(true);
 	
 	/** Listening for session changes, starting and stopping sync as needed */
@@ -87,7 +150,7 @@ public class ListSyncManager {
 		public void onChange() {
 			if (mUser == null || mUser.getUserId() != mEta.getUser().getUserId()) {
 				mSyncCount = 0;
-				runSyncLoop();
+				forceSync();
 			}
 		}
 	};
@@ -99,105 +162,149 @@ public class ListSyncManager {
 			
 			mUser = mEta.getUser();
 			
-			// Stop the sync manager if it's an offline user or the app isn't resumed
-			if (!mEta.getUser().isLoggedIn() || !mEta.isResumed() ) {
+			// If it's an offline user, then just quit it
+			if (!mUser.isLoggedIn() ) {
 				return;
 			}
 			
-			User user = mEta.getUser();
-			
-			// Prepare for next iteration
-			mHandler.postDelayed(mSyncLoop, mSyncSpeed);
-			
+			/* 
+			 * Prepare for next iteration if app is still resumed.
+			 * By not doing a return statement we allow for a final sync, and
+			 * sending local changes to server
+			 */
+			if ( mEta.isResumed() ) {
+				mHandler.postDelayed(mSyncLoop, mSyncSpeed);
+			}
+
 			// Only do an update, if there are no pending transactions, and we are online
 			if (!mCurrentRequests.isEmpty() || !mEta.isOnline()) {
 				return;
 			}
 			
-			// If there are local changes to a list, then syncLocalListChanges will handle it: return
-			List<Shoppinglist> lists = DbHelper.getInstance().getLists(mEta.getUser(), true);
-			if (syncLocalListChanges(lists, user)) {
-				return;
-			}
+			// Perform the actual sync cycle
+			performSyncCycle(mUser);
 			
-			// If there are changes to any items, then syncLocalItemChanges will handle it: return
-			boolean hasLocalChanges = false;
-			for (Shoppinglist sl : lists) {
-				hasLocalChanges = syncLocalItemChanges(sl, user) || hasLocalChanges;
-				hasLocalChanges = syncLocalShareChanges(sl, user) || hasLocalChanges;
-			}
-			
-			if (hasLocalChanges) {
-				return;
-			}
-			
-			// Finally ready to get server changes
-            if (mSyncCount%3 == 0) {
-            	
-            	// Get a new set of lists
-                syncLists(user);
-                
-            } else if (mSyncCount%10 == 0) {
-            	
-            	/* Because we update modified on lists, on all changes, we might
-            	 * have a situation where two devices have set the same modified
-            	 * on a list, and therefore won't try to get a new list of items
-            	 * So we force the SDK to get a new set once in a while */
-        		List<Shoppinglist> localLists = DbHelper.getInstance().getLists(user);
-        		for (Shoppinglist sl : localLists) {
-        			syncItems(sl, user);
-        		}
-        		
-            } else {
-            	
-            	// Base case, just check if there is changes
-                syncListsModified(user);
-                
-            }
-            mSyncCount++;
-            
 		}
 		
 	};
 	
-	public ListSyncManager(Eta eta) {
+	private void performSyncCycle(User user) {
+		
+		// If there are local changes to a list, then syncLocalListChanges will handle it: return
+		List<Shoppinglist> lists = DbHelper.getInstance().getLists(mEta.getUser(), true);
+		if (syncLocalListChanges(lists, user)) {
+			return;
+		}
+		
+		// If there are changes to any items, then syncLocalItemChanges will handle it: return
+		boolean hasLocalChanges = false;
+		for (Shoppinglist sl : lists) {
+			hasLocalChanges = syncLocalItemChanges(sl, user) || hasLocalChanges;
+			hasLocalChanges = syncLocalShareChanges(sl, user) || hasLocalChanges;
+		}
+		
+		// Skip further sync if we just posted our own changes
+		if (hasLocalChanges) {
+			return;
+		}
+		
+		// Finally ready to get server changes
+        if (mSyncCount%3 == 0) {
+        	
+        	// Get a new set of lists
+            syncLists(user);
+            
+        } else if (mSyncCount%10 == 0) {
+        	
+        	/* Because we update modified on lists, on all changes, we might
+        	 * have a situation where two devices have set the same modified
+        	 * on a list, and therefore won't try to get a new list of items
+        	 * So we force the SDK to get a new set once in a while */
+    		List<Shoppinglist> localLists = DbHelper.getInstance().getLists(user);
+    		for (Shoppinglist sl : localLists) {
+    			syncItems(sl, user);
+    		}
+    		
+        } else {
+        	
+        	// Base case, just check if there is changes
+            syncListsModified(user);
+            
+        }
+        mSyncCount++;
+        
+	}
+	
+	/**
+	 * Default constructor for the {@link SyncManager}
+	 * @param eta An Eta instance
+	 */
+	public SyncManager(Eta eta) {
 		mEta = eta;
 		// Create a new thread for a handler, so that i can later post content to that thread.
 		HandlerThread t = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
 		t.start();
 		mHandler = new Handler(t.getLooper());
 	}
-	
+
+	/**
+	 * Method for determining if the first sync cycle is done.
+	 * 
+	 * <p>This is dependent on, both:
+	 * <ul>
+	 * 		<li>the {@link SyncManager} having performed the first sync cycle, and </li>
+	 * 		<li>whether a {@link User} is {@link User#isLoggedIn() logged in}</li>
+	 * </ul>
+	 * </p>
+	 * @return True if the first sync is complete, or there is no user to sync.
+	 */
 	public boolean hasFirstSync() {
 		return mSyncCount > 0;
 	}
 	
 	/**
-	 * Method for starting and stopping the sync manager
-	 * @param run, true if manager should sync.
+	 * Method for forcing a new synchronization iteration.
+	 * <p>This method will trigger the synchronization loop, so it's essentially
+	 * also the method for starting the {@link SyncManager} sync loop</p>
+	 * 
+	 * <p>This method should only be used in special cases, as the
+	 * synchronization is (within reasonably time intervals) being handled
+	 * automatically by the {@link SyncManager}</p>
 	 */
-	public void runSyncLoop() {
+	public void forceSync() {
 		// First make sure, that we do not leak memory by posting the runnable multiple times
 		mHandler.removeCallbacks(mSyncLoop);
 		mHandler.post(mSyncLoop);
 	}
-	
+
+	/**
+	 * Method to call on all onResume events.
+	 * <p>This is implicitly handled by the {@link Eta} instance</p>
+	 */
 	public void onResume() {
 		mEta.getSessionManager().subscribe(sessionListener);
-		runSyncLoop();
+		forceSync();
 	}
-	
+
+	/**
+	 * Method to call on all onPause events.
+	 * <p>This is implicitly handled by the {@link Eta} instance</p>
+	 */
 	public void onPause() {
+		forceSync();
 		mEta.getSessionManager().unSubscribe(sessionListener);
 	}
 	
 	/**
-	 * Set the speed, at which the SyncManager should do updates.
-	 * NOTE: lower bound on sync time is 3 seconds (3000ms), to spare both the phone and the server
-	 * @param time in milliseconds between sync loops
+	 * Set synchronization interval for {@link Shoppinglist}, and {@link ShoppinglistItem}.
+	 * 
+	 * <p>Also time must be greater than or equal to 3000 (milliseconds)</p>
+	 * @param time A synchronization interval in milliseconds
 	 */
 	public void setSyncSpeed(int time) {
-		mSyncSpeed = time < 3000 ? 3000 : time;
+		if (time == SyncSpeed.SLOW || time == SyncSpeed.MEDIUM || time == SyncSpeed.FAST ) {
+			mSyncSpeed = time;
+		}
 	}
 	
 	private void addRequest(Request<?> r) {
@@ -231,12 +338,7 @@ public class ListSyncManager {
 		}
 	}
 	
-	/**
-	 * Sync all shopping lists.<br>
-	 * This is run at certain intervals if startSync() has been called.<br>
-	 * startSync() is called if Eta.onResume() is called.
-	 */
-	public void syncLists(final User user) {
+	private void syncLists(final User user) {
 		
 		Listener<JSONArray> listListener = new Listener<JSONArray>() {
 			
@@ -371,11 +473,6 @@ public class ListSyncManager {
 		
 	}
 	
-	/**
-	 * 
-	 * @param serverList
-	 * @param localList
-	 */
 	private void migrateOfflineLists() {
 		
 		DbHelper db = DbHelper.getInstance();
@@ -408,11 +505,8 @@ public class ListSyncManager {
 			
 	}
 	
-	/**
-	 * 
-	 * @param user
-	 */
-	public void syncListsModified(final User user) {
+	
+	private void syncListsModified(final User user) {
 
 		final DbHelper db = DbHelper.getInstance();
 		List<Shoppinglist> localLists = db.getLists(user);
@@ -479,13 +573,8 @@ public class ListSyncManager {
 				
 	}
 	
-	/**
-	 * Sync all shopping list items, associated with the given shopping list.<br>
-	 * This is run at certain intervals if startSync() has been called.<br>
-	 * startSync() is called if Eta.onResume() is called.
-	 * @param sl shoppinglist to update
-	 */
-	public void syncItems(final Shoppinglist sl, final User user) {
+	
+	private void syncItems(final Shoppinglist sl, final User user) {
 
 		final DbHelper db = DbHelper.getInstance();
 		
