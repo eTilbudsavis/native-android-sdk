@@ -163,7 +163,7 @@ public class SyncManager {
 			mUser = mEta.getUser();
 			
 			// If it's an offline user, then just quit it
-			if (!mUser.isLoggedIn() ) {
+			if ( !mUser.isLoggedIn() ) {
 				return;
 			}
 			
@@ -175,7 +175,7 @@ public class SyncManager {
 			if ( mEta.isResumed() ) {
 				mHandler.postDelayed(mSyncLoop, mSyncSpeed);
 			}
-
+			
 			// Only do an update, if there are no pending transactions, and we are online
 			if (!mCurrentRequests.isEmpty() || !mEta.isOnline()) {
 				return;

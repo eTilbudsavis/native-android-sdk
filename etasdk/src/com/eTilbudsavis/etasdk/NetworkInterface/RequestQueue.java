@@ -198,6 +198,27 @@ public class RequestQueue {
 	}
 	
 	/**
+	 * Get the {@link Network} associated with this {@link RequestQueue}
+	 * @return A {@link Network}
+	 */
+	public Network getNetwork() {
+		return mNetwork;
+	}
+
+	/**
+	 * Get the {@link Cache} associated with this {@link RequestQueue}
+	 * @return A {@link Cache}
+	 */
+	public Cache getCache() {
+		return mCache;
+	}
+	
+	public void clear() {
+		mCache.clear();
+		mLog.clear();
+	}
+	
+	/**
 	 * Add a new request to this RequestQueue, everything from this point onward will be performed on separate threads
 	 * @param request
 	 * 			the request to add
@@ -208,8 +229,6 @@ public class RequestQueue {
     	synchronized (mCurrentRequests) {
 			mCurrentRequests.add(request);
 		}
-    	
-//    	request.debugNetwork(true);
     	
     	request.setRequestQueue(this);
     	
@@ -241,6 +260,15 @@ public class RequestQueue {
     	
     }
     
+    /**
+     * Cancel all {@link Request requests} with a given tag.
+     * 
+     * <p>Matching is done with {@code ==} and not the
+     * {@link Object#equals(Object) equals} method</p>
+     * 
+     * @param tag A tag to match
+     * @return
+     */
     public int cancelAll(Object tag) {
 
     	int count = 0;

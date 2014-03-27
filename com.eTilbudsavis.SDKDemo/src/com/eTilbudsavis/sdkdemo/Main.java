@@ -38,32 +38,34 @@ public class Main extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
-        /*
-         *  Eta is a singleton, so we'll set it, first chance we get.
-         *  Even better do this in Application (global state), that way the
-         *  singleton will be available in all activities even if your app
-         *  gets garbage collected by the system.
-         */
-        Eta eta = Eta.getInstance();
-        
+
         /* 
-         * You MUST set the Eta object, in order for it to work
+         * You MUST create an Eta instance before invoking Eta.getinstance.
+         * 
+         * You can do this in Application (global state), that way the
+         * singleton will be available in all activities even if your app
+         * gets garbage collected by the system.
+         * 
          * ApiKey and ApiSecret are not included in the demo/SDK, but you can
          * get your own at https://etilbudsavis.dk/developers/ :-)
          */
-        eta.set(Keys.API_KEY, Keys.API_SECRET, this);
+        Eta.createInstance(Keys.API_KEY, Keys.API_SECRET, this);
         
         /* 
          * Enable debug mode, so debug info will show in LogCat
          * You might not want to have this set to true in a release version.
          */
         EtaLog.enableLogd(true);
+
+        /*
+         * Eta is a singleton you interact with via this method
+         */
+        Eta eta = Eta.getInstance();
         
         /*
          * Set the location (This could also be set via LocationManager)
          */
-        EtaLocation loc = Eta.getInstance().getLocation();
+        EtaLocation loc = eta.getLocation();
         loc.setLatitude(55.63105);
         loc.setLongitude(12.5766);
         loc.setRadius(700000);

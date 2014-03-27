@@ -16,6 +16,7 @@
 package com.eTilbudsavis.etasdk;
 
 import android.annotation.SuppressLint;
+import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
@@ -23,10 +24,11 @@ import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
+import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.NetworkHelpers.HttpNetwork;
 import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
-import com.eTilbudsavis.etasdk.NetworkInterface.Network;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
@@ -44,98 +46,140 @@ public class Eta {
 	
 	public static final String TAG = "ETA";
 	
+	/** The Eta singleton */
 	private static Eta mEta;
 	
+	/** Application context for usage in the SDK */
 	private Context mContext;
+	
+	/** The developers APIkey */
 	private String mApiKey;
+	
+	/** The developers APIsecret */
 	private String mApiSecret;
+
+	/** The developers app version, this isn't strictly necessary */
 	private String mAppVersion;
+	
+	/** The SDK settings */
 	private Settings mSettings;
+	
+	/** A session manager, for handling all session requests, user information e.t.c. */
 	private SessionManager mSessionManager;
+	
+	/** The current location that the SDK is aware of */
 	private EtaLocation mLocation;
+	
+	/** Manager for handling all {@link Shoppinglist}, and {@link ShoppinglistItem} */
 	private ListManager mListManager;
 	
 	/** Manager for doing asynchronous sync */
 	private SyncManager mSyncManager;
 	
+	/** A static handler for usage in the SDK, this will help prevent leaks */
 	private static Handler mHandler;
+	
+	/** The current state of the SDK */
 	private boolean mResumed = false;
+	
+	/** A {@link RequestQueue} implementation to handle all API requests */
 	private RequestQueue mRequestQueue;
-	private Cache mCache;
+	
+	/** System manager for getting the connectivity status */
 	private ConnectivityManager mConnectivityManager;
 	
-	private Eta() {
-		mCache = new Cache();
-		Network n = new HttpNetwork();
-		mRequestQueue = new RequestQueue(this, mCache, n);
+	/**
+	 * Default constructor, this is private to allow us to create a singleton instance
+	 * @param apiKey An API v2 apiKey
+	 * @param apiSecret An API v2 apiSecret (matching the apiKey)
+	 * @param ctx A context
+	 */
+	private Eta(String apiKey, String apiSecret, Context ctx) {
+		
+		// Get a context that isn't likely to disappear with an activity.
+		mContext = ctx.getApplicationContext();
+		mApiKey = apiKey;
+		mApiSecret = apiSecret;
+		
+		mRequestQueue = new RequestQueue(this, new Cache(), new HttpNetwork());
 		mRequestQueue.start();
+		
+		mHandler = new Handler(Looper.getMainLooper());
+		
+		mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+		
+		try {
+			String name = mContext.getPackageName();
+			String version = mContext.getPackageManager().getPackageInfo(name, 0 ).versionName;
+			setAppVersion(version);
+		} catch (NameNotFoundException e) {
+			EtaLog.d(TAG, e);
+		}
+		
+		mSettings = new Settings(mContext);
+		mLocation = new EtaLocation(this);
+		mSessionManager = new SessionManager(this);
+		mListManager = new ListManager(this);
+		mSyncManager = new SyncManager(this);
+		
 	}
 	
 	/**
-	 * TODO: Write a long story about usage, this will basically be the documentation
-	 * @param apiKey The API key found at http://etilbudsavis.dk/api/
-	 * @param apiSecret The API secret found at http://etilbudsavis.dk/api/
-	 * @param context The context of the activity instantiating this class.
+	 * Singleton access to a {@link Eta} object.
+	 * 
+	 * <p> Be sure to {@link Eta#createInstance(String, String, Context) create an
+	 * instance} before invoking this method, or bad things will happen. </p>
+	 * 
+	 * @throws IllegalStateException If {@link Eta} no instance is available
 	 */
 	public static Eta getInstance() {
 		if (mEta == null) {
-			synchronized (Eta.class) {
-				if (mEta == null) {
-					mEta = new Eta();
-				}
-			}
+			throw new IllegalStateException("Eta.createInstance needs to be called"
+					+ "before Eta.getInstance()");
 		}
 		return mEta;
 	}
 	
 	/**
-	 * This method must be called before performing any requests.<br><br>
-	 * It's given that the SDK cannot perform any requests without an apiKey and apiSecret.
-	 * @param apiKey for eTilbudsavis API v2
-	 * @param apiSecret for eTilbudsavis API v2
-	 * @param context of your application
+	 * Creates a new instance of {@link Eta}.
+	 * 
+	 * <p>This method will instantiate a new instance of {@link Eta}, than can be
+	 * used throughout your app. But you can only create one instance pr. context
+	 * (or app), this amongst others ensures some session and user safety.</p>
+	 * 
+	 * @param apiKey An API v2 apiKey
+	 * @param apiSecret An API v2 apiSecret (matching the apiKey)
+	 * @param ctx A context
 	 */
-	public void set(String apiKey, String apiSecret, Context context) {
+	public static void createInstance(String apiKey, String apiSecret, Context ctx) {
 		
-		mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		
-		mContext = context;
-		mApiKey = apiKey;
-		mApiSecret = apiSecret;
-
-		try {
-			String name = context.getPackageName();
-			String version = context.getPackageManager().getPackageInfo(name, 0 ).versionName;
-			setAppVersion(version);
-		} catch (NameNotFoundException e) {
-			EtaLog.d(TAG, e);
-		}
-
-		if (!isSet()) {
-			mSettings = new Settings(mContext);
-			mLocation = new EtaLocation(this);
-			mListManager = new ListManager(this);
-			mSyncManager = new SyncManager(this);
-			mSessionManager = new SessionManager(this);
+		if (mEta == null) {
+			synchronized (Eta.class) {
+				if (mEta == null) {
+					mEta = new Eta(apiKey, apiSecret, ctx);
+				}
+			}
 		} else {
-			EtaLog.d(TAG, "Eta already set. apiKey, apiSecret and context has been switched");
+			EtaLog.d(TAG, "Eta instance already created");
 		}
 		
 	}
 	
-	public boolean isSet() {
-		return mApiKey != null && mApiSecret == null;
-	}
-	
+	/**
+	 * Method for determining the current network state
+	 * @return true if network connectivity exists, false otherwise.
+	 */
 	public boolean isOnline() {
 		NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
 		return netInfo != null && netInfo.isConnected();
 	}
 
 	/**
-	 * The context, the given Eta has been set in.<br>
-	 * This context, does not necessarily have real estate on screen
-	 * to instantiate any views.
+	 * The {@link Context}, {@link Eta} has been instantiated with
+	 * 
+	 * <p>Note that this is the {@link Application#getApplicationContext()
+	 * application context}, and therefore has some restrictions</p>
+	 * 
 	 * @return A context
 	 */
 	public Context getContext() {
@@ -236,15 +280,7 @@ public class Eta {
     public EtaLocation getLocation() {
             return mLocation;
     }
-
-    /**
-     * Get the ETA SDK cache for various items and objects.
-     * @return the current cache object
-     */
-    public Cache getCache() {
-            return mCache;
-    }
-
+    
     /**
      * Get the current instance of {@link ListManager}.
      * @return A ListManager
@@ -267,49 +303,47 @@ public class Eta {
 	 * @return a handler
 	 */
 	public Handler getHandler() {
-		if (mHandler == null) {
-			mHandler = new Handler(Looper.getMainLooper());
-		}
 		return mHandler;
 	}
 	
 	/**
-	 * First clears all preferences with {@link #clear() clear()}, and then null's this instance of Eta.<br>
-	 * Therefore you must get a new instance and then {@link #set(String, String, Context) set()} it again.
-	 * if you want to continue using the SDK. 
+	 * First clears all preferences with {@link #clear()}, and then {@code null's}
+	 * this instance of Eta
+	 * 
+	 * <p>For further use of {@link Eta} after this, you must invoke
+	 * {@link #createInstance(String, String, Context) set()} it again.</p>
 	 */
 	public void reset() {
 		clear();
-		mCache.clear();
-		mListManager.clear();
 		mEta = null;
 	}
 	
 	/**
-	 * Clears all preferences that the SDK has created.<br><br>
+	 * Clears all preferences that the SDK has created.
 	 * 
-	 * This includes invalidating the current session and user, clearing all rows in DB, clearing preferences,
-	 * resetting location info, clearing API cache, e.t.c.
+	 * <p>This includes invalidating the current session and user, clearing all
+	 * rows in DB, clearing preferences, resetting location info, clearing API
+	 * cache, e.t.c.</p>
 	 */
 	public void clear() {
 		mSessionManager.invalidate();
 		mSettings.clear();
 		mLocation.clear();
-		mRequestQueue.getLog().clear();
+		mRequestQueue.clear();
+		mListManager.clear();
 		EtaLog.getExceptionLog().clear();
 	}
 	
 	/**
 	 * Get the current state of the Eta instance
-	 * @return if it's resumed.
+	 * @return {@code true} if in resumed state, else {@code false}
 	 */
 	public boolean isResumed() {
 		return mResumed;
 	}
 
 	/**
-	 * Method must be called when the current activity is put to background.<br>
-	 * This amongst other stops any sync services.
+	 * Method must be called when the current activity is put to background
 	 */
 	@SuppressLint("NewApi")
 	public void onPause() {
@@ -318,14 +352,14 @@ public class Eta {
 			mListManager.onPause();
 			mSyncManager.onPause();
 			mSessionManager.onPause();
-			for (PageflipWebview p : PageflipWebview.pageflips)
+			for (PageflipWebview p : PageflipWebview.pageflips) {
 				p.onPause();
+			}
 		}
 	}
 	
 	/**
-	 * Method must be called when the activity is resuming from background.<br>
-	 * This will amongst other start any sync services.
+	 * Method must be called when the activity is resuming
 	 */
 	@SuppressLint("NewApi")
 	public void onResume() {
@@ -334,8 +368,9 @@ public class Eta {
 			mSessionManager.onResume();
 			mListManager.onResume();
 			mSyncManager.onResume();
-			for (PageflipWebview p : PageflipWebview.pageflips)
+			for (PageflipWebview p : PageflipWebview.pageflips) {
 				p.onResume();
+			}
 		}
 	}
 
