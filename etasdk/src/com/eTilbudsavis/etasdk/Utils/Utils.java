@@ -55,6 +55,9 @@ public final class Utils {
 	/** The date format as returned from the server */
 	public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZZ";
 	
+	/** String representation of epoc */
+	public static final String DATE_EPOC = "1970-01-01T00:00:00+0000";
+	
 	/**
 	 * Create universally unique identifier.
 	 *

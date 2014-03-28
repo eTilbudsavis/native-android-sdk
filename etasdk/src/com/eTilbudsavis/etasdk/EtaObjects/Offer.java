@@ -72,7 +72,7 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 	public Offer() {
 		
 	}
-
+	
 	/**
 	 * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
 	 * @param offers A {@link JSONArray} in the format of a valid API v2 offer response

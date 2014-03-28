@@ -101,10 +101,10 @@ public class Eta {
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
 		
+		mHandler = new Handler(Looper.getMainLooper());
+		
 		mRequestQueue = new RequestQueue(this, new Cache(), new HttpNetwork());
 		mRequestQueue.start();
-		
-		mHandler = new Handler(Looper.getMainLooper());
 		
 		mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 		
@@ -127,15 +127,15 @@ public class Eta {
 	/**
 	 * Singleton access to a {@link Eta} object.
 	 * 
-	 * <p> Be sure to {@link Eta#createInstance(String, String, Context) create an
-	 * instance} before invoking this method, or bad things will happen. </p>
+	 * <p>Be sure to {@link Eta#createInstance(String, String, Context) create an
+	 * instance} before invoking this method, or bad things will happen.</p>
 	 * 
 	 * @throws IllegalStateException If {@link Eta} no instance is available
 	 */
 	public static Eta getInstance() {
 		if (mEta == null) {
-			throw new IllegalStateException("Eta.createInstance needs to be called"
-					+ "before Eta.getInstance()");
+			throw new IllegalStateException("Eta.createInstance() needs to be"
+					+ "called before Eta.getInstance()");
 		}
 		return mEta;
 	}
@@ -262,7 +262,7 @@ public class Eta {
 	 * @return a user
 	 */
 	public User getUser() {
-		return getSessionManager().getSession().getUser();
+		return mSessionManager.getSession().getUser();
 	}
 
 	/**

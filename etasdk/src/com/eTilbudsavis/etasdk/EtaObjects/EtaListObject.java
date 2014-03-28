@@ -40,7 +40,12 @@ public abstract class EtaListObject<T> extends EtaErnObject<T> implements Compar
 		int ERROR	= 5;
 	}
 	
-	/** A string indication the first item in a list of items */
+	/** 
+	 * 
+	 * A string indication the first item in a list of items.
+	 * <p>Represented by the static value:
+	 * "00000000-0000-0000-0000-000000000000"</p>
+	 */
 	public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
 	
 	private int mState = State.TO_SYNC;

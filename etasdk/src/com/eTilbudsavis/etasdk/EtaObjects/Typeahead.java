@@ -100,9 +100,12 @@ public class Typeahead extends EtaObject {
 		if (typeahead == null) typeahead = new Typeahead();
 		if (jTypeahead == null) return typeahead;
 		
+		EtaLog.d(TAG, "JSON: " + jTypeahead.toString());
 		typeahead.setSubject(Json.valueOf(jTypeahead, ServerKey.SUBJECT));
 		typeahead.setOffset(Json.valueOf(jTypeahead, ServerKey.OFFSET, 0));
 		typeahead.setLength(Json.valueOf(jTypeahead, ServerKey.LENGTH, 0));
+		
+		EtaLog.d(TAG, "POJO: " + typeahead.toJSON().toString());
 		
 		return typeahead;
 	}
@@ -133,8 +136,7 @@ public class Typeahead extends EtaObject {
 	 * @param length The length of the match. This may not be longer that the length of the subject
 	 */
 	public void setLength(int length) {
-		int max = mSubject.length() - mOffset;
-		mLength = (length > max ? max : length);
+		mLength = length;
 	}
 	
 	/**
@@ -150,8 +152,7 @@ public class Typeahead extends EtaObject {
 	 * @param offset
 	 */
 	public void setOffset(int offset) {
-		mOffset = ( offset > mSubject.length() ) ? mSubject.length() : mOffset;
-		setLength(mLength);
+		mOffset = offset;
 	}
 	
 	/**
@@ -169,9 +170,6 @@ public class Typeahead extends EtaObject {
 	 */
 	public void setSubject(String subject) {
 		mSubject = subject;
-		// Remember to update these bastards
-		setOffset(mOffset);
-		setLength(mLength);
 	}
 	
 	/**
@@ -192,7 +190,8 @@ public class Typeahead extends EtaObject {
 	 * as a {@link Spanned} object. This type of object can directly be used in a TextView to create
 	 * the desired effect.
 	 * 
-	 * @return A {@link Spanned} containing the subject
+	 * @return A {@link Spanned} containing the subject, or {@code null} if
+	 *          subject id null
 	 */
 	public Spanned getHtml(String startTag, String endTag) {
 		
@@ -200,7 +199,9 @@ public class Typeahead extends EtaObject {
 			return null;
 		}
 		
-		if (mOffset == 0 && mLength == 0) {
+		if ( (mOffset == 0 && mLength == 0) ||
+				mOffset > mSubject.length() ||
+				( (mOffset + mLength) > mSubject.length() ) ) {
 			
 			// no really good reason to prepend the string with both tags
 			return Html.fromHtml(mSubject);

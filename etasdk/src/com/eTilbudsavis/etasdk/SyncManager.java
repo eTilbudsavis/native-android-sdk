@@ -136,6 +136,12 @@ public class SyncManager {
 	private User mUser;
 	
 	/** 
+	 * Variable to determine if offline lists should automatically be
+	 * synchronized if certain criterias are met.
+	 */
+	private boolean mMigrateOfflineLists = false;
+	
+	/** 
 	 * A tag for identifying all requests originating from this {@link SyncManager}
 	 * in the {@link RequestQueue}
 	 */
@@ -307,6 +313,32 @@ public class SyncManager {
 		}
 	}
 	
+	/**
+	 * Method for easily migrating "offline" lists to "online" lists.
+	 * 
+	 * <p>If true, the {@link SyncManager} ensures the merging of any
+	 * (non-empty) "offline" lists, into a new "online" user's
+	 * {@link Shoppinglist shoppinglists}, on the first completed sync cycle.</p>
+	 * <p>
+	 * (a user is considered a "new" if he/she haven't got any lists on the
+	 * server already)</p>
+	 * 
+	 * @param migrate {@code true} if to do automatic migration of offline
+	 *                 {@link Shoppinglist shoppinglists}, else {@code false}
+	 */
+	public void setMigrateOfflineLists(boolean migrate) {
+		mMigrateOfflineLists = migrate;
+	}
+	
+	/**
+	 * True if "offline" {@link Shoppinglist} will be migrated on first sync with
+	 * a new "online" user's {@link Shoppinglist shoppinglists}.
+	 * @return
+	 */
+	public boolean isMigratingOfflineLists() {
+		return mMigrateOfflineLists;
+	}
+	
 	private void addRequest(Request<?> r) {
 		// No request from here should return a result from cache
 		r.setIgnoreCache(true);
@@ -362,7 +394,7 @@ public class SyncManager {
 					// On first iteration, check and merge lists plus notify subscribers of first sync event
 					if (mSyncCount == 1) {
 						
-						if (serverLists.isEmpty() && localLists.isEmpty()) {
+						if (mMigrateOfflineLists && serverLists.isEmpty() && localLists.isEmpty()) {
 							migrateOfflineLists();
 						}
 						

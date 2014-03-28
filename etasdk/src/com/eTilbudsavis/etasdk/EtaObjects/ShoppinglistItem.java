@@ -126,7 +126,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 		sli.setShoppinglistId(Json.valueOf(jSli, ServerKey.SHOPPINGLIST_ID));
 		sli.setErn(Json.valueOf(jSli, ServerKey.ERN));
 		sli.setCreator(Json.valueOf(jSli, ServerKey.CREATOR));
-		String date = Json.valueOf(jSli, ServerKey.MODIFIED, "1970-01-01T00:00:00+0000");
+		String date = Json.valueOf(jSli, ServerKey.MODIFIED, Utils.DATE_EPOC);
 		sli.setModified( Utils.parseDate(date) );
 		sli.setPreviousId(Json.valueOf(jSli, ServerKey.PREVIOUS_ID, null));
 
@@ -153,15 +153,13 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 
 	@Override
 	public JSONObject toJSON() {
-		JSONObject o = new JSONObject();
+		JSONObject o = super.toJSON();
 		try {
-			o.put(ServerKey.ID, Json.nullCheck(getId()));
 			o.put(ServerKey.TICK, Json.nullCheck(isTicked()));
 			o.put(ServerKey.OFFER_ID, Json.nullCheck(getOfferId()));
 			o.put(ServerKey.COUNT, getCount());
 			o.put(ServerKey.DESCRIPTION, Json.nullCheck(getDescription()));
 			o.put(ServerKey.SHOPPINGLIST_ID, Json.nullCheck(getShoppinglistId()));
-			o.put(ServerKey.ERN, Json.nullCheck(getErn()));
 			o.put(ServerKey.CREATOR, Json.nullCheck(getCreator()));
 			o.put(ServerKey.MODIFIED, Json.nullCheck(Utils.parseDate(getModified())));
 			o.put(ServerKey.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
