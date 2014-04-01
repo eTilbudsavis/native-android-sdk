@@ -55,8 +55,10 @@ public class EtaLog {
 	 * @param message The message you would like logged.
 	 */
 	public static void d(String tag, String message) {
-		if (!DEBUG) return;
-		Log.d(tag, message);
+		if (!DEBUG) {
+			return;
+		}
+		Log.d(tag, (message == null ? "null" : message) );
 	}
 
 	/**

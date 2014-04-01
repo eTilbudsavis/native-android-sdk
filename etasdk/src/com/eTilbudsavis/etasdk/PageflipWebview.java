@@ -29,6 +29,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
@@ -325,18 +326,7 @@ public final class PageflipWebview extends WebView {
 		@Override
 		public boolean onJsAlert(WebView view, String url, String message, final android.webkit.JsResult result) {
 			EtaLog.d(TAG, "JsAlert: " + message);
-			if (!Eta.getInstance().isResumed())
-				return true;
-			
-			new AlertDialog.Builder(mEta.getContext())  
-            .setTitle("JavaScript Alert")  
-            .setMessage(message)  
-            .setPositiveButton(android.R.string.ok, new AlertDialog.OnClickListener() { 
-            	public void onClick(DialogInterface dialog, int which) { result.confirm(); } })
-            .setCancelable(false)
-            .create()
-            .show();
-        return true;  
+			return false;
 		}
 	};
 	
@@ -369,19 +359,24 @@ public final class PageflipWebview extends WebView {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
 			setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 		}
-		
-		// Add debugging if needed
-		if (DEBUG) {	
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-			    WebView.setWebContentsDebuggingEnabled(true);
-			}
-			setWebChromeClient(wcc);
-		}
-		
+
 		// Get the HTML, and get Pageflip running
 		String url = Endpoint.pageflipProxy(mUuid);
 		StringRequest req = new StringRequest(url, htmlListener);
+		req.debugNetwork(true);
 		mEta.add(req);
+		
+		DEBUG = !url.contains(Endpoint.Prefix.PAGEFLIP_PRODUCTION);
+		
+		EtaLog.d(TAG, "debug: " + DEBUG + ", url: " + url);
+		
+		// Add debugging if needed
+		if (DEBUG) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+				WebView.setWebContentsDebuggingEnabled(true);
+			}
+			setWebChromeClient(wcc);
+		}
 		
 	}
 	

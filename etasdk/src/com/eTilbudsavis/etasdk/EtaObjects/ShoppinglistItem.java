@@ -129,7 +129,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 		String date = Json.valueOf(jSli, ServerKey.MODIFIED, Utils.DATE_EPOC);
 		sli.setModified( Utils.parseDate(date) );
 		sli.setPreviousId(Json.valueOf(jSli, ServerKey.PREVIOUS_ID, null));
-
+		
 		// A whole lot of 'saving my ass from exceptions' for meta
 		String metaString = Json.valueOf(jSli, ServerKey.META, "{}").trim();
 		// If it looks like a JSONObject, try parsing it

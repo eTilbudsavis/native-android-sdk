@@ -26,6 +26,7 @@ import com.eTilbudsavis.etasdk.SessionManager;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Header;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -101,7 +102,7 @@ public class NetworkDispatcher extends Thread {
                 
                 // Perform the network request.
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
-
+                
                 request.addEvent("parsing-network-response");
                 Response<?> response = request.parseNetworkResponse(networkResponse);
                 

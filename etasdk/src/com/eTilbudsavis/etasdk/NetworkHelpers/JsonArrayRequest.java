@@ -30,6 +30,7 @@ import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response;
 import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -70,8 +71,8 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	
 	@Override
 	protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
-
-        String jsonString = new String(response.data);
+		
+        String jsonString = "";
 		try {
 			try {
 				jsonString = new String(response.data, getParamsEncoding());
@@ -97,6 +98,18 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
             return r;
             
         } catch (Exception e) {
+        	
+        	
+        	// TODO include old data in parse errors
+
+            try {
+            	EtaLog.d(TAG, toString());
+        		EtaLog.d(TAG, "sc: " + response.statusCode);
+        		EtaLog.d(TAG, "data: " + new String(response.data));
+            } catch (Exception e1) {
+            	
+            }
+    		
             return Response.fromError(new ParseError(e, JSONArray.class));
         }
 	}

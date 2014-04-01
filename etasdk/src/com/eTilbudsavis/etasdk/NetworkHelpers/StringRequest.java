@@ -118,7 +118,8 @@ public class StringRequest extends Request<String> {
 			// Server Response
 			JSONObject response = new JSONObject();
 			response.put("statuscode", statusCode);
-			response.put("success", successData);
+			int sl = (successData == null ? 0 : successData.length());
+			response.put("success", "length: " + sl);
 			response.put("error", error == null ? null : error.toJSON());
 			response.put("headers", headers == null ? new JSONObject() : new JSONObject(headers));
 			
