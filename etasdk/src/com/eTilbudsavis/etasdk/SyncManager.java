@@ -1330,6 +1330,7 @@ public class SyncManager {
 		popRequest();
 		if (mCurrentRequests.isEmpty()) {
 			Eta.getInstance().getListManager().notifySubscribers(mNotification);
+			mNotification = new ListNotification(true);
 		}
 		
 	}

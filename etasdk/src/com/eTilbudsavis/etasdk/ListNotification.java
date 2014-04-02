@@ -113,23 +113,6 @@ public class ListNotification {
 		return new ArrayList<Shoppinglist>(mListEdited.values());
 	}
 	
-	public void clear() {
-		clearItemNotifications();
-		clearListNotifications();
-	}
-	
-	public void clearListNotifications() {
-		mListAdded.clear();
-		mListDeleted.clear();
-		mListEdited.clear();
-	}
-	
-	public void clearItemNotifications() {
-		mItemAdded.clear();
-		mItemDeleted.clear();
-		mItemEdited.clear();
-	}
-	
 	public boolean hasListNotifications() {
 		boolean empty = mListAdded.isEmpty() && mListDeleted.isEmpty() && mListEdited.isEmpty();
 		return !empty;

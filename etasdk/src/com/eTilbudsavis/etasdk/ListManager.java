@@ -16,6 +16,7 @@
 package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,7 +55,7 @@ public class ListManager {
 	private Eta mEta;
 	
 	/** Subscriber queue for shopping list changes */
-	private List<OnChangeListener> mListSubscribers = new ArrayList<OnChangeListener>();
+	private List<OnChangeListener> mListSubscribers = Collections.synchronizedList(new ArrayList<OnChangeListener>());
 	
 	/** The notification service for ListManager, this allows for bundling
 	 * list and item notifications, to avoid multiple updates for a single operation */
@@ -143,7 +144,7 @@ public class ListManager {
 		if (success) {
 			mNotification.add(sl);
 		}
-		notifySubscribers(mNotification);
+		sendNotification(mNotification);
 		return success;
 	}
 	
@@ -178,7 +179,7 @@ public class ListManager {
 			dbShare.setState(Share.State.DELETE);
 			db.editShare(dbShare, user);
 			mNotification.del(sl);
-			notifySubscribers(mNotification);
+			sendNotification(mNotification);
 			return true;
 		}
 		
@@ -280,7 +281,7 @@ public class ListManager {
 		if (success) {
 			mNotification.edit(sl);
 		}
-		notifySubscribers(mNotification);
+		sendNotification(mNotification);
 		return success;
 	}
 	
@@ -353,7 +354,7 @@ public class ListManager {
 		if (success) {
 			mNotification.del(sl);
 		}
-		notifySubscribers(mNotification);
+		sendNotification(mNotification);
 		return success;
 	}
 
@@ -480,7 +481,7 @@ public class ListManager {
 			mNotification.edit(sl);
 			mNotification.add(sli);
 		}
-		notifySubscribers(mNotification);
+		sendNotification(mNotification);
 		return success;
 	}
 	
@@ -551,7 +552,7 @@ public class ListManager {
 			mNotification.edit(sl);
 			mNotification.edit(sli);
 		}
-		notifySubscribers(mNotification);
+		sendNotification(mNotification);
 		return success;
 	}
 
@@ -657,11 +658,9 @@ public class ListManager {
 			sl.setModified(now);
 			db.editList(sl, user);
 			mNotification.edit(sl);
-		} else {
-			// TODO handle shit? We might have some changes in items, but not all
-			mNotification.clear();
 		}
-		notifySubscribers(mNotification);
+		
+		sendNotification(mNotification);
 		return success;
 	}
 	
@@ -717,7 +716,7 @@ public class ListManager {
 			
 			mNotification.del(sli);
 		}
-		notifySubscribers(mNotification);
+		sendNotification(mNotification);
 		return success;
 	}
 	
@@ -822,6 +821,11 @@ public class ListManager {
 		mListSubscribers.remove(l);
 	}
 	
+	private void sendNotification(ListNotification n) {
+		notifySubscribers(n);
+		mNotification = new ListNotification(false);
+	}
+	
 	/**
 	 * Method for notifying all {@link OnChangeListener subscribers} on a given
 	 * set of events.
@@ -829,38 +833,29 @@ public class ListManager {
 	 */
 	public void notifySubscribers(final ListNotification n) {
 		
-		// Make sure that messages are passed on to the UI thread
-		Eta.getInstance().getHandler().post(new Runnable() {
-			
-			public void run() {
+		for (final OnChangeListener s : mListSubscribers) {
+
+			Eta.getInstance().getHandler().post(new Runnable() {
 				
-				if (n.isFirstSync()) {
+				public void run() {
 					
-					for (OnChangeListener s : mListSubscribers) {
+					if (n.isFirstSync()) {
 						s.onFirstSync();
 					}
 					
-				}
-				
-				boolean list = n.hasListNotifications();
-				boolean item = n.hasItemNotifications();
-				
-				if (list || item) {
-					
-					for (final OnChangeListener s : mListSubscribers) {
-						if (list) {
-							s.onListUpdate(n.isServer(), n.getAddedLists(), n.getDeletedLists(), n.getEditedLists());
-						}
-						if (item) {
-							s.onItemUpdate(n.isServer(), n.getAddedItems(), n.getDeletedItems(), n.getEditedItems());
-						}
+					if (n.hasListNotifications()) {
+						s.onListUpdate(n.isServer(), n.getAddedLists(), n.getDeletedLists(), n.getEditedLists());
 					}
-					n.clear();
+						
+					if (n.hasItemNotifications()) {
+						s.onItemUpdate(n.isServer(), n.getAddedItems(), n.getDeletedItems(), n.getEditedItems());
+					}
 					
 				}
-
-			}
-		});
+				
+			});
+			
+		}
 		
 	}
 	
