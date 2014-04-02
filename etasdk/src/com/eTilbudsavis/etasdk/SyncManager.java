@@ -121,8 +121,11 @@ public class SyncManager {
 	/** The current sync speed */
 	private int mSyncSpeed = 3000;
 	
-	/** Simple counter keeping track of sync loop */
+	/** Sync iteration counter */
 	private int mSyncCount = 0;
+	
+	/** Has sync got the first sync */
+	private boolean mHasFirstSync = false;
 	
 	private Stack<Request<?>> mCurrentRequests = new Stack<Request<?>>();
 	
@@ -155,6 +158,7 @@ public class SyncManager {
 
 		public void onChange() {
 			if (mUser == null || mUser.getUserId() != mEta.getUser().getUserId()) {
+				mHasFirstSync = false;
 				mSyncCount = 0;
 				forceSync();
 			}
@@ -259,13 +263,12 @@ public class SyncManager {
 	 * <p>This is dependent on, both:
 	 * <ul>
 	 * 		<li>the {@link SyncManager} having performed the first sync cycle, and </li>
-	 * 		<li>whether a {@link User} is {@link User#isLoggedIn() logged in}</li>
 	 * </ul>
 	 * </p>
 	 * @return True if the first sync is complete, or there is no user to sync.
 	 */
 	public boolean hasFirstSync() {
-		return mSyncCount > 0;
+		return mHasFirstSync;
 	}
 	
 	/**
@@ -398,6 +401,7 @@ public class SyncManager {
 							migrateOfflineLists();
 						}
 						
+						mHasFirstSync = true;
 						mNotification.setFirstSync(true);
 						
 					}
