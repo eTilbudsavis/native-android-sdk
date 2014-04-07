@@ -76,7 +76,9 @@ public class EtaLog {
 	 * @param t The throwable you would like logged.
 	 */
 	public static void d(String tag, Throwable t) {
-		if (!DEBUG) return;
+		if (!DEBUG) {
+			return;
+		}
 		if (mEnableLogHistory) {
 			addLog(t);
 		}
@@ -111,7 +113,9 @@ public class EtaLog {
 	 * @param message The message you would like logged.
 	 */
 	public static void dAll(String tag, String message) {
-		if (!DEBUG) return;
+		if (!DEBUG) {
+			return;
+		}
 		
 		if (message.length() > 4000) {
 		    int chunkCount = message.length() / 4000;     // integer division
@@ -161,7 +165,9 @@ public class EtaLog {
 	 * @param error An {@link EtaError}, this may be {@code null}
 	 */
 	public static void d(String tag, String name, String response, EtaError error) {
-		if (!DEBUG) return;
+		if (!DEBUG) {
+			return;
+		}
 		String e = error == null ? "null" : error.toJSON().toString();
 		String s = response == null ? "null" : response;
 		Log.d(tag, name + ": Response[" + s + "], Error[" + e + "]");

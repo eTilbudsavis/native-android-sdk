@@ -49,17 +49,17 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 		init();
 	}
 
-	public JsonArrayRequest(int method, String url, Listener<JSONArray> listener) {
+	public JsonArrayRequest(Method method, String url, Listener<JSONArray> listener) {
 		super(method, url, null, listener);
 		init();
 	}
 	
-	public JsonArrayRequest(int method, String url, JSONArray requestBody, Listener<JSONArray> listener) {
+	public JsonArrayRequest(Method method, String url, JSONArray requestBody, Listener<JSONArray> listener) {
 		super(method, url, requestBody == null ? null : requestBody.toString(), listener);
 		init();
 	}
 	
-	public JsonArrayRequest(int method, String url, JSONObject requestBody, Listener<JSONArray> listener) {
+	public JsonArrayRequest(Method method, String url, JSONObject requestBody, Listener<JSONArray> listener) {
 		super(method, url, requestBody == null ? null : requestBody.toString(), listener);
 		init();
 	}

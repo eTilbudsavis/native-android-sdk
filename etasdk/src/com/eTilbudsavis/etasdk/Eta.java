@@ -21,14 +21,19 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.NetworkHelpers.HttpNetwork;
+import com.eTilbudsavis.etasdk.NetworkHelpers.DefaultHttpNetwork;
+import com.eTilbudsavis.etasdk.NetworkHelpers.HttpURLNetwork;
+import com.eTilbudsavis.etasdk.NetworkHelpers.NetworkImpl;
 import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
+import com.eTilbudsavis.etasdk.NetworkInterface.HttpStack;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request;
 import com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
@@ -103,7 +108,16 @@ public class Eta {
 		
 		mHandler = new Handler(Looper.getMainLooper());
 		
-		mRequestQueue = new RequestQueue(this, new Cache(), new HttpNetwork());
+		HttpStack stack = null;
+//        if (Build.VERSION.SDK_INT > 8) {
+            stack = new HttpURLNetwork();
+//        } else {
+//            stack = new DefaultHttpNetwork();
+//        }
+        
+    	Log.d(TAG, "HttpStack: " + stack.getClass().getSimpleName());
+        
+		mRequestQueue = new RequestQueue(this, new Cache(), new NetworkImpl(stack));
 		mRequestQueue.start();
 		
 		mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -163,6 +177,15 @@ public class Eta {
 			EtaLog.d(TAG, "Eta instance already created");
 		}
 		
+	}
+	
+	/**
+	 * Check if the instance have been instantiated.
+	 * <p>To instantiate an instance use {@link #createInstance(String, String, Context)}</p>
+	 * @return {@code true} if Eta is instantiated, else {@code false}
+	 */
+	public static boolean isInstanciated() {
+		return mEta != null;
 	}
 	
 	/**

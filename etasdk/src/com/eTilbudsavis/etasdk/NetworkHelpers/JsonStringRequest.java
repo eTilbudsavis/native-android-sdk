@@ -35,7 +35,7 @@ public class JsonStringRequest extends JsonRequest<String>{
 		super(url, listener);
 	}
 	
-	public JsonStringRequest(int method, String url, String requestBody, Listener<String> listener) {
+	public JsonStringRequest(Method method, String url, String requestBody, Listener<String> listener) {
 		super(method, url, requestBody, listener);
 	}
 	

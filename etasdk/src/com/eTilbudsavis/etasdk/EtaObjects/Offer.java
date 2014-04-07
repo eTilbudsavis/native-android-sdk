@@ -533,7 +533,7 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 		mStore = store;
 		return this;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

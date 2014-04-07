@@ -18,9 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
@@ -29,7 +27,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
-import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
@@ -736,7 +733,7 @@ public final class PageflipWebview extends WebView {
 					final String rUrl = request.getString("url");
 					final String rBody = request.has("data") ? request.getString("data") : null;
 					
-					int rMethod = Method.GET;
+					Method rMethod = Method.GET;
 					if (request.has("type")) {
 						String m = request.getString("type").toLowerCase();
 						if (m.equals("put")) {

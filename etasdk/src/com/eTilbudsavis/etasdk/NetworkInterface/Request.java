@@ -33,18 +33,21 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 public abstract class Request<T> implements Comparable<Request<T>> {
 	
 	public static final String TAG = "Request";
-
+	
 	/** Default encoding for POST or PUT parameters. See {@link #getParamsEncoding()}. */
 	protected static final String DEFAULT_PARAMS_ENCODING = "utf-8";
-
+	
 	/** Default cache time in milliseconds */
 	protected static final long DEFAULT_CACHE_TTL = 3 * Utils.MINUTE_IN_MILLIS;
+	
+	/** Default connection timeout, this is for both connection and socket */
+	private static final int CONNECTION_TIME_OUT = (int) (20 * Utils.SECOND_IN_MILLIS);
 	
 	/** Listener interface, for responses */
 	private final Listener<T> mListener;
 	
 	/** Request method of this request.  Currently supports GET, POST, PUT, and DELETE. */
-	private final int mMethod;
+	private final Method mMethod;
 	
 	/** URL of this request. */
 	private String mUrl;
@@ -76,6 +79,8 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /** Indication if the request is finished */
     private boolean mFinished = false;
     
+    private int mTimeout = CONNECTION_TIME_OUT;
+    
 	/** Log of this request */
 	private final EventLog mLog;
 	
@@ -104,12 +109,14 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	}
 	
 	/** Supported request methods. */
-	public interface Method {
-		int GET = 0;
-		int POST = 1;
-		int PUT = 2;
-		int DELETE = 3;
-	}
+//	public interface Method {
+//		int GET = 0;
+//		int POST = 1;
+//		int PUT = 2;
+//		int DELETE = 3;
+//	}
+	
+	public enum Method { GET, POST, PUT, DELETE }
 
 	/**
 	 * Creates a new request with the given method (one of the values from {@link Method}),
@@ -117,7 +124,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * delivery of responses is provided by subclasses, who have a better idea of how to deliver
 	 * an already-parsed response.
 	 */
-	public Request(int method, String url, Listener<T> listener) {
+	public Request(Method method, String url, Listener<T> listener) {
 		mMethod = method;
 		mUrl = url;
 		mListener = listener;
@@ -196,6 +203,26 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     	mRequestQueue.dataOut += out;
     }
     
+    /**
+     * Get the connection timeout for this request.
+     * <p>The timeout will be the same for connecting, and for reading data</p>
+     * @return The timeout in milliseconds
+     */
+    public int getTimeOut() {
+    	return mTimeout;
+    }
+    
+    /**
+     * Set the timeout value for this request.
+     * <p>The timeout will be the same for connecting, and for reading data</p>
+     * @param timeout
+     * @return
+     */
+    public Request setTimeOut(int timeout) {
+    	mTimeout = timeout;
+    	return this;
+    }
+    
 	/** Returns a list of headers for this request. */
 	public Map<String, String> getHeaders() {
 		return mHeaders;
@@ -212,19 +239,19 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	/**
 	 * Return the method for this request.  Can be one of the values in {@link Method}.
 	 */
-	public int getMethod() {
+	public Method getMethod() {
 		return mMethod;
 	}
 	
-	public String getMethodString() {
-		switch (mMethod) {
-		case 0: return "GET";
-		case 1: return "POST";
-		case 2: return "PUT";
-		case 3: return "DELETE";
-		default: return "UNDEFINED";
-		}
-	}
+//	public String getMethodString() {
+//		switch (mMethod) {
+//		case 0: return "GET";
+//		case 1: return "POST";
+//		case 2: return "PUT";
+//		case 3: return "DELETE";
+//		default: return "UNDEFINED";
+//		}
+//	}
 	/**
 	 * Returns the response listener for this request
 	 * @return a listener of type T
@@ -555,7 +582,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 */
 	@Override
 	public String toString() {
-		return getMethodString() + ": " + Utils.buildQueryString(this);
+		return mMethod.toString() + ": " + Utils.buildQueryString(this);
 	}
 	
 }

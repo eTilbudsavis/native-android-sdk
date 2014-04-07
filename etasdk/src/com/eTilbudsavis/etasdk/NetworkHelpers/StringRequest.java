@@ -45,7 +45,7 @@ public class StringRequest extends Request<String> {
 		super(Method.GET, url, listener);
 	}
 	
-	public StringRequest(int method, String url, String requestBody, Listener<String> listener) {
+	public StringRequest(Method method, String url, String requestBody, Listener<String> listener) {
 		super(method, url, listener);
 		boolean nonBodyRequest = (method == Method.GET || method == Method.DELETE);
 		if (nonBodyRequest && requestBody != null) {
@@ -125,7 +125,7 @@ public class StringRequest extends Request<String> {
 			
 			// Client request
 			JSONObject request = new JSONObject();
-			request.put("method", getMethodString());
+			request.put("method", getMethod().toString());
 			request.put("url", Utils.buildQueryString(this));
 			request.put(HTTP.CONTENT_TYPE, getBodyContentType());
 			request.put("headers", new JSONObject(getHeaders()));

@@ -19,7 +19,7 @@ package com.eTilbudsavis.etasdk.Utils;
  * Helper class for headers the eTilbudsavis API uses
  * @author Danny Hvam - danny@etilbudsavis.dk
  */
-public class Header {
+public class HeaderUtils {
 	
 	/** Header name for the session token */
 	public static final String X_TOKEN = "X-Token";

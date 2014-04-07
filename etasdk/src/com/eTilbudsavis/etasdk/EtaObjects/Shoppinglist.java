@@ -328,6 +328,9 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 	 * @return A type
 	 */
 	public String getType() {
+		if (mType == null) {
+			mType = TYPE_SHOPPING_LIST;
+		}
 		return mType;
 	}
 	
@@ -344,7 +347,7 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 	 * @return This object
 	 */
 	public Shoppinglist setType(String type) {
-		if (type == null || type.equals("")) {
+		if (type == null) {
 			// it's a Shoppinglist
 			mType = TYPE_SHOPPING_LIST;
 		} else {

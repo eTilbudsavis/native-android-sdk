@@ -375,7 +375,8 @@ public final class Utils {
 	 */
 	public static Date roundTime(Date date) {
 		if (date != null) {
-			date.setTime( 1000 * (date.getTime()/1000) );
+			long t = date.getTime()/1000;
+			date.setTime( 1000 * t );
 		}
 		return date;
 	}

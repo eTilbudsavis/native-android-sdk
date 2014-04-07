@@ -35,7 +35,7 @@ public class JsonObjectRequest extends JsonRequest<JSONObject>{
 		super(url, listener);
 	}
 	
-	public JsonObjectRequest(int method, String url, JSONObject requestBody, Listener<JSONObject> listener) {
+	public JsonObjectRequest(Method method, String url, JSONObject requestBody, Listener<JSONObject> listener) {
 		super(method, url, requestBody == null ? null : requestBody.toString(), listener);
 	}
 	

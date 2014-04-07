@@ -26,8 +26,7 @@ import com.eTilbudsavis.etasdk.SessionManager;
 import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
 import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Header;
+import com.eTilbudsavis.etasdk.Utils.HeaderUtils;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressWarnings("rawtypes")
@@ -176,9 +175,9 @@ public class NetworkDispatcher extends Thread {
         	
         	Map<String, String> headers = new HashMap<String, String>();
         	String token = mEta.getSessionManager().getSession().getToken();
-        	headers.put(Header.X_TOKEN, token);
+        	headers.put(HeaderUtils.X_TOKEN, token);
         	String sha256 = Utils.generateSHA256(mEta.getApiSecret() + token);
-        	headers.put(Header.X_SIGNATURE, sha256);
+        	headers.put(HeaderUtils.X_SIGNATURE, sha256);
         	request.setHeaders(headers);
         	
         }
@@ -193,8 +192,8 @@ public class NetworkDispatcher extends Thread {
 	 * @param headers to check for new token.
 	 */
 	private void updateSessionInfo(Map<String, String> headers) {
-		String token = headers.get(Header.X_TOKEN);
-	    String expire = headers.get(Header.X_TOKEN_EXPIRES);
+		String token = headers.get(HeaderUtils.X_TOKEN);
+	    String expire = headers.get(HeaderUtils.X_TOKEN_EXPIRES);
 	    
 	    if ( !(token == null || expire == null) ) {
 	    	mEta.getSessionManager().updateTokens(token, expire);
