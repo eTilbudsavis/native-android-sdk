@@ -18,9 +18,9 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.NetworkHelpers.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.NetworkHelpers.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
+import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 
 /**
  * <p>The super-class for all eTilbudsavis objects.<p>

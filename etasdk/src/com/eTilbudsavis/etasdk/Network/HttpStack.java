@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.NetworkInterface;
+package com.eTilbudsavis.etasdk.Network;
 
 import java.io.IOException;
 

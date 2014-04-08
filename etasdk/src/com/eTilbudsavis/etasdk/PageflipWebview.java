@@ -30,11 +30,11 @@ import android.webkit.WebView;
 
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
-import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
-import com.eTilbudsavis.etasdk.NetworkHelpers.JsonStringRequest;
-import com.eTilbudsavis.etasdk.NetworkHelpers.StringRequest;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
-import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Network.EtaError;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonStringRequest;
+import com.eTilbudsavis.etasdk.Network.Impl.StringRequest;
+import com.eTilbudsavis.etasdk.Network.Request.Method;
+import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;

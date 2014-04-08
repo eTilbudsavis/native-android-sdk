@@ -13,17 +13,19 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.NetworkHelpers;
+package com.eTilbudsavis.etasdk.Network.Impl;
+
+import com.eTilbudsavis.etasdk.Network.EtaError;
 
 
-public class NetworkError extends EtaError {
+public class ParseError extends EtaError {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public NetworkError(Throwable t) {
-		super(t, Code.NETWORK_ERROR, "Networking error", "There was an error "
-				+ "establishing a connection to the API. Please check that the "
-				+ "device has a working internet connection.");
+	public ParseError(Exception e, Class<?> c) {
+		super(e, Code.PARSE_ERROR, 
+				"Unable to parse API response into " + c.getSimpleName(),
+				"The data structure returned from endpoint, does not matches the Request-type");
 	}
-
+	
 }

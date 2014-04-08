@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.NetworkHelpers;
+package com.eTilbudsavis.etasdk.Network.Impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,10 +9,11 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.ByteArrayBuffer;
 
-import com.eTilbudsavis.etasdk.NetworkInterface.HttpStack;
-import com.eTilbudsavis.etasdk.NetworkInterface.Network;
-import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
+import com.eTilbudsavis.etasdk.Network.EtaError;
+import com.eTilbudsavis.etasdk.Network.HttpStack;
+import com.eTilbudsavis.etasdk.Network.Network;
+import com.eTilbudsavis.etasdk.Network.NetworkResponse;
+import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class NetworkImpl implements Network {

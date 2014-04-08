@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.NetworkHelpers;
+package com.eTilbudsavis.etasdk.Network.Impl;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -25,11 +25,12 @@ import org.json.JSONObject;
 
 import android.text.TextUtils;
 
-import com.eTilbudsavis.etasdk.NetworkInterface.Cache;
-import com.eTilbudsavis.etasdk.NetworkInterface.NetworkResponse;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
-import com.eTilbudsavis.etasdk.NetworkInterface.Response;
-import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Network.Cache;
+import com.eTilbudsavis.etasdk.Network.EtaError;
+import com.eTilbudsavis.etasdk.Network.NetworkResponse;
+import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.Response;
+import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Sort;

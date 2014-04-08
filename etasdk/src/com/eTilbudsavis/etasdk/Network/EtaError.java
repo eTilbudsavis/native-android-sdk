@@ -13,12 +13,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.NetworkHelpers;
+package com.eTilbudsavis.etasdk.Network;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
+import com.eTilbudsavis.etasdk.Network.Impl.ApiError;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.Network.Impl.ParseError;
 
 public class EtaError extends Exception {
 

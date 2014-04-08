@@ -27,12 +27,12 @@ import android.webkit.CookieSyncManager;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
-import com.eTilbudsavis.etasdk.NetworkHelpers.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Method;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request.Priority;
-import com.eTilbudsavis.etasdk.NetworkInterface.Response.Listener;
+import com.eTilbudsavis.etasdk.Network.EtaError;
+import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.Network.Request.Method;
+import com.eTilbudsavis.etasdk.Network.Request.Priority;
+import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;

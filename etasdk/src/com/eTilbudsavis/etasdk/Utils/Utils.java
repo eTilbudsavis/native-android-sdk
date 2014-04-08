@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
-import com.eTilbudsavis.etasdk.NetworkInterface.Request;
+import com.eTilbudsavis.etasdk.Network.Request;
 
 public final class Utils {
 	

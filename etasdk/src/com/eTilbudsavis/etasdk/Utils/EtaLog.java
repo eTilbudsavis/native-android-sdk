@@ -31,7 +31,7 @@ import android.util.Log;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.FixedArrayList;
-import com.eTilbudsavis.etasdk.NetworkHelpers.EtaError;
+import com.eTilbudsavis.etasdk.Network.EtaError;
 
 public class EtaLog {
 
