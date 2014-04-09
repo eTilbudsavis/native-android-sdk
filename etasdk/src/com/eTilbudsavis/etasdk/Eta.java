@@ -378,6 +378,7 @@ public class Eta {
 			for (PageflipWebview p : PageflipWebview.pageflips) {
 				p.onPause();
 			}
+			mSettings.setLastUsageNow();
 		}
 	}
 	

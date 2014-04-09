@@ -15,6 +15,7 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,9 +32,10 @@ public class Settings {
 	/** Name for the SDK SharedPreferences file */
 	private static final String PREFS_NAME = "eta_sdk";
 
+	private static final String SETTING_LAST_USAGE	= "last_usage";
+	
 	private static final String SESSION_JSON		= "session_json";
 	private static final String SESSION_USER		= "session_user";
-	private static final String SESSION_PASS		= "session_pass";
 	private static final String SESSION_FACEBOOK	= "session_facebook";
 
 	private static final String SLM_CURRENT_ONLINE	= "slm_current_online";
@@ -78,6 +80,15 @@ public class Settings {
 		return session;
 	}
 
+	public long getLastUsage() {
+		return mPrefs.getLong(SETTING_LAST_USAGE, 0L);
+	}
+	
+	public boolean setLastUsageNow() {
+		Date now = new Date();
+		return mEditor.putLong(SETTING_LAST_USAGE, now.getTime()).commit();
+	}
+	
 	public boolean setSessionJson(JSONObject session) {
 		return mEditor.putString(SESSION_JSON, session.toString()).commit();
 	}
@@ -89,11 +100,7 @@ public class Settings {
 	public boolean setSessionUser(String user) {
 		return mEditor.putString(SESSION_USER, user).commit();
 	}
-
-	public String getSessionPass() {
-		return mPrefs.getString(SESSION_PASS, null);
-	}
-
+	
 	public boolean setSessionFacebook(String token) {
 		return mEditor.putString(SESSION_FACEBOOK, token).commit();
 	}
@@ -101,11 +108,7 @@ public class Settings {
 	public String getSessionFacebook() {
 		return mPrefs.getString(SESSION_FACEBOOK, null);
 	}
-
-	public boolean setSessionPass(String pass) {
-		return mEditor.putString(SESSION_PASS, pass).commit();
-	}
-
+	
 	public String getShoppinglistManagerCurrent(boolean isLoggedin) {
 		return mPrefs.getString(isLoggedin ? SLM_CURRENT_ONLINE : SLM_CURRENT_OFFLINE , null);
 	}

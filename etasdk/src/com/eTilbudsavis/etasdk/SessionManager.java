@@ -16,6 +16,7 @@
 package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -36,6 +37,7 @@ import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class SessionManager {
 	
@@ -49,13 +51,19 @@ public class SessionManager {
 	/** Token time to live in seconds. Default for Android SDK is 45 days */
     public static int TTL = 3888000;
     
+    /** Reference to Eta instance */
 	private Eta mEta;
+	
+	/** The current user session */
 	private Session mSession;
+	
+	/** The lock object to use when requiring synchronization locks in SessionManager*/
 	private Object LOCK = new Object();
 	
 	/** weather or not, the SessionManager should recover from a bad session request */
 	boolean mTryToRecover = true;
 	
+	/**  */
 	private LinkedList<Request<?>> mSessionQueue = new LinkedList<Request<?>>();
 	
 	private Request<?> mReqInFlight;
@@ -87,8 +95,9 @@ public class SessionManager {
 //				EtaLog.d(TAG, "Session", response, error);
 				
 				synchronized (LOCK) {
+					
 					mReqInFlight = null;
-				
+					
 					if (response != null) {
 						
 						setSession(response);
@@ -121,6 +130,7 @@ public class SessionManager {
 		synchronized (LOCK) {
 			r.setPriority(Priority.HIGH);
 			mSessionQueue.add(r);
+			r.debugNetwork(true);
 			runQueue();
 		}
 		
@@ -241,11 +251,20 @@ public class SessionManager {
 	 */
 	public void onResume() {
 		
-		// Make sure, that the session is up to date
 		if (mSession.getToken() == null) {
+			// If no session exists post for new
 			postSession(null);
 		} else {
-			putSession(null);
+			/* 
+			 * If it's been more than 2 hours since last usage, put for
+			 * a session refresh, else ignore session refresh
+			 */
+			Date now = new Date();
+			long delta = now.getTime() - mEta.getSettings().getLastUsage();
+			boolean shouldPut = delta > (2 * Utils.HOUR_IN_MILLIS);
+			if (shouldPut) {
+				putSession(null);
+			}
 		}
 		
 	}

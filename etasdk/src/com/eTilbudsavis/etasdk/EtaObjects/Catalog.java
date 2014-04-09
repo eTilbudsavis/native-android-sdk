@@ -111,8 +111,6 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 		if (catalog == null) catalog = new Catalog();
 		if (jCatalog == null) return catalog;
 		
-		EtaLog.d(TAG, jCatalog.toString());
-		
 		if (jCatalog.has(ServerKey.STORE_ID) && jCatalog.has(ServerKey.OFFER_COUNT)) {
 			// if we have a full catalog
 			try {
