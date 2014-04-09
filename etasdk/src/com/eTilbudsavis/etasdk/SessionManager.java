@@ -248,6 +248,9 @@ public class SessionManager {
 	
 	/**
 	 * Method for ensuring that there is a valid session on every resume event.
+	 * <p>If no session exists, it will post for a new session. If the session
+	 * does exist, and it's been more than 2 hours since last usage it will put
+	 * for an session update</p>
 	 */
 	public void onResume() {
 		
