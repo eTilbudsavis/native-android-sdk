@@ -63,6 +63,7 @@ public class SessionManager {
 	private ArrayList<OnSessionChangeListener> mSubscribers = new ArrayList<OnSessionChangeListener>();
 	
 	public SessionManager(Eta eta) {
+		
 		mEta = eta;
 		JSONObject session = mEta.getSettings().getSessionJson();
 		
@@ -115,10 +116,14 @@ public class SessionManager {
 		
 	}
 	
-	private synchronized void addRequest(JsonObjectRequest r) {
-		r.setPriority(Priority.HIGH);
-		mSessionQueue.add(r);
-		runQueue();
+	private void addRequest(JsonObjectRequest r) {
+
+		synchronized (LOCK) {
+			r.setPriority(Priority.HIGH);
+			mSessionQueue.add(r);
+			runQueue();
+		}
+		
 	}
 	
 	private void runQueue() {
@@ -149,17 +154,21 @@ public class SessionManager {
 	 * @return true if SessionManager is trying, or will try to refresh the session. 
 	 * False if no more tries will be attempted.
 	 */
-	public synchronized boolean recover(EtaError e) {
-		
-		if (mTryToRecover) {
-			if (!recoverableError(e)) {
-				postSession(null);
-			} else {
-				putSession(null);
+	public boolean recover(EtaError e) {
+
+		synchronized (LOCK) {
+			
+			if (mTryToRecover) {
+				if (!recoverableError(e)) {
+					postSession(null);
+				} else {
+					putSession(null);
+				}
+				return true;
 			}
-			return true;
+			return false;
 		}
-		return false;
+		
 	}
 	
 	/**
@@ -167,25 +176,30 @@ public class SessionManager {
 	 * @param session to update from
 	 * @return true if session was updated
 	 */
-	public synchronized boolean setSession(JSONObject session) {
+	public boolean setSession(JSONObject session) {
 		
-		Session s = Session.fromJSON(session);
-		
-		// Check that the JSON is actually session JSON
-		if (s.getToken() == null) {
-			return false;
+		synchronized (LOCK) {
+			
+			Session s = Session.fromJSON(session);
+			
+			// Check that the JSON is actually session JSON
+			if (s.getToken() == null) {
+				return false;
+			}
+			
+			mSession = s;
+			mEta.getSettings().setSessionJson(session);
+			
+			// Reset session retry boolean
+			mTryToRecover = true;
+			
+			// Send out notifications
+			notifySubscribers();
+			
+			return true;
+			
 		}
 		
-		mSession = s;
-		mEta.getSettings().setSessionJson(session);
-		
-		// Reset session retry boolean
-		mTryToRecover = true;
-		
-		// Send out notifications
-		notifySubscribers();
-		
-		return true;
 	}
 	
 	/**

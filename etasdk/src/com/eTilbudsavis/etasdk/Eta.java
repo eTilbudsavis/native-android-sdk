@@ -109,11 +109,11 @@ public class Eta {
 		mHandler = new Handler(Looper.getMainLooper());
 		
 		HttpStack stack = null;
-//        if (Build.VERSION.SDK_INT > 8) {
+        if (Build.VERSION.SDK_INT > 8) {
             stack = new HttpURLNetwork();
-//        } else {
-//            stack = new DefaultHttpNetwork();
-//        }
+        } else {
+            stack = new DefaultHttpNetwork();
+        }
         
     	Log.d(TAG, "HttpStack: " + stack.getClass().getSimpleName());
         
