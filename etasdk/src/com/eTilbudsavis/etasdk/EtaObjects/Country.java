@@ -53,7 +53,7 @@ public class Country extends EtaErnObject<Country> implements Serializable {
 					list.add(Country.fromJSON(countries.getJSONObject(i)));
 			}
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return list;
 	}
@@ -95,7 +95,7 @@ public class Country extends EtaErnObject<Country> implements Serializable {
 			
 			o.put(ServerKey.UNSUBSCRIBE_PRINT_URL, Json.nullCheck(getUnsubscribePrintUrl()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

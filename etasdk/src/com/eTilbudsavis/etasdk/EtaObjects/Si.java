@@ -57,7 +57,7 @@ public class Si  extends EtaObject implements Serializable {
 			o.put(ServerKey.SYMBOL, Json.nullCheck(getSymbol()));
 			o.put(ServerKey.FACTOR, Json.nullCheck(getFactor()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

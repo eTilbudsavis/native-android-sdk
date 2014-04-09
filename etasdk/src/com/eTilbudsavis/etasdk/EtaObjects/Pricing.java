@@ -50,7 +50,7 @@ public class Pricing extends EtaObject implements Serializable {
 			p.setPrePrice(pricing.isNull(ServerKey.PREPRICE) ? null : pricing.getDouble(ServerKey.PREPRICE));
 			p.setCurrency(Json.valueOf(pricing, ServerKey.CURRENCY));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return p;
 	}
@@ -63,7 +63,7 @@ public class Pricing extends EtaObject implements Serializable {
 			o.put(ServerKey.PREPRICE, Json.nullCheck(getPrePrice()));
 			o.put(ServerKey.CURRENCY, Json.nullCheck(getCurrency()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

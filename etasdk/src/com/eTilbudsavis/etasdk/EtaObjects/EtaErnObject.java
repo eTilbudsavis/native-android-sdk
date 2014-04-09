@@ -58,7 +58,7 @@ public abstract class EtaErnObject<T> extends EtaObject {
 			o.put(ServerKey.ID, Json.nullCheck(getId()));
 			o.put(ServerKey.ERN, Json.nullCheck(getErn()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

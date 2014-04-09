@@ -24,7 +24,6 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
@@ -115,8 +114,6 @@ public class Eta {
             stack = new DefaultHttpNetwork();
         }
         
-    	Log.d(TAG, "HttpStack: " + stack.getClass().getSimpleName());
-        
 		mRequestQueue = new RequestQueue(this, new Cache(), new NetworkImpl(stack));
 		mRequestQueue.start();
 		
@@ -127,7 +124,7 @@ public class Eta {
 			String version = mContext.getPackageManager().getPackageInfo(name, 0 ).versionName;
 			setAppVersion(version);
 		} catch (NameNotFoundException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		
 		mSettings = new Settings(mContext);

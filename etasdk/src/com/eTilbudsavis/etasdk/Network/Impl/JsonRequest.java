@@ -34,11 +34,11 @@ import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Network.Cache;
+import com.eTilbudsavis.etasdk.Network.Cache.Item;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.RequestQueue;
 import com.eTilbudsavis.etasdk.Network.Response;
-import com.eTilbudsavis.etasdk.Network.Cache.Item;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
@@ -224,7 +224,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 			}
 			
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		
 		if (ernlist.isEmpty()) {
@@ -246,7 +246,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 				return ern;
 			}
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return null;
 	}
@@ -313,7 +313,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 				try {
 					tmp.put(jObject.getString(Param.ERN));
 				} catch (JSONException e) {
-					EtaLog.d(TAG, e);
+					EtaLog.e(TAG, e);
 				}
 				
 			} else {
@@ -354,7 +354,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 				}
 				
 			} catch (JSONException e) {
-				EtaLog.d(TAG, e);
+				EtaLog.e(TAG, e);
 			}
 			
 		}
@@ -387,7 +387,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 			getLog().setSummary(request);
 			
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		
 	}

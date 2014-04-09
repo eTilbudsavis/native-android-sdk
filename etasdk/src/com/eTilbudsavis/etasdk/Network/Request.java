@@ -189,7 +189,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		try {
 			mLog.getSummary().put("duration", getLog().getTotalDuration());
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		
     	mFinished = true;

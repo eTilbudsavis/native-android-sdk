@@ -31,7 +31,6 @@ import com.eTilbudsavis.etasdk.Network.NetworkResponse;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -84,7 +83,8 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 			Response<JSONArray> r = null;
             if (Utils.isSuccess(response.statusCode)) {
             	// Parse into array if it's successful
-                r = Response.fromSuccess(new JSONArray(jsonString), getCache());
+            	JSONArray jArray = new JSONArray(jsonString);
+                r = Response.fromSuccess(jArray, getCache());
         		putJSON(r.result);
         		
             } else {
@@ -100,17 +100,6 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
             
         } catch (Exception e) {
         	
-        	
-        	// TODO include old data in parse errors
-
-            try {
-            	EtaLog.d(TAG, toString());
-        		EtaLog.d(TAG, "sc: " + response.statusCode);
-        		EtaLog.d(TAG, "data: " + new String(response.data));
-            } catch (Exception e1) {
-            	
-            }
-    		
             return Response.fromError(new ParseError(e, JSONArray.class));
         }
 	}

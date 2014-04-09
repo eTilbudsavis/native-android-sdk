@@ -75,7 +75,7 @@ public class Typeahead extends EtaObject {
 				resp.add(Typeahead.fromJSON((JSONObject)typeaheads.get(i)));
 			}
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return resp;
 	}
@@ -118,7 +118,7 @@ public class Typeahead extends EtaObject {
 			o.put(ServerKey.LENGTH, getLength());
 			o.put(ServerKey.OFFSET, getOffset());
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

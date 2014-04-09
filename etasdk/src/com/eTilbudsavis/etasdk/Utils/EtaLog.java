@@ -46,7 +46,7 @@ public class EtaLog {
 	/** Variable determining the state of logging */
 	private static boolean mEnableLogHistory = false;
 	
-	/** The log containing all exceptions, that have been printed via {@link #d(String, Exception) } */
+	/** The log containing all exceptions, that have been printed via {@link #e(String, Exception) } */
 	private static final EventLog mExceptionLog = new EventLog(DEFAULT_EXCEPTION_LOG_SIZE);
 	
 	/**
@@ -64,25 +64,39 @@ public class EtaLog {
 	/**
 	 * Print a debug log message to LogCat.
 	 * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
-	 * @param e The exception you would like logged.
+	 * @param e The EtaError you would like logged.
 	 */
-	public static void d(String tag, Exception e) {
-		d(tag, (Throwable)e);
+	public static void e(String tag, EtaError e) {
+		if (!DEBUG) {
+			return;
+		}
+		if (mEnableLogHistory) {
+			addLog(e);
+		}
+		d(tag, e.toJSON().toString());
 	}
 
 	/**
 	 * Print a debug log message to LogCat.
 	 * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
+	 * @param e The exception you would like logged.
+	 */
+	public static void e(String tag, Exception e) {
+		e(tag, (Throwable)e);
+	}
+	
+	/**
+	 * Print a debug log message to LogCat.
+	 * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
 	 * @param t The throwable you would like logged.
 	 */
-	public static void d(String tag, Throwable t) {
+	public static void e(String tag, Throwable t) {
 		if (!DEBUG) {
 			return;
 		}
 		if (mEnableLogHistory) {
 			addLog(t);
 		}
-		addLog(t);
 		t.printStackTrace(); 
 	}
 	
@@ -352,7 +366,7 @@ public class EtaLog {
 			try {
 				d(TAG, getSummary().toString(indentSpaces));
 			} catch (JSONException e) {
-				d(TAG, e);
+				e(TAG, e);
 			}
 		}
 		
@@ -459,7 +473,7 @@ public class EtaLog {
 					o.put("name", name);
 					o.put("data", data);
 				} catch (JSONException e) {
-					d(TAG, e);
+					e(TAG, e);
 					
 				}
 				return o;

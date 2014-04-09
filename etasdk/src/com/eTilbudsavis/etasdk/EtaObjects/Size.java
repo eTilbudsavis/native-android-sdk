@@ -57,7 +57,7 @@ public class Size extends EtaObject implements Serializable {
 			o.put(ServerKey.FROM, getFrom());
 			o.put(ServerKey.TO, getTo());
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

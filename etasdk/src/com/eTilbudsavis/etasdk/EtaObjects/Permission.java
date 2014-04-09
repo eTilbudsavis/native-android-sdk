@@ -68,7 +68,7 @@ public class Permission extends EtaObject implements Serializable {
 			}
 			
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		
 		return p;
@@ -88,7 +88,7 @@ public class Permission extends EtaObject implements Serializable {
 				o.put(name, jArray);
 			}
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

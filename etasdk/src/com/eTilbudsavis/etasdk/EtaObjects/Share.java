@@ -62,7 +62,7 @@ public class Share extends EtaListObject<Share> {
 			}
 			
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return list;
 	}
@@ -82,7 +82,7 @@ public class Share extends EtaListObject<Share> {
 			s.setAccess(Json.valueOf(share, ServerKey.ACCESS));
 			s.setAccepted(Json.valueOf(share, ServerKey.ACCEPTED, false));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		
 		return s;
@@ -108,7 +108,7 @@ public class Share extends EtaListObject<Share> {
 				o.put(ServerKey.ACCEPT_URL, getAcceptUrl());
 			}
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

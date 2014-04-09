@@ -58,7 +58,7 @@ public class Branding extends EtaObject  implements Serializable {
 			b.setColor(Color.parseColor("#"+branding.getString(EtaObject.ServerKey.COLOR)));
 			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(EtaObject.ServerKey.PAGEFLIP)));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return b;
 	}
@@ -74,7 +74,7 @@ public class Branding extends EtaObject  implements Serializable {
 			o.put(ServerKey.COLOR, Json.nullCheck(getColorString()));
 			o.put(ServerKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

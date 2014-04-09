@@ -109,7 +109,7 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 				list.add(s);
 			}
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return list;
 	}
@@ -153,7 +153,7 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 					// Try to parse the json string
 					shoppinglist.setMeta(new JSONObject(metaString));
 				} catch (JSONException e) {
-					EtaLog.d(TAG, e);
+					EtaLog.e(TAG, e);
 					// Meta parsing failed, so we'll do a recovery
 					shoppinglist.setMeta(new JSONObject());
 					shoppinglist.setModified(new Date());
@@ -167,7 +167,7 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 			
 			shoppinglist.putShares(Share.fromJSON(jShoppinglist.getJSONArray(ServerKey.SHARES)));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		
 		return shoppinglist;
@@ -189,7 +189,7 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 			}
 			o.put(ServerKey.SHARES, shares);
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}
@@ -449,7 +449,7 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> {
 			try {
 				return new JSONObject(mMeta);
 			} catch (JSONException e) {
-				EtaLog.d(TAG, e);
+				EtaLog.e(TAG, e);
 			}
 		}
 		return new JSONObject();

@@ -98,7 +98,7 @@ public class CatalogViewer extends Activity {
 		        
 			} else {
 				
-				EtaLog.d(TAG, error);
+				EtaLog.e(TAG, error);
 				
 			}
 		}

@@ -136,7 +136,7 @@ public class StringRequest extends Request<String> {
 			getLog().setSummary(request);
 			
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		
 	}

@@ -50,7 +50,7 @@ public class Quantity extends EtaObject implements Serializable {
 			q.setSize(quantity.isNull(ServerKey.SIZE) ? null : Size.fromJSON(quantity.getJSONObject(ServerKey.SIZE)));
 			q.setPieces(quantity.isNull(ServerKey.PIECES) ? null : Pieces.fromJSON(quantity.getJSONObject(ServerKey.PIECES)));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return q;
 	}
@@ -63,7 +63,7 @@ public class Quantity extends EtaObject implements Serializable {
 			o.put(ServerKey.SIZE, Json.toJson(getSize()));
 			o.put(ServerKey.PIECES, Json.toJson(getPieces()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

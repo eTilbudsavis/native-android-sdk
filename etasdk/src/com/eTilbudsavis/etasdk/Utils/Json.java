@@ -54,7 +54,7 @@ public class Json {
 		try {
 			return object.isNull(key) ? defValue : object.getString(key);
 		} catch (Exception e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return defValue;
 	}
@@ -70,7 +70,7 @@ public class Json {
 		try {
 			return object.isNull(key) ? defValue : object.getInt(key);
 		} catch (Exception e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 			EtaLog.d(TAG, object.toString());
 		}
 		return defValue;
@@ -87,7 +87,7 @@ public class Json {
 		try {
 			return object.isNull(key) ? defValue : object.getDouble(key);
 		} catch (Exception e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return defValue;
 	}
@@ -103,7 +103,7 @@ public class Json {
 		try {
 			return object.isNull(key) ? defValue : object.getLong(key);
 		} catch (Exception e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return defValue;
 	}
@@ -119,7 +119,7 @@ public class Json {
 		try {
 			return object.isNull(key) ? defValue : object.getBoolean(key);
 		} catch (Exception e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return defValue;
 	}

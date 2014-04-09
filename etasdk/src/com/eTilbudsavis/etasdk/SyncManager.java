@@ -39,13 +39,13 @@ import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Network.RequestQueue;
 import com.eTilbudsavis.etasdk.Network.EtaError.Code;
+import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.Request.Method;
+import com.eTilbudsavis.etasdk.Network.RequestQueue;
+import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.Network.Request.Method;
-import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
@@ -368,7 +368,7 @@ public class SyncManager {
 			try {
 				mCurrentRequests.pop();
 			} catch (Exception e) {
-				EtaLog.d(TAG, e);
+				EtaLog.e(TAG, e);
 			}
 		}
 	}
@@ -584,7 +584,7 @@ public class SyncManager {
 								db.editList(sl, user);
 							}
 						} catch (JSONException e) {
-							EtaLog.d(TAG, e);
+							EtaLog.e(TAG, e);
 							// error? just write new state to DB, next iteration will fix it
 							db.editList(sl, user);
 						}

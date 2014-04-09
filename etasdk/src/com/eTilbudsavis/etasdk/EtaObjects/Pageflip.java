@@ -63,7 +63,7 @@ public class Pageflip extends EtaObject implements Serializable {
 			o.put(ServerKey.LOGO, Json.nullCheck(getLogo()));
 			o.put(ServerKey.COLOR, Json.nullCheck(getColorString()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

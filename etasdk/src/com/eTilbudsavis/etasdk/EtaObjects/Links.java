@@ -54,7 +54,7 @@ public class Links extends EtaObject implements Serializable {
 		try {
 			o.put(ServerKey.WEBSHOP, Json.nullCheck(getWebshop()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

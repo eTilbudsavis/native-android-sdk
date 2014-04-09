@@ -52,7 +52,7 @@ public class Dimension extends EtaObject implements Serializable {
 				d.setHeight(dimension.getDouble(ServerKey.HEIGHT));
 			}
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return d;
 	}
@@ -64,7 +64,7 @@ public class Dimension extends EtaObject implements Serializable {
 			o.put(ServerKey.HEIGHT, Json.nullCheck(getHeight()));
 			o.put(ServerKey.WIDTH, Json.nullCheck(getWidth()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

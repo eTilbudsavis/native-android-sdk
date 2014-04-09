@@ -101,7 +101,7 @@ public abstract class EtaListObject<T> extends EtaErnObject<T> implements Compar
 		try {
 			o.put("state", getStateString());
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

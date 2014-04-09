@@ -220,7 +220,7 @@ public class EtaLocation extends Location {
 				o.put(Param.BOUND_WEST, getBoundWest());
 			}
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

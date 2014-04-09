@@ -57,7 +57,7 @@ public class Pieces extends EtaObject implements Serializable {
 			o.put(ServerKey.FROM, Json.nullCheck(getFrom()));
 			o.put(ServerKey.TO, Json.nullCheck(getTo()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

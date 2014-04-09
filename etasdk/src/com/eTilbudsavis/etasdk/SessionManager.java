@@ -30,10 +30,10 @@ import com.eTilbudsavis.etasdk.EtaObjects.Session;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Network.Request.Priority;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
@@ -501,7 +501,7 @@ public class SessionManager {
 						}
 					});
 				} catch (Exception e) {
-					EtaLog.d(TAG, e);
+					EtaLog.e(TAG, e);
 				}
 			}
 			

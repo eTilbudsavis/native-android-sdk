@@ -59,7 +59,7 @@ public class JsonStringRequest extends JsonRequest<String>{
 					log(response.statusCode, response.headers, jObject, null);
 					putJSON(jObject);
 				} catch (JSONException e) {
-					EtaLog.d(TAG, e);
+					EtaLog.e(TAG, e);
 		            return Response.fromError(new ParseError(e, JSONObject.class));
 				}
 				
@@ -70,7 +70,7 @@ public class JsonStringRequest extends JsonRequest<String>{
 					log(response.statusCode, response.headers, jArray, null);
 					putJSON(jArray);
 				} catch (JSONException e) {
-					EtaLog.d(TAG, e);
+					EtaLog.e(TAG, e);
 		            return Response.fromError(new ParseError(e, JSONArray.class));
 				}
 			}
@@ -125,7 +125,7 @@ public class JsonStringRequest extends JsonRequest<String>{
 				}
 				
 			} catch (JSONException e) {
-				EtaLog.d(TAG, e);
+				EtaLog.e(TAG, e);
 			}
     		
     		return cache;

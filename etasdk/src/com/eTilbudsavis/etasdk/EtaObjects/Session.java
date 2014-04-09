@@ -56,7 +56,7 @@ public class Session extends EtaObject implements Serializable {
 			try {
 				user = session.getJSONObject(ServerKey.USER);
 			} catch (JSONException e) {
-				EtaLog.d(TAG, e);
+				EtaLog.e(TAG, e);
 			}
 		}
 		s.setUser(user == null ? new User() : User.fromJSON(user));
@@ -66,7 +66,7 @@ public class Session extends EtaObject implements Serializable {
 			try {
 				perm = session.getJSONObject(ServerKey.PERMISSIONS);
 			} catch (JSONException e) {
-				EtaLog.d(TAG, e);
+				EtaLog.e(TAG, e);
 			}
 		}
 		s.setPermission(perm == null ? new Permission() : Permission.fromJSON(perm)) ;
@@ -86,7 +86,7 @@ public class Session extends EtaObject implements Serializable {
 			o.put(ServerKey.PERMISSIONS, Json.toJson(getPermission()));
 			o.put(ServerKey.PROVIDER, Json.nullCheck(getProvider()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}

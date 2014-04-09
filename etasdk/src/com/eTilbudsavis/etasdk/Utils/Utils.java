@@ -166,7 +166,7 @@ public final class Utils {
 		try {
 			value = URLEncoder.encode(value, encoding);
 		} catch (UnsupportedEncodingException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 			value = URLEncoder.encode(value);
 		}
 		return value;
@@ -243,7 +243,7 @@ public final class Utils {
 		try {
 			d = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(date);
 		} catch (ParseException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return d;
 	}

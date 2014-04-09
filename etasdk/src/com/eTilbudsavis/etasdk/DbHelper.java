@@ -189,7 +189,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		try {
 			sl.setMeta(meta == null ? null : new JSONObject(meta));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		sl.setUserId(c.getInt(c.getColumnIndex(USER)));
 		return sl;
@@ -252,7 +252,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		try {
 			sli.setMeta(meta == null ? null : new JSONObject(meta));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		sli.setUserId(c.getInt(c.getColumnIndex(USER)));
 		return sli;

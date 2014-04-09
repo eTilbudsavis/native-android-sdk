@@ -117,7 +117,7 @@ public class ListManager {
 				o.put(ServerKey.ACCESS, Share.ACCESS_OWNER);
 				owner = Share.fromJSON(o);
 			} catch (JSONException e) {
-				EtaLog.d(TAG, e);
+				EtaLog.e(TAG, e);
 			}
 			List<Share> shares = new ArrayList<Share>(1);
 			shares.add(owner);

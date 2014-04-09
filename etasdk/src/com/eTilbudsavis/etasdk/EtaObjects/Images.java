@@ -60,7 +60,7 @@ public class Images extends EtaObject implements Serializable {
 			o.put(ServerKey.ZOOM, Json.nullCheck(getZoom()));
 			o.put(ServerKey.THUMB, Json.nullCheck(getThumb()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}
