@@ -71,7 +71,6 @@ public class Json {
 			return object.isNull(key) ? defValue : object.getInt(key);
 		} catch (Exception e) {
 			EtaLog.e(TAG, e);
-			EtaLog.d(TAG, object.toString());
 		}
 		return defValue;
 	}

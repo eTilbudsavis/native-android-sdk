@@ -360,12 +360,9 @@ public final class PageflipWebview extends WebView {
 		// Get the HTML, and get Pageflip running
 		String url = Endpoint.pageflipProxy(mUuid);
 		StringRequest req = new StringRequest(url, htmlListener);
-		req.debugNetwork(true);
 		mEta.add(req);
 		
 		DEBUG = !url.contains(Endpoint.Prefix.PAGEFLIP_PRODUCTION);
-		
-		EtaLog.d(TAG, "debug: " + DEBUG + ", url: " + url);
 		
 		// Add debugging if needed
 		if (DEBUG) {

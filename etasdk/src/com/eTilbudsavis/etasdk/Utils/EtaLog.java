@@ -106,6 +106,10 @@ public class EtaLog {
 	 */
 	private static void addLog(Throwable t) {
 		
+		if (!mEnableLogHistory) {
+			return;
+		}
+		
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		t.printStackTrace(pw);

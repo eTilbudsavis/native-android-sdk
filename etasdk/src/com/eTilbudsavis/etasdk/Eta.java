@@ -333,7 +333,7 @@ public class Eta {
 	 * <p>For further use of {@link Eta} after this, you must invoke
 	 * {@link #createInstance(String, String, Context) set()} it again.</p>
 	 */
-	public void reset() {
+	public void destroyInstance() {
 		clear();
 		mEta = null;
 	}

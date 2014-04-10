@@ -183,7 +183,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	 * if non-exist it will be an empty string.</p>
 	 * @return A human readable title
 	 */
-	public String getTitle() {
+	private String getTitle() {
 		if (mDescription == null || mDescription.length() == 0) {
 			return mOffer == null ? "" : mOffer.getHeading();
 		} else {
@@ -193,10 +193,10 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	
 	/**
 	 * Get the description for this object
-	 * @return A description, or null
+	 * @return A description, or an empty String
 	 */
 	public String getDescription() {
-		return mDescription;
+		return mDescription == null ? "" : mDescription;
 	}
 	
 	/**

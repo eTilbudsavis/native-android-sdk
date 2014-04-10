@@ -24,9 +24,9 @@ import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class EPrint {
+public class PrettyPrint {
 	
-	public static final String TAG = "EPrint";
+	public static final String TAG = "PrettyPrint";
 	
 	/**
 	 * Prints the essential parameters (for debugging) a list of ShoppinglistItems
@@ -61,9 +61,9 @@ public class EPrint {
 	public static String shoppinglistItemToString(ShoppinglistItem sli)  {
 		String id = sli.getId().substring(0, 8);
 		String prev = sli.getPreviousId() == null ? "null" : sli.getPreviousId().substring(0, 8);
-		String title = sli.getTitle();
-		if (sli.getTitle().length() > 8) {
-			title = sli.getTitle().substring(0, 8);
+		String title = sli.getDescription();
+		if (title.length() > 8) {
+			title = title.substring(0, 8);
 		}
 		String resp = "item[%-8s] prev[%s] id[%s] modified[%s]";
 		resp = String.format(resp, title, prev, id, Utils.parseDate(sli.getModified()));

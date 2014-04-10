@@ -735,12 +735,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		
 		synchronized (LOCK) {
 			
-//			try {
-				return mDatabase.rawQueryWithFactory(null, query, null, null);
-//			} catch (Exception e) {
-//				EtaLog.d(TAG, e);
-//				return new MatrixCursor(new String[] {"empty"});
-//			}
+			return mDatabase.rawQueryWithFactory(null, query, null, null);
+			
 		}
 		
 	}

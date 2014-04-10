@@ -100,12 +100,9 @@ public class Typeahead extends EtaObject {
 		if (typeahead == null) typeahead = new Typeahead();
 		if (jTypeahead == null) return typeahead;
 		
-		EtaLog.d(TAG, "JSON: " + jTypeahead.toString());
 		typeahead.setSubject(Json.valueOf(jTypeahead, ServerKey.SUBJECT));
 		typeahead.setOffset(Json.valueOf(jTypeahead, ServerKey.OFFSET, 0));
 		typeahead.setLength(Json.valueOf(jTypeahead, ServerKey.LENGTH, 0));
-		
-		EtaLog.d(TAG, "POJO: " + typeahead.toJSON().toString());
 		
 		return typeahead;
 	}

@@ -130,7 +130,6 @@ public class SessionManager {
 		synchronized (LOCK) {
 			r.setPriority(Priority.HIGH);
 			mSessionQueue.add(r);
-			r.debugNetwork(true);
 			runQueue();
 		}
 		
