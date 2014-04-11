@@ -23,6 +23,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.Network.Request;
@@ -57,6 +58,13 @@ public final class Utils {
 	
 	/** String representation of epoc */
 	public static final String DATE_EPOC = "1970-01-01T00:00:00+0000";
+	
+	/** Single instance of SimpleDateFormat to save time and memory */
+	private static SimpleDateFormat mSdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
+	
+	static {
+		System.out.println("Utils.static hit");
+	}
 	
 	/**
 	 * Create universally unique identifier.
@@ -239,13 +247,22 @@ public final class Utils {
 	 * @return a Date object
 	 */
 	public static Date parseDate(String date) {
+
 		Date d = null;
-		try {
-			d = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(date);
-		} catch (ParseException e) {
-			EtaLog.e(TAG, e);
+		synchronized (mSdf) {
+			try {
+				d = mSdf.parse(date);
+				pd(date,d);
+			} catch (ParseException e) {
+				EtaLog.e(TAG, e);
+			}
 		}
 		return d;
+	}
+	
+	private static void pd(String s, Date d) {
+		EtaLog.d(TAG, "String: " + s);
+		EtaLog.d(TAG, "Date  : " + d.toGMTString());
 	}
 	
 	/**
@@ -255,7 +272,9 @@ public final class Utils {
 	 * @return a string
 	 */
 	public static String parseDate(Date date) {
-		return new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(date);
+		synchronized (mSdf) {
+			return mSdf.format(date);
+		}
 	}
 	
 	/**
