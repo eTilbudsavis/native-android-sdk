@@ -252,17 +252,11 @@ public final class Utils {
 		synchronized (mSdf) {
 			try {
 				d = mSdf.parse(date);
-				pd(date,d);
 			} catch (ParseException e) {
 				EtaLog.e(TAG, e);
 			}
 		}
 		return d;
-	}
-	
-	private static void pd(String s, Date d) {
-		EtaLog.d(TAG, "String: " + s);
-		EtaLog.d(TAG, "Date  : " + d.toGMTString());
 	}
 	
 	/**
