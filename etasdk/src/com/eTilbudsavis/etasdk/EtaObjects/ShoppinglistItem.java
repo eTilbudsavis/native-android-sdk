@@ -176,22 +176,6 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	}
 	
 	/**
-	 * Returns a human readable title for this ShoppinglistItem.
-	 * <p>The title is either the description, or heading of the related offer.
-	 * If the description isn't {@code null}, this will be used, else if
-	 * offer isn't {@code null}, the heading will be used, and finally,
-	 * if non-exist it will be an empty string.</p>
-	 * @return A human readable title
-	 */
-	private String getTitle() {
-		if (mDescription == null || mDescription.length() == 0) {
-			return mOffer == null ? "" : mOffer.getHeading();
-		} else {
-			return mDescription;
-		}
-	}
-	
-	/**
 	 * Get the description for this object
 	 * @return A description, or an empty String
 	 */
@@ -490,7 +474,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 	}
 
 	/**
-	 * Compare object, that uses the {@link ShoppinglistItem#getTitle() title}
+	 * Compare object, that uses the {@link ShoppinglistItem#getDescription() description}
 	 * to compare two items.
 	 */
 	public static Comparator<ShoppinglistItem> TitleAscending  = new Comparator<ShoppinglistItem>() {
@@ -500,8 +484,8 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> {
 			if (item1 == null || item2 == null) {
 				return item1 == null ? (item2 == null ? 0 : 1) : -1;
 			} else {
-				String t1 = item1.getTitle();
-				String t2 = item2.getTitle();
+				String t1 = item1.getDescription();
+				String t2 = item2.getDescription();
 				if (t1 == null || t2 == null) {
 					return t1 == null ? (t2 == null ? 0 : 1) : -1;
 				}
