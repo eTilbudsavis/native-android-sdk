@@ -45,7 +45,7 @@ public class CatalogViewer extends Activity {
 	ProgressDialog mPd;
 	// Pageflip viewer hack
 	String mViewSession = null;
-
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

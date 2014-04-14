@@ -23,7 +23,6 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.Network.Request;
