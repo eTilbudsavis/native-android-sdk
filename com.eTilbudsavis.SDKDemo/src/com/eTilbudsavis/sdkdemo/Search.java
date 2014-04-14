@@ -15,6 +15,7 @@
 *******************************************************************************/
 package com.eTilbudsavis.sdkdemo;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -44,11 +45,15 @@ import com.etilbudsavis.sdkdemo.R;
 public class Search extends Activity {
 
 	public static final String TAG = "Search";
-
+	
+	public static final String P_OFFERS = "offers";
+	public static final String P_QUERY = "query";
+	
 	EditText mQuery;
 	ProgressDialog mPd;
 	List<Offer> mOffers;
 	ListView mResultDisplayer;
+	Eta mEta;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,6 +69,22 @@ public class Search extends Activity {
         // Find views
         mQuery = (EditText) findViewById(R.id.etQuery);
         mResultDisplayer = (ListView) findViewById(R.id.lvResult);
+        
+        // Check for any saved state
+        if (savedInstanceState != null) {
+        	mOffers = (List<Offer>)savedInstanceState.getSerializable(P_OFFERS);
+        	if (mOffers != null) {
+            	mResultDisplayer.setAdapter(new SearchAdapter());
+        	}
+        	String q = savedInstanceState.getString(P_QUERY);
+        	if (q != null) {
+            	mQuery.setText(q);
+            	mQuery.setSelection(q.length());
+        	}
+        	
+        }
+        
+        System.out.print("Eta null: " + Eta.getInstance().getClass().toString());
         
         Button search = (Button) findViewById(R.id.btnPerformSearch);
         search.setOnClickListener(new OnClickListener() {
@@ -92,7 +113,7 @@ public class Search extends Activity {
 	 * This simple query gets a list of offers, based on a search query.
 	 */
     private void performSearch(String query) {
-
+    	
 		/*
 		 * Create a new Listener.
 		 * 
@@ -105,7 +126,9 @@ public class Search extends Activity {
 			@Override
 			public void onComplete(JSONArray response, EtaError error) {
 				
-				mPd.dismiss();
+				if (mPd != null) {
+					mPd.dismiss();
+				}
 				
 				/* 
 				 * Determining the state of the request response is simple.
@@ -146,6 +169,12 @@ public class Search extends Activity {
 		// Send the request to the SDK for execution
 		Eta.getInstance().add(offerRequest);
 		
+    }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+    	outState.putSerializable(P_OFFERS, (Serializable) mOffers);
+    	outState.putString(P_QUERY, mQuery.getText().toString());
     }
     
     @Override

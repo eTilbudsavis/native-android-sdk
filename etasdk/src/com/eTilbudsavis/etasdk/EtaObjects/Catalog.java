@@ -24,6 +24,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.PageflipWebview;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
@@ -67,10 +70,9 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 	private Dealer mDealer;
 	private Store mStore;
 	private int mOfferOnPage = 1;
-
-	public Catalog() {
-	}
-
+	
+	public Catalog() { }
+	
 	/**
 	 * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
 	 * @param catalogs A {@link JSONArray} in the format of a valid API v2 catalog response

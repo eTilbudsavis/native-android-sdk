@@ -27,23 +27,21 @@
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
+        android:allowBackup="false"
         android:theme="@style/AppTheme" >
         
         <activity
             android:name="com.eTilbudsavis.sdkdemo.Main"
-            android:label="@string/title_activity_main"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" >
+            android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         
-        <activity android:name="com.eTilbudsavis.sdkdemo.CatalogViewer"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" />
+        <activity android:name="com.eTilbudsavis.sdkdemo.CatalogViewer" />
         
-        <activity android:name="com.eTilbudsavis.sdkdemo.Search"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize" />
+        <activity android:name="com.eTilbudsavis.sdkdemo.Search" />
         
     </application>
 

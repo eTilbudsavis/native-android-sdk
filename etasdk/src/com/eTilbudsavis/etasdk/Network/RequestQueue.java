@@ -15,8 +15,10 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.Network;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
@@ -51,9 +54,12 @@ public class RequestQueue {
     
     /** The queue of requests that are actually going out to the network. */
     private final PriorityBlockingQueue<Request> mNetworkQueue = new PriorityBlockingQueue<Request>();
-    
+
     /** Queue of items waiting for session request */
-    private final LinkedList<Request> mParking = new LinkedList<Request>();
+    private final LinkedList<Request> mSessionParking = new LinkedList<Request>();
+
+    /** Queue of items waiting for similar request to finish */
+    private final Map<String, LinkedList<Request>> mRequestParking = new HashMap<String, LinkedList<Request>>();
     
     /** Network dispatchers, the threads that will actually perform the work */
     private NetworkDispatcher[] mNetworkDispatchers;
@@ -154,15 +160,15 @@ public class RequestQueue {
 			return;
 		}
 		
-		synchronized (mParking) {
+		synchronized (mSessionParking) {
 			
-			for (Request r : mParking) {
+			for (Request r : mSessionParking) {
 				
 				r.addEvent("resuming-request");
 	    		mCacheQueue.add(r);
 	    		
 			}
-			mParking.clear();
+			mSessionParking.clear();
 			
 		}
 		
@@ -180,7 +186,24 @@ public class RequestQueue {
 		synchronized (mCurrentRequests) {
 			mCurrentRequests.remove(request);
 		}
+
 		
+    	if (!request.ignoreCache() && request.getMethod() == Method.GET) {
+    		
+    		synchronized (mRequestParking) {
+				
+    			String url = request.getUrl();
+        		LinkedList<Request> waiting = mRequestParking.remove(url);
+        		if (waiting != null) {
+        			String msg = "Posting %d requests, waiting for %s";
+        			EtaLog.d(TAG, String.format(msg, waiting.size(), url));
+        			mCacheQueue.addAll(waiting);
+        		}
+        		
+			}
+    		
+    	}
+    	
 		// Append the request summary to the debugging log
 		mLog.add(EventLog.TYPE_REQUEST, request.getLog().getSummary());
 		
@@ -225,23 +248,23 @@ public class RequestQueue {
 	 * @return the request object
 	 */
     public Request add(Request request) {
-    	
+
     	synchronized (mCurrentRequests) {
 			mCurrentRequests.add(request);
 		}
-    	
+
+		prepareRequest(request);
+		
     	request.setRequestQueue(this);
     	
     	request.setSequence(mSequenceGenerator.incrementAndGet());
     	
-		prepareRequest(request);
-		
     	if (mEta.getSessionManager().isRequestInFlight() && !isSessionEndpoint(request)) {
     		
     		request.addEvent("added-to-parking-queue");
     		
-    		synchronized (mParking) {
-        		mParking.add(request);
+    		synchronized (mSessionParking) {
+        		mSessionParking.add(request);
 			}
     		
     	} else {
@@ -252,8 +275,26 @@ public class RequestQueue {
     			EtaLog.d(TAG, "Session changes should be handled by SessionManager. This request might cause problems");
     		}
     		
-    		mCacheQueue.add(request);
-    		
+    		// Either add to waiting queue, or add to cache queue
+        	synchronized (mRequestParking) {
+        		
+        		String url = request.getUrl();
+        		if (mRequestParking.containsKey(url)) {
+        			request.addEvent("waiting-for-similar-request");
+        			LinkedList<Request> waiting = mRequestParking.get(url);
+        			if (waiting == null) {
+        				waiting = new LinkedList<Request>();
+        			}
+        			waiting.add(request);
+        			mRequestParking.put(url, waiting);
+        		} else {
+        			/* add null, and only allocate memory if needed */
+        			mRequestParking.put(url, null);
+            		mCacheQueue.add(request);
+        		}
+        		
+        	}
+        	
     	}
     	
     	return request;
