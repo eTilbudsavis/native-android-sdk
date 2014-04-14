@@ -279,7 +279,9 @@ public class RequestQueue {
         	synchronized (mRequestParking) {
         		
         		String url = request.getUrl();
+        		
         		if (mRequestParking.containsKey(url)) {
+        			
         			request.addEvent("waiting-for-similar-request");
         			LinkedList<Request> waiting = mRequestParking.get(url);
         			if (waiting == null) {
@@ -287,10 +289,13 @@ public class RequestQueue {
         			}
         			waiting.add(request);
         			mRequestParking.put(url, waiting);
+        			
         		} else {
+        			
         			/* add null, and only allocate memory if needed */
         			mRequestParking.put(url, null);
             		mCacheQueue.add(request);
+            		
         		}
         		
         	}
