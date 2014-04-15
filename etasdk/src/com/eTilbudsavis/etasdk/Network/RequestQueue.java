@@ -59,7 +59,7 @@ public class RequestQueue {
     private final LinkedList<Request> mSessionParking = new LinkedList<Request>();
 
     /** Queue of items waiting for similar request to finish */
-    private final Map<String, LinkedList<Request>> mRequestParking = new HashMap<String, LinkedList<Request>>();
+//    private final Map<String, LinkedList<Request>> mRequestParking = new HashMap<String, LinkedList<Request>>();
     
     /** Network dispatchers, the threads that will actually perform the work */
     private NetworkDispatcher[] mNetworkDispatchers;
@@ -188,21 +188,21 @@ public class RequestQueue {
 		}
 
 		
-    	if (!request.ignoreCache() && request.getMethod() == Method.GET) {
-    		
-    		synchronized (mRequestParking) {
-				
-    			String url = request.getUrl();
-        		LinkedList<Request> waiting = mRequestParking.remove(url);
-        		if (waiting != null) {
-        			String msg = "Posting %d requests, waiting for %s";
-        			EtaLog.d(TAG, String.format(msg, waiting.size(), url));
-        			mCacheQueue.addAll(waiting);
-        		}
-        		
-			}
-    		
-    	}
+//    	if (!request.ignoreCache() && request.getMethod() == Method.GET) {
+//    		
+//    		synchronized (mRequestParking) {
+//				
+//    			String url = request.getUrl();
+//        		LinkedList<Request> waiting = mRequestParking.remove(url);
+//        		if (waiting != null) {
+//        			String msg = "Posting %d requests, waiting for %s";
+//        			EtaLog.d(TAG, String.format(msg, waiting.size(), url));
+//        			mCacheQueue.addAll(waiting);
+//        		}
+//        		
+//			}
+//    		
+//    	}
     	
 		// Append the request summary to the debugging log
 		mLog.add(EventLog.TYPE_REQUEST, request.getLog().getSummary());
@@ -261,8 +261,8 @@ public class RequestQueue {
     	
     	if (mEta.getSessionManager().isRequestInFlight() && !isSessionEndpoint(request)) {
     		
+    		// Waiting for a new session before continuing
     		request.addEvent("added-to-parking-queue");
-    		
     		synchronized (mSessionParking) {
         		mSessionParking.add(request);
 			}
@@ -275,30 +275,30 @@ public class RequestQueue {
     			EtaLog.d(TAG, "Session changes should be handled by SessionManager. This request might cause problems");
     		}
     		
-    		// Either add to waiting queue, or add to cache queue
-        	synchronized (mRequestParking) {
-        		
-        		String url = request.getUrl();
-        		
-        		if (mRequestParking.containsKey(url)) {
-        			
-        			request.addEvent("waiting-for-similar-request");
-        			LinkedList<Request> waiting = mRequestParking.get(url);
-        			if (waiting == null) {
-        				waiting = new LinkedList<Request>();
-        			}
-        			waiting.add(request);
-        			mRequestParking.put(url, waiting);
-        			
-        		} else {
-        			
-        			/* add null, and only allocate memory if needed */
-        			mRequestParking.put(url, null);
+//        	synchronized (mRequestParking) {
+//
+//        		String url = request.getUrl();
+//        		
+//        		// Either add to waiting queue, or add to cache queue
+//        		if (mRequestParking.containsKey(url)) {
+//        			
+//        			request.addEvent("waiting-for-similar-request");
+//        			LinkedList<Request> waiting = mRequestParking.get(url);
+//        			if (waiting == null) {
+//        				waiting = new LinkedList<Request>();
+//        			}
+//        			waiting.add(request);
+//        			mRequestParking.put(url, waiting);
+//        			
+//        		} else {
+//        			
+//        			/* add null, and only allocate memory if needed */
+//        			mRequestParking.put(url, null);
             		mCacheQueue.add(request);
             		
-        		}
-        		
-        	}
+//        		}
+//        		
+//        	}
         	
     	}
     	
