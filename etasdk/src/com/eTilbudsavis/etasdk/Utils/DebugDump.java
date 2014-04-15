@@ -1,11 +1,26 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.Utils;
 
 import java.util.LinkedList;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
@@ -14,18 +29,22 @@ import android.os.AsyncTask;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class DebugDump extends AsyncTask<Void, Void, Void> {
+/**
+ * A class used for dumping random debug data, to an endpoint that isn't yet specified.
+ * @author Danny Hvam
+ *
+ */
+public class DebugDump extends AsyncTask<Void, Void, Integer> {
 
 	public static final String TAG = "DebugDump";
 	
-	public static String DEBUG_URL = null;
-	private String mUrl = "";
+	private String mUrl;
 	private LinkedList<NameValuePair> mQuery = new LinkedList<NameValuePair>();
+	private OnCompleteListener mListener;
 	
-	public DebugDump(String exception, String data) {
+	public DebugDump(String url, String exception, String data) {
 		
-		if (DEBUG_URL == null)
-			return;
+		mUrl = url;
 		
 		try {
 			String appVersion = Eta.getInstance().getAppVersion();
@@ -37,34 +56,43 @@ public class DebugDump extends AsyncTask<Void, Void, Void> {
 			mQuery.add(new BasicNameValuePair("kernel", Device.getKernel()));
 			mQuery.add(new BasicNameValuePair("data", data));
 		} catch (Exception e) {
-			
+			e.printStackTrace();
 		}
 		
-		mUrl = DEBUG_URL + "?" + URLEncodedUtils.format(mQuery, HTTP.UTF_8);
 	}
-
-	@Override
-	protected Void doInBackground(Void... params) {
-		
-		if (DEBUG_URL != null) {
-
-			DefaultHttpClient httpClient = new DefaultHttpClient();
-			try {
-				HttpPost post = new HttpPost(mUrl);
-				post.setEntity(new UrlEncodedFormEntity(mQuery, HTTP.UTF_8));
-				httpClient.execute(post);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-		}
-		
-		return null;
+	
+	public DebugDump(String url, String exception, String data, OnCompleteListener l) {
+		this(url, exception, data);
+		mListener = l;
 	}
 	
 	@Override
-	protected void onPostExecute(Void result) {
+	protected Integer doInBackground(Void... urls) {
 		
+		DefaultHttpClient httpClient = new DefaultHttpClient();
+		Integer sc = null;
+		try {
+			HttpPost post = new HttpPost(mUrl);
+			post.setEntity(new UrlEncodedFormEntity(mQuery, HTTP.UTF_8));
+			HttpResponse resp = httpClient.execute(post);
+			sc = resp.getStatusLine().getStatusCode();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return sc;
+	}
+	
+	@Override
+	protected void onPostExecute(Integer result) {
+		if (mListener != null) {
+			int sc = result == null ? -1 : result;
+			mListener.onComplete(sc);
+		}
+	}
+	
+	public interface OnCompleteListener {
+		public void onComplete(int statusCode);
 	}
 	
 }

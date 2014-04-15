@@ -1,3 +1,18 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
@@ -17,24 +32,12 @@ public class Permission extends EtaObject implements Serializable {
 
 	public static final String TAG = "Permission";
 	
-	private HashMap<String, ArrayList<String>> perm = new HashMap<String, ArrayList<String>>();
+	private HashMap<String, ArrayList<String>> mPermissions = new HashMap<String, ArrayList<String>>();
 	
 	public Permission() {
+		
 	}
-
-	public static Permission fromJSON(String permission) {
-		Permission p = new Permission();
-		if (permission == null)
-			return p;
-		try {
-			p = fromJSON(p, new JSONObject(permission));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return p;
-	}
-
-	@SuppressWarnings("unchecked")
+	
 	public static Permission fromJSON(JSONObject permission) {
 		return fromJSON(new Permission(), permission);
 	}
@@ -47,7 +50,6 @@ public class Permission extends EtaObject implements Serializable {
 			
 			JSONArray groups = permission.names();
 			if (groups == null) {
-				EtaLog.d(TAG, "Permission is empty. Reddis error!");
 				return p;
 			}
 			
@@ -61,77 +63,56 @@ public class Permission extends EtaObject implements Serializable {
 					permissions.add(jArray.get(j).toString());
 				}
 				
-				p.getAll().put(group, permissions);
+				p.getPermissions().put(group, permissions);
 				
 			}
 			
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		
 		return p;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Permission p) {
 		JSONObject o = new JSONObject();
 		try {
-			Iterator<String> it = p.getAll().keySet().iterator();
+			Iterator<String> it = getPermissions().keySet().iterator();
 			while (it.hasNext()) {
 				JSONArray jArray = new JSONArray();
 				String name = (String) it.next();
-				for (String value : p.getAll().get(name))
+				for (String value : getPermissions().get(name)) {
 					jArray.put(value);
-				
+				}				
 				o.put(name, jArray);
 			}
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}
-
-	public ArrayList<String> get(String key) {
-		return perm.get(key);
+	
+	public ArrayList<String> getGroupPermissions(String group) {
+		return mPermissions.get(group);
 	}
-
-	public Permission put(String key, ArrayList<String> permission) {
-		perm.put(key, permission);
+	
+	public Permission put(String group, ArrayList<String> permissions) {
+		if (mPermissions.containsKey(group)) {
+			mPermissions.get(group).addAll(permissions);
+		} else {
+			mPermissions.put(group, permissions);
+		}
 		return this;
 	}
 	
-	public HashMap<String, ArrayList<String>> getAll() {
-		return perm;
+	public HashMap<String, ArrayList<String>> getPermissions() {
+		return mPermissions;
 	}
 	
 	public Permission putAll(HashMap<String, ArrayList<String>> permissions) {
-		perm.putAll(permissions);
+		mPermissions.putAll(permissions);
 		return this;
-	}
-	
-	
-	
-	/**
-	 * Prints this object
-	 */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[");
-		
-		Iterator<String> it = perm.keySet().iterator();
-		while (it.hasNext()) {
-			String group = (String) it.next();
-			sb.append(group).append("[");
-			for (String permission : perm.get(group)) {
-				sb.append(permission).append(", ");
-			}
-			sb.append("]");
-		}
-		return sb.append("]").toString();
 	}
 	
 }

@@ -1,37 +1,52 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.Utils;
 
-import com.eTilbudsavis.etasdk.Network.Request;
-
 /**
- * Params is being depricated, for new/updated values, goto {@link Request.Params Request.Params}
+ * Helper class for the parameters the eTilbudsavis API supports.<br>
+ * Note that not all parameters are necessarily in this set.<br><br>
+ * 
+ * For more information on parameters, please read the API documentation at our 
+ * <a href="http://engineering.etilbudsavis.dk/">Engineering Blog</a>
  * 
  * @author Danny Hvam - danny@etilbudsavis.dk
  */
-@Deprecated
-public final class Params {
-	
+public class Param {
 
 	/** String identifying the order by parameter for all list calls to the API */
 	public static final String ORDER_BY = "order_by";
 
 	/** API v2 parameter name for sensor. */
 	public static final String SENSOR = "r_sensor";
-	
+
 	/** API v2 parameter name for latitude. */
 	public static final String LATITUDE = "r_lat";
-	
+
 	/** API v2 parameter name for longitude. */
 	public static final String LONGITUDE = "r_lng";
-	
+
 	/** API v2 parameter name for radius. */
 	public static final String RADIUS = "r_radius";
-	
+
 	/** API v2 parameter name for bounds east. */
 	public static final String BOUND_EAST = "b_east";
-	
+
 	/** API v2 parameter name for bounds north. */
 	public static final String BOUND_NORTH = "b_north";
-	
+
 	/** API v2 parameter name for bounds south. */
 	public static final String BOUND_SOUTH = "b_south";
 
@@ -40,28 +55,19 @@ public final class Params {
 
 	/** API v2 parameter name for API Key */
 	public static final String API_KEY = "api_key";
-	
-	/** Header name for the session token */
-	public static final String HEADER_X_TOKEN = "X-Token";
-	
-	/** Header name for the signature */
-	public static final String HEADER_X_SIGNATURE = "X-Signature";
 
-	/** Header name for content_type */
-	public static final String HEADER_CONTENT_TYPE = "Content-Type";
-	
 	/** String identifying the offset parameter for all list calls to the API */
 	public static final String OFFSET = "offset";
 
 	/** String identifying the limit parameter for all list calls to the API */
 	public static final String LIMIT = "limit";
-	
+
 	/** String identifying the run from parameter for all list calls to the API */
 	public static final String RUN_FROM = "run_from";
-	
+
 	/** String identifying the run till parameter for all list calls to the API */
 	public static final String RUN_TILL = "run_till";
-	
+
 	/** String identifying the color parameter for all list calls to the API */
 	public static final String COLOR = "color";
 
@@ -113,12 +119,6 @@ public final class Params {
 	/** Parameter for a resource password */
 	public static final String PASSWORD = "password";
 
-	/** Parameter for a resource old token */
-	public static final String TOKEN_OLD = "token_old";
-
-	/** Parameter for a resource token time to live */
-	public static final String TOKEN_TTL = "token_ttl";
-
 	/** Parameter for a resource birth year */
 	public static final String BIRTH_YEAR = "birth_year";
 
@@ -140,6 +140,31 @@ public final class Params {
 	/** Parameter for a delete filter */
 	public static final String FILTER_DELETE = "filter";
 
+	public static final String ID = "id";
+	
+	public static final String MODIFIED = "modified";
+	
+	public static final String ERN = "ern";
+	
+	public static final String ACCESS = "access";
+	
+	public static final String ACCEPT_URL = "accept_url";
+
+	public static final String DESCRIPTION = "description";
+	
+	public static final String COUNT = "count";
+	
+	public static final String TICK = "tick";
+	
+	public static final String OFFER_ID = "offer_id";
+	
+	public static final String CREATOR = "creator";
+	
+	public static final String SHOPPING_LIST_ID = "shopping_list_id";
+
+	/** Parameter for a resource token time to live */
+	public static final String TOKEN_TTL = "token_ttl";
+
 	/** Parameter for a v1 session migration */
 	public static final String V1_AUTH_ID = "v1_auth_id";
 
@@ -149,17 +174,10 @@ public final class Params {
 	/** Parameter for a v1 session migration */
 	public static final String V1_AUTH_HASH = "v1_auth_hash";
 
-	public static final String ID = "id";
-	public static final String MODIFIED = "modified";
-	public static final String ERN = "ern";
-	public static final String ACCESS = "access";
-	public static final String ACCEPT_URL = "accept_url";
+	/** Parameter for locale */
+	public static final String LOCALE = "locale";
 
-	public static final String DESCRIPTION = "description";
-	public static final String COUNT = "count";
-	public static final String TICK = "tick";
-	public static final String OFFER_ID = "offer_id";
-	public static final String CREATOR = "creator";
-	public static final String SHOPPING_LIST_ID = "shopping_list_id";
-	    
+	/** Parameter for sending the app version for better app statistics in insight */
+	public static final String API_AV = "api_av";
+	
 }

@@ -1,247 +1,343 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class User extends EtaObject implements Serializable {
+
+/**
+ * <p>This class is a representation of a user as the API v2 exposes it</p>
+ * 
+ * <p>More documentation available on via our
+ * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/users.html">User Reference</a>
+ * documentation, on the engineering blog.
+ * </p>
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ *
+ */
+public class User extends EtaErnObject<User> implements Serializable {
+
+	public static final String TAG = "User";
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final String TAG = "User";
-	
-	/** Parameter for a user e-mail */
-	public static final String PARAM_EMAIL = Request.Param.EMAIL;
-	
-	/** Parameter for a user password */
-	public static final String PARAM_PASSWORD = Request.Param.PASSWORD;
-	
-	/** Parameter for a user birth year */
-	public static final String PARAM_BIRTH_YEAR = Request.Param.BIRTH_YEAR;
-	
-	/** Parameter for a user gender */
-	public static final String PARAM_GENDER = Request.Param.GENDER;
-	
-	/** Parameter for a user success redirect */
-	public static final String PARAM_SUCCESS_REDIRECT = Request.Param.SUCCESS_REDIRECT;
-	
-	/** Parameter for a user error redirect */
-	public static final String PARAM_ERROR_REDIRECT = Request.Param.ERROR_REDIRECT;
-	
-	/** Parameter for a user old password */
-	public static final String PARAM_OLD_PASSWORD = Request.Param.OLD_PASSWORD;
-	
-	/** Parameter for a facebook token */
-	public static final String PARAM_FACEBOOK_TOKEN = Request.Param.FACEBOOK_TOKEN;
-	
-	/** Endpoint for a user resource */
-	public static final String ENDPOINT_RESET = Request.Endpoint.USER_RESET;
-	
 	public static final int NO_USER = -1;
 	
-	private int mId = NO_USER;
-	private String mErn;
 	private String mGender;
 	private int mBirthYear = 0;
 	private String mName;
 	private String mEmail;
 	private Permission mPermissions;
-	private ArrayList<User.UserStatusListener> mSubscribers = new ArrayList<User.UserStatusListener>();
-
-	public User() { }
-
-	public static User fromJSON(String user) {	
-		User u = new User();
-		try {
-			u = fromJSON(u, new JSONObject(user));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return u;
+	
+	/**
+	 * Default constructor
+	 */
+	public User() {
+		setUserId(NO_USER);
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * A factory method for converting {@link JSONObject} into a POJO.
+	 * @param user A {@link JSONObject} in the format of a valid API v2 user response
+	 * @return A User object
+	 */
 	public static User fromJSON(JSONObject user) {	
 		return fromJSON(new User(), user);
 	}
-	
-	private static User fromJSON(User u, JSONObject user) {
-		if (u == null) u = new User();
-		if (user == null) return u;
+
+	/**
+	 * A factory method for converting {@link JSONObject} into POJO.
+	 * <p>This method exposes a way, of updating/setting an objects properties</p>
+	 * @param user An object to set/update
+	 * @param jUser A {@link JSONObject} in the format of a valid API v2 user response
+	 * @return A {@link List} of POJO
+	 */
+	public static User fromJSON(User user, JSONObject jUser) {
+		if (user == null) user = new User();
+		if (jUser == null) return user;
 		
 		try {
-			u.setId(jsonToInt(user, S_ID, NO_USER));
-			u.setErn(getJsonString(user, S_ERN));
-			u.setGender(getJsonString(user, S_GENDER));
-			u.setBirthYear(jsonToInt(user, S_BIRTH_YEAR, 0));
-			u.setName(getJsonString(user, S_NAME));
-			u.setEmail(getJsonString(user, S_EMAIL));
-			u.setPermissions(Permission.fromJSON(user.getJSONObject(S_PERMISSIONS)));
+			user.setUserId(Json.valueOf(jUser, ServerKey.ID, User.NO_USER));
+			user.setErn(Json.valueOf(jUser, ServerKey.ERN));
+			user.setGender(Json.valueOf(jUser, ServerKey.GENDER));
+			user.setBirthYear(Json.valueOf(jUser, ServerKey.BIRTH_YEAR, 0));
+			user.setName(Json.valueOf(jUser, ServerKey.NAME));
+			user.setEmail(Json.valueOf(jUser, ServerKey.EMAIL));
+			user.setPermissions(Permission.fromJSON(jUser.getJSONObject(ServerKey.PERMISSIONS)));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
-		return u;
+		return user;
 	}
 	
+	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(User u) {
-		JSONObject o = new JSONObject();
+		JSONObject o = super.toJSON();
 		try {
-			o.put(S_ID, u.getId());
-			o.put(S_ERN, u.getErn());
-			o.put(S_GENDER, u.getGender());
-			o.put(S_BIRTH_YEAR, u.getBirthYear());
-			o.put(S_NAME, u.getName());
-			o.put(S_EMAIL, u.getEmail());
-			o.put(S_PERMISSIONS, u.getPermissions() == null ? null : u.getPermissions().toJSON());
+			o.put(ServerKey.GENDER, Json.nullCheck(getGender()));
+			o.put(ServerKey.BIRTH_YEAR, Json.nullCheck(getBirthYear()));
+			o.put(ServerKey.NAME, Json.nullCheck(getName()));
+			o.put(ServerKey.EMAIL, Json.nullCheck(getEmail()));
+			o.put(ServerKey.PERMISSIONS, Json.toJson(getPermissions()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}
 	
-	public boolean isLoggedIn() {
-		return mEmail != null && mId > -1;
+	@Override
+	public String getErnPrefix() {
+		return ERN_USER;
 	}
 	
-	public int getId() {
-		return mId;
+	/**
+	 * Method for finding out if the user is logged in via the API. It is determined
+	 * on the basis that the {@link #getEmail() email} != null and the
+	 * {@link #getUserId() user id} > {@link #NO_USER -1}.
+	 * 
+	 * <p>It is not a requirement to be logged in, but it does offer some
+	 * advantages, such as online lists</p> 
+	 * @return
+	 */
+	public boolean isLoggedIn() {
+		return mEmail != null && getUserId() > NO_USER;
 	}
-
-	public User setId(int id) {
-		mId = id;
+	
+	/**
+	 * Method returns the user id as a String.
+	 * <p>This method is inherited from </p>
+	 * @deprecated Use {@link #getUserId()} to get the id an an {@link Integer}
+	 */
+	@Override
+	public String getId() {
+		return String.valueOf(super.getId());
+	}
+	
+	/**
+     * This method is not supported and throws an UnsupportedOperationException when called.
+     * <p>To set the user id, use {@link #setUserId(int)} instead</p>
+     * @see #setUserId(int)
+	 * @param id Ignored
+	 * @throws UnsupportedOperationException Every time this method is invoked.
+	 */
+	@Override
+	public User setId(String id) {
+		throw new UnsupportedOperationException("Share does not support setId(String)");
+	}
+	
+	/**
+	 * Get the user id
+	 * @return A user id
+	 */
+	public int getUserId() {
+		return Integer.valueOf(super.getId());
+	}
+	
+	/**
+	 * Set the user id
+	 * @param id A positive integer
+	 * @return This object
+	 */
+	public User setUserId(int id) {
+		super.setId(String.valueOf(id));
 		return this;
 	}
-
-	public String getErn() {
-		return mErn;
-	}
-
-	public User setErn(String ern) {
-		mErn = ern;
-		return this;
-	}
-
+	
+	/**
+	 * Get the gender of this user. Gender can be either:
+	 * 
+	 * <table border=1>
+	 * <tr>
+	 * <td>male</td>
+	 * 		<td>{@link String} "male"</td>
+	 * </tr>
+	 * <tr>
+	 * 		<td>female</td>
+	 * 		<td>{@link String} "female"</td>
+	 * </tr>
+	 * <tr>
+	 * 		<td>unknown</td>
+	 * 		<td><code>null</code></td>
+	 * </tr>
+	 * </table>
+	 * 
+	 * @return The gender, or <code>null</code>
+	 */
 	public String getGender() {
 		return mGender;
 	}
 
 	/**
-	 * Gender can be either <code>male</code> or <code>female</code>
+	 * Set the gender of the user. Gender can be set to:
+	 * <table border=1>
+	 * <tr>
+	 * <td>male</td>
+	 * 		<td>{@link String} "male"</td>
+	 * </tr>
+	 * <tr>
+	 * 		<td>female</td>
+	 * 		<td>{@link String} "female"</td>
+	 * </tr>
+	 * </table>
+	 * 
+	 * It is not allowed to 'reset' gender, to unknown by passing <code>null</code> as argument
+	 * 
 	 * @param gender of either male or female
-	 * @return
+	 * @return This object
 	 */
 	public User setGender(String gender) {
 		if (gender != null) {
 			gender = gender.toLowerCase();
-			if (gender.equals("male") || gender.equals("female") )
+			if (gender.equals("male") || gender.equals("female") ) {
 				mGender = gender;
+			}
 		}		
 		return this;
 	}
-
+	
+	/**
+	 * Get the birth year of the user
+	 * @return Birth year as an {@link Integer}
+	 */
 	public int getBirthYear() {
 		return mBirthYear;
 	}
-
+	
+	/**
+	 * Set the birth year of the user.
+	 * <p>Not setting a birth year is preferred, over setting a fake birth year.</p>
+	 * @param birthYear An {@link Integer}
+	 * @return This object
+	 */
 	public User setBirthYear(int birthYear) {
 		mBirthYear = birthYear;
 		return this;
 	}
-
+	
+	/**
+	 * Get the name of the user.
+	 * @return A name, or <code>null</code>
+	 */
 	public String getName() {
 		return mName;
 	}
-
+	
+	/**
+	 * Set the name of a user.
+	 * @param name A non-<code>null</code> {@link String} 
+	 * @return This object
+	 */
 	public User setName(String name) {
-		mName = name;
+		if (name != null) {
+			mName = name;
+		}
 		return this;
 	}
-
+	
+	/**
+	 * Get the e-mail address of the user.
+	 * @return An email, or <code>null</code>
+	 */
 	public String getEmail() {
 		return mEmail;
 	}
-
+	
+	/**
+	 * Set the email of the user.
+	 * @param email A non-<code>null</code> {@link String} 
+	 * @return This object
+	 */
 	public User setEmail(String email) {
 		mEmail = email;
 		return this;
 	}
-
+	
+	/**
+	 * Get this users {@link Permission}. Permissions determine what access levelse the user has in the API.
+	 * @return A set of permissions, or <code>null</code>
+	 */
 	public Permission getPermissions() {
 		return mPermissions;
 	}
-
-	public void setPermissions(Permission permissions) {
-		this.mPermissions = permissions;
-	}
-
-	public String getFacebookEndpoint() {
-		return Request.Endpoint.facebook(mId);
+	
+	/**
+	 * Set {@link Permission}s for this user.
+	 * 
+	 * <p>Note that, permissions isn't decided client-side, but should rather be handled by the API/SDK.</p>
+	 * @param permissions The new set of permissions
+	 * @return This object
+	 */
+	public User setPermissions(Permission permissions) {
+		mPermissions = permissions;
+		return this;
 	}
 	
-	public void subscribe(UserStatusListener statusListener) {
-		mSubscribers.add(statusListener);
-	}
-
-	public void unsubscribe(UserStatusListener statusListener) {
-		mSubscribers.remove(statusListener);
-	}
-	
-	public void notifySubscribers(Integer response, Object object) {
-		for (UserStatusListener s : mSubscribers) {
-			s.onStatusChange(response, object);
-		}
-	}
-	
-	public interface UserStatusListener {
-		public void onStatusChange(Integer response, Object object);
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + mBirthYear;
+		result = prime * result + ((mEmail == null) ? 0 : mEmail.hashCode());
+		result = prime * result + ((mGender == null) ? 0 : mGender.hashCode());
+		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
+		result = prime * result
+				+ ((mPermissions == null) ? 0 : mPermissions.hashCode());
+		return result;
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		
-		if (!(o instanceof User))
+		if (!super.equals(obj))
 			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		User other = (User) obj;
+		if (mBirthYear != other.mBirthYear)
+			return false;
+		if (mEmail == null) {
+			if (other.mEmail != null)
+				return false;
+		} else if (!mEmail.equals(other.mEmail))
+			return false;
+		if (mGender == null) {
+			if (other.mGender != null)
+				return false;
+		} else if (!mGender.equals(other.mGender))
+			return false;
+		if (mName == null) {
+			if (other.mName != null)
+				return false;
+		} else if (!mName.equals(other.mName))
+			return false;
+		if (mPermissions == null) {
+			if (other.mPermissions != null)
+				return false;
+		} else if (!mPermissions.equals(other.mPermissions))
+			return false;
+		return true;
+	}
 
-		User u = (User)o;
-		return mId == u.getId() &&
-				stringCompare(mErn, u.getErn()) &&
-				stringCompare(mGender, u.getGender()) &&
-				mBirthYear == u.getBirthYear() &&
-				stringCompare(mName, u.getName()) &&
-				stringCompare(mEmail, u.getEmail()) &&
-				mPermissions.equals(u.getPermissions());
-	}
-	
-	@Override
-	public String toString() {
-		return toString(false);
-	}
-	
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[")
-		.append("id=").append(mId)
-		.append(", email=").append(mEmail);
-		
-		if (everything) {
-			sb.append(", name=").append(mName)
-			.append(", gender=").append(mGender)
-			.append(", birthyear=").append(mBirthYear)
-			.append(", ern=").append(mErn)
-			.append(", permission=").append(mPermissions == null ? null : mPermissions.toString());
-		}
-		return sb.append("]").toString();
-	}
-	
 }

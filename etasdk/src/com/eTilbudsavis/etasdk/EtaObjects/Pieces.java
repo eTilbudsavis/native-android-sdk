@@ -1,3 +1,18 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
@@ -6,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Pieces extends EtaObject implements Serializable {
 
@@ -17,19 +33,9 @@ public class Pieces extends EtaObject implements Serializable {
 	private int mTo = 1;
 	
 	public Pieces() {
+		
 	}
 	
-	public static Pieces fromJSON(String pieces) {
-		Pieces p = new Pieces();
-		try {
-			p = fromJSON(p, new JSONObject(pieces));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return p;
-	}
-	
-	@SuppressWarnings("unchecked")
 	public static Pieces fromJSON(JSONObject pieces) {
 		return fromJSON(new Pieces(), pieces);
 	}
@@ -38,23 +44,20 @@ public class Pieces extends EtaObject implements Serializable {
 		if (p == null) p = new Pieces();
 		if (pieces == null) return p;
 		
-		p.setFrom(jsonToInt(pieces, S_FROM, 1));
-		p.setTo(jsonToInt(pieces, S_TO, 1));
+		p.setFrom(Json.valueOf(pieces, ServerKey.FROM, 1));
+		p.setTo(Json.valueOf(pieces, ServerKey.TO, 1));
 		
 		return p;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Pieces p) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_FROM, p.getFrom());
-			o.put(S_TO, p.getTo());
+			o.put(ServerKey.FROM, Json.nullCheck(getFrom()));
+			o.put(ServerKey.TO, Json.nullCheck(getTo()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}
@@ -62,8 +65,7 @@ public class Pieces extends EtaObject implements Serializable {
 	public int getFrom() {
 		return mFrom;
 	}
-
-
+	
 	public Pieces setFrom(int from) {
 		mFrom = from;
 		return this;
@@ -81,27 +83,29 @@ public class Pieces extends EtaObject implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Pieces))
-			return false;
-
-		Pieces p = (Pieces)o;
-		return mFrom == p.getFrom() &&
-				mTo == p.getTo();
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + mFrom;
+		result = prime * result + mTo;
+		return result;
 	}
-	
+
 	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(getClass().getSimpleName()).append("[")
-		.append("from=").append(mFrom)
-		.append(", to=").append(mTo)
-		.append("]").toString();
-		
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Pieces other = (Pieces) obj;
+		if (mFrom != other.mFrom)
+			return false;
+		if (mTo != other.mTo)
+			return false;
+		return true;
 	}
 	
-
+	
 }

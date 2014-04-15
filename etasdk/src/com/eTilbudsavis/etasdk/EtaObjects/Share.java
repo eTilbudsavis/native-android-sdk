@@ -1,6 +1,20 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -8,48 +22,37 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.Bundle;
+import android.annotation.SuppressLint;
 
-import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Share extends EtaObject implements Comparable<Share>, Serializable {
-	private static final long serialVersionUID = 1L;
+public class Share extends EtaListObject<Share> {
 
+	public static final String TAG = "Share";
+	
+	private static final long serialVersionUID = -9184865445908448266L;
+	
 	public static final String ACCESS_OWNER = "owner";
 	public static final String ACCESS_READWRITE = "rw";
 	public static final String ACCESS_READONLY = "r";
-	
-	public static final String TAG = "Share";
-
-	/** States a shoppping list can be in */
-	public interface State {
-		int TO_SYNC	= 0;
-		int SYNCING	= 1;
-		int SYNCED	= 2;
-		int DELETE	= 4;
-		int ERROR	= 5;
-	}
 	
 	private String mName;
 	private String mEmail;
 	private String mAccess;
 	private String mShoppinglistId;
-	private boolean mAccepted = false;
+	private boolean mAccepted;
 	private String mAcceptUrl;
-	private int mState = State.SYNCED;
 	
 	public Share(String email, String access, String acceptUrl) {
+		mName = email;
 		mEmail = email;
 		mAccess = access;
 		mAcceptUrl = acceptUrl;
-		mState = State.TO_SYNC;
-		mName = email;
 	}
 	
 	private Share() { }
 	
-	@SuppressWarnings("unchecked")
 	public static ArrayList<Share> fromJSON(JSONArray shares) {
 		ArrayList<Share> list = new ArrayList<Share>();
 		try {
@@ -59,15 +62,13 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 			}
 			
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return list;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Share fromJSON(JSONObject share) {
-		Share s = new Share();
-		return fromJSON(s, share);
+		return fromJSON(new Share(), share);
 	}
 	
 	public static Share fromJSON(Share s, JSONObject share) {
@@ -75,140 +76,236 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 		try {
 			
 			JSONObject o = share.getJSONObject(ServerKey.USER);
-			s.setEmail(getJsonString(o, ServerKey.EMAIL));
-			s.setName(getJsonString(o, ServerKey.NAME));
+			s.setEmail(Json.valueOf(o, ServerKey.EMAIL));
+			s.setName(Json.valueOf(o, ServerKey.NAME));
 			
-			s.setAccess(getJsonString(share, ServerKey.ACCESS));
-			s.setAccepted(jsonToBoolean(share, ServerKey.ACCEPTED, false));
+			s.setAccess(Json.valueOf(share, ServerKey.ACCESS));
+			s.setAccepted(Json.valueOf(share, ServerKey.ACCEPTED, false));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		
 		return s;
 	}
+
+	@Override
+	public JSONObject toJSON() {
+		
+		/* Do not call super class to create JSON, as we server does not support
+		 * id and ern keys.
+		 */
+		
+		JSONObject o = new JSONObject();
+		try {
+			JSONObject user = new JSONObject();
+			user.put(ServerKey.EMAIL, Json.nullCheck(getEmail()));
+			user.put(ServerKey.NAME, Json.nullCheck(getName()));
+			
+			o.put(ServerKey.USER, Json.nullCheck(user));
+			o.put(ServerKey.ACCEPTED, Json.nullCheck(getAccepted()));
+			o.put(ServerKey.ACCESS, Json.nullCheck(getAccess()));
+			if (getAcceptUrl() != null) {
+				o.put(ServerKey.ACCEPT_URL, getAcceptUrl());
+			}
+		} catch (JSONException e) {
+			EtaLog.e(TAG, e);
+		}
+		return o;
+	}
 	
+	@Override
+	public String getErnPrefix() {
+		return ERN_SHARE;
+	}
+	
+	/**
+     * This method is not supported and throws an UnsupportedOperationException when called.
+	 * @param id Ignored
+	 * @throws UnsupportedOperationException Every time this method is invoked.
+	 */
+	@Override
+	public Share setId(String id) {
+		throw new UnsupportedOperationException("Share does not support setId(String)");
+	}
+
+	/**
+     * This method is not supported and throws an UnsupportedOperationException when called.
+	 * @throws UnsupportedOperationException Every time this method is invoked.
+	 */
+	@Override
+	public String getId() {
+		throw new UnsupportedOperationException("Share does not support getId()");
+	}
+
+	/**
+     * This method is not supported and throws an UnsupportedOperationException when called.
+	 * @param id Ignored
+	 * @throws UnsupportedOperationException Every time this method is invoked.
+	 */
+	@Override
+	public Share setErn(String ern) {
+		throw new UnsupportedOperationException("Share does not support setErn(String)");
+	}
+
+	/**
+     * This method is not supported and throws an UnsupportedOperationException when called.
+	 * @throws UnsupportedOperationException Every time this method is invoked.
+	 */
+	@Override
+	public String getErn() {
+		throw new UnsupportedOperationException("Share does not support getErn()");
+	}
+	
+	/**
+	 * Get the e-mail of this share
+	 * @return An e-mail, or {@code null}
+	 */
 	public String getEmail() {
 		return mEmail;
 	}
 	
+	/**
+	 * Set the e-mail of this share
+	 * @param email An e-mail, not {@code null}
+	 * @return This object
+	 */
 	public Share setEmail(String email) {
-		mEmail = email;
+		if (email != null) {
+			mEmail = email;
+		}
 		return this;
 	}
-
+	
+	/**
+	 * Get the name of this share
+	 * @return A name, or {@code null}
+	 */
 	public String getName() {
 		return mName;
 	}
 	
+	/**
+	 * Set the name of this share
+	 * @param name A name, not {@code null}
+	 * @return
+	 */
 	public Share setName(String name) {
-		mName = name;
+		if (name != null) {
+			mName = name;
+		}
 		return this;
 	}
-
+	
+	/**
+	 * Get the access parmission for this share
+	 * <p>Current valid access permissions are {@link Share#ACCESS_OWNER},
+	 * {@link Share#ACCESS_READONLY}, and {@link Share#ACCESS_READWRITE}.
+	 * Other strings will be ignored by the API.</p>
+	 * @return An access permission
+	 */
 	public String getAccess() {
 		return mAccess;
 	}
 
 	/**
-	 * 
-	 * @param readwrite true for 'read and write' access, false for 'read only'
-	 * @return this share
+	 * Set the access level for this share.
+	 * <p>Current valid access permissions are {@link Share#ACCESS_OWNER},
+	 * {@link Share#ACCESS_READONLY}, and {@link Share#ACCESS_READWRITE}.
+	 * Other strings will be ignored by the API.</p>
+	 * @param permission An permission for this share
+	 * @return This object
 	 */
 	public Share setAccess(String permission) {
-		mAccess = permission;
-		return Share.this;
+		if (permission != null) {
+			mAccess = permission;
+		}
+		return this;
 	}
-
+	
+	/**
+	 * Whether or not the share/user have accepted the invitation to the
+	 * {@link Shoppinglist}, and are currently receiving updates about the
+	 * {@link Shoppinglist}
+	 * @return {@code true} if user have accepted, else {@code false}
+	 */
 	public boolean getAccepted() {
 		return mAccepted;
 	}
 	
+	/**
+	 * Whether or not the share/user have accepted the invitation.
+	 * <p>This shouldn't be handled by the app, or SDK, as this is something
+	 * being determined by the API</p>
+	 * @param accepted {@code true} if user have accepted the invitation, else {@code false}
+	 * @return This object
+	 */
 	public Share setAccepted(boolean accepted) {
 		mAccepted = accepted;
 		return this;
 	}
 	
+	/**
+	 * Set the absolute URL to redirect the user to when he/she accepts to
+	 * share the {@link Shoppinglist}.
+	 * @param url The URL
+	 * @return This object
+	 */
+	public Share setAcceptUrl(String url) {
+		mAcceptUrl = url;
+		return this;
+	}
+	
+	/**
+	 * Get the absolute URL to redirect the user to when he/she accepts to
+	 * share the {@link Shoppinglist}.
+	 * @return An URL
+	 */
 	public String getAcceptUrl() {
 		return mAcceptUrl;
 	}
 	
-	public int getState() {
-		return mState;
-	}
-	
-	public Share setState(int state) {
-		if (State.TO_SYNC <= state && state <= State.ERROR)
-			mState = state;
-		return this;
-	}
-
+	/**
+	 * The {@link Shoppinglist#getId() id} of the shopping list associated with
+	 * this share.
+	 * @return The shopping list id, or {@code null}
+	 */
 	public String getShoppinglistId() {
 		return mShoppinglistId;
 	}
 	
+	/**
+	 * Set the {@link Shoppinglist#getId() id} if the associated shoppinglist
+	 * @param id An id of a {@link Shoppinglist}
+	 * @return This object
+	 */
 	public Share setShoppinglistId(String id) {
 		mShoppinglistId = id;
 		return this;
 	}
 	
-	public static JSONObject toJSON(Share s) {
-		JSONObject o = new JSONObject();
-		try {
-			
-			JSONObject user = new JSONObject();
-			user.put(ServerKey.EMAIL, s.getEmail());
-			user.put(ServerKey.NAME, s.getName());
-			
-			o.put(ServerKey.USER, user);
-			o.put(ServerKey.ACCEPTED, s.getAccepted());
-			o.put(ServerKey.ACCESS, s.getAccess());
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return o;
-	}
-	
-	public Bundle getApiParams() {
-
-		Bundle b = new Bundle();
-		b.putString(Request.Param.ACCESS, getAccess());
-		b.putString(Request.Param.ACCEPT_URL, getAcceptUrl());
-		
-		return b;
-	}
-	
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(getClass().getSimpleName()).append("[")
-		.append("email=").append(mEmail)
-		.append(", name=").append(mName)
-		.append(", access=").append(mAccess)
-		.append(", accepted=").append(mAccepted)
-		.append("]").toString();
-	}
-
 	public int compareTo(Share another) {
 		return 0;
 	}
-
-	public static Comparator<Share> EmailComparator  = new Comparator<Share>() {
+	
+	public static Comparator<Share> EmailAscending  = new Comparator<Share>() {
 		
+		@SuppressLint("DefaultLocale")
 		public int compare(Share item1, Share item2) {
-
-			String itemName1 = item1.getEmail().toUpperCase();
-			String itemName2 = item2.getEmail().toUpperCase();
+			
+			String e1 = item1.getEmail().toLowerCase();
+			String e2 = item2.getEmail().toLowerCase();
 			
 			//ascending order
-			return itemName1.compareTo(itemName2);
+			return e1.compareTo(e2);
+			
 		}
-
+		
 	};
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result
 				+ ((mAcceptUrl == null) ? 0 : mAcceptUrl.hashCode());
 		result = prime * result + (mAccepted ? 1231 : 1237);
@@ -217,7 +314,6 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
 		result = prime * result
 				+ ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
-		result = prime * result + mState;
 		return result;
 	}
 
@@ -225,7 +321,7 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -257,10 +353,8 @@ public class Share extends EtaObject implements Comparable<Share>, Serializable 
 				return false;
 		} else if (!mShoppinglistId.equals(other.mShoppinglistId))
 			return false;
-		if (mState != other.mState)
-			return false;
 		return true;
 	}
-
+	
 }
 

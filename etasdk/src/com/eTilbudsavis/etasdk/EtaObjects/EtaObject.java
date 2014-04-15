@@ -1,180 +1,64 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 
-
-
-public class EtaObject {
+/**
+ * <p>The super-class for all eTilbudsavis objects.<p>
+ * 
+ * <p>The object ensures the existens of a {@link #toJSON()} method on all objects, which proves useful when
+ * communication with the API</p>
+ * 
+ * <p>The object also contains {@link ServerKey}, a class containing a set of Strings that is meant as help when 
+ * converting JSON-data received from the API.</p>
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ *
+ */
+public abstract class EtaObject {
 	
-	public static final String TAG = "EtaBaseObject";
-	
-	/*
-	 * All possible JSON keys returned from server
-	 */
-	protected static final String S_ID = "id";
-	protected static final String S_ERN = "ern";
-	protected static final String S_NAME = "name";
-	protected static final String S_RUN_FROM = "run_from";
-	protected static final String S_RUN_TILL = "run_till";
-	protected static final String S_DEALER_ID = "dealer_id";
-	protected static final String S_DEALER_URL = "dealer_url";
-	protected static final String S_STORE_ID = "store_id";
-	protected static final String S_STORE_URL = "store_url";
-	protected static final String S_IMAGES = "images";
-	protected static final String S_BRANDING = "branding";
-	public static final String S_MODIFIED = "modified";
-	protected static final String S_DESCRIPTION = "description";
-	protected static final String S_URL_NAME = "url_name";
-	protected static final String S_WEBSITE = "website";
-	protected static final String S_LOGO = "logo";
-	protected static final String S_COLOR = "color";
-	protected static final String S_PAGEFLIP = "pageflip";
-	protected static final String S_COUNTRY = "country";
-	protected static final String S_ACCESS = "access";
-	protected static final String S_LABEL = "label";
-	protected static final String S_BACKGROUND = "background";
-	protected static final String S_PAGE_COUNT = "page_count";
-	protected static final String S_OFFER_COUNT = "offer_count";
-	protected static final String S_DIMENSIONS = "dimensions";
-	protected static final String S_PAGES = "pages";
-	protected static final String P_PAGE = "page";
-	protected static final String S_OWNER = "owner";
-	protected static final String S_TICK = "tick";
-	protected static final String S_OFFER_ID = "offer_id";
-	protected static final String S_COUNT = "count";
-	protected static final String S_SHOPPINGLIST_ID = "shopping_list_id";
-	protected static final String S_CREATOR = "creator";
-	protected static final String S_HEADING = "heading";
-	protected static final String S_CATALOG_PAGE = "catalog_page";
-	protected static final String S_PRICING = "pricing";
-	protected static final String S_QUANTITY = "quantity";
-	protected static final String S_LINKS = "links";
-	protected static final String S_CATALOG_URL = "catalog_url";
-	protected static final String S_CATALOG_ID = "catalog_id";
-	protected static final String S_STREET = "street";
-	protected static final String S_CITY = "city";
-	protected static final String S_ZIP_CODE = "zip_code";
-	protected static final String S_LATITUDE = "latitude";
-	protected static final String S_LONGITUDE = "longitude";
-	protected static final String S_CONTACT = "contact";
-	protected static final String S_WEBSHOP = "webshop";
-	protected static final String S_WIDTH = "width";
-	protected static final String S_HEIGHT = "height";
-	protected static final String S_CODE = "code";
-	protected static final String S_MESSAGE = "message";
-	protected static final String S_DETAILS = "details";
-	protected static final String S_VIEW = "view";
-	protected static final String S_ZOOM = "zoom";
-	protected static final String S_THUMB = "thumb";
-	protected static final String S_FROM = "from";
-	protected static final String S_TO = "to";
-	protected static final String S_UNIT = "unit";
-	protected static final String S_SIZE = "size";
-	protected static final String S_PIECES = "pieces";
-	protected static final String S_USER = "user";
-	protected static final String S_ACCEPTED = "accepted";
-	protected static final String S_SYMBOL = "symbol";
-	protected static final String S_GENDER = "gender";
-	protected static final String S_BIRTH_YEAR = "birth_year";
-	protected static final String S_EMAIL = "email";
-	protected static final String S_PERMISSIONS = "permissions";
-	protected static final String S_PREVIOUS_ID = "previous_id";
-	protected static final String S_SI = "si";
-	protected static final String S_FACTOR = "factor";
-	protected static final String SERVER_UNSUBSCRIBE_PRINT_URL = "unsubscribe_print_url";
-	protected static final String SERVER_TYPE = "type";
-	protected static final String SERVER_META = "meta";
-	
-	public JSONObject serverData;
-	
-	public EtaObject() { }
+	public static final String TAG = "EtaObject";
 	
 	/**
-	 * More or less a static factory method, for ease of creating lists of objects, in situations where
-	 * the type is irrelevant, like conversion of objects in the shoppinglist manager.
-	 * @param objects to be converted
-	 * @return List of something that extends EtaBaseObjects
+	 * <p>Method for converting this object into a JSONObject.</p>
+	 * 
+	 * <p>This is especially usable when {@link Request.Method.PUT PUT}- and {@link Request.Method.POST POST}ing data
+	 * to API v2 with {@link JsonObjectRequest} and {@link JsonArrayRequest}, which ( not by coincidence ^_^ ) takes 
+	 * {@link JSONObject} and {@link JSONArray} respectively as body.</p>
+	 * @return A {@link JSONObject} representation of the object. Same structure as API v2, including any extra
+	 * 			variables needed for successful requests)
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T extends List<? extends EtaObject>> T fromJSON(JSONArray objects) {
-		ArrayList<EtaObject> list = new ArrayList<EtaObject>(0);
-		try {
-			JSONObject o = objects.getJSONObject(0);
-			if (o.has(ServerKey.ERN)) {
-				list = EtaErnObject.fromJSON(objects);
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return (T) list;
-	}
+	public abstract JSONObject toJSON();
 	
-	@SuppressWarnings("unchecked")
-	public static <T extends EtaObject> T fromJSON(JSONObject object) {
-		EtaObject item = new EtaObject();
-		if (object.has(ServerKey.ERN)) {
-			item = EtaErnObject.fromJSON(object);
-		}
-		return (T) item;
-	}
-	
-	public JSONObject toJSON() {
-		return new JSONObject();
-	}
-
-	protected static String getJsonString(JSONObject object, String name) {
-		if (object == null || name == null) 
-			return null;
-		
-		try {
-			if (!object.has(name))
-				return null;
-			return object.isNull(name) ? null : object.getString(name);
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return null;
-	}
-
-	protected static int jsonToInt(JSONObject object, String key, int defValue) {
-		try {
-			return object.isNull(key) ? defValue : object.getInt(key);
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return defValue;
-	}
-
-	protected static double jsonToDouble(JSONObject object, String key, double defValue) {
-		try {
-			return object.isNull(key) ? defValue : object.getDouble(key);
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return defValue;
-	}
-
-	protected static boolean jsonToBoolean(JSONObject object, String key, boolean defValue) {
-		try {
-			return object.isNull(key) ? defValue : object.getBoolean(key);
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return defValue;
-	}
-
-	protected static boolean stringCompare(String first, String second) {
-		return first == null ? second == null : first.equals(second);
-	}
-
+	/**
+	 * <p>This class contains most (but probably not all) strings, that eTilbudsavis API v2 can return as keys, in
+	 * responses of the types {@link JSONObject} and {@link JSONArray}.
+	 * </p>
+	 * 
+	 * <p><b>Note</b> not all keys are contained in this set, and for detailed documentation of each key, in a given
+	 * context, we will refer you to the <a href="http://engineering.etilbudsavis.dk/eta-api/">API documentation</a></p>
+	 * 
+	 * @author Danny Hvam - danny@etilbudsavis.dk
+	 */
 	public class ServerKey {
 		
 		public static final String ID = "id";
@@ -254,6 +138,28 @@ public class EtaObject {
 		public static final String TOKEN = "token";
 		public static final String EXPIRES = "expires";
 		public static final String PROVIDER = "provider";
+		public static final String PRICE = "price";
+		public static final String PREPRICE = "pre_price";
+		public static final String CURRENCY = "currency";
+		public static final String LENGTH = "length";
+		public static final String OFFSET = "offset";
+		public static final String SUBJECT = "subject";
+		public static final String ACCEPT_URL = "accept_url";
 		
 	}
+
+	/**
+	 * <p>This class contains a set of {@link String}s that eTilbudsavis uses
+	 * as keys for the meta-{@link JSONObject}, found on {@link Shoppinglist},
+	 * and {@link ShoppinglistItem}.</p>
+	 * 
+	 * <p>It's not guaranteed, that all keys are given in this class</p>
+	 * 
+	 * @author Danny Hvam - danny@etilbudsavis.dk
+	 */
+	public class MetaKey {
+		public static final String COMMENT = "eta_comment";
+		public static final String THEME = "eta_theme";
+	}
+	
 }

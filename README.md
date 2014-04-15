@@ -1,22 +1,32 @@
-# eTilbudsavis - Android SDK
+eTilbudsavis - Android SDK
+===
+
+The simple solution to querying for eTilbudsavis-data.
+
 
 # Introduction
-This is a short guide to guide you through our Android SDK. We will assume you
-are using [eclipse](http://www.eclipse.org/) and the [Android Development Tools](http://developer.android.com/tools/sdk/eclipse-adt.html) plugin. 
-Furthermore you are goind to need an API key and secret from [found here](https://etilbudsavis.dk/developers/api/).
-Lastly we have included a ETA SDK Demo app in the repository. It demonstrates 
-some basic features, some of which are also described in this README.
+This is a short guide to guide you through our Android SDK. We will assume you are using [eclipse](http://www.eclipse.org/) and the [Android Development Tools](http://developer.android.com/tools/sdk/eclipse-adt.html) plugin. 
 
-If you want to get started quickly, just clone the [native-android-sdk](https://github.com/eTilbudsavis/native-android-sdk.git) repository.
-Start a new Android Application Project and import the ETA SDK into Eclipse as a library via the menu `Project -> Properties -> Android`.
+To get started you'll need to:
 
-- [Eta](#eta)
-- [Location](#location)
-- [Api](#api)
-- [Pageflip](#pageflip)
-- [Session](#session)
-- [Shoppinglist Manager](#shoppinglist-manager)
-- [Eta Objects](#eta-objects)
+ 1. Get an **API key** and **API secret** from [here](https://etilbudsavis.dk/developers/) (look for "Apply for Developer Program" in the top right corner).
+ 2. Clone the [native-android-sdk](https://github.com/eTilbudsavis/native-android-sdk.git) repository.
+
+The SDK Demo app included in the repo demonstrates some basic features, some of which are also described in this README. If you want to get started quickly, just start a new Android Application Project and import the ETA SDK into Eclipse as a library. 
+
+
+The rest of this documentation will offer detailed insights into:
+
+- [Eta](#eta) - the root object of the SDK
+- [Location](#location) - All requests need this
+- [Session](#session) - No session -> no data
+- [Request (Networking)](#request) - How to create requests, and what to include
+    - [Response](#request) - What you'll get
+    - [Error](#request) - What to do about this
+- [PageflipWebview](#pageflipwebview) - Showing a catalog
+- [Shoppinglist Manager](#shoppinglist-manager) - Managing and synchronizing lists, with no effort
+- [Eta Objects](#eta-objects) - The building blocks
+- [Debugging](#debugging) - You'll definitely find this useful
 
 
 # Usage
@@ -31,7 +41,7 @@ This is the main Class. Before you can start using the SDK, you must set the `Et
 because the `Eta` object is a singleton. The singleton pattern assures that the database, session and other settings are not
 ending up in a corrupt state.
 
-	Eta.getInstance().set("YOUR_API_KEY", "YOUR_API_SECRET", Context);
+    Eta.getInstance().set("YOUR_API_KEY", "YOUR_API_SECRET", Context);
 
 The `Eta` class, must also be part of your app's Lifecycle, which means that `onResume()` and `onPause()`
 must be called on the `mEta` object, this ensures all preferences are saved correctly, and database connections are
@@ -64,57 +74,33 @@ The `eta` object offers several usefull methods, see each Class for details:
 - `getShoppinglistManager()` - This is a very convinient class, and allows to easily create an shoppinglist for both offline as well as online synchronization.
 - `debug(boolean useDebug)` - Use this to enable debugging output to LogCat. NOTE: no debugging output will be displayed, if this isn't set to `true`
 
-We have an array of convenience methods, for the most commonly used methodcalls to the API, all located in the `eta` object.
-They all return an `Api` object, that can have further options enabled before `execute()`is called.
-They are mostly selfexplainatory from their method names, and parameters. And for further details, i'll refer to the JavaDoc.
-
-- `getCatalog` - methods will get some type of `Catalog` either an object or list, based on the exact method.
-- `getOffer*` - methods will get some type of `Offer` either an object or list, based on the exact method.
-- `getDealer*` - methods will get some type of `Dealer` either an object or list, based on the exact method.
-- `getStore*` - methods will get some type of `Store` either an object or list, based on the exact method.
-- `searchCatalog*` - search interface for `Catalog`
-- `searchOffer*` - search interface for `Offer`
-- `searchDealer*` - search interface for `Dealer`
-- `searchStore*` - search interface for `Store`
-
 
 ## Location
 The EtaLocation object, is a pure state object, and is where you want to store any Location information.
 Without a valid location set, the API won't respond with any data, as the whole service is geolocation based.
 
-To set a valid location, you must provide at least a `latitude`, `longitude` and a `radius`.
+To set a valid location, you must provide at least a **latitude**, **longitude** and a **radius**.
 If you are using `LocationManager` you can pass any new `location` objects directly into `EtaLocation`.
 
 `EtaLocation` will save the last known location to shared preferences, so a valid location is always accessible,
 once an initial location have been given.
 
-## Api
+## Request
 You can include various options into the api.request() call, just create a Bundle 
 with key/value pairs, and send it as a parameter. See more about REST API options
 [here](https://etilbudsavis.dk/developers/docs/).
 
-### Api Listeners
-We've created a neat callback interface, for returning data for you, so you don't have to do any work.
-Basically, you just define the type of data you want returned, and we'll get it for you. So if you want
-to get a catalog, just pass the `Api` a `ItemListener<Catalog>`:
 
-	ItemListener<Catalog> listener = new ItemListener<Catalog> {
-		
-		@Override
-		public void onComplete(boolean isCache, int statusCode, Catalog item, EtaError error) {
-		}
-	}
+#### Request types
+ETA SDK has four default request types, ready to use out of the box.
 
-We have defined 5 basic interfaces for returning data:
-
-- `ItemListener<T extends EtaErnObject>` returns an `Object` of type `T`, where `T` can be of any type that extends `EtaErnObject`, see [Eta Objects](#eta-objects)
-- `ListListener<T extends EtaErnObject>` returns an `List` of type `T`, where `T` can be of any type that extends `EtaErnObject`, see [Eta Objects](#eta-objects)
-- `ItemListener<JSONObject>` returns a `JSONObject`
-- `ListListener<JSONArray>` returns a `JSONArray`
-- `ApiListener<String>` returns the result as `String`
+JsonObjectRequest
+JsonArrayRequest
+JsonStringRequest
+StringRequest
 
 
-## Pageflip
+## PageflipWebview
 Pageflip, is basically just a simple and smooth catalog viewer. With a simple yet effective interface.
 The Pageflip view, can be added to any XML layout you're using in eclipse, either via the GUI editor,
 under _Custom and Library Views->Pageflip_ or with this XML tag:
@@ -125,7 +111,7 @@ The `Pageflip` must be executed like other elements in the SDK with the `execute
 have full control of setting up any options, you want before actually loading the `Pageflip`, and make sure that
 you to decide what happens, and when. See a simple working example of how to interact with the `Pageflip`, in the SDKDemo (bundled in the SDK).
 
-### Events
+#### Events
 `Pageflip` takes a `PageflipListener`, through which you will recieve information about the actions the user
 performs on the view. The current list of events, and corresponding JSONObjects can be found [here](http://engineering.etilbudsavis.dk/eta-web-app/#eta-catalog-view).
 
@@ -179,10 +165,12 @@ The objects are:
 
 The objects will in someway contain parts of all other objects, that have been included in this SDK.
 
-# Utilities
-The Utils class, has a static set of methods, that you will hopefully find usefull during development.
+## Debugging
 
-It contains simple tools for input validation (e-mail, name, gender e.t.c.), data transformation (bundle to JavaScript string, SHA256 hasher e.t.c.) and easily printing API responses to LogCat.
+
+# Utilities
+
+
 
 
 # Feedback

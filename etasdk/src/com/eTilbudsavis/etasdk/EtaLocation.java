@@ -5,6 +5,9 @@
 package com.eTilbudsavis.etasdk;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,42 +18,43 @@ import android.location.LocationManager;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
-import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Param;
 
 public class EtaLocation extends Location {
-
+	
 	public static final String TAG = "EtaLocation";
 	
-	private static final String ETA_PROVIDER	= "etasdk";
+	private static final String ETA_PROVIDER = "etasdk";
 	
-	private static final int RADIUS_MIN = 0;
-	private static final int RADIUS_MAX = 700000;
-	private static final double BOUND_DEFAULT = 0.0;
+	public static final int RADIUS_MIN = 0;
+	public static final int RADIUS_MAX = 700000;
+	public static final int DEFAULT_RADIUS = 100000;
+	public static final double DEFAULT_COORDINATE = 0.0d;
 	
-	// Location.
-	private static int mRadius = RADIUS_MAX;
-	private static boolean mSensor = false;
-	private static String mAddress = null;
-	private static double mBoundNorth = BOUND_DEFAULT;
-	private static double mBoundEast = BOUND_DEFAULT;
-	private static double mBoundSouth = BOUND_DEFAULT;
-	private static double mBoundWest = BOUND_DEFAULT;
-	private static Eta mEta;
-	private static boolean mPushNotifications = false;
-	private static ArrayList<LocationListener> mSubscribers = new ArrayList<LocationListener>();
+	private int mRadius = DEFAULT_RADIUS;
+	private boolean mSensor = false;
+	private String mAddress = null;
+	private double mBoundNorth = DEFAULT_COORDINATE;
+	private double mBoundEast = DEFAULT_COORDINATE;
+	private double mBoundSouth = DEFAULT_COORDINATE;
+	private double mBoundWest = DEFAULT_COORDINATE;
+	private Eta mEta;
+	private Observable mObservers = new Observable();
+	private List<LocationListener> mSubscribers = new ArrayList<LocationListener>();
 	
 	public EtaLocation(Eta eta) {
 		super(ETA_PROVIDER);
 		mEta = eta;
 		restoreState();
 	}
-
+	
 	@Override
 	public void set(Location l) {
 		super.set(l);
-		mSensor = (getProvider().equals(LocationManager.GPS_PROVIDER) || getProvider().equals(LocationManager.NETWORK_PROVIDER) );
-		mPushNotifications = true;
-		save();
+		mSensor = (l.getProvider().equals(LocationManager.GPS_PROVIDER) || l.getProvider().equals(LocationManager.NETWORK_PROVIDER) );
+		saveState();
+		notifySubscribers();
 	}
 	
 	/**
@@ -63,13 +67,14 @@ public class EtaLocation extends Location {
 	 * @param longitude of the address
 	 * @return this object
 	 */
-	public EtaLocation set(String address, double latitude, double longitude) {
+	public void set(String address, double latitude, double longitude) {
 		mAddress = address;
-		setLatitude(latitude);
-		setLongitude(longitude);
-		setSensor(false);
-		save();
-		return this;
+		super.setLatitude(latitude);
+		super.setLongitude(longitude);
+		mSensor = false;
+		super.setTime(System.currentTimeMillis());
+		saveState();
+		notifySubscribers();
 	}
 	
 	/**
@@ -77,12 +82,18 @@ public class EtaLocation extends Location {
 	 * @param radius in meters <li> Min value = 0 <li> Max value = 700000
 	 * @return this Object, for easy chaining of set methods.
 	 */
-	public EtaLocation setRadius(int radius) {
-		mRadius =  radius < RADIUS_MIN ? RADIUS_MIN : ( radius > RADIUS_MAX ? RADIUS_MAX : radius );
-		save();
-		return this;
+	public void setRadius(int radius) {
+		if (radius < RADIUS_MIN || radius > RADIUS_MAX) {
+			String distError = "Radius must be within range %s to %s, provided radius: %s";
+			EtaLog.d(TAG, String.format(distError, RADIUS_MIN, RADIUS_MAX, radius));
+			return;
+		}
+		mRadius = radius;
+		super.setTime(System.currentTimeMillis());
+		saveState();
+		notifySubscribers();
 	}
-
+	
 	/**
 	 * Get current radius
 	 * @return radius in meters.
@@ -90,43 +101,89 @@ public class EtaLocation extends Location {
 	public int getRadius() {
 		return mRadius;
 	}
-
-	public EtaLocation setSensor(boolean sensor) {
-		mSensor = sensor;
-		save();
-		return this;
+	
+	@Override
+	public void setLatitude(double latitude) {
+		super.setLatitude(latitude);
+		super.setTime(System.currentTimeMillis());
+		saveState();
+		notifySubscribers();
 	}
 	
+	@Override
+	public void setLongitude(double longitude) {
+		super.setLongitude(longitude);
+		super.setTime(System.currentTimeMillis());
+		saveState();
+		notifySubscribers();
+	}
+	
+	@Override
+	public void setTime(long time) {
+		super.setTime(time);
+		saveState();
+		notifySubscribers();
+	}
+	
+	/**
+	 * Set whether the location has been set by sensor.<br>
+	 * Sensor is automatically set to true if location is set via {@link #set(Location) setLocation(Location l)}
+	 * and the given location is from a sensor (network, or GPS).
+	 * @param sensor
+	 */
+	public void setSensor(boolean sensor) {
+		mSensor = sensor;
+		super.setTime(System.currentTimeMillis());
+		saveState();
+		notifySubscribers();
+	}
+	
+	/**
+	 * Determines if the location is set by a sensor
+	 * @return true if location have been set by a sensor
+	 */
 	public boolean isSensor() {
 		return mSensor;
 	}
-
+	
 	/**
-	 * Set an postal address of a location.<br /><br />
-	 * <b>NOTICE</b> The address is purely a convenience for the developers.<br />
-	 * The SDK does NOT USE the data for anything, only latitude, longitude, radius and sensor are used, and hence they must be set.
+	 * 
 	 * @param address
-	 * @return This EtaLocation object
 	 */
-	public EtaLocation setAddress(String address) {
+	public void setAddress(String address) {
 		mAddress = address;
-		save();
-		return this;
+		super.setTime(System.currentTimeMillis());
+		saveState();
+		notifySubscribers();
 	}
 	
-	
+	/**
+	 * Returns an address, of this location if the address have previously been set 
+	 * with {@link #set(String, double, double) set(String address, double latitude, double longitude)}.
+	 * @return an address if one was given, else null
+	 */
 	public String getAddress() {
 		return mAddress;
 	}
-
+	
+	/**
+	 * Method for determining if the location have indeed been set.
+	 * @return true, if latitude != 0.0 and longitude != 0.0
+	 */
 	public boolean isSet() {
 		return isValidLocation(getLatitude(), getLongitude());
 	}
 	
+	/**
+	 * Method for validating an location's latitude and longitude
+	 * @param lat to check
+	 * @param lng to check
+	 * @return true, if lat != 0.0 and lng != 0.0
+	 */
 	public static boolean isValidLocation(double lat, double lng) {
 		return isValid(lat) && isValid(lng);
 	}
-
+	
 	/*
 	 * A coordinate is valid is it's not in the range of -0.1 to 0.1
 	 */
@@ -135,10 +192,10 @@ public class EtaLocation extends Location {
 	}
 	
 	public boolean isBoundsSet() {
-		return (mBoundNorth != BOUND_DEFAULT && 
-				mBoundSouth != BOUND_DEFAULT && 
-				mBoundEast != BOUND_DEFAULT && 
-				mBoundWest != BOUND_DEFAULT);
+		return (mBoundNorth != DEFAULT_COORDINATE && 
+				mBoundSouth != DEFAULT_COORDINATE && 
+				mBoundEast != DEFAULT_COORDINATE && 
+				mBoundWest != DEFAULT_COORDINATE);
 	}
 
 	/**
@@ -152,21 +209,33 @@ public class EtaLocation extends Location {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(Request.Param.LATITUDE, getLatitude());
-			o.put(Request.Param.LONGITUDE, getLongitude());
-			o.put(Request.Param.SENSOR, isSensor());
-			o.put(Request.Param.RADIUS, getRadius());
+			o.put(Param.LATITUDE, getLatitude());
+			o.put(Param.LONGITUDE, getLongitude());
+			o.put(Param.SENSOR, isSensor());
+			o.put(Param.RADIUS, getRadius());
+			if (isBoundsSet()) {
+				o.put(Param.BOUND_EAST, getBoundEast());
+				o.put(Param.BOUND_NORTH, getBoundNorth());
+				o.put(Param.BOUND_SOUTH, getBoundSouth());
+				o.put(Param.BOUND_WEST, getBoundWest());
+			}
 		} catch (JSONException e) {
-			e.printStackTrace();
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}
-
-	public int distanceToStore(Store store) {
+	
+	/**
+	 * Returns the approximate distance in meters between this location and the given location. Distance is defined using the WGS84 ellipsoid.
+	 * @see {@link #distanceTo(Location)}
+	 * @param store to mesure distance to
+	 * @return the approximate distance in meters
+	 */
+	public int distanceTo(Store store) {
 		Location tmp = new Location(EtaLocation.ETA_PROVIDER);
 		tmp.setLatitude(store.getLatitude());
 		tmp.setLongitude(store.getLongitude());
-		double dist = distanceTo(tmp);
+		float dist = distanceTo(tmp);
 		return (int)dist;
 	}
 
@@ -183,9 +252,11 @@ public class EtaLocation extends Location {
 		mBoundNorth = boundNorth;
 		mBoundSouth = boundSouth;
 		mBoundWest = boundWest;
-		save();
+		super.setTime(System.currentTimeMillis());
+		saveState();
+		notifySubscribers();
 	}
-
+	
 	public double getBoundEast() {
 		return mBoundEast;
 	}
@@ -202,58 +273,49 @@ public class EtaLocation extends Location {
 		return mBoundWest;
 	}
 	
+	/**
+	 * Generates a set of parameters that can be used as query parameters, when making requests to API v2.
+	 * @return a bundle containing query parameters
+	 */
 	public Bundle getQuery() {
 		
 		Bundle b = new Bundle();
 
-		b.putDouble(Request.Param.LATITUDE, getLatitude());
-		b.putDouble(Request.Param.LONGITUDE, getLongitude());
-		b.putBoolean(Request.Param.SENSOR, isSensor());
-		b.putInt(Request.Param.RADIUS, getRadius());
+		b.putDouble(Param.LATITUDE, getLatitude());
+		b.putDouble(Param.LONGITUDE, getLongitude());
+		b.putBoolean(Param.SENSOR, isSensor());
+		b.putInt(Param.RADIUS, getRadius());
 
 		// Determine whether to include bounds.
 		if (isBoundsSet()) {
-			b.putDouble(Request.Param.BOUND_EAST, getBoundEast());
-			b.putDouble(Request.Param.BOUND_NORTH, getBoundNorth());
-			b.putDouble(Request.Param.BOUND_SOUTH, getBoundSouth());
-			b.putDouble(Request.Param.BOUND_WEST, getBoundWest());
+			b.putDouble(Param.BOUND_EAST, getBoundEast());
+			b.putDouble(Param.BOUND_NORTH, getBoundNorth());
+			b.putDouble(Param.BOUND_SOUTH, getBoundSouth());
+			b.putDouble(Param.BOUND_WEST, getBoundWest());
 		}
 		return b;
-//		List<NameValuePair> query = new ArrayList<NameValuePair>();
-//		
-//		query.add(Utils.getNameValuePair(LATITUDE, getLatitude()));
-//		query.add(Utils.getNameValuePair(LONGITUDE, getLongitude()));
-//		query.add(Utils.getNameValuePair(SENSOR, isSensor()));
-//		query.add(Utils.getNameValuePair(RADIUS, getRadius()));
-//
-//		// Determine whether to include bounds.
-//		if (isBoundsSet()) {
-//			query.add(Utils.getNameValuePair(BOUND_EAST, getBoundEast()));
-//			query.add(Utils.getNameValuePair(BOUND_NORTH, getBoundNorth()));
-//			query.add(Utils.getNameValuePair(BOUND_SOUTH, getBoundSouth()));
-//			query.add(Utils.getNameValuePair(BOUND_WEST, getBoundWest()));
-//		}
-//		return query;
-	}
-
-
-	public void saveState() {
-		SharedPreferences.Editor editor = mEta.getSettings().getPrefs().edit();
-    	editor
-		.putBoolean(Settings.LOC_SENSOR, mSensor)
-		.putInt(Settings.LOC_RADIUS, mRadius)
-		.putFloat(Settings.LOC_LATITUDE, (float)getLatitude())
-		.putFloat(Settings.LOC_LONGITUDE, (float)getLongitude())
-		.putFloat(Settings.LOC_BOUND_EAST, (float)mBoundEast)
-		.putFloat(Settings.LOC_BOUND_WEST, (float)mBoundWest)
-		.putFloat(Settings.LOC_BOUND_NORTH, (float)mBoundNorth)
-		.putFloat(Settings.LOC_BOUND_SOUTH, (float)mBoundSouth)
-		.putString(Settings.LOC_ADDRESS, mAddress)
-		.putLong(Settings.LOC_TIME, getTime())
-		.commit();
+		
 	}
 	
-	public boolean restoreState() {
+	/**
+	 * Saves this locations state to SharedPreferences. This method is called on all onPause events.
+	 */
+	private void saveState() {
+		SharedPreferences.Editor e = mEta.getSettings().getPrefs().edit();
+    	e.putBoolean(Settings.LOC_SENSOR, mSensor);
+		e.putInt(Settings.LOC_RADIUS, mRadius);
+		e.putFloat(Settings.LOC_LATITUDE, (float)getLatitude());
+		e.putFloat(Settings.LOC_LONGITUDE, (float)getLongitude());
+		e.putFloat(Settings.LOC_BOUND_EAST, (float)mBoundEast);
+		e.putFloat(Settings.LOC_BOUND_WEST, (float)mBoundWest);
+		e.putFloat(Settings.LOC_BOUND_NORTH, (float)mBoundNorth);
+		e.putFloat(Settings.LOC_BOUND_SOUTH, (float)mBoundSouth);
+		e.putString(Settings.LOC_ADDRESS, mAddress);
+		e.putLong(Settings.LOC_TIME, getTime());
+		e.commit();
+	}
+	
+	private boolean restoreState() {
 		
 		SharedPreferences prefs = mEta.getSettings().getPrefs();
 		if (prefs.contains(Settings.LOC_SENSOR) && prefs.contains(Settings.LOC_RADIUS) && prefs.contains(Settings.LOC_LATITUDE) && 
@@ -261,22 +323,40 @@ public class EtaLocation extends Location {
 			
 			mSensor = prefs.getBoolean(Settings.LOC_SENSOR, false);
 			mRadius = prefs.getInt(Settings.LOC_RADIUS, Integer.MAX_VALUE);
-			setLatitude(prefs.getFloat(Settings.LOC_LATITUDE, 0.0f));
-			setLongitude(prefs.getFloat(Settings.LOC_LONGITUDE, 0.0f));
+			super.setLatitude(prefs.getFloat(Settings.LOC_LATITUDE, 0.0f));
+			super.setLongitude(prefs.getFloat(Settings.LOC_LONGITUDE, 0.0f));
 			mBoundEast = prefs.getFloat(Settings.LOC_BOUND_EAST, 0.0f);
 			mBoundWest = prefs.getFloat(Settings.LOC_BOUND_WEST, 0.0f);
 			mBoundNorth = prefs.getFloat(Settings.LOC_BOUND_NORTH, 0.0f);
 			mBoundSouth = prefs.getFloat(Settings.LOC_BOUND_SOUTH, 0.0f);
 			mAddress = prefs.getString(Settings.LOC_ADDRESS, null);
-			setTime(prefs.getLong(Settings.LOC_TIME, System.currentTimeMillis()));
+			super.setTime(prefs.getLong(Settings.LOC_TIME, System.currentTimeMillis()));
 			return true;
 		} 
 		return false;
 		
 	}
 	
-	public void save() {
-		setTime(System.currentTimeMillis());
+	/**
+	 * Method clears all location variables, and saves the new state to preferences.
+	 */
+	public void clear() {
+		super.setAccuracy(0.0f);
+		super.setAltitude(0.0d);
+		super.setBearing(0.0f);
+		super.setExtras(null);
+		super.setLatitude(DEFAULT_COORDINATE);
+		super.setLongitude(DEFAULT_COORDINATE);
+		super.setProvider(ETA_PROVIDER);
+		super.setSpeed(0.0f);
+		super.setTime(System.currentTimeMillis());
+		mAddress = null;
+		mBoundEast = DEFAULT_COORDINATE;
+		mBoundNorth = DEFAULT_COORDINATE;
+		mBoundSouth = DEFAULT_COORDINATE;
+		mBoundWest = DEFAULT_COORDINATE;
+		mRadius = DEFAULT_RADIUS;
+		mSensor = false;
 		saveState();
 		notifySubscribers();
 	}
@@ -286,12 +366,12 @@ public class EtaLocation extends Location {
 	 * This object automatically notifies all subscribers on changes.
 	 */
 	public void notifySubscribers() {
-		if (!mPushNotifications)
-			return;
+		
+		mObservers.notifyObservers();
 		
 		for (LocationListener l : mSubscribers) {
 			try {
-				l.onChange();
+				l.onLocationChange();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -303,6 +383,13 @@ public class EtaLocation extends Location {
 	 * @param listener for callbacks
 	 */
 	public void subscribe(LocationListener listener) {
+		mObservers.addObserver(new Observer() {
+			
+			public void update(Observable observable, Object data) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		if (!mSubscribers.contains(listener))
 			mSubscribers.add(listener);
 	}
@@ -318,16 +405,22 @@ public class EtaLocation extends Location {
 	
 	@Override 
 	public String toString() {
-        return "Location[mProvider=" + getProvider() +
-                ",mTime=" + getTime() +
-                ",mLatitude=" + getLatitude() +
-                ",mLongitude=" + getLongitude() +
-                ",mRadius=" + mRadius +
-                ",mSensor=" + mSensor + "]";
+        return "Location[provider=" + getProvider() +
+                ",time=" + getTime() +
+                ",latitude=" + getLatitude() +
+                ",longitude=" + getLongitude() +
+                ",address=[" + getAddress() + "]" + 
+                ",radius=" + mRadius +
+                ",sensor=" + mSensor + 
+                ",bounds=[west=" + getBoundWest() + 
+                ",north=" + getBoundNorth() + 
+                ",east=" + getBoundEast() + 
+                ",south=" + getBoundSouth() + "]" +
+                "]";
 	}
 	
 	public interface LocationListener {
-		public void onChange();
+		public void onLocationChange();
 	}
 	
 }

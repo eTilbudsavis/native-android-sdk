@@ -1,3 +1,18 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
@@ -8,6 +23,7 @@ import org.json.JSONObject;
 import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Branding extends EtaObject  implements Serializable {
 	
@@ -22,45 +38,43 @@ public class Branding extends EtaObject  implements Serializable {
 	private Integer mColor;
 	private Pageflip mPageflip;
 	
-	public Branding() { }
+	public Branding() {
+		
+	}
 	
-	@SuppressWarnings("unchecked")
 	public static Branding fromJSON(JSONObject branding) {
 		return fromJSON(new Branding(), branding);
 	}
-
+	
 	private static Branding fromJSON(Branding b, JSONObject branding) {
 		if (b == null) b = new Branding();
 		if (branding == null) return b;
 		
 		try {
-			b.setName(getJsonString(branding, S_NAME));
-			b.setUrlName(getJsonString(branding, S_URL_NAME));
-			b.setWebsite(getJsonString(branding, S_WEBSITE));
-			b.setLogo(getJsonString(branding, S_LOGO));
-			b.setColor(Color.parseColor("#"+branding.getString(EtaObject.S_COLOR)));
-			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(EtaObject.S_PAGEFLIP)));
+			b.setName(Json.valueOf(branding, ServerKey.NAME));
+			b.setUrlName(Json.valueOf(branding, ServerKey.URL_NAME));
+			b.setWebsite(Json.valueOf(branding, ServerKey.WEBSITE));
+			b.setLogo(Json.valueOf(branding, ServerKey.LOGO));
+			b.setColor(Color.parseColor("#"+branding.getString(EtaObject.ServerKey.COLOR)));
+			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(EtaObject.ServerKey.PAGEFLIP)));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return b;
 	}
 	
+	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Branding b) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_NAME, b.getName());
-			o.put(S_URL_NAME, b.getUrlName());
-			o.put(S_WEBSITE, b.getWebsite());
-			o.put(S_LOGO, b.getLogo());
-			o.put(S_COLOR, b.getColorString());
-			o.put(S_PAGEFLIP, b.getPageflip().toJSON());
+			o.put(ServerKey.NAME, Json.nullCheck(getName()));
+			o.put(ServerKey.URL_NAME, Json.nullCheck(getUrlName()));
+			o.put(ServerKey.WEBSITE, Json.nullCheck(getWebsite()));
+			o.put(ServerKey.LOGO, Json.nullCheck(getLogo()));
+			o.put(ServerKey.COLOR, Json.nullCheck(getColorString()));
+			o.put(ServerKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}
@@ -123,27 +137,6 @@ public class Branding extends EtaObject  implements Serializable {
 		return mPageflip;
 	}
 	
-	@Override
-	public String toString() {
-		return toString(false);
-	}
-	
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[")
-		.append("name=").append(mName)
-		.append(", urlName=").append(mUrlName)
-		.append(", website=").append(mWebsite);
-				
-		if (everything) {
-			sb.append(", logo=").append(mLogo)
-			.append(", color=").append(mColor)
-			.append(", pageflip=").append(mPageflip == null ? null : mPageflip.toString());
-		}
-		
-		return sb.append("]").toString();
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;

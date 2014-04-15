@@ -1,3 +1,18 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
@@ -7,43 +22,26 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 
-public class Store extends EtaErnObject implements Serializable {
+/**
+ * <p>This class is a representation of a store as the API v2 exposes it</p>
+ * 
+ * <p>More documentation available on via our
+ * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/stores.html">Store Reference</a>
+ * documentation, on the engineering blog.
+ * </p>
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ *
+ */
+public class Store extends EtaErnObject<Store> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Store";
-	
-	/** Sort a list by distance in ascending order. (smallest to largest) */
-	public static final String SORT_DISTANCE = Request.Sort.DISTANCE;
-
-	/** Sort a list by distance in descending order. (largest to smallest)*/
-	public static final String SORT_DISTANCE_DESC = Request.Sort.DISTANCE_DESC;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Request.Sort.CREATED;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
-
-	/** Parameter for getting a list of specific store id's */
-	public static final String FILTER_STORE_IDS = Request.Param.FILTER_STORE_IDS;
-
-	/** Endpoint for store list resource */
-	public static final String ENDPOINT_LIST = Request.Endpoint.STORE_LIST;
-
-	/** Endpoint for a single store resource */
-	public static final String ENDPOINT_ID = Request.Endpoint.STORE_ID;
-
-	/** Endpoint for searching stores */
-	public static final String ENDPOINT_SEARCH = Request.Endpoint.STORE_SEARCH;
-
-	/** Endpoint for fast searching stores */
-	public static final String ENDPOINT_QUICK_SEARCH = Request.Endpoint.STORE_QUICK_SEARCH;
-
 	
 	private String mStreet;
 	private String mCity;
@@ -59,8 +57,7 @@ public class Store extends EtaErnObject implements Serializable {
 	private Dealer mDealer;
 
 	public Store() { }
-
-	@SuppressWarnings("unchecked")
+	
 	public static ArrayList<Store> fromJSON(JSONArray stores) {
 		ArrayList<Store> list = new ArrayList<Store>();
 		try {
@@ -68,62 +65,61 @@ public class Store extends EtaErnObject implements Serializable {
 				list.add(Store.fromJSON((JSONObject)stores.get(i)));
 			
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return list;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Store fromJSON(JSONObject store) {
 		return fromJSON(new Store(), store);
 	}
 	
-	private static Store fromJSON(Store s, JSONObject store) {
+	public static Store fromJSON(Store s, JSONObject store) {
 		if (s == null) s = new Store();
 		if (store == null) return s;
 		
 		try {
-			s.setId(getJsonString(store, S_ID));
-			s.setErn(getJsonString(store, S_ERN));
-			s.setStreet(getJsonString(store, S_STREET));
-			s.setCity(getJsonString(store, S_CITY));
-			s.setZipcode(getJsonString(store, S_ZIP_CODE));
-			s.setCountry(Country.fromJSON(store.getJSONObject(S_COUNTRY)));
-			s.setLatitude(jsonToDouble(store, S_LATITUDE, 0.0));
-			s.setLongitude(jsonToDouble(store, S_LONGITUDE, 0.0));
-			s.setDealerUrl(getJsonString(store, S_DEALER_URL));
-			s.setDealerId(getJsonString(store, S_DEALER_ID));
-			s.setBranding(Branding.fromJSON(store.getJSONObject(S_BRANDING)));
-			s.setContact(getJsonString(store, S_CONTACT));
+			s.setId(Json.valueOf(store, ServerKey.ID));
+			s.setErn(Json.valueOf(store, ServerKey.ERN));
+			s.setStreet(Json.valueOf(store, ServerKey.STREET));
+			s.setCity(Json.valueOf(store, ServerKey.CITY));
+			s.setZipcode(Json.valueOf(store, ServerKey.ZIP_CODE));
+			s.setCountry(Country.fromJSON(store.getJSONObject(ServerKey.COUNTRY)));
+			s.setLatitude(Json.valueOf(store, ServerKey.LATITUDE, 0.0d));
+			s.setLongitude(Json.valueOf(store, ServerKey.LONGITUDE, 0.0d));
+			s.setDealerUrl(Json.valueOf(store, ServerKey.DEALER_URL));
+			s.setDealerId(Json.valueOf(store, ServerKey.DEALER_ID));
+			s.setBranding(Branding.fromJSON(store.getJSONObject(ServerKey.BRANDING)));
+			s.setContact(Json.valueOf(store, ServerKey.CONTACT));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return s;
 	}
 
+	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Store s) {
-		JSONObject o = new JSONObject();
+		JSONObject o = super.toJSON();
 		try {
-			o.put(S_ID, s.getId());
-			o.put(S_ERN, s.getErn());
-			o.put(S_STREET, s.getStreet());
-			o.put(S_CITY, s.getCity());
-			o.put(S_ZIP_CODE, s.getZipcode());
-			o.put(S_COUNTRY, s.getCountry().toJSON());
-			o.put(S_LATITUDE, s.getLatitude());
-			o.put(S_LONGITUDE, s.getLongitude());
-			o.put(S_DEALER_URL, s.getDealerUrl());
-			o.put(S_DEALER_ID, s.getDealerId());
-			o.put(S_BRANDING, s.getBranding().toJSON());
-			o.put(S_CONTACT, s.getContact());
+			o.put(ServerKey.STREET, Json.nullCheck(getStreet()));
+			o.put(ServerKey.CITY, Json.nullCheck(getCity()));
+			o.put(ServerKey.ZIP_CODE, Json.nullCheck(getZipcode()));
+			o.put(ServerKey.COUNTRY, Json.nullCheck(getCountry().toJSON()));
+			o.put(ServerKey.LATITUDE, getLatitude());
+			o.put(ServerKey.LONGITUDE, getLongitude());
+			o.put(ServerKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
+			o.put(ServerKey.DEALER_ID, Json.nullCheck(getDealerId()));
+			o.put(ServerKey.BRANDING, Json.nullCheck(getBranding().toJSON()));
+			o.put(ServerKey.CONTACT, Json.nullCheck(getContact()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
+	}
+	
+	@Override
+	public String getErnPrefix() {
+		return ERN_STORE;
 	}
 	
 	public Store setStreet(String street) {
@@ -226,50 +222,87 @@ public class Store extends EtaErnObject implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Store))
-			return false;
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((mBranding == null) ? 0 : mBranding.hashCode());
+		result = prime * result + ((mCity == null) ? 0 : mCity.hashCode());
+		result = prime * result
+				+ ((mContact == null) ? 0 : mContact.hashCode());
+		result = prime * result
+				+ ((mCountry == null) ? 0 : mCountry.hashCode());
+		result = prime * result
+				+ ((mDealerId == null) ? 0 : mDealerId.hashCode());
+		result = prime * result
+				+ ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(mLatitude);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(mLongitude);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((mStreet == null) ? 0 : mStreet.hashCode());
+		result = prime * result
+				+ ((mZipcode == null) ? 0 : mZipcode.hashCode());
+		return result;
+	}
 
-		Store s = (Store)o;
-		return stringCompare(mId, s.getId()) &&
-				stringCompare(mErn, s.getErn()) &&
-				stringCompare(mStreet, s.getStreet()) &&
-				stringCompare(mCity, s.getCity()) &&
-				stringCompare(mZipcode, s.getZipcode()) &&
-				mCountry == null ? s.getCountry() == null : mCountry.equals(s.getCountry()) &&
-				mLatitude == s.getLatitude() &&
-				mLongitude == s.getLongitude() &&
-				stringCompare(mDealerUrl, s.getDealerUrl()) &&
-				stringCompare(mDealerId, s.getDealerId()) &&
-				mBranding == null ? s.getBranding() == null : mBranding.equals(s.getBranding()) &&
-				stringCompare(mContact, s.getContact());
-	}
-	
 	@Override
-	public String toString() {
-		return toString(false);
-	}
-	
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[")
-		.append("branding=").append(mBranding.toString(everything))
-		.append(", id=").append(mId)
-		.append(", street=").append(mStreet)
-		.append(", city=").append(mCity);
-		
-		if (everything) {
-			sb.append(", zipcode=").append(mZipcode)
-			.append(", country=").append(mCountry.toString(everything))
-			.append(", latitude=").append(mLatitude)
-			.append(", longitude=").append(mLongitude)
-			.append(", dealer=").append(mDealer == null ? mDealerId : mDealer.toString(everything))
-			.append(", contact=").append(mContact);
-		}
-		return sb.append("]").toString();
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Store other = (Store) obj;
+		if (mBranding == null) {
+			if (other.mBranding != null)
+				return false;
+		} else if (!mBranding.equals(other.mBranding))
+			return false;
+		if (mCity == null) {
+			if (other.mCity != null)
+				return false;
+		} else if (!mCity.equals(other.mCity))
+			return false;
+		if (mContact == null) {
+			if (other.mContact != null)
+				return false;
+		} else if (!mContact.equals(other.mContact))
+			return false;
+		if (mCountry == null) {
+			if (other.mCountry != null)
+				return false;
+		} else if (!mCountry.equals(other.mCountry))
+			return false;
+		if (mDealerId == null) {
+			if (other.mDealerId != null)
+				return false;
+		} else if (!mDealerId.equals(other.mDealerId))
+			return false;
+		if (mDealerUrl == null) {
+			if (other.mDealerUrl != null)
+				return false;
+		} else if (!mDealerUrl.equals(other.mDealerUrl))
+			return false;
+		if (Double.doubleToLongBits(mLatitude) != Double
+				.doubleToLongBits(other.mLatitude))
+			return false;
+		if (Double.doubleToLongBits(mLongitude) != Double
+				.doubleToLongBits(other.mLongitude))
+			return false;
+		if (mStreet == null) {
+			if (other.mStreet != null)
+				return false;
+		} else if (!mStreet.equals(other.mStreet))
+			return false;
+		if (mZipcode == null) {
+			if (other.mZipcode != null)
+				return false;
+		} else if (!mZipcode.equals(other.mZipcode))
+			return false;
+		return true;
 	}
 	
 }

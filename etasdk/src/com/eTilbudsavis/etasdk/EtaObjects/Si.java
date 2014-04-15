@@ -1,3 +1,18 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
@@ -6,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Si  extends EtaObject implements Serializable {
 
@@ -14,23 +30,12 @@ public class Si  extends EtaObject implements Serializable {
 	public static final String TAG = "Unit";
 	
 	private String mSymbol;
-	private double mFactor = 1;
+	private double mFactor = 1.0d;
 	
 	public Si() {
 		
 	}
 	
-	public static Si fromJSON(String si) {
-		Si s = new Si();
-		try {
-			s = fromJSON(s, new JSONObject(si));
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
-		}
-		return s;
-	}
-	
-	@SuppressWarnings("unchecked")
 	public static Si fromJSON(JSONObject si) {
 		return fromJSON(new Si(), si);
 	}
@@ -39,27 +44,24 @@ public class Si  extends EtaObject implements Serializable {
 		if (s == null) s = new Si();
 		if (si == null) return s;
 		
-		s.setSymbol(getJsonString(si, S_SYMBOL));
-		s.setFactor(jsonToDouble(si, S_FACTOR, 1));
+		s.setSymbol(Json.valueOf(si, ServerKey.SYMBOL));
+		s.setFactor(Json.valueOf(si, ServerKey.FACTOR, 1.0d));
 		
 		return s;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Si s) {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(S_SYMBOL, s.getSymbol());
-			o.put(S_FACTOR, s.getFactor());
+			o.put(ServerKey.SYMBOL, Json.nullCheck(getSymbol()));
+			o.put(ServerKey.FACTOR, Json.nullCheck(getFactor()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}
-
+	
 	public String getSymbol() {
 		return mSymbol;
 	}
@@ -69,35 +71,45 @@ public class Si  extends EtaObject implements Serializable {
 		return this;
 	}
 
-	public Double getFactor() {
+	public double getFactor() {
 		return mFactor;
 	}
-
-	public Si setFactor(Double factor) {
-		mFactor = factor == null ? 1 : factor;
+	
+	public Si setFactor(double factor) {
+		mFactor = factor;
 		return this;
 	}
-	
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Si))
-			return false;
 
-		Si s = (Si)o;
-		return stringCompare(mSymbol, s.getSymbol()) &&
-				mFactor == s.getFactor();
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		long temp;
+		temp = Double.doubleToLongBits(mFactor);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((mSymbol == null) ? 0 : mSymbol.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Si other = (Si) obj;
+		if (Double.doubleToLongBits(mFactor) != Double
+				.doubleToLongBits(other.mFactor))
+			return false;
+		if (mSymbol == null) {
+			if (other.mSymbol != null)
+				return false;
+		} else if (!mSymbol.equals(other.mSymbol))
+			return false;
+		return true;
 	}
 	
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(getClass().getSimpleName()).append("[")
-		.append("symbol=").append(mSymbol)
-		.append("factor=").append(mFactor)
-		.append("]").toString();
-		
-	}
+	
 }

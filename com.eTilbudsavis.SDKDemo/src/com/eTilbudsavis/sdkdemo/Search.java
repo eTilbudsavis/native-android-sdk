@@ -1,6 +1,24 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.sdkdemo;
 
+import java.io.Serializable;
 import java.util.List;
+
+import org.json.JSONArray;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -14,88 +32,74 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.eTilbudsavis.etasdk.Api;
-import com.eTilbudsavis.etasdk.Api.ListListener;
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaError;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
+import com.eTilbudsavis.etasdk.Network.EtaError;
+import com.eTilbudsavis.etasdk.Network.Response.Listener;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.Utils.Param;
 import com.etilbudsavis.sdkdemo.R;
 
 public class Search extends Activity {
 
 	public static final String TAG = "Search";
-
+	
+	public static final String P_OFFERS = "offers";
+	public static final String P_QUERY = "query";
+	
 	EditText mQuery;
-	Button mPerformSearch;
 	ProgressDialog mPd;
 	List<Offer> mOffers;
 	ListView mResultDisplayer;
+	Eta mEta;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search);
-
+        
         /*
-         *  Note here, that because we setup Eta in the Main activity, 
-         *  we don't necessarily need to do t again. So we can just
-         *  call Eta.getInstance()
+         *  Because we 'set' Eta in the Main activity, it's not necessarily to
+         *  do it again. And therefore you can just call Eta.getInstance() when
+         *  ever you need the SDK
          */
         
         // Find views
         mQuery = (EditText) findViewById(R.id.etQuery);
         mResultDisplayer = (ListView) findViewById(R.id.lvResult);
         
-        // Set listeners
-        mPerformSearch = (Button) findViewById(R.id.btnPerformSearch);
-        mPerformSearch.setOnClickListener(new OnClickListener() {
+        // Check for any saved state
+        if (savedInstanceState != null) {
+        	mOffers = (List<Offer>)savedInstanceState.getSerializable(P_OFFERS);
+        	if (mOffers != null) {
+            	mResultDisplayer.setAdapter(new SearchAdapter());
+        	}
+        	String q = savedInstanceState.getString(P_QUERY);
+        	if (q != null) {
+            	mQuery.setText(q);
+            	mQuery.setSelection(q.length());
+        	}
+        	
+        }
+        
+        System.out.print("Eta null: " + Eta.getInstance().getClass().toString());
+        
+        Button search = (Button) findViewById(R.id.btnPerformSearch);
+        search.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				
-				mPd = ProgressDialog.show(Search.this, "", "Searching...", true, true);
-				String q = mQuery.getText().toString();
+				String query = mQuery.getText().toString().trim();
 				
-				/* This is where the magic happens.
-				 * This simple query gets a list of offers, based on a search query. */
-				
-				// Create a new Listener
-				ListListener<Offer> offerListener = new ListListener<Offer>() {
+				if (query.length() > 0) {
 					
-					@Override
-					public void onComplete(boolean isCache, int statusCode, List<Offer> list, EtaError error) {
-						
-						mPd.dismiss();
-						
-						/* If it's a successfull request, the list will be populated and error will be null
-						 * else an error is returned, and the list is null */
-						if (Utils.isSuccess(statusCode)) {
-							mOffers = list;
-							mResultDisplayer.setAdapter(new SearchAdapter());
-						} else {
-							
-							EtaLog.d(TAG, error.toString());
-							
-						}
-						
-					}
-				};
-				
-				// Make the Api object, with one of the simple wrapper methods found in mEta
-				Api api = Eta.getInstance().searchOffers(offerListener, q);
-				
-				/* You can set other options on the Api object, as you please.
-				 * E.g.: You can enable the debug flag, to get more info on this particulare
-				 * Api request as it executes. 
-				 * (This requires the Eta object to have set debugging to true, mEta.debug(true)) */
-				api.setFlag(Api.FLAG_PRINT_DEBUG);
-				
-				// Finally execute the Api request, as you would with any other AsyncTast :-)
-				api.execute();
-				
-				// This can all be wrapped into a one-liner but, for these examples we prefer some readability :-)
+					mPd = ProgressDialog.show(Search.this, "", "Searching...", true, true);
+					performSearch(query);
+					
+				}
 				
 			}
 		});
@@ -104,6 +108,75 @@ public class Search extends Activity {
         
     }
 
+	/* 
+	 * This is where the magic happens.
+	 * This simple query gets a list of offers, based on a search query.
+	 */
+    private void performSearch(String query) {
+    	
+		/*
+		 * Create a new Listener.
+		 * 
+		 * This is a JSONArray listener, and it's therefore important
+		 * to request an API endpoint that returns valid JSONArray data,
+		 * or you will get a ParseError.
+		 */
+		Listener<JSONArray> offerListener = new Listener<JSONArray>() {
+
+			@Override
+			public void onComplete(JSONArray response, EtaError error) {
+				
+				if (mPd != null) {
+					mPd.dismiss();
+				}
+				
+				/* 
+				 * Determining the state of the request response is simple.
+				 * 
+				 * If it's a successful request, the response will be populated
+				 * and the error object will be null. And if the request failed
+				 * the error object will be populated, and the request will be
+				 * null.
+				 * 
+				 */
+				if (response != null) {
+					
+					/*
+					 * Generate object from the JSONArray, with the factory method
+					 * in the Offer object.
+					 */
+					mOffers = Offer.fromJSON(response);
+					mResultDisplayer.setAdapter(new SearchAdapter());
+					
+				} else {
+					
+					/*
+					 * If the request failed, you can print the error message
+					 */
+					EtaLog.d(TAG, error.toJSON().toString());
+				}
+				
+			}
+		};
+		
+		Bundle args = new Bundle();
+		args.putString(Param.QUERY, query);
+		
+		// Create the request
+		JsonArrayRequest offerRequest = new JsonArrayRequest(Endpoint.OFFER_SEARCH, offerListener);
+		offerRequest.putQueryParameters(args);
+		
+		// Send the request to the SDK for execution
+		Eta.getInstance().add(offerRequest);
+		
+    }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+    	outState.putSerializable(P_OFFERS, (Serializable) mOffers);
+    	outState.putString(P_QUERY, mQuery.getText().toString());
+    }
+    
     @Override
     public void onResume() {
     	super.onResume();

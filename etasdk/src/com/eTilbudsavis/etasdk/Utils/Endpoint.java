@@ -1,201 +1,186 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.Utils;
-
-import com.eTilbudsavis.etasdk.Network.Request;
-
 
 
 /**
- * Endpoint is being depricated, for new/updated values, goto {@link Request.Endpoint Request.Endpoint}
+ * This class contains a basic list of endpoints, and some methods to generate
+ * various URL's to request API data.
  * 
- * {@link com.eTilbudsavis.etasdk.Utils.Endpoint Endpoint} holds most endpoint-links for API v2.<br><br>
- * 
- * This class should be referenced, when using the 
- * {@link com.eTilbudsavis.etasdk.Api #request(String, com.eTilbudsavis.etasdk.Api.RequestListener, android.os.Bundle, com.eTilbudsavis.etasdk.Api.RequestType, android.os.Bundle) Api.request()}
- * to avoid invalid parameters and improve caching.<br><br>
- * 
- * {@link com.eTilbudsavis.etasdk.Utils.Endpoint Endpoint}
- * is referenced in all classes that has an endpoint on the server. 
- * This minimizes confusion about what endpoints exists for each class.
- * An example getting a list of catalogs, here {@link com.eTilbudsavis.etasdk.EtaObjects.Catalog Catalog}
- * will hold an appropriate endpoint, in this case 
- * {@link com.eTilbudsavis.etasdk.EtaObjects.Catalog #ENDPOINT_LIST Catalog.ENDPOINT_LIST}<br><br>
- * 
- * NOT ALL endpoints is defined in the SDK, please reference the online documentation for more options.
+ * <p>This list of endpoints is fra from complete, but a full list of endpoints
+ * and their capabilities can be found via the 
+ * <a href="https://edge.etilbudsavis.dk/v2/help">Endpoint Documentation</a>.
+ * The documentation isn't complete but, if questions arise please feel free to
+ * contact us :-)</p>
  * 
  * @author Danny Hvam - danny@etilbudsavis.dk
- *
  */
-@Deprecated
-public final class Endpoint {
-
-	private static final String ITEM = "/";
-	private static final String CAT = "catalogs";
+public class Endpoint {
 	
-	public class Path {
+	public class Prefix {
 		
-		public static final String CATALOGS		= "/v2/" + CAT;
-		public static final String DEALERS		= "/v2/dealers";
-		public static final String OFFERS		= "/v2/offers";
-		public static final String STORES		= "/v2/stores";
-		public static final String SESSIONS		= "/v2/sessions";
-		public static final String USERS		= "/v2/users";
-		public static final String CATEGORIES	= "/v2/categories";
-
-		public static final String ENDPOINTS	= "/v2/endpoints";
+		public static final String API_PRODUCTION = "https://api.etilbudsavis.dk";
+		public static final String API_EDGE = "https://edge.etilbudsavis.dk";
 		
-		public static final String SHOPPINGLIST	= "/shoppinglists";
-		public static final String SEARCH = "/search";
-		public static final String QUICK_SEARCH = "/quicksearch";
-		public static final String TYPEAHEAD = "/typeahead";
-		public static final String FACEBOOK = "/facebook";
-		public static final String MODIFIED = "/modified";
-		public static final String SHARES = "/shares";
-		public static final String ITEMS = "/items";
-		public static final String EMPTY = "/empty";
-		public static final String RESET = "/reset";
-		public static final String PAGEFLIP_PROXY = "https://etilbudsavis.dk/proxy/";
+		public static final String PAGEFLIP_PRODUCTION = "https://etilbudsavis.dk";
+		public static final String PAGEFLIP_STAGING = "https://staging.etilbudsavis.dk";
+		public static final String PAGEFLIP_DEV = "http://10.0.1.41:3000";
+		
+		public static final String THEMES_PRODUCTION = "https://etilbudsavis.dk";
+		public static final String THEMES_STAGING = "https://staging.etilbudsavis.dk";
+		
 	}
 	
-	// GLOBALS
-	public static final String HOST = "https://edge.etilbudsavis.dk";
+	public static String API_HOST_PREFIX = Prefix.API_PRODUCTION;
+	public static String PAGEFLIP_HOST_PREFIX = Prefix.PAGEFLIP_PRODUCTION;
+	public static String THEMES_HOST_PREFIX = Prefix.THEMES_PRODUCTION;
 	
-	// LISTS
-	public static final String CATALOG_LIST = Path.CATALOGS;
-	public static final String DEALER_LIST = Path.DEALERS;
-	public static final String OFFER_LIST = Path.OFFERS;
-	public static final String STORE_LIST = Path.STORES;
+	public static final String CATALOG_LIST = "/v2/catalogs";
+	public static final String CATALOG_ID = "/v2/catalogs/";
+	public static final String CATALOG_SEARCH = "/v2/catalogs/search";
+	public static final String CATALOG_TYPEAHEAD = "/v2/catalogs/typeahead";
 	
-	// SINGLE ID
-	public static final String CATALOG_ID = Path.CATALOGS + ITEM;
-	public static final String DEALER_ID = Path.DEALERS + ITEM;
-	public static final String OFFER_ID = Path.OFFERS + ITEM;
-	public static final String STORE_ID = Path.STORES + ITEM;
-	
-	public static final String SESSIONS = Path.SESSIONS;
-	
-	public static final String USER_ID = Path.USERS + ITEM;
-	public static final String USER_RESET = Path.USERS + Path.RESET;
-	
-	// SEARCH
-	public static final String CATALOG_SEARCH = Path.CATALOGS + Path.SEARCH;
-	public static final String DEALER_SEARCH = Path.DEALERS + Path.SEARCH;
-	public static final String OFFER_SEARCH = Path.OFFERS + Path.SEARCH;
-	public static final String STORE_SEARCH = Path.STORES + Path.SEARCH;
-	
-	// Typeahead
-	public static final String OFFER_TYPEAHEAD = Path.OFFERS + Path.TYPEAHEAD;
-	
-	// QUICK SEARCH
-	public static final String STORE_QUICK_SEARCH = Path.STORES + Path.QUICK_SEARCH;
+	public static final String DEALER_LIST = "/v2/dealers";
+	public static final String DEALER_ID = "/v2/dealers/";
+	public static final String DEALER_SEARCH = "/v2/dealers/search";
 
-	/**
-	 * https://etilbudsavis.dk/proxy/{id}/
-	 * @param id of pageflip proxy (can be random)
-	 * @return https://etilbudsavis.dk/proxy/{id}/
-	 */
-	public static String getPageflipProxy(String id) {
-		return Path.PAGEFLIP_PROXY + id + ITEM;
-	}
+	public static final String OFFER_LIST = "/v2/offers";
+	public static final String OFFER_ID = "/v2/offers/";
+	public static final String OFFER_SEARCH = "/v2/offers/search";
+	public static final String OFFER_TYPEAHEAD = "/v2/offers/typeahead";
+
+	public static final String STORE_LIST = "/v2/stores";
+	public static final String STORE_ID = "/v2/stores/";
+	public static final String STORE_SEARCH = "/v2/stores/search";
+	public static final String STORE_QUICK_SEARCH = "/v2/stores/quicksearch";
+
+	public static final String SESSIONS = "/v2/sessions";
+
+	public static final String USER = "/v2/users";
+
+	public static final String USER_RESET = "/v2/users/reset";
+
+	public static final String CATEGORIES	= "/v2/categories";
+
+	public static final String COUNTRIES = "/v2/countries";
 	
 	/**
-	 * /v2/users/{user_id}/facebook
-	 * @param userId
-	 * @return
+	 * Get the current host to use. This can be changed by editing Endpoint.API_HOST_PREFIX.
+	 * https://{prefix}.etilbudsavis.dk
+	 * @return A string
 	 */
-	public static String getFacebookByUserId(int userId) {
-		return USER_ID + String.valueOf(userId) + Path.FACEBOOK;
+	public static String getHost() {
+		return API_HOST_PREFIX;
 	}
-
-	/**
-	 * /v2/users/{user_id}/shoppinglists
-	 * @param userId
-	 * @return
-	 */
-	public static String getListsByUserId(int userId) {
-		return USER_ID + String.valueOf(userId) + Path.SHOPPINGLIST;
+	
+	/** {pageflip_host_prefix}/proxy/{id}/ */
+	public static String pageflipProxy(String id) {
+		return String.format("%s/proxy/%s/", PAGEFLIP_HOST_PREFIX, id);
+	}
+	
+	/** {theme_host_prefix}/utils/ajax/lists/themes/ */
+	public static String themes() {
+		return String.format("%s/utils/ajax/lists/themes/", THEMES_HOST_PREFIX);
+	}
+	
+	/** /v2/offers/{offer_id} */
+	public static String offerId(String offerId) {
+		return String.format("/v2/offers/%s", offerId);
 	}
 
-	/**
-	 * /v2/users/{user_id}/shoppinglists/{list_uuid}
-	 * @param userId
-	 * @param listId
-	 * @return
-	 */
-	public static String getListById(int userId, String listId) {
-		return getListsByUserId(userId) + ITEM + listId;
+	/** /v2/stores/{store_id} */
+	public static String storeId(String storeId) {
+		return String.format("/v2/stores/%s", storeId);
 	}
 
-	/**
-	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/modified
-	 * @param userId
-	 * @param listId
-	 * @return
-	 */
-	public static String getListModifiedById(int userId, String listId) {
-		return getListById(userId, listId) + Path.MODIFIED;
+	/** /v2/dealers/{dealer_id} */
+	public static String dealerId(String dealerId) {
+		return String.format("/v2/dealers/%s", dealerId);
 	}
 
-	/**
-	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/empty
-	 * @param userId
-	 * @param listId
-	 * @return
-	 */
-	public static String getListEmpty(int userId, String listId) {
-		return getListById(userId, listId) + Path.EMPTY;
+	/** /v2/catalogs/{catalog_id} */
+	public static String catalogId(String catalogId) {
+		return String.format("/v2/catalogs/%s", catalogId);
+	}
+
+	/** /v2/catalogs/{catalog_id}/collect */
+	public static String catalogCollect(String catalogId) {
+		return String.format("/v2/catalogs/%s/collect", catalogId);
+	}
+	
+	/** /v2/offers/{offer_id}/collect */
+	public static String offerCollect(String offerId) {
+		return String.format("/v2/offers/%s/collect", offerId);
 	}
 	
 	/**
-	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares
-	 * @param userId
-	 * @param listId
-	 * @return
+	 * /v2/stores/{offer_id}/collect
 	 */
-	public static String getSharesByListId(int userId, String listId) {
-		return getListById(userId, listId) + Path.SHARES;
+	public static String storeCollect(String storeId) {
+		return String.format("/v2/stores/%s/collect", storeId);
 	}
 
-	/**
-	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email}
-	 * @param userId
-	 * @param listUuid
-	 * @param shareEmail
-	 * @return
-	 */
-	public static String getShareByEmail(int userId, String listUuid, String shareEmail) {
-		return getSharesByListId(userId, listUuid) + ITEM + shareEmail;
+	/** /v2/users/{user_id}/facebook */
+	public static String facebook(int userId) {
+		return String.format("/v2/users/%s/facebook", userId);
 	}
 
-	/**
-	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items
-	 * @param userId
-	 * @param listId
-	 * @return
-	 */
-	public static String getItemByListId(int userId, String listId) {
-		return getListById(userId, listId) + Path.ITEMS;
+	/** /v2/users/{user_id}/shoppinglists */
+	public static String lists(int userId) {
+		return String.format("/v2/users/%s/shoppinglists", userId);
 	}
 
-	/**
-	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}
-	 * @param userId
-	 * @param listId
-	 * @param itemId
-	 * @return
-	 */
-	public static String getItemById(int userId, String listId, String itemId) {
-		return getItemByListId(userId, listId) + ITEM + itemId;
+	/** /v2/users/{user_id}/shoppinglists/{list_uuid} */
+	public static String list(int userId, String listId) {
+		return String.format("/v2/users/%s/shoppinglists/%s", userId, listId);
 	}
 
-	/**
-	 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified
-	 * @param userId
-	 * @param listId
-	 * @param itemId
-	 * @return
-	 */
-	public static String getItemModifiedById(int userId, String listId, String itemId) {
-		return getItemById(userId, listId, itemId) + Path.MODIFIED;
+	/** /v2/users/{user_id}/shoppinglists/{list_uuid}/modified */
+	public static String listModified(int userId, String listId) {
+		return String.format("/v2/users/%s/shoppinglists/%s/modified", userId, listId);
 	}
-	
+
+	/** /v2/users/{user_id}/shoppinglists/{list_uuid}/empty */
+	public static String listEmpty(int userId, String listId) {
+		return String.format("/v2/users/%s/shoppinglists/%s/empty", userId, listId);
+	}
+
+	/** /v2/users/{user_id}/shoppinglists/{list_uuid}/shares */
+	public static String listShares(int userId, String listId) {
+		return String.format("/v2/users/%s/shoppinglists/%s/shares", userId, listId);
+	}
+
+	/** /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email} */
+	public static String listShareEmail(int userId, String listId, String email) {
+		return String.format("/v2/users/%s/shoppinglists/%s/shares/%s", userId, listId, email);
+	}
+
+	/** /v2/users/{user_id}/shoppinglists/{list_uuid}/items */
+	public static String listitems(int userId, String listId) {
+		return String.format("/v2/users/%s/shoppinglists/%s/items", userId, listId);
+	}
+
+	/** /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid} */
+	public static String listitem(int userId, String listId, String itemId) {
+		return String.format("/v2/users/%s/shoppinglists/%s/items/%s", userId, listId, itemId);
+	}
+
+	/** /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified */
+	public static String listitemModifiedById(int userId, String listId, String itemId) {
+		return String.format("/v2/users/%s/shoppinglists/%s/items/%s/modified", userId, listId, itemId);
+	}
+
 }

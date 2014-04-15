@@ -1,416 +1,587 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.Network;
 
-import com.eTilbudsavis.etasdk.Eta;
+import java.util.HashMap;
+import java.util.Map;
 
-public abstract class Request {
+import org.json.JSONException;
 
-	public static final String TAG = "Request";
+import android.os.Bundle;
+import android.os.Handler;
 
-	/**
-	 * Helper class for the parameters the eTilbudsavis API supports.<br>
-	 * Note that not all parameters are necessarily in this set.<br><br>
-	 * 
-	 * For more information on parameters, please read the API documentation at engineering.etilbudsavis.dk/eta-api/
-	 * 
-	 * @author Danny Hvam - danny@etilbudsavis.dk
-	 */
-	public static class Param {
+import com.eTilbudsavis.etasdk.Network.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
-		/** String identifying the order by parameter for all list calls to the API */
-		public static final String ORDER_BY = "order_by";
-
-		/** API v2 parameter name for sensor. */
-		public static final String SENSOR = "r_sensor";
-
-		/** API v2 parameter name for latitude. */
-		public static final String LATITUDE = "r_lat";
-
-		/** API v2 parameter name for longitude. */
-		public static final String LONGITUDE = "r_lng";
-
-		/** API v2 parameter name for radius. */
-		public static final String RADIUS = "r_radius";
-
-		/** API v2 parameter name for bounds east. */
-		public static final String BOUND_EAST = "b_east";
-
-		/** API v2 parameter name for bounds north. */
-		public static final String BOUND_NORTH = "b_north";
-
-		/** API v2 parameter name for bounds south. */
-		public static final String BOUND_SOUTH = "b_south";
-
-		/** API v2 parameter name for bounds west. */
-		public static final String BOUND_WEST = "b_west";
-
-		/** API v2 parameter name for API Key */
-		public static final String API_KEY = "api_key";
-
-		/** String identifying the offset parameter for all list calls to the API */
-		public static final String OFFSET = "offset";
-
-		/** String identifying the limit parameter for all list calls to the API */
-		public static final String LIMIT = "limit";
-
-		/** String identifying the run from parameter for all list calls to the API */
-		public static final String RUN_FROM = "run_from";
-
-		/** String identifying the run till parameter for all list calls to the API */
-		public static final String RUN_TILL = "run_till";
-
-		/** String identifying the color parameter for all list calls to the API */
-		public static final String COLOR = "color";
-
-		/** Parameter for pdf file location */
-		public static final String PDF = "pdf";
-
-		/** Parameter for a resource name, e.g. dealer name */
-		public static final String NAME = "name";
-
-		/** Parameter for a dealer resource */
-		public static final String DEALER = "dealer";
-
-		/** Parameter for the friendly name of a website */
-		public static final String URL_NAME = "url_name";
-
-		/** Parameter for pageflip color */
-		public static final String PAGEFLIP_COLOR = "pageflip_color";
-
-		/** Parameter for the absolute address of a website */
-		public static final String WEBSITE = "website";
-
-		/** Parameter for a resource logo */
-		public static final String LOGO = "logo";
-
-		/** Parameter for search */
-		public static final String QUERY = "query";
-
-		/** Parameter for pageflip logo location */
-		public static final String PAGEFLIP_LOGO = "pageflip_Logo";
-
-		/** Parameter for catalog id's */
-		public static final String FILTER_CATALOG_IDS = "catalog_ids";
-
-		/** Parameter for store id's */
-		public static final String FILTER_STORE_IDS = "store_ids";
-
-		/** Parameter for area id's */
-		public static final String FILTER_AREA_IDS = "area_ids";
-
-		/** Parameter for store id's */
-		public static final String FILTER_OFFER_IDS = "offer_ids";
-
-		/** Parameter for getting a list of specific dealer id's */
-		public static final String FILTER_DEALER_IDS = "dealer_ids";
-
-		/** Parameter for a resource e-mail */
-		public static final String EMAIL = "email";
-
-		/** Parameter for a resource password */
-		public static final String PASSWORD = "password";
-
-		/** Parameter for a resource birth year */
-		public static final String BIRTH_YEAR = "birth_year";
-
-		/** Parameter for a resource gender */
-		public static final String GENDER = "gender";
-
-		/** Parameter for a resource success redirect */
-		public static final String SUCCESS_REDIRECT = "success_redirect";
-
-		/** Parameter for a resource error redirect */
-		public static final String ERROR_REDIRECT = "error_redirect";
-
-		/** Parameter for a resource old password */
-		public static final String OLD_PASSWORD = "old_password";
-
-		/** Parameter for a facebook token */
-		public static final String FACEBOOK_TOKEN = "facebook_token";
-
-		/** Parameter for a delete filter */
-		public static final String FILTER_DELETE = "filter";
-
-		public static final String ID = "id";
-		
-		public static final String MODIFIED = "modified";
-		
-		public static final String ERN = "ern";
-		
-		public static final String ACCESS = "access";
-		
-		public static final String ACCEPT_URL = "accept_url";
-
-		public static final String DESCRIPTION = "description";
-		
-		public static final String COUNT = "count";
-		
-		public static final String TICK = "tick";
-		
-		public static final String OFFER_ID = "offer_id";
-		
-		public static final String CREATOR = "creator";
-		
-		public static final String SHOPPING_LIST_ID = "shopping_list_id";
-
-		/** Parameter for a resource token time to live */
-		public static final String TOKEN_TTL = "token_ttl";
-
-		/** Parameter for a v1 session migration */
-		public static final String V1_AUTH_ID = "v1_auth_id";
+@SuppressWarnings("rawtypes")
+public abstract class Request<T> implements Comparable<Request<T>> {
 	
-		/** Parameter for a v1 session migration */
-		public static final String V1_AUTH_TIME = "v1_auth_time";
+	public static final String TAG = "Request";
+	
+	/** Default encoding for POST or PUT parameters. See {@link #getParamsEncoding()}. */
+	protected static final String DEFAULT_PARAMS_ENCODING = "utf-8";
+	
+	/** Default cache time in milliseconds */
+	protected static final long DEFAULT_CACHE_TTL = 3 * Utils.MINUTE_IN_MILLIS;
+	
+	/** Default connection timeout, this is for both connection and socket */
+	private static final int CONNECTION_TIME_OUT = (int) (20 * Utils.SECOND_IN_MILLIS);
+	
+	/** Listener interface, for responses */
+	private final Listener<T> mListener;
+	
+	/** Request method of this request.  Currently supports GET, POST, PUT, and DELETE. */
+	private final Method mMethod;
+	
+	/** URL of this request. */
+	private String mUrl;
+	
+	/** Headers to be used in this request */
+	private Map<String, String> mHeaders = new HashMap<String, String>();
+	
+	/** Parameters to use in this request */
+	private Bundle mQuery = new Bundle();
+	
+	/** Sequence number used for prioritizing the queue */
+	private int mSequence = 0;
 
-		/** Parameter for a v1 session migration */
-		public static final String V1_AUTH_HASH = "v1_auth_hash";
+	/** Item for containing cache items */
+	protected Map<String, Cache.Item> mCache = new HashMap<String, Cache.Item>();
+	
+	/** Should this request use location in the query */
+	private boolean mUseLocation = true;
+	
+	/** If true Request will return data from cache if exists */
+	private boolean mIgnoreCache = false;
+	
+	/** Whether or not responses to this request should be cached. */
+	private boolean mIsCachable = true;
+	
+	/** Whether or not this request has been canceled. */
+	private boolean mCanceled = false;
 
-		/** Parameter for locale */
-		public static final String LOCALE = "locale";
+    /** Indication if the request is finished */
+    private boolean mFinished = false;
+    
+    private int mTimeout = CONNECTION_TIME_OUT;
+    
+	/** Log of this request */
+	private final EventLog mLog;
+	
+	private boolean mCacheHit = false;
 
-		/** Parameter for sending the app version for better app statistics in insight */
-		public static final String API_AV = "api_av";
+	/** Allows for the network response printed */
+    private boolean mDebugNetwork = false;
+
+	/** Allows for the network response printed */
+    private boolean mDebugPerformance = false;
+    
+	/** Handler, for returning requests on correct queue */
+	private Handler mHandler;
+	
+	/** Boolean deciding if the summary should be added to RequestQueue log entries */
+	private boolean mLogSummary = true;
+	
+	/**  */
+	private RequestQueue mRequestQueue;
+	
+	/** A tag to identify the request, useful for bulk operations */
+	private Object mTag;
+	
+	public enum Priority {
+		LOW, MEDIUM, HIGH
+	}
+	
+	/** Supported request methods. */
+//	public interface Method {
+//		int GET = 0;
+//		int POST = 1;
+//		int PUT = 2;
+//		int DELETE = 3;
+//	}
+	
+	public enum Method { GET, POST, PUT, DELETE }
+
+	/**
+	 * Creates a new request with the given method (one of the values from {@link Method}),
+	 * URL, and error listener.  Note that the normal response listener is not provided here as
+	 * delivery of responses is provided by subclasses, who have a better idea of how to deliver
+	 * an already-parsed response.
+	 */
+	public Request(Method method, String url, Listener<T> listener) {
+		mMethod = method;
+		mUrl = url;
+		mListener = listener;
+		mLog = new EventLog();
+	}
+	
+	/** Adds event to a request, for later debugging purposes */
+	public void addEvent(String event) {
+		mLog.add(event);
+	}
+	
+	/**
+	 * Get the log for this request, log contains actions, and timings that have been performed on this request
+	 * @return the EventLog for this request
+	 */
+	public EventLog getLog() {
+		return mLog;
+	}
+	
+	/**
+	 * If true, this requests summary (found in the EventLog with getLog()) will be saved in
+	 * the RequestQueue's log history. This is true by default.<br><br>
+	 * This can be set to false, if you e.g. want to avoid flooding the log, with 
+	 * unnecessary messages.
+	 * @param saveSummaryToLog true is logging should be enabled for this request.
+	 * @return this object
+	 */
+	public Request logSummary(boolean saveSummaryToLog) {
+		mLogSummary = saveSummaryToLog;
+		return this;
+	}
+	
+	public boolean logSummary() {
+		return mLogSummary;
+	}
+	
+	/** Mark this request as canceled.  No callback will be delivered. */
+	public void cancel() {
+		mCanceled = true;
+	}
+
+	/** Returns true if this request has been canceled. */
+	public boolean isCanceled() {
+		return mCanceled;
+	}
+	
+	/**
+	 * Method for determining if the request is finished.
+	 * Whether the request was successful or not, it <b>NOT</b> reflected here.
+	 * @return true if the SDK, has finished this request
+	 */
+    public boolean isFinished() {
+            return mFinished;
+    }
+    
+    /**
+     * Method for marking a request as finished
+     * @return this object
+     */
+    public Request finish(String reason) {
+    	mLog.add(reason);
+    	
+		try {
+			mLog.getSummary().put("duration", getLog().getTotalDuration());
+		} catch (JSONException e) {
+			EtaLog.e(TAG, e);
+		}
+		
+    	mFinished = true;
+    	mRequestQueue.finish(this);
+    	return Request.this;
+    }
+    
+    public void stats(int in, int out) {
+    	mRequestQueue.dataIn += in;
+    	mRequestQueue.dataOut += out;
+    }
+    
+    /**
+     * Get the connection timeout for this request.
+     * <p>The timeout will be the same for connecting, and for reading data</p>
+     * @return The timeout in milliseconds
+     */
+    public int getTimeOut() {
+    	return mTimeout;
+    }
+    
+    /**
+     * Set the timeout value for this request.
+     * <p>The timeout will be the same for connecting, and for reading data</p>
+     * @param timeout
+     * @return
+     */
+    public Request setTimeOut(int timeout) {
+    	mTimeout = timeout;
+    	return this;
+    }
+    
+	/** Returns a list of headers for this request. */
+	public Map<String, String> getHeaders() {
+		return mHeaders;
+	}
+	
+	/**
+	 * Set any headers wanted in the request
+	 * @param headers to include
+	 */
+	public void setHeaders(Map<String, String> headers) {
+		mHeaders.putAll(headers);
+	}
+	
+	/**
+	 * Return the method for this request.  Can be one of the values in {@link Method}.
+	 */
+	public Method getMethod() {
+		return mMethod;
+	}
+	
+//	public String getMethodString() {
+//		switch (mMethod) {
+//		case 0: return "GET";
+//		case 1: return "POST";
+//		case 2: return "PUT";
+//		case 3: return "DELETE";
+//		default: return "UNDEFINED";
+//		}
+//	}
+	/**
+	 * Returns the response listener for this request
+	 * @return a listener of type T
+	 */
+	public Listener getListener() {
+		return mListener;
+	}
+
+	/**
+	 * returns whether this request is cachable or not
+	 * @return true if the request is cachable
+	 */
+	public boolean isCachable() {
+		return mIsCachable;
+	}
+	
+	/**
+	 * Whether this request should be added to cache.
+	 * @param isResponseCachable
+	 */
+	protected void setCachable(boolean isResponseCachable) {
+		mIsCachable = isResponseCachable;
+	}
+	
+	/**
+	 * Set a tag on this request. This can later be used for bulk operations.
+	 * @param tag An object to identify this request buy
+	 * @return This object
+	 */
+	public Request setTag(Object tag) {
+		mTag = tag;
+		return this;
+	}
+	
+	/**
+	 * A tag to identify this request (or its origin) for performing batch operations.
+	 * @return An object. This requests tag or null.
+	 */
+	public Object getTag() {
+		return mTag;
+	}
+	
+	/**
+	 * Set the executing request queue, in order to later inform the RequestQueue
+	 * if this requests finished execution.
+	 * @param requestQueue The RequestQueue that is performing this Request
+	 * @return This object
+	 */
+	public Request setRequestQueue(RequestQueue requestQueue) {
+		mRequestQueue = requestQueue;
+		return this;
+	}
+	
+	/**
+	 * Find out if the response from this request is from cache or not.
+	 * @return true if response is from cache, else false
+	 */
+	public boolean isCacheHit() {
+		return mCacheHit;
+	}
+	
+	/**
+	 * Set whether this was from cache
+	 * @param cacheHit true is response is cache hit, else false
+	 * @return this object
+	 */
+	public Request setCacheHit(boolean cacheHit) {
+		mCacheHit = cacheHit;
+		return this;
+	}
+	
+	/**
+	 * The time-to-live for a given Cache.Item this request may create
+	 * @return request time-to-live in milliseconds
+	 */
+	public long getCacheTTL() {
+		return DEFAULT_CACHE_TTL;
+	}
+	
+	/**
+	 * Method determining is cache should be ignored
+	 * @return true, if this request should query the cache for data
+	 */
+	public boolean ignoreCache() {
+		return mIgnoreCache;
+	}
+
+	/**
+	 * Set whether this request may use data from cache or not
+	 * @param skip true if cache should not be used
+	 * @return this object
+	 */
+	public Request setIgnoreCache(boolean skip) {
+		mIgnoreCache = skip;
+		return Request.this;
+	}
+	
+	/**
+	 * This method enables you to have the response posted via any given handler.
+	 * Thereby returning on any (also non-UI) thread, for further processing.
+	 * @param handler that will receive the callback
+	 * @return this object
+	 */
+	public Request setHandler(Handler handler) {
+		mHandler = handler;
+		return Request.this;
+	}
+	
+	/**
+	 * Get the custom handler for this request.
+	 * @return a handler or null, if using default handler
+	 */
+	public Handler getHandler() {
+		return mHandler;
+	}
+	
+	/**
+	 * Get the cache item that this request have generated
+	 * @return an Cache.Item, or null is no Cache.Item have been generated
+	 */
+	public Map<String, Cache.Item> getCache() {
+		return mCache;
+	}
+	
+	/**
+	 * Set the Cache.Item that have been generated from this request.
+	 * @param cache the generated Cache.Item
+	 * @return this object
+	 */
+	public Request putCache(Map<String, Cache.Item> cache) {
+		mCache.putAll(cache);
+		return this;
+	}
+	
+	/**
+	 * Determining if this request should include location data.
+	 * @return true if location data should be used in this request, else false.
+	 */
+	public boolean useLocation() {
+		return mUseLocation;
+	}
+	
+	/**
+	 * Enable or disable the usage of location data in this request.<br>
+	 * Please use with care, <b>most API v2 endpoints require location data</b>
+	 * @param useLocation true to include, and false exclude location data in request parameters
+	 * @return
+	 */
+	public Request setUseLocation(boolean useLocation) {
+		mUseLocation = useLocation;
+		return Request.this;
+	}
+	
+	/** 
+	 * Get the url for this request
+	 * @return the url for this request
+	 */
+	public String getUrl() {
+		return mUrl;
+	}
+
+	/** 
+	 * Set the url of this request
+	 * @param url to use in this request
+	 * @return this object
+	 */
+	public Request setUrl(String url) {
+		mUrl = url;
+		return Request.this;
+	}
+	
+	/**
+	 * Get the query parameters that will be used to perform this query.<br>
+	 * @return the query parameters
+	 */
+	public Bundle getQueryParameters() {
+		return mQuery;
+	}
+	
+	/**
+	 * Add request parameters to this request. The parameters will be appended 
+	 * as HTTP query parameters to the URL, when the SDK executes the request. 
+	 * Therefore you should <b>not</b> do nested structures, only simple key-value-pairs.
+	 * This is <b>not the same as appending a body</b> to the request, when doing a PUT or POST request.
+	 * @param query
+	 * @return
+	 */
+	public Request putQueryParameters(Bundle query) {
+		mQuery.putAll(query);
+		return Request.this;
+	}
+	
+	/**
+	 * Get the priority of which this request has.
+	 * @return the request priority
+	 */
+	protected Priority getPriority() {
+		return Priority.MEDIUM;
+	}
+	
+	/**
+	 * Get the sequence number that this request have been given. 
+	 * The sequence number reflects the order of which the request was handed to the
+	 * {@link #com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue RequestQueue}.
+	 * and can partially be used to determine the order of execution.
+	 * @return the sequence number (a non-negative number)
+	 */
+	protected int getSequence() {
+		return mSequence;
+	}
+	
+	/**
+	 * Set a sequence number for when the request was received by
+	 * {@link #com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue RequestQueue}
+	 * in order to partially determine the order of execution of requests.
+	 * @param seq
+	 */
+	protected void setSequence(int seq) {
+		mSequence = seq;
+	}
+	
+	/**
+	 * Get parameter encoding of the request. Useful for decoding data.
+	 * @return the encoding
+	 */
+	public String getParamsEncoding() {
+		return DEFAULT_PARAMS_ENCODING;
+	}
+	
+	/**
+	 * Get content type of the body. Useful for setting headers.
+	 * @return
+	 */
+	public String getBodyContentType() {
+		return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
+	}
+	
+	/**
+	 * Get the body of this request. 
+	 * @return body, if body have been set, else null
+	 */
+	public byte[] getBody() {
+		return null;
+	}
+	
+	/**
+	 * Method to be implemented, should handle parsing of network data, and simultaneously create
+	 * a Cache.Item (or several Cache.Item) if such a item(s) can and shall be created.
+	 * @param response NetworkResponse to parse into <b>both</b> a Response, and Cache.Item
+	 * @return a valid Response is possible, or null
+	 */
+	abstract protected Response<T> parseNetworkResponse(NetworkResponse response);
+	
+	/**
+	 * Method to be implemented in subclasses, which will be able to parse a Cache.Item,
+	 * previously generated by this request in {@link #parseNetworkResponse(NetworkResponse) parseNetworkResponse()}.
+	 * @param c item to parse
+	 * @return a valid Response is possible, or null
+	 */
+	abstract protected Response<T> parseCache(Cache c);
+	
+	/**
+	 * Method for easily delivering the response to the user, via the given callback-listener.
+	 * @param response to deliver, may be null
+	 * @param error to deliver, may be null
+	 */
+	protected void deliverResponse(T response, EtaError error) {
+		if (mListener != null) {
+			mListener.onComplete(response, error);
+		}
+	}
+	
+	public int compareTo(Request<T> other) {
+		Priority left = this.getPriority();
+		Priority right = other.getPriority();
+		return left == right ? this.mSequence - other.mSequence : right.ordinal() - left.ordinal();
+	}
+	
+	/**
+	 * Set to true, to enable printing of the request timings via LogCat.
+	 * @see {@link #com.eTilbudsavis.etasdk.Utils.EtaLog EtaLog} for detalis about SDK Log.d output
+	 * @param printRequestTimings true to print timings of the request
+	 * @return this object
+	 */
+	public Request debugPerformance(boolean printRequestTimings) {
+		mDebugPerformance = printRequestTimings;
+		return this;
+	}
+
+	/**
+	 * Set to true, to enable printing of network debugging information via LogCat.
+	 * @see {@link #com.eTilbudsavis.etasdk.Utils.EtaLog EtaLog} for detalis about SDK Log.d output
+	 * @param printNetworkInfo true to print a complete network debug log
+	 * @return this object
+	 */
+	public Request debugNetwork(boolean printNetworkInfo) {
+		mDebugNetwork = printNetworkInfo;
+		return this;
+	}
+	
+	/**
+	 * Method for triggering print of log information, if logging was enabled.
+	 */
+	public void debugPrint() {
+		
+		if (mDebugNetwork) {
+			mLog.printSummary();
+		}
+		
+		if (mDebugPerformance) {
+			mLog.printEventLog(getClass().getSimpleName());
+		}
 		
 	}
 
 	/**
-	 * Helper class for headers the eTilbudsavis API uses
-	 * @author Danny Hvam - danny@etilbudsavis.dk
-	 */
-	public static class Header {
-
-		/** Header name for the session token */
-		public static final String X_TOKEN = "X-Token";
-
-		/** Header name for the session expire token */
-		public static final String X_TOKEN_EXPIRES = "X-Token-Expires";
-
-		/** Header name for the signature */
-		public static final String X_SIGNATURE = "X-Signature";
-
-		/** Header name for content_type */
-		public static final String CONTENT_TYPE = "Content-Type";
-
-		/** Header name for content_type */
-		public static final String RETRY_AFTER = "Retry-After";
-
-	}
-
-	/**
-	 * Helper class for the sort orders the eTilbudsavis API supports.<br>
-	 * These are typically used for requests to any list endpoint.<br>
-	 * Note that not all parameters are necessarily in this set.<br><br>
+	 * Returns a complete printable representation of this Request, e.g:
 	 * 
-	 * For more information on parameters, please read the API documentation at engineering.etilbudsavis.dk/eta-api/
+	 * <li>GET: https://api.etilbudsavis.dk/v2/catalogs/{catalog_id}?param1=value1&amp;param2=value2</li>
 	 * 
-	 * @author Danny Hvam - danny@etilbudsavis.dk
+	 * <p>The SDK/API parameters are not added to the 
+	 * {@link Request#getQueryParameters() query parameters}, before the request
+	 * is handed to the {@link RequestQueue}. So if you want to have the SDK/API
+	 * parameters appended as well in the string do:</p>
+	 * <li>Eta.getInstance().add(Request)</li>
+	 * <p>and then call: </p>
+	 * <li>toString()</li>
 	 */
-	public static class Sort {
-
-		/** String identifying the order by parameter for all list calls to the API */
-		public static final String ORDER_BY = "order_by";
-
-		/** String identifying the descending variable */
-		public static final String DESC = "-";
-
-		/** Sort a list by popularity in ascending order. (smallest to largest) */
-		public static final String POPULARITY = "popularity";
-
-		/** Sort a list by distance in ascending order. (smallest to largest) */
-		public static final String DISTANCE = "distance";
-
-		/** Sort a list by name in ascending order. (a-z) */
-		public static final String NAME = "name";
-
-		/** Sort a list by published in ascending order. (smallest to largest) */
-		public static final String PUBLICATION_DATE = "publication_date";
-
-		/** Sort a list by expired in ascending order. (smallest to largest) */
-		public static final String EXPIRATION_DATE = "expiration_date";
-
-		/** Sort a list by created in ascending order. (smallest to largest) */
-		public static final String CREATED = "created";
-
-		/** Sort a list by page (in catalog) in ascending order. (smallest to largest) */
-		public static final String PAGE = "page";
-
-		/** Sort a list by price in ascending order. (smallest to largest) */
-		public static final String PRICE = "price";
-
-		/** Sort a list by popularity in descending order. (largest to smallest)*/
-		public static final String POPULARITY_DESC = DESC + POPULARITY;
-
-		/** Sort a list by distance in descending order. (largest to smallest)*/
-		public static final String DISTANCE_DESC = DESC + DISTANCE;
-
-		/** Sort a list by name in descending order. (z-a)*/
-		public static final String NAME_DESC = DESC + NAME;
-
-		/** Sort a list by published in descending order. (largest to smallest)*/
-		public static final String PUBLICATION_DATE_DESC = DESC + PUBLICATION_DATE;
-
-		/** Sort a list by expired in descending order. (largest to smallest)*/
-		public static final String EXPIRATION_DATE_DESC = DESC + EXPIRATION_DATE;
-
-		/** Sort a list by created in ascending order. (smallest to largest) */
-		public static final String CREATED_DESC = DESC + CREATED;
-
-		/** Sort a list by page (in catalog) in descending order. (largest to smallest)*/
-		public static final String PAGE_DESC = DESC + PAGE;
-
-		/** Sort a list by price in descending order. (largest to smallest)*/
-		public static final String PRICE_DESC = DESC + PRICE;
-
+	@Override
+	public String toString() {
+		return mMethod.toString() + ": " + Utils.buildQueryString(this);
 	}
-
-	/**
-	 * @author Danny Hvam - danny@etilbudsavis.dk
-	 */
-	public static class Endpoint {
-		
-		// GLOBALS
-		public static final String PRODUCTION = "https://api.etilbudsavis.dk";
-		public static final String EDGE = "https://edge.etilbudsavis.dk";
-		public static final String STAGING = "https://staging.etilbudsavis.dk";
-		
-		// LISTS
-		public static final String CATALOG_LIST = "/v2/catalogs";
-		public static final String CATALOG_ID = "/v2/catalogs/";
-		public static final String CATALOG_SEARCH = "/v2/catalogs/search";
-		
-		public static final String DEALER_LIST = "/v2/dealers";
-		public static final String DEALER_ID = "/v2/dealers/";
-		public static final String DEALER_SEARCH = "/v2/dealers/search";
-		
-		public static final String OFFER_LIST = "/v2/offers";
-		public static final String OFFER_ID = "/v2/offers/";
-		public static final String OFFER_SEARCH = "/v2/offers/search";
-		public static final String OFFER_TYPEAHEAD = "/v2/offers/typeahead";
-		
-		public static final String STORE_LIST = "/v2/stores";
-		public static final String STORE_ID = "/v2/stores/";
-		public static final String STORE_SEARCH = "/v2/stores/search";
-		public static final String STORE_QUICK_SEARCH = "/v2/stores/quicksearch";
-		
-		public static final String SESSIONS = "/v2/sessions";
-		
-		public static final String USER = "/v2/users";
-		public static final String USER_RESET = "/v2/users/reset";
-		
-		public static final String CATEGORIES	= "/v2/categories";
-		
-		
-		public static String getHost() {
-			return Eta.DEBUG_ENDPOINT ? EDGE : PRODUCTION;
-		}
-
-		/**
-		 * /v2/offers/{offer_id}/collect
-		 */
-		public static String offerCollect(String offerId) {
-			return String.format("/v2/offers/%s/collect", offerId);
-		}
-
-		/**
-		 * /v2/stores/{offer_id}/collect
-		 */
-		public static String storeCollect(String storeId) {
-			return String.format("/v2/stores/%s/collect", storeId);
-		}
-		
-		/**
-		 * https://etilbudsavis.dk/proxy/{id}/
-		 */
-		public static String pageflipProxy(String id) {
-			String production = "https://etilbudsavis.dk/proxy/%s/";
-//			String staging = "http://10.0.1.6:3000/proxy/%s/";
-			String staging = "https://staging.etilbudsavis.dk/proxy/%s/";
-			return String.format(Eta.DEBUG_PAGEFLIP ? staging : production, id);
-		}
-		
-		/**
-		 * https://staging.etilbudsavis.dk/utils/ajax/lists/themes/
-		 */
-		public static String themes() {
-			String production = "https://etilbudsavis.dk/utils/ajax/lists/themes/";
-			String staging = "https://staging.etilbudsavis.dk/utils/ajax/lists/themes/";
-			return production;
-		}
-		
-		/**
-		 * /v2/users/{user_id}/facebook
-		 */
-		public static String facebook(int userId) {
-			return String.format("/v2/users/%s/facebook", userId);
-		}
-
-		/**
-		 * /v2/users/{user_id}/shoppinglists
-		 */
-		public static String lists(int userId) {
-			return String.format("/v2/users/%s/shoppinglists", userId);
-		}
-
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}
-		 * @param userId
-		 * @param listId
-		 * @return
-		 */
-		public static String list(int userId, String listId) {
-			return String.format("/v2/users/%s/shoppinglists/%s", userId, listId);
-		}
-
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/modified
-		 */
-		public static String listModified(int userId, String listId) {
-			return String.format("/v2/users/%s/shoppinglists/%s/modified", userId, listId);
-		}
-
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/empty
-		 */
-		public static String listEmpty(int userId, String listId) {
-			return String.format("/v2/users/%s/shoppinglists/%s/empty", userId, listId);
-		}
-		
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares
-		 * @param userId
-		 * @param listId
-		 * @return
-		 */
-		public static String listShares(int userId, String listId) {
-			return String.format("/v2/users/%s/shoppinglists/%s/shares", userId, listId);
-		}
-
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email}
-		 */
-		public static String listShareEmail(int userId, String listId, String email) {
-			return String.format("/v2/users/%s/shoppinglists/%s/shares/%s", userId, listId, email);
-		}
-
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items
-		 */
-		public static String items(int userId, String listId) {
-			return String.format("/v2/users/%s/shoppinglists/%s/items", userId, listId);
-		}
-
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}
-		 */
-		public static String item(int userId, String listId, String itemId) {
-			return String.format("/v2/users/%s/shoppinglists/%s/items/%s", userId, listId, itemId);
-		}
-
-		/**
-		 * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified
-		 */
-		public static String itemModifiedById(int userId, String listId, String itemId) {
-			return String.format("/v2/users/%s/shoppinglists/%s/items/%s/modified", userId, listId, itemId);
-		}
-
-	}
+	
 }

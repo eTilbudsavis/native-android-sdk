@@ -1,56 +1,52 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.PageflipWebview;
+import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Catalog extends EtaErnObject implements Serializable {
+/**
+ * <p>This class is a representation of a catalog as the API v2 exposes it</p>
+ * 
+ * <p>More documentation available on via our
+ * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/catalogs.html">Catalog Reference</a>
+ * documentation, on the engineering blog.
+ * </p>
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ *
+ */
+public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Catalog";
 	
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
-
-	/** Parameter for getting a list of specific catalog id's */
-	public static final String FILTER_CATALOG_IDS = Request.Param.FILTER_CATALOG_IDS;
-
-	/** Parameter for posting a list of store id's to publish the catalog in */
-	public static final String FILTER_STORE_IDS = Request.Param.FILTER_STORE_IDS;
-
-	/** Parameter for posting a list of area id's to publish the catalog in */
-	public static final String FILTER_AREA_IDS = Request.Param.FILTER_AREA_IDS;
-
-	/** Parameter for the location of the PDF to post */
-	public static final String PARAM_PDF = Request.Param.PDF;
-
-	/** String identifying the offset parameter for all list calls to the API */
-	public static final String PARAM_OFFSET = Request.Param.OFFSET;
-
-	/** String identifying the offset parameter for all list calls to the API */
-	public static final String PARAM_LIMIT = Request.Param.LIMIT;
-
-	/** String identifying the query parameter */
-	public static final String PARAM_QUERY = Request.Param.QUERY;
-	
-	/** Endpoint for catalog list resource */
-	public static final String ENDPOINT_LIST = Request.Endpoint.CATALOG_LIST;
-
-	/** Endpoint for a single catalog resource */
-	public static final String ENDPOINT_ID = Request.Endpoint.CATALOG_ID;
-
-	/** Endpoint for searching catalogs */
-	public static final String ENDPOINT_SEARCH = Request.Endpoint.CATALOG_SEARCH;
-
 	// From JSON blob
 	private String mLabel;
 	private String mBackground;
@@ -65,129 +61,120 @@ public class Catalog extends EtaErnObject implements Serializable {
 	private String mStoreUrl;
 	private Dimension mDimension;
 	private Images mImages;
-	private Pages mPages;
 	
-	// From seperate queries
+	// From separate queries
+	private Pages mPages;
 	private Dealer mDealer;
 	private Store mStore;
-	private int mOfferOnPage;
-
-	public Catalog() {
-	}
-
-	public Catalog(Catalog c) {
-		set(c);
-	}
+	private int mOfferOnPage = 1;
 	
-	@SuppressWarnings("unchecked")
-	public static ArrayList<Catalog> fromJSON(JSONArray catalogs) {
-		ArrayList<Catalog> list = new ArrayList<Catalog>();
+	public Catalog() { }
+	
+	/**
+	 * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
+	 * @param catalogs A {@link JSONArray} in the format of a valid API v2 catalog response
+	 * @return A {@link List} of POJO
+	 */
+	public static List<Catalog> fromJSON(JSONArray catalogs) {
+		List<Catalog> list = new ArrayList<Catalog>();
 		try {
-			for (int i = 0 ; i < catalogs.length() ; i++ )
+			for (int i = 0 ; i < catalogs.length() ; i++ ) {
 				list.add(Catalog.fromJSON((JSONObject)catalogs.get(i)));
-			
+			}
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return list;
 	}
-	
-	@SuppressWarnings("unchecked")
+
+	/**
+	 * A factory method for converting {@link JSONObject} into a POJO.
+	 * @param catalog A {@link JSONObject} in the format of a valid API v2 catalog response
+	 * @return A Catalog object
+	 */
 	public static Catalog fromJSON(JSONObject catalog) {
 		return fromJSON(new Catalog(), catalog);
 	}
 
-	private static Catalog fromJSON(Catalog c, JSONObject catalog) {
-		if(c == null)
-			c = new Catalog();
-
-		if (catalog == null)
-			return c;
-
-		if (catalog.has(S_STORE_ID) && catalog.has(S_OFFER_COUNT)) {
+	/**
+	 * A factory method for converting {@link JSONObject} into POJO.
+	 * <p>This method exposes a way, of updating/setting an objects properties</p>
+	 * @param catalog An object to set/update
+	 * @param jCatalog A {@link JSONObject} in the format of a valid API v2 catalog response.
+	 * 		But a special case exists where, {@link PageflipWebview} only exposes
+	 * 		the keys "{@link ServerKey#ID id}", and "{@link ServerKey#PAGE page}", this is
+	 * 		valid too, but not a complete/workable catalog object.
+	 * @return A {@link List} of POJO
+	 */
+	public static Catalog fromJSON(Catalog catalog, JSONObject jCatalog) {
+		if (catalog == null) catalog = new Catalog();
+		if (jCatalog == null) return catalog;
+		
+		if (jCatalog.has(ServerKey.STORE_ID) && jCatalog.has(ServerKey.OFFER_COUNT)) {
 			// if we have a full catalog
 			try {
-				c.setId(getJsonString(catalog, S_ID));
-				c.setErn(getJsonString(catalog, S_ERN));
-				c.setLabel(getJsonString(catalog, S_LABEL));
-				c.setBackground(getJsonString(catalog, S_BACKGROUND));
-				Date runFrom = Utils.parseDate(getJsonString(catalog, S_RUN_FROM));
-				c.setRunFrom(runFrom);
-				Date runTill = Utils.parseDate(getJsonString(catalog, S_RUN_TILL));
-				c.setRunTill(runTill);
-				c.setPageCount(jsonToInt(catalog, S_PAGE_COUNT, 0));
-				c.setOfferCount(jsonToInt(catalog, S_OFFER_COUNT, 0));
-				c.setBranding(Branding.fromJSON(catalog.getJSONObject(S_BRANDING)));
-				c.setDealerId(getJsonString(catalog, S_DEALER_ID));
-				c.setDealerUrl(getJsonString(catalog, S_DEALER_URL));
-				c.setStoreId(getJsonString(catalog, S_STORE_ID));
-				c.setStoreUrl(getJsonString(catalog, S_STORE_URL));
-				c.setDimension(Dimension.fromJSON(catalog.getJSONObject(S_DIMENSIONS)));
-				c.setImages(Images.fromJSON(catalog.getJSONObject(S_IMAGES)));
-				c.setPages(Pages.fromJSON(catalog.getJSONObject(S_PAGES)));
+				catalog.setId(Json.valueOf(jCatalog, ServerKey.ID));
+				catalog.setErn(Json.valueOf(jCatalog, ServerKey.ERN));
+				catalog.setLabel(Json.valueOf(jCatalog, ServerKey.LABEL));
+				catalog.setBackground(Json.valueOf(jCatalog, ServerKey.BACKGROUND));
+				Date runFrom = Utils.parseDate(Json.valueOf(jCatalog, ServerKey.RUN_FROM));
+				catalog.setRunFrom(runFrom);
+				Date runTill = Utils.parseDate(Json.valueOf(jCatalog, ServerKey.RUN_TILL));
+				catalog.setRunTill(runTill);
+				catalog.setPageCount(Json.valueOf(jCatalog, ServerKey.PAGE_COUNT, 0));
+				catalog.setOfferCount(Json.valueOf(jCatalog, ServerKey.OFFER_COUNT, 0));
+				catalog.setBranding(Branding.fromJSON(jCatalog.getJSONObject(ServerKey.BRANDING)));
+				catalog.setDealerId(Json.valueOf(jCatalog, ServerKey.DEALER_ID));
+				catalog.setDealerUrl(Json.valueOf(jCatalog, ServerKey.DEALER_URL));
+				catalog.setStoreId(Json.valueOf(jCatalog, ServerKey.STORE_ID));
+				catalog.setStoreUrl(Json.valueOf(jCatalog, ServerKey.STORE_URL));
+				catalog.setDimension(Dimension.fromJSON(jCatalog.getJSONObject(ServerKey.DIMENSIONS)));
+				catalog.setImages(Images.fromJSON(jCatalog.getJSONObject(ServerKey.IMAGES)));
 			} catch (JSONException e) {
-				EtaLog.d(TAG, e);
+				EtaLog.e(TAG, e);
 			}
-		} else if (catalog.has(S_ID) && catalog.has(P_PAGE)) {
+			
+		} else if (jCatalog.has(ServerKey.ID) && jCatalog.has(ServerKey.PAGE)) {
 			// If it is a partial catalog
-			try {
-				c.setId(getJsonString(catalog, S_ID));
-				c.setOfferOnPage(catalog.getInt(P_PAGE));
-			} catch (JSONException e) {
-				EtaLog.d(TAG, e);
-			}
+			catalog.setId(Json.valueOf(jCatalog, ServerKey.ID));
+			catalog.setOfferOnPage(Json.valueOf(jCatalog, ServerKey.PAGE, 1));
+			
 		}
-		return c;
+		return catalog;
 	}
-	
+
+	@Override
 	public JSONObject toJSON() {
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Catalog c) {
-		JSONObject o = new JSONObject();
+		JSONObject o = super.toJSON();
 		try {
-			o.put(S_ID, c.getId());
-			o.put(S_ERN, c.getErn());
-			o.put(S_LABEL, c.getLabel());
-			o.put(S_BACKGROUND, c.getBackground());
-			o.put(S_RUN_FROM, Utils.formatDate(c.getRunFrom()));
-			o.put(S_RUN_TILL, Utils.formatDate(c.getRunTill()));
-			o.put(S_PAGE_COUNT, c.getPageCount());
-			o.put(S_OFFER_COUNT, c.getOfferCount());
-			o.put(S_BRANDING, c.getBranding().toJSON());
-			o.put(S_DEALER_ID, c.getDealerId());
-			o.put(S_DEALER_URL, c.getDealerUrl());
-			o.put(S_STORE_ID, c.getStoreId());
-			o.put(S_STORE_URL, c.getStoreUrl());
-			o.put(S_DIMENSIONS, c.getDimension().toJSON());
-			o.put(S_IMAGES, c.getImages().toJSON());
-			o.put(S_PAGES, c.getPages().toJSON());
+			o.put(ServerKey.LABEL, Json.nullCheck(getLabel()));
+			o.put(ServerKey.BACKGROUND, Json.nullCheck(getBackground()));
+			o.put(ServerKey.RUN_FROM, Json.nullCheck(Utils.parseDate(getRunFrom())));
+			o.put(ServerKey.RUN_TILL, Json.nullCheck(Utils.parseDate(getRunTill())));
+			o.put(ServerKey.PAGE_COUNT, getPageCount());
+			o.put(ServerKey.OFFER_COUNT, getOfferCount());
+			o.put(ServerKey.BRANDING, Json.nullCheck(getBranding().toJSON()));
+			o.put(ServerKey.DEALER_ID, Json.nullCheck(getDealerId()));
+			o.put(ServerKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
+			o.put(ServerKey.STORE_ID, Json.nullCheck(getStoreId()));
+			o.put(ServerKey.STORE_URL, Json.nullCheck(getStoreUrl()));
+			o.put(ServerKey.DIMENSIONS, Json.nullCheck(getDimension().toJSON()));
+			o.put(ServerKey.IMAGES, Json.nullCheck(getImages().toJSON()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o;
 	}
 	
-	public void set(Catalog c) {
-		mId = c.getId();
-		mErn = c.getErn();
-		mLabel = c.getLabel();
-		mBackground = c.getBackground();
-		mRunFrom = c.getRunFrom();
-		mRunTill = c.getRunTill();
-		mPageCount = c.getPageCount();
-		mOfferCount = c.getOfferCount();
-		mBranding = c.getBranding();
-		mDealerId = c.getDealerId();
-		mDealerUrl = c.getDealerUrl();
-		mStoreId = c.getStoreId();
-		mStoreUrl = c.getStoreUrl();
-		mDimension = c.getDimension();
-		mImages = c.getImages();
-		mPages = c.getPages();
+	@Override
+	public String getErnPrefix() {
+		return ERN_CATALOG;
 	}
-
+	
+	/**
+	 * TODO what is label?
+	 * @return
+	 */
 	public String getLabel() {
 		return mLabel;
 	}
@@ -196,7 +183,7 @@ public class Catalog extends EtaErnObject implements Serializable {
 		mLabel = label;
 		return this;
 	}
-
+	
 	public String getBackground() {
 		return mBackground;
 	}
@@ -206,196 +193,402 @@ public class Catalog extends EtaErnObject implements Serializable {
 		return this;
 	}
 
+	/**
+	 * Set the {@link Date} this catalog is be valid from.
+	 * 
+	 * <p>The {@link Date#getTime() time} of the date will be floored to the
+	 * nearest second (i.e. milliseconds will be removed) as the server responds 
+	 * in seconds and comparison of {@link Date}s will other wise be 
+	 * unpredictable/impossible.</p>
+	 * 
+	 * @param date A {@link Date}
+	 * @return This object
+	 */
 	public Catalog setRunFrom(Date time) {
-		time.setTime(1000 * (time.getTime()/ 1000));
-		mRunFrom = time;
+		mRunFrom = Utils.roundTime(time);
 		return this;
 	}
 
+	/**
+	 * Returns the {@link Date} this catalog is be valid from.
+	 * @return A {@link Date}, or <code>null</code>
+	 */
 	public Date getRunFrom() {
 		return mRunFrom;
 	}
 
+	/**
+	 * Set the {@link Date} this catalog is be valid till.
+	 * 
+	 * <p>The {@link Date#getTime() time} of the date will be floored to the
+	 * nearest second (i.e. milliseconds will be removed) as the server responds 
+	 * in seconds and comparison of {@link Date}s will other wise be 
+	 * unpredictable/impossible.</p>
+	 * 
+	 * @param date A {@link Date}
+	 * @return This object
+	 */
 	public Catalog setRunTill(Date time) {
-		time.setTime(1000 * (time.getTime() / 1000));
-		mRunTill = time;
+		mRunTill = Utils.roundTime(time);
 		return this;
 	}
 
+	/**
+	 * Returns the {@link Date} this catalog is be valid till.
+	 * @return A {@link Date}, or <code>null</code>
+	 */
 	public Date getRunTill() {
 		return mRunTill;
 	}
-
-	public Catalog setPageCount(Integer mPageCount) {
-		this.mPageCount = mPageCount;
+	
+	/**
+	 * Set the number of pages this catalog has.
+	 * @param pageCount Number of pages in this catalog
+	 * @return This object
+	 */
+	public Catalog setPageCount(Integer pageCount) {
+		mPageCount = pageCount;
 		return this;
 	}
-
+	
+	/**
+	 * Get the number of pages in this catalog
+	 * @return The number of pages
+	 */
 	public int getPageCount() {
 		return mPageCount;
 	}
-
-	public Catalog setOfferCount(Integer mOfferCount) {
-		this.mOfferCount = mOfferCount;
+	
+	/**
+	 * Set the number of {@link Offer} in this catalog.
+	 * @param offerCount The number of offers
+	 * @return This object
+	 */
+	public Catalog setOfferCount(Integer offerCount) {
+		this.mOfferCount = offerCount;
 		return this;
 	}
-
+	
+	/**
+	 * Get the number of {@link Offer}s in this catalog.
+	 * @return The number of catalogs
+	 */
 	public int getOfferCount() {
 		return mOfferCount;
 	}
-
+	
+	/**
+	 * Set the {@link Branding} to apply to this catalog.
+	 * @param branding A branding object
+	 * @return This object
+	 */
 	public Catalog setBranding(Branding branding) {
 		this.mBranding = branding;
 		return this;
 	}
-
+	
+	/**
+	 * Get the branding, that is applied to this catalog.
+	 * @return A {@link Branding} object, or {@code null}
+	 */
 	public Branding getBranding() {
 		return mBranding;
 	}
-
-	public Catalog setDealerId(String dealer) {
-		this.mDealerId = dealer;
+	
+	/**
+	 * Set the dealer id associated with this catalog
+	 * @param dealerId A dealer id to set
+	 * @return This object
+	 */
+	public Catalog setDealerId(String dealerId) {
+		this.mDealerId = dealerId;
 		return this;
 	}
-
+	
+	/**
+	 * Get the dealer id associated with this object
+	 * @return A dealer id, or {@code null}
+	 */
 	public String getDealerId() {
 		return mDealerId;
 	}
-
+	
+	/**
+	 * Get the URL to the {@link Dealer} resource for this {@link Catalog}
+	 * @return A {@link Dealer} resource URL, or {@code null}
+	 */
 	public String getDealerUrl() {
 		return mDealerUrl;
 	}
-
+	
+	/**
+	 * Set the URL to the {@link Dealer} resource for this {@link Catalog}
+	 * @param url An URL pointing to a {@link Dealer} resource for this catalog
+	 * @return This object
+	 */
 	public Catalog setDealerUrl(String url) {
 		mDealerUrl = url;
 		return this;
 	}
 
+	/**
+	 * Set the {@link Store#getId() store.id} associated with this catalog
+	 * @param storeId A store id to set
+	 * @return This object
+	 */
 	public Catalog setStoreId(String storeId) {
 		mStoreId = storeId;
 		return this;
 	}
 
+	/**
+	 * Get the {@link Store#getId() store.id} id associated with this object
+	 * @return A store id, or {@code null}
+	 */
 	public String getStoreId() {
 		return mStoreId;
 	}
 
+	/**
+	 * Get the URL to the {@link Store} resource for this {@link Catalog}
+	 * @return A {@link Store} resource URL, or {@code null}
+	 */
 	public String getStoreUrl() {
 		return mStoreUrl;
 	}
 
+	/**
+	 * Set the URL to the {@link Store} resource for this {@link Catalog}
+	 * @param url An URL pointing to a {@link Store} resource for this catalog
+	 * @return This object
+	 */
 	public Catalog setStoreUrl(String url) {
 		mStoreUrl = url;
 		return this;
 	}
-
+	
+	/**
+	 * Get the dimensions for this catalog.
+	 * @return A dimensions object, or {@code null}
+	 */
 	public Dimension getDimension() {
 		return mDimension;
 	}
-
+	
+	/**
+	 * Set the dimensions for this catalog
+	 * @param dimension A dimension
+	 * @return This object
+	 */
 	public Catalog setDimension(Dimension dimension) {
 		mDimension = dimension;
 		return this;
 	}
-
+	
+	/**
+	 * Set the images associated with this object
+	 * @param images An image object
+	 * @return This object
+	 */
 	public Catalog setImages(Images images) {
 		mImages = images;
 		return this;
 	}
-
+	
+	/**
+	 * Get the images associated with this catalog
+	 * @return An images object, or {@code null}
+	 */
 	public Images getImages() {
 		return mImages;
 	}
-
+	
+	/**
+	 * Get the pages in this catalog.
+	 * <p>Pages isn't bundled in the catalog object by default. But should be
+	 * downloaded separately via the pages endpoint, and
+	 * {@link Catalog#setPages(Pages) set} manually by the developer. </p>
+	 * @return
+	 */
 	public Pages getPages() {
 		return mPages;
 	}
-
+	
+	/**
+	 * Method for setting the {@link Pages} associated with this catalog
+	 * @param pages A pages object
+	 */
 	public void setPages(Pages pages) {
 		mPages = pages;
 	}
-
+	
+	/**
+	 * Set the page number of a specific {@link Offer}.
+	 * <p>This is a use case for e.g. {@link PageflipWebview}</p>
+	 * @param offerOnPage A page number of an offer
+	 * @return This object
+	 */
 	public Catalog setOfferOnPage(Integer offerOnPage) {
 		this.mOfferOnPage = offerOnPage;
 		return this;
 	}
 
+	/**
+	 * Get the page number of a specific {@link Offer}.
+	 * <p>This is a use case for e.g. {@link PageflipWebview}</p>
+	 * @return A page number of a specific {@link Offer} to display
+	 */
 	public int getOfferOnPage() {
 		return mOfferOnPage;
 	}
 
+	/**
+	 * Method for setting the {@link Store} associated with this catalog
+	 * @param store A Store object
+	 */
 	public Catalog setStore(Store store) {
 		mStore = store;
 		return this;
 	}
 
+	/**
+	 * Get the {@link Store} associated with this catalog.
+	 * <p>Store isn't bundled in the catalog object by default. But should be
+	 * downloaded separately via the store {@link Endpoint#storeId(String) endpoint},
+	 * and  {@link Catalog#setStore(Store) set} manually by the developer. </p>
+	 * @return A Store, or {@code null}
+	 */
 	public Store getStore() {
 		return mStore;
 	}
 
+	/**
+	 * Method for setting the {@link Dealer} associated with this catalog
+	 * @param store A Dealer object
+	 */
 	public Catalog setDealer(Dealer dealer) {
 		this.mDealer = dealer;
 		return this;
 	}
 
+	/**
+	 * Get the {@link Dealer} associated with this catalog.
+	 * <p>Dealer isn't bundled in the catalog object by default. But should be
+	 * downloaded separately via the dealer {@link Endpoint#dealerId(String) endpoint},
+	 * and  {@link Catalog#setDealer(Dealer) set} manually by the developer. </p>
+	 * @return A Dealer, or {@code null}
+	 */
 	public Dealer getDealer() {
 		return mDealer;
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Catalog))
-			return false;
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((mBackground == null) ? 0 : mBackground.hashCode());
+		result = prime * result
+				+ ((mBranding == null) ? 0 : mBranding.hashCode());
+		result = prime * result
+				+ ((mDealerId == null) ? 0 : mDealerId.hashCode());
+		result = prime * result
+				+ ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
+		result = prime * result
+				+ ((mDimension == null) ? 0 : mDimension.hashCode());
+		result = prime * result + ((mImages == null) ? 0 : mImages.hashCode());
+		result = prime * result + ((mLabel == null) ? 0 : mLabel.hashCode());
+		result = prime * result + mOfferCount;
+		result = prime * result + mOfferOnPage;
+		result = prime * result + mPageCount;
+		result = prime * result + ((mPages == null) ? 0 : mPages.hashCode());
+		result = prime * result
+				+ ((mRunFrom == null) ? 0 : mRunFrom.hashCode());
+		result = prime * result
+				+ ((mRunTill == null) ? 0 : mRunTill.hashCode());
+		result = prime * result
+				+ ((mStoreId == null) ? 0 : mStoreId.hashCode());
+		result = prime * result
+				+ ((mStoreUrl == null) ? 0 : mStoreUrl.hashCode());
+		return result;
+	}
 
-		Catalog c = (Catalog)o;
-		return mId.equals(c.getId()) &&
-				mErn.equals(c.getErn()) &&
-				stringCompare(mLabel, c.getLabel()) &&
-				stringCompare(mBackground, c.getBackground()) &&
-				mRunFrom == c.getRunFrom() &&
-				mRunTill == c.getRunTill() &&
-				mPageCount == c.getPageCount() &&
-				mOfferCount == c.getOfferCount() &&
-				mBranding == null ? c.getBranding() == null : mBranding.equals(c.getBranding()) &&
-				stringCompare(mDealerId, c.getDealerId()) &&
-				stringCompare(mDealerUrl, c.getDealerUrl()) &&
-				stringCompare(mStoreId, c.getStoreId()) &&
-				stringCompare(mStoreUrl, c.getStoreUrl()) &&
-				mDimension == null ? c.getDimension() == null : mDimension.equals(c.getDimension()) &&
-				mImages == null ? c.getImages() == null : mImages.equals(c.getImages()) &&
-				mPages == null ? c.getPages() == null : mPages.equals(c.getPages()) &&
-				mDealer == null ? c.getDealer() == null : (c.getDealer() != null && mDealer.equals(c.getDealer())) &&
-				mStore == null ? c.getStore() == null : (c.getStore() != null && mStore.equals(c.getStore())) &&
-				mOfferOnPage == c.getOfferOnPage();
-	}
-	
 	@Override
-	public String toString() {
-		return toString(false);
-	}
-	
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[")
-		.append("branding=").append(mBranding == null ? null : mBranding.toString(everything))
-		.append(", id=").append(mId)
-		.append(", from=").append(Utils.formatDate(getRunFrom()))
-		.append(", till=").append(Utils.formatDate(getRunTill()));
-		if(everything) {
-			sb.append(", ern=").append(mErn)
-			.append(", background=").append(mBackground)
-			.append(", pageCount=").append(mPageCount)
-			.append(", offerCount=").append(mOfferCount)
-			.append(", dealer=").append(mDealer == null ? mDealerId : mDealer.toString())
-			.append(", store=").append(mStore == null ? mStoreId : mStore.toString())
-			.append(", dimension=").append(mDimension == null ? null : mDimension.toString())
-			.append(", images=").append(mImages == null ? null : mImages.toString())
-			.append(", pages=").append(mPages == null ? null : mPages.toString());
-		}
-		return sb.append("]").toString();
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Catalog other = (Catalog) obj;
+		if (mBackground == null) {
+			if (other.mBackground != null)
+				return false;
+		} else if (!mBackground.equals(other.mBackground))
+			return false;
+		if (mBranding == null) {
+			if (other.mBranding != null)
+				return false;
+		} else if (!mBranding.equals(other.mBranding))
+			return false;
+		if (mDealerId == null) {
+			if (other.mDealerId != null)
+				return false;
+		} else if (!mDealerId.equals(other.mDealerId))
+			return false;
+		if (mDealerUrl == null) {
+			if (other.mDealerUrl != null)
+				return false;
+		} else if (!mDealerUrl.equals(other.mDealerUrl))
+			return false;
+		if (mDimension == null) {
+			if (other.mDimension != null)
+				return false;
+		} else if (!mDimension.equals(other.mDimension))
+			return false;
+		if (mImages == null) {
+			if (other.mImages != null)
+				return false;
+		} else if (!mImages.equals(other.mImages))
+			return false;
+		if (mLabel == null) {
+			if (other.mLabel != null)
+				return false;
+		} else if (!mLabel.equals(other.mLabel))
+			return false;
+		if (mOfferCount != other.mOfferCount)
+			return false;
+		if (mOfferOnPage != other.mOfferOnPage)
+			return false;
+		if (mPageCount != other.mPageCount)
+			return false;
+		if (mPages == null) {
+			if (other.mPages != null)
+				return false;
+		} else if (!mPages.equals(other.mPages))
+			return false;
+		if (mRunFrom == null) {
+			if (other.mRunFrom != null)
+				return false;
+		} else if (!mRunFrom.equals(other.mRunFrom))
+			return false;
+		if (mRunTill == null) {
+			if (other.mRunTill != null)
+				return false;
+		} else if (!mRunTill.equals(other.mRunTill))
+			return false;
+		if (mStoreId == null) {
+			if (other.mStoreId != null)
+				return false;
+		} else if (!mStoreId.equals(other.mStoreId))
+			return false;
+		if (mStoreUrl == null) {
+			if (other.mStoreUrl != null)
+				return false;
+		} else if (!mStoreUrl.equals(other.mStoreUrl))
+			return false;
+		return true;
 	}
 	
 }

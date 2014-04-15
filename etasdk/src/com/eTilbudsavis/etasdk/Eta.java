@@ -1,139 +1,205 @@
-/*!
- * eTilbudsavis ApS
- * (c) 2012, eTilbudsavis ApS
- * http://etilbudsavis.dk
- */
-/**
- * @fileoverview	Main class.
- * @author			Morten Bo <morten@etilbudsavis.dk>
- * 					Danny Hvam <danny@etilbudsavid.dk>
- * @version			0.3.0
- */
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk;
 
-import java.io.Serializable;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import android.annotation.SuppressLint;
+import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Bundle;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
-import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.EtaObjects.Store;
+import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
+import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.Network.EtaCache;
+import com.eTilbudsavis.etasdk.Network.Cache;
+import com.eTilbudsavis.etasdk.Network.HttpStack;
 import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.RequestQueue;
+import com.eTilbudsavis.etasdk.Network.Impl.DefaultHttpNetwork;
+import com.eTilbudsavis.etasdk.Network.Impl.HttpURLNetwork;
+import com.eTilbudsavis.etasdk.Network.Impl.NetworkImpl;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-// Main object for interacting with the SDK.
-public class Eta implements Serializable {
+/**
+ * 
+ * The main class for interacting with the eTilbudsavis SDK / API
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ * @version 2.1.0
+ *
+ */
+public class Eta {
 	
-	private static final long serialVersionUID = 1L;
 	public static final String TAG = "ETA";
-
-	public static boolean DEBUG_ENDPOINT = false;
-	public static boolean DEBUG_LOGD = false;
-	public static boolean DEBUG_PAGEFLIP = false;
 	
+	/** The Eta singleton */
 	private static Eta mEta;
 	
+	/** Application context for usage in the SDK */
 	private Context mContext;
+	
+	/** The developers APIkey */
 	private String mApiKey;
+	
+	/** The developers APIsecret */
 	private String mApiSecret;
+
+	/** The developers app version, this isn't strictly necessary */
 	private String mAppVersion;
+	
+	/** The SDK settings */
 	private Settings mSettings;
+	
+	/** A session manager, for handling all session requests, user information e.t.c. */
 	private SessionManager mSessionManager;
+	
+	/** The current location that the SDK is aware of */
 	private EtaLocation mLocation;
-	private EtaCache mCache;
+	
+	/** Manager for handling all {@link Shoppinglist}, and {@link ShoppinglistItem} */
 	private ListManager mListManager;
+	
+	/** Manager for doing asynchronous sync */
+	private SyncManager mSyncManager;
+	
+	/** A static handler for usage in the SDK, this will help prevent leaks */
 	private static Handler mHandler;
-	private ExecutorService mThreads = Executors.newFixedThreadPool(10);
+	
+	/** The current state of the SDK */
 	private boolean mResumed = false;
+	
+	/** A {@link RequestQueue} implementation to handle all API requests */
+	private RequestQueue mRequestQueue;
+	
+	/** System manager for getting the connectivity status */
 	private ConnectivityManager mConnectivityManager;
 	
-	private Eta() { }
-
 	/**
-	 * TODO: Write a long story about usage, this will basically be the documentation
-	 * @param apiKey The API key found at http://etilbudsavis.dk/api/
-	 * @param apiSecret The API secret found at http://etilbudsavis.dk/api/
-	 * @param context The context of the activity instantiating this class.
+	 * Default constructor, this is private to allow us to create a singleton instance
+	 * @param apiKey An API v2 apiKey
+	 * @param apiSecret An API v2 apiSecret (matching the apiKey)
+	 * @param ctx A context
+	 */
+	private Eta(String apiKey, String apiSecret, Context ctx) {
+		
+		// Get a context that isn't likely to disappear with an activity.
+		mContext = ctx.getApplicationContext();
+		mApiKey = apiKey;
+		mApiSecret = apiSecret;
+		
+		mHandler = new Handler(Looper.getMainLooper());
+		
+		HttpStack stack = null;
+        if (Build.VERSION.SDK_INT > 8) {
+            stack = new HttpURLNetwork();
+        } else {
+            stack = new DefaultHttpNetwork();
+        }
+        
+		mRequestQueue = new RequestQueue(this, new Cache(), new NetworkImpl(stack));
+		mRequestQueue.start();
+		
+		mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+		
+		try {
+			String name = mContext.getPackageName();
+			String version = mContext.getPackageManager().getPackageInfo(name, 0 ).versionName;
+			setAppVersion(version);
+		} catch (NameNotFoundException e) {
+			EtaLog.e(TAG, e);
+		}
+		
+		mSettings = new Settings(mContext);
+		mLocation = new EtaLocation(this);
+		mSessionManager = new SessionManager(this);
+		mListManager = new ListManager(this);
+		mSyncManager = new SyncManager(this);
+		
+	}
+	
+	/**
+	 * Singleton access to a {@link Eta} object.
+	 * 
+	 * <p>Be sure to {@link Eta#createInstance(String, String, Context) create an
+	 * instance} before invoking this method, or bad things will happen.</p>
+	 * 
+	 * @throws IllegalStateException If {@link Eta} no instance is available
 	 */
 	public static Eta getInstance() {
 		if (mEta == null) {
-			synchronized (Eta.class) {
-				if (mEta == null) {
-					mEta = new Eta();
-				}
-			}
+			throw new IllegalStateException("Eta.createInstance() needs to be"
+					+ "called before Eta.getInstance()");
 		}
 		return mEta;
 	}
 	
 	/**
-	 * Use this method to do the initial instanciation of the Eta object.<br>
-	 * If you do not the SDK will not function.
-	 * @param apiKey for your app
-	 * @param apiSecret for your app
-	 * @param appVersion Please see {@link #setAppVersion(String) appVersion()}
-	 * @param context for your app
+	 * Creates a new instance of {@link Eta}.
+	 * 
+	 * <p>This method will instantiate a new instance of {@link Eta}, than can be
+	 * used throughout your app. But you can only create one instance pr. context
+	 * (or app), this amongst others ensures some session and user safety.</p>
+	 * 
+	 * @param apiKey An API v2 apiKey
+	 * @param apiSecret An API v2 apiSecret (matching the apiKey)
+	 * @param ctx A context
 	 */
-	public void set(String apiKey, String apiSecret, Context context) {
+	public static void createInstance(String apiKey, String apiSecret, Context ctx) {
 		
-		mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-		
-		mContext = context;
-		mApiKey = apiKey;
-		mApiSecret = apiSecret;
-		
-		try {
-			String name = context.getPackageName();
-			String version = context.getPackageManager().getPackageInfo(name, 0 ).versionName;
-			setAppVersion(version);
-		} catch (NameNotFoundException e) {
-			EtaLog.d(TAG, e);
-		}
-		
-		if (!isSet()) {
-			mSettings = new Settings(mContext);
-			mLocation = new EtaLocation(Eta.this);
-			mCache = new EtaCache();
-			mListManager = new ListManager(Eta.this);
-			mSessionManager = new SessionManager(this);
+		if (mEta == null) {
+			synchronized (Eta.class) {
+				if (mEta == null) {
+					mEta = new Eta(apiKey, apiSecret, ctx);
+				}
+			}
 		} else {
-			EtaLog.d(TAG, "Eta already set. apiKey, apiSecret and context has been switched");
+			EtaLog.d(TAG, "Eta instance already created");
 		}
 		
 	}
 	
 	/**
-	 * Method for checking if the Eta object have been set.<br>
-	 * note: Nothing happens if Eta.set() is called multiple times.
-	 * @return
+	 * Check if the instance have been instantiated.
+	 * <p>To instantiate an instance use {@link #createInstance(String, String, Context)}</p>
+	 * @return {@code true} if Eta is instantiated, else {@code false}
 	 */
-	public boolean isSet() {
-		return mApiKey != null && mApiSecret == null;
+	public static boolean isInstanciated() {
+		return mEta != null;
 	}
 	
+	/**
+	 * Method for determining the current network state
+	 * @return true if network connectivity exists, false otherwise.
+	 */
 	public boolean isOnline() {
 		NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
 		return netInfo != null && netInfo.isConnected();
 	}
-	
+
 	/**
-	 * The context, the given Eta has been set in.<br>
-	 * This context, does not necessarily have real estate on screen
-	 * to instantiate any views.
+	 * The {@link Context}, {@link Eta} has been instantiated with
+	 * 
+	 * <p>Note that this is the {@link Application#getApplicationContext()
+	 * application context}, and therefore has some restrictions</p>
+	 * 
 	 * @return A context
 	 */
 	public Context getContext() {
@@ -176,7 +242,7 @@ public class Eta implements Serializable {
 	public String getAppVersion() {
 		return mAppVersion;
 	}
-	
+
 	/**
 	 * Returns the API secret found at http://etilbudsavis.dk/api/.
 	 * @return API secret as String
@@ -184,7 +250,25 @@ public class Eta implements Serializable {
 	public String getApiSecret() {
 		return mApiSecret;
 	}
-
+	
+	/**
+	 * Shortcut method for adding requests to the RequestQueue.
+	 * @param request to be performed
+	 * @return the request
+	 */
+	public <T> Request<T> add(Request<T> request) {
+		return mRequestQueue.add(request);
+	}
+	
+	/**
+	 * Get the current instance of request queue. This is the queue 
+	 * responsible for any API request passed into the SDK.
+	 * @return
+	 */
+	public RequestQueue getRequestQueue() {
+		return mRequestQueue;
+	}
+	
 	/**
 	 * Get the currently active session.
 	 * @return a session
@@ -200,7 +284,7 @@ public class Eta implements Serializable {
 	public User getUser() {
 		return mSessionManager.getSession().getUser();
 	}
-	
+
 	/**
 	 * Get the settings, that ETA SDK is using.
 	 */
@@ -208,30 +292,29 @@ public class Eta implements Serializable {
 		return mSettings;
 	}
 
-	/**
-	 * A location object used by ETA, when making API requests.
-	 * This object should be edited when ever you want to change location.
-	 * @return <li> A location object
-	 */
-	public EtaLocation getLocation() {
-		return mLocation;
-	}
-
-	/**
-	 * Get the ETA SDK cache for various items and objects.
-	 * @return the current cache object
-	 */
-	public EtaCache getCache() {
-		return mCache;
-	}
-	
-	/**
-	 * Gets the current ShoppinglistManager.<br>
-	 * Use this manager for all shopping list relevant operations to ensure data consistency.
-	 * @return an instance of ShoppinglistManager
-	 */
+    /**
+     * A location object used by ETA, when making API requests.
+     * This object should be edited when ever you want to change location.
+     * @return <li> A location object
+     */
+    public EtaLocation getLocation() {
+            return mLocation;
+    }
+    
+    /**
+     * Get the current instance of {@link ListManager}.
+     * @return A ListManager
+     */
 	public ListManager getListManager() {
 		return mListManager;
+	}
+	
+    /**
+     * Get the current instance of {@link SyncManager}.
+     * @return A SyncManager
+     */
+	public SyncManager getSyncManager() {
+		return mSyncManager;
 	}
 	
 	/**
@@ -240,246 +323,76 @@ public class Eta implements Serializable {
 	 * @return a handler
 	 */
 	public Handler getHandler() {
-		if (mHandler == null) {
-			mHandler = new Handler(Looper.getMainLooper());
-		}
 		return mHandler;
 	}
 	
 	/**
-	 * Returns an ExecutorService (thread pool), used by the Api.<br>
-	 * Using a custom thread pool, rather than AsyncTast, is way better for
-	 * parallel actions, as the AsyncTash sometimes only has one thread (sequential execution).
-	 * @return ExecutorService used by Api class
-	 */
-	public ExecutorService getThreadPool() {
-		return mThreads;
-	}
-	
-	/**
-	 * Simply instantiates and returns a new Api object.
-	 * @return a new Api object
-	 */
-	public Api getApi() {
-		return new Api(this);
-	}
-	
-	/**
-	 * Clears ALL preferences that the SDK has created.<br><br>
+	 * First clears all preferences with {@link #clear()}, and then {@code null's}
+	 * this instance of Eta
 	 * 
-	 * This includes the session and user.
-	 * @return Returns true if the new values were successfully written to persistent storage.
+	 * <p>For further use of {@link Eta} after this, you must invoke
+	 * {@link #createInstance(String, String, Context) set()} it again.</p>
 	 */
-	public boolean clearPreferences() {
-		mSessionManager.invalidate();
-		mListManager.clear();
-		return mSettings.clear();
-	}
-
-	/**
-	 * The debug mode will allow for printing of Exceptions e.t.c. to LogCat.
-	 * @param useDebug true if Eta hsould be in debug mode
-	 * @return this object
-	 */
-	public Eta printLogCat(boolean useDebug) {
-		DEBUG_LOGD = useDebug;
-		return this;
+	public void destroyInstance() {
+		clear();
+		mEta = null;
 	}
 	
 	/**
-	 * Method for querying for the current life cycle state of the app.
-	 * @return true if resumed
+	 * Clears all preferences that the SDK has created.
+	 * 
+	 * <p>This includes invalidating the current session and user, clearing all
+	 * rows in DB, clearing preferences, resetting location info, clearing API
+	 * cache, e.t.c.</p>
+	 */
+	public void clear() {
+		mSessionManager.invalidate();
+		mSettings.clear();
+		mLocation.clear();
+		mRequestQueue.clear();
+		mListManager.clear();
+		EtaLog.getExceptionLog().clear();
+	}
+	
+	/**
+	 * Get the current state of the Eta instance
+	 * @return {@code true} if in resumed state, else {@code false}
 	 */
 	public boolean isResumed() {
 		return mResumed;
 	}
-	
+
 	/**
-	 * Method to call on Activity.onPause().
-	 * This method will clean up the SDK.
+	 * Method must be called when the current activity is put to background
 	 */
 	@SuppressLint("NewApi")
 	public void onPause() {
 		if (mResumed) {
 			mResumed = false;
-			mLocation.saveState();
 			mListManager.onPause();
-			for (PageflipWebview p : PageflipWebview.pageflips)
+			mSyncManager.onPause();
+			mSessionManager.onPause();
+			for (PageflipWebview p : PageflipWebview.pageflips) {
 				p.onPause();
+			}
+			mSettings.setLastUsageNow();
 		}
 	}
 	
 	/**
-	 * Method to call on Activity.onResume().<br>
-	 * This method will resume all SDK relevant stuff.
+	 * Method must be called when the activity is resuming
 	 */
 	@SuppressLint("NewApi")
 	public void onResume() {
 		if (!mResumed) {
 			mResumed = true;
-			mLocation.restoreState();
-			mListManager.onResume();
 			mSessionManager.onResume();
-			for (PageflipWebview p : PageflipWebview.pageflips)
+			mListManager.onResume();
+			mSyncManager.onResume();
+			for (PageflipWebview p : PageflipWebview.pageflips) {
 				p.onResume();
+			}
 		}
-	}
-	
-	private Bundle getApiParams(int offset, int limit, String orderBy) {
-		Bundle apiParams = new Bundle();
-		apiParams.putInt(Request.Param.OFFSET, offset);
-		apiParams.putInt(Request.Param.LIMIT, limit);
-		if (orderBy != null) 
-			apiParams.putString(Request.Sort.ORDER_BY, orderBy);
-		return apiParams;
-	}
-	
-	private Bundle getSearchApiParams(int offset, int limit, String orderBy, String query) {
-		Bundle apiParams = getApiParams(offset, limit, orderBy);
-		apiParams.putString(Request.Param.QUERY, query);
-		return apiParams;
-	}
-
-//  ****************
-//	*   CATALOGS   *
-//	****************
-	
-	public Api getCatalogList(Api.ListListener<Catalog> listener) {
-		return getCatalogList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-	
-	public Api getCatalogList(Api.ListListener<Catalog> listener, int offset, int limit) {
-		return getApi().get(Catalog.ENDPOINT_LIST, listener, getApiParams(offset, limit, null));
-	}
-
-	public Api getCatalogList(Api.ListListener<Catalog> listener, int offset, int limit, String orderBy) {
-		Api a = getApi().get(Catalog.ENDPOINT_LIST, listener).setOffset(offset).setLimit(limit);
-		if (orderBy != null) a.setOrderBy(orderBy);
-		return a;
-	}
-
-	public Api getCatalogFromId(Api.ItemListener<Catalog> listener, String catalogId) {
-		return getApi().get(Catalog.ENDPOINT_ID, listener).setId(catalogId);
-	}
-
-	public Api getCatalogFromIds(Api.ListListener<Catalog> listener, Set<String> catalogIds) {
-		return getApi().get(Catalog.ENDPOINT_LIST, listener).setCatalogIds(catalogIds);
-	}
-
-	public Api searchCatalogss(Api.ListListener<Catalog> listener, String query) {
-		return searchCatalogss(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public Api searchCatalogss(Api.ListListener<Catalog> listener, String query, int offset, int limit, String orderBy) {
-		return getApi().get(Catalog.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
-	}
-
-//  **************
-//	*   OFFER    *
-//	**************
-	
-	public Api getOfferList(Api.ListListener<Offer> listener) {
-		return getOfferList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public Api getOfferList(Api.ListListener<Offer> listener, int offset, int limit) {
-		return getApi().get(Offer.ENDPOINT_LIST, listener, getApiParams(offset, limit, null));
-	}
-
-	public Api getOfferList(Api.ListListener<Offer> listener, int offset, int limit, String orderBy) {
-		return getApi().get(Offer.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
-	}
-	
-	public Api getOfferFromId(Api.ItemListener<Offer> listener, String offerId) {
-		return getApi().get(Offer.ENDPOINT_ID, listener, new Bundle()).setId(offerId);
-	}
-	
-	public Api getOfferFromIds(Api.ListListener<Offer> listener, Set<String> offerIds) {
-		return getApi().get(Offer.ENDPOINT_LIST, listener, new Bundle()).setOfferIds(offerIds);
-	}
-	
-	public Api searchOffers(Api.ListListener<Offer> listener, String query) {
-		return searchOffers(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public Api searchOffers(Api.ListListener<Offer> listener, String query, int offset, int limit) {
-		return searchOffers(listener, query, offset, limit, null);
-	}
-
-	public Api searchOffers(Api.ListListener<Offer> listener, String query, int offset, int limit, String orderBy) {
-		return getApi().get(Offer.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
-	}
-
-//  **************
-//	*   DEALER   *
-//	**************
-	
-	public Api getDealerList(Api.ListListener<Dealer> listener) {
-		return getDealerList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public Api getDealerList(Api.ListListener<Dealer> listener, int offset, int limit) {
-		return getApi().get(Dealer.ENDPOINT_LIST, listener, getApiParams(offset, limit, null));
-	}
-
-	public Api getDealerList(Api.ListListener<Dealer> listener, int offset, int limit, String orderBy) {
-		return getApi().get(Dealer.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
-	}
-	
-	public Api getDealerFromId(Api.ItemListener<Dealer> listener, String dealerId) {
-		return getApi().get(Dealer.ENDPOINT_ID, listener, new Bundle()).setId(dealerId);
-	}
-	
-	public Api getDealerFromIds(Api.ListListener<Dealer> listener, Set<String> dealerIds) {
-		return getApi().get(Dealer.ENDPOINT_LIST, listener, new Bundle()).setDealerIds(dealerIds);
-	}
-
-	public Api searchDealers(Api.ListListener<Dealer> listener, String query) {
-		return searchDealers(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public Api searchDealers(Api.ListListener<Dealer> listener, String query, int offset, int limit) {
-		return searchDealers(listener, query, offset, limit, null);
-	}
-
-	public Api searchDealers(Api.ListListener<Dealer> listener, String query, int offset, int limit, String orderBy) {
-		return getApi().get(Dealer.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
-	}
-
-//  **************
-//	*   STORES   *
-//	**************
-	
-	public Api getStoreList(Api.ListListener<Store> listener) {
-		return getStoreList(listener, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public Api getStoreList(Api.ListListener<Store> listener, int offset, int limit) {
-		return getApi().get(Store.ENDPOINT_LIST, listener).setOffset(offset).setLimit(limit);
-	}
-
-	public Api getStoreList(Api.ListListener<Store> listener, int offset, int limit, String orderBy) {
-		return getApi().get(Store.ENDPOINT_LIST, listener, getApiParams(offset, limit, orderBy));
-	}
-	
-	public Api getStoreFromId(Api.ItemListener<Store> listener, String storeId) {
-		return getApi().get(Store.ENDPOINT_ID, listener, new Bundle()).setId(storeId);
-	}
-	
-	public Api getStoreFromIds(Api.ListListener<Store> listener, Set<String> storeIds) {
-		return getApi().get(Store.ENDPOINT_LIST, listener, new Bundle()).setStoreIds(storeIds);
-	}
-
-	public Api searchStores(Api.ListListener<Store> listener, String query) {
-		return searchStores(listener, query, Api.DEFAULT_OFFSET, Api.DEFAULT_LIMIT, null);
-	}
-
-	public Api searchStores(Api.ListListener<Store> listener, String query, int offset, int limit) {
-		return searchStores(listener, query, offset, limit, null);
-	}
-
-	public Api searchStores(Api.ListListener<Store> listener, String query, int offset, int limit, String orderBy) {
-		return getApi().get(Store.ENDPOINT_SEARCH, listener, getSearchApiParams(offset, limit, orderBy, query));
 	}
 
 }

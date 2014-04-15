@@ -1,3 +1,18 @@
+/*******************************************************************************
+* Copyright 2014 eTilbudsavis
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*   http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
@@ -9,41 +24,25 @@ import org.json.JSONObject;
 
 import android.graphics.Color;
 
-import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Dealer extends EtaErnObject implements Serializable {
+/**
+ * <p>This class is a representation of a dealer as the API v2 exposes it</p>
+ * 
+ * <p>More documentation available on via our
+ * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/dealers.html">Dealer Reference</a>
+ * documentation, on the engineering blog.
+ * </p>
+ * 
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ *
+ */
+public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	public static final String TAG = "Dealer";
-
-	/** Sort a list by name in ascending order. (smallest to largest) */
-	public static final String SORT_NAME = Request.Sort.NAME;
-
-	/** Sort a list by name in descending order. (largest to smallest)*/
-	public static final String SORT_NAME_DESC = Request.Sort.NAME_DESC;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED = Request.Sort.CREATED;
-
-	/** Sort a list by created in ascending order. (smallest to largest) */
-	public static final String SORT_CREATED_DESC = Request.Sort.CREATED_DESC;
-
-	/** Parameter for getting a list of specific dealer id's */
-	public static final String FILTER_DEALER_IDS = Request.Param.FILTER_DEALER_IDS;
-
-	/** String identifying the query parameter */
-	public static final String PARAM_QUERY = Request.Param.QUERY;
-	
-	/** Endpoint for dealer list resource */
-	public static final String ENDPOINT_LIST = Request.Endpoint.DEALER_LIST;
-	
-	/** Endpoint for a single dealer resource */
-	public static final String ENDPOINT_ID = Request.Endpoint.DEALER_ID;
-	
-	/** Endpoint for searching dealers */
-	public static final String ENDPOINT_SEARCH = Request.Endpoint.DEALER_SEARCH;
 	
 	private String mName;
 	private String mUrlName;
@@ -54,7 +53,6 @@ public class Dealer extends EtaErnObject implements Serializable {
 
 	public Dealer() { }
 	
-	@SuppressWarnings("unchecked")
 	public static ArrayList<Dealer> fromJSON(JSONArray dealers) {
 		ArrayList<Dealer> list = new ArrayList<Dealer>();
 		try {
@@ -62,54 +60,53 @@ public class Dealer extends EtaErnObject implements Serializable {
 				list.add(Dealer.fromJSON((JSONObject)dealers.get(i)));
 			
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return list;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Dealer fromJSON(JSONObject dealer) {
 		return fromJSON(new Dealer(), dealer);
 	}
 	
-	private static Dealer fromJSON(Dealer d, JSONObject dealer) {
+	public static Dealer fromJSON(Dealer d, JSONObject dealer) {
 		if (d == null) d = new Dealer();
 		if (dealer == null) return d;
-
+		
 		try {
-			d.setId(getJsonString(dealer, S_ID));
-			d.setErn(getJsonString(dealer, S_ERN));
-			d.setName(getJsonString(dealer, S_NAME));
-			d.setUrlName(getJsonString(dealer, S_URL_NAME));
-			d.setWebsite(getJsonString(dealer, S_WEBSITE));
-			d.setLogo(getJsonString(dealer, S_LOGO));
-			d.setColor(Color.parseColor("#"+getJsonString(dealer, S_COLOR)));
-			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(S_PAGEFLIP)));
+			d.setId(Json.valueOf(dealer, ServerKey.ID));
+			d.setErn(Json.valueOf(dealer, ServerKey.ERN));
+			d.setName(Json.valueOf(dealer, ServerKey.NAME));
+			d.setUrlName(Json.valueOf(dealer, ServerKey.URL_NAME));
+			d.setWebsite(Json.valueOf(dealer, ServerKey.WEBSITE));
+			d.setLogo(Json.valueOf(dealer, ServerKey.LOGO));
+			d.setColor(Color.parseColor("#"+Json.valueOf(dealer, ServerKey.COLOR)));
+			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(ServerKey.PAGEFLIP)));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return d;
 	}
-	
-	public JSONObject toJSON(){
-		return toJSON(this);
-	}
-	
-	public static JSONObject toJSON(Dealer d) {
-		JSONObject o = new JSONObject();
+
+	@Override
+	public JSONObject toJSON() {
+		JSONObject o = super.toJSON();
 		try {
-			o.put(S_ID, d.getId());
-			o.put(S_ERN, d.getErn());
-			o.put(S_NAME, d.getName());
-			o.put(S_URL_NAME, d.getUrlName());
-			o.put(S_WEBSITE, d.getWebsite());
-			o.put(S_LOGO, d.getLogo());
-			o.put(S_COLOR, d.getColorString());
-			o.put(S_PAGEFLIP, d.getPageflip().toJSON());
+			o.put(ServerKey.NAME, Json.nullCheck(getName()));
+			o.put(ServerKey.URL_NAME, Json.nullCheck(getUrlName()));
+			o.put(ServerKey.WEBSITE, Json.nullCheck(getWebsite()));
+			o.put(ServerKey.LOGO, Json.nullCheck(getLogo()));
+			o.put(ServerKey.COLOR, Json.nullCheck(getColorString()));
+			o.put(ServerKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
 		} catch (JSONException e) {
-			EtaLog.d(TAG, e);
+			EtaLog.e(TAG, e);
 		}
 		return o; 
+	}
+	
+	@Override
+	public String getErnPrefix() {
+		return ERN_DEALER;
 	}
 	
 	public Dealer setName(String name) {
@@ -171,43 +168,61 @@ public class Dealer extends EtaErnObject implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		
-		if (!(o instanceof Dealer))
-			return false;
-
-		Dealer dealer = (Dealer)o;
-		return stringCompare(mId, dealer.getId()) &&
-				stringCompare(mErn, dealer.getErn()) &&
-				stringCompare(mName, dealer.getName()) &&
-				stringCompare(mUrlName, dealer.getUrlName()) &&
-				stringCompare(mWebsite, dealer.getWebsite()) &&
-				stringCompare(mLogo, dealer.getLogo()) &&
-				mColor.equals(dealer.getColor()) &&
-				mPageflip == null ? dealer.getPageflip() == null : mPageflip.equals(dealer.getPageflip());
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((mColor == null) ? 0 : mColor.hashCode());
+		result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
+		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
+		result = prime * result
+				+ ((mPageflip == null) ? 0 : mPageflip.hashCode());
+		result = prime * result
+				+ ((mUrlName == null) ? 0 : mUrlName.hashCode());
+		result = prime * result
+				+ ((mWebsite == null) ? 0 : mWebsite.hashCode());
+		return result;
 	}
 
 	@Override
-	public String toString() {
-		return toString(false);
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Dealer other = (Dealer) obj;
+		if (mColor == null) {
+			if (other.mColor != null)
+				return false;
+		} else if (!mColor.equals(other.mColor))
+			return false;
+		if (mLogo == null) {
+			if (other.mLogo != null)
+				return false;
+		} else if (!mLogo.equals(other.mLogo))
+			return false;
+		if (mName == null) {
+			if (other.mName != null)
+				return false;
+		} else if (!mName.equals(other.mName))
+			return false;
+		if (mPageflip == null) {
+			if (other.mPageflip != null)
+				return false;
+		} else if (!mPageflip.equals(other.mPageflip))
+			return false;
+		if (mUrlName == null) {
+			if (other.mUrlName != null)
+				return false;
+		} else if (!mUrlName.equals(other.mUrlName))
+			return false;
+		if (mWebsite == null) {
+			if (other.mWebsite != null)
+				return false;
+		} else if (!mWebsite.equals(other.mWebsite))
+			return false;
+		return true;
 	}
 	
-	public String toString(boolean everything) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append("[")
-		.append("name=").append(mName)
-		.append(", id=").append(mId);
-		
-		if (everything) {
-			sb.append(", ern=").append(mErn)
-			.append(", urlName=").append(mUrlName)
-			.append(", website=").append(mWebsite)
-			.append(", logo=").append(mLogo)
-			.append(", color=").append(mColor)
-			.append(", pageflip=").append(mPageflip == null ? null : mPageflip.toString());
-		}
-		return sb.append("]").toString();
-	}
 }
