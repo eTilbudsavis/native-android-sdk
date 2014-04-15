@@ -12,6 +12,7 @@
   - 
 
 - Future improvements
+  - Re-implement queueing of "same" requests, before they hit the cache-queue
   - Native Pageflip View
   - Testing package
   - RequestFactory - Needed for testing
