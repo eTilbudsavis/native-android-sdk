@@ -75,7 +75,6 @@ public abstract class EtaErnObject<T> extends EtaObject {
 	 * <a href="http://www.ietf.org/rfc/rfc4122.txt">RFC&nbsp;4122:</a>, 
 	 * though exceptions can occur e.g. {@link Country#setId(String)}.</p>
 	 * 
-	 * <p>When setting the id, the ERN is automatically update the match</p>
 	 * @param id A non-<code>null</code> String
 	 * @return This object
 	 */
@@ -83,7 +82,6 @@ public abstract class EtaErnObject<T> extends EtaObject {
 	public T setId(String id) {
 		if (id != null) {
 			mId = id;
-			mErn = getErnPrefix() + ":" + id;
 		}
 		return (T)this;
 	}
@@ -107,8 +105,6 @@ public abstract class EtaErnObject<T> extends EtaObject {
 	public T setErn(String ern) {
 		if (ern != null) {
 			mErn = ern;
-			String[] parts = mErn.split(":");
-			mId = parts[parts.length-1];
 		}
 		return (T)this;
 	}

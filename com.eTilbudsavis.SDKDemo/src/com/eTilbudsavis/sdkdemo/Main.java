@@ -38,7 +38,7 @@ public class Main extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
+        
         /* 
          * You MUST create an Eta instance before invoking Eta.getinstance.
          * 

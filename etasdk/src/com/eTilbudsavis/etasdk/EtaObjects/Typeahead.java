@@ -205,21 +205,29 @@ public class Typeahead extends EtaObject {
 			
 		} else {
 			
-			StringBuilder sb = new StringBuilder();
+			String html = mSubject;
 			
-			int start = mOffset;
-			int end = mOffset + mLength;
-			
-			if (mOffset > 0) {
-				sb.append(mSubject.substring(0, start));
+			try {
+				
+				StringBuilder sb = new StringBuilder();
+				
+				int start = mOffset;
+				int end = mOffset + mLength;
+				
+				if (mOffset > 0) {
+					sb.append(mSubject.substring(0, start));
+				}
+				sb.append(startTag);
+				sb.append(mSubject.substring(start, end));
+				sb.append(endTag);
+				if (end < mSubject.length()) {
+					sb.append(mSubject.substring(end));
+				}
+				html = sb.toString();
+				
+			} catch (StringIndexOutOfBoundsException e) {
+				EtaLog.e(TAG, e);
 			}
-			sb.append(startTag);
-			sb.append(mSubject.substring(start, end));
-			sb.append(endTag);
-			if (end < mSubject.length()) {
-				sb.append(mSubject.substring(end));
-			}
-			String html = sb.toString();
 			
 			return Html.fromHtml(html);
 			

@@ -59,7 +59,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 public final class PageflipWebview extends WebView {
 	
 	private static final String TAG = "PageflipWebview";
-
+	
 	/**
 	 * Variable controlling debugging mode for PageflipWebview. If set to true, a WebChromeClient will be enabled.
 	 */
@@ -374,6 +374,15 @@ public final class PageflipWebview extends WebView {
 		
 	}
 	
+	/**
+	 * If this method is allready executed
+	 * <p>Note double execution isn't allowed, and will be ignored</p>
+	 * @return True 
+	 */
+	public boolean isExecuted() {
+		return mListener != null && mCatalogId != null;
+	}
+	
 	private JSONObject location() {
 		JSONObject loc = new JSONObject();
 		try {
@@ -495,7 +504,7 @@ public final class PageflipWebview extends WebView {
 		}
 		
 	}
-
+	
 	/**
 	 * Method for determining if the Pageflip is ready.
 	 * @return true if Pageflip JavaScript is ready for user-input
