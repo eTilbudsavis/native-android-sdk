@@ -15,6 +15,7 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import org.json.JSONException;
@@ -30,8 +31,10 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public abstract class EtaErnObject<T> extends EtaObject {
+public abstract class EtaErnObject<T> extends EtaObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	public static final String TAG = "EtaErnObject";
 	
 	/* 

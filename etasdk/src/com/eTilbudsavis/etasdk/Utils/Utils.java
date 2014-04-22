@@ -62,7 +62,7 @@ public final class Utils {
 	private static SimpleDateFormat mSdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
 	
 	static {
-		System.out.println("Utils.static hit");
+		
 	}
 	
 	/**

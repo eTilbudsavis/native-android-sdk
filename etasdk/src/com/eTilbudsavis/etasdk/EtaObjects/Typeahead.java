@@ -205,8 +205,6 @@ public class Typeahead extends EtaObject {
 			
 		} else {
 			
-			String html = mSubject;
-			
 			try {
 				
 				StringBuilder sb = new StringBuilder();
@@ -223,13 +221,14 @@ public class Typeahead extends EtaObject {
 				if (end < mSubject.length()) {
 					sb.append(mSubject.substring(end));
 				}
-				html = sb.toString();
+				String html = sb.toString();
+				return Html.fromHtml(html);
 				
 			} catch (StringIndexOutOfBoundsException e) {
 				EtaLog.e(TAG, e);
 			}
 			
-			return Html.fromHtml(html);
+			return Html.fromHtml(mSubject);
 			
 		}
 		
