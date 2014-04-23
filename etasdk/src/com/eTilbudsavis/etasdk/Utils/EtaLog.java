@@ -60,7 +60,7 @@ public class EtaLog {
 		}
 		Log.d(tag, (message == null ? "null" : message) );
 	}
-
+	
 	/**
 	 * Print a debug log message to LogCat.
 	 * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
@@ -75,7 +75,7 @@ public class EtaLog {
 		}
 		d(tag, e.toJSON().toString());
 	}
-
+	
 	/**
 	 * Print a debug log message to LogCat.
 	 * @param tag Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
@@ -137,13 +137,11 @@ public class EtaLog {
 		
 		if (message.length() > 4000) {
 		    int chunkCount = message.length() / 4000;     // integer division
+	        String chunk = "[chunk %s/%s] %s";
 		    for (int i = 0; i <= chunkCount; i++) {
 		        int max = 4000 * (i + 1);
-		        if (max >= message.length()) {
-		            d(tag, "chunk " + i + " of " + chunkCount + ":" + message.substring(4000 * i));
-		        } else {
-		            d(tag, "chunk " + i + " of " + chunkCount + ":" + message.substring(4000 * i, max));
-		        }
+		        int end = (max >= message.length()) ? message.length() : max;
+		        d(tag, String.format(chunk, i, chunkCount, message.substring(4000 * i, end) ) );
 		    }
 		} else {
 			d(tag,message);
@@ -162,7 +160,7 @@ public class EtaLog {
 		String resp = response == null ? "null" : response.toString();
 		d(tag, name, resp, error);
 	}
-
+	
 	/**
 	 * Print a debug log message to LogCat.
 	 * @param tag A tag
@@ -226,9 +224,12 @@ public class EtaLog {
 	 * Print a StackTrace from any given point of your source code.
 	 */
 	public static void printStackTrace() {
-		if (!DEBUG) return;
-			for (StackTraceElement ste : Thread.currentThread().getStackTrace())
-				System.out.println(ste);
+		if (!DEBUG) {
+			return;
+		}
+		for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+			System.out.println(ste);
+		}
 	}
 	
 	/**
