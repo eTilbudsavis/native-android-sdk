@@ -15,6 +15,7 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -37,7 +38,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Shoppinglist extends EtaListObject< Shoppinglist> {
+public class Shoppinglist extends EtaListObject< Shoppinglist> implements Serializable {
 
 	public static final String TAG = "Shoppinglist";
 	

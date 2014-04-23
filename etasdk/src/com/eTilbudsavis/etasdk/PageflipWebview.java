@@ -1,8 +1,6 @@
 /**
  * @fileoverview	Pageflip.
- * @author			Morten Bo <morten@etilbudsavis.dk>
- * 					Danny Hvam <danny@etilbudsavid.dk>
- * @version			0.3.0
+ * @author			Danny Hvam <danny@etilbudsavis.dk>
  */
 package com.eTilbudsavis.etasdk;
 

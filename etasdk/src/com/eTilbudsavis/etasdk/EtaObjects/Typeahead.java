@@ -15,6 +15,7 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +43,7 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Typeahead extends EtaObject {
+public class Typeahead extends EtaObject implements Serializable {
 
 	public static final String TAG = "Typeahead";
 	

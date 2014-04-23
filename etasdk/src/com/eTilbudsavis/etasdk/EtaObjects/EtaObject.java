@@ -15,6 +15,8 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
+import java.io.Serializable;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -34,7 +36,9 @@ import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public abstract class EtaObject {
+public abstract class EtaObject implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	public static final String TAG = "EtaObject";
 	
