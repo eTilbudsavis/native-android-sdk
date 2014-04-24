@@ -72,12 +72,13 @@ public abstract class EtaErnObject<T> extends EtaObject implements Serializable 
 	 * @return The prefix as a {@link String}
 	 */
 	public abstract String getErnPrefix();
-	
+
 	/**
 	 * <p>Set the identifier for this object. An identifier is often a {@link UUID} as described in
 	 * <a href="http://www.ietf.org/rfc/rfc4122.txt">RFC&nbsp;4122:</a>, 
 	 * though exceptions can occur e.g. {@link Country#setId(String)}.</p>
 	 * 
+	 * <p>When setting the id, the ERN is automatically update to match</p>
 	 * @param id A non-<code>null</code> String
 	 * @return This object
 	 */
@@ -85,6 +86,7 @@ public abstract class EtaErnObject<T> extends EtaObject implements Serializable 
 	public T setId(String id) {
 		if (id != null) {
 			mId = id;
+			mErn = getErnPrefix() + ":" + id;
 		}
 		return (T)this;
 	}
@@ -96,7 +98,7 @@ public abstract class EtaErnObject<T> extends EtaObject implements Serializable 
 	public String getId() {
 		return mId;
 	}
-	
+
 	/**
 	 * Set the Etilbudsavis Resource Name (ERN) for this object.
 	 * <p>ERN is a <i>unique</i> identifier for objects in the eTilbudsavis API v2, and should in most cases be 
@@ -108,6 +110,8 @@ public abstract class EtaErnObject<T> extends EtaObject implements Serializable 
 	public T setErn(String ern) {
 		if (ern != null) {
 			mErn = ern;
+			String[] parts = mErn.split(":");
+			mId = parts[parts.length-1];
 		}
 		return (T)this;
 	}
