@@ -126,7 +126,7 @@ public class SessionManager {
 	}
 	
 	private void addRequest(JsonObjectRequest r) {
-
+		
 		synchronized (LOCK) {
 			r.setPriority(Priority.HIGH);
 			mSessionQueue.add(r);

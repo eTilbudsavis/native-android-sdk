@@ -15,6 +15,7 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +43,7 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Typeahead extends EtaObject {
+public class Typeahead extends EtaObject implements Serializable {
 
 	public static final String TAG = "Typeahead";
 	
@@ -205,23 +206,30 @@ public class Typeahead extends EtaObject {
 			
 		} else {
 			
-			StringBuilder sb = new StringBuilder();
-			
-			int start = mOffset;
-			int end = mOffset + mLength;
-			
-			if (mOffset > 0) {
-				sb.append(mSubject.substring(0, start));
+			try {
+				
+				StringBuilder sb = new StringBuilder();
+				
+				int start = mOffset;
+				int end = mOffset + mLength;
+				
+				if (mOffset > 0) {
+					sb.append(mSubject.substring(0, start));
+				}
+				sb.append(startTag);
+				sb.append(mSubject.substring(start, end));
+				sb.append(endTag);
+				if (end < mSubject.length()) {
+					sb.append(mSubject.substring(end));
+				}
+				String html = sb.toString();
+				return Html.fromHtml(html);
+				
+			} catch (StringIndexOutOfBoundsException e) {
+				EtaLog.e(TAG, e);
 			}
-			sb.append(startTag);
-			sb.append(mSubject.substring(start, end));
-			sb.append(endTag);
-			if (end < mSubject.length()) {
-				sb.append(mSubject.substring(end));
-			}
-			String html = sb.toString();
 			
-			return Html.fromHtml(html);
+			return Html.fromHtml(mSubject);
 			
 		}
 		

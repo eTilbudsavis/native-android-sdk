@@ -3,6 +3,8 @@ eTilbudsavis - Android SDK
 
 The simple solution to querying for eTilbudsavis-data.
 
+This guide is out of date
+===
 
 # Introduction
 This is a short guide to guide you through our Android SDK. We will assume you are using [eclipse](http://www.eclipse.org/) and the [Android Development Tools](http://developer.android.com/tools/sdk/eclipse-adt.html) plugin. 

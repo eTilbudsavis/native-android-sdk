@@ -15,6 +15,7 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.EtaObjects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -27,7 +28,7 @@ import android.annotation.SuppressLint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Share extends EtaListObject<Share> {
+public class Share extends EtaListObject<Share> implements Serializable {
 
 	public static final String TAG = "Share";
 	

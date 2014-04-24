@@ -25,7 +25,7 @@ import android.graphics.Color;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Branding extends EtaObject  implements Serializable {
+public class Branding extends EtaObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
