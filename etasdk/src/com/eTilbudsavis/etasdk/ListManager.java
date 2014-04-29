@@ -807,8 +807,10 @@ public class ListManager {
 	 * @param l A {@link OnChangeListener} for receiving events
 	 */
 	public void setOnChangeListener(OnChangeListener l) {
-		if (!mListSubscribers.contains(l)) {
-			mListSubscribers.add(l);
+		synchronized (mListSubscribers) {
+			if (!mListSubscribers.contains(l)) {
+				mListSubscribers.add(l);
+			}
 		}
 	}
 	
@@ -818,7 +820,9 @@ public class ListManager {
 	 * @param l The {@link OnChangeListener} to remove
 	 */
 	public void removeOnChangeListener(OnChangeListener l) {
-		mListSubscribers.remove(l);
+		synchronized (mListSubscribers) {
+			mListSubscribers.remove(l);
+		}
 	}
 	
 	private void sendNotification(ListNotification n) {
@@ -833,28 +837,30 @@ public class ListManager {
 	 */
 	public void notifySubscribers(final ListNotification n) {
 		
-		for (final OnChangeListener s : mListSubscribers) {
+		synchronized (mListSubscribers) {
+			for (final OnChangeListener s : mListSubscribers) {
 
-			Eta.getInstance().getHandler().post(new Runnable() {
-				
-				public void run() {
+				Eta.getInstance().getHandler().post(new Runnable() {
 					
-					if (n.isFirstSync()) {
-						s.onFirstSync();
-					}
-					
-					if (n.hasListNotifications()) {
-						s.onListUpdate(n.isServer(), n.getAddedLists(), n.getDeletedLists(), n.getEditedLists());
-					}
+					public void run() {
 						
-					if (n.hasItemNotifications()) {
-						s.onItemUpdate(n.isServer(), n.getAddedItems(), n.getDeletedItems(), n.getEditedItems());
+						if (n.isFirstSync()) {
+							s.onFirstSync();
+						}
+						
+						if (n.hasListNotifications()) {
+							s.onListUpdate(n.isServer(), n.getAddedLists(), n.getDeletedLists(), n.getEditedLists());
+						}
+							
+						if (n.hasItemNotifications()) {
+							s.onItemUpdate(n.isServer(), n.getAddedItems(), n.getDeletedItems(), n.getEditedItems());
+						}
+						
 					}
 					
-				}
+				});
 				
-			});
-			
+			}
 		}
 		
 	}
