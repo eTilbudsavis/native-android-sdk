@@ -41,7 +41,7 @@ public class EtaLog {
 	public static boolean DEBUG = false;
 	
 	/** Variable to control the size of the exception log */
-	public static final int DEFAULT_EXCEPTION_LOG_SIZE = 64;
+	public static final int DEFAULT_EXCEPTION_LOG_SIZE = 16;
 	
 	/** Variable determining the state of logging */
 	private static boolean mEnableLogHistory = false;
