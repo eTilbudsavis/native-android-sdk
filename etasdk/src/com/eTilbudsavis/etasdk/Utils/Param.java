@@ -155,8 +155,10 @@ public class Param {
 	public static final String COUNT = "count";
 	
 	public static final String TICK = "tick";
-	
+
 	public static final String OFFER_ID = "offer_id";
+
+	public static final String OFFER_IDS = "offer_ids";
 	
 	public static final String CREATOR = "creator";
 	
