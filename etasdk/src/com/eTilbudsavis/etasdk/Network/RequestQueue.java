@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaLocation;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
@@ -350,19 +351,48 @@ public class RequestQueue {
 		}
 		
 		// Append necessary API parameters
-		Bundle params = new Bundle();
-
+		Bundle b = request.getQueryParameters();
+		
 		String version = Eta.getInstance().getAppVersion();
 		if (version != null) {
-			params.putString(Param.API_AV, version);
-		}
-
-		if (request.useLocation() && mEta.getLocation().isSet()) {
-			params.putAll(mEta.getLocation().getQuery());
+			b.putString(Param.API_AV, version);
 		}
 		
-		request.putQueryParameters(params);
-
+		EtaLocation l = mEta.getLocation();
+		
+		if (request.useLocation() && l.isSet()) {
+			
+			if (!b.containsKey(Param.LATITUDE)) {
+				b.putDouble(Param.LATITUDE, l.getLatitude());
+			}
+			if (!b.containsKey(Param.LONGITUDE)) {
+				b.putDouble(Param.LONGITUDE, l.getLongitude());
+			}
+			if (!b.containsKey(Param.SENSOR)) {
+				b.putBoolean(Param.SENSOR, l.isSensor());
+			}
+			if (!b.containsKey(Param.RADIUS)) {
+				b.putInt(Param.RADIUS, l.getRadius());
+			}
+			
+			// Determine whether to include bounds.
+			if (l.isBoundsSet()) {
+				if (!b.containsKey(Param.BOUND_EAST)) {
+					b.putDouble(Param.BOUND_EAST, l.getBoundEast());
+				}
+				if (!b.containsKey(Param.BOUND_NORTH)) {
+					b.putDouble(Param.BOUND_NORTH, l.getBoundNorth());
+				}
+				if (!b.containsKey(Param.BOUND_SOUTH)) {
+					b.putDouble(Param.BOUND_SOUTH, l.getBoundSouth());
+				}
+				if (!b.containsKey(Param.BOUND_WEST)) {
+					b.putDouble(Param.BOUND_WEST, l.getBoundWest());
+				}
+			}
+			
+		}
+		
 	}
 	
 	/**

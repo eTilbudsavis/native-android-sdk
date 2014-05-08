@@ -15,7 +15,6 @@ import org.json.JSONObject;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
@@ -274,30 +273,6 @@ public class EtaLocation extends Location {
 	}
 	
 	/**
-	 * Generates a set of parameters that can be used as query parameters, when making requests to API v2.
-	 * @return a bundle containing query parameters
-	 */
-	public Bundle getQuery() {
-		
-		Bundle b = new Bundle();
-
-		b.putDouble(Param.LATITUDE, getLatitude());
-		b.putDouble(Param.LONGITUDE, getLongitude());
-		b.putBoolean(Param.SENSOR, isSensor());
-		b.putInt(Param.RADIUS, getRadius());
-
-		// Determine whether to include bounds.
-		if (isBoundsSet()) {
-			b.putDouble(Param.BOUND_EAST, getBoundEast());
-			b.putDouble(Param.BOUND_NORTH, getBoundNorth());
-			b.putDouble(Param.BOUND_SOUTH, getBoundSouth());
-			b.putDouble(Param.BOUND_WEST, getBoundWest());
-		}
-		return b;
-		
-	}
-	
-	/**
 	 * Saves this locations state to SharedPreferences. This method is called on all onPause events.
 	 */
 	private void saveState() {
@@ -318,8 +293,13 @@ public class EtaLocation extends Location {
 	private boolean restoreState() {
 		
 		SharedPreferences prefs = mEta.getSettings().getPrefs();
-		if (prefs.contains(Settings.LOC_SENSOR) && prefs.contains(Settings.LOC_RADIUS) && prefs.contains(Settings.LOC_LATITUDE) && 
-				prefs.contains(Settings.LOC_LONGITUDE) && prefs.contains(Settings.LOC_ADDRESS)  && prefs.contains(Settings.LOC_TIME) ) {
+		
+		if ( prefs.contains(Settings.LOC_SENSOR) &&
+				prefs.contains(Settings.LOC_RADIUS) &&
+				prefs.contains(Settings.LOC_LATITUDE) && 
+				prefs.contains(Settings.LOC_LONGITUDE) &&
+				prefs.contains(Settings.LOC_ADDRESS)  &&
+				prefs.contains(Settings.LOC_TIME) ) {
 			
 			mSensor = prefs.getBoolean(Settings.LOC_SENSOR, false);
 			mRadius = prefs.getInt(Settings.LOC_RADIUS, Integer.MAX_VALUE);

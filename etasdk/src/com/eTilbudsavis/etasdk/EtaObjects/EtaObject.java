@@ -81,6 +81,7 @@ public abstract class EtaObject implements Serializable {
 		public static final String URL_NAME = "url_name";
 		public static final String WEBSITE = "website";
 		public static final String LOGO = "logo";
+		public static final String LOGO_BACKGROUND = "logo_background";
 		public static final String COLOR = "color";
 		public static final String PAGEFLIP = "pageflip";
 		public static final String COUNTRY = "country";

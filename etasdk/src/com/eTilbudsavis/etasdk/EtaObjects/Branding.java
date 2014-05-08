@@ -35,6 +35,7 @@ public class Branding extends EtaObject implements Serializable {
 	private String mUrlName;
 	private String mWebsite;
 	private String mLogo;
+	private Integer mLogoBackground;
 	private Integer mColor;
 	private Pageflip mPageflip;
 	
@@ -55,8 +56,11 @@ public class Branding extends EtaObject implements Serializable {
 			b.setUrlName(Json.valueOf(branding, ServerKey.URL_NAME));
 			b.setWebsite(Json.valueOf(branding, ServerKey.WEBSITE));
 			b.setLogo(Json.valueOf(branding, ServerKey.LOGO));
-			b.setColor(Color.parseColor("#"+branding.getString(EtaObject.ServerKey.COLOR)));
-			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(EtaObject.ServerKey.PAGEFLIP)));
+			String color = Json.valueOf(branding, ServerKey.COLOR, "ffffff");
+			b.setColor(Color.parseColor("#"+color));
+			String logoColor = Json.valueOf(branding, ServerKey.LOGO_BACKGROUND, color);
+			b.setLogoBackground(Color.parseColor("#"+logoColor));
+			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(ServerKey.PAGEFLIP)));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, e);
 		}
@@ -113,6 +117,19 @@ public class Branding extends EtaObject implements Serializable {
 
 	public String getLogo() {
 		return mLogo;
+	}
+
+	public Branding setLogoBackground(Integer color) {
+		mLogoBackground = color;
+		return this;
+	}
+	
+	public Integer getLogoBackground() {
+		return mLogoBackground;
+	}
+
+	public String getLogoBackgroundString() {
+		return String.format("%06X", 0xFFFFFF & mLogoBackground);
 	}
 
 	public Branding setColor(Integer color) {
