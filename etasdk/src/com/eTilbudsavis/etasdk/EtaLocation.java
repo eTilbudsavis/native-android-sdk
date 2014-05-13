@@ -312,7 +312,7 @@ public class EtaLocation extends Location {
 			mAddress = prefs.getString(Settings.LOC_ADDRESS, null);
 			super.setTime(prefs.getLong(Settings.LOC_TIME, System.currentTimeMillis()));
 			return true;
-		} 
+		}
 		return false;
 		
 	}

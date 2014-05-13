@@ -408,7 +408,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	public List<Shoppinglist> getLists(User user) {
 		return getLists(user, false);
 	}
-
+	
 	/**
 	 * 
 	 * @param userId

@@ -397,8 +397,8 @@ public class EtaLog {
 			d(TAG, sb.toString());
 		}
 		
-		public JSONArray toJSON() {
-			return toJSON(mEvents);
+		public JSONArray toJSON(boolean rawTime) {
+			return toJSON(mEvents, rawTime);
 		}
 		
 		/**
@@ -406,11 +406,11 @@ public class EtaLog {
 		 * @param events to torn into a JSONArray
 		 * @return a JSONArray
 		 */
-		public static JSONArray toJSON(List<Event> events) {
+		public static JSONArray toJSON(List<Event> events, boolean rawTime) {
 			JSONArray jArray = new JSONArray();
 			if (events != null && !events.isEmpty()) {
 				for (Event e : events) {
-					jArray.put(e.toJSON());
+					jArray.put(e.toJSON(rawTime));
 				}
 			}
 			return jArray;
@@ -467,11 +467,11 @@ public class EtaLog {
 				this.token = token;
 				this.data = data;
 			}
-			
-			public JSONObject toJSON() {
+
+			public JSONObject toJSON(boolean rawTime) {
 				JSONObject o = new JSONObject();
 				try {
-					o.put("timestamp", Utils.parseDate(new Date(time)));
+					o.put("timestamp", (rawTime ? time : Utils.parseDate(new Date(time))) );
 					o.put("type", type);
 					o.put("token", token);
 					o.put("userid", user);
