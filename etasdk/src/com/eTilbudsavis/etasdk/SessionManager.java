@@ -375,12 +375,21 @@ public class SessionManager {
 	 */
 	public void signout(final Listener<JSONObject> l) {
 		
-		final User u = mSession.getUser();
-        mEta.getListManager().clear(u.getUserId());
-        Map<String, String> args = new HashMap<String, String>();
-        args.put(Param.EMAIL, "");
-        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
-        addRequest(req);
+		if (Eta.getInstance().isOnline()) {
+	        mEta.getListManager().clear(mSession.getUser().getUserId());
+	        Map<String, String> args = new HashMap<String, String>();
+	        args.put(Param.EMAIL, "");
+	        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
+	        addRequest(req);
+		} else {
+			invalidate();
+			Eta.getInstance().getHandler().post(new Runnable() {
+				
+				public void run() {
+					l.onComplete(mSession.toJSON(), null);
+				}
+			});
+		}
         
 	}
 	
@@ -463,6 +472,7 @@ public class SessionManager {
 			mSession = new Session();
 			mEta.getSettings().setSessionJson(mSession.toJSON());
 			clearUser();
+			notifySubscribers();
 		}
 	}
 	
