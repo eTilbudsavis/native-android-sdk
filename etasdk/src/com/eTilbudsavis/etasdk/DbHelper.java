@@ -370,7 +370,7 @@ public class DbHelper extends SQLiteOpenHelper {
 			c = execQuery(q);
 			sl = c.moveToFirst() ? cursorToSl(c) : null;
 		} finally {
-			close(c);
+			closeCursorAndDB(c);
 		}
 		if (sl != null) {
 			sl.putShares(getShares(sl, user, false));
@@ -410,7 +410,7 @@ public class DbHelper extends SQLiteOpenHelper {
 				} while (c.moveToNext());
 			}
 		} finally {
-			close(c);
+			closeCursorAndDB(c);
 		}
 		
 		List<Shoppinglist> lists = new ArrayList<Shoppinglist>(tmp.size());
@@ -495,7 +495,7 @@ public class DbHelper extends SQLiteOpenHelper {
 				sli = cursorToSli(c);
 			}
 		} finally {
-			close(c);
+			closeCursorAndDB(c);
 		}
 		return sli;
 	}
@@ -541,7 +541,7 @@ public class DbHelper extends SQLiteOpenHelper {
 				} while (c.moveToNext());
 			}
 		} finally {
-			close(c);
+			closeCursorAndDB(c);
 		}
 		return items;
 	}
@@ -562,7 +562,7 @@ public class DbHelper extends SQLiteOpenHelper {
 				sli = cursorToSli(c);
 			}
 		} finally {
-			close(c);
+			closeCursorAndDB(c);
 		}
 		return sli;
 	}
@@ -582,7 +582,7 @@ public class DbHelper extends SQLiteOpenHelper {
 				sl = cursorToSl(c); 
 			}
 		} finally {
-			close(c);
+			closeCursorAndDB(c);
 		}
 		return sl;
 	}
@@ -656,7 +656,7 @@ public class DbHelper extends SQLiteOpenHelper {
 				} while (c.moveToNext());
 			}
 		} finally {
-			close(c);
+			closeCursorAndDB(c);
 		}
 		
 		return shares;
@@ -712,9 +712,7 @@ public class DbHelper extends SQLiteOpenHelper {
 					c.moveToFirst();
 				}
 			} finally {
-				if (c != null) {
-					c.close();
-				}
+				closeCursor(c);
 			}
 			
 			// Get number of affected rows in last statement (query)
@@ -724,9 +722,7 @@ public class DbHelper extends SQLiteOpenHelper {
 					i = c.getInt(0);
 				}
 			} finally {
-				if (c != null) {
-					c.close();
-				}
+				closeCursorAndDB(c);
 			}
 			
 		}
@@ -749,13 +745,11 @@ public class DbHelper extends SQLiteOpenHelper {
 		
 	}
 
-	private void close(Cursor c) {
+	private void closeCursorAndDB(Cursor c) {
 
 		synchronized (LOCK) {
 			
-			if (c != null) {
-				c.close();
-			}
+			closeCursor(c);
 			
 			if (!Eta.getInstance().isResumed()) {
 				mDatabase.close();
@@ -763,6 +757,12 @@ public class DbHelper extends SQLiteOpenHelper {
 			
 		}
 		
+	}
+	
+	private void closeCursor(Cursor c) {
+		if (c != null) {
+			c.close();
+		}
 	}
 	
 	private static String escape(Object o) {
