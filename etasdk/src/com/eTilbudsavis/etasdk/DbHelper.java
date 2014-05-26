@@ -683,12 +683,13 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 	
 	private Cursor execQuery(String query) {
-		
-		// If we are resuming the activity
-		if (mDatabase == null || !mDatabase.isOpen())
-			mDatabase = getWritableDatabase();
-		
+
 		synchronized (LOCK) {
+			
+			// If we are resuming the activity
+			if (mDatabase == null || !mDatabase.isOpen()) {
+				mDatabase = getWritableDatabase();
+			}
 			
 			return mDatabase.rawQueryWithFactory(null, query, null, null);
 			
@@ -697,13 +698,19 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 
 	private void close(Cursor c) {
-		if (c != null) {
-			c.close();
+
+		synchronized (LOCK) {
+			
+			if (c != null) {
+				c.close();
+			}
+			
+			if (!Eta.getInstance().isResumed()) {
+				mDatabase.close();
+			}
+			
 		}
 		
-		if (!Eta.getInstance().isResumed()) {
-			mDatabase.close();
-		}
 	}
 	
 	private static String escape(Object o) {
