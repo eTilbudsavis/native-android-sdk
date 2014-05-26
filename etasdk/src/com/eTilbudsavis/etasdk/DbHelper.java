@@ -364,10 +364,14 @@ public class DbHelper extends SQLiteOpenHelper {
 	public Shoppinglist getList(String id, User user) {
 		id = escape(id);
 		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s!=%s", LIST_TABLE, ID, id, USER, user.getUserId(), STATE, Shoppinglist.State.DELETE);
-		Cursor c = execQuery(q);
+		Cursor c = null;
 		Shoppinglist sl = null;
-		sl = c.moveToFirst() ? cursorToSl(c) : null;
-		close(c);
+		try {
+			c = execQuery(q);
+			sl = c.moveToFirst() ? cursorToSl(c) : null;
+		} finally {
+			close(c);
+		}
 		if (sl != null) {
 			sl.putShares(getShares(sl, user, false));
 			sl = sl.getShares().containsKey(user.getEmail()) ? sl : null;
@@ -396,20 +400,26 @@ public class DbHelper extends SQLiteOpenHelper {
 		} else {
 			q = String.format("SELECT * FROM %s WHERE %s!=%s AND %s=%s", LIST_TABLE, STATE, Shoppinglist.State.DELETE, USER, user.getUserId());
 		}
-		Cursor c = execQuery(q);
-		List<Shoppinglist> tmp = new ArrayList<Shoppinglist>(c.getCount());
-		if (c.moveToFirst() ) {
-			do { 
-				tmp.add(cursorToSl(c));
-			} while (c.moveToNext());
+		Cursor c = null;
+		List<Shoppinglist> tmp = new ArrayList<Shoppinglist>();
+		try {
+			c = execQuery(q);
+			if (c.moveToFirst()) {
+				do { 
+					tmp.add(cursorToSl(c));
+				} while (c.moveToNext());
+			}
+		} finally {
+			close(c);
 		}
-		close(c);
-		List<Shoppinglist> lists = new ArrayList<Shoppinglist>(c.getCount());
+		
+		List<Shoppinglist> lists = new ArrayList<Shoppinglist>(tmp.size());
 		for (Shoppinglist sl : tmp) {
 			sl.putShares(getShares(sl, user, includeDeleted));
 			// Only add list, if list has user as share
-			if (sl.getShares().containsKey(user.getEmail()))
+			if (sl.getShares().containsKey(user.getEmail())) {
 				lists.add(sl);
+			}
 		}
 		Collections.sort(lists);
 		return lists;
@@ -477,10 +487,16 @@ public class DbHelper extends SQLiteOpenHelper {
 	public ShoppinglistItem getItem(String itemId, User user) {
 		itemId = escape(itemId);
 		String q = String.format("SELECT * FROM %s WHERE %s=%s AND  %s=%s", ITEM_TABLE, ID, itemId, USER , user.getUserId());
-		Cursor c = execQuery(q);
+		Cursor c = null;
 		ShoppinglistItem sli = null;
-		sli = c.moveToFirst() ? cursorToSli(c) : null;
-		close(c);
+		try {
+			c = execQuery(q);
+			if (c.moveToFirst()) {
+				sli = cursorToSli(c);
+			}
+		} finally {
+			close(c);
+		}
 		return sli;
 	}
 	
@@ -515,14 +531,18 @@ public class DbHelper extends SQLiteOpenHelper {
 		} else {
 			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, STATE, ShoppinglistItem.State.DELETE, USER, user.getUserId());
 		}
-		Cursor c = execQuery(q);
 		List<ShoppinglistItem> items = new ArrayList<ShoppinglistItem>();
-		if (c.moveToFirst() ) {
-			do { 
-				items.add(cursorToSli(c));
-			} while (c.moveToNext());
+		Cursor c = null;
+		try {
+			c = execQuery(q);
+			if (c.moveToFirst() ) {
+				do { 
+					items.add(cursorToSli(c));
+				} while (c.moveToNext());
+			}
+		} finally {
+			close(c);
 		}
-		close(c);
 		return items;
 	}
 
@@ -534,9 +554,16 @@ public class DbHelper extends SQLiteOpenHelper {
 		String id = escape(shoppinglistId);
 		String prev = escape(previousId);
 		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, PREVIOUS_ID, prev, USER, user.getUserId());
-		Cursor c = execQuery(q);
-		ShoppinglistItem sli = c.moveToFirst() ? cursorToSli(c) : null;
-		close(c);
+		ShoppinglistItem sli = null;
+		Cursor c = null;
+		try {
+			c = execQuery(q);
+			if (c.moveToFirst()) {
+				sli = cursorToSli(c);
+			}
+		} finally {
+			close(c);
+		}
 		return sli;
 	}
 
@@ -547,9 +574,16 @@ public class DbHelper extends SQLiteOpenHelper {
 	public Shoppinglist getListPrevious(String previousId, User user) {
 		String prev = escape(previousId);
 		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", LIST_TABLE, PREVIOUS_ID, prev, USER, user.getUserId());
-		Cursor c = execQuery(q);
-		Shoppinglist sl = c.moveToFirst() ? cursorToSl(c) : null;
-		close(c);
+		Shoppinglist sl = null;
+		Cursor c = null;
+		try {
+			c = execQuery(q);
+			if (c.moveToFirst()) {
+				sl = cursorToSl(c); 
+			}
+		} finally {
+			close(c);
+		}
 		return sl;
 	}
 	
@@ -596,31 +630,6 @@ public class DbHelper extends SQLiteOpenHelper {
 		return execQueryWithChangesCount(q);
 	}
 	
-	private int execQueryWithChangesCount(String query) {
-		
-		int i = 0;
-		
-		synchronized (LOCK) {
-			// Get the actual query out of the way...
-			Cursor c = execQuery(query);
-			if (c != null) {
-				c.moveToFirst();
-				c.close();
-			}
-			
-			// Get number of affected rows in last statement (query)
-			c = execQuery("SELECT changes() AS 'changes'");
-			
-			if (c != null && c.moveToFirst()) {
-				i = c.getInt(0);
-			}
-			
-			close(c);
-		}
-
-		return i;
-	}
-	
 	/**
 	 * 
 	 * @param sl
@@ -632,18 +641,24 @@ public class DbHelper extends SQLiteOpenHelper {
 		String slId = escape(sl.getId());
 		String q = null;
 		if (includeDeleted) {
-				q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, USER, user.getUserId());
-			} else {
-				q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, STATE, Share.State.DELETE, USER, user.getUserId());
-			}
-		Cursor c = execQuery(q);
-		List<Share> shares = new ArrayList<Share>(c.getCount());
-		if (c.moveToFirst() ) {
-			do {
-				shares.add(cursorToShare(c, sl));
-			} while (c.moveToNext());
+			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, USER, user.getUserId());
+		} else {
+			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, STATE, Share.State.DELETE, USER, user.getUserId());
 		}
-		close(c);
+		
+		List<Share> shares = new ArrayList<Share>();
+		Cursor c = null;
+		try {
+			c = execQuery(q);
+			if (c.moveToFirst() ) {
+				do {
+					shares.add(cursorToShare(c, sl));
+				} while (c.moveToNext());
+			}
+		} finally {
+			close(c);
+		}
+		
 		return shares;
 	}
 	
@@ -681,9 +696,46 @@ public class DbHelper extends SQLiteOpenHelper {
 		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, USER, user.getUserId());
 		return execQueryWithChangesCount(q);
 	}
+
+	private int execQueryWithChangesCount(String query) {
+		
+		int i = 0;
+		
+		synchronized (LOCK) {
+			
+			Cursor c = null;
+			
+			// Get the actual query out of the way...
+			try {
+				c = execQuery(query);
+				if (c != null) {
+					c.moveToFirst();
+				}
+			} finally {
+				if (c != null) {
+					c.close();
+				}
+			}
+			
+			// Get number of affected rows in last statement (query)
+			try {
+				c = execQuery("SELECT changes() AS 'changes'");
+				if (c != null && c.moveToFirst()) {
+					i = c.getInt(0);
+				}
+			} finally {
+				if (c != null) {
+					c.close();
+				}
+			}
+			
+		}
+		
+		return i;
+	}
 	
 	private Cursor execQuery(String query) {
-
+		
 		synchronized (LOCK) {
 			
 			// If we are resuming the activity
