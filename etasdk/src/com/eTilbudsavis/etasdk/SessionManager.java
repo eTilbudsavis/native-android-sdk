@@ -27,7 +27,6 @@ import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
-import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Request.Method;
