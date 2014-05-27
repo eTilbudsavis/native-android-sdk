@@ -28,6 +28,7 @@ import com.eTilbudsavis.etasdk.EtaLocation;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
+import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog.Event;
 import com.eTilbudsavis.etasdk.Utils.Param;
 
 @SuppressWarnings("rawtypes")
@@ -206,7 +207,7 @@ public class RequestQueue {
 		mLog.add(EventLog.TYPE_REQUEST, request.getLog().getSummary());
 		
 	}
-	
+		
 	/**
 	 * Get the log of all requests that have passed through this RequestQueue.<br><br>
 	 * 
