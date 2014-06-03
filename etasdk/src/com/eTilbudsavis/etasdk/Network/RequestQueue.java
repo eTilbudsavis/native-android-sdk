@@ -86,7 +86,7 @@ public class RequestQueue {
     
     /** The EventLog containing condensed information about requests and their responses */
     private EventLog mLog;
-
+    
     /* tmp var for testing */
 	public int dataIn = 0;
     /* tmp var for testing */
