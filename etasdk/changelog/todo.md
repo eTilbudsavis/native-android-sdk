@@ -12,11 +12,14 @@
   - 
 
 - Future improvements
+  - Methods for cancelling requests to e.g. SessinManager, so no callbacks will 
+    occour post fragment/activity onPause/onStop.
+  - Handling of OutOfMemoryError (either clear logs, or create smaller logs)
   - Re-implement queueing of "same" requests, before they hit the cache-queue
   - Native Pageflip View
   - Testing package
-  - RequestFactory - Needed for testing
-  - ObjectFactory - Needed for testing
-  - Create Mock objects for testing, this will also require a ObjectFactory to create dummy data
+    - RequestFactory
+    - ObjectFactory
+    - Create Mock objects for testing, this will also require a ObjectFactory to create dummy data
 
 

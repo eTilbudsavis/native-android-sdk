@@ -28,7 +28,6 @@ import com.eTilbudsavis.etasdk.EtaLocation;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
-import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog.Event;
 import com.eTilbudsavis.etasdk.Utils.Param;
 
 @SuppressWarnings("rawtypes")
