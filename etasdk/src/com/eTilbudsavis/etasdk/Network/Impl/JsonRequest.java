@@ -17,14 +17,12 @@ package com.eTilbudsavis.etasdk.Network.Impl;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,7 +33,6 @@ import android.text.TextUtils;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Network.Cache;
 import com.eTilbudsavis.etasdk.Network.Cache.Item;
-import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.RequestQueue;
 import com.eTilbudsavis.etasdk.Network.Response;
@@ -207,7 +204,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 		
     }
     
-	protected void putJSON(JSONArray a) {
+	protected void cacheJSONArray(JSONArray a) {
 		
 		LinkedList<String> ernlist = new LinkedList<String>();
 		try {
@@ -215,7 +212,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 			for (int i = 0; i < a.length() ; i++) {
 				Object o = a.get(i);
 				if (o instanceof JSONObject) {
-					String ern = putJSON((JSONObject)o);
+					String ern = cacheJSONObject((JSONObject)o);
 					if (ern != null) {
 						ernlist.add(ern);
 					}
@@ -235,14 +232,14 @@ public abstract class JsonRequest<T> extends Request<T> {
 		
 	}
 	
-	protected String putJSON(JSONObject o) {
+	protected String cacheJSONObject(JSONObject o) {
 		
 		try {
+			
 			if (o.has(EtaObject.ServerKey.ERN)) {
 				String ern = o.getString(EtaObject.ServerKey.ERN);
 				Cache.Item i = new Item(o, getCacheTTL());
 				getCache().put(ern, i);
-				
 				return ern;
 			}
 		} catch (JSONException e) {
@@ -297,99 +294,6 @@ public abstract class JsonRequest<T> extends Request<T> {
 			return String.format("ern:%s:%s", type, id);
 		}
 		return type;
-	}
-	
-
-	protected void log(int statusCode, Map<String, String> headers, JSONObject jObject, EtaError error) {
-
-		String data = null;
-		
-		if (jObject != null) {
-			
-			JSONArray tmp = new JSONArray();
-			
-			if (jObject.has(Param.ERN)) {
-				
-				try {
-					tmp.put(jObject.getString(Param.ERN));
-				} catch (JSONException e) {
-					EtaLog.e(TAG, e);
-				}
-				
-			} else {
-				data = jObject.toString();
-			}
-			
-			data = tmp.toString();
-			
-		}
-		
-		setLogDebug(statusCode, headers, data, error);
-		
-	}
-	
-	protected void log(int statusCode, Map<String, String> headers, JSONArray jArray, EtaError error) {
-		
-		String data = null;
-		
-		if (jArray != null) {
-			
-			try {
-				
-				if (0 < jArray.length() && jArray.get(0) instanceof JSONObject && jArray.getJSONObject(0).has(Param.ERN) ) {
-					
-					JSONArray tmp = new JSONArray();
-					for (int i = 0 ; i < jArray.length() ; i++ ) {
-						JSONObject o = jArray.getJSONObject(i);
-						if (o.has(Param.ERN)) {
-							tmp.put(o.getString(Param.ERN));
-						} else {
-							tmp.put("non-ern-object-in-list");
-						}
-					}
-					data = tmp.toString();
-					
-				} else {
-					data = jArray.toString();
-				}
-				
-			} catch (JSONException e) {
-				EtaLog.e(TAG, e);
-			}
-			
-		}
-		
-		setLogDebug(statusCode, headers, data, error);
-		
-	}
-	
-	private void setLogDebug(int statusCode, Map<String, String> headers, String successData, EtaError error) {
-		
-		try {
-			
-			// Server Response
-			JSONObject response = new JSONObject();
-			response.put("statuscode", statusCode);
-			response.put("success", successData);
-			response.put("error", error == null ? null : error.toJSON());
-			response.put("headers", headers == null ? new JSONObject() : new JSONObject(headers));
-			
-			// Client request
-			JSONObject request = new JSONObject();
-			request.put("method", getMethod().toString());
-			request.put("url", Utils.buildQueryString(this));
-			request.put(HTTP.CONTENT_TYPE, getBodyContentType());
-			request.put("headers", new JSONObject(getHeaders()));
-			request.put("time", Utils.parseDate(new Date()));
-			request.put("response", response);
-			request.put("body", mRequestBody);
-			
-			getLog().setSummary(request);
-			
-		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
-		}
-		
 	}
 	
 	/**

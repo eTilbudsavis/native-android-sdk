@@ -1,74 +1,27 @@
-/*******************************************************************************
-* Copyright 2014 eTilbudsavis
-* 
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-* 
-*   http://www.apache.org/licenses/LICENSE-2.0
-* 
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*******************************************************************************/
 package com.eTilbudsavis.etasdk.Network;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
-import com.eTilbudsavis.etasdk.Network.Request.Method;
+public interface Cache {
+	
+	public void put(Request<?> request, Response<?> response);
+	
+	public Cache.Item get(String key);
+	
+	public void clear();
+	
 
-public class Cache implements Serializable {
-
-	private static final long serialVersionUID = 1L;
-
-	public static final String TAG = "EtaCache";
-	
-	private Map<String, Item> mItems;
-	
-	public Cache() {
-		mItems = Collections.synchronizedMap(new HashMap<String, Cache.Item>());
-	}
-	
-	public void clear() {
-		mItems.clear();
-	}
-	
-	public void put(Request<?> request, Response<?> response) {
+	public static class Item implements Serializable {
 		
-        // If the request is cachable
-        if (request.getMethod() == Method.GET && request.isCachable() && !request.isCacheHit() && response.cache != null) {
-        	request.addEvent("add-response-to-cache");
-			mItems.putAll(response.cache);
-        }
-        
-	}
-	
-	public Cache.Item get(String key) {
-		
-		Cache.Item c = mItems.get(key);
-		if (c == null) {
-			return null;
-		} else if (c.isExpired()) {
-			mItems.remove(key);
-			return null;
-		}
-		return c;
-		
-	}
-	
-	public static class Item {
+		private static final long serialVersionUID = 1L;
 		
 		// Time of insertion
 		public final long expires;
 		public final Object object;
+		public long size;
 		
-		public Item(Object o, long ttl) {
-			this.expires = System.currentTimeMillis() + ttl;
+		public Item(Object o, long timeToLive) {
+			this.expires = System.currentTimeMillis() + timeToLive;
 			this.object = o;
 		}
 		

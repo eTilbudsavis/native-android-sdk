@@ -56,14 +56,12 @@ public class JsonObjectRequest extends JsonRequest<JSONObject>{
             JSONObject item = new JSONObject(jsonString);
 			Response<JSONObject> r = null;
             if (Utils.isSuccess(response.statusCode)) {
-                putJSON(item);
-                r = Response.fromSuccess(item, mCache);
+                cacheJSONObject(item);
+                r = Response.fromSuccess(item, getCache());
             } else {
             	EtaError e = EtaError.fromJSON(item);
             	r = Response.fromError(e);
             }
-            
-            log(response.statusCode, response.headers, r.result, r.error);
             
             return r;
             
@@ -81,9 +79,6 @@ public class JsonObjectRequest extends JsonRequest<JSONObject>{
 	@Override
 	public Response<JSONObject> parseCache(Cache c) {
 		Response<JSONObject> cache = getJSONObject(c);
-		if (cache != null) {
-			log(0, new HashMap<String, String>(), cache.result, cache.error);
-		}
 		return cache;
 	}
 	

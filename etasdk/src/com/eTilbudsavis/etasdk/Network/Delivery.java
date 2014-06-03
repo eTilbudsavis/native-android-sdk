@@ -81,7 +81,6 @@ public class Delivery {
             }
             
         	mRequest.finish("execution-finished-succesfully");
-        	mRequest.debugPrint();
             mRequest.deliverResponse(mResponse.result, mResponse.error);
             
        }

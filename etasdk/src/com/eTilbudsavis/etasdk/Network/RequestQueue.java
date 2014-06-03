@@ -15,20 +15,27 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.Network;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.http.protocol.HTTP;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaLocation;
+import com.eTilbudsavis.etasdk.Network.Cache;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
+import com.eTilbudsavis.etasdk.Utils.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressWarnings("rawtypes")
 public class RequestQueue {
@@ -184,7 +191,6 @@ public class RequestQueue {
 		synchronized (mCurrentRequests) {
 			mCurrentRequests.remove(request);
 		}
-
 		
 //    	if (!request.ignoreCache() && request.getMethod() == Method.GET) {
 //    		
@@ -202,9 +208,6 @@ public class RequestQueue {
 //    		
 //    	}
     	
-		// Append the request summary to the debugging log
-		mLog.add(EventLog.TYPE_REQUEST, request.getLog().getSummary());
-		
 	}
 		
 	/**
@@ -250,12 +253,14 @@ public class RequestQueue {
     	synchronized (mCurrentRequests) {
 			mCurrentRequests.add(request);
 		}
-
+    	
 		prepareRequest(request);
 		
     	request.setRequestQueue(this);
     	
     	request.setSequence(mSequenceGenerator.incrementAndGet());
+    	
+    	appendRequestNetworkLog(request);
     	
     	if (mEta.getSessionManager().isRequestInFlight() && !isSessionEndpoint(request)) {
     		
@@ -302,6 +307,22 @@ public class RequestQueue {
     	
     	return request;
     	
+    }
+    
+    private void appendRequestNetworkLog(Request r) {
+    	
+    	JSONObject log = r.getNetworkLog();
+    	
+		try {
+			log.put("method", r.getMethod().toString());
+			log.put("url", Utils.buildQueryString(r));
+			log.put(HTTP.CONTENT_TYPE, r.getBodyContentType());
+			log.put("headers", new JSONObject(r.getHeaders()));
+			log.put("time", Utils.parseDate(new Date()));
+		} catch (JSONException e) {
+			EtaLog.e(TAG, e);
+		}
+		
     }
     
     /**

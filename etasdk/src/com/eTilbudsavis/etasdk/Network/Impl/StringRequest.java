@@ -16,16 +16,8 @@
 package com.eTilbudsavis.etasdk.Network.Impl;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.http.protocol.HTTP;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Network.Cache;
-import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.NetworkResponse;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response;
@@ -89,57 +81,23 @@ public class StringRequest extends Request<String> {
             string = new String(response.data);
         }
         
-		mCache.put(Utils.buildQueryString(this), new Cache.Item(string, getCacheTTL()));
+        String url = Utils.buildQueryString(this);
+        Cache.Item c = new Cache.Item(string, getCacheTTL());
+		getCache().put(url, c);
 		
-        Response<String> r = Response.fromSuccess(string, mCache);
-        
-        log(response.statusCode, response.headers, r.result, r.error);
+        Response<String> r = Response.fromSuccess(string, getCache());
         
         return r;
 	}
 
 	@Override
 	protected Response<String> parseCache(Cache c) {
-		
 		String url = Utils.buildQueryString(this);
 		Cache.Item ci = c.get(url);
-		Response<String> r = null;
 		if (ci != null && ci.object instanceof String ) {
-			r = Response.fromSuccess((String)ci.object, null);
-			log(0, new HashMap<String, String>(), r.result, r.error);
+			return Response.fromSuccess((String)ci.object, null);
 		}
-		
-		return r;
+		return null;
 	}
-
-	protected void log(int statusCode, Map<String, String> headers, String successData, EtaError error) {
-		
-		try {
-			
-			// Server Response
-			JSONObject response = new JSONObject();
-			response.put("statuscode", statusCode);
-			int sl = (successData == null ? 0 : successData.length());
-			response.put("success", "length: " + sl);
-			response.put("error", error == null ? null : error.toJSON());
-			response.put("headers", headers == null ? new JSONObject() : new JSONObject(headers));
-			
-			// Client request
-			JSONObject request = new JSONObject();
-			request.put("method", getMethod().toString());
-			request.put("url", Utils.buildQueryString(this));
-			request.put(HTTP.CONTENT_TYPE, getBodyContentType());
-			request.put("headers", new JSONObject(getHeaders()));
-			request.put("time", Utils.parseDate(new Date()));
-			request.put("response", response);
-			
-			getLog().setSummary(request);
-			
-		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
-		}
-		
-	}
-	
 	
 }
