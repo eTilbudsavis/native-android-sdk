@@ -62,7 +62,7 @@ public class RequestQueue {
 
     /** Queue of items waiting for session request */
     private final LinkedList<Request> mSessionParking = new LinkedList<Request>();
-
+    
     /** Queue of items waiting for similar request to finish */
 //    private final Map<String, LinkedList<Request>> mRequestParking = new HashMap<String, LinkedList<Request>>();
     

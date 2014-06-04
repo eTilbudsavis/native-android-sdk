@@ -33,7 +33,7 @@ import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.RequestQueue;
 import com.eTilbudsavis.etasdk.Network.Impl.DefaultHttpNetwork;
 import com.eTilbudsavis.etasdk.Network.Impl.HttpURLNetwork;
-import com.eTilbudsavis.etasdk.Network.Impl.LruMemoryCache;
+import com.eTilbudsavis.etasdk.Network.Impl.MemoryCache;
 import com.eTilbudsavis.etasdk.Network.Impl.NetworkImpl;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -114,7 +114,7 @@ public class Eta {
             stack = new DefaultHttpNetwork();
         }
         
-		mRequestQueue = new RequestQueue(this, new LruMemoryCache(), new NetworkImpl(stack));
+		mRequestQueue = new RequestQueue(this, new MemoryCache(), new NetworkImpl(stack));
 		mRequestQueue.start();
 		
 		mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);

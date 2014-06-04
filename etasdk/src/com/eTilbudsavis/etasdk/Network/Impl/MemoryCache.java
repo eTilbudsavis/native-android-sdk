@@ -29,45 +29,51 @@ import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Network.Response;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
-public class LruMemoryCache implements Cache {
+public class MemoryCache implements Cache {
 	
 	public static final String TAG = "LruMemoryCache";
 	
 	/** On average we've measured a Cache.Item from the ETA API to be around 4kb */
 	private static final int AVG_ITEM_SIZE = 4096;
 	
-	/** The default fraction of memory to use */
-	private static final int DEFAULT_MEMORY_TO_USE = 8;
-	
-	/** Default percentage of cache to clean */
-	private static final int DEFAULT_PERCENT_TO_CLEAN = 20;
-	
 	/** Max cache size - init to 1mb */
-	private int mMaxSize = 256;
+	private int mMaxItems = 256;
 	
 	/** Perceent of cache to remove on cleanup */
-	private int mPercentToClean = DEFAULT_PERCENT_TO_CLEAN;
+	private int mPercentToClean = 20;
 	
-	private Map<String, Item> mItems;
+	private Map<String, Item> mCache;
 	
-	public LruMemoryCache() {
+	public MemoryCache() {
 		
-		long maxMem = Runtime.getRuntime().maxMemory();
-		int maxItems = (int)(maxMem / AVG_ITEM_SIZE);
-		setLimit( maxItems / DEFAULT_MEMORY_TO_USE );
+		setLimit(Runtime.getRuntime().maxMemory() / 8);
 		
 		// Allocate only memory needed
-		mItems = Collections.synchronizedMap(new HashMap<String, Cache.Item>(mMaxSize));
+		mCache = Collections.synchronizedMap(new HashMap<String, Cache.Item>(mMaxItems));
 		
 	}
 	
+	/**
+	 * Set the percentage of cache to clean out when memory limit is hit
+	 * @param percentToClean A percentage between 0 and 100 (default is 20)
+	 */
 	public void setCleanLimit(int percentToClean) {
+		if (percentToClean <= 0 || 100 <= percentToClean) {
+			new IllegalArgumentException("Percent a number between 0-100");
+		}
 		mPercentToClean = percentToClean;
 	}
 	
-	public void setLimit(int maxLimit) {
-		mMaxSize = maxLimit;
-		Log.d(TAG, "New MaxMemory: " + mMaxSize + ", equivalent to: " + (mMaxSize*AVG_ITEM_SIZE)/1024 + "kb");
+	/**
+	 * Set the limit on memory this Cache may use.
+	 * @param maxMemLimit The limit in bytes
+	 */
+	public void setLimit(long maxMemLimit) {
+		if (maxMemLimit > Runtime.getRuntime().maxMemory()) {
+			throw new IllegalArgumentException("maxMemLimit cannot be more than max heap size");
+		}
+		mMaxItems = (int)(maxMemLimit / AVG_ITEM_SIZE);
+		Log.d(TAG, "New memory limit: " + maxMemLimit/1024 + "kb (" + mMaxItems + " items)");
 	}
 	
 	public void put(Request<?> request, Response<?> response) {
@@ -76,8 +82,8 @@ public class LruMemoryCache implements Cache {
         if (request.getMethod() == Method.GET && request.isCachable() && !request.isCacheHit() && response.cache != null) {
         	
         	request.addEvent("add-response-to-cache");
-        	synchronized (mItems) {
-            	mItems.putAll(response.cache);
+        	synchronized (mCache) {
+            	mCache.putAll(response.cache);
     			checkSize();
 			}
 			
@@ -87,15 +93,15 @@ public class LruMemoryCache implements Cache {
 	
 	private void checkSize() {
 		
-		int size = mItems.size();
+		int size = mCache.size();
 		
-		if( size > mMaxSize){
+		if( size > mMaxItems){
 			
 			float percentToRemove = (float)mPercentToClean/(float)100;
 			int itemsToRemove = (int)(size*percentToRemove);
 			
         	//least recently accessed item will be the first one iterated
-        	Iterator<Entry<String, Cache.Item>> it = mItems.entrySet().iterator();
+        	Iterator<Entry<String, Cache.Item>> it = mCache.entrySet().iterator();
 			while(it.hasNext()){
 				it.next();
 				it.remove();
@@ -104,7 +110,7 @@ public class LruMemoryCache implements Cache {
 				}
 			}
 			
-			EtaLog.d(TAG, "Cleaned " + TAG + " new size: " + mItems.size());
+			EtaLog.d(TAG, "Cleaned " + TAG + " new size: " + mCache.size());
 			
 		}
 		
@@ -112,13 +118,13 @@ public class LruMemoryCache implements Cache {
 	
 	public Cache.Item get(String key) {
 		
-		synchronized (mItems) {
+		synchronized (mCache) {
 			
-			Cache.Item c = mItems.get(key);
+			Cache.Item c = mCache.get(key);
 			if (c == null) {
 				return null;
 			} else if (c.isExpired()) {
-				mItems.remove(key);
+				mCache.remove(key);
 				return null;
 			}
 			return c;
@@ -128,8 +134,8 @@ public class LruMemoryCache implements Cache {
 	}
 	
 	public void clear() {
-		synchronized (mItems) {
-			mItems.clear();
+		synchronized (mCache) {
+			mCache.clear();
 		}
 	}
 	
