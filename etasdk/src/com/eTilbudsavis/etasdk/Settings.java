@@ -48,11 +48,9 @@ public class Settings {
 	public static final String LOC_TIME				= "loc_time";
 
 	private static SharedPreferences mPrefs;
-	private static Context mContext;
 	
 	public Settings(Context context) {
-		mContext = context;
-		mPrefs = mContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+		mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 	}
 
 	public boolean clear() {

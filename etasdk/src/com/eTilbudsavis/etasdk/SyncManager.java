@@ -109,7 +109,7 @@ public class SyncManager {
 	
 	public static final String TAG = "SyncManager";
 	
-	private static final boolean USE_LOG_SUMMARY = false;
+	private static final boolean SAVE_NETWORK_LOG = false;
 
 	/** Supported sync speeds for {@link SyncManager} */
 	public interface SyncSpeed {
@@ -418,7 +418,7 @@ public class SyncManager {
 		// Offset and limit are set to default values, we want to ignore this.
 		listRequest.getQueryParameters().remove(Param.OFFSET);
 		listRequest.getQueryParameters().remove(Param.LIMIT);
-		listRequest.logSummary(USE_LOG_SUMMARY);
+		listRequest.setSaveNetworkLog(SAVE_NETWORK_LOG);
 		addRequest(listRequest);
 		
 	}
@@ -602,7 +602,7 @@ public class SyncManager {
 			};
 			
 			JsonObjectRequest modifiedRequest = new JsonObjectRequest(Endpoint.listModified(mEta.getUser().getUserId(), sl.getId()), modifiedListener);
-			modifiedRequest.logSummary(USE_LOG_SUMMARY);
+			modifiedRequest.setSaveNetworkLog(SAVE_NETWORK_LOG);
 			addRequest(modifiedRequest);
 			
 		}
@@ -681,7 +681,7 @@ public class SyncManager {
 		// Offset and limit are set to default values, we want to ignore this.
 		itemRequest.getQueryParameters().remove(Param.OFFSET);
 		itemRequest.getQueryParameters().remove(Param.LIMIT);
-		itemRequest.logSummary(USE_LOG_SUMMARY);
+		itemRequest.setSaveNetworkLog(SAVE_NETWORK_LOG);
 		addRequest(itemRequest);
 		
 	}

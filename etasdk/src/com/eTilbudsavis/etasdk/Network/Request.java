@@ -19,13 +19,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.os.Bundle;
 import android.os.Handler;
 
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.EtaLog.EventLog;
+import com.eTilbudsavis.etasdk.Utils.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressWarnings("rawtypes")
@@ -61,7 +62,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	private int mSequence = 0;
 
 	/** Item for containing cache items */
-	protected Map<String, Cache.Item> mCache = new HashMap<String, Cache.Item>();
+	private Map<String, Cache.Item> mCache = new HashMap<String, Cache.Item>();
 	
 	/** Should this request use location in the query */
 	private boolean mUseLocation = true;
@@ -81,7 +82,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     private int mTimeout = CONNECTION_TIME_OUT;
     
 	/** Log of this request */
-	private final EventLog mLog;
+	private final EventLog mEventLog;
+	
+	private final JSONObject mNetworkLog;
 	
 	private boolean mCacheHit = false;
 
@@ -91,11 +94,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	/** Allows for the network response printed */
     private boolean mDebugPerformance = false;
     
+    /** Boolean deciding if logs should be enabled */
+    private boolean mSaveNetworkLog = true;
+    
 	/** Handler, for returning requests on correct queue */
 	private Handler mHandler;
-	
-	/** Boolean deciding if the summary should be added to RequestQueue log entries */
-	private boolean mLogSummary = true;
 	
 	/**  */
 	private RequestQueue mRequestQueue;
@@ -127,12 +130,13 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		mMethod = method;
 		mUrl = url;
 		mListener = listener;
-		mLog = new EventLog();
+		mEventLog = new EventLog();
+		mNetworkLog = new JSONObject();
 	}
 	
 	/** Adds event to a request, for later debugging purposes */
 	public void addEvent(String event) {
-		mLog.add(event);
+		mEventLog.add(event);
 	}
 	
 	/**
@@ -140,24 +144,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * @return the EventLog for this request
 	 */
 	public EventLog getLog() {
-		return mLog;
-	}
-	
-	/**
-	 * If true, this requests summary (found in the EventLog with getLog()) will be saved in
-	 * the RequestQueue's log history. This is true by default.<br><br>
-	 * This can be set to false, if you e.g. want to avoid flooding the log, with 
-	 * unnecessary messages.
-	 * @param saveSummaryToLog true is logging should be enabled for this request.
-	 * @return this object
-	 */
-	public Request logSummary(boolean saveSummaryToLog) {
-		mLogSummary = saveSummaryToLog;
-		return this;
-	}
-	
-	public boolean logSummary() {
-		return mLogSummary;
+		return mEventLog;
 	}
 	
 	/** Mark this request as canceled.  No callback will be delivered. */
@@ -184,17 +171,37 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * @return this object
      */
     public Request finish(String reason) {
-    	mLog.add(reason);
+    	
+    	mEventLog.add(reason);
     	
 		try {
-			mLog.getSummary().put("duration", getLog().getTotalDuration());
+			mNetworkLog.put("duration", getLog().getTotalDuration());
 		} catch (JSONException e) {
 			EtaLog.e(TAG, e);
+		}
+
+		if (mSaveNetworkLog) {
+			// Append the request summary to the debugging log
+			mRequestQueue.getLog().add(EventLog.TYPE_REQUEST, mNetworkLog);
 		}
 		
     	mFinished = true;
     	mRequestQueue.finish(this);
+
+		if (mDebugNetwork) {
+			EtaLog.d(TAG, mNetworkLog.toString());
+		}
+		
+		if (mDebugPerformance) {
+			String log = mEventLog.getString(getClass().getSimpleName());
+			EtaLog.d(TAG, log);
+		}
+		
     	return Request.this;
+    }
+    
+    public JSONObject getNetworkLog() {
+    	return mNetworkLog;
     }
     
     public void stats(int in, int out) {
@@ -539,7 +546,16 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		mDebugPerformance = printRequestTimings;
 		return this;
 	}
-
+	
+	/**
+	 * Use this method, to enable/disable saving summarys to
+	 * {@link RequestQueue#getLog() RequestQueue.getLogs()}.
+	 * @param saveNetworkLog True to save logs to global log
+	 */
+	public void setSaveNetworkLog(boolean saveNetworkLog) {
+		mSaveNetworkLog = saveNetworkLog;
+	}
+	
 	/**
 	 * Set to true, to enable printing of network debugging information via LogCat.
 	 * @see {@link #com.eTilbudsavis.etasdk.Utils.EtaLog EtaLog} for detalis about SDK Log.d output
@@ -551,21 +567,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return this;
 	}
 	
-	/**
-	 * Method for triggering print of log information, if logging was enabled.
-	 */
-	public void debugPrint() {
-		
-		if (mDebugNetwork) {
-			mLog.printSummary();
-		}
-		
-		if (mDebugPerformance) {
-			mLog.printEventLog(getClass().getSimpleName());
-		}
-		
-	}
-
 	/**
 	 * Returns a complete printable representation of this Request, e.g:
 	 * 

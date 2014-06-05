@@ -19,12 +19,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.SessionManager;
 import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.HeaderUtils;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -100,6 +104,8 @@ public class NetworkDispatcher extends Thread {
                 
                 // Perform the network request.
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
+
+                appendLogging(request, networkResponse);
                 
                 request.addEvent("parsing-network-response");
                 Response<?> response = request.parseNetworkResponse(networkResponse);
@@ -181,6 +187,24 @@ public class NetworkDispatcher extends Thread {
         	
         }
         
+	}
+	
+	private void appendLogging(Request req, NetworkResponse resp) {
+
+		try {
+			
+			// Server Response
+			JSONObject r = new JSONObject();
+			r.put("statuscode", resp.statusCode);
+			if (resp.headers != null) {
+				r.put("headers", new JSONObject(resp.headers));
+			}
+			req.getNetworkLog().put("response", r);
+			
+		} catch (JSONException e) {
+			EtaLog.e(TAG, e);
+		}
+		
 	}
 	
 	/**

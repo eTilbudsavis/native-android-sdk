@@ -28,12 +28,12 @@ import android.os.Looper;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.Network.Cache;
 import com.eTilbudsavis.etasdk.Network.HttpStack;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.RequestQueue;
 import com.eTilbudsavis.etasdk.Network.Impl.DefaultHttpNetwork;
 import com.eTilbudsavis.etasdk.Network.Impl.HttpURLNetwork;
+import com.eTilbudsavis.etasdk.Network.Impl.MemoryCache;
 import com.eTilbudsavis.etasdk.Network.Impl.NetworkImpl;
 import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -114,7 +114,7 @@ public class Eta {
             stack = new DefaultHttpNetwork();
         }
         
-		mRequestQueue = new RequestQueue(this, new Cache(), new NetworkImpl(stack));
+		mRequestQueue = new RequestQueue(this, new MemoryCache(), new NetworkImpl(stack));
 		mRequestQueue.start();
 		
 		mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);

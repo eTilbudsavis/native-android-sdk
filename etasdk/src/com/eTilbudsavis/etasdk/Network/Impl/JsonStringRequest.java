@@ -16,7 +16,6 @@
 package com.eTilbudsavis.etasdk.Network.Impl;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,8 +55,7 @@ public class JsonStringRequest extends JsonRequest<String>{
 				
 				try {
 					JSONObject jObject = new JSONObject(jsonString);
-					log(response.statusCode, response.headers, jObject, null);
-					putJSON(jObject);
+					cacheJSONObject(jObject);
 				} catch (JSONException e) {
 					EtaLog.e(TAG, e);
 		            return Response.fromError(new ParseError(e, JSONObject.class));
@@ -67,8 +65,7 @@ public class JsonStringRequest extends JsonRequest<String>{
 
 				try {
 					JSONArray jArray = new JSONArray(jsonString);
-					log(response.statusCode, response.headers, jArray, null);
-					putJSON(jArray);
+					cacheJSONArray(jArray);
 				} catch (JSONException e) {
 					EtaLog.e(TAG, e);
 		            return Response.fromError(new ParseError(e, JSONArray.class));
@@ -82,9 +79,7 @@ public class JsonStringRequest extends JsonRequest<String>{
 			try {
 				JSONObject jObject = new JSONObject(jsonString);
 				EtaError e = EtaError.fromJSON(jObject);
-				Response<String> r = Response.fromError(e);
-				log(response.statusCode, response.headers, new JSONObject(), r.error);
-				return r;
+				return Response.fromError(e);
 	        } catch (Exception e) {
 	            return Response.fromError(new ParseError(e, JSONObject.class));
 	        }
@@ -115,19 +110,6 @@ public class JsonStringRequest extends JsonRequest<String>{
 
     		Response<String> cache = Response.fromSuccess(cacheString, null);
     		
-
-			try {
-				
-				if (cache.result.startsWith("{") && cache.result.endsWith("}")) {
-					log(0, new HashMap<String, String>(), new JSONObject(cache.result), null);
-				} else if (cache.result.startsWith("[") && cache.result.endsWith("]")) {
-					log(0, new HashMap<String, String>(), new JSONArray(cache.result), null);
-				}
-				
-			} catch (JSONException e) {
-				EtaLog.e(TAG, e);
-			}
-			
     		return cache;
     		
         }
