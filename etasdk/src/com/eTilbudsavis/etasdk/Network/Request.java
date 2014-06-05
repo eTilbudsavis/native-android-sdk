@@ -15,11 +15,9 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.Network;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 

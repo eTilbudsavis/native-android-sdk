@@ -16,7 +16,6 @@
 package com.eTilbudsavis.etasdk.Network.Impl;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
