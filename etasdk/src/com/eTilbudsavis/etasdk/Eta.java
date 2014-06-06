@@ -171,7 +171,7 @@ public class Eta {
 				}
 			}
 		} else {
-			EtaLog.i(TAG, "Eta instance already created");
+			EtaLog.d(TAG, "Eta instance already created");
 		}
 		
 	}

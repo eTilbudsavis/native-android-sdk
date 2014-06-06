@@ -31,7 +31,7 @@ import com.eTilbudsavis.etasdk.Network.Response;
 
 public class MemoryCache implements Cache {
 	
-	public static final String TAG = "LruMemoryCache";
+	public static final String TAG = MemoryCache.class.getSimpleName();
 	
 	/** On average we've measured a Cache.Item from the ETA API to be around 4kb */
 	private static final int AVG_ITEM_SIZE = 4096;
@@ -73,7 +73,7 @@ public class MemoryCache implements Cache {
 			throw new IllegalArgumentException("maxMemLimit cannot be more than max heap size");
 		}
 		mMaxItems = (int)(maxMemLimit / AVG_ITEM_SIZE);
-		Log.d(TAG, "New memory limit: " + maxMemLimit/1024 + "kb (" + mMaxItems + " items)");
+		EtaLog.v(TAG, "New memory limit: " + maxMemLimit/1024 + "kb (approx " + mMaxItems + " items)");
 	}
 	
 	public void put(Request<?> request, Response<?> response) {
