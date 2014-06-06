@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Request;
 
 public final class Utils {
@@ -132,7 +133,8 @@ public final class Utils {
 				String value = valueIsNull(o);
 				sb.append(encode(key, encoding)).append("=").append(encode(value, encoding));
 			} else {
-				EtaLog.d(TAG, String.format("Key: %s with value-type: %s is not allowed", 
+				
+				EtaLog.w(TAG, String.format("Key: %s with value-type: %s is not allowed", 
 						key, o.getClass().getSimpleName()));
 			}
 		}
@@ -173,7 +175,7 @@ public final class Utils {
 		try {
 			value = URLEncoder.encode(value, encoding);
 		} catch (UnsupportedEncodingException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 			value = URLEncoder.encode(value);
 		}
 		return value;
@@ -252,7 +254,7 @@ public final class Utils {
 			try {
 				d = mSdf.parse(date);
 			} catch (ParseException e) {
-				EtaLog.e(TAG, e);
+				EtaLog.e(TAG, null, e);
 			}
 		}
 		return d;

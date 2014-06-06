@@ -21,7 +21,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 
@@ -86,7 +86,7 @@ public class User extends EtaErnObject<User> implements Serializable {
 			user.setEmail(Json.valueOf(jUser, ServerKey.EMAIL));
 			user.setPermissions(Permission.fromJSON(jUser.getJSONObject(ServerKey.PERMISSIONS)));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return user;
 	}
@@ -101,7 +101,7 @@ public class User extends EtaErnObject<User> implements Serializable {
 			o.put(ServerKey.EMAIL, Json.nullCheck(getEmail()));
 			o.put(ServerKey.PERMISSIONS, Json.toJson(getPermissions()));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}

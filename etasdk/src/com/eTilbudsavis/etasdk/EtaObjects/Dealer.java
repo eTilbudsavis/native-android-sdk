@@ -24,7 +24,7 @@ import org.json.JSONObject;
 
 import android.graphics.Color;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 /**
@@ -60,7 +60,7 @@ public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 				list.add(Dealer.fromJSON((JSONObject)dealers.get(i)));
 			
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return list;
 	}
@@ -83,7 +83,7 @@ public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 			d.setColor(Color.parseColor("#"+Json.valueOf(dealer, ServerKey.COLOR)));
 			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(ServerKey.PAGEFLIP)));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return d;
 	}
@@ -99,7 +99,7 @@ public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 			o.put(ServerKey.COLOR, Json.nullCheck(getColorString()));
 			o.put(ServerKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o; 
 	}

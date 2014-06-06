@@ -22,7 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class Pages extends EtaObject implements Serializable {
 	
@@ -61,7 +61,7 @@ public class Pages extends EtaObject implements Serializable {
 				p.getZoom().add(jArray.getString(i));
 			}
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return p;
 	}
@@ -86,7 +86,7 @@ public class Pages extends EtaObject implements Serializable {
 			o.put(ServerKey.VIEW, aView);
 			o.put(ServerKey.ZOOM, aZoom);
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}

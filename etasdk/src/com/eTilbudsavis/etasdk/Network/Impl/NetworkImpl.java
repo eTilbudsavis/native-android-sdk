@@ -9,12 +9,12 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.ByteArrayBuffer;
 
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.HttpStack;
 import com.eTilbudsavis.etasdk.Network.Network;
 import com.eTilbudsavis.etasdk.Network.NetworkResponse;
 import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class NetworkImpl implements Network {
 	
@@ -62,7 +62,7 @@ public class NetworkImpl implements Network {
 			return r;
 			
 		} catch (Exception e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 			throw new NetworkError(e);
 		}
 		

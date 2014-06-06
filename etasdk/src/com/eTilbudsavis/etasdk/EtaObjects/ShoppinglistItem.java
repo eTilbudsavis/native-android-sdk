@@ -26,7 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.ListManager;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -95,7 +95,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 				list.add(s);
 			}
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return list;
 	}
@@ -139,7 +139,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 			try {
 				sli.setMeta(new JSONObject(metaString));
 			} catch (JSONException e) {
-				EtaLog.e(TAG, e);
+				EtaLog.e(TAG, "", e);
 				sli.setMeta(new JSONObject());
 				sli.setModified(new Date());
 			}
@@ -166,7 +166,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 			o.put(ServerKey.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
 			o.put(ServerKey.META, Json.nullCheck(getMeta()));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
@@ -392,7 +392,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 			try {
 				return new JSONObject(mMeta);
 			} catch (JSONException e) {
-				EtaLog.e(TAG, e);
+				EtaLog.e(TAG, "", e);
 			}
 		}
 		return new JSONObject();
@@ -461,7 +461,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 			meta.put(MetaKey.COMMENT, comment);
 			setMeta(meta);
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return this;
 	}

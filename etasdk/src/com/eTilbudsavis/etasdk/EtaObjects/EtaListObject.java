@@ -20,7 +20,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public abstract class EtaListObject<T> extends EtaErnObject<T> implements Comparable<T>, Serializable {
 	
@@ -101,7 +101,7 @@ public abstract class EtaListObject<T> extends EtaErnObject<T> implements Compar
 		try {
 			o.put("state", getStateString());
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}

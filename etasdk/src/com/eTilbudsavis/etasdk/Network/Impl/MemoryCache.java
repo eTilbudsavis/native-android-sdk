@@ -23,11 +23,11 @@ import java.util.Map.Entry;
 
 import android.util.Log;
 
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Cache;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Network.Response;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 
 public class MemoryCache implements Cache {
 	

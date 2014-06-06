@@ -34,7 +34,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 /**
@@ -117,7 +117,7 @@ public class ListManager {
 				o.put(ServerKey.ACCESS, Share.ACCESS_OWNER);
 				owner = Share.fromJSON(o);
 			} catch (JSONException e) {
-				EtaLog.e(TAG, e);
+				EtaLog.e(TAG, null, e);
 			}
 			List<Share> shares = new ArrayList<Share>(1);
 			shares.add(owner);
@@ -184,7 +184,7 @@ public class ListManager {
 		}
 		
 		if (!canEdit(sl, slShares.get(user.getEmail()))) {
-			EtaLog.d(TAG, String.format("User [%s], doesn't have rights to edit this list", user.getEmail()));
+			EtaLog.i(TAG, String.format("User [%s], doesn't have rights to edit this list", user.getEmail()));
 			return false;
 		}
 		
@@ -215,7 +215,7 @@ public class ListManager {
 				} else {
 					if (dbShare.getAccess().equals(Share.ACCESS_OWNER)) {
 						owner = dbShare;
-						EtaLog.d(TAG, "Owner cannot be removed from lists, owner will be reattached");
+						EtaLog.i(TAG, "Owner cannot be removed from lists, owner will be reattached");
 					} else {
 						if (user.isLoggedIn()) {
 							dbShare.setState(Share.State.DELETE);
@@ -248,7 +248,7 @@ public class ListManager {
 		// Check for changes in previous item, and update surrounding
 		Shoppinglist oldList = db.getList(sl.getId(), user);
 		if (oldList == null) {
-			EtaLog.d(TAG, "No such list exists in DB, considder addList() instead");
+			EtaLog.i(TAG, "No such list exists in the database. To add new items, use addList().");
 			return false;
 		}
 		
@@ -404,12 +404,12 @@ public class ListManager {
 	public boolean addItem(ShoppinglistItem sli, boolean incrementCount, User user) {
 		
 		if (!canEdit(sli.getShoppinglistId(), user)) {
-			EtaLog.d(TAG, "The user cannot edit the given ShoppinglistItem");
+			EtaLog.i(TAG, "The user cannot edit the given ShoppinglistItem");
 			return false;
 		}
 		
 		if (sli.getOfferId() == null && sli.getDescription() == null) {
-			EtaLog.d(TAG, "The ShoppinglistItem neither has offerId, or"
+			EtaLog.i(TAG, "The ShoppinglistItem neither has offerId, or"
 					+ "description, one or the other this is required by the API");
 			return false;
 		}
@@ -447,7 +447,7 @@ public class ListManager {
 		Shoppinglist sl = getList(sli.getShoppinglistId());
 
 		if (sl == null) {
-			EtaLog.d(TAG, "The shoppinglist id on the shoppinglist item, could"
+			EtaLog.i(TAG, "The shoppinglist id on the shoppinglist item, could"
 					+ "not be found, please add a shoppinglist before adding items");
 			return false;
 		}
@@ -494,7 +494,7 @@ public class ListManager {
 	public boolean editItem(ShoppinglistItem sli) {
 		User u = user();
 		if (!canEdit(sli.getShoppinglistId(), u)) {
-			EtaLog.d(TAG, "The user cannot edit the given ShoppinglistItem");
+			EtaLog.i(TAG, "The user cannot edit the given ShoppinglistItem");
 			return false;
 		}
 		return editItem(sli, u);
@@ -512,7 +512,7 @@ public class ListManager {
 		// Check for changes in previous item, and update surrounding
 		ShoppinglistItem oldItem = db.getItem(sli.getId(), user);
 		if (oldItem == null) {
-			EtaLog.d(TAG, "No such item exists, considder addItem() instead: " + sli.toString());
+			EtaLog.i(TAG, "No such item exists, considder addItem() instead: " + sli.toString());
 			return false;
 		}
 		
@@ -673,7 +673,7 @@ public class ListManager {
 	public boolean deleteItem(ShoppinglistItem sli) {
 		User u = user();
 		if (!canEdit(sli.getShoppinglistId(), u)){
-			EtaLog.d(TAG, "The user cannot edit the given ShoppinglistItem");
+			EtaLog.i(TAG, "The user cannot edit the given ShoppinglistItem");
 			return false;
 		}
 		return deleteItem(sli, u);

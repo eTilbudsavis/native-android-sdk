@@ -18,6 +18,7 @@ package com.eTilbudsavis.etasdk.Utils;
 import java.util.List;
 
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 /**
  * A class to help print debug messages.

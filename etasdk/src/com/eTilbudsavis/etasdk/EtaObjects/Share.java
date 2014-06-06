@@ -25,7 +25,7 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Share extends EtaListObject<Share> implements Serializable {
@@ -63,7 +63,7 @@ public class Share extends EtaListObject<Share> implements Serializable {
 			}
 			
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return list;
 	}
@@ -83,7 +83,7 @@ public class Share extends EtaListObject<Share> implements Serializable {
 			s.setAccess(Json.valueOf(share, ServerKey.ACCESS));
 			s.setAccepted(Json.valueOf(share, ServerKey.ACCEPTED, false));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		
 		return s;
@@ -109,7 +109,7 @@ public class Share extends EtaListObject<Share> implements Serializable {
 				o.put(ServerKey.ACCEPT_URL, getAcceptUrl());
 			}
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}

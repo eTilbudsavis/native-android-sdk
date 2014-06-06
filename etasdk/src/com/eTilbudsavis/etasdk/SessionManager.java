@@ -27,6 +27,7 @@ import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Request.Method;
@@ -34,7 +35,6 @@ import com.eTilbudsavis.etasdk.Network.Request.Priority;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -509,7 +509,7 @@ public class SessionManager {
 						}
 					});
 				} catch (Exception e) {
-					EtaLog.e(TAG, e);
+					EtaLog.e(TAG, "", e);
 				}
 			}
 			

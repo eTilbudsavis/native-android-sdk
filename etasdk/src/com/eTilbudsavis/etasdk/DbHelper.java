@@ -32,7 +32,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class DbHelper extends SQLiteOpenHelper {
@@ -136,7 +136,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-		EtaLog.d(TAG, "Upgrading database from version " + oldVersion + " to "
+		EtaLog.i(TAG, "Upgrading database from version " + oldVersion + " to "
 				+ newVersion + ", which will destroy all old data");
 		
 		synchronized (LOCK) {
@@ -189,7 +189,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		try {
 			sl.setMeta(meta == null ? null : new JSONObject(meta));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 		}
 		sl.setUserId(c.getInt(c.getColumnIndex(USER)));
 		return sl;
@@ -252,7 +252,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		try {
 			sli.setMeta(meta == null ? null : new JSONObject(meta));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 		}
 		sli.setUserId(c.getInt(c.getColumnIndex(USER)));
 		return sli;

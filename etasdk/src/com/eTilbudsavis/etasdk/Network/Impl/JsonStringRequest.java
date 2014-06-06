@@ -21,12 +21,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Cache;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.NetworkResponse;
 import com.eTilbudsavis.etasdk.Network.Response;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class JsonStringRequest extends JsonRequest<String>{
@@ -57,7 +57,7 @@ public class JsonStringRequest extends JsonRequest<String>{
 					JSONObject jObject = new JSONObject(jsonString);
 					cacheJSONObject(jObject);
 				} catch (JSONException e) {
-					EtaLog.e(TAG, e);
+					EtaLog.e(TAG, "", e);
 		            return Response.fromError(new ParseError(e, JSONObject.class));
 				}
 				
@@ -67,7 +67,7 @@ public class JsonStringRequest extends JsonRequest<String>{
 					JSONArray jArray = new JSONArray(jsonString);
 					cacheJSONArray(jArray);
 				} catch (JSONException e) {
-					EtaLog.e(TAG, e);
+					EtaLog.e(TAG, "", e);
 		            return Response.fromError(new ParseError(e, JSONArray.class));
 				}
 			}

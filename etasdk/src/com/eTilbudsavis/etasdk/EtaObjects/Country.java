@@ -25,7 +25,7 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Country extends EtaErnObject<Country> implements Serializable {
@@ -53,7 +53,7 @@ public class Country extends EtaErnObject<Country> implements Serializable {
 					list.add(Country.fromJSON(countries.getJSONObject(i)));
 			}
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return list;
 	}
@@ -95,7 +95,7 @@ public class Country extends EtaErnObject<Country> implements Serializable {
 			
 			o.put(ServerKey.UNSUBSCRIBE_PRINT_URL, Json.nullCheck(getUnsubscribePrintUrl()));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
@@ -126,7 +126,7 @@ public class Country extends EtaErnObject<Country> implements Serializable {
 		if (id != null && id.length() == 2) {
 			super.setId(id.toUpperCase());
 		} else {
-			EtaLog.d(TAG, "The country code: " + id + " isn't allowed, see documentation for more details");
+			EtaLog.i(TAG, "The country code: " + id + " isn't allowed, see documentation for more details");
 		}
 		return this;
 	}

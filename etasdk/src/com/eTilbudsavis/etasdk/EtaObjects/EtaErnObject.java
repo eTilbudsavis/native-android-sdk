@@ -21,7 +21,7 @@ import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 /**
@@ -61,7 +61,7 @@ public abstract class EtaErnObject<T> extends EtaObject implements Serializable 
 			o.put(ServerKey.ID, Json.nullCheck(getId()));
 			o.put(ServerKey.ERN, Json.nullCheck(getErn()));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
