@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.Utils;
+package com.eTilbudsavis.etasdk.Log;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.FixedArrayList;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 /**
  * EventLog class have been created to simplify logging within the ETA SDK.
@@ -224,7 +225,7 @@ public class EventLog {
 				o.put("name", name);
 				o.put("data", data);
 			} catch (JSONException e) {
-				EtaLog.e(TAG, e);
+				EtaLog.e(TAG, null, e);
 			}
 			return o;
 		}

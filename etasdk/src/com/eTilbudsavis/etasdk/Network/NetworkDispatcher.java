@@ -26,9 +26,9 @@ import android.os.Process;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.SessionManager;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.HeaderUtils;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -202,7 +202,7 @@ public class NetworkDispatcher extends Thread {
 			req.getNetworkLog().put("response", r);
 			
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		
 	}

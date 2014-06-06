@@ -20,7 +20,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Size extends EtaObject implements Serializable {
@@ -57,7 +57,7 @@ public class Size extends EtaObject implements Serializable {
 			o.put(ServerKey.FROM, getFrom());
 			o.put(ServerKey.TO, getTo());
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}

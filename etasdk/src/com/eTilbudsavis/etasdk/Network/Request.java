@@ -24,9 +24,9 @@ import org.json.JSONObject;
 import android.os.Bundle;
 import android.os.Handler;
 
+import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EventLog;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressWarnings("rawtypes")
@@ -177,7 +177,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		try {
 			mNetworkLog.put("duration", getLog().getTotalDuration());
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 
 		if (mSaveNetworkLog) {

@@ -28,13 +28,13 @@ import android.webkit.WebView;
 
 import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonStringRequest;
 import com.eTilbudsavis.etasdk.Network.Impl.StringRequest;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 /**
@@ -389,7 +389,7 @@ public final class PageflipWebview extends WebView {
 			loc.put(Init.LOCATION_SENSOR, mEta.getLocation().isSensor());
 			loc.put(Init.LOCATION_RADIUS, mEta.getLocation().getRadius());
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 		}
 		return loc;
 	}
@@ -427,7 +427,7 @@ public final class PageflipWebview extends WebView {
 			mCatalogViewOptions = null;
 		
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 		}
 		
 	}
@@ -498,7 +498,7 @@ public final class PageflipWebview extends WebView {
 			data.put("animated", "false");
 			mPFInterface.etaProxy(Command.CATALOG_VIEW_GOTO_PAGE, data);
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 		}
 		
 	}
@@ -584,8 +584,7 @@ public final class PageflipWebview extends WebView {
 	 */
 	public void setOption(String key, String value) {
 		if (mCatalogViewOptions == null) {
-			EtaLog.printStackTrace();
-			EtaLog.d(TAG, "Calling setOption() efter invoking execute() isn't allowed");
+			EtaLog.w(TAG, "Calling setOption() efter invoking execute() isn't allowed");
 		} else {
 			try {
 				mCatalogViewOptions.put(key, value);
@@ -644,7 +643,7 @@ public final class PageflipWebview extends WebView {
 				}
 				
 			} catch (JSONException e) {
-				EtaLog.e(TAG, e);
+				EtaLog.e(TAG, null, e);
 			}
 			
 		}
@@ -683,7 +682,7 @@ public final class PageflipWebview extends WebView {
 			try {
 				o.put("id", id);
 			} catch (JSONException e) {
-				EtaLog.e(TAG, e);
+				EtaLog.e(TAG, null, e);
 			}
 			
 			injectJS(String.format("window.etaProxy.push( ['%s', '%s'] );", command, o.toString()));
@@ -718,8 +717,7 @@ public final class PageflipWebview extends WebView {
 		
 		public void onEvent(String event, JSONObject data){
 			
-			EtaLog.d(TAG, event);
-			
+			EtaLog.v(TAG, event);
 			
 			if (event.equals(Event.SESSION_CHANGE)) {
 				
@@ -786,7 +784,7 @@ public final class PageflipWebview extends WebView {
 								etaProxy(rId, Command.API_REQUEST_COMPLETE, resp);
 								
 							} catch (JSONException e) {
-								EtaLog.e(TAG, e);
+								EtaLog.e(TAG, null, e);
 							}
 							
 						}
@@ -795,7 +793,7 @@ public final class PageflipWebview extends WebView {
 					mEta.add(req);
 					
 				} catch (JSONException e) {
-					EtaLog.e(TAG, e);
+					EtaLog.e(TAG, null, e);
 				}
 				
 			} else {

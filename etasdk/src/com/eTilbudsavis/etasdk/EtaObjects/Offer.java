@@ -24,7 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -85,7 +85,7 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 				list.add(Offer.fromJSON((JSONObject) offers.get(i)));
 			}
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return list;
 	}
@@ -131,7 +131,7 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 			offer.setCatalogUrl(Json.valueOf(jOffer, ServerKey.CATALOG_URL));
 			offer.setCatalogId(Json.valueOf(jOffer, ServerKey.CATALOG_ID));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		
 		return offer;

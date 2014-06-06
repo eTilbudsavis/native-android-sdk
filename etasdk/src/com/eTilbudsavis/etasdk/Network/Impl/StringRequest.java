@@ -17,12 +17,12 @@ package com.eTilbudsavis.etasdk.Network.Impl;
 
 import java.io.UnsupportedEncodingException;
 
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Cache;
 import com.eTilbudsavis.etasdk.Network.NetworkResponse;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class StringRequest extends Request<String> {
@@ -42,7 +42,7 @@ public class StringRequest extends Request<String> {
 		super(method, url, listener);
 		boolean nonBodyRequest = (method == Method.GET || method == Method.DELETE);
 		if (nonBodyRequest && requestBody != null) {
-			EtaLog.d(TAG, "GET and DELETE requests doesn't take a body, and will be ignored.\n"
+			EtaLog.i(TAG, "GET and DELETE requests doesn't take a body, and will be ignored.\n"
 					+ "Please append any parameters to Request.putQueryParameters()");
 		}
 		mRequestBody = requestBody;

@@ -17,7 +17,7 @@ import android.location.Location;
 import android.location.LocationManager;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
 
 public class EtaLocation extends Location {
@@ -83,8 +83,8 @@ public class EtaLocation extends Location {
 	 */
 	public void setRadius(int radius) {
 		if (radius < RADIUS_MIN || radius > RADIUS_MAX) {
-			String distError = "Radius must be within range %s to %s, provided radius: %s";
-			EtaLog.d(TAG, String.format(distError, RADIUS_MIN, RADIUS_MAX, radius));
+			String errMsg = "Radius must be within range %s to %s, provided radius: %s";
+			EtaLog.i(TAG, String.format(errMsg, RADIUS_MIN, RADIUS_MAX, radius));
 			return;
 		}
 		mRadius = radius;
@@ -219,7 +219,7 @@ public class EtaLocation extends Location {
 				o.put(Param.BOUND_WEST, getBoundWest());
 			}
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 		}
 		return o;
 	}

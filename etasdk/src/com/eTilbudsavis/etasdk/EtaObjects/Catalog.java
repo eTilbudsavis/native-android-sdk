@@ -25,8 +25,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.PageflipWebview;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -82,7 +82,7 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 				list.add(Catalog.fromJSON((JSONObject)catalogs.get(i)));
 			}
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return list;
 	}
@@ -131,7 +131,7 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 				catalog.setDimension(Dimension.fromJSON(jCatalog.getJSONObject(ServerKey.DIMENSIONS)));
 				catalog.setImages(Images.fromJSON(jCatalog.getJSONObject(ServerKey.IMAGES)));
 			} catch (JSONException e) {
-				EtaLog.e(TAG, e);
+				EtaLog.e(TAG, "", e);
 			}
 			
 		} else if (jCatalog.has(ServerKey.ID) && jCatalog.has(ServerKey.PAGE)) {
@@ -161,7 +161,7 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 			o.put(ServerKey.DIMENSIONS, Json.nullCheck(getDimension().toJSON()));
 			o.put(ServerKey.IMAGES, Json.nullCheck(getImages().toJSON()));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}

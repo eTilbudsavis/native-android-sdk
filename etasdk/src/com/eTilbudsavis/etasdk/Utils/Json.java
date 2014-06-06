@@ -18,6 +18,7 @@ package com.eTilbudsavis.etasdk.Utils;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 /**
  * Helper class designed to simplify working with JSON in Android - specifically the eTilbudsavis Android SDK.
@@ -54,7 +55,7 @@ public class Json {
 		try {
 			return object.isNull(key) ? defValue : object.getString(key);
 		} catch (Exception e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 		}
 		return defValue;
 	}
@@ -70,7 +71,7 @@ public class Json {
 		try {
 			return object.isNull(key) ? defValue : object.getInt(key);
 		} catch (Exception e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 		}
 		return defValue;
 	}
@@ -86,7 +87,7 @@ public class Json {
 		try {
 			return object.isNull(key) ? defValue : object.getDouble(key);
 		} catch (Exception e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 		}
 		return defValue;
 	}
@@ -102,7 +103,7 @@ public class Json {
 		try {
 			return object.isNull(key) ? defValue : object.getLong(key);
 		} catch (Exception e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 		}
 		return defValue;
 	}
@@ -118,7 +119,7 @@ public class Json {
 		try {
 			return object.isNull(key) ? defValue : object.getBoolean(key);
 		} catch (Exception e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 		}
 		return defValue;
 	}

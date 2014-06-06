@@ -24,7 +24,8 @@ import android.widget.Button;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaLocation;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.DevLogger;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.etilbudsavis.sdkdemo.R;
 
 public class Main extends Activity {
@@ -38,6 +39,11 @@ public class Main extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        /* 
+         * 
+         */
+        EtaLog.setLogger(new DevLogger());
         
         /* 
          * You MUST create an Eta instance before invoking Eta.getinstance.
@@ -51,12 +57,6 @@ public class Main extends Activity {
          */
         Eta.createInstance(Keys.API_KEY, Keys.API_SECRET, this);
         
-        /* 
-         * Enable debug mode, so debug info will show in LogCat
-         * You might not want to have this set to true in a release version.
-         */
-        EtaLog.enableLogd(true);
-
         /*
          * Eta is a singleton you interact with via this method
          */

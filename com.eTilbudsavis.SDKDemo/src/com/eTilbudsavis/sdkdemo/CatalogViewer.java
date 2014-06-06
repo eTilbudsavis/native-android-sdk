@@ -31,11 +31,11 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.PageflipWebview;
 import com.eTilbudsavis.etasdk.PageflipWebview.PageflipListener;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.etilbudsavis.sdkdemo.R;
 
 public class CatalogViewer extends Activity {
@@ -98,7 +98,7 @@ public class CatalogViewer extends Activity {
 		        
 			} else {
 				
-				EtaLog.e(TAG, error);
+				EtaLog.e(TAG, "", error);
 				
 			}
 		}

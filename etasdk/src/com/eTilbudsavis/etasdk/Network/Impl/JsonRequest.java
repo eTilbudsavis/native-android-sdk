@@ -31,13 +31,13 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Cache;
 import com.eTilbudsavis.etasdk.Network.Cache.Item;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.RequestQueue;
 import com.eTilbudsavis.etasdk.Network.Response;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -64,7 +64,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 		super(method, url, listener);
 		boolean nonBodyRequest = (method == Method.GET || method == Method.DELETE);
 		if (nonBodyRequest && requestBody != null) {
-			EtaLog.d(TAG, "GET and DELETE requests doesn't take a body, and will be ignored.\n"
+			EtaLog.i(TAG, "GET and DELETE requests doesn't take a body, and will be ignored.\n"
 					+ "Please append any GET and DELETE parameters to Request.putQueryParameters()");
 		}
 		mRequestBody = requestBody;
@@ -221,7 +221,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 			}
 			
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		
 		if (ernlist.isEmpty()) {
@@ -243,7 +243,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 				return ern;
 			}
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return null;
 	}

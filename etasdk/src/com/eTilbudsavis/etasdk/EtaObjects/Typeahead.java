@@ -27,7 +27,7 @@ import android.text.Html;
 import android.text.Spanned;
 import android.widget.AutoCompleteTextView;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 /**
@@ -44,6 +44,8 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  *
  */
 public class Typeahead extends EtaObject implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = "Typeahead";
 	
@@ -76,7 +78,7 @@ public class Typeahead extends EtaObject implements Serializable {
 				resp.add(Typeahead.fromJSON((JSONObject)typeaheads.get(i)));
 			}
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return resp;
 	}
@@ -116,7 +118,7 @@ public class Typeahead extends EtaObject implements Serializable {
 			o.put(ServerKey.LENGTH, getLength());
 			o.put(ServerKey.OFFSET, getOffset());
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
@@ -226,7 +228,7 @@ public class Typeahead extends EtaObject implements Serializable {
 				return Html.fromHtml(html);
 				
 			} catch (StringIndexOutOfBoundsException e) {
-				EtaLog.e(TAG, e);
+				EtaLog.e(TAG, "", e);
 			}
 			
 			return Html.fromHtml(mSubject);

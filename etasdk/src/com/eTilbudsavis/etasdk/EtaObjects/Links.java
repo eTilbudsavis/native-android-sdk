@@ -20,7 +20,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Links extends EtaObject implements Serializable {
@@ -54,7 +54,7 @@ public class Links extends EtaObject implements Serializable {
 		try {
 			o.put(ServerKey.WEBSHOP, Json.nullCheck(getWebshop()));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}

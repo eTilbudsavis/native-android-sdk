@@ -20,7 +20,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Unit extends EtaObject implements Serializable {
@@ -48,7 +48,7 @@ public class Unit extends EtaObject implements Serializable {
 			u.setSymbol(Json.valueOf(unit, ServerKey.SYMBOL));
 			u.setSi(Si.fromJSON(unit.getJSONObject(ServerKey.SI)));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		
 		return u;
@@ -61,7 +61,7 @@ public class Unit extends EtaObject implements Serializable {
 			o.put(ServerKey.SYMBOL, Json.nullCheck(getSymbol()));
 			o.put(ServerKey.SI, Json.toJson(getSi()));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}

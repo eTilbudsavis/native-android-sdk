@@ -30,9 +30,9 @@ import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaLocation;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -160,7 +160,7 @@ public class RequestQueue {
 	public void runParkedQueue() {
 		
 		if (mEta.getSessionManager().isRequestInFlight()) {
-			EtaLog.d(TAG, "Cannot resume yet, session request still in flight.");
+			EtaLog.i(TAG, "Cannot resume yet, session request still in flight.");
 			return;
 		}
 		
@@ -274,7 +274,7 @@ public class RequestQueue {
         	request.addEvent("added-to-queue");
         	
     		if (isSessionEndpoint(request) && request != mEta.getSessionManager().getRequestInFlight()) {
-    			EtaLog.d(TAG, "Session changes should be handled by SessionManager. This request might cause problems");
+    			EtaLog.w(TAG, "Session changes should be handled by SessionManager. This request might cause problems");
     		}
     		
 //        	synchronized (mRequestParking) {
@@ -319,7 +319,7 @@ public class RequestQueue {
 			log.put("headers", new JSONObject(r.getHeaders()));
 			log.put("time", Utils.parseDate(new Date()));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		
     }

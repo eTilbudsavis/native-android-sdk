@@ -28,6 +28,7 @@ import android.os.Looper;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.HttpStack;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.RequestQueue;
@@ -35,7 +36,6 @@ import com.eTilbudsavis.etasdk.Network.Impl.DefaultHttpNetwork;
 import com.eTilbudsavis.etasdk.Network.Impl.HttpURLNetwork;
 import com.eTilbudsavis.etasdk.Network.Impl.MemoryCache;
 import com.eTilbudsavis.etasdk.Network.Impl.NetworkImpl;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 /**
@@ -124,7 +124,7 @@ public class Eta {
 			String version = mContext.getPackageManager().getPackageInfo(name, 0 ).versionName;
 			setAppVersion(version);
 		} catch (NameNotFoundException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 		}
 		
 		mSettings = new Settings(mContext);
@@ -171,7 +171,7 @@ public class Eta {
 				}
 			}
 		} else {
-			EtaLog.d(TAG, "Eta instance already created");
+			EtaLog.i(TAG, "Eta instance already created");
 		}
 		
 	}
@@ -351,7 +351,7 @@ public class Eta {
 		mLocation.clear();
 		mRequestQueue.clear();
 		mListManager.clear();
-		EtaLog.getExceptionLog().clear();
+		EtaLog.getLogger().getLog().clear();
 	}
 	
 	/**

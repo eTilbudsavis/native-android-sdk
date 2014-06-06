@@ -22,7 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 
@@ -65,7 +65,7 @@ public class Store extends EtaErnObject<Store> implements Serializable {
 				list.add(Store.fromJSON((JSONObject)stores.get(i)));
 			
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return list;
 	}
@@ -92,7 +92,7 @@ public class Store extends EtaErnObject<Store> implements Serializable {
 			s.setBranding(Branding.fromJSON(store.getJSONObject(ServerKey.BRANDING)));
 			s.setContact(Json.valueOf(store, ServerKey.CONTACT));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return s;
 	}
@@ -112,7 +112,7 @@ public class Store extends EtaErnObject<Store> implements Serializable {
 			o.put(ServerKey.BRANDING, Json.nullCheck(getBranding().toJSON()));
 			o.put(ServerKey.CONTACT, Json.nullCheck(getContact()));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
