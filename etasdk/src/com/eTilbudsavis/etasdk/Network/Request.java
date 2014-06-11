@@ -182,7 +182,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
 		if (mSaveNetworkLog) {
 			// Append the request summary to the debugging log
-			mRequestQueue.getLog().add(EventLog.TYPE_REQUEST, mNetworkLog);
+			EtaLog.getLogger().getLog().add(EventLog.TYPE_REQUEST, mNetworkLog);
 		}
 		
     	mFinished = true;

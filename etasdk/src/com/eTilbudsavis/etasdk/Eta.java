@@ -327,13 +327,20 @@ public class Eta {
 	}
 	
 	/**
+	 * @deprecated
+	 */
+	public void destroyInstance() {
+		destroy();
+	}
+
+	/**
 	 * First clears all preferences with {@link #clear()}, and then {@code null's}
 	 * this instance of Eta
 	 * 
 	 * <p>For further use of {@link Eta} after this, you must invoke
 	 * {@link #createInstance(String, String, Context) set()} it again.</p>
 	 */
-	public void destroyInstance() {
+	public void destroy() {
 		clear();
 		mEta = null;
 	}

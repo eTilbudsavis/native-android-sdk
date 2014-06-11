@@ -43,9 +43,6 @@ public class RequestQueue {
 	
     /** Number of network request dispatcher threads to start. */
     private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;
-
-    /** Number of log entries the RequestQueue should save. */
-    private static final int DEFAULT_LOG_SIZE = 16;
     
     /** Eta object controlling the whole lot */
     private final Eta mEta;
@@ -83,9 +80,6 @@ public class RequestQueue {
     /** Atomic number generator for sequencing requests in the queues */
     private final AtomicInteger mSequenceGenerator = new AtomicInteger();
     
-    /** The EventLog containing condensed information about requests and their responses */
-    private EventLog mLog;
-    
     /* tmp var for testing */
 	public int dataIn = 0;
     /* tmp var for testing */
@@ -100,15 +94,13 @@ public class RequestQueue {
      * @param network the implementation you want to use for this RequestQueue
      * @param poolSize, number of threads to do requests
      * @param delivery object for returning objects to UI thread
-     * @param logSize the number of logs to save. use 0 to skip logging.
      */
-    public RequestQueue(Eta eta, Cache cache, Network network, int poolSize, Delivery delivery, int logSize) {
+    public RequestQueue(Eta eta, Cache cache, Network network, int poolSize, Delivery delivery) {
     	mEta = eta;
 		mCache = cache;
 		mNetwork = network;
 		mNetworkDispatchers = new NetworkDispatcher[poolSize];
 		mDelivery = delivery;
-		mLog = new EventLog(logSize);
 	}
     
 	/**
@@ -118,7 +110,7 @@ public class RequestQueue {
      * @param network - the implementation you want to use for this RequestQueue
 	 */
     public RequestQueue(Eta eta, Cache cache, Network network) {
-    	this(eta, cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE, new Delivery(eta.getHandler()), DEFAULT_LOG_SIZE);
+    	this(eta, cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE, new Delivery(eta.getHandler()));
     }
     
 	/**
@@ -208,16 +200,19 @@ public class RequestQueue {
 //    	}
     	
 	}
-		
+
 	/**
-	 * Get the log of all requests that have passed through this RequestQueue.<br><br>
+	 * This method have been depricated, please refer to {@link EtaLog#getLogger()}
+	 * for a complete log of eta sdk.<br><br>
 	 * 
+	 * Get the log of all requests that have passed through this RequestQueue.
 	 * The log contains a summary of the request it self, and the response given by the API.
 	 * This can be very useful for debugging.
 	 * @return the EventLog from this RequestQueue
+	 * @deprecated
 	 */
 	public EventLog getLog() {
-		return mLog;
+		return EtaLog.getLogger().getLog();
 	}
 	
 	/**
@@ -238,7 +233,6 @@ public class RequestQueue {
 	
 	public void clear() {
 		mCache.clear();
-		mLog.clear();
 	}
 	
 	/**

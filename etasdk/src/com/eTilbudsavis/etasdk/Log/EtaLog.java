@@ -1,5 +1,10 @@
 package com.eTilbudsavis.etasdk.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.eTilbudsavis.etasdk.Utils.Utils;
+
 
 public class EtaLog {
 
@@ -7,7 +12,7 @@ public class EtaLog {
 
 	private static final String LOG_D_CHUNK = "[chunk %s/%s] %s";
 	
-	private static EtaLogger mLogger;
+	private static EtaLogger mLogger = new DefaultLogger();
 	
 	public static EtaLogger getLogger() {
 		return mLogger;
@@ -86,5 +91,24 @@ public class EtaLog {
 			d(TAG, String.valueOf(ste));
 		}
 	}
+	
+
+	/**
+	 * Adds the throwable to the {@link #mExceptionLog Exception Log}.
+	 * @param t The throwable to add
+	 */
+	public static JSONObject exceptionToJson(Throwable t) {
+		
+		JSONObject log = new JSONObject();
+		try {
+			log.put("exception", t.getClass().getName());
+			log.put("stacktrace", Utils.exceptionToString(t));
+			return log;
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return new JSONObject();
+	}
+	
 	
 }

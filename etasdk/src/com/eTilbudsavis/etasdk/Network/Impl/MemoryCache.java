@@ -16,12 +16,10 @@
 package com.eTilbudsavis.etasdk.Network.Impl;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import android.util.Log;
 
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Cache;
@@ -48,8 +46,9 @@ public class MemoryCache implements Cache {
 		
 		setLimit(Runtime.getRuntime().maxMemory() / 8);
 		
-		// Allocate only memory needed
-		mCache = Collections.synchronizedMap(new HashMap<String, Cache.Item>(mMaxItems));
+		float loadFactor = 1.5f; // Quicker lookup times
+		boolean accessOrder = true; // Enable LRU ordering
+		mCache = Collections.synchronizedMap(new LinkedHashMap<String, Item>(mMaxItems,loadFactor,accessOrder));
 		
 	}
 	

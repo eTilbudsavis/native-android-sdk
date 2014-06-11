@@ -7,7 +7,15 @@ public class DefaultLogger implements EtaLogger {
 	/** Variable to control the size of the exception log */
 	public static final int DEFAULT_EXCEPTION_LOG_SIZE = 16;
 	
-	private EventLog mLog = new EventLog(DEFAULT_EXCEPTION_LOG_SIZE);
+	private EventLog mLog;
+	
+	public DefaultLogger() {
+		this(DEFAULT_EXCEPTION_LOG_SIZE);
+	}
+	
+	public DefaultLogger(int logSize) {
+		mLog = new EventLog(logSize);
+	}
 	
 	public int v(String tag, String msg) {
 		return 0;
@@ -49,7 +57,7 @@ public class DefaultLogger implements EtaLogger {
 		if (msg == null || msg.length() == 0) {
 			msg = tr.getMessage();
 		}
-		tr.printStackTrace();
+		mLog.add(EventLog.TYPE_EXCEPTION, EtaLog.exceptionToJson(tr));
 		return Log.e(tag, msg, tr);
 	}
 
