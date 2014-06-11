@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -22,7 +23,7 @@ import com.eTilbudsavis.etasdk.Utils.Param;
 
 public class EtaLocation extends Location {
 	
-	public static final String TAG = "EtaLocation";
+	public static final String TAG = EtaLocation.class.getSimpleName();
 	
 	private static final String ETA_PROVIDER = "etasdk";
 	
@@ -51,9 +52,9 @@ public class EtaLocation extends Location {
 	@Override
 	public void set(Location l) {
 		super.set(l);
-		mSensor = (l.getProvider().equals(LocationManager.GPS_PROVIDER) || l.getProvider().equals(LocationManager.NETWORK_PROVIDER) );
-		saveState();
-		notifySubscribers();
+		String p = l.getProvider();
+		mSensor = (LocationManager.GPS_PROVIDER.equals(p) || LocationManager.NETWORK_PROVIDER.equals(p) );
+		saveAndNotify();
 	}
 	
 	/**
@@ -72,25 +73,24 @@ public class EtaLocation extends Location {
 		super.setLongitude(longitude);
 		mSensor = false;
 		super.setTime(System.currentTimeMillis());
-		saveState();
-		notifySubscribers();
+		saveAndNotify();
 	}
 	
 	/**
 	 * Set the current search radius.
 	 * @param radius in meters <li> Min value = 0 <li> Max value = 700000
+	 * @throws IllegalArgumentException if radius is out of bounds
 	 * @return this Object, for easy chaining of set methods.
 	 */
 	public void setRadius(int radius) {
 		if (radius < RADIUS_MIN || radius > RADIUS_MAX) {
 			String errMsg = "Radius must be within range %s to %s, provided radius: %s";
-			EtaLog.i(TAG, String.format(errMsg, RADIUS_MIN, RADIUS_MAX, radius));
-			return;
+			errMsg = String.format(errMsg, RADIUS_MIN, RADIUS_MAX, radius);
+			throw new IllegalArgumentException(errMsg);
 		}
 		mRadius = radius;
 		super.setTime(System.currentTimeMillis());
-		saveState();
-		notifySubscribers();
+		saveAndNotify();
 	}
 	
 	/**
@@ -105,23 +105,20 @@ public class EtaLocation extends Location {
 	public void setLatitude(double latitude) {
 		super.setLatitude(latitude);
 		super.setTime(System.currentTimeMillis());
-		saveState();
-		notifySubscribers();
+		saveAndNotify();
 	}
 	
 	@Override
 	public void setLongitude(double longitude) {
 		super.setLongitude(longitude);
 		super.setTime(System.currentTimeMillis());
-		saveState();
-		notifySubscribers();
+		saveAndNotify();
 	}
 	
 	@Override
 	public void setTime(long time) {
 		super.setTime(time);
-		saveState();
-		notifySubscribers();
+		saveAndNotify();
 	}
 	
 	/**
@@ -133,8 +130,7 @@ public class EtaLocation extends Location {
 	public void setSensor(boolean sensor) {
 		mSensor = sensor;
 		super.setTime(System.currentTimeMillis());
-		saveState();
-		notifySubscribers();
+		saveAndNotify();
 	}
 	
 	/**
@@ -152,8 +148,7 @@ public class EtaLocation extends Location {
 	public void setAddress(String address) {
 		mAddress = address;
 		super.setTime(System.currentTimeMillis());
-		saveState();
-		notifySubscribers();
+		saveAndNotify();
 	}
 	
 	/**
@@ -252,8 +247,7 @@ public class EtaLocation extends Location {
 		mBoundSouth = boundSouth;
 		mBoundWest = boundWest;
 		super.setTime(System.currentTimeMillis());
-		saveState();
-		notifySubscribers();
+		saveAndNotify();
 	}
 	
 	public double getBoundEast() {
@@ -275,19 +269,9 @@ public class EtaLocation extends Location {
 	/**
 	 * Saves this locations state to SharedPreferences. This method is called on all onPause events.
 	 */
-	private void saveState() {
-		SharedPreferences.Editor e = mEta.getSettings().getPrefs().edit();
-    	e.putBoolean(Settings.LOC_SENSOR, mSensor);
-		e.putInt(Settings.LOC_RADIUS, mRadius);
-		e.putFloat(Settings.LOC_LATITUDE, (float)getLatitude());
-		e.putFloat(Settings.LOC_LONGITUDE, (float)getLongitude());
-		e.putFloat(Settings.LOC_BOUND_EAST, (float)mBoundEast);
-		e.putFloat(Settings.LOC_BOUND_WEST, (float)mBoundWest);
-		e.putFloat(Settings.LOC_BOUND_NORTH, (float)mBoundNorth);
-		e.putFloat(Settings.LOC_BOUND_SOUTH, (float)mBoundSouth);
-		e.putString(Settings.LOC_ADDRESS, mAddress);
-		e.putLong(Settings.LOC_TIME, getTime());
-		e.commit();
+	private void saveAndNotify() {
+		new EtaLocationWriter().execute();
+		notifySubscribers();
 	}
 	
 	private boolean restoreState() {
@@ -337,8 +321,7 @@ public class EtaLocation extends Location {
 		mBoundWest = DEFAULT_COORDINATE;
 		mRadius = DEFAULT_RADIUS;
 		mSensor = false;
-		saveState();
-		notifySubscribers();
+		saveAndNotify();
 	}
 	
 	/**
@@ -401,6 +384,31 @@ public class EtaLocation extends Location {
 	
 	public interface LocationListener {
 		public void onLocationChange();
+	}
+	
+	public class EtaLocationWriter extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected Void doInBackground(Void... params) {
+
+			EtaLog.i(TAG, "Saving location to disk");
+//			EtaLog.printStackTrace();
+			
+			SharedPreferences.Editor e = mEta.getSettings().getPrefs().edit();
+	    	e.putBoolean(Settings.LOC_SENSOR, mSensor);
+			e.putInt(Settings.LOC_RADIUS, mRadius);
+			e.putFloat(Settings.LOC_LATITUDE, (float)getLatitude());
+			e.putFloat(Settings.LOC_LONGITUDE, (float)getLongitude());
+			e.putFloat(Settings.LOC_BOUND_EAST, (float)mBoundEast);
+			e.putFloat(Settings.LOC_BOUND_WEST, (float)mBoundWest);
+			e.putFloat(Settings.LOC_BOUND_NORTH, (float)mBoundNorth);
+			e.putFloat(Settings.LOC_BOUND_SOUTH, (float)mBoundSouth);
+			e.putString(Settings.LOC_ADDRESS, mAddress);
+			e.putLong(Settings.LOC_TIME, getTime());
+			e.commit();
+			return null;
+		}
+		
 	}
 	
 }
