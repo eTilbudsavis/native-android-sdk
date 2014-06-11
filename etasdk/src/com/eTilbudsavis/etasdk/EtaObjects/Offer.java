@@ -24,6 +24,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -39,7 +42,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Offer extends EtaErnObject<Offer> implements Serializable {
+public class Offer extends EtaErnObject<Offer> implements Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -651,5 +654,62 @@ public class Offer extends EtaErnObject<Offer> implements Serializable {
 			return false;
 		return true;
 	}
+
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 	
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(mHeading);
+		dest.writeString(mDescription);
+		dest.writeInt(mCatalogPage);
+		dest.writeValue(mPricing);
+		dest.writeValue(mQuantity);
+		dest.writeValue(mImages);
+		dest.writeValue(mLinks);
+		dest.writeValue(mRunFrom);
+		dest.writeValue(mRunTill);
+		dest.writeString(mDealerUrl);
+		dest.writeString(mDealerId);
+		dest.writeString(mStoreUrl);
+		dest.writeString(mStoreId);
+		dest.writeString(mCatalogUrl);
+		dest.writeString(mCatalogId);
+		dest.writeValue(mCatalog);
+		dest.writeValue(mDealer);
+		dest.writeValue(mStore);
+	}
+	
+    private Offer(Parcel in) {
+    	mHeading = in.readString();
+		mDescription = in.readString();
+		mCatalogPage = in.readInt();
+		mPricing = (Pricing) in.readValue(Pricing.class.getClassLoader());
+		mQuantity = (Quantity)in.readValue(Quantity.class.getClassLoader());
+		mImages = (Images)in.readValue(Images.class.getClassLoader());
+		mLinks = (Links)in.readValue(Links.class.getClassLoader());
+		mRunFrom = (Date)in.readValue(Date.class.getClassLoader());
+		mRunTill = (Date)in.readValue(Date.class.getClassLoader());
+		mDealerUrl = in.readString();
+		mDealerId = in.readString();
+		mStoreUrl = in.readString();
+		mStoreId = in.readString();
+		mCatalogUrl = in.readString();
+		mCatalogId = in.readString();
+		mCatalog = (Catalog)in.readValue(Catalog.class.getClassLoader());
+		mDealer = (Dealer)in.readValue(Dealer.class.getClassLoader());
+		mStore = (Store)in.readValue(Store.class.getClassLoader());
+    }
+
+    public static final Parcelable.Creator<Offer> CREATOR = new Parcelable.Creator<Offer>() {
+        public Offer createFromParcel(Parcel in) {
+            return new Offer(in);
+        }
+
+        public Offer[] newArray(int size) {
+            return new Offer[size];
+        }
+    };
+    
 }

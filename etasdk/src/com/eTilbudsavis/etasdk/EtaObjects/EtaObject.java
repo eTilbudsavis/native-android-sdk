@@ -20,6 +20,8 @@ import java.io.Serializable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
