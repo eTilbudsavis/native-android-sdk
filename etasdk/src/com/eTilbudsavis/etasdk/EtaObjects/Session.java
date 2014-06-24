@@ -64,7 +64,9 @@ public class Session extends EtaObject implements Serializable {
 		JSONObject perm = null;
 		if (session.isNull(ServerKey.PERMISSIONS)) {
 			try {
-				perm = session.getJSONObject(ServerKey.PERMISSIONS);
+				if (!session.isNull(ServerKey.PERMISSIONS)) {
+					perm = session.getJSONObject(ServerKey.PERMISSIONS);
+				}
 			} catch (JSONException e) {
 				EtaLog.e(TAG, "", e);
 			}

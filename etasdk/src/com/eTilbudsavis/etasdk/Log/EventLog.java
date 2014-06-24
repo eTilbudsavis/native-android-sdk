@@ -78,8 +78,12 @@ public class EventLog {
 	 */
 	private void add(String name, String type, JSONObject data) {
 		long time = System.currentTimeMillis();
-		String user = Eta.getInstance().getUser().getErn();
-		String token = Eta.getInstance().getSessionManager().getSession().getToken();
+		String user = "none";
+		String token = "no-token";
+		if (Eta.isInstanciated()) {
+			user = Eta.getInstance().getUser().getErn();
+			token = Eta.getInstance().getSessionManager().getSession().getToken();
+		}
 		add(new Event(name, time, type, user, token, data));
 	}
 	

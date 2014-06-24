@@ -717,8 +717,6 @@ public final class PageflipWebview extends WebView {
 		
 		public void onEvent(String event, JSONObject data){
 			
-			EtaLog.v(TAG, event);
-			
 			if (event.equals(Event.SESSION_CHANGE)) {
 				
 				mSessionFromPageflip = true;
