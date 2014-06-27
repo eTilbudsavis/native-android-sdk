@@ -15,7 +15,6 @@ import org.json.JSONObject;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -42,6 +41,29 @@ public class EtaLocation extends Location {
 	private Eta mEta;
 	private Observable mObservers = new Observable();
 	private List<LocationListener> mSubscribers = new ArrayList<LocationListener>();
+	
+	private Runnable mSaveToDisk = new Runnable() {
+		
+		public void run() {
+
+			EtaLog.i(TAG, "Saving location to disk");
+//			EtaLog.printStackTrace();
+			
+			SharedPreferences.Editor e = mEta.getSettings().getPrefs().edit();
+	    	e.putBoolean(Settings.LOC_SENSOR, mSensor);
+			e.putInt(Settings.LOC_RADIUS, mRadius);
+			e.putFloat(Settings.LOC_LATITUDE, (float)getLatitude());
+			e.putFloat(Settings.LOC_LONGITUDE, (float)getLongitude());
+			e.putFloat(Settings.LOC_BOUND_EAST, (float)mBoundEast);
+			e.putFloat(Settings.LOC_BOUND_WEST, (float)mBoundWest);
+			e.putFloat(Settings.LOC_BOUND_NORTH, (float)mBoundNorth);
+			e.putFloat(Settings.LOC_BOUND_SOUTH, (float)mBoundSouth);
+			e.putString(Settings.LOC_ADDRESS, mAddress);
+			e.putLong(Settings.LOC_TIME, getTime());
+			e.commit();
+			
+		}
+	};
 	
 	public EtaLocation(Eta eta) {
 		super(ETA_PROVIDER);
@@ -270,7 +292,7 @@ public class EtaLocation extends Location {
 	 * Saves this locations state to SharedPreferences. This method is called on all onPause events.
 	 */
 	private void saveAndNotify() {
-		new EtaLocationWriter().execute();
+		new Thread(mSaveToDisk).start();
 		notifySubscribers();
 	}
 	
@@ -384,31 +406,6 @@ public class EtaLocation extends Location {
 	
 	public interface LocationListener {
 		public void onLocationChange();
-	}
-	
-	public class EtaLocationWriter extends AsyncTask<Void, Void, Void> {
-
-		@Override
-		protected Void doInBackground(Void... params) {
-
-			EtaLog.i(TAG, "Saving location to disk");
-//			EtaLog.printStackTrace();
-			
-			SharedPreferences.Editor e = mEta.getSettings().getPrefs().edit();
-	    	e.putBoolean(Settings.LOC_SENSOR, mSensor);
-			e.putInt(Settings.LOC_RADIUS, mRadius);
-			e.putFloat(Settings.LOC_LATITUDE, (float)getLatitude());
-			e.putFloat(Settings.LOC_LONGITUDE, (float)getLongitude());
-			e.putFloat(Settings.LOC_BOUND_EAST, (float)mBoundEast);
-			e.putFloat(Settings.LOC_BOUND_WEST, (float)mBoundWest);
-			e.putFloat(Settings.LOC_BOUND_NORTH, (float)mBoundNorth);
-			e.putFloat(Settings.LOC_BOUND_SOUTH, (float)mBoundSouth);
-			e.putString(Settings.LOC_ADDRESS, mAddress);
-			e.putLong(Settings.LOC_TIME, getTime());
-			e.commit();
-			return null;
-		}
-		
 	}
 	
 }
