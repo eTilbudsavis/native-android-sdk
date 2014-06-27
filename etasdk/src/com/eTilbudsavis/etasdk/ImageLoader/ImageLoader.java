@@ -58,17 +58,17 @@ public class ImageLoader {
 	public void displayImage(ImageRequest ir) {
 		
 		ir.start();
-		ir.imageView.setTag(ir.url);
-		mImageViews.put(ir.imageView, ir.url);
+		ir.getImageView().setTag(ir.getUrl());
+		mImageViews.put(ir.getImageView(), ir.getUrl());
 		
-		ir.bitmap = mMemoryCache.get(ir.url);
-		if(ir.bitmap != null) {
-			ir.source = LoadSource.MEMORY;
+		ir.mBitmap = mMemoryCache.get(ir.getUrl());
+		if(ir.mBitmap != null) {
+			ir.mLoadSource = LoadSource.MEMORY;
 			processAndDisplay(ir);
 		} else {
 			mExecutorService.submit(new PhotosLoader(ir));
-			if (ir.placeholderLoading != 0) {
-				ir.imageView.setImageResource(ir.placeholderLoading);
+			if (ir.mPlaceholderLoading != 0) {
+				ir.getImageView().setImageResource(ir.mPlaceholderLoading);
 			}
 		}
 	}
@@ -90,20 +90,20 @@ public class ImageLoader {
 			
 			try{
 				
-				ir.bitmap = mFileCache.get(ir.url);
+				ir.mBitmap = mFileCache.get(ir.getUrl());
 				
-				if (ir.bitmap != null) {
+				if (ir.mBitmap != null) {
 					
-					ir.source = LoadSource.FILE;
+					ir.mLoadSource = LoadSource.FILE;
 					
 				} else {
 					
 					int retries = 0;
-					while (ir.bitmap == null && retries<2) {
+					while (ir.mBitmap == null && retries<2) {
 						
 						retries++;
 						try {
-							ir.bitmap = mDownloader.getBitmap(ir.url);
+							ir.mBitmap = mDownloader.getBitmap(ir.getUrl());
 						} catch (Throwable t) {
 							EtaLog.d(TAG, t.getMessage(), t);
 							if (t instanceof OutOfMemoryError) {
@@ -113,8 +113,8 @@ public class ImageLoader {
 						
 					}
 					
-					if (ir.bitmap != null) {
-						ir.source = LoadSource.WEB;
+					if (ir.mBitmap != null) {
+						ir.mLoadSource = LoadSource.WEB;
 					}
 					
 				}
@@ -131,16 +131,16 @@ public class ImageLoader {
 	
 	private void addToCache(ImageRequest ir) {
 		
-		if (ir.bitmap == null || ir.source == null) {
+		if (ir.mBitmap == null || ir.mLoadSource == null) {
 			return;
 		}
 		
 		// Add to filecache and/or memorycache depending on the source
-		switch (ir.source) {
+		switch (ir.mLoadSource) {
 			case WEB:
-				mFileCache.save(ir.url, ir.bitmap);
+				mFileCache.save(ir.getUrl(), ir.mBitmap);
 			case FILE:
-				mMemoryCache.put(ir.url, ir.bitmap);
+				mMemoryCache.put(ir.getUrl(), ir.mBitmap);
 			default:
 				break;
 		}
@@ -149,12 +149,12 @@ public class ImageLoader {
 	
 	private void processAndDisplay(final ImageRequest ir) {
 		
-		if (imageViewReused(ir) || ir.bitmap == null) {
+		if (imageViewReused(ir) || ir.mBitmap == null) {
 			ir.finish();
 			return;
 		}
 		
-		if (ir.processor != null) {
+		if (ir.mPostProcessor != null) {
 			
 			if (Looper.myLooper() == Looper.getMainLooper()) {
 				
@@ -162,14 +162,14 @@ public class ImageLoader {
 					
 					public void run() {
 						
-						ir.bitmap = ir.processor.process(ir.bitmap);
+						ir.mBitmap = ir.mPostProcessor.process(ir.mBitmap);
 						display(ir);
 					}
 				});
 				
 			} else {
 				
-				ir.bitmap = ir.processor.process(ir.bitmap);
+				ir.mBitmap = ir.mPostProcessor.process(ir.mBitmap);
 				display(ir);
 				
 			}
@@ -191,11 +191,11 @@ public class ImageLoader {
 					return;
 				}
 				
-				if (ir.displayer == null) {
-					ir.displayer = new DefaultBitmapDisplayer();
+				if (ir.mDisplayer == null) {
+					ir.mDisplayer = new DefaultBitmapDisplayer();
 				}
 				ir.finish();
-				ir.displayer.display(ir);
+				ir.mDisplayer.display(ir);
 			}
 		};
 		
@@ -215,8 +215,8 @@ public class ImageLoader {
 	 * @return true if the View have been reused, false otherwise
 	 */
 	private boolean imageViewReused(ImageRequest ir) {
-		String url = mImageViews.get(ir.imageView);
-		return ((url == null || !url.contains(ir.url)));
+		String url = mImageViews.get(ir.getImageView());
+		return ((url == null || !url.contains(ir.getUrl())));
 	}
 	
 	public void clear() {
