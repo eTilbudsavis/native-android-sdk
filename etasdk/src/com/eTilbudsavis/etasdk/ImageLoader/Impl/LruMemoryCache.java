@@ -15,17 +15,31 @@ public class LruMemoryCache implements MemoryCache {
 	
 	public static final String TAG = MemoryCache.class.getSimpleName();
 	
-	//Last argument true for LRU ordering
+	/**
+	 * The map containing the actual cache. Last argument true for LRU ordering
+	 */
 	private Map<String, Bitmap> mCache = Collections.synchronizedMap(new LinkedHashMap<String, Bitmap>(10,1.5f,true));
 	
-	//current allocated size
+	/** The currently allocated size of cache */
 	private long mSize = 0;
 	
-	//max memory in bytes
-	private long mLimit = 0x100000;
+	/** Max memory in bytes - default to 1mb */
+	private long mMemoryLimit = 0x100000;
 	
 	public LruMemoryCache() {
-		mLimit = Runtime.getRuntime().maxMemory()/4;
+		// Set maxMem to 20% the size of max available memory in VM
+		setMemoryLimit(Runtime.getRuntime().maxMemory()/8);
+	}
+	
+	/**
+	 * Set the max memory limit for this cache.
+	 * @param limit A memory limit between 0 and max available memory in VM
+	 */
+	public void setMemoryLimit(long limit) {
+		if (limit < 0 || limit > Runtime.getRuntime().maxMemory()) {
+			throw new IllegalArgumentException("Invalid memory limit: " + limit);
+		}
+		mMemoryLimit = limit;
 	}
 	
 	public void put(String id, Bitmap b){
@@ -54,10 +68,10 @@ public class LruMemoryCache implements MemoryCache {
 	
 	private void checkSize() {
 		
-		if(mSize>mLimit){
+		if(mSize>mMemoryLimit){
 			EtaLog.d(TAG, "cache-clear");
 			Iterator<Entry<String, Bitmap>> iter=mCache.entrySet().iterator();  
-			while(iter.hasNext() && (mSize>mLimit)){
+			while(iter.hasNext() && (mSize>mMemoryLimit)){
 				Entry<String, Bitmap> entry=iter.next();
 				mSize-=getSizeInBytes(entry.getValue());
 				iter.remove();
