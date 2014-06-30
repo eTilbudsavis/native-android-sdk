@@ -17,13 +17,14 @@ public class DefaultImageDownloader implements ImageDownloader {
 	public static final String TAG = ImageDownloader.class.getSimpleName();
 	
 	private static final int BUFFER_SIZE = 0x10000;
+	private static final int TIMEOUT = 20000;
 	
 	public Bitmap getBitmap(String url) throws IllegalStateException, IOException, OutOfMemoryError {
 		
 		URL imageUrl = new URL(url);
 		HttpURLConnection conn = (HttpURLConnection)imageUrl.openConnection();
-		conn.setConnectTimeout(30000);
-		conn.setReadTimeout(30000);
+		conn.setConnectTimeout(TIMEOUT);
+		conn.setReadTimeout(TIMEOUT);
 		conn.setInstanceFollowRedirects(true);
 		byte[] image = entityToBytes(conn);
 		return BitmapFactory.decodeByteArray(image, 0, image.length);

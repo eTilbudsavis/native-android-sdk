@@ -710,7 +710,13 @@ public final class PageflipWebview extends WebView {
 			mEta.getHandler().post(new Runnable() {
 				
 				public void run() {
-					loadUrl(s);
+					try {
+						// Keep getting a NullPointerException, is the string null?
+						loadUrl(s);
+						
+					} catch (Exception e) {
+						EtaLog.e(TAG, e.getMessage(), e);
+					}
 				}
 			});
 		}

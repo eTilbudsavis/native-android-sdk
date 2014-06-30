@@ -15,12 +15,12 @@ public class ImageRequest {
 	
 	private final String mUrl;
 	private final ImageView mImageView;
-	public BitmapProcessor mPostProcessor;
-	public Bitmap mBitmap;
-	public int mPlaceholderLoading;
-	public int mPlaceholderError;
-	public BitmapDisplayer mDisplayer;
-	public LoadSource mLoadSource;
+	private BitmapProcessor mPostProcessor;
+	private Bitmap mBitmap;
+	private int mPlaceholderLoading;
+	private int mPlaceholderError;
+	private BitmapDisplayer mDisplayer;
+	private LoadSource mLoadSource;
 	private long mTimeStart = 0L;
 	private long mTimeLoad = 0L;
 	

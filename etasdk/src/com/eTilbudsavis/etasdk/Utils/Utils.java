@@ -250,16 +250,14 @@ public final class Utils {
 	 * @return a Date object
 	 */
 	public static Date parseDate(String date) {
-
-		Date d = null;
 		synchronized (mSdf) {
 			try {
-				d = mSdf.parse(date);
+				return mSdf.parse(date);
 			} catch (ParseException e) {
 				EtaLog.e(TAG, null, e);
+				return new Date(1000);
 			}
 		}
-		return d;
 	}
 	
 	/**
@@ -270,7 +268,11 @@ public final class Utils {
 	 */
 	public static String parseDate(Date date) {
 		synchronized (mSdf) {
-			return mSdf.format(date);
+			try {
+				return mSdf.format(date);
+			} catch (NullPointerException e) {
+				return null;
+			}
 		}
 	}
 	

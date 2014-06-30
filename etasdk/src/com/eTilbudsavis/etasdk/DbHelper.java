@@ -655,6 +655,8 @@ public class DbHelper extends SQLiteOpenHelper {
 					shares.add(cursorToShare(c, sl));
 				} while (c.moveToNext());
 			}
+		} catch (IllegalStateException e) {
+			EtaLog.d(TAG, e.getMessage(), e);
 		} finally {
 			closeCursorAndDB(c);
 		}

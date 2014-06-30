@@ -7,11 +7,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.ImageView;
 
-import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultBitmapDisplayer;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultFileCache;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultImageDownloader;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultThreadFactory;
@@ -61,14 +61,14 @@ public class ImageLoader {
 		ir.getImageView().setTag(ir.getUrl());
 		mImageViews.put(ir.getImageView(), ir.getUrl());
 		
-		ir.mBitmap = mMemoryCache.get(ir.getUrl());
-		if(ir.mBitmap != null) {
-			ir.mLoadSource = LoadSource.MEMORY;
+		ir.setBitmap(mMemoryCache.get(ir.getUrl()));
+		if(ir.getBitmap() != null) {
+			ir.setLoadSource(LoadSource.MEMORY);
 			processAndDisplay(ir);
 		} else {
 			mExecutorService.submit(new PhotosLoader(ir));
-			if (ir.mPlaceholderLoading != 0) {
-				ir.getImageView().setImageResource(ir.mPlaceholderLoading);
+			if (ir.getPlaceholderLoading() != 0) {
+				ir.getImageView().setImageResource(ir.getPlaceholderLoading());
 			}
 		}
 	}
@@ -90,20 +90,20 @@ public class ImageLoader {
 			
 			try{
 				
-				ir.mBitmap = mFileCache.get(ir.getUrl());
+				ir.setBitmap(mFileCache.get(ir.getUrl()));
 				
-				if (ir.mBitmap != null) {
+				if (ir.getBitmap() != null) {
 					
-					ir.mLoadSource = LoadSource.FILE;
+					ir.setLoadSource(LoadSource.FILE);
 					
 				} else {
 					
 					int retries = 0;
-					while (ir.mBitmap == null && retries<2) {
+					while (ir.getBitmap() == null && retries<2) {
 						
 						retries++;
 						try {
-							ir.mBitmap = mDownloader.getBitmap(ir.getUrl());
+							ir.setBitmap(mDownloader.getBitmap(ir.getUrl()));
 						} catch (Throwable t) {
 							EtaLog.d(TAG, t.getMessage(), t);
 							if (t instanceof OutOfMemoryError) {
@@ -113,8 +113,8 @@ public class ImageLoader {
 						
 					}
 					
-					if (ir.mBitmap != null) {
-						ir.mLoadSource = LoadSource.WEB;
+					if (ir.getBitmap() != null) {
+						ir.setLoadSource(LoadSource.WEB);
 					}
 					
 				}
@@ -131,16 +131,16 @@ public class ImageLoader {
 	
 	private void addToCache(ImageRequest ir) {
 		
-		if (ir.mBitmap == null || ir.mLoadSource == null) {
+		if (ir.getBitmap() == null || ir.getLoadSource() == null) {
 			return;
 		}
 		
 		// Add to filecache and/or memorycache depending on the source
-		switch (ir.mLoadSource) {
+		switch (ir.getLoadSource()) {
 			case WEB:
-				mFileCache.save(ir.getUrl(), ir.mBitmap);
+				mFileCache.save(ir.getUrl(), ir.getBitmap());
 			case FILE:
-				mMemoryCache.put(ir.getUrl(), ir.mBitmap);
+				mMemoryCache.put(ir.getUrl(), ir.getBitmap());
 			default:
 				break;
 		}
@@ -149,27 +149,27 @@ public class ImageLoader {
 	
 	private void processAndDisplay(final ImageRequest ir) {
 		
-		if (imageViewReused(ir) || ir.mBitmap == null) {
+		if (imageViewReused(ir) || ir.getBitmap() == null) {
 			ir.finish();
 			return;
 		}
 		
-		if (ir.mPostProcessor != null) {
+		if (ir.getBitmapProcessor() != null) {
 			
 			if (Looper.myLooper() == Looper.getMainLooper()) {
 				
 				mExecutorService.execute(new Runnable() {
 					
 					public void run() {
-						
-						ir.mBitmap = ir.mPostProcessor.process(ir.mBitmap);
+						Bitmap tmp = ir.getBitmapProcessor().process(ir.getBitmap());
+						ir.setBitmap(tmp);
 						display(ir);
 					}
 				});
 				
 			} else {
-				
-				ir.mBitmap = ir.mPostProcessor.process(ir.mBitmap);
+				Bitmap tmp = ir.getBitmapProcessor().process(ir.getBitmap());
+				ir.setBitmap(tmp);
 				display(ir);
 				
 			}
@@ -191,11 +191,8 @@ public class ImageLoader {
 					return;
 				}
 				
-				if (ir.mDisplayer == null) {
-					ir.mDisplayer = new DefaultBitmapDisplayer();
-				}
 				ir.finish();
-				ir.mDisplayer.display(ir);
+				ir.getBitmapDisplayer().display(ir);
 			}
 		};
 		
