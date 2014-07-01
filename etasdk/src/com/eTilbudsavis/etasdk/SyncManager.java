@@ -29,6 +29,7 @@ import org.json.JSONObject;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.util.Log;
 
 import com.eTilbudsavis.etasdk.SessionManager.OnSessionChangeListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject;
@@ -302,6 +303,8 @@ public class SyncManager {
 	public void onPause() {
 		forceSync();
 		mEta.getSessionManager().unSubscribe(sessionListener);
+		mHasFirstSync = false;
+		mSyncCount = -1;
 	}
 	
 	/**

@@ -31,16 +31,16 @@ public class FadeBitmapDisplayer implements BitmapDisplayer {
 	
 	public void display(ImageRequest ir) {
 		
-		if(ir.mBitmap != null) {
-			ir.getImageView().setImageBitmap(ir.mBitmap);
-		} else if (ir.mPlaceholderError != 0) {
-			ir.getImageView().setImageResource(ir.mPlaceholderError);
+		if(ir.getBitmap() != null) {
+			ir.getImageView().setImageBitmap(ir.getBitmap());
+		} else if (ir.getPlaceholderError() != 0) {
+			ir.getImageView().setImageResource(ir.getPlaceholderError());
 		}
 		
 		
-		if ( (ir.mLoadSource == LoadSource.WEB && mFadeFromWeb) ||
-				(ir.mLoadSource == LoadSource.FILE && mFadeFromFile) ||
-				(ir.mLoadSource == LoadSource.MEMORY && mFadeFromMemory) ) {
+		if ( (ir.getLoadSource() == LoadSource.WEB && mFadeFromWeb) ||
+				(ir.getLoadSource() == LoadSource.FILE && mFadeFromFile) ||
+				(ir.getLoadSource() == LoadSource.MEMORY && mFadeFromMemory) ) {
 			
 			AlphaAnimation fadeImage = new AlphaAnimation(0, 1);
 			fadeImage.setDuration(mDuration);
