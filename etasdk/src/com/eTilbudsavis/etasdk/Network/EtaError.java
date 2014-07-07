@@ -18,6 +18,7 @@ package com.eTilbudsavis.etasdk.Network;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Impl.ApiError;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.Network.Impl.ParseError;
@@ -80,6 +81,7 @@ public class EtaError extends Exception {
     public static EtaError fromJSON(JSONObject apiError) {
     	
 		try {
+			EtaLog.d(TAG, apiError.toString());
 			// Not using Json-class to parse data, as we'd rather want it to fail
 			String id = apiError.getString(ID);
 			int code = apiError.getInt(CODE);
@@ -89,6 +91,7 @@ public class EtaError extends Exception {
             return new ApiError(code, message, id, details, failedOnField);
             
 		} catch (Exception e) {
+			EtaLog.e(TAG, "", e);
 			return new ParseError(e, ApiError.class);
 		}
 		

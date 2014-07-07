@@ -17,8 +17,11 @@ package com.eTilbudsavis.etasdk.Utils;
 
 import java.util.List;
 
+import org.json.JSONObject;
+
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Network.EtaError;
 
 /**
  * A class to help print debug messages.
@@ -85,4 +88,14 @@ public class PrettyPrint {
 	}
 	
 
+	public static void printResponse(String tag, String name, JSONObject response, EtaError error) {
+		
+		if (response != null) {
+			EtaLog.d(tag, name + " - " + response.toString());
+		} else {
+			EtaLog.d(tag, name + " - " + error.toJSON().toString());
+		}
+		
+	}
+	
 }

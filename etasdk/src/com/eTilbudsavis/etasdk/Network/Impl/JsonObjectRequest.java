@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Cache;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.NetworkResponse;
@@ -58,6 +59,7 @@ public class JsonObjectRequest extends JsonRequest<JSONObject>{
                 cacheJSONObject(item);
                 r = Response.fromSuccess(item, getCache());
             } else {
+            	
             	EtaError e = EtaError.fromJSON(item);
             	r = Response.fromError(e);
             }

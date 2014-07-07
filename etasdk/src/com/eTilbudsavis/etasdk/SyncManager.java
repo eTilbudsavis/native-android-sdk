@@ -29,7 +29,6 @@ import org.json.JSONObject;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
-import android.util.Log;
 
 import com.eTilbudsavis.etasdk.SessionManager.OnSessionChangeListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject;
@@ -50,6 +49,7 @@ import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Param;
+import com.eTilbudsavis.etasdk.Utils.PrettyPrint;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 /**
@@ -360,8 +360,10 @@ public class SyncManager {
 		mEta.add(r);
 		
 //		boolean isPullRequest = r.getUrl().contains("modified") || r.getUrl().endsWith("shoppinglists") || r.getUrl().endsWith("items");
-//		if (!isPullRequest) {
+//		if (!isPullRequest && r.getMethod() != Request.Method.GET) {
 //			EtaLog.d(TAG, r.toString());
+//			r.debugNetwork(true);
+//			
 //		}
 		
 	}
@@ -647,27 +649,30 @@ public class SyncManager {
 					localItems = db.getItems(sl, user);
 					Utils.sortItems(localItems);
 					
-					/* Update previous_id's, modified and state if needed */
-					String tmp = EtaListObject.FIRST_ITEM;
-					for (ShoppinglistItem sli : localItems) {
+					if (Eta.getInstance().getListManager().canEdit(sl, user)) {
 						
-						if (!tmp.equals(sli.getPreviousId())) {
-							sli.setPreviousId(tmp);
-							sli.setModified(new Date());
-							sli.setState(State.TO_SYNC);
+						/* Update previous_id's, modified and state if needed */
+						String tmp = EtaListObject.FIRST_ITEM;
+						for (ShoppinglistItem sli : localItems) {
 							
-							/* If it's a new item, it's already in the added list,
-							 * then we'll override it else add it to the edited
-							 * as a new item to the edited list */
-							if (mNotification.mItemAdded.containsKey(sli.getId())) {
-								mNotification.add(sli);
-							} else {
-								mNotification.edit(sli);
+							if (!tmp.equals(sli.getPreviousId())) {
+								sli.setPreviousId(tmp);
+								sli.setModified(new Date());
+								sli.setState(State.TO_SYNC);
+								
+								/* If it's a new item, it's already in the added list,
+								 * then we'll override it else add it to the edited
+								 * as a new item to the edited list */
+								if (mNotification.mItemAdded.containsKey(sli.getId())) {
+									mNotification.add(sli);
+								} else {
+									mNotification.edit(sli);
+								}
+								
+								db.editItem(sli, user);
 							}
-							
-							db.editItem(sli, user);
+							tmp = sli.getId();
 						}
-						tmp = sli.getId();
 					}
 					
 					popRequestAndPushNotifications();
@@ -965,7 +970,7 @@ public class SyncManager {
 	}
 
 	private void putItem(final ShoppinglistItem sli, final User user) {
-
+		
 		final DbHelper db = DbHelper.getInstance();
 		
 		sli.setState(State.SYNCING);
@@ -1018,6 +1023,7 @@ public class SyncManager {
 		
 		String url = Endpoint.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
 		JsonObjectRequest itemReq = new JsonObjectRequest(Method.PUT, url, sli.toJSON(), itemListener);
+//		EtaLog.d(TAG, sli.toJSON().toString());
 		addRequest(itemReq);
 		
 	}
@@ -1085,7 +1091,8 @@ public class SyncManager {
 					ShoppinglistItem serverSli = ShoppinglistItem.fromJSON(response);
 					serverSli.setState(State.SYNCED);
 					serverSli.setPreviousId(serverSli.getPreviousId() == null ? sli.getPreviousId() : serverSli.getPreviousId());
-					db.editItem(serverSli, user);
+//					EtaLog.d(TAG, "affected: " + db.editItem(serverSli, user));
+//					EtaLog.d(TAG, serverSli.toJSON().toString());
 					mNotification.edit(serverSli);
 					
 				} else {
