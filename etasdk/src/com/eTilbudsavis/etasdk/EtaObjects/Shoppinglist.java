@@ -570,9 +570,8 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> implements Serial
 		result = prime * result + mUserId;
 		return result;
 	}
-
-	@Override
-	public boolean equals(Object obj) {
+	
+	public boolean equals(Object obj, boolean skipModified, boolean skipSync) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -590,11 +589,15 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> implements Serial
 				return false;
 		} else if (!mMeta.equals(other.mMeta))
 			return false;
-		if (mModified == null) {
-			if (other.mModified != null)
+
+		if (!skipModified) {
+			if (mModified == null) {
+				if (other.mModified != null)
+					return false;
+			} else if (!mModified.equals(other.mModified))
 				return false;
-		} else if (!mModified.equals(other.mModified))
-			return false;
+		}
+		
 		if (mName == null) {
 			if (other.mName != null)
 				return false;
@@ -618,6 +621,11 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> implements Serial
 		if (mUserId != other.mUserId)
 			return false;
 		return true;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return equals(obj, false, false);
 	}
 	
 }

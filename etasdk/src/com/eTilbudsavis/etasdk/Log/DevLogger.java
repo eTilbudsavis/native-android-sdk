@@ -1,8 +1,8 @@
 package com.eTilbudsavis.etasdk.Log;
 
-import com.eTilbudsavis.etasdk.Eta;
-
 import android.util.Log;
+
+import com.eTilbudsavis.etasdk.Eta;
 
 public class DevLogger implements EtaLogger {
 	

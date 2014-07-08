@@ -1,6 +1,5 @@
 package com.eTilbudsavis.etasdk.Log;
 
-import com.eTilbudsavis.etasdk.Eta;
 
 
 public interface EtaLogger {

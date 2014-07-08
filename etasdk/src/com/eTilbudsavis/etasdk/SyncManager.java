@@ -48,6 +48,7 @@ import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.ListUtils;
 import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -203,6 +204,7 @@ public class SyncManager {
 		// If there are local changes to a list, then syncLocalListChanges will handle it: return
 		List<Shoppinglist> lists = DbHelper.getInstance().getLists(mEta.getUser(), true);
 		if (syncLocalListChanges(lists, user)) {
+			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncLocalListChanges - ");
 			return;
 		}
 		
@@ -215,6 +217,7 @@ public class SyncManager {
 		
 		// Skip further sync if we just posted our own changes
 		if (hasLocalChanges) {
+			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - hasLocalChanges");
 			return;
 		}
 		
@@ -222,10 +225,12 @@ public class SyncManager {
         if (mSyncCount%3 == 0) {
         	
         	// Get a new set of lists
+			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncAllLists");
             syncLists(user);
             
         } else if (mSyncCount%10 == 0) {
         	
+			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncAllItems");
         	/* Because we update modified on lists, on all changes, we might
         	 * have a situation where two devices have set the same modified
         	 * on a list, and therefore won't try to get a new list of items
@@ -236,7 +241,8 @@ public class SyncManager {
     		}
     		
         } else {
-        	
+
+			EtaLog.d(TAG, "SyncManager - checkModified - " + mSyncCount);
         	// Base case, just check if there is changes
             syncListsModified(user);
             
@@ -646,7 +652,7 @@ public class SyncManager {
 					/* fetch updated items from DB, as the state might be a bit
 					 * whack after the merging of items */
 					localItems = db.getItems(sl, user);
-					Utils.sortItems(localItems);
+					ListUtils.sortItems(localItems);
 					
 					if (Eta.getInstance().getListManager().canEdit(sl, user)) {
 						

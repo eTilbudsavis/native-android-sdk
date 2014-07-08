@@ -15,10 +15,10 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.Utils;
 
-import com.eTilbudsavis.etasdk.Eta;
-
 import android.annotation.SuppressLint;
 import android.os.Build;
+
+import com.eTilbudsavis.etasdk.Eta;
 
 public class Device {
 	

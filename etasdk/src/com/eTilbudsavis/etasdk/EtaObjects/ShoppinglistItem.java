@@ -549,6 +549,10 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 
 	@Override
 	public boolean equals(Object obj) {
+		return equals(obj, false, false);
+	}
+	
+	public boolean equals(Object obj, boolean skipModified, boolean skipSyncState) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -573,11 +577,15 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 				return false;
 		} else if (!mMeta.equals(other.mMeta))
 			return false;
-		if (mModified == null) {
-			if (other.mModified != null)
+		
+		if (!skipModified) {
+			if (mModified == null) {
+				if (other.mModified != null)
+					return false;
+			} else if (!mModified.equals(other.mModified))
 				return false;
-		} else if (!mModified.equals(other.mModified))
-			return false;
+		}
+		
 		if (mOffer == null) {
 			if (other.mOffer != null)
 				return false;

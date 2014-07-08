@@ -35,7 +35,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.Utils.ListUtils;
 
 /**
  * This class provides methods, for easily handling of
@@ -375,7 +375,7 @@ public class ListManager {
 	 */
 	public List<ShoppinglistItem> getItems(Shoppinglist sl) {
 		List<ShoppinglistItem> items = DbHelper.getInstance().getItems(sl, user());
-		Utils.sortItems(items);
+		ListUtils.sortItems(items);
 		return items;
 	}
 	
@@ -493,6 +493,29 @@ public class ListManager {
 	 */
 	public boolean editItem(ShoppinglistItem sli) {
 		User u = user();
+		boolean result = editItemImpl(u, sli);
+		sendNotification(mNotification);
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @param items
+	 * @return
+	 */
+	public int editItems(List<ShoppinglistItem> items) {
+		User u = user();
+		int count = 0;
+		for (ShoppinglistItem sli : items) {
+			if (editItemImpl(u, sli)) {
+				count++;
+			}
+		}
+		sendNotification(mNotification);
+		return count;
+	}
+	
+	private boolean editItemImpl(User u, ShoppinglistItem sli) {
 		if (!canEdit(sli.getShoppinglistId(), u)) {
 			EtaLog.i(TAG, "The user cannot edit the given ShoppinglistItem");
 			return false;
@@ -501,7 +524,6 @@ public class ListManager {
 	}
 	
 	private boolean editItem(final ShoppinglistItem sli, User user) {
-		
 		
 		DbHelper db = DbHelper.getInstance();
 		
@@ -516,31 +538,6 @@ public class ListManager {
 			return false;
 		}
 		
-		if (!oldItem.getPreviousId().equals(sli.getPreviousId())) {
-			
-			String sl = sli.getShoppinglistId();
-			
-			// If there is an item pointing at sli, it needs to point at the oldSli.prev
-			ShoppinglistItem sliAfter = db.getItemPrevious(sl, sli.getId(), user);
-			if (sliAfter != null) {
-				sliAfter.setPreviousId(oldItem.getPreviousId());
-				sliAfter.setModified(now);
-				sliAfter.setState(ShoppinglistItem.State.TO_SYNC);
-				db.editItem(sliAfter, user);
-				mNotification.edit(sliAfter);
-			}
-			
-			// If some another sli was pointing at the same item, it should be pointing at sli
-			ShoppinglistItem sliSamePointer = db.getItemPrevious(sl, sli.getPreviousId(), user);
-			if (sliSamePointer != null) {
-				sliSamePointer.setPreviousId(sli.getId());
-				sliSamePointer.setModified(now);
-				sliSamePointer.setState(ShoppinglistItem.State.TO_SYNC);
-				db.editItem(sliSamePointer, user);
-				mNotification.edit(sliSamePointer);
-			}
-			
-		}
 		boolean success = (db.editItem(sli, user) == 1);
 		if (success) {
 			/* Update SL info, but not state. This will prevent sync, and API
@@ -552,9 +549,11 @@ public class ListManager {
 			mNotification.edit(sl);
 			mNotification.edit(sli);
 		}
-		sendNotification(mNotification);
+		
 		return success;
 	}
+	
+	
 
 	/**
 	 * Delete all {@link ShoppinglistItem ShoppinglistItems} from a

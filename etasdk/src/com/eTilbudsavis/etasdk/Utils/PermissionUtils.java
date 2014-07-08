@@ -1,9 +1,9 @@
 package com.eTilbudsavis.etasdk.Utils;
 
-import com.eTilbudsavis.etasdk.Eta;
-
 import android.content.Context;
 import android.content.pm.PackageManager;
+
+import com.eTilbudsavis.etasdk.Eta;
 
 public class PermissionUtils {
 	
