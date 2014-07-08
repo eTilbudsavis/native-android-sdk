@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Cache;
 import com.eTilbudsavis.etasdk.Network.Request;
@@ -29,7 +30,7 @@ import com.eTilbudsavis.etasdk.Network.Response;
 
 public class MemoryCache implements Cache {
 	
-	public static final String TAG = MemoryCache.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + MemoryCache.class.getSimpleName();
 	
 	/** On average we've measured a Cache.Item from the ETA API to be around 4kb */
 	private static final int AVG_ITEM_SIZE = 4096;

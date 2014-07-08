@@ -17,6 +17,7 @@ package com.eTilbudsavis.etasdk.Network.Impl;
 
 import java.io.UnsupportedEncodingException;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Cache;
 import com.eTilbudsavis.etasdk.Network.NetworkResponse;
@@ -26,7 +27,9 @@ import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class StringRequest extends Request<String> {
-
+	
+	public static final String TAG = Eta.TAG_PREFIX + StringRequest.class.getSimpleName();
+	
 	/** Content type for request. */
     private static final String PROTOCOL_CONTENT_TYPE = String.format("text/plain; charset=%s", DEFAULT_PARAMS_ENCODING);
     

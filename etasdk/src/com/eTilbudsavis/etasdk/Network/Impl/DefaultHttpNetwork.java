@@ -41,6 +41,7 @@ import org.apache.http.impl.conn.DefaultHttpRoutePlanner;
 import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.params.HttpConnectionParams;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Network.HttpStack;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.HeaderUtils;
@@ -48,7 +49,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class DefaultHttpNetwork implements HttpStack {
 
-	public static final String TAG = "HttpNetwork";
+	public static final String TAG = Eta.TAG_PREFIX + DefaultHttpNetwork.class.getSimpleName();
 	
 	public HttpResponse performNetworking(Request<?> request) throws ClientProtocolException, IOException {
 		

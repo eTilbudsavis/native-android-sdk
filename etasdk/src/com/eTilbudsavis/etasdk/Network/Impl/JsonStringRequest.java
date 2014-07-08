@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Cache;
 import com.eTilbudsavis.etasdk.Network.EtaError;
@@ -30,6 +31,8 @@ import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class JsonStringRequest extends JsonRequest<String>{
+
+	public static final String TAG = Eta.TAG_PREFIX + JsonStringRequest.class.getSimpleName();
 	
 	public JsonStringRequest(String url, Listener<String> listener) {
 		super(url, listener);

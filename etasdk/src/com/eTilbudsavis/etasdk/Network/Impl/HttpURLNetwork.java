@@ -33,6 +33,7 @@ import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Network.HttpStack;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Utils.HeaderUtils;
@@ -40,7 +41,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class HttpURLNetwork implements HttpStack {
 	
-	public static final String TAG = "HttpURLNetwork";
+	public static final String TAG = Eta.TAG_PREFIX + HttpURLNetwork.class.getSimpleName();
 	
 	public HttpResponse performNetworking(Request<?> request) throws ClientProtocolException, IOException {
 		

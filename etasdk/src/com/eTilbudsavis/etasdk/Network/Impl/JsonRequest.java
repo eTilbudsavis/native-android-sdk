@@ -30,6 +30,7 @@ import org.json.JSONObject;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Cache;
@@ -42,6 +43,8 @@ import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public abstract class JsonRequest<T> extends Request<T> {
+
+	public static final String TAG = Eta.TAG_PREFIX + JsonRequest.class.getSimpleName();
 	
 	/** Content type for request. */
     private static final String PROTOCOL_CONTENT_TYPE = String.format("application/json; charset=%s", DEFAULT_PARAMS_ENCODING);

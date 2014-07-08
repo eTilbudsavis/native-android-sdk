@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Cache;
 import com.eTilbudsavis.etasdk.Network.EtaError;
@@ -30,6 +31,8 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class JsonObjectRequest extends JsonRequest<JSONObject>{
 
+	public static final String TAG = Eta.TAG_PREFIX + JsonObjectRequest.class.getSimpleName();
+	
     private static final long CACHE_TTL = 3 * Utils.MINUTE_IN_MILLIS;
     
 	public JsonObjectRequest(String url, Listener<JSONObject> listener) {
