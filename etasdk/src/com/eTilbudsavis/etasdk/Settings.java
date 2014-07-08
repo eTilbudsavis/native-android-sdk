@@ -25,7 +25,7 @@ import android.content.SharedPreferences;
 
 public class Settings {
 
-	public static final String TAG = "Settings";
+	public static final String TAG = Eta.TAG_PREFIX + Settings.class.getSimpleName();
 	
 	/** Name for the SDK SharedPreferences file */
 	private static final String PREFS_NAME = "eta_sdk";

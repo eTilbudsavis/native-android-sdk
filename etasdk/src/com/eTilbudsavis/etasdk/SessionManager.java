@@ -40,7 +40,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class SessionManager {
 	
-	public static final String TAG = "SessionManager";
+	public static final String TAG = Eta.TAG_PREFIX + SessionManager.class.getSimpleName();
 	
     public static final String ETA_COOKIE_DOMAIN = "etilbudsavis.dk";
     public static final String COOKIE_AUTH_ID = "auth[id]";

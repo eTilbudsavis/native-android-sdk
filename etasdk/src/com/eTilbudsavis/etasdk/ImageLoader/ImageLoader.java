@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.ImageView;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultFileCache;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultImageDownloader;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultThreadFactory;
@@ -20,7 +21,7 @@ import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class ImageLoader {
 
-	public static final String TAG = ImageLoader.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + ImageLoader.class.getSimpleName();
 	
 	private static final int DEFAULT_THREAD_COUNT = 3;
 	

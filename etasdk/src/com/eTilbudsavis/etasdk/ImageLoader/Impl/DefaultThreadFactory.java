@@ -3,9 +3,11 @@ package com.eTilbudsavis.etasdk.ImageLoader.Impl;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 public class DefaultThreadFactory implements ThreadFactory {
 	
-	public static final String TAG = DefaultThreadFactory.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + DefaultThreadFactory.class.getSimpleName();
 	
 	private static final int DEFAULT_THREAD_PRIORITY = Thread.NORM_PRIORITY-1;
 	private static final String DEFAULT_THREAD_NAME = "eta-il-";

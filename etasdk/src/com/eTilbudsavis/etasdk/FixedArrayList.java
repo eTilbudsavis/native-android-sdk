@@ -20,6 +20,8 @@ import java.util.Collection;
 
 public class FixedArrayList<E> extends ArrayList<E> {
 	
+	public static final String TAG = Eta.TAG_PREFIX + FixedArrayList.class.getSimpleName();
+	
 	private static final long serialVersionUID = -2709268219112197508L;
 	
 	int mMaxSize = 16;

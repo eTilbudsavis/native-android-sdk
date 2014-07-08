@@ -26,13 +26,14 @@ import java.util.regex.Pattern;
 
 import android.os.Bundle;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Request;
 
 public final class Utils {
 	
-	public static final String TAG = "Utils";
+	public static final String TAG = Eta.TAG_PREFIX + Utils.class.getSimpleName();
 	
 	/** A second in milliseconds */
 	public static final long SECOND_IN_MILLIS = 1000;

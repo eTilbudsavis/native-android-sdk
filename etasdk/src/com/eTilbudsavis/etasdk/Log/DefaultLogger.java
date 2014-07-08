@@ -1,9 +1,13 @@
 package com.eTilbudsavis.etasdk.Log;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 import android.util.Log;
 
 public class DefaultLogger implements EtaLogger {
-
+	
+	public static final String TAG = Eta.TAG_PREFIX + DefaultLogger.class.getSimpleName();
+	
 	/** Variable to control the size of the exception log */
 	public static final int DEFAULT_EXCEPTION_LOG_SIZE = 16;
 	

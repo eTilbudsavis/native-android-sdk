@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
@@ -30,7 +31,7 @@ import com.eTilbudsavis.etasdk.Network.EtaError;
  */
 public class PrettyPrint {
 	
-	public static final String TAG = "PrettyPrint";
+	public static final String TAG = Eta.TAG_PREFIX + PrettyPrint.class.getSimpleName();
 	
 	/**
 	 * Prints the essential parameters (for debugging) a list of ShoppinglistItems

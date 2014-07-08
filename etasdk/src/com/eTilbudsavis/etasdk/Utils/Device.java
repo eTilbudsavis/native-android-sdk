@@ -15,11 +15,15 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.Utils;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 import android.annotation.SuppressLint;
 import android.os.Build;
 
 public class Device {
-
+	
+	public static final String TAG = Eta.TAG_PREFIX + Device.class.getSimpleName();
+	
 	@SuppressLint("NewApi")
 	public static String getRadio() {
 		String radio = "";

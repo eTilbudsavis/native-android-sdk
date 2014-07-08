@@ -36,7 +36,7 @@ import com.eTilbudsavis.etasdk.Eta;
  */
 public class DebugDump extends AsyncTask<Void, Void, Integer> {
 
-	public static final String TAG = "DebugDump";
+	public static final String TAG = Eta.TAG_PREFIX + DebugDump.class.getSimpleName();
 	
 	private String mUrl;
 	private LinkedList<NameValuePair> mQuery = new LinkedList<NameValuePair>();

@@ -37,7 +37,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class DbHelper extends SQLiteOpenHelper {
 
-	public static final String TAG = "DbHelper";
+	public static final String TAG = Eta.TAG_PREFIX + DbHelper.class.getSimpleName();
 	
 	private static final String DB_NAME = "shoppinglist.db";
 	private static final int DB_VERSION = 5;

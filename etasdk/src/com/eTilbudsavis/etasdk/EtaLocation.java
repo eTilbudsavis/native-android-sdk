@@ -22,7 +22,7 @@ import com.eTilbudsavis.etasdk.Utils.Param;
 
 public class EtaLocation extends Location {
 	
-	public static final String TAG = EtaLocation.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + EtaLocation.class.getSimpleName();
 	
 	private static final String ETA_PROVIDER = "etasdk";
 	

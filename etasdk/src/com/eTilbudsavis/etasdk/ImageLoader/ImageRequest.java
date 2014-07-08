@@ -3,6 +3,7 @@ package com.eTilbudsavis.etasdk.ImageLoader;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultBitmapDisplayer;
 
 /**
@@ -11,7 +12,7 @@ import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultBitmapDisplayer;
  */
 public class ImageRequest {
 	
-	public static final String TAG = ImageRequest.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + ImageRequest.class.getSimpleName();
 	
 	private final String mUrl;
 	private final ImageView mImageView;

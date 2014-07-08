@@ -48,7 +48,8 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  */
 public class Eta {
 	
-	public static final String TAG = "ETA";
+	public static final String TAG_PREFIX = "etasdk-";
+	public static final String TAG = TAG_PREFIX + Eta.class.getSimpleName();
 	
 	/** The Eta singleton */
 	private static Eta mEta;
@@ -227,7 +228,7 @@ public class Eta {
 		if (Utils.validVersion(appVersion)) {
 			mAppVersion = appVersion;
 		}
-		EtaLog.d(TAG, "AppVersion: " + (mAppVersion == null ? "version not valid" : mAppVersion));
+		EtaLog.v(TAG, "AppVersion: " + (mAppVersion == null ? "version not valid" : mAppVersion));
 	}
 
 	/**

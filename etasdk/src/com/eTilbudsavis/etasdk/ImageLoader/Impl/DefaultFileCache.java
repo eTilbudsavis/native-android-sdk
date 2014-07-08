@@ -13,13 +13,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.FileCache;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.PermissionUtils;
 
 public class DefaultFileCache implements FileCache {
 
-	public static final String TAG = DefaultFileCache.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + DefaultFileCache.class.getSimpleName();
 	
 	private File mCacheDir;
 	

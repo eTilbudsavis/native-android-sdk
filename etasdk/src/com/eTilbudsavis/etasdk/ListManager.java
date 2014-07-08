@@ -49,7 +49,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  */
 public class ListManager {
 	
-	public static final String TAG = "ListManager";
+	public static final String TAG = Eta.TAG_PREFIX + ListManager.class.getSimpleName();
 	
 	/** The global {@link Eta} object */
 	private Eta mEta;

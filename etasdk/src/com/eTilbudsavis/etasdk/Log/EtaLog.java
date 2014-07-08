@@ -3,12 +3,13 @@ package com.eTilbudsavis.etasdk.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 
 public class EtaLog {
 
-	public static final String TAG = EtaLog.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + EtaLog.class.getSimpleName();
 
 	private static final String LOG_D_CHUNK = "[chunk %s/%s] %s";
 	

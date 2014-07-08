@@ -17,6 +17,7 @@ package com.eTilbudsavis.etasdk.Utils;
 
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 
@@ -29,7 +30,7 @@ import com.eTilbudsavis.etasdk.Log.EtaLog;
  */
 public class Json {
 
-	public static final String TAG = "Json";
+	public static final String TAG = Eta.TAG_PREFIX + Json.class.getSimpleName();
 	
 	/**
 	 * Searches the JSONObject for the key and returns the matching value if it exists.

@@ -10,11 +10,12 @@ import org.apache.http.util.ByteArrayBuffer;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageDownloader;
 
 public class DefaultImageDownloader implements ImageDownloader {
 	
-	public static final String TAG = ImageDownloader.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + ImageDownloader.class.getSimpleName();
 	
 	private static final int BUFFER_SIZE = 0x10000;
 	private static final int TIMEOUT = 20000;

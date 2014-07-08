@@ -49,7 +49,6 @@ import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Param;
-import com.eTilbudsavis.etasdk.Utils.PrettyPrint;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 /**
@@ -108,7 +107,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  */
 public class SyncManager {
 	
-	public static final String TAG = "SyncManager";
+	public static final String TAG = Eta.TAG_PREFIX + SyncManager.class.getSimpleName();
 	
 	private static final boolean SAVE_NETWORK_LOG = false;
 

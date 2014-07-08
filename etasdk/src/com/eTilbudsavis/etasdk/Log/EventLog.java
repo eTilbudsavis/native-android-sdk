@@ -24,7 +24,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  */
 public class EventLog {
 	
-	public static final String TAG = "EventLog";
+	public static final String TAG = Eta.TAG_PREFIX + EventLog.class.getSimpleName();
 	
 	public static final String TYPE_REQUEST = "request";
 	public static final String TYPE_EXCEPTION = "exception";

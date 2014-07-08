@@ -8,12 +8,13 @@ import java.util.Map.Entry;
 
 import android.graphics.Bitmap;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.MemoryCache;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class LruMemoryCache implements MemoryCache {
 	
-	public static final String TAG = MemoryCache.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + LruMemoryCache.class.getSimpleName();
 	
 	/**
 	 * The map containing the actual cache. Last argument true for LRU ordering

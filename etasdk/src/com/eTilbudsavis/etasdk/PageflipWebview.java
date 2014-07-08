@@ -56,7 +56,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 @SuppressLint("SetJavaScriptEnabled")
 public final class PageflipWebview extends WebView {
 	
-	private static final String TAG = "PageflipWebview";
+	private static final String TAG = Eta.TAG_PREFIX + PageflipWebview.class.getSimpleName();
 	
 	/**
 	 * Variable controlling debugging mode for PageflipWebview. If set to true, a WebChromeClient will be enabled.
