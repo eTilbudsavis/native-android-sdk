@@ -825,8 +825,12 @@ public class ListManager {
 	}
 	
 	private void sendNotification(ListNotification n) {
-		notifySubscribers(n);
-		mNotification = new ListNotification(false);
+		boolean p = Eta.getInstance().getSyncManager().isPaused();
+		EtaLog.d(TAG, "sendNotification-paused: " + p);
+		if (!p) {
+			notifySubscribers(n);
+			mNotification = new ListNotification(false);
+		}
 	}
 	
 	/**

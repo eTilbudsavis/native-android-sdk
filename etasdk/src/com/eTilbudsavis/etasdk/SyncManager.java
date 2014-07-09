@@ -166,6 +166,10 @@ public class SyncManager {
 		}
 	};
 	
+	private void log(boolean isEnabled, String log) {
+		
+	}
+	
 	/** The actual sync loop running every x seconds*/
 	private Runnable mSyncLoop = new Runnable() {
 		
@@ -175,6 +179,7 @@ public class SyncManager {
 			
 			// If it's an offline user, then just quit it
 			if ( !mUser.isLoggedIn() ) {
+				EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (NotLoggedIn)");
 				return;
 			}
 			
@@ -188,7 +193,8 @@ public class SyncManager {
 			}
 			
 			// Only do an update, if there are no pending transactions, and we are online
-			if (!mCurrentRequests.isEmpty() || !mEta.isOnline()) {
+			if (!mCurrentRequests.isEmpty() || !mEta.isOnline() || isPaused()) {
+				EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (ReqInFlight-Offline-Paused)");
 				return;
 			}
 			
@@ -204,7 +210,7 @@ public class SyncManager {
 		// If there are local changes to a list, then syncLocalListChanges will handle it: return
 		List<Shoppinglist> lists = DbHelper.getInstance().getLists(mEta.getUser(), true);
 		if (syncLocalListChanges(lists, user)) {
-			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncLocalListChanges - ");
+			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncLocalListChanges");
 			return;
 		}
 		
@@ -217,6 +223,13 @@ public class SyncManager {
 		
 		// Skip further sync if we just posted our own changes
 		if (hasLocalChanges) {
+//			pauseSync();
+//			mHandler.postDelayed(new Runnable() {
+//				
+//				public void run() {
+//					resumeSync();
+//				}
+//			}, 3500);
 			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - hasLocalChanges");
 			return;
 		}
@@ -242,13 +255,35 @@ public class SyncManager {
     		
         } else {
 
-			EtaLog.d(TAG, "SyncManager - checkModified - " + mSyncCount);
+			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - checkModified");
         	// Base case, just check if there is changes
             syncListsModified(user);
             
         }
         mSyncCount++;
         
+	}
+	
+	Object RESUME_LOCK = new Object();
+	
+	boolean isPaused = false;
+	
+	public boolean isPaused() {
+		synchronized (RESUME_LOCK) {
+			return isPaused;
+		}
+	}
+	
+	public void pauseSync() {
+		synchronized (RESUME_LOCK) {
+			isPaused = true;
+		}
+	}
+	
+	public void resumeSync() {
+		synchronized (RESUME_LOCK) {
+			isPaused = false;
+		}
 	}
 	
 	/**
@@ -1347,8 +1382,13 @@ public class SyncManager {
 		
 		popRequest();
 		if (mCurrentRequests.isEmpty()) {
-			Eta.getInstance().getListManager().notifySubscribers(mNotification);
-			mNotification = new ListNotification(true);
+			boolean p = isPaused();
+//			EtaLog.d(TAG, "popRequestAndPushNotifications-paused: " + p);
+			if (!p) {
+				Eta.getInstance().getListManager().notifySubscribers(mNotification);
+				mNotification = new ListNotification(true);
+			}
+			
 		}
 		
 	}

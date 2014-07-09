@@ -13,6 +13,10 @@ import com.eTilbudsavis.etasdk.Log.EtaLog;
 public class ListUtils {
 	
 	public static final String TAG = Eta.TAG_PREFIX + ListUtils.class.getSimpleName();
+
+	public static void printItem(String tag, ShoppinglistItem s) {
+		EtaLog.d(tag, "Item " + s.getDescription() + " prevId( " + s.getPreviousId() + ") - modified( " + s.getModified().toGMTString() + " ) ");
+	}
 	
 	/**
 	 * 
@@ -29,6 +33,7 @@ public class ListUtils {
 			return new ArrayList<ShoppinglistItem>();
 		}
 		
+		printItem(TAG, list.get(movePos));
 		EtaLog.d(TAG, "list-size: " + list.size() + ", prevPos: " + prevPos + ", movePos: " + movePos);
 		
 		ShoppinglistItem move = list.get(movePos);
