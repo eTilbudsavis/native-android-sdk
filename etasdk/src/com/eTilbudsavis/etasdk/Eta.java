@@ -15,6 +15,10 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
@@ -47,9 +51,12 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  *
  */
 public class Eta {
-	
+
 	public static final String TAG_PREFIX = "etasdk-";
 	public static final String TAG = TAG_PREFIX + Eta.class.getSimpleName();
+	
+	private static final int DEFAULT_THREAD_COUNT = 3;
+	private static final String DEFAULT_THREAD_NAME = "etasdk-";
 	
 	/** The Eta singleton */
 	private static Eta mEta;
@@ -93,6 +100,8 @@ public class Eta {
 	/** System manager for getting the connectivity status */
 	private ConnectivityManager mConnectivityManager;
 	
+	private ExecutorService mExecutor;
+	
 	/**
 	 * Default constructor, this is private to allow us to create a singleton instance
 	 * @param apiKey An API v2 apiKey
@@ -107,6 +116,8 @@ public class Eta {
 		mApiSecret = apiSecret;
 		
 		mHandler = new Handler(Looper.getMainLooper());
+		ThreadFactory tf = new DefaultThreadFactory(DEFAULT_THREAD_NAME);
+		mExecutor = Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT, tf);
 		
 		HttpStack stack = null;
         if (Build.VERSION.SDK_INT > 8) {
@@ -129,7 +140,7 @@ public class Eta {
 		}
 		
 		mSettings = new Settings(mContext);
-		mLocation = new EtaLocation(this);
+		mLocation = mSettings.getLocation();
 		mSessionManager = new SessionManager(this);
 		mListManager = new ListManager(this);
 		mSyncManager = new SyncManager(this);
@@ -184,6 +195,14 @@ public class Eta {
 	 */
 	public static boolean isInstanciated() {
 		return mEta != null;
+	}
+	
+	/**
+	 * This returns a pool of threads for executing various SDK tasks on a thread.
+	 * @return An {@link ExecutorService}
+	 */
+	public ExecutorService getExecutor() {
+		return mExecutor;
 	}
 	
 	/**
@@ -377,6 +396,12 @@ public class Eta {
 	public void onPause() {
 		if (mResumed) {
 			mResumed = false;
+			mExecutor.execute(new Runnable() {
+				
+				public void run() {
+					mSettings.setLocation(mLocation);
+				}
+			});
 			mListManager.onPause();
 			mSyncManager.onPause();
 			mSessionManager.onPause();

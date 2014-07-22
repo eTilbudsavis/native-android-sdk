@@ -107,7 +107,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  *
  */
 public class SyncManager {
-	
+
 	public static final String TAG = Eta.TAG_PREFIX + SyncManager.class.getSimpleName();
 	
 	private static final boolean SAVE_NETWORK_LOG = false;
@@ -179,7 +179,7 @@ public class SyncManager {
 			
 			// If it's an offline user, then just quit it
 			if ( !mUser.isLoggedIn() ) {
-				EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (NotLoggedIn)");
+//				EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (NotLoggedIn)");
 				return;
 			}
 			
@@ -194,7 +194,7 @@ public class SyncManager {
 			
 			// Only do an update, if there are no pending transactions, and we are online
 			if (!mCurrentRequests.isEmpty() || !mEta.isOnline() || isPaused()) {
-				EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (ReqInFlight-Offline-Paused)");
+//				EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (ReqInFlight-Offline-Paused)");
 				return;
 			}
 			
@@ -210,7 +210,7 @@ public class SyncManager {
 		// If there are local changes to a list, then syncLocalListChanges will handle it: return
 		List<Shoppinglist> lists = DbHelper.getInstance().getLists(mEta.getUser(), true);
 		if (syncLocalListChanges(lists, user)) {
-			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncLocalListChanges");
+//			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncLocalListChanges");
 			return;
 		}
 		
@@ -230,7 +230,7 @@ public class SyncManager {
 //					resumeSync();
 //				}
 //			}, 3500);
-			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - hasLocalChanges");
+//			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - hasLocalChanges");
 			return;
 		}
 		
@@ -238,12 +238,12 @@ public class SyncManager {
         if (mSyncCount%3 == 0) {
         	
         	// Get a new set of lists
-			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncAllLists");
+//			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncAllLists");
             syncLists(user);
             
         } else if (mSyncCount%10 == 0) {
         	
-			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncAllItems");
+//			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncAllItems");
         	/* Because we update modified on lists, on all changes, we might
         	 * have a situation where two devices have set the same modified
         	 * on a list, and therefore won't try to get a new list of items
@@ -255,7 +255,7 @@ public class SyncManager {
     		
         } else {
 
-			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - checkModified");
+//			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - checkModified");
         	// Base case, just check if there is changes
             syncListsModified(user);
             

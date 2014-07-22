@@ -2,7 +2,7 @@ package com.eTilbudsavis.etasdk.ImageLoader;
 
 import android.graphics.Bitmap;
 
-import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultThreadFactory;
+import com.eTilbudsavis.etasdk.DefaultThreadFactory;
 
 /**
  * Interface that allows pre/post processing of Bitmaps while the ImageLoader

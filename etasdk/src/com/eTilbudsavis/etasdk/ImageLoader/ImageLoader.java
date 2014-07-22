@@ -4,9 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
@@ -15,7 +13,6 @@ import android.widget.ImageView;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultFileCache;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultImageDownloader;
-import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultThreadFactory;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.LruMemoryCache;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 
@@ -23,28 +20,26 @@ public class ImageLoader {
 
 	public static final String TAG = Eta.TAG_PREFIX + ImageLoader.class.getSimpleName();
 	
-	private static final int DEFAULT_THREAD_COUNT = 3;
-	
 	private Map<ImageView, String> mImageViews=Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
 	private MemoryCache mMemoryCache;
 	private FileCache mFileCache;
-	private ExecutorService mExecutorService;
+	private ExecutorService mExecutor;
 	private ImageDownloader mDownloader;
 	private Handler mHandler;
 	
 	private static ImageLoader mImageloader;
 	
-	private ImageLoader(Context context) {
+	private ImageLoader(Eta e) {
 		mMemoryCache = new LruMemoryCache();
-		mFileCache = new DefaultFileCache(context);
-		mExecutorService = Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT, new DefaultThreadFactory());
+		mFileCache = new DefaultFileCache(e.getContext());
+		mExecutor = e.getExecutor();
 		mDownloader = new DefaultImageDownloader();
 		mHandler = new Handler(Looper.getMainLooper());
 	}
 	
-	public synchronized static void init(Context c) {
+	public synchronized static void init(Eta e) {
 		if (mImageloader == null) {
-			mImageloader = new ImageLoader(c);
+			mImageloader = new ImageLoader(e);
 		}
 	}
 	
@@ -67,7 +62,7 @@ public class ImageLoader {
 			ir.setLoadSource(LoadSource.MEMORY);
 			processAndDisplay(ir);
 		} else {
-			mExecutorService.submit(new PhotosLoader(ir));
+			mExecutor.submit(new PhotosLoader(ir));
 			if (ir.getPlaceholderLoading() != 0) {
 				ir.getImageView().setImageResource(ir.getPlaceholderLoading());
 			}
@@ -159,7 +154,7 @@ public class ImageLoader {
 			
 			if (Looper.myLooper() == Looper.getMainLooper()) {
 				
-				mExecutorService.execute(new Runnable() {
+				mExecutor.execute(new Runnable() {
 					
 					public void run() {
 						Bitmap tmp = ir.getBitmapProcessor().process(ir.getBitmap());

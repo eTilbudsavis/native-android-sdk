@@ -92,6 +92,22 @@ public class Json {
 		}
 		return defValue;
 	}
+
+	/**
+	 * Searches the JSONObject for the key and returns the matching value if it exists.
+	 * @param object An object to get data from
+	 * @param key A key to map to a value
+	 * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
+	 */
+	public static float valueOf(JSONObject object, String key, float defValue) {
+		try {
+			return object.isNull(key) ? defValue : (float)object.getDouble(key);
+		} catch (Exception e) {
+			EtaLog.e(TAG, null, e);
+		}
+		return defValue;
+	}
 	
 	/**
 	 * Searches the JSONObject for the key and returns the matching value if it exists.

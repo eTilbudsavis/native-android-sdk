@@ -23,6 +23,8 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.eTilbudsavis.etasdk.Log.EtaLog;
+
 public class Settings {
 
 	public static final String TAG = Eta.TAG_PREFIX + Settings.class.getSimpleName();
@@ -35,6 +37,7 @@ public class Settings {
 	private static final String SESSION_JSON		= "session_json";
 	private static final String SESSION_USER		= "session_user";
 	private static final String SESSION_FACEBOOK	= "session_facebook";
+	private static final String LOCATION			= "location_json";
 	
 	public static final String LOC_SENSOR			= "loc_sensor";
 	public static final String LOC_LATITUDE			= "loc_latitude";
@@ -102,4 +105,69 @@ public class Settings {
 	public SharedPreferences getPrefs() {
 		return mPrefs;
 	}
+	
+	private EtaLocation migrateLocation() {
+
+		EtaLocation l = null;
+		
+		if ( mPrefs.contains(LOC_RADIUS) &&
+				mPrefs.contains(LOC_LATITUDE) && 
+				mPrefs.contains(LOC_LONGITUDE) ) {
+			
+			l = new EtaLocation();
+			l.setSensor(mPrefs.getBoolean(LOC_SENSOR, false));
+			l.setRadius(mPrefs.getInt(LOC_RADIUS, Integer.MAX_VALUE));
+			l.setLatitude(mPrefs.getFloat(LOC_LATITUDE, 0.0f));
+			l.setLongitude(mPrefs.getFloat(LOC_LONGITUDE, 0.0f));
+			double east = mPrefs.getFloat(LOC_BOUND_EAST, 0.0f);
+			double west = mPrefs.getFloat(LOC_BOUND_WEST, 0.0f);
+			double north = mPrefs.getFloat(LOC_BOUND_NORTH, 0.0f);
+			double south = mPrefs.getFloat(LOC_BOUND_SOUTH, 0.0f);
+			l.setBounds(north, east, south, west);
+			l.setAddress(mPrefs.getString(LOC_ADDRESS, null));
+			l.setTime(mPrefs.getLong(LOC_TIME, System.currentTimeMillis()));
+			
+			mPrefs.edit()
+			.remove(LOC_ADDRESS)
+			.remove(LOC_BOUND_EAST)
+			.remove(LOC_BOUND_NORTH)
+			.remove(LOC_BOUND_SOUTH)
+			.remove(LOC_BOUND_WEST)
+			.remove(LOC_LATITUDE)
+			.remove(LOC_LONGITUDE)
+			.remove(LOC_RADIUS)
+			.remove(LOC_SENSOR)
+			.remove(LOC_TIME)
+			.commit();
+			
+			setLocation(l);
+			
+		}
+		return l;
+		
+	}
+	
+	public boolean setLocation(EtaLocation l) {
+		return mPrefs.edit().putString(LOCATION, l.toJSON().toString()).commit();
+	}
+	
+	public EtaLocation getLocation() {
+		
+		if (mPrefs.contains(LOCATION)) {
+			
+			try {
+				String loc = mPrefs.getString(LOCATION, null);
+				if (loc != null) {
+					return new EtaLocation(new JSONObject(loc));
+				}
+			} catch (JSONException e) {
+				EtaLog.e(TAG, "Not able to parse location json from SharedPreferances", e);
+			}
+			
+		}
+		
+		EtaLocation loc = migrateLocation();
+		return loc == null ? new EtaLocation() : loc;
+	}
+	
 }
