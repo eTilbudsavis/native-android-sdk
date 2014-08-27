@@ -39,16 +39,16 @@ public class Settings {
 	private static final String SESSION_FACEBOOK	= "session_facebook";
 	private static final String LOCATION			= "location_json";
 	
-	public static final String LOC_SENSOR			= "loc_sensor";
-	public static final String LOC_LATITUDE			= "loc_latitude";
-	public static final String LOC_LONGITUDE		= "loc_longitude";
-	public static final String LOC_RADIUS			= "loc_radius";
-	public static final String LOC_BOUND_EAST		= "loc_b_east";
-	public static final String LOC_BOUND_NORTH		= "loc_b_north";
-	public static final String LOC_BOUND_SOUTH		= "loc_b_south";
-	public static final String LOC_BOUND_WEST		= "loc_b_west";
-	public static final String LOC_ADDRESS			= "loc_address";
-	public static final String LOC_TIME				= "loc_time";
+	private static final String LOC_SENSOR			= "loc_sensor";
+	private static final String LOC_LATITUDE		= "loc_latitude";
+	private static final String LOC_LONGITUDE		= "loc_longitude";
+	private static final String LOC_RADIUS			= "loc_radius";
+	private static final String LOC_BOUND_EAST		= "loc_b_east";
+	private static final String LOC_BOUND_NORTH		= "loc_b_north";
+	private static final String LOC_BOUND_SOUTH		= "loc_b_south";
+	private static final String LOC_BOUND_WEST		= "loc_b_west";
+	private static final String LOC_ADDRESS			= "loc_address";
+	private static final String LOC_TIME			= "loc_time";
 
 	private static SharedPreferences mPrefs;
 	
@@ -158,7 +158,9 @@ public class Settings {
 			try {
 				String loc = mPrefs.getString(LOCATION, null);
 				if (loc != null) {
-					return new EtaLocation(new JSONObject(loc));
+					JSONObject jLoc = new JSONObject(loc);
+					EtaLog.d(TAG, "Location-loading: " + jLoc.toString());
+					return new EtaLocation(jLoc);
 				}
 			} catch (JSONException e) {
 				EtaLog.e(TAG, "Not able to parse location json from SharedPreferances", e);

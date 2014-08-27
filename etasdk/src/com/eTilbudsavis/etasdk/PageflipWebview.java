@@ -26,7 +26,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
 
-import com.eTilbudsavis.etasdk.EtaLocation.LocationListener;
+import com.eTilbudsavis.etasdk.DataObserver.DataObserver;
 import com.eTilbudsavis.etasdk.EtaObjects.Session;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
@@ -431,12 +431,12 @@ public final class PageflipWebview extends WebView {
 		}
 		
 	}
-
-	private LocationListener ll = new LocationListener() {
+	
+	DataObserver mLocationChange = new DataObserver() {
 		
-		public void onLocationChange() {
+		public void onChanged() {
 			mPFInterface.etaProxy(Command.GEOLOCATION_CHANGE, location());
-		}
+		};
 		
 	};
 	
@@ -451,7 +451,7 @@ public final class PageflipWebview extends WebView {
 	
 	@SuppressLint("NewApi")
 	public void onResume() {
-		mEta.getLocation().subscribe(ll);
+		mEta.getLocation().registerObserver(mLocationChange);
 		mPFInterface.etaProxy("resume");
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
 			super.onResume();
@@ -481,7 +481,7 @@ public final class PageflipWebview extends WebView {
 	
 	public void closePageflip() {
 		if (mPFInterface != null) {
-			Eta.getInstance().getLocation().unSubscribe(ll);
+			Eta.getInstance().getLocation().unregisterObserver(mLocationChange);
 			pageflips.remove(PageflipWebview.this);
 			mPFInterface.etaProxy(Command.CATALOG_VIEW_CLOSE);
 		}

@@ -104,6 +104,7 @@ public class Json {
 		try {
 			return object.isNull(key) ? defValue : (float)object.getDouble(key);
 		} catch (Exception e) {
+			EtaLog.d(TAG, key + ", " + object.toString());
 			EtaLog.e(TAG, null, e);
 		}
 		return defValue;

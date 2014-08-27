@@ -15,6 +15,8 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.Utils;
 
+import com.eTilbudsavis.etasdk.EtaLocation;
+
 /**
  * Helper class for the parameters the eTilbudsavis API supports.<br>
  * Note that not all parameters are necessarily in this set.<br><br>
@@ -181,5 +183,48 @@ public class Param {
 
 	/** Parameter for sending the app version for better app statistics in insight */
 	public static final String API_AV = "api_av";
+	
+	
+	/**
+	 * Parameter for accuracy in the JSON representation of the {@link EtaLocation} objects.
+	 * <p>This is <b>non-api-compliant</b> meaning that the API does not currently accept this parameter</p>
+	 */
+	public static final String ACCURACY  = "accuracy";
+	
+	/**
+	 * Parameter for bearing in the JSON representation of the {@link EtaLocation} objects.
+	 * <p>This is <b>non-api-compliant</b> meaning that the API does not currently accept this parameter</p>
+	 */
+	public static final String BEARING  = "bearing";
+	
+	/**
+	 * Parameter for altitude in the JSON representation of the {@link EtaLocation} objects.
+	 * <p>This is <b>non-api-compliant</b> meaning that the API does not currently accept this parameter</p>
+	 */
+	public static final String ALTITUDE  = "altitude";
+	
+	/**
+	 * Parameter for provider in the JSON representation of the {@link EtaLocation} objects.
+	 * <p>This is <b>non-api-compliant</b> meaning that the API does not currently accept this parameter</p>
+	 */
+	public static final String PROVIDER  = "provider";
+	
+	/**
+	 * Parameter for speed in the JSON representation of the {@link EtaLocation} objects.
+	 * <p>This is <b>non-api-compliant</b> meaning that the API does not currently accept this parameter</p>
+	 */
+	public static final String SPEED  = "speed";
+	
+	/**
+	 * Parameter for time in the JSON representation of the {@link EtaLocation} objects.
+	 * <p>This is <b>non-api-compliant</b> meaning that the API does not currently accept this parameter</p>
+	 */
+	public static final String TIME  = "time";
+	
+	/**
+	 * Parameter for address in the JSON representation of the {@link EtaLocation} objects.
+	 * <p>This is <b>non-api-compliant</b> meaning that the API does not currently accept this parameter</p>
+	 */
+	public static final String ADDRESS  = "address";
 	
 }

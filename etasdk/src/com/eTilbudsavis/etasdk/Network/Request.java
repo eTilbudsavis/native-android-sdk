@@ -87,13 +87,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	private final JSONObject mNetworkLog;
 	
 	private boolean mCacheHit = false;
-
-	/** Allows for the network response printed */
-    private boolean mDebugNetwork = false;
-
-	/** Allows for the network response printed */
-    private boolean mDebugPerformance = false;
-    
+	
+	private RequestDebugger mDebugger;
+	
     /** Boolean deciding if logs should be enabled */
     private boolean mSaveNetworkLog = true;
     
@@ -187,16 +183,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		
     	mFinished = true;
     	mRequestQueue.finish(this);
-
-		if (mDebugNetwork) {
-			EtaLog.d(TAG, mNetworkLog.toString());
-		}
-		
-		if (mDebugPerformance) {
-			String log = mEventLog.getString(getClass().getSimpleName());
-			EtaLog.d(TAG, log);
-		}
-		
+    	
+    	if (mDebugger != null) {
+    		mDebugger.debug(this);
+    	}
+    	
     	return Request.this;
     }
     
@@ -537,13 +528,13 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	}
 	
 	/**
-	 * Set to true, to enable printing of the request timings via LogCat.
+	 * Set a debugger to perform debugging when {@link Request} finishes.
 	 * @see {@link #com.eTilbudsavis.etasdk.Utils.EtaLog EtaLog} for detalis about SDK Log.d output
-	 * @param printRequestTimings true to print timings of the request
+	 * @param debugger A {@link RequestDebugger} to print/debug the {@link Request}
 	 * @return this object
 	 */
-	public Request debugPerformance(boolean printRequestTimings) {
-		mDebugPerformance = printRequestTimings;
+	public Request setDebugger(RequestDebugger debugger) {
+		mDebugger = debugger;
 		return this;
 	}
 	
@@ -554,17 +545,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 */
 	public void setSaveNetworkLog(boolean saveNetworkLog) {
 		mSaveNetworkLog = saveNetworkLog;
-	}
-	
-	/**
-	 * Set to true, to enable printing of network debugging information via LogCat.
-	 * @see {@link #com.eTilbudsavis.etasdk.Utils.EtaLog EtaLog} for detalis about SDK Log.d output
-	 * @param printNetworkInfo true to print a complete network debug log
-	 * @return this object
-	 */
-	public Request debugNetwork(boolean printNetworkInfo) {
-		mDebugNetwork = printNetworkInfo;
-		return this;
 	}
 	
 	/**

@@ -52,7 +52,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  */
 public class Eta {
 
-	public static final String TAG_PREFIX = "etasdk-";
+	public static final String TAG_PREFIX = "EtaSdk-";
 	public static final String TAG = TAG_PREFIX + Eta.class.getSimpleName();
 	
 	private static final int DEFAULT_THREAD_COUNT = 3;
@@ -80,7 +80,7 @@ public class Eta {
 	private SessionManager mSessionManager;
 	
 	/** The current location that the SDK is aware of */
-	private EtaLocation mLocation;
+	private final EtaLocation mLocation;
 	
 	/** Manager for handling all {@link Shoppinglist}, and {@link ShoppinglistItem} */
 	private ListManager mListManager;
@@ -396,12 +396,7 @@ public class Eta {
 	public void onPause() {
 		if (mResumed) {
 			mResumed = false;
-			mExecutor.execute(new Runnable() {
-				
-				public void run() {
-					mSettings.setLocation(mLocation);
-				}
-			});
+			mSettings.setLocation(mLocation);
 			mListManager.onPause();
 			mSyncManager.onPause();
 			mSessionManager.onPause();
