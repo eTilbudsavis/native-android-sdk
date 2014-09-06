@@ -16,10 +16,6 @@ public class DefaultThreadFactory implements ThreadFactory {
 	private final String namePrefix;
 	private final int threadPriority;
 	
-	private DefaultThreadFactory() {
-		this(DEFAULT_THREAD_PRIORITY, "eta-");
-	}
-	
 	public DefaultThreadFactory(String threadNamePrefix) {
 		this(DEFAULT_THREAD_PRIORITY, threadNamePrefix);
 	}

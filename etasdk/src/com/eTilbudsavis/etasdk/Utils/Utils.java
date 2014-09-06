@@ -58,6 +58,8 @@ public final class Utils {
 	
 	/** String representation of epoc */
 	public static final String DATE_EPOC = "1970-01-01T00:00:00+0000";
+
+	public static final String APP_VERSION_FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([+-][0-9A-Za-z-.]*)?";
 	
 	/** Single instance of SimpleDateFormat to save time and memory */
 	private static SimpleDateFormat mSdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
@@ -171,6 +173,7 @@ public final class Utils {
 	 * @param encoding encoding to use
 	 * @return an URL-encoded string
 	 */
+	@SuppressWarnings("deprecation")
 	private static String encode(String value, String encoding) {
 		try {
 			value = URLEncoder.encode(value, encoding);
@@ -289,9 +292,7 @@ public final class Utils {
 	 * @return true, if the version matched the regex
 	 */
 	public static boolean validVersion(String version) {
-	    String APP_VERSION_FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([+-][0-9A-Za-z-.]*)?";
-	    Pattern PATTERN = Pattern.compile(APP_VERSION_FORMAT);
-	    return PATTERN.matcher(version).matches();
+	    return Pattern.compile(APP_VERSION_FORMAT).matcher(version).matches();
 	}
 	
 	/**

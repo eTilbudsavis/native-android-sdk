@@ -358,50 +358,28 @@ public class EtaLocation extends Location {
 	}
 	
 	/**
-	 * Checks if two {@link EtaLocation} is at the same point
-	 * <p>It's not a equals method</p>
+	 * Checks if two {@link EtaLocation} is at the same point in the eyes of the API.
+	 * So, latitude, longitude, radius and sensor will be checked. (and null)
+	 * <p><b>It's not an equals method<b></p>
 	 * @param other A location to compare with
 	 * @return true if they are the same, otherwise false
 	 */
 	public boolean isSame(EtaLocation other) {
 		if (this == other)
 			return true;
+		
 		if (other == null)
 			return false;
 		
-		if (Double.doubleToLongBits(getLatitude()) != Double
-				.doubleToLongBits(other.getLatitude()))
-			return false;
-		if (Double.doubleToLongBits(getLongitude()) != Double
-				.doubleToLongBits(other.getLongitude()))
-			return false;
-		if (mAddress == null) {
-			if (other.mAddress != null)
-				return false;
-		} else if (!mAddress.equals(other.mAddress))
-			return false;
-		if (Double.doubleToLongBits(mBoundEast) != Double
-				.doubleToLongBits(other.mBoundEast))
-			return false;
-		if (Double.doubleToLongBits(mBoundNorth) != Double
-				.doubleToLongBits(other.mBoundNorth))
-			return false;
-		if (Double.doubleToLongBits(mBoundSouth) != Double
-				.doubleToLongBits(other.mBoundSouth))
-			return false;
-		if (Double.doubleToLongBits(mBoundWest) != Double
-				.doubleToLongBits(other.mBoundWest))
-			return false;
 		if (mRadius != other.mRadius)
 			return false;
+		
 		if (mSensor != other.mSensor)
 			return false;
-		if (Double.doubleToLongBits(getAltitude()) != Double
-				.doubleToLongBits(other.getAltitude()))
+		
+		if (distanceTo(other)<1)
 			return false;
-		if (Float.floatToIntBits(getAccuracy()) != Float
-				.floatToIntBits(other.getAccuracy()))
-			return false;
+		
 		return true;
 	}
 	

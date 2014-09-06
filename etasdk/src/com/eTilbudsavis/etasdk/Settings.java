@@ -140,15 +140,16 @@ public class Settings {
 			.remove(LOC_TIME)
 			.commit();
 			
-			setLocation(l);
+			saveLocation(l);
 			
 		}
 		return l;
 		
 	}
 	
-	public boolean setLocation(EtaLocation l) {
-		return mPrefs.edit().putString(LOCATION, l.toJSON().toString()).commit();
+	public boolean saveLocation(EtaLocation l) {
+		String loc = l.toJSON().toString();
+		return mPrefs.edit().putString(LOCATION, loc).commit();
 	}
 	
 	public EtaLocation getLocation() {
@@ -157,9 +158,9 @@ public class Settings {
 			
 			try {
 				String loc = mPrefs.getString(LOCATION, null);
+				
 				if (loc != null) {
 					JSONObject jLoc = new JSONObject(loc);
-					EtaLog.d(TAG, "Location-loading: " + jLoc.toString());
 					return new EtaLocation(jLoc);
 				}
 			} catch (JSONException e) {

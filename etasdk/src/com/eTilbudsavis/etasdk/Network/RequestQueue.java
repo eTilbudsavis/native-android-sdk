@@ -119,7 +119,7 @@ public class RequestQueue {
 	public void start() {
 		
 		// Creates new CacheDispatcher
-		mCacheDispatcher = new CacheDispatcher(mEta, mCacheQueue, mNetworkQueue, mCache, mDelivery);
+		mCacheDispatcher = new CacheDispatcher(mCacheQueue, mNetworkQueue, mCache, mDelivery);
 		mCacheDispatcher.start();
 
         // Create network dispatchers (and corresponding threads) up to the pool size.

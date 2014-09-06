@@ -166,10 +166,6 @@ public class SyncManager {
 		}
 	};
 	
-	private void log(boolean isEnabled, String log) {
-		
-	}
-	
 	/** The actual sync loop running every x seconds*/
 	private Runnable mSyncLoop = new Runnable() {
 		

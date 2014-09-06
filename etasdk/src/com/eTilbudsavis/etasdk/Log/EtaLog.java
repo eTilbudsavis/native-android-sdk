@@ -93,7 +93,6 @@ public class EtaLog {
 		}
 	}
 	
-
 	/**
 	 * Adds the throwable to the {@link #mExceptionLog Exception Log}.
 	 * @param t The throwable to add

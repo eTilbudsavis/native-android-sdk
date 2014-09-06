@@ -32,6 +32,7 @@ import android.os.Looper;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.HttpStack;
 import com.eTilbudsavis.etasdk.Network.Request;
@@ -141,9 +142,10 @@ public class Eta {
 		
 		mSettings = new Settings(mContext);
 		mLocation = mSettings.getLocation();
-		mSessionManager = new SessionManager(this);
-		mListManager = new ListManager(this);
-		mSyncManager = new SyncManager(this);
+		mSessionManager = new SessionManager(Eta.this);
+		mListManager = new ListManager(Eta.this);
+		mSyncManager = new SyncManager(Eta.this);
+        ImageLoader.init(Eta.this);
 		
 	}
 	
@@ -156,11 +158,13 @@ public class Eta {
 	 * @throws IllegalStateException If {@link Eta} no instance is available
 	 */
 	public static Eta getInstance() {
-		if (mEta == null) {
-			throw new IllegalStateException("Eta.createInstance() needs to be"
-					+ "called before Eta.getInstance()");
+		synchronized (Eta.class) {
+			if (mEta == null) {
+				throw new IllegalStateException("Eta.createInstance() needs to be"
+						+ "called before Eta.getInstance()");
+			}
+			return mEta;
 		}
-		return mEta;
 	}
 	
 	/**
@@ -194,7 +198,9 @@ public class Eta {
 	 * @return {@code true} if Eta is instantiated, else {@code false}
 	 */
 	public static boolean isInstanciated() {
-		return mEta != null;
+		synchronized (Eta.class) {
+			return mEta != null;
+		}
 	}
 	
 	/**
@@ -276,6 +282,7 @@ public class Eta {
 	 * @param request to be performed
 	 * @return the request
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> Request<T> add(Request<T> request) {
 		return mRequestQueue.add(request);
 	}
@@ -362,7 +369,9 @@ public class Eta {
 	 */
 	public void destroy() {
 		clear();
-		mEta = null;
+		synchronized (Eta.class) {
+			mEta = null;
+		}
 	}
 	
 	/**
@@ -396,7 +405,7 @@ public class Eta {
 	public void onPause() {
 		if (mResumed) {
 			mResumed = false;
-			mSettings.setLocation(mLocation);
+			mSettings.saveLocation(mLocation);
 			mListManager.onPause();
 			mSyncManager.onPause();
 			mSessionManager.onPause();

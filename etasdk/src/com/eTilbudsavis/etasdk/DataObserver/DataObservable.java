@@ -2,7 +2,12 @@ package com.eTilbudsavis.etasdk.DataObserver;
 
 import android.database.Observable;
 
+import com.eTilbudsavis.etasdk.Log.EtaLog;
+
 public class DataObservable extends Observable<DataObserver> {
+	
+	public static final String TAG = DataObservable.class.getSimpleName();
+	
 	/**
      * Invokes {@link DataObservable#onChanged} on each observer.
      * Called when the contents of the data set have changed.  The recipient
@@ -18,6 +23,15 @@ public class DataObservable extends Observable<DataObserver> {
                 mObservers.get(i).onChanged();
             }
         }
+    }
+    
+    @Override
+    public void unregisterObserver(DataObserver observer) {
+    	try {
+        	super.unregisterObserver(observer);
+    	} catch (Exception e) {
+    		EtaLog.e(TAG, "Observer not registered", e);
+    	}
     }
     
 }
