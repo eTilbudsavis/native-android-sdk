@@ -118,7 +118,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 * @return this object
 	 */
 	public Request<?> setOrderBy(String order) {
-		getQueryParameters().putString(Sort.ORDER_BY, order);
+		getParameters().put(Sort.ORDER_BY, order);
 		return this;
 	}
 	
@@ -129,7 +129,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 */
 	public Request<?> setOrderBy(List<String> order) {
 		String tmp = TextUtils.join(",",order);
-		getQueryParameters().putString(Sort.ORDER_BY, tmp);
+		getParameters().put(Sort.ORDER_BY, tmp);
 		return this;
 	}
 	
@@ -138,7 +138,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 * @return the order as a String, or null if no order have been given.
 	 */
 	public String getOrderBy() {
-		return getQueryParameters().getString(Sort.ORDER_BY);
+		return getParameters().get(Sort.ORDER_BY);
 	}
 	
 	/**
@@ -149,7 +149,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 * @return this object
 	 */
 	public Request<?> setOffset(int offset) {
-		getQueryParameters().putInt(Param.OFFSET, offset);
+		getParameters().put(Param.OFFSET, String.valueOf(offset));
 		return this;
 	}
 	
@@ -158,7 +158,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 * @return offset
 	 */
 	public int getOffset() {
-		return getQueryParameters().getInt(Param.OFFSET);
+		return Integer.valueOf(getParameters().get(Param.OFFSET));
 	}
 	
 	/**
@@ -169,7 +169,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 * @return
 	 */
 	public Request<?> setLimit(int limit) {
-		getQueryParameters().putInt(Param.LIMIT, limit);
+		getParameters().put(Param.LIMIT, String.valueOf(limit));
 		return this;
 	}
 	
@@ -178,7 +178,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 * @return max number of items API should return
 	 */
 	public int getLimit() {
-		return getQueryParameters().getInt(Param.LIMIT);
+		return Integer.valueOf(getParameters().get(Param.LIMIT));
 	}
 	
 	/**
@@ -191,7 +191,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 */
 	public Request<?> setIds(String type, Set<String> ids) {
 		String idList = TextUtils.join(",",ids);
-		getQueryParameters().putString(type, idList);
+		getParameters().put(type, idList);
 		return this;
 	}
 	

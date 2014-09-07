@@ -21,6 +21,7 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.R.string;
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -55,14 +56,14 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	/** Headers to be used in this request */
 	private Map<String, String> mHeaders = new HashMap<String, String>();
 	
-	/** Parameters to use in this request */
-	private Bundle mQuery = new Bundle();
-	
 	/** Sequence number used for prioritizing the queue */
 	private int mSequence = 0;
 
 	/** Item for containing cache items */
 	private Map<String, Cache.Item> mCache = new HashMap<String, Cache.Item>();
+	
+	/** Parameters to add to request */
+	private Map<String, String> mParameters;
 	
 	/** Should this request use location in the query */
 	private boolean mUseLocation = true;
@@ -419,13 +420,18 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		mUrl = url;
 		return Request.this;
 	}
-	
+
 	/**
 	 * Get the query parameters that will be used to perform this query.<br>
 	 * @return the query parameters
 	 */
+	@Deprecated
 	public Bundle getQueryParameters() {
-		return mQuery;
+		Bundle b = new Bundle();
+		for (String s : mParameters.keySet()) {
+			b.putString(s, mParameters.get(b));
+		}
+		return b;
 	}
 	
 	/**
@@ -436,8 +442,30 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * @param query
 	 * @return
 	 */
+	@Deprecated
 	public Request putQueryParameters(Bundle query) {
-		mQuery.putAll(query);
+		mParameters.putAll(Utils.bundleToMap(query));
+		return Request.this;
+	}
+	
+	/**
+	 * Get the query parameters that will be used to perform this query.<br>
+	 * @return the query parameters
+	 */
+	public Map<String, String> getParameters() {
+		return mParameters;
+	}
+	
+	/**
+	 * Add request parameters to this request. The parameters will be appended 
+	 * as HTTP query parameters to the URL, when the SDK executes the request. 
+	 * Therefore you should <b>not</b> do nested structures, only simple key-value-pairs.
+	 * This is <b>not the same as appending a body</b> to the request, when doing a PUT or POST request.
+	 * @param query
+	 * @return
+	 */
+	public Request putParameters(Map<String, String> query) {
+		mParameters.putAll(query);
 		return Request.this;
 	}
 	

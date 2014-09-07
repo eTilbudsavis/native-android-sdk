@@ -16,6 +16,8 @@
 package com.eTilbudsavis.etasdk.Network.Impl;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,11 +30,22 @@ import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.NetworkResponse;
 import com.eTilbudsavis.etasdk.Network.Response;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class JsonStringRequest extends JsonRequest<String>{
 
 	public static final String TAG = Eta.TAG_PREFIX + JsonStringRequest.class.getSimpleName();
+
+	// Define catchable types
+	private static Map<String, String> mFilterTypes = new HashMap<String, String>();
+	
+	static {
+		mFilterTypes.put("catalogs", Param.FILTER_CATALOG_IDS);
+		mFilterTypes.put("offers", Param.FILTER_OFFER_IDS);
+		mFilterTypes.put("dealers", Param.FILTER_DEALER_IDS);
+		mFilterTypes.put("stores", Param.FILTER_STORE_IDS);
+	}
 	
 	public JsonStringRequest(String url, Listener<String> listener) {
 		super(url, listener);
@@ -97,12 +110,12 @@ public class JsonStringRequest extends JsonRequest<String>{
 		// This method of guessing isn't perfect, but atleast we won't get false data from cache
         String[] path = getUrl().split("/");
         String cacheString = null;
-        if (getFilterTypes().containsKey(path[path.length-1])) {
+        if (mFilterTypes.containsKey(path[path.length-1])) {
         	Response<JSONArray> cacheArray = getJSONArray(c);
         	if (cacheArray != null) {
             	cacheString = cacheArray.result.toString();
         	}
-        } else if (getFilterTypes().containsKey(path[path.length-2])) {
+        } else if (mFilterTypes.containsKey(path[path.length-2])) {
         	Response<JSONObject> cacheObject = getJSONObject(c);
         	if (cacheObject != null) {
         		cacheString = cacheObject.result.toString();

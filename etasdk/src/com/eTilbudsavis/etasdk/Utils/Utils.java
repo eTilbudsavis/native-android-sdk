@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -117,7 +118,7 @@ public final class Utils {
 	public static String buildQueryString(Request<?> r) {
 		return r.getQueryParameters().isEmpty() ? r.getUrl() : r.getUrl() + "?" + buildQueryString(r.getQueryParameters(), r.getParamsEncoding());
 	}
-	
+
 	/**
 	 * Returns a string of parameters, ordered alfabetically (for better cache performance)
 	 * @param apiParams to convert into query parameters
@@ -144,6 +145,25 @@ public final class Utils {
 		String query = sb.toString();
 		
 		return query;
+	}
+
+	/**
+	 * Returns a string of parameters, ordered alfabetically (for better cache performance)
+	 * @param apiParams to convert into query parameters
+	 * @return a string of parameters
+	 */
+	public static Map<String, String> bundleToMap(Bundle b) {
+		Map<String, String> map = new HashMap<String, String>();
+		for (String key : b.keySet()) {
+			Object o = b.get(key);
+			if (o instanceof Bundle) {
+				throw new IllegalArgumentException("Type Bundle not allowed");
+			} else {
+				map.put(key, String.valueOf(o));
+			}
+		}
+		
+		return map;
 	}
 	
 	/**

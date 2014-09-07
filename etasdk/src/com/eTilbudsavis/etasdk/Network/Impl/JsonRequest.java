@@ -48,15 +48,22 @@ public abstract class JsonRequest<T> extends Request<T> {
 	
 	/** Content type for request. */
     private static final String PROTOCOL_CONTENT_TYPE = String.format("application/json; charset=%s", DEFAULT_PARAMS_ENCODING);
-
+    
+    private static final String ERN_FORMAT = "ern:%s:%s";
     private String mRequestBody;
     
     private Priority mPriority = Priority.MEDIUM;
     
-	// Define catchable types
-	private static Map<String, String> mFilterTypes = new HashMap<String, String>();
-	
 	private static Set<String> mErnTypes = new HashSet<String>();
+	
+	static {
+		mErnTypes.add("catalogs");
+		mErnTypes.add("offers");
+		mErnTypes.add("dealers");
+		mErnTypes.add("stores");
+		mErnTypes.add("shoppinglists");
+		mErnTypes.add("items");
+	}
 	
     public JsonRequest(String url, Listener<T> listener) {
 		super(Method.GET, url, listener);
@@ -79,6 +86,7 @@ public abstract class JsonRequest<T> extends Request<T> {
      * @param value - The value matching the key
      * @return this object, for easy chaining
      */
+    @Deprecated
     public Request<?> putQueryParam(String key, String value) {
     	getQueryParameters().putString(key, value);
     	return this;
@@ -251,35 +259,6 @@ public abstract class JsonRequest<T> extends Request<T> {
 		return null;
 	}
 	
-	protected Map<String, String> getFilterTypes() {
-
-		synchronized (mFilterTypes) {
-			if (mFilterTypes.isEmpty()) {
-				mFilterTypes.put("catalogs", Param.FILTER_CATALOG_IDS);
-				mFilterTypes.put("offers", Param.FILTER_OFFER_IDS);
-				mFilterTypes.put("dealers", Param.FILTER_DEALER_IDS);
-				mFilterTypes.put("stores", Param.FILTER_STORE_IDS);
-			}
-		}
-		return mFilterTypes;
-		
-	}
-	
-	protected Set<String> getErnTypes() {
-
-		synchronized (mErnTypes) {
-			if (mErnTypes.isEmpty()) {
-				mErnTypes.add("catalogs");
-				mErnTypes.add("offers");
-				mErnTypes.add("dealers");
-				mErnTypes.add("stores");
-				mErnTypes.add("shoppinglists");
-				mErnTypes.add("items");
-			}
-		}
-		return mErnTypes;
-	}
-	
 	protected Set<String> getIdsFromFilter(String filterName, Bundle apiParams) {
 		
 		String tmp = apiParams.getString(filterName);
@@ -292,9 +271,9 @@ public abstract class JsonRequest<T> extends Request<T> {
 	
 	private String buildErn(String type, String id) {
 		
-		if (getErnTypes().contains(type)) {
+		if (mErnTypes.contains(type)) {
 			type = type.substring(0, type.length()-1);
-			return String.format("ern:%s:%s", type, id);
+			return String.format(ERN_FORMAT, type, id);
 		}
 		return type;
 	}
