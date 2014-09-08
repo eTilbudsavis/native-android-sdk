@@ -142,7 +142,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 		
 		// Lets try to see if it's possible to create a response from 
 		// previously cached items
-		Set<String> keys = getQueryParameters().keySet();
+		Set<String> keys = getParameters().keySet();
 		boolean hasFilter = keys.contains(Param.FILTER_CATALOG_IDS) || 
 				keys.contains(Param.FILTER_DEALER_IDS) || 
 				keys.contains(Param.FILTER_OFFER_IDS) || 
@@ -158,7 +158,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 		// if last element is a type, then we'll expect a list
 		String type = path[path.length-1];
 		
-		Set<String> ids = getIdsFromFilter(type, getQueryParameters());
+		Set<String> ids = getIdsFromFilter(type, getParameters());
 		
 		// No ids? no catchable items...
 		if (ids.size() == 0) {
@@ -259,9 +259,9 @@ public abstract class JsonRequest<T> extends Request<T> {
 		return null;
 	}
 	
-	protected Set<String> getIdsFromFilter(String filterName, Bundle apiParams) {
+	protected Set<String> getIdsFromFilter(String filterName, Map<String, String> apiParams) {
 		
-		String tmp = apiParams.getString(filterName);
+		String tmp = apiParams.get(filterName);
 		Set<String> list = new HashSet<String>();
 		if (tmp != null) {
 			Collections.addAll(list, TextUtils.split(tmp, ","));

@@ -17,11 +17,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
+
+import org.apache.http.client.utils.URLEncodedUtils;
 
 import android.os.Bundle;
 
@@ -116,7 +119,7 @@ public final class Utils {
 	 * @return
 	 */
 	public static String buildQueryString(Request<?> r) {
-		return r.getQueryParameters().isEmpty() ? r.getUrl() : r.getUrl() + "?" + buildQueryString(r.getQueryParameters(), r.getParamsEncoding());
+		return r.getParameters().isEmpty() ? r.getUrl() : r.getUrl() + "?" + buildQueryString(r.getParameters(), r.getParamsEncoding());
 	}
 
 	/**
@@ -147,6 +150,26 @@ public final class Utils {
 		return query;
 	}
 
+	/**
+	 * Returns a string of parameters, ordered alfabetically (for better cache performance)
+	 * @param apiParams to convert into query parameters
+	 * @return a string of parameters
+	 */
+	public static String buildQueryString(Map<String, String> apiParams, String encoding) {
+		StringBuilder sb = new StringBuilder();
+		LinkedList<String> keys = new LinkedList<String>(apiParams.keySet());
+		Collections.sort(keys);
+		for (String key : keys) {
+			String value = valueIsNull(apiParams.get(key));
+			if (sb.length() > 0) {
+				sb.append("&");
+			}
+			sb.append(encode(key, encoding)).append("=").append(encode(value, encoding));
+
+		}
+		return sb.toString();
+	}
+	
 	/**
 	 * Returns a string of parameters, ordered alfabetically (for better cache performance)
 	 * @param apiParams to convert into query parameters

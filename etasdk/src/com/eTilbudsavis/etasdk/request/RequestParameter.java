@@ -5,7 +5,7 @@ import java.util.Map;
 
 public abstract class RequestParameter implements IRequestParameter {
 	
-	Map<String, String> mParam = new HashMap<String, String>();
+	private Map<String, String> mParam = new HashMap<String, String>();
 	
 	protected boolean put(String parameter, String value) {
 		mParam.put(parameter, value);

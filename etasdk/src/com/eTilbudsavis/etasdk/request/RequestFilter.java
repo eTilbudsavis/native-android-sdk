@@ -12,7 +12,7 @@ public abstract class RequestFilter<T extends Set<String>> implements IRequestPa
 	
 	Map<String, T> mFilters = new HashMap<String, T>();
 	
-	protected boolean set(String filter, T ids) {
+	protected boolean add(String filter, T ids) {
 		Set<String> set = mFilters.get(filter);
 		if (set != null) {
 			set.addAll(ids);
@@ -34,7 +34,7 @@ public abstract class RequestFilter<T extends Set<String>> implements IRequestPa
 		return true;
 	}
 	
-	protected Map<String, T> getFilter() {
+	protected Map<String, T> getFilters() {
 		return mFilters;
 	}
 	

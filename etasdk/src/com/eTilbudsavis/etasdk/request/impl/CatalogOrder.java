@@ -8,37 +8,28 @@ public class CatalogOrder extends RequestOrder {
 		setDefault("-" + POPULARITY);
 	}
 	
-	public void byPopularity(boolean enableOrder, boolean descending) {
-		setOrder(enableOrder, descending, POPULARITY);
-	}
-
-	public void byDealer(boolean enableOrder, boolean descending) {
-		setOrder(enableOrder, descending, DEALER);
-	}
-
-	public void byCreated(boolean enableOrder, boolean descending) {
-		setOrder(enableOrder, descending, CREATED);
-	}
-
-	public void byExpirationDate(boolean enableOrder, boolean descending) {
-		setOrder(enableOrder, descending, EXPIRATION_DATE);
-	}
-
-	public void byPublicationDate(boolean enableOrder, boolean descending) {
-		setOrder(enableOrder, descending, PUBLICATION_DATE);
-	}
-
-	public void byDistance(boolean enableOrder, boolean descending) {
-		setOrder(enableOrder, descending, DISTANCE);
+	public void byPopularity(boolean enable, boolean descending) {
+		setOrder(enable, descending, POPULARITY);
 	}
 	
-	/*
-popularity
-dealer
-created
-expiration_date
-publication_date
-distance
-	 */
+	public void byDealer(boolean enable, boolean descending) {
+		setOrder(enable, descending, DEALER);
+	}
+	
+	public void byCreated(boolean enable, boolean descending) {
+		setOrder(enable, descending, CREATED);
+	}
+
+	public void byExpirationDate(boolean enable, boolean descending) {
+		setOrder(enable, descending, EXPIRATION_DATE);
+	}
+
+	public void byPublicationDate(boolean enable, boolean descending) {
+		setOrder(enable, descending, PUBLICATION_DATE);
+	}
+
+	public void byDistance(boolean enable, boolean descending) {
+		setOrder(enable, descending, DISTANCE);
+	}
 	
 }

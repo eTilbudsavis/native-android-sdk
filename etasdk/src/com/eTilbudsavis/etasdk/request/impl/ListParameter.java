@@ -6,7 +6,7 @@ public class ListParameter extends RequestParameter {
 
 	/** String identifying the offset parameter for all list calls to the API */
 	public static final String OFFSET = "offset";
-
+	
 	/** String identifying the limit parameter for all list calls to the API */
 	public static final String LIMIT = "limit";
 	

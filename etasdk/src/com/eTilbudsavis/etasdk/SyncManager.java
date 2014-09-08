@@ -457,8 +457,8 @@ public class SyncManager {
 		
 		JsonArrayRequest listRequest = new JsonArrayRequest(Method.GET, Endpoint.lists(mEta.getUser().getUserId()), listListener);
 		// Offset and limit are set to default values, we want to ignore this.
-		listRequest.getQueryParameters().remove(Param.OFFSET);
-		listRequest.getQueryParameters().remove(Param.LIMIT);
+		listRequest.getParameters().remove(Param.OFFSET);
+		listRequest.getParameters().remove(Param.LIMIT);
 		listRequest.setSaveNetworkLog(SAVE_NETWORK_LOG);
 		addRequest(listRequest);
 		
@@ -723,8 +723,8 @@ public class SyncManager {
 		
 		JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Endpoint.listitems(mEta.getUser().getUserId(), sl.getId()), itemListener);
 		// Offset and limit are set to default values, we want to ignore this.
-		itemRequest.getQueryParameters().remove(Param.OFFSET);
-		itemRequest.getQueryParameters().remove(Param.LIMIT);
+		itemRequest.getParameters().remove(Param.OFFSET);
+		itemRequest.getParameters().remove(Param.LIMIT);
 		itemRequest.setSaveNetworkLog(SAVE_NETWORK_LOG);
 		addRequest(itemRequest);
 		
@@ -965,7 +965,7 @@ public class SyncManager {
 		String url = Endpoint.list(user.getUserId(), sl.getId());
 		
 		JsonObjectRequest listReq = new JsonObjectRequest(Method.DELETE, url, null, listListener);
-		listReq.putQueryParam(Param.MODIFIED, Utils.parseDate(sl.getModified()));
+		listReq.getParameters().put(Param.MODIFIED, Utils.parseDate(sl.getModified()));
 		addRequest(listReq);
 		
 	}
@@ -1103,7 +1103,7 @@ public class SyncManager {
 		
 		String url = Endpoint.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
 		JsonObjectRequest itemReq = new JsonObjectRequest(Method.DELETE, url, null, itemListener);
-		itemReq.putQueryParam(Param.MODIFIED, Utils.parseDate(sli.getModified()));
+		itemReq.getParameters().put(Param.MODIFIED, Utils.parseDate(sli.getModified()));
 		addRequest(itemReq);
 		
 	}

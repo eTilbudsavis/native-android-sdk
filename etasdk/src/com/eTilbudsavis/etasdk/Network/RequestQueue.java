@@ -18,6 +18,7 @@ package com.eTilbudsavis.etasdk.Network;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,8 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaLocation;
@@ -354,7 +353,7 @@ public class RequestQueue {
 	 * Method for adding required parameters for calling the eTilbudsavis.<br>
 	 * @param request
 	 */
-	private void prepareRequest(Request request) {
+	private void prepareRequest(Request<?> request) {
 		
 		request.addEvent("preparing-sdk-parameters");
 		// Append HOST if needed
@@ -364,49 +363,52 @@ public class RequestQueue {
 			request.setUrl(preUrl + url);
 		}
 		
-		// Append necessary API parameters
-		Bundle b = request.getQueryParameters();
-		
 		String version = Eta.getInstance().getAppVersion();
 		if (version != null) {
-			b.putString(Param.API_AV, version);
+			request.getParameters().put(Param.API_AV, version);
 		}
 		
-		EtaLocation l = mEta.getLocation();
-		
-		if (request.useLocation() && l.isSet()) {
-			
-			if (!b.containsKey(Param.LATITUDE)) {
-				b.putDouble(Param.LATITUDE, l.getLatitude());
-			}
-			if (!b.containsKey(Param.LONGITUDE)) {
-				b.putDouble(Param.LONGITUDE, l.getLongitude());
-			}
-			if (!b.containsKey(Param.SENSOR)) {
-				b.putBoolean(Param.SENSOR, l.isSensor());
-			}
-			if (!b.containsKey(Param.RADIUS)) {
-				b.putInt(Param.RADIUS, l.getRadius());
-			}
-			
-			// Determine whether to include bounds.
-			if (l.isBoundsSet()) {
-				if (!b.containsKey(Param.BOUND_EAST)) {
-					b.putDouble(Param.BOUND_EAST, l.getBoundEast());
-				}
-				if (!b.containsKey(Param.BOUND_NORTH)) {
-					b.putDouble(Param.BOUND_NORTH, l.getBoundNorth());
-				}
-				if (!b.containsKey(Param.BOUND_SOUTH)) {
-					b.putDouble(Param.BOUND_SOUTH, l.getBoundSouth());
-				}
-				if (!b.containsKey(Param.BOUND_WEST)) {
-					b.putDouble(Param.BOUND_WEST, l.getBoundWest());
-				}
-			}
-			
+		if (request.useLocation()) {
+			appendLocationParams(request.getParameters(), Eta.getInstance().getLocation());
 		}
 		
+	}
+	
+	public void appendLocationParams(Map<String, String> map, EtaLocation l) {
+
+		if (!l.isSet()) {
+			return;
+		}
+		
+		if (!map.containsKey(Param.LATITUDE)) {
+			map.put(Param.LATITUDE, String.valueOf(l.getLatitude()));
+		}
+		if (!map.containsKey(Param.LONGITUDE)) {
+			map.put(Param.LONGITUDE, String.valueOf(l.getLongitude()));
+		}
+		if (!map.containsKey(Param.SENSOR)) {
+			map.put(Param.SENSOR, String.valueOf(l.isSensor()));
+		}
+		if (!map.containsKey(Param.RADIUS)) {
+			map.put(Param.RADIUS, String.valueOf(l.getRadius()));
+		}
+		
+		// Determine whether to include bounds.
+		if (l.isBoundsSet()) {
+			if (!map.containsKey(Param.BOUND_EAST)) {
+				map.put(Param.BOUND_EAST, String.valueOf(l.getBoundEast()));
+			}
+			if (!map.containsKey(Param.BOUND_NORTH)) {
+				map.put(Param.BOUND_NORTH, String.valueOf(l.getBoundNorth()));
+			}
+			if (!map.containsKey(Param.BOUND_SOUTH)) {
+				map.put(Param.BOUND_SOUTH, String.valueOf(l.getBoundSouth()));
+			}
+			if (!map.containsKey(Param.BOUND_WEST)) {
+				map.put(Param.BOUND_WEST, String.valueOf(l.getBoundWest()));
+			}
+		}
+			
 	}
 	
 	/**

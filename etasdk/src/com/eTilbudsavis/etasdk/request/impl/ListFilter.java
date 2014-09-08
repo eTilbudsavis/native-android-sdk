@@ -16,8 +16,8 @@ public class ListFilter extends RequestFilter<Set<String>> {
 	public static final String OFFER_IDS = "offer_ids";
 	public static final String DEALER_IDS = "dealer_ids";
 
-	protected boolean set(String filter, String id) {
-		Map<String, Set<String>> map = getFilter();
+	protected boolean add(String filter, String id) {
+		Map<String, Set<String>> map = getFilters();
 		if (map.containsKey(filter) && map.get(filter) != null) {
 			map.get(filter).add(id);
 		} else {

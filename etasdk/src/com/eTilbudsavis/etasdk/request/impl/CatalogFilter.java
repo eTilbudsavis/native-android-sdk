@@ -4,28 +4,28 @@ import java.util.Set;
 
 public class CatalogFilter extends ListFilter {
 	
-	public void setCatalogIds(Set<String> ids) {
-		set(CATALOG_IDS, ids);
+	public void addCatalogFilter(Set<String> catalogIds) {
+		add(CATALOG_IDS, catalogIds);
 	}
 	
-	public void setDealerIds(Set<String> ids) {
-		set(DEALER_IDS, ids);
+	public void addDealerFilter(Set<String> dealerIds) {
+		add(DEALER_IDS, dealerIds);
 	}
 	
-	public void setStoreIds(Set<String> ids) {
-		set(STORE_IDS, ids);
+	public void addStoreFilter(Set<String> storeIds) {
+		add(STORE_IDS, storeIds);
 	}
 	
-	public void setCatalogIds(String id) {
-		set(CATALOG_IDS, id);
+	public void addCatalogFilter(String catalogId) {
+		add(CATALOG_IDS, catalogId);
 	}
 	
-	public void setDealerIds(String id) {
-		set(DEALER_IDS, id);
+	public void addDealerFilter(String dealerId) {
+		add(DEALER_IDS, dealerId);
 	}
 	
-	public void setStoreIds(String id) {
-		set(STORE_IDS, id);
+	public void addStoreFilter(String storeId) {
+		add(STORE_IDS, storeId);
 	}
 	
 }

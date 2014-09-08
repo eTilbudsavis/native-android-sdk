@@ -12,8 +12,8 @@ import com.eTilbudsavis.etasdk.request.RequestParameter;
 
 public class ListRequest extends JsonArrayRequest {
 	
-	private static final String ERROR_NO_REQUESTQUEUE = "The request must have been handed to RequestQueue, before the "
-			+ "next() method is available";
+	private static final String ERROR_NO_REQUESTQUEUE = 
+			"Request must initially be added to RequestQueue, subsequent pagination requests can be performed with next() method";
 	
 	private IRequestParameter mFilters;
 	private IRequestParameter mOrder;
