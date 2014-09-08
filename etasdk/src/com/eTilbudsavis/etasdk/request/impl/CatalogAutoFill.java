@@ -3,15 +3,14 @@ package com.eTilbudsavis.etasdk.request.impl;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Pages;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
-import com.eTilbudsavis.etasdk.request.EtaObjectFiller;
+import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 
-public class CatalogFiller extends EtaObjectFiller {
+public class CatalogAutoFill extends RequestAutoFill {
 	
-
 	private boolean mPages;
 	private boolean mDealer;
 	private boolean mStore;
-
+	
 	public void fillPages(boolean getPages) {
 		mPages = getPages;
 	}

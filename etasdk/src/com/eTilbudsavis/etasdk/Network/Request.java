@@ -45,7 +45,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	private static final int CONNECTION_TIME_OUT = (int) (20 * Utils.SECOND_IN_MILLIS);
 	
 	/** Listener interface, for responses */
-	private final Listener<T> mListener;
+	private  Listener<T> mListener;
 	
 	/** Request method of this request.  Currently supports GET, POST, PUT, and DELETE. */
 	private final Method mMethod;
@@ -259,6 +259,15 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	}
 
 	/**
+	 * Returns the response listener for this request
+	 * @return a listener of type T
+	 */
+	protected Request setListener(Listener<T> listener) {
+		mListener = listener;
+		return this;
+	}
+
+	/**
 	 * returns whether this request is cachable or not
 	 * @return true if the request is cachable
 	 */
@@ -301,6 +310,10 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	public Request setRequestQueue(RequestQueue requestQueue) {
 		mRequestQueue = requestQueue;
 		return this;
+	}
+	
+	protected RequestQueue getRequestQueue() {
+		return mRequestQueue;
 	}
 	
 	/**
