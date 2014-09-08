@@ -5,6 +5,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.request.IRequestParameter;
 import com.eTilbudsavis.etasdk.request.RequestFilter;
 import com.eTilbudsavis.etasdk.request.RequestOrder;
 import com.eTilbudsavis.etasdk.request.RequestParameter;
@@ -14,14 +15,14 @@ public class ListRequest extends JsonArrayRequest {
 	private static final String ERROR_NO_REQUESTQUEUE = "The request must have been handed to RequestQueue, before the "
 			+ "next() method is available";
 	
-	private RequestFilter<?> mFilters;
-	private RequestOrder mOrder;
-	private RequestParameter mParam;
+	private IRequestParameter mFilters;
+	private IRequestParameter mOrder;
+	private IRequestParameter mParam;
 	
 	public ListRequest(String url, Listener<JSONArray> listener) {
 		super(url, listener);
 	}
-
+	
 	public ListRequest(Method method, String url, Listener<JSONArray> listener) {
 		super(method, url, listener);
 	}
@@ -34,12 +35,16 @@ public class ListRequest extends JsonArrayRequest {
 		super(method, url, requestBody, listener);
 	}
 	
-	public void setFilter(ListFilter filter) {
+	public void setFilter(RequestFilter filter) {
 		mFilters = filter;
 	}
 	
 	public void setOrder(RequestOrder order) {
 		mOrder = order;
+	}
+	
+	public void setParameters(RequestParameter params) {
+		mParam = params;
 	}
 	
 	public void updateParameters() {
