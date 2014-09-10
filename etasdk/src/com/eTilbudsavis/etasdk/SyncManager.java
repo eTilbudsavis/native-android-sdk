@@ -112,8 +112,8 @@ public class SyncManager {
 	public static final String TAG = Eta.TAG_PREFIX + SyncManager.class.getSimpleName();
 
 	private static final boolean SAVE_NETWORK_LOG = false;
-	private static final boolean LOG_SYNC = true;
-	private static final boolean LOG = true;
+	private static final boolean LOG_SYNC = false;
+	private static final boolean LOG = false;
 
 	/** Supported sync speeds for {@link SyncManager} */
 	public interface SyncSpeed {
