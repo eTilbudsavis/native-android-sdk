@@ -784,6 +784,8 @@ public class SyncManager {
 						// Migration code, to get comments into the DB
 						mNotification.edit(serverSli);
 						db.editItem(serverSli, user);
+					} else if (localSli.equals(serverSli)) {
+						EtaLog.d(TAG, "We have a mismatch");
 					}
 					
 				} else {

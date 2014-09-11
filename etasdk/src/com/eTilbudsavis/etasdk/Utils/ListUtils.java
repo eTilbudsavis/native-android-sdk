@@ -34,8 +34,8 @@ public class ListUtils {
 		}
 
 		ShoppinglistItem move = list.get(movePos);
-		printItem(TAG, move);
-		EtaLog.d(TAG, "list-size: " + list.size() + ", prevPos: " + prevPos + ", movePos: " + movePos);
+//		printItem(TAG, move);
+//		EtaLog.d(TAG, "list-size: " + list.size() + ", prevPos: " + prevPos + ", movePos: " + movePos);
 		
 		boolean isFirst = prevPos < 0;
 		ShoppinglistItem prev = isFirst ? null : list.get(prevPos);
