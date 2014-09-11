@@ -29,7 +29,7 @@ import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Share extends EtaListObject<Share> implements Serializable {
-
+	
 	public static final String TAG = "Share";
 	
 	private static final long serialVersionUID = -9184865445908448266L;
