@@ -30,13 +30,13 @@ public class ListUtils {
 		List<ShoppinglistItem> tmp = new ArrayList<ShoppinglistItem>();
 		
 		if (list == null || list.isEmpty() || movePos<0) {
-			return new ArrayList<ShoppinglistItem>();
+			return tmp;
 		}
-		
-		printItem(TAG, list.get(movePos));
-		EtaLog.d(TAG, "list-size: " + list.size() + ", prevPos: " + prevPos + ", movePos: " + movePos);
-		
+
 		ShoppinglistItem move = list.get(movePos);
+//		printItem(TAG, move);
+//		EtaLog.d(TAG, "list-size: " + list.size() + ", prevPos: " + prevPos + ", movePos: " + movePos);
+		
 		boolean isFirst = prevPos < 0;
 		ShoppinglistItem prev = isFirst ? null : list.get(prevPos);
 		String prevId = isFirst ? ShoppinglistItem.FIRST_ITEM : prev.getId();

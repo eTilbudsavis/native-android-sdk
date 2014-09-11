@@ -367,19 +367,20 @@ public class EtaLocation extends Location {
 	 * @return true if they are the same, otherwise false
 	 */
 	public boolean isSame(EtaLocation other) {
-		if (this == other)
-			return true;
-		
+
 		if (other == null)
 			return false;
 		
+		if (this == other)
+			return true;
+		
 		if (mRadius != other.mRadius)
 			return false;
-		
+
 		if (mSensor != other.mSensor)
 			return false;
 		
-		if (distanceTo(other)<1)
+		if (distanceTo(other) > 1)
 			return false;
 		
 		return true;

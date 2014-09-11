@@ -39,6 +39,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Log.SyncLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.EtaError.Code;
 import com.eTilbudsavis.etasdk.Network.Request;
@@ -109,8 +110,10 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 public class SyncManager {
 
 	public static final String TAG = Eta.TAG_PREFIX + SyncManager.class.getSimpleName();
-	
+
 	private static final boolean SAVE_NETWORK_LOG = false;
+	private static final boolean LOG_SYNC = false;
+	private static final boolean LOG = false;
 
 	/** Supported sync speeds for {@link SyncManager} */
 	public interface SyncSpeed {
@@ -175,7 +178,7 @@ public class SyncManager {
 			
 			// If it's an offline user, then just quit it
 			if ( !mUser.isLoggedIn() ) {
-//				EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (NotLoggedIn)");
+				SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (NotLoggedIn)");
 				return;
 			}
 			
@@ -189,8 +192,16 @@ public class SyncManager {
 			}
 			
 			// Only do an update, if there are no pending transactions, and we are online
-			if (!mCurrentRequests.isEmpty() || !mEta.isOnline() || isPaused()) {
-//				EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (ReqInFlight-Offline-Paused)");
+			if (!mCurrentRequests.isEmpty()) {
+				SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (ReqInFlight)");
+				return;
+			}
+			if (!mEta.isOnline() ) {
+				SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (Offline)");
+				return;
+			}
+			if (isPaused()) {
+				SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (Paused)");
 				return;
 			}
 			
@@ -206,7 +217,7 @@ public class SyncManager {
 		// If there are local changes to a list, then syncLocalListChanges will handle it: return
 		List<Shoppinglist> lists = DbHelper.getInstance().getLists(mEta.getUser(), true);
 		if (syncLocalListChanges(lists, user)) {
-//			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncLocalListChanges");
+			SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - syncLocalListChanges");
 			return;
 		}
 		
@@ -226,7 +237,7 @@ public class SyncManager {
 //					resumeSync();
 //				}
 //			}, 3500);
-//			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - hasLocalChanges");
+			SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - hasLocalChanges");
 			return;
 		}
 		
@@ -234,12 +245,12 @@ public class SyncManager {
         if (mSyncCount%3 == 0) {
         	
         	// Get a new set of lists
-//			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncAllLists");
+        	SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - syncAllLists");
             syncLists(user);
             
         } else if (mSyncCount%10 == 0) {
         	
-//			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - syncAllItems");
+        	SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - syncAllItems");
         	/* Because we update modified on lists, on all changes, we might
         	 * have a situation where two devices have set the same modified
         	 * on a list, and therefore won't try to get a new list of items
@@ -251,7 +262,7 @@ public class SyncManager {
     		
         } else {
 
-//			EtaLog.d(TAG, "SyncManager(" + mSyncCount + ") - checkModified");
+        	SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - checkModified");
         	// Base case, just check if there is changes
             syncListsModified(user);
             
@@ -288,6 +299,8 @@ public class SyncManager {
 	 */
 	public SyncManager(Eta eta) {
 		mEta = eta;
+		SyncLog.setLog(LOG);
+		SyncLog.setLogSync(LOG_SYNC);
 		// Create a new thread for a handler, so that i can later post content to that thread.
 		HandlerThread t = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
 		t.start();
@@ -771,6 +784,8 @@ public class SyncManager {
 						// Migration code, to get comments into the DB
 						mNotification.edit(serverSli);
 						db.editItem(serverSli, user);
+					} else if (localSli.equals(serverSli)) {
+						EtaLog.d(TAG, "We have a mismatch");
 					}
 					
 				} else {
