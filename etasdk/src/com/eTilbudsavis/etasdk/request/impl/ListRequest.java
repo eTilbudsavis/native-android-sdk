@@ -35,7 +35,7 @@ public class ListRequest extends JsonArrayRequest {
 		super(method, url, requestBody, listener);
 	}
 	
-	public void setFilter(RequestFilter filter) {
+	public void setFilter(RequestFilter<?> filter) {
 		mFilters = filter;
 	}
 	

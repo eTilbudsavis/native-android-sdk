@@ -21,7 +21,6 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.R.string;
 import android.os.Bundle;
 import android.os.Handler;
 
@@ -567,7 +566,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		Priority right = other.getPriority();
 		return left == right ? this.mSequence - other.mSequence : right.ordinal() - left.ordinal();
 	}
-	
+
 	/**
 	 * Set a debugger to perform debugging when {@link Request} finishes.
 	 * @see {@link #com.eTilbudsavis.etasdk.Utils.EtaLog EtaLog} for detalis about SDK Log.d output
@@ -577,6 +576,14 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	public Request setDebugger(RequestDebugger debugger) {
 		mDebugger = debugger;
 		return this;
+	}
+
+	/**
+	 * Get the {@link RequestDebugger} assiciated with this request
+	 * @return A {@link RequestDebugger}, or null
+	 */
+	public RequestDebugger getDebugger() {
+		return mDebugger;
 	}
 	
 	/**
