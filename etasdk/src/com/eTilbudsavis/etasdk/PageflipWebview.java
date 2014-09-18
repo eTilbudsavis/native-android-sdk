@@ -442,6 +442,7 @@ public final class PageflipWebview extends WebView {
 	
 	@SuppressLint("NewApi")
 	public void onPause() {
+		mEta.getLocation().unregisterObserver(mLocationChange);
 		mPFInterface.etaProxy("pause");
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
 			super.onPause();
