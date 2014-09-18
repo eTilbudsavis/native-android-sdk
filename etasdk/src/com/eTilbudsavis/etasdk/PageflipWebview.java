@@ -245,7 +245,7 @@ public final class PageflipWebview extends WebView {
 	/** 
 	 * The interface between PageflipWebview And Pageflip
 	 */
-	private PageflipJavaScriptInterface mPFInterface;
+	private PageflipJavaScriptInterface mPFInterface = new PageflipJavaScriptInterface();
 	
 	/** 
 	 * To avoid recursion, when Pageflip updates session
@@ -340,7 +340,6 @@ public final class PageflipWebview extends WebView {
 		mListener = Listener;
 		mCatalogId = CatalogId;
 		mUuid = Utils.createUUID();
-		mPFInterface = new PageflipJavaScriptInterface();
 		pageflips.add(this);
 		
 		// Create settings for Webview to function properly
@@ -369,6 +368,8 @@ public final class PageflipWebview extends WebView {
 			}
 			setWebChromeClient(wcc);
 		}
+		
+		Eta.getInstance().getLocation().registerObserver(mLocationChange);
 		
 	}
 	
@@ -440,24 +441,14 @@ public final class PageflipWebview extends WebView {
 		
 	};
 	
-	@SuppressLint("NewApi")
-	public void onPause() {
-		mEta.getLocation().unregisterObserver(mLocationChange);
+	public void pause() {
+		Eta.getInstance().getLocation().unregisterObserver(mLocationChange);
 		mPFInterface.etaProxy("pause");
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
-			super.onPause();
-		}
-		
 	}
 	
-	@SuppressLint("NewApi")
-	public void onResume() {
-		mEta.getLocation().registerObserver(mLocationChange);
+	public void resume() {
+		Eta.getInstance().getLocation().registerObserver(mLocationChange);
 		mPFInterface.etaProxy("resume");
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
-			super.onResume();
-		}
-		
 	}
 	
 	public boolean isThumbnailsToggled() {
@@ -474,7 +465,7 @@ public final class PageflipWebview extends WebView {
 	
 	public void updateSession() {
 		if (!mSessionFromPageflip) {
-			Session s = mEta.getSessionManager().getSession();		
+			Session s = Eta.getInstance().getSessionManager().getSession();		
 			mPFInterface.etaProxy(Option.SESSION_CHANGE, s.toJSON());
 		}
 		mSessionFromPageflip = false;

@@ -410,7 +410,7 @@ public class Eta {
 			mSyncManager.onPause();
 			mSessionManager.onPause();
 			for (PageflipWebview p : PageflipWebview.pageflips) {
-				p.onPause();
+				p.pause();
 			}
 			mSettings.setLastUsageNow();
 		}
@@ -427,7 +427,7 @@ public class Eta {
 			mListManager.onResume();
 			mSyncManager.onResume();
 			for (PageflipWebview p : PageflipWebview.pageflips) {
-				p.onResume();
+				p.resume();
 			}
 		}
 	}
