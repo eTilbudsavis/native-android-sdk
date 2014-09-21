@@ -1,52 +1,69 @@
 package com.eTilbudsavis.etasdk.request;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 
 import android.os.Handler;
 
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.RequestDebugger;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonRequest;
+import com.eTilbudsavis.etasdk.request.impl.ListRequest;
 
-public class RequestAutoFill {
+public abstract class RequestAutoFill {
 	
-	private boolean mIsRunning = false;
-	private Request<?> mParentRequest;
-	private OnAutoFillComplete mParentListener;
+	private OnAutoFillCompleteListener mListener;
 	private Handler mHandler;
-	private AtomicInteger mCount = new AtomicInteger();
+	private AutoFillParams mParams;
+	private List<Request<?>> mRequests;
 	
 	protected void done() {
-		if (mCount.get()==0 && !mParentRequest.isCanceled()) {
-			mParentListener.onComplete();
+		if (isFinished()) {
+			mListener.onComplete();
 		}
-		mCount.decrementAndGet();
 	}
 	
-	protected void run(Request<?> parent, OnAutoFillComplete listener) {
-		mParentRequest = parent;
-		mParentListener = listener;
-		mCount.incrementAndGet();
+	protected void addRequest(Request<?> request) {
+		mParams.applyParams(request);
+		mRequests.add(request);
 	}
 	
-	protected boolean isRunning() {
-		return mIsRunning;
+	public List<Request<?>> getRequests() {
+		return mRequests;
 	}
-	
-	protected void add(Request<?> request) {
-		if (mParentRequest.isCanceled()) {
-			return;
+
+	/**
+	 * Returns true if ALL requests in this {@link RequestAutoFill} is finished
+	 * @return true if all {@link RequestAutoFill} are finished, else false
+	 */
+	public boolean isFinished() {
+		for (Request<?> r : mRequests) {
+			if (!r.isFinished()) {
+				return false;
+			}
 		}
-		mCount.incrementAndGet();
-		request.setTag(mParentRequest.getTag());
-		request.setDebugger(mParentRequest.getDebugger());
+		return true;
 	}
 	
+	/**
+	 * Returns true if ALL requests in this {@link RequestAutoFill} is cancelled
+	 * @return true if all {@link RequestAutoFill} are cancelled, else false
+	 */
 	public boolean isCancled() {
-		return mParentRequest == null || mParentRequest.isCanceled();
+		for (Request<?> r : mRequests) {
+			if (!r.isCanceled()) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
-	public OnAutoFillComplete getListener() {
-		return mParentListener;
+	protected void setOnAutoFillCompleteListener(OnAutoFillCompleteListener listener) {
+		mListener = listener;
+	}
+	
+	public OnAutoFillCompleteListener getOnAutoFillCompleteListener() {
+		return mListener;
 	}
 	
 	public void setHandler(Handler h) {
@@ -57,23 +74,45 @@ public class RequestAutoFill {
 		return mHandler;
 	}
 	
-	public interface OnAutoFillComplete {
+	public interface OnAutoFillCompleteListener {
 		public void onComplete();
 	}
 	
 	public static class AutoFillParams {
 		
-		public Object tag = null;
-		public RequestDebugger debugger = null;
+		private Object tag = null;
+		private RequestDebugger debugger = null;
+		private Handler handler = null;
+		private boolean useLocation = true;
+		private boolean ignoreCache = false;
+		private boolean isCachable = true;
 		
-		public AutoFillParams(Object tag, RequestDebugger debugger) {
-			this.tag = tag;
-			this.debugger = debugger;
+		public void applyParams(Request<?> r) {
+			
+			r.setTag(tag);
+			r.setDebugger(debugger);
+			r.setUseLocation(useLocation);
+			r.setHandler(handler);
+			r.setIgnoreCache(ignoreCache);
+			
 		}
-
+		
+		public AutoFillParams() {
+			this(new Object(), null, null, true, false, true);
+		}
+		
 		public AutoFillParams(Request<?> parent) {
-			this(parent.getTag(), parent.getDebugger());
+			this(parent.getTag(), parent.getDebugger(), parent.getHandler(), parent.useLocation(), parent.ignoreCache(), parent.isCachable());
 		}
-
+		
+		public AutoFillParams(Object tag, RequestDebugger debugger, Handler h, boolean useLocation, boolean ignoreCache, boolean isCachable) {
+			this.tag = (tag == null ? new Object() : tag);
+			this.debugger = debugger;
+			this.handler = h;
+			this.useLocation = useLocation;
+			this.ignoreCache = ignoreCache;
+			this.isCachable = isCachable;
+		}
+		
 	}
 }

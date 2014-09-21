@@ -34,6 +34,8 @@ import com.eTilbudsavis.etasdk.Log.EventLog;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.request.RequestAutoFill;
+import com.eTilbudsavis.etasdk.request.RequestFilter;
 
 @SuppressWarnings("rawtypes")
 public class RequestQueue {
@@ -232,6 +234,12 @@ public class RequestQueue {
 	
 	public void clear() {
 		mCache.clear();
+	}
+	
+	public void add(RequestAutoFill autofiller) {
+		for (Request<?> r : autofiller.getRequests()) {
+			add(r);
+		}
 	}
 	
 	/**

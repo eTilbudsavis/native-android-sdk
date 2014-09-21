@@ -57,7 +57,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	
 	/** Sequence number used for prioritizing the queue */
 	private int mSequence = 0;
-
+	
 	/** Item for containing cache items */
 	private Map<String, Cache.Item> mCache = new HashMap<String, Cache.Item>();
 	
@@ -104,6 +104,13 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	
 	public enum Priority {
 		LOW, MEDIUM, HIGH
+	}
+	
+	protected void resetstate() {
+		getLog().add("request-state-reset");
+		mFinished = false;
+		mCanceled = false;
+		mCacheHit = false;
 	}
 	
 	/** Supported request methods. */
@@ -477,7 +484,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * @return
 	 */
 	public Request putParameters(Map<String, String> query) {
-		mParameters.putAll(query);
+		if (query != null) {
+			mParameters.putAll(query);
+		}
 		return Request.this;
 	}
 	

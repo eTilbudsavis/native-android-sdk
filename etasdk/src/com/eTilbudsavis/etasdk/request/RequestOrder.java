@@ -25,7 +25,7 @@ public abstract class RequestOrder implements IRequestParameter {
 	
 	private LinkedHashSet<String> mOrder = new LinkedHashSet<String>();
 	
-	protected void setDefault(String defaultOrder) {
+	public RequestOrder(String defaultOrder) {
 		mDefault = defaultOrder;
 	}
 	

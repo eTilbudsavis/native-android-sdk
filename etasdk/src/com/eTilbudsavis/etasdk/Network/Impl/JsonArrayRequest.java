@@ -35,6 +35,10 @@ import com.eTilbudsavis.etasdk.Utils.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class JsonArrayRequest extends JsonRequest<JSONArray> {
+
+	private static final String ERROR_OFFSET_NEGATIVE = "Offset may not be negative";
+
+	private static final String ERROR_LIMIT_NEGATIVE = "Limit may not be negative";
 	
 	/**  
 	 * The default limit for API calls.<br>
@@ -149,6 +153,9 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 * @return this object
 	 */
 	public Request<?> setOffset(int offset) {
+		if (offset<0) {
+			throw new IllegalStateException(ERROR_OFFSET_NEGATIVE);
+		}
 		getParameters().put(Param.OFFSET, String.valueOf(offset));
 		return this;
 	}
@@ -169,6 +176,9 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 * @return
 	 */
 	public Request<?> setLimit(int limit) {
+		if (limit<0) {
+			throw new IllegalStateException(ERROR_LIMIT_NEGATIVE);
+		}
 		getParameters().put(Param.LIMIT, String.valueOf(limit));
 		return this;
 	}
