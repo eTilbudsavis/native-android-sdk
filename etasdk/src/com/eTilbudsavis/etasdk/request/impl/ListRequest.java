@@ -14,10 +14,12 @@ public class ListRequest<T> extends JsonArrayRequest {
 
 	private static final String ERROR_NO_REQUESTQUEUE = 
 			"Request must initially be added to RequestQueue, subsequent pagination requests can be performed with next() method";
-
+	
+	private Listener<T> mListener;
 	private IRequestParameter mFilters;
 	private IRequestParameter mOrder;
 	private IRequestParameter mParam;
+	private boolean mDeliverOnThread = false;
 	
 	public ListRequest(String url, Listener<JSONArray> listener) {
 		super(url, listener);
@@ -41,6 +43,15 @@ public class ListRequest<T> extends JsonArrayRequest {
 	
 	public void setParameters(RequestParameter params) {
 		mParam = params;
+	}
+	
+	public void setDeliverOnThread(boolean deliverOnThread) {
+		mDeliverOnThread = deliverOnThread;
+	}
+	
+	@Override
+	public boolean deliverOnThread() {
+		return mDeliverOnThread;
 	}
 	
 	public void nextPage() {

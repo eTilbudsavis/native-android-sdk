@@ -15,27 +15,32 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.Network;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import android.os.Handler;
+import android.os.Looper;
 
 public class Delivery {
 	
 	/** Used for posting responses, typically to the main thread. */
-    private final Executor mResponsePoster;
+	private final Handler mHandler;
+    private final ExecutorService mExecutorService;
 
     /**
      * Creates a new response delivery interface.
      * @param handler {@link Handler} to post responses on
      */
-    public Delivery(final Handler handler) {
-        // Make an Executor that just wraps the handler.
-        mResponsePoster = new Executor() {
-        	
-            public void execute(Runnable command) {
-                handler.post(command);
-            }
-        };
+    public Delivery(ExecutorService executor) {
+    	this(new Handler(Looper.getMainLooper()), executor);
+    }
+    
+    /**
+     * Creates a new response delivery interface.
+     * @param handler {@link Handler} to post responses on
+     */
+    public Delivery(Handler h, ExecutorService executor) {
+    	mHandler = h;
+    	mExecutorService = executor;
     }
     
     /**
@@ -46,12 +51,18 @@ public class Delivery {
     public void postResponse(Request<?> request, Response<?> response) {
     	request.addEvent("post-response");
     	
-    	if (request.getHandler() != null) {
-    		request.getHandler().post(new DeliveryRunnable(request, response));
-    	} else {
-            mResponsePoster.execute(new DeliveryRunnable(request, response));
-    	}
+    	DeliveryRunnable runner = new DeliveryRunnable(request, response);
     	
+    	if (request.getHandler() != null) {
+    		// Deliver to custom handler (custom thread)
+    		request.getHandler().post(runner);
+    	} else if (request.deliverOnThread()) {
+    		// Deliver to a SDK provided thread (to e.g. perform an autocomplete action)
+    		mExecutorService.submit(runner);
+    	} else {
+    		// Return to the main thread, this is default behavior
+            mHandler.post(runner);
+    	}
     	
     }
     
@@ -77,11 +88,11 @@ public class Delivery {
             // If this request has canceled, finish it and don't deliver.
             if (mRequest.isCanceled()) {
             	mRequest.finish("cancelled-at-delivery");
-                return;
+            } else {
+            	mRequest.finish("execution-finished-succesfully");
+                mRequest.deliverResponse(mResponse.result, mResponse.error);
             }
             
-        	mRequest.finish("execution-finished-succesfully");
-            mRequest.deliverResponse(mResponse.result, mResponse.error);
             
        }
     }

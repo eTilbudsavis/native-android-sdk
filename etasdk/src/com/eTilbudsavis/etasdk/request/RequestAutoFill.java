@@ -6,14 +6,10 @@ import android.os.Handler;
 
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.RequestDebugger;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonRequest;
-import com.eTilbudsavis.etasdk.request.impl.ListRequest;
 
 public abstract class RequestAutoFill {
 	
 	private OnAutoFillCompleteListener mListener;
-	private Handler mHandler;
 	private AutoFillParams mParams;
 	private List<Request<?>> mRequests;
 	
@@ -64,14 +60,6 @@ public abstract class RequestAutoFill {
 	
 	public OnAutoFillCompleteListener getOnAutoFillCompleteListener() {
 		return mListener;
-	}
-	
-	public void setHandler(Handler h) {
-		mHandler = h;
-	}
-	
-	protected Handler getHandlet() {
-		return mHandler;
 	}
 	
 	public interface OnAutoFillCompleteListener {

@@ -136,6 +136,9 @@ public class SyncManager {
 	/** Reference to the {@link Eta} object */
 	private Eta mEta;
 	
+	/** Thread running the options */
+	HandlerThread mThread;
+	
 	/** The Handler instantiated on the sync Thread */
 	private Handler mHandler;
 	
@@ -302,9 +305,9 @@ public class SyncManager {
 		SyncLog.setLog(LOG);
 		SyncLog.setLogSync(LOG_SYNC);
 		// Create a new thread for a handler, so that i can later post content to that thread.
-		HandlerThread t = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
-		t.start();
-		mHandler = new Handler(t.getLooper());
+		mThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
+		mThread.start();
+		mHandler = new Handler(mThread.getLooper());
 	}
 
 	/**

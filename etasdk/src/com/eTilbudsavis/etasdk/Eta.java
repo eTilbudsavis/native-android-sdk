@@ -101,6 +101,7 @@ public class Eta {
 	/** System manager for getting the connectivity status */
 	private ConnectivityManager mConnectivityManager;
 	
+	/** My go to executor service */
 	private ExecutorService mExecutor;
 	
 	/**

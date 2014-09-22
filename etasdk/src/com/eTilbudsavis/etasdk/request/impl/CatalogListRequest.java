@@ -11,7 +11,6 @@ import org.json.JSONArray;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
@@ -35,9 +34,8 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 	
 	public static class Builder extends ListRequestBuilder<List<Catalog>>{
 		
-		private Listener<List<Catalog>> mListener;
-		
-		OnAutoFillCompleteListener listener = new OnAutoFillCompleteListener() {
+		private CatalogAutoFill mFiller;
+		OnAutoFillCompleteListener mComppleteListener = new OnAutoFillCompleteListener() {
 			
 			public void onComplete() {
 				
@@ -45,19 +43,19 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 		};
 		
 		public Builder(Listener<List<Catalog>> l) {
+			super(l);
 			
-			super(new CatalogListRequest(Endpoint.CATALOG_LIST, new Listener<JSONArray>() {
+			setRequest(new CatalogListRequest(Endpoint.CATALOG_LIST, new Listener<JSONArray>() {
 				
 				public void onComplete(JSONArray response, EtaError error) {
 					if (response != null) {
 						List<Catalog> catalogs = Catalog.fromJSON(response);
+						mFiller.createRequests(Builder.this.getRequest(), catalogs, mComppleteListener);
 					} else {
 						
 					}
 				}
 			}));
-			mListener = l;
-			
 		}
 		
 		public void setFilter(Filter filter) {
@@ -73,8 +71,9 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 		}
 		
 		public void setAutoFill(CatalogAutoFill filler) {
-			filler.setOnAutoFillCompleteListener(listener);
-			super.setAutoFiller(filler);
+			mFiller = filler;
+			mFiller.setOnAutoFillCompleteListener(mComppleteListener);
+			super.setAutoFiller(mFiller);
 		}
 		
 		@Override
@@ -99,71 +98,72 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 			return super.build();
 		}
 		
-		public static class Filter extends ListFilter {
-			
-			public void addCatalogFilter(Set<String> catalogIds) {
-				add(CATALOG_IDS, catalogIds);
-			}
-			
-			public void addDealerFilter(Set<String> dealerIds) {
-				add(DEALER_IDS, dealerIds);
-			}
-			
-			public void addStoreFilter(Set<String> storeIds) {
-				add(STORE_IDS, storeIds);
-			}
-			
-			public void addCatalogFilter(String catalogId) {
-				add(CATALOG_IDS, catalogId);
-			}
-			
-			public void addDealerFilter(String dealerId) {
-				add(DEALER_IDS, dealerId);
-			}
-			
-			public void addStoreFilter(String storeId) {
-				add(STORE_IDS, storeId);
-			}
-			
-		}
-		
-		public static class Order extends RequestOrder {
-			
-			public Order() {
-				super("-" + POPULARITY);
-			}
-			
-			public void byPopularity(boolean enable, boolean descending) {
-				setOrder(enable, descending, POPULARITY);
-			}
-			
-			public void byDealer(boolean enable, boolean descending) {
-				setOrder(enable, descending, DEALER);
-			}
-			
-			public void byCreated(boolean enable, boolean descending) {
-				setOrder(enable, descending, CREATED);
-			}
+	}
 
-			public void byExpirationDate(boolean enable, boolean descending) {
-				setOrder(enable, descending, EXPIRATION_DATE);
-			}
-			
-			public void byPublicationDate(boolean enable, boolean descending) {
-				setOrder(enable, descending, PUBLICATION_DATE);
-			}
-			
-			public void byDistance(boolean enable, boolean descending) {
-				setOrder(enable, descending, DISTANCE);
-			}
-			
+	public static class Filter extends ListFilter {
+		
+		public void addCatalogFilter(Set<String> catalogIds) {
+			add(CATALOG_IDS, catalogIds);
 		}
 		
-		public class Parameter extends ListParameter {
-			// Intentionally left empty to create a new type, but with all parent properties
+		public void addDealerFilter(Set<String> dealerIds) {
+			add(DEALER_IDS, dealerIds);
+		}
+		
+		public void addStoreFilter(Set<String> storeIds) {
+			add(STORE_IDS, storeIds);
+		}
+		
+		public void addCatalogFilter(String catalogId) {
+			add(CATALOG_IDS, catalogId);
+		}
+		
+		public void addDealerFilter(String dealerId) {
+			add(DEALER_IDS, dealerId);
+		}
+		
+		public void addStoreFilter(String storeId) {
+			add(STORE_IDS, storeId);
 		}
 		
 	}
+	
+	public static class Order extends RequestOrder {
+		
+		public Order() {
+			super("-" + POPULARITY);
+		}
+		
+		public void byPopularity(boolean enable, boolean descending) {
+			setOrder(enable, descending, POPULARITY);
+		}
+		
+		public void byDealer(boolean enable, boolean descending) {
+			setOrder(enable, descending, DEALER);
+		}
+		
+		public void byCreated(boolean enable, boolean descending) {
+			setOrder(enable, descending, CREATED);
+		}
+
+		public void byExpirationDate(boolean enable, boolean descending) {
+			setOrder(enable, descending, EXPIRATION_DATE);
+		}
+		
+		public void byPublicationDate(boolean enable, boolean descending) {
+			setOrder(enable, descending, PUBLICATION_DATE);
+		}
+		
+		public void byDistance(boolean enable, boolean descending) {
+			setOrder(enable, descending, DISTANCE);
+		}
+		
+	}
+	
+	public static class Parameter extends ListParameter {
+		// Intentionally left empty to create a new type, but with all parent properties
+	}
+	
 	public static class CatalogAutoFill extends RequestAutoFill {
 		
 		private List<Catalog> mCatalogs;

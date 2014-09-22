@@ -16,12 +16,24 @@ public abstract class ListRequestBuilder<T> {
 		mRequest.putParameters(mFilters.getParameter());
 		mRequest.putParameters(mOrder.getParameter());
 		mRequest.putParameters(mParam.getParameter());
-		
+		mRequest.setDeliverOnThread(mAutofill != null);
 		return mRequest;
 	}
 	
-	public ListRequestBuilder(ListRequest<?> request) {
+	public ListRequestBuilder(Listener<T> l) {
+		mListener = l;
+	}
+	
+	protected Listener<T> getListener() {
+		return mListener;
+	}
+	
+	protected void setRequest(ListRequest<?> request) {
 		mRequest = request;
+	}
+	
+	protected ListRequest<?> getRequest() {
+		return mRequest;
 	}
 	
 	protected IRequestParameter getFilter() {

@@ -378,6 +378,14 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	}
 	
 	/**
+	 * Method for determining of the response should be delivered on the current thread, instead of
+	 * @return
+	 */
+	public boolean deliverOnThread() {
+		return false;
+	}
+	
+	/**
 	 * Get the custom handler for this request.
 	 * @return a handler or null, if using default handler
 	 */

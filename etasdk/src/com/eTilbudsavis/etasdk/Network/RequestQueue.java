@@ -111,7 +111,7 @@ public class RequestQueue {
      * @param network - the implementation you want to use for this RequestQueue
 	 */
     public RequestQueue(Eta eta, Cache cache, Network network) {
-    	this(eta, cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE, new Delivery(eta.getHandler()));
+    	this(eta, cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE, new Delivery(eta.getExecutor()));
     }
     
 	/**
