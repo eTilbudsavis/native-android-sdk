@@ -236,12 +236,6 @@ public class RequestQueue {
 		mCache.clear();
 	}
 	
-	public void add(RequestAutoFill autofiller) {
-		for (Request<?> r : autofiller.getRequests()) {
-			add(r);
-		}
-	}
-	
 	/**
 	 * Add a new request to this RequestQueue, everything from this point onward will be performed on separate threads
 	 * @param request

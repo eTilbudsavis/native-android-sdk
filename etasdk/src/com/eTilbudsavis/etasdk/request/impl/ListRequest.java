@@ -2,27 +2,27 @@ package com.eTilbudsavis.etasdk.request.impl;
 
 import org.json.JSONArray;
 
+import android.os.Handler;
+import android.os.Looper;
+
+import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.Utils.Param;
-import com.eTilbudsavis.etasdk.request.IRequestParameter;
-import com.eTilbudsavis.etasdk.request.RequestFilter;
-import com.eTilbudsavis.etasdk.request.RequestOrder;
-import com.eTilbudsavis.etasdk.request.RequestParameter;
+import com.eTilbudsavis.etasdk.request.RequestAutoFill;
+import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
+import com.eTilbudsavis.etasdk.request.RequestAutoFill.OnAutoFillCompleteListener;
 
 public class ListRequest<T> extends JsonArrayRequest {
-
+	
 	private static final String ERROR_NO_REQUESTQUEUE = 
 			"Request must initially be added to RequestQueue, subsequent pagination requests can be performed with next() method";
 	
 	private Listener<T> mListener;
-	private IRequestParameter mFilters;
-	private IRequestParameter mOrder;
-	private IRequestParameter mParam;
-	private boolean mDeliverOnThread = false;
+	private RequestAutoFill<T> mFiller;
 	
-	public ListRequest(String url, Listener<JSONArray> listener) {
+	public ListRequest(String url, Listener<JSONArray> listener, Listener<T> objListener) {
 		super(url, listener);
+		mListener = objListener;
 	}
 	
 	public ListRequest(Method method, String url, Listener<JSONArray> listener) {
@@ -33,25 +33,57 @@ public class ListRequest<T> extends JsonArrayRequest {
 		super(method, url, requestBody, listener);
 	}
 	
-	public void setFilter(RequestFilter<?> filter) {
-		mFilters = filter;
+	public void setAutoFill(RequestAutoFill<T> filler) {
+		mFiller = filler;
 	}
 	
-	public void setOrder(RequestOrder order) {
-		mOrder = order;
+	@Override
+	public void cancel() {
+		mFiller.cancel();
+		super.cancel();
 	}
 	
-	public void setParameters(RequestParameter params) {
-		mParam = params;
+	protected void runAutoFiller(final T data, final EtaError error) {
+		addEvent("callback-intercepted");
+		if (data == null) {
+			deliver(data, error);
+		} else {
+			mFiller.execute(data, getRequestQueue(), new AutoFillParams(this), new OnAutoFillCompleteListener() {
+
+				public void onComplete() {
+					deliver(data, error);
+				}
+				
+			});
+		}
 	}
 	
-	public void setDeliverOnThread(boolean deliverOnThread) {
-		mDeliverOnThread = deliverOnThread;
+	private void deliver(final T data, final EtaError error) {
+		
+		Runnable r = new Runnable() {
+			
+			public void run() {
+				
+	            addEvent("request-on-new-thread");
+	            
+	            if (!isCanceled()) {
+	            	addEvent("performing-callback-to-original-listener");
+	            	mListener.onComplete(data, error);
+	            }
+			}
+		};
+		
+		if (getHandler() == null) {
+			new Handler(Looper.getMainLooper()).post(r);
+		} else {
+			getHandler().post(r);
+		}
+		
 	}
 	
 	@Override
 	public boolean deliverOnThread() {
-		return mDeliverOnThread;
+		return mFiller != null;
 	}
 	
 	public void nextPage() {

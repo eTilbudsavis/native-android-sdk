@@ -1,7 +1,6 @@
 package com.eTilbudsavis.etasdk.request.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,43 +18,29 @@ import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.request.ListRequestBuilder;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
-import com.eTilbudsavis.etasdk.request.RequestAutoFill.OnAutoFillCompleteListener;
 import com.eTilbudsavis.etasdk.request.RequestOrder;
 
 public class CatalogListRequest extends ListRequest<List<Catalog>> {
 	
-	private CatalogListRequest(String url, Listener<JSONArray> listener) {
-		super(url, listener);
-	}
-	
-	private CatalogListRequest(Method method, String url, JSONArray requestBody, Listener<JSONArray> listener) {
-		super(method, url, requestBody, listener);
+	private CatalogListRequest(Listener<JSONArray> listener, Listener<List<Catalog>> objListener) {
+		super(Endpoint.CATALOG_LIST, listener, objListener);
 	}
 	
 	public static class Builder extends ListRequestBuilder<List<Catalog>>{
 		
-		private CatalogAutoFill mFiller;
-		OnAutoFillCompleteListener mComppleteListener = new OnAutoFillCompleteListener() {
-			
-			public void onComplete() {
-				
-			}
-		};
-		
 		public Builder(Listener<List<Catalog>> l) {
 			super(l);
-			
-			setRequest(new CatalogListRequest(Endpoint.CATALOG_LIST, new Listener<JSONArray>() {
+			setRequest(new CatalogListRequest(new Listener<JSONArray>() {
 				
 				public void onComplete(JSONArray response, EtaError error) {
+					List<Catalog> catalogs = null;
 					if (response != null) {
-						List<Catalog> catalogs = Catalog.fromJSON(response);
-						mFiller.createRequests(Builder.this.getRequest(), catalogs, mComppleteListener);
-					} else {
-						
+						catalogs = Catalog.fromJSON(response);
 					}
+					getRequest().runAutoFiller(catalogs, error);
 				}
-			}));
+			}, l));
+			
 		}
 		
 		public void setFilter(Filter filter) {
@@ -71,13 +56,11 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 		}
 		
 		public void setAutoFill(CatalogAutoFill filler) {
-			mFiller = filler;
-			mFiller.setOnAutoFillCompleteListener(mComppleteListener);
-			super.setAutoFiller(mFiller);
+			super.setAutoFiller(filler);
 		}
 		
 		@Override
-		public ListRequest build() {
+		public ListRequest<List<Catalog>> build() {
 			
 			if (getFilter() == null) {
 				setFilter(new Filter());
@@ -99,7 +82,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 		}
 		
 	}
-
+	
 	public static class Filter extends ListFilter {
 		
 		public void addCatalogFilter(Set<String> catalogIds) {
@@ -164,9 +147,8 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 		// Intentionally left empty to create a new type, but with all parent properties
 	}
 	
-	public static class CatalogAutoFill extends RequestAutoFill {
+	public static class CatalogAutoFill extends RequestAutoFill<List<Catalog>> {
 		
-		private List<Catalog> mCatalogs;
 		private boolean mPages;
 		private boolean mDealer;
 		private boolean mStore;
@@ -174,55 +156,45 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 		public CatalogAutoFill() {
 			this(false, false, false);
 		}
-
+		
 		public CatalogAutoFill(boolean pages, boolean dealer, boolean store) {
 			mPages = pages;
 			mDealer = dealer;
 			mStore = store;
 		}
-		
-		public void createRequests(Request<?> parent, Catalog c, OnAutoFillCompleteListener listener) {
-			List<Catalog> list = mCatalogs = Collections.synchronizedList(new ArrayList<Catalog>());
-			list.add(c);
-			createRequests(new AutoFillParams(parent), list, listener);
-		}
-		
-		protected void setOnAutoFillCompleteListener(OnAutoFillCompleteListener listener) {
-			super.setOnAutoFillCompleteListener(listener);
-		}
-		
-		public void createRequests(Request<?> parent, List<Catalog> list, OnAutoFillCompleteListener listener) {
-			createRequests(new AutoFillParams(parent), list, listener);
-		}
-		
-		protected void createRequests(AutoFillParams params, List<Catalog> list, OnAutoFillCompleteListener listener) {
+
+		@Override
+		public List<Request<?>> createRequests(List<Catalog> data) {
 			
-			mCatalogs = list;
+			List<Request<?>> reqs = new ArrayList<Request<?>>();
 			
-			if (mCatalogs != null) {
+			if (!data.isEmpty()) {
 				
 				if (mStore) {
-					addRequest(getStoreRequest());
+					reqs.add(getStoreRequest(data));
 				}
 				
 				if (mDealer) {
-					addRequest(getDealerRequest());
+					reqs.add(getDealerRequest(data));
 				}
 				
 				if (mPages) {
-					addRequest(getPagesRequest());
+					
+					for (Catalog c : data) {
+						reqs.add(getPagesRequest(c));
+					}
+					
 				}
 				
 			}
 			
-			done();
-			
+			return reqs;
 		}
 		
-		private JsonArrayRequest getDealerRequest() {
+		private JsonArrayRequest getDealerRequest(final List<Catalog> catalogs) {
 			
-			Set<String> ids = new HashSet<String>(mCatalogs.size());
-			for (Catalog c : mCatalogs) {
+			Set<String> ids = new HashSet<String>(catalogs.size());
+			for (Catalog c : catalogs) {
 				ids.add(c.getDealerId());
 			}
 			
@@ -232,7 +204,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 					
 					if (response != null) {
 						List<Dealer> dealers = Dealer.fromJSON(response);
-						for(Catalog c : mCatalogs) {
+						for(Catalog c : catalogs) {
 							for(Dealer d: dealers) {
 								if (c.getDealerId().equals(d.getId())) {
 									c.setDealer(d);
@@ -252,15 +224,15 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 			return req;
 		}
 
-		private JsonArrayRequest getPagesRequest() {
-			// TODO where to get pages?
+		private JsonArrayRequest getPagesRequest(Catalog c) {
+			
 			return null;
 		}
 		
-		private JsonArrayRequest getStoreRequest() {
+		private JsonArrayRequest getStoreRequest(final List<Catalog> catalogs) {
 			
-			Set<String> ids = new HashSet<String>(mCatalogs.size());
-			for (Catalog c : mCatalogs) {
+			Set<String> ids = new HashSet<String>(catalogs.size());
+			for (Catalog c : catalogs) {
 				ids.add(c.getStoreId());
 			}
 			
@@ -270,7 +242,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 					
 					if (response != null) {
 						List<Store> stores = Store.fromJSON(response);
-						for(Catalog c : mCatalogs) {
+						for(Catalog c : catalogs) {
 							for(Store s: stores) {
 								if (c.getStoreId().equals(s.getId())) {
 									c.setStore(s);
@@ -288,7 +260,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 			req.setIds(Param.FILTER_STORE_IDS, ids);
 			return req;
 		}
-		
+
 	}
 
 }

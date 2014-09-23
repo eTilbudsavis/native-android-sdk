@@ -5,34 +5,35 @@ import com.eTilbudsavis.etasdk.request.impl.ListRequest;
 
 public abstract class ListRequestBuilder<T> {
 	
-	ListRequest mRequest;
+	private ListRequest<T> mRequest;
 	private Listener<T> mListener;
+	private RequestAutoFill<T> mAutofill;
 	private IRequestParameter mFilters;
 	private IRequestParameter mOrder;
 	private IRequestParameter mParam;
-	private RequestAutoFill mAutofill;
 	
-	public ListRequest build() {
+	public ListRequest<T> build() {
 		mRequest.putParameters(mFilters.getParameter());
 		mRequest.putParameters(mOrder.getParameter());
 		mRequest.putParameters(mParam.getParameter());
-		mRequest.setDeliverOnThread(mAutofill != null);
+		mRequest.setAutoFill(mAutofill);
 		return mRequest;
 	}
-	
+
 	public ListRequestBuilder(Listener<T> l) {
 		mListener = l;
 	}
-	
-	protected Listener<T> getListener() {
-		return mListener;
+
+	public ListRequestBuilder(Listener<T> l, ListRequest<T> r) {
+		mRequest = r;
+		mListener = l;
 	}
 	
-	protected void setRequest(ListRequest<?> request) {
+	protected void setRequest(ListRequest<T> request) {
 		mRequest = request;
 	}
 	
-	protected ListRequest<?> getRequest() {
+	protected ListRequest<T> getRequest() {
 		return mRequest;
 	}
 	
@@ -60,11 +61,11 @@ public abstract class ListRequestBuilder<T> {
 		mParam = params;
 	}
 	
-	protected RequestAutoFill getAutofill() {
+	protected RequestAutoFill<T> getAutofill() {
 		return mAutofill;
 	}
 	
-	protected void setAutoFiller(RequestAutoFill filler) {
+	protected void setAutoFiller(RequestAutoFill<T> filler) {
 		mAutofill = filler;
 	}
 	

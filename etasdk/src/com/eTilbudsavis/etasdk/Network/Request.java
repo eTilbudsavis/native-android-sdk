@@ -62,7 +62,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	private Map<String, Cache.Item> mCache = new HashMap<String, Cache.Item>();
 	
 	/** Parameters to add to request */
-	private Map<String, String> mParameters;
+	private Map<String, String> mParameters = new HashMap<String, String>();
 	
 	/** Should this request use location in the query */
 	private boolean mUseLocation = true;
@@ -101,7 +101,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	
 	/** A tag to identify the request, useful for bulk operations */
 	private Object mTag;
-	
+
+    private boolean mDeliverOnThread = false;
+    
 	public enum Priority {
 		LOW, MEDIUM, HIGH
 	}
@@ -174,6 +176,12 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * @return this object
      */
     public Request finish(String reason) {
+    	
+    	if (mFinished) {
+        	EtaLog.d(TAG, getClass().getSimpleName() + " - BAD is finished");
+    	} else {
+        	EtaLog.d(TAG, getClass().getSimpleName() + " - FINISHED");
+    	}
     	
     	mEventLog.add(reason);
     	
@@ -318,7 +326,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return this;
 	}
 	
-	protected RequestQueue getRequestQueue() {
+	public RequestQueue getRequestQueue() {
 		return mRequestQueue;
 	}
 	
@@ -381,10 +389,14 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * Method for determining of the response should be delivered on the current thread, instead of
 	 * @return
 	 */
-	public boolean deliverOnThread() {
-		return false;
-	}
-	
+    public boolean deliverOnThread() {
+    	return mDeliverOnThread;
+    }
+    
+    public void setDeliverOnThread(boolean deliverResponseOnthread) {
+    	mDeliverOnThread = deliverResponseOnthread;
+    }
+    
 	/**
 	 * Get the custom handler for this request.
 	 * @return a handler or null, if using default handler

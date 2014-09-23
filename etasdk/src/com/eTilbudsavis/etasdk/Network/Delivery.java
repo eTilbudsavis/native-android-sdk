@@ -30,6 +30,14 @@ public class Delivery {
      * Creates a new response delivery interface.
      * @param handler {@link Handler} to post responses on
      */
+    public Delivery() {
+    	this(new Handler(Looper.getMainLooper()), null);
+    }
+
+    /**
+     * Creates a new response delivery interface.
+     * @param handler {@link Handler} to post responses on
+     */
     public Delivery(ExecutorService executor) {
     	this(new Handler(Looper.getMainLooper()), executor);
     }
@@ -56,7 +64,7 @@ public class Delivery {
     	if (request.getHandler() != null) {
     		// Deliver to custom handler (custom thread)
     		request.getHandler().post(runner);
-    	} else if (request.deliverOnThread()) {
+    	} else if (request.deliverOnThread() && mExecutorService != null) {
     		// Deliver to a SDK provided thread (to e.g. perform an autocomplete action)
     		mExecutorService.submit(runner);
     	} else {
@@ -83,9 +91,8 @@ public class Delivery {
         @SuppressWarnings("unchecked")
         public void run() {
         	
-            mRequest.addEvent("request-on-main-thread");
+            mRequest.addEvent("request-on-new-thread");
             
-            // If this request has canceled, finish it and don't deliver.
             if (mRequest.isCanceled()) {
             	mRequest.finish("cancelled-at-delivery");
             } else {

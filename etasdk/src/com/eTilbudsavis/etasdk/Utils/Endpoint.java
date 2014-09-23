@@ -116,6 +116,11 @@ public class Endpoint {
 		return String.format("/v2/catalogs/%s", catalogId);
 	}
 
+	/** /v2/catalogs/{catalog_id} */
+	public static String catalogPages(String catalogId) {
+		return String.format("/v2/catalogs/%s/pages", catalogId);
+	}
+
 	/** /v2/catalogs/{catalog_id}/collect */
 	public static String catalogCollect(String catalogId) {
 		return String.format("/v2/catalogs/%s/collect", catalogId);
