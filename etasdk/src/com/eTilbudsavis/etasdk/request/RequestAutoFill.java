@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.os.Handler;
 
+import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.RequestDebugger;
 import com.eTilbudsavis.etasdk.Network.RequestQueue;
@@ -18,10 +19,17 @@ public abstract class RequestAutoFill<T> {
 	
 	public abstract List<Request<?>> createRequests(T data);
 	
-	public void execute(T data, RequestQueue rq, AutoFillParams params, OnAutoFillCompleteListener l) {
-		mData = data;
+	public void setAutoFillParams(AutoFillParams params) {
 		mParams = params;
+	}
+	
+	public void setOnAutoFillCompleteListener(OnAutoFillCompleteListener l) {
 		mListener = l;
+	}
+	
+	public void execute(T data, RequestQueue rq) {
+		mRequests.clear();
+		mData = data;
 		mRequests.addAll(createRequests(mData));
 		runRequests(rq);
 		done();
@@ -32,7 +40,6 @@ public abstract class RequestAutoFill<T> {
 		for (Request<?> r : mRequests) {
 			r.addEvent("recieved-by-autofiller");
 			mParams.applyParams(r);
-			r.setDeliverOnThread(true);
 			rq.add(r);
 		}
 		

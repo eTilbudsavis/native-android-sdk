@@ -6,41 +6,41 @@ import java.util.List;
 import java.util.Set;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
+import com.eTilbudsavis.etasdk.EtaObjects.Pages;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Param;
-import com.eTilbudsavis.etasdk.request.ListRequestBuilder;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
-import com.eTilbudsavis.etasdk.request.RequestOrder;
 
 public class CatalogListRequest extends ListRequest<List<Catalog>> {
 	
-	private CatalogListRequest(Listener<JSONArray> listener, Listener<List<Catalog>> objListener) {
-		super(Endpoint.CATALOG_LIST, listener, objListener);
+	private CatalogListRequest(Listener<List<Catalog>> l) {
+		super(Endpoint.CATALOG_LIST, l);
 	}
 	
-	public static class Builder extends ListRequestBuilder<List<Catalog>>{
+	@Override
+	protected void deliverResponse(JSONArray response, EtaError error) {
+		addEvent("delivery-intercepted");
+		List<Catalog> mCatalogs = null;
+		if (response != null) {
+			mCatalogs = Catalog.fromJSON(response);
+		}
+		runAutoFill(mCatalogs, error);
+	}
+	
+	public static class Builder extends ListRequest.Builder<List<Catalog>>{
 		
 		public Builder(Listener<List<Catalog>> l) {
-			super(l);
-			setRequest(new CatalogListRequest(new Listener<JSONArray>() {
-				
-				public void onComplete(JSONArray response, EtaError error) {
-					List<Catalog> catalogs = null;
-					if (response != null) {
-						catalogs = Catalog.fromJSON(response);
-					}
-					getRequest().runAutoFiller(catalogs, error);
-				}
-			}, l));
-			
+			super(new CatalogListRequest(l));
 		}
 		
 		public void setFilter(Filter filter) {
@@ -83,7 +83,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 		
 	}
 	
-	public static class Filter extends ListFilter {
+	public static class Filter extends ListRequest.Filter {
 		
 		public void addCatalogFilter(Set<String> catalogIds) {
 			add(CATALOG_IDS, catalogIds);
@@ -111,7 +111,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 		
 	}
 	
-	public static class Order extends RequestOrder {
+	public static class Order extends ListRequest.Order {
 		
 		public Order() {
 			super("-" + POPULARITY);
@@ -143,7 +143,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 		
 	}
 	
-	public static class Parameter extends ListParameter {
+	public static class Parameter extends ListRequest.Parameter {
 		// Intentionally left empty to create a new type, but with all parent properties
 	}
 	
@@ -224,9 +224,18 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 			return req;
 		}
 
-		private JsonArrayRequest getPagesRequest(Catalog c) {
+		private JsonObjectRequest getPagesRequest(final Catalog c) {
 			
-			return null;
+			JsonObjectRequest req = new JsonObjectRequest(Endpoint.catalogPages(c.getId()), new Listener<JSONObject>() {
+
+				public void onComplete(JSONObject response, EtaError error) {
+					if (response != null) {
+						c.setPages(Pages.fromJSON(response));
+					}
+				}
+			});
+			
+			return req;
 		}
 		
 		private JsonArrayRequest getStoreRequest(final List<Catalog> catalogs) {

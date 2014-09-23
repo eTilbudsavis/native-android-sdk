@@ -101,9 +101,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	
 	/** A tag to identify the request, useful for bulk operations */
 	private Object mTag;
-
-    private boolean mDeliverOnThread = false;
-    
+	
 	public enum Priority {
 		LOW, MEDIUM, HIGH
 	}
@@ -326,7 +324,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return this;
 	}
 	
-	public RequestQueue getRequestQueue() {
+	protected RequestQueue getRequestQueue() {
 		return mRequestQueue;
 	}
 	
@@ -390,11 +388,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * @return
 	 */
     public boolean deliverOnThread() {
-    	return mDeliverOnThread;
-    }
-    
-    public void setDeliverOnThread(boolean deliverResponseOnthread) {
-    	mDeliverOnThread = deliverResponseOnthread;
+    	return false;
     }
     
 	/**
