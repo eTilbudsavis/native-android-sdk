@@ -29,7 +29,6 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 	
 	@Override
 	protected void deliverResponse(JSONArray response, EtaError error) {
-		addEvent("delivery-intercepted");
 		List<Catalog> mCatalogs = null;
 		if (response != null) {
 			mCatalogs = Catalog.fromJSON(response);

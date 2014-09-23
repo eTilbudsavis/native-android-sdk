@@ -54,7 +54,7 @@ public class ListRequest<T> extends JsonArrayRequest {
 	}
 	
 	protected void runAutoFill(final T response, final EtaError error) {
-		addEvent("delivery-intercepted-by-autofill");
+		addEvent("delivery-intercepted");
 		if (response == null) {
 			deliver(response, error);
 		} else {

@@ -39,6 +39,7 @@ public abstract class RequestOrder implements IRequestParameter {
 	}
 	
 	protected boolean setOrder(boolean orderBy, boolean descending, String order) {
+		// TODO this probably won't cut it, please remember to fix the descending filter
 		if (orderBy) {
 			return set((descending ? "-" : "") + order);
 		} else {
