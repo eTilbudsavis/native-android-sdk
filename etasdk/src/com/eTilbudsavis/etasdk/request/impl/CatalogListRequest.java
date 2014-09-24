@@ -223,7 +223,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 			req.setIds(Param.FILTER_DEALER_IDS, ids);
 			return req;
 		}
-
+		
 		private JsonArrayRequest getPagesRequest(final Catalog c) {
 			
 			JsonArrayRequest req = new JsonArrayRequest(Endpoint.catalogPages(c.getId()), new Listener<JSONArray>() {

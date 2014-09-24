@@ -58,7 +58,7 @@ public class Pages extends EtaObject implements Serializable {
 		}
 		return p;
 	}
-
+	
 	@Override
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
@@ -74,7 +74,7 @@ public class Pages extends EtaObject implements Serializable {
 			
 			for (String s : getZoom())
 				aZoom.put(s);
-
+			
 			o.put(ServerKey.THUMB, aThumb);
 			o.put(ServerKey.VIEW, aView);
 			o.put(ServerKey.ZOOM, aZoom);
