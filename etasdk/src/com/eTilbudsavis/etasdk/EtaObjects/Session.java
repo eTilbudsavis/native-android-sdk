@@ -22,13 +22,15 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Permission;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Session extends EtaObject implements Serializable {
+public class Session implements EtaObject<JSONObject>, Serializable {
 	
-	public static final String TAG = "Session";
+	public static final String TAG = Session.class.getSimpleName();
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -38,15 +40,11 @@ public class Session extends EtaObject implements Serializable {
 	private Permission mPermission = null;
 	private String mProvider = null;
 	
-	public Session() { }
-	
-	public static Session fromJSON(JSONObject session) {	
-		return fromJSON(new Session(), session);
-	}
-	
-	public static Session fromJSON(Session s, JSONObject session) {
-		if (s == null) s = new Session();
-		if (session == null) return s;
+	public static Session fromJSON(JSONObject session) {
+		Session s = new Session();
+		if (session == null) {
+			return s;
+		}
 		
 		s.setToken(Json.valueOf(session, ServerKey.TOKEN));
 		s.setExpires(Json.valueOf(session, ServerKey.EXPIRES));
@@ -77,8 +75,7 @@ public class Session extends EtaObject implements Serializable {
 		
 		return s;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {

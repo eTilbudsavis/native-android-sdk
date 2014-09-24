@@ -13,109 +13,75 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Pages extends EtaObject implements Serializable {
+public class Images implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Pages";
-
-	private ArrayList<String> mThumb = new ArrayList<String>();
-	private ArrayList<String> mView = new ArrayList<String>();
-	private ArrayList<String> mZoom = new ArrayList<String>();
+	public static final String TAG = Images.class.getSimpleName();
 	
-	public Pages() {
-		
-	}
+	private String mView;
+	private String mZoom;
+	private String mThumb;
 	
-	public static Pages fromJSON(JSONObject pages) {
-		return fromJSON(new Pages(), pages);
-	}
-	
-	public static Pages fromJSON(Pages p, JSONObject pages) {
-		if (p == null) p = new Pages();
-		if (pages == null) return p;
-		
-		try {
-			JSONArray jArray = pages.getJSONArray(ServerKey.THUMB);
-			int i;
-			for (i = 0 ; i < jArray.length() ; i++ ) {
-				p.getThumb().add(jArray.getString(i));
-			}
-			jArray = pages.getJSONArray(ServerKey.VIEW);
-			for (i = 0 ; i < jArray.length() ; i++ ) {
-				p.getView().add(jArray.getString(i));
-			}
-			jArray = pages.getJSONArray(ServerKey.ZOOM);
-			for (i = 0 ; i < jArray.length() ; i++ ) {
-				p.getZoom().add(jArray.getString(i));
-			}
-		} catch (JSONException e) {
-			EtaLog.e(TAG, "", e);
+	public static Images fromJSON(JSONObject image) {
+		Images i = new Images();
+		if (image == null) {
+			return i;
 		}
-		return p;
+		
+		i.setView(Json.valueOf(image, ServerKey.VIEW));
+		i.setZoom(Json.valueOf(image, ServerKey.ZOOM));
+		i.setThumb(Json.valueOf(image, ServerKey.THUMB));
+		
+    	return i;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			JSONArray aThumb = new JSONArray();
-			JSONArray aView = new JSONArray();
-			JSONArray aZoom = new JSONArray();
-			for (String s : getThumb())
-				aThumb.put(s);
-			
-			for (String s : getView())
-				aView.put(s);
-			
-			for (String s : getZoom())
-				aZoom.put(s);
-
-			o.put(ServerKey.THUMB, aThumb);
-			o.put(ServerKey.VIEW, aView);
-			o.put(ServerKey.ZOOM, aZoom);
+			o.put(ServerKey.VIEW, Json.nullCheck(getView()));
+			o.put(ServerKey.ZOOM, Json.nullCheck(getZoom()));
+			o.put(ServerKey.THUMB, Json.nullCheck(getThumb()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
 	
-	public ArrayList<String> getThumb() {
-		return mThumb;
-	}
-
-	public Pages setThumb(ArrayList<String> thumb) {
-		mThumb = thumb;
-		return this;
-	}
-
-	public ArrayList<String> getView() {
+	public String getView() {
 		return mView;
 	}
 
-	public Pages setView(ArrayList<String> view) {
-		mView = view;
-		return this;
+	public void setView(String viewUrl) {
+		this.mView = viewUrl;
 	}
 
-	public ArrayList<String> getZoom() {
+	public String getZoom() {
 		return mZoom;
 	}
 
-	public Pages setZoom(ArrayList<String> zoom) {
-		mZoom = zoom;
-		return this;
+	public void setZoom(String zoomUrl) {
+		this.mZoom = zoomUrl;
+	}
+
+	public String getThumb() {
+		return mThumb;
+	}
+
+	public void setThumb(String thumbUrl) {
+		this.mThumb = thumbUrl;
 	}
 
 	@Override
@@ -136,7 +102,7 @@ public class Pages extends EtaObject implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Pages other = (Pages) obj;
+		Images other = (Images) obj;
 		if (mThumb == null) {
 			if (other.mThumb != null)
 				return false;
@@ -154,7 +120,6 @@ public class Pages extends EtaObject implements Serializable {
 			return false;
 		return true;
 	}
-	
-	
+
 	
 }

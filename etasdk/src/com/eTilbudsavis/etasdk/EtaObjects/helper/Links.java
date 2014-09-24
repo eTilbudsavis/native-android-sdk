@@ -13,81 +13,61 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Si  extends EtaObject implements Serializable {
+public class Links implements EtaObject<JSONObject>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Unit";
-	
-	private String mSymbol;
-	private double mFactor = 1.0d;
-	
-	public Si() {
-		
-	}
-	
-	public static Si fromJSON(JSONObject si) {
-		return fromJSON(new Si(), si);
-	}
-	
-	public static Si fromJSON(Si s, JSONObject si) {
-		if (s == null) s = new Si();
-		if (si == null) return s;
-		
-		s.setSymbol(Json.valueOf(si, ServerKey.SYMBOL));
-		s.setFactor(Json.valueOf(si, ServerKey.FACTOR, 1.0d));
-		
-		return s;
-	}
+	public static final String TAG = Links.class.getSimpleName();
 
-	@Override
+	private String mWebshop;
+	
+	public static Links fromJSON(JSONObject links) {
+		Links l = new Links();
+		if (links == null) {
+			return l;
+		}
+		
+		l.setWebshop(Json.valueOf(links, ServerKey.WEBSHOP));
+		
+		return l;
+	}
+	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.SYMBOL, Json.nullCheck(getSymbol()));
-			o.put(ServerKey.FACTOR, Json.nullCheck(getFactor()));
+			o.put(ServerKey.WEBSHOP, Json.nullCheck(getWebshop()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
 	
-	public String getSymbol() {
-		return mSymbol;
-	}
-
-	public Si setSymbol(String symbol) {
-		mSymbol = symbol;
-		return this;
-	}
-
-	public double getFactor() {
-		return mFactor;
+	public void setWebshop(String url) {
+		mWebshop = url;
 	}
 	
-	public Si setFactor(double factor) {
-		mFactor = factor;
-		return this;
+	public String getWebshop() {
+		return mWebshop;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		long temp;
-		temp = Double.doubleToLongBits(mFactor);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((mSymbol == null) ? 0 : mSymbol.hashCode());
+		result = prime * result
+				+ ((mWebshop == null) ? 0 : mWebshop.hashCode());
 		return result;
 	}
 
@@ -99,17 +79,14 @@ public class Si  extends EtaObject implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Si other = (Si) obj;
-		if (Double.doubleToLongBits(mFactor) != Double
-				.doubleToLongBits(other.mFactor))
-			return false;
-		if (mSymbol == null) {
-			if (other.mSymbol != null)
+		Links other = (Links) obj;
+		if (mWebshop == null) {
+			if (other.mWebshop != null)
 				return false;
-		} else if (!mSymbol.equals(other.mSymbol))
+		} else if (!mWebshop.equals(other.mWebshop))
 			return false;
 		return true;
 	}
-	
+
 	
 }

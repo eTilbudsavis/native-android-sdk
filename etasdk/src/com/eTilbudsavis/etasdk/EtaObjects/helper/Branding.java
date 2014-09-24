@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
 
@@ -22,14 +22,16 @@ import org.json.JSONObject;
 
 import android.graphics.Color;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Branding extends EtaObject implements Serializable {
+public class Branding implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Branding";
+	public static final String TAG = Branding.class.getSimpleName();
 	
 	private String mName;
 	private String mUrlName;
@@ -39,17 +41,11 @@ public class Branding extends EtaObject implements Serializable {
 	private Integer mColor;
 	private Pageflip mPageflip;
 	
-	public Branding() {
-		
-	}
-	
 	public static Branding fromJSON(JSONObject branding) {
-		return fromJSON(new Branding(), branding);
-	}
-	
-	private static Branding fromJSON(Branding b, JSONObject branding) {
-		if (b == null) b = new Branding();
-		if (branding == null) return b;
+		Branding b = new Branding();
+		if (branding == null) {
+			return b;
+		}
 		
 		try {
 			b.setName(Json.valueOf(branding, ServerKey.NAME));
@@ -67,7 +63,6 @@ public class Branding extends EtaObject implements Serializable {
 		return b;
 	}
 	
-	@Override
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {

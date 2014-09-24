@@ -27,12 +27,17 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api;
+import com.eTilbudsavis.etasdk.Utils.Api.MetaKey;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements Serializable {
+public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements EtaObject<JSONObject>, Serializable {
 
 	public static final String TAG = "ShoppinglistItem";
+
+	private static final String ERN_CLASS = "shoppinglist:item";
 	
 	private static final long serialVersionUID = -8186715532715467496L;
 
@@ -172,8 +177,8 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 	}
 	
 	@Override
-	public String getErnPrefix() {
-		return ERN_SHOPPINGLISTITEM;
+	String getErnClass() {
+		return ERN_CLASS;
 	}
 	
 	/**
@@ -442,7 +447,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 	 * @return A comment, or {@code null}
 	 */
 	public String getComment() {
-		String comment = Json.valueOf(getMeta(), EtaObject.MetaKey.COMMENT);
+		String comment = Json.valueOf(getMeta(), Api.MetaKey.COMMENT);
 		comment = (comment != null && comment.length() > 0) ? comment : null;
 		return comment;
 	}

@@ -33,7 +33,6 @@ import android.os.Process;
 import com.eTilbudsavis.etasdk.SessionManager.OnSessionChangeListener;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject;
 import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject.State;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
@@ -48,9 +47,10 @@ import com.eTilbudsavis.etasdk.Network.RequestQueue;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Api;
+import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Api.Param;
 import com.eTilbudsavis.etasdk.Utils.ListUtils;
-import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 /**
@@ -628,7 +628,7 @@ public class SyncManager {
 						
 						sl.setState(State.SYNCED);
 						try {
-							String modified = response.getString(EtaObject.ServerKey.MODIFIED);
+							String modified = response.getString(Api.ServerKey.MODIFIED);
 							// If local list has been modified before the server list, then sync items
 							if (sl.getModified().before(Utils.parseDate(modified))) {
 								// If there are changes, update items (this will update list-state in DB)

@@ -16,12 +16,13 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
-import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Permission;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 
@@ -36,11 +37,13 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class User extends EtaErnObject<User> implements Serializable {
-
-	public static final String TAG = "User";
+public class User extends ErnObject<User> implements EtaObject<JSONObject>, Serializable {
+	
+	public static final String TAG = User.class.getSimpleName();
 	
 	private static final long serialVersionUID = 1L;
+
+	private static final String ERN_CLASS = "user";
 	
 	public static final int NO_USER = -1;
 	
@@ -56,25 +59,14 @@ public class User extends EtaErnObject<User> implements Serializable {
 	public User() {
 		setUserId(NO_USER);
 	}
-
+	
 	/**
 	 * A factory method for converting {@link JSONObject} into a POJO.
 	 * @param user A {@link JSONObject} in the format of a valid API v2 user response
 	 * @return A User object
 	 */
-	public static User fromJSON(JSONObject user) {	
-		return fromJSON(new User(), user);
-	}
-
-	/**
-	 * A factory method for converting {@link JSONObject} into POJO.
-	 * <p>This method exposes a way, of updating/setting an objects properties</p>
-	 * @param user An object to set/update
-	 * @param jUser A {@link JSONObject} in the format of a valid API v2 user response
-	 * @return A {@link List} of POJO
-	 */
-	public static User fromJSON(User user, JSONObject jUser) {
-		if (user == null) user = new User();
+	public static User fromJSON(JSONObject jUser) {
+		User user = new User();
 		if (jUser == null) return user;
 		
 		try {
@@ -91,9 +83,8 @@ public class User extends EtaErnObject<User> implements Serializable {
 		return user;
 	}
 	
-	@Override
 	public JSONObject toJSON() {
-		JSONObject o = super.toJSON();
+		JSONObject o = new JSONObject();
 		try {
 			o.put(ServerKey.GENDER, Json.nullCheck(getGender()));
 			o.put(ServerKey.BIRTH_YEAR, Json.nullCheck(getBirthYear()));
@@ -107,8 +98,8 @@ public class User extends EtaErnObject<User> implements Serializable {
 	}
 	
 	@Override
-	public String getErnPrefix() {
-		return ERN_USER;
+	String getErnClass() {
+		return ERN_CLASS;
 	}
 	
 	/**

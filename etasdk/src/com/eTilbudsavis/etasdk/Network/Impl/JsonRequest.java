@@ -31,7 +31,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Cache;
 import com.eTilbudsavis.etasdk.Network.Cache.Item;
@@ -39,7 +38,8 @@ import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.RequestQueue;
 import com.eTilbudsavis.etasdk.Network.Response;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.Param;
+import com.eTilbudsavis.etasdk.Utils.Api;
+import com.eTilbudsavis.etasdk.Utils.Api.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public abstract class JsonRequest<T> extends Request<T> {
@@ -239,8 +239,8 @@ public abstract class JsonRequest<T> extends Request<T> {
 		
 		try {
 			
-			if (o.has(EtaObject.ServerKey.ERN)) {
-				String ern = o.getString(EtaObject.ServerKey.ERN);
+			if (o.has(Api.ServerKey.ERN)) {
+				String ern = o.getString(Api.ServerKey.ERN);
 				Cache.Item i = new Item(o, getCacheTTL());
 				getCache().put(ern, i);
 				return ern;

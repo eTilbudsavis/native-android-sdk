@@ -13,70 +13,70 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Size extends EtaObject implements Serializable {
-
+public class Dimension implements EtaObject<JSONObject>, Serializable {
+	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Size";
+	public static final String TAG = Dimension.class.getSimpleName();
 	
-	private double mFrom = 1.0d;
-	private double mTo = 1.0d;
+	private Double mWidth = null;
+	private Double mHeight = null;
 	
-	public Size() {
+	public static Dimension fromJSON(JSONObject dimension) {
+		Dimension d = new Dimension();
+		if (dimension == null) return d;
 		
+		try {
+			if (!dimension.isNull(ServerKey.WIDTH)) {
+				d.setWidth(dimension.getDouble(ServerKey.WIDTH));
+			}
+			if (!dimension.isNull(ServerKey.HEIGHT)) {
+				d.setHeight(dimension.getDouble(ServerKey.HEIGHT));
+			}
+		} catch (JSONException e) {
+			EtaLog.e(TAG, "", e);
+		}
+		return d;
 	}
 	
-	public static Size fromJSON(JSONObject size) {
-		return fromJSON(new Size(), size);
-	}
-	
-	public static Size fromJSON(Size s, JSONObject size) {
-		if (s == null) s = new Size();
-		if (size == null) return s;
-		
-		s.setFrom(Json.valueOf(size, ServerKey.FROM, 1.0d));
-		s.setTo(Json.valueOf(size, ServerKey.TO, 1.0d));
-		
-		return s;
-	}
-
-	@Override
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.FROM, getFrom());
-			o.put(ServerKey.TO, getTo());
+			o.put(ServerKey.HEIGHT, Json.nullCheck(getHeight()));
+			o.put(ServerKey.WIDTH, Json.nullCheck(getWidth()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
 	
-	public double getFrom() {
-		return mFrom;
+	public Double getWidth() {
+		return mWidth;
 	}
-	
-	public Size setFrom(double from) {
-		mFrom = from;
+
+	public Dimension setWidth(double width) {
+		mWidth = width;
 		return this;
 	}
-	
-	public double getTo() {
-		return mTo;
+
+	public Double getHeight() {
+		return mHeight;
 	}
-	
-	public Size setTo(double to) {
-		mTo = to;
+
+	public Dimension setHeight(double height) {
+		mHeight = height;
 		return this;
 	}
 
@@ -85,9 +85,9 @@ public class Size extends EtaObject implements Serializable {
 		final int prime = 31;
 		int result = super.hashCode();
 		long temp;
-		temp = Double.doubleToLongBits(mFrom);
+		temp = Double.doubleToLongBits(mHeight);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(mTo);
+		temp = Double.doubleToLongBits(mWidth);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
@@ -100,11 +100,12 @@ public class Size extends EtaObject implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Size other = (Size) obj;
-		if (Double.doubleToLongBits(mFrom) != Double
-				.doubleToLongBits(other.mFrom))
+		Dimension other = (Dimension) obj;
+		if (Double.doubleToLongBits(mHeight) != Double
+				.doubleToLongBits(other.mHeight))
 			return false;
-		if (Double.doubleToLongBits(mTo) != Double.doubleToLongBits(other.mTo))
+		if (Double.doubleToLongBits(mWidth) != Double
+				.doubleToLongBits(other.mWidth))
 			return false;
 		return true;
 	}

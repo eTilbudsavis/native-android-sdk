@@ -30,8 +30,8 @@ import com.eTilbudsavis.etasdk.Network.NetworkResponse;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.Param;
-import com.eTilbudsavis.etasdk.Utils.Sort;
+import com.eTilbudsavis.etasdk.Utils.Api.Param;
+import com.eTilbudsavis.etasdk.Utils.Api.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class JsonArrayRequest extends JsonRequest<JSONArray> {

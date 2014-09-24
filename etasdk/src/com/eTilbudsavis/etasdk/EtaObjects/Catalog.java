@@ -25,8 +25,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.PageflipWebview;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -41,11 +46,13 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Catalog extends EtaErnObject<Catalog> implements Serializable {
+public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Catalog";
+	public static final String TAG = Catalog.class.getSimpleName();
+
+	private static final String ERN_CLASS = "catalog";
 	
 	// From JSON blob
 	private String mLabel;
@@ -63,12 +70,10 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 	private Images mImages;
 	
 	// From separate queries
-	private Pages mPages;
+	private List<Page> mPages;
 	private Dealer mDealer;
 	private Store mStore;
 	private int mOfferOnPage = 1;
-	
-	public Catalog() { }
 	
 	/**
 	 * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
@@ -92,23 +97,11 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 	 * @param catalog A {@link JSONObject} in the format of a valid API v2 catalog response
 	 * @return A Catalog object
 	 */
-	public static Catalog fromJSON(JSONObject catalog) {
-		return fromJSON(new Catalog(), catalog);
-	}
-
-	/**
-	 * A factory method for converting {@link JSONObject} into POJO.
-	 * <p>This method exposes a way, of updating/setting an objects properties</p>
-	 * @param catalog An object to set/update
-	 * @param jCatalog A {@link JSONObject} in the format of a valid API v2 catalog response.
-	 * 		But a special case exists where, {@link PageflipWebview} only exposes
-	 * 		the keys "{@link ServerKey#ID id}", and "{@link ServerKey#PAGE page}", this is
-	 * 		valid too, but not a complete/workable catalog object.
-	 * @return A {@link List} of POJO
-	 */
-	public static Catalog fromJSON(Catalog catalog, JSONObject jCatalog) {
-		if (catalog == null) catalog = new Catalog();
-		if (jCatalog == null) return catalog;
+	public static Catalog fromJSON(JSONObject jCatalog) {
+		Catalog catalog = new Catalog();
+		if (jCatalog == null) {
+			return catalog;
+		}
 		
 		if (jCatalog.has(ServerKey.STORE_ID) && jCatalog.has(ServerKey.OFFER_COUNT)) {
 			// if we have a full catalog
@@ -142,8 +135,7 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 		}
 		return catalog;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
 		JSONObject o = super.toJSON();
 		try {
@@ -165,16 +157,12 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 		}
 		return o;
 	}
-	
+
 	@Override
-	public String getErnPrefix() {
-		return ERN_CATALOG;
+	String getErnClass() {
+		return ERN_CLASS;
 	}
 	
-	/**
-	 * TODO what is label?
-	 * @return
-	 */
 	public String getLabel() {
 		return mLabel;
 	}
@@ -407,18 +395,18 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 	 * Get the pages in this catalog.
 	 * <p>Pages isn't bundled in the catalog object by default. But should be
 	 * downloaded separately via the pages endpoint, and
-	 * {@link Catalog#setPages(Pages) set} manually by the developer. </p>
+	 * {@link Catalog#setPages(Page) set} manually by the developer. </p>
 	 * @return
 	 */
-	public Pages getPages() {
+	public List<Page> getPages() {
 		return mPages;
 	}
 	
 	/**
-	 * Method for setting the {@link Pages} associated with this catalog
+	 * Method for setting the {@link Page} associated with this catalog
 	 * @param pages A pages object
 	 */
-	public void setPages(Pages pages) {
+	public void setPages(List<Page> pages) {
 		mPages = pages;
 	}
 	
@@ -590,5 +578,5 @@ public class Catalog extends EtaErnObject<Catalog> implements Serializable {
 			return false;
 		return true;
 	}
-	
+
 }

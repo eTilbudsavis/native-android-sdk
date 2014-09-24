@@ -13,37 +13,33 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Quantity extends EtaObject implements Serializable {
+public class Quantity implements EtaObject<JSONObject>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Quantity";
+	public static final String TAG = Quantity.class.getSimpleName();
 	
 	private Unit mUnit;
 	private Size mSize;
 	private Pieces mPieces;
 	
-	public Quantity() {
-		
-	}
-	
 	public static Quantity fromJSON(JSONObject quantity) {
-		return fromJSON(new Quantity(), quantity);
-	}
-	
-	public static Quantity fromJSON(Quantity q, JSONObject quantity) {
-		if (q == null) q = new Quantity();
-		if (quantity == null) return q;
+		Quantity q = new Quantity();
+		if (quantity == null) {
+			return q;
+		}
 		
 		try {
 			q.setUnit(quantity.isNull(ServerKey.UNIT) ? null : Unit.fromJSON(quantity.getJSONObject(ServerKey.UNIT)));
@@ -54,8 +50,7 @@ public class Quantity extends EtaObject implements Serializable {
 		}
 		return q;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {

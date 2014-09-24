@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,27 +24,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 
-public class Permission extends EtaObject implements Serializable {
+public class Permission implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Permission";
+	public static final String TAG = Permission.class.getSimpleName();
 	
 	private HashMap<String, ArrayList<String>> mPermissions = new HashMap<String, ArrayList<String>>();
 	
-	public Permission() {
-		
-	}
-	
 	public static Permission fromJSON(JSONObject permission) {
-		return fromJSON(new Permission(), permission);
-	}
-	
-	public static Permission fromJSON(Permission p, JSONObject permission) {
-		if (p == null) p = new Permission();
-		if (permission == null) return p;
+		Permission p = new Permission();
+		if (permission == null) {
+			return p;
+		}
 		
 		try {
 			
@@ -73,8 +68,7 @@ public class Permission extends EtaObject implements Serializable {
 		
 		return p;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {

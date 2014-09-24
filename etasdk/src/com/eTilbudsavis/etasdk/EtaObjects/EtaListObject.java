@@ -17,15 +17,10 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.eTilbudsavis.etasdk.Log.EtaLog;
-
-public abstract class EtaListObject<T> extends EtaErnObject<T> implements Comparable<T>, Serializable {
+public abstract class EtaListObject<T> extends ErnObject<T> implements Comparable<T>, Serializable {
 	
-	public static final String TAG = "EtaListObject";
-
+	public static final String TAG = EtaListObject.class.getSimpleName();
+	
 	private static final long serialVersionUID = 8166712456946780878L;
 	
 	/**
@@ -95,17 +90,17 @@ public abstract class EtaListObject<T> extends EtaErnObject<T> implements Compar
 		}
 		return null;
 	}
-	
-	public JSONObject toJSON() {
-		JSONObject o = super.toJSON();
-		try {
-			o.put("state", getStateString());
-		} catch (JSONException e) {
-			EtaLog.e(TAG, "", e);
-		}
-		return o;
-	}
-	
+//	
+//	public JSONObject toJSON() {
+//		JSONObject o = super.toJSON();
+//		try {
+//			o.put("state", getStateString());
+//		} catch (JSONException e) {
+//			EtaLog.e(TAG, "", e);
+//		}
+//		return o;
+//	}
+//	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

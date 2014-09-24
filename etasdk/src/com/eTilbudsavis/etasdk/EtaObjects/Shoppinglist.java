@@ -29,6 +29,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -38,9 +39,11 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Shoppinglist extends EtaListObject< Shoppinglist> implements Serializable {
+public class Shoppinglist extends EtaListObject<Shoppinglist> implements EtaObject<JSONObject>, Serializable {
 
-	public static final String TAG = "Shoppinglist";
+	public static final String TAG = Shoppinglist.class.getSimpleName();
+
+	private static final String ERN_CLASS = "shopping:list";
 	
 	private static final long serialVersionUID = 5718447151312028262L;
 	
@@ -121,18 +124,11 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> implements Serial
 	 *                       shoppinglist response
 	 * @return An {@link Shoppinglist} object
 	 */
-	public static Shoppinglist fromJSON(JSONObject shoppinglist) {
-		return fromJSON(new Shoppinglist(), shoppinglist);
-	}
-
-	/**
-	 * A factory method for converting {@link JSONObject} into POJO.
-	 * <p>This method exposes a way, of updating/setting an objects properties</p>
-	 * @param shoppinglist An object to set/update
-	 * @param jShoppinglist A {@link JSONObject} in the format of a valid API v2 shoppinglist response
-	 * @return A {@link List} of POJO
-	 */
-	public static Shoppinglist fromJSON(Shoppinglist shoppinglist, JSONObject jShoppinglist) {
+	public static Shoppinglist fromJSON(JSONObject jShoppinglist) {
+		Shoppinglist shoppinglist = new  Shoppinglist();
+		if (jShoppinglist==null) {
+			return shoppinglist;
+		}
 		
 		try {
 			// We've don't use OWNER anymore, since we now get all share info.
@@ -173,8 +169,7 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> implements Serial
 		
 		return shoppinglist;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
 		JSONObject o = super.toJSON();
 		try {
@@ -196,8 +191,8 @@ public class Shoppinglist extends EtaListObject< Shoppinglist> implements Serial
 	}
 	
 	@Override
-	public String getErnPrefix() {
-		return ERN_SHOPPINGLIST;
+	String getErnClass() {
+		return ERN_CLASS;
 	}
 	
 	/**

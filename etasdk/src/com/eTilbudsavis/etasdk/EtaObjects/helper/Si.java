@@ -13,77 +13,63 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Dimension extends EtaObject implements Serializable {
-	
+public class Si implements EtaObject<JSONObject>, Serializable {
+
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Dimension";
+	public static final String TAG = Si.class.getSimpleName();
 	
-	private Double mWidth = null;
-	private Double mHeight = null;
+	private String mSymbol;
+	private double mFactor = 1.0d;
 	
-	public Dimension() {
+	public static Si fromJSON(JSONObject si) {
+		Si s = new Si();
+		if (si == null) return s;
 		
-	}
-	
-	public static Dimension fromJSON(JSONObject dimension) {
-		return fromJSON(new Dimension(), dimension);
-	}
-	
-	public static Dimension fromJSON(Dimension d, JSONObject dimension) {
-		if (d == null) d = new Dimension();
-		if (dimension == null) return d;
+		s.setSymbol(Json.valueOf(si, ServerKey.SYMBOL));
+		s.setFactor(Json.valueOf(si, ServerKey.FACTOR, 1.0d));
 		
-		try {
-			if (!dimension.isNull(ServerKey.WIDTH)) {
-				d.setWidth(dimension.getDouble(ServerKey.WIDTH));
-			}
-			if (!dimension.isNull(ServerKey.HEIGHT)) {
-				d.setHeight(dimension.getDouble(ServerKey.HEIGHT));
-			}
-		} catch (JSONException e) {
-			EtaLog.e(TAG, "", e);
-		}
-		return d;
+		return s;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.HEIGHT, Json.nullCheck(getHeight()));
-			o.put(ServerKey.WIDTH, Json.nullCheck(getWidth()));
+			o.put(ServerKey.SYMBOL, Json.nullCheck(getSymbol()));
+			o.put(ServerKey.FACTOR, Json.nullCheck(getFactor()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
 	
-	public Double getWidth() {
-		return mWidth;
+	public String getSymbol() {
+		return mSymbol;
 	}
 
-	public Dimension setWidth(double width) {
-		mWidth = width;
+	public Si setSymbol(String symbol) {
+		mSymbol = symbol;
 		return this;
 	}
 
-	public Double getHeight() {
-		return mHeight;
+	public double getFactor() {
+		return mFactor;
 	}
-
-	public Dimension setHeight(double height) {
-		mHeight = height;
+	
+	public Si setFactor(double factor) {
+		mFactor = factor;
 		return this;
 	}
 
@@ -92,10 +78,9 @@ public class Dimension extends EtaObject implements Serializable {
 		final int prime = 31;
 		int result = super.hashCode();
 		long temp;
-		temp = Double.doubleToLongBits(mHeight);
+		temp = Double.doubleToLongBits(mFactor);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(mWidth);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((mSymbol == null) ? 0 : mSymbol.hashCode());
 		return result;
 	}
 
@@ -107,12 +92,14 @@ public class Dimension extends EtaObject implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Dimension other = (Dimension) obj;
-		if (Double.doubleToLongBits(mHeight) != Double
-				.doubleToLongBits(other.mHeight))
+		Si other = (Si) obj;
+		if (Double.doubleToLongBits(mFactor) != Double
+				.doubleToLongBits(other.mFactor))
 			return false;
-		if (Double.doubleToLongBits(mWidth) != Double
-				.doubleToLongBits(other.mWidth))
+		if (mSymbol == null) {
+			if (other.mSymbol != null)
+				return false;
+		} else if (!mSymbol.equals(other.mSymbol))
 			return false;
 		return true;
 	}

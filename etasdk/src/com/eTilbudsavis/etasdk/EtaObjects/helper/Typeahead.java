@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,7 +27,9 @@ import android.text.Html;
 import android.text.Spanned;
 import android.widget.AutoCompleteTextView;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 /**
@@ -43,11 +45,11 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Typeahead extends EtaObject implements Serializable {
+public class Typeahead implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Typeahead";
+	public static final String TAG = Typeahead.class.getSimpleName();
 	
 	private int mLength = 0;
 	private int mOffset = 0;
@@ -82,16 +84,7 @@ public class Typeahead extends EtaObject implements Serializable {
 		}
 		return resp;
 	}
-
-	/**
-	 * A factory method for converting {@link JSONObject} into a POJO.
-	 * @param typeahead A {@link JSONObject} in the format of a valid API v2 typeahead response
-	 * @return A Typeahead object
-	 */
-	public static Typeahead fromJSON(JSONObject typeahead) {
-		return fromJSON(new Typeahead(), typeahead );
-	}
-
+	
 	/**
 	 * A factory method for converting {@link JSONObject} into POJO.
 	 * <p>This method exposes a way, of updating/setting an objects properties</p>
@@ -99,9 +92,11 @@ public class Typeahead extends EtaObject implements Serializable {
 	 * @param jTypeahead A {@link JSONObject} in the format of a valid API v2 typeahead response
 	 * @return A {@link List} of POJO
 	 */
-	public static Typeahead fromJSON(Typeahead typeahead, JSONObject jTypeahead) {
-		if (typeahead == null) typeahead = new Typeahead();
-		if (jTypeahead == null) return typeahead;
+	public static Typeahead fromJSON(JSONObject jTypeahead) {
+		Typeahead typeahead = new Typeahead();
+		if (jTypeahead == null) {
+			return typeahead;
+		}
 		
 		typeahead.setSubject(Json.valueOf(jTypeahead, ServerKey.SUBJECT));
 		typeahead.setOffset(Json.valueOf(jTypeahead, ServerKey.OFFSET, 0));
@@ -110,7 +105,6 @@ public class Typeahead extends EtaObject implements Serializable {
 		return typeahead;
 	}
 	
-	@Override
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {

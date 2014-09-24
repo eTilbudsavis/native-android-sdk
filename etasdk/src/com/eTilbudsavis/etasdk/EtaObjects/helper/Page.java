@@ -13,82 +13,95 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Images extends EtaObject implements Serializable {
+public class Page implements EtaObject<JSONObject>, Serializable {
 	
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -1467489830915012500L;
 
-	public static final String TAG = "Images";
+	public static final String TAG = Page.class.getSimpleName();
 	
+	private String mThumb;
 	private String mView;
 	private String mZoom;
-	private String mThumb;
-
-	public Images() {
-		
+	
+	public static List<Page> fromJSON(JSONArray pages) {
+		List<Page> list = new ArrayList<Page>();
+		for (int i = 0 ; i < pages.length() ; i++) {
+			try {
+				list.add(fromJSON(pages.getJSONObject(i)));
+			} catch (JSONException e) {
+				EtaLog.e(TAG, e.getMessage(), e);
+			}
+		}
+		return list;
 	}
 	
-	public static Images fromJSON(JSONObject images) {
-		return fromJSON(new Images(), images);
+	public static Page fromJSON(JSONObject page) {
+		Page p = new Page();
+		if (page == null) {
+			return p;
+		}
+		
+		p.setThumb(Json.valueOf(page, ServerKey.THUMB));
+		p.setView(Json.valueOf(page, ServerKey.VIEW));
+		p.setZoom(Json.valueOf(page, ServerKey.ZOOM));
+		
+		return p;
 	}
 	
-	public static Images fromJSON(Images i, JSONObject image) {
-		if (i == null) i = new Images();
-		if (image == null) return i;
-		
-		i.setView(Json.valueOf(image, ServerKey.VIEW));
-		i.setZoom(Json.valueOf(image, ServerKey.ZOOM));
-		i.setThumb(Json.valueOf(image, ServerKey.THUMB));
-		
-    	return i;
-	}
-
-	@Override
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.VIEW, Json.nullCheck(getView()));
-			o.put(ServerKey.ZOOM, Json.nullCheck(getZoom()));
-			o.put(ServerKey.THUMB, Json.nullCheck(getThumb()));
+			o.put(ServerKey.THUMB, getThumb());
+			o.put(ServerKey.VIEW, getView());
+			o.put(ServerKey.ZOOM, getZoom());
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
 	
-	public String getView() {
-		return mView;
-	}
-
-	public void setView(String viewUrl) {
-		this.mView = viewUrl;
-	}
-
-	public String getZoom() {
-		return mZoom;
-	}
-
-	public void setZoom(String zoomUrl) {
-		this.mZoom = zoomUrl;
-	}
-
 	public String getThumb() {
 		return mThumb;
 	}
-
-	public void setThumb(String thumbUrl) {
-		this.mThumb = thumbUrl;
+	
+	public Page setThumb(String thumb) {
+		mThumb = thumb;
+		return this;
 	}
-
+	
+	public String getView() {
+		return mView;
+	}
+	
+	public Page setView(String view) {
+		mView = view;
+		return this;
+	}
+	
+	public String getZoom() {
+		return mZoom;
+	}
+	
+	public Page setZoom(String zoom) {
+		mZoom = zoom;
+		return this;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -107,7 +120,7 @@ public class Images extends EtaObject implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Images other = (Images) obj;
+		Page other = (Page) obj;
 		if (mThumb == null) {
 			if (other.mThumb != null)
 				return false;
@@ -125,6 +138,7 @@ public class Images extends EtaObject implements Serializable {
 			return false;
 		return true;
 	}
-
+	
+	
 	
 }

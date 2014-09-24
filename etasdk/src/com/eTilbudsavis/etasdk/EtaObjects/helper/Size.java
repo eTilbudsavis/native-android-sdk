@@ -13,74 +13,65 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Unit extends EtaObject implements Serializable {
+public class Size implements EtaObject<JSONObject>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Unit";
+	public static final String TAG = Size.class.getSimpleName();
 	
-	private String mSymbol;
-	private Si mSi;
+	private double mFrom = 1.0d;
+	private double mTo = 1.0d;
 	
-	public Unit() {
-		
-	}
-	
-	public static Unit fromJSON(JSONObject unit) {
-		return fromJSON(new Unit(), unit);
-	}
-	
-	public static Unit fromJSON(Unit u, JSONObject unit) {
-		if (u == null) u = new Unit();
-		if (unit == null) return u;
-		
-		try {
-			u.setSymbol(Json.valueOf(unit, ServerKey.SYMBOL));
-			u.setSi(Si.fromJSON(unit.getJSONObject(ServerKey.SI)));
-		} catch (JSONException e) {
-			EtaLog.e(TAG, "", e);
+	public static Size fromJSON(JSONObject size) {
+		Size s = new Size();
+		if (size == null) {
+			return s;
 		}
 		
-		return u;
+		s.setFrom(Json.valueOf(size, ServerKey.FROM, 1.0d));
+		s.setTo(Json.valueOf(size, ServerKey.TO, 1.0d));
+		
+		return s;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.SYMBOL, Json.nullCheck(getSymbol()));
-			o.put(ServerKey.SI, Json.toJson(getSi()));
+			o.put(ServerKey.FROM, getFrom());
+			o.put(ServerKey.TO, getTo());
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
 	
-	public String getSymbol() {
-		return mSymbol;
+	public double getFrom() {
+		return mFrom;
 	}
-
-	public Unit setSymbol(String symbol) {
-		mSymbol = symbol;
+	
+	public Size setFrom(double from) {
+		mFrom = from;
 		return this;
 	}
-
-	public Si getSi() {
-		return mSi;
+	
+	public double getTo() {
+		return mTo;
 	}
-
-	public Unit setSi(Si si) {
-		mSi = si;
+	
+	public Size setTo(double to) {
+		mTo = to;
 		return this;
 	}
 
@@ -88,8 +79,11 @@ public class Unit extends EtaObject implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((mSi == null) ? 0 : mSi.hashCode());
-		result = prime * result + ((mSymbol == null) ? 0 : mSymbol.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(mFrom);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(mTo);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
 
@@ -101,16 +95,11 @@ public class Unit extends EtaObject implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Unit other = (Unit) obj;
-		if (mSi == null) {
-			if (other.mSi != null)
-				return false;
-		} else if (!mSi.equals(other.mSi))
+		Size other = (Size) obj;
+		if (Double.doubleToLongBits(mFrom) != Double
+				.doubleToLongBits(other.mFrom))
 			return false;
-		if (mSymbol == null) {
-			if (other.mSymbol != null)
-				return false;
-		} else if (!mSymbol.equals(other.mSymbol))
+		if (Double.doubleToLongBits(mTo) != Double.doubleToLongBits(other.mTo))
 			return false;
 		return true;
 	}
