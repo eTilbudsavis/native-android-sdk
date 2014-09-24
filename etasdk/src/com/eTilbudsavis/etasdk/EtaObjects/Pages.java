@@ -37,28 +37,21 @@ public class Pages extends EtaObject implements Serializable {
 	public Pages() {
 		
 	}
-	
-	public static Pages fromJSON(JSONObject pages) {
+
+	public static Pages fromJSON(JSONArray pages) {
 		return fromJSON(new Pages(), pages);
 	}
 	
-	public static Pages fromJSON(Pages p, JSONObject pages) {
+	public static Pages fromJSON(Pages p, JSONArray pages) {
 		if (p == null) p = new Pages();
 		if (pages == null) return p;
 		
 		try {
-			JSONArray jArray = pages.getJSONArray(ServerKey.THUMB);
-			int i;
-			for (i = 0 ; i < jArray.length() ; i++ ) {
-				p.getThumb().add(jArray.getString(i));
-			}
-			jArray = pages.getJSONArray(ServerKey.VIEW);
-			for (i = 0 ; i < jArray.length() ; i++ ) {
-				p.getView().add(jArray.getString(i));
-			}
-			jArray = pages.getJSONArray(ServerKey.ZOOM);
-			for (i = 0 ; i < jArray.length() ; i++ ) {
-				p.getZoom().add(jArray.getString(i));
+			for (int i = 0 ; i < pages.length() ; i++ ) {
+				JSONObject page = pages.getJSONObject(i);
+				p.getThumb().add(page.getString(ServerKey.THUMB));
+				p.getView().add(page.getString(ServerKey.VIEW));
+				p.getZoom().add(page.getString(ServerKey.ZOOM));
 			}
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
