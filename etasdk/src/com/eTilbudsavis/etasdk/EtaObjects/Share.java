@@ -26,7 +26,7 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>, Serializable {
@@ -77,12 +77,12 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 		
 		try {
 			
-			JSONObject o = share.getJSONObject(ServerKey.USER);
-			s.setEmail(Json.valueOf(o, ServerKey.EMAIL));
-			s.setName(Json.valueOf(o, ServerKey.NAME));
+			JSONObject o = share.getJSONObject(JsonKey.USER);
+			s.setEmail(Json.valueOf(o, JsonKey.EMAIL));
+			s.setName(Json.valueOf(o, JsonKey.NAME));
 			
-			s.setAccess(Json.valueOf(share, ServerKey.ACCESS));
-			s.setAccepted(Json.valueOf(share, ServerKey.ACCEPTED, false));
+			s.setAccess(Json.valueOf(share, JsonKey.ACCESS));
+			s.setAccepted(Json.valueOf(share, JsonKey.ACCEPTED, false));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -100,14 +100,14 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 		JSONObject o = new JSONObject();
 		try {
 			JSONObject user = new JSONObject();
-			user.put(ServerKey.EMAIL, Json.nullCheck(getEmail()));
-			user.put(ServerKey.NAME, Json.nullCheck(getName()));
+			user.put(JsonKey.EMAIL, Json.nullCheck(getEmail()));
+			user.put(JsonKey.NAME, Json.nullCheck(getName()));
 			
-			o.put(ServerKey.USER, Json.nullCheck(user));
-			o.put(ServerKey.ACCEPTED, Json.nullCheck(getAccepted()));
-			o.put(ServerKey.ACCESS, Json.nullCheck(getAccess()));
+			o.put(JsonKey.USER, Json.nullCheck(user));
+			o.put(JsonKey.ACCEPTED, Json.nullCheck(getAccepted()));
+			o.put(JsonKey.ACCESS, Json.nullCheck(getAccess()));
 			if (getAcceptUrl() != null) {
-				o.put(ServerKey.ACCEPT_URL, getAcceptUrl());
+				o.put(JsonKey.ACCEPT_URL, getAcceptUrl());
 			}
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);

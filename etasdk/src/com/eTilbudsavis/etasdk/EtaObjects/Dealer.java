@@ -26,7 +26,7 @@ import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Pageflip;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 /**
@@ -74,13 +74,13 @@ public class Dealer extends ErnObject<Dealer> implements EtaObject<JSONObject>, 
 		}
 		
 		try {
-			d.setErn(Json.valueOf(dealer, ServerKey.ERN));
-			d.setName(Json.valueOf(dealer, ServerKey.NAME));
-			d.setUrlName(Json.valueOf(dealer, ServerKey.URL_NAME));
-			d.setWebsite(Json.valueOf(dealer, ServerKey.WEBSITE));
-			d.setLogo(Json.valueOf(dealer, ServerKey.LOGO));
-			d.setColor(Color.parseColor("#"+Json.valueOf(dealer, ServerKey.COLOR)));
-			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(ServerKey.PAGEFLIP)));
+			d.setErn(Json.valueOf(dealer, JsonKey.ERN));
+			d.setName(Json.valueOf(dealer, JsonKey.NAME));
+			d.setUrlName(Json.valueOf(dealer, JsonKey.URL_NAME));
+			d.setWebsite(Json.valueOf(dealer, JsonKey.WEBSITE));
+			d.setLogo(Json.valueOf(dealer, JsonKey.LOGO));
+			d.setColor(Color.parseColor("#"+Json.valueOf(dealer, JsonKey.COLOR)));
+			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(JsonKey.PAGEFLIP)));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -90,14 +90,14 @@ public class Dealer extends ErnObject<Dealer> implements EtaObject<JSONObject>, 
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.ID, Json.nullCheck(getId()));
-			o.put(ServerKey.ERN, Json.nullCheck(getErn()));
-			o.put(ServerKey.NAME, Json.nullCheck(getName()));
-			o.put(ServerKey.URL_NAME, Json.nullCheck(getUrlName()));
-			o.put(ServerKey.WEBSITE, Json.nullCheck(getWebsite()));
-			o.put(ServerKey.LOGO, Json.nullCheck(getLogo()));
-			o.put(ServerKey.COLOR, Json.nullCheck(getColorString()));
-			o.put(ServerKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
+			o.put(JsonKey.ID, Json.nullCheck(getId()));
+			o.put(JsonKey.ERN, Json.nullCheck(getErn()));
+			o.put(JsonKey.NAME, Json.nullCheck(getName()));
+			o.put(JsonKey.URL_NAME, Json.nullCheck(getUrlName()));
+			o.put(JsonKey.WEBSITE, Json.nullCheck(getWebsite()));
+			o.put(JsonKey.LOGO, Json.nullCheck(getLogo()));
+			o.put(JsonKey.COLOR, Json.nullCheck(getColorString()));
+			o.put(JsonKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

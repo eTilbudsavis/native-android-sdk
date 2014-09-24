@@ -10,6 +10,7 @@ import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.OnAutoFillCompleteListener;
@@ -156,12 +157,6 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 	}
 	
 	public static class Parameter extends RequestParameter {
-
-		/** String identifying the offset parameter for all list calls to the API */
-		public static final String OFFSET = "offset";
-		
-		/** String identifying the limit parameter for all list calls to the API */
-		public static final String LIMIT = "limit";
 		
 		/**
 		 * The API relies on pagination for retrieving data. Therefore you need to
@@ -171,7 +166,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		 * @return this object
 		 */
 		public Parameter setOffset(int offset) {
-			put(OFFSET, String.valueOf(offset));
+			put(Api.Param.OFFSET, String.valueOf(offset));
 			return this;
 		}
 		
@@ -180,7 +175,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		 * @return offset
 		 */
 		public int getOffset() {
-			String offset = getFilter().get(OFFSET);
+			String offset = getFilter().get(Api.Param.OFFSET);
 			if (offset != null) {
 				return Integer.valueOf(offset);
 			}
@@ -195,7 +190,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		 * @return
 		 */
 		public Parameter setLimit(int limit) {
-			put(LIMIT, String.valueOf(limit));
+			put(Api.Param.LIMIT, String.valueOf(limit));
 			return this;
 		}
 		
@@ -204,7 +199,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		 * @return max number of items API should return
 		 */
 		public int getLimit() {
-			String offset = getFilter().get(LIMIT);
+			String offset = getFilter().get(Api.Param.LIMIT);
 			if (offset != null) {
 				return Integer.valueOf(offset);
 			}

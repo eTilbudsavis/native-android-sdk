@@ -22,7 +22,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Si implements EtaObject<JSONObject>, Serializable {
@@ -38,8 +38,8 @@ public class Si implements EtaObject<JSONObject>, Serializable {
 		Si s = new Si();
 		if (si == null) return s;
 		
-		s.setSymbol(Json.valueOf(si, ServerKey.SYMBOL));
-		s.setFactor(Json.valueOf(si, ServerKey.FACTOR, 1.0d));
+		s.setSymbol(Json.valueOf(si, JsonKey.SYMBOL));
+		s.setFactor(Json.valueOf(si, JsonKey.FACTOR, 1.0d));
 		
 		return s;
 	}
@@ -47,8 +47,8 @@ public class Si implements EtaObject<JSONObject>, Serializable {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.SYMBOL, Json.nullCheck(getSymbol()));
-			o.put(ServerKey.FACTOR, Json.nullCheck(getFactor()));
+			o.put(JsonKey.SYMBOL, Json.nullCheck(getSymbol()));
+			o.put(JsonKey.FACTOR, Json.nullCheck(getFactor()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

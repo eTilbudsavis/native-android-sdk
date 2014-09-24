@@ -32,7 +32,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.helper.Links;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Pricing;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Quantity;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -109,25 +109,25 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, Se
 		}
 		
 		try {
-			offer.setId(Json.valueOf(jOffer, ServerKey.ID));
-			offer.setErn(Json.valueOf(jOffer, ServerKey.ERN));
-			offer.setHeading(Json.valueOf(jOffer, ServerKey.HEADING));
-			offer.setDescription(Json.valueOf(jOffer, ServerKey.DESCRIPTION));
-			offer.setCatalogPage(Json.valueOf(jOffer, ServerKey.CATALOG_PAGE, 0));
-			offer.setPricing(Pricing.fromJSON(jOffer.getJSONObject(ServerKey.PRICING)));
-			offer.setQuantity(Quantity.fromJSON(jOffer.getJSONObject(ServerKey.QUANTITY)));
-			offer.setImages(Images.fromJSON(jOffer.getJSONObject(ServerKey.IMAGES)));
-			offer.setLinks(Links.fromJSON(jOffer.getJSONObject(ServerKey.LINKS)));
-			Date runFrom = Utils.parseDate(Json.valueOf(jOffer, ServerKey.RUN_FROM));
+			offer.setId(Json.valueOf(jOffer, JsonKey.ID));
+			offer.setErn(Json.valueOf(jOffer, JsonKey.ERN));
+			offer.setHeading(Json.valueOf(jOffer, JsonKey.HEADING));
+			offer.setDescription(Json.valueOf(jOffer, JsonKey.DESCRIPTION));
+			offer.setCatalogPage(Json.valueOf(jOffer, JsonKey.CATALOG_PAGE, 0));
+			offer.setPricing(Pricing.fromJSON(jOffer.getJSONObject(JsonKey.PRICING)));
+			offer.setQuantity(Quantity.fromJSON(jOffer.getJSONObject(JsonKey.QUANTITY)));
+			offer.setImages(Images.fromJSON(jOffer.getJSONObject(JsonKey.IMAGES)));
+			offer.setLinks(Links.fromJSON(jOffer.getJSONObject(JsonKey.LINKS)));
+			Date runFrom = Utils.parseDate(Json.valueOf(jOffer, JsonKey.RUN_FROM));
 			offer.setRunFrom(runFrom);
-			Date runTill = Utils.parseDate(Json.valueOf(jOffer, ServerKey.RUN_TILL));
+			Date runTill = Utils.parseDate(Json.valueOf(jOffer, JsonKey.RUN_TILL));
 			offer.setRunTill(runTill);
-			offer.setDealerUrl(Json.valueOf(jOffer, ServerKey.DEALER_URL));
-			offer.setDealerId(Json.valueOf(jOffer, ServerKey.DEALER_ID));
-			offer.setStoreUrl(Json.valueOf(jOffer, ServerKey.STORE_URL));
-			offer.setStoreId(Json.valueOf(jOffer, ServerKey.STORE_ID));
-			offer.setCatalogUrl(Json.valueOf(jOffer, ServerKey.CATALOG_URL));
-			offer.setCatalogId(Json.valueOf(jOffer, ServerKey.CATALOG_ID));
+			offer.setDealerUrl(Json.valueOf(jOffer, JsonKey.DEALER_URL));
+			offer.setDealerId(Json.valueOf(jOffer, JsonKey.DEALER_ID));
+			offer.setStoreUrl(Json.valueOf(jOffer, JsonKey.STORE_URL));
+			offer.setStoreId(Json.valueOf(jOffer, JsonKey.STORE_ID));
+			offer.setCatalogUrl(Json.valueOf(jOffer, JsonKey.CATALOG_URL));
+			offer.setCatalogId(Json.valueOf(jOffer, JsonKey.CATALOG_ID));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -138,21 +138,21 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, Se
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.HEADING, Json.nullCheck(getHeading()));
-			o.put(ServerKey.DESCRIPTION, Json.nullCheck(getDescription()));
-			o.put(ServerKey.CATALOG_PAGE, getCatalogPage());
-			o.put(ServerKey.PRICING, Json.toJson(getPricing()));
-			o.put(ServerKey.QUANTITY, Json.toJson(getQuantity()));
-			o.put(ServerKey.IMAGES, Json.toJson(getImages()));
-			o.put(ServerKey.LINKS, Json.toJson(getLinks()));
-			o.put(ServerKey.RUN_FROM, Json.nullCheck(Utils.parseDate(getRunFrom())));
-			o.put(ServerKey.RUN_TILL, Json.nullCheck(Utils.parseDate(getRunTill())));
-			o.put(ServerKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
-			o.put(ServerKey.DEALER_ID, Json.nullCheck(getDealerId()));
-			o.put(ServerKey.STORE_URL, Json.nullCheck(getStoreUrl()));
-			o.put(ServerKey.STORE_ID, Json.nullCheck(getStoreId()));
-			o.put(ServerKey.CATALOG_URL, Json.nullCheck(getCatalogUrl()));
-			o.put(ServerKey.CATALOG_ID, Json.nullCheck(getCatalogId()));
+			o.put(JsonKey.HEADING, Json.nullCheck(getHeading()));
+			o.put(JsonKey.DESCRIPTION, Json.nullCheck(getDescription()));
+			o.put(JsonKey.CATALOG_PAGE, getCatalogPage());
+			o.put(JsonKey.PRICING, Json.toJson(getPricing()));
+			o.put(JsonKey.QUANTITY, Json.toJson(getQuantity()));
+			o.put(JsonKey.IMAGES, Json.toJson(getImages()));
+			o.put(JsonKey.LINKS, Json.toJson(getLinks()));
+			o.put(JsonKey.RUN_FROM, Json.nullCheck(Utils.parseDate(getRunFrom())));
+			o.put(JsonKey.RUN_TILL, Json.nullCheck(Utils.parseDate(getRunTill())));
+			o.put(JsonKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
+			o.put(JsonKey.DEALER_ID, Json.nullCheck(getDealerId()));
+			o.put(JsonKey.STORE_URL, Json.nullCheck(getStoreUrl()));
+			o.put(JsonKey.STORE_ID, Json.nullCheck(getStoreId()));
+			o.put(JsonKey.CATALOG_URL, Json.nullCheck(getCatalogUrl()));
+			o.put(JsonKey.CATALOG_ID, Json.nullCheck(getCatalogId()));
 			
 		} catch (JSONException e) {
 			e.printStackTrace();

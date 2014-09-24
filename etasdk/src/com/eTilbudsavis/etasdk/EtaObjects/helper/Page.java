@@ -25,7 +25,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Page implements EtaObject<JSONObject>, Serializable {
@@ -56,9 +56,9 @@ public class Page implements EtaObject<JSONObject>, Serializable {
 			return p;
 		}
 		
-		p.setThumb(Json.valueOf(page, ServerKey.THUMB));
-		p.setView(Json.valueOf(page, ServerKey.VIEW));
-		p.setZoom(Json.valueOf(page, ServerKey.ZOOM));
+		p.setThumb(Json.valueOf(page, JsonKey.THUMB));
+		p.setView(Json.valueOf(page, JsonKey.VIEW));
+		p.setZoom(Json.valueOf(page, JsonKey.ZOOM));
 		
 		return p;
 	}
@@ -66,9 +66,9 @@ public class Page implements EtaObject<JSONObject>, Serializable {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.THUMB, getThumb());
-			o.put(ServerKey.VIEW, getView());
-			o.put(ServerKey.ZOOM, getZoom());
+			o.put(JsonKey.THUMB, getThumb());
+			o.put(JsonKey.VIEW, getView());
+			o.put(JsonKey.ZOOM, getZoom());
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

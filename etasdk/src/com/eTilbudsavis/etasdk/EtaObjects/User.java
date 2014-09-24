@@ -22,7 +22,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Permission;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 
@@ -70,13 +70,13 @@ public class User extends ErnObject<User> implements EtaObject<JSONObject>, Seri
 		if (jUser == null) return user;
 		
 		try {
-			user.setUserId(Json.valueOf(jUser, ServerKey.ID, User.NO_USER));
-			user.setErn(Json.valueOf(jUser, ServerKey.ERN));
-			user.setGender(Json.valueOf(jUser, ServerKey.GENDER));
-			user.setBirthYear(Json.valueOf(jUser, ServerKey.BIRTH_YEAR, 0));
-			user.setName(Json.valueOf(jUser, ServerKey.NAME));
-			user.setEmail(Json.valueOf(jUser, ServerKey.EMAIL));
-			user.setPermissions(Permission.fromJSON(jUser.getJSONObject(ServerKey.PERMISSIONS)));
+			user.setUserId(Json.valueOf(jUser, JsonKey.ID, User.NO_USER));
+			user.setErn(Json.valueOf(jUser, JsonKey.ERN));
+			user.setGender(Json.valueOf(jUser, JsonKey.GENDER));
+			user.setBirthYear(Json.valueOf(jUser, JsonKey.BIRTH_YEAR, 0));
+			user.setName(Json.valueOf(jUser, JsonKey.NAME));
+			user.setEmail(Json.valueOf(jUser, JsonKey.EMAIL));
+			user.setPermissions(Permission.fromJSON(jUser.getJSONObject(JsonKey.PERMISSIONS)));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -86,11 +86,11 @@ public class User extends ErnObject<User> implements EtaObject<JSONObject>, Seri
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.GENDER, Json.nullCheck(getGender()));
-			o.put(ServerKey.BIRTH_YEAR, Json.nullCheck(getBirthYear()));
-			o.put(ServerKey.NAME, Json.nullCheck(getName()));
-			o.put(ServerKey.EMAIL, Json.nullCheck(getEmail()));
-			o.put(ServerKey.PERMISSIONS, Json.toJson(getPermissions()));
+			o.put(JsonKey.GENDER, Json.nullCheck(getGender()));
+			o.put(JsonKey.BIRTH_YEAR, Json.nullCheck(getBirthYear()));
+			o.put(JsonKey.NAME, Json.nullCheck(getName()));
+			o.put(JsonKey.EMAIL, Json.nullCheck(getEmail()));
+			o.put(JsonKey.PERMISSIONS, Json.toJson(getPermissions()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

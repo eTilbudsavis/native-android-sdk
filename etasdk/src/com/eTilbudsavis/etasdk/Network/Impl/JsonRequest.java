@@ -245,8 +245,8 @@ public abstract class JsonRequest<T> extends Request<T> {
 		
 		try {
 			
-			if (o.has(Api.ServerKey.ERN)) {
-				String ern = o.getString(Api.ServerKey.ERN);
+			if (o.has(Api.JsonKey.ERN)) {
+				String ern = o.getString(Api.JsonKey.ERN);
 				Cache.Item i = new Item(o, getCacheTTL());
 				getCache().put(ern, i);
 				return ern;

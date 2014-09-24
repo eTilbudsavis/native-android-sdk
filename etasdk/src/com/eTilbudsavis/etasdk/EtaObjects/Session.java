@@ -24,7 +24,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Permission;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -46,13 +46,13 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 			return s;
 		}
 		
-		s.setToken(Json.valueOf(session, ServerKey.TOKEN));
-		s.setExpires(Json.valueOf(session, ServerKey.EXPIRES));
+		s.setToken(Json.valueOf(session, JsonKey.TOKEN));
+		s.setExpires(Json.valueOf(session, JsonKey.EXPIRES));
 		
 		JSONObject user = null;
-		if (!session.isNull(ServerKey.USER)) {
+		if (!session.isNull(JsonKey.USER)) {
 			try {
-				user = session.getJSONObject(ServerKey.USER);
+				user = session.getJSONObject(JsonKey.USER);
 			} catch (JSONException e) {
 				EtaLog.e(TAG, "", e);
 			}
@@ -60,10 +60,10 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 		s.setUser(user == null ? new User() : User.fromJSON(user));
 
 		JSONObject perm = null;
-		if (session.isNull(ServerKey.PERMISSIONS)) {
+		if (session.isNull(JsonKey.PERMISSIONS)) {
 			try {
-				if (!session.isNull(ServerKey.PERMISSIONS)) {
-					perm = session.getJSONObject(ServerKey.PERMISSIONS);
+				if (!session.isNull(JsonKey.PERMISSIONS)) {
+					perm = session.getJSONObject(JsonKey.PERMISSIONS);
 				}
 			} catch (JSONException e) {
 				EtaLog.e(TAG, "", e);
@@ -71,7 +71,7 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 		}
 		s.setPermission(perm == null ? new Permission() : Permission.fromJSON(perm)) ;
 		 
-		s.setProvider(Json.valueOf(session, ServerKey.PROVIDER));
+		s.setProvider(Json.valueOf(session, JsonKey.PROVIDER));
 		
 		return s;
 	}
@@ -79,11 +79,11 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.TOKEN, Json.nullCheck(getToken()));
-			o.put(ServerKey.EXPIRES, Json.nullCheck(Utils.parseDate(getExpire())));
-			o.put(ServerKey.USER, getUser().getUserId() == User.NO_USER ? JSONObject.NULL : getUser().toJSON());
-			o.put(ServerKey.PERMISSIONS, Json.toJson(getPermission()));
-			o.put(ServerKey.PROVIDER, Json.nullCheck(getProvider()));
+			o.put(JsonKey.TOKEN, Json.nullCheck(getToken()));
+			o.put(JsonKey.EXPIRES, Json.nullCheck(Utils.parseDate(getExpire())));
+			o.put(JsonKey.USER, getUser().getUserId() == User.NO_USER ? JSONObject.NULL : getUser().toJSON());
+			o.put(JsonKey.PERMISSIONS, Json.toJson(getPermission()));
+			o.put(JsonKey.PROVIDER, Json.nullCheck(getProvider()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

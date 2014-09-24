@@ -22,7 +22,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Quantity implements EtaObject<JSONObject>, Serializable {
@@ -42,9 +42,9 @@ public class Quantity implements EtaObject<JSONObject>, Serializable {
 		}
 		
 		try {
-			q.setUnit(quantity.isNull(ServerKey.UNIT) ? null : Unit.fromJSON(quantity.getJSONObject(ServerKey.UNIT)));
-			q.setSize(quantity.isNull(ServerKey.SIZE) ? null : Size.fromJSON(quantity.getJSONObject(ServerKey.SIZE)));
-			q.setPieces(quantity.isNull(ServerKey.PIECES) ? null : Pieces.fromJSON(quantity.getJSONObject(ServerKey.PIECES)));
+			q.setUnit(quantity.isNull(JsonKey.UNIT) ? null : Unit.fromJSON(quantity.getJSONObject(JsonKey.UNIT)));
+			q.setSize(quantity.isNull(JsonKey.SIZE) ? null : Size.fromJSON(quantity.getJSONObject(JsonKey.SIZE)));
+			q.setPieces(quantity.isNull(JsonKey.PIECES) ? null : Pieces.fromJSON(quantity.getJSONObject(JsonKey.PIECES)));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -54,9 +54,9 @@ public class Quantity implements EtaObject<JSONObject>, Serializable {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.UNIT, Json.toJson(getUnit()));
-			o.put(ServerKey.SIZE, Json.toJson(getSize()));
-			o.put(ServerKey.PIECES, Json.toJson(getPieces()));
+			o.put(JsonKey.UNIT, Json.toJson(getUnit()));
+			o.put(JsonKey.SIZE, Json.toJson(getSize()));
+			o.put(JsonKey.PIECES, Json.toJson(getPieces()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

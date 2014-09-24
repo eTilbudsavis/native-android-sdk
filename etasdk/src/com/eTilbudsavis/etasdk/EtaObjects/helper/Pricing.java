@@ -22,7 +22,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Pricing implements EtaObject<JSONObject>, Serializable {
@@ -42,9 +42,9 @@ public class Pricing implements EtaObject<JSONObject>, Serializable {
 		}
 		
 		try {
-			p.setPrice(Json.valueOf(pricing, ServerKey.PRICE, 1.0d));
-			p.setPrePrice(pricing.isNull(ServerKey.PREPRICE) ? null : pricing.getDouble(ServerKey.PREPRICE));
-			p.setCurrency(Json.valueOf(pricing, ServerKey.CURRENCY));
+			p.setPrice(Json.valueOf(pricing, JsonKey.PRICE, 1.0d));
+			p.setPrePrice(pricing.isNull(JsonKey.PREPRICE) ? null : pricing.getDouble(JsonKey.PREPRICE));
+			p.setCurrency(Json.valueOf(pricing, JsonKey.CURRENCY));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -54,9 +54,9 @@ public class Pricing implements EtaObject<JSONObject>, Serializable {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.PRICE, getPrice());
-			o.put(ServerKey.PREPRICE, Json.nullCheck(getPrePrice()));
-			o.put(ServerKey.CURRENCY, Json.nullCheck(getCurrency()));
+			o.put(JsonKey.PRICE, getPrice());
+			o.put(JsonKey.PREPRICE, Json.nullCheck(getPrePrice()));
+			o.put(JsonKey.CURRENCY, Json.nullCheck(getCurrency()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

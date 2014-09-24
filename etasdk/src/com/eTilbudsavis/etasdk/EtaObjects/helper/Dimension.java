@@ -22,7 +22,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Dimension implements EtaObject<JSONObject>, Serializable {
@@ -39,11 +39,11 @@ public class Dimension implements EtaObject<JSONObject>, Serializable {
 		if (dimension == null) return d;
 		
 		try {
-			if (!dimension.isNull(ServerKey.WIDTH)) {
-				d.setWidth(dimension.getDouble(ServerKey.WIDTH));
+			if (!dimension.isNull(JsonKey.WIDTH)) {
+				d.setWidth(dimension.getDouble(JsonKey.WIDTH));
 			}
-			if (!dimension.isNull(ServerKey.HEIGHT)) {
-				d.setHeight(dimension.getDouble(ServerKey.HEIGHT));
+			if (!dimension.isNull(JsonKey.HEIGHT)) {
+				d.setHeight(dimension.getDouble(JsonKey.HEIGHT));
 			}
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
@@ -54,8 +54,8 @@ public class Dimension implements EtaObject<JSONObject>, Serializable {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.HEIGHT, Json.nullCheck(getHeight()));
-			o.put(ServerKey.WIDTH, Json.nullCheck(getWidth()));
+			o.put(JsonKey.HEIGHT, Json.nullCheck(getHeight()));
+			o.put(JsonKey.WIDTH, Json.nullCheck(getWidth()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

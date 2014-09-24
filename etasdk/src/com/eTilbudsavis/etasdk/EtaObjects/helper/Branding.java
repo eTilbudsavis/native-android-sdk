@@ -24,7 +24,7 @@ import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Branding implements EtaObject<JSONObject>, Serializable {
@@ -48,15 +48,15 @@ public class Branding implements EtaObject<JSONObject>, Serializable {
 		}
 		
 		try {
-			b.setName(Json.valueOf(branding, ServerKey.NAME));
-			b.setUrlName(Json.valueOf(branding, ServerKey.URL_NAME));
-			b.setWebsite(Json.valueOf(branding, ServerKey.WEBSITE));
-			b.setLogo(Json.valueOf(branding, ServerKey.LOGO));
-			String color = Json.valueOf(branding, ServerKey.COLOR, "ffffff");
+			b.setName(Json.valueOf(branding, JsonKey.NAME));
+			b.setUrlName(Json.valueOf(branding, JsonKey.URL_NAME));
+			b.setWebsite(Json.valueOf(branding, JsonKey.WEBSITE));
+			b.setLogo(Json.valueOf(branding, JsonKey.LOGO));
+			String color = Json.valueOf(branding, JsonKey.COLOR, "ffffff");
 			b.setColor(Color.parseColor("#"+color));
-			String logoColor = Json.valueOf(branding, ServerKey.LOGO_BACKGROUND, color);
+			String logoColor = Json.valueOf(branding, JsonKey.LOGO_BACKGROUND, color);
 			b.setLogoBackground(Color.parseColor("#"+logoColor));
-			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(ServerKey.PAGEFLIP)));
+			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(JsonKey.PAGEFLIP)));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -66,12 +66,12 @@ public class Branding implements EtaObject<JSONObject>, Serializable {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.NAME, Json.nullCheck(getName()));
-			o.put(ServerKey.URL_NAME, Json.nullCheck(getUrlName()));
-			o.put(ServerKey.WEBSITE, Json.nullCheck(getWebsite()));
-			o.put(ServerKey.LOGO, Json.nullCheck(getLogo()));
-			o.put(ServerKey.COLOR, Json.nullCheck(getColorString()));
-			o.put(ServerKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
+			o.put(JsonKey.NAME, Json.nullCheck(getName()));
+			o.put(JsonKey.URL_NAME, Json.nullCheck(getUrlName()));
+			o.put(JsonKey.WEBSITE, Json.nullCheck(getWebsite()));
+			o.put(JsonKey.LOGO, Json.nullCheck(getLogo()));
+			o.put(JsonKey.COLOR, Json.nullCheck(getColorString()));
+			o.put(JsonKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

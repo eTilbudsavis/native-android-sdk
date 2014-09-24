@@ -24,7 +24,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 
@@ -79,18 +79,18 @@ public class Store extends ErnObject<Store> implements EtaObject<JSONObject>, Se
 		}
 		
 		try {
-			s.setId(Json.valueOf(store, ServerKey.ID));
-			s.setErn(Json.valueOf(store, ServerKey.ERN));
-			s.setStreet(Json.valueOf(store, ServerKey.STREET));
-			s.setCity(Json.valueOf(store, ServerKey.CITY));
-			s.setZipcode(Json.valueOf(store, ServerKey.ZIP_CODE));
-			s.setCountry(Country.fromJSON(store.getJSONObject(ServerKey.COUNTRY)));
-			s.setLatitude(Json.valueOf(store, ServerKey.LATITUDE, 0.0d));
-			s.setLongitude(Json.valueOf(store, ServerKey.LONGITUDE, 0.0d));
-			s.setDealerUrl(Json.valueOf(store, ServerKey.DEALER_URL));
-			s.setDealerId(Json.valueOf(store, ServerKey.DEALER_ID));
-			s.setBranding(Branding.fromJSON(store.getJSONObject(ServerKey.BRANDING)));
-			s.setContact(Json.valueOf(store, ServerKey.CONTACT));
+			s.setId(Json.valueOf(store, JsonKey.ID));
+			s.setErn(Json.valueOf(store, JsonKey.ERN));
+			s.setStreet(Json.valueOf(store, JsonKey.STREET));
+			s.setCity(Json.valueOf(store, JsonKey.CITY));
+			s.setZipcode(Json.valueOf(store, JsonKey.ZIP_CODE));
+			s.setCountry(Country.fromJSON(store.getJSONObject(JsonKey.COUNTRY)));
+			s.setLatitude(Json.valueOf(store, JsonKey.LATITUDE, 0.0d));
+			s.setLongitude(Json.valueOf(store, JsonKey.LONGITUDE, 0.0d));
+			s.setDealerUrl(Json.valueOf(store, JsonKey.DEALER_URL));
+			s.setDealerId(Json.valueOf(store, JsonKey.DEALER_ID));
+			s.setBranding(Branding.fromJSON(store.getJSONObject(JsonKey.BRANDING)));
+			s.setContact(Json.valueOf(store, JsonKey.CONTACT));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -100,16 +100,16 @@ public class Store extends ErnObject<Store> implements EtaObject<JSONObject>, Se
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.STREET, Json.nullCheck(getStreet()));
-			o.put(ServerKey.CITY, Json.nullCheck(getCity()));
-			o.put(ServerKey.ZIP_CODE, Json.nullCheck(getZipcode()));
-			o.put(ServerKey.COUNTRY, Json.nullCheck(getCountry().toJSON()));
-			o.put(ServerKey.LATITUDE, getLatitude());
-			o.put(ServerKey.LONGITUDE, getLongitude());
-			o.put(ServerKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
-			o.put(ServerKey.DEALER_ID, Json.nullCheck(getDealerId()));
-			o.put(ServerKey.BRANDING, Json.nullCheck(getBranding().toJSON()));
-			o.put(ServerKey.CONTACT, Json.nullCheck(getContact()));
+			o.put(JsonKey.STREET, Json.nullCheck(getStreet()));
+			o.put(JsonKey.CITY, Json.nullCheck(getCity()));
+			o.put(JsonKey.ZIP_CODE, Json.nullCheck(getZipcode()));
+			o.put(JsonKey.COUNTRY, Json.nullCheck(getCountry().toJSON()));
+			o.put(JsonKey.LATITUDE, getLatitude());
+			o.put(JsonKey.LONGITUDE, getLongitude());
+			o.put(JsonKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
+			o.put(JsonKey.DEALER_ID, Json.nullCheck(getDealerId()));
+			o.put(JsonKey.BRANDING, Json.nullCheck(getBranding().toJSON()));
+			o.put(JsonKey.CONTACT, Json.nullCheck(getContact()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

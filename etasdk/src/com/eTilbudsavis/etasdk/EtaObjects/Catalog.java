@@ -31,7 +31,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -103,34 +103,34 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 			return catalog;
 		}
 		
-		if (jCatalog.has(ServerKey.STORE_ID) && jCatalog.has(ServerKey.OFFER_COUNT)) {
+		if (jCatalog.has(JsonKey.STORE_ID) && jCatalog.has(JsonKey.OFFER_COUNT)) {
 			// if we have a full catalog
 			try {
-				catalog.setId(Json.valueOf(jCatalog, ServerKey.ID));
-				catalog.setErn(Json.valueOf(jCatalog, ServerKey.ERN));
-				catalog.setLabel(Json.valueOf(jCatalog, ServerKey.LABEL));
-				catalog.setBackground(Json.valueOf(jCatalog, ServerKey.BACKGROUND));
-				Date runFrom = Utils.parseDate(Json.valueOf(jCatalog, ServerKey.RUN_FROM));
+				catalog.setId(Json.valueOf(jCatalog, JsonKey.ID));
+				catalog.setErn(Json.valueOf(jCatalog, JsonKey.ERN));
+				catalog.setLabel(Json.valueOf(jCatalog, JsonKey.LABEL));
+				catalog.setBackground(Json.valueOf(jCatalog, JsonKey.BACKGROUND));
+				Date runFrom = Utils.parseDate(Json.valueOf(jCatalog, JsonKey.RUN_FROM));
 				catalog.setRunFrom(runFrom);
-				Date runTill = Utils.parseDate(Json.valueOf(jCatalog, ServerKey.RUN_TILL));
+				Date runTill = Utils.parseDate(Json.valueOf(jCatalog, JsonKey.RUN_TILL));
 				catalog.setRunTill(runTill);
-				catalog.setPageCount(Json.valueOf(jCatalog, ServerKey.PAGE_COUNT, 0));
-				catalog.setOfferCount(Json.valueOf(jCatalog, ServerKey.OFFER_COUNT, 0));
-				catalog.setBranding(Branding.fromJSON(jCatalog.getJSONObject(ServerKey.BRANDING)));
-				catalog.setDealerId(Json.valueOf(jCatalog, ServerKey.DEALER_ID));
-				catalog.setDealerUrl(Json.valueOf(jCatalog, ServerKey.DEALER_URL));
-				catalog.setStoreId(Json.valueOf(jCatalog, ServerKey.STORE_ID));
-				catalog.setStoreUrl(Json.valueOf(jCatalog, ServerKey.STORE_URL));
-				catalog.setDimension(Dimension.fromJSON(jCatalog.getJSONObject(ServerKey.DIMENSIONS)));
-				catalog.setImages(Images.fromJSON(jCatalog.getJSONObject(ServerKey.IMAGES)));
+				catalog.setPageCount(Json.valueOf(jCatalog, JsonKey.PAGE_COUNT, 0));
+				catalog.setOfferCount(Json.valueOf(jCatalog, JsonKey.OFFER_COUNT, 0));
+				catalog.setBranding(Branding.fromJSON(jCatalog.getJSONObject(JsonKey.BRANDING)));
+				catalog.setDealerId(Json.valueOf(jCatalog, JsonKey.DEALER_ID));
+				catalog.setDealerUrl(Json.valueOf(jCatalog, JsonKey.DEALER_URL));
+				catalog.setStoreId(Json.valueOf(jCatalog, JsonKey.STORE_ID));
+				catalog.setStoreUrl(Json.valueOf(jCatalog, JsonKey.STORE_URL));
+				catalog.setDimension(Dimension.fromJSON(jCatalog.getJSONObject(JsonKey.DIMENSIONS)));
+				catalog.setImages(Images.fromJSON(jCatalog.getJSONObject(JsonKey.IMAGES)));
 			} catch (JSONException e) {
 				EtaLog.e(TAG, "", e);
 			}
 			
-		} else if (jCatalog.has(ServerKey.ID) && jCatalog.has(ServerKey.PAGE)) {
+		} else if (jCatalog.has(JsonKey.ID) && jCatalog.has(JsonKey.PAGE)) {
 			// If it is a partial catalog
-			catalog.setId(Json.valueOf(jCatalog, ServerKey.ID));
-			catalog.setOfferOnPage(Json.valueOf(jCatalog, ServerKey.PAGE, 1));
+			catalog.setId(Json.valueOf(jCatalog, JsonKey.ID));
+			catalog.setOfferOnPage(Json.valueOf(jCatalog, JsonKey.PAGE, 1));
 			
 		}
 		return catalog;
@@ -139,19 +139,19 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 	public JSONObject toJSON() {
 		JSONObject o = super.toJSON();
 		try {
-			o.put(ServerKey.LABEL, Json.nullCheck(getLabel()));
-			o.put(ServerKey.BACKGROUND, Json.nullCheck(getBackground()));
-			o.put(ServerKey.RUN_FROM, Json.nullCheck(Utils.parseDate(getRunFrom())));
-			o.put(ServerKey.RUN_TILL, Json.nullCheck(Utils.parseDate(getRunTill())));
-			o.put(ServerKey.PAGE_COUNT, getPageCount());
-			o.put(ServerKey.OFFER_COUNT, getOfferCount());
-			o.put(ServerKey.BRANDING, Json.nullCheck(getBranding().toJSON()));
-			o.put(ServerKey.DEALER_ID, Json.nullCheck(getDealerId()));
-			o.put(ServerKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
-			o.put(ServerKey.STORE_ID, Json.nullCheck(getStoreId()));
-			o.put(ServerKey.STORE_URL, Json.nullCheck(getStoreUrl()));
-			o.put(ServerKey.DIMENSIONS, Json.nullCheck(getDimension().toJSON()));
-			o.put(ServerKey.IMAGES, Json.nullCheck(getImages().toJSON()));
+			o.put(JsonKey.LABEL, Json.nullCheck(getLabel()));
+			o.put(JsonKey.BACKGROUND, Json.nullCheck(getBackground()));
+			o.put(JsonKey.RUN_FROM, Json.nullCheck(Utils.parseDate(getRunFrom())));
+			o.put(JsonKey.RUN_TILL, Json.nullCheck(Utils.parseDate(getRunTill())));
+			o.put(JsonKey.PAGE_COUNT, getPageCount());
+			o.put(JsonKey.OFFER_COUNT, getOfferCount());
+			o.put(JsonKey.BRANDING, Json.nullCheck(getBranding().toJSON()));
+			o.put(JsonKey.DEALER_ID, Json.nullCheck(getDealerId()));
+			o.put(JsonKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
+			o.put(JsonKey.STORE_ID, Json.nullCheck(getStoreId()));
+			o.put(JsonKey.STORE_URL, Json.nullCheck(getStoreUrl()));
+			o.put(JsonKey.DIMENSIONS, Json.nullCheck(getDimension().toJSON()));
+			o.put(JsonKey.IMAGES, Json.nullCheck(getImages().toJSON()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

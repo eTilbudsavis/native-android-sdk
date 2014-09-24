@@ -19,8 +19,8 @@ public final class Api {
 	 * 
 	 * @author Danny Hvam - danny@etilbudsavis.dk
 	 */
-	public class ServerKey {
-
+	public class JsonKey {
+		
 		public static final String ID = "id";
 		public static final String ERN = "ern";
 		public static final String NAME = "name";

@@ -22,7 +22,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Images implements EtaObject<JSONObject>, Serializable {
@@ -41,9 +41,9 @@ public class Images implements EtaObject<JSONObject>, Serializable {
 			return i;
 		}
 		
-		i.setView(Json.valueOf(image, ServerKey.VIEW));
-		i.setZoom(Json.valueOf(image, ServerKey.ZOOM));
-		i.setThumb(Json.valueOf(image, ServerKey.THUMB));
+		i.setView(Json.valueOf(image, JsonKey.VIEW));
+		i.setZoom(Json.valueOf(image, JsonKey.ZOOM));
+		i.setThumb(Json.valueOf(image, JsonKey.THUMB));
 		
     	return i;
 	}
@@ -51,9 +51,9 @@ public class Images implements EtaObject<JSONObject>, Serializable {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.VIEW, Json.nullCheck(getView()));
-			o.put(ServerKey.ZOOM, Json.nullCheck(getZoom()));
-			o.put(ServerKey.THUMB, Json.nullCheck(getThumb()));
+			o.put(JsonKey.VIEW, Json.nullCheck(getView()));
+			o.put(JsonKey.ZOOM, Json.nullCheck(getZoom()));
+			o.put(JsonKey.THUMB, Json.nullCheck(getThumb()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

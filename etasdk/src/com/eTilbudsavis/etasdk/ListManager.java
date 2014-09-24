@@ -34,7 +34,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.ListUtils;
 
 /**
@@ -110,11 +110,11 @@ public class ListManager {
 			JSONObject o = new JSONObject();
 			try {
 				JSONObject u = new JSONObject();
-				u.put(ServerKey.EMAIL, mEta.getUser().getEmail());
-				u.put(ServerKey.NAME, mEta.getUser().getName());
-				o.put(ServerKey.USER, u);
-				o.put(ServerKey.ACCEPTED, true);
-				o.put(ServerKey.ACCESS, Share.ACCESS_OWNER);
+				u.put(JsonKey.EMAIL, mEta.getUser().getEmail());
+				u.put(JsonKey.NAME, mEta.getUser().getName());
+				o.put(JsonKey.USER, u);
+				o.put(JsonKey.ACCEPTED, true);
+				o.put(JsonKey.ACCESS, Share.ACCESS_OWNER);
 				owner = Share.fromJSON(o);
 			} catch (JSONException e) {
 				EtaLog.e(TAG, null, e);

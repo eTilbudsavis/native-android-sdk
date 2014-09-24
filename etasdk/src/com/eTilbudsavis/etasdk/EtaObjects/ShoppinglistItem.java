@@ -29,7 +29,7 @@ import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.MetaKey;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -124,20 +124,20 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 	public static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject jSli) {
 		
 		
-		sli.setId(Json.valueOf(jSli, ServerKey.ID));
-		sli.setTick(Json.valueOf(jSli, ServerKey.TICK, false));
-		sli.setOfferId(Json.valueOf(jSli, ServerKey.OFFER_ID));
-		sli.setCount(Json.valueOf(jSli, ServerKey.COUNT, 1));
-		sli.setDescription(Json.valueOf(jSli, ServerKey.DESCRIPTION));
-		sli.setShoppinglistId(Json.valueOf(jSli, ServerKey.SHOPPINGLIST_ID));
-		sli.setErn(Json.valueOf(jSli, ServerKey.ERN));
-		sli.setCreator(Json.valueOf(jSli, ServerKey.CREATOR));
-		String date = Json.valueOf(jSli, ServerKey.MODIFIED, Utils.DATE_EPOC);
+		sli.setId(Json.valueOf(jSli, JsonKey.ID));
+		sli.setTick(Json.valueOf(jSli, JsonKey.TICK, false));
+		sli.setOfferId(Json.valueOf(jSli, JsonKey.OFFER_ID));
+		sli.setCount(Json.valueOf(jSli, JsonKey.COUNT, 1));
+		sli.setDescription(Json.valueOf(jSli, JsonKey.DESCRIPTION));
+		sli.setShoppinglistId(Json.valueOf(jSli, JsonKey.SHOPPINGLIST_ID));
+		sli.setErn(Json.valueOf(jSli, JsonKey.ERN));
+		sli.setCreator(Json.valueOf(jSli, JsonKey.CREATOR));
+		String date = Json.valueOf(jSli, JsonKey.MODIFIED, Utils.DATE_EPOC);
 		sli.setModified( Utils.parseDate(date) );
-		sli.setPreviousId(Json.valueOf(jSli, ServerKey.PREVIOUS_ID, null));
+		sli.setPreviousId(Json.valueOf(jSli, JsonKey.PREVIOUS_ID, null));
 		
 		// A whole lot of 'saving my ass from exceptions' for meta
-		String metaString = Json.valueOf(jSli, ServerKey.META, "{}").trim();
+		String metaString = Json.valueOf(jSli, JsonKey.META, "{}").trim();
 		// If it looks like a JSONObject, try parsing it
 		if (metaString.startsWith("{") && metaString.endsWith("}")) {
 			
@@ -161,15 +161,15 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 	public JSONObject toJSON() {
 		JSONObject o = super.toJSON();
 		try {
-			o.put(ServerKey.TICK, Json.nullCheck(isTicked()));
-			o.put(ServerKey.OFFER_ID, Json.nullCheck(getOfferId()));
-			o.put(ServerKey.COUNT, getCount());
-			o.put(ServerKey.DESCRIPTION, Json.nullCheck(getDescription()));
-			o.put(ServerKey.SHOPPINGLIST_ID, Json.nullCheck(getShoppinglistId()));
-			o.put(ServerKey.CREATOR, Json.nullCheck(getCreator()));
-			o.put(ServerKey.MODIFIED, Json.nullCheck(Utils.parseDate(getModified())));
-			o.put(ServerKey.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
-			o.put(ServerKey.META, Json.nullCheck(getMeta()));
+			o.put(JsonKey.TICK, Json.nullCheck(isTicked()));
+			o.put(JsonKey.OFFER_ID, Json.nullCheck(getOfferId()));
+			o.put(JsonKey.COUNT, getCount());
+			o.put(JsonKey.DESCRIPTION, Json.nullCheck(getDescription()));
+			o.put(JsonKey.SHOPPINGLIST_ID, Json.nullCheck(getShoppinglistId()));
+			o.put(JsonKey.CREATOR, Json.nullCheck(getCreator()));
+			o.put(JsonKey.MODIFIED, Json.nullCheck(Utils.parseDate(getModified())));
+			o.put(JsonKey.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
+			o.put(JsonKey.META, Json.nullCheck(getMeta()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

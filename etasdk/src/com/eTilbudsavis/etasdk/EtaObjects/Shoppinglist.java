@@ -29,7 +29,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -132,17 +132,17 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements EtaObje
 		
 		try {
 			// We've don't use OWNER anymore, since we now get all share info.
-			shoppinglist.setId(Json.valueOf(jShoppinglist, ServerKey.ID));
-			shoppinglist.setErn(Json.valueOf(jShoppinglist, ServerKey.ERN));
-			shoppinglist.setName(Json.valueOf(jShoppinglist, ServerKey.NAME));
-			shoppinglist.setAccess(Json.valueOf(jShoppinglist, ServerKey.ACCESS));
-			String modified = Json.valueOf(jShoppinglist, ServerKey.MODIFIED, Utils.DATE_EPOC);
+			shoppinglist.setId(Json.valueOf(jShoppinglist, JsonKey.ID));
+			shoppinglist.setErn(Json.valueOf(jShoppinglist, JsonKey.ERN));
+			shoppinglist.setName(Json.valueOf(jShoppinglist, JsonKey.NAME));
+			shoppinglist.setAccess(Json.valueOf(jShoppinglist, JsonKey.ACCESS));
+			String modified = Json.valueOf(jShoppinglist, JsonKey.MODIFIED, Utils.DATE_EPOC);
 			shoppinglist.setModified(Utils.parseDate(modified));
-			shoppinglist.setPreviousId(Json.valueOf(jShoppinglist, ServerKey.PREVIOUS_ID));
-			shoppinglist.setType(Json.valueOf(jShoppinglist, ServerKey.TYPE));
+			shoppinglist.setPreviousId(Json.valueOf(jShoppinglist, JsonKey.PREVIOUS_ID));
+			shoppinglist.setType(Json.valueOf(jShoppinglist, JsonKey.TYPE));
 			
 			// A whole lot of 'saving my ass from exceptions' for meta
-			String metaString = Json.valueOf(jShoppinglist, ServerKey.META, "{}").trim();
+			String metaString = Json.valueOf(jShoppinglist, JsonKey.META, "{}").trim();
 			// If it looks like a JSONObject, try parsing it
 			if (metaString.startsWith("{") && metaString.endsWith("}")) {
 				
@@ -162,7 +162,7 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements EtaObje
 				shoppinglist.setModified(new Date());
 			}
 			
-			shoppinglist.putShares(Share.fromJSON(jShoppinglist.getJSONArray(ServerKey.SHARES)));
+			shoppinglist.putShares(Share.fromJSON(jShoppinglist.getJSONArray(JsonKey.SHARES)));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -173,17 +173,17 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements EtaObje
 	public JSONObject toJSON() {
 		JSONObject o = super.toJSON();
 		try {
-			o.put(ServerKey.NAME, Json.nullCheck(getName()));
-			o.put(ServerKey.ACCESS, Json.nullCheck(getAccess()));
-			o.put(ServerKey.MODIFIED, Json.nullCheck(Utils.parseDate(getModified())));
-			o.put(ServerKey.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
-			o.put(ServerKey.TYPE, Json.nullCheck(getType()));
-			o.put(ServerKey.META, Json.nullCheck(getMeta()));
+			o.put(JsonKey.NAME, Json.nullCheck(getName()));
+			o.put(JsonKey.ACCESS, Json.nullCheck(getAccess()));
+			o.put(JsonKey.MODIFIED, Json.nullCheck(Utils.parseDate(getModified())));
+			o.put(JsonKey.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
+			o.put(JsonKey.TYPE, Json.nullCheck(getType()));
+			o.put(JsonKey.META, Json.nullCheck(getMeta()));
 			JSONArray shares = new JSONArray();
 			for (Share share : getShares().values()) {
 				shares.put(share.toJSON());
 			}
-			o.put(ServerKey.SHARES, shares);
+			o.put(JsonKey.SHARES, shares);
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

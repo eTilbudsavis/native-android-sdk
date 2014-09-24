@@ -22,7 +22,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Links implements EtaObject<JSONObject>, Serializable {
@@ -39,7 +39,7 @@ public class Links implements EtaObject<JSONObject>, Serializable {
 			return l;
 		}
 		
-		l.setWebshop(Json.valueOf(links, ServerKey.WEBSHOP));
+		l.setWebshop(Json.valueOf(links, JsonKey.WEBSHOP));
 		
 		return l;
 	}
@@ -47,7 +47,7 @@ public class Links implements EtaObject<JSONObject>, Serializable {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.WEBSHOP, Json.nullCheck(getWebshop()));
+			o.put(JsonKey.WEBSHOP, Json.nullCheck(getWebshop()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

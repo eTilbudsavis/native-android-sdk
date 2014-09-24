@@ -26,7 +26,7 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Country extends ErnObject<Country> implements EtaObject<JSONObject>, Serializable {
@@ -67,8 +67,8 @@ public class Country extends ErnObject<Country> implements EtaObject<JSONObject>
 			return country;
 		}
 		
-		country.setId(Json.valueOf(jCountry, ServerKey.ID));
-		country.setUnsubscribePrintUrl(Json.valueOf(jCountry, ServerKey.UNSUBSCRIBE_PRINT_URL));
+		country.setId(Json.valueOf(jCountry, JsonKey.ID));
+		country.setUnsubscribePrintUrl(Json.valueOf(jCountry, JsonKey.UNSUBSCRIBE_PRINT_URL));
 		
 		return country;
 	}
@@ -76,9 +76,9 @@ public class Country extends ErnObject<Country> implements EtaObject<JSONObject>
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.ID, Json.nullCheck(getId()));
-			o.put(ServerKey.ERN, Json.nullCheck(getErn()));
-			o.put(ServerKey.UNSUBSCRIBE_PRINT_URL, Json.nullCheck(getUnsubscribePrintUrl()));
+			o.put(JsonKey.ID, Json.nullCheck(getId()));
+			o.put(JsonKey.ERN, Json.nullCheck(getErn()));
+			o.put(JsonKey.UNSUBSCRIBE_PRINT_URL, Json.nullCheck(getUnsubscribePrintUrl()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

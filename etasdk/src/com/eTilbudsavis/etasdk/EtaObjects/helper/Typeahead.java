@@ -29,7 +29,7 @@ import android.widget.AutoCompleteTextView;
 
 import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 /**
@@ -98,9 +98,9 @@ public class Typeahead implements EtaObject<JSONObject>, Serializable {
 			return typeahead;
 		}
 		
-		typeahead.setSubject(Json.valueOf(jTypeahead, ServerKey.SUBJECT));
-		typeahead.setOffset(Json.valueOf(jTypeahead, ServerKey.OFFSET, 0));
-		typeahead.setLength(Json.valueOf(jTypeahead, ServerKey.LENGTH, 0));
+		typeahead.setSubject(Json.valueOf(jTypeahead, JsonKey.SUBJECT));
+		typeahead.setOffset(Json.valueOf(jTypeahead, JsonKey.OFFSET, 0));
+		typeahead.setLength(Json.valueOf(jTypeahead, JsonKey.LENGTH, 0));
 		
 		return typeahead;
 	}
@@ -108,9 +108,9 @@ public class Typeahead implements EtaObject<JSONObject>, Serializable {
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.SUBJECT, Json.nullCheck(getSubject()));
-			o.put(ServerKey.LENGTH, getLength());
-			o.put(ServerKey.OFFSET, getOffset());
+			o.put(JsonKey.SUBJECT, Json.nullCheck(getSubject()));
+			o.put(JsonKey.LENGTH, getLength());
+			o.put(JsonKey.OFFSET, getOffset());
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

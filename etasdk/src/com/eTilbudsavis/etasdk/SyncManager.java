@@ -631,7 +631,7 @@ public class SyncManager {
 						
 						sl.setState(State.SYNCED);
 						try {
-							String modified = response.getString(Api.ServerKey.MODIFIED);
+							String modified = response.getString(Api.JsonKey.MODIFIED);
 							// If local list has been modified before the server list, then sync items
 							if (sl.getModified().before(Utils.parseDate(modified))) {
 								// If there are changes, update items (this will update list-state in DB)

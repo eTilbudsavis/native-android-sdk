@@ -63,7 +63,7 @@ public abstract class ObjectRequest<T> extends JsonObjectRequest {
 			mAutoFiller.cancel();
 		}
 	}
-
+	
 	public static abstract class Builder<T> extends com.eTilbudsavis.etasdk.request.Builder<T> {
 		
 		private ObjectRequest<T> mRequest;
