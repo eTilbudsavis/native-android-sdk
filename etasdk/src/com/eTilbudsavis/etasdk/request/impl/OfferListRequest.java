@@ -9,6 +9,7 @@ import org.json.JSONArray;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
+import com.eTilbudsavis.etasdk.EtaObjects.Quantity;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
@@ -80,7 +81,39 @@ public class OfferListRequest extends ListRequest<List<Offer>> {
 	}
 	
 	public static class Filter extends ListRequest.Filter {
-		// TODO lookup API doc to find relevant filters
+
+		public void addOfferFilter(Set<String> offerIds) {
+			add(OFFER_IDS, offerIds);
+		}
+
+		public void addCatalogFilter(Set<String> catalogIds) {
+			add(CATALOG_IDS, catalogIds);
+		}
+		
+		public void addDealerFilter(Set<String> dealerIds) {
+			add(DEALER_IDS, dealerIds);
+		}
+		
+		public void addStoreFilter(Set<String> storeIds) {
+			add(STORE_IDS, storeIds);
+		}
+
+		public void addOfferFilter(String offerId) {
+			add(OFFER_IDS, offerId);
+		}
+		
+		public void addCatalogFilter(String catalogId) {
+			add(CATALOG_IDS, catalogId);
+		}
+		
+		public void addDealerFilter(String dealerId) {
+			add(DEALER_IDS, dealerId);
+		}
+		
+		public void addStoreFilter(String storeId) {
+			add(STORE_IDS, storeId);
+		}
+		
 	}
 	
 	public static class Order extends ListRequest.Order {
@@ -88,7 +121,54 @@ public class OfferListRequest extends ListRequest<List<Offer>> {
 		public Order() {
 			super("-" + POPULARITY);
 		}
-		// TODO lookup API doc to find relevant order
+		
+		public void byPopularity(boolean enable, boolean descending) {
+			setOrder(enable, descending, POPULARITY);
+		}
+
+		public void byPage(boolean enable, boolean descending) {
+			setOrder(enable, descending, PAGE);
+		}
+
+		public void byCreated(boolean enable, boolean descending) {
+			setOrder(enable, descending, CREATED);
+		}
+
+		public void byPrice(boolean enable, boolean descending) {
+			setOrder(enable, descending, PRICE);
+		}
+
+		public void bySavings(boolean enable, boolean descending) {
+			setOrder(enable, descending, SAVINGS);
+		}
+
+		public void byQuantity(boolean enable, boolean descending) {
+			setOrder(enable, descending, QUANTITY);
+		}
+		
+		public void byCount(boolean enable, boolean descending) {
+			setOrder(enable, descending, COUNT);
+		}
+		
+		public void byExpirationDate(boolean enable, boolean descending) {
+			setOrder(enable, descending, EXPIRATION_DATE);
+		}
+		
+		public void byPublicationDate(boolean enable, boolean descending) {
+			setOrder(enable, descending, PUBLICATION_DATE);
+		}
+
+		public void byValidDate(boolean enable, boolean descending) {
+			setOrder(enable, descending, VALID_DATE);
+		}
+
+		public void byDealer(boolean enable, boolean descending) {
+			setOrder(enable, descending, DEALER);
+		}
+		
+		public void byDistance(boolean enable, boolean descending) {
+			setOrder(enable, descending, DISTANCE);
+		}
 		
 	}
 	

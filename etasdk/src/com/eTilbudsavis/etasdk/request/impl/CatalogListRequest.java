@@ -233,8 +233,8 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 					}
 				}
 			});
-			
 			return req;
+			
 		}
 		
 		private JsonArrayRequest getStoreRequest(final List<Catalog> catalogs) {
@@ -268,7 +268,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 			req.setIds(Param.FILTER_STORE_IDS, ids);
 			return req;
 		}
-
+		
 	}
 
 }

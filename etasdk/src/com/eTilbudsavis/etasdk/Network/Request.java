@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import android.os.Bundle;
 import android.os.Handler;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Log.EventLog;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
@@ -98,7 +99,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	
 	/**  */
 	private RequestQueue mRequestQueue;
-	
+
+    private boolean mDeliverOnThread = false;
+    
 	/** A tag to identify the request, useful for bulk operations */
 	private Object mTag;
 	
@@ -177,18 +180,16 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     	
     	if (mFinished) {
         	EtaLog.d(TAG, getClass().getSimpleName() + " - BAD is finished");
-    	} else {
-        	EtaLog.d(TAG, getClass().getSimpleName() + " - FINISHED");
     	}
     	
-    	mEventLog.add(reason);
+    	addEvent(reason);
     	
 		try {
 			mNetworkLog.put("duration", getLog().getTotalDuration());
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
-
+		
 		if (mSaveNetworkLog) {
 			// Append the request summary to the debugging log
 			EtaLog.getLogger().getLog().add(EventLog.TYPE_REQUEST, mNetworkLog);
@@ -384,11 +385,31 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	}
 	
 	/**
-	 * Method for determining of the response should be delivered on the current thread, instead of
-	 * @return
+	 * Method for forcing {@link Delivery} to deliver response data to a non-UI-thread.
+	 * 
+	 * <p>Please use with caution, as it's not default behavior to return data to a {@link Thread}</p>
+	 * @param deliverOnThread - true if response should be delivered on a non UI thread
+	 * @return this object
+	 */
+	public Request setDeliverOnThread(boolean deliverOnThread) {
+		mDeliverOnThread = deliverOnThread;
+		return this;
+	}
+	
+	/**
+	 * Method allows for overriding default behavior of returning the callback to UI thread.
+	 * This is especially useful if post-processing of a request is required before the data is
+	 * presented to e.g. a fragment or activity.
+	 * <p>If the method returns true, the {@link Delivery} has two options, return the response data to either:
+	 * <li> a {@link Request #getHandler() handler} if one was set on the request, this is the first priority. or</li> 
+	 * <li> a random thread in {@link Eta#getExecutor()}.</li>
+	 * </p>
+	 * 
+	 * <p>Please use with caution, as it's not default behavior to return data to a {@link Thread}</p>
+	 * @return true if data should be delivered to a non-UI-thread, else false (return response data to UI-thread).
 	 */
     public boolean deliverOnThread() {
-    	return false;
+    	return mDeliverOnThread;
     }
     
 	/**

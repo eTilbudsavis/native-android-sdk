@@ -20,6 +20,11 @@ public abstract class RequestOrder implements IRequestParameter {
 	public static final String DEALER = "dealer";
 	public static final String PAGE = "page";
 	public static final String SCORE = "score";
+	public static final String PRICE = "price";
+	public static final String SAVINGS = "savings";
+	public static final String QUANTITY = "quantity";
+	public static final String COUNT = "count";
+	public static final String VALID_DATE = "valid_date";
 	
 	private String mDefault = null;
 	
