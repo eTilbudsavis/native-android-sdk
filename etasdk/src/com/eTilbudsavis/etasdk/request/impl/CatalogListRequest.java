@@ -6,17 +6,16 @@ import java.util.List;
 import java.util.Set;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Pages;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.Utils.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Param;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
@@ -212,6 +211,8 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 							}
 						}
 						
+					} else {
+						EtaLog.d(TAG, error.toJSON().toString());
 					}
 					
 					done();
@@ -223,14 +224,17 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 			return req;
 		}
 
-		private JsonObjectRequest getPagesRequest(final Catalog c) {
+		private JsonArrayRequest getPagesRequest(final Catalog c) {
 			
-			JsonObjectRequest req = new JsonObjectRequest(Endpoint.catalogPages(c.getId()), new Listener<JSONObject>() {
-
-				public void onComplete(JSONObject response, EtaError error) {
+			JsonArrayRequest req = new JsonArrayRequest(Endpoint.catalogPages(c.getId()), new Listener<JSONArray>() {
+				
+				public void onComplete(JSONArray response, EtaError error) {
 					if (response != null) {
 						c.setPages(Pages.fromJSON(response));
+					} else {
+						EtaLog.d(TAG, error.toJSON().toString());
 					}
+					done();
 				}
 			});
 			return req;
@@ -259,6 +263,8 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 							}
 						}
 						
+					} else {
+						EtaLog.d(TAG, error.toJSON().toString());
 					}
 					done();
 					
