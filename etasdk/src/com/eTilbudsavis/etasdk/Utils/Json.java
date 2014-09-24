@@ -149,7 +149,7 @@ public class Json {
 	 * Typically {@link #JSOBObject.NULL JSOBObject.NULL} or null is used for this purpose
 	 * @return A JSONObject, or defValue
 	 */
-	public static Object toJson(EtaObject object, Object defValue) {
+	public static Object toJson(EtaObject<?> object, Object defValue) {
 		return object == null ? defValue : object.toJSON();
 	}
 
@@ -158,7 +158,7 @@ public class Json {
 	 * @param object The EtaObject to convert
 	 * @return A JSONObject, or JSONObject.NULL
 	 */
-	public static Object toJson(EtaObject object) {
+	public static Object toJson(EtaObject<?> object) {
 		return toJson(object, JSONObject.NULL);
 	}
 	

@@ -27,7 +27,12 @@ import org.json.JSONObject;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Links;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Pricing;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Quantity;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
@@ -42,11 +47,13 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Offer extends EtaErnObject<Offer> implements Serializable, Parcelable {
+public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Offer";
+	public static final String TAG = Offer.class.getSimpleName();
+
+	private static final String ERN_CLASS = "offer";
 	
 	private String mHeading;
 	private String mDescription;
@@ -69,9 +76,6 @@ public class Offer extends EtaErnObject<Offer> implements Serializable, Parcelab
 	private Dealer mDealer;
 	private Store mStore;
 	
-	/**
-	 * Default constructor
-	 */
 	public Offer() {
 		
 	}
@@ -98,21 +102,12 @@ public class Offer extends EtaErnObject<Offer> implements Serializable, Parcelab
 	 * @param offer A {@link JSONObject} in the format of a valid API v2 offer response
 	 * @return An Offer object
 	 */
-	public static Offer fromJSON(JSONObject offer) {
-		return fromJSON(new Offer(), offer);
-	}
-
-	/**
-	 * A factory method for converting {@link JSONObject} into POJO.
-	 * <p>This method exposes a way, of updating/setting an objects properties</p>
-	 * @param offer An object to set/update
-	 * @param jOffer A {@link JSONObject} in the format of a valid API v2 offer response
-	 * @return A {@link List} of POJO
-	 */
-	public static Offer fromJSON(Offer offer, JSONObject jOffer) {
-		if (offer == null) offer = new Offer();
-		if (jOffer == null) return offer;
-
+	public static Offer fromJSON(JSONObject jOffer) {
+		Offer offer = new Offer();
+		if (jOffer == null) {
+			return offer;
+		}
+		
 		try {
 			offer.setId(Json.valueOf(jOffer, ServerKey.ID));
 			offer.setErn(Json.valueOf(jOffer, ServerKey.ERN));
@@ -139,10 +134,9 @@ public class Offer extends EtaErnObject<Offer> implements Serializable, Parcelab
 		
 		return offer;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
-		JSONObject o = super.toJSON();
+		JSONObject o = new JSONObject();
 		try {
 			o.put(ServerKey.HEADING, Json.nullCheck(getHeading()));
 			o.put(ServerKey.DESCRIPTION, Json.nullCheck(getDescription()));
@@ -165,12 +159,12 @@ public class Offer extends EtaErnObject<Offer> implements Serializable, Parcelab
 		}
 		return o;
 	}
-	
+
 	@Override
-	public String getErnPrefix() {
-		return ERN_OFFER;
+	String getErnClass() {
+		return ERN_CLASS;
 	}
-	
+    
 	/**
 	 * Get the offer heading
 	 * @return A {@link String}, or null
@@ -656,7 +650,6 @@ public class Offer extends EtaErnObject<Offer> implements Serializable, Parcelab
 	}
 
 	public int describeContents() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 	

@@ -1,12 +1,9 @@
 package com.eTilbudsavis.etasdk.request.impl;
 
-import org.json.JSONException;
-
 import android.os.Handler;
 import android.os.Looper;
 
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Log.EventLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;

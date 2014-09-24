@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
 
@@ -22,32 +22,32 @@ import org.json.JSONObject;
 
 import android.graphics.Color;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Pageflip extends EtaObject implements Serializable {
+public class Pageflip implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Pageflip";
+	public static final String TAG = Pageflip.class.getSimpleName();
 	
 	private String mLogo;
 	private int mColor = 0;
-
+	
 	public Pageflip() {
 	}
-
+	
 	public Pageflip(int color) {
 		mColor = color;
 	}
 	
 	public static Pageflip fromJSON(JSONObject pageflip) {
-		return fromJSON(new Pageflip(), pageflip);
-	}
-	
-	public static Pageflip fromJSON(Pageflip p, JSONObject pageflip) {
-		if (p == null) p = new Pageflip();
-		if (pageflip == null) return p;
+		Pageflip p = new Pageflip();
+		if (pageflip == null) {
+			return p;
+		}
 		
 		p.setLogo(Json.valueOf(pageflip, ServerKey.LOGO));
 		String color = Json.valueOf(pageflip, ServerKey.COLOR, "7b9119");
@@ -55,8 +55,7 @@ public class Pageflip extends EtaObject implements Serializable {
 		
 		return p;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {

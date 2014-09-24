@@ -13,37 +13,33 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Pricing extends EtaObject implements Serializable {
+public class Pricing implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Pricing";
+	public static final String TAG = Pricing.class.getSimpleName();
 	
 	private double mPrice = 1.0d;
 	private Double mPrePrice;
 	private String mCurrency;
 	
-	public Pricing() {
-		
-	}
-	
 	public static Pricing fromJSON(JSONObject pricing) {
-		return fromJSON(new Pricing(), pricing);
-	}
-	
-	public static Pricing fromJSON(Pricing p, JSONObject pricing) {
-		if (p == null) p = new Pricing();
-		if (pricing == null) return p;
+		Pricing p = new Pricing();
+		if (pricing == null) {
+			return p;
+		}
 		
 		try {
 			p.setPrice(Json.valueOf(pricing, ServerKey.PRICE, 1.0d));
@@ -54,8 +50,7 @@ public class Pricing extends EtaObject implements Serializable {
 		}
 		return p;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {

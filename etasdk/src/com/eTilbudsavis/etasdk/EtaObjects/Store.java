@@ -22,7 +22,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 
@@ -37,11 +39,13 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Store extends EtaErnObject<Store> implements Serializable {
+public class Store extends ErnObject<Store> implements EtaObject<JSONObject>, Serializable {
 	
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 4105775934027363052L;
 
-	public static final String TAG = "Store";
+	public static final String TAG = Store.class.getSimpleName();
+
+	private static final String ERN_CLASS = "store";
 	
 	private String mStreet;
 	private String mCity;
@@ -55,8 +59,6 @@ public class Store extends EtaErnObject<Store> implements Serializable {
 	private String mContact;
 	
 	private Dealer mDealer;
-
-	public Store() { }
 	
 	public static ArrayList<Store> fromJSON(JSONArray stores) {
 		ArrayList<Store> list = new ArrayList<Store>();
@@ -71,12 +73,10 @@ public class Store extends EtaErnObject<Store> implements Serializable {
 	}
 	
 	public static Store fromJSON(JSONObject store) {
-		return fromJSON(new Store(), store);
-	}
-	
-	public static Store fromJSON(Store s, JSONObject store) {
-		if (s == null) s = new Store();
-		if (store == null) return s;
+		Store s = new Store();
+		if (store == null) {
+			return s;
+		}
 		
 		try {
 			s.setId(Json.valueOf(store, ServerKey.ID));
@@ -96,10 +96,9 @@ public class Store extends EtaErnObject<Store> implements Serializable {
 		}
 		return s;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
-		JSONObject o = super.toJSON();
+		JSONObject o = new JSONObject();
 		try {
 			o.put(ServerKey.STREET, Json.nullCheck(getStreet()));
 			o.put(ServerKey.CITY, Json.nullCheck(getCity()));
@@ -116,10 +115,9 @@ public class Store extends EtaErnObject<Store> implements Serializable {
 		}
 		return o;
 	}
-	
 	@Override
-	public String getErnPrefix() {
-		return ERN_STORE;
+	String getErnClass() {
+		return ERN_CLASS;
 	}
 	
 	public Store setStreet(String street) {

@@ -24,8 +24,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import org.apache.http.client.utils.URLEncodedUtils;
-
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;

@@ -9,15 +9,15 @@ import org.json.JSONArray;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
-import com.eTilbudsavis.etasdk.EtaObjects.Pages;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Param;
+import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Api.Param;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 
 public class CatalogListRequest extends ListRequest<List<Catalog>> {
@@ -230,7 +230,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 				
 				public void onComplete(JSONArray response, EtaError error) {
 					if (response != null) {
-						c.setPages(Pages.fromJSON(response));
+						c.setPages(Page.fromJSON(response));
 					} else {
 						EtaLog.d(TAG, error.toJSON().toString());
 					}

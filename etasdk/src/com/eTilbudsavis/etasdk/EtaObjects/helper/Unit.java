@@ -13,81 +13,78 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.EtaObjects.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Pieces extends EtaObject implements Serializable {
+public class Unit implements EtaObject<JSONObject>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = "Pieces";
+	public static final String TAG = Unit.class.getSimpleName();
 	
-	private int mFrom = 1;
-	private int mTo = 1;
+	private String mSymbol;
+	private Si mSi;
 	
-	public Pieces() {
-		
-	}
-	
-	public static Pieces fromJSON(JSONObject pieces) {
-		return fromJSON(new Pieces(), pieces);
-	}
-	
-	public static Pieces fromJSON(Pieces p, JSONObject pieces) {
-		if (p == null) p = new Pieces();
-		if (pieces == null) return p;
-		
-		p.setFrom(Json.valueOf(pieces, ServerKey.FROM, 1));
-		p.setTo(Json.valueOf(pieces, ServerKey.TO, 1));
-		
-		return p;
-	}
+	public static Unit fromJSON(JSONObject unit) {
+		Unit u = new Unit();
+		if (unit == null) {
+			return u;
+		}
 
-	@Override
+		u.setSymbol(Json.valueOf(unit, ServerKey.SYMBOL));
+		try {
+			u.setSi(Si.fromJSON(unit.getJSONObject(ServerKey.SI)));
+		} catch (JSONException e) {
+			EtaLog.e(TAG, "", e);
+		}
+		
+		return u;
+	}
+	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(ServerKey.FROM, Json.nullCheck(getFrom()));
-			o.put(ServerKey.TO, Json.nullCheck(getTo()));
+			o.put(ServerKey.SYMBOL, Json.nullCheck(getSymbol()));
+			o.put(ServerKey.SI, Json.toJson(getSi()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
 	
-	public int getFrom() {
-		return mFrom;
+	public String getSymbol() {
+		return mSymbol;
 	}
-	
-	public Pieces setFrom(int from) {
-		mFrom = from;
+
+	public Unit setSymbol(String symbol) {
+		mSymbol = symbol;
 		return this;
 	}
 
-
-	public int getTo() {
-		return mTo;
+	public Si getSi() {
+		return mSi;
 	}
 
-
-	public Pieces setTo(int to) {
-		mTo = to;
+	public Unit setSi(Si si) {
+		mSi = si;
 		return this;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + mFrom;
-		result = prime * result + mTo;
+		int result = super.hashCode();
+		result = prime * result + ((mSi == null) ? 0 : mSi.hashCode());
+		result = prime * result + ((mSymbol == null) ? 0 : mSymbol.hashCode());
 		return result;
 	}
 
@@ -95,14 +92,20 @@ public class Pieces extends EtaObject implements Serializable {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Pieces other = (Pieces) obj;
-		if (mFrom != other.mFrom)
+		Unit other = (Unit) obj;
+		if (mSi == null) {
+			if (other.mSi != null)
+				return false;
+		} else if (!mSi.equals(other.mSi))
 			return false;
-		if (mTo != other.mTo)
+		if (mSymbol == null) {
+			if (other.mSymbol != null)
+				return false;
+		} else if (!mSymbol.equals(other.mSymbol))
 			return false;
 		return true;
 	}

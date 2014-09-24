@@ -26,11 +26,14 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Share extends EtaListObject<Share> implements Serializable {
-	
-	public static final String TAG = "Share";
+public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>, Serializable {
+
+	public static final String TAG = Share.class.getSimpleName();
+
+	private static final String ERN_CLASS = "share";
 	
 	private static final long serialVersionUID = -9184865445908448266L;
 	
@@ -56,23 +59,21 @@ public class Share extends EtaListObject<Share> implements Serializable {
 	
 	public static ArrayList<Share> fromJSON(JSONArray shares) {
 		ArrayList<Share> list = new ArrayList<Share>();
-		try {
-			for (int i = 0 ; i < shares.length() ; i++ ) {
-				Share s = Share.fromJSON(shares.getJSONObject(i));
-				list.add(s);
+		for (int i = 0 ; i < shares.length() ; i++ ) {
+			try {
+				list.add(Share.fromJSON(shares.getJSONObject(i)));
+			} catch (JSONException e) {
+				EtaLog.e(TAG, "", e);
 			}
-			
-		} catch (JSONException e) {
-			EtaLog.e(TAG, "", e);
 		}
 		return list;
 	}
 	
 	public static Share fromJSON(JSONObject share) {
-		return fromJSON(new Share(), share);
-	}
-	
-	public static Share fromJSON(Share s, JSONObject share) {
+		Share s = new Share();
+		if (share==null) {
+			return s;
+		}
 		
 		try {
 			
@@ -113,10 +114,10 @@ public class Share extends EtaListObject<Share> implements Serializable {
 		}
 		return o;
 	}
-	
+
 	@Override
-	public String getErnPrefix() {
-		return ERN_SHARE;
+	String getErnClass() {
+		return ERN_CLASS;
 	}
 	
 	/**

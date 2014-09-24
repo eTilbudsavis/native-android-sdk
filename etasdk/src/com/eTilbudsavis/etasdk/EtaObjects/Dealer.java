@@ -24,7 +24,9 @@ import org.json.JSONObject;
 
 import android.graphics.Color;
 
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Pageflip;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 /**
@@ -38,11 +40,13 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Dealer extends EtaErnObject<Dealer> implements Serializable {
+public class Dealer extends ErnObject<Dealer> implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final String TAG = "Dealer";
+	public static final String TAG = Dealer.class.getSimpleName();
+	
+	private static final String ERN_CLASS = "dealer";
 	
 	private String mName;
 	private String mUrlName;
@@ -50,8 +54,6 @@ public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 	private String mLogo;
 	private Integer mColor;
 	private Pageflip mPageflip;
-
-	public Dealer() { }
 	
 	public static ArrayList<Dealer> fromJSON(JSONArray dealers) {
 		ArrayList<Dealer> list = new ArrayList<Dealer>();
@@ -66,15 +68,12 @@ public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 	}
 	
 	public static Dealer fromJSON(JSONObject dealer) {
-		return fromJSON(new Dealer(), dealer);
-	}
-	
-	public static Dealer fromJSON(Dealer d, JSONObject dealer) {
-		if (d == null) d = new Dealer();
-		if (dealer == null) return d;
+		Dealer d = new Dealer();
+		if (dealer == null) {
+			return d;
+		}
 		
 		try {
-			d.setId(Json.valueOf(dealer, ServerKey.ID));
 			d.setErn(Json.valueOf(dealer, ServerKey.ERN));
 			d.setName(Json.valueOf(dealer, ServerKey.NAME));
 			d.setUrlName(Json.valueOf(dealer, ServerKey.URL_NAME));
@@ -87,11 +86,12 @@ public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 		}
 		return d;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
-		JSONObject o = super.toJSON();
+		JSONObject o = new JSONObject();
 		try {
+			o.put(ServerKey.ID, Json.nullCheck(getId()));
+			o.put(ServerKey.ERN, Json.nullCheck(getErn()));
 			o.put(ServerKey.NAME, Json.nullCheck(getName()));
 			o.put(ServerKey.URL_NAME, Json.nullCheck(getUrlName()));
 			o.put(ServerKey.WEBSITE, Json.nullCheck(getWebsite()));
@@ -101,12 +101,7 @@ public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
-		return o; 
-	}
-	
-	@Override
-	public String getErnPrefix() {
-		return ERN_DEALER;
+		return o;
 	}
 	
 	public Dealer setName(String name) {
@@ -225,4 +220,8 @@ public class Dealer extends EtaErnObject<Dealer> implements Serializable {
 		return true;
 	}
 	
+	public String getErnClass() {
+		return ERN_CLASS;
+	}
+
 }

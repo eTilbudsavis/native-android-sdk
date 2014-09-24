@@ -16,12 +16,12 @@
 package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.ServerKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 /**
@@ -31,63 +31,31 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public abstract class EtaErnObject<T> extends EtaObject implements Serializable {
+public abstract class ErnObject<T> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-
-	public static final String TAG = "EtaErnObject";
 	
-	/* 
-	 * A list of nice to have strings, ready to use in subclasses
-	 * Also gives a hint as to which classes extend this class
-	 */
-	protected static final String ERN_CATALOG = "ern:catalog";
-	protected static final String ERN_DEALER = "ern:dealer";
-	protected static final String ERN_OFFER = "ern:offer";
-	protected static final String ERN_SHOPPINGLIST = "ern:shopping:list";
-	protected static final String ERN_SHOPPINGLISTITEM = "ern:shoppinglist:item";
-	protected static final String ERN_STORE = "ern:store";
-	protected static final String ERN_SHARE = "ern:share";
-	protected static final String ERN_COUNTRY = "ern:country";
-	protected static final String ERN_USER = "ern:user";
+	public static final String TAG = ErnObject.class.getSimpleName();
 	
 	private String mId;
 	private String mErn;
-
-	@Override
-	public JSONObject toJSON() {
-		JSONObject o = new JSONObject();
-		try {
-			o.put(ServerKey.ID, Json.nullCheck(getId()));
-			o.put(ServerKey.ERN, Json.nullCheck(getErn()));
-		} catch (JSONException e) {
-			EtaLog.e(TAG, "", e);
-		}
-		return o;
-	}
+	
+//	public ErnObject() {
+//		setId(Utils.createUUID());
+//	}
 	
 	/**
-	 * Method for getting the preferred Etilbudsavis Resource Name (ERN) prefix for the given object 
-	 * (such as "ern:catalog").
-	 * @return The prefix as a {@link String}
+	 * Method for getting the ERN class for this object. The ERN class is part of the ERN
+	 * identifier for the object.
+	 * <p>The identifier for a {@link Catalog} is the string "catalog"</p>
+	 * @return An ERN class identifier
 	 */
-	public abstract String getErnPrefix();
-
-	/**
-	 * <p>Set the identifier for this object. An identifier is often a {@link UUID} as described in
-	 * <a href="http://www.ietf.org/rfc/rfc4122.txt">RFC&nbsp;4122:</a>, 
-	 * though exceptions can occur e.g. {@link Country#setId(String)}.</p>
-	 * 
-	 * <p>When setting the id, the ERN is automatically update to match</p>
-	 * @param id A non-<code>null</code> String
-	 * @return This object
-	 */
+	abstract String getErnClass();
+	
 	@SuppressWarnings("unchecked")
 	public T setId(String id) {
-		if (id != null) {
-			mId = id;
-			mErn = getErnPrefix() + ":" + id;
-		}
+		mId = id;
+		mErn = String.format("ern:%s:%s", getErnClass(), id);
 		return (T)this;
 	}
 	
@@ -98,7 +66,7 @@ public abstract class EtaErnObject<T> extends EtaObject implements Serializable 
 	public String getId() {
 		return mId;
 	}
-
+	
 	/**
 	 * Set the Etilbudsavis Resource Name (ERN) for this object.
 	 * <p>ERN is a <i>unique</i> identifier for objects in the eTilbudsavis API v2, and should in most cases be 
@@ -125,7 +93,18 @@ public abstract class EtaErnObject<T> extends EtaObject implements Serializable 
 	public String getErn() {
 		return mErn;
 	}
-
+	
+	public JSONObject toJSON() {
+		JSONObject o = new JSONObject();
+		try {
+			o.put(ServerKey.ID, Json.nullCheck(getId()));
+			o.put(ServerKey.ERN, Json.nullCheck(getErn()));
+		} catch (JSONException e) {
+			EtaLog.e(TAG, "", e);
+		}
+		return o;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -143,7 +122,7 @@ public abstract class EtaErnObject<T> extends EtaObject implements Serializable 
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		EtaErnObject<?> other = (EtaErnObject<?>) obj;
+		ErnObject<?> other = (ErnObject<?>) obj;
 		if (mErn == null) {
 			if (other.mErn != null)
 				return false;

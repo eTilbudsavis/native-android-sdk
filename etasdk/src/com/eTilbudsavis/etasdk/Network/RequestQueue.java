@@ -31,11 +31,9 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaLocation;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Log.EventLog;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Param;
+import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Api.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
-import com.eTilbudsavis.etasdk.request.RequestAutoFill;
-import com.eTilbudsavis.etasdk.request.RequestFilter;
 
 @SuppressWarnings("rawtypes")
 public class RequestQueue {
