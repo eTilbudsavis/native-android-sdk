@@ -227,6 +227,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 					done();
 				}
 			});
+			req.setDeliverOnThread(true);
 			return req;
 			
 		}

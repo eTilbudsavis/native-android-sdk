@@ -244,7 +244,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 					
 				}
 			});
-			
+			req.setDeliverOnThread(true);
 			req.setIds(Param.DEALER_IDS, ids);
 			return req;
 		}
@@ -278,7 +278,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 					
 				}
 			});
-			
+			req.setDeliverOnThread(true);
 			req.setIds(Param.STORE_IDS, ids);
 			return req;
 		}
@@ -290,7 +290,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 				ids.add(item.getCatalogId());
 			}
 			
-			JsonArrayRequest req = new JsonArrayRequest(Endpoint.CATALOG_LIST, new Listener<JSONArray>() {
+			Listener<JSONArray> l = new Listener<JSONArray>() {
 				
 				public void onComplete(JSONArray response, EtaError error) {
 					
@@ -312,8 +312,10 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 					done();
 					
 				}
-			});
+			};
 			
+			JsonArrayRequest req = new JsonArrayRequest(Endpoint.CATALOG_LIST, l);
+			req.setDeliverOnThread(true);
 			req.setIds(Param.CATALOG_IDS, ids);
 			return req;
 		}

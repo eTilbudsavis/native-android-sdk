@@ -12,7 +12,7 @@ public abstract class RequestParameter implements IRequestParameter {
 		return true;
 	}
 	
-	public boolean remove(String filter) {
+	protected boolean remove(String filter) {
 		mParam.remove(filter);
 		return true;
 	}
