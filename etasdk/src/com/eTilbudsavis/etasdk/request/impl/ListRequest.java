@@ -136,7 +136,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		
 	}
 	
-	public static class Order extends RequestOrder {
+	public static abstract class Order extends RequestOrder {
 
 		public Order(String defaultOrder) {
 			super(defaultOrder);
@@ -144,7 +144,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		
 	}
 	
-	public static class Filter extends RequestFilter<Set<String>> {
+	public static abstract class Filter extends RequestFilter<Set<String>> {
 		
 		protected boolean add(String filter, String id) {
 			Map<String, Set<String>> map = getFilters();
@@ -160,7 +160,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		
 	}
 	
-	public static class Parameter extends RequestParameter {
+	public static abstract class Parameter extends RequestParameter {
 		
 		/**
 		 * The API relies on pagination for retrieving data. Therefore you need to

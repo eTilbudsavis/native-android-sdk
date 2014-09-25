@@ -6,32 +6,32 @@ import java.util.Set;
 
 import org.json.JSONArray;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Store;
+import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 
-public class StoreListRequest extends ListRequest<List<Store>> {
+public class DealerListRequest extends ListRequest<List<Dealer>> {
 	
-	private StoreListRequest(Listener<List<Store>> l) {
-		super(Endpoint.STORE_LIST, l);
+	private DealerListRequest(Listener<List<Dealer>> l) {
+		super(Endpoint.DEALER_LIST, l);
 	}
 	
 	@Override
 	protected void deliverResponse(JSONArray response, EtaError error) {
-		List<Store> offers = null;
+		List<Dealer> dealers = null;
 		if (response != null) {
-			offers = Store.fromJSON(response);
+			dealers = Dealer.fromJSON(response);
 		}
-		runAutoFill(offers, error);
+		runAutoFill(dealers, error);
 	}
 	
-	public static class Builder extends ListRequest.Builder<List<Store>>{
+	public static class Builder extends ListRequest.Builder<List<Dealer>>{
 		
-		public Builder(Listener<List<Store>> l) {
-			super(new StoreListRequest(l));
+		public Builder(Listener<List<Dealer>> l) {
+			super(new DealerListRequest(l));
 		}
 		
 		public void setFilter(Filter filter) {
@@ -46,12 +46,12 @@ public class StoreListRequest extends ListRequest<List<Store>> {
 			super.setParameters(params);
 		}
 		
-		public void setAutoFill(StoreAutoFill filler) {
+		public void setAutoFill(DealerAutoFill filler) {
 			super.setAutoFiller(filler);
 		}
 		
 		@Override
-		public ListRequest<List<Store>> build() {
+		public ListRequest<List<Dealer>> build() {
 			
 			if (getFilter() == null) {
 				setFilter(new Filter());
@@ -66,7 +66,7 @@ public class StoreListRequest extends ListRequest<List<Store>> {
 			}
 			
 			if (getAutofill() == null) {
-				setAutoFiller(new StoreAutoFill());
+				setAutoFiller(new DealerAutoFill());
 			}
 			
 			return super.build();
@@ -75,37 +75,13 @@ public class StoreListRequest extends ListRequest<List<Store>> {
 	}
 	
 	public static class Filter extends ListRequest.Filter {
-
-		public void addOfferFilter(Set<String> offerIds) {
-			add(Api.Param.OFFER_IDS, offerIds);
-		}
-
-		public void addCatalogFilter(Set<String> catalogIds) {
-			add(Api.Param.CATALOG_IDS, catalogIds);
-		}
 		
 		public void addDealerFilter(Set<String> dealerIds) {
 			add(Api.Param.DEALER_IDS, dealerIds);
 		}
 		
-		public void addStoreFilter(Set<String> storeIds) {
-			add(Api.Param.STORE_IDS, storeIds);
-		}
-		
-		public void addOfferFilter(String offerId) {
-			add(Api.Param.OFFER_IDS, offerId);
-		}
-		
-		public void addCatalogFilter(String catalogId) {
-			add(Api.Param.CATALOG_IDS, catalogId);
-		}
-		
 		public void addDealerFilter(String dealerId) {
 			add(Api.Param.DEALER_IDS, dealerId);
-		}
-		
-		public void addStoreFilter(String storeId) {
-			add(Api.Param.STORE_IDS, storeId);
 		}
 		
 	}
@@ -122,30 +98,12 @@ public class StoreListRequest extends ListRequest<List<Store>> {
 		// TODO lookup API doc to find relevant filters
 	}
 	
-	public static class StoreAutoFill extends ListRequest.ListAutoFill<List<Store>> {
-		
-		private boolean mDealer;
-		
-		public StoreAutoFill() {
-			this(false);
-		}
-		
-		public StoreAutoFill(boolean dealer) {
-			mDealer = dealer;
-		}
+	public static class DealerAutoFill extends ListRequest.ListAutoFill<List<Dealer>> {
 		
 		@Override
-		public List<Request<?>> createRequests(List<Store> data) {
+		public List<Request<?>> createRequests(List<Dealer> data) {
 			
 			List<Request<?>> reqs = new ArrayList<Request<?>>();
-			
-			if (!data.isEmpty()) {
-				
-				if (mDealer) {
-					reqs.add(getDealerRequest(data));
-				}
-				
-			}
 			
 			return reqs;
 		}
