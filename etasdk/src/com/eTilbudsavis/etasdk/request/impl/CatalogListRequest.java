@@ -16,6 +16,7 @@ import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Api.Param;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
@@ -84,27 +85,27 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 	public static class Filter extends ListRequest.Filter {
 		
 		public void addCatalogFilter(Set<String> catalogIds) {
-			add(CATALOG_IDS, catalogIds);
+			add(Api.Param.CATALOG_IDS, catalogIds);
 		}
 		
 		public void addDealerFilter(Set<String> dealerIds) {
-			add(DEALER_IDS, dealerIds);
+			add(Api.Param.DEALER_IDS, dealerIds);
 		}
 		
 		public void addStoreFilter(Set<String> storeIds) {
-			add(STORE_IDS, storeIds);
+			add(Api.Param.STORE_IDS, storeIds);
 		}
 		
 		public void addCatalogFilter(String catalogId) {
-			add(CATALOG_IDS, catalogId);
+			add(Api.Param.CATALOG_IDS, catalogId);
 		}
 		
 		public void addDealerFilter(String dealerId) {
-			add(DEALER_IDS, dealerId);
+			add(Api.Param.DEALER_IDS, dealerId);
 		}
 		
 		public void addStoreFilter(String storeId) {
-			add(STORE_IDS, storeId);
+			add(Api.Param.STORE_IDS, storeId);
 		}
 		
 	}
@@ -112,31 +113,31 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 	public static class Order extends ListRequest.Order {
 		
 		public Order() {
-			super("-" + POPULARITY);
+			super("-" + Api.Sort.POPULARITY);
 		}
 		
 		public void byPopularity(boolean enable, boolean descending) {
-			setOrder(enable, descending, POPULARITY);
+			setOrder(enable, descending, Api.Sort.POPULARITY);
 		}
 		
 		public void byDealer(boolean enable, boolean descending) {
-			setOrder(enable, descending, DEALER);
+			setOrder(enable, descending, Api.Sort.DEALER);
 		}
 		
 		public void byCreated(boolean enable, boolean descending) {
-			setOrder(enable, descending, CREATED);
+			setOrder(enable, descending, Api.Sort.CREATED);
 		}
 
 		public void byExpirationDate(boolean enable, boolean descending) {
-			setOrder(enable, descending, EXPIRATION_DATE);
+			setOrder(enable, descending, Api.Sort.EXPIRATION_DATE);
 		}
 		
 		public void byPublicationDate(boolean enable, boolean descending) {
-			setOrder(enable, descending, PUBLICATION_DATE);
+			setOrder(enable, descending, Api.Sort.PUBLICATION_DATE);
 		}
 		
 		public void byDistance(boolean enable, boolean descending) {
-			setOrder(enable, descending, DISTANCE);
+			setOrder(enable, descending, Api.Sort.DISTANCE);
 		}
 		
 	}
@@ -220,7 +221,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 				}
 			});
 			
-			req.setIds(Param.FILTER_DEALER_IDS, ids);
+			req.setIds(Param.DEALER_IDS, ids);
 			return req;
 		}
 		
@@ -271,7 +272,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 				}
 			});
 			
-			req.setIds(Param.FILTER_STORE_IDS, ids);
+			req.setIds(Param.STORE_IDS, ids);
 			return req;
 		}
 		

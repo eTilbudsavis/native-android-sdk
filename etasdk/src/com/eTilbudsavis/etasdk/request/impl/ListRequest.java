@@ -136,12 +136,6 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 	
 	public static class Filter extends RequestFilter<Set<String>> {
 		
-		public static final String CATALOG_IDS = "catalog_ids";
-		public static final String STORE_IDS = "store_ids";
-		public static final String AREA_IDS = "area_ids";
-		public static final String OFFER_IDS = "offer_ids";
-		public static final String DEALER_IDS = "dealer_ids";
-		
 		protected boolean add(String filter, String id) {
 			Map<String, Set<String>> map = getFilters();
 			if (map.containsKey(filter) && map.get(filter) != null) {

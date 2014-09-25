@@ -37,7 +37,6 @@ import com.eTilbudsavis.etasdk.Network.RequestQueue;
 import com.eTilbudsavis.etasdk.Network.Response;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.Api;
-import com.eTilbudsavis.etasdk.Utils.Api.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public abstract class JsonRequest<T> extends Request<T> {
@@ -141,10 +140,10 @@ public abstract class JsonRequest<T> extends Request<T> {
 		// Lets try to see if it's possible to create a response from 
 		// previously cached items
 		Set<String> keys = getParameters().keySet();
-		boolean hasFilter = keys.contains(Param.FILTER_CATALOG_IDS) || 
-				keys.contains(Param.FILTER_DEALER_IDS) || 
-				keys.contains(Param.FILTER_OFFER_IDS) || 
-				keys.contains(Param.FILTER_STORE_IDS);
+		boolean hasFilter = keys.contains(Api.Param.CATALOG_IDS) || 
+				keys.contains(Api.Param.DEALER_IDS) || 
+				keys.contains(Api.Param.OFFER_IDS) || 
+				keys.contains(Api.Param.STORE_IDS);
 		
 		if (!hasFilter) {
 			// Nothing to work with

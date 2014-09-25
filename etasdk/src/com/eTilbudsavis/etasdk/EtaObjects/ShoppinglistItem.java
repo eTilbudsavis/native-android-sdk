@@ -28,8 +28,8 @@ import org.json.JSONObject;
 import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api;
-import com.eTilbudsavis.etasdk.Utils.Api.MetaKey;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Utils.Api.MetaKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 

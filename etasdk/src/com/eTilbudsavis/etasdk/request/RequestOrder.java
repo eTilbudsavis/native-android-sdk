@@ -6,25 +6,11 @@ import java.util.Map;
 
 import android.text.TextUtils;
 
+import com.eTilbudsavis.etasdk.Utils.Api;
+
 public abstract class RequestOrder implements IRequestParameter {
 
 	private static final String DELIMITER = ",";
-	
-	public static final String ORDER_BY = "order_by";
-	public static final String POPULARITY = "popularity";
-	public static final String DISTANCE = "distance";
-	public static final String NAME = "name";
-	public static final String PUBLICATION_DATE = "publication_date";
-	public static final String EXPIRATION_DATE = "expiration_date";
-	public static final String CREATED = "created";
-	public static final String DEALER = "dealer";
-	public static final String PAGE = "page";
-	public static final String SCORE = "score";
-	public static final String PRICE = "price";
-	public static final String SAVINGS = "savings";
-	public static final String QUANTITY = "quantity";
-	public static final String COUNT = "count";
-	public static final String VALID_DATE = "valid_date";
 	
 	private String mDefault = null;
 	
@@ -60,9 +46,9 @@ public abstract class RequestOrder implements IRequestParameter {
 		// Default a default list order if one was given
 		Map<String, String> map = new HashMap<String, String>();
 		if (!mOrder.isEmpty()) {
-			map.put(ORDER_BY, TextUtils.join(DELIMITER, mOrder));
+			map.put(Api.Param.ORDER_BY, TextUtils.join(DELIMITER, mOrder));
 		} else if (mDefault != null) {
-			map.put(ORDER_BY, mDefault);
+			map.put(Api.Param.ORDER_BY, mDefault);
 		}
 		return map;
 	}

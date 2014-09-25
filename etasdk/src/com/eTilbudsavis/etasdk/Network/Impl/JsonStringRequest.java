@@ -41,10 +41,10 @@ public class JsonStringRequest extends JsonRequest<String>{
 	private static Map<String, String> mFilterTypes = new HashMap<String, String>();
 	
 	static {
-		mFilterTypes.put("catalogs", Param.FILTER_CATALOG_IDS);
-		mFilterTypes.put("offers", Param.FILTER_OFFER_IDS);
-		mFilterTypes.put("dealers", Param.FILTER_DEALER_IDS);
-		mFilterTypes.put("stores", Param.FILTER_STORE_IDS);
+		mFilterTypes.put("catalogs", Param.CATALOG_IDS);
+		mFilterTypes.put("offers", Param.OFFER_IDS);
+		mFilterTypes.put("dealers", Param.DEALER_IDS);
+		mFilterTypes.put("stores", Param.STORE_IDS);
 	}
 	
 	public JsonStringRequest(String url, Listener<String> listener) {

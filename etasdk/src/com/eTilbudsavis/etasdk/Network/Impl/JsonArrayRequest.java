@@ -30,8 +30,8 @@ import com.eTilbudsavis.etasdk.Network.NetworkResponse;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.Param;
-import com.eTilbudsavis.etasdk.Utils.Api.Sort;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class JsonArrayRequest extends JsonRequest<JSONArray> {
@@ -122,7 +122,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 * @return this object
 	 */
 	public Request<?> setOrderBy(String order) {
-		getParameters().put(Sort.ORDER_BY, order);
+		getParameters().put(Api.Param.ORDER_BY, order);
 		return this;
 	}
 	
@@ -133,7 +133,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 */
 	public Request<?> setOrderBy(List<String> order) {
 		String tmp = TextUtils.join(",",order);
-		getParameters().put(Sort.ORDER_BY, tmp);
+		getParameters().put(Api.Param.ORDER_BY, tmp);
 		return this;
 	}
 	
@@ -142,7 +142,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 * @return the order as a String, or null if no order have been given.
 	 */
 	public String getOrderBy() {
-		return getParameters().get(Sort.ORDER_BY);
+		return getParameters().get(Api.Param.ORDER_BY);
 	}
 	
 	/**
