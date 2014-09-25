@@ -179,9 +179,9 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		/**
 		 * The API relies on pagination for retrieving data. Therefore you need to
 		 * define a limit for the data you want to retrieve. If no limit is set
-		 * this will default to {@link #DEFAULT_LIMIT DEFAULT_LIMIT} if no limit is set.
+		 * this will default to {@link #DEFAULT_LIMIT} if no limit is set.
 		 * @param limit
-		 * @return
+		 * @return this object
 		 */
 		public Parameter setLimit(int limit) {
 			put(Api.Param.LIMIT, String.valueOf(limit));

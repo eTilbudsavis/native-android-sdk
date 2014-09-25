@@ -14,7 +14,13 @@ import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
  *
  */
 public final class Api {
-
+	
+	/**
+	 * The delimiter used for separating multiple variables given to one parameter
+	 */
+	public static final String DELIMITER = ",";
+	
+	
 	/**
 	 * This class contains sub-set of strings, that eTilbudsavis API v2 uses as keys, for the JSON data
 	 * that is being send to and from the API.

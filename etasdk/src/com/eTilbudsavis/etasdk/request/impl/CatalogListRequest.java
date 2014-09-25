@@ -116,28 +116,52 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 			super("-" + Api.Sort.POPULARITY);
 		}
 		
-		public void byPopularity(boolean enable, boolean descending) {
-			setOrder(enable, descending, Api.Sort.POPULARITY);
+		public void byPopularity(boolean descending) {
+			add(Api.Sort.POPULARITY, descending);
+		}
+		
+		public void removePopularity() {
+			remove(Api.Sort.POPULARITY);
 		}
 		
 		public void byDealer(boolean enable, boolean descending) {
-			setOrder(enable, descending, Api.Sort.DEALER);
+			add(Api.Sort.DEALER, descending);
+		}
+
+		public void removeDealer() {
+			remove(Api.Sort.DEALER);
 		}
 		
 		public void byCreated(boolean enable, boolean descending) {
-			setOrder(enable, descending, Api.Sort.CREATED);
+			add(Api.Sort.CREATED, descending);
 		}
 
+		public void removeCreated() {
+			remove(Api.Sort.CREATED);
+		}
+		
 		public void byExpirationDate(boolean enable, boolean descending) {
-			setOrder(enable, descending, Api.Sort.EXPIRATION_DATE);
+			add(Api.Sort.EXPIRATION_DATE, descending);
+		}
+
+		public void removeExpirationDate() {
+			remove(Api.Sort.EXPIRATION_DATE);
 		}
 		
 		public void byPublicationDate(boolean enable, boolean descending) {
-			setOrder(enable, descending, Api.Sort.PUBLICATION_DATE);
+			add(Api.Sort.PUBLICATION_DATE, descending);
+		}
+
+		public void removePublicationDate() {
+			remove(Api.Sort.PUBLICATION_DATE);
 		}
 		
 		public void byDistance(boolean enable, boolean descending) {
-			setOrder(enable, descending, Api.Sort.DISTANCE);
+			add(Api.Sort.DISTANCE, descending);
+		}
+
+		public void removeDistance() {
+			remove(Api.Sort.DISTANCE);
 		}
 		
 	}
@@ -190,41 +214,6 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 			return reqs;
 		}
 		
-		private JsonArrayRequest getDealerRequest(final List<Catalog> catalogs) {
-			
-			Set<String> ids = new HashSet<String>(catalogs.size());
-			for (Catalog c : catalogs) {
-				ids.add(c.getDealerId());
-			}
-			
-			JsonArrayRequest req = new JsonArrayRequest(Endpoint.DEALER_LIST, new Listener<JSONArray>() {
-				
-				public void onComplete(JSONArray response, EtaError error) {
-					
-					if (response != null) {
-						List<Dealer> dealers = Dealer.fromJSON(response);
-						for(Catalog c : catalogs) {
-							for(Dealer d: dealers) {
-								if (c.getDealerId().equals(d.getId())) {
-									c.setDealer(d);
-									break;
-								}
-							}
-						}
-						
-					} else {
-						EtaLog.d(TAG, error.toJSON().toString());
-					}
-					
-					done();
-					
-				}
-			});
-			
-			req.setIds(Param.DEALER_IDS, ids);
-			return req;
-		}
-		
 		private JsonArrayRequest getPagesRequest(final Catalog c) {
 			
 			JsonArrayRequest req = new JsonArrayRequest(Endpoint.catalogPages(c.getId()), new Listener<JSONArray>() {
@@ -240,40 +229,6 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 			});
 			return req;
 			
-		}
-		
-		private JsonArrayRequest getStoreRequest(final List<Catalog> catalogs) {
-			
-			Set<String> ids = new HashSet<String>(catalogs.size());
-			for (Catalog c : catalogs) {
-				ids.add(c.getStoreId());
-			}
-			
-			JsonArrayRequest req = new JsonArrayRequest(Endpoint.STORE_LIST, new Listener<JSONArray>() {
-				
-				public void onComplete(JSONArray response, EtaError error) {
-					
-					if (response != null) {
-						List<Store> stores = Store.fromJSON(response);
-						for(Catalog c : catalogs) {
-							for(Store s: stores) {
-								if (c.getStoreId().equals(s.getId())) {
-									c.setStore(s);
-									break;
-								}
-							}
-						}
-						
-					} else {
-						EtaLog.d(TAG, error.toJSON().toString());
-					}
-					done();
-					
-				}
-			});
-			
-			req.setIds(Param.STORE_IDS, ids);
-			return req;
 		}
 		
 	}

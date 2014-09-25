@@ -24,9 +24,11 @@ import org.json.JSONObject;
 
 import android.graphics.Color;
 
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Pageflip;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 /**
@@ -64,6 +66,7 @@ public class Dealer extends ErnObject<Dealer> implements EtaObject<JSONObject>, 
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
+		
 		return list;
 	}
 	

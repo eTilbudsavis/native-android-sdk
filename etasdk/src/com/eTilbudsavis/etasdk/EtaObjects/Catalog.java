@@ -25,6 +25,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.PageflipWebview;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
@@ -46,7 +49,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>, Serializable {
+public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>, IDealer<Catalog>, IStore<Catalog>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 

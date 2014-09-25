@@ -6,9 +6,9 @@ import java.util.Set;
 
 import android.text.TextUtils;
 
+import com.eTilbudsavis.etasdk.Utils.Api;
+
 public abstract class RequestFilter<T extends Set<String>> implements IRequestParameter {
-	
-	private static final String DELIMITER = ",";
 	
 	Map<String, T> mFilters = new HashMap<String, T>();
 	
@@ -41,7 +41,7 @@ public abstract class RequestFilter<T extends Set<String>> implements IRequestPa
 	public Map<String, String> getParameter() {
 		Map<String, String> map = new HashMap<String, String>();
 		for (String key : mFilters.keySet()) {
-			map.put(key, TextUtils.join(DELIMITER, mFilters.get(key)));
+			map.put(key, TextUtils.join(Api.DELIMITER, mFilters.get(key)));
 		}
 		return map;
 	}

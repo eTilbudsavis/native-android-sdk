@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects;
+package com.eTilbudsavis.etasdk.EtaObjects.Interface;
 
 public interface EtaObject<T> {
 	

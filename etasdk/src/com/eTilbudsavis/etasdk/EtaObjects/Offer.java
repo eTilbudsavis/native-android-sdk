@@ -27,6 +27,10 @@ import org.json.JSONObject;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.ICatalog;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Links;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Pricing;
@@ -47,7 +51,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, Serializable, Parcelable {
+public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 

@@ -1,43 +1,38 @@
 package com.eTilbudsavis.etasdk.request.impl;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.json.JSONArray;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
-import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Api.Param;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 
-public class OfferListRequest extends ListRequest<List<Offer>> {
+public class StoreListRequest extends ListRequest<List<Store>> {
 	
-	private OfferListRequest(Listener<List<Offer>> l) {
-		super(Endpoint.OFFER_LIST, l);
+	private StoreListRequest(Listener<List<Store>> l) {
+		super(Endpoint.STORE_LIST, l);
 	}
 	
 	@Override
 	protected void deliverResponse(JSONArray response, EtaError error) {
-		List<Offer> offers = null;
+		List<Store> offers = null;
 		if (response != null) {
-			offers = Offer.fromJSON(response);
+			offers = Store.fromJSON(response);
 		}
 		runAutoFill(offers, error);
 	}
 	
-	public static class Builder extends ListRequest.Builder<List<Offer>>{
+	public static class Builder extends ListRequest.Builder<List<Store>>{
 		
-		public Builder(Listener<List<Offer>> l) {
-			super(new OfferListRequest(l));
+		public Builder(Listener<List<Store>> l) {
+			super(new StoreListRequest(l));
 		}
 		
 		public void setFilter(Filter filter) {
@@ -52,12 +47,12 @@ public class OfferListRequest extends ListRequest<List<Offer>> {
 			super.setParameters(params);
 		}
 		
-		public void setAutoFill(OfferAutoFill filler) {
+		public void setAutoFill(StoreAutoFill filler) {
 			super.setAutoFiller(filler);
 		}
 		
 		@Override
-		public ListRequest<List<Offer>> build() {
+		public ListRequest<List<Store>> build() {
 			
 			if (getFilter() == null) {
 				setFilter(new Filter());
@@ -72,7 +67,7 @@ public class OfferListRequest extends ListRequest<List<Offer>> {
 			}
 			
 			if (getAutofill() == null) {
-				setAutoFiller(new OfferAutoFill());
+				setAutoFiller(new StoreAutoFill());
 			}
 			
 			return super.build();
@@ -224,46 +219,34 @@ public class OfferListRequest extends ListRequest<List<Offer>> {
 		// TODO lookup API doc to find relevant filters
 	}
 	
-	public static class OfferAutoFill extends RequestAutoFill<List<Offer>> {
+	public static class StoreAutoFill extends RequestAutoFill<List<Store>> {
 		
-		private boolean mCatalogs;
 		private boolean mDealer;
-		private boolean mStore;
 		
-		public OfferAutoFill() {
-			this(false, false, false);
+		public StoreAutoFill() {
+			this(false);
 		}
 		
-		public OfferAutoFill(boolean catalogs, boolean dealer, boolean store) {
-			mCatalogs = catalogs;
+		public StoreAutoFill(boolean dealer) {
 			mDealer = dealer;
-			mStore = store;
 		}
 		
 		@Override
-		public List<Request<?>> createRequests(List<Offer> data) {
+		public List<Request<?>> createRequests(List<Store> data) {
 			
 			List<Request<?>> reqs = new ArrayList<Request<?>>();
 			
 			if (!data.isEmpty()) {
 				
-				if (mStore) {
-					reqs.add(getStoreRequest(data));
-				}
-				
 				if (mDealer) {
 					reqs.add(getDealerRequest(data));
-				}
-				
-				if (mCatalogs) {
-					reqs.add(getCatalogRequest(data));
 				}
 				
 			}
 			
 			return reqs;
 		}
-
+		
 	}
 
 }
