@@ -1,16 +1,26 @@
 package com.eTilbudsavis.etasdk.request.impl;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONArray;
 
+import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
+import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
+import com.eTilbudsavis.etasdk.EtaObjects.Store;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.ICatalog;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.Utils.Api;
+import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Api.Param;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.OnAutoFillCompleteListener;
@@ -198,6 +208,114 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 				return Integer.valueOf(offset);
 			}
 			return 0;
+		}
+		
+	}
+	
+	public static abstract class ListAutoFill<T extends List<?>> extends RequestAutoFill<T> {
+		
+		protected JsonArrayRequest getDealerRequest(final List<? extends IDealer<?>> list) {
+			
+			Set<String> ids = new HashSet<String>(list.size());
+			for (IDealer<?> item : list) {
+				ids.add(item.getDealerId());
+			}
+			
+			JsonArrayRequest req = new JsonArrayRequest(Endpoint.DEALER_LIST, new Listener<JSONArray>() {
+				
+				public void onComplete(JSONArray response, EtaError error) {
+					
+					if (response != null) {
+						List<Dealer> dealers = Dealer.fromJSON(response);
+						for(IDealer<?> item : list) {
+							for(Dealer d: dealers) {
+								if (item.getDealerId().equals(d.getId())) {
+									item.setDealer(d);
+									break;
+								}
+							}
+						}
+						
+					} else {
+						EtaLog.d(TAG, error.toJSON().toString());
+					}
+					
+					done();
+					
+				}
+			});
+			
+			req.setIds(Param.DEALER_IDS, ids);
+			return req;
+		}
+
+		protected JsonArrayRequest getStoreRequest(final List<? extends IStore<?>> list) {
+			
+			Set<String> ids = new HashSet<String>(list.size());
+			for (IStore<?> item : list) {
+				ids.add(item.getStoreId());
+			}
+			
+			JsonArrayRequest req = new JsonArrayRequest(Endpoint.STORE_LIST, new Listener<JSONArray>() {
+				
+				public void onComplete(JSONArray response, EtaError error) {
+					
+					if (response != null) {
+						List<Store> stores = Store.fromJSON(response);
+						for(IStore<?> item : list) {
+							for(Store s: stores) {
+								if (item.getStoreId().equals(s.getId())) {
+									item.setStore(s);
+									break;
+								}
+							}
+						}
+						
+					} else {
+						EtaLog.d(TAG, error.toJSON().toString());
+					}
+					done();
+					
+				}
+			});
+			
+			req.setIds(Param.STORE_IDS, ids);
+			return req;
+		}
+
+		protected JsonArrayRequest getCatalogRequest(final List<? extends ICatalog<?>> list) {
+			
+			Set<String> ids = new HashSet<String>(list.size());
+			for (ICatalog<?> item : list) {
+				ids.add(item.getCatalogId());
+			}
+			
+			JsonArrayRequest req = new JsonArrayRequest(Endpoint.CATALOG_LIST, new Listener<JSONArray>() {
+				
+				public void onComplete(JSONArray response, EtaError error) {
+					
+					if (response != null) {
+						List<Catalog> catalogss = Catalog.fromJSON(response);
+						for(ICatalog<?> item : list) {
+							for(Catalog c: catalogss) {
+								if (item.getCatalogId().equals(c.getId())) {
+									item.setCatalog(c);
+									break;
+								}
+							}
+						}
+						
+					} else {
+						EtaLog.d(TAG, error.toJSON().toString());
+					}
+					
+					done();
+					
+				}
+			});
+			
+			req.setIds(Param.CATALOG_IDS, ids);
+			return req;
 		}
 		
 	}

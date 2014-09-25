@@ -224,7 +224,7 @@ public class OfferListRequest extends ListRequest<List<Offer>> {
 		// TODO lookup API doc to find relevant filters
 	}
 	
-	public static class OfferAutoFill extends RequestAutoFill<List<Offer>> {
+	public static class OfferAutoFill extends ListRequest.ListAutoFill<List<Offer>> {
 		
 		private boolean mCatalogs;
 		private boolean mDealer;

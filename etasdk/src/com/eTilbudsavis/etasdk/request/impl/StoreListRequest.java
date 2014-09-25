@@ -12,7 +12,6 @@ import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
-import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 
 public class StoreListRequest extends ListRequest<List<Store>> {
 	
@@ -219,7 +218,7 @@ public class StoreListRequest extends ListRequest<List<Store>> {
 		// TODO lookup API doc to find relevant filters
 	}
 	
-	public static class StoreAutoFill extends RequestAutoFill<List<Store>> {
+	public static class StoreAutoFill extends ListRequest.ListAutoFill<List<Store>> {
 		
 		private boolean mDealer;
 		

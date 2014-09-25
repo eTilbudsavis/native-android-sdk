@@ -170,7 +170,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 		// Intentionally left empty to create a new type, but with all parent properties
 	}
 	
-	public static class CatalogAutoFill extends RequestAutoFill<List<Catalog>> {
+	public static class CatalogAutoFill extends ListRequest.ListAutoFill<List<Catalog>> {
 		
 		private boolean mPages;
 		private boolean mDealer;
