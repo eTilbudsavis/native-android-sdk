@@ -14,13 +14,13 @@ public abstract class ObjectRequest<T> extends JsonObjectRequest {
 	
 	private DeliveryHelper<T> mDelivery;
 	private RequestAutoFill<T> mAutoFiller;
-
-	private ObjectRequest(String url, Listener<T> listener) {
+	
+	public ObjectRequest(String url, Listener<T> listener) {
 		super(url, null);
 		init(listener);
 	}
 	
-	private ObjectRequest(Method method, String url, JSONObject requestBody, Listener<T> listener) {
+	public ObjectRequest(Method method, String url, JSONObject requestBody, Listener<T> listener) {
 		super(method, url, requestBody, null);
 		init(listener);
 	}

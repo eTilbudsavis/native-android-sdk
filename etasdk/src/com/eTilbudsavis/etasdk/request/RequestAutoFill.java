@@ -5,7 +5,6 @@ import java.util.List;
 
 import android.os.Handler;
 
-import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.RequestDebugger;
 import com.eTilbudsavis.etasdk.Network.RequestQueue;
