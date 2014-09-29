@@ -369,6 +369,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		try {
 			c = execQuery(q);
 			sl = c.moveToFirst() ? cursorToSl(c) : null;
+		} catch (IllegalStateException e) {
+			EtaLog.d(TAG, e.getMessage(), e);
 		} finally {
 			closeCursorAndDB(c);
 		}
@@ -409,6 +411,8 @@ public class DbHelper extends SQLiteOpenHelper {
 					tmp.add(cursorToSl(c));
 				} while (c.moveToNext());
 			}
+		} catch (IllegalStateException e) {
+			EtaLog.d(TAG, e.getMessage(), e);
 		} finally {
 			closeCursorAndDB(c);
 		}
@@ -494,6 +498,8 @@ public class DbHelper extends SQLiteOpenHelper {
 			if (c.moveToFirst()) {
 				sli = cursorToSli(c);
 			}
+		} catch (IllegalStateException e) {
+			EtaLog.d(TAG, e.getMessage(), e);
 		} finally {
 			closeCursorAndDB(c);
 		}
@@ -540,6 +546,8 @@ public class DbHelper extends SQLiteOpenHelper {
 					items.add(cursorToSli(c));
 				} while (c.moveToNext());
 			}
+		} catch (IllegalStateException e) {
+			EtaLog.d(TAG, e.getMessage(), e);
 		} finally {
 			closeCursorAndDB(c);
 		}
@@ -561,6 +569,8 @@ public class DbHelper extends SQLiteOpenHelper {
 			if (c.moveToFirst()) {
 				sli = cursorToSli(c);
 			}
+		} catch (IllegalStateException e) {
+			EtaLog.d(TAG, e.getMessage(), e);
 		} finally {
 			closeCursorAndDB(c);
 		}
@@ -581,6 +591,8 @@ public class DbHelper extends SQLiteOpenHelper {
 			if (c.moveToFirst()) {
 				sl = cursorToSl(c); 
 			}
+		} catch (IllegalStateException e) {
+			EtaLog.d(TAG, e.getMessage(), e);
 		} finally {
 			closeCursorAndDB(c);
 		}
@@ -713,6 +725,8 @@ public class DbHelper extends SQLiteOpenHelper {
 				if (c != null) {
 					c.moveToFirst();
 				}
+			} catch (IllegalStateException e) {
+				EtaLog.d(TAG, e.getMessage(), e);
 			} finally {
 				closeCursor(c);
 			}
@@ -723,6 +737,8 @@ public class DbHelper extends SQLiteOpenHelper {
 				if (c != null && c.moveToFirst()) {
 					i = c.getInt(0);
 				}
+			} catch (IllegalStateException e) {
+				EtaLog.d(TAG, e.getMessage(), e);
 			} finally {
 				closeCursorAndDB(c);
 			}

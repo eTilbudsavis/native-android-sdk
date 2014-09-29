@@ -9,8 +9,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-public class Observable<T> {
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 
+public class Observable<T> {
+	
+	public static final String TAG = Observable.class.getSimpleName();
+	
 	protected final Set<T> mObservers = newSetFromMap(new WeakHashMap<T, Boolean>());
 	
     /**
@@ -26,9 +30,11 @@ public class Observable<T> {
         }
         synchronized(mObservers) {
             if (mObservers.contains(observer)) {
-                throw new IllegalStateException("Observer " + observer + " is already registered.");
+            	EtaLog.w(TAG, "Observer " + observer + " is already registered. Ignoring.");
+//                throw new IllegalStateException("Observer " + observer + " is already registered.");
+            } else {
+                mObservers.add(observer);
             }
-            mObservers.add(observer);
         }
         
     }
@@ -46,9 +52,11 @@ public class Observable<T> {
         }
         synchronized(mObservers) {
             if (!mObservers.contains(observer)) {
-                throw new IllegalStateException("Observer " + observer + " was not registered.");
+            	EtaLog.w(TAG, "Observer " + observer + " is already registered. Ignoring.");
+//                throw new IllegalStateException("Observer " + observer + " was not registered.");
+            } else {
+                mObservers.remove(observer);
             }
-            mObservers.remove(observer);
         }
     }
     
