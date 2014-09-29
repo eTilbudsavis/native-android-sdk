@@ -107,12 +107,12 @@ public class Eta {
 	 * Default constructor, this is private to allow us to create a singleton instance
 	 * @param apiKey An API v2 apiKey
 	 * @param apiSecret An API v2 apiSecret (matching the apiKey)
-	 * @param ctx A context
+	 * @param applicationContext A context - to avoid memory leaks use the ApplicationContext
 	 */
-	private Eta(String apiKey, String apiSecret, Context ctx) {
+	private Eta(String apiKey, String apiSecret, Context applicationContext) {
 		
 		// Get a context that isn't likely to disappear with an activity.
-		mContext = ctx.getApplicationContext();
+		mContext = applicationContext.getApplicationContext();
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
 		
@@ -410,7 +410,7 @@ public class Eta {
 			mSyncManager.onPause();
 			mSessionManager.onPause();
 			for (PageflipWebview p : PageflipWebview.pageflips) {
-				p.onPause();
+				p.pause();
 			}
 			mSettings.setLastUsageNow();
 		}
@@ -427,7 +427,7 @@ public class Eta {
 			mListManager.onResume();
 			mSyncManager.onResume();
 			for (PageflipWebview p : PageflipWebview.pageflips) {
-				p.onResume();
+				p.resume();
 			}
 		}
 	}
