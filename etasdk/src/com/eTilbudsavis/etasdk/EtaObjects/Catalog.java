@@ -79,7 +79,7 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 	private int mOfferOnPage = 1;
 	
 	/**
-	 * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
+	 * Convert a {@link JSONArray} into a {@link List};.
 	 * @param catalogs A {@link JSONArray} in the format of a valid API v2 catalog response
 	 * @return A {@link List} of POJO
 	 */

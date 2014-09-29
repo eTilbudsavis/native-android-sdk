@@ -37,7 +37,7 @@ public class Observable<T> {
      * Removes a previously registered observer. The observer must not be null and it
      * must already have been registered.
      * @param observer the observer to unregister
-     * @throws IllegalArgumentException the observer is null
+     * @throws IllegalArgumentException the observer is  null
      * @throws IllegalStateException the observer is not yet registered
      */
     public void unregisterObserver(T observer) {
