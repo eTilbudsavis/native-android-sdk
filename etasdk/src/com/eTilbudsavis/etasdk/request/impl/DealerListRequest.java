@@ -20,7 +20,7 @@ public class DealerListRequest extends ListRequest<List<Dealer>> {
 	}
 	
 	@Override
-	protected void deliverResponse(JSONArray response, EtaError error) {
+	public void deliverResponse(JSONArray response, EtaError error) {
 		List<Dealer> dealers = null;
 		if (response != null) {
 			dealers = Dealer.fromJSON(response);
@@ -34,32 +34,12 @@ public class DealerListRequest extends ListRequest<List<Dealer>> {
 			super(new DealerListRequest(l));
 		}
 		
-		public void setFilter(Filter filter) {
-			super.setFilter(filter);
-		}
-		
-		public void setOrder(Order order) {
-			super.setOrder(order);
-		}
-		
-		public void setParameters(Parameter params) {
-			super.setParameters(params);
-		}
-		
 		public void setAutoFill(DealerAutoFill filler) {
 			super.setAutoFiller(filler);
 		}
 		
 		@Override
 		public ListRequest<List<Dealer>> build() {
-			
-			if (getFilter() == null) {
-				setFilter(new Filter());
-			}
-			
-			if (getOrder() == null) {
-				setOrder(new Order());
-			}
 			
 			if (getParameters() == null) {
 				setParameters(new Parameter());
@@ -74,28 +54,16 @@ public class DealerListRequest extends ListRequest<List<Dealer>> {
 		
 	}
 	
-	public static class Filter extends ListRequest.Filter {
+	public static class Parameter extends ListRequest.ListParameterBuilder {
 		
 		public void addDealerFilter(Set<String> dealerIds) {
-			add(Api.Param.DEALER_IDS, dealerIds);
+			addFilter(Api.Param.DEALER_IDS, dealerIds);
 		}
 		
 		public void addDealerFilter(String dealerId) {
-			add(Api.Param.DEALER_IDS, dealerId);
+			addFilter(Api.Param.DEALER_IDS, dealerId);
 		}
 		
-	}
-	
-	public static class Order extends ListRequest.Order {
-		
-		public Order() {
-			super(null);
-		}
-		
-	}
-	
-	public static class Parameter extends ListRequest.Parameter {
-		// TODO lookup API doc to find relevant filters
 	}
 	
 	public static class DealerAutoFill extends ListRequest.ListAutoFill<List<Dealer>> {

@@ -20,7 +20,7 @@ public class StoreListRequest extends ListRequest<List<Store>> {
 	}
 	
 	@Override
-	protected void deliverResponse(JSONArray response, EtaError error) {
+	public void deliverResponse(JSONArray response, EtaError error) {
 		List<Store> offers = null;
 		if (response != null) {
 			offers = Store.fromJSON(response);
@@ -34,14 +34,6 @@ public class StoreListRequest extends ListRequest<List<Store>> {
 			super(new StoreListRequest(l));
 		}
 		
-		public void setFilter(Filter filter) {
-			super.setFilter(filter);
-		}
-		
-		public void setOrder(Order order) {
-			super.setOrder(order);
-		}
-		
 		public void setParameters(Parameter params) {
 			super.setParameters(params);
 		}
@@ -52,14 +44,6 @@ public class StoreListRequest extends ListRequest<List<Store>> {
 		
 		@Override
 		public ListRequest<List<Store>> build() {
-			
-			if (getFilter() == null) {
-				setFilter(new Filter());
-			}
-			
-			if (getOrder() == null) {
-				setOrder(new Order());
-			}
 			
 			if (getParameters() == null) {
 				setParameters(new Parameter());
@@ -73,53 +57,41 @@ public class StoreListRequest extends ListRequest<List<Store>> {
 		}
 		
 	}
-	
-	public static class Filter extends ListRequest.Filter {
 
+	public static class Parameter extends ListRequest.ListParameterBuilder {
+		
 		public void addOfferFilter(Set<String> offerIds) {
-			add(Api.Param.OFFER_IDS, offerIds);
+			addFilter(Api.Param.OFFER_IDS, offerIds);
 		}
 
 		public void addCatalogFilter(Set<String> catalogIds) {
-			add(Api.Param.CATALOG_IDS, catalogIds);
+			addFilter(Api.Param.CATALOG_IDS, catalogIds);
 		}
 		
 		public void addDealerFilter(Set<String> dealerIds) {
-			add(Api.Param.DEALER_IDS, dealerIds);
+			addFilter(Api.Param.DEALER_IDS, dealerIds);
 		}
 		
 		public void addStoreFilter(Set<String> storeIds) {
-			add(Api.Param.STORE_IDS, storeIds);
+			addFilter(Api.Param.STORE_IDS, storeIds);
 		}
 		
 		public void addOfferFilter(String offerId) {
-			add(Api.Param.OFFER_IDS, offerId);
+			addFilter(Api.Param.OFFER_IDS, offerId);
 		}
 		
 		public void addCatalogFilter(String catalogId) {
-			add(Api.Param.CATALOG_IDS, catalogId);
+			addFilter(Api.Param.CATALOG_IDS, catalogId);
 		}
 		
 		public void addDealerFilter(String dealerId) {
-			add(Api.Param.DEALER_IDS, dealerId);
+			addFilter(Api.Param.DEALER_IDS, dealerId);
 		}
 		
 		public void addStoreFilter(String storeId) {
-			add(Api.Param.STORE_IDS, storeId);
+			addFilter(Api.Param.STORE_IDS, storeId);
 		}
 		
-	}
-	
-	public static class Order extends ListRequest.Order {
-		
-		public Order() {
-			super(null);
-		}
-		
-	}
-	
-	public static class Parameter extends ListRequest.Parameter {
-		// TODO lookup API doc to find relevant filters
 	}
 	
 	public static class StoreAutoFill extends ListRequest.ListAutoFill<List<Store>> {

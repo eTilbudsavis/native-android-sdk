@@ -22,9 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
-import android.os.Handler;
 
-import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Log.EventLog;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
@@ -45,7 +43,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	private static final int CONNECTION_TIME_OUT = (int) (20 * Utils.SECOND_IN_MILLIS);
 	
 	/** Listener interface, for responses */
-	private  Listener<T> mListener;
+	private final Listener<T> mListener;
 	
 	/** Request method of this request.  Currently supports GET, POST, PUT, and DELETE. */
 	private final Method mMethod;
@@ -94,16 +92,13 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /** Boolean deciding if logs should be enabled */
     private boolean mSaveNetworkLog = true;
     
-	/** Handler, for returning requests on correct queue */
-	private Handler mHandler;
-	
 	/**  */
 	private RequestQueue mRequestQueue;
-
-    private boolean mDeliverOnThread = false;
-    
+	
 	/** A tag to identify the request, useful for bulk operations */
 	private Object mTag;
+
+	private Delivery mDelivery;
 	
 	public enum Priority {
 		LOW, MEDIUM, HIGH
@@ -254,32 +249,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		return mMethod;
 	}
 	
-//	public String getMethodString() {
-//		switch (mMethod) {
-//		case 0: return "GET";
-//		case 1: return "POST";
-//		case 2: return "PUT";
-//		case 3: return "DELETE";
-//		default: return "UNDEFINED";
-//		}
-//	}
-	/**
-	 * Returns the response listener for this request
-	 * @return a listener of type T
-	 */
-	public Listener getListener() {
-		return mListener;
-	}
-
-	/**
-	 * Returns the response listener for this request
-	 * @return a listener of type T
-	 */
-	protected Request setListener(Listener<T> listener) {
-		mListener = listener;
-		return this;
-	}
-
 	/**
 	 * returns whether this request is cachable or not
 	 * @return true if the request is cachable
@@ -374,50 +343,21 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	}
 	
 	/**
-	 * This method enables you to have the response posted via any given handler.
-	 * Thereby returning on any (also non-UI) thread, for further processing.
-	 * @param handler that will receive the callback
-	 * @return this object
+	 * Get the {@link Delivery} for this request, if any exists.
+	 * @return A delivery, or null
 	 */
-	public Request setHandler(Handler handler) {
-		mHandler = handler;
-		return Request.this;
+	public Delivery getDelivery() {
+		return mDelivery;
 	}
 	
 	/**
-	 * Method for forcing {@link Delivery} to deliver response data to a non-UI-thread.
-	 * 
-	 * <p>Please use with caution, as it's not default behavior to return data to a {@link Thread}</p>
-	 * @param deliverOnThread - true if response should be delivered on a non UI thread
+	 * Set a specific {@link Delivery} interface for handling the response once a {@link Request} has finished. 
+	 * @param d Delivery interface to handle the response once this {@link Request} has finished
 	 * @return this object
 	 */
-	public Request setDeliverOnThread(boolean deliverOnThread) {
-		mDeliverOnThread = deliverOnThread;
+	public Request setDelivery(Delivery d) {
+		mDelivery = d;
 		return this;
-	}
-	
-	/**
-	 * Method allows for overriding default behavior of returning the callback to UI thread.
-	 * This is especially useful if post-processing of a request is required before the data is
-	 * presented to e.g. a fragment or activity.
-	 * <p>If the method returns true, the {@link Delivery} has two options, return the response data to either:
-	 * <li> a {@link Request #getHandler() handler} if one was set on the request, this is the first priority. or</li> 
-	 * <li> a random thread in {@link Eta#getExecutor()}.</li>
-	 * </p>
-	 * 
-	 * <p>Please use with caution, as it's not default behavior to return data to a {@link Thread}</p>
-	 * @return true if data should be delivered to a non-UI-thread, else false (return response data to UI-thread).
-	 */
-    public boolean deliverOnThread() {
-    	return mDeliverOnThread;
-    }
-    
-	/**
-	 * Get the custom handler for this request.
-	 * @return a handler or null, if using default handler
-	 */
-	public Handler getHandler() {
-		return mHandler;
 	}
 	
 	/**
@@ -599,7 +539,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * @param response to deliver, may be null
 	 * @param error to deliver, may be null
 	 */
-	protected void deliverResponse(T response, EtaError error) {
+	public void deliverResponse(T response, EtaError error) {
 		if (mListener != null) {
 			mListener.onComplete(response, error);
 		}
@@ -621,7 +561,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		mDebugger = debugger;
 		return this;
 	}
-
+	
 	/**
 	 * Get the {@link RequestDebugger} assiciated with this request
 	 * @return A {@link RequestDebugger}, or null

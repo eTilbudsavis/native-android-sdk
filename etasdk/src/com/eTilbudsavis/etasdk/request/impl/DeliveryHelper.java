@@ -3,52 +3,67 @@ package com.eTilbudsavis.etasdk.request.impl;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Network.Delivery;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.Response;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 
-public class DeliveryHelper<T> implements Runnable {
+public class DeliveryHelper<T> implements Delivery {
 	
 	public static final String TAG = DeliveryHelper.class.getSimpleName();
-	
+
 	private Request<?> mRequest;
 	private Listener<T> mListener;
-	private T mData;
-	private EtaError mError;
-
+//	private Delivery mClientDelivery;
+	
 	public DeliveryHelper(Request<?> r, Listener<T> l) {
-		mRequest = r;
 		mListener = l;
+		mRequest = r;
 	}
 	
+	public void postResponse(Request<?> request, Response<?> response) {
+    	request.addEvent("post-response-to-executor-service");
+    	Eta.getInstance().getExecutor().execute(new DeliveryRunnable(request, response));
+	}
+    
 	public void deliver(T data, final EtaError error) {
 		
-		mData = data;
-		mError = error;
-		
-		if (mRequest.getHandler() == null) {
-			new Handler(Looper.getMainLooper()).post(this);
-		} else {
-			mRequest.getHandler().post(this);
-		}
+		Runnable run = new DeliveryHelperRunnable(data, error);
+		new Handler(Looper.getMainLooper()).post(run);
 		
 	}
 	
-	public void run() {
-		
-        mRequest.addEvent("request-on-new-thread");
-        
-        if (!mRequest.isCanceled()) {
-        	mRequest.addEvent("performing-callback-to-original-listener");
-        	
-        	if (mRequest.getDebugger() != null) {
-        		EtaLog.d(TAG, "Total duration: " + mRequest.getLog().getTotalDuration());
-        	}
-        	
-        	mListener.onComplete(mData, mError);
+//	public void setDelivery(Delivery d) {
+//		mClientDelivery = d;
+//	}
+//	
+//	public Delivery getDelivery() {
+//		return mClientDelivery;
+//	}
+	
+    public class DeliveryHelperRunnable implements Runnable {
+    	
+    	private T mData;
+    	private EtaError mError;
+    	
+        public DeliveryHelperRunnable(T data, final EtaError error) {
+            mData = data;
+            mError = error;
         }
         
-	}
-	
+        public void run() {
+        	
+            mRequest.addEvent("request-on-new-thread");
+            
+            if (!mRequest.isCanceled()) {
+            	mRequest.addEvent("performing-callback-to-original-listener");
+            	mListener.onComplete(mData, mError);
+            }
+            
+       }
+        
+    }
+
 }

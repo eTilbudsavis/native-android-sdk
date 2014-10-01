@@ -20,7 +20,7 @@ public class OfferListRequest extends ListRequest<List<Offer>> {
 	}
 	
 	@Override
-	protected void deliverResponse(JSONArray response, EtaError error) {
+	public void deliverResponse(JSONArray response, EtaError error) {
 		List<Offer> offers = null;
 		if (response != null) {
 			offers = Offer.fromJSON(response);
@@ -34,14 +34,6 @@ public class OfferListRequest extends ListRequest<List<Offer>> {
 			super(new OfferListRequest(l));
 		}
 		
-		public void setFilter(Filter filter) {
-			super.setFilter(filter);
-		}
-		
-		public void setOrder(Order order) {
-			super.setOrder(order);
-		}
-		
 		public void setParameters(Parameter params) {
 			super.setParameters(params);
 		}
@@ -52,14 +44,6 @@ public class OfferListRequest extends ListRequest<List<Offer>> {
 		
 		@Override
 		public ListRequest<List<Offer>> build() {
-			
-			if (getFilter() == null) {
-				setFilter(new Filter());
-			}
-			
-			if (getOrder() == null) {
-				setOrder(new Order());
-			}
 			
 			if (getParameters() == null) {
 				setParameters(new Parameter());
@@ -73,149 +57,141 @@ public class OfferListRequest extends ListRequest<List<Offer>> {
 		}
 		
 	}
-	
-	public static class Filter extends ListRequest.Filter {
 
+	public static class Parameter extends ListRequest.ListParameterBuilder {
+
+		public Parameter() {
+			setDefaultOrder("-" + Api.Sort.POPULARITY);
+		}
+		
 		public void addOfferFilter(Set<String> offerIds) {
-			add(Api.Param.OFFER_IDS, offerIds);
+			addFilter(Api.Param.OFFER_IDS, offerIds);
 		}
 
 		public void addCatalogFilter(Set<String> catalogIds) {
-			add(Api.Param.CATALOG_IDS, catalogIds);
+			addFilter(Api.Param.CATALOG_IDS, catalogIds);
 		}
 		
 		public void addDealerFilter(Set<String> dealerIds) {
-			add(Api.Param.DEALER_IDS, dealerIds);
+			addFilter(Api.Param.DEALER_IDS, dealerIds);
 		}
 		
 		public void addStoreFilter(Set<String> storeIds) {
-			add(Api.Param.STORE_IDS, storeIds);
+			addFilter(Api.Param.STORE_IDS, storeIds);
 		}
 
 		public void addOfferFilter(String offerId) {
-			add(Api.Param.OFFER_IDS, offerId);
+			addFilter(Api.Param.OFFER_IDS, offerId);
 		}
 		
 		public void addCatalogFilter(String catalogId) {
-			add(Api.Param.CATALOG_IDS, catalogId);
+			addFilter(Api.Param.CATALOG_IDS, catalogId);
 		}
 		
 		public void addDealerFilter(String dealerId) {
-			add(Api.Param.DEALER_IDS, dealerId);
+			addFilter(Api.Param.DEALER_IDS, dealerId);
 		}
 		
 		public void addStoreFilter(String storeId) {
-			add(Api.Param.STORE_IDS, storeId);
+			addFilter(Api.Param.STORE_IDS, storeId);
 		}
 		
-	}
-	
-	public static class Order extends ListRequest.Order {
-		
-		public Order() {
-			super("-" + Api.Sort.POPULARITY);
+		public void orderByPopularity(boolean enable, boolean descending) {
+			addOrder(Api.Sort.POPULARITY, descending);
 		}
 
-		public void byPopularity(boolean enable, boolean descending) {
-			add(Api.Sort.POPULARITY, descending);
-		}
-
-		public void removePopularity() {
+		public void removeOrderPopularity() {
 			remove(Api.Sort.POPULARITY);
 		}
 
-		public void byPage(boolean enable, boolean descending) {
-			add(Api.Sort.PAGE, descending);
+		public void orderByPage(boolean enable, boolean descending) {
+			addOrder(Api.Sort.PAGE, descending);
 		}
 
-		public void removePage() {
+		public void removeOrderPage() {
 			remove(Api.Sort.PAGE);
 		}
 
-		public void byCreated(boolean enable, boolean descending) {
-			add(Api.Sort.CREATED, descending);
+		public void orderByCreated(boolean enable, boolean descending) {
+			addOrder(Api.Sort.CREATED, descending);
 		}
 
-		public void removeCreated() {
+		public void removeOrderCreated() {
 			remove(Api.Sort.CREATED);
 		}
 
-		public void byPrice(boolean enable, boolean descending) {
-			add(Api.Sort.PRICE, descending);
+		public void orderByPrice(boolean enable, boolean descending) {
+			addOrder(Api.Sort.PRICE, descending);
 		}
 
-		public void removePrice() {
+		public void removeOrderPrice() {
 			remove(Api.Sort.PRICE);
 		}
 
-		public void bySavings(boolean enable, boolean descending) {
-			add(Api.Sort.SAVINGS, descending);
+		public void orderBySavings(boolean enable, boolean descending) {
+			addOrder(Api.Sort.SAVINGS, descending);
 		}
 
-		public void removeSavings() {
+		public void removeOrderSavings() {
 			remove(Api.Sort.SAVINGS);
 		}
 
-		public void byQuantity(boolean enable, boolean descending) {
-			add(Api.Sort.QUANTITY, descending);
+		public void orderByQuantity(boolean enable, boolean descending) {
+			addOrder(Api.Sort.QUANTITY, descending);
 		}
 
-		public void removeQuantity() {
+		public void removeOrderQuantity() {
 			remove(Api.Sort.QUANTITY);
 		}
 
-		public void byCount(boolean enable, boolean descending) {
-			add(Api.Sort.COUNT, descending);
+		public void orderByCount(boolean enable, boolean descending) {
+			addOrder(Api.Sort.COUNT, descending);
 		}
 
-		public void removeCount() {
+		public void removeOrderCount() {
 			remove(Api.Sort.COUNT);
 		}
 
-		public void byExpirationDate(boolean enable, boolean descending) {
-			add(Api.Sort.EXPIRATION_DATE, descending);
+		public void orderByExpirationDate(boolean enable, boolean descending) {
+			addOrder(Api.Sort.EXPIRATION_DATE, descending);
 		}
 
-		public void removeExpirationDate() {
+		public void removeOrderExpirationDate() {
 			remove(Api.Sort.EXPIRATION_DATE);
 		}
 		
-		public void byPublicationDate(boolean enable, boolean descending) {
-			add(Api.Sort.PUBLICATION_DATE, descending);
+		public void orderByPublicationDate(boolean enable, boolean descending) {
+			addOrder(Api.Sort.PUBLICATION_DATE, descending);
 		}
 		
-		public void removePublicationDate() {
+		public void removeOrderPublicationDate() {
 			remove(Api.Sort.PUBLICATION_DATE);
 		}
 		
-		public void byValidDate(boolean enable, boolean descending) {
-			add(Api.Sort.VALID_DATE, descending);
+		public void orderByValidDate(boolean enable, boolean descending) {
+			addOrder(Api.Sort.VALID_DATE, descending);
 		}
 		
-		public void removeValidDate() {
+		public void removeOrderValidDate() {
 			remove(Api.Sort.VALID_DATE);
 		}
 		
-		public void byDealer(boolean enable, boolean descending) {
-			add(Api.Sort.DEALER, descending);
+		public void orderByDealer(boolean enable, boolean descending) {
+			addOrder(Api.Sort.DEALER, descending);
 		}
 		
-		public void removeDealer() {
+		public void removeOrderDealer() {
 			remove(Api.Sort.DEALER);
 		}
 		
-		public void byDistance(boolean enable, boolean descending) {
-			add(Api.Sort.DISTANCE, descending);
+		public void orderByDistance(boolean enable, boolean descending) {
+			addOrder(Api.Sort.DISTANCE, descending);
 		}
 		
-		public void removeDistance() {
+		public void removeOrderDistance() {
 			remove(Api.Sort.DISTANCE);
 		}
 
-	}
-	
-	public static class Parameter extends ListRequest.Parameter {
-		// TODO lookup API doc to find relevant filters
 	}
 	
 	public static class OfferAutoFill extends ListRequest.ListAutoFill<List<Offer>> {

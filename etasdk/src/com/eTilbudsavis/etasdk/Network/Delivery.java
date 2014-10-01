@@ -15,78 +15,27 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.Network;
 
-import java.util.concurrent.ExecutorService;
 
-import android.os.Handler;
-import android.os.Looper;
 
-public class Delivery {
+public interface Delivery {
 	
-	/** Used for posting responses, typically to the main thread. */
-	private final Handler mHandler;
-    private final ExecutorService mExecutorService;
-
     /**
-     * Creates a new response delivery interface.
-     * @param handler {@link Handler} to post responses on
+     * Post the {@link Request} and {@link Response}, on to another thread, 
+     * and then trigger the listener waiting for the callback.
+     * @param request A {@link Request}
+     * @param response A {@link Response} to the {@link Request}
      */
-    public Delivery() {
-    	this(new Handler(Looper.getMainLooper()), null);
-    }
-
-    /**
-     * Creates a new response delivery interface.
-     * @param handler {@link Handler} to post responses on
-     */
-    public Delivery(ExecutorService executor) {
-    	this(new Handler(Looper.getMainLooper()), executor);
-    }
+    public void postResponse(Request<?> request, Response<?> response);
     
-    /**
-     * Creates a new response delivery interface.
-     * @param handler {@link Handler} to post responses on
-     */
-    public Delivery(Handler h, ExecutorService executor) {
-    	mHandler = h;
-    	mExecutorService = executor;
-    }
-    
-    /**
-     * Post the Response to a Request, back to the UI-thread, and then trigger the listener waiting for the callback.
-     * @param request made by the user
-     * @param a response response from the API fulfilling the Request
-     */
-    public void postResponse(Request<?> request, Response<?> response) {
-    	request.addEvent("post-response");
+    public class DeliveryRunnable implements Runnable {
     	
-    	DeliveryRunnable runner = new DeliveryRunnable(request, response);
-    	
-    	if (request.getHandler() != null) {
-    		// Deliver to custom handler (custom thread)
-    		request.getHandler().post(runner);
-    	} else if (request.deliverOnThread() && mExecutorService != null) {
-    		// Deliver to a SDK provided thread (to e.g. perform an autocomplete action)
-    		mExecutorService.submit(runner);
-    	} else {
-    		// Return to the main thread, this is default behavior
-            mHandler.post(runner);
-    	}
-    	
-    }
-    
-    /**
-     * A Runnable used for delivering network responses to a listener on the UI-thread.
-     */
-    @SuppressWarnings("rawtypes")
-    private class DeliveryRunnable implements Runnable {
         private final Request mRequest;
         private final Response mResponse;
-
+        
         public DeliveryRunnable(Request request, Response response) {
             mRequest = request;
             mResponse = response;
         }
-        
         
         @SuppressWarnings("unchecked")
         public void run() {
@@ -97,10 +46,11 @@ public class Delivery {
             	mRequest.finish("cancelled-at-delivery");
             } else {
             	mRequest.finish("execution-finished-succesfully");
-                mRequest.deliverResponse(mResponse.result, mResponse.error);
+            	mRequest.deliverResponse(mResponse.result, mResponse.error);
             }
             
-            
        }
+        
     }
+    
 }

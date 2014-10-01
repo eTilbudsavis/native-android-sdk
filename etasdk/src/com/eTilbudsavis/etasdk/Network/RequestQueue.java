@@ -31,6 +31,7 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaLocation;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Log.EventLog;
+import com.eTilbudsavis.etasdk.Network.Impl.HandlerDelivery;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Api.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -109,7 +110,7 @@ public class RequestQueue {
      * @param network - the implementation you want to use for this RequestQueue
 	 */
     public RequestQueue(Eta eta, Cache cache, Network network) {
-    	this(eta, cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE, new Delivery(eta.getExecutor()));
+    	this(eta, cache, network, DEFAULT_NETWORK_THREAD_POOL_SIZE, new HandlerDelivery());
     }
     
 	/**
@@ -419,5 +420,5 @@ public class RequestQueue {
 	public int getRequestCount() {
 		return mSequenceGenerator.get();
 	}
-    
+	
 }

@@ -2,17 +2,16 @@ package com.eTilbudsavis.etasdk.request.impl;
 
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Network.Delivery;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
-import com.eTilbudsavis.etasdk.request.RequestAutoFill.OnAutoFillCompleteListener;
 
 public abstract class ObjectRequest<T> extends JsonObjectRequest {
 	
-	private DeliveryHelper<T> mDelivery;
 	private RequestAutoFill<T> mAutoFiller;
 	
 	public ObjectRequest(String url, Listener<T> listener) {
@@ -24,10 +23,9 @@ public abstract class ObjectRequest<T> extends JsonObjectRequest {
 		super(method, url, requestBody, null);
 		init(listener);
 	}
-
+	
 	private void init(Listener<T> listener) {
-		mDelivery = new DeliveryHelper<T>(this, listener);
-		setDeliverOnThread(true);
+		setDelivery(new DeliveryHelper<T>(this, listener));
 	}
 	
 	public Request<?> setAutoFill(RequestAutoFill<T> filler) {
@@ -41,18 +39,12 @@ public abstract class ObjectRequest<T> extends JsonObjectRequest {
 	
 	protected void runAutoFill(final T response, final EtaError error) {
 		addEvent("delivery-intercepted");
-		if (response == null) {
-			mDelivery.deliver(response, error);
-		} else {
-			mAutoFiller.setAutoFillParams(new AutoFillParams(this));
-			mAutoFiller.setOnAutoFillCompleteListener(new OnAutoFillCompleteListener() {
+		getAutoFill().run(new AutoFillParams(this), response, error, getRequestQueue(), new Listener<T>() {
 
-				public void onComplete() {
-					mDelivery.deliver(response, error);
-				}
-			});
-			mAutoFiller.execute(response, getRequestQueue());
-		}
+			public void onComplete(T response, EtaError error) {
+				((DeliveryHelper<T>)getDelivery()).deliver(response, error);
+			}
+		});
 		
 	}
 	
@@ -64,21 +56,26 @@ public abstract class ObjectRequest<T> extends JsonObjectRequest {
 		}
 	}
 	
-	public static abstract class Builder<T> extends com.eTilbudsavis.etasdk.request.Builder<T> {
+	@Override
+	public Request<?> setDelivery(Delivery delivery) {
+		String msg = "ObjectRequest does not support setting Delivery. All requests are returned to UI Thread";
+		throw new UnsupportedOperationException(msg);
+	}
+	
+	public static abstract class Builder<T> extends com.eTilbudsavis.etasdk.request.Builder<ObjectRequest<T>> {
 		
-		private ObjectRequest<T> mRequest;
 		private RequestAutoFill<T> mAutofill;
 		
 		public ObjectRequest<T> build() {
+			ObjectRequest<T> r = super.build();
 			if (mAutofill != null) {
-				mRequest.setAutoFill(mAutofill);
+				r.setAutoFill(mAutofill);
 			}
-			return mRequest;
+			return r;
 		}
 		
 		public Builder(ObjectRequest<T> r) {
 			super(r);
-			mRequest = r;
 		}
 		
 		protected RequestAutoFill<T> getAutofill() {

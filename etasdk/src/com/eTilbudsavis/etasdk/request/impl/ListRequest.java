@@ -1,12 +1,17 @@
 package com.eTilbudsavis.etasdk.request.impl;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONArray;
 
+import android.text.TextUtils;
+
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
@@ -14,23 +19,21 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.ICatalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Network.Delivery;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.Network.Impl.ThreadDelivery;
 import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Api.Param;
+import com.eTilbudsavis.etasdk.request.ParameterBuilder;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
-import com.eTilbudsavis.etasdk.request.RequestAutoFill.OnAutoFillCompleteListener;
-import com.eTilbudsavis.etasdk.request.RequestFilter;
-import com.eTilbudsavis.etasdk.request.RequestOrder;
-import com.eTilbudsavis.etasdk.request.RequestParameter;
 
 public abstract class ListRequest<T> extends JsonArrayRequest {
 	
-	private DeliveryHelper<T> mDelivery;
 	private RequestAutoFill<T> mAutoFiller;
 	
 	private static final String ERROR_NO_REQUESTQUEUE = 
@@ -52,8 +55,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 	}
 	
 	private void init(Listener<T> listener) {
-		mDelivery = new DeliveryHelper<T>(this, listener);
-		setDeliverOnThread(true);
+		super.setDelivery(new DeliveryHelper<T>(this, listener));
 	}
 	
 	public Request<?> setAutoFill(RequestAutoFill<T> filler) {
@@ -67,26 +69,19 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 	
 	protected void runAutoFill(final T response, final EtaError error) {
 		addEvent("delivery-intercepted");
-		if (response == null) {
-			mDelivery.deliver(response, error);
-		} else {
-			mAutoFiller.setAutoFillParams(new AutoFillParams(this));
-			mAutoFiller.setOnAutoFillCompleteListener(new OnAutoFillCompleteListener() {
+		getAutoFill().run(new AutoFillParams(this), response, error, getRequestQueue(), new Listener<T>() {
 
-				public void onComplete() {
-					mDelivery.deliver(response, error);
-				}
-			});
-			mAutoFiller.execute(response, getRequestQueue());
-		}
-		
+			public void onComplete(T response, EtaError error) {
+				((DeliveryHelper<T>)getDelivery()).deliver(response, error);
+			}
+		});
 	}
 	
 	public void nextPage() {
 		getLog().add("request-next-page");
 		pageChange(getOffset()+getLimit());
 	}
-
+	
 	public void prevPage() {
 		getLog().add("request-previous-page");
 		pageChange(getOffset()-getLimit());
@@ -109,21 +104,30 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		}
 	}
 	
-	public static abstract class Builder<T> extends com.eTilbudsavis.etasdk.request.Builder<T> {
+	@Override
+	public Request<?> setDelivery(Delivery delivery) {
+		String msg = "ListRequest does not support setting Delivery. All requests are returned to UI Thread";
+		throw new UnsupportedOperationException(msg);
+	}
+	
+	public static abstract class Builder<T> extends com.eTilbudsavis.etasdk.request.Builder<ListRequest<T>> {
 		
-		private ListRequest<T> mRequest;
 		private RequestAutoFill<T> mAutofill;
+		private Delivery mDelivery;
 		
 		public ListRequest<T> build() {
-			if (mAutofill != null) {
-				mRequest.setAutoFill(mAutofill);
+			ListRequest<T> r = super.build();
+			if (mAutofill == null) {
+				r.setAutoFill(mAutofill);
 			}
-			return mRequest;
+//			if (r.mDelivery != null) {
+//				r.mDelivery.setDelivery(mDelivery);
+//			}
+			return r;
 		}
 		
 		public Builder(ListRequest<T> r) {
 			super(r);
-			mRequest = r;
 		}
 		
 		protected RequestAutoFill<T> getAutofill() {
@@ -134,19 +138,76 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 			mAutofill = filler;
 		}
 		
-	}
-	
-	public static abstract class Order extends RequestOrder {
+		public void setDelivery(Delivery d) {
+			mDelivery = d;
+		}
 
-		public Order(String defaultOrder) {
-			super(defaultOrder);
+		public Delivery getDelivery() {
+			return mDelivery;
 		}
 		
 	}
 	
-	public static abstract class Filter extends RequestFilter<Set<String>> {
+	public static class ListParameterBuilder extends ParameterBuilder {
 		
-		protected boolean add(String filter, String id) {
+		private String mOrderDefault = null;
+		private LinkedHashSet<String> mOrder = new LinkedHashSet<String>();
+		Map<String, Set<String>> mFilters = new HashMap<String, Set<String>>();
+		
+		protected void setDefaultOrder(String defaultOrder) {
+			mOrderDefault = defaultOrder;
+		}
+		
+		protected boolean setOrder(LinkedHashSet<String> orders) {
+			return mOrder.addAll(orders);
+		}
+		
+		/**
+		 * Adds the order to the set. Use with caution, as this method does
+		 * not remove negated values in the set.
+		 * @param order the order to add
+		 * @return true when this {@link RequestOrder} did not already contain the order, false otherwise
+		 */
+		protected boolean addOrder(String order) {
+			return mOrder.add(order);
+		}
+		
+		/**
+		 * Removed the given order (checks for both ascending, and descending order).
+		 * @param order the order to remove
+		 * @return true if the order was removed, otherwise false
+		 */
+		protected boolean removeOrder(String order) {
+			// removing the negated value of the given order
+			if (order.startsWith("-")) {
+				mOrder.remove(order.replaceFirst("-", ""));
+			} else {
+				mOrder.remove("-" + order);
+			}
+			return mOrder.remove(order);
+		}
+		
+		/**
+		 * Adds the given order to the set of orders, removing any order
+		 * currently in the set, that may be in conflict with the new order.
+		 * 
+		 * @param order the string to add
+		 * @param descending true if the string "-" should be prepended, indicating descending order. else false
+		 * @return true when this {@link RequestOrder} did not already contain the order, false otherwise
+		 */
+		protected boolean addOrder(String order, boolean descending) {
+			String tmp = (descending ? "-" : "") + order;
+			// Performing cleanup, ensuring only ONE of each 'order' is added to the set
+			if (mOrder.contains(order)) {
+				mOrder.remove(order);
+			}
+			return addOrder(tmp);
+		}
+		
+		/*
+		 * The filters
+		 */
+		protected boolean addFilter(String filter, String id) {
 			Map<String, Set<String>> map = getFilters();
 			if (map.containsKey(filter) && map.get(filter) != null) {
 				map.get(filter).add(id);
@@ -158,9 +219,31 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 			return true;
 		}
 		
-	}
-	
-	public static abstract class Parameter extends RequestParameter {
+		protected boolean addFilter(String filter, Set<String> ids) {
+			Set<String> set = mFilters.get(filter);
+			if (set != null) {
+				set.addAll(ids);
+			} else {
+				mFilters.put(filter, ids);
+			}
+			return true;
+		}
+
+		protected boolean removeFilter(String filter, String id) {
+			if (mFilters.get(filter) != null) {
+				return mFilters.get(filter).remove(id);
+			}
+			return false;
+		}
+		
+		protected boolean removeFilter(String filter) {
+			mFilters.remove(filter);
+			return true;
+		}
+		
+		protected Map<String, Set<String>> getFilters() {
+			return mFilters;
+		}
 		
 		/**
 		 * The API relies on pagination for retrieving data. Therefore you need to
@@ -169,7 +252,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		 * @param offset to first item in list
 		 * @return this object
 		 */
-		public Parameter setOffset(int offset) {
+		public ListParameterBuilder setOffset(int offset) {
 			put(Api.Param.OFFSET, String.valueOf(offset));
 			return this;
 		}
@@ -179,7 +262,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		 * @return offset
 		 */
 		public int getOffset() {
-			String offset = getFilter().get(Api.Param.OFFSET);
+			String offset = getParameters().get(Api.Param.OFFSET);
 			if (offset != null) {
 				return Integer.valueOf(offset);
 			}
@@ -193,7 +276,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		 * @param limit
 		 * @return this object
 		 */
-		public Parameter setLimit(int limit) {
+		public ListParameterBuilder setLimit(int limit) {
 			put(Api.Param.LIMIT, String.valueOf(limit));
 			return this;
 		}
@@ -203,122 +286,34 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		 * @return max number of items API should return
 		 */
 		public int getLimit() {
-			String offset = getFilter().get(Api.Param.LIMIT);
+			String offset = getParameters().get(Api.Param.LIMIT);
 			if (offset != null) {
 				return Integer.valueOf(offset);
 			}
 			return 0;
 		}
 		
+		@Override
+		public Map<String, String> getParameters() {
+			
+			Map<String, String> map = super.getParameters();
+			
+			if (!mOrder.isEmpty()) {
+				map.put(Api.Param.ORDER_BY, TextUtils.join(Api.DELIMITER, mOrder));
+			} else if (mOrderDefault != null) {
+				map.put(Api.Param.ORDER_BY, mOrderDefault);
+			}
+			
+			for (String key : mFilters.keySet()) {
+				map.put(key, TextUtils.join(Api.DELIMITER, mFilters.get(key)));
+			}
+			
+			return map;
+		}
+		
 	}
 	
 	public static abstract class ListAutoFill<T extends List<?>> extends RequestAutoFill<T> {
-		
-		protected JsonArrayRequest getDealerRequest(final List<? extends IDealer<?>> list) {
-			
-			Set<String> ids = new HashSet<String>(list.size());
-			for (IDealer<?> item : list) {
-				ids.add(item.getDealerId());
-			}
-			
-			JsonArrayRequest req = new JsonArrayRequest(Endpoint.DEALER_LIST, new Listener<JSONArray>() {
-				
-				public void onComplete(JSONArray response, EtaError error) {
-					
-					if (response != null) {
-						List<Dealer> dealers = Dealer.fromJSON(response);
-						for(IDealer<?> item : list) {
-							for(Dealer d: dealers) {
-								if (item.getDealerId().equals(d.getId())) {
-									item.setDealer(d);
-									break;
-								}
-							}
-						}
-						
-					} else {
-						EtaLog.d(TAG, error.toJSON().toString());
-					}
-					
-					done();
-					
-				}
-			});
-			req.setDeliverOnThread(true);
-			req.setIds(Param.DEALER_IDS, ids);
-			return req;
-		}
-
-		protected JsonArrayRequest getStoreRequest(final List<? extends IStore<?>> list) {
-			
-			Set<String> ids = new HashSet<String>(list.size());
-			for (IStore<?> item : list) {
-				ids.add(item.getStoreId());
-			}
-			
-			JsonArrayRequest req = new JsonArrayRequest(Endpoint.STORE_LIST, new Listener<JSONArray>() {
-				
-				public void onComplete(JSONArray response, EtaError error) {
-					
-					if (response != null) {
-						List<Store> stores = Store.fromJSON(response);
-						for(IStore<?> item : list) {
-							for(Store s: stores) {
-								if (item.getStoreId().equals(s.getId())) {
-									item.setStore(s);
-									break;
-								}
-							}
-						}
-						
-					} else {
-						EtaLog.d(TAG, error.toJSON().toString());
-					}
-					done();
-					
-				}
-			});
-			req.setDeliverOnThread(true);
-			req.setIds(Param.STORE_IDS, ids);
-			return req;
-		}
-
-		protected JsonArrayRequest getCatalogRequest(final List<? extends ICatalog<?>> list) {
-			
-			Set<String> ids = new HashSet<String>(list.size());
-			for (ICatalog<?> item : list) {
-				ids.add(item.getCatalogId());
-			}
-			
-			Listener<JSONArray> l = new Listener<JSONArray>() {
-				
-				public void onComplete(JSONArray response, EtaError error) {
-					
-					if (response != null) {
-						List<Catalog> catalogss = Catalog.fromJSON(response);
-						for(ICatalog<?> item : list) {
-							for(Catalog c: catalogss) {
-								if (item.getCatalogId().equals(c.getId())) {
-									item.setCatalog(c);
-									break;
-								}
-							}
-						}
-						
-					} else {
-						EtaLog.d(TAG, error.toJSON().toString());
-					}
-					
-					done();
-					
-				}
-			};
-			
-			JsonArrayRequest req = new JsonArrayRequest(Endpoint.CATALOG_LIST, l);
-			req.setDeliverOnThread(true);
-			req.setIds(Param.CATALOG_IDS, ids);
-			return req;
-		}
 		
 	}
 	

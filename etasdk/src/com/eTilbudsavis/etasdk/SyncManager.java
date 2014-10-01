@@ -39,14 +39,17 @@ import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Log.SyncLog;
+import com.eTilbudsavis.etasdk.Network.Delivery;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.EtaError.Code;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Network.RequestQueue;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
+import com.eTilbudsavis.etasdk.Network.Impl.HandlerDelivery;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.Network.Impl.ThreadDelivery;
 import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Api.Param;
@@ -159,6 +162,8 @@ public class SyncManager {
 	
 	/** The notification object, used to combine and collect notifications */
 	private ListNotification mNotification = new ListNotification(true);
+
+	private Delivery mDelivery;
 	
 	/** Listening for session changes, starting and stopping sync as needed */
 	private OnSessionChangeListener sessionListener = new OnSessionChangeListener() {
@@ -308,6 +313,7 @@ public class SyncManager {
 		mThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
 		mThread.start();
 		mHandler = new Handler(mThread.getLooper());
+		mDelivery = new HandlerDelivery(mHandler);
 	}
 
 	/**
@@ -405,7 +411,7 @@ public class SyncManager {
 		}
 		
 		// Make sure, that requests will return to this thread
-		r.setHandler(mHandler);
+		r.setDelivery(mDelivery);
 		
 		r.setTag(mRequestTag);
 		
