@@ -38,7 +38,7 @@ public abstract class RequestAutoFill<T> {
 	private T mData;
 	private EtaError mError;
 	private List<Request<?>> mRequests = new ArrayList<Request<?>>();
-	
+
 	public abstract List<Request<?>> createRequests(T data);
 	
 	public void run(AutoFillParams params, T data, EtaError e, RequestQueue rq, Listener<T> l) {
@@ -46,6 +46,7 @@ public abstract class RequestAutoFill<T> {
 		mRequests.clear();
 		mData = data;
 		mError = e;
+		mRequests = createRequests(mData);
 		if (mData != null) {
 			
 			for (Request<?> r : mRequests) {

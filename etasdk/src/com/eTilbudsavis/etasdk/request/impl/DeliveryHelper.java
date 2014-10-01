@@ -59,6 +59,9 @@ public class DeliveryHelper<T> implements Delivery {
             
             if (!mRequest.isCanceled()) {
             	mRequest.addEvent("performing-callback-to-original-listener");
+            	if (mRequest.getDebugger() != null) {
+            		mRequest.getDebugger().onDelivery(mRequest);
+            	}
             	mListener.onComplete(mData, mError);
             }
             

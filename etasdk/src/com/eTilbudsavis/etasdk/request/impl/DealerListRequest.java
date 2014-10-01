@@ -34,7 +34,7 @@ public class DealerListRequest extends ListRequest<List<Dealer>> {
 			super(new DealerListRequest(l));
 		}
 		
-		public void setAutoFill(DealerAutoFill filler) {
+		public void setAutoFill(DealerListAutoFill filler) {
 			super.setAutoFiller(filler);
 		}
 		
@@ -46,7 +46,7 @@ public class DealerListRequest extends ListRequest<List<Dealer>> {
 			}
 			
 			if (getAutofill() == null) {
-				setAutoFiller(new DealerAutoFill());
+				setAutoFiller(new DealerListAutoFill());
 			}
 			
 			return super.build();
@@ -66,16 +66,13 @@ public class DealerListRequest extends ListRequest<List<Dealer>> {
 		
 	}
 	
-	public static class DealerAutoFill extends ListRequest.ListAutoFill<List<Dealer>> {
+	public static class DealerListAutoFill extends ListRequest.ListAutoFill<List<Dealer>> {
 		
 		@Override
 		public List<Request<?>> createRequests(List<Dealer> data) {
-			
-			List<Request<?>> reqs = new ArrayList<Request<?>>();
-			
-			return reqs;
+			return new ArrayList<Request<?>>();
 		}
 		
 	}
-
+	
 }

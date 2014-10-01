@@ -194,7 +194,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     	mRequestQueue.finish(this);
     	
     	if (mDebugger != null) {
-    		mDebugger.debug(this);
+    		mDebugger.onFinish(this);
     	}
     	
     	return Request.this;
@@ -540,6 +540,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 * @param error to deliver, may be null
 	 */
 	public void deliverResponse(T response, EtaError error) {
+		if (mDebugger!=null) {
+			mDebugger.onDelivery(this);
+		}
 		if (mListener != null) {
 			mListener.onComplete(response, error);
 		}

@@ -45,7 +45,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 			super.setParameters(params);
 		}
 		
-		public void setAutoFill(CatalogAutoFill filler) {
+		public void setAutoFill(CatalogListAutoFill filler) {
 			super.setAutoFiller(filler);
 		}
 		
@@ -57,7 +57,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 			}
 			
 			if (getAutofill() == null) {
-				setAutoFiller(new CatalogAutoFill());
+				setAutoFiller(new CatalogListAutoFill());
 			}
 			
 			return super.build();
@@ -145,17 +145,17 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 		
 	}
 	
-	public static class CatalogAutoFill extends RequestAutoFill<List<Catalog>> {
+	public static class CatalogListAutoFill extends RequestAutoFill<List<Catalog>> {
 		
 		private boolean mPages;
 		private boolean mDealer;
 		private boolean mStore;
 		
-		public CatalogAutoFill() {
+		public CatalogListAutoFill() {
 			this(false, false, false);
 		}
 		
-		public CatalogAutoFill(boolean pages, boolean dealer, boolean store) {
+		public CatalogListAutoFill(boolean pages, boolean dealer, boolean store) {
 			mPages = pages;
 			mDealer = dealer;
 			mStore = store;
@@ -163,7 +163,7 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 		
 		@Override
 		public List<Request<?>> createRequests(List<Catalog> data) {
-			
+				
 			List<Request<?>> reqs = new ArrayList<Request<?>>();
 			
 			if (!data.isEmpty()) {

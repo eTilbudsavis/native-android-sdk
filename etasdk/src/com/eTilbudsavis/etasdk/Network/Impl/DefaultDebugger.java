@@ -8,9 +8,13 @@ public class DefaultDebugger implements RequestDebugger {
 	
 	public String TAG = DefaultDebugger.class.getSimpleName();
 	
-	public void debug(Request<?> req) {
+	public void onFinish(Request<?> req) {
 		EtaLog.d(TAG, req.getNetworkLog().toString());
 		EtaLog.d(TAG, req.getLog().getString(getClass().getSimpleName()));
+	}
+	
+	public void onDelivery(Request<?> r) {
+		EtaLog.d(TAG, "TotalDuration: " + r.getLog().getTotalDuration());
 	}
 	
 }

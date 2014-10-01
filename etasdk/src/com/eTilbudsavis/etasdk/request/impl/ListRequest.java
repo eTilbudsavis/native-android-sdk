@@ -11,23 +11,12 @@ import org.json.JSONArray;
 
 import android.text.TextUtils;
 
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
-import com.eTilbudsavis.etasdk.EtaObjects.Store;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.ICatalog;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Delivery;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.Network.Impl.ThreadDelivery;
 import com.eTilbudsavis.etasdk.Utils.Api;
-import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Api.Param;
 import com.eTilbudsavis.etasdk.request.ParameterBuilder;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
@@ -70,7 +59,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 	protected void runAutoFill(final T response, final EtaError error) {
 		addEvent("delivery-intercepted");
 		getAutoFill().run(new AutoFillParams(this), response, error, getRequestQueue(), new Listener<T>() {
-
+			
 			public void onComplete(T response, EtaError error) {
 				((DeliveryHelper<T>)getDelivery()).deliver(response, error);
 			}
@@ -117,12 +106,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
 		
 		public ListRequest<T> build() {
 			ListRequest<T> r = super.build();
-			if (mAutofill == null) {
-				r.setAutoFill(mAutofill);
-			}
-//			if (r.mDelivery != null) {
-//				r.mDelivery.setDelivery(mDelivery);
-//			}
+			r.setAutoFill(mAutofill);
 			return r;
 		}
 		

@@ -1,7 +1,9 @@
 package com.eTilbudsavis.etasdk.Network;
 
 public interface RequestDebugger {
-	
-	public void debug(Request<?> r);
+
+	public void onFinish(Request<?> r);
+
+	public void onDelivery(Request<?> r);
 	
 }

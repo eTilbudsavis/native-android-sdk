@@ -38,7 +38,7 @@ public class StoreListRequest extends ListRequest<List<Store>> {
 			super.setParameters(params);
 		}
 		
-		public void setAutoFill(StoreAutoFill filler) {
+		public void setAutoFill(StoreListAutoFill filler) {
 			super.setAutoFiller(filler);
 		}
 		
@@ -50,7 +50,7 @@ public class StoreListRequest extends ListRequest<List<Store>> {
 			}
 			
 			if (getAutofill() == null) {
-				setAutoFiller(new StoreAutoFill());
+				setAutoFiller(new StoreListAutoFill());
 			}
 			
 			return super.build();
@@ -94,15 +94,15 @@ public class StoreListRequest extends ListRequest<List<Store>> {
 		
 	}
 	
-	public static class StoreAutoFill extends ListRequest.ListAutoFill<List<Store>> {
+	public static class StoreListAutoFill extends ListRequest.ListAutoFill<List<Store>> {
 		
 		private boolean mDealer;
 		
-		public StoreAutoFill() {
+		public StoreListAutoFill() {
 			this(false);
 		}
 		
-		public StoreAutoFill(boolean dealer) {
+		public StoreListAutoFill(boolean dealer) {
 			mDealer = dealer;
 		}
 		

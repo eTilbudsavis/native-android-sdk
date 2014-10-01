@@ -8,8 +8,12 @@ public class NetworkDebugger implements RequestDebugger{
 	
 	public String TAG = NetworkDebugger.class.getSimpleName();
 	
-	public void debug(Request<?> r) {
+	public void onFinish(Request<?> r) {
 		EtaLog.d(TAG, r.getNetworkLog().toString());
+	}
+
+	public void onDelivery(Request<?> r) {
+		EtaLog.d(TAG, "TotalDuration: " + r.getLog().getTotalDuration());
 	}
 	
 }

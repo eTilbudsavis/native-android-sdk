@@ -38,7 +38,7 @@ public class OfferListRequest extends ListRequest<List<Offer>> {
 			super.setParameters(params);
 		}
 		
-		public void setAutoFill(OfferAutoFill filler) {
+		public void setAutoFill(OfferListAutoFill filler) {
 			super.setAutoFiller(filler);
 		}
 		
@@ -50,7 +50,7 @@ public class OfferListRequest extends ListRequest<List<Offer>> {
 			}
 			
 			if (getAutofill() == null) {
-				setAutoFiller(new OfferAutoFill());
+				setAutoFiller(new OfferListAutoFill());
 			}
 			
 			return super.build();
@@ -194,17 +194,17 @@ public class OfferListRequest extends ListRequest<List<Offer>> {
 
 	}
 	
-	public static class OfferAutoFill extends ListRequest.ListAutoFill<List<Offer>> {
+	public static class OfferListAutoFill extends ListRequest.ListAutoFill<List<Offer>> {
 		
 		private boolean mCatalogs;
 		private boolean mDealer;
 		private boolean mStore;
 		
-		public OfferAutoFill() {
+		public OfferListAutoFill() {
 			this(false, false, false);
 		}
 		
-		public OfferAutoFill(boolean catalogs, boolean dealer, boolean store) {
+		public OfferListAutoFill(boolean catalogs, boolean dealer, boolean store) {
 			mCatalogs = catalogs;
 			mDealer = dealer;
 			mStore = store;
