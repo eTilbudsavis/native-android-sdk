@@ -25,7 +25,7 @@ public abstract class ObjectRequest<T> extends JsonObjectRequest {
 	}
 	
 	private void init(Listener<T> listener) {
-		setDelivery(new DeliveryHelper<T>(this, listener));
+		super.setDelivery(new DeliveryHelper<T>(this, listener));
 	}
 	
 	public Request<?> setAutoFill(RequestAutoFill<T> filler) {
