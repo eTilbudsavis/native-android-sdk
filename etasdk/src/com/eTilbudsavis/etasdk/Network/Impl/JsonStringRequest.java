@@ -71,7 +71,7 @@ public class JsonStringRequest extends JsonRequest<String>{
 				
 				try {
 					JSONObject jObject = new JSONObject(jsonString);
-					cacheJSONObject(jObject);
+					JsonCacheHelper.cacheJSONObject(this, jObject);
 				} catch (JSONException e) {
 					EtaLog.e(TAG, "", e);
 		            return Response.fromError(new ParseError(e, JSONObject.class));
@@ -81,7 +81,7 @@ public class JsonStringRequest extends JsonRequest<String>{
 
 				try {
 					JSONArray jArray = new JSONArray(jsonString);
-					cacheJSONArray(jArray);
+					JsonCacheHelper.cacheJSONArray(this, jArray);
 				} catch (JSONException e) {
 					EtaLog.e(TAG, "", e);
 		            return Response.fromError(new ParseError(e, JSONArray.class));
@@ -111,19 +111,19 @@ public class JsonStringRequest extends JsonRequest<String>{
         String[] path = getUrl().split("/");
         String cacheString = null;
         if (mFilterTypes.containsKey(path[path.length-1])) {
-        	Response<JSONArray> cacheArray = getJSONArray(c);
+        	Response<JSONArray> cacheArray = JsonCacheHelper.getJSONArray(this, c);
         	if (cacheArray != null) {
             	cacheString = cacheArray.result.toString();
         	}
         } else if (mFilterTypes.containsKey(path[path.length-2])) {
-        	Response<JSONObject> cacheObject = getJSONObject(c);
+        	Response<JSONObject> cacheObject = JsonCacheHelper.getJSONObject(this, c);
         	if (cacheObject != null) {
         		cacheString = cacheObject.result.toString();
         	}
         }
         
         if (cacheString != null) {
-
+        	
     		Response<String> cache = Response.fromSuccess(cacheString, null);
     		
     		return cache;

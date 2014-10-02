@@ -27,6 +27,7 @@ import android.text.Html;
 import android.text.Spanned;
 import android.widget.AutoCompleteTextView;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
@@ -49,7 +50,7 @@ public class Typeahead implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Typeahead.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Typeahead.class.getSimpleName();
 	
 	private int mLength = 0;
 	private int mOffset = 0;

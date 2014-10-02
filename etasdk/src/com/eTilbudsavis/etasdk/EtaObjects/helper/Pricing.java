@@ -20,6 +20,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
@@ -29,7 +30,7 @@ public class Pricing implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Pricing.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Pricing.class.getSimpleName();
 	
 	private double mPrice = 1.0d;
 	private Double mPrePrice;

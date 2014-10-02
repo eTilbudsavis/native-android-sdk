@@ -22,6 +22,7 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Permission;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -31,7 +32,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class Session implements EtaObject<JSONObject>, Serializable {
 	
-	public static final String TAG = Session.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Session.class.getSimpleName();
 	
 	private static final long serialVersionUID = 1L;
 	

@@ -20,6 +20,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Permission;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -40,7 +41,7 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  */
 public class User extends ErnObject<User> implements EtaObject<JSONObject>, Serializable {
 	
-	public static final String TAG = User.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + User.class.getSimpleName();
 	
 	private static final long serialVersionUID = 1L;
 

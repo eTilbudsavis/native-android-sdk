@@ -35,7 +35,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 @SuppressWarnings("rawtypes")
 public class NetworkDispatcher extends Thread {
 
-	public static final String TAG = "NetworkDispatcher";
+	public static final String TAG = Eta.TAG_PREFIX + NetworkDispatcher.class.getSimpleName();
 	
     /** Eta object controlling the whole lot */
     private final Eta mEta;

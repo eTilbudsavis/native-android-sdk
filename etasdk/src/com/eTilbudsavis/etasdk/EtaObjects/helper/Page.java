@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
@@ -32,7 +33,7 @@ public class Page implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = -1467489830915012500L;
 
-	public static final String TAG = Page.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Page.class.getSimpleName();
 	
 	private String mThumb;
 	private String mView;

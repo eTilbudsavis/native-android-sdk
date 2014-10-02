@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.ICatalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
@@ -55,7 +56,7 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Offer.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Offer.class.getSimpleName();
 
 	private static final String ERN_CLASS = "offer";
 	

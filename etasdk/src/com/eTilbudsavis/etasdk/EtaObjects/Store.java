@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
@@ -45,7 +46,7 @@ public class Store extends ErnObject<Store> implements EtaObject<JSONObject>, ID
 	
 	private static final long serialVersionUID = 4105775934027363052L;
 
-	public static final String TAG = Store.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Store.class.getSimpleName();
 
 	private static final String ERN_CLASS = "store";
 	

@@ -17,12 +17,14 @@ package com.eTilbudsavis.etasdk.Network;
 
 import java.util.concurrent.BlockingQueue;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 import android.os.Process;
 
 @SuppressWarnings("rawtypes")
 public class CacheDispatcher extends Thread {
 
-	public static final String TAG = "CacheDispatcher";
+	public static final String TAG = Eta.TAG_PREFIX + CacheDispatcher.class.getSimpleName();
 	
 	/** The queue of requests to service. */
 	private final BlockingQueue<Request> mQueue;

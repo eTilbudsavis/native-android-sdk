@@ -24,6 +24,7 @@ import org.json.JSONObject;
 
 import android.graphics.Color;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Pageflip;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -45,7 +46,7 @@ public class Dealer extends ErnObject<Dealer> implements EtaObject<JSONObject>, 
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final String TAG = Dealer.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Dealer.class.getSimpleName();
 	
 	private static final String ERN_CLASS = "dealer";
 	

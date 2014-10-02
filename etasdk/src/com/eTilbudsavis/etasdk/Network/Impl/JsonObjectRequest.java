@@ -58,7 +58,7 @@ public class JsonObjectRequest extends JsonRequest<JSONObject>{
             JSONObject item = new JSONObject(jsonString);
 			Response<JSONObject> r = null;
             if (Utils.isSuccess(response.statusCode)) {
-                cacheJSONObject(item);
+                JsonCacheHelper.cacheJSONObject(this, item);
                 r = Response.fromSuccess(item, getCache());
             } else {
             	
@@ -81,7 +81,7 @@ public class JsonObjectRequest extends JsonRequest<JSONObject>{
 	
 	@Override
 	public Response<JSONObject> parseCache(Cache c) {
-		Response<JSONObject> cache = getJSONObject(c);
+		Response<JSONObject> cache = JsonCacheHelper.getJSONObject(this, c);
 		return cache;
 	}
 	

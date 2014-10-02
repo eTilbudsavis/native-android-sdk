@@ -12,7 +12,7 @@ import com.eTilbudsavis.etasdk.Network.Response.Listener;
 
 public class DeliveryHelper<T> implements Delivery {
 	
-	public static final String TAG = DeliveryHelper.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + DeliveryHelper.class.getSimpleName();
 
 	private Request<?> mRequest;
 	private Listener<T> mListener;

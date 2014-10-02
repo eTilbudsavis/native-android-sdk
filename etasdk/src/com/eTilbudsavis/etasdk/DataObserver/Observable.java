@@ -9,11 +9,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class Observable<T> {
 	
-	public static final String TAG = Observable.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Observable.class.getSimpleName();
 	
 	protected final Set<T> mObservers = newSetFromMap(new WeakHashMap<T, Boolean>());
 	

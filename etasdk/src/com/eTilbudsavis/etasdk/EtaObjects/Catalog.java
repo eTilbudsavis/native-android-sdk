@@ -24,6 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.PageflipWebview;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
@@ -53,7 +54,7 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Catalog.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Catalog.class.getSimpleName();
 
 	private static final String ERN_CLASS = "catalog";
 	

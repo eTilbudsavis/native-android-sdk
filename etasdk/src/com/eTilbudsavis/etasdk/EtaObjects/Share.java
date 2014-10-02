@@ -25,6 +25,7 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
@@ -32,7 +33,7 @@ import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>, Serializable {
 
-	public static final String TAG = Share.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Share.class.getSimpleName();
 
 	private static final String ERN_CLASS = "share";
 	

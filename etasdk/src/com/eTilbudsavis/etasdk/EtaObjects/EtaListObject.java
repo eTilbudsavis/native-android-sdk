@@ -17,9 +17,11 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 public abstract class EtaListObject<T> extends ErnObject<T> implements Comparable<T>, Serializable {
 	
-	public static final String TAG = EtaListObject.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + EtaListObject.class.getSimpleName();
 	
 	private static final long serialVersionUID = 8166712456946780878L;
 	

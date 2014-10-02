@@ -32,7 +32,7 @@ import com.eTilbudsavis.etasdk.Utils.Api.Param;
 
 public abstract class RequestAutoFill<T> {
 	
-	public static final String TAG = RequestAutoFill.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + RequestAutoFill.class.getSimpleName();
 	
 	private Listener<T> mListener;
 	private T mData;

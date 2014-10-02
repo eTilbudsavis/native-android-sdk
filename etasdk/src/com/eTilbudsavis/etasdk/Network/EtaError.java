@@ -18,6 +18,7 @@ package com.eTilbudsavis.etasdk.Network;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Impl.ApiError;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
@@ -25,7 +26,7 @@ import com.eTilbudsavis.etasdk.Network.Impl.ParseError;
 
 public class EtaError extends Exception {
 
-	public static final String TAG = "EtaError";
+	public static final String TAG = Eta.TAG_PREFIX + EtaError.class.getSimpleName();
 	
 	private static final long serialVersionUID = 1L;
 

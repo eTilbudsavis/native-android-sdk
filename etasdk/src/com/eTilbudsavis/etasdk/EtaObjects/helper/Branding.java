@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import android.graphics.Color;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
@@ -31,7 +32,7 @@ public class Branding implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Branding.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Branding.class.getSimpleName();
 	
 	private String mName;
 	private String mUrlName;

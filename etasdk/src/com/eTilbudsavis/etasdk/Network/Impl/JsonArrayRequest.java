@@ -88,7 +88,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
             	// Parse into array if it's successful
             	JSONArray jArray = new JSONArray(jsonString);
                 r = Response.fromSuccess(jArray, getCache());
-        		cacheJSONArray(r.result);
+        		JsonCacheHelper.cacheJSONArray(this, r.result);
         		
             } else {
             	// Parse into object if it failed.
@@ -107,8 +107,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	
 	@Override
 	public Response<JSONArray> parseCache(Cache c) {
-		Response<JSONArray> cache = getJSONArray(c);
-		return cache;
+		return JsonCacheHelper.getJSONArray(this, c);
 	}
 	
 	@Override

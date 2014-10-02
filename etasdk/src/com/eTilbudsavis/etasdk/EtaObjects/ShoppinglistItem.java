@@ -25,6 +25,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -36,7 +37,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements EtaObject<JSONObject>, Serializable {
 
-	public static final String TAG = "ShoppinglistItem";
+	public static final String TAG = Eta.TAG_PREFIX + ShoppinglistItem.class.getSimpleName();
 
 	private static final String ERN_CLASS = "shoppinglist:item";
 	

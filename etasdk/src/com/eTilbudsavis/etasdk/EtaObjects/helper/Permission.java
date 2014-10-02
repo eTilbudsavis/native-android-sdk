@@ -24,6 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 
@@ -31,7 +32,7 @@ public class Permission implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Permission.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Permission.class.getSimpleName();
 	
 	private HashMap<String, ArrayList<String>> mPermissions = new HashMap<String, ArrayList<String>>();
 	

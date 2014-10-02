@@ -39,7 +39,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 @SuppressWarnings("rawtypes")
 public class RequestQueue {
 	
-	public static final String TAG = "RequestQueue";
+	public static final String TAG = Eta.TAG_PREFIX + RequestQueue.class.getSimpleName();
 	
     /** Number of network request dispatcher threads to start. */
     private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;

@@ -52,8 +52,8 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  *
  */
 public class Eta {
-
-	public static final String TAG_PREFIX = "EtaSdk-";
+	
+	public static final String TAG_PREFIX = "Eta.sdk.";
 	public static final String TAG = TAG_PREFIX + Eta.class.getSimpleName();
 	
 	private static final int DEFAULT_THREAD_COUNT = 3;

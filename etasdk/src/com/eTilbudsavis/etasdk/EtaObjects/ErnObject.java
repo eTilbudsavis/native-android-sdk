@@ -20,6 +20,7 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
@@ -35,7 +36,7 @@ public abstract class ErnObject<T> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final String TAG = ErnObject.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + ErnObject.class.getSimpleName();
 	
 	private String mId;
 	private String mErn;
