@@ -179,7 +179,7 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
                     }
                 });
 
-        mGestureDetector.setOnDoubleTapListener(new DefaultOnDoubleTapListener(this));
+//        mGestureDetector.setOnDoubleTapListener(new DefaultOnDoubleTapListener(this));
 
         // Finally, update the UI so that we're zoomable
         setZoomable(true);
@@ -188,8 +188,8 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
     public void setOnDoubleTapListener(GestureDetector.OnDoubleTapListener newOnDoubleTapListener) {
         if (newOnDoubleTapListener != null)
             this.mGestureDetector.setOnDoubleTapListener(newOnDoubleTapListener);
-        else
-            this.mGestureDetector.setOnDoubleTapListener(new DefaultOnDoubleTapListener(this));
+//        else
+//            this.mGestureDetector.setOnDoubleTapListener(new DefaultOnDoubleTapListener(this));
     }
 
     public boolean canZoom() {
@@ -721,17 +721,17 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
         ImageView imageView = getImageView();
         return imageView == null ? null : imageView.getDrawingCache();
     }
-
+    
     public void setZoomTransitionDuration(int milliseconds) {
         if (milliseconds < 0)
             milliseconds = DEFAULT_ZOOM_DURATION;
         this.ZOOM_DURATION = milliseconds;
     }
-
+    
     public IPhotoView getIPhotoViewImplementation() {
         return this;
     }
-
+    
     /**
      * Helper method that 'unpacks' a Matrix and returns the required value
      *

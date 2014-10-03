@@ -1,10 +1,11 @@
 package com.eTilbudsavis.etasdk.DataObserver;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class DataObservable extends Observable<DataObserver> {
 	
-	public static final String TAG = DataObservable.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + DataObservable.class.getSimpleName();
 	
 	/**
      * Invokes {@link DataObservable#onChanged} on each observer.

@@ -11,35 +11,33 @@ import android.widget.ImageView;
  * To be used via {@link uk.co.senab.photoview.PhotoViewAttacher#setOnDoubleTapListener(android.view.GestureDetector.OnDoubleTapListener)}
  */
 public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapListener {
-
-    private PhotoViewAttacher photoViewAttacher;
+	
+    private PhotoView2 mPhotoView;
 
     /**
      * Default constructor
      *
      * @param photoViewAttacher PhotoViewAttacher to bind to
      */
-    public DefaultOnDoubleTapListener(PhotoViewAttacher photoViewAttacher) {
-        setPhotoViewAttacher(photoViewAttacher);
+    public DefaultOnDoubleTapListener(PhotoView2 photoView) {
+    	setPhotoView(photoView);
     }
-
+    
     /**
      * Allows to change PhotoViewAttacher within range of single instance
      *
      * @param newPhotoViewAttacher PhotoViewAttacher to bind to
      */
-    public void setPhotoViewAttacher(PhotoViewAttacher newPhotoViewAttacher) {
-        this.photoViewAttacher = newPhotoViewAttacher;
+    public void setPhotoView(PhotoView2 photoView) {
+        mPhotoView = photoView;
     }
     
     public boolean onSingleTapConfirmed(MotionEvent e) {
-        if (this.photoViewAttacher == null)
+        if (mPhotoView == null)
             return false;
-
-        ImageView imageView = photoViewAttacher.getImageView();
-
-        if (null != photoViewAttacher.getOnPhotoTapListener()) {
-            final RectF displayRect = photoViewAttacher.getDisplayRect();
+        
+        if (null != mPhotoView.getOnPhotoTapListener()) {
+            final RectF displayRect = mPhotoView.getDisplayRect();
 
             if (null != displayRect) {
                 final float x = e.getX(), y = e.getY();
@@ -52,35 +50,36 @@ public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapLi
                     float yResult = (y - displayRect.top)
                             / displayRect.height();
 
-                    photoViewAttacher.getOnPhotoTapListener().onPhotoTap(imageView, xResult, yResult);
+                    mPhotoView.getOnPhotoTapListener().onPhotoTap(mPhotoView, xResult, yResult);
                     return true;
                 }
             }
         }
-        if (null != photoViewAttacher.getOnViewTapListener()) {
-            photoViewAttacher.getOnViewTapListener().onViewTap(imageView, e.getX(), e.getY());
+        if (null != mPhotoView.getOnViewTapListener()) {
+        	mPhotoView.getOnViewTapListener().onViewTap(mPhotoView, e.getX(), e.getY());
         }
-
+        
         return false;
     }
 
     
     public boolean onDoubleTap(MotionEvent ev) {
-        if (photoViewAttacher == null)
+        if (mPhotoView == null)
             return false;
-
+        
         try {
-            float scale = photoViewAttacher.getScale();
+            float scale = mPhotoView.getScale();
             float x = ev.getX();
             float y = ev.getY();
-
-            if (scale < photoViewAttacher.getMediumScale()) {
-                photoViewAttacher.setScale(photoViewAttacher.getMediumScale(), x, y, true);
-            } else if (scale >= photoViewAttacher.getMediumScale() && scale < photoViewAttacher.getMaximumScale()) {
-                photoViewAttacher.setScale(photoViewAttacher.getMaximumScale(), x, y, true);
+            
+            float mid = mPhotoView.getMaximumScale()-mPhotoView.getMinimumScale();
+            
+            if (scale >= mid) {
+            	mPhotoView.setScale(mPhotoView.getMaximumScale(), x, y, true);
             } else {
-                photoViewAttacher.setScale(photoViewAttacher.getMinimumScale(), x, y, true);
+            	mPhotoView.setScale(mPhotoView.getMinimumScale(), x, y, true);
             }
+            
         } catch (ArrayIndexOutOfBoundsException e) {
             // Can sometimes happen when getX() and getY() is called
         }
