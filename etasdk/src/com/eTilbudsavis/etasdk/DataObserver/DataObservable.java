@@ -1,7 +1,5 @@
 package com.eTilbudsavis.etasdk.DataObserver;
 
-import android.database.Observable;
-
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class DataObservable extends Observable<DataObserver> {
