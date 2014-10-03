@@ -12,14 +12,14 @@ import android.widget.ImageView;
  */
 public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapListener {
 	
-    private PhotoView2 mPhotoView;
+    private PhotoView mPhotoView;
 
     /**
      * Default constructor
      *
      * @param photoViewAttacher PhotoViewAttacher to bind to
      */
-    public DefaultOnDoubleTapListener(PhotoView2 photoView) {
+    public DefaultOnDoubleTapListener(PhotoView photoView) {
     	setPhotoView(photoView);
     }
     
@@ -28,7 +28,7 @@ public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapLi
      *
      * @param newPhotoViewAttacher PhotoViewAttacher to bind to
      */
-    public void setPhotoView(PhotoView2 photoView) {
+    public void setPhotoView(PhotoView photoView) {
         mPhotoView = photoView;
     }
     
@@ -61,7 +61,6 @@ public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapLi
         
         return false;
     }
-
     
     public boolean onDoubleTap(MotionEvent ev) {
         if (mPhotoView == null)
