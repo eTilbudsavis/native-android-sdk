@@ -150,15 +150,17 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 		private boolean mPages;
 		private boolean mDealer;
 		private boolean mStore;
+		private boolean mHotspots;
 		
 		public CatalogListAutoFill() {
-			this(false, false, false);
+			this(false, false, false, false);
 		}
 		
-		public CatalogListAutoFill(boolean pages, boolean dealer, boolean store) {
+		public CatalogListAutoFill(boolean pages, boolean dealer, boolean store, boolean hotspots) {
 			mPages = pages;
 			mDealer = dealer;
 			mStore = store;
+			mHotspots = hotspots;
 		}
 		
 		@Override
@@ -175,11 +177,19 @@ public class CatalogListRequest extends ListRequest<List<Catalog>> {
 				if (mDealer) {
 					reqs.add(getDealerRequest(data));
 				}
-				
+
 				if (mPages) {
 					
 					for (Catalog c : data) {
 						reqs.add(getPagesRequest(c));
+					}
+					
+				}
+
+				if (mHotspots) {
+					
+					for (Catalog c : data) {
+						reqs.add(getHotspotsRequest(c));
 					}
 					
 				}

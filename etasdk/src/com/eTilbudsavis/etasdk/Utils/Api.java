@@ -455,9 +455,14 @@ public final class Api {
 			return String.format("/v2/catalogs/%s", catalogId);
 		}
 
-		/** /v2/catalogs/{catalog_id} */
+		/** /v2/catalogs/{catalog_id}/pages */
 		public static String catalogPages(String catalogId) {
 			return String.format("/v2/catalogs/%s/pages", catalogId);
+		}
+
+		/** /v2/catalogs/{catalog_id}/hotspots */
+		public static String catalogHotspots(String catalogId) {
+			return String.format("/v2/catalogs/%s/hotspots", catalogId);
 		}
 
 		/** /v2/catalogs/{catalog_id}/collect */

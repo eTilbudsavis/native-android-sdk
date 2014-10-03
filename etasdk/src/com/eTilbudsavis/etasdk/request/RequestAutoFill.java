@@ -261,7 +261,7 @@ public abstract class RequestAutoFill<T> {
 		r.setDelivery(new ThreadDelivery(Eta.getInstance().getExecutor()));
 		return r;
 	}
-	
+
 	protected JsonArrayRequest getPagesRequest(final Catalog c) {
 		
 		JsonArrayRequest req = new JsonArrayRequest(Endpoint.catalogPages(c.getId()), new Listener<JSONArray>() {
@@ -269,6 +269,25 @@ public abstract class RequestAutoFill<T> {
 			public void onComplete(JSONArray response, EtaError error) {
 				if (response != null) {
 					c.setPages(Page.fromJSON(response));
+				} else {
+					EtaLog.d(TAG, error.toJSON().toString());
+				}
+				done();
+			}
+		});
+		
+		return req;
+		
+	}
+
+	protected JsonArrayRequest getHotspotsRequest(final Catalog c) {
+		
+		JsonArrayRequest req = new JsonArrayRequest(Endpoint.catalogHotspots(c.getId()), new Listener<JSONArray>() {
+			
+			public void onComplete(JSONArray response, EtaError error) {
+				if (response != null) {
+					//TODO set hotspots
+					EtaLog.d(TAG, response.toString());
 				} else {
 					EtaLog.d(TAG, error.toJSON().toString());
 				}

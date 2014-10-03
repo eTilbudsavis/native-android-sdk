@@ -734,6 +734,8 @@ public final class PageflipWebview extends WebView {
 					final String rUrl = request.getString("url");
 					final String rBody = request.has("data") ? request.getString("data") : null;
 					
+					EtaLog.d(TAG, rUrl);
+					
 					Method rMethod = Method.GET;
 					if (request.has("type")) {
 						String m = request.getString("type").toLowerCase();
