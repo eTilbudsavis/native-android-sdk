@@ -3,7 +3,6 @@ package com.eTilbudsavis.etasdk.photoview;
 import android.graphics.RectF;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.widget.ImageView;
 
 /**
  * Provided default implementation of GestureDetector.OnDoubleTapListener, to be overriden with custom behavior, if needed
