@@ -74,7 +74,7 @@ public class PageflipFragment extends Fragment {
 		
 		mPager.setOnPageChangeListener(mPageChangeListener);
 		
-		return getView();
+		return v;
 		
 	}
 	
