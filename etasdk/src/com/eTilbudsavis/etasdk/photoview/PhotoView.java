@@ -48,7 +48,9 @@ import com.eTilbudsavis.etasdk.photoview.scrollerproxy.ScrollerProxy;
 public class PhotoView extends ImageView implements View.OnTouchListener, OnGestureListener, ViewTreeObserver.OnGlobalLayoutListener {
 
 	public static final String TAG = PhotoView.class.getSimpleName();
-
+	
+	private static final boolean DEBUG = true;
+	
 	public static final float DEFAULT_MAX_SCALE = 3.0f;
 	public static final float DEFAULT_MIN_SCALE = 1.0f;
 	public static final int DEFAULT_ZOOM_DURATION = 200;
@@ -774,10 +776,10 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 		}
 
 		public void cancelFling() {
-			EtaLog.d(TAG, "Cancel Fling");
+			log(TAG, "Cancel Fling");
 			mScroller.forceFinished(true);
 		}
-
+		
 		public void fling(int viewWidth, int viewHeight, int velocityX,
 				int velocityY) {
 			final RectF rect = getDisplayRect();
@@ -806,7 +808,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			mCurrentX = startX;
 			mCurrentY = startY;
 			
-			EtaLog.d(TAG, "fling. StartX:" + startX + " StartY:" + startY + " MaxX:" + maxX + " MaxY:" + maxY);
+			log(TAG, "fling. StartX:" + startX + " StartY:" + startY + " MaxX:" + maxX + " MaxY:" + maxY);
 			
 			// If we actually can move, fling the scroller
 			if (startX != maxX || startY != maxY) {
@@ -825,7 +827,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 				final int newX = mScroller.getCurrX();
 				final int newY = mScroller.getCurrY();
 
-				EtaLog.d(TAG, "fling run(). CurrentX:" + mCurrentX + " CurrentY:"
+				log(TAG, "fling run(). CurrentX:" + mCurrentX + " CurrentY:"
 						+ mCurrentY + " NewX:" + newX + " NewY:"
 						+ newY);
 
@@ -904,7 +906,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			return; // Do not drag if we are already scaling
 		}
 
-//		EtaLog.d(TAG, String.format("onDrag: dx: %.2f. dy: %.2f", dx, dy));
+		log(TAG, String.format("onDrag: dx: %.2f. dy: %.2f", dx, dy));
 
 		mSuppMatrix.postTranslate(dx, dy);
 		checkAndDisplayMatrix();
@@ -935,7 +937,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 
 	public void onFling(float startX, float startY, float velocityX,
 			float velocityY) {
-//		EtaLog.d(TAG, "onFling. sX: " + startX + " sY: " + startY + " Vx: " + velocityX + " Vy: " + velocityY);
+		log(TAG, "onFling. sX: " + startX + " sY: " + startY + " Vx: " + velocityX + " Vy: " + velocityY);
 
 		mCurrentFlingRunnable = new FlingRunnable(getContext());
 		mCurrentFlingRunnable.fling(getImageViewWidth(),
@@ -944,7 +946,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 	}
 
 	public void onScale(float scaleFactor, float focusX, float focusY) {
-//		EtaLog.d(TAG, String.format("onScale: scale: %.2f. fX: %.2f. fY: %.2f", scaleFactor, focusX, focusY));
+		log(TAG, String.format("onScale: scale: %.2f. fX: %.2f. fY: %.2f", scaleFactor, focusX, focusY));
 
 		if (getScale() < mMaxScale || scaleFactor < 1f) {
 			mSuppMatrix.postScale(scaleFactor, scaleFactor, focusX, focusY);
@@ -996,8 +998,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			}
 
 			// Try the Scale/Drag detector
-			if (null != mScaleDragDetector
-					&& mScaleDragDetector.onTouchEvent(event)) {
+			if (null != mScaleDragDetector && mScaleDragDetector.onTouchEvent(event)) {
 				handled = true;
 			}
 
@@ -1067,5 +1068,9 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 		 */
 		void onViewTap(View view, float x, float y);
 	}
-
+	
+	private void log(String tag, String msg) {
+		if (DEBUG)
+			EtaLog.d(tag, msg);
+	}
 }

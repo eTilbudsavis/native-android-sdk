@@ -11,6 +11,9 @@ import android.view.MotionEvent;
  */
 public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapListener {
 	
+	public static final String TAG = DefaultOnDoubleTapListener.class.getSimpleName();
+	private static final float EPSILON = 0.001f;
+	
     private PhotoView mPhotoView;
 
     /**
@@ -62,27 +65,44 @@ public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapLi
     }
     
     public boolean onDoubleTap(MotionEvent ev) {
-        if (mPhotoView == null)
+        if (mPhotoView == null) {
             return false;
+        }
         
         try {
             float scale = mPhotoView.getScale();
+            float min = mPhotoView.getMinimumScale();
+            float max = mPhotoView.getMaximumScale();
             float x = ev.getX();
             float y = ev.getY();
             
-            float mid = mPhotoView.getMaximumScale()-mPhotoView.getMinimumScale();
-            
-            if (scale >= mid) {
-            	mPhotoView.setScale(mPhotoView.getMaximumScale(), x, y, true);
+            float midScale = min+((max-min)/2);
+
+            if ( scale < midScale ) {
+            	mPhotoView.setScale(max, x, y, true);
             } else {
-            	mPhotoView.setScale(mPhotoView.getMinimumScale(), x, y, true);
+            	mPhotoView.setScale(min, x, y, true);
             }
+
+//            if ( almostEqual(min, scale) || ( scale > midScale && !almostEqual(max, scale)) ) {
+//            	mPhotoView.setScale(max, x, y, true);
+//            } else {
+//            	mPhotoView.setScale(min, x, y, true);
+//            }
             
         } catch (ArrayIndexOutOfBoundsException e) {
             // Can sometimes happen when getX() and getY() is called
         }
 
         return true;
+    }
+
+    public static boolean almostEqual(double a, double b){
+    	return Math.abs(a-b)<EPSILON;
+    }
+
+    public static boolean almostEqual(double a, double b, double eps){
+    	return Math.abs(a-b)<eps;
     }
     
     public boolean onDoubleTapEvent(MotionEvent e) {
