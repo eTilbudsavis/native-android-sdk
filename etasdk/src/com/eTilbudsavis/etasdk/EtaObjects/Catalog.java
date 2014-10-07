@@ -31,6 +31,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspots;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -77,6 +78,7 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 	private List<Page> mPages;
 	private Dealer mDealer;
 	private Store mStore;
+	private Hotspots mHotspots;
 	private int mOfferOnPage = 1;
 	
 	/**
@@ -472,6 +474,26 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 	 */
 	public Dealer getDealer() {
 		return mDealer;
+	}
+
+	/**
+	 * Method for setting the {@link Hotspots} associated with this catalog
+	 * @param hotspots A {@link Hotspots} object
+	 */
+	public Catalog setHotspots(Hotspots hotspots) {
+		mHotspots = hotspots;
+		return this;
+	}
+
+	/**
+	 * Get the {@link Hotspots} associated with this catalog.
+	 * <p>Hotspots isn't bundled in the catalog object by default. But should be
+	 * downloaded separately via the store {@link Endpoint#catalogHotspots(String) endpoint},
+	 * and  {@link Catalog#setHotspots(Hotspots) set} manually by the developer. </p>
+	 * @return A {@link Hotspots} object, or {@code null}
+	 */
+	public Hotspots getHotspots() {
+		return mHotspots;
 	}
 
 	@Override

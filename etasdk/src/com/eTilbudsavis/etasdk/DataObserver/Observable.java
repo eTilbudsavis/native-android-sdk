@@ -27,7 +27,6 @@ public class Observable<T> {
         synchronized(mObservers) {
             if (mObservers.contains(observer)) {
             	EtaLog.w(TAG, "Observer " + observer + " is already registered. Ignoring.");
-//                throw new IllegalStateException("Observer " + observer + " is already registered.");
             } else {
                 mObservers.add(observer);
             }
@@ -48,8 +47,7 @@ public class Observable<T> {
         }
         synchronized(mObservers) {
             if (!mObservers.contains(observer)) {
-            	EtaLog.w(TAG, "Observer " + observer + " is already registered. Ignoring.");
-//                throw new IllegalStateException("Observer " + observer + " was not registered.");
+            	EtaLog.w(TAG, "Observer " + observer + " not registered.");
             } else {
                 mObservers.remove(observer);
             }

@@ -37,27 +37,53 @@ public class CatalogObjectRequest extends ObjectRequest<Catalog> {
 	
 	public static class CatalogAutoFill extends RequestAutoFill<Catalog> {
 		
-		private boolean mPages;
-		private boolean mDealer;
-		private boolean mStore;
+		private boolean mPages = false;
+		private boolean mDealer = false;
+		private boolean mStore = false;
+		private boolean mHotspots = false;
 		
 		public CatalogAutoFill() {
-			this(false, false, false);
 		}
 		
-		public CatalogAutoFill(boolean pages, boolean dealer, boolean store) {
+		public boolean loadPages() {
+			return mPages;
+		}
+
+		public void setLoadPages(boolean pages) {
 			mPages = pages;
+		}
+
+		public boolean loadDealer() {
+			return mDealer;
+		}
+
+		public void setLoadDealer(boolean dealer) {
 			mDealer = dealer;
+		}
+
+		public boolean loadStore() {
+			return mStore;
+		}
+
+		public void setLoadStore(boolean store) {
 			mStore = store;
 		}
-		
+
+		public boolean loadHotspots() {
+			return mHotspots;
+		}
+
+		public void setLoadHotspots(boolean hotspots) {
+			mHotspots = hotspots;
+		}
+
 		@Override
 		public List<Request<?>> createRequests(Catalog data) {
-			
+
 			List<Request<?>> reqs = new ArrayList<Request<?>>();
-			
+
 			if (data != null) {
-				
+
 				if (mStore) {
 					reqs.add(getStoreRequest(data));
 				}
@@ -65,9 +91,13 @@ public class CatalogObjectRequest extends ObjectRequest<Catalog> {
 				if (mDealer) {
 					reqs.add(getDealerRequest(data));
 				}
-				
+
 				if (mPages) {
 					reqs.add(getPagesRequest(data));
+				}
+				
+				if (mHotspots) {
+					reqs.add(getHotspotsRequest(data));
 				}
 				
 			}

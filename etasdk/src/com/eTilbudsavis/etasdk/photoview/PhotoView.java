@@ -996,12 +996,12 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 				}
 				break;
 			}
-
+			
 			// Try the Scale/Drag detector
 			if (null != mScaleDragDetector && mScaleDragDetector.onTouchEvent(event)) {
 				handled = true;
 			}
-
+			
 			// Check to see if the user double tapped
 			if (null != mGestureDetector && mGestureDetector.onTouchEvent(event)) {
 				handled = true;

@@ -39,13 +39,13 @@ public abstract class ObjectRequest<T> extends JsonObjectRequest {
 	
 	protected void runAutoFill(final T response, final EtaError error) {
 		addEvent("delivery-intercepted");
-		getAutoFill().run(new AutoFillParams(this), response, error, getRequestQueue(), new Listener<T>() {
+		getAutoFill().prepare(new AutoFillParams(this), response, error, new Listener<T>() {
 
 			public void onComplete(T response, EtaError error) {
 				((DeliveryHelper<T>)getDelivery()).deliver(response, error);
 			}
 		});
-		
+		getAutoFill().execute(getRequestQueue());
 	}
 	
 	@Override
