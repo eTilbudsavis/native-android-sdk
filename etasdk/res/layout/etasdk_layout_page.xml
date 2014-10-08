@@ -10,10 +10,4 @@
         android:layout_height="match_parent"
         />
     
-    <com.eTilbudsavis.etasdk.photoview.PhotoView
-        android:id="@+id/etasdk_pageflip_right_page"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
-    
 </LinearLayout>

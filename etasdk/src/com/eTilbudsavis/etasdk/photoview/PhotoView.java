@@ -49,7 +49,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 
 	public static final String TAG = PhotoView.class.getSimpleName();
 	
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	
 	public static final float DEFAULT_MAX_SCALE = 3.0f;
 	public static final float DEFAULT_MIN_SCALE = 1.0f;

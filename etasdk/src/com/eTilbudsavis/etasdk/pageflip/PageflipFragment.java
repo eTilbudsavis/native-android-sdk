@@ -36,9 +36,8 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	
 	Listener<Catalog> mFillListener = new Listener<Catalog>() {
 		
-		public void onComplete(Catalog response, EtaError error) {
-			EtaLog.d(TAG, "Request complete");
-			if (response != null) {
+		public void onComplete(Catalog c, EtaError error) {
+			if (c != null) {
 				resetAdapter();
 			} else {
 				EtaLog.e(TAG, error.getMessage(), error);
@@ -71,9 +70,8 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		mLandscape = isLandscape();
+		mLandscape = PageflipUtils.isLandscape(getActivity());
 		if (getArguments() != null) {
-			
 			if(getArguments().containsKey(CATALOG)) {
 				mCatalog = (Catalog)getArguments().getSerializable(CATALOG);
 				int page = getArguments().getInt(PAGE);
@@ -88,28 +86,24 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		super.onCreateView(inflater, container, savedInstanceState);
+//		super.onCreateView(inflater, container, savedInstanceState);
 		
-		View v = inflater.inflate(R.layout.pageflip, container);
-		mPager = (ViewPager) v.findViewById(R.id.viewpager);
-//		mPager = new ViewPager(getActivity());
-//		ViewGroup.LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-//		mPager.setLayoutParams(lp);
-		
+		mPager = new ViewPager(getActivity());
+		ViewGroup.LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+		mPager.setLayoutParams(lp);
+		mPager.setId(0xff3344);
 		mPager.setOnPageChangeListener(this);
-		return v;
+		return mPager;
 		
 	}
 	
 	private void resetAdapter() {
-		EtaLog.d(TAG, "resetAdapter");
 		mAdapter = new PageflipAdapter(getChildFragmentManager(), mCatalog, mLandscape);
 		mPager.setAdapter(mAdapter);
 		mPager.setCurrentItem(mCurrentPosition);
 	}
 
 	private void ensureCatalog() {
-		EtaLog.d(TAG, "ensureCatalog:" + mCatalog.getBranding().getName());
 		CatalogAutoFill caf = new CatalogAutoFill();
 		caf.setLoadDealer(mCatalog.getDealer()==null);
 		caf.setLoadHotspots(mCatalog.getHotspots()==null);
@@ -122,17 +116,16 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 		
 	}
 	
-	private boolean isLandscape() {
-		return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-	}
-	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		boolean land = isLandscape();
+		boolean land = PageflipUtils.isLandscape(newConfig);
 		if (land != mLandscape) {
+			EtaLog.d(TAG, "onConfigurationChanged.isLandscape");
 			mLandscape = land;
 			ensureCatalog();
+		} else {
+			EtaLog.d(TAG, "onConfigurationChanged");
 		}
 	}
 	
