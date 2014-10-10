@@ -23,13 +23,4 @@ public class DataObservable extends Observable<DataObserver> {
         }
     }
     
-    @Override
-    public void unregisterObserver(DataObserver observer) {
-    	try {
-        	super.unregisterObserver(observer);
-    	} catch (Exception e) {
-    		EtaLog.e(TAG, "Observer not registered", e);
-    	}
-    }
-    
 }
