@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.URLEncoder;
 
 import android.content.Context;
@@ -82,7 +84,7 @@ public class DefaultFileCache implements FileCache {
 		}
 		
 	}
-	
+
 	public Bitmap get(String url) {
 		File f = new File(mCacheDir, getFileName(url));
 		Bitmap b = null;
@@ -96,7 +98,39 @@ public class DefaultFileCache implements FileCache {
 		}
 		return b;
 	}
+
+	public byte[] getBytes(String url) {
+		File f = new File(mCacheDir, getFileName(url));
+		byte[] b = null;
+		if (f.exists()) {
+			try {
+				b = readFile(f);
+			} catch (FileNotFoundException e) {
+				EtaLog.d(TAG, e.getMessage(), e);
+			} catch ( IOException  e2) {
+				
+			}
+		}
+		return b;
+	}
 	
+	public static byte[] readFile(File file) throws IOException {
+        // Open file
+        RandomAccessFile f = new RandomAccessFile(file, "r");
+        try {
+            // Get and check length
+            long longlength = f.length();
+            int length = (int) longlength;
+            if (length != longlength)
+                throw new IOException("File size >= 2 GB");
+            // Read file and return data
+            byte[] data = new byte[length];
+            f.readFully(data);
+            return data;
+        } finally {
+            f.close();
+        }
+    }
 	private static final long WEEK_IN_MILLIS = 1000 * 60 * 60 * 24 * 7;
 	
 	Runnable cleaner = new Runnable() {

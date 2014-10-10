@@ -12,11 +12,9 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.Impl.DefaultDebugger;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
 import com.eTilbudsavis.etasdk.request.impl.CatalogObjectRequest.CatalogAutoFill;
@@ -75,7 +73,7 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 			if(getArguments().containsKey(CATALOG)) {
 				mCatalog = (Catalog)getArguments().getSerializable(CATALOG);
 				int page = getArguments().getInt(PAGE);
-				mCurrentPosition = (mLandscape ? PageflipUtils.pageToPosition(mCurrentPosition) : page);
+				mCurrentPosition = PageflipUtils.pageToPosition(page, mLandscape);;
 			} else {
 				EtaLog.w(TAG, "No catalog provided");
 			}

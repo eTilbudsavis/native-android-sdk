@@ -20,18 +20,42 @@ public class PageflipUtils {
 		return c.orientation == Configuration.ORIENTATION_LANDSCAPE;
 	}
 	
-	public static int pageToPosition(int page) {
-		if (page <= 1) {
-			return 1;
+	public static int pageToPosition(int page, boolean landscape) {
+		if (page<0) {
+			throw new IllegalArgumentException("Page cannot be negative");
 		}
-		return ( (page-(page%2)) /2)+1;
+		int pos = -1;
+		if (landscape) {
+			
+			if (page==0) {
+				pos = 0;
+			} else {
+				pos = ( (page-(page%2)) /2)+1;
+			}
+			
+		} else {
+			pos = page;
+		}
+		return pos;
 	}
-
-	public static int positionToPage(int position) {
-		if (position <= 0) {
-			return 1;
+	
+	public static int positionToPage(int position, boolean landscape) {
+		if (position<0) {
+			throw new IllegalArgumentException("Position cannot be negative");
 		}
-		return (position-1)*2;
+		int page = -1;
+		if (landscape) {
+			
+			if (position == 0) {
+				page = 0;
+			} else {
+				page = (position*2)-1;
+			}
+			
+		} else {
+			page = position;
+		}
+		return page;
 	}
 
 	public static Bitmap mergeImage(Bitmap leftBitmap, Bitmap rightBitmap) {

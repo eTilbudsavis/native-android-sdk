@@ -76,52 +76,52 @@ public class ImageLoader {
 		PhotosLoader(ImageRequest request){
 			ir = request;
 		}
-		
+
 		public void run() {
 
 			if (imageViewReused(ir)) {
 				ir.finish();
 				return;
 			}
-			
-			try{
-				
-				ir.setBitmap(mFileCache.get(ir.getUrl()));
-				
-				if (ir.getBitmap() != null) {
+
+			try {
+
+
+				int retries = 0;
+				while (ir.getBitmap() == null && retries<2) {
 					
-					ir.setLoadSource(LoadSource.FILE);
-					
-				} else {
-					
-					int retries = 0;
-					while (ir.getBitmap() == null && retries<2) {
+					try {
 						
 						retries++;
-						try {
+						ir.setBitmap(mFileCache.get(ir.getUrl()));
+
+						if (ir.getBitmap() != null) {
+
+							ir.setLoadSource(LoadSource.FILE);
+
+						} else {
+							
 							ir.setBitmap(mDownloader.getBitmap(ir.getUrl()));
-						} catch (Throwable t) {
-							EtaLog.d(TAG, t.getMessage(), t);
-							if (t instanceof OutOfMemoryError) {
-								mMemoryCache.clear();
+							if (ir.getBitmap() != null) {
+								ir.setLoadSource(LoadSource.WEB);
 							}
+
 						}
 						
+					} catch (OutOfMemoryError t) {
+						mMemoryCache.clear();
 					}
-					
-					if (ir.getBitmap() != null) {
-						ir.setLoadSource(LoadSource.WEB);
-					}
-					
+
 				}
 				
 				addToCache(ir);
-				
-				processAndDisplay(ir);
 
-			}catch(Throwable th){
+			} catch (Throwable th){
 				EtaLog.d(TAG, th.getMessage(), th);
 			}
+
+			processAndDisplay(ir);
+
 		}
 	}
 	

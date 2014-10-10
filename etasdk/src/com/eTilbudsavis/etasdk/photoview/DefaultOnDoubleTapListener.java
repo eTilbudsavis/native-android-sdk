@@ -77,7 +77,6 @@ public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapLi
             float y = ev.getY();
             
             float midScale = min+((max-min)/2);
-
             if ( scale < midScale ) {
             	mPhotoView.setScale(max, x, y, true);
             } else {

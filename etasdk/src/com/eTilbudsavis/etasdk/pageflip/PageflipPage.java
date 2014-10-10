@@ -1,6 +1,7 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
 import android.app.Activity;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,27 +13,20 @@ import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.photoview.PhotoView;
+import com.eTilbudsavis.etasdk.photoview.PhotoView.OnMatrixChangedListener;
 
-public class PageflipPage extends Fragment {
+public abstract class PageflipPage extends Fragment {
 	
 	public static final String TAG = PageflipPage.class.getSimpleName();
 	
 	protected static final String CATALOG = "catalog";
 	protected static final String PAGE = "page_num";
-//	protected static final String ZOOM = "zoom";
 	
 	private Catalog mCatalog;
 	private int mPageNum = 0;
 	private PhotoView mPhotoView;
 	
-	public static PageflipPage newInstance(Catalog c, int position, boolean landscape) {
-		Bundle b = new Bundle();
-		b.putSerializable(CATALOG, c);
-		b.putInt(PAGE, landscape ? PageflipUtils.positionToPage(position) : position);
-		PageflipPage f = landscape ? new PageflipDoublePage() : new PageflipSinglePage();
-		f.setArguments(b);
-		return f;
-	}
+	public abstract void loadPages();
 	
 	@Override
 	public void onAttach(Activity activity) {
@@ -41,7 +35,6 @@ public class PageflipPage extends Fragment {
 			mCatalog = (Catalog)getArguments().getSerializable(CATALOG);
 			mPageNum = getArguments().getInt(PAGE);
 		}
-		
 		if (mCatalog==null) {
 			throw new IllegalStateException("Catalog, and page number must be provided as argument");
 		}
@@ -53,21 +46,39 @@ public class PageflipPage extends Fragment {
 		super.onCreateView(inflater, container, savedInstanceState);
 		View v = inflater.inflate(R.layout.etasdk_layout_page, container, false);
 		mPhotoView = (PhotoView) v.findViewById(R.id.etasdk_pageflip_left_page);
+		mPhotoView.setOnMatrixChangeListener(new OnMatrixChangedListener() {
+			
+			public void onMatrixChanged(RectF rect) {
+				boolean intercept = almost(mPhotoView.getScale(), mPhotoView.getMinimumScale());
+				mPhotoView.setAllowParentInterceptOnEdge(intercept);
+			}
+		});
 		return v;
+	}
+	
+	private boolean almost(float first, float second) {
+		return Math.abs(first-second)<0.1;
+	}
+	
+	@Override
+	public void onResume() {
+		
+		loadPages();
+		super.onResume();
 	}
 	
 	protected PhotoView getPhotoView() {
 		return mPhotoView;
 	}
 	
-	protected Page getLeftPage() {
+	protected Page getPageLeft() {
 		return mCatalog.getPages().get(mPageNum);
 	}
 	
-	protected Page getRightPage() {
+	protected Page getPageRight() {
 		try {
 			return mCatalog.getPages().get(mPageNum+1);
-		} catch (ArrayIndexOutOfBoundsException e) {
+		} catch (IndexOutOfBoundsException e) {
 			EtaLog.i(TAG, "No more pages");
 			return null;
 		}

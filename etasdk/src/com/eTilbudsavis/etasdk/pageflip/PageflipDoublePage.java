@@ -1,55 +1,100 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.widget.ImageView;
 
+import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapDisplayer;
+import com.eTilbudsavis.etasdk.ImageLoader.BitmapProcessor;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class PageflipDoublePage extends PageflipPage {
+
+	public static PageflipPage newInstance(Catalog c, int page) {
+		Bundle b = new Bundle();
+		b.putSerializable(CATALOG, c);
+		b.putInt(PAGE, page);
+		PageflipPage f = new PageflipDoublePage();
+		f.setArguments(b);
+		return f;
+	}
 	
-	private Bitmap mTmpBitmap;
+	Object LOCK = new Object();
+	private ImageView mIVLeft;
+	private ImageView mIVRight;
+	private Bitmap mBitmapLeft;
+	private Bitmap mBitmapRight;
+	private Bitmap mBitmapMerged;
 	
-	BitmapDisplayer mLeftListener = new BitmapDisplayer() {
-		
-		public void display(ImageRequest ir) {
-			if (mTmpBitmap == null) {
-				mTmpBitmap = ir.getBitmap();
-			} else {
-				getPhotoView().setImageBitmap(PageflipUtils.mergeImage(ir.getBitmap(), mTmpBitmap));
-				mTmpBitmap = null;
+	@Override
+	public void onAttach(Activity activity) {
+		mIVLeft = new ImageView(activity);
+		mIVRight = new ImageView(activity);
+		super.onAttach(activity);
+	}
+	
+	private void merge() {
+
+		synchronized (LOCK) {
+			if (mBitmapLeft != null && mBitmapRight != null) {
+				mBitmapMerged = PageflipUtils.mergeImage(mBitmapLeft, mBitmapRight);
 			}
+		}
+	}
+
+	BitmapProcessor left = new BitmapProcessor() {
+		
+		public Bitmap process(Bitmap b) {
+
+			synchronized (LOCK) {
+				mBitmapLeft = b;
+				merge();
+			}
+			return b;
+		}
+	};
+
+	BitmapProcessor right = new BitmapProcessor() {
+		
+		public Bitmap process(Bitmap b) {
+
+			synchronized (LOCK) {
+				mBitmapRight = b;
+				merge();
+			}
+			return b;
 		}
 	};
 	
-	BitmapDisplayer mRightListener = new BitmapDisplayer() {
+	BitmapDisplayer displayer = new BitmapDisplayer() {
 		
 		public void display(ImageRequest ir) {
-			if (mTmpBitmap == null) {
-				mTmpBitmap = ir.getBitmap();
-			} else {
-				getPhotoView().setImageBitmap(PageflipUtils.mergeImage(mTmpBitmap, ir.getBitmap()));
-				mTmpBitmap = null;
+			
+			synchronized (LOCK) {
+				if (mBitmapMerged!=null) {
+					getPhotoView().setImageBitmap(mBitmapMerged);
+				}
 			}
+			
 		}
 	};
 	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View v = super.onCreateView(inflater, container, savedInstanceState);
-		
+	public void loadPages() {
 		if (getPhotoView().getDrawable() == null) {
-			ImageLoader l = ImageLoader.getInstance();
-			l.displayImage(new ImageRequest(getLeftPage().getThumb(), getPhotoView()).setBitmapDisplayer(mLeftListener));
-			l.displayImage(new ImageRequest(getRightPage().getThumb(), getPhotoView()).setBitmapDisplayer(mRightListener));
+			runImageloader(getPageLeft().getThumb(), mIVLeft, left);
+			runImageloader(getPageRight().getThumb(), mIVRight, right);
 		}
-		
-		return v;
-		
 	}
 	
+	private void runImageloader(String url, ImageView i,BitmapProcessor p) {
+		ImageRequest r = new ImageRequest(url, i);
+		r.setBitmapDisplayer(displayer);
+		r.setBitmapProcessor(p);
+		ImageLoader.getInstance().displayImage(r);
+	}
 }

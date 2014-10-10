@@ -464,7 +464,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 		mMatrixChangeListener = null;
 		mPhotoTapListener = null;
 		mViewTapListener = null;
-
+		
 	}
 
 	private void update() {
