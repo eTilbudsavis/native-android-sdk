@@ -1,6 +1,5 @@
 package com.eTilbudsavis.etasdk.DataObserver;
 
-import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class DataObservable extends Observable<DataObserver> {
 	

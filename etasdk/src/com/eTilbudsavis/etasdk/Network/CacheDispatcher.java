@@ -17,9 +17,9 @@ package com.eTilbudsavis.etasdk.Network;
 
 import java.util.concurrent.BlockingQueue;
 
-import com.eTilbudsavis.etasdk.Eta;
-
 import android.os.Process;
+
+import com.eTilbudsavis.etasdk.Eta;
 
 @SuppressWarnings("rawtypes")
 public class CacheDispatcher extends Thread {
