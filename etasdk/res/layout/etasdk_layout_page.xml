@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    android:layout_height="match_parent" >
+    
+    <ProgressBar
+        android:id="@+id/etasdk_pageflip_loader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
     
     <com.eTilbudsavis.etasdk.photoview.PhotoView
-        android:id="@+id/etasdk_pageflip_left_page"
+        android:id="@+id/etasdk_pageflip_photoview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
-    
-</LinearLayout>
+        android:layout_height="match_parent" />
+
+</FrameLayout>

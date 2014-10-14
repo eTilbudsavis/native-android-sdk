@@ -2,15 +2,15 @@ package com.eTilbudsavis.etasdk.pageflip;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
+import android.graphics.PorterDuff.Mode;
 import android.os.Bundle;
 import android.widget.ImageView;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.ImageLoader.BitmapDisplayer;
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapProcessor;
-import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class PageflipDoublePage extends PageflipPage {
 
@@ -26,9 +26,9 @@ public class PageflipDoublePage extends PageflipPage {
 	Object LOCK = new Object();
 	private ImageView mIVLeft;
 	private ImageView mIVRight;
-	private Bitmap mBitmapLeft;
-	private Bitmap mBitmapRight;
-	private Bitmap mBitmapMerged;
+	private Bitmap mLeft;
+	private Bitmap mRight;
+	private Bitmap mPage;
 	
 	@Override
 	public void onAttach(Activity activity) {
@@ -38,23 +38,38 @@ public class PageflipDoublePage extends PageflipPage {
 	}
 	
 	private void merge() {
-
-		synchronized (LOCK) {
-			if (mBitmapLeft != null && mBitmapRight != null) {
-				mBitmapMerged = PageflipUtils.mergeImage(mBitmapLeft, mBitmapRight);
-			}
+		
+		if (mLeft == null || mRight == null) {
+			return;
 		}
+		int w = mLeft.getWidth()*2;
+		int h = mLeft.getHeight();
+		mPage = Bitmap.createBitmap(w, h, Config.ARGB_8888);
+		Canvas canvas = new Canvas(mPage);
+		canvas.drawColor(0, Mode.CLEAR);
+		canvas.drawBitmap(mLeft, 0, 0, null);
+		canvas.drawBitmap(mRight, (w/2), 0, null);
+		clean();
+		
 	}
-
+	
+	private void clean() {
+		mLeft.recycle();
+		mRight.recycle();
+		mLeft = null;
+		mRight = null;
+	}
+	
 	BitmapProcessor left = new BitmapProcessor() {
 		
 		public Bitmap process(Bitmap b) {
-
+			
 			synchronized (LOCK) {
-				mBitmapLeft = b;
+				mLeft = b;
 				merge();
 			}
 			return b;
+			
 		}
 	};
 
@@ -63,38 +78,36 @@ public class PageflipDoublePage extends PageflipPage {
 		public Bitmap process(Bitmap b) {
 
 			synchronized (LOCK) {
-				mBitmapRight = b;
+				mRight = b;
 				merge();
 			}
 			return b;
 		}
 	};
 	
-	BitmapDisplayer displayer = new BitmapDisplayer() {
+	PageflipBitmapDisplayer mDisplayer = new PageflipBitmapDisplayer() {
 		
 		public void display(ImageRequest ir) {
-			
-			synchronized (LOCK) {
-				if (mBitmapMerged!=null) {
-					getPhotoView().setImageBitmap(mBitmapMerged);
-				}
+			if (mPage!=null) {
+				ir.setBitmap(mPage);
+				super.display(ir);
 			}
-			
-		}
+		};
 	};
 	
 	@Override
 	public void loadPages() {
 		if (getPhotoView().getDrawable() == null) {
-			runImageloader(getPageLeft().getThumb(), mIVLeft, left);
-			runImageloader(getPageRight().getThumb(), mIVRight, right);
+			runImageloader(getPageLeft().getView(), mIVLeft, left);
+			runImageloader(getPageRight().getView(), mIVRight, right);
 		}
 	}
 	
 	private void runImageloader(String url, ImageView i,BitmapProcessor p) {
 		ImageRequest r = new ImageRequest(url, i);
-		r.setBitmapDisplayer(displayer);
+		r.setBitmapDisplayer(mDisplayer);
 		r.setBitmapProcessor(p);
-		ImageLoader.getInstance().displayImage(r);
+		addRequest(r);
 	}
+	
 }

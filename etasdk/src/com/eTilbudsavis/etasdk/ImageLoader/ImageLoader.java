@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.widget.ImageView;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultBitmapDecoder;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultFileCache;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultImageDownloader;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.LruMemoryCache;
@@ -55,6 +56,9 @@ public class ImageLoader {
 		
 		ir.start();
 		ir.getImageView().setTag(ir.getUrl());
+		if (ir.getBitmapDecoder()==null) {
+			ir.setBitmapDecoder(new DefaultBitmapDecoder());
+		}
 		mImageViews.put(ir.getImageView(), ir.getUrl());
 		
 		ir.setBitmap(mMemoryCache.get(ir.getUrl()));
@@ -70,13 +74,13 @@ public class ImageLoader {
 	}
 	
 	class PhotosLoader implements Runnable {
-
+		
 		ImageRequest ir;
-
+		
 		PhotosLoader(ImageRequest request){
 			ir = request;
 		}
-
+		
 		public void run() {
 
 			if (imageViewReused(ir)) {
@@ -85,15 +89,14 @@ public class ImageLoader {
 			}
 
 			try {
-
-
+				
 				int retries = 0;
 				while (ir.getBitmap() == null && retries<2) {
 					
 					try {
 						
 						retries++;
-						ir.setBitmap(mFileCache.get(ir.getUrl()));
+						ir.setBitmap(mFileCache.get(ir));
 
 						if (ir.getBitmap() != null) {
 
@@ -119,9 +122,9 @@ public class ImageLoader {
 			} catch (Throwable th){
 				EtaLog.d(TAG, th.getMessage(), th);
 			}
-
+			
 			processAndDisplay(ir);
-
+			
 		}
 	}
 	
@@ -134,9 +137,13 @@ public class ImageLoader {
 		// Add to filecache and/or memorycache depending on the source
 		switch (ir.getLoadSource()) {
 			case WEB:
-				mFileCache.save(ir.getUrl(), ir.getBitmap());
+				if (ir.useFileCache()) {
+					mFileCache.save(ir, ir.getBitmap());
+				}
 			case FILE:
-				mMemoryCache.put(ir.getUrl(), ir.getBitmap());
+				if (ir.useMemoryCache()) {
+					mMemoryCache.put(ir.getUrl(), ir.getBitmap());
+				}
 			default:
 				break;
 		}

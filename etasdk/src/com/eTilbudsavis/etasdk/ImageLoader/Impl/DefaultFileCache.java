@@ -3,7 +3,6 @@ package com.eTilbudsavis.etasdk.ImageLoader.Impl;
 import static android.os.Environment.MEDIA_MOUNTED;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,11 +11,12 @@ import java.net.URLEncoder;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Environment;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.ImageLoader.BitmapDecoder;
 import com.eTilbudsavis.etasdk.ImageLoader.FileCache;
+import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.PermissionUtils;
 
@@ -67,10 +67,10 @@ public class DefaultFileCache implements FileCache {
 		return URLEncoder.encode(url);
 	}
 	
-	public void save(String id, Bitmap b) {
+	public void save(ImageRequest ir, Bitmap b) {
 		FileOutputStream out = null;
 		try {
-			File f = new File(mCacheDir, getFileName(id));
+			File f = new File(mCacheDir, getFileName(ir.getUrl()));
 			out = new FileOutputStream(f);
 			b.compress(Bitmap.CompressFormat.PNG, 90, out);
 		} catch (Exception e) {
@@ -85,17 +85,36 @@ public class DefaultFileCache implements FileCache {
 		
 	}
 
-	public Bitmap get(String url) {
-		File f = new File(mCacheDir, getFileName(url));
+	public Bitmap get(ImageRequest ir) {
+		
 		Bitmap b = null;
+		File f = new File(mCacheDir, getFileName(ir.getUrl()));
+		
 		if (f.exists()) {
+			
 			try {
-				FileInputStream is = new FileInputStream(f);
-				b = BitmapFactory.decodeStream(is);
+				RandomAccessFile rf = new RandomAccessFile(f, "r");
+		        try {
+		            // Get and check length
+		            long longlength = f.length();
+		            int length = (int) longlength;
+		            // Read file and return data
+		            byte[] data = new byte[length];
+		            rf.readFully(data);
+		            b = ir.getBitmapDecoder().decode(null, data);
+		        } finally {
+		        	if (rf!=null) {
+			            rf.close();
+		        	}
+		        }
+		        
 			} catch (FileNotFoundException e) {
+				EtaLog.d(TAG, e.getMessage(), e);
+			} catch (IOException e) {
 				EtaLog.d(TAG, e.getMessage(), e);
 			}
 		}
+		
 		return b;
 	}
 

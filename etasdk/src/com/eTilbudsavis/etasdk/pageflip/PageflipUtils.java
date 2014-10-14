@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
+import android.graphics.PorterDuff.Mode;
 
 public class PageflipUtils {
 
@@ -57,14 +58,15 @@ public class PageflipUtils {
 		}
 		return page;
 	}
-
+	
 	public static Bitmap mergeImage(Bitmap leftBitmap, Bitmap rightBitmap) {
-		int width = leftBitmap.getWidth()*2;
-		int height = leftBitmap.getHeight();
-		Bitmap mBitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
-		Canvas canvas = new Canvas(mBitmap);
+		int w = leftBitmap.getWidth()*2;
+		int h = leftBitmap.getHeight();
+		Bitmap b = Bitmap.createBitmap(w, h, Config.ARGB_8888);
+		Canvas canvas = new Canvas(b);
 		canvas.drawBitmap(leftBitmap, 0, 0, null);
-		canvas.drawBitmap(rightBitmap, (width/2), 0, null);
-		return mBitmap;
+		canvas.drawBitmap(rightBitmap, (w/2), 0, null);
+		return b;
 	}
+	
 }

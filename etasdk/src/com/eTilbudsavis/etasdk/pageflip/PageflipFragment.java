@@ -1,6 +1,5 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
-import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,6 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewGroup.OnHierarchyChangeListener;
+import android.widget.FrameLayout;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
@@ -22,6 +23,9 @@ import com.eTilbudsavis.etasdk.request.impl.CatalogObjectRequest.CatalogAutoFill
 public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	
 	public static final String TAG = PageflipFragment.class.getSimpleName();
+	
+	public static final String STATE_CURRENT_POSITION = "eta_sdk_pageflip_current_position";
+	
 	private static final String CATALOG = "catalog";
 	protected static final String PAGE = "page_num";
 	
@@ -30,7 +34,7 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	private Catalog mCatalog;
 	private int mCurrentPosition = 0;
 	private boolean mLandscape = false;
-	CatalogAutoFill caf;
+	private FrameLayout mFrame;
 	
 	Listener<Catalog> mFillListener = new Listener<Catalog>() {
 		
@@ -66,9 +70,7 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	}
 	
 	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		mLandscape = PageflipUtils.isLandscape(getActivity());
+	public void onCreate(Bundle savedInstanceState) {mLandscape = PageflipUtils.isLandscape(getActivity());
 		if (getArguments() != null) {
 			if(getArguments().containsKey(CATALOG)) {
 				mCatalog = (Catalog)getArguments().getSerializable(CATALOG);
@@ -77,31 +79,55 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 			} else {
 				EtaLog.w(TAG, "No catalog provided");
 			}
-			
+	
 		}
-		
+		super.onCreate(savedInstanceState);
 	}
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 //		super.onCreateView(inflater, container, savedInstanceState);
 		
-		mPager = new ViewPager(getActivity());
-		ViewGroup.LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-		mPager.setLayoutParams(lp);
-		mPager.setId(0xff3344);
-		mPager.setOnPageChangeListener(this);
-		return mPager;
+		if (savedInstanceState != null) {
+			mCurrentPosition = savedInstanceState.getInt(STATE_CURRENT_POSITION, mCurrentPosition);
+		}
+		
+		setUpView();
+		
+		return mFrame;
 		
 	}
 	
+	private void setUpView() {
+		if (mFrame == null) {
+			mFrame = new FrameLayout(getActivity());
+			ViewGroup.LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+			mFrame.setLayoutParams(lp);
+		} else {
+			mFrame.removeAllViews();
+		}
+		mPager = getPager();
+		mFrame.addView(mPager);
+	}
+	
+	private ViewPager getPager() {
+		ViewPager p = new ViewPager(getActivity());
+		ViewGroup.LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+		p.setLayoutParams(lp);
+		p.setId(0xff3344);
+		p.setOnPageChangeListener(this);
+		return p;
+	}
+	
 	private void resetAdapter() {
+		EtaLog.d(TAG, "resetAdapter");
 		mAdapter = new PageflipAdapter(getChildFragmentManager(), mCatalog, mLandscape);
 		mPager.setAdapter(mAdapter);
-		mPager.setCurrentItem(mCurrentPosition);
+		mPager.setCurrentItem(mCurrentPosition, false);
 	}
 
 	private void ensureCatalog() {
+		
 		CatalogAutoFill caf = new CatalogAutoFill();
 		caf.setLoadDealer(mCatalog.getDealer()==null);
 		caf.setLoadHotspots(mCatalog.getHotspots()==null);
@@ -118,13 +144,19 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		boolean land = PageflipUtils.isLandscape(newConfig);
+		EtaLog.d(TAG, "onConfigurationChanged[orientation.landscape[" + mLandscape + "->" + land + "]");
 		if (land != mLandscape) {
-			EtaLog.d(TAG, "onConfigurationChanged.isLandscape");
 			mLandscape = land;
+			setUpView();
 			ensureCatalog();
-		} else {
-			EtaLog.d(TAG, "onConfigurationChanged");
+			
 		}
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putInt(STATE_CURRENT_POSITION, mCurrentPosition);
+		super.onSaveInstanceState(outState);
 	}
 	
 	@Override
@@ -138,7 +170,7 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 		//TODO collect stats
 		super.onPause();
 	}
-
+	
 	public void onPageSelected(int position) {
 		mCurrentPosition = position;
 	}

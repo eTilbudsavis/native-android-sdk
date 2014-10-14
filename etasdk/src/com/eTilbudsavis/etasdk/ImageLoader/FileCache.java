@@ -13,14 +13,14 @@ public interface FileCache {
 	 * @param id An identifier for the bitmap
 	 * @param b A bitmap to cache
 	 */
-	public void save(String id, Bitmap b);
+	public void save(ImageRequest ir, Bitmap b);
 	
 	/**
 	 * Method for getting bitmaps from cache.
 	 * @param id An identifier to search for in cache
 	 * @return A bitmap if one exists, else {@code null}
 	 */
-	public Bitmap get(String id);
+	public Bitmap get(ImageRequest ir);
 	
 	/**
 	 * Method for clearing the cache completely

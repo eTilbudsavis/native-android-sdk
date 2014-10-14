@@ -24,6 +24,9 @@ public class ImageRequest {
 	private LoadSource mLoadSource;
 	private long mTimeStart = 0L;
 	private long mTimeLoad = 0L;
+	private boolean mFileCache = true;
+	private boolean mMemoryCache = true;
+	private BitmapDecoder mDecoder;
 	
 	@SuppressWarnings("unused")
 	private ImageRequest() {
@@ -101,10 +104,44 @@ public class ImageRequest {
 		return this;
 	}
 	
+	/**
+	 * Get the decoder for this request
+	 * @return A BitmapDecoder
+	 */
+	public BitmapDecoder getBitmapDecoder() {
+		return mDecoder;
+	}
+	
+	/**
+	 * Set the BitmapDecoder for decoding the data from this request
+	 * @param decoder
+	 * @return
+	 */
+	public ImageRequest setBitmapDecoder(BitmapDecoder decoder) {
+		this.mDecoder = decoder;
+		return this;
+	}
+	
+	public boolean useFileCache() {
+		return mFileCache;
+	}
+	
+	public void setFileCache(boolean usrFileCache) {
+		mFileCache = usrFileCache;
+	}
+	
+	public boolean useMemoryCache() {
+		return mMemoryCache;
+	}
+	
+	public void setMemoryCache(boolean useMemoryCache) {
+		mMemoryCache = useMemoryCache;
+	}
+	
 	public int getPlaceholderLoading() {
 		return mPlaceholderLoading;
 	}
-
+	
 	public ImageRequest setPlaceholderLoading(int placeholderLoading) {
 		this.mPlaceholderLoading = placeholderLoading;
 		return this;
