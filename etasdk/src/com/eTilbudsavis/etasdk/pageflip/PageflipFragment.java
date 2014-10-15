@@ -2,6 +2,7 @@ package com.eTilbudsavis.etasdk.pageflip;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -35,6 +36,7 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	private int mCurrentPosition = 0;
 	private boolean mLandscape = false;
 	private FrameLayout mFrame;
+	private Handler mHandler;
 	
 	Listener<Catalog> mFillListener = new Listener<Catalog>() {
 		
@@ -70,17 +72,17 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	}
 	
 	@Override
-	public void onCreate(Bundle savedInstanceState) {mLandscape = PageflipUtils.isLandscape(getActivity());
-		if (getArguments() != null) {
-			if(getArguments().containsKey(CATALOG)) {
-				mCatalog = (Catalog)getArguments().getSerializable(CATALOG);
-				int page = getArguments().getInt(PAGE);
-				mCurrentPosition = PageflipUtils.pageToPosition(page, mLandscape);;
-			} else {
-				EtaLog.w(TAG, "No catalog provided");
-			}
-	
+	public void onCreate(Bundle savedInstanceState) {
+		
+		if (getArguments() == null || !getArguments().containsKey(CATALOG)) {
+			throw new IllegalArgumentException("No catalog provided");
 		}
+		
+		mHandler = new Handler();
+		mLandscape = PageflipUtils.isLandscape(getActivity());
+		mCatalog = (Catalog)getArguments().getSerializable(CATALOG);
+		int page = getArguments().getInt(PAGE);
+		mCurrentPosition = PageflipUtils.pageToPosition(page, mLandscape);;
 		super.onCreate(savedInstanceState);
 	}
 	
@@ -114,7 +116,17 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 		ViewPager p = new ViewPager(getActivity());
 		ViewGroup.LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		p.setLayoutParams(lp);
-		p.setId(0xff3344);
+		p.setId(View.NO_ID);
+		p.setOnHierarchyChangeListener(new OnHierarchyChangeListener() {
+			
+			public void onChildViewRemoved(View parent, View child) {
+				EtaLog.d(TAG, "onChildViewRemoved");
+			}
+			
+			public void onChildViewAdded(View parent, View child) {
+				EtaLog.d(TAG, "onChildViewRemoved");
+			}
+		});
 		p.setOnPageChangeListener(this);
 		return p;
 	}
@@ -123,7 +135,13 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 		EtaLog.d(TAG, "resetAdapter");
 		mAdapter = new PageflipAdapter(getChildFragmentManager(), mCatalog, mLandscape);
 		mPager.setAdapter(mAdapter);
-		mPager.setCurrentItem(mCurrentPosition, false);
+		mHandler.postDelayed(new Runnable() {
+			
+			public void run() {
+				EtaLog.d(TAG, "current: " + mCurrentPosition);
+				mPager.setCurrentItem(mCurrentPosition, false);
+			}
+		}, 5000);
 	}
 
 	private void ensureCatalog() {
