@@ -19,18 +19,15 @@ import java.util.concurrent.BlockingQueue;
 
 import android.os.Process;
 
-import com.eTilbudsavis.etasdk.Eta;
-
-@SuppressWarnings("rawtypes")
 public class CacheDispatcher extends Thread {
 
-	public static final String TAG = Eta.TAG_PREFIX + CacheDispatcher.class.getSimpleName();
+	public static final String TAG = "CacheDispatcher";
 	
 	/** The queue of requests to service. */
-	private final BlockingQueue<Request> mQueue;
+	private final BlockingQueue<Request<?>> mQueue;
 
 	/** The queue of requests to service. */
-	private final BlockingQueue<Request> mNetworkQueue;
+	private final BlockingQueue<Request<?>> mNetworkQueue;
 
 	/** The cache to write to. */
 	private final Cache mCache;
@@ -41,7 +38,7 @@ public class CacheDispatcher extends Thread {
 	/** Used for telling us to die. */
 	private volatile boolean mQuit = false;
 
-	public CacheDispatcher(BlockingQueue<Request> cacheQueue, BlockingQueue<Request> networkQueue, Cache cache, Delivery delivery) {
+	public CacheDispatcher(BlockingQueue<Request<?>> cacheQueue, BlockingQueue<Request<?>> networkQueue, Cache cache, Delivery delivery) {
 		mQueue = cacheQueue;
 		mNetworkQueue = networkQueue;
 		mCache = cache;

@@ -32,7 +32,6 @@ import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.HeaderUtils;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-@SuppressWarnings("rawtypes")
 public class NetworkDispatcher extends Thread {
 
 	public static final String TAG = Eta.TAG_PREFIX + NetworkDispatcher.class.getSimpleName();
@@ -41,7 +40,7 @@ public class NetworkDispatcher extends Thread {
     private final Eta mEta;
     
     /** The queue of requests to service. */
-	private final BlockingQueue<Request> mQueue;
+	private final BlockingQueue<Request<?>> mQueue;
 	
 	/** The RequestQueue this NetworkDispatcher receives Requests from */
 	private final RequestQueue mRequestQueue;
@@ -58,7 +57,7 @@ public class NetworkDispatcher extends Thread {
     /** Used for telling us to die. */
     private volatile boolean mQuit = false;
     
-    public NetworkDispatcher(Eta eta, RequestQueue requestQueue, BlockingQueue<Request> queue, Network network, Cache cache, Delivery delivery) {
+    public NetworkDispatcher(Eta eta, RequestQueue requestQueue, BlockingQueue<Request<?>> queue, Network network, Cache cache, Delivery delivery) {
         mQueue = queue;
         mNetwork = network;
         mCache = cache;
