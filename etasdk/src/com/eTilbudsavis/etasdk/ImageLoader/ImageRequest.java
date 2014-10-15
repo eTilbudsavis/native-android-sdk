@@ -50,6 +50,7 @@ public class ImageRequest {
 	 */
 	public void finish() {
 		mTimeLoad = System.currentTimeMillis() - mTimeStart;
+//		EtaLog.d(TAG, "Time: " + mTimeLoad + ", " + mUrl);
 	}
 	
 	/**

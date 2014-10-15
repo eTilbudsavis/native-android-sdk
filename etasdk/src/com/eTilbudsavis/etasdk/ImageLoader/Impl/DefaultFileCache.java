@@ -14,7 +14,6 @@ import android.graphics.Bitmap;
 import android.os.Environment;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.ImageLoader.BitmapDecoder;
 import com.eTilbudsavis.etasdk.ImageLoader.FileCache;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
 import com.eTilbudsavis.etasdk.Log.EtaLog;

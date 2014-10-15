@@ -12,7 +12,6 @@ import android.graphics.BitmapFactory;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageDownloader;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class DefaultImageDownloader implements ImageDownloader {
 	
@@ -29,10 +28,7 @@ public class DefaultImageDownloader implements ImageDownloader {
 		conn.setReadTimeout(TIMEOUT);
 		conn.setInstanceFollowRedirects(true);
 		byte[] image = entityToBytes(conn);
-		long s = System.currentTimeMillis();
-		Bitmap b = BitmapFactory.decodeByteArray(image, 0, image.length);
-		EtaLog.d(TAG, "time:" + (System.currentTimeMillis()-s));
-		return b;
+		return BitmapFactory.decodeByteArray(image, 0, image.length);
 		
 	}
 	
