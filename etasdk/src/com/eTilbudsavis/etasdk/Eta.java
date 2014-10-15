@@ -18,6 +18,7 @@ package com.eTilbudsavis.etasdk;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
@@ -98,10 +99,10 @@ public class Eta {
 	/** A {@link RequestQueue} implementation to handle all API requests */
 	private RequestQueue mRequestQueue;
 	
-	/** System manager for getting the connectivity status */
-	private ConnectivityManager mConnectivityManager;
-	
+	/** My go to executor service */
 	private ExecutorService mExecutor;
+	
+	private static Object INSTANCE_LOCK = new Object();
 	
 	/**
 	 * Default constructor, this is private to allow us to create a singleton instance
@@ -130,8 +131,6 @@ public class Eta {
 		mRequestQueue = new RequestQueue(this, new MemoryCache(), new NetworkImpl(stack));
 		mRequestQueue.start();
 		
-		mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-		
 		try {
 			String name = mContext.getPackageName();
 			String version = mContext.getPackageManager().getPackageInfo(name, 0 ).versionName;
@@ -158,7 +157,7 @@ public class Eta {
 	 * @throws IllegalStateException If {@link Eta} no instance is available
 	 */
 	public static Eta getInstance() {
-		synchronized (Eta.class) {
+		synchronized (INSTANCE_LOCK) {
 			if (mEta == null) {
 				throw new IllegalStateException("Eta.createInstance() needs to be"
 						+ "called before Eta.getInstance()");
@@ -181,7 +180,7 @@ public class Eta {
 	public static void createInstance(String apiKey, String apiSecret, Context ctx) {
 		
 		if (mEta == null) {
-			synchronized (Eta.class) {
+			synchronized (INSTANCE_LOCK) {
 				if (mEta == null) {
 					mEta = new Eta(apiKey, apiSecret, ctx);
 				}
@@ -198,7 +197,7 @@ public class Eta {
 	 * @return {@code true} if Eta is instantiated, else {@code false}
 	 */
 	public static boolean isInstanciated() {
-		synchronized (Eta.class) {
+		synchronized (INSTANCE_LOCK) {
 			return mEta != null;
 		}
 	}
@@ -216,7 +215,8 @@ public class Eta {
 	 * @return true if network connectivity exists, false otherwise.
 	 */
 	public boolean isOnline() {
-		NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
+		ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo netInfo = cm.getActiveNetworkInfo();
 		return netInfo != null && netInfo.isConnected();
 	}
 
@@ -253,7 +253,9 @@ public class Eta {
 		if (Utils.validVersion(appVersion)) {
 			mAppVersion = appVersion;
 		}
-		EtaLog.v(TAG, "AppVersion: " + (mAppVersion == null ? "version not valid" : mAppVersion));
+		EtaLog.v(TAG, mAppVersion == null ? 
+				("invalid version format: " + appVersion) : 
+					("AppVersion: " + mAppVersion) );
 	}
 
 	/**
@@ -282,8 +284,7 @@ public class Eta {
 	 * @param request to be performed
 	 * @return the request
 	 */
-	@SuppressWarnings("unchecked")
-	public <T> Request<T> add(Request<T> request) {
+	public Request<?> add(Request<?> request) {
 		return mRequestQueue.add(request);
 	}
 	
@@ -365,11 +366,11 @@ public class Eta {
 	 * this instance of Eta
 	 * 
 	 * <p>For further use of {@link Eta} after this, you must invoke
-	 * {@link #createInstance(String, String, Context) set()} it again.</p>
+	 * {@link #createInstance(String, String, Context)} it again.</p>
 	 */
 	public void destroy() {
-		clear();
-		synchronized (Eta.class) {
+		synchronized (INSTANCE_LOCK) {
+			clear();
 			mEta = null;
 		}
 	}
@@ -414,6 +415,49 @@ public class Eta {
 			}
 			mSettings.setLastUsageNow();
 		}
+		
+	}
+	
+	Runnable termination = new Runnable() {
+		
+		public void run() {
+			if (mResumed) {
+				EtaLog.i(TAG, "Eta has been resumed, bail out");
+				return;
+			}
+			EtaLog.i(TAG, "Finalizing long running tasks...");
+			int retries = 0;
+			mRequestQueue.stop();
+			mExecutor.shutdown();
+			while (true && retries < 5) {
+				retries ++;
+				try {
+					if (mExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+						break;
+					}
+				} catch (InterruptedException e) {
+					// Ignore
+				}
+			}
+			finalCleanup();
+			EtaLog.i(TAG, "SDK cleanup complete");
+		}
+	};
+	
+	private void finalCleanup() {
+		// TODO don't need to null everything
+		mApiKey = null;
+		mApiSecret = null;
+		mAppVersion = null;
+		mContext = null;
+		mEta = null;
+		mExecutor = null;
+		mHandler = null;
+		mListManager = null;
+		mRequestQueue = null;
+		mSessionManager = null;
+		mSettings = null;
+		mSyncManager = null;
 	}
 	
 	/**

@@ -36,7 +36,6 @@ import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Api.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-@SuppressWarnings("rawtypes")
 public class RequestQueue {
 	
 	public static final String TAG = "RequestQueue";
@@ -48,16 +47,16 @@ public class RequestQueue {
     private final Eta mEta;
     
     /** All requests currently being handled by this request queue */
-    private final Set<Request> mCurrentRequests = new HashSet<Request>();
+    private final Set<Request<?>> mCurrentRequests = new HashSet<Request<?>>();
     
     /** Queue for preparation, and cache checks */
-    private final PriorityBlockingQueue<Request> mCacheQueue = new PriorityBlockingQueue<Request>();
+    private final PriorityBlockingQueue<Request<?>> mCacheQueue = new PriorityBlockingQueue<Request<?>>();
     
     /** The queue of requests that are actually going out to the network. */
-    private final PriorityBlockingQueue<Request> mNetworkQueue = new PriorityBlockingQueue<Request>();
+    private final PriorityBlockingQueue<Request<?>> mNetworkQueue = new PriorityBlockingQueue<Request<?>>();
 
     /** Queue of items waiting for session request */
-    private final LinkedList<Request> mSessionParking = new LinkedList<Request>();
+    private final LinkedList<Request<?>> mSessionParking = new LinkedList<Request<?>>();
     
     /** Queue of items waiting for similar request to finish */
 //    private final Map<String, LinkedList<Request>> mRequestParking = new HashMap<String, LinkedList<Request>>();
@@ -121,7 +120,7 @@ public class RequestQueue {
 		// Creates new CacheDispatcher
 		mCacheDispatcher = new CacheDispatcher(mCacheQueue, mNetworkQueue, mCache, mDelivery);
 		mCacheDispatcher.start();
-
+		
         // Create network dispatchers (and corresponding threads) up to the pool size.
         for (int i = 0; i < mNetworkDispatchers.length; i++) {
             NetworkDispatcher networkDispatcher = new NetworkDispatcher(mEta, this, mNetworkQueue, mNetwork, mCache, mDelivery);
@@ -158,7 +157,7 @@ public class RequestQueue {
 		
 		synchronized (mSessionParking) {
 			
-			for (Request r : mSessionParking) {
+			for (Request<?> r : mSessionParking) {
 				
 				r.addEvent("resuming-request");
 	    		mCacheQueue.add(r);
@@ -177,7 +176,7 @@ public class RequestQueue {
 	 * On complete the others can be triggered, and instantly hitting local cache.
 	 * @param request - request, that finished
 	 */
-	public synchronized void finish(Request request) {
+	public synchronized void finish(Request<?> request) {
 		
 		synchronized (mCurrentRequests) {
 			mCurrentRequests.remove(request);
@@ -241,7 +240,7 @@ public class RequestQueue {
 	 * 			the request to add
 	 * @return the request object
 	 */
-    public Request add(Request request) {
+    public Request<?> add(Request<?> request) {
 
     	synchronized (mCurrentRequests) {
 			mCurrentRequests.add(request);
@@ -302,7 +301,7 @@ public class RequestQueue {
     	
     }
     
-    private void appendRequestNetworkLog(Request r) {
+    private void appendRequestNetworkLog(Request<?> r) {
     	
     	JSONObject log = r.getNetworkLog();
     	
@@ -336,7 +335,7 @@ public class RequestQueue {
     	}
     	
     	synchronized (mCurrentRequests) {
-			for (Request r : mCurrentRequests) {
+			for (Request<?> r : mCurrentRequests) {
 				if (r.getTag() == tag) {
 					count++;
 					r.cancel();
@@ -346,7 +345,7 @@ public class RequestQueue {
     	return count;
     }
     
-	private boolean isSessionEndpoint(Request r) {
+	private boolean isSessionEndpoint(Request<?> r) {
 		return r.getUrl().contains(Endpoint.SESSIONS);
 	}
 	
