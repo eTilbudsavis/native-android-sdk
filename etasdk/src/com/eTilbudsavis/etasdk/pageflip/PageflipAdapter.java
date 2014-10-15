@@ -13,21 +13,21 @@ public class PageflipAdapter extends FragmentStatePagerAdapter {
 	
 	private Catalog mCatalog;
 	private boolean mLandscape = false;
-	private int mPageCount = -1;
-	private int mCount = -1;
+	private int mViewCount = 0;
+	private int mPageCount = 0;
 	
 	public PageflipAdapter(FragmentManager fm, Catalog c, boolean landscape) {
 		super(fm);
 		mCatalog = c;
 		mLandscape = landscape;
+		mViewCount = mLandscape ? (mCatalog.getPageCount()/2)+1 : mCatalog.getPageCount();
 		mPageCount = mCatalog.getPageCount()-1;
-		mCount = mLandscape ? (mCatalog.getPageCount()/2)+1 : mPageCount;
 	}
 	
 	@Override
 	public Fragment getItem(int position) {
 		int page = PageflipUtils.positionToPage(position, mLandscape);
-//		EtaLog.d(TAG, "getItem[pos:" + position + ", max:" + getCount() + ", page:" + page + ", max:" + mPageCount);
+		EtaLog.d(TAG, "getItem[pos:" + position + ", maxPos:" + (mViewCount-1) + ", page:" + page + ", maxPage:" + mPageCount);
 		if ( !mLandscape || page == 0 || page == mPageCount ) {
 			return PageflipSinglePage.newInstance(mCatalog, page);
 		} else {
@@ -37,9 +37,7 @@ public class PageflipAdapter extends FragmentStatePagerAdapter {
 	
 	@Override
 	public int getCount() {
-		return mCount;
+		return mViewCount;
 	}
-	
-	
 	
 }

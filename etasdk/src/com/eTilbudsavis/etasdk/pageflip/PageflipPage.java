@@ -29,10 +29,10 @@ public abstract class PageflipPage extends Fragment {
 	public static final String TAG = PageflipPage.class.getSimpleName();
 	
 	protected static final int FADE_IN_DURATION = 150;
-	protected static final float MAX_SCALE = 4.0f;
+	protected static final float MAX_SCALE = 3.0f;
 	
-	protected static final String CATALOG = "catalog";
-	protected static final String PAGE = "page_num";
+	protected static final String CATALOG = "eta_sdk_pageflip_page_catalog";
+	protected static final String PAGE = "eta_sdk_pageflip_page_page";
 	
 	private Catalog mCatalog;
 	private int mPage = -1;
@@ -48,15 +48,18 @@ public abstract class PageflipPage extends Fragment {
 			mCatalog = (Catalog)getArguments().getSerializable(CATALOG);
 			mPage = getArguments().getInt(PAGE);
 		}
-		if (mCatalog==null || mPage == -1) {
-			throw new IllegalStateException("Catalog, and page number must be provided as argument");
-		}
 		
 	}
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
+
+		if (savedInstanceState != null) {
+			mCatalog = (Catalog) savedInstanceState.getSerializable(CATALOG);
+			mPage = savedInstanceState.getInt(PAGE);
+		}
+		
 		View v = inflater.inflate(R.layout.etasdk_layout_page, container, false);
 		mPhotoView = (PhotoView) v.findViewById(R.id.etasdk_pageflip_photoview);
 		mPhotoView.setMaximumScale(MAX_SCALE);
@@ -78,6 +81,13 @@ public abstract class PageflipPage extends Fragment {
 	
 	private boolean almost(float first, float second) {
 		return Math.abs(first-second)<0.1;
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putSerializable(CATALOG, mCatalog);
+		outState.putInt(PAGE, mPage);
+		super.onSaveInstanceState(outState);
 	}
 	
 	@Override
