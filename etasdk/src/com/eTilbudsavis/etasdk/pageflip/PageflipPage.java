@@ -1,5 +1,7 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
+import java.util.Set;
+
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
@@ -15,6 +17,7 @@ import android.widget.ProgressBar;
 
 import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
+import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapDisplayer;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
@@ -31,11 +34,11 @@ public abstract class PageflipPage extends Fragment {
 	protected static final int FADE_IN_DURATION = 150;
 	protected static final float MAX_SCALE = 3.0f;
 	
-	protected static final String CATALOG = "eta_sdk_pageflip_page_catalog";
-	protected static final String PAGE = "eta_sdk_pageflip_page_page";
+	protected static final String ARG_CATALOG = "eta_sdk_pageflip_page_catalog";
+	protected static final String ARG_PAGE = "eta_sdk_pageflip_page_page";
 	
 	private Catalog mCatalog;
-	private int mPage = -1;
+	private int mPage = 0;
 	private PhotoView mPhotoView;
 	private ProgressBar mProgress;
 	
@@ -45,8 +48,8 @@ public abstract class PageflipPage extends Fragment {
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		if (getArguments()!=null) {
-			mCatalog = (Catalog)getArguments().getSerializable(CATALOG);
-			mPage = getArguments().getInt(PAGE);
+			mCatalog = (Catalog)getArguments().getSerializable(ARG_CATALOG);
+			mPage = getArguments().getInt(ARG_PAGE);
 		}
 		
 	}
@@ -54,10 +57,10 @@ public abstract class PageflipPage extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
-
+		
 		if (savedInstanceState != null) {
-			mCatalog = (Catalog) savedInstanceState.getSerializable(CATALOG);
-			mPage = savedInstanceState.getInt(PAGE);
+			mCatalog = (Catalog) savedInstanceState.getSerializable(ARG_CATALOG);
+			mPage = savedInstanceState.getInt(ARG_PAGE);
 		}
 		
 		View v = inflater.inflate(R.layout.etasdk_layout_page, container, false);
@@ -73,7 +76,7 @@ public abstract class PageflipPage extends Fragment {
 		});
 		mProgress = (ProgressBar) v.findViewById(R.id.etasdk_pageflip_loader);
 		
-		mPhotoView.setVisibility(View.INVISIBLE);
+		mPhotoView.setVisibility(View.GONE);
 		mProgress.setVisibility(View.VISIBLE);
 		
 		return v;
@@ -85,8 +88,8 @@ public abstract class PageflipPage extends Fragment {
 	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		outState.putSerializable(CATALOG, mCatalog);
-		outState.putInt(PAGE, mPage);
+		outState.putSerializable(ARG_CATALOG, mCatalog);
+		outState.putInt(ARG_PAGE, mPage);
 		super.onSaveInstanceState(outState);
 	}
 	
@@ -101,10 +104,28 @@ public abstract class PageflipPage extends Fragment {
 		ImageLoader.getInstance().displayImage(ir);
 	}
 	
+	protected void click(int page, float x, float y) {
+
+		EtaLog.d(TAG, "page:" + page + " (" + x + "," + y + ")");
+		Set<Offer> offers = mCatalog.getHotspots().getOfferFromHotspot(mPage, mCatalog.getDimension(), x, y);
+		for (Offer o : offers) {
+			EtaLog.d(TAG, o.getHeading());
+		}
+		
+	}
+	
 	protected PhotoView getPhotoView() {
 		return mPhotoView;
 	}
 	
+	public Catalog getCatalog() {
+		return mCatalog;
+	}
+
+	public int getPage() {
+		return mPage;
+	}
+
 	protected Page getPageLeft() {
 		return mCatalog.getPages().get(mPage);
 	}

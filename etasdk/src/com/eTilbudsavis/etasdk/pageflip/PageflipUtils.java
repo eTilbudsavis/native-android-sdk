@@ -14,7 +14,7 @@ public class PageflipUtils {
 	public static final String TAG = PageflipUtils.class.getSimpleName();
 	
 	private PageflipUtils() {
-		// TODO Auto-generated constructor stub
+		// Empty constructor
 	}
 
 	public static boolean isLandscape(Context c) {

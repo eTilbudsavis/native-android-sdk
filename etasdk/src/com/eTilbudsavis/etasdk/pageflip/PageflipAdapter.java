@@ -27,7 +27,7 @@ public class PageflipAdapter extends FragmentStatePagerAdapter {
 	@Override
 	public Fragment getItem(int position) {
 		int page = PageflipUtils.positionToPage(position, mLandscape);
-		EtaLog.d(TAG, "getItem[pos:" + position + ", maxPos:" + (mViewCount-1) + ", page:" + page + ", maxPage:" + mPageCount);
+//		EtaLog.d(TAG, "getItem[pos:" + position + ", maxPos:" + (mViewCount-1) + ", page:" + page + ", maxPage:" + mPageCount);
 		if ( !mLandscape || page == 0 || page == mPageCount ) {
 			return PageflipSinglePage.newInstance(mCatalog, page);
 		} else {

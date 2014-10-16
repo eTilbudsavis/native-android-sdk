@@ -114,25 +114,34 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 		}
 		
 		try {
+			
+			// Stuff found in the Hotspots parsed first
 			offer.setId(Json.valueOf(jOffer, JsonKey.ID));
 			offer.setErn(Json.valueOf(jOffer, JsonKey.ERN));
 			offer.setHeading(Json.valueOf(jOffer, JsonKey.HEADING));
-			offer.setDescription(Json.valueOf(jOffer, JsonKey.DESCRIPTION));
-			offer.setCatalogPage(Json.valueOf(jOffer, JsonKey.CATALOG_PAGE, 0));
 			offer.setPricing(Pricing.fromJSON(jOffer.getJSONObject(JsonKey.PRICING)));
 			offer.setQuantity(Quantity.fromJSON(jOffer.getJSONObject(JsonKey.QUANTITY)));
-			offer.setImages(Images.fromJSON(jOffer.getJSONObject(JsonKey.IMAGES)));
-			offer.setLinks(Links.fromJSON(jOffer.getJSONObject(JsonKey.LINKS)));
 			Date runFrom = Utils.parseDate(Json.valueOf(jOffer, JsonKey.RUN_FROM));
 			offer.setRunFrom(runFrom);
 			Date runTill = Utils.parseDate(Json.valueOf(jOffer, JsonKey.RUN_TILL));
 			offer.setRunTill(runTill);
-			offer.setDealerUrl(Json.valueOf(jOffer, JsonKey.DEALER_URL));
-			offer.setDealerId(Json.valueOf(jOffer, JsonKey.DEALER_ID));
-			offer.setStoreUrl(Json.valueOf(jOffer, JsonKey.STORE_URL));
-			offer.setStoreId(Json.valueOf(jOffer, JsonKey.STORE_ID));
-			offer.setCatalogUrl(Json.valueOf(jOffer, JsonKey.CATALOG_URL));
-			offer.setCatalogId(Json.valueOf(jOffer, JsonKey.CATALOG_ID));
+			
+			// TODO: What about the publish key, found in hotspots?
+			
+			// The rest isn't in the hotspots and is discarded
+			if ( jOffer.has(JsonKey.DESCRIPTION) && jOffer.has(JsonKey.CATALOG_ID) ) {
+				offer.setDescription(Json.valueOf(jOffer, JsonKey.DESCRIPTION));
+				offer.setCatalogPage(Json.valueOf(jOffer, JsonKey.CATALOG_PAGE, 0));
+				offer.setImages(Images.fromJSON(jOffer.getJSONObject(JsonKey.IMAGES)));
+				offer.setLinks(Links.fromJSON(jOffer.getJSONObject(JsonKey.LINKS)));
+				offer.setDealerUrl(Json.valueOf(jOffer, JsonKey.DEALER_URL));
+				offer.setDealerId(Json.valueOf(jOffer, JsonKey.DEALER_ID));
+				offer.setStoreUrl(Json.valueOf(jOffer, JsonKey.STORE_URL));
+				offer.setStoreId(Json.valueOf(jOffer, JsonKey.STORE_ID));
+				offer.setCatalogUrl(Json.valueOf(jOffer, JsonKey.CATALOG_URL));
+				offer.setCatalogId(Json.valueOf(jOffer, JsonKey.CATALOG_ID));
+			}
+			
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}

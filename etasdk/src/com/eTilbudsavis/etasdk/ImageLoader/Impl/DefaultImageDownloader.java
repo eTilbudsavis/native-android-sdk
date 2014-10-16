@@ -35,6 +35,7 @@ public class DefaultImageDownloader implements ImageDownloader {
 	private static byte[] entityToBytes(HttpURLConnection connection) throws IOException {
 		
 		int init_buf = ( 0 <= connection.getContentLength() ? (int)connection.getContentLength() : BUFFER_SIZE );
+		
 		ByteArrayBuffer bytes = new ByteArrayBuffer(init_buf);
 		InputStream is = connection.getInputStream();
 		

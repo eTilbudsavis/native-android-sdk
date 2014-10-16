@@ -15,7 +15,7 @@ public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapLi
 	private static final float EPSILON = 0.001f;
 	
     private PhotoView mPhotoView;
-
+    
     /**
      * Default constructor
      *
@@ -65,14 +65,16 @@ public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapLi
     }
     
     public boolean onDoubleTap(MotionEvent ev) {
+    	
         if (mPhotoView == null) {
             return false;
         }
         
         try {
+        	
             float scale = mPhotoView.getScale();
             float min = mPhotoView.getMinimumScale();
-            float max = mPhotoView.getMaximumScale();
+            float max = mPhotoView.getMaximumScale()*0.6f;
             float x = ev.getX();
             float y = ev.getY();
             

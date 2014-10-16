@@ -440,8 +440,12 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 		}
 	}
 
-	//TODO: HELPERS
-
+	/**
+	 * 
+	 * INTERFACES
+	 * 
+	 */
+	
 	private void cleanup() {
 
 		// Remove this as a global layout listener
@@ -680,9 +684,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 
 		return null;
 	}
-
-	//TODO: STATIC HELPERS
-
+	
 	private void checkZoomLevels(float minZoom, float maxZoom) {
 		if (minZoom >= maxZoom) {
 			throw new IllegalArgumentException("minZoom has to be less than MaxZoom");
@@ -843,8 +845,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			}
 		}
 	}
-	//TODO: Override methods
-
+	
 	@Override
 	protected void onDetachedFromWindow() {
 		cleanup();
@@ -868,9 +869,13 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 		super.setImageURI(uri);
 		update();
 	}
-
-	// TODO interface implementations
-
+	
+	/**
+	 * 
+	 * INTERFACES
+	 * 
+	 */
+	
 	public void onGlobalLayout() {
 		if (mZoomEnabled) {
 			final int top = getTop();

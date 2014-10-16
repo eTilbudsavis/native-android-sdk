@@ -4,7 +4,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,11 +23,10 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	
 	public static final String TAG = PageflipFragment.class.getSimpleName();
 	
-	private static final String CATALOG = "eta_sdk_pageflip_catalog";
-	private static final String PAGE = "eta_sdk_pageflip_page";
-	private static final String STATE_PAGE = "eta_sdk_pageflip_state_page";
+	private static final String ARG_CATALOG = "eta_sdk_pageflip_catalog";
+	private static final String ARG_PAGE = "eta_sdk_pageflip_page";
 	
-	private ViewPager mPager;
+	private PageflipViewPager mPager;
 	private PageflipAdapter mAdapter;
 	private Catalog mCatalog;
 	private int mCurrentPosition = 0;
@@ -60,8 +58,8 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 			page = 0;
 		}
 		Bundle b = new Bundle();
-		b.putSerializable(CATALOG, c);
-		b.putInt(PAGE, page);
+		b.putSerializable(ARG_CATALOG, c);
+		b.putInt(ARG_PAGE, page);
 		PageflipFragment f = new PageflipFragment();
 		f.setArguments(b);
 		return f;
@@ -72,14 +70,14 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 		
 		PageflipUtils.test();
 		
-		if (getArguments() == null || !getArguments().containsKey(CATALOG)) {
+		if (getArguments() == null || !getArguments().containsKey(ARG_CATALOG)) {
 			throw new IllegalArgumentException("No catalog provided");
 		}
 		
 		mHandler = new Handler();
 		mLandscape = PageflipUtils.isLandscape(getActivity());
-		mCatalog = (Catalog)getArguments().getSerializable(CATALOG);
-		setCurrentPosition(getArguments().getInt(PAGE, 0));
+		mCatalog = (Catalog)getArguments().getSerializable(ARG_CATALOG);
+		setCurrentPosition(getArguments().getInt(ARG_PAGE, 0));
 		super.onCreate(savedInstanceState);
 	}
 	
@@ -88,7 +86,7 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 //		super.onCreateView(inflater, container, savedInstanceState);
 		
 		if (savedInstanceState != null) {
-			setCurrentPosition(savedInstanceState.getInt(STATE_PAGE, 0));
+			setCurrentPosition(savedInstanceState.getInt(ARG_PAGE, mCurrentPosition));
 		}
 		
 		setUpView();
@@ -105,17 +103,16 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 		} else {
 			mFrame.removeAllViews();
 		}
-		mPager = getPager();
+		resetPager();
 		mFrame.addView(mPager);
 	}
 	
-	private ViewPager getPager() {
-		ViewPager p = new ViewPager(getActivity());
-		ViewGroup.LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
-		p.setLayoutParams(lp);
-		p.setId(0xfedcba);
-		p.setOnPageChangeListener(this);
-		return p;
+	private void resetPager() {
+		mPager = new PageflipViewPager(getActivity());
+		mPager.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		mPager.setId(0xfedcba);
+		mPager.setScrollDurationFactor(0.5);
+		mPager.setOnPageChangeListener(this);
 	}
 	
 	Runnable resetAdapter = new Runnable() {
@@ -169,7 +166,7 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		outState.putInt(STATE_PAGE, PageflipUtils.positionToPage(mCurrentPosition, mLandscape));
+		outState.putInt(ARG_PAGE, PageflipUtils.positionToPage(mCurrentPosition, mLandscape));
 		super.onSaveInstanceState(outState);
 	}
 	
@@ -194,17 +191,6 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	}
 	
 	public void onPageScrolled(int arg0, float arg1, int arg2) {
-		
-	}
-	
-	public interface PageflipListener {
-		
-		public void onPageChange(PageflipFragment f, int newPage);
-		
-		public void onOutOfBounds();
-		
-		public void onHotspotClick(String offerId);
-		
 		
 	}
 	

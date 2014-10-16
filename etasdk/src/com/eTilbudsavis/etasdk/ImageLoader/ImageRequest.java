@@ -5,6 +5,7 @@ import android.widget.ImageView;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultBitmapDisplayer;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 /**
  * The class for requesting images via the ImageLoader.
@@ -50,7 +51,7 @@ public class ImageRequest {
 	 */
 	public void finish() {
 		mTimeLoad = System.currentTimeMillis() - mTimeStart;
-//		EtaLog.d(TAG, "Time: " + mTimeLoad + ", " + mUrl);
+//		EtaLog.d(TAG, "source:" + mLoadSource + ", time: " + mTimeLoad + ", " + mUrl);
 	}
 	
 	/**
