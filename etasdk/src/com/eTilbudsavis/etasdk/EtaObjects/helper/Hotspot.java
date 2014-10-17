@@ -1,21 +1,33 @@
 package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
+import java.io.Serializable;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.graphics.PointF;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 
-public class Hotspot implements EtaObject<JSONObject> {
+public class Hotspot implements EtaObject<JSONObject>, Serializable {
 	
+	private static final long serialVersionUID = 7068341225117028048L;
+
 	public static final String TAG = Hotspot.class.getSimpleName();
 	
-	private PointF mNorthWest = new PointF(Float.MIN_VALUE, Float.MIN_VALUE);
-	private PointF mSouthEast = new PointF(Float.MIN_VALUE, Float.MIN_VALUE);
+	/** The top most part of the hotspot, relative to the catalog.dimensions */
+	public double top = Double.MIN_VALUE;
+
+	/** The bottom most part of the hotspot, relative to the catalog.dimensions */
+	public double bottom = Double.MIN_VALUE;
+
+	/** The left most part of the hotspot, relative to the catalog.dimensions */
+	public double left = Double.MIN_VALUE;
+
+	/** The top most part of the hotspot, relative to the catalog.dimensions */
+	public double right = Double.MIN_VALUE;
+	
 	private Offer mOffer;
 	
 	public static Hotspot fromJSON(JSONArray jHotspot) {
@@ -40,31 +52,31 @@ public class Hotspot implements EtaObject<JSONObject> {
 					continue;
 				}
 				
-				float x = Float.valueOf(point.getString(0));
-				float y = Float.valueOf(point.getString(1));
+				double x = Double.valueOf(point.getString(0));
+				double y = Double.valueOf(point.getString(1));
 				
-				if (h.getNorthWest().x == Float.MIN_VALUE) {
+				if (h.left == Double.MIN_VALUE) {
 					// Nothing set yet
-					h.getNorthWest().x = x;
-				} else if (h.getNorthWest().x > x) {
+					h.left = x;
+				} else if (h.left > x) {
 					// switch values
-					h.getSouthEast().x = h.getNorthWest().x;
-					h.getNorthWest().x = x;
+					h.right = h.left;
+					h.left = x;
 				} else {
 					// no other options left
-					h.getSouthEast().x = x;
+					h.right = x;
 				}
 				
-				if (h.getNorthWest().y == Float.MIN_VALUE) {
+				if (h.top == Double.MIN_VALUE) {
 					// Nothing set yet
-					h.getNorthWest().y = y;
-				} else if (h.getNorthWest().y > y) {
+					h.top = y;
+				} else if (h.top > y) {
 					// switch values
-					h.getSouthEast().y = h.getNorthWest().y;
-					h.getNorthWest().y = y;
+					h.bottom = h.top;
+					h.top = y;
 				} else {
 					// no other options left
-					h.getSouthEast().y = y;
+					h.bottom = y;
 				}
 				
 			} catch (JSONException e) {
@@ -79,27 +91,11 @@ public class Hotspot implements EtaObject<JSONObject> {
 	}
 	
 	public boolean contains(double x, double y) {
-		return (mNorthWest.x < x && x < mSouthEast.x) && (mNorthWest.y < y && y < mSouthEast.y);
+		return (top < x && x < bottom ) && (left < y && y < right);
 	}
 	
 	public JSONObject toJSON() {
 		return null;
-	}
-	
-	public PointF getNorthWest() {
-		return mNorthWest;
-	}
-	
-	public void setNorthWest(PointF northWest) {
-		mNorthWest = northWest;
-	}
-	
-	public PointF getSouthEast() {
-		return mSouthEast;
-	}
-	
-	public void setSouthEast(PointF southEast) {
-		mSouthEast = southEast;
 	}
 	
 	public Offer getOffer() {
@@ -113,7 +109,52 @@ public class Hotspot implements EtaObject<JSONObject> {
 	@Override
 	public String toString() {
 		String offer = (mOffer==null?"null":mOffer.getHeading());
-		return Hotspot.class.getSimpleName() + "[offer:" + offer + ", northWest(" + mNorthWest.toString() + "), southEast(" + mSouthEast.toString() + ")]";
+		return "hotspot[offer:" + offer + ", t:" + top + ", b:" + bottom + ", l:" + left + ", r:" + right + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		long temp;
+		temp = Double.doubleToLongBits(bottom);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(left);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((mOffer == null) ? 0 : mOffer.hashCode());
+		temp = Double.doubleToLongBits(right);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(top);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Hotspot other = (Hotspot) obj;
+		if (Double.doubleToLongBits(bottom) != Double
+				.doubleToLongBits(other.bottom))
+			return false;
+		if (Double.doubleToLongBits(left) != Double
+				.doubleToLongBits(other.left))
+			return false;
+		if (mOffer == null) {
+			if (other.mOffer != null)
+				return false;
+		} else if (!mOffer.equals(other.mOffer))
+			return false;
+		if (Double.doubleToLongBits(right) != Double
+				.doubleToLongBits(other.right))
+			return false;
+		if (Double.doubleToLongBits(top) != Double.doubleToLongBits(other.top))
+			return false;
+		return true;
 	}
 	
 }
