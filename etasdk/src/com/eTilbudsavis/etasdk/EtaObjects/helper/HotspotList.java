@@ -1,5 +1,6 @@
 package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,8 +20,10 @@ import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class HotspotList implements EtaObject<JSONArray> {
+public class HotspotList implements EtaObject<JSONArray>, Serializable {
 	
+	private static final long serialVersionUID = -4654824845675092954L;
+
 	public static final String TAG = HotspotList.class.getSimpleName();
 	
 	private static final String TYPE_OFFER = "offer";

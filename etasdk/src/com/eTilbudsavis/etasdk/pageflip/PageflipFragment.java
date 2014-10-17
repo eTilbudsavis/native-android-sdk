@@ -22,9 +22,12 @@ import com.eTilbudsavis.etasdk.request.impl.CatalogObjectRequest.CatalogAutoFill
 public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	
 	public static final String TAG = PageflipFragment.class.getSimpleName();
-	
+
 	private static final String ARG_CATALOG = "eta_sdk_pageflip_catalog";
 	private static final String ARG_PAGE = "eta_sdk_pageflip_page";
+	
+	private static final String STATE_CATALOG = "eta_sdk_pageflip_state_catalog";
+	private static final String STATE_PAGE = "eta_sdk_pageflip_state_page";
 	
 	private PageflipViewPager mPager;
 	private PageflipAdapter mAdapter;
@@ -83,10 +86,11 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//		super.onCreateView(inflater, container, savedInstanceState);
+		super.onCreateView(inflater, container, savedInstanceState);
 		
 		if (savedInstanceState != null) {
-			setCurrentPosition(savedInstanceState.getInt(ARG_PAGE, mCurrentPosition));
+			setCurrentPosition(savedInstanceState.getInt(STATE_PAGE, mCurrentPosition));
+			mCatalog = (Catalog) savedInstanceState.getSerializable(STATE_CATALOG);
 		}
 		
 		setUpView();
@@ -166,7 +170,8 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		outState.putInt(ARG_PAGE, PageflipUtils.positionToPage(mCurrentPosition, mLandscape));
+		outState.putInt(STATE_PAGE, PageflipUtils.positionToPage(mCurrentPosition, mLandscape));
+		outState.putSerializable(STATE_CATALOG, mCatalog);
 		super.onSaveInstanceState(outState);
 	}
 	

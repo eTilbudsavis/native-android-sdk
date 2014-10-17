@@ -65,7 +65,6 @@ public class PageflipDoublePage extends PageflipPage {
 		int left = ( isLeft ? 0 : b.getWidth() );
 		mCanvas.drawBitmap(b, left, 0, null);
 		mCount++;
-		b.recycle();
 		
 	}
 	
@@ -80,14 +79,16 @@ public class PageflipDoublePage extends PageflipPage {
 	};
 	
 	public BitmapProcessor getProcessor(final boolean left) {
-		return new BitmapProcessor() {
+		return new PageflipBitmapProcessor(getCatalog(), getPage(), mDrawHotSpotRects) {
 			
 			public Bitmap process(Bitmap b) {
+				b = super.process(b);
 				if (left) {
 					merge(b, null);
 				} else {
 					merge(null, b);
 				}
+				b.recycle();
 				// Bitmap have been recycled by now, don't use it
 				return null;
 			}

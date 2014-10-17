@@ -41,6 +41,7 @@ public abstract class PageflipPage extends Fragment {
 	private int mPage = 0;
 	private PhotoView mPhotoView;
 	private ProgressBar mProgress;
+	protected boolean mDrawHotSpotRects = true;
 	
 	public abstract void loadPages();
 	
