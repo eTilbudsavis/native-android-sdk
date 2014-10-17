@@ -301,7 +301,7 @@ public abstract class RequestAutoFill<T> {
 			
 			public void onComplete(JSONArray response, EtaError error) {
 				if (response != null) {
-					c.setHotspots(HotspotList.fromJSON(response));
+					c.setHotspots(HotspotList.fromJSON(c.getDimension(), response));
 				} else {
 					EtaLog.d(TAG, error.toJSON().toString());
 				}

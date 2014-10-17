@@ -50,15 +50,16 @@ public class PageflipBitmapProcessor implements BitmapProcessor {
 
 	}
 	
-	private Bitmap drawDebugRects(Bitmap immutableBitmap) {
+	private Bitmap drawDebugRects(Bitmap bitmap) {
 		
 		Bitmap b = null;
 		List<Hotspot> hotspots = mCatalog.getHotspots().getHotspots().get(mPage);
 		
 		if (hotspots != null && !hotspots.isEmpty()) {
 			
-			b = immutableBitmap.copy(Bitmap.Config.ARGB_8888, true);
-			immutableBitmap.recycle();
+			// The given bitmap is immutable, so we'll copy it, and recycle the old one
+			b = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+			bitmap.recycle();
 			Canvas c = new Canvas(b);
 			
 			Paint p = new Paint();
@@ -67,14 +68,16 @@ public class PageflipBitmapProcessor implements BitmapProcessor {
 			p.setStrokeWidth(5);
 			
 			int count = 0;
+//			int bw = (int)((double)b.getWidth()*mCatalog.getDimension().getWidth());
+//			int bh = (int)((double)b.getHeight()*mCatalog.getDimension().getWidth());
 			int bw = b.getWidth();
 			int bh = b.getHeight();
 			for (Hotspot h : hotspots) {
 				p.setColor(mRectColors[count%mRectColors.length]);
 				int left = (int)(h.left*(double)bw);
-				int top = (int)(h.top*(double)bh);
-				int right = (int)(h.right*(double)bw);
-				int bottom = (int)(h.bottom*(double)bh);
+				int top = (int)((h.top)*(double)bh);
+				int right = (int)((h.right)*(double)bw);
+				int bottom = (int)((h.bottom)*(double)bh);
 				Rect r = new Rect(left, top, right, bottom);
 				c.drawRect(r, p);
 				count++;

@@ -30,7 +30,7 @@ public class HotspotList implements EtaObject<JSONArray>, Serializable {
 	
 	Map<Integer, List<Hotspot>> mHotspots = new HashMap<Integer, List<Hotspot>>();
 	
-	public static HotspotList fromJSON(JSONArray jHotspots) {
+	public static HotspotList fromJSON(Dimension d, JSONArray jHotspots) {
 		
 		HotspotList list = new HotspotList();
 		if (jHotspots==null) {
@@ -38,6 +38,7 @@ public class HotspotList implements EtaObject<JSONArray>, Serializable {
 		}
 		
 		for (int i = 0 ; i < jHotspots.length() ; i++ ) {
+			
 			try {
 				
 				JSONObject jHotspot = jHotspots.getJSONObject(i);
@@ -49,25 +50,26 @@ public class HotspotList implements EtaObject<JSONArray>, Serializable {
 					JSONObject offer = jHotspot.getJSONObject(Api.JsonKey.OFFER);
 					Offer o = Offer.fromJSON(offer);
 					
-					JSONObject points = jHotspot.getJSONObject(Api.JsonKey.LOCATIONS);
+					JSONObject rectangleList = jHotspot.getJSONObject(Api.JsonKey.LOCATIONS);
 					
-					Iterator<String> keys = points.keys();
+					Iterator<String> keys = rectangleList.keys();
 					while (keys.hasNext()) {
 						
 						String key = (String) keys.next();
+						Integer page = Integer.valueOf(key);
+						// Hotspot page are offset by one! (crappy real world numbers)
+						page = page - 1;
+						JSONArray rect = rectangleList.getJSONArray(key);
 						
-						// TODO: If it throws an exception?
-						Integer p = Integer.valueOf(key);
-						// Hotspots are offset by one!
-						p = p-1;
-						if (!list.mHotspots.containsKey(p)) {
-							list.mHotspots.put(p, new ArrayList<Hotspot>());
+						if (!list.mHotspots.containsKey(page)) {
+							list.mHotspots.put(page, new ArrayList<Hotspot>());
 						}
 						
-						JSONArray jCoords = points.getJSONArray(key);
-						Hotspot h = Hotspot.fromJSON(jCoords);
+						Hotspot h = Hotspot.fromJSON(rect);
+						h.normalize(d);
+						h.setPage(page);
 						h.setOffer(o);
-						list.mHotspots.get(p).add(h);
+						list.mHotspots.get(page).add(h);
 						
 					}
 				}
@@ -80,16 +82,15 @@ public class HotspotList implements EtaObject<JSONArray>, Serializable {
 		return list;
 	}
 	
-	public Set<Offer> getOfferFromHotspot(int page, Dimension dimen, double x, double y) {
-		Set<Offer> list = new HashSet<Offer>();
-		double absX = dimen.getHeight()*x;
-		double absY = dimen.getWidth()*y;
-		List<Hotspot> lh = mHotspots.get(Integer.valueOf(page));
-		if (lh != null && !lh.isEmpty()) {
-			for (Hotspot h : lh) {
-				if (h.contains(absX, absY)) {
-					list.add(h.getOffer());
-				}
+	public Set<Hotspot> getHotspots(int page, double xPercent, double yPercent) {
+		Set<Hotspot> list = new HashSet<Hotspot>();
+		List<Hotspot> lh = mHotspots.get(page);
+		if (lh == null) {
+			return list;
+		}
+		for (Hotspot h : lh) {
+			if (h.contains(xPercent, yPercent)) {
+				list.add(h);
 			}
 		}
 		return list;

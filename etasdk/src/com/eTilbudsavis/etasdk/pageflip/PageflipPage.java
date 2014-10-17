@@ -14,10 +14,11 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.Offer;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapDisplayer;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
@@ -106,11 +107,12 @@ public abstract class PageflipPage extends Fragment {
 	}
 	
 	protected void click(int page, float x, float y) {
-
-		EtaLog.d(TAG, "page:" + page + " (" + x + "," + y + ")");
-		Set<Offer> offers = mCatalog.getHotspots().getOfferFromHotspot(mPage, mCatalog.getDimension(), x, y);
-		for (Offer o : offers) {
-			EtaLog.d(TAG, o.getHeading());
+		
+		EtaLog.d(TAG, String.format("click(p:%s x:%.2f , y:%.2f)", page, x, y));
+		
+		Set<Hotspot> list = mCatalog.getHotspots().getHotspots(page, x, y);
+		for (Hotspot h : list) {
+			Toast.makeText(getActivity(), h.getOffer().getHeading(), Toast.LENGTH_SHORT).show();
 		}
 		
 	}

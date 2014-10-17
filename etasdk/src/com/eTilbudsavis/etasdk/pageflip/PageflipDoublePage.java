@@ -39,7 +39,11 @@ public class PageflipDoublePage extends PageflipPage {
 
 			public void onPhotoTap(View view, float x, float y) {
 				
-				EtaLog.d(TAG, "view:" + view.getClass().getSimpleName() + ", x:" + x + ", y:" + y);
+				if (x>0.5) {
+					click(getPage()+1, ((float)(x-0.5)*2) , y);
+				} else {
+					click(getPage(), x*2, y);
+				}
 				
 			}
 		});

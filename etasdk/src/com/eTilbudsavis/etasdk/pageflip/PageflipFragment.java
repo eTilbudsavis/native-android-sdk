@@ -71,8 +71,6 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		
-		PageflipUtils.test();
-		
 		if (getArguments() == null || !getArguments().containsKey(ARG_CATALOG)) {
 			throw new IllegalArgumentException("No catalog provided");
 		}
