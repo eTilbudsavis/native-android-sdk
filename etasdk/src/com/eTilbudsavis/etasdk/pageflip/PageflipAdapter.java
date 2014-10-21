@@ -4,35 +4,29 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
-
 public class PageflipAdapter extends FragmentStatePagerAdapter {
 	
 	public static final String TAG = PageflipAdapter.class.getSimpleName();
 	
-	private Catalog mCatalog;
-	private boolean mLandscape = false;
+	private PageCallback mCallback;
 	private int mViewCount = 0;
-	private int mPageCount = 0;
 	
-	public PageflipAdapter(FragmentManager fm, Catalog c, boolean landscape) {
+	public PageflipAdapter(FragmentManager fm, PageCallback callback) {
 		super(fm);
-		mCatalog = c;
-		mLandscape = landscape;
-		mViewCount = mLandscape ? (mCatalog.getPageCount()/2)+1 : mCatalog.getPageCount();
-		mPageCount = mCatalog.getPageCount()-1;
+		mCallback = callback;
+		if (mCallback.isLandscape()) {
+			mViewCount = (mCallback.getCatalog().getPageCount()/2)+1;
+		} else {
+			mViewCount = mCallback.getCatalog().getPageCount();
+		}
 	}
 	
 	@Override
 	public Fragment getItem(int position) {
-		int page = PageflipUtils.positionToPage(position, mLandscape);
-//		EtaLog.d(TAG, "getItem[pos:" + position + ", maxPos:" + (mViewCount-1) + ", page:" + page + ", maxPage:" + mPageCount);
-		if ( !mLandscape || page == 0 || page == mPageCount ) {
-			return PageflipSinglePage.newInstance(mCatalog, page);
-		} else {
-			return PageflipDoublePage.newInstance(mCatalog, page);
-		}
+		int[] pages = PageflipUtils.positionToPages(position, mCallback.getCatalog().getPageCount(), mCallback.isLandscape());
+		PageflipPage f = PageflipPage.newInstance(mCallback.getCatalog(), pages, mCallback.isLandscape());
+		f.setPageCallback(mCallback);
+		return f;
 	}
 	
 	@Override

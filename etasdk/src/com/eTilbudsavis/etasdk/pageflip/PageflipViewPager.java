@@ -5,18 +5,20 @@ import java.lang.reflect.Field;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.animation.Interpolator;
 import android.widget.Scroller;
 
 public class PageflipViewPager extends ViewPager {
 	
+	public static final String TAG = PageflipViewPager.class.getSimpleName();
 	private ScrollerCustomDuration mScroller = null;
 	
 	public PageflipViewPager(Context context) {
 		super(context);
 		init();
 	}
-
+	
 	public PageflipViewPager(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init();
@@ -24,6 +26,12 @@ public class PageflipViewPager extends ViewPager {
 	
 	private void init() {
 		setScroller();
+	}
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+//		EtaLog.d(TAG, "OnTouchListener: " + event.toString());
+		return super.onTouchEvent(event);
 	}
 	
 	private void setScroller() {
@@ -73,7 +81,7 @@ public class PageflipViewPager extends ViewPager {
 	    public void startScroll(int startX, int startY, int dx, int dy, int duration) {
 	        super.startScroll(startX, startY, dx, dy, (int) (duration * mScrollFactor));
 	    }
-
+	    
 	}
 	
 }

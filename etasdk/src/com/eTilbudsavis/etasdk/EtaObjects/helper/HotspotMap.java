@@ -4,14 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
@@ -19,22 +19,30 @@ import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class HotspotList implements EtaObject<JSONArray>, Serializable {
+public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements EtaObject<JSONArray>, Serializable {
 	
 	private static final long serialVersionUID = -4654824845675092954L;
 
-	public static final String TAG = HotspotList.class.getSimpleName();
+	public static final String TAG = HotspotMap.class.getSimpleName();
 	
 	private static final String TYPE_OFFER = "offer";
 	
-	Map<Integer, List<Hotspot>> mHotspots = new HashMap<Integer, List<Hotspot>>();
+	private static final int[] mRectColors = { 
+		Color.BLACK, 
+		Color.BLUE, 
+		Color.GREEN, 
+		Color.RED, 
+		Color.YELLOW, 
+		Color.MAGENTA 
+	};
 	
-	public static HotspotList fromJSON(Dimension d, JSONArray jHotspots) {
+	public static HotspotMap fromJSON(Dimension d, JSONArray jHotspots) {
 		
-		HotspotList list = new HotspotList();
+		HotspotMap map = new HotspotMap();
 		if (jHotspots==null) {
-			return list;
+			return map;
 		}
 		
 		for (int i = 0 ; i < jHotspots.length() ; i++ ) {
@@ -50,26 +58,28 @@ public class HotspotList implements EtaObject<JSONArray>, Serializable {
 					JSONObject offer = jHotspot.getJSONObject(Api.JsonKey.OFFER);
 					Offer o = Offer.fromJSON(offer);
 					
+					int color = mRectColors[i%mRectColors.length];
+					
 					JSONObject rectangleList = jHotspot.getJSONObject(Api.JsonKey.LOCATIONS);
 					
-					Iterator<String> keys = rectangleList.keys();
-					while (keys.hasNext()) {
+					List<String> keys = Utils.copyIterator(rectangleList.keys());
+					
+					for (String key : keys) {
 						
-						String key = (String) keys.next();
 						Integer page = Integer.valueOf(key);
-						// Hotspot page are offset by one! (crappy real world numbers)
-						page = page - 1;
 						JSONArray rect = rectangleList.getJSONArray(key);
 						
-						if (!list.mHotspots.containsKey(page)) {
-							list.mHotspots.put(page, new ArrayList<Hotspot>());
+						if (!map.containsKey(page)) {
+							map.put(page, new ArrayList<Hotspot>());
 						}
 						
 						Hotspot h = Hotspot.fromJSON(rect);
 						h.normalize(d);
 						h.setPage(page);
 						h.setOffer(o);
-						list.mHotspots.get(page).add(h);
+						h.setColor(color);
+						h.setDualPage(keys.size()>1);
+						map.get(page).add(h);
 						
 					}
 				}
@@ -79,17 +89,21 @@ public class HotspotList implements EtaObject<JSONArray>, Serializable {
 			}
 		}
 		
-		return list;
+		return map;
 	}
 	
-	public Set<Hotspot> getHotspots(int page, double xPercent, double yPercent) {
+	public Set<Hotspot> getHotspots(int page, double xPercent, double yPercent, boolean landscape) {
+		return getHotspots(page, xPercent, yPercent, Hotspot.SIGNIFICANT_AREA, landscape);
+	}
+	
+	public Set<Hotspot> getHotspots(int page, double xPercent, double yPercent, double minArea, boolean landscape) {
 		Set<Hotspot> list = new HashSet<Hotspot>();
-		List<Hotspot> lh = mHotspots.get(page);
+		List<Hotspot> lh = get(page);
 		if (lh == null) {
 			return list;
 		}
 		for (Hotspot h : lh) {
-			if (h.contains(xPercent, yPercent)) {
+			if (h.inBounds(xPercent, yPercent, minArea, landscape)) {
 				list.add(h);
 			}
 		}
@@ -98,10 +112,6 @@ public class HotspotList implements EtaObject<JSONArray>, Serializable {
 	
 	public JSONArray toJSON() {
 		return null;
-	}
-
-	public Map<Integer, List<Hotspot>> getHotspots() {
-		return mHotspots;
 	}
 	
 }

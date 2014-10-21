@@ -37,12 +37,46 @@ public abstract class PageflipPage extends Fragment {
 	
 	protected static final String ARG_CATALOG = "eta_sdk_pageflip_page_catalog";
 	protected static final String ARG_PAGE = "eta_sdk_pageflip_page_page";
+	protected static final String ARG_LANDSCAPE = "eta_sdk_pageflip_page_landscape";
 	
-	private Catalog mCatalog;
-	private int mPage = 0;
+//	private Catalog mCatalog;
+	private int[] mPages;
 	private PhotoView mPhotoView;
 	private ProgressBar mProgress;
-	protected boolean mDrawHotSpotRects = true;
+//	private boolean mLandscape = false;
+	protected boolean debug = true;
+	private boolean mIsZoomed = false;
+	private PageCallback mCallback;
+
+	OnMatrixChangedListener mMatrixChangedListener = new OnMatrixChangedListener() {
+		
+		public void onMatrixChanged(RectF rect) {
+			boolean isMinScale = PageflipUtils.almost(mPhotoView.getScale(), mPhotoView.getMinimumScale(), 0.001f);
+			mPhotoView.setAllowParentInterceptOnEdge(isMinScale);
+//			EtaLog.d(TAG, "page: " + PageflipUtils.join(",", getPages()) + ", isMinScale:" + isMinScale + ", isZoomed:" + mIsZoomed);
+			if (isMinScale && mIsZoomed) {
+				EtaLog.d(TAG, "zoom.stop");
+				mIsZoomed = false;
+				mCallback.zoomStop();
+			} else if (!mIsZoomed && !isMinScale) {
+				EtaLog.d(TAG, "zoom.start");
+				mIsZoomed = true;
+				mCallback.zoomStart();
+			}
+		}
+		
+	};
+	
+	public static PageflipPage newInstance(Catalog c, int[] pages, boolean landscape) {
+		Bundle b = new Bundle();
+		b.putSerializable(ARG_CATALOG, c);
+		b.putIntArray(ARG_PAGE, pages);
+		b.putBoolean(ARG_LANDSCAPE, landscape);
+		PageflipPage f = pages.length == 1 ? new PageflipSinglePage() : new PageflipDoublePage();
+		EtaLog.d(TAG, "l:"+pages.length+", f:"+f.getClass().getSimpleName());
+		f.setArguments(b);
+		return f;
+	}
 	
 	public abstract void loadPages();
 	
@@ -50,8 +84,9 @@ public abstract class PageflipPage extends Fragment {
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		if (getArguments()!=null) {
-			mCatalog = (Catalog)getArguments().getSerializable(ARG_CATALOG);
-			mPage = getArguments().getInt(ARG_PAGE);
+//			mCatalog = (Catalog)getArguments().getSerializable(ARG_CATALOG);
+			mPages = getArguments().getIntArray(ARG_PAGE);
+//			mLandscape = getArguments().getBoolean(ARG_LANDSCAPE, false);
 		}
 		
 	}
@@ -61,21 +96,15 @@ public abstract class PageflipPage extends Fragment {
 		super.onCreateView(inflater, container, savedInstanceState);
 		
 		if (savedInstanceState != null) {
-			mCatalog = (Catalog) savedInstanceState.getSerializable(ARG_CATALOG);
-			mPage = savedInstanceState.getInt(ARG_PAGE);
+//			mCatalog = (Catalog) savedInstanceState.getSerializable(ARG_CATALOG);
+			mPages = savedInstanceState.getIntArray(ARG_PAGE);
+//			mLandscape = savedInstanceState.getBoolean(ARG_LANDSCAPE);
 		}
 		
 		View v = inflater.inflate(R.layout.etasdk_layout_page, container, false);
 		mPhotoView = (PhotoView) v.findViewById(R.id.etasdk_pageflip_photoview);
 		mPhotoView.setMaximumScale(MAX_SCALE);
-		mPhotoView.setOnMatrixChangeListener(new OnMatrixChangedListener() {
-			
-			public void onMatrixChanged(RectF rect) {
-				boolean intercept = almost(mPhotoView.getScale(), mPhotoView.getMinimumScale());
-				mPhotoView.setAllowParentInterceptOnEdge(intercept);
-			}
-			
-		});
+		mPhotoView.setOnMatrixChangeListener(mMatrixChangedListener);
 		mProgress = (ProgressBar) v.findViewById(R.id.etasdk_pageflip_loader);
 		
 		mPhotoView.setVisibility(View.GONE);
@@ -84,21 +113,26 @@ public abstract class PageflipPage extends Fragment {
 		return v;
 	}
 	
-	private boolean almost(float first, float second) {
-		return Math.abs(first-second)<0.1;
-	}
-	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		outState.putSerializable(ARG_CATALOG, mCatalog);
-		outState.putInt(ARG_PAGE, mPage);
+//		outState.putSerializable(ARG_CATALOG, mCatalog);
+		outState.putIntArray(ARG_PAGE, mPages);
+//		outState.putBoolean(ARG_LANDSCAPE, mLandscape);
 		super.onSaveInstanceState(outState);
 	}
 	
-	@Override
-	public void onResume() {
-		loadPages();
-		super.onResume();
+	private void debug() {
+		
+		EtaLog.d(TAG, "pages[" + PageflipUtils.join(",", getPages()) + "]");
+//		List<Hotspot> spots = getCatalog().getHotspots().get(getPage());
+//		if (spots == null) {
+//			return;
+//		}
+//		for(Hotspot h : spots) {
+//			if (h.isAreaSignificant(mLandscape)) {
+//				EtaLog.d(TAG, h.getOffer().getHeading() + ", " + h.getArea());
+//			}
+//		}
 	}
 	
 	protected void addRequest(ImageRequest ir) {
@@ -108,9 +142,9 @@ public abstract class PageflipPage extends Fragment {
 	
 	protected void click(int page, float x, float y) {
 		
-		EtaLog.d(TAG, String.format("click(p:%s x:%.2f , y:%.2f)", page, x, y));
+//		EtaLog.d(TAG, String.format("click(p:%s x:%.2f , y:%.2f)", page, x, y));
 		
-		Set<Hotspot> list = mCatalog.getHotspots().getHotspots(page, x, y);
+		Set<Hotspot> list = getCatalog().getHotspots().getHotspots(page, x, y, isLandscape());
 		for (Hotspot h : list) {
 			Toast.makeText(getActivity(), h.getOffer().getHeading(), Toast.LENGTH_SHORT).show();
 		}
@@ -121,29 +155,41 @@ public abstract class PageflipPage extends Fragment {
 		return mPhotoView;
 	}
 	
-	public Catalog getCatalog() {
-		return mCatalog;
-	}
-
-	public int getPage() {
-		return mPage;
-	}
-
-	protected Page getPageLeft() {
-		return mCatalog.getPages().get(mPage);
+	public void setPageCallback(PageCallback callback) {
+		mCallback = callback;
 	}
 	
-	protected Page getPageRight() {
-		try {
-			return mCatalog.getPages().get(mPage+1);
-		} catch (IndexOutOfBoundsException e) {
-			EtaLog.i(TAG, "No more pages");
-			return null;
-		}
+	public Catalog getCatalog() {
+		return mCallback.getCatalog();
+	}
+
+	public int[] getPages() {
+		return mPages;
+	}
+	
+	public boolean isLandscape() {
+		return mCallback.isLandscape();
+	}
+	
+	protected Page getPage(int page) {
+		// Offset the given page number by one. Real-world to array number 
+		return getCatalog().getPages().get(page-1);
+	}
+	
+	@Override
+	public void onResume() {
+//		EtaLog.d(TAG, "onResume[pages:" + PageflipUtils.join(",", getPages()) + "]");
+		loadPages();
+		super.onResume();
 	}
 	
 	@Override
 	public void onPause() {
+//		EtaLog.d(TAG, "onPause[pages:" + PageflipUtils.join(",", getPages()) + "]");
+		// Reset the scale of PhotoView (implicitly stopping any zoom collect view)
+		if (mPhotoView.getScale() != mPhotoView.getMinimumScale()) {
+			mPhotoView.setScale(mPhotoView.getMinimumScale());
+		}
 		BitmapDrawable d = (BitmapDrawable)mPhotoView.getDrawable();
 		if (d != null) {
 			Bitmap b = d.getBitmap();
@@ -153,7 +199,7 @@ public abstract class PageflipPage extends Fragment {
 		}
 		super.onPause();
 	}
-
+	
 	public class PageflipBitmapDisplayer implements BitmapDisplayer {
 		
 		private boolean mFadeFromMemory = true;

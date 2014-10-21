@@ -31,7 +31,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.HotspotList;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.HotspotMap;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -80,7 +80,7 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 	private List<Page> mPages;
 	private Dealer mDealer;
 	private Store mStore;
-	private HotspotList mHotspots;
+	private HotspotMap mHotspots;
 	private int mOfferOnPage = 1;
 	
 	/**
@@ -493,22 +493,22 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 	}
 
 	/**
-	 * Method for setting the {@link HotspotList} associated with this catalog
-	 * @param hotspots A {@link HotspotList} object
+	 * Method for setting the {@link HotspotMap} associated with this catalog
+	 * @param hotspots A {@link HotspotMap} object
 	 */
-	public Catalog setHotspots(HotspotList hotspots) {
+	public Catalog setHotspots(HotspotMap hotspots) {
 		mHotspots = hotspots;
 		return this;
 	}
 
 	/**
-	 * Get the {@link HotspotList} associated with this catalog.
+	 * Get the {@link HotspotMap} associated with this catalog.
 	 * <p>Hotspots isn't bundled in the catalog object by default. But should be
 	 * downloaded separately via the store {@link Endpoint#catalogHotspots(String) endpoint},
-	 * and  {@link Catalog#setHotspots(HotspotList) set} manually by the developer. </p>
-	 * @return A {@link HotspotList} object, or {@code null}
+	 * and  {@link Catalog#setHotspots(HotspotMap) set} manually by the developer. </p>
+	 * @return A {@link HotspotMap} object, or {@code null}
 	 */
-	public HotspotList getHotspots() {
+	public HotspotMap getHotspots() {
 		return mHotspots;
 	}
 	

@@ -3,52 +3,43 @@ package com.eTilbudsavis.etasdk.pageflip;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
-import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapProcessor;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoTapListener;
 
 public class PageflipDoublePage extends PageflipPage {
-
-	public static PageflipPage newInstance(Catalog c, int page) {
-		Bundle b = new Bundle();
-		b.putSerializable(ARG_CATALOG, c);
-		b.putInt(ARG_PAGE, page);
-		PageflipPage f = new PageflipDoublePage();
-		f.setArguments(b);
-		return f;
-	}
 	
-	Object LOCK = new Object();
+	private Object LOCK = new Object();
 	private int mCount = 0;
 	private Bitmap mPage;
 	private Canvas mCanvas;
-	
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View v = super.onCreateView(inflater, container, savedInstanceState);
-
-		getPhotoView().setOnPhotoTapListener(new OnPhotoTapListener() {
-
-			public void onPhotoTap(View view, float x, float y) {
-				
-				if (x>0.5) {
-					click(getPage()+1, ((float)(x-0.5)*2) , y);
-				} else {
-					click(getPage(), x*2, y);
-				}
-				
+	private OnPhotoTapListener mTapListener = new OnPhotoTapListener() {
+		
+		public void onPhotoTap(View view, float x, float y) {
+			
+			if (x>0.5) {
+				click(getRightPage(), ((float)(x-0.5)*2) , y);
+			} else {
+				click(getLeftPage(), x*2, y);
 			}
-		});
+			
+		}
+	};
+	
+	public void onResume() {
+		super.onResume();
+		getPhotoView().setOnPhotoTapListener(mTapListener);
+	};
+	
+	private int getLeftPage() {
+		return getPages()[0];
+	}
 
-		return v;
+	private int getRightPage() {
+		return getPages()[1];
 	}
 	
 	private void merge(Bitmap l, Bitmap r) {
@@ -82,8 +73,29 @@ public class PageflipDoublePage extends PageflipPage {
 		};
 	};
 	
+	@Override
+	public void loadPages() {
+		
+		if (getPhotoView().getDrawable() == null) {
+			
+			runImageloader(getPage(getLeftPage()).getView(), true);
+			
+			runImageloader(getPage(getRightPage()).getView(), false);
+			
+		}
+		
+	}
+	
+	private void runImageloader(String url, boolean left) {
+		ImageRequest r = new ImageRequest(url, new ImageView(getActivity()));
+		r.setBitmapDisplayer(mDisplayer);
+		r.setBitmapProcessor(getProcessor(left));
+		addRequest(r);
+	}
+	
 	public BitmapProcessor getProcessor(final boolean left) {
-		return new PageflipBitmapProcessor(getCatalog(), getPage(), mDrawHotSpotRects) {
+		int page = left ? getLeftPage() : getRightPage();
+		return new PageflipBitmapProcessor(getCatalog(), page, isLandscape(), debug) {
 			
 			public Bitmap process(Bitmap b) {
 				b = super.process(b);
@@ -97,25 +109,6 @@ public class PageflipDoublePage extends PageflipPage {
 				return null;
 			}
 		};
-	}
-	@Override
-	public void loadPages() {
-		
-		if (getPhotoView().getDrawable() == null) {
-			
-			runImageloader(getPageLeft().getView(), true);
-			
-			runImageloader(getPageRight().getView(), false);
-			
-		}
-		
-	}
-	
-	private void runImageloader(String url, boolean left) {
-		ImageRequest r = new ImageRequest(url, new ImageView(getActivity()));
-		r.setBitmapDisplayer(mDisplayer);
-		r.setBitmapProcessor(getProcessor(left));
-		addRequest(r);
 	}
 	
 }

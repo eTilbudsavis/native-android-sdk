@@ -99,7 +99,7 @@ public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapLi
     }
 
     public static boolean almostEqual(double a, double b){
-    	return Math.abs(a-b)<EPSILON;
+    	return almostEqual(a, b, EPSILON);
     }
 
     public static boolean almostEqual(double a, double b, double eps){

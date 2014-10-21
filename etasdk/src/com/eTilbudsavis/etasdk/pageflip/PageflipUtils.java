@@ -1,5 +1,7 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
+import java.util.Arrays;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -24,34 +26,39 @@ public class PageflipUtils {
 	public static boolean isLandscape(Configuration c) {
 		return c.orientation == Configuration.ORIENTATION_LANDSCAPE;
 	}
+
+	private static final boolean LANDSCAPE = true;
+	private static final boolean PORTRAIT = false;
 	
 	public static void test() {
 		
 		EtaLog.d(TAG, "Running page/position tests");
-		testPageToPosition(0, true, 0);
-		testPageToPosition(1, true, 1);
-		testPageToPosition(2, true, 1);
-		testPageToPosition(3, true, 2);
-		testPageToPosition(4, true, 2);
 		
-		testPageToPosition(0, false, 0);
-		testPageToPosition(1, false, 1);
-		testPageToPosition(2, false, 2);
-		testPageToPosition(3, false, 3);
-		testPageToPosition(4, false, 4);
+		testPageToPosition(1, LANDSCAPE, 0);
+		testPageToPosition(2, LANDSCAPE, 1);
+		testPageToPosition(3, LANDSCAPE, 1);
+		testPageToPosition(4, LANDSCAPE, 2);
+		testPageToPosition(5, LANDSCAPE, 2);
+		
+		int PAGE_COUNT = 8;
+		testPositionToPage(0, PAGE_COUNT, LANDSCAPE, new int[]{1});
+		testPositionToPage(1, PAGE_COUNT, LANDSCAPE, new int[]{2,3});
+		testPositionToPage(2, PAGE_COUNT, LANDSCAPE, new int[]{4,5});
+		testPositionToPage(3, PAGE_COUNT, LANDSCAPE, new int[]{6,7});
+		testPositionToPage(4, PAGE_COUNT, LANDSCAPE, new int[]{8});
+		
+		testPageToPosition(1, PORTRAIT, 0);
+		testPageToPosition(2, PORTRAIT, 1);
+		testPageToPosition(3, PORTRAIT, 2);
+		testPageToPosition(4, PORTRAIT, 3);
 
-		testPositionToPage(0, true, 0);
-		testPositionToPage(1, true, 1);
-		testPositionToPage(2, true, 3);
-		testPositionToPage(3, true, 5);
-		testPositionToPage(4, true, 7);
-
-		testPositionToPage(0, false, 0);
-		testPositionToPage(1, false, 1);
-		testPositionToPage(2, false, 2);
-		testPositionToPage(3, false, 3);
-		testPositionToPage(4, false, 4);
-
+		PAGE_COUNT = 4;
+		testPositionToPage(0, PAGE_COUNT, PORTRAIT, new int[]{1});
+		testPositionToPage(1, PAGE_COUNT, PORTRAIT, new int[]{2});
+		testPositionToPage(2, PAGE_COUNT, PORTRAIT, new int[]{3});
+		testPositionToPage(3, PAGE_COUNT, PORTRAIT, new int[]{4});
+		testPositionToPage(4, PAGE_COUNT, PORTRAIT, new int[]{5});
+		
 		EtaLog.d(TAG, "Done page/position tests");
 	}
 	
@@ -61,40 +68,72 @@ public class PageflipUtils {
 		}
 	}
 	
-	private static void testPositionToPage(int pos, boolean land, int expectedPage) {
-		if ( positionToPage(pos, land) != expectedPage ) {
-			EtaLog.e(TAG, "positionToPage[pos:" + pos + ", land:" + land + ", expected:" + expectedPage);
+	private static void testPositionToPage(int pos, int pageCount, boolean land, int[] expectedPages) {
+		int[] pages = positionToPages(pos, pageCount, land);
+		if ( !Arrays.equals(pages, expectedPages) ) {
+			EtaLog.e(TAG, "positionToPage[pos:" + pos + ", land:" + land + ", expected:" + join(",", expectedPages) + ", got:" + join(",", pages));
 		}
 	}
 	
+	public static String join(CharSequence delimiter, int[] tokens) {
+		StringBuilder sb = new StringBuilder();
+		boolean firstTime = true;
+		for (Object token: tokens) {
+			if (firstTime) {
+				firstTime = false;
+			} else {
+				sb.append(delimiter);
+			}
+			sb.append(token);
+		}
+		return sb.toString();
+	}
+	
+	public static int pageToPosition(int[] pages, boolean landscape) {
+		return pageToPosition(pages[0], landscape);
+	}
+
 	public static int pageToPosition(int page, boolean landscape) {
-		int pos = page;
-		if (landscape) {
-			if (page%2!=0) {
-				page++;
+		int pos = page-1;
+		if (landscape && page > 1) {
+			if (page%2==1) {
+				page--;
 			}
 			pos = page/2;
 		}
-//		EtaLog.d(TAG, "pageToPosition[page:" + page + ", pos:" + pos + "]");
 		return pos;
 	}
 	
-	public static int positionToPage(int position, boolean landscape) {
-		int page = position;
-		if (landscape) {
-			if (position == 0) {
-				page = 0;
-			} else {
-				page = (position*2)-1;
-			}
+	public static int[] positionToPages(int position, int pageCount, boolean landscape) {
+		// default is offset by one
+		int page = 0;
+		if (landscape && position != 0) {
+			page = (position*2);
+		} else {
+			page = position+1;
 		}
 		
-//		EtaLog.d(TAG, "positionToPage[page:" + page + ", pos:" + position + "]");
-		return page;
+		int[] pages = null;
+		if (!landscape || page == 1 || page == pageCount) {
+			// first, last, and everything in portrait is single-page
+			pages = new int[]{page};
+		} else {
+			// Anything else is double page
+			pages = new int[]{page, (page+1)};
+		}
+		return pages;
 	}
-
-	public static boolean withInPageRange(Catalog c, int page) {
-		return ( 0 <= page && page < c.getPageCount());
+	
+	public static boolean isValidPage(Catalog c, int page) {
+		return ( 1 <= page && page <= c.getPageCount());
+	}
+	
+	public static boolean almost(float first, float second) {
+		return almost(first, second, 0.1f);
+	}
+	
+	public static boolean almost(float first, float second, float epsilon) {
+		return Math.abs(first-second)<epsilon;
 	}
 	
 	public static Bitmap mergeImage(Bitmap leftBitmap, Bitmap rightBitmap) {

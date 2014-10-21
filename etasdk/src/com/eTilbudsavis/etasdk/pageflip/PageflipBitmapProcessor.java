@@ -4,7 +4,6 @@ import java.util.List;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
@@ -17,23 +16,15 @@ public class PageflipBitmapProcessor implements BitmapProcessor {
 	
 	public static final String TAG = PageflipBitmapProcessor.class.getSimpleName();
 	
-	private static final int[] mRectColors = { 
-		Color.BLACK, 
-		Color.BLUE, 
-		Color.GREEN, 
-		Color.RED, 
-		Color.WHITE, 
-		Color.YELLOW, 
-		Color.MAGENTA 
-	};
-	
 	private Catalog mCatalog;
 	private int mPage = 0;
 	private boolean mDrawHotspotRects = false;
+	private boolean mLandscape = false;
 	
-	public PageflipBitmapProcessor(Catalog c, int page, boolean drawHotSpotRects) {
+	public PageflipBitmapProcessor(Catalog c, int page, boolean landscape, boolean drawHotSpotRects) {
 		mCatalog = c;
 		mPage = page;
+		mLandscape = landscape;
 		mDrawHotspotRects = drawHotSpotRects;
 	}
 	
@@ -47,13 +38,13 @@ public class PageflipBitmapProcessor implements BitmapProcessor {
 			EtaLog.e(TAG, e.getMessage(), e);
 		}
 		return b;
-
+		
 	}
 	
-	private Bitmap drawDebugRects(Bitmap bitmap) {
+	protected Bitmap drawDebugRects(Bitmap bitmap) {
 		
 		Bitmap b = null;
-		List<Hotspot> hotspots = mCatalog.getHotspots().getHotspots().get(mPage);
+		List<Hotspot> hotspots = mCatalog.getHotspots().get(mPage);
 		
 		if (hotspots != null && !hotspots.isEmpty()) {
 			
@@ -63,24 +54,21 @@ public class PageflipBitmapProcessor implements BitmapProcessor {
 			Canvas c = new Canvas(b);
 			
 			Paint p = new Paint();
-			
 			p.setStyle(Paint.Style.STROKE);
 			p.setStrokeWidth(5);
 			
-			int count = 0;
-//			int bw = (int)((double)b.getWidth()*mCatalog.getDimension().getWidth());
-//			int bh = (int)((double)b.getHeight()*mCatalog.getDimension().getWidth());
-			int bw = b.getWidth();
-			int bh = b.getHeight();
+			double bw = b.getWidth();
+			double bh = b.getHeight();
 			for (Hotspot h : hotspots) {
-				p.setColor(mRectColors[count%mRectColors.length]);
-				int left = (int)(h.left*(double)bw);
-				int top = (int)((h.top)*(double)bh);
-				int right = (int)((h.right)*(double)bw);
-				int bottom = (int)((h.bottom)*(double)bh);
-				Rect r = new Rect(left, top, right, bottom);
-				c.drawRect(r, p);
-				count++;
+				if (h.isAreaSignificant(mLandscape)) {
+					p.setColor(h.getColor());
+					int left = (int)(h.left*bw);
+					int top = (int)(h.top*bh);
+					int right = (int)(h.right*bw);
+					int bottom = (int)(h.bottom*bh);
+					Rect r = new Rect(left, top, right, bottom);
+					c.drawRect(r, p);
+				}
 			}
 			
 		}

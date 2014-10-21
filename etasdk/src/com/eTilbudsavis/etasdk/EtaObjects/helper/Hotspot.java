@@ -6,6 +6,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.graphics.Color;
+
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -16,9 +18,14 @@ public class Hotspot implements EtaObject<JSONObject>, Serializable {
 
 	public static final String TAG = Hotspot.class.getSimpleName();
 	
-	private int page = 0;
-
+	/** The default significant area */
+	public static final double SIGNIFICANT_AREA = 0.01d;
+	
+	private int mPage = 0;
+	
 	private Offer mOffer;
+	
+	private boolean mIsSpanningTwoPages = false;
 	
 	/** The top most part of the hotspot, relative to the catalog.dimensions */
 	public double top = Double.MIN_VALUE;
@@ -43,6 +50,8 @@ public class Hotspot implements EtaObject<JSONObject>, Serializable {
 
 	/** The top most part of the hotspot. This is the absolute value */
 	public double absRight = Double.MIN_VALUE;
+	
+	private int mColor = Color.TRANSPARENT;
 	
 	public static Hotspot fromJSON(JSONArray jHotspot) {
 		Hotspot h = new Hotspot();
@@ -108,8 +117,27 @@ public class Hotspot implements EtaObject<JSONObject>, Serializable {
 		left = absLeft/d.getWidth();
 	}
 	
-	public boolean contains(double x, double y) {
+	public boolean inBounds(double x, double y, double minArea, boolean landscape) {
+		return inBounds(x, x) && isAreaSignificant(landscape);
+	}
+	
+	public boolean inBounds(double x, double y) {
 		return top < y && y < bottom && left < x && x < right;
+	}
+	
+	public boolean isAreaSignificant(boolean landscape) {
+		return isAreaSignificant(SIGNIFICANT_AREA, landscape);
+	}
+	
+	public boolean isAreaSignificant(double minArea, boolean landscape) {
+		if (!landscape && mIsSpanningTwoPages) {
+			return getArea() > minArea;
+		}
+		return true;
+	}
+	
+	public double getArea() {
+		return Math.abs(top-bottom) * Math.abs(left-right);
 	}
 	
 	public JSONObject toJSON() {
@@ -126,13 +154,21 @@ public class Hotspot implements EtaObject<JSONObject>, Serializable {
 		}
 		return o;
 	}
+
+	public boolean isDualPage() {
+		return mIsSpanningTwoPages;
+	}
+
+	public void setDualPage(boolean isDualPage) {
+		mIsSpanningTwoPages = isDualPage;
+	}
 	
 	public int getPage() {
-		return page;
+		return mPage;
 	}
 
 	public void setPage(int page) {
-		this.page = page;
+		this.mPage = page;
 	}
 
 	public Offer getOffer() {
@@ -141,6 +177,14 @@ public class Hotspot implements EtaObject<JSONObject>, Serializable {
 	
 	public void setOffer(Offer offer) {
 		mOffer = offer;
+	}
+	
+	public int getColor() {
+		return mColor;
+	}
+	
+	public void setColor(int color) {
+		mColor = color;
 	}
 	
 	@Override
