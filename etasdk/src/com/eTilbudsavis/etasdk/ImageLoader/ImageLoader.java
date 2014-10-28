@@ -1,5 +1,6 @@
 package com.eTilbudsavis.etasdk.ImageLoader;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -53,9 +54,11 @@ public class ImageLoader {
 	}
 	
 	public void displayImage(ImageRequest ir) {
+		ir.add("start-image-request");
+		if (ir.getImageView().getTag()==null) {
+			ir.getImageView().setTag(ir.getUrl());
+		}
 		
-		ir.start();
-		ir.getImageView().setTag(ir.getUrl());
 		if (ir.getBitmapDecoder()==null) {
 			ir.setBitmapDecoder(new DefaultBitmapDecoder());
 		}
@@ -64,9 +67,10 @@ public class ImageLoader {
 		ir.setBitmap(mMemoryCache.get(ir.getUrl()));
 		if(ir.getBitmap() != null) {
 			ir.setLoadSource(LoadSource.MEMORY);
+			ir.add("loaded-from-" + ir.getLoadSource());
 			processAndDisplay(ir);
 		} else {
-			mExecutor.submit(new PhotosLoader(ir));
+			mExecutor.execute(new PhotosLoader(ir));
 			if (ir.getPlaceholderLoading() != 0) {
 				ir.getImageView().setImageResource(ir.getPlaceholderLoading());
 			}
@@ -82,45 +86,48 @@ public class ImageLoader {
 		}
 		
 		public void run() {
-
+			ir.add("running-on-executor");
 			if (imageViewReused(ir)) {
-				ir.finish();
+				ir.finish("imageview-reused");
 				return;
 			}
-
-			try {
+			
+			int retries = 0;
+			while (ir.getBitmap() == null && retries<2) {
 				
-				int retries = 0;
-				while (ir.getBitmap() == null && retries<2) {
+				ir.add("retries-"+retries);
+				
+				try {
 					
-					try {
-						
-						retries++;
-						ir.setBitmap(mFileCache.get(ir));
+					retries++;
+					ir.add("trying-file-cache");
+					ir.setBitmap(mFileCache.get(ir));
+					
+					if (ir.getBitmap() != null) {
 
+						ir.setLoadSource(LoadSource.FILE);
+						ir.add("loaded-from-" + ir.getLoadSource());
+
+					} else {
+
+						ir.add("trying-download");
+						ir.setBitmap(mDownloader.getBitmap(ir));
 						if (ir.getBitmap() != null) {
-
-							ir.setLoadSource(LoadSource.FILE);
-
-						} else {
-							
-							ir.setBitmap(mDownloader.getBitmap(ir.getUrl()));
-							if (ir.getBitmap() != null) {
-								ir.setLoadSource(LoadSource.WEB);
-							}
-
+							ir.setLoadSource(LoadSource.WEB);
+							ir.add("loaded-from-" + ir.getLoadSource());
 						}
 						
-					} catch (OutOfMemoryError t) {
-						mMemoryCache.clear();
 					}
-
+					
+				} catch (OutOfMemoryError t) {
+					ir.add("out-of-memory");
+					mMemoryCache.clear();
+				} catch (IOException e) {
+					ir.add("download-failed");
+					EtaLog.e(TAG, "Download error", e);
 				}
-				
 				addToCache(ir);
-
-			} catch (Throwable th){
-				EtaLog.d(TAG, th.getMessage(), th);
+				
 			}
 			
 			processAndDisplay(ir);
@@ -131,6 +138,7 @@ public class ImageLoader {
 	private void addToCache(ImageRequest ir) {
 		
 		if (ir.getBitmap() == null || ir.getLoadSource() == null) {
+			ir.add("cannot-cache-request");
 			return;
 		}
 		
@@ -152,29 +160,34 @@ public class ImageLoader {
 	
 	private void processAndDisplay(final ImageRequest ir) {
 		
-		if (imageViewReused(ir) || ir.getBitmap() == null) {
-			ir.finish();
+		if (imageViewReusedOrBitmapNull(ir)) {
 			return;
 		}
 		
 		if (ir.getBitmapProcessor() != null) {
 			
-			if (Looper.myLooper() == Looper.getMainLooper()) {
+
+			Runnable processPoster = new Runnable() {
 				
-				mExecutor.execute(new Runnable() {
+				public void run() {
 					
-					public void run() {
+					try {
+						ir.add("processing-bitmap");
 						Bitmap tmp = ir.getBitmapProcessor().process(ir.getBitmap());
+						ir.add("processing-bitmap-done");
 						ir.setBitmap(tmp);
 						display(ir);
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-				});
-				
+				}
+			};
+			
+			ir.add("has-bitmap-processor");
+			if (Looper.myLooper() == Looper.getMainLooper()) {
+				mExecutor.execute(processPoster);
 			} else {
-				Bitmap tmp = ir.getBitmapProcessor().process(ir.getBitmap());
-				ir.setBitmap(tmp);
-				display(ir);
-				
+				processPoster.run();
 			}
 			
 		} else {
@@ -184,27 +197,45 @@ public class ImageLoader {
 	}
 	
 	private void display(final ImageRequest ir) {
+
+//		ir.isAlive("display");
 		
 		Runnable work = new Runnable() {
 			
 			public void run() {
 				
-				if (imageViewReused(ir)) {
-					ir.finish();
+//				ir.isAlive("run-display");
+				if (imageViewReusedOrBitmapNull(ir)) {
 					return;
 				}
 				
-				ir.finish();
+				ir.finish("display-on-UI-thread");
 				ir.getBitmapDisplayer().display(ir);
 			}
 		};
 		
 		if (Looper.myLooper() == Looper.getMainLooper()) {
+//			ir.isAlive("just run");
 			work.run();
 		} else {
+//			ir.isAlive("post run");
+			ir.add("posting-to-UI-thread");
 			mHandler.post(work);
 		}
 		
+	}
+
+	private boolean imageViewReusedOrBitmapNull(ImageRequest ir) {
+		if (imageViewReused(ir)) {
+			ir.finish("imageview-reused");
+			return true;
+		}
+
+		if (ir.getBitmap()==null) {
+			ir.finish("bitmap-is-null");
+			return true;
+		}
+		return false;
 	}
 	
 	/**

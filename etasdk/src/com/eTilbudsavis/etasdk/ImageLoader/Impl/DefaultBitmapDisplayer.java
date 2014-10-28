@@ -10,6 +10,8 @@ public class DefaultBitmapDisplayer implements BitmapDisplayer {
 	
 	public void display(ImageRequest ir) {
 		
+		ir.isAlive("def-displayer");
+		
 		if(ir.getBitmap() != null) {
 			ir.getImageView().setImageBitmap(ir.getBitmap());
 		} else if (ir.getPlaceholderError() != 0) {

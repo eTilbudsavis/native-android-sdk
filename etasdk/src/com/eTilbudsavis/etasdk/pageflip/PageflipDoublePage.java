@@ -1,21 +1,26 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapProcessor;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoTapListener;
 
 public class PageflipDoublePage extends PageflipPage {
 	
+	public static final String TAG = PageflipDoublePage.class.getSimpleName();
+	
 	private Object LOCK = new Object();
-	private int mCount = 0;
+	private AtomicInteger mCount = new AtomicInteger();
 	private Bitmap mPage;
 	private Canvas mCanvas;
+	String mTag;
 	private OnPhotoTapListener mTapListener = new OnPhotoTapListener() {
 		
 		public void onPhotoTap(View view, float x, float y) {
@@ -39,7 +44,12 @@ public class PageflipDoublePage extends PageflipPage {
 	}
 
 	private int getRightPage() {
-		return getPages()[1];
+		try {
+			return getPages()[1];
+		} catch (Exception mE) {
+			EtaLog.d(TAG, "Pages are off... " + PageflipUtils.join(",", getPages()));
+		}
+		return getPages()[0]+1;
 	}
 	
 	private void merge(Bitmap l, Bitmap r) {
@@ -49,47 +59,93 @@ public class PageflipDoublePage extends PageflipPage {
 		
 		synchronized (LOCK) {
 			// Lock to only allow one thread to create the new bitmap
-			if(mPage==null) {
+			
+			int count = 0;
+			while (mPage==null && count < 3) {
+				
+				count++;
+
+				EtaLog.d(TAG, "Count:"+count);
+				
 				int w = b.getWidth();
 				int h = b.getHeight();
-				mPage = Bitmap.createBitmap(w*2, h, Config.ARGB_8888);
-				mCanvas = new Canvas(mPage);
+				try {
+					printHeap();
+					mPage = Bitmap.createBitmap(w*2, h, Config.ARGB_8888);
+					mCanvas = new Canvas(mPage);
+				} catch (OutOfMemoryError e) {
+					e.printStackTrace();
+					
+					mPage = null;
+					System.gc();
+					// lets see if the GC is being caused now
+					try {
+						EtaLog.d(TAG, "sleep 500");
+						Thread.sleep(1000);
+						EtaLog.d(TAG, "done sleeping");
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+				
 			}
+			
 		}
+		
 		// Allow both threads to draw at the same time
 		int left = ( isLeft ? 0 : b.getWidth() );
 		mCanvas.drawBitmap(b, left, 0, null);
-		mCount++;
 		
+	}
+	
+	private void printHeap() {
+
+		Runtime rt = Runtime.getRuntime();
+		long kb = 1024;
+		long free = rt.freeMemory()/kb;
+		long available = rt.totalMemory()/kb;
+		long max = rt.maxMemory()/kb;
+		EtaLog.d(TAG, "Heap[free: " + free + ", available: " + available + ", max: " + max);
 	}
 	
 	PageflipBitmapDisplayer mDisplayer = new PageflipBitmapDisplayer() {
 		
 		public void display(ImageRequest ir) {
-			if (mCount==2) {
+			
+			/*
+			 *  BE AWARE: The bitmap in ImageRequest, have been recycled by the BitmapProcessor.
+			 *  Use the dual-page bitmap instead
+			 */
+			
+//			ir.isAlive("count:"+mCount.get());
+			if (mCount.getAndIncrement()==1) {
 				ir.setBitmap(mPage);
 				super.display(ir);
 			}
 		};
 	};
-	
+
 	@Override
-	public void loadPages() {
-		
-		if (getPhotoView().getDrawable() == null) {
-			
-			runImageloader(getPage(getLeftPage()).getView(), true);
-			
-			runImageloader(getPage(getRightPage()).getView(), false);
-			
-		}
-		
+	public void loadView() {
+		mTag = getPage(getLeftPage()).getView();
+		load(getPage(getLeftPage()).getView(), true);
+		load(getPage(getRightPage()).getView(), false);
+	}
+
+	@Override
+	public void loadZoom() {
+		mTag = getPage(getLeftPage()).getZoom();
+		load(getPage(getLeftPage()).getZoom(), true);
+		load(getPage(getRightPage()).getZoom(), false);
 	}
 	
-	private void runImageloader(String url, boolean left) {
-		ImageRequest r = new ImageRequest(url, new ImageView(getActivity()));
+	private void load(String url, boolean left) {
+		getPhotoView().setTag(mTag);
+		ImageRequest r = new ImageRequest(url, getPhotoView());
 		r.setBitmapDisplayer(mDisplayer);
 		r.setBitmapProcessor(getProcessor(left));
+		
 		addRequest(r);
 	}
 	
@@ -98,15 +154,21 @@ public class PageflipDoublePage extends PageflipPage {
 		return new PageflipBitmapProcessor(getCatalog(), page, isLandscape(), debug) {
 			
 			public Bitmap process(Bitmap b) {
-				b = super.process(b);
-				if (left) {
-					merge(b, null);
-				} else {
-					merge(null, b);
+				try {
+					b = super.process(b);
+					if (left) {
+						merge(b, null);
+					} else {
+						merge(null, b);
+					}
+					b.recycle();
+					// Try to garbage collect... this might not work...
+					System.gc();
+					// Bitmap have been recycled by now, don't use it
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				b.recycle();
-				// Bitmap have been recycled by now, don't use it
-				return null;
+				return b;
 			}
 		};
 	}

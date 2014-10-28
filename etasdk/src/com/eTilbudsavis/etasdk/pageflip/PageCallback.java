@@ -7,9 +7,11 @@ public interface PageCallback {
 	public Catalog getCatalog();
 	
 	public boolean isLandscape();
-
+	
 	public void zoomStart();
 	
 	public void zoomStop();
+	
+	public boolean isPositionSet();
 	
 }

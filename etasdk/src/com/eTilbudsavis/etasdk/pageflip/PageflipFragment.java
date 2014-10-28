@@ -21,7 +21,6 @@ import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Network.Impl.DefaultDebugger;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
@@ -51,17 +50,6 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 	private long mCollectZoomStart = 0;
 	private long mCollectZoomAccumulated = 0;
 	
-	Listener<Catalog> mFillListener = new Listener<Catalog>() {
-		
-		public void onComplete(Catalog c, EtaError error) {
-			if (c != null) {
-				mHandler.post(mAdapterReset);
-			} else {
-				EtaLog.e(TAG, error.getMessage(), error);
-			}
-		}
-	};
-
 	Runnable mAdapterReset = new Runnable() {
 		
 		public void run() {
@@ -101,7 +89,6 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 
 		mCollectViewStart = System.currentTimeMillis();
 		mCollectZoomStart = System.currentTimeMillis();
-		
 		mHandler = new Handler();
 		mLandscape = PageflipUtils.isLandscape(getActivity());
 		mCatalog = (Catalog)getArguments().getSerializable(ARG_CATALOG);
@@ -152,7 +139,14 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 		caf.setLoadPages(mCatalog.getPages()==null);
 		caf.setLoadStore(mCatalog.getStore() == null);
 		AutoFillParams p = new AutoFillParams();
-		caf.prepare(p, mCatalog, null, mFillListener);
+		caf.prepare(p, mCatalog, null, new Listener<Catalog>() {
+			
+			public void onComplete(Catalog c, EtaError error) {
+				if (isAdded()) {
+					mHandler.post(mAdapterReset);
+				}
+			}
+		});
 		caf.execute(Eta.getInstance().getRequestQueue());
 		
 	}
@@ -161,17 +155,17 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		boolean land = PageflipUtils.isLandscape(newConfig);
-//		EtaLog.d(TAG, "onConfigurationChanged[orientation.landscape[" + mLandscape + "->" + land + "]");
 		if (land != mLandscape) {
+			EtaLog.d(TAG, "onConfigurationChanged[orientation.landscape[" + mLandscape + "->" + land + "]");
 			// Get the old page
 			int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
 			// switch to landscape mode
 			mLandscape = land;
 			// set new current position accordingly
-			setPage(pages[0]);
+//			setPage(pages[0]);
+			mCurrentPosition = PageflipUtils.pageToPosition(pages[0], mLandscape);
 			setUpView();
 			ensureCatalog();
-			
 		}
 	}
 	
@@ -231,10 +225,11 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 		// call collecct before changing current position
 		collectView();
 		mCurrentPosition = position;
+		
 		if (mListener != null) {
 			mListener.onPageChange(PageflipUtils.positionToPages(position, mCatalog.getPageCount(), mLandscape));
 		}
-		EtaLog.d(TAG, "onPageSelected:"+position);
+//		EtaLog.d(TAG, "onPageSelected:"+position);
 	}
 	
 	private void collectView() {
@@ -266,7 +261,7 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 		JSONObject body = getCollectData(isView, duration, mLandscape, getPages());
 		String url = Api.Endpoint.catalogCollect(mCatalog.getId());
 		
-		EtaLog.d(TAG, url + ", data: " + body.toString());
+//		EtaLog.d(TAG, url + ", data: " + body.toString());
 		
 		JsonObjectRequest r = new JsonObjectRequest(Method.POST, url, body, new Listener<JSONObject>() {
 
@@ -315,7 +310,7 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 	
 	public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 		boolean isLeft = mCurrentPosition==0;
-		if ( !boundsCalled && (isLeft || mCurrentPosition==mAdapter.getCount()-1 ) && count > 3 && px < 2) {
+		if ( mAdapter != null && !boundsCalled && (isLeft || mCurrentPosition==mAdapter.getCount()-1 ) && count > 3 && px < 2) {
 			if (isLeft) {
 				EtaLog.d(TAG, "outOfBounds.left");
 			} else {
@@ -340,4 +335,7 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 		return mLandscape;
 	}
 	
+	public boolean isPositionSet() {
+		return mPager.getCurrentItem() == mCurrentPosition;
+	}
 }

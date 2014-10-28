@@ -3,6 +3,7 @@ package com.eTilbudsavis.etasdk.pageflip;
 import java.util.List;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -41,16 +42,20 @@ public class PageflipBitmapProcessor implements BitmapProcessor {
 		
 	}
 	
-	protected Bitmap drawDebugRects(Bitmap bitmap) {
+	protected Bitmap drawDebugRects(Bitmap b) {
 		
-		Bitmap b = null;
 		List<Hotspot> hotspots = mCatalog.getHotspots().get(mPage);
 		
 		if (hotspots != null && !hotspots.isEmpty()) {
 			
-			// The given bitmap is immutable, so we'll copy it, and recycle the old one
-			b = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-			bitmap.recycle();
+			if (!b.isMutable()) {
+				// Memory inefficient but need to on older devices
+				Bitmap tmp = b.copy(Config.ARGB_8888, true);
+				b.recycle();
+				System.gc();
+				b = tmp;
+			}
+			
 			Canvas c = new Canvas(b);
 			
 			Paint p = new Paint();

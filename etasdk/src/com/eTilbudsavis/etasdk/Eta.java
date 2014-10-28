@@ -119,7 +119,44 @@ public class Eta {
 		
 		mHandler = new Handler(Looper.getMainLooper());
 		ThreadFactory tf = new DefaultThreadFactory(DEFAULT_THREAD_NAME);
-		mExecutor = Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT, tf);
+		mExecutor = Executors.newFixedThreadPool(1, tf);
+//		mExecutor = new ThreadPoolExecutor(DEFAULT_THREAD_COUNT, 10, 60, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>()) {
+//			
+//			@Override
+//			public <T> Future<T> submit(final Callable<T> task) {
+//				Callable<T> wrappedTask = new Callable<T>() {
+//
+//					public T call() throws Exception {
+//						
+//						try {
+//							return task.call();
+//						} catch (Exception mE) {
+//							mE.printStackTrace();
+//						}
+//						return null;
+//					}
+//					
+//				};
+//				return super.submit(wrappedTask);
+//			}
+//			
+//			@Override
+//			public Future<?> submit(final Runnable task) {
+//				Runnable r = new Runnable() {
+//					
+//					public void run() {
+//						try {
+//							task.run();
+//						} catch (Exception e) {
+//							e.printStackTrace();
+//						}
+//					}
+//				};
+//				
+//				return super.submit(r);
+//			}
+//		};
+		
 		
 		HttpStack stack = null;
         if (Build.VERSION.SDK_INT > 8) {

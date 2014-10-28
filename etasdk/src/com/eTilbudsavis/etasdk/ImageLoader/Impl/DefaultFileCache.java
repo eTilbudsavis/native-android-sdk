@@ -3,6 +3,7 @@ package com.eTilbudsavis.etasdk.ImageLoader.Impl;
 import static android.os.Environment.MEDIA_MOUNTED;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -61,7 +62,6 @@ public class DefaultFileCache implements FileCache {
 		return cacheDir;
 	}
 	
-	@SuppressWarnings("deprecation")
 	private String getFileName(String url) {
 		return URLEncoder.encode(url);
 	}
@@ -86,32 +86,24 @@ public class DefaultFileCache implements FileCache {
 
 	public Bitmap get(ImageRequest ir) {
 		
-		Bitmap b = null;
 		File f = new File(mCacheDir, getFileName(ir.getUrl()));
+		if (!f.exists()) {
+			return null;
+		}
 		
-		if (f.exists()) {
+		Bitmap b = null;
+		FileInputStream fis = null;
+		
+		try {
 			
-			try {
-				RandomAccessFile rf = new RandomAccessFile(f, "r");
-		        try {
-		            // Get and check length
-		            long longlength = f.length();
-		            int length = (int) longlength;
-		            // Read file and return data
-		            byte[] data = new byte[length];
-		            rf.readFully(data);
-		            b = ir.getBitmapDecoder().decode(null, data);
-		        } finally {
-		        	if (rf!=null) {
-			            rf.close();
-		        	}
-		        }
-		        
-			} catch (FileNotFoundException e) {
-				EtaLog.d(TAG, e.getMessage(), e);
-			} catch (IOException e) {
-				EtaLog.d(TAG, e.getMessage(), e);
-			}
+			fis = new FileInputStream(f);
+			b = ir.getBitmapDecoder().decode(ir, fis);
+			fis.close();
+			
+		} catch (FileNotFoundException e) {
+			EtaLog.d(TAG, e.getMessage(), e);
+		} catch (IOException e) {
+			EtaLog.d(TAG, e.getMessage(), e);
 		}
 		
 		return b;

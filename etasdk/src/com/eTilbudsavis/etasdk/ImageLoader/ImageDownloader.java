@@ -18,6 +18,6 @@ public interface ImageDownloader {
 	 * @throws IOException
 	 * @throws OutOfMemoryError
 	 */
-	public Bitmap getBitmap(String url) throws IllegalStateException, IOException, OutOfMemoryError;
+	public Bitmap getBitmap(ImageRequest ir) throws IllegalStateException, IOException, OutOfMemoryError;
 	
 }

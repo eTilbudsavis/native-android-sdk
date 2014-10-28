@@ -1,11 +1,15 @@
 package com.eTilbudsavis.etasdk.ImageLoader;
 
+import java.util.List;
+
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultBitmapDisplayer;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EventLog;
+import com.eTilbudsavis.etasdk.Log.EventLog.Event;
 
 /**
  * The class for requesting images via the ImageLoader.
@@ -23,11 +27,11 @@ public class ImageRequest {
 	private int mPlaceholderError;
 	private BitmapDisplayer mDisplayer;
 	private LoadSource mLoadSource;
-	private long mTimeStart = 0L;
-	private long mTimeLoad = 0L;
 	private boolean mFileCache = true;
 	private boolean mMemoryCache = true;
 	private BitmapDecoder mDecoder;
+	private EventLog mLog = new EventLog();
+	private ImageDebugger mDebugger;
 	
 	@SuppressWarnings("unused")
 	private ImageRequest() {
@@ -40,18 +44,14 @@ public class ImageRequest {
 	}
 	
 	/**
-	 * This method is invoked on {@link ImageLoader#displayImage(ImageRequest) displayImage()}
-	 */
-	public void start() {
-		mTimeStart = System.currentTimeMillis();
-	}
-	
-	/**
 	 * This method is invoked when bitmap loading is complete
 	 */
-	public void finish() {
-		mTimeLoad = System.currentTimeMillis() - mTimeStart;
-//		EtaLog.d(TAG, "source:" + mLoadSource + ", time: " + mTimeLoad + ", " + mUrl);
+	public void finish(String event) {
+		add(event);
+	}
+	
+	public void add(String event) {
+		mLog.add(event);
 	}
 	
 	/**
@@ -124,6 +124,28 @@ public class ImageRequest {
 		return this;
 	}
 	
+	public EventLog getLog() {
+		return mLog;
+	}
+	
+	public void isAlive(String msg) {
+		if (mDebugger != null) {
+			String[] parts = mUrl.split("/");
+			List<Event> e = mLog.getEvents();
+			EtaLog.d(TAG, "alive[" + parts[parts.length-1] + ", msg:" + msg + ", log:" + e.get(e.size()-1).name + "]");
+		}
+		
+	}
+	
+	public ImageDebugger getDebugger() {
+		return mDebugger;
+	}
+	
+	public ImageRequest setDebugger(ImageDebugger d) {
+		this.mDebugger = d;
+		return this;
+	}
+	
 	public boolean useFileCache() {
 		return mFileCache;
 	}
@@ -191,14 +213,6 @@ public class ImageRequest {
 	public ImageRequest setLoadSource(LoadSource source) {
 		this.mLoadSource = source;
 		return this;
-	}
-	
-	/**
-	 * Get the total load time
-	 * @return The load time
-	 */
-	public long getLoadTime() {
-		return mTimeLoad;
 	}
 	
 	public static class Builder {

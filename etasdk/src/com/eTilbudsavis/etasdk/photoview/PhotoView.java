@@ -78,7 +78,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 	private final Matrix mSuppMatrix = new Matrix();
 	private final RectF mDisplayRect = new RectF();
 	private final float[] mMatrixValues = new float[9];
-
+	
 	// Listeners
 	private OnMatrixChangedListener mMatrixChangeListener;
 	private OnPhotoTapListener mPhotoTapListener;
@@ -90,6 +90,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 	private int mScrollEdge = EDGE_BOTH;
 
 	private boolean mZoomEnabled = true;
+	private boolean mAnimating = false;
 	private ScaleType mScaleType = ScaleType.FIT_CENTER;
 
 	public PhotoView(Context context) {
@@ -261,7 +262,11 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 		checkZoomLevels(mMinScale, maximumScale);
 		mMaxScale = maximumScale;
 	}
-
+	
+	public boolean isAnimating() {
+		return mAnimating;
+	}
+	
 	/**
 	 * Register a callback to be invoked when the Photo displayed by this view is long-pressed.
 	 *
@@ -491,7 +496,11 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 		mDrawMatrix.postConcat(mSuppMatrix);
 		return mDrawMatrix;
 	}
-
+	
+	protected Matrix getSupportMatrix() {
+		return mSuppMatrix;
+	}
+	
 	private void cancelFling() {
 		if (null != mCurrentFlingRunnable) {
 			mCurrentFlingRunnable.cancelFling();
@@ -728,7 +737,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			super.setScaleType(ScaleType.MATRIX);
 		}
 	}
-
+	
 	private class AnimatedZoomRunnable implements Runnable {
 
 		private final float mFocalX, mFocalY;
@@ -749,15 +758,17 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			float t = interpolate();
 			float scale = mZoomStart + t * (mZoomEnd - mZoomStart);
 			float deltaScale = scale / getScale();
-
+			
+			mAnimating = t < 1f;
+			
 			mSuppMatrix.postScale(deltaScale, deltaScale, mFocalX, mFocalY);
 			checkAndDisplayMatrix();
 
 			// We haven't hit our target scale yet, so post ourselves again
-			if (t < 1f) {
+			if (mAnimating) {
 				Compat.postOnAnimation(PhotoView.this, this);
 			}
-
+			
 		}
 
 		private float interpolate() {
@@ -767,7 +778,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			return t;
 		}
 	}
-
+	
 	private class FlingRunnable implements Runnable {
 
 		private final ScrollerProxy mScroller;
@@ -814,17 +825,16 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			
 			// If we actually can move, fling the scroller
 			if (startX != maxX || startY != maxY) {
+				mAnimating = true;
 				mScroller.fling(startX, startY, velocityX, velocityY, minX,
 						maxX, minY, maxY, 0, 0);
 			}
 		}
 
 		public void run() {
-			if (mScroller.isFinished()) {
-				return; // remaining post that should not be handled
-			}
-
-			if (mScroller.computeScrollOffset()) {
+			
+			mAnimating = !mScroller.isFinished() && mScroller.computeScrollOffset();
+			if (mAnimating) {
 
 				final int newX = mScroller.getCurrX();
 				final int newY = mScroller.getCurrY();
@@ -843,6 +853,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 				// Post On animation
 				Compat.postOnAnimation(PhotoView.this, this);
 			}
+			
 		}
 	}
 	
@@ -952,11 +963,12 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 
 	public void onScale(float scaleFactor, float focusX, float focusY) {
 		log(TAG, String.format("onScale: scale: %.2f. fX: %.2f. fY: %.2f", scaleFactor, focusX, focusY));
-
+		
 		if (getScale() < mMaxScale || scaleFactor < 1f) {
 			mSuppMatrix.postScale(scaleFactor, scaleFactor, focusX, focusY);
 			checkAndDisplayMatrix();
 		}
+		
 	}
 
 	/**
@@ -989,6 +1001,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			case ACTION_CANCEL:
 			case ACTION_UP:
 				
+				mAnimating = false;
 				// If the user has zoomed less than min scale, zoom back
 				// to min scale
 				if (getScale() < mMinScale) {
@@ -1011,6 +1024,8 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			if (null != mGestureDetector && mGestureDetector.onTouchEvent(event)) {
 				handled = true;
 			}
+			mAnimating = handled;
+			
 		}
 		
 		return handled;

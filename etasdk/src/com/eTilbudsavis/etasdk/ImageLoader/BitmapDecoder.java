@@ -1,5 +1,7 @@
 package com.eTilbudsavis.etasdk.ImageLoader;
 
+import java.io.InputStream;
+
 import android.graphics.Bitmap;
 
 public interface BitmapDecoder {
@@ -11,6 +13,6 @@ public interface BitmapDecoder {
 	 * @param image The image data
 	 * @return A bitmap, or null
 	 */
-	public Bitmap decode(ImageRequest request, byte[] image);
+	public Bitmap decode(ImageRequest ir, InputStream is);
 	
 }
