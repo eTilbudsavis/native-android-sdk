@@ -30,6 +30,8 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 	
 	public static final String TAG = PageflipFragment.class.getSimpleName();
 	
+	private static final long LOW_MEMORY_BOUNDARY = 42 * 1024 * 1024;
+	
 	private static final String ARG_CATALOG = "eta_sdk_pageflip_catalog";
 	private static final String ARG_PAGE = "eta_sdk_pageflip_page";
 	
@@ -44,6 +46,7 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 	private FrameLayout mFrame;
 	private Handler mHandler;
 	private PageflipListener mListener;
+	private boolean mLowMemoryDevice = false;
 	
 	private long mCollectViewSession = System.currentTimeMillis();
 	private long mCollectViewStart = 0;
@@ -82,11 +85,13 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		
+		mLowMemoryDevice = Runtime.getRuntime().maxMemory() < LOW_MEMORY_BOUNDARY;
+		
 		if (getArguments() == null || !getArguments().containsKey(ARG_CATALOG)) {
 //			throw new IllegalArgumentException("No catalog provided");
 			// TODO: Don't throw exception, need to figure out XML solution
 		}
-
+		
 		mCollectViewStart = System.currentTimeMillis();
 		mCollectZoomStart = System.currentTimeMillis();
 		mHandler = new Handler();
@@ -211,6 +216,7 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 	@Override
 	public void onResume() {
 		super.onResume();
+		PU.printHeapInfo(TAG);
 //		PageflipUtils.test();
 		ensureCatalog();
 	}
@@ -337,5 +343,9 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 	
 	public boolean isPositionSet() {
 		return mPager.getCurrentItem() == mCurrentPosition;
+	}
+	
+	public boolean isLowMemory() {
+		return mLowMemoryDevice;
 	}
 }

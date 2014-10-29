@@ -7,29 +7,25 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
 
-import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.photoview.PhotoView;
 
 public class PageflipPhotoView extends PhotoView {
 	
 	private static final String STATE_DISPLAY_MATRIX = "state_display_matrix";
+	private static final float MIN_SCALE_EPSILON = 0.1f;
 
 	private boolean mZoomed = false;
-	
 	private OnZoomChangeListener mZoomChangeListener;
 	private OnMatrixChangedListener mMatrixChangedListener;
 	private OnMatrixChangedListener mMyMatrixChangedListener = new OnMatrixChangedListener() {
 		
 		public void onMatrixChanged(RectF rect) {
-//			EtaLog.d(TAG, "onMatrixChanged");
-			boolean isMinScale = PageflipUtils.almost(getScale(), getMinimumScale(), 0.001f);
+			boolean isMinScale = PageflipUtils.almost(getScale(), getMinimumScale(), MIN_SCALE_EPSILON);
 			setAllowParentInterceptOnEdge(isMinScale);
-			if (!isAnimating()) {
-				if (isMinScale && mZoomed) {
-					zoomChange(false);
-				} else if (!mZoomed && !isMinScale) {
-					zoomChange(true);
-				}
+			if (isMinScale && mZoomed) {
+				zoomChange(false);
+			} else if (!mZoomed && !isMinScale) {
+				zoomChange(true);
 			}
 			if (mMatrixChangedListener!=null) {
 				mMatrixChangedListener.onMatrixChanged(rect);
@@ -38,8 +34,7 @@ public class PageflipPhotoView extends PhotoView {
 	};
 	
 	private void zoomChange(boolean isZoomed) {
-		mZoomed = true;
-		EtaLog.d(TAG, "isZoom:"+isZoomed);
+		mZoomed = isZoomed;
 		if (mZoomChangeListener!=null) {
 			mZoomChangeListener.onZoomChange(isZoomed);
 		}
@@ -66,7 +61,7 @@ public class PageflipPhotoView extends PhotoView {
 	
 	@Override
 	public void setOnMatrixChangeListener(OnMatrixChangedListener listener) {
-		super.setOnMatrixChangeListener(listener);
+		mMatrixChangedListener = listener;
 	}
 	
 	public void setOnZoomListener(OnZoomChangeListener l) {
@@ -93,16 +88,21 @@ public class PageflipPhotoView extends PhotoView {
 		}
 	}
 	
+	public Bitmap getBitmap() {
+		BitmapDrawable d = (BitmapDrawable)getDrawable();
+		if (d != null) {
+			return d.getBitmap();
+		}
+		return null;
+	}
+	
 	@Override
 	public void setImageBitmap(Bitmap bm) {
 		Bundle state = null;
-		BitmapDrawable d = (BitmapDrawable)getDrawable();
-		if (d!=null) {
-			Bitmap b = d.getBitmap();
-			if (b!=null) {
-				state = new Bundle();
-				saveState(state);
-			}
+		Bitmap b = getBitmap();
+		if (b!=null) {
+			state = new Bundle();
+			saveState(state);
 		}
 		// Remove the MatrixChangeListener, as it shouldn't be perceived as a matrix change
 		super.setOnMatrixChangeListener(null);

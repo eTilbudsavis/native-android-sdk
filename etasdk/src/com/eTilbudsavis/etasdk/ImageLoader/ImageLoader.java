@@ -32,9 +32,9 @@ public class ImageLoader {
 	private static ImageLoader mImageloader;
 	
 	private ImageLoader(Eta e) {
-		mMemoryCache = new LruMemoryCache();
-		mFileCache = new DefaultFileCache(e.getContext());
 		mExecutor = e.getExecutor();
+		mMemoryCache = new LruMemoryCache();
+		mFileCache = new DefaultFileCache(e.getContext(), mExecutor);
 		mDownloader = new DefaultImageDownloader();
 		mHandler = new Handler(Looper.getMainLooper());
 	}
@@ -96,27 +96,34 @@ public class ImageLoader {
 			while (ir.getBitmap() == null && retries<2) {
 				
 				ir.add("retries-"+retries);
+				byte[] image = null;
 				
 				try {
 					
 					retries++;
 					ir.add("trying-file-cache");
-					ir.setBitmap(mFileCache.get(ir));
+					image = mFileCache.getByteArray(ir);
 					
-					if (ir.getBitmap() != null) {
-
+					if (image != null) {
+						
 						ir.setLoadSource(LoadSource.FILE);
-						ir.add("loaded-from-" + ir.getLoadSource());
-
+						
 					} else {
-
+						
 						ir.add("trying-download");
-						ir.setBitmap(mDownloader.getBitmap(ir));
-						if (ir.getBitmap() != null) {
+						image = mDownloader.getByteArray(ir);
+						if (image != null) {
 							ir.setLoadSource(LoadSource.WEB);
-							ir.add("loaded-from-" + ir.getLoadSource());
 						}
 						
+					}
+					
+					if (image != null) {
+						Bitmap b = ir.getBitmapDecoder().decode(ir, image);
+						ir.setBitmap(b);
+						ir.add("loaded-from-" + ir.getLoadSource());
+					} else {
+						ir.add("no-image-loaded");
 					}
 					
 				} catch (OutOfMemoryError t) {
@@ -126,7 +133,7 @@ public class ImageLoader {
 					ir.add("download-failed");
 					EtaLog.e(TAG, "Download error", e);
 				}
-				addToCache(ir);
+				addToCache(ir, image);
 				
 			}
 			
@@ -135,25 +142,35 @@ public class ImageLoader {
 		}
 	}
 	
-	private void addToCache(ImageRequest ir) {
+	
+	private void addToCache(ImageRequest ir, byte[] image) {
 		
-		if (ir.getBitmap() == null || ir.getLoadSource() == null) {
+		// This is a bit messy, but i'll cleanup later
+		
+		if (image == null || ir.getBitmap() == null || ir.getLoadSource() == null) {
 			ir.add("cannot-cache-request");
 			return;
 		}
 		
-		// Add to filecache and/or memorycache depending on the source
-		switch (ir.getLoadSource()) {
-			case WEB:
-				if (ir.useFileCache()) {
-					mFileCache.save(ir, ir.getBitmap());
-				}
-			case FILE:
-				if (ir.useMemoryCache()) {
-					mMemoryCache.put(ir.getUrl(), ir.getBitmap());
-				}
-			default:
-				break;
+		LoadSource s = ir.getLoadSource();
+		if (s==LoadSource.WEB) {
+			
+			if (ir.useFileCache()) {
+				ir.add("adding-to-file-cache");
+				mFileCache.save(ir, image);
+			}
+			if (ir.useMemoryCache()) {
+				ir.add("adding-to-memory-cache");
+				mMemoryCache.put(ir.getUrl(), ir.getBitmap());
+			}
+			
+		} else if (s==LoadSource.FILE) {
+			
+			if (ir.useMemoryCache()) {
+				ir.add("adding-to-memory-cache");
+				mMemoryCache.put(ir.getUrl(), ir.getBitmap());
+			}
+			
 		}
 		
 	}

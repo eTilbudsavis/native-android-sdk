@@ -1,6 +1,5 @@
 package com.eTilbudsavis.etasdk.ImageLoader;
 
-import android.graphics.Bitmap;
 
 /**
  * Interface for caching bitmaps to disk.
@@ -13,14 +12,14 @@ public interface FileCache {
 	 * @param id An identifier for the bitmap
 	 * @param b A bitmap to cache
 	 */
-	public void save(ImageRequest ir, Bitmap b);
+	public void save(ImageRequest ir, byte[] b);
 	
 	/**
 	 * Method for getting bitmaps from cache.
 	 * @param id An identifier to search for in cache
 	 * @return A bitmap if one exists, else {@code null}
 	 */
-	public Bitmap get(ImageRequest ir);
+	public byte[] getByteArray(ImageRequest ir);
 	
 	/**
 	 * Method for clearing the cache completely

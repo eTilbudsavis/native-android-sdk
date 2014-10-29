@@ -16,7 +16,7 @@ public class FadeBitmapDisplayer implements BitmapDisplayer {
 	private boolean mFadeFromMemory = true;
 	private boolean mFadeFromFile = true;
 	private boolean mFadeFromWeb = true;
-
+	
 	public FadeBitmapDisplayer() {
 		this(100);
 	}

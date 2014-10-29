@@ -1001,7 +1001,6 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			case ACTION_CANCEL:
 			case ACTION_UP:
 				
-				mAnimating = false;
 				// If the user has zoomed less than min scale, zoom back
 				// to min scale
 				if (getScale() < mMinScale) {
@@ -1024,7 +1023,6 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			if (null != mGestureDetector && mGestureDetector.onTouchEvent(event)) {
 				handled = true;
 			}
-			mAnimating = handled;
 			
 		}
 		

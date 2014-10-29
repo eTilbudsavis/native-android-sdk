@@ -48,6 +48,9 @@ public class ImageRequest {
 	 */
 	public void finish(String event) {
 		add(event);
+		if (mDebugger!=null) {
+			mDebugger.debug(this);
+		}
 	}
 	
 	public void add(String event) {

@@ -14,4 +14,6 @@ public interface PageCallback {
 	
 	public boolean isPositionSet();
 	
+	public boolean isLowMemory();
+	
 }

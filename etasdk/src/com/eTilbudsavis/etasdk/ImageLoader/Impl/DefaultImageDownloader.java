@@ -21,15 +21,17 @@ public class DefaultImageDownloader implements ImageDownloader {
 	private static final int TIMEOUT = 20000;
 	
 	public Bitmap getBitmap(ImageRequest ir) throws IllegalStateException, IOException, OutOfMemoryError {
-		
+		return ir.getBitmapDecoder().decode(ir, getByteArray(ir));
+	}
+	
+	public byte[] getByteArray(ImageRequest ir) throws IllegalStateException, IOException, OutOfMemoryError {
 		URL imageUrl = new URL(ir.getUrl());
 		HttpURLConnection conn = (HttpURLConnection)imageUrl.openConnection();
 		conn.setConnectTimeout(TIMEOUT);
 		conn.setReadTimeout(TIMEOUT);
 		conn.setInstanceFollowRedirects(true);
-//		byte[] image = entityToBytes(conn);
-		Bitmap b = ir.getBitmapDecoder().decode(ir, conn.getInputStream());
-		return b;
+		byte[] image = entityToBytes(conn);
+		return image;
 	}
 	
 	private static byte[] entityToBytes(HttpURLConnection connection) throws IOException {
@@ -51,5 +53,5 @@ public class DefaultImageDownloader implements ImageDownloader {
 		
 		return bytes.toByteArray();
 	}
-	
+
 }

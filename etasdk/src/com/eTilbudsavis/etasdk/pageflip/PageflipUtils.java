@@ -1,14 +1,18 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
 import java.util.Arrays;
+import java.util.List;
 
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class PageflipUtils {
@@ -136,14 +140,43 @@ public class PageflipUtils {
 		return Math.abs(first-second)<epsilon;
 	}
 	
-	public static Bitmap mergeImage(Bitmap leftBitmap, Bitmap rightBitmap) {
-		int w = leftBitmap.getWidth()*2;
-		int h = leftBitmap.getHeight();
-		Bitmap b = Bitmap.createBitmap(w, h, Config.ARGB_8888);
-		Canvas canvas = new Canvas(b);
-		canvas.drawBitmap(leftBitmap, 0, 0, null);
-		canvas.drawBitmap(rightBitmap, (w/2), 0, null);
+	public static Bitmap drawDebugRects(Catalog catalog, int page, boolean landscape, Bitmap b) {
+		
+		List<Hotspot> hotspots = catalog.getHotspots().get(page);
+		
+		if (hotspots != null && !hotspots.isEmpty()) {
+			
+			if (!b.isMutable()) {
+				// Memory inefficient but need to on older devices
+				Bitmap tmp = b.copy(Config.ARGB_8888, true);
+				b.recycle();
+				System.gc();
+				b = tmp;
+			}
+			
+			Canvas c = new Canvas(b);
+			
+			Paint p = new Paint();
+			p.setStyle(Paint.Style.STROKE);
+			p.setStrokeWidth(5);
+			
+			double bw = b.getWidth();
+			double bh = b.getHeight();
+			for (Hotspot h : hotspots) {
+				if (h.isAreaSignificant(landscape)) {
+					p.setColor(h.getColor());
+					int left = (int)(h.left*bw);
+					int top = (int)(h.top*bh);
+					int right = (int)(h.right*bw);
+					int bottom = (int)(h.bottom*bh);
+					Rect r = new Rect(left, top, right, bottom);
+					c.drawRect(r, p);
+				}
+			}
+			
+		}
+		
 		return b;
 	}
-	
+
 }

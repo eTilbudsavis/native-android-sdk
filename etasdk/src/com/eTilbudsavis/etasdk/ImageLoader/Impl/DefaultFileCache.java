@@ -3,15 +3,14 @@ package com.eTilbudsavis.etasdk.ImageLoader.Impl;
 import static android.os.Environment.MEDIA_MOUNTED;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.URLEncoder;
+import java.util.concurrent.ExecutorService;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Environment;
 
 import com.eTilbudsavis.etasdk.Eta;
@@ -25,9 +24,11 @@ public class DefaultFileCache implements FileCache {
 	public static final String TAG = Eta.TAG_PREFIX + DefaultFileCache.class.getSimpleName();
 	
 	private File mCacheDir;
+	private ExecutorService mExecutor;
 	
-	public DefaultFileCache(Context context){
+	public DefaultFileCache(Context context, ExecutorService executor){
 		mCacheDir = getCacheDirectory(context, true);
+		mExecutor = executor;
 		EtaLog.v(TAG, "CacheDir: " + mCacheDir.getAbsolutePath());
 		cleanup();
 	}
@@ -62,55 +63,45 @@ public class DefaultFileCache implements FileCache {
 		return cacheDir;
 	}
 	
+	@SuppressWarnings("deprecation")
 	private String getFileName(String url) {
 		return URLEncoder.encode(url);
 	}
-	
-	public void save(ImageRequest ir, Bitmap b) {
-		FileOutputStream out = null;
-		try {
-			File f = new File(mCacheDir, getFileName(ir.getUrl()));
-			out = new FileOutputStream(f);
-			b.compress(Bitmap.CompressFormat.PNG, 90, out);
-		} catch (Exception e) {
-			EtaLog.d(TAG, e.getMessage(), e);
-		} finally {
-			try{
-				out.close();
-			} catch(Throwable t) {
-				EtaLog.d(TAG, t.getMessage(), t);
+
+	public void save(final ImageRequest ir, final byte[] b) {
+		
+		Runnable r = new Runnable() {
+			
+			public void run() {
+
+				long start = System.currentTimeMillis();
+				File f = new File(mCacheDir, getFileName(ir.getUrl()));
+				FileOutputStream fos = null;
+				if (f.exists()) {
+					f.delete();
+				}
+				try {
+					fos = new FileOutputStream(f);
+					fos.write(b);
+				} catch (IOException e) {
+					EtaLog.d(TAG, e.getMessage(), e);
+				} finally {
+					try{
+						fos.close();
+					} catch(Throwable t) {
+						EtaLog.d(TAG, t.getMessage(), t);
+					}
+				}
+//				EtaLog.d(TAG, "SaveByteArray: " + (System.currentTimeMillis()-start));
 			}
-		}
+		};
+		
+		mExecutor.execute(r);
 		
 	}
-
-	public Bitmap get(ImageRequest ir) {
-		
+	
+	public byte[] getByteArray(ImageRequest ir) {
 		File f = new File(mCacheDir, getFileName(ir.getUrl()));
-		if (!f.exists()) {
-			return null;
-		}
-		
-		Bitmap b = null;
-		FileInputStream fis = null;
-		
-		try {
-			
-			fis = new FileInputStream(f);
-			b = ir.getBitmapDecoder().decode(ir, fis);
-			fis.close();
-			
-		} catch (FileNotFoundException e) {
-			EtaLog.d(TAG, e.getMessage(), e);
-		} catch (IOException e) {
-			EtaLog.d(TAG, e.getMessage(), e);
-		}
-		
-		return b;
-	}
-
-	public byte[] getBytes(String url) {
-		File f = new File(mCacheDir, getFileName(url));
 		byte[] b = null;
 		if (f.exists()) {
 			try {
@@ -146,26 +137,27 @@ public class DefaultFileCache implements FileCache {
 	Runnable cleaner = new Runnable() {
 		
 		public void run() {
-			int count = 0;
 			File[] files = mCacheDir.listFiles();
 			if( files == null ) {
 				return;
 			}
+			int count = 0;
 			for(File f:files) {
-				if ( (System.currentTimeMillis()-f.lastModified()) > WEEK_IN_MILLIS ) {
+				boolean recentlyModified = (System.currentTimeMillis()-f.lastModified()) < WEEK_IN_MILLIS;
+				if ( !recentlyModified ) {
 					count++;
 					f.delete();
 				}
 			}
 			if (count > 0) {
-				EtaLog.v(TAG, "Deleted " + count + " files from FileCache");
+				EtaLog.v(TAG, "Deleted " + count + " files from " + getClass().getSimpleName());
 			}
 		}
 	};
 	
 	public void cleanup(){
 		
-		new Thread(cleaner).start();
+		mExecutor.execute(cleaner);
 		
 	}
 	
