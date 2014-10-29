@@ -5,12 +5,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
+import android.graphics.PointF;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapProcessor;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.photoview.DefaultOnDoubleTapListener;
+import com.eTilbudsavis.etasdk.photoview.PhotoView;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoTapListener;
 
 public class DoublePageFragment extends PageFragment {
@@ -35,6 +39,7 @@ public class DoublePageFragment extends PageFragment {
 				
 			}
 		});
+		getPhotoView().setOnDoubleTapListener(new DoublePageDoubleTapListener(getPhotoView()));
 	};
 	
 	private void reset(String tag) {
@@ -139,4 +144,24 @@ public class DoublePageFragment extends PageFragment {
 		}
 		
 	}
+	
+	public class DoublePageDoubleTapListener extends DefaultOnDoubleTapListener {
+
+		public DoublePageDoubleTapListener(PhotoView photoView) {
+			super(photoView);
+		}
+		
+		@Override
+		public boolean onDoubleTap(MotionEvent ev) {
+			boolean result = super.onDoubleTap(ev);
+			PointF p = eventToXY(ev);
+			if (p != null) {
+				int page = (p.x>0.5) ? getSecondNum() : getFirstNum();
+				getCallback().getWrapperListener().onDoubleClick(getPhotoView(), page);
+			}
+			return result;
+		}
+		
+	}
+	
 }

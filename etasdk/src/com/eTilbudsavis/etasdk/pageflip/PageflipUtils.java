@@ -8,9 +8,11 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
+import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -179,4 +181,28 @@ public class PageflipUtils {
 		return b;
 	}
 
+	/** Get brightness of a specific color */
+	public static Integer getBrightness(Integer color) {
+		return (int) Math.sqrt(
+				Color.red(color) * Color.red(color) * .241 + 
+				Color.green(color) * Color.green(color) * .691 + 
+				Color.blue(color) * Color.blue(color) * .068);
+	}
+	
+	public static boolean isBright(int color) {
+		return getBrightness(color) > 160;
+	}
+	
+	/**
+	 * Get the text color based on the brightness of another color
+	 * @param color
+	 * The color to compare and evaluate
+	 * @return
+	 * A color for text (white, or dark grey)
+	 */
+	public static Integer getTextColor(Integer color, Context c) {
+		int resId = isBright(color) ? R.color.etasdk_text_dark : R.color.etasdk_text_light;
+		return c.getResources().getColor(resId);
+	}
+	
 }

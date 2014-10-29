@@ -8,12 +8,12 @@ public interface PageCallback {
 	
 	public boolean isLandscape();
 	
-	public void zoomStart();
-	
-	public void zoomStop();
+	public void onZoom(boolean start);
 	
 	public boolean isPositionSet();
 	
 	public boolean isLowMemory();
+	
+	public PageflipListener getWrapperListener();
 	
 }

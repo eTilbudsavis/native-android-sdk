@@ -1,11 +1,11 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Set;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -17,20 +17,20 @@ import android.widget.FrameLayout;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
 import com.eTilbudsavis.etasdk.request.impl.CatalogObjectRequest.CatalogAutoFill;
 
-public class PageflipFragment extends Fragment implements OnPageChangeListener, PageCallback {
+public class PageflipFragment extends Fragment implements PageCallback, OnPageChangeListener {
 	
 	public static final String TAG = PageflipFragment.class.getSimpleName();
 	
 	private static final long LOW_MEMORY_BOUNDARY = 42 * 1024 * 1024;
+	private static final double PAGER_SCROLL_FACTOR = 0.5d;
+	private static final int PAGER_ID = 0xfedcba;
 	
 	private static final String ARG_CATALOG = "eta_sdk_pageflip_catalog";
 	private static final String ARG_PAGE = "eta_sdk_pageflip_page";
@@ -45,17 +45,15 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 	private boolean mLandscape = false;
 	private FrameLayout mFrame;
 	private Handler mHandler;
-	private PageflipListener mListener;
+	private PageflipListenerWrapper mWrapperListener = new PageflipListenerWrapper();
 	private boolean mLowMemoryDevice = false;
+	private StatsCollect mCollector;
 	
-	private long mCollectViewSession = System.currentTimeMillis();
-	private long mCollectViewStart = 0;
-	private long mCollectZoomStart = 0;
-	private long mCollectZoomAccumulated = 0;
-	
-	Runnable mAdapterReset = new Runnable() {
+	Runnable mOnCatalogComplete = new Runnable() {
 		
 		public void run() {
+			setBranding();
+			mCollector = new StatsCollectImpl(mCatalog);
 			mAdapter = new PageflipAdapter(getChildFragmentManager(), PageflipFragment.this);
 			mPager.setAdapter(mAdapter);
 			mPager.setCurrentItem(mCurrentPosition);
@@ -92,8 +90,6 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 			// TODO: Don't throw exception, need to figure out XML solution
 		}
 		
-		mCollectViewStart = System.currentTimeMillis();
-		mCollectZoomStart = System.currentTimeMillis();
 		mHandler = new Handler();
 		mLandscape = PageflipUtils.isLandscape(getActivity());
 		mCatalog = (Catalog)getArguments().getSerializable(ARG_CATALOG);
@@ -131,9 +127,13 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 	private void resetPager() {
 		mPager = new PageflipViewPager(getActivity());
 		mPager.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-		mPager.setId(0xfedcba);
-		mPager.setScrollDurationFactor(0.5);
+		mPager.setId(PAGER_ID);
+		mPager.setScrollDurationFactor(PAGER_SCROLL_FACTOR);
 		mPager.setOnPageChangeListener(this);
+	}
+	
+	private void setBranding() {
+		mFrame.setBackgroundColor(mCatalog.getBranding().getColor());
 	}
 	
 	private void ensureCatalog() {
@@ -147,8 +147,21 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 		caf.prepare(p, mCatalog, null, new Listener<Catalog>() {
 			
 			public void onComplete(Catalog c, EtaError error) {
-				if (isAdded()) {
-					mHandler.post(mAdapterReset);
+				if (!isAdded()) {
+					return;
+				}
+				if ( c!=null && c.getPages()!=null && c.getHotspots()!=null ) {
+					if (Looper.getMainLooper() == Looper.myLooper()) {
+						mOnCatalogComplete.run();
+					} else {
+						mHandler.post(mOnCatalogComplete);
+					}
+				} else {
+					
+					EtaLog.d(TAG, error.toJSON().toString());
+					// TODO improve error stuff 1 == network error
+					mWrapperListener.onError(error);
+					
 				}
 			}
 		});
@@ -175,17 +188,21 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 	}
 	
 	public PageflipListener getListener() {
-		return mListener;
+		return mWrapperListener.getListener();
+	}
+	
+	public PageflipListener getWrapperListener() {
+		return mWrapperListener;
 	}
 	
 	public void setPageflipListener(PageflipListener l) {
-		mListener = l;
+		mWrapperListener.setListener(l);;
 	}
 	
 	public int[] getPages() {
 		return PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
 	}
-
+	
 	public void setPage(int page) {
 		if (PageflipUtils.isValidPage(mCatalog, page)) {
 			setPosition(PageflipUtils.pageToPosition(page, mLandscape));
@@ -216,8 +233,9 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 	@Override
 	public void onResume() {
 		super.onResume();
-		PU.printHeapInfo(TAG);
-//		PageflipUtils.test();
+		if (mCatalog!=null) {
+			setBranding();
+		}
 		ensureCatalog();
 	}
 	
@@ -227,112 +245,35 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 		super.onPause();
 	}
 	
+	int mOutOfBoundsPX = 0;
+	int mOutOfBoundsCount = 0;
+	boolean mOutOfBoundsCalled = false;
+	
 	public void onPageSelected(int position) {
-		// call collecct before changing current position
-		collectView();
+		mCollector.collectView(mLandscape, getPages());
 		mCurrentPosition = position;
-		
-		if (mListener != null) {
-			mListener.onPageChange(PageflipUtils.positionToPages(position, mCatalog.getPageCount(), mLandscape));
-		}
-//		EtaLog.d(TAG, "onPageSelected:"+position);
+		mWrapperListener.onPageChange(PageflipUtils.positionToPages(position, mCatalog.getPageCount(), mLandscape));
 	}
-	
-	private void collectView() {
-		long now = System.currentTimeMillis();
-		long duration = (now - mCollectViewStart) - mCollectZoomAccumulated;
-		mCollectViewStart = now;
-		mCollectZoomAccumulated = 0;
-		collect(true, duration);
-	}
-	
-	public void zoomStart() {
-		mCollectZoomStart = System.currentTimeMillis();
-		if (mListener!=null) {
-			mListener.onZoom(getPages(), true);
-		}
-	}
-	
-	public void zoomStop() {
-		long duration = System.currentTimeMillis() - mCollectZoomStart;
-		mCollectZoomAccumulated += duration;
-		collect(false, duration);
-		if (mListener!=null) {
-			mListener.onZoom(getPages(), false);
-		}
-	}
-	
-	private void collect(boolean isView, long duration) {
-
-		JSONObject body = getCollectData(isView, duration, mLandscape, getPages());
-		String url = Api.Endpoint.catalogCollect(mCatalog.getId());
-		
-//		EtaLog.d(TAG, url + ", data: " + body.toString());
-		
-		JsonObjectRequest r = new JsonObjectRequest(Method.POST, url, body, new Listener<JSONObject>() {
-
-			public void onComplete(JSONObject response, EtaError error) {
-				if (response!= null) {
-//					EtaLog.d(TAG, response.toString());
-				} else {
-					EtaLog.d(TAG, error.toJSON().toString());
-				}
-			}
-		});
-		Eta.getInstance().add(r);
-		
-	}
-	
-	private JSONObject getCollectData(boolean isView, long ms, boolean isLandscape, int[] pages) {
-		JSONObject o = new JSONObject();
-		try {
-			o.put("type", isView ? "view" : "zoom");
-			o.put("ms", ms);
-			o.put("orientation", isLandscape ? "landscape" : "portrait");
-			o.put("pages", PageflipUtils.join(",", pages));
-			o.put("view_session", mCollectViewSession);
-		} catch (JSONException e) {
-			EtaLog.d(TAG, e.getMessage(), e);
-		}
-		return o;
-	}
-	
-	int px = 0;
-	int count = 0;
-	boolean boundsCalled = false;
-	public void onPageScrollStateChanged(int state) {
-		if (state == ViewPager.SCROLL_STATE_IDLE) {
-			px = 0;
-			count = 0;
-			boundsCalled = false;
-		}
-		if (mListener != null) {
-			mListener.onDragStateChanged(state);
-		}
-//		EtaLog.d(TAG, "onPageScrollStateChanged:"+state);
-		
-	}
-	
 	
 	public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 		boolean isLeft = mCurrentPosition==0;
-		if ( mAdapter != null && !boundsCalled && (isLeft || mCurrentPosition==mAdapter.getCount()-1 ) && count > 3 && px < 2) {
-			if (isLeft) {
-				EtaLog.d(TAG, "outOfBounds.left");
-			} else {
-				EtaLog.d(TAG, "outOfBounds.right");
-			}
-			if (mListener != null) {
-				mListener.onOutOfBounds();
-			}
-			boundsCalled = true;
+		if ( mAdapter != null && !mOutOfBoundsCalled && (isLeft || mCurrentPosition==mAdapter.getCount()-1 ) && mOutOfBoundsCount > 3 && mOutOfBoundsPX < 2) {
+			mWrapperListener.onOutOfBounds(isLeft);
+			mOutOfBoundsCalled = true;
 		}
-		count++;
-		px += positionOffsetPixels;
-//		String text = "onPageScrolled: pos:%s, posOfffset:%.2f, posOffsetPx:%s";
-//		EtaLog.d(TAG, String.format(text, position, positionOffset, positionOffsetPixels));
+		mOutOfBoundsCount++;
+		mOutOfBoundsPX += positionOffsetPixels;
 	}
-
+	
+	public void onPageScrollStateChanged(int state) {
+		if (state == ViewPager.SCROLL_STATE_IDLE) {
+			mOutOfBoundsPX = 0;
+			mOutOfBoundsCount = 0;
+			mOutOfBoundsCalled = false;
+		}
+		mWrapperListener.onDragStateChanged(state);
+	}
+	
 	public Catalog getCatalog() {
 		return mCatalog;
 	}
@@ -348,4 +289,74 @@ public class PageflipFragment extends Fragment implements OnPageChangeListener, 
 	public boolean isLowMemory() {
 		return mLowMemoryDevice;
 	}
+	
+	public void onZoom(boolean zoomIn) {
+		mCollector.collectZoom(zoomIn, mLandscape, getPages());
+		mWrapperListener.onZoom(getPages(), zoomIn);
+	}
+	
+	protected class PageflipListenerWrapper implements PageflipListener {
+		
+		protected PageflipListener mListener;
+		private static final boolean LOG = true;
+		
+		private boolean post() {
+			return mListener != null;
+		}
+		
+		public void setListener(PageflipListener l) {
+			mListener = l;
+		}
+		
+		public PageflipListener getListener() {
+			return mListener;
+		}
+		
+		public void onZoom(int[] pages, boolean zoonIn) {
+			log("onZoom.pages: " + PageflipUtils.join(",", pages) + ", zoomIn: " + zoonIn);
+			if (post()) mListener.onZoom(pages, zoonIn);
+		}
+		
+		public void onPageChange(int[] pages) {
+			log("onPageChange: " + PageflipUtils.join(",", pages));
+			if (post()) mListener.onPageChange(pages);
+		}
+		
+		public void onOutOfBounds(boolean left) {
+			log("onOutOfBounds." + (left ? "left" : "right"));
+			if (post()) mListener.onOutOfBounds(left);
+		}
+		
+		public void onHotspotClick(Set<Hotspot> hotspots) {
+			log("onHotspotClick.size: " + hotspots.size());
+			if (post()) mListener.onHotspotClick(hotspots);
+		}
+		
+		public void onError(EtaError error) {
+			log("onError: " + error.toJSON().toString());
+			if (post()) mListener.onError(error);
+		}
+		
+		public void onDragStateChanged(int state) {
+			log("onDragStateChanged: " + state);
+			if (post()) mListener.onDragStateChanged(state);
+		}
+		
+		public void onDoubleClick(View v, int page) {
+			log("onDoubleClick.page: " + page);
+			if (post()) mListener.onDoubleClick(v, page);
+		}
+		
+		public void onClick(View v, int page) {
+			log("onClick.page: " + page);
+			if (post()) mListener.onClick(v, page);
+		}
+		
+		private void log(String message) {
+			if (LOG) {
+				EtaLog.d(TAG, message);
+			}
+		}
+	}
+
 }

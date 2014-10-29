@@ -1,8 +1,12 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
+import android.graphics.PointF;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
+import com.eTilbudsavis.etasdk.photoview.DefaultOnDoubleTapListener;
+import com.eTilbudsavis.etasdk.photoview.PhotoView;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoTapListener;
 
 public class SinglePageFragment extends PageFragment {
@@ -15,6 +19,7 @@ public class SinglePageFragment extends PageFragment {
 				onClick(getFirstNum(), x, y);
 			}
 		});
+		getPhotoView().setOnDoubleTapListener(new SinglePageDoubleTapListener(getPhotoView()));
 	};
 	
 	@Override
@@ -37,6 +42,24 @@ public class SinglePageFragment extends PageFragment {
 		ir.setBitmapDisplayer(new PageFadeBitmapDisplayer());
 		ir.setBitmapDecoder(new LowMemoryDecoder(sampleSize));
 		addRequest(ir);
+	}
+
+	public class SinglePageDoubleTapListener extends DefaultOnDoubleTapListener {
+
+		public SinglePageDoubleTapListener(PhotoView photoView) {
+			super(photoView);
+		}
+		
+		@Override
+		public boolean onDoubleTap(MotionEvent ev) {
+			boolean result = super.onDoubleTap(ev);
+			PointF p = eventToXY(ev);
+			if (p != null) {
+				getCallback().getWrapperListener().onDoubleClick(getPhotoView(), getFirstNum());
+			}
+			return result;
+		}
+		
 	}
 	
 }

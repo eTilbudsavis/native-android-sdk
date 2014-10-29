@@ -6,18 +6,25 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
+import com.eTilbudsavis.etasdk.ImageLoader.BitmapDisplayer;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
-import com.eTilbudsavis.etasdk.ImageLoader.Impl.FadeBitmapDisplayer;
-import com.eTilbudsavis.etasdk.pageflip.PageflipPhotoView.OnZoomChangeListener;
+import com.eTilbudsavis.etasdk.ImageLoader.LoadSource;
+import com.eTilbudsavis.etasdk.pageflip.ZoomPhotoView.OnZoomChangeListener;
+import com.eTilbudsavis.etasdk.photoview.DefaultOnDoubleTapListener;
+import com.eTilbudsavis.etasdk.photoview.PhotoView;
 
 public abstract class PageFragment extends Fragment {
 	
@@ -29,8 +36,9 @@ public abstract class PageFragment extends Fragment {
 	protected static final String ARG_PAGE = "eta_sdk_pageflip_page_page";
 	
 	private int[] mPages;
-	private PageflipPhotoView mPhotoView;
+	private ZoomPhotoView mPhotoView;
 	private ProgressBar mProgress;
+	private TextView mPageNum;
 	private PageCallback mCallback;
 	private boolean mHasZoomImage = false;
 	
@@ -55,29 +63,36 @@ public abstract class PageFragment extends Fragment {
 		super.onCreateView(inflater, container, savedInstanceState);
 		
 		View v = inflater.inflate(R.layout.etasdk_layout_page, container, false);
-		mPhotoView = (PageflipPhotoView) v.findViewById(R.id.etasdk_pageflip_photoview);
+		mPhotoView = (ZoomPhotoView) v.findViewById(R.id.etasdk_pageflip_photoview);
+		mPageNum = (TextView) v.findViewById(R.id.etasdk_pageflip_pagenum);
+		mProgress = (ProgressBar) v.findViewById(R.id.etasdk_pageflip_loader);
+		
 		mPhotoView.setMaximumScale(MAX_SCALE);
 		mPhotoView.setOnZoomListener(new OnZoomChangeListener() {
 			
 			public void onZoomChange(boolean isZoomed) {
-				if (isZoomed) {
-					if (!mHasZoomImage) {
-						mHasZoomImage = true;
-						loadZoom();
-					}
-					mCallback.zoomStart();
-				} else {
-					mCallback.zoomStop();
+				if (isZoomed && !mHasZoomImage) {
+					mHasZoomImage = true;
+					loadZoom();
 				}
+				mCallback.onZoom(isZoomed);
 			}
 		});
-		
-		mProgress = (ProgressBar) v.findViewById(R.id.etasdk_pageflip_loader);
-		
-		mPhotoView.setVisibility(View.GONE);
-		mProgress.setVisibility(View.VISIBLE);
-		
+		mPageNum.setText(PageflipUtils.join("-", mPages));
+		int brandingColor = getCallback().getCatalog().getBranding().getColor();
+		int complimentColor = PageflipUtils.getTextColor(brandingColor, getActivity());
+		mPageNum.setTextColor(complimentColor);
+		toggleContentVisibility(true);
 		return v;
+	}
+	
+	private void toggleContentVisibility(boolean isLoading) {
+		int content = isLoading ? View.GONE : View.VISIBLE;
+		int loader = isLoading ? View.VISIBLE : View.INVISIBLE;
+		mPhotoView.setVisibility(content);
+		mProgress.setVisibility(loader);
+		mPageNum.setVisibility(loader);
+		
 	}
 	
 	@Override
@@ -94,12 +109,14 @@ public abstract class PageFragment extends Fragment {
 	
 	protected void onClick(int page, float x, float y) {
 		Set<Hotspot> list = mCallback.getCatalog().getHotspots().getHotspots(page, x, y, mCallback.isLandscape());
-		for (Hotspot h : list) {
-			Toast.makeText(getActivity(), h.getOffer().getHeading(), Toast.LENGTH_SHORT).show();
+		if (list.isEmpty()) {
+			getCallback().getWrapperListener().onClick(mPhotoView, page);
+		} else {
+			getCallback().getWrapperListener().onHotspotClick(list);
 		}
 	}
 	
-	protected PageflipPhotoView getPhotoView() {
+	protected ZoomPhotoView getPhotoView() {
 		return mPhotoView;
 	}
 	
@@ -161,11 +178,34 @@ public abstract class PageFragment extends Fragment {
 		super.onPause();
 	}
 	
-	public class PageFadeBitmapDisplayer extends FadeBitmapDisplayer {
-		
-		public PageFadeBitmapDisplayer() {
-			super(FADE_IN_DURATION);
+	public class PageFadeBitmapDisplayer implements BitmapDisplayer {
+
+		private boolean mFadeFromMemory = true;
+		private boolean mFadeFromFile = false;
+		private boolean mFadeFromWeb = false;
+
+		public void display(ImageRequest ir) {
+			
+			if(ir.getBitmap() != null) {
+				mPhotoView.setImageBitmap(ir.getBitmap());
+			} else if (ir.getPlaceholderError() != 0) {
+				mPhotoView.setImageResource(ir.getPlaceholderError());
+			}
+			
+			toggleContentVisibility(false);
+			
+			if ( (ir.getLoadSource() == LoadSource.WEB && mFadeFromWeb) ||
+					(ir.getLoadSource() == LoadSource.FILE && mFadeFromFile) ||
+					(ir.getLoadSource() == LoadSource.MEMORY && mFadeFromMemory) ) {
+
+				AlphaAnimation fadeImage = new AlphaAnimation(0, 1);
+				fadeImage.setDuration(FADE_IN_DURATION);
+				fadeImage.setInterpolator(new DecelerateInterpolator());
+				mPhotoView.startAnimation(fadeImage);
+				
+			}
 		}
+
 	}
 	
 }

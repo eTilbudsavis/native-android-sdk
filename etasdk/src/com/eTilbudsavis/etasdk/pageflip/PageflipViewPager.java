@@ -12,6 +12,7 @@ import android.widget.Scroller;
 public class PageflipViewPager extends ViewPager {
 	
 	public static final String TAG = PageflipViewPager.class.getSimpleName();
+	
 	private ScrollerCustomDuration mScroller = null;
 	
 	public PageflipViewPager(Context context) {

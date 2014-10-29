@@ -9,7 +9,7 @@ import android.util.AttributeSet;
 
 import com.eTilbudsavis.etasdk.photoview.PhotoView;
 
-public class PageflipPhotoView extends PhotoView {
+public class ZoomPhotoView extends PhotoView {
 	
 	private static final String STATE_DISPLAY_MATRIX = "state_display_matrix";
 	private static final float MIN_SCALE_EPSILON = 0.1f;
@@ -40,17 +40,17 @@ public class PageflipPhotoView extends PhotoView {
 		}
 	}
 	
-	public PageflipPhotoView(Context context) {
+	public ZoomPhotoView(Context context) {
 		super(context);
 		init();
 	}
 
-	public PageflipPhotoView(Context context, AttributeSet attrs) {
+	public ZoomPhotoView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init();
 	}
 
-	public PageflipPhotoView(Context context, AttributeSet attrs, int defStyle) {
+	public ZoomPhotoView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		init();
 	}

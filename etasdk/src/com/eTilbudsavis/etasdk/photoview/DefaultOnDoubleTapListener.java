@@ -1,5 +1,6 @@
 package com.eTilbudsavis.etasdk.photoview;
 
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -25,6 +26,29 @@ public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapLi
     	setPhotoView(photoView);
     }
     
+    protected PointF eventToXY(MotionEvent e) {
+    	PointF p = null;
+    	try {
+        	final RectF displayRect = mPhotoView.getDisplayRect();
+        	if (null == displayRect) {
+        		return p;
+        	}
+
+        	final float x = e.getX();
+        	final float y = e.getY();
+
+        	// Check to see if the user tapped on the photo
+        	if (displayRect.contains(x, y)) {
+        		p = new PointF();
+        		p.x = (x - displayRect.left) / displayRect.width();
+        		p.y = (y - displayRect.top) / displayRect.height();
+        	}
+    	} catch (ArrayIndexOutOfBoundsException ex) {
+    		// Can sometimes happen when getX() and getY() is called
+    	}
+    	return p;
+    }
+    
     /**
      * Allows to change PhotoViewAttacher within range of single instance
      *
@@ -39,23 +63,11 @@ public class DefaultOnDoubleTapListener implements GestureDetector.OnDoubleTapLi
             return false;
         
         if (null != mPhotoView.getOnPhotoTapListener()) {
-            final RectF displayRect = mPhotoView.getDisplayRect();
-
-            if (null != displayRect) {
-                final float x = e.getX(), y = e.getY();
-
-                // Check to see if the user tapped on the photo
-                if (displayRect.contains(x, y)) {
-
-                    float xResult = (x - displayRect.left)
-                            / displayRect.width();
-                    float yResult = (y - displayRect.top)
-                            / displayRect.height();
-
-                    mPhotoView.getOnPhotoTapListener().onPhotoTap(mPhotoView, xResult, yResult);
-                    return true;
-                }
-            }
+        	PointF p = eventToXY(e);
+        	if (p!=null) {
+                mPhotoView.getOnPhotoTapListener().onPhotoTap(mPhotoView, p.x, p.y);
+                return true;
+        	}
         }
         if (null != mPhotoView.getOnViewTapListener()) {
         	mPhotoView.getOnViewTapListener().onViewTap(mPhotoView, e.getX(), e.getY());
