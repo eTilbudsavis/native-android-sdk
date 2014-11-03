@@ -1,12 +1,12 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
-import android.graphics.PointF;
-import android.view.MotionEvent;
+import android.graphics.Bitmap;
 import android.view.View;
 
+import com.eTilbudsavis.etasdk.ImageLoader.BitmapProcessor;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
-import com.eTilbudsavis.etasdk.photoview.DefaultOnDoubleTapListener;
-import com.eTilbudsavis.etasdk.photoview.PhotoView;
+import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoDoubleClickListener;
+import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoLongClickListener;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoTapListener;
 
 public class SinglePageFragment extends PageFragment {
@@ -16,10 +16,21 @@ public class SinglePageFragment extends PageFragment {
 		getPhotoView().setOnPhotoTapListener(new OnPhotoTapListener() {
 
 			public void onPhotoTap(View view, float x, float y) {
-				onClick(getFirstNum(), x, y);
+				onSingleClick(getFirstNum(), x, y);
 			}
 		});
-		getPhotoView().setOnDoubleTapListener(new SinglePageDoubleTapListener(getPhotoView()));
+		getPhotoView().setOnPhotoDoubleClickListener(new OnPhotoDoubleClickListener() {
+			
+			public void onPhotoTap(View view, float x, float y) {
+				onDoubleClick(getFirstNum(), x, y);
+			}
+		});
+		getPhotoView().setOnPhotoLongClickListener(new OnPhotoLongClickListener() {
+			
+			public void onPhotoTap(View view, float x, float y) {
+				onLongClick(getFirstNum(), x, y);
+			}
+		});
 	};
 	
 	@Override
@@ -41,25 +52,8 @@ public class SinglePageFragment extends PageFragment {
 	private void load(ImageRequest ir, int sampleSize) {
 		ir.setBitmapDisplayer(new PageFadeBitmapDisplayer());
 		ir.setBitmapDecoder(new LowMemoryDecoder(sampleSize));
+		ir.setBitmapProcessor(new PageBitmapProcessor(getFirstNum()));
 		addRequest(ir);
-	}
-
-	public class SinglePageDoubleTapListener extends DefaultOnDoubleTapListener {
-
-		public SinglePageDoubleTapListener(PhotoView photoView) {
-			super(photoView);
-		}
-		
-		@Override
-		public boolean onDoubleTap(MotionEvent ev) {
-			boolean result = super.onDoubleTap(ev);
-			PointF p = eventToXY(ev);
-			if (p != null) {
-				getCallback().getWrapperListener().onDoubleClick(getPhotoView(), getFirstNum());
-			}
-			return result;
-		}
-		
 	}
 	
 }

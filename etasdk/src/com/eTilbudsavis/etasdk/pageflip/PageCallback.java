@@ -1,5 +1,7 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
+import android.view.View;
+
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 
 public interface PageCallback {
@@ -8,7 +10,7 @@ public interface PageCallback {
 	
 	public boolean isLandscape();
 	
-	public void onZoom(boolean start);
+	public void onZoom(View v, boolean start);
 	
 	public boolean isPositionSet();
 	

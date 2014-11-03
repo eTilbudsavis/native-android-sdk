@@ -5,44 +5,73 @@ import java.util.concurrent.atomic.AtomicInteger;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
-import android.graphics.PointF;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.eTilbudsavis.etasdk.ImageLoader.BitmapProcessor;
+import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.photoview.DefaultOnDoubleTapListener;
-import com.eTilbudsavis.etasdk.photoview.PhotoView;
+import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoDoubleClickListener;
+import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoLongClickListener;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoTapListener;
 
 public class DoublePageFragment extends PageFragment {
 	
 	public static final String TAG = DoublePageFragment.class.getSimpleName();
-	
+
+	private Object LOCK = new Object();
 	private AtomicInteger mCount = new AtomicInteger();
 	private Bitmap mPage;
 	private Canvas mCanvas;
+	private boolean mClearBitmap = false;
 	
 	public void onResume() {
 		super.onResume();
 		getPhotoView().setOnPhotoTapListener(new OnPhotoTapListener() {
 			
 			public void onPhotoTap(View view, float x, float y) {
-				
-				if (x>0.5) {
-					onClick(getSecondNum(), ((float)(x-0.5)*2) , y);
-				} else {
-					onClick(getFirstNum(), x*2, y);
-				}
-				
+				Converter c = new Converter(x, y);
+				onSingleClick(c.page, c.x , c.y);
 			}
 		});
-		getPhotoView().setOnDoubleTapListener(new DoublePageDoubleTapListener(getPhotoView()));
+		getPhotoView().setOnPhotoDoubleClickListener(new OnPhotoDoubleClickListener() {
+			
+			public void onPhotoTap(View view, float x, float y) {
+				Converter c = new Converter(x, y);
+				onDoubleClick(c.page, c.x , c.y);
+			}
+		});
+		getPhotoView().setOnPhotoLongClickListener(new OnPhotoLongClickListener() {
+			
+			public void onPhotoTap(View view, float x, float y) {
+				Converter c = new Converter(x, y);
+				onLongClick(c.page, c.x , c.y);
+			}
+		});
 	};
 	
+	private class Converter {
+		int page;
+		float x;
+		float y;
+		public Converter(float x, float y) {
+
+			if (x>0.5f) {
+				this.page = getSecondNum();
+				this.x = (x-0.5f)*2;
+				this.y = y;
+			} else {
+				this.page = getFirstNum();
+				this.x = x*2;
+				this.y = y;
+			}
+			
+		}
+	}
+	
 	private void reset(String tag) {
+		mClearBitmap = true;
 		mPage = null;
 		mCount = new AtomicInteger();
 		mCanvas = null;
@@ -74,23 +103,35 @@ public class DoublePageFragment extends PageFragment {
 		addRequest(r);
 	}
 	
-	public class DoublePageProcessor implements BitmapProcessor {
+	public class DoublePageProcessor extends PageBitmapProcessor {
 		
 		private boolean mLeft = true;
 		
 		public DoublePageProcessor(boolean leftSide) {
+			super(leftSide?getFirstNum():getSecondNum());
 			mLeft = leftSide;
 		}
 		
 		public Bitmap process(Bitmap b) {
-			if (mLeft) {
-				merge(b, null);
-			} else {
-				merge(null, b);
+			
+			synchronized (LOCK) {
+				
+				b = super.process(b);
+				
+				if (mLeft) {
+					merge(b, null);
+				} else {
+					merge(null, b);
+				}
+				
+				/* 
+				 * Recycle the old bitmap, and try to garbage collect...
+				 * (garbage collection can't be forced)
+				 */
+				b.recycle();
+				System.gc();
+				
 			}
-			// Recycle the old bitmap, and try to garbage collect... (garbage collection can't be forced)
-			b.recycle();
-			System.gc();
 			return b;
 		}
 
@@ -98,70 +139,71 @@ public class DoublePageFragment extends PageFragment {
 			
 			boolean isLeft = l!=null;
 			Bitmap b = (isLeft?l:r);
-			createFullPage(b);
-			int left = ( isLeft ? 0 : b.getWidth() );
-			mCanvas.drawBitmap(b, left, 0, null);
+			createDoublePage(b);
+			if (mPage != null) {
+				int left = ( isLeft ? 0 : b.getWidth() );
+				mCanvas.drawBitmap(b, left, 0, null);
+			}
 			
 		}
 		
-		private synchronized void createFullPage(Bitmap b) {
-			// Lock to only allow one thread to create the new bitmap
+		private void createDoublePage(Bitmap b) {
 			
-			int count = 0;
-			while (mPage==null && count < 3) {
-				count++;
+			boolean allowRetry = true;
+			while (mPage==null && allowRetry) {
+				
 				int w = b.getWidth();
 				int h = b.getHeight();
 				try {
 					mPage = Bitmap.createBitmap(w*2, h, Config.ARGB_8888);
 					mCanvas = new Canvas(mPage);
 				} catch (OutOfMemoryError e) {
-					// TODO What to do about this?
-					EtaLog.e(TAG, e.getMessage(), e);
-					System.gc();
+					
+					if (allowRetry) {
+						allowRetry = false;
+						EtaLog.e(TAG, e.getMessage(), e);
+						try {
+							// Try to clear up some memory
+							Eta.getInstance().getRequestQueue().clear();
+							ImageLoader.getInstance().getMemoryCache().clear();
+							// 'force' a GC
+							Runtime.getRuntime().gc();
+							// Wait, and hope for the best
+							Thread.sleep(1000);
+						} catch (InterruptedException e1) {
+							EtaLog.e(TAG, "Sleep failed");
+						}
+					} else {
+						throw e;
+					}
+					
 				}
 				
 			}
-
+			
 		}
 		
 	}
 	
 	public class DoublePageDisplayer extends PageFadeBitmapDisplayer {
-		
+
 		@Override
 		public void display(ImageRequest ir) {
 			
 			if (mCount.getAndIncrement()==1) {
-				Bitmap b = getPhotoView().getBitmap();
-				if (b!=null && !b.isRecycled()) {
-					b.recycle();
+				if (mClearBitmap) {
+					mClearBitmap = false;
+					Bitmap b = getPhotoView().getBitmap();
+					if (b!=null && !b.isRecycled()) {
+						b.recycle();
+					}
 				}
 				ir.setBitmap(mPage);
 				super.display(ir);
 			}
 			
 		}
-		
-	}
-	
-	public class DoublePageDoubleTapListener extends DefaultOnDoubleTapListener {
 
-		public DoublePageDoubleTapListener(PhotoView photoView) {
-			super(photoView);
-		}
-		
-		@Override
-		public boolean onDoubleTap(MotionEvent ev) {
-			boolean result = super.onDoubleTap(ev);
-			PointF p = eventToXY(ev);
-			if (p != null) {
-				int page = (p.x>0.5) ? getSecondNum() : getFirstNum();
-				getCallback().getWrapperListener().onDoubleClick(getPhotoView(), page);
-			}
-			return result;
-		}
-		
 	}
 	
 }

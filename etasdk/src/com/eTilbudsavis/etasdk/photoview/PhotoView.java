@@ -25,13 +25,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Matrix.ScaleToFit;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.FloatMath;
-import android.view.GestureDetector;
-import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewParent;
@@ -41,12 +40,13 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.photoview.gestures.GestureDetector;
 import com.eTilbudsavis.etasdk.photoview.gestures.OnGestureListener;
 import com.eTilbudsavis.etasdk.photoview.gestures.VersionedGestureDetector;
 import com.eTilbudsavis.etasdk.photoview.scrollerproxy.ScrollerProxy;
 
 public class PhotoView extends ImageView implements View.OnTouchListener, OnGestureListener, ViewTreeObserver.OnGlobalLayoutListener {
-
+	
 	public static final String TAG = PhotoView.class.getSimpleName();
 	
 	private static final boolean DEBUG = false;
@@ -69,8 +69,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 	private boolean mAllowParentInterceptOnEdge = true;
 
 	// Gesture Detectors
-	private GestureDetector mGestureDetector;
-	private com.eTilbudsavis.etasdk.photoview.gestures.GestureDetector mScaleDragDetector;
+	private GestureDetector mScaleDragDetector;
 
 	// These are set so we don't keep allocating them on the heap
 	private final Matrix mBaseMatrix = new Matrix();
@@ -83,8 +82,11 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 	private OnMatrixChangedListener mMatrixChangeListener;
 	private OnPhotoTapListener mPhotoTapListener;
 	private OnViewTapListener mViewTapListener;
-	private OnLongClickListener mLongClickListener;
-
+	private OnPhotoLongClickListener mPhotoLongClickListener;
+	private OnViewLongClickListener mViewLongClickListener;
+	private OnPhotoDoubleClickListener mPhotoDoubleClickListener;
+	private OnViewDoubleClickListener mViewDoubleClickListener;
+	
 	private int mIvTop, mIvRight, mIvBottom, mIvLeft;
 	private FlingRunnable mCurrentFlingRunnable;
 	private int mScrollEdge = EDGE_BOTH;
@@ -122,25 +124,9 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 		if (isInEditMode()) {
 			return;
 		}
-
+		
 		// Create Gesture Detectors...
 		mScaleDragDetector = VersionedGestureDetector.newInstance(getContext(), this);
-
-		mGestureDetector = new GestureDetector(getContext(),
-				new GestureDetector.SimpleOnGestureListener() {
-
-			// forward long click listener
-			@Override
-			public void onLongPress(MotionEvent e) {
-				if (null != mLongClickListener) {
-					mLongClickListener.onLongClick(PhotoView.this);
-				}
-			}
-		});
-
-		mGestureDetector.setOnDoubleTapListener(new DefaultOnDoubleTapListener(this));
-		
-		setOnDoubleTapListener(new DefaultOnDoubleTapListener(this));
 		
 		// Finally, update the UI so that we're zoomable
 		setZoomable(true);
@@ -266,15 +252,6 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 	public boolean isAnimating() {
 		return mAnimating;
 	}
-	
-	/**
-	 * Register a callback to be invoked when the Photo displayed by this view is long-pressed.
-	 *
-	 * @param listener - Listener to be registered.
-	 */
-	public void setOnLongClickListener(OnLongClickListener listener) {
-		mLongClickListener = listener;
-	}
 
 	/**
 	 * Register a callback to be invoked when the Matrix has changed for this View. An example would
@@ -285,7 +262,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 	public void setOnMatrixChangeListener(OnMatrixChangedListener listener) {
 		mMatrixChangeListener = listener;
 	}
-
+	
 	/**
 	 * Register a callback to be invoked when the Photo displayed by this View is tapped with a
 	 * single tap.
@@ -295,7 +272,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 	public void setOnPhotoTapListener(OnPhotoTapListener listener) {
 		mPhotoTapListener = listener;
 	}
-
+	
 	/**
 	 * Returns a listener to be invoked when the Photo displayed by this View is tapped with a
 	 * single tap.
@@ -323,7 +300,71 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 	public OnViewTapListener getOnViewTapListener() {
 		return mViewTapListener;
 	}
+	
+	/**
+	 * Register a callback to be invoked when the Photo displayed by this View is long clicked.
+	 * @param listener - Listener to be registered.
+	 */
+	public void setOnPhotoLongClickListener(OnPhotoLongClickListener listener) {
+		mPhotoLongClickListener = listener;
+	}
+	
+	/**
+	 * Returns a listener to be invoked when the Photo displayed by this View is long clicked.
+	 * @return OnPhotoLongClickListener currently set, may be null
+	 */
+	public OnPhotoLongClickListener getOnPhotoLongClickListener() {
+		return mPhotoLongClickListener;
+	}
 
+	/**
+	 * Register a callback to be invoked when the View is tapped with a single tap.
+	 * @param listener - Listener to be registered.
+	 */
+	public void setOnViewLongClickListener(OnViewLongClickListener listener) {
+		mViewLongClickListener = listener;
+	}
+
+	/**
+	 * Returns a callback listener to be invoked when the View is tapped with a single tap.
+	 * @return OnViewLongClickListener currently set, may be null
+	 */
+	public OnViewLongClickListener getOnViewLongClickListener() {
+		return mViewLongClickListener;
+	}
+
+	/**
+	 * Register a callback to be invoked when the Photo displayed by this View is double clicked
+	 * @param listener - Listener to be registered.
+	 */
+	public void setOnPhotoDoubleClickListener(OnPhotoDoubleClickListener listener) {
+		mPhotoDoubleClickListener = listener;
+	}
+	
+	/**
+	 * Returns a listener to be invoked when the Photo displayed by this View is double clicked.
+	 * @return OnPhotoDoubleClickListener currently set, may be null
+	 */
+	public OnPhotoDoubleClickListener getOnPhotoDoubleClickListener() {
+		return mPhotoDoubleClickListener;
+	}
+	
+	/**
+	 * Register a callback to be invoked when the View is tapped with a double click
+	 * @param listener - Listener to be registered.
+	 */
+	public void setOnViewDoubleClickListener(OnViewDoubleClickListener listener) {
+		mViewDoubleClickListener = listener;
+	}
+
+	/**
+	 * Returns a callback listener to be invoked when the View is tapped with a double click
+	 * @return OnViewDoubleClickListener currently set, may be null
+	 */
+	public OnViewDoubleClickListener getOnViewDoubleClickListener() {
+		return mViewDoubleClickListener;
+	}
+	
 	/**
 	 * Enables rotation via PhotoView internal functions.
 	 *
@@ -439,12 +480,12 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 	 *
 	 * @param newOnDoubleTapListener custom OnDoubleTapListener to be set on ImageView
 	 */
-	public void setOnDoubleTapListener(OnDoubleTapListener newOnDoubleTapListener) {
-		if (newOnDoubleTapListener != null) {
-			mGestureDetector.setOnDoubleTapListener(newOnDoubleTapListener);
+	public void setOnGestureListener(OnGestureListener.SimpleOnGestureListener gestureListener) {
+		if (gestureListener != null) {
+			mScaleDragDetector.setOnGestureListener(gestureListener);
 		}
 	}
-
+	
 	/**
 	 * 
 	 * INTERFACES
@@ -458,21 +499,25 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 		if (null != observer && observer.isAlive()) {
 			observer.removeGlobalOnLayoutListener(this);
 		}
-
+		
 		// Remove the ImageView's reference to this
 		setOnTouchListener(null);
-
+		
 		// make sure a pending fling runnable won't be run
 		cancelFling();
-
-		if (null != mGestureDetector) {
-			mGestureDetector.setOnDoubleTapListener(null);
+		
+		if (mScaleDragDetector != null) {
+			mScaleDragDetector.setOnGestureListener(null);
 		}
-
+		
 		// Clear listeners too
 		mMatrixChangeListener = null;
 		mPhotoTapListener = null;
 		mViewTapListener = null;
+		mPhotoLongClickListener = null;
+		mViewLongClickListener = null;
+		mPhotoDoubleClickListener = null;
+		mViewDoubleClickListener = null;
 		
 	}
 
@@ -950,7 +995,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			}
 		}
 	}
-
+	
 	public void onFling(float startX, float startY, float velocityX,
 			float velocityY) {
 		log(TAG, "onFling. sX: " + startX + " sY: " + startY + " Vx: " + velocityX + " Vy: " + velocityY);
@@ -960,7 +1005,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 				getImageViewHeight(), (int) velocityX, (int) velocityY);
 		post(mCurrentFlingRunnable);
 	}
-
+	
 	public void onScale(float scaleFactor, float focusX, float focusY) {
 		log(TAG, String.format("onScale: scale: %.2f. fX: %.2f. fY: %.2f", scaleFactor, focusX, focusY));
 		
@@ -970,14 +1015,106 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 		}
 		
 	}
+	
+	public boolean onSingleTab(MotionEvent e) {
+		boolean handled = false;
+        if (null != mPhotoTapListener) {
+        	PointF p = eventToPhotoCoordinate(e);
+        	if (p!=null) {
+        		mPhotoTapListener.onPhotoTap(this, p.x, p.y);
+            	handled = true;
+        	}
+        }
+        if (null != mViewTapListener) {
+        	mViewTapListener.onViewTap(this, e.getX(), e.getY());
+        	handled = true;
+        }
+        return handled;
+	}
+	
+	public boolean onDoubleTab(MotionEvent e) {
+		boolean handled = false;
+        try {
+        	
+            float scale = getScale();
+            float min = getMinimumScale();
+            float max = getMaximumScale();
+            float x = e.getX();
+            float y = e.getY();
+            
+            float midScale = min+((max-min)/2);
+            if ( scale < midScale ) {
+            	setScale(max, x, y, true);
+            } else {
+            	setScale(min, x, y, true);
+            }
+            
+            handled = true;
+            
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            // Can sometimes happen when getX() and getY() is called
+        }
 
+        if (mPhotoDoubleClickListener != null) {
+            PointF p = eventToPhotoCoordinate(e);
+        	if (p!=null) {
+        		mPhotoDoubleClickListener.onPhotoTap(this, p.x, p.y);
+        	}
+        }
+    	
+        if (null != mViewDoubleClickListener) {
+        	mViewDoubleClickListener.onViewTap(this, e.getX(), e.getY());
+        }
+        
+        return handled;
+	}
+	
+	public boolean onLongPress(MotionEvent e) {
+		
+        if (mPhotoLongClickListener != null) {
+            PointF p = eventToPhotoCoordinate(e);
+        	if (p!=null) {
+        		mPhotoLongClickListener.onPhotoTap(this, p.x, p.y);
+        	}
+        }
+    	
+        if (null != mViewLongClickListener) {
+        	mViewLongClickListener.onViewTap(this, e.getX(), e.getY());
+        }
+        
+		return false;
+	}
+	
+    private PointF eventToPhotoCoordinate(MotionEvent e) {
+    	PointF p = null;
+    	try {
+        	final RectF displayRect = getDisplayRect();
+        	if (null == displayRect) {
+        		return p;
+        	}
+        	
+        	final float x = e.getX();
+        	final float y = e.getY();
+
+        	// Check to see if the user tapped on the photo
+        	if (displayRect.contains(x, y)) {
+        		p = new PointF();
+        		p.x = (x - displayRect.left) / displayRect.width();
+        		p.y = (y - displayRect.top) / displayRect.height();
+        	}
+    	} catch (ArrayIndexOutOfBoundsException ex) {
+    		// Can sometimes happen when getX() and getY() is called
+    	}
+    	return p;
+    }
+    
 	/**
 	 * @return true if the ImageView exists, and it's Drawable existss
 	 */
 	public static boolean hasDrawable(ImageView imageView) {
 		return null != imageView && null != imageView.getDrawable();
 	}
-
+	
 	public boolean onTouch(View v, MotionEvent event) {
 		boolean handled = false;
 		
@@ -1016,11 +1153,6 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 			
 			// Try the Scale/Drag detector
 			if (null != mScaleDragDetector && mScaleDragDetector.onTouchEvent(event)) {
-				handled = true;
-			}
-			
-			// Check to see if the user double tapped
-			if (null != mGestureDetector && mGestureDetector.onTouchEvent(event)) {
 				handled = true;
 			}
 			
@@ -1086,9 +1218,74 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 		 */
 		void onViewTap(View view, float x, float y);
 	}
+
+	/**
+	 * Interface definition for a callback to be invoked when the Photo is long clicked.
+	 */
+	public static interface OnPhotoLongClickListener {
+
+		/**
+		 * A callback to receive where the user long clicks on a photo. You will only receive a callback if
+		 * the user long clicks on the actual photo, tapping on 'whitespace' will be ignored.
+		 *
+		 * @param view - The view that was clicked and held.
+		 * @param x    - where the user clicked from the of the Drawable, as percentage of the Drawable width.
+		 * @param y    - where the user clicked from the top of the Drawable, as percentage of the Drawable height.
+		 */
+		void onPhotoTap(View view, float x, float y);
+	}
+
+	/**
+	 * Interface definition for a callback to be invoked when the ImageView is long clicked.
+	 */
+	public static interface OnViewLongClickListener {
+
+		/**
+		 * A callback to receive where the user long clicks on a ImageView. You will receive a callback if
+		 * the user long clicks anywhere on the view, tapping on 'whitespace' will not be ignored.
+		 *
+		 * @param view - The view that was clicked and held.
+		 * @param x    - where the user clicked from the left of the View.
+		 * @param y    - where the user clicked from the top of the View.
+		 */
+		void onViewTap(View view, float x, float y);
+	}
+
+	/**
+	 * Interface definition for a callback to be invoked when the Photo is long clicked.
+	 */
+	public static interface OnPhotoDoubleClickListener {
+
+		/**
+		 * A callback to receive where the user long clicks on a photo. You will only receive a callback if
+		 * the user long clicks on the actual photo, tapping on 'whitespace' will be ignored.
+		 *
+		 * @param view - The view that was clicked and held.
+		 * @param x    - where the user clicked from the of the Drawable, as percentage of the Drawable width.
+		 * @param y    - where the user clicked from the top of the Drawable, as percentage of the Drawable height.
+		 */
+		void onPhotoTap(View view, float x, float y);
+	}
+
+	/**
+	 * Interface definition for a callback to be invoked when the ImageView is long clicked.
+	 */
+	public static interface OnViewDoubleClickListener {
+
+		/**
+		 * A callback to receive where the user long clicks on a ImageView. You will receive a callback if
+		 * the user long clicks anywhere on the view, tapping on 'whitespace' will not be ignored.
+		 *
+		 * @param view - The view that was clicked and held.
+		 * @param x    - where the user clicked from the left of the View.
+		 * @param y    - where the user clicked from the top of the View.
+		 */
+		void onViewTap(View view, float x, float y);
+	}
 	
 	private void log(String tag, String msg) {
 		if (DEBUG)
 			EtaLog.d(tag, msg);
 	}
+	
 }

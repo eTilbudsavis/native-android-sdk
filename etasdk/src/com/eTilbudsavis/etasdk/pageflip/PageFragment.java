@@ -1,30 +1,28 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
-import java.util.Set;
+import java.util.List;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapDisplayer;
+import com.eTilbudsavis.etasdk.ImageLoader.BitmapProcessor;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
 import com.eTilbudsavis.etasdk.ImageLoader.LoadSource;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.pageflip.ZoomPhotoView.OnZoomChangeListener;
-import com.eTilbudsavis.etasdk.photoview.DefaultOnDoubleTapListener;
-import com.eTilbudsavis.etasdk.photoview.PhotoView;
 
 public abstract class PageFragment extends Fragment {
 	
@@ -41,6 +39,7 @@ public abstract class PageFragment extends Fragment {
 	private TextView mPageNum;
 	private PageCallback mCallback;
 	private boolean mHasZoomImage = false;
+	private boolean mDebugRects = false;
 	
 	public static PageFragment newInstance(int[] pages) {
 		Bundle b = new Bundle();
@@ -75,7 +74,7 @@ public abstract class PageFragment extends Fragment {
 					mHasZoomImage = true;
 					loadZoom();
 				}
-				mCallback.onZoom(isZoomed);
+				mCallback.onZoom(mPhotoView, isZoomed);
 			}
 		});
 		mPageNum.setText(PageflipUtils.join("-", mPages));
@@ -103,17 +102,22 @@ public abstract class PageFragment extends Fragment {
 	
 	protected void addRequest(ImageRequest ir) {
 		ir.setMemoryCache(false);
-		ir.setDebugger(PU.getSimpleDebugger(TAG));
 		ImageLoader.getInstance().displayImage(ir);
 	}
+
+	protected void onSingleClick(int page, float x, float y) {
+		List<Hotspot> list = mCallback.getCatalog().getHotspots().getHotspots(page, x, y, mCallback.isLandscape());
+		getCallback().getWrapperListener().onSingleClick(mPhotoView, page, x, y, list);
+	}
 	
-	protected void onClick(int page, float x, float y) {
-		Set<Hotspot> list = mCallback.getCatalog().getHotspots().getHotspots(page, x, y, mCallback.isLandscape());
-		if (list.isEmpty()) {
-			getCallback().getWrapperListener().onClick(mPhotoView, page);
-		} else {
-			getCallback().getWrapperListener().onHotspotClick(list);
-		}
+	protected void onDoubleClick(int page, float x, float y) {
+		List<Hotspot> list = mCallback.getCatalog().getHotspots().getHotspots(page, x, y, mCallback.isLandscape());
+		getCallback().getWrapperListener().onDoubleClick(mPhotoView, page, x, y, list);
+	}
+	
+	protected void onLongClick(int page, float x, float y) {
+		List<Hotspot> list = mCallback.getCatalog().getHotspots().getHotspots(page, x, y, mCallback.isLandscape());
+		getCallback().getWrapperListener().onLongClick(mPhotoView, page, x, y, list);
 	}
 	
 	protected ZoomPhotoView getPhotoView() {
@@ -176,6 +180,28 @@ public abstract class PageFragment extends Fragment {
 			b.recycle();
 		}
 		super.onPause();
+	}
+	
+	public class PageBitmapProcessor implements BitmapProcessor {
+		
+		int page = 0;
+		
+		public PageBitmapProcessor(int page) {
+			this.page = page;
+		}
+		
+		public Bitmap process(Bitmap b) {
+			
+			if (mDebugRects) {
+				try {
+					return PageflipUtils.drawDebugRects(getCallback().getCatalog(), page, getCallback().isLandscape(), b);
+				} catch (Exception e) {
+					EtaLog.d(TAG, e.getMessage(), e);
+				}
+			}
+			return b;
+		}
+		
 	}
 	
 	public class PageFadeBitmapDisplayer implements BitmapDisplayer {

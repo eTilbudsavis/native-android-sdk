@@ -129,9 +129,9 @@ public class PageflipUtils {
 		}
 		return pages;
 	}
-	
+
 	public static boolean isValidPage(Catalog c, int page) {
-		return ( 1 <= page && page <= c.getPageCount());
+		return 1 <= page && (c==null || page <= c.getPageCount());
 	}
 	
 	public static boolean almost(float first, float second) {
