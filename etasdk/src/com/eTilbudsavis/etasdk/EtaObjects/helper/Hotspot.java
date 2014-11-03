@@ -118,7 +118,7 @@ public class Hotspot implements EtaObject<JSONObject>, Serializable {
 	}
 	
 	public boolean inBounds(double x, double y, double minArea, boolean landscape) {
-		return inBounds(x, x) && isAreaSignificant(landscape);
+		return inBounds(x, y) && isAreaSignificant(landscape);
 	}
 	
 	public boolean inBounds(double x, double y) {

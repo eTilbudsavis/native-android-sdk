@@ -3,7 +3,6 @@ package com.eTilbudsavis.etasdk.EtaObjects.helper;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -92,12 +91,12 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements EtaOb
 		return map;
 	}
 	
-	public Set<Hotspot> getHotspots(int page, double xPercent, double yPercent, boolean landscape) {
+	public List<Hotspot> getHotspots(int page, double xPercent, double yPercent, boolean landscape) {
 		return getHotspots(page, xPercent, yPercent, Hotspot.SIGNIFICANT_AREA, landscape);
 	}
 	
-	public Set<Hotspot> getHotspots(int page, double xPercent, double yPercent, double minArea, boolean landscape) {
-		Set<Hotspot> list = new HashSet<Hotspot>();
+	public List<Hotspot> getHotspots(int page, double xPercent, double yPercent, double minArea, boolean landscape) {
+		List<Hotspot> list = new ArrayList<Hotspot>();
 		List<Hotspot> lh = get(page);
 		if (lh == null) {
 			return list;
