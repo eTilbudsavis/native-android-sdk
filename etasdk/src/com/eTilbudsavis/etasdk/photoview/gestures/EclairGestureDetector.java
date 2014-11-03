@@ -31,7 +31,7 @@ public class EclairGestureDetector extends CupcakeGestureDetector {
     public EclairGestureDetector(Context context) {
         super(context);
     }
-
+    
     @Override
     float getActiveX(MotionEvent ev) {
         try {

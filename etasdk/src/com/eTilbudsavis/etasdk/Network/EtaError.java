@@ -168,6 +168,11 @@ public class EtaError extends Exception {
 		 * Auto loading of objects failed
 		 */
 	    public static final int AUTO_LOAD_ERROR				= 10300;
+
+		/**
+		 * Out of memory error occurred, no further work possible
+		 */
+	    public static final int OUT_OF_MEMORY				= 10400;
 	    
 		/** Session error */
 	    public static final int SESSION_ERROR				= 1100;

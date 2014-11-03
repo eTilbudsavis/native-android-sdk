@@ -15,13 +15,71 @@
  *******************************************************************************/
 package com.eTilbudsavis.etasdk.photoview.gestures;
 
+import android.view.MotionEvent;
+
+import com.eTilbudsavis.etasdk.photoview.PhotoView;
+
 public interface OnGestureListener {
-
+	
     public void onDrag(float dx, float dy);
-
-    public void onFling(float startX, float startY, float velocityX,
-                        float velocityY);
-
+    
+    public void onFling(float startX, float startY, float velocityX, float velocityY);
+    
     public void onScale(float scaleFactor, float focusX, float focusY);
+    
+    public boolean onSingleTab(MotionEvent e);
+    
+    public boolean onDoubleTab(MotionEvent e);
+    
+    public boolean onLongPress(MotionEvent e);
+    
+    /**
+     * A convenience class to extend when you only want to listen for a subset of all the gestures.
+     * This implements all methods in the {@link OnGestureListener}, and by default calls the method in the
+     * {@link PhotoView} if these aren't overridden.
+     * 
+     * @author Danny Hvam
+     */
+	public class SimpleOnGestureListener implements OnGestureListener {
+		
+		private PhotoView mPhotoview;
+		
+		public SimpleOnGestureListener(PhotoView photoView) {
+			setPhotoView(photoView);
+		}
+		
+		public void setPhotoView(PhotoView photoView) {
+			mPhotoview = photoView;
+		}
+		
+		public PhotoView getPhotoView() {
+			return mPhotoview;
+		}
+		
+		public void onDrag(float dx, float dy) {
+			mPhotoview.onDrag(dx, dy);
+		}
+		
+		public void onFling(float startX, float startY, float velocityX, float velocityY) {
+			mPhotoview.onFling(startX, startY, velocityX, velocityY);
+		}
 
+		public void onScale(float scaleFactor, float focusX, float focusY) {
+			mPhotoview.onScale(scaleFactor, focusX, focusY);
+		}
+
+		public boolean onSingleTab(MotionEvent e) {
+			return mPhotoview.onSingleTab(e);
+		}
+		
+		public boolean onDoubleTab(MotionEvent e) {
+			return mPhotoview.onDoubleTab(e);
+		}
+
+		public boolean onLongPress(MotionEvent e) {
+			return mPhotoview.onLongPress(e);
+		}
+		
+	}
+	
 }

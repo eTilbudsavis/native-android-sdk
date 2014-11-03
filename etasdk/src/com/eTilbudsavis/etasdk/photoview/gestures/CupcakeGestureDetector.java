@@ -17,33 +17,52 @@ package com.eTilbudsavis.etasdk.photoview.gestures;
 
 import android.content.Context;
 import android.util.FloatMath;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
-public class CupcakeGestureDetector implements GestureDetector {
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 
+public class CupcakeGestureDetector implements GestureDetector {
+	
+    public static final String TAG = CupcakeGestureDetector.class.getSimpleName();
+    
     protected OnGestureListener mListener;
-    private static final String LOG_TAG = "CupcakeGestureDetector";
     float mLastTouchX;
     float mLastTouchY;
     final float mTouchSlop;
     final float mMinimumVelocity;
+    private VelocityTracker mVelocityTracker;
+    private boolean mIsDragging;
+    final android.view.GestureDetector mGestureDetector;
+    final android.view.GestureDetector.SimpleOnGestureListener mSimpleOnGestureListener = 
+    		new android.view.GestureDetector.SimpleOnGestureListener() {
+    	
+    	public void onLongPress(MotionEvent e) {
+    		mListener.onLongPress(e);
+    	};
+    	
+    	@Override
+    	public boolean onDoubleTap(MotionEvent e) {
+    		return mListener.onDoubleTab(e);
+    	}
+    	
+    	public boolean onSingleTapConfirmed(MotionEvent e) {
+    		return mListener.onSingleTab(e);
+    	};
+    	
+    };
     
     public void setOnGestureListener(OnGestureListener listener) {
         this.mListener = listener;
     }
-
+    
     public CupcakeGestureDetector(Context context) {
-        final ViewConfiguration configuration = ViewConfiguration
-                .get(context);
+    	mGestureDetector = new android.view.GestureDetector(context, mSimpleOnGestureListener); 
+        final ViewConfiguration configuration = ViewConfiguration.get(context);
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mTouchSlop = configuration.getScaledTouchSlop();
     }
-
-    private VelocityTracker mVelocityTracker;
-    private boolean mIsDragging;
 
     float getActiveX(MotionEvent ev) {
         return ev.getX();
@@ -64,7 +83,7 @@ public class CupcakeGestureDetector implements GestureDetector {
                 if (null != mVelocityTracker) {
                     mVelocityTracker.addMovement(ev);
                 } else {
-                    Log.i(LOG_TAG, "Velocity tracker is null");
+                    EtaLog.i(TAG, "Velocity tracker is null");
                 }
 
                 mLastTouchX = getActiveX(ev);
@@ -135,7 +154,8 @@ public class CupcakeGestureDetector implements GestureDetector {
                 break;
             }
         }
-
+        mGestureDetector.onTouchEvent(ev);
         return true;
     }
+    
 }

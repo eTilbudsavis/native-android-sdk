@@ -191,7 +191,6 @@ public class ImageLoader {
 					try {
 						ir.add("processing-bitmap");
 						Bitmap tmp = ir.getBitmapProcessor().process(ir.getBitmap());
-						ir.add("processing-bitmap-done");
 						ir.setBitmap(tmp);
 						display(ir);
 					} catch (Exception e) {
@@ -200,7 +199,6 @@ public class ImageLoader {
 				}
 			};
 			
-			ir.add("has-bitmap-processor");
 			if (Looper.myLooper() == Looper.getMainLooper()) {
 				mExecutor.execute(processPoster);
 			} else {
@@ -214,8 +212,6 @@ public class ImageLoader {
 	}
 	
 	private void display(final ImageRequest ir) {
-
-//		ir.isAlive("display");
 		
 		Runnable work = new Runnable() {
 			
@@ -241,7 +237,7 @@ public class ImageLoader {
 		}
 		
 	}
-
+	
 	private boolean imageViewReusedOrBitmapNull(ImageRequest ir) {
 		if (imageViewReused(ir)) {
 			ir.finish("imageview-reused");
