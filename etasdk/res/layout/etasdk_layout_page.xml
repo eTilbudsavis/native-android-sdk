@@ -4,7 +4,7 @@
     android:layout_height="match_parent" >
     
     <TextView
-        android:id="@+id/etasdk_pageflip_pagenum"
+        android:id="@+id/etasdk_layout_page_pagenum"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -13,13 +13,13 @@
         android:textSize="120sp" />
     
     <ProgressBar
-        android:id="@+id/etasdk_pageflip_loader"
+        android:id="@+id/etasdk_layout_page_loader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center" />
 
     <com.eTilbudsavis.etasdk.pageflip.ZoomPhotoView
-        android:id="@+id/etasdk_pageflip_photoview"
+        android:id="@+id/etasdk_layout_page_photoview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
