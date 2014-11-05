@@ -4,15 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
     
-    <ProgressBar
-        android:id="@+id/etasdk_layout_pageflip_loader"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
-    
     <com.eTilbudsavis.etasdk.pageflip.PageflipViewPager
         android:id="@+id/etasdk_layout_pageflip_viewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+    
+    <TextView
+        android:id="@+id/etasdk_layout_pageflip_loader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:text="Bilka\n..."
+        android:textSize="30sp" />
     
 </FrameLayout>

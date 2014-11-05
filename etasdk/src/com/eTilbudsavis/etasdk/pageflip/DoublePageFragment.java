@@ -72,11 +72,9 @@ public class DoublePageFragment extends PageFragment {
 			return;
 		}
 		reset(getFirst().getZoom());
-		int sampleSize = lowMem() ? 2 : 1;
-		String firstUrl = getFirst().getZoom();
-		load(firstUrl, true, sampleSize, false);
-		String secondUrl = getSecond().getZoom();
-		load(secondUrl, false, sampleSize, false);
+		load(getFirst().getZoom(), true, 1, false);
+		load(getSecond().getZoom(), false, 1, false);
+		
 	}
 	
 	private void load(String url, boolean left, int sampleSize, boolean autoScale) {
@@ -123,9 +121,7 @@ public class DoublePageFragment extends PageFragment {
 			
 			boolean isLeft = l!=null;
 			Bitmap b = (isLeft?l:r);
-			synchronized (LowMemoryDecoder.LOCK) {
-				createDoublePage(b);
-			}
+			createDoublePage(b);
 			if (mPage != null) {
 				int left = ( isLeft ? 0 : b.getWidth() );
 				mCanvas.drawBitmap(b, left, 0, null);

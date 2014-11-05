@@ -36,20 +36,6 @@ public class PU {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public static String getName(String url) {
-		String s[] = url.split("/");
-		int l = s.length-1;
-		return s[l-1] + "-" + s[l];
-	}
-	
-	public static String getName(ImageRequest ir) {
-		return getName(ir.getUrl());
-	}
-	
-	public static void printName(String tag, ImageRequest ir) {
-		EtaLog.d(tag, getName(ir));
-	}
-	
 	public static void printHeap(String tag) {
 		Runtime rt = Runtime.getRuntime();
 		long free = rt.freeMemory()/KILO_BYTE;
@@ -117,20 +103,18 @@ public class PU {
 		return new ImageDebugger() {
 			
 			public void debug(ImageRequest ir) {
-				EtaLog.d(tag, getName(ir) + ", " + ir.getLog().getTotalDuration());
+				EtaLog.d(tag, ir.getFileName() + ", " + ir.getLog().getTotalDuration());
 			}
 		};
 	}
 	
-
 	public static void cacheAllImages(final String tag, final Context ctx, final Catalog c) {
 		Runnable downloader = new Runnable() {
 			
 			public void run() {
-
+				
 				toast(ctx, "Downloading " + c.getBranding().getName());
 				int count = 0;
-				ImageLoader i = ImageLoader.getInstance();
 				ImageRequest t = null;
 				ImageRequest v = null;
 				ImageRequest z = null;
@@ -147,13 +131,13 @@ public class PU {
 					}
 					
 					count++;
-					t = new ImageRequest(p.getThumb(), new ImageView(ctx));
-					v = new ImageRequest(p.getView(), new ImageView(ctx));
-					z = new ImageRequest(p.getZoom(), new ImageView(ctx));
-					i.displayImage(t);
-					i.displayImage(v);
-					i.displayImage(z);
 					
+					// Get thumb
+					t = display(p.getThumb(), ctx);
+					v = display(p.getView(), ctx);
+					z = display(p.getZoom(), ctx);
+					
+					// Give feedback
 					String s = String.format("%s / %s", count, c.getPageCount());
 					EtaLog.d(tag, s);
 					if (count%5==0) {
@@ -165,6 +149,13 @@ public class PU {
 			}
 		};
 		new Thread(downloader).start();
+	}
+	
+	private static ImageRequest display(String url, Context ctx) {
+		ImageRequest ir = new ImageRequest(url, new ImageView(ctx));
+		ir.setFileName(new PageflipFileNameGenerator());
+		ImageLoader.getInstance().displayImage(ir);
+		return ir;
 	}
 	
 	private static void toast(final Context ctx, final String s) {

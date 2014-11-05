@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.net.URLEncoder;
 import java.util.concurrent.ExecutorService;
 
 import android.content.Context;
@@ -63,19 +62,13 @@ public class DefaultFileCache implements FileCache {
 		return cacheDir;
 	}
 	
-	@SuppressWarnings("deprecation")
-	private String getFileName(String url) {
-		return URLEncoder.encode(url);
-	}
-
 	public void save(final ImageRequest ir, final byte[] b) {
 		
 		Runnable r = new Runnable() {
 			
 			public void run() {
-
-				long start = System.currentTimeMillis();
-				File f = new File(mCacheDir, getFileName(ir.getUrl()));
+				
+				File f = new File(mCacheDir, ir.getFileName());
 				FileOutputStream fos = null;
 				if (f.exists()) {
 					f.delete();
@@ -101,7 +94,7 @@ public class DefaultFileCache implements FileCache {
 	}
 	
 	public byte[] getByteArray(ImageRequest ir) {
-		File f = new File(mCacheDir, getFileName(ir.getUrl()));
+		File f = new File(mCacheDir, ir.getFileName());
 		byte[] b = null;
 		if (f.exists()) {
 			try {

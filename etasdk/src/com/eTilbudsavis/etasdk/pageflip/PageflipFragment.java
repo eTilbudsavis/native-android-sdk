@@ -13,7 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.Eta;
@@ -45,7 +45,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	private LayoutInflater mInflater;
 	private ViewGroup mContainer;
 	private FrameLayout mFrame;
-	private ProgressBar mProgress;
+	private TextView mProgress;
 	private PageflipViewPager mPager;
 	private PageflipAdapter mAdapter;
 	
@@ -57,6 +57,8 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	// Callbacks and stats
 	private PageflipListenerWrapper mWrapperListener = new PageflipListenerWrapper();
 	private StatsCollect mCollector;
+	private TextAnimLoader mLoader;
+	private Handler mHandler;
 	
 	// Out of bounds detector stuff
 	int mOutOfBoundsPX = 0;
@@ -74,7 +76,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 				if (main == Looper.myLooper()) {
 					mOnCatalogComplete.run();
 				} else {
-					new Handler(main).post(mOnCatalogComplete);
+					mHandler.post(mOnCatalogComplete);
 				}
 			} else {
 				
@@ -116,6 +118,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		mHandler = new Handler();
 		mLowMemory = PageflipUtils.hasLowMemory(getActivity());
 		mLandscape = PageflipUtils.isLandscape(getActivity());
 		if (getArguments()!=null) {
@@ -153,12 +156,14 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 				parent.removeView(mFrame);
 			}
 		}
-		mProgress = (ProgressBar) mFrame.findViewById(R.id.etasdk_layout_pageflip_loader);
+		mProgress = (TextView) mFrame.findViewById(R.id.etasdk_layout_pageflip_loader);
 		mPager = (PageflipViewPager) mFrame.findViewById(R.id.etasdk_layout_pageflip_viewpager);
 		mPager.setScrollDurationFactor(PAGER_SCROLL_FACTOR);
 		mPager.setOnPageChangeListener(this);
 		mProgress.setVisibility(View.VISIBLE);
 		mPager.setVisibility(View.INVISIBLE);
+		setBranding();
+		startLoading();
 	}
 	
 	private static int pageValidator(Catalog c, int page) {
@@ -169,8 +174,20 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		return page;
 	}
 	
+	private void startLoading() {
+		mLoader = new TextAnimLoader(mProgress);
+		if (mCatalog!=null) {
+			int branding = mCatalog.getBranding().getColor();
+			int text = PageflipUtils.getTextColor(branding, getActivity());
+			mProgress.setTextColor(text);
+			mLoader.setText(mCatalog.getBranding().getName());
+		}
+		mLoader.run();
+	}
 	private void setBranding() {
-		mFrame.setBackgroundColor(mCatalog.getBranding().getColor());
+		if (mCatalog!= null) {
+			mFrame.setBackgroundColor(mCatalog.getBranding().getColor());
+		}
 	}
 	
 	private void ensureCatalog() {
@@ -183,12 +200,18 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		caf.execute(Eta.getInstance().getRequestQueue());
 	}
 	
+	private void removeRunners() {
+		mLoader.stop();
+		mHandler.removeCallbacks(mOnCatalogComplete);
+	}
+	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		boolean land = PageflipUtils.isLandscape(newConfig);
 		if (land != mLandscape) {
 			EtaLog.d(TAG, "onConfigurationChanged[orientation.landscape[" + mLandscape + "->" + land + "]");
+			removeRunners();
 			// Get the old page
 			int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
 			// switch to landscape mode
@@ -275,6 +298,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	@Override
 	public void onPause() {
+		removeRunners();
 		//TODO collect stats - discuss with Morten how to
 		super.onPause();
 	}
@@ -416,5 +440,5 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		}
 		
 	}
-
+	
 }

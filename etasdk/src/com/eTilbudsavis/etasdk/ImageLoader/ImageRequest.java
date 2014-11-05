@@ -7,6 +7,7 @@ import android.widget.ImageView;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultBitmapDisplayer;
+import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultFileName;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Log.EventLog;
 import com.eTilbudsavis.etasdk.Log.EventLog.Event;
@@ -32,6 +33,7 @@ public class ImageRequest {
 	private BitmapDecoder mDecoder;
 	private EventLog mLog = new EventLog();
 	private ImageDebugger mDebugger;
+	private FileNameGenerator mFileName;
 	private boolean mFinished = false;
 	
 	@SuppressWarnings("unused")
@@ -153,6 +155,21 @@ public class ImageRequest {
 	public ImageRequest setDebugger(ImageDebugger d) {
 		this.mDebugger = d;
 		return this;
+	}
+	
+	public FileNameGenerator getFileNameGenerator() {
+		if (mFileName==null) {
+			mFileName = new DefaultFileName();
+		}
+		return mFileName;
+	}
+	
+	public String getFileName() {
+		return getFileNameGenerator().getFileName(this);
+	}
+	
+	public void setFileName(FileNameGenerator fileName) {
+		mFileName = fileName;
 	}
 	
 	public boolean useFileCache() {

@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.eTilbudsavis.etasdk.R;
@@ -35,11 +34,24 @@ public abstract class PageFragment extends Fragment {
 	
 	private int[] mPages;
 	private ZoomPhotoView mPhotoView;
-	private ProgressBar mProgress;
 	private TextView mPageNum;
 	private PageCallback mCallback;
 	private boolean mHasZoomImage = false;
 	private boolean mDebugRects = false;
+	private TextAnimLoader mLoader;
+	
+	private void runLoader() {
+
+		int brandingColor = getCallback().getCatalog().getBranding().getColor();
+		int complimentColor = PageflipUtils.getTextColor(brandingColor, getActivity());
+		mPageNum.setTextColor(complimentColor);
+		if (mLoader==null) {
+			mLoader = new TextAnimLoader(mPageNum);
+		}
+		mLoader.stop();
+		mLoader.setText(PageflipUtils.join("-", mPages));
+		mLoader.run();
+	}
 	
 	public static PageFragment newInstance(int[] pages) {
 		Bundle b = new Bundle();
@@ -64,7 +76,6 @@ public abstract class PageFragment extends Fragment {
 		View v = inflater.inflate(R.layout.etasdk_layout_page, container, false);
 		mPhotoView = (ZoomPhotoView) v.findViewById(R.id.etasdk_layout_page_photoview);
 		mPageNum = (TextView) v.findViewById(R.id.etasdk_layout_page_pagenum);
-		mProgress = (ProgressBar) v.findViewById(R.id.etasdk_layout_page_loader);
 		
 		mPhotoView.setMaximumScale(MAX_SCALE);
 		mPhotoView.setOnZoomListener(new OnZoomChangeListener() {
@@ -77,10 +88,6 @@ public abstract class PageFragment extends Fragment {
 				mCallback.onZoom(mPhotoView, isZoomed);
 			}
 		});
-		mPageNum.setText(PageflipUtils.join("-", mPages));
-		int brandingColor = getCallback().getCatalog().getBranding().getColor();
-		int complimentColor = PageflipUtils.getTextColor(brandingColor, getActivity());
-		mPageNum.setTextColor(complimentColor);
 		toggleContentVisibility(true);
 		return v;
 	}
@@ -89,9 +96,10 @@ public abstract class PageFragment extends Fragment {
 		int content = isLoading ? View.GONE : View.VISIBLE;
 		int loader = isLoading ? View.VISIBLE : View.INVISIBLE;
 		mPhotoView.setVisibility(content);
-		mProgress.setVisibility(loader);
 		mPageNum.setVisibility(loader);
-		
+		if (isLoading) {
+			runLoader();
+		}
 	}
 	
 	@Override
@@ -102,6 +110,7 @@ public abstract class PageFragment extends Fragment {
 	
 	protected void addRequest(ImageRequest ir) {
 		ir.setMemoryCache(false);
+		ir.setFileName(new PageflipFileNameGenerator());
 		ImageLoader.getInstance().displayImage(ir);
 	}
 	
@@ -180,7 +189,7 @@ public abstract class PageFragment extends Fragment {
 	
 	@Override
 	public void onPause() {
-		
+		mLoader.stop();
 		if (mPhotoView.getScale() != mPhotoView.getMinimumScale()) {
 			mPhotoView.setScale(mPhotoView.getMinimumScale());
 		}

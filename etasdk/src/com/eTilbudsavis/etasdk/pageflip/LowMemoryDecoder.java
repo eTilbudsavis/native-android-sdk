@@ -18,19 +18,22 @@ public class LowMemoryDecoder implements BitmapDecoder {
 	// Variable kept across all PageFragment, to save some work and mem
 	private Point mDisplay;
 	
-	public static final Object LOCK = new Object();
 	private static final float DISPLAY_SCALE_FACTOR = 0.8f;
 	
 	private int mSampleSize = 0;
-	private boolean mTryDisplayScale = false;
+	private boolean mAutoScale = false;
 	private Context mContext;
 
-	public LowMemoryDecoder(Context c, int sampleSize, boolean tryDisplayScale) {
+	public LowMemoryDecoder(Context c, int sampleSize, boolean autoScale) {
 		mContext = c;
-		mTryDisplayScale = tryDisplayScale;
+		mAutoScale = autoScale;
 		mSampleSize = sampleSize;
 		mDisplay = PU.getDisplayDimen(c);
-		mDisplay.y = (int)((float)mDisplay.y*DISPLAY_SCALE_FACTOR);
+		if (PageflipUtils.hasLowMemory(c)) {
+			// If it's a low memory device, lower the standards
+			mDisplay.y = (int)((float)mDisplay.y*DISPLAY_SCALE_FACTOR);
+			mDisplay.x = (int)((float)mDisplay.x*DISPLAY_SCALE_FACTOR);
+		}
 	}
 
 	public LowMemoryDecoder(Context c) {
@@ -46,37 +49,26 @@ public class LowMemoryDecoder implements BitmapDecoder {
 			o.inMutable = true;
 		}
 	    
-	    if (mTryDisplayScale) {
-
-		    synchronized (LOCK) {
-		    	
-			    // Get the best possible size
-			    o.inJustDecodeBounds = true;
-			    BitmapFactory.decodeByteArray(image, 0, image.length, o);
-			    
-			    boolean land = PageflipUtils.isLandscape(mContext);
-			    int w = (land?mDisplay.x:mDisplay.y);
-			    int h = (land?mDisplay.y:mDisplay.x);
-			    int displaySampleSize = calcDisplaySampleSize(o, h, w);
-			    
-			    // Find the largest, of either user provided or calculated sampleSize
-			    o.inSampleSize = Math.max(mSampleSize, displaySampleSize);
-			    o.inJustDecodeBounds = false;
+	    if (mAutoScale) {
+	    	
+		    // Get the best possible size
+		    o.inJustDecodeBounds = true;
+		    BitmapFactory.decodeByteArray(image, 0, image.length, o);
 		    
-//			    PU.printName(TAG, ir);
-//			    PU.printOptions(TAG, o);
-//				EtaLog.d(TAG, String.format("DispSampleSize %s, from req[w: %s, h: %s]", displaySampleSize, w, h));
-//				EtaLog.d(TAG, "mSampleSize: " + mSampleSize);
-			}
+		    boolean land = PageflipUtils.isLandscape(mContext);
+		    int w = (land?mDisplay.x:mDisplay.y);
+		    int h = (land?mDisplay.y:mDisplay.x);
+		    int displaySampleSize = calcDisplaySampleSize(o, h, w);
+		    
+		    // Find the largest, of either user provided or calculated sampleSize
+		    o.inSampleSize = Math.max(mSampleSize, displaySampleSize);
+		    o.inJustDecodeBounds = false;
 		    
 	    }
 	    
 	    // Perform actual decoding
 	    long s = System.currentTimeMillis();
-		Bitmap b = null;
-	    synchronized (LOCK) {
-			b = BitmapFactory.decodeByteArray(image, 0, image.length, o);
-		}
+		Bitmap b = BitmapFactory.decodeByteArray(image, 0, image.length, o);
 		EtaLog.d(TAG, "decode.time: " + (System.currentTimeMillis()-s));
 //		PU.printBitmapInfo(TAG, b);
 		return b;
