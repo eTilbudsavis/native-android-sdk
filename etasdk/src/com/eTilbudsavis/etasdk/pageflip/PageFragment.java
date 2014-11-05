@@ -27,7 +27,7 @@ import com.eTilbudsavis.etasdk.pageflip.ZoomPhotoView.OnZoomChangeListener;
 public abstract class PageFragment extends Fragment {
 	
 	public static final String TAG = PageFragment.class.getSimpleName();
-	
+
 	protected static final int FADE_IN_DURATION = 150;
 	protected static final float MAX_SCALE = 3.0f;
 	
@@ -62,9 +62,9 @@ public abstract class PageFragment extends Fragment {
 		super.onCreateView(inflater, container, savedInstanceState);
 		
 		View v = inflater.inflate(R.layout.etasdk_layout_page, container, false);
-		mPhotoView = (ZoomPhotoView) v.findViewById(R.id.etasdk_pageflip_photoview);
-		mPageNum = (TextView) v.findViewById(R.id.etasdk_pageflip_pagenum);
-		mProgress = (ProgressBar) v.findViewById(R.id.etasdk_pageflip_loader);
+		mPhotoView = (ZoomPhotoView) v.findViewById(R.id.etasdk_layout_page_photoview);
+		mPageNum = (TextView) v.findViewById(R.id.etasdk_layout_page_pagenum);
+		mProgress = (ProgressBar) v.findViewById(R.id.etasdk_layout_page_loader);
 		
 		mPhotoView.setMaximumScale(MAX_SCALE);
 		mPhotoView.setOnZoomListener(new OnZoomChangeListener() {
@@ -104,7 +104,7 @@ public abstract class PageFragment extends Fragment {
 		ir.setMemoryCache(false);
 		ImageLoader.getInstance().displayImage(ir);
 	}
-
+	
 	protected void onSingleClick(int page, float x, float y) {
 		List<Hotspot> list = mCallback.getCatalog().getHotspots().getHotspots(page, x, y, mCallback.isLandscape());
 		getCallback().getWrapperListener().onSingleClick(mPhotoView, page, x, y, list);
@@ -152,7 +152,15 @@ public abstract class PageFragment extends Fragment {
 	protected int getFirstNum() {
 		return mPages[0];
 	}
-
+	
+	protected boolean lowMem() {
+		return mCallback.isLowMemory();
+	}
+	
+	protected boolean land() {
+		return mCallback.isLandscape();
+	}
+	
 	protected int getSecondNum() {
 		return mPages[1];
 	}
@@ -162,6 +170,7 @@ public abstract class PageFragment extends Fragment {
 	
 	@Override
 	public void onResume() {
+		
 		Bitmap b = mPhotoView.getBitmap();
 		if ( (b == null || b.isRecycled() ) && mCallback.isPositionSet() ) {
 			loadView();

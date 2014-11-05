@@ -1,9 +1,7 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
-import android.graphics.Bitmap;
 import android.view.View;
 
-import com.eTilbudsavis.etasdk.ImageLoader.BitmapProcessor;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoDoubleClickListener;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoLongClickListener;
@@ -38,7 +36,7 @@ public class SinglePageFragment extends PageFragment {
 		getPhotoView().setTag(null);
 		int sampleSize = getCallback().isLowMemory() ? 2 : 0;
 		ImageRequest ir = new ImageRequest(getFirst().getView(), getPhotoView());
-		load(ir, sampleSize);
+		load(ir, sampleSize, true);
 	}
 	
 	@Override
@@ -46,12 +44,12 @@ public class SinglePageFragment extends PageFragment {
 		getPhotoView().setTag(null);
 		String url = getCallback().isLowMemory() ? getFirst().getView() : getFirst().getZoom();
 		ImageRequest ir = new ImageRequest(url, getPhotoView());
-		load(ir, 0);
+		load(ir, 0, false);
 	}
 	
-	private void load(ImageRequest ir, int sampleSize) {
+	private void load(ImageRequest ir, int sampleSize, boolean autoScale) {
 		ir.setBitmapDisplayer(new PageFadeBitmapDisplayer());
-		ir.setBitmapDecoder(new LowMemoryDecoder(sampleSize));
+		ir.setBitmapDecoder(new LowMemoryDecoder(getActivity(), sampleSize, autoScale));
 		ir.setBitmapProcessor(new PageBitmapProcessor(getFirstNum()));
 		addRequest(ir);
 	}

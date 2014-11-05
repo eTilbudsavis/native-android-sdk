@@ -51,25 +51,6 @@ public class DoublePageFragment extends PageFragment {
 		});
 	};
 	
-	private class Converter {
-		int page;
-		float x;
-		float y;
-		public Converter(float x, float y) {
-
-			if (x>0.5f) {
-				this.page = getSecondNum();
-				this.x = (x-0.5f)*2;
-				this.y = y;
-			} else {
-				this.page = getFirstNum();
-				this.x = x*2;
-				this.y = y;
-			}
-			
-		}
-	}
-	
 	private void reset(String tag) {
 		mClearBitmap = true;
 		mPage = null;
@@ -80,26 +61,29 @@ public class DoublePageFragment extends PageFragment {
 	@Override
 	public void loadView() {
 		reset(getFirst().getView());
-		int sampleSize = getCallback().isLowMemory() ? 2 : 0;
-		load(getFirst().getView(), true, sampleSize);
-		load(getSecond().getView(), false, sampleSize);
-	}
-
-	@Override
-	public void loadZoom() {
-		reset(getFirst().getZoom());
-		boolean low = getCallback().isLowMemory();
-		String firstUrl = low ? getFirst().getView() : getFirst().getZoom();
-		load(firstUrl, true, 0);
-		String secondUrl = low ? getSecond().getView() : getSecond().getZoom();
-		load(secondUrl, false, 0);
+		int sampleSize = lowMem() ? 2 : 1;
+		load(getFirst().getView(), true, sampleSize, true);
+		load(getSecond().getView(), false, sampleSize, true);
 	}
 	
-	private void load(String url, boolean left, int sampleSize) {
+	@Override
+	public void loadZoom() {
+		if (lowMem()) {
+			return;
+		}
+		reset(getFirst().getZoom());
+		int sampleSize = lowMem() ? 2 : 1;
+		String firstUrl = getFirst().getZoom();
+		load(firstUrl, true, sampleSize, false);
+		String secondUrl = getSecond().getZoom();
+		load(secondUrl, false, sampleSize, false);
+	}
+	
+	private void load(String url, boolean left, int sampleSize, boolean autoScale) {
 		ImageRequest r = new ImageRequest(url, new ImageView(getActivity()));
 		r.setBitmapDisplayer(new DoublePageDisplayer());
 		r.setBitmapProcessor(new DoublePageProcessor(left));
-		r.setBitmapDecoder(new LowMemoryDecoder(sampleSize));
+		r.setBitmapDecoder(new LowMemoryDecoder(getActivity(), sampleSize, autoScale));
 		addRequest(r);
 	}
 	
@@ -139,7 +123,9 @@ public class DoublePageFragment extends PageFragment {
 			
 			boolean isLeft = l!=null;
 			Bitmap b = (isLeft?l:r);
-			createDoublePage(b);
+			synchronized (LowMemoryDecoder.LOCK) {
+				createDoublePage(b);
+			}
 			if (mPage != null) {
 				int left = ( isLeft ? 0 : b.getWidth() );
 				mCanvas.drawBitmap(b, left, 0, null);
@@ -204,6 +190,25 @@ public class DoublePageFragment extends PageFragment {
 			
 		}
 
+	}
+
+	private class Converter {
+		int page;
+		float x;
+		float y;
+		public Converter(float x, float y) {
+
+			if (x>0.5f) {
+				this.page = getSecondNum();
+				this.x = (x-0.5f)*2;
+				this.y = y;
+			} else {
+				this.page = getFirstNum();
+				this.x = x*2;
+				this.y = y;
+			}
+			
+		}
 	}
 	
 }

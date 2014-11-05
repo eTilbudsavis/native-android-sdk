@@ -7,8 +7,6 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Network.RequestDebugger;
 import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
@@ -63,7 +61,7 @@ public class StatsCollectImpl implements StatsCollect {
 				}
 			}
 		});
-		EtaLog.d(TAG, r.getUrl());
+//		EtaLog.d(TAG, r.getUrl());
 		Eta.getInstance().add(r);
 		
 	}

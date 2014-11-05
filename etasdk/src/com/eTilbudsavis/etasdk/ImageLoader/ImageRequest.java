@@ -32,6 +32,7 @@ public class ImageRequest {
 	private BitmapDecoder mDecoder;
 	private EventLog mLog = new EventLog();
 	private ImageDebugger mDebugger;
+	private boolean mFinished = false;
 	
 	@SuppressWarnings("unused")
 	private ImageRequest() {
@@ -51,6 +52,11 @@ public class ImageRequest {
 		if (mDebugger!=null) {
 			mDebugger.debug(this);
 		}
+		mFinished = true;
+	}
+	
+	public boolean isFinished() {
+		return mFinished;
 	}
 	
 	public void add(String event) {

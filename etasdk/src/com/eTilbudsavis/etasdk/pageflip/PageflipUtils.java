@@ -3,6 +3,7 @@ package com.eTilbudsavis.etasdk.pageflip;
 import java.util.Arrays;
 import java.util.List;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -11,6 +12,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 
 import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
@@ -20,6 +23,8 @@ import com.eTilbudsavis.etasdk.Log.EtaLog;
 public class PageflipUtils {
 	
 	public static final String TAG = PageflipUtils.class.getSimpleName();
+
+	private static final long LOW_MEMORY_BOUNDARY = 42;
 	
 	private PageflipUtils() {
 		// Empty constructor
@@ -79,6 +84,19 @@ public class PageflipUtils {
 		if ( !Arrays.equals(pages, expectedPages) ) {
 			EtaLog.e(TAG, "positionToPage[pos:" + pos + ", land:" + land + ", expected:" + join(",", expectedPages) + ", got:" + join(",", pages));
 		}
+	}
+	
+	public static int getMaxHeap(Context c) {
+		ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+		if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
+			return am.getLargeMemoryClass();
+		} else {
+			return am.getMemoryClass();
+		}
+	}
+	
+	public static boolean hasLowMemory(Context c) {
+		return getMaxHeap(c) < LOW_MEMORY_BOUNDARY;
 	}
 	
 	public static String join(CharSequence delimiter, int[] tokens) {
