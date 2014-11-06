@@ -6,6 +6,8 @@ import android.widget.TextView;
 
 public class TextAnimLoader implements Runnable {
 	
+	public static final String TAG = TextAnimLoader.class.getSimpleName();
+	
 	public static final int DELAY = 350;
 	public static final int NUM_DOTS = 5;
 	private Handler mHandler;
@@ -26,6 +28,13 @@ public class TextAnimLoader implements Runnable {
 	
 	public void stop() {
 		mHandler.removeCallbacks(this);
+		mDots = 1;
+		mCountUp = true;
+	}
+	
+	public void error() {
+		stop();
+		mTextView.setText("Couldn't load\npage " + mText);
 	}
 	
 	public void run() {

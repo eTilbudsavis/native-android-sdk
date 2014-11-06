@@ -2,6 +2,8 @@ package com.eTilbudsavis.etasdk.pageflip;
 
 import java.util.List;
 
+import org.json.JSONObject;
+
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,6 +25,9 @@ import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
 import com.eTilbudsavis.etasdk.request.impl.CatalogObjectRequest.CatalogAutoFill;
 
@@ -34,12 +39,12 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	private static final String ARG_CATALOG = "eta_sdk_pageflip_catalog";
 	private static final String ARG_PAGE = "eta_sdk_pageflip_page";
-	
-	private static final String STATE_CATALOG = "eta_sdk_pageflip_state_catalog";
-	private static final String STATE_PAGE = "eta_sdk_pageflip_state_page";
+	private static final String ARG_FAKE_CATALOG_GET = "eta_sdk_pageflip_fake_catalog_get";
+	private static final String ARG_VIEWSESSION = "eta_sdk_pageflip_viewsession";
 	
 	// Need this
 	private Catalog mCatalog;
+	private boolean mHasPerformedFakeCatalogGet = false;
 	
 	// Views
 	private LayoutInflater mInflater;
@@ -53,10 +58,11 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	private int mCurrentPosition = 0;
 	private boolean mLandscape = false;
 	private boolean mLowMemory = false;
+	private boolean mPagesReady = false;
 	
 	// Callbacks and stats
 	private PageflipListenerWrapper mWrapperListener = new PageflipListenerWrapper();
-	private StatsCollect mCollector;
+	private String mViewSessionUuid;
 	private TextAnimLoader mLoader;
 	private Handler mHandler;
 	
@@ -92,7 +98,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		
 		public void run() {
 			setBranding();
-			mCollector = new StatsCollectImpl(mCatalog);
 			mAdapter = new PageflipAdapter(getChildFragmentManager(), PageflipFragment.this);
 			mPager.setAdapter(mAdapter);
 			mPager.setCurrentItem(mCurrentPosition);
@@ -121,11 +126,47 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		mHandler = new Handler();
 		mLowMemory = PageflipUtils.hasLowMemory(getActivity());
 		mLandscape = PageflipUtils.isLandscape(getActivity());
-		if (getArguments()!=null) {
+		
+		if (savedInstanceState!=null) {
+
+			setPage(savedInstanceState.getInt(ARG_PAGE, mCurrentPosition));
+			mCatalog = (Catalog) savedInstanceState.getSerializable(ARG_CATALOG);
+			mHasPerformedFakeCatalogGet = savedInstanceState.getBoolean(ARG_FAKE_CATALOG_GET);
+			mViewSessionUuid = savedInstanceState.getString(ARG_VIEWSESSION, Utils.createUUID());
+			
+		} else if (getArguments() != null) {
+			
 			setPage(getArguments().getInt(ARG_PAGE, 1));
 			mCatalog = (Catalog)getArguments().getSerializable(ARG_CATALOG);
+			fakeCatalog(mCatalog.getId());
+			mViewSessionUuid = Utils.createUUID();
+			
+		} else {
+			
+			// This is possible from XML - then what
+			
 		}
+		
 		super.onCreate(savedInstanceState);
+	}
+	
+	private void fakeCatalog(String id) {
+		
+		if (mHasPerformedFakeCatalogGet) {
+			return;
+		}
+		
+		Listener<JSONObject> l = new Listener<JSONObject>() {
+			
+			public void onComplete(JSONObject response, EtaError error) {
+				mHasPerformedFakeCatalogGet = true;
+			}
+		};
+		String url = Endpoint.catalogId(id);
+		JsonObjectRequest r = new JsonObjectRequest(url, l);
+		r.setIgnoreCache(true);
+		Eta.getInstance().add(r);
+		
 	}
 	
 	@Override
@@ -135,11 +176,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		mInflater = inflater;
 		mContainer = container;
 		setUpView(true);
-		
-		if (savedInstanceState != null) {
-			setPage(savedInstanceState.getInt(STATE_PAGE, mCurrentPosition));
-			mCatalog = (Catalog) savedInstanceState.getSerializable(STATE_CATALOG);
-		}
 		
 		return mFrame;
 		
@@ -212,6 +248,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		if (land != mLandscape) {
 			EtaLog.d(TAG, "onConfigurationChanged[orientation.landscape[" + mLandscape + "->" + land + "]");
 			removeRunners();
+			mPagesReady = false;
 			// Get the old page
 			int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
 			// switch to landscape mode
@@ -283,8 +320,10 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		outState.putIntArray(STATE_PAGE, PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape));
-		outState.putSerializable(STATE_CATALOG, mCatalog);
+		outState.putIntArray(ARG_PAGE, PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape));
+		outState.putSerializable(ARG_CATALOG, mCatalog);
+		outState.putBoolean(ARG_FAKE_CATALOG_GET, mHasPerformedFakeCatalogGet);
+		outState.putString(ARG_VIEWSESSION, mViewSessionUuid);
 		super.onSaveInstanceState(outState);
 	}
 	
@@ -299,7 +338,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	@Override
 	public void onPause() {
 		removeRunners();
-		//TODO collect stats - discuss with Morten how to
+		mPagesReady = false;
 		super.onPause();
 	}
 	
@@ -307,8 +346,27 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		return false;
 	}
 	
+	private PageFragment getPage(int position) {
+		return (PageFragment)mAdapter.instantiateItem(mContainer, position);
+	}
+	
+	public void onReady(int position) {
+		if (position==mCurrentPosition) {
+			EtaLog.d(TAG, "onReady.visible - " + position);
+			PageFragment old = getPage(position);
+			old.onVisible();
+			mPagesReady = true;
+		}
+	}
+	
 	public void onPageSelected(int position) {
-		mCollector.collectView(mLandscape, getPages());
+		// TODO Here we can prevent things from going bad onConfigChange - by not decoding multiple bitmaps at once
+		if (mPagesReady) {
+			PageFragment old = getPage(mCurrentPosition);
+			old.onInvisible();
+			PageFragment current = getPage(position);
+			current.onVisible();
+		}
 		mCurrentPosition = position;
 		mWrapperListener.onPageChange(PageflipUtils.positionToPages(position, mCatalog.getPageCount(), mLandscape));
 	}
@@ -348,9 +406,8 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		return mLowMemory;
 	}
 	
-	public void onZoom(View v, boolean zoomIn) {
-		mCollector.collectZoom(zoomIn, mLandscape, getPages());
-		mWrapperListener.onZoom(v, getPages(), zoomIn);
+	public String getViewSession() {
+		return mViewSessionUuid;
 	}
 	
 	protected class PageflipListenerWrapper implements PageflipListener {

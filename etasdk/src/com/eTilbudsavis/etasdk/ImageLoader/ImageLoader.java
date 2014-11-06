@@ -177,11 +177,12 @@ public class ImageLoader {
 	
 	private void processAndDisplay(final ImageRequest ir) {
 		
-		if (imageViewReusedOrBitmapNull(ir)) {
+		if (imageViewReused(ir)) {
+			ir.finish("imageview-reused");
 			return;
 		}
 		
-		if (ir.getBitmapProcessor() != null) {
+		if (ir.getBitmap()!=null && ir.getBitmapProcessor() != null) {
 			
 
 			Runnable processPoster = new Runnable() {
@@ -218,7 +219,8 @@ public class ImageLoader {
 			public void run() {
 				
 //				ir.isAlive("run-display");
-				if (imageViewReusedOrBitmapNull(ir)) {
+				if (imageViewReused(ir)) {
+					ir.finish("imageview-reused");
 					return;
 				}
 				
@@ -236,19 +238,6 @@ public class ImageLoader {
 			mHandler.post(work);
 		}
 		
-	}
-	
-	private boolean imageViewReusedOrBitmapNull(ImageRequest ir) {
-		if (imageViewReused(ir)) {
-			ir.finish("imageview-reused");
-			return true;
-		}
-
-		if (ir.getBitmap()==null) {
-			ir.finish("bitmap-is-null");
-			return true;
-		}
-		return false;
 	}
 	
 	/**

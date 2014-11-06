@@ -37,7 +37,7 @@ public class HandlerDelivery implements Delivery {
     	request.addEvent("post-response");
     	
     	if (request.getDelivery() != null) {
-    		request.getDelivery().postResponse(request, response);
+        	mHandler.post(new DeliveryRunnable(request, response));
     	} else {
         	mHandler.post(new DeliveryRunnable(request, response));
     	}

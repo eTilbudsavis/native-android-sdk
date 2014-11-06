@@ -67,9 +67,9 @@ public class LowMemoryDecoder implements BitmapDecoder {
 	    }
 	    
 	    // Perform actual decoding
-	    long s = System.currentTimeMillis();
+//	    long s = System.currentTimeMillis();
 		Bitmap b = BitmapFactory.decodeByteArray(image, 0, image.length, o);
-		EtaLog.d(TAG, "decode.time: " + (System.currentTimeMillis()-s));
+//		EtaLog.d(TAG, "decode.time: " + (System.currentTimeMillis()-s));
 //		PU.printBitmapInfo(TAG, b);
 		return b;
 	}

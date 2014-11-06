@@ -20,13 +20,17 @@ public class ZoomPhotoView extends PhotoView {
 	private OnMatrixChangedListener mMyMatrixChangedListener = new OnMatrixChangedListener() {
 		
 		public void onMatrixChanged(RectF rect) {
-			boolean isMinScale = PageflipUtils.almost(getScale(), getMinimumScale(), MIN_SCALE_EPSILON);
+			float scale = getScale();
+			boolean isMinScale = PageflipUtils.almost(scale, getMinimumScale(), MIN_SCALE_EPSILON);
 			setAllowParentInterceptOnEdge(isMinScale);
-			if (isMinScale && mZoomed) {
-				zoomChange(false);
-			} else if (!mZoomed && !isMinScale) {
-				zoomChange(true);
+			if (scale > getMinimumScale()) {
+				if (isMinScale && mZoomed) {
+					zoomChange(false);
+				} else if (!mZoomed && !isMinScale) {
+					zoomChange(true);
+				}
 			}
+			
 			if (mMatrixChangedListener!=null) {
 				mMatrixChangedListener.onMatrixChanged(rect);
 			}

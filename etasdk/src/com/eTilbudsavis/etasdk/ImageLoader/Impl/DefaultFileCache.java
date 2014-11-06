@@ -77,12 +77,12 @@ public class DefaultFileCache implements FileCache {
 					fos = new FileOutputStream(f);
 					fos.write(b);
 				} catch (IOException e) {
-					EtaLog.d(TAG, e.getMessage(), e);
+					
 				} finally {
 					try{
 						fos.close();
 					} catch(Throwable t) {
-						EtaLog.d(TAG, t.getMessage(), t);
+						
 					}
 				}
 //				EtaLog.d(TAG, "SaveByteArray: " + (System.currentTimeMillis()-start));
@@ -100,7 +100,7 @@ public class DefaultFileCache implements FileCache {
 			try {
 				b = readFile(f);
 			} catch (FileNotFoundException e) {
-				EtaLog.d(TAG, e.getMessage(), e);
+				
 			} catch ( IOException  e2) {
 				
 			}

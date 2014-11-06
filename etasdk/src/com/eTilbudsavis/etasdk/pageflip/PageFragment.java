@@ -29,8 +29,10 @@ public abstract class PageFragment extends Fragment {
 
 	protected static final int FADE_IN_DURATION = 150;
 	protected static final float MAX_SCALE = 3.0f;
-	
+
 	protected static final String ARG_PAGE = "eta_sdk_pageflip_page_page";
+	protected static final String ARG_POSITION = "eta_sdk_pageflip_page_position";
+	
 	
 	private int[] mPages;
 	private ZoomPhotoView mPhotoView;
@@ -38,33 +40,36 @@ public abstract class PageFragment extends Fragment {
 	private PageCallback mCallback;
 	private boolean mHasZoomImage = false;
 	private boolean mDebugRects = false;
-	private TextAnimLoader mLoader;
+	private TextAnimLoader mTextLoader;
+	private PageStat mStats;
 	
 	private void runLoader() {
-
+		
 		int brandingColor = getCallback().getCatalog().getBranding().getColor();
 		int complimentColor = PageflipUtils.getTextColor(brandingColor, getActivity());
 		mPageNum.setTextColor(complimentColor);
-		if (mLoader==null) {
-			mLoader = new TextAnimLoader(mPageNum);
+		if (mTextLoader==null) {
+			mTextLoader = new TextAnimLoader(mPageNum);
 		}
-		mLoader.stop();
-		mLoader.setText(PageflipUtils.join("-", mPages));
-		mLoader.run();
+		mTextLoader.stop();
+		mTextLoader.setText(PageflipUtils.join("-", mPages));
+		mTextLoader.run();
 	}
 	
-	public static PageFragment newInstance(int[] pages) {
+	public static PageFragment newInstance(int position, int[] pages) {
 		Bundle b = new Bundle();
 		b.putIntArray(ARG_PAGE, pages);
+		b.putInt(ARG_POSITION, position);
 		PageFragment f = pages.length == 1 ? new SinglePageFragment() : new DoublePageFragment();
 		f.setArguments(b);
 		return f;
 	}
-	
+	private int mPosition = -1;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		if (getArguments()!=null) {
 			mPages = getArguments().getIntArray(ARG_PAGE);
+			mPosition = getArguments().getInt(ARG_POSITION, 0);
 		}
 		super.onCreate(savedInstanceState);
 	}
@@ -72,7 +77,7 @@ public abstract class PageFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
-		
+
 		View v = inflater.inflate(R.layout.etasdk_layout_page, container, false);
 		mPhotoView = (ZoomPhotoView) v.findViewById(R.id.etasdk_layout_page_photoview);
 		mPageNum = (TextView) v.findViewById(R.id.etasdk_layout_page_pagenum);
@@ -85,7 +90,14 @@ public abstract class PageFragment extends Fragment {
 					mHasZoomImage = true;
 					loadZoom();
 				}
-				mCallback.onZoom(mPhotoView, isZoomed);
+				
+				if (isZoomed) {
+					getStat().zoomStart();
+				} else {
+					getStat().zoomCollect();
+				}
+				
+				getCallback().getWrapperListener().onZoom(mPhotoView, mPages, isZoomed);
 			}
 		});
 		toggleContentVisibility(true);
@@ -106,6 +118,13 @@ public abstract class PageFragment extends Fragment {
 	public void onSaveInstanceState(Bundle outState) {
 //		outState.putIntArray(ARG_PAGE, mPages);
 		super.onSaveInstanceState(outState);
+	}
+	
+	private PageStat getStat() {
+		if (mStats==null) {
+			mStats = new PageStat(mCallback.getCatalog().getId(), mCallback.getViewSession(), mPages, land());
+		}
+		return mStats;
 	}
 	
 	protected void addRequest(ImageRequest ir) {
@@ -176,27 +195,52 @@ public abstract class PageFragment extends Fragment {
 	public abstract void loadView();
 
 	public abstract void loadZoom();
-	
-	@Override
-	public void onResume() {
-		
+
+	private void loadImage() {
+
 		Bitmap b = mPhotoView.getBitmap();
 		if ( (b == null || b.isRecycled() ) && mCallback.isPositionSet() ) {
 			loadView();
 		}
+	}
+
+	private void unLoadImage() {
+		Bitmap b = mPhotoView.getBitmap();
+		if (b != null && !b.isRecycled()) {
+			if (mPhotoView.getScale() != mPhotoView.getMinimumScale()) {
+				mPhotoView.setScale(mPhotoView.getMinimumScale());
+			}
+			b.recycle();
+		}
+	}
+	
+	@Override
+	public void onResume() {
+		getCallback().onReady(mPosition);
+		loadImage();
 		super.onResume();
+	}
+	
+	public void onVisible() {
+		getStat().viewStart();
+		// TODO do performance stuff, low memory devices can start loading here instead of onResume
+	}
+	
+	public void onInvisible() {
+		getStat().viewCollect();
+		Bitmap b = mPhotoView.getBitmap();
+		if (b != null && !b.isRecycled()) {
+			getStat().reset(0);
+		} else {
+			getStat().reset(1);
+		}
 	}
 	
 	@Override
 	public void onPause() {
-		mLoader.stop();
-		if (mPhotoView.getScale() != mPhotoView.getMinimumScale()) {
-			mPhotoView.setScale(mPhotoView.getMinimumScale());
-		}
-		Bitmap b = mPhotoView.getBitmap();
-		if (b != null) {
-			b.recycle();
-		}
+		mTextLoader.stop();
+		unLoadImage();
+		onInvisible();
 		super.onPause();
 	}
 	
@@ -231,12 +275,15 @@ public abstract class PageFragment extends Fragment {
 		public void display(ImageRequest ir) {
 			
 			if(ir.getBitmap() != null) {
+				getStat().viewStart();
 				mPhotoView.setImageBitmap(ir.getBitmap());
-			} else if (ir.getPlaceholderError() != 0) {
-				mPhotoView.setImageResource(ir.getPlaceholderError());
+				toggleContentVisibility(false);
+			} else {
+				mTextLoader.error();
 			}
-			
-			toggleContentVisibility(false);
+//			} else if (ir.getPlaceholderError() != 0) {
+//				mPhotoView.setImageResource(ir.getPlaceholderError());
+//			}
 			
 			if ( (ir.getLoadSource() == LoadSource.WEB && mFadeFromWeb) ||
 					(ir.getLoadSource() == LoadSource.FILE && mFadeFromFile) ||
