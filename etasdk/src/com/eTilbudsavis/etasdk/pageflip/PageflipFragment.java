@@ -84,7 +84,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 				} else {
 					mHandler.post(mOnCatalogComplete);
 				}
-			} else {
+			} else if (error!=null ){
 				
 				EtaLog.d(TAG, error.toJSON().toString());
 				// TODO improve error stuff 1 == network error
@@ -352,7 +352,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	public void onReady(int position) {
 		if (position==mCurrentPosition) {
-			EtaLog.d(TAG, "onReady.visible - " + position);
 			PageFragment old = getPage(position);
 			old.onVisible();
 			mPagesReady = true;
@@ -361,14 +360,15 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	public void onPageSelected(int position) {
 		// TODO Here we can prevent things from going bad onConfigChange - by not decoding multiple bitmaps at once
+		int oldPos = mCurrentPosition;
+		mCurrentPosition = position;
 		if (mPagesReady) {
-			PageFragment old = getPage(mCurrentPosition);
+			PageFragment old = getPage(oldPos);
 			old.onInvisible();
-			PageFragment current = getPage(position);
+			PageFragment current = getPage(mCurrentPosition);
 			current.onVisible();
 		}
-		mCurrentPosition = position;
-		mWrapperListener.onPageChange(PageflipUtils.positionToPages(position, mCatalog.getPageCount(), mLandscape));
+		mWrapperListener.onPageChange(PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape));
 	}
 	
 	public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

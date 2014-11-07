@@ -42,6 +42,7 @@ public abstract class PageFragment extends Fragment {
 	private boolean mDebugRects = false;
 	private TextAnimLoader mTextLoader;
 	private PageStat mStats;
+	boolean mPageVisible = false;
 	
 	private void runLoader() {
 		
@@ -92,9 +93,9 @@ public abstract class PageFragment extends Fragment {
 				}
 				
 				if (isZoomed) {
-					getStat().zoomStart();
+					getStat().startZoom();
 				} else {
-					getStat().zoomCollect();
+					getStat().collectZoom();
 				}
 				
 				getCallback().getWrapperListener().onZoom(mPhotoView, mPages, isZoomed);
@@ -195,15 +196,14 @@ public abstract class PageFragment extends Fragment {
 	public abstract void loadView();
 
 	public abstract void loadZoom();
-
+	
 	private void loadImage() {
-
 		Bitmap b = mPhotoView.getBitmap();
 		if ( (b == null || b.isRecycled() ) && mCallback.isPositionSet() ) {
 			loadView();
 		}
 	}
-
+	
 	private void unLoadImage() {
 		Bitmap b = mPhotoView.getBitmap();
 		if (b != null && !b.isRecycled()) {
@@ -221,19 +221,24 @@ public abstract class PageFragment extends Fragment {
 		super.onResume();
 	}
 	
+	public boolean isPageVisible() {
+		return mPageVisible;
+	}
+	
 	public void onVisible() {
-		getStat().viewStart();
-		// TODO do performance stuff, low memory devices can start loading here instead of onResume
+		loadImage();
+		if (!mPageVisible) {
+			if (mPhotoView.getBitmap()!=null) {
+				getStat().startView();
+			}
+			// TODO do performance stuff, low memory devices can start loading here instead of onResume
+		}
+		mPageVisible = true;
 	}
 	
 	public void onInvisible() {
-		getStat().viewCollect();
-		Bitmap b = mPhotoView.getBitmap();
-		if (b != null && !b.isRecycled()) {
-			getStat().reset(0);
-		} else {
-			getStat().reset(1);
-		}
+		getStat().collectView();
+		mPageVisible = false;
 	}
 	
 	@Override
@@ -275,12 +280,15 @@ public abstract class PageFragment extends Fragment {
 		public void display(ImageRequest ir) {
 			
 			if(ir.getBitmap() != null) {
-				getStat().viewStart();
+				if (isPageVisible()) {
+					getStat().startView();
+				}
 				mPhotoView.setImageBitmap(ir.getBitmap());
 				toggleContentVisibility(false);
 			} else {
 				mTextLoader.error();
 			}
+			
 //			} else if (ir.getPlaceholderError() != 0) {
 //				mPhotoView.setImageResource(ir.getPlaceholderError());
 //			}

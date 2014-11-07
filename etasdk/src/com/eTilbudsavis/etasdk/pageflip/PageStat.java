@@ -21,12 +21,9 @@ public class PageStat {
 	private final String mViewSession;
 	private final boolean mLandscape;
 	private final int[] mPages;
-	private int mViewStartCounter = 0;
 	private long mViewStart = 0;
 	private long mZoomStart = 0;
 	private long mZoomAccumulated = 0;
-	private boolean mViewCollectStarted = false;
-	private boolean mZoomCollectStarted = false;
 	
 	public PageStat(String catalogId, String viewSessionUuid, int[] pages, boolean landscape) {
 		mCatalogId = catalogId;
@@ -35,54 +32,40 @@ public class PageStat {
 		mLandscape = landscape;
 	}
 	
-	private String page() {
-		return PageflipUtils.join("-", mPages);
-	}
-	
-	public void viewCollect() {
-		if (mViewCollectStarted) {
+	public void collectView() {
+		if (mViewStart!=0) {
 			log("viewCollect");
-			zoomCollect();
+			collectZoom();
 			long now = System.currentTimeMillis();
 			long duration = (now - mViewStart) - mZoomAccumulated;
-			String s = "now: %s, start: %s, zoom: %s";
-			EtaLog.d(TAG, String.format(s, now, mViewStart, mZoomAccumulated));
 			collect(true, duration);
 		}
-		mViewCollectStarted = false;
+		mViewStart = 0;
 	}
 	
-	public void reset(int eventsNeeded) {
-		log("reset");
-		mViewStartCounter = 0;
-	}
-	
-	public void viewStart() {
-		// We need both a onVisible event, and image loaded event
-		if (mViewStartCounter==1) {
+	public void startView() {
+		if (mViewStart==0) {
 			log("viewStart");
 			mViewStart = System.currentTimeMillis();
 			mZoomAccumulated = 0;
-			mViewCollectStarted = true;
 		}
-		mViewStartCounter++;
 	}
 	
-	public void zoomStart() {
-		log("zoomStart");
-		mZoomCollectStarted = true;
-		mZoomStart = System.currentTimeMillis();
+	public void startZoom() {
+		if (mZoomStart==0) {
+			log("zoomStart");
+			mZoomStart = System.currentTimeMillis();
+		}
 	}
 	
-	public void zoomCollect() {
-		if (mZoomCollectStarted) {
+	public void collectZoom() {
+		if (mZoomStart!=0) {
 			log("zoomCollect");
-			long now = System.currentTimeMillis();
-			long duration = now - mZoomStart;
+			long duration = System.currentTimeMillis() - mZoomStart;
 			mZoomAccumulated += duration;
 			collect(false, duration);
 		}
-		mZoomCollectStarted = false;
+		mZoomStart = 0;
 	}
 	
 	private void collect(boolean isView, long duration) {
@@ -121,7 +104,7 @@ public class PageStat {
 	
 	private void log(String s) {
 		if (LOG) {
-			EtaLog.d(TAG, "[" + page() + "] " + s);
+			EtaLog.d(TAG, "[" + PageflipUtils.join("-", mPages) + "] " + s);
 		}
 	}
 	
