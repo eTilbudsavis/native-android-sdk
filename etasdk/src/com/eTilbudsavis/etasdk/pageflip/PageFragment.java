@@ -44,11 +44,18 @@ public abstract class PageFragment extends Fragment {
 	private PageStat mStats;
 	boolean mPageVisible = false;
 	
+	private void updateBranding() {
+		if (getCallback().getCatalog()!=null) {
+			int brandingColor = getCallback().getCatalog().getBranding().getColor();
+			int complimentColor = PageflipUtils.getTextColor(brandingColor, getActivity());
+			mPageNum.setTextColor(complimentColor);
+		}
+	}
+	
 	private void runLoader() {
 		
-		int brandingColor = getCallback().getCatalog().getBranding().getColor();
-		int complimentColor = PageflipUtils.getTextColor(brandingColor, getActivity());
-		mPageNum.setTextColor(complimentColor);
+		updateBranding();
+		
 		if (mTextLoader==null) {
 			mTextLoader = new TextAnimLoader(mPageNum);
 		}
@@ -65,6 +72,7 @@ public abstract class PageFragment extends Fragment {
 		f.setArguments(b);
 		return f;
 	}
+	
 	private int mPosition = -1;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -216,6 +224,7 @@ public abstract class PageFragment extends Fragment {
 	
 	@Override
 	public void onResume() {
+		updateBranding();
 		getCallback().onReady(mPosition);
 		loadImage();
 		super.onResume();
