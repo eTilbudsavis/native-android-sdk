@@ -37,14 +37,16 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	private static final double PAGER_SCROLL_FACTOR = 0.5d;
 	
-	private static final String ARG_CATALOG = "eta_sdk_pageflip_catalog";
-	private static final String ARG_PAGE = "eta_sdk_pageflip_page";
-	private static final String ARG_FAKE_CATALOG_GET = "eta_sdk_pageflip_fake_catalog_get";
-	private static final String ARG_VIEWSESSION = "eta_sdk_pageflip_viewsession";
+	private static final String ARG_CATALOG = "com.eTilbudsavis.etasdk.pageflip.pageflipFragment.catalog";
+	private static final String ARG_CATALOG_ID = "com.eTilbudsavis.etasdk.pageflip.pageflipFragment.catalog.id";
+	private static final String ARG_PAGE = "com.eTilbudsavis.etasdk.pageflip.pageflipFragment.page";
+	private static final String ARG_CATALOG_VIEW = "com.eTilbudsavis.etasdk.pageflip.pageflipFragment.fakeCatalogGet";
+	private static final String ARG_VIEWSESSION = "com.eTilbudsavis.etasdk.pageflip.pageflipFragment.viewSession";
 	
 	// Need this
 	private Catalog mCatalog;
-	private boolean mHasPerformedFakeCatalogGet = false;
+	private String mCatalogId;
+	private boolean mHasCatalogView = false;
 	
 	// Views
 	private LayoutInflater mInflater;
@@ -59,6 +61,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	private boolean mLandscape = false;
 	private boolean mLowMemory = false;
 	private boolean mPagesReady = false;
+	private boolean mPageflipStarted = false;
 	
 	// Callbacks and stats
 	private PageflipListenerWrapper mWrapperListener = new PageflipListenerWrapper();
@@ -97,7 +100,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	Runnable mOnCatalogComplete = new Runnable() {
 		
 		public void run() {
-			setBranding();
 			mAdapter = new PageflipAdapter(getChildFragmentManager(), PageflipFragment.this);
 			mPager.setAdapter(mAdapter);
 			mPager.setCurrentItem(mCurrentPosition);
@@ -110,11 +112,19 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	public static PageflipFragment newInstance(Catalog c) {
 		return newInstance(c, 1);
 	}
-	
+
 	public static PageflipFragment newInstance(Catalog c, int page) {
-		page = pageValidator(c, page);
 		Bundle b = new Bundle();
 		b.putSerializable(ARG_CATALOG, c);
+		b.putInt(ARG_PAGE, page);
+		PageflipFragment f = new PageflipFragment();
+		f.setArguments(b);
+		return f;
+	}
+
+	public static PageflipFragment newInstance(String catalogId, int page) {
+		Bundle b = new Bundle();
+		b.putString(ARG_CATALOG_ID, catalogId);
 		b.putInt(ARG_PAGE, page);
 		PageflipFragment f = new PageflipFragment();
 		f.setArguments(b);
@@ -123,6 +133,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		
 		mHandler = new Handler();
 		mLowMemory = PageflipUtils.hasLowMemory(getActivity());
 		mLandscape = PageflipUtils.isLandscape(getActivity());
@@ -130,15 +141,19 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		if (savedInstanceState!=null) {
 
 			setPage(savedInstanceState.getInt(ARG_PAGE, mCurrentPosition));
-			mCatalog = (Catalog) savedInstanceState.getSerializable(ARG_CATALOG);
-			mHasPerformedFakeCatalogGet = savedInstanceState.getBoolean(ARG_FAKE_CATALOG_GET);
+			setCatalog((Catalog) savedInstanceState.getSerializable(ARG_CATALOG));
+			mHasCatalogView = savedInstanceState.getBoolean(ARG_CATALOG_VIEW);
 			mViewSessionUuid = savedInstanceState.getString(ARG_VIEWSESSION, Utils.createUUID());
 			
 		} else if (getArguments() != null) {
-			
-			setPage(getArguments().getInt(ARG_PAGE, 1));
-			mCatalog = (Catalog)getArguments().getSerializable(ARG_CATALOG);
-			fakeCatalog(mCatalog.getId());
+			Bundle b = getArguments();
+			setPage(b.getInt(ARG_PAGE, 1));
+			if (b.containsKey(ARG_CATALOG)) {
+				setCatalog((Catalog) b.getSerializable(ARG_CATALOG));
+			} else if (b.containsKey(ARG_CATALOG_ID)) {
+				setCatalogId(b.getString(ARG_CATALOG_ID));
+			}
+			mHasCatalogView = false;
 			mViewSessionUuid = Utils.createUUID();
 			
 		} else {
@@ -150,25 +165,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		super.onCreate(savedInstanceState);
 	}
 	
-	private void fakeCatalog(String id) {
-		
-		if (mHasPerformedFakeCatalogGet) {
-			return;
-		}
-		
-		Listener<JSONObject> l = new Listener<JSONObject>() {
-			
-			public void onComplete(JSONObject response, EtaError error) {
-				mHasPerformedFakeCatalogGet = true;
-			}
-		};
-		String url = Endpoint.catalogId(id);
-		JsonObjectRequest r = new JsonObjectRequest(url, l);
-		r.setIgnoreCache(true);
-		Eta.getInstance().add(r);
-		
-	}
-	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
@@ -176,7 +172,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		mInflater = inflater;
 		mContainer = container;
 		setUpView(true);
-		
 		return mFrame;
 		
 	}
@@ -198,35 +193,57 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		mPager.setOnPageChangeListener(this);
 		mProgress.setVisibility(View.VISIBLE);
 		mPager.setVisibility(View.INVISIBLE);
-		setBranding();
-		startLoading();
-	}
-	
-	private static int pageValidator(Catalog c, int page) {
-		if (!PageflipUtils.isValidPage(c, page)) {
-			EtaLog.i(TAG, "Page (" + page + ") not within catalog.pages range (1-" +c.getPageCount()+ "). Setting page to 1");
-			return 1;
+		
+		if (mLoader == null) {
+			mLoader = new TextAnimLoader(mProgress);
 		}
-		return page;
+		mLoader.run();
+		
 	}
 	
-	private void startLoading() {
-		mLoader = new TextAnimLoader(mProgress);
-		if (mCatalog!=null) {
+	private void runCatalogView() {
+		
+		if ( mCatalog != null && mHasCatalogView ) {
+			return;
+		}
+		
+		Listener<JSONObject> l = new Listener<JSONObject>() {
+			
+			public void onComplete(JSONObject response, EtaError error) {
+				
+				mHasCatalogView = response != null;
+				
+				if (response != null) {
+					if (mCatalog == null) {
+						setCatalog(Catalog.fromJSON(response));
+						onceWeHaveACatalog();
+					}
+				} else {
+					mLoader.error();
+				}
+				
+			}
+		};
+		
+		String url = Endpoint.catalogId(mCatalogId);
+		JsonObjectRequest r = new JsonObjectRequest(url, l);
+		r.setIgnoreCache(true);
+		Eta.getInstance().add(r);
+		
+	}
+	
+	private void onceWeHaveACatalog() {
+		if (mCatalog != null) {
+			mLoader.setText(mCatalog.getBranding().getName());
 			int branding = mCatalog.getBranding().getColor();
 			int text = PageflipUtils.getTextColor(branding, getActivity());
 			mProgress.setTextColor(text);
-			mLoader.setText(mCatalog.getBranding().getName());
-		}
-		mLoader.run();
-	}
-	private void setBranding() {
-		if (mCatalog!= null) {
-			mFrame.setBackgroundColor(mCatalog.getBranding().getColor());
+			mFrame.setBackgroundColor(branding);
+			runCatalogFiller();
 		}
 	}
 	
-	private void ensureCatalog() {
+	private void runCatalogFiller() {
 		boolean needHotspots = mCatalog.getHotspots()==null;
 		boolean needPages = mCatalog.getPages()==null;
 		CatalogAutoFill caf = new CatalogAutoFill();
@@ -249,12 +266,14 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 			EtaLog.d(TAG, "onConfigurationChanged[orientation.landscape[" + mLandscape + "->" + land + "]");
 			removeRunners();
 			mPagesReady = false;
+			mPageflipStarted = false;
 			// Get the old page
 			int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
 			// switch to landscape mode
 			mLandscape = land;
 			// set new current position accordingly
 			mCurrentPosition = PageflipUtils.pageToPosition(pages[0], mLandscape);
+			
 			setUpView(false);
 			start();
 		}
@@ -309,12 +328,22 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	public void setCatalog(Catalog c) {
 		mCatalog = c;
+		mCatalogId = mCatalog.getId();
+	}
+	
+	public void setCatalogId(String catalogId) {
+		mCatalogId = catalogId;
 	}
 	
 	public void start() {
+		if (mPageflipStarted) {
+			return;
+		}
+		mPageflipStarted = true;
 		if (mCatalog!=null) {
-			setBranding();
-			ensureCatalog();
+			onceWeHaveACatalog();
+		} else {
+			runCatalogView();
 		}
 	}
 	
@@ -322,7 +351,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	public void onSaveInstanceState(Bundle outState) {
 		outState.putIntArray(ARG_PAGE, PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape));
 		outState.putSerializable(ARG_CATALOG, mCatalog);
-		outState.putBoolean(ARG_FAKE_CATALOG_GET, mHasPerformedFakeCatalogGet);
+		outState.putBoolean(ARG_CATALOG_VIEW, mHasCatalogView);
 		outState.putString(ARG_VIEWSESSION, mViewSessionUuid);
 		super.onSaveInstanceState(outState);
 	}
@@ -330,15 +359,14 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (mCatalog!=null) {
-			start();
-		}
+		start();
 	}
 	
 	@Override
 	public void onPause() {
 		removeRunners();
 		mPagesReady = false;
+		mPageflipStarted = false;
 		super.onPause();
 	}
 	

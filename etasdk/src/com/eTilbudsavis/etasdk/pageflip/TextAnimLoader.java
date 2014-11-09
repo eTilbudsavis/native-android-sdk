@@ -1,5 +1,8 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
+import com.eTilbudsavis.etasdk.R;
+
+import android.content.res.Resources;
 import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
@@ -34,7 +37,9 @@ public class TextAnimLoader implements Runnable {
 	
 	public void error() {
 		stop();
-		mTextView.setText("Couldn't load\npage " + mText);
+		Resources r = mTextView.getContext().getResources();
+		String s = r.getString(R.string.etasdk_pageflip_load, mText);
+		mTextView.setText(s);
 	}
 	
 	public void run() {

@@ -30,8 +30,8 @@ public abstract class PageFragment extends Fragment {
 	protected static final int FADE_IN_DURATION = 150;
 	protected static final float MAX_SCALE = 3.0f;
 
-	protected static final String ARG_PAGE = "eta_sdk_pageflip_page_page";
-	protected static final String ARG_POSITION = "eta_sdk_pageflip_page_position";
+	protected static final String ARG_PAGE = "com.eTilbudsavis.etasdk.pageflip.pageFragment.page";
+	protected static final String ARG_POSITION = "com.eTilbudsavis.etasdk.pageflip.pageFragment.position";
 	
 	
 	private int[] mPages;

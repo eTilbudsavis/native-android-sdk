@@ -75,13 +75,13 @@ public class PageStat {
 		JsonObjectRequest r = new JsonObjectRequest(Method.POST, url, body, new Listener<JSONObject>() {
 
 			public void onComplete(JSONObject response, EtaError error) {
-				String format = null;
-				if (response== null) {
-					format = "ERROR - %s";
-				} else {
-					format = "OK - %s";
-				}
-				EtaLog.d(TAG, String.format(format, body.toString()));
+//				String format = null;
+//				if (response== null) {
+//					format = "ERROR - %s";
+//				} else {
+//					format = "OK - %s";
+//				}
+//				EtaLog.d(TAG, String.format(format, body.toString()));
 			}
 		});
 		Eta.getInstance().add(r);
