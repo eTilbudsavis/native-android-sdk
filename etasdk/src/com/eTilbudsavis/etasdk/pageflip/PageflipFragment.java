@@ -77,6 +77,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	Listener<Catalog> mCatListener = new Listener<Catalog>() {
 		
 		public void onComplete(Catalog c, EtaError error) {
+			
 			if (!isAdded()) {
 				return;
 			}
@@ -100,9 +101,16 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	Runnable mOnCatalogComplete = new Runnable() {
 		
 		public void run() {
+			
 			mAdapter = new PageflipAdapter(getChildFragmentManager(), PageflipFragment.this);
 			mPager.setAdapter(mAdapter);
-			mPager.setCurrentItem(mCurrentPosition);
+			// force the first page change if needed
+			boolean doPageChange = (mPager.getCurrentItem()!=mCurrentPosition);
+			if (doPageChange) {
+				mPager.setCurrentItem(mCurrentPosition);
+			} else {
+				mWrapperListener.onPageChange(PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape));
+			}
 			mProgress.setVisibility(View.GONE);
 			mPager.setVisibility(View.VISIBLE);
 		}
@@ -233,6 +241,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	}
 	
 	private void onceWeHaveACatalog() {
+		
 		if (mCatalog != null) {
 			mLoader.setText(mCatalog.getBranding().getName());
 			int branding = mCatalog.getBranding().getColor();
@@ -244,6 +253,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	}
 	
 	private void runCatalogFiller() {
+		
 		boolean needHotspots = mCatalog.getHotspots()==null;
 		boolean needPages = mCatalog.getPages()==null;
 		CatalogAutoFill caf = new CatalogAutoFill();
@@ -263,7 +273,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		super.onConfigurationChanged(newConfig);
 		boolean land = PageflipUtils.isLandscape(newConfig);
 		if (land != mLandscape) {
-			EtaLog.d(TAG, "onConfigurationChanged[orientation.landscape[" + mLandscape + "->" + land + "]");
+//			EtaLog.d(TAG, "onConfigurationChanged[orientation.landscape[" + mLandscape + "->" + land + "]");
 			removeRunners();
 			mPagesReady = false;
 			mPageflipStarted = false;
@@ -336,6 +346,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	}
 	
 	public void start() {
+		
 		if (mPageflipStarted) {
 			return;
 		}

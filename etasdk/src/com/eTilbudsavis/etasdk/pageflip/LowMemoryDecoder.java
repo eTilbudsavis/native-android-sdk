@@ -9,7 +9,6 @@ import android.os.Build.VERSION_CODES;
 
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapDecoder;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class LowMemoryDecoder implements BitmapDecoder {
 	
