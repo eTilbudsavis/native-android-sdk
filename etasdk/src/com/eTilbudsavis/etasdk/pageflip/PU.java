@@ -33,7 +33,7 @@ public class PU {
 	public static final long KILO_BYTE = 0x400;
 	
 	private PU() {
-		// TODO Auto-generated constructor stub
+		
 	}
 	
 	public static void printHeap(String tag) {

@@ -147,7 +147,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		mLandscape = PageflipUtils.isLandscape(getActivity());
 		
 		if (savedInstanceState!=null) {
-
+			
 			setPage(savedInstanceState.getInt(ARG_PAGE, mCurrentPosition));
 			setCatalog((Catalog) savedInstanceState.getSerializable(ARG_CATALOG));
 			mHasCatalogView = savedInstanceState.getBoolean(ARG_CATALOG_VIEW);
@@ -337,8 +337,10 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	}
 	
 	public void setCatalog(Catalog c) {
-		mCatalog = c;
-		mCatalogId = mCatalog.getId();
+		if (c != null) {
+			mCatalog = c;
+			mCatalogId = mCatalog.getId();
+		}
 	}
 	
 	public void setCatalogId(String catalogId) {
@@ -398,7 +400,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	}
 	
 	public void onPageSelected(int position) {
-		// TODO Here we can prevent things from going bad onConfigChange - by not decoding multiple bitmaps at once
 		int oldPos = mCurrentPosition;
 		mCurrentPosition = position;
 		if (mPagesReady) {
