@@ -3,18 +3,18 @@ package com.eTilbudsavis.etasdk.ImageLoader.Impl;
 import static android.os.Environment.MEDIA_MOUNTED;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.net.URLEncoder;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.concurrent.ExecutorService;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Environment;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.FileCache;
+import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.PermissionUtils;
 
@@ -23,9 +23,11 @@ public class DefaultFileCache implements FileCache {
 	public static final String TAG = Eta.TAG_PREFIX + DefaultFileCache.class.getSimpleName();
 	
 	private File mCacheDir;
+	private ExecutorService mExecutor;
 	
-	public DefaultFileCache(Context context){
+	public DefaultFileCache(Context context, ExecutorService executor){
 		mCacheDir = getCacheDirectory(context, true);
+		mExecutor = executor;
 		EtaLog.v(TAG, "CacheDir: " + mCacheDir.getAbsolutePath());
 		cleanup();
 	}
@@ -60,68 +62,95 @@ public class DefaultFileCache implements FileCache {
 		return cacheDir;
 	}
 	
-	@SuppressWarnings("deprecation")
-	private String getFileName(String url) {
-		return URLEncoder.encode(url);
-	}
-	
-	public void save(String id, Bitmap b) {
-		FileOutputStream out = null;
-		try {
-			File f = new File(mCacheDir, getFileName(id));
-			out = new FileOutputStream(f);
-			b.compress(Bitmap.CompressFormat.PNG, 90, out);
-		} catch (Exception e) {
-			EtaLog.d(TAG, e.getMessage(), e);
-		} finally {
-			try{
-				out.close();
-			} catch(Throwable t) {
-				EtaLog.d(TAG, t.getMessage(), t);
+	public void save(final ImageRequest ir, final byte[] b) {
+		
+		Runnable r = new Runnable() {
+			
+			public void run() {
+				
+				File f = new File(mCacheDir, ir.getFileName());
+				FileOutputStream fos = null;
+				if (f.exists()) {
+					f.delete();
+				}
+				try {
+					fos = new FileOutputStream(f);
+					fos.write(b);
+				} catch (IOException e) {
+					
+				} finally {
+					try{
+						fos.close();
+					} catch(Throwable t) {
+						
+					}
+				}
+//				EtaLog.d(TAG, "SaveByteArray: " + (System.currentTimeMillis()-start));
 			}
-		}
+		};
+		
+		mExecutor.execute(r);
 		
 	}
 	
-	public Bitmap get(String url) {
-		File f = new File(mCacheDir, getFileName(url));
-		Bitmap b = null;
+	public byte[] getByteArray(ImageRequest ir) {
+		File f = new File(mCacheDir, ir.getFileName());
+		byte[] b = null;
 		if (f.exists()) {
 			try {
-				FileInputStream is = new FileInputStream(f);
-				b = BitmapFactory.decodeStream(is);
+				b = readFile(f);
 			} catch (FileNotFoundException e) {
-				EtaLog.d(TAG, e.getMessage(), e);
+				
+			} catch ( IOException  e2) {
+				
 			}
 		}
 		return b;
 	}
 	
+	public static byte[] readFile(File file) throws IOException {
+        // Open file
+        RandomAccessFile f = new RandomAccessFile(file, "r");
+        try {
+            // Get and check length
+            long longlength = f.length();
+            int length = (int) longlength;
+            if (length != longlength)
+                throw new IOException("File size >= 2 GB");
+            // Read file and return data
+            byte[] data = new byte[length];
+            f.readFully(data);
+            return data;
+        } finally {
+            f.close();
+        }
+    }
 	private static final long WEEK_IN_MILLIS = 1000 * 60 * 60 * 24 * 7;
 	
 	Runnable cleaner = new Runnable() {
 		
 		public void run() {
-			int count = 0;
 			File[] files = mCacheDir.listFiles();
 			if( files == null ) {
 				return;
 			}
+			int count = 0;
 			for(File f:files) {
-				if ( (System.currentTimeMillis()-f.lastModified()) > WEEK_IN_MILLIS ) {
+				boolean recentlyModified = (System.currentTimeMillis()-f.lastModified()) < WEEK_IN_MILLIS;
+				if ( !recentlyModified ) {
 					count++;
 					f.delete();
 				}
 			}
 			if (count > 0) {
-				EtaLog.v(TAG, "Deleted " + count + " files from FileCache");
+				EtaLog.v(TAG, "Deleted " + count + " files from " + getClass().getSimpleName());
 			}
 		}
 	};
 	
 	public void cleanup(){
 		
-		new Thread(cleaner).start();
+		mExecutor.execute(cleaner);
 		
 	}
 	

@@ -36,11 +36,12 @@ public class HandlerDelivery implements Delivery {
     public void postResponse(Request<?> request, Response<?> response) {
     	request.addEvent("post-response");
     	
-//    	if (request.getDelivery() != null) {
-//    		request.getDelivery().postResponse(request, response);
-//    	} else {
+    	// TODO fix the issue of recursive calls to the handler delivery
+    	if (request.getDelivery() != null) {
         	mHandler.post(new DeliveryRunnable(request, response));
-//    	}
+    	} else {
+        	mHandler.post(new DeliveryRunnable(request, response));
+    	}
     	
     }
     

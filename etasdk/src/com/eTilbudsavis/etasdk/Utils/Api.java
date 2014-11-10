@@ -114,6 +114,10 @@ public final class Api {
 		public static final String OFFSET = "offset";
 		public static final String SUBJECT = "subject";
 		public static final String ACCEPT_URL = "accept_url";
+		public static final String PDF_URL = "pdf_url";
+		public static final String CATEGORY_IDS = "category_ids";
+		public static final String OFFER = "offer";
+		public static final String LOCATIONS = "locations";
 
 	}
 

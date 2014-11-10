@@ -15,6 +15,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Store;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.ICatalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.HotspotMap;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Delivery;
@@ -37,31 +38,45 @@ public abstract class RequestAutoFill<T> {
 	private Listener<T> mListener;
 	private T mData;
 	private EtaError mError;
+	private AutoFillParams mParams;
 	private List<Request<?>> mRequests = new ArrayList<Request<?>>();
-
+	
 	public abstract List<Request<?>> createRequests(T data);
 	
-	public void run(AutoFillParams params, T data, EtaError e, RequestQueue rq, Listener<T> l) {
+	public void prepare(AutoFillParams params, T data, Listener<T> l) {
+		prepare(params, data, null, l);
+	}
+	
+	public void prepare(AutoFillParams params, T data, EtaError e, Listener<T> l) {
+		mParams = params;
 		mListener = l;
-		mRequests.clear();
 		mData = data;
 		mError = e;
-		mRequests = createRequests(mData);
+	}
+	
+	public void execute(RequestQueue rq) {
+		
+		mRequests.clear();
 		if (mData != null) {
-			
+			mRequests = createRequests(mData);
 			for (Request<?> r : mRequests) {
 				r.addEvent("executed-by-autofiller");
-				params.applyParams(r);
+				mParams.applyParams(r);
 				r.setDelivery(new ThreadDelivery(Eta.getInstance().getExecutor()));
 				rq.add(r);
 			}
-			
+		} else if (mError==null) {
+			mError = new AutoLoadError(new Exception("The data provided is null"));
 		}
 		done();
+		
 	}
 	
 	protected void done() {
 		if (isFinished()) {
+			if (mData==null && mError==null) {
+				mError = new AutoLoadError(new Exception("Daiam"));
+			}
 			mListener.onComplete(mData, mError);
 		}
 	}
@@ -286,8 +301,7 @@ public abstract class RequestAutoFill<T> {
 			
 			public void onComplete(JSONArray response, EtaError error) {
 				if (response != null) {
-					//TODO set hotspots
-					EtaLog.d(TAG, response.toString());
+					c.setHotspots(HotspotMap.fromJSON(c.getDimension(), response));
 				} else {
 					EtaLog.d(TAG, error.toJSON().toString());
 				}
@@ -307,6 +321,51 @@ public abstract class RequestAutoFill<T> {
 		private boolean useLocation = true;
 		private boolean ignoreCache = false;
 //		private boolean isCachable = true;
+
+		public AutoFillParams setTag(Object tag) {
+			this.tag = tag;
+			return this;
+		}
+		
+		public Object getTag() {
+			return tag;
+		}
+
+		public AutoFillParams setDebugger(RequestDebugger debugger) {
+			this.debugger = debugger;
+			return this;
+		}
+		
+		public RequestDebugger getDebugger() {
+			return debugger;
+		}
+
+		public AutoFillParams setDelivery(Delivery delivery) {
+			this.delivery = delivery;
+			return this;
+		}
+		
+		public Delivery getDelivery() {
+			return delivery;
+		}
+
+		public AutoFillParams setUseLocation(boolean useLocation) {
+			this.useLocation = useLocation;
+			return this;
+		}
+		
+		public boolean useLocation() {
+			return useLocation;
+		}
+
+		public AutoFillParams setIgnoreCache(boolean ignoreCache) {
+			this.ignoreCache = ignoreCache;
+			return this;
+		}
+		
+		public boolean getIgnoreCache() {
+			return ignoreCache;
+		}
 		
 		public void applyParams(Request<?> r) {
 			r.setTag(tag);

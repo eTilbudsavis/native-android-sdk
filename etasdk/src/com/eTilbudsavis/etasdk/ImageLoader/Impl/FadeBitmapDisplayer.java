@@ -16,7 +16,7 @@ public class FadeBitmapDisplayer implements BitmapDisplayer {
 	private boolean mFadeFromMemory = true;
 	private boolean mFadeFromFile = true;
 	private boolean mFadeFromWeb = true;
-
+	
 	public FadeBitmapDisplayer() {
 		this(100);
 	}
@@ -24,7 +24,7 @@ public class FadeBitmapDisplayer implements BitmapDisplayer {
 	public FadeBitmapDisplayer(int durationInMillis) {
 		this(durationInMillis, true, true, true);
 	}
-
+	
 	public FadeBitmapDisplayer(int durationInMillis, boolean fadeFromMemory, boolean fadeFromFile, boolean fadeFromWeb) {
 		mDuration = durationInMillis;
 		mFadeFromMemory = fadeFromMemory;
@@ -39,7 +39,6 @@ public class FadeBitmapDisplayer implements BitmapDisplayer {
 		} else if (ir.getPlaceholderError() != 0) {
 			ir.getImageView().setImageResource(ir.getPlaceholderError());
 		}
-		
 		
 		if ( (ir.getLoadSource() == LoadSource.WEB && mFadeFromWeb) ||
 				(ir.getLoadSource() == LoadSource.FILE && mFadeFromFile) ||

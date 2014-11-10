@@ -83,14 +83,22 @@ public class EtaLog {
 		}
 		
 	}
-	
+
 	/**
 	 * Print a StackTrace from any given point of your source code.
 	 */
-	public static void printStackTrace() {
+	public static void printStackTrace(String tag) {
 		for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
-			d(TAG, String.valueOf(ste));
+			d(tag, String.valueOf(ste));
 		}
+	}
+
+	/**
+	 * Print a StackTrace from any given point of your source code.
+	 */
+	public static void printParentMethod(String tag) {
+		StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+		d(tag, String.valueOf(trace[4]));
 	}
 	
 	/**

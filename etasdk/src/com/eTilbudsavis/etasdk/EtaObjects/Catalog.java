@@ -31,6 +31,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.HotspotMap;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -72,11 +73,14 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 	private String mStoreUrl;
 	private Dimension mDimension;
 	private Images mImages;
+	private List<String> mCatrgoryIds;
+	private String mPdfUrl;
 	
 	// From separate queries
 	private List<Page> mPages;
 	private Dealer mDealer;
 	private Store mStore;
+	private HotspotMap mHotspots;
 	private int mOfferOnPage = 1;
 	
 	/**
@@ -127,6 +131,18 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 				catalog.setStoreUrl(Json.valueOf(jCatalog, JsonKey.STORE_URL));
 				catalog.setDimension(Dimension.fromJSON(jCatalog.getJSONObject(JsonKey.DIMENSIONS)));
 				catalog.setImages(Images.fromJSON(jCatalog.getJSONObject(JsonKey.IMAGES)));
+				
+				if (jCatalog.has(JsonKey.CATEGORY_IDS)) {
+					JSONArray jCats = jCatalog.getJSONArray(JsonKey.CATEGORY_IDS);
+					List<String> cat = new ArrayList<String>();
+					for (int i = 0 ; i < jCats.length() ; i++) {
+						cat.add(jCats.getString(i));
+					}
+					catalog.setCatrgoryIds(cat);
+				}
+				
+				catalog.setPdfUrl(Json.valueOf(jCatalog, JsonKey.PDF_URL));
+				
 			} catch (JSONException e) {
 				EtaLog.e(TAG, "", e);
 			}
@@ -156,6 +172,8 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 			o.put(JsonKey.STORE_URL, Json.nullCheck(getStoreUrl()));
 			o.put(JsonKey.DIMENSIONS, Json.nullCheck(getDimension().toJSON()));
 			o.put(JsonKey.IMAGES, Json.nullCheck(getImages().toJSON()));
+			o.put(JsonKey.CATEGORY_IDS, Json.nullCheck(getCatrgoryIds()));
+			o.put(JsonKey.PDF_URL, Json.nullCheck(getPdfUrl()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -474,6 +492,58 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 		return mDealer;
 	}
 
+	/**
+	 * Method for setting the {@link HotspotMap} associated with this catalog
+	 * @param hotspots A {@link HotspotMap} object
+	 */
+	public Catalog setHotspots(HotspotMap hotspots) {
+		mHotspots = hotspots;
+		return this;
+	}
+
+	/**
+	 * Get the {@link HotspotMap} associated with this catalog.
+	 * <p>Hotspots isn't bundled in the catalog object by default. But should be
+	 * downloaded separately via the store {@link Endpoint#catalogHotspots(String) endpoint},
+	 * and  {@link Catalog#setHotspots(HotspotMap) set} manually by the developer. </p>
+	 * @return A {@link HotspotMap} object, or {@code null}
+	 */
+	public HotspotMap getHotspots() {
+		return mHotspots;
+	}
+	
+	/**
+	 * Get the category id's for this catalog
+	 * @return A list of categories, or null
+	 */
+	public List<String> getCatrgoryIds() {
+		return mCatrgoryIds;
+	}
+	
+	/**
+	 * Set the list of categories for this catalog.
+	 * @param catrgoryIds A list of categories
+	 */
+	public void setCatrgoryIds(List<String> catrgoryIds) {
+		mCatrgoryIds = catrgoryIds;
+	}
+	
+	/**
+	 * Get the URL where the PDF can be downloaded.
+	 * @return A url, or null
+	 */
+	public String getPdfUrl() {
+		return mPdfUrl;
+	}
+	
+	/**
+	 * Set the URL where the PDF can be downloaded.
+	 * @param pdfUrl A url
+	 */
+	public void setPdfUrl(String pdfUrl) {
+		mPdfUrl = pdfUrl;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -483,17 +553,22 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 		result = prime * result
 				+ ((mBranding == null) ? 0 : mBranding.hashCode());
 		result = prime * result
+				+ ((mCatrgoryIds == null) ? 0 : mCatrgoryIds.hashCode());
+		result = prime * result
 				+ ((mDealerId == null) ? 0 : mDealerId.hashCode());
 		result = prime * result
 				+ ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
 		result = prime * result
 				+ ((mDimension == null) ? 0 : mDimension.hashCode());
+		result = prime * result
+				+ ((mHotspots == null) ? 0 : mHotspots.hashCode());
 		result = prime * result + ((mImages == null) ? 0 : mImages.hashCode());
 		result = prime * result + ((mLabel == null) ? 0 : mLabel.hashCode());
 		result = prime * result + mOfferCount;
 		result = prime * result + mOfferOnPage;
 		result = prime * result + mPageCount;
 		result = prime * result + ((mPages == null) ? 0 : mPages.hashCode());
+		result = prime * result + ((mPdfUrl == null) ? 0 : mPdfUrl.hashCode());
 		result = prime * result
 				+ ((mRunFrom == null) ? 0 : mRunFrom.hashCode());
 		result = prime * result
@@ -524,6 +599,11 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 				return false;
 		} else if (!mBranding.equals(other.mBranding))
 			return false;
+		if (mCatrgoryIds == null) {
+			if (other.mCatrgoryIds != null)
+				return false;
+		} else if (!mCatrgoryIds.equals(other.mCatrgoryIds))
+			return false;
 		if (mDealerId == null) {
 			if (other.mDealerId != null)
 				return false;
@@ -538,6 +618,11 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 			if (other.mDimension != null)
 				return false;
 		} else if (!mDimension.equals(other.mDimension))
+			return false;
+		if (mHotspots == null) {
+			if (other.mHotspots != null)
+				return false;
+		} else if (!mHotspots.equals(other.mHotspots))
 			return false;
 		if (mImages == null) {
 			if (other.mImages != null)
@@ -559,6 +644,11 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 			if (other.mPages != null)
 				return false;
 		} else if (!mPages.equals(other.mPages))
+			return false;
+		if (mPdfUrl == null) {
+			if (other.mPdfUrl != null)
+				return false;
+		} else if (!mPdfUrl.equals(other.mPdfUrl))
 			return false;
 		if (mRunFrom == null) {
 			if (other.mRunFrom != null)
@@ -582,5 +672,5 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 			return false;
 		return true;
 	}
-
+	
 }

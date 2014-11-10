@@ -1,5 +1,6 @@
 package com.eTilbudsavis.etasdk.ImageLoader;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -11,6 +12,7 @@ import android.os.Looper;
 import android.widget.ImageView;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultBitmapDecoder;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultFileCache;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultImageDownloader;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.LruMemoryCache;
@@ -30,9 +32,9 @@ public class ImageLoader {
 	private static ImageLoader mImageloader;
 	
 	private ImageLoader(Eta e) {
-		mMemoryCache = new LruMemoryCache();
-		mFileCache = new DefaultFileCache(e.getContext());
 		mExecutor = e.getExecutor();
+		mMemoryCache = new LruMemoryCache();
+		mFileCache = new DefaultFileCache(e.getContext(), mExecutor);
 		mDownloader = new DefaultImageDownloader();
 		mHandler = new Handler(Looper.getMainLooper());
 	}
@@ -52,17 +54,23 @@ public class ImageLoader {
 	}
 	
 	public void displayImage(ImageRequest ir) {
+		ir.add("start-image-request");
+		if (ir.getImageView().getTag()==null) {
+			ir.getImageView().setTag(ir.getUrl());
+		}
 		
-		ir.start();
-		ir.getImageView().setTag(ir.getUrl());
+		if (ir.getBitmapDecoder()==null) {
+			ir.setBitmapDecoder(new DefaultBitmapDecoder());
+		}
 		mImageViews.put(ir.getImageView(), ir.getUrl());
 		
 		ir.setBitmap(mMemoryCache.get(ir.getUrl()));
 		if(ir.getBitmap() != null) {
 			ir.setLoadSource(LoadSource.MEMORY);
+			ir.add("loaded-from-" + ir.getLoadSource());
 			processAndDisplay(ir);
 		} else {
-			mExecutor.submit(new PhotosLoader(ir));
+			mExecutor.execute(new PhotosLoader(ir));
 			if (ir.getPlaceholderLoading() != 0) {
 				ir.getImageView().setImageResource(ir.getPlaceholderLoading());
 			}
@@ -70,104 +78,132 @@ public class ImageLoader {
 	}
 	
 	class PhotosLoader implements Runnable {
-
+		
 		ImageRequest ir;
-
+		
 		PhotosLoader(ImageRequest request){
 			ir = request;
 		}
 		
 		public void run() {
-
+			ir.add("running-on-executor");
 			if (imageViewReused(ir)) {
-				ir.finish();
+				ir.finish("imageview-reused");
 				return;
 			}
 			
-			try{
+			int retries = 0;
+			while (ir.getBitmap() == null && retries<2) {
 				
-				ir.setBitmap(mFileCache.get(ir.getUrl()));
+				ir.add("retries-"+retries);
+				byte[] image = null;
 				
-				if (ir.getBitmap() != null) {
+				try {
 					
-					ir.setLoadSource(LoadSource.FILE);
+					retries++;
+					ir.add("trying-file-cache");
+					image = mFileCache.getByteArray(ir);
 					
-				} else {
-					
-					int retries = 0;
-					while (ir.getBitmap() == null && retries<2) {
+					if (image != null) {
 						
-						retries++;
-						try {
-							ir.setBitmap(mDownloader.getBitmap(ir.getUrl()));
-						} catch (Throwable t) {
-							EtaLog.d(TAG, t.getMessage(), t);
-							if (t instanceof OutOfMemoryError) {
-								mMemoryCache.clear();
-							}
+						ir.setLoadSource(LoadSource.FILE);
+						
+					} else {
+						
+						ir.add("trying-download");
+						image = mDownloader.getByteArray(ir);
+						if (image != null) {
+							ir.setLoadSource(LoadSource.WEB);
 						}
 						
 					}
 					
-					if (ir.getBitmap() != null) {
-						ir.setLoadSource(LoadSource.WEB);
+					if (image != null) {
+						Bitmap b = ir.getBitmapDecoder().decode(ir, image);
+						ir.setBitmap(b);
+						ir.add("loaded-from-" + ir.getLoadSource());
+					} else {
+						ir.add("no-image-loaded");
 					}
 					
+				} catch (OutOfMemoryError t) {
+					ir.add("out-of-memory");
+					mMemoryCache.clear();
+				} catch (IOException e) {
+					ir.add("download-failed");
+					EtaLog.e(TAG, "Download error", e);
 				}
+				addToCache(ir, image);
 				
-				addToCache(ir);
-				
-				processAndDisplay(ir);
-
-			}catch(Throwable th){
-				EtaLog.d(TAG, th.getMessage(), th);
 			}
+			
+			processAndDisplay(ir);
+			
 		}
 	}
 	
-	private void addToCache(ImageRequest ir) {
+	
+	private void addToCache(ImageRequest ir, byte[] image) {
 		
-		if (ir.getBitmap() == null || ir.getLoadSource() == null) {
+		// This is a bit messy, but i'll cleanup later
+		
+		if (image == null || ir.getBitmap() == null || ir.getLoadSource() == null) {
+			ir.add("cannot-cache-request");
 			return;
 		}
 		
-		// Add to filecache and/or memorycache depending on the source
-		switch (ir.getLoadSource()) {
-			case WEB:
-				mFileCache.save(ir.getUrl(), ir.getBitmap());
-			case FILE:
+		LoadSource s = ir.getLoadSource();
+		if (s==LoadSource.WEB) {
+			
+			if (ir.useFileCache()) {
+				ir.add("adding-to-file-cache");
+				mFileCache.save(ir, image);
+			}
+			if (ir.useMemoryCache()) {
+				ir.add("adding-to-memory-cache");
 				mMemoryCache.put(ir.getUrl(), ir.getBitmap());
-			default:
-				break;
+			}
+			
+		} else if (s==LoadSource.FILE) {
+			
+			if (ir.useMemoryCache()) {
+				ir.add("adding-to-memory-cache");
+				mMemoryCache.put(ir.getUrl(), ir.getBitmap());
+			}
+			
 		}
 		
 	}
 	
 	private void processAndDisplay(final ImageRequest ir) {
 		
-		if (imageViewReused(ir) || ir.getBitmap() == null) {
-			ir.finish();
+		if (imageViewReused(ir)) {
+			ir.finish("imageview-reused");
 			return;
 		}
 		
-		if (ir.getBitmapProcessor() != null) {
+		if (ir.getBitmap()!=null && ir.getBitmapProcessor() != null) {
 			
-			if (Looper.myLooper() == Looper.getMainLooper()) {
+
+			Runnable processPoster = new Runnable() {
 				
-				mExecutor.execute(new Runnable() {
+				public void run() {
 					
-					public void run() {
+					try {
+						ir.add("processing-bitmap");
 						Bitmap tmp = ir.getBitmapProcessor().process(ir.getBitmap());
 						ir.setBitmap(tmp);
 						display(ir);
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-				});
-				
+				}
+			};
+			
+			if (Looper.myLooper() == Looper.getMainLooper()) {
+				mExecutor.execute(processPoster);
 			} else {
-				Bitmap tmp = ir.getBitmapProcessor().process(ir.getBitmap());
-				ir.setBitmap(tmp);
-				display(ir);
-				
+				processPoster.run();
 			}
 			
 		} else {
@@ -182,19 +218,23 @@ public class ImageLoader {
 			
 			public void run() {
 				
+//				ir.isAlive("run-display");
 				if (imageViewReused(ir)) {
-					ir.finish();
+					ir.finish("imageview-reused");
 					return;
 				}
 				
-				ir.finish();
+				ir.finish("display-on-UI-thread");
 				ir.getBitmapDisplayer().display(ir);
 			}
 		};
 		
 		if (Looper.myLooper() == Looper.getMainLooper()) {
+//			ir.isAlive("just run");
 			work.run();
 		} else {
+//			ir.isAlive("post run");
+			ir.add("posting-to-UI-thread");
 			mHandler.post(work);
 		}
 		

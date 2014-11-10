@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/etasdk_layout_pageflip_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    
+    <com.eTilbudsavis.etasdk.pageflip.PageflipViewPager
+        android:id="@+id/etasdk_layout_pageflip_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    
+    <TextView
+        android:id="@+id/etasdk_layout_pageflip_loader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:text="Bilka\n..."
+        android:textSize="30sp" />
+    
+</FrameLayout>

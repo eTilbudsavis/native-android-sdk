@@ -47,7 +47,7 @@ public class Observable<T> {
         }
         synchronized(mObservers) {
             if (!mObservers.contains(observer)) {
-            	EtaLog.w(TAG, "Observer " + observer + " is not registered. Ignoring.");
+            	EtaLog.w(TAG, "Observer " + observer + " not registered.");
             } else {
                 mObservers.remove(observer);
             }

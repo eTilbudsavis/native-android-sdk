@@ -1,10 +1,16 @@
 package com.eTilbudsavis.etasdk.ImageLoader;
 
+import java.util.List;
+
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultBitmapDisplayer;
+import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultFileName;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EventLog;
+import com.eTilbudsavis.etasdk.Log.EventLog.Event;
 
 /**
  * The class for requesting images via the ImageLoader.
@@ -22,8 +28,13 @@ public class ImageRequest {
 	private int mPlaceholderError;
 	private BitmapDisplayer mDisplayer;
 	private LoadSource mLoadSource;
-	private long mTimeStart = 0L;
-	private long mTimeLoad = 0L;
+	private boolean mFileCache = true;
+	private boolean mMemoryCache = true;
+	private BitmapDecoder mDecoder;
+	private EventLog mLog = new EventLog();
+	private ImageDebugger mDebugger;
+	private FileNameGenerator mFileName;
+	private boolean mFinished = false;
 	
 	@SuppressWarnings("unused")
 	private ImageRequest() {
@@ -36,17 +47,22 @@ public class ImageRequest {
 	}
 	
 	/**
-	 * This method is invoked on {@link ImageLoader#displayImage(ImageRequest) displayImage()}
-	 */
-	public void start() {
-		mTimeStart = System.currentTimeMillis();
-	}
-	
-	/**
 	 * This method is invoked when bitmap loading is complete
 	 */
-	public void finish() {
-		mTimeLoad = System.currentTimeMillis() - mTimeStart;
+	public void finish(String event) {
+		add(event);
+		if (mDebugger!=null) {
+			mDebugger.debug(this);
+		}
+		mFinished = true;
+	}
+	
+	public boolean isFinished() {
+		return mFinished;
+	}
+	
+	public void add(String event) {
+		mLog.add(event);
 	}
 	
 	/**
@@ -101,10 +117,81 @@ public class ImageRequest {
 		return this;
 	}
 	
+	/**
+	 * Get the decoder for this request
+	 * @return A BitmapDecoder
+	 */
+	public BitmapDecoder getBitmapDecoder() {
+		return mDecoder;
+	}
+	
+	/**
+	 * Set the BitmapDecoder for decoding the data from this request
+	 * @param decoder
+	 * @return
+	 */
+	public ImageRequest setBitmapDecoder(BitmapDecoder decoder) {
+		this.mDecoder = decoder;
+		return this;
+	}
+	
+	public EventLog getLog() {
+		return mLog;
+	}
+	
+	public void isAlive(String msg) {
+		if (mDebugger != null) {
+			String[] parts = mUrl.split("/");
+			List<Event> e = mLog.getEvents();
+			EtaLog.d(TAG, "alive[" + parts[parts.length-1] + ", msg:" + msg + ", log:" + e.get(e.size()-1).name + "]");
+		}
+		
+	}
+	
+	public ImageDebugger getDebugger() {
+		return mDebugger;
+	}
+	
+	public ImageRequest setDebugger(ImageDebugger d) {
+		this.mDebugger = d;
+		return this;
+	}
+	
+	public FileNameGenerator getFileNameGenerator() {
+		if (mFileName==null) {
+			mFileName = new DefaultFileName();
+		}
+		return mFileName;
+	}
+	
+	public String getFileName() {
+		return getFileNameGenerator().getFileName(this);
+	}
+	
+	public void setFileName(FileNameGenerator fileName) {
+		mFileName = fileName;
+	}
+	
+	public boolean useFileCache() {
+		return mFileCache;
+	}
+	
+	public void setFileCache(boolean usrFileCache) {
+		mFileCache = usrFileCache;
+	}
+	
+	public boolean useMemoryCache() {
+		return mMemoryCache;
+	}
+	
+	public void setMemoryCache(boolean useMemoryCache) {
+		mMemoryCache = useMemoryCache;
+	}
+	
 	public int getPlaceholderLoading() {
 		return mPlaceholderLoading;
 	}
-
+	
 	public ImageRequest setPlaceholderLoading(int placeholderLoading) {
 		this.mPlaceholderLoading = placeholderLoading;
 		return this;
@@ -152,14 +239,6 @@ public class ImageRequest {
 	public ImageRequest setLoadSource(LoadSource source) {
 		this.mLoadSource = source;
 		return this;
-	}
-	
-	/**
-	 * Get the total load time
-	 * @return The load time
-	 */
-	public long getLoadTime() {
-		return mTimeLoad;
 	}
 	
 	public static class Builder {

@@ -810,6 +810,7 @@ public final class PageflipWebview extends WebView {
 				}
 				
 				// Send standard event
+				EtaLog.d(TAG, "event:"+event + ", " + data.toString());
 				mListener.onEvent(event, mUuid, data);
 				
 			} 

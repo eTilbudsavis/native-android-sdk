@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -386,6 +387,19 @@ public final class Utils {
 		PrintWriter pw = new PrintWriter(sw);
 		t.printStackTrace(pw);
 		return sw.toString();
+	}
+	
+	/**
+	 * 
+	 * @param iter
+	 * @return
+	 */
+	public static <T> List<T> copyIterator(Iterator<T> iter) {
+	    List<T> copy = new ArrayList<T>();
+	    while (iter.hasNext()) {
+	        copy.add(iter.next());
+	    }
+	    return copy;
 	}
 	
 }

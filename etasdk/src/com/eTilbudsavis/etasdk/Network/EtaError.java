@@ -157,12 +157,22 @@ public class EtaError extends Exception {
 		 * returns valid JSOBObject-data.
 		 */
 	    public static final int PARSE_ERROR					= 10100;
-	    
+
 		/**
 		 * There was an error establishing a connection to the API. Please check
 		 * that the device has a working internet connection.
 		 */
 	    public static final int NETWORK_ERROR				= 10200;
+
+		/**
+		 * Auto loading of objects failed
+		 */
+	    public static final int AUTO_LOAD_ERROR				= 10300;
+
+		/**
+		 * Out of memory error occurred, no further work possible
+		 */
+	    public static final int OUT_OF_MEMORY				= 10400;
 	    
 		/** Session error */
 	    public static final int SESSION_ERROR				= 1100;

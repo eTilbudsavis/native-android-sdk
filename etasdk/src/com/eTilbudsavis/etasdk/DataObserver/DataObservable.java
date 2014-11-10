@@ -1,6 +1,5 @@
 package com.eTilbudsavis.etasdk.DataObserver;
 
-
 public class DataObservable extends Observable<DataObserver> {
 	
 	public static final String TAG = DataObservable.class.getSimpleName();
