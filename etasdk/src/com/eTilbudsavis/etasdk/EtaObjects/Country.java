@@ -26,19 +26,22 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Country extends ErnObject<Country> implements EtaObject<JSONObject>, Serializable {
+public class Country implements Ern<Country>, EtaObject<JSONObject>, Serializable {
 	
 	public static final String TAG = Eta.TAG_PREFIX + Country.class.getSimpleName();
 
 	private static final String ERN_CLASS = "country";
 	
 	private static final long serialVersionUID = 1L;
-	
+
+	private String mId;
+	private String mErn;
 	private String mUnsubscribeUrl;
 	
 	/**
@@ -70,6 +73,7 @@ public class Country extends ErnObject<Country> implements EtaObject<JSONObject>
 		}
 		
 		country.setId(Json.valueOf(jCountry, JsonKey.ID));
+		country.setErn(Json.valueOf(jCountry, JsonKey.ERN));
 		country.setUnsubscribePrintUrl(Json.valueOf(jCountry, JsonKey.UNSUBSCRIBE_PRINT_URL));
 		
 		return country;
@@ -86,20 +90,14 @@ public class Country extends ErnObject<Country> implements EtaObject<JSONObject>
 		}
 		return o;
 	}
-
-	@Override
-	String getErnClass() {
-		return ERN_CLASS;
-	}
 	
 	/**
 	 * Get the country code of this country. The country codes are two-letter uppercase ISO country codes (such as "US")
 	 * as defined by ISO 3166-1 (alfa-2), see <a href="http://da.wikipedia.org/wiki/ISO_3166-1">wikipedia</a> for more info.
 	 * @return A String if id exists, or null
 	 */
-	@Override
 	public String getId() {
-		return super.getId();
+		return mId;
 	}
 	
 	/**
@@ -108,14 +106,27 @@ public class Country extends ErnObject<Country> implements EtaObject<JSONObject>
 	 * @return A String
 	 */
 	@SuppressLint("DefaultLocale")
-	@Override
 	public Country setId(String id) {
 		if (id != null && id.length() == 2) {
-			super.setId(id.toUpperCase());
+			mId = id.toUpperCase();
+			mErn = String.format("ern:%s:%s", ERN_CLASS, id);
 		} else {
 			EtaLog.i(TAG, "The country code: " + id + " isn't allowed, see documentation for more details");
 		}
 		return this;
+	}
+
+	public Country setErn(String ern) {
+		if (ern != null) {
+			mErn = ern;
+			String[] parts = mErn.split(":");
+			mId = parts[parts.length-1];
+		}
+		return this;
+	}
+	
+	public String getErn() {
+		return mErn;
 	}
 	
 	/**
@@ -136,30 +147,4 @@ public class Country extends ErnObject<Country> implements EtaObject<JSONObject>
 		return mUnsubscribeUrl;
 	}
 	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result
-				+ ((mUnsubscribeUrl == null) ? 0 : mUnsubscribeUrl.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Country other = (Country) obj;
-		if (mUnsubscribeUrl == null) {
-			if (other.mUnsubscribeUrl != null)
-				return false;
-		} else if (!mUnsubscribeUrl.equals(other.mUnsubscribeUrl))
-			return false;
-		return true;
-	}
-
 }

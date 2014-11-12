@@ -23,7 +23,6 @@ public class DoublePageFragment extends PageFragment {
 	private Object LOCK = new Object();
 	private AtomicInteger mCount = new AtomicInteger();
 	private Bitmap mPage;
-	private Canvas mCanvas;
 	private boolean mClearBitmap = false;
 	
 	public void onResume() {
@@ -52,10 +51,15 @@ public class DoublePageFragment extends PageFragment {
 	};
 	
 	private void reset(String tag) {
-		mClearBitmap = true;
-		mPage = null;
-		mCount = new AtomicInteger();
-		mCanvas = null;
+		
+		synchronized (LOCK) {
+			
+			mClearBitmap = true;
+			mPage = null;
+			mCount = new AtomicInteger();
+			
+		}
+		
 	}
 	
 	@Override
@@ -121,15 +125,23 @@ public class DoublePageFragment extends PageFragment {
 			
 			boolean isLeft = l!=null;
 			Bitmap b = (isLeft?l:r);
-			createDoublePage(b);
-			if (mPage != null) {
+			
+			createDoublePageIfNeeded(b);
+
+			if (mPage==null) {
+				EtaLog.d(TAG, "Can't draw on double-page-bitmap it's null");
+			} else if (mPage.isRecycled()) {
+				EtaLog.d(TAG, "Can't draw on double-page-bitmap it's recycled");
+			} else {
+				// Do the paint job
 				int left = ( isLeft ? 0 : b.getWidth() );
-				mCanvas.drawBitmap(b, left, 0, null);
+				Canvas c = new Canvas(mPage);
+				c.drawBitmap(b, left, 0, null);
 			}
 			
 		}
 		
-		private void createDoublePage(Bitmap b) {
+		private void createDoublePageIfNeeded(Bitmap b) {
 			
 			boolean allowRetry = true;
 			while (mPage==null && allowRetry) {
@@ -138,7 +150,6 @@ public class DoublePageFragment extends PageFragment {
 				int h = b.getHeight();
 				try {
 					mPage = Bitmap.createBitmap(w*2, h, Config.ARGB_8888);
-					mCanvas = new Canvas(mPage);
 				} catch (OutOfMemoryError e) {
 					
 					if (allowRetry) {

@@ -9,6 +9,8 @@ import com.eTilbudsavis.etasdk.Network.EtaError;
 
 public interface PageflipListener {
 	
+	public void onReady();
+	
 	public void onPageChange(int[] pages);
 	
 	public void onOutOfBounds(boolean left);

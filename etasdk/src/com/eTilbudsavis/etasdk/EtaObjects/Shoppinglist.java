@@ -29,6 +29,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ListManager;
+import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
@@ -41,7 +42,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Shoppinglist extends EtaListObject<Shoppinglist> implements EtaObject<JSONObject>, Serializable {
+public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Shoppinglist>, EtaObject<JSONObject>, Serializable {
 
 	public static final String TAG = Eta.TAG_PREFIX + Shoppinglist.class.getSimpleName();
 
@@ -75,7 +76,9 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements EtaObje
 	 * to anyone who has a {@link Share share} with read/write privileges.
 	 */
 	public static final String ACCESS_PUBLIC = "public";
-	
+
+	private String mId;
+	private String mErn;
 	private String mName = "";
 	private String mAccess = ACCESS_PRIVATE;
 	private Date mModified;
@@ -173,8 +176,10 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements EtaObje
 	}
 	
 	public JSONObject toJSON() {
-		JSONObject o = super.toJSON();
+		JSONObject o = new JSONObject();
 		try {
+			o.put(JsonKey.ID, Json.nullCheck(getId()));
+			o.put(JsonKey.ERN, Json.nullCheck(getErn()));
 			o.put(JsonKey.NAME, Json.nullCheck(getName()));
 			o.put(JsonKey.ACCESS, Json.nullCheck(getAccess()));
 			o.put(JsonKey.MODIFIED, Json.nullCheck(Utils.parseDate(getModified())));
@@ -191,10 +196,28 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements EtaObje
 		}
 		return o;
 	}
+
+	public Shoppinglist setId(String id) {
+		mId = id;
+		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		return this;
+	}
 	
-	@Override
-	String getErnClass() {
-		return ERN_CLASS;
+	public String getId() {
+		return mId;
+	}
+	
+	public Shoppinglist setErn(String ern) {
+		if (ern != null) {
+			mErn = ern;
+			String[] parts = mErn.split(":");
+			mId = parts[parts.length-1];
+		}
+		return this;
+	}
+	
+	public String getErn() {
+		return mErn;
 	}
 	
 	/**
@@ -555,8 +578,10 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements EtaObje
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((mAccess == null) ? 0 : mAccess.hashCode());
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
 		result = prime * result
 				+ ((mModified == null) ? 0 : mModified.hashCode());
@@ -567,11 +592,16 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements EtaObje
 		result = prime * result + mUserId;
 		return result;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return equals(obj, false, false);
+	}
 	
 	public boolean equals(Object obj, boolean skipModified, boolean skipSync) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -580,6 +610,16 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements EtaObje
 			if (other.mAccess != null)
 				return false;
 		} else if (!mAccess.equals(other.mAccess))
+			return false;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
 			return false;
 		if (mMeta == null) {
 			if (other.mMeta != null)
@@ -618,11 +658,6 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements EtaObje
 		if (mUserId != other.mUserId)
 			return false;
 		return true;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		return equals(obj, false, false);
 	}
 	
 }

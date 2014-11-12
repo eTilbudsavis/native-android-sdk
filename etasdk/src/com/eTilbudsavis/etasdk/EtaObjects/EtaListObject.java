@@ -19,7 +19,7 @@ import java.io.Serializable;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public abstract class EtaListObject<T> extends ErnObject<T> implements Comparable<T>, Serializable {
+public abstract class EtaListObject<T> implements Comparable<T>, Serializable {
 	
 	public static final String TAG = Eta.TAG_PREFIX + EtaListObject.class.getSimpleName();
 	
@@ -92,17 +92,7 @@ public abstract class EtaListObject<T> extends ErnObject<T> implements Comparabl
 		}
 		return null;
 	}
-//	
-//	public JSONObject toJSON() {
-//		JSONObject o = super.toJSON();
-//		try {
-//			o.put("state", getStateString());
-//		} catch (JSONException e) {
-//			EtaLog.e(TAG, "", e);
-//		}
-//		return o;
-//	}
-//	
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -110,7 +100,7 @@ public abstract class EtaListObject<T> extends ErnObject<T> implements Comparabl
 		result = prime * result + mState;
 		return result;
 	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

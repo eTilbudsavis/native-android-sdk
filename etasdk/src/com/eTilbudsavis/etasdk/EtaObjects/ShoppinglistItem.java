@@ -43,6 +43,8 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 	
 	private static final long serialVersionUID = -8186715532715467496L;
 
+	private String mId;
+	private String mErn;
 	private boolean mTick = false;
 	private String mOfferId = null;
 	private int mCount = 1;
@@ -112,21 +114,15 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 	 * @param shoppinglistItem A {@link JSONObject} in the format of a valid API v2 shoppinglistItem response
 	 * @return An ShoppinglistItem object
 	 */
-	public static ShoppinglistItem fromJSON(JSONObject shoppinglistItem) {
-		return fromJSON(new ShoppinglistItem(), shoppinglistItem);
-	}
+	public static ShoppinglistItem fromJSON(JSONObject jSli) {
 
-	/**
-	 * A factory method for converting {@link JSONObject} into POJO.
-	 * <p>This method exposes a way, of updating/setting an objects properties</p>
-	 * @param sli An object to set/update
-	 * @param jOffer A {@link JSONObject} in the format of a valid API v2 offer response
-	 * @return A {@link List} of POJO
-	 */
-	public static ShoppinglistItem fromJSON(ShoppinglistItem sli, JSONObject jSli) {
-		
+		ShoppinglistItem sli = new ShoppinglistItem();
+		if (jSli == null) {
+			return sli;
+		}
 		
 		sli.setId(Json.valueOf(jSli, JsonKey.ID));
+		sli.setErn(Json.valueOf(jSli, JsonKey.ERN));
 		sli.setTick(Json.valueOf(jSli, JsonKey.TICK, false));
 		sli.setOfferId(Json.valueOf(jSli, JsonKey.OFFER_ID));
 		sli.setCount(Json.valueOf(jSli, JsonKey.COUNT, 1));
@@ -158,11 +154,12 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 		
 		return sli;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
-		JSONObject o = super.toJSON();
+		JSONObject o = new JSONObject();
 		try {
+			o.put(JsonKey.ID, Json.nullCheck(getId()));
+			o.put(JsonKey.ERN, Json.nullCheck(getErn()));
 			o.put(JsonKey.TICK, Json.nullCheck(isTicked()));
 			o.put(JsonKey.OFFER_ID, Json.nullCheck(getOfferId()));
 			o.put(JsonKey.COUNT, getCount());
@@ -177,10 +174,28 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 		}
 		return o;
 	}
+
+	public ShoppinglistItem setId(String id) {
+		mId = id;
+		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		return this;
+	}
 	
-	@Override
-	String getErnClass() {
-		return ERN_CLASS;
+	public String getId() {
+		return mId;
+	}
+	
+	public ShoppinglistItem setErn(String ern) {
+		if (ern != null) {
+			mErn = ern;
+			String[] parts = mErn.split(":");
+			mId = parts[parts.length-1];
+		}
+		return this;
+	}
+	
+	public String getErn() {
+		return mErn;
 	}
 	
 	/**
@@ -530,7 +545,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 		}
 
 	};
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -540,6 +555,8 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 				+ ((mCreator == null) ? 0 : mCreator.hashCode());
 		result = prime * result
 				+ ((mDescription == null) ? 0 : mDescription.hashCode());
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
 		result = prime * result
 				+ ((mModified == null) ? 0 : mModified.hashCode());
@@ -578,6 +595,16 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 			if (other.mDescription != null)
 				return false;
 		} else if (!mDescription.equals(other.mDescription))
+			return false;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
 			return false;
 		if (mMeta == null) {
 			if (other.mMeta != null)
@@ -619,5 +646,5 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 			return false;
 		return true;
 	}
-	
+
 }

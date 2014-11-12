@@ -74,49 +74,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	int mOutOfBoundsCount = 0;
 	boolean mOutOfBoundsCalled = false;
 	
-	Listener<Catalog> mCatListener = new Listener<Catalog>() {
-		
-		public void onComplete(Catalog c, EtaError error) {
-			
-			if (!isAdded()) {
-				return;
-			}
-			if ( c!=null && c.getPages()!=null && c.getHotspots()!=null ) {
-				Looper main = Looper.getMainLooper();
-				if (main == Looper.myLooper()) {
-					mOnCatalogComplete.run();
-				} else {
-					mHandler.post(mOnCatalogComplete);
-				}
-			} else if (error!=null ){
-				
-				EtaLog.d(TAG, error.toJSON().toString());
-				// TODO improve error stuff 1 == network error
-				mWrapperListener.onError(error);
-				
-			}
-		}
-	};
-	
-	Runnable mOnCatalogComplete = new Runnable() {
-		
-		public void run() {
-			
-			mAdapter = new PageflipAdapter(getChildFragmentManager(), PageflipFragment.this);
-			mPager.setAdapter(mAdapter);
-			// force the first page change if needed
-			boolean doPageChange = (mPager.getCurrentItem()!=mCurrentPosition);
-			if (doPageChange) {
-				mPager.setCurrentItem(mCurrentPosition);
-			} else {
-				mWrapperListener.onPageChange(PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape));
-			}
-			mProgress.setVisibility(View.GONE);
-			mPager.setVisibility(View.VISIBLE);
-		}
-		
-	};
-	
 	public static PageflipFragment newInstance(Catalog c) {
 		return newInstance(c, 1);
 	}
@@ -262,6 +219,54 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		caf.prepare(new AutoFillParams(), mCatalog, null, mCatListener);
 		caf.execute(Eta.getInstance().getRequestQueue());
 	}
+
+	Listener<Catalog> mCatListener = new Listener<Catalog>() {
+		
+		public void onComplete(Catalog c, EtaError error) {
+
+			if (!isAdded()) {
+				return;
+			}
+			
+			if ( c!=null && c.getPages()!=null && c.getHotspots()!=null ) {
+				Looper main = Looper.getMainLooper();
+				if (main == Looper.myLooper()) {
+					mOnCatalogComplete.run();
+				} else {
+					mHandler.post(mOnCatalogComplete);
+				}
+			} else if (error!=null ){
+				
+				EtaLog.d(TAG, error.toJSON().toString());
+				// TODO improve error stuff 1 == network error
+				mWrapperListener.onError(error);
+				
+			}
+		}
+	};
+	
+	Runnable mOnCatalogComplete = new Runnable() {
+		
+		public void run() {
+			
+			mAdapter = new PageflipAdapter(getChildFragmentManager(), PageflipFragment.this);
+			mPager.setAdapter(mAdapter);
+			
+			// force the first page change if needed
+			boolean doPageChange = (mPager.getCurrentItem()!=mCurrentPosition);
+			if (doPageChange) {
+				mPager.setCurrentItem(mCurrentPosition);
+			} else {
+				mWrapperListener.onPageChange(PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape));
+			}
+			mProgress.setVisibility(View.GONE);
+			mPager.setVisibility(View.VISIBLE);
+			
+			mWrapperListener.onReady();
+			
+		}
+		
+	};
 	
 	private void removeRunners() {
 		mLoader.stop();
@@ -454,6 +459,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		
 		protected PageflipListener mListener;
 		private static final boolean LOG = false;
+		private boolean mReadyCalled = false;
 		
 		private boolean post() {
 			return mListener != null;
@@ -466,8 +472,16 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		public PageflipListener getListener() {
 			return mListener;
 		}
-
+		
+		public void onReady() {
+			log("onReady");
+			if (post()) mListener.onReady();
+		}
+		
 		public void onPageChange(int[] pages) {
+			if (!mReadyCalled) {
+				
+			}
 			log("onPageChange: " + PageflipUtils.join(",", pages));
 			if (post()) mListener.onPageChange(pages);
 		}

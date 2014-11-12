@@ -28,6 +28,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.ICatalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
@@ -52,14 +53,16 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>, Serializable, Parcelable {
+public class Offer implements Ern<Offer>, EtaObject<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
-
-	public static final String TAG = Eta.TAG_PREFIX + Offer.class.getSimpleName();
-
-	private static final String ERN_CLASS = "offer";
 	
+	public static final String TAG = Eta.TAG_PREFIX + Offer.class.getSimpleName();
+	
+	private static final String ERN_CLASS = "offer";
+
+	private String mId;
+	private String mErn;
 	private String mHeading;
 	private String mDescription;
 	private int mCatalogPage = 0;
@@ -82,7 +85,6 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 	private Store mStore;
 	
 	public Offer() {
-		
 	}
 	
 	/**
@@ -101,7 +103,7 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 		}
 		return list;
 	}
-
+	
 	/**
 	 * A factory method for converting {@link JSONObject} into a POJO.
 	 * @param offer A {@link JSONObject} in the format of a valid API v2 offer response
@@ -152,6 +154,8 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
+			o.put(JsonKey.ID, Json.nullCheck(getId()));
+			o.put(JsonKey.ERN, Json.nullCheck(getErn()));
 			o.put(JsonKey.HEADING, Json.nullCheck(getHeading()));
 			o.put(JsonKey.DESCRIPTION, Json.nullCheck(getDescription()));
 			o.put(JsonKey.CATALOG_PAGE, getCatalogPage());
@@ -173,12 +177,30 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 		}
 		return o;
 	}
-
-	@Override
-	String getErnClass() {
-		return ERN_CLASS;
+	
+	public Offer setId(String id) {
+		mId = id;
+		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		return this;
 	}
-    
+	
+	public String getId() {
+		return mId;
+	}
+	
+	public Offer setErn(String ern) {
+		if (ern != null) {
+			mErn = ern;
+			String[] parts = mErn.split(":");
+			mId = parts[parts.length-1];
+		}
+		return this;
+	}
+	
+	public String getErn() {
+		return mErn;
+	}
+	
 	/**
 	 * Get the offer heading
 	 * @return A {@link String}, or null
@@ -548,20 +570,25 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
+		result = prime * result
+				+ ((mCatalog == null) ? 0 : mCatalog.hashCode());
 		result = prime * result
 				+ ((mCatalogId == null) ? 0 : mCatalogId.hashCode());
 		result = prime * result + mCatalogPage;
 		result = prime * result
 				+ ((mCatalogUrl == null) ? 0 : mCatalogUrl.hashCode());
+		result = prime * result + ((mDealer == null) ? 0 : mDealer.hashCode());
 		result = prime * result
 				+ ((mDealerId == null) ? 0 : mDealerId.hashCode());
 		result = prime * result
 				+ ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
 		result = prime * result
 				+ ((mDescription == null) ? 0 : mDescription.hashCode());
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
 		result = prime * result
 				+ ((mHeading == null) ? 0 : mHeading.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mImages == null) ? 0 : mImages.hashCode());
 		result = prime * result + ((mLinks == null) ? 0 : mLinks.hashCode());
 		result = prime * result
@@ -572,6 +599,7 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 				+ ((mRunFrom == null) ? 0 : mRunFrom.hashCode());
 		result = prime * result
 				+ ((mRunTill == null) ? 0 : mRunTill.hashCode());
+		result = prime * result + ((mStore == null) ? 0 : mStore.hashCode());
 		result = prime * result
 				+ ((mStoreId == null) ? 0 : mStoreId.hashCode());
 		result = prime * result
@@ -583,11 +611,16 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		Offer other = (Offer) obj;
+		if (mCatalog == null) {
+			if (other.mCatalog != null)
+				return false;
+		} else if (!mCatalog.equals(other.mCatalog))
+			return false;
 		if (mCatalogId == null) {
 			if (other.mCatalogId != null)
 				return false;
@@ -599,6 +632,11 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 			if (other.mCatalogUrl != null)
 				return false;
 		} else if (!mCatalogUrl.equals(other.mCatalogUrl))
+			return false;
+		if (mDealer == null) {
+			if (other.mDealer != null)
+				return false;
+		} else if (!mDealer.equals(other.mDealer))
 			return false;
 		if (mDealerId == null) {
 			if (other.mDealerId != null)
@@ -615,10 +653,20 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 				return false;
 		} else if (!mDescription.equals(other.mDescription))
 			return false;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
 		if (mHeading == null) {
 			if (other.mHeading != null)
 				return false;
 		} else if (!mHeading.equals(other.mHeading))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
 			return false;
 		if (mImages == null) {
 			if (other.mImages != null)
@@ -650,6 +698,11 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 				return false;
 		} else if (!mRunTill.equals(other.mRunTill))
 			return false;
+		if (mStore == null) {
+			if (other.mStore != null)
+				return false;
+		} else if (!mStore.equals(other.mStore))
+			return false;
 		if (mStoreId == null) {
 			if (other.mStoreId != null)
 				return false;
@@ -668,6 +721,8 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 	}
 	
 	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(mId);
+		dest.writeString(mErn);
 		dest.writeString(mHeading);
 		dest.writeString(mDescription);
 		dest.writeInt(mCatalogPage);
@@ -689,6 +744,8 @@ public class Offer extends ErnObject<Offer> implements EtaObject<JSONObject>, IC
 	}
 	
     private Offer(Parcel in) {
+    	mId = in.readString();
+    	mErn = in.readString();
     	mHeading = in.readString();
 		mDescription = in.readString();
 		mCatalogPage = in.readInt();

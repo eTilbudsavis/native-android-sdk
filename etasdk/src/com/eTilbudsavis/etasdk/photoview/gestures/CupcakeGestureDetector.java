@@ -39,16 +39,24 @@ public class CupcakeGestureDetector implements GestureDetector {
     		new android.view.GestureDetector.SimpleOnGestureListener() {
     	
     	public void onLongPress(MotionEvent e) {
-    		mListener.onLongPress(e);
+    		if (mListener!=null) {
+        		mListener.onLongPress(e);
+    		}
     	};
     	
     	@Override
     	public boolean onDoubleTap(MotionEvent e) {
-    		return mListener.onDoubleTab(e);
+    		if (mListener!=null) {
+        		return mListener.onDoubleTab(e);
+    		}
+    		return false;
     	}
     	
     	public boolean onSingleTapConfirmed(MotionEvent e) {
-    		return mListener.onSingleTab(e);
+    		if (mListener!=null) {
+        		return mListener.onSingleTab(e);
+    		}
+    		return false;
     	};
     	
     };
@@ -104,7 +112,9 @@ public class CupcakeGestureDetector implements GestureDetector {
                 }
 
                 if (mIsDragging) {
-                    mListener.onDrag(dx, dy);
+                	if (mListener!=null) {
+                        mListener.onDrag(dx, dy);
+                	}
                     mLastTouchX = x;
                     mLastTouchY = y;
 
@@ -140,8 +150,9 @@ public class CupcakeGestureDetector implements GestureDetector {
                         // If the velocity is greater than minVelocity, call
                         // listener
                         if (Math.max(Math.abs(vX), Math.abs(vY)) >= mMinimumVelocity) {
-                            mListener.onFling(mLastTouchX, mLastTouchY, -vX,
-                                    -vY);
+                        	if (mListener!=null) {
+                                mListener.onFling(mLastTouchX, mLastTouchY, -vX, -vY);
+                        	}
                         }
                     }
                 }

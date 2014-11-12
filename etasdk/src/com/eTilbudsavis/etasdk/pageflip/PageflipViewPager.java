@@ -2,6 +2,8 @@ package com.eTilbudsavis.etasdk.pageflip;
 
 import java.lang.reflect.Field;
 
+import com.eTilbudsavis.etasdk.Log.EtaLog;
+
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -31,8 +33,12 @@ public class PageflipViewPager extends ViewPager {
 	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-//		EtaLog.d(TAG, "OnTouchListener: " + event.toString());
-		return super.onTouchEvent(event);
+		try {
+			return super.onTouchEvent(event);
+		} catch (IllegalArgumentException e) {
+			// Bug in Eclair - ignore any exceptions
+		}
+		return false;
 	}
 	
 	private void setScroller() {

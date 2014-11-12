@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.PageflipWebview;
+import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
@@ -51,15 +52,17 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>, IDealer<Catalog>, IStore<Catalog>, Serializable {
+public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Catalog>, IStore<Catalog>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
-
+	
 	public static final String TAG = Eta.TAG_PREFIX + Catalog.class.getSimpleName();
-
+	
 	private static final String ERN_CLASS = "catalog";
 	
 	// From JSON blob
+	private String mId;
+	private String mErn;
 	private String mLabel;
 	private String mBackground;
 	private Date mRunFrom;
@@ -157,8 +160,10 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 	}
 	
 	public JSONObject toJSON() {
-		JSONObject o = super.toJSON();
+		JSONObject o = new JSONObject();
 		try {
+			o.put(JsonKey.ID, Json.nullCheck(getId()));
+			o.put(JsonKey.ERN, Json.nullCheck(getErn()));
 			o.put(JsonKey.LABEL, Json.nullCheck(getLabel()));
 			o.put(JsonKey.BACKGROUND, Json.nullCheck(getBackground()));
 			o.put(JsonKey.RUN_FROM, Json.nullCheck(Utils.parseDate(getRunFrom())));
@@ -180,9 +185,27 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 		return o;
 	}
 
-	@Override
-	String getErnClass() {
-		return ERN_CLASS;
+	public Catalog setId(String id) {
+		mId = id;
+		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		return this;
+	}
+	
+	public String getId() {
+		return mId;
+	}
+	
+	public Catalog setErn(String ern) {
+		if (ern != null) {
+			mErn = ern;
+			String[] parts = mErn.split(":");
+			mId = parts[parts.length-1];
+		}
+		return this;
+	}
+	
+	public String getErn() {
+		return mErn;
 	}
 	
 	public String getLabel() {
@@ -543,25 +566,28 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 	public void setPdfUrl(String pdfUrl) {
 		mPdfUrl = pdfUrl;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
 		result = prime * result
 				+ ((mBackground == null) ? 0 : mBackground.hashCode());
 		result = prime * result
 				+ ((mBranding == null) ? 0 : mBranding.hashCode());
 		result = prime * result
 				+ ((mCatrgoryIds == null) ? 0 : mCatrgoryIds.hashCode());
+		result = prime * result + ((mDealer == null) ? 0 : mDealer.hashCode());
 		result = prime * result
 				+ ((mDealerId == null) ? 0 : mDealerId.hashCode());
 		result = prime * result
 				+ ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
 		result = prime * result
 				+ ((mDimension == null) ? 0 : mDimension.hashCode());
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
 		result = prime * result
 				+ ((mHotspots == null) ? 0 : mHotspots.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mImages == null) ? 0 : mImages.hashCode());
 		result = prime * result + ((mLabel == null) ? 0 : mLabel.hashCode());
 		result = prime * result + mOfferCount;
@@ -573,6 +599,7 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 				+ ((mRunFrom == null) ? 0 : mRunFrom.hashCode());
 		result = prime * result
 				+ ((mRunTill == null) ? 0 : mRunTill.hashCode());
+		result = prime * result + ((mStore == null) ? 0 : mStore.hashCode());
 		result = prime * result
 				+ ((mStoreId == null) ? 0 : mStoreId.hashCode());
 		result = prime * result
@@ -584,7 +611,7 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -604,6 +631,11 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 				return false;
 		} else if (!mCatrgoryIds.equals(other.mCatrgoryIds))
 			return false;
+		if (mDealer == null) {
+			if (other.mDealer != null)
+				return false;
+		} else if (!mDealer.equals(other.mDealer))
+			return false;
 		if (mDealerId == null) {
 			if (other.mDealerId != null)
 				return false;
@@ -619,10 +651,20 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 				return false;
 		} else if (!mDimension.equals(other.mDimension))
 			return false;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
 		if (mHotspots == null) {
 			if (other.mHotspots != null)
 				return false;
 		} else if (!mHotspots.equals(other.mHotspots))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
 			return false;
 		if (mImages == null) {
 			if (other.mImages != null)
@@ -660,6 +702,11 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 				return false;
 		} else if (!mRunTill.equals(other.mRunTill))
 			return false;
+		if (mStore == null) {
+			if (other.mStore != null)
+				return false;
+		} else if (!mStore.equals(other.mStore))
+			return false;
 		if (mStoreId == null) {
 			if (other.mStoreId != null)
 				return false;
@@ -672,5 +719,6 @@ public class Catalog extends ErnObject<Catalog> implements EtaObject<JSONObject>
 			return false;
 		return true;
 	}
+	
 	
 }

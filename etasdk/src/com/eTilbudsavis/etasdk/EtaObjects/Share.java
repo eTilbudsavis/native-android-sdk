@@ -32,10 +32,8 @@ import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>, Serializable {
-
+	
 	public static final String TAG = Eta.TAG_PREFIX + Share.class.getSimpleName();
-
-	private static final String ERN_CLASS = "share";
 	
 	private static final long serialVersionUID = -9184865445908448266L;
 	
@@ -91,13 +89,8 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 		
 		return s;
 	}
-
-	@Override
+	
 	public JSONObject toJSON() {
-		
-		/* Do not call super class to create JSON, as we server does not support
-		 * id and ern keys.
-		 */
 		
 		JSONObject o = new JSONObject();
 		try {
@@ -115,49 +108,6 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
-	}
-
-	@Override
-	String getErnClass() {
-		return ERN_CLASS;
-	}
-	
-	/**
-     * This method is not supported and throws an UnsupportedOperationException when called.
-	 * @param id Ignored
-	 * @throws UnsupportedOperationException Every time this method is invoked.
-	 */
-	@Override
-	public Share setId(String id) {
-		throw new UnsupportedOperationException("Share does not support setId(String)");
-	}
-
-	/**
-     * This method is not supported and throws an UnsupportedOperationException when called.
-	 * @throws UnsupportedOperationException Every time this method is invoked.
-	 */
-	@Override
-	public String getId() {
-		throw new UnsupportedOperationException("Share does not support getId()");
-	}
-
-	/**
-     * This method is not supported and throws an UnsupportedOperationException when called.
-	 * @param id Ignored
-	 * @throws UnsupportedOperationException Every time this method is invoked.
-	 */
-	@Override
-	public Share setErn(String ern) {
-		throw new UnsupportedOperationException("Share does not support setErn(String)");
-	}
-
-	/**
-     * This method is not supported and throws an UnsupportedOperationException when called.
-	 * @throws UnsupportedOperationException Every time this method is invoked.
-	 */
-	@Override
-	public String getErn() {
-		throw new UnsupportedOperationException("Share does not support getErn()");
 	}
 	
 	/**
@@ -309,7 +259,7 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
 		result = prime * result
 				+ ((mAcceptUrl == null) ? 0 : mAcceptUrl.hashCode());
 		result = prime * result + (mAccepted ? 1231 : 1237);
@@ -325,7 +275,7 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -359,6 +309,6 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 			return false;
 		return true;
 	}
-	
+
 }
 

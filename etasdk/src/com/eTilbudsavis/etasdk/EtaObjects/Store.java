@@ -23,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
@@ -42,14 +43,16 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Store extends ErnObject<Store> implements EtaObject<JSONObject>, IDealer<Store>, Serializable {
+public class Store implements Ern<Store>, EtaObject<JSONObject>, IDealer<Store>, Serializable {
 	
 	private static final long serialVersionUID = 4105775934027363052L;
 
 	public static final String TAG = Eta.TAG_PREFIX + Store.class.getSimpleName();
 
 	private static final String ERN_CLASS = "store";
-	
+
+	private String mId;
+	private String mErn;
 	private String mStreet;
 	private String mCity;
 	private String mZipcode;
@@ -103,6 +106,8 @@ public class Store extends ErnObject<Store> implements EtaObject<JSONObject>, ID
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
+			o.put(JsonKey.ID, Json.nullCheck(getId()));
+			o.put(JsonKey.ERN, Json.nullCheck(getErn()));
 			o.put(JsonKey.STREET, Json.nullCheck(getStreet()));
 			o.put(JsonKey.CITY, Json.nullCheck(getCity()));
 			o.put(JsonKey.ZIP_CODE, Json.nullCheck(getZipcode()));
@@ -118,9 +123,28 @@ public class Store extends ErnObject<Store> implements EtaObject<JSONObject>, ID
 		}
 		return o;
 	}
-	@Override
-	String getErnClass() {
-		return ERN_CLASS;
+
+	public Store setId(String id) {
+		mId = id;
+		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		return this;
+	}
+	
+	public String getId() {
+		return mId;
+	}
+	
+	public Store setErn(String ern) {
+		if (ern != null) {
+			mErn = ern;
+			String[] parts = mErn.split(":");
+			mId = parts[parts.length-1];
+		}
+		return this;
+	}
+	
+	public String getErn() {
+		return mErn;
 	}
 	
 	public Store setStreet(String street) {

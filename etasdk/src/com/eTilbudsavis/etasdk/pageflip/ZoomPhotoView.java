@@ -35,6 +35,7 @@ public class ZoomPhotoView extends PhotoView {
 				mMatrixChangedListener.onMatrixChanged(rect);
 			}
 		}
+		
 	};
 	
 	private void zoomChange(boolean isZoomed) {

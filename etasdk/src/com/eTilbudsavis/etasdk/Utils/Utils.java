@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
@@ -401,5 +402,27 @@ public final class Utils {
 	    }
 	    return copy;
 	}
-	
+
+	/**
+	 * This method converts device independent pixels (dp) to the equivalent pixels (px) .
+	 * @param dp A value in device independent pixels, to convert.
+	 * @param c Context to get device specifications from.
+	 * @return The value in px representing the equivalent value given in dp
+	 */
+	public static int convertDpToPx(int dp, Context c){
+	    float px = (float)dp * c.getResources().getDisplayMetrics().density;
+	    return (int)px;
+	}
+
+	/**
+	 * This method converts pixels (px) to the equivalent device independent pixels (dp).
+	 * @param px A value in pixels, to convert.
+	 * @param c Context to get device specifications from.
+	 * @return The value in dp representing the equivalent value given in px
+	 */
+	public static int convertPxToDp(int px, Context c){
+	    float dp = (float)px / c.getResources().getDisplayMetrics().density;
+	    return (int)dp;
+	}
+
 }

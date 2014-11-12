@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Pageflip;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -42,14 +43,16 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Dealer extends ErnObject<Dealer> implements EtaObject<JSONObject>, Serializable {
+public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	public static final String TAG = Eta.TAG_PREFIX + Dealer.class.getSimpleName();
 	
 	private static final String ERN_CLASS = "dealer";
-	
+
+	private String mId;
+	private String mErn;
 	private String mName;
 	private String mUrlName;
 	private String mWebsite;
@@ -77,6 +80,8 @@ public class Dealer extends ErnObject<Dealer> implements EtaObject<JSONObject>, 
 		}
 		
 		try {
+			d.setId(Json.valueOf(dealer, JsonKey.ID));
+			d.setErn(Json.valueOf(dealer, JsonKey.ERN));
 			d.setErn(Json.valueOf(dealer, JsonKey.ERN));
 			d.setName(Json.valueOf(dealer, JsonKey.NAME));
 			d.setUrlName(Json.valueOf(dealer, JsonKey.URL_NAME));
@@ -105,6 +110,29 @@ public class Dealer extends ErnObject<Dealer> implements EtaObject<JSONObject>, 
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
+	}
+	
+	public Dealer setId(String id) {
+		mId = id;
+		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		return this;
+	}
+	
+	public String getId() {
+		return mId;
+	}
+	
+	public Dealer setErn(String ern) {
+		if (ern != null) {
+			mErn = ern;
+			String[] parts = mErn.split(":");
+			mId = parts[parts.length-1];
+		}
+		return this;
+	}
+	
+	public String getErn() {
+		return mErn;
 	}
 	
 	public Dealer setName(String name) {
@@ -168,8 +196,10 @@ public class Dealer extends ErnObject<Dealer> implements EtaObject<JSONObject>, 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
 		result = prime * result + ((mColor == null) ? 0 : mColor.hashCode());
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
 		result = prime * result
@@ -185,7 +215,7 @@ public class Dealer extends ErnObject<Dealer> implements EtaObject<JSONObject>, 
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -194,6 +224,16 @@ public class Dealer extends ErnObject<Dealer> implements EtaObject<JSONObject>, 
 			if (other.mColor != null)
 				return false;
 		} else if (!mColor.equals(other.mColor))
+			return false;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
 			return false;
 		if (mLogo == null) {
 			if (other.mLogo != null)
@@ -223,8 +263,4 @@ public class Dealer extends ErnObject<Dealer> implements EtaObject<JSONObject>, 
 		return true;
 	}
 	
-	public String getErnClass() {
-		return ERN_CLASS;
-	}
-
 }

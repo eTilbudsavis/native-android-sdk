@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Permission;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -39,7 +40,7 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class User extends ErnObject<User> implements EtaObject<JSONObject>, Serializable {
+public class User implements Ern<User>, EtaObject<JSONObject>, Serializable {
 	
 	public static final String TAG = Eta.TAG_PREFIX + User.class.getSimpleName();
 	
@@ -48,7 +49,9 @@ public class User extends ErnObject<User> implements EtaObject<JSONObject>, Seri
 	private static final String ERN_CLASS = "user";
 	
 	public static final int NO_USER = -1;
-	
+
+	private String mId;
+	private String mErn;
 	private String mGender;
 	private int mBirthYear = 0;
 	private String mName;
@@ -99,11 +102,6 @@ public class User extends ErnObject<User> implements EtaObject<JSONObject>, Seri
 		return o;
 	}
 	
-	@Override
-	String getErnClass() {
-		return ERN_CLASS;
-	}
-	
 	/**
 	 * Method for finding out if the user is logged in via the API. It is determined
 	 * on the basis that the {@link #getEmail() email} != null and the
@@ -117,26 +115,29 @@ public class User extends ErnObject<User> implements EtaObject<JSONObject>, Seri
 		return mEmail != null && getUserId() > NO_USER;
 	}
 	
-	/**
-	 * Method returns the user id as a String.
-	 * <p>This method is inherited from </p>
-	 * @deprecated Use {@link #getUserId()} to get the id an an {@link Integer}
-	 */
-	@Override
-	public String getId() {
-		return String.valueOf(super.getId());
+	@Deprecated
+	public User setId(String id) {
+		mId = id;
+		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		return this;
 	}
 	
-	/**
-     * This method is not supported and throws an UnsupportedOperationException when called.
-     * <p>To set the user id, use {@link #setUserId(int)} instead</p>
-     * @see #setUserId(int)
-	 * @param id Ignored
-	 * @throws UnsupportedOperationException Every time this method is invoked.
-	 */
-	@Override
-	public User setId(String id) {
-		throw new UnsupportedOperationException("Share does not support setId(String)");
+	@Deprecated
+	public String getId() {
+		return mId;
+	}
+	
+	public User setErn(String ern) {
+		if (ern != null) {
+			mErn = ern;
+			String[] parts = mErn.split(":");
+			mId = parts[parts.length-1];
+		}
+		return this;
+	}
+	
+	public String getErn() {
+		return mErn;
 	}
 	
 	/**
@@ -144,7 +145,7 @@ public class User extends ErnObject<User> implements EtaObject<JSONObject>, Seri
 	 * @return A user id
 	 */
 	public int getUserId() {
-		return Integer.valueOf(super.getId());
+		return Integer.valueOf(getId());
 	}
 	
 	/**
@@ -153,7 +154,7 @@ public class User extends ErnObject<User> implements EtaObject<JSONObject>, Seri
 	 * @return This object
 	 */
 	public User setUserId(int id) {
-		super.setId(String.valueOf(id));
+		setId(String.valueOf(id));
 		return this;
 	}
 	
