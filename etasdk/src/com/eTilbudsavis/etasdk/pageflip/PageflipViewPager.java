@@ -18,7 +18,7 @@ public class PageflipViewPager extends ViewPager {
 	private ScrollerCustomDuration mScroller = null;
 	private boolean mIsBeingDragged = false;
 	private float mLastMotionX;
-	private boolean mBoundHitPosted = false;
+	private boolean mOutOfBoundsCalled = false;
 	
 	public PageflipViewPager(Context context) {
 		super(context);
@@ -71,7 +71,7 @@ public class PageflipViewPager extends ViewPager {
 		switch (ev.getAction() & MotionEventCompat.ACTION_MASK) {
 		case  MotionEvent.ACTION_MOVE:
 			
-			if (!mBoundHitPosted) {
+			if (!mOutOfBoundsCalled) {
 				
 	            // Scroll to follow the motion event
 	            final float x = ev.getX();
@@ -86,12 +86,12 @@ public class PageflipViewPager extends ViewPager {
 	            	if (mListener!=null) {
 	            		mListener.onOutOfBounds(true);
 	            	}
-	                mBoundHitPosted = true;
+	                mOutOfBoundsCalled = true;
 	            } else if ( deltaX > 0 && currentItem == lastItemIndex) {
 	            	if (mListener!=null) {
 	            		mListener.onOutOfBounds(false);
 	            	}
-	                mBoundHitPosted = true;
+	                mOutOfBoundsCalled = true;
 	            }
 	            
 			}
@@ -101,7 +101,7 @@ public class PageflipViewPager extends ViewPager {
 		case MotionEvent.ACTION_UP:
 		case MotionEvent.ACTION_POINTER_UP:
 		case MotionEvent.ACTION_CANCEL:
-			mBoundHitPosted = false;
+			mOutOfBoundsCalled = false;
 			break;
 		}
 	}
