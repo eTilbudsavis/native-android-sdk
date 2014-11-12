@@ -2,9 +2,8 @@ package com.eTilbudsavis.etasdk.pageflip;
 
 import java.lang.reflect.Field;
 
-import com.eTilbudsavis.etasdk.Log.EtaLog;
-
 import android.content.Context;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -15,7 +14,11 @@ public class PageflipViewPager extends ViewPager {
 	
 	public static final String TAG = PageflipViewPager.class.getSimpleName();
 	
+	private PageflipListener mListener;
 	private ScrollerCustomDuration mScroller = null;
+	private boolean mIsBeingDragged = false;
+	private float mLastMotionX;
+	private boolean mBoundHitPosted = false;
 	
 	public PageflipViewPager(Context context) {
 		super(context);
@@ -31,14 +34,76 @@ public class PageflipViewPager extends ViewPager {
 		setScroller();
 	}
 	
+	public void setPageflipListener(PageflipListener l) {
+		mListener = l;
+	}
+	
 	@Override
-	public boolean onTouchEvent(MotionEvent event) {
+	public boolean onInterceptTouchEvent(MotionEvent ev) {
+		mIsBeingDragged = false;
 		try {
-			return super.onTouchEvent(event);
+			mIsBeingDragged = super.onInterceptTouchEvent(ev);
+			mLastMotionX = ev.getX();
 		} catch (IllegalArgumentException e) {
 			// Bug in Eclair - ignore any exceptions
 		}
-		return false;
+		return mIsBeingDragged;
+	}
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent ev) {
+		boolean isWorking = false;
+		try {
+			isWorking = super.onTouchEvent(ev);
+			if (mIsBeingDragged && isWorking) {
+				tryBounds(ev);
+			}
+			
+		} catch (IllegalArgumentException e) {
+			// Bug in Eclair - ignore any exceptions
+		}
+		
+        return isWorking;
+	}
+	
+	private void tryBounds(MotionEvent ev) {
+		
+		switch (ev.getAction() & MotionEventCompat.ACTION_MASK) {
+		case  MotionEvent.ACTION_MOVE:
+			
+			if (!mBoundHitPosted) {
+				
+	            // Scroll to follow the motion event
+	            final float x = ev.getX();
+	            final float deltaX = mLastMotionX - x;
+	            mLastMotionX = x;
+	            
+	            final int lastItemIndex = getAdapter().getCount() - 1;
+	            final int currentItem = getCurrentItem();
+	            
+	            // TODO do callbacks to fragment
+	            if ( deltaX < 0 && currentItem == 0) {
+	            	if (mListener!=null) {
+	            		mListener.onOutOfBounds(true);
+	            	}
+	                mBoundHitPosted = true;
+	            } else if ( deltaX > 0 && currentItem == lastItemIndex) {
+	            	if (mListener!=null) {
+	            		mListener.onOutOfBounds(false);
+	            	}
+	                mBoundHitPosted = true;
+	            }
+	            
+			}
+            
+			break;
+			
+		case MotionEvent.ACTION_UP:
+		case MotionEvent.ACTION_POINTER_UP:
+		case MotionEvent.ACTION_CANCEL:
+			mBoundHitPosted = false;
+			break;
+		}
 	}
 	
 	private void setScroller() {

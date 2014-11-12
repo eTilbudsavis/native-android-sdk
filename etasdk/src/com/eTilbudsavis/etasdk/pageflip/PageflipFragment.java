@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -156,6 +155,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		mPager = (PageflipViewPager) mFrame.findViewById(R.id.etasdk_layout_pageflip_viewpager);
 		mPager.setScrollDurationFactor(PAGER_SCROLL_FACTOR);
 		mPager.setOnPageChangeListener(this);
+		mPager.setPageflipListener(mWrapperListener);
 		mProgress.setVisibility(View.VISIBLE);
 		mPager.setVisibility(View.INVISIBLE);
 		
@@ -417,21 +417,10 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	}
 	
 	public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-		boolean isLeft = mCurrentPosition==0;
-		if ( isReady() && !mOutOfBoundsCalled && (isLeft || mCurrentPosition==mAdapter.getCount()-1 ) && mOutOfBoundsCount > 3 && mOutOfBoundsPX < 2) {
-			mWrapperListener.onOutOfBounds(isLeft);
-			mOutOfBoundsCalled = true;
-		}
-		mOutOfBoundsCount++;
-		mOutOfBoundsPX += positionOffsetPixels;
+		
 	}
 	
 	public void onPageScrollStateChanged(int state) {
-		if (state == ViewPager.SCROLL_STATE_IDLE) {
-			mOutOfBoundsPX = 0;
-			mOutOfBoundsCount = 0;
-			mOutOfBoundsCalled = false;
-		}
 		mWrapperListener.onDragStateChanged(state);
 	}
 	
@@ -459,7 +448,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		
 		protected PageflipListener mListener;
 		private static final boolean LOG = false;
-		private boolean mReadyCalled = false;
 		
 		private boolean post() {
 			return mListener != null;
@@ -479,9 +467,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		}
 		
 		public void onPageChange(int[] pages) {
-			if (!mReadyCalled) {
-				
-			}
 			log("onPageChange: " + PageflipUtils.join(",", pages));
 			if (post()) mListener.onPageChange(pages);
 		}
