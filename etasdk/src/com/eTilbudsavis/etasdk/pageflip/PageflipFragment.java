@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.EtaError;
@@ -36,11 +37,11 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	private static final double PAGER_SCROLL_FACTOR = 0.5d;
 	
-	private static final String ARG_CATALOG = "com.eTilbudsavis.etasdk.pageflip.pageflipFragment.catalog";
-	private static final String ARG_CATALOG_ID = "com.eTilbudsavis.etasdk.pageflip.pageflipFragment.catalog.id";
-	private static final String ARG_PAGE = "com.eTilbudsavis.etasdk.pageflip.pageflipFragment.page";
-	private static final String ARG_CATALOG_VIEW = "com.eTilbudsavis.etasdk.pageflip.pageflipFragment.fakeCatalogGet";
-	private static final String ARG_VIEWSESSION = "com.eTilbudsavis.etasdk.pageflip.pageflipFragment.viewSession";
+	private static final String ARG_CATALOG = Eta.ARG_PREFIX + "pageflipfragment.catalog";
+	private static final String ARG_CATALOG_ID = Eta.ARG_PREFIX + "pageflipfragment.catalog-id";
+	private static final String ARG_PAGE = Eta.ARG_PREFIX + "pageflipfragment.page";
+	private static final String ARG_CATALOG_VIEW = Eta.ARG_PREFIX + "pageflipfragment.catalog-view";
+	private static final String ARG_VIEWSESSION = Eta.ARG_PREFIX + "pageflipfragment.view-session";
 	
 	// Need this
 	private Catalog mCatalog;
@@ -273,12 +274,15 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		mHandler.removeCallbacks(mOnCatalogComplete);
 	}
 	
+	long start = 0;
+	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		boolean land = PageflipUtils.isLandscape(newConfig);
 		if (land != mLandscape) {
-//			EtaLog.d(TAG, "onConfigurationChanged[orientation.landscape[" + mLandscape + "->" + land + "]");
+			start = System.currentTimeMillis();
+			EtaLog.d(TAG, "onConfigurationChanged[orientation.landscape[" + mLandscape + "->" + land + "]");
 			removeRunners();
 			mPagesReady = false;
 			mPageflipStarted = false;
@@ -398,6 +402,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	public void onReady(int position) {
 		if (position==mCurrentPosition) {
+			EtaLog.d(TAG, "Time: " + (System.currentTimeMillis()-start));
 			PageFragment old = getPage(position);
 			old.onVisible();
 			mPagesReady = true;

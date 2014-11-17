@@ -11,9 +11,12 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
+import android.view.Display;
+import android.view.WindowManager;
 
 import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
@@ -221,6 +224,25 @@ public class PageflipUtils {
 	public static Integer getTextColor(Integer color, Context c) {
 		int resId = isBright(color) ? R.color.etasdk_text_dark : R.color.etasdk_text_light;
 		return c.getResources().getColor(resId);
+	}
+	
+	/**
+	 * Get the display dimensions from a given {@link Context}.
+	 * @param c Context of the application/activity
+	 * @return A point containing the screen dimens
+	 */
+	@SuppressWarnings("deprecation")
+	public static Point getDisplayDimen(Context c) {
+		Point p = new Point();
+		WindowManager wm = (WindowManager) c.getSystemService(Context.WINDOW_SERVICE);
+		Display display = wm.getDefaultDisplay();
+		if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB_MR2) {
+			display.getSize(p);
+		} else {
+			p.y = display.getHeight();
+			p.x = display.getWidth();
+		}
+		return p;
 	}
 	
 }

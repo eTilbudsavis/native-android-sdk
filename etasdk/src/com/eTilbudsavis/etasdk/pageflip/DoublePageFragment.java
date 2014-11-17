@@ -2,7 +2,9 @@ package com.eTilbudsavis.etasdk.pageflip;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.view.View;
@@ -85,7 +87,10 @@ public class DoublePageFragment extends PageFragment {
 		ImageRequest r = new ImageRequest(url, new ImageView(getActivity()));
 		r.setBitmapDisplayer(new DoublePageDisplayer());
 		r.setBitmapProcessor(new DoublePageProcessor(left));
-		r.setBitmapDecoder(new LowMemoryDecoder(getActivity(), sampleSize, autoScale));
+		LowMemoryDecoder lmd = new LowMemoryDecoder(getActivity());
+		lmd.setMinimumSampleSize(sampleSize);
+		lmd.useAutoScale(autoScale);
+		r.setBitmapDecoder(lmd);
 		addRequest(r);
 	}
 	
@@ -148,6 +153,71 @@ public class DoublePageFragment extends PageFragment {
 				
 				int w = b.getWidth();
 				int h = b.getHeight();
+				try {
+					mPage = Bitmap.createBitmap(w*2, h, Config.ARGB_8888);
+				} catch (OutOfMemoryError e) {
+					
+					if (allowRetry) {
+						allowRetry = false;
+						EtaLog.e(TAG, e.getMessage(), e);
+						try {
+							// Try to clear up some memory
+							Eta.getInstance().getRequestQueue().clear();
+							ImageLoader.getInstance().getMemoryCache().clear();
+							// 'force' a GC
+							Runtime.getRuntime().gc();
+							// Wait, and hope for the best
+							Thread.sleep(1000);
+						} catch (InterruptedException e1) {
+							EtaLog.e(TAG, "Sleep failed");
+						}
+					} else {
+						throw e;
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+	}
+	
+	public class DoublePageDecoder extends LowMemoryDecoder {
+		
+		private boolean mLeft;
+		
+		public DoublePageDecoder(Context c, boolean left) {
+			super(c);
+			mLeft = left;
+		}
+		
+		@Override
+		public Bitmap decode(ImageRequest ir, byte[] image) {
+			
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			
+			setMutable(o);
+			
+		    setSampleSize(image, o);
+		    
+		    int ss = (o.inSampleSize<1?1:o.inSampleSize);
+		    int w = (o.outWidth/ss);
+		    int h = (o.outHeight/ss);
+		    
+		    createDoublePageIfNeeded(w, h);
+		    o.inBitmap = mPage;
+		    
+		    // Perform actual decoding
+			Bitmap b = BitmapFactory.decodeByteArray(image, 0, image.length, o);
+			return b;
+		}
+
+		private void createDoublePageIfNeeded(int w, int h) {
+			
+			boolean allowRetry = true;
+			while (mPage==null && allowRetry) {
+				
 				try {
 					mPage = Bitmap.createBitmap(w*2, h, Config.ARGB_8888);
 				} catch (OutOfMemoryError e) {

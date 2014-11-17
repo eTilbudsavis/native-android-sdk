@@ -49,7 +49,10 @@ public class SinglePageFragment extends PageFragment {
 	
 	private void load(ImageRequest ir, int sampleSize, boolean autoScale) {
 		ir.setBitmapDisplayer(new PageFadeBitmapDisplayer());
-		ir.setBitmapDecoder(new LowMemoryDecoder(getActivity(), sampleSize, autoScale));
+		LowMemoryDecoder lmd = new LowMemoryDecoder(getActivity());
+		lmd.setMinimumSampleSize(sampleSize);
+		lmd.useAutoScale(autoScale);
+		ir.setBitmapDecoder(lmd);
 		ir.setBitmapProcessor(new PageBitmapProcessor(getFirstNum()));
 		addRequest(ir);
 	}

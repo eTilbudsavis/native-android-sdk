@@ -94,7 +94,7 @@ public class PageGridOverview extends DialogFragment {
 		mGrid.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
 		mGrid.setBackgroundColor(mCatalog.getBranding().getColor());
 		
-		Point screen = PU.getDisplayDimen(getActivity());
+		Point screen = PageflipUtils.getDisplayDimen(getActivity());
 		int columns = (int)Math.floor(screen.x/MAX_WIDTH);
 		mGrid.setNumColumns(Math.min(columns, MAX_COLUMNS));
 

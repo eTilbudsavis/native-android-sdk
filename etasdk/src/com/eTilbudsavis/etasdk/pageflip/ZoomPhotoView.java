@@ -2,6 +2,7 @@ package com.eTilbudsavis.etasdk.pageflip;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -101,11 +102,43 @@ public class ZoomPhotoView extends PhotoView {
 		return null;
 	}
 	
+	public boolean isBitmapValid() {
+		return isBitmapValid(getBitmap());
+	}
+	
+	private boolean isBitmapValid(Bitmap b) {
+		return b!=null && !b.isRecycled();
+	}
+	
+	@Override
+	protected void onDraw(Canvas canvas) {
+		if (isBitmapValid()) {
+			super.onDraw(canvas);
+		}
+	}
+	
+	public void resetScale() {
+		if (getScale() != getMinimumScale()) {
+			setScale(getMinimumScale());
+		}
+	}
+	
+	public void recycle() {
+		Bitmap b = getBitmap();
+		if (isBitmapValid(b)) {
+			resetScale();
+			b.recycle();
+			b = null;
+			super.setImageBitmap(null);
+		}
+	}
+	
 	@Override
 	public void setImageBitmap(Bitmap bm) {
 		Bundle state = null;
 		Bitmap b = getBitmap();
-		if (b!=null) {
+		boolean valid = isBitmapValid(b);
+		if (valid) {
 			state = new Bundle();
 			saveState(state);
 		}
@@ -114,7 +147,9 @@ public class ZoomPhotoView extends PhotoView {
 		super.setImageBitmap(bm);
 		// Set the MatrixChangeListener again
 		super.setOnMatrixChangeListener(mMyMatrixChangedListener);
-		restoreState(state);
+		if (valid) {
+			restoreState(state);
+		}
 	}
 	
 	public interface OnZoomChangeListener {

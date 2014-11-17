@@ -246,7 +246,7 @@ public final class Api {
 		public static final String URL_NAME = "url_name";
 
 		/** Parameter for pageflip color */
-		public static final String PAGEFLIP_COLOR = "pageflip_color";
+//		public static final String PAGEFLIP_COLOR = "pageflip_color";
 
 		/** Parameter for the absolute address of a website */
 		public static final String WEBSITE = "website";
@@ -258,7 +258,7 @@ public final class Api {
 		public static final String QUERY = "query";
 
 		/** Parameter for pageflip logo location */
-		public static final String PAGEFLIP_LOGO = "pageflip_Logo";
+//		public static final String PAGEFLIP_LOGO = "pageflip_Logo";
 
 		/** Parameter for catalog id's */
 		public static final String CATALOG_IDS = "catalog_ids";
@@ -378,17 +378,12 @@ public final class Api {
 			public static final String API_PRODUCTION = "https://api.etilbudsavis.dk";
 			public static final String API_EDGE = "https://edge.etilbudsavis.dk";
 
-			public static final String PAGEFLIP_PRODUCTION = "https://etilbudsavis.dk";
-			public static final String PAGEFLIP_STAGING = "https://staging.etilbudsavis.dk";
-			public static final String PAGEFLIP_DEV = "http://10.0.1.41:3000";
-
 			public static final String THEMES_PRODUCTION = "https://etilbudsavis.dk";
 			public static final String THEMES_STAGING = "https://staging.etilbudsavis.dk";
 
 		}
 		
 		public static String API_HOST_PREFIX = Prefix.API_PRODUCTION;
-		public static String PAGEFLIP_HOST_PREFIX = Prefix.PAGEFLIP_PRODUCTION;
 		public static String THEMES_HOST_PREFIX = Prefix.THEMES_PRODUCTION;
 
 		public static final String CATALOG_LIST = "/v2/catalogs";
@@ -427,11 +422,6 @@ public final class Api {
 		 */
 		public static String getHost() {
 			return API_HOST_PREFIX;
-		}
-
-		/** {pageflip_host_prefix}/proxy/{id}/ */
-		public static String pageflipProxy(String id) {
-			return String.format("%s/proxy/%s/", PAGEFLIP_HOST_PREFIX, id);
 		}
 
 		/** {theme_host_prefix}/utils/ajax/lists/themes/ */

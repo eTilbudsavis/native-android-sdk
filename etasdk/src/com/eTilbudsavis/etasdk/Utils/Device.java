@@ -16,6 +16,9 @@
 package com.eTilbudsavis.etasdk.Utils;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.os.Build;
 
 import com.eTilbudsavis.etasdk.Eta;
@@ -23,6 +26,9 @@ import com.eTilbudsavis.etasdk.Eta;
 public class Device {
 	
 	public static final String TAG = Eta.TAG_PREFIX + Device.class.getSimpleName();
+	
+	public static final long KB = 1024;
+	public static final long MB = KB * KB;
 	
 	@SuppressLint("NewApi")
 	public static String getRadio() {
@@ -96,4 +102,36 @@ public class Device {
 		return sb.toString();
 	}
 	
+	public static boolean hasLargeHeap(Context c) {
+		return (c.getApplicationInfo().flags & ApplicationInfo.FLAG_LARGE_HEAP) != 0;
+	}
+	
+	public static String getHeapInfo(Context c) {
+		
+		StringBuilder sb = new StringBuilder();
+		
+		Runtime rt = Runtime.getRuntime();
+		long free = rt.freeMemory()/MB;
+		long available = rt.totalMemory()/MB;
+		long max = rt.maxMemory()/MB;
+		
+		String format = "Heap[max %smb - currently %smb free, %smb allocated";
+		sb.append(String.format(format, max, free, available));
+		
+		sb.append(", LargeHeap: ").append(hasLargeHeap(c));
+		if (hasLargeHeap(c)) {
+			
+			ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+			try {
+				// getLargeMemoryClass will fail on old devices
+				int largeMem = am.getLargeMemoryClass();
+				sb.append("(").append(largeMem).append(")");
+			} catch (Throwable t) {
+				sb.append("NoInfo");
+			}
+			
+		}
+		
+		return sb.append("]").toString();
+	}
 }

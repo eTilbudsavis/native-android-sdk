@@ -12,8 +12,11 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.R;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.HotspotMap;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapDisplayer;
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapProcessor;
@@ -29,10 +32,9 @@ public abstract class PageFragment extends Fragment {
 
 	protected static final int FADE_IN_DURATION = 150;
 	protected static final float MAX_SCALE = 3.0f;
-
-	protected static final String ARG_PAGE = "com.eTilbudsavis.etasdk.pageflip.pageFragment.page";
-	protected static final String ARG_POSITION = "com.eTilbudsavis.etasdk.pageflip.pageFragment.position";
 	
+	protected static final String ARG_PAGE = Eta.ARG_PREFIX + "pagefragment.page";
+	protected static final String ARG_POSITION = Eta.ARG_PREFIX + "pagefragment.position";
 	
 	private int[] mPages;
 	private ZoomPhotoView mPhotoView;
@@ -45,10 +47,8 @@ public abstract class PageFragment extends Fragment {
 	boolean mPageVisible = false;
 	
 	private void updateBranding() {
-		if (getCallback()==null) {
-			return;
-		}
-		if (getCallback().getCatalog()==null) {
+		PageCallback cb = getCallback();
+		if (!isAdded() || cb==null || cb.getCatalog()==null) {
 			return;
 		}
 		int brandingColor = getCallback().getCatalog().getBranding().getColor();
@@ -149,6 +149,7 @@ public abstract class PageFragment extends Fragment {
 	protected void onSingleClick(int page, float x, float y) {
 		List<Hotspot> list = mCallback.getCatalog().getHotspots().getHotspots(page, x, y, mCallback.isLandscape());
 		getCallback().getWrapperListener().onSingleClick(mPhotoView, page, x, y, list);
+		
 	}
 	
 	protected void onDoubleClick(int page, float x, float y) {
@@ -205,25 +206,19 @@ public abstract class PageFragment extends Fragment {
 	protected int getSecondNum() {
 		return mPages[1];
 	}
+	
 	public abstract void loadView();
 
 	public abstract void loadZoom();
 	
 	private void loadImage() {
-		Bitmap b = mPhotoView.getBitmap();
-		if ( (b == null || b.isRecycled() ) && mCallback.isPositionSet() ) {
+		if ( !mPhotoView.isBitmapValid() && mCallback.isPositionSet() ) {
 			loadView();
 		}
 	}
 	
 	private void unLoadImage() {
-		Bitmap b = mPhotoView.getBitmap();
-		if (b != null && !b.isRecycled()) {
-			if (mPhotoView.getScale() != mPhotoView.getMinimumScale()) {
-				mPhotoView.setScale(mPhotoView.getMinimumScale());
-			}
-			b.recycle();
-		}
+		mPhotoView.recycle();
 	}
 	
 	@Override
@@ -266,7 +261,8 @@ public abstract class PageFragment extends Fragment {
 		onInvisible();
 		super.onPause();
 	}
-	
+
+	private static final Object HOTSPOT_LOCK = new Object();
 	public class PageBitmapProcessor implements BitmapProcessor {
 		
 		int page = 0;
@@ -274,8 +270,26 @@ public abstract class PageFragment extends Fragment {
 		public PageBitmapProcessor(int page) {
 			this.page = page;
 		}
+
+		private Dimension createDimension(Bitmap b) {
+			Dimension d = new Dimension();
+			d.setWidth(1); // magic number... always one
+			double h = (double)((float)b.getHeight()/(float)b.getWidth());
+			d.setHeight(h);
+			return d;
+		}
 		
 		public Bitmap process(Bitmap b) {
+			
+			HotspotMap m = getCallback().getCatalog().getHotspots(); 
+			if (!m.isNormalized()) {
+				synchronized (HOTSPOT_LOCK) {
+					if (!m.isNormalized()) {
+						Dimension d = createDimension(b);
+						m.normalize(d);
+					}
+				}
+			}
 			
 			if (mDebugRects) {
 				try {
@@ -294,10 +308,11 @@ public abstract class PageFragment extends Fragment {
 		private boolean mFadeFromMemory = true;
 		private boolean mFadeFromFile = false;
 		private boolean mFadeFromWeb = false;
-
+		
 		public void display(ImageRequest ir) {
 			
 			if(ir.getBitmap() != null) {
+				
 				if (isPageVisible()) {
 					getStat().startView();
 				}

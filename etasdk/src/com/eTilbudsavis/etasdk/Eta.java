@@ -55,6 +55,8 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 public class Eta {
 
 	public static final String TAG_PREFIX = "EtaSdk-";
+	public static final String ARG_PREFIX = "com.eTilbudsavis.etasdk.";
+	
 	public static final String TAG = TAG_PREFIX + Eta.class.getSimpleName();
 	
 	private static final int DEFAULT_THREAD_COUNT = 3;
@@ -410,9 +412,6 @@ public class Eta {
 			mListManager.onPause();
 			mSyncManager.onPause();
 			mSessionManager.onPause();
-			for (PageflipWebview p : PageflipWebview.pageflips) {
-				p.pause();
-			}
 			mSettings.setLastUsageNow();
 		}
 		
@@ -470,9 +469,6 @@ public class Eta {
 			mSessionManager.onResume();
 			mListManager.onResume();
 			mSyncManager.onResume();
-			for (PageflipWebview p : PageflipWebview.pageflips) {
-				p.resume();
-			}
 		}
 	}
 

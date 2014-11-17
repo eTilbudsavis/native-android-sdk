@@ -507,7 +507,6 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 		cancelFling();
 		
 		if (mScaleDragDetector != null) {
-			// TODO is this the 
 			mScaleDragDetector.setOnGestureListener(null);
 		}
 		

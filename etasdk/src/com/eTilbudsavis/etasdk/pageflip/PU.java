@@ -36,23 +36,6 @@ public class PU {
 		
 	}
 	
-	public static void printHeap(String tag) {
-		Runtime rt = Runtime.getRuntime();
-		long free = rt.freeMemory()/KILO_BYTE;
-		long available = rt.totalMemory()/KILO_BYTE;
-		long max = rt.maxMemory()/KILO_BYTE;
-		EtaLog.d(tag, "Heap[free: " + free + " (of " + available + "), max: " + max);
-	}
-	
-	public static void printMemory(String tag, Context c) {
-		ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
-		try {
-			EtaLog.d(tag, "LargeHeap[Mem: " + am.getMemoryClass() + ", LargeMem: " + am.getLargeMemoryClass() + "]");
-		} catch (Throwable t) {
-			EtaLog.d(tag, "LargeHeap[Mem: " + am.getMemoryClass() + "]");
-		}
-	}
-	
 	public static void printViewDimen(String tag, String viewName, View v) {
 		EtaLog.d(tag, viewName + ", getWidth: " + v.getWidth() + ", getHeight: " + v.getHeight());
 		EtaLog.d(tag, viewName + ", getMeasuredWidth: " + v.getMeasuredWidth() + ", getMeasuredHeight: " + v.getMeasuredHeight());
@@ -74,23 +57,9 @@ public class PU {
 	}
 	
 	public static void printScreen(String tag, Context c) {
-		Point p = getDisplayDimen(c);
+		Point p = PageflipUtils.getDisplayDimen(c);
 		String out = String.format("ScreenSize[w:%s, h:%s]", p.x, p.y);
 		EtaLog.d(tag, out);
-	}
-	
-	@SuppressWarnings("deprecation")
-	public static Point getDisplayDimen(Context c) {
-		Point p = new Point();
-		WindowManager wm = (WindowManager) c.getSystemService(Context.WINDOW_SERVICE);
-		Display display = wm.getDefaultDisplay();
-		if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB_MR2) {
-			display.getSize(p);
-		} else {
-			p.y = display.getHeight();
-			p.x = display.getWidth();
-		}
-		return p;
 	}
 	
 	public static void printOptions(String tag, BitmapFactory.Options o) {

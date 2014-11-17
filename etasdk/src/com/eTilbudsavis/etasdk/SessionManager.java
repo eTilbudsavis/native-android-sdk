@@ -513,10 +513,6 @@ public class SessionManager {
 				}
 			}
 			
-			for (PageflipWebview p : PageflipWebview.pageflips) {
-				p.updateSession();
-			}
-			
 		}
 		return this;
 	}

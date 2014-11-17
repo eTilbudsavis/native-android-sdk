@@ -19,35 +19,60 @@ public class LowMemoryDecoder implements BitmapDecoder {
 	
 	private static final float DISPLAY_SCALE_FACTOR = 0.8f;
 	
-	private int mSampleSize = 0;
+	private int mMinSampleSize = 1;
 	private boolean mAutoScale = false;
 	private Context mContext;
-
-	public LowMemoryDecoder(Context c, int sampleSize, boolean autoScale) {
+	
+	public LowMemoryDecoder(Context c) {
 		mContext = c;
-		mAutoScale = autoScale;
-		mSampleSize = sampleSize;
-		mDisplay = PU.getDisplayDimen(c);
+		mDisplay = PageflipUtils.getDisplayDimen(c);
 		if (PageflipUtils.hasLowMemory(c)) {
 			// If it's a low memory device, lower the standards
 			mDisplay.y = (int)((float)mDisplay.y*DISPLAY_SCALE_FACTOR);
 			mDisplay.x = (int)((float)mDisplay.x*DISPLAY_SCALE_FACTOR);
 		}
 	}
-
-	public LowMemoryDecoder(Context c) {
-		this(c, 0, true);
+	
+	public void setMinimumSampleSize(int sampleSize) {
+		mMinSampleSize = sampleSize;
+	}
+	
+	public int getMinimumSampleSize() {
+		return mMinSampleSize;
+	}
+	
+	public void useAutoScale(boolean autoScale) {
+		mAutoScale = autoScale;
+	}
+	
+	public boolean autoScale() {
+		return mAutoScale;
 	}
 	
 	public Bitmap decode(ImageRequest ir, byte[] image) {
 		
 		BitmapFactory.Options o = new BitmapFactory.Options();
 		
+		setMutable(o);
+		
+	    setSampleSize(image, o);
+	    
+	    // Perform actual decoding
+		Bitmap b = BitmapFactory.decodeByteArray(image, 0, image.length, o);
+		return b;
+	}
+	
+	public void setMutable(BitmapFactory.Options o) {
+
 		// try to make it mutable
 	    if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
 			o.inMutable = true;
 		}
 	    
+	}
+	
+	public void setSampleSize(byte[] image, BitmapFactory.Options o) {
+
 	    if (mAutoScale) {
 	    	
 		    // Get the best possible size
@@ -60,17 +85,11 @@ public class LowMemoryDecoder implements BitmapDecoder {
 		    int displaySampleSize = calcDisplaySampleSize(o, h, w);
 		    
 		    // Find the largest, of either user provided or calculated sampleSize
-		    o.inSampleSize = Math.max(mSampleSize, displaySampleSize);
+		    o.inSampleSize = Math.max(mMinSampleSize, displaySampleSize);
 		    o.inJustDecodeBounds = false;
 		    
 	    }
 	    
-	    // Perform actual decoding
-//	    long s = System.currentTimeMillis();
-		Bitmap b = BitmapFactory.decodeByteArray(image, 0, image.length, o);
-//		EtaLog.d(TAG, "decode.time: " + (System.currentTimeMillis()-s));
-//		PU.printBitmapInfo(TAG, b);
-		return b;
 	}
 	
 	private int calcDisplaySampleSize(BitmapFactory.Options o, int reqHeight, int reqWidth) {
