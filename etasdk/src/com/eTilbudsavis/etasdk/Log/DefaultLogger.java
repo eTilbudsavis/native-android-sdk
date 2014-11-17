@@ -1,5 +1,7 @@
 package com.eTilbudsavis.etasdk.Log;
 
+import org.json.JSONObject;
+
 import android.util.Log;
 
 import com.eTilbudsavis.etasdk.Eta;
@@ -64,7 +66,7 @@ public class DefaultLogger implements EtaLogger {
 		mLog.add(EventLog.TYPE_EXCEPTION, EtaLog.exceptionToJson(tr));
 		return Log.e(tag, msg, tr);
 	}
-
+	
 	public EventLog getLog() {
 		return mLog;
 	}

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +27,8 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements EtaOb
 	public static final String TAG = HotspotMap.class.getSimpleName();
 	
 	private static final String TYPE_OFFER = "offer";
+	
+	private boolean mIsNormalized = false;
 	
 	private static final int[] mRectColors = { 
 		Color.BLACK, 
@@ -72,7 +75,7 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements EtaOb
 						}
 						
 						Hotspot h = Hotspot.fromJSON(rect);
-						h.normalize(d);
+						
 						h.setPage(page);
 						h.setOffer(o);
 						h.setColor(color);
@@ -87,7 +90,38 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements EtaOb
 			}
 		}
 		
+		map.normalize(d);
+		
 		return map;
+	}
+	
+	public boolean isNormalized() {
+		return mIsNormalized;
+	}
+	
+	public void normalize(Dimension d) {
+		
+		if (!d.isSet()) {
+			return;
+		}
+		
+		Set<Integer> keys = keySet();
+		if (keys==null||keys.isEmpty()) {
+			return;
+		}
+		
+		for (Integer i : keys) {
+			
+			List<Hotspot> hotspots = get(i);
+			if (hotspots!=null && !hotspots.isEmpty()) {
+				for (Hotspot h : hotspots) {
+					h.normalize(d);
+				}
+			}
+			
+		}
+		
+		mIsNormalized = true;
 	}
 	
 	public List<Hotspot> getHotspots(int page, double xPercent, double yPercent, boolean landscape) {

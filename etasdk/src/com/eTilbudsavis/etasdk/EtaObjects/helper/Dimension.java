@@ -32,23 +32,18 @@ public class Dimension implements EtaObject<JSONObject>, Serializable {
 
 	public static final String TAG = Eta.TAG_PREFIX + Dimension.class.getSimpleName();
 	
-	private Double mWidth = null;
-	private Double mHeight = null;
+	public static final double DEF_VALUE = -1d;
+	
+	private double mWidth = DEF_VALUE;
+	private double mHeight = DEF_VALUE;
 	
 	public static Dimension fromJSON(JSONObject dimension) {
 		Dimension d = new Dimension();
 		if (dimension == null) return d;
 		
-		try {
-			if (!dimension.isNull(JsonKey.WIDTH)) {
-				d.setWidth(dimension.getDouble(JsonKey.WIDTH));
-			}
-			if (!dimension.isNull(JsonKey.HEIGHT)) {
-				d.setHeight(dimension.getDouble(JsonKey.HEIGHT));
-			}
-		} catch (JSONException e) {
-			EtaLog.e(TAG, "", e);
-		}
+		d.setWidth(Json.valueOf(dimension, JsonKey.WIDTH, DEF_VALUE));
+		d.setHeight(Json.valueOf(dimension, JsonKey.HEIGHT, DEF_VALUE));
+		
 		return d;
 	}
 	
@@ -80,7 +75,11 @@ public class Dimension implements EtaObject<JSONObject>, Serializable {
 		mHeight = height;
 		return this;
 	}
-
+	
+	public boolean isSet() {
+		return mWidth>DEF_VALUE && mHeight>DEF_VALUE;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
