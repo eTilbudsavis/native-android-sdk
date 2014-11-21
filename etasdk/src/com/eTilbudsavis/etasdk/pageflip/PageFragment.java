@@ -217,10 +217,6 @@ public abstract class PageFragment extends Fragment {
 		}
 	}
 	
-	private void unLoadImage() {
-		mPhotoView.recycle();
-	}
-	
 	@Override
 	public void onResume() {
 		updateBranding();
@@ -257,7 +253,7 @@ public abstract class PageFragment extends Fragment {
 	@Override
 	public void onPause() {
 		mTextLoader.stop();
-		unLoadImage();
+		mPhotoView.recycle();
 		onInvisible();
 		super.onPause();
 	}

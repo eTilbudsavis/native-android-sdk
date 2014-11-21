@@ -14,11 +14,17 @@ public class PageflipViewPager extends ViewPager {
 	
 	public static final String TAG = PageflipViewPager.class.getSimpleName();
 	
-	private PageflipListener mListener;
+	private PageflipListener mPageflipListener;
 	private ScrollerCustomDuration mScroller = null;
 	private boolean mIsBeingDragged = false;
 	private float mLastMotionX;
 	private boolean mOutOfBoundsCalled = false;
+//	private HackPageChangeListener mOnPageChangeListener = new HackPageChangeListener();
+	
+//	@Override
+//	public void setOnPageChangeListener(OnPageChangeListener listener) {
+//		mOnPageChangeListener.mOnPageChangeListener = listener;
+//	}
 	
 	public PageflipViewPager(Context context) {
 		super(context);
@@ -31,11 +37,12 @@ public class PageflipViewPager extends ViewPager {
 	}
 	
 	private void init() {
+//		super.setOnPageChangeListener(mOnPageChangeListener);
 		setScroller();
 	}
 	
 	public void setPageflipListener(PageflipListener l) {
-		mListener = l;
+		mPageflipListener = l;
 	}
 	
 	@Override
@@ -83,13 +90,13 @@ public class PageflipViewPager extends ViewPager {
 	            
 	            // TODO do callbacks to fragment
 	            if ( deltaX < 0 && currentItem == 0) {
-	            	if (mListener!=null) {
-	            		mListener.onOutOfBounds(true);
+	            	if (mPageflipListener!=null) {
+	            		mPageflipListener.onOutOfBounds(true);
 	            	}
 	                mOutOfBoundsCalled = true;
 	            } else if ( deltaX > 0 && currentItem == lastItemIndex) {
-	            	if (mListener!=null) {
-	            		mListener.onOutOfBounds(false);
+	            	if (mPageflipListener!=null) {
+	            		mPageflipListener.onOutOfBounds(false);
 	            	}
 	                mOutOfBoundsCalled = true;
 	            }
@@ -155,5 +162,33 @@ public class PageflipViewPager extends ViewPager {
 	    }
 	    
 	}
+
+//	public class HackPageChangeListener implements OnPageChangeListener {
+//	    
+//		private float mLastPositionOffset = 0f;
+//	    
+//	    public OnPageChangeListener mOnPageChangeListener;
+//	    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+//	        if(positionOffset < mLastPositionOffset && positionOffset < 0.7) {
+//	            setCurrentItem(position);
+//	        } else if(positionOffset > mLastPositionOffset && positionOffset > 0.3) {
+//	            setCurrentItem(position+1);
+//	        }
+//	        mLastPositionOffset = positionOffset;
+//	        if (mOnPageChangeListener!=null) {
+//	        	mOnPageChangeListener.onPageScrolled(position, positionOffset, positionOffsetPixels);
+//	        }
+//	    }
+//		public void onPageScrollStateChanged(int arg0) {
+//	        if (mOnPageChangeListener!=null) {
+//	        	mOnPageChangeListener.onPageScrollStateChanged(arg0);
+//	        }
+//		}
+//		public void onPageSelected(int arg0) {
+//	        if (mOnPageChangeListener!=null) {
+//	        	mOnPageChangeListener.onPageSelected(arg0);
+//	        }
+//		}
+//	}
 	
 }

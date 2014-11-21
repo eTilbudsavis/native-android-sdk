@@ -1,7 +1,5 @@
 package com.eTilbudsavis.etasdk.Log;
 
-import org.json.JSONObject;
-
 import android.util.Log;
 
 import com.eTilbudsavis.etasdk.Eta;

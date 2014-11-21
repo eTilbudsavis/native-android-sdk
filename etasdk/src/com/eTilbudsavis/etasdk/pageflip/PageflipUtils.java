@@ -32,11 +32,22 @@ public class PageflipUtils {
 	private PageflipUtils() {
 		// Empty constructor
 	}
-
+	
+	/**
+	 * Method for checking if a {@link Context} (device) is in
+	 * {@link Configuration Configuration.ORIENTATION_LANDSCAPE}
+	 * @param c A context
+	 * @return true if landscape, else false
+	 */
 	public static boolean isLandscape(Context c) {
 		return isLandscape(c.getResources().getConfiguration());
 	}
 	
+	/**
+	 * Method for checking if a configuration is in {@link Configuration Configuration.ORIENTATION_LANDSCAPE}
+	 * @param c A configuration
+	 * @return true if landscape, else false
+	 */
 	public static boolean isLandscape(Configuration c) {
 		return c.orientation == Configuration.ORIENTATION_LANDSCAPE;
 	}
@@ -44,6 +55,9 @@ public class PageflipUtils {
 	private static final boolean LANDSCAPE = true;
 	private static final boolean PORTRAIT = false;
 	
+	/**
+	 * Simple testing of the pageToPosition and positionToPage
+	 */
 	public static void test() {
 		
 		EtaLog.d(TAG, "Running page/position tests");
@@ -89,6 +103,11 @@ public class PageflipUtils {
 		}
 	}
 	
+	/**
+	 * Get the max available heap size
+	 * @param c A context
+	 * @return the maximum available heap size for the device
+	 */
 	public static int getMaxHeap(Context c) {
 		ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
 		if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
@@ -98,10 +117,21 @@ public class PageflipUtils {
 		}
 	}
 	
+	/**
+	 * Method for checking if the device has a small heap size (42mb)
+	 * @param c A context
+	 * @return true if the heap size is small, else false
+	 */
 	public static boolean hasLowMemory(Context c) {
 		return getMaxHeap(c) < LOW_MEMORY_BOUNDARY;
 	}
 	
+	/**
+	 * Method for joining an array of int
+	 * @param delimiter A string to join the int's by
+	 * @param tokens the values
+	 * @return A formatted string
+	 */
 	public static String join(CharSequence delimiter, int[] tokens) {
 		StringBuilder sb = new StringBuilder();
 		boolean firstTime = true;
@@ -116,10 +146,22 @@ public class PageflipUtils {
 		return sb.toString();
 	}
 	
+	/**
+	 * Convert an array of pages into it's corresponding position in the {@link PageflipViewPager}.
+	 * @param pages Array to convert
+	 * @param landscape The orientation of the device
+	 * @return A position
+	 */
 	public static int pageToPosition(int[] pages, boolean landscape) {
 		return pageToPosition(pages[0], landscape);
 	}
-
+	
+	/**
+	 * Convert an page into it's corresponding position in the {@link PageflipViewPager}.
+	 * @param page An int to convert
+	 * @param landscape The orientation of the device
+	 * @return A position
+	 */
 	public static int pageToPosition(int page, boolean landscape) {
 		int pos = page-1;
 		if (landscape && page > 1) {
@@ -131,6 +173,13 @@ public class PageflipUtils {
 		return pos;
 	}
 	
+	/**
+	 * Convert a position of a {@link PageflipViewPager} into it's corresponding human readable pages.
+	 * @param position The {@link PageflipViewPager} position
+	 * @param pageCount The number of pages in the {@link Catalog} being displayed in the {@link PageflipViewPager}
+	 * @param landscape The orientation of the device
+	 * @return An array of pages
+	 */
 	public static int[] positionToPages(int position, int pageCount, boolean landscape) {
 		// default is offset by one
 		int page = 0;
@@ -150,19 +199,46 @@ public class PageflipUtils {
 		}
 		return pages;
 	}
-
+	
+	/**
+	 * Check if a page is within a valid range
+	 * @param c A catalog
+	 * @param page the page number
+	 * @return true if valid, else false
+	 */
 	public static boolean isValidPage(Catalog c, int page) {
 		return 1 <= page && (c==null || page <= c.getPageCount());
 	}
 	
+	/**
+	 * Method for detecting if two floats are almost equal (precision within 0.1)
+	 * @param first a float
+	 * @param second another float
+	 * @return true if equal, else false
+	 */
 	public static boolean almost(float first, float second) {
 		return almost(first, second, 0.1f);
 	}
 	
+	/**
+	 * Method for detecting if two floats are almost equal
+	 * @param first a float
+	 * @param second another float
+	 * @param epsilon The precision of the measurement
+	 * @return true if equal, else false
+	 */
 	public static boolean almost(float first, float second, float epsilon) {
 		return Math.abs(first-second)<epsilon;
 	}
 	
+	/**
+	 * Method for drawing rectangles in the pages in a catalog.
+	 * @param catalog A catalog
+	 * @param page The page number
+	 * @param landscape The device orientation
+	 * @param b The bitmap to draw onto
+	 * @return A painted bitmap
+	 */
 	public static Bitmap drawDebugRects(Catalog catalog, int page, boolean landscape, Bitmap b) {
 		
 		List<Hotspot> hotspots = catalog.getHotspots().get(page);
