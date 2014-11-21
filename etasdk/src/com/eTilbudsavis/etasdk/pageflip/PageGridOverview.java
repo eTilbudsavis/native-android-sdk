@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
@@ -30,9 +31,12 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 
 @SuppressWarnings("deprecation")
 public class PageGridOverview extends DialogFragment {
-
-	private static final String ARG_CATALOG = "com.eTilbudsavis.etasdk.pageflip.PagesOverview.catalog";
-	private static final String ARG_PAGE = "com.eTilbudsavis.etasdk.pageflip.PagesOverview.page";
+	
+	public static final String TAG = Eta.TAG_PREFIX + PageGridOverview.class.getSimpleName();
+	
+	private static final String ARG_CATALOG = Eta.ARG_PREFIX + "pageGridOverview.catalog";
+	private static final String ARG_PAGE = Eta.ARG_PREFIX + "pageGridOverview.page";
+	
 	Catalog mCatalog;
 	int mPage = 1;
 	GridView mGrid;

@@ -2,6 +2,8 @@ package com.eTilbudsavis.etasdk.pageflip;
 
 import java.lang.reflect.Field;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 import android.content.Context;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
@@ -12,7 +14,7 @@ import android.widget.Scroller;
 
 public class PageflipViewPager extends ViewPager {
 	
-	public static final String TAG = PageflipViewPager.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + PageflipViewPager.class.getSimpleName();
 	
 	private PageflipListener mPageflipListener;
 	private ScrollerCustomDuration mScroller = null;

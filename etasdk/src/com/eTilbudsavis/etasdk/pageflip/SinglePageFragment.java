@@ -9,6 +9,8 @@ import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoTapListener;
 
 public class SinglePageFragment extends PageFragment {
 	
+	public static final String TAG = SinglePageFragment.class.getSimpleName();
+	
 	public void onResume() {
 		super.onResume();
 		getPhotoView().setOnPhotoTapListener(new OnPhotoTapListener() {

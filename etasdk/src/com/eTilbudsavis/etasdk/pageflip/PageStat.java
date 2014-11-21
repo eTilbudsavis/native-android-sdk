@@ -13,7 +13,7 @@ import com.eTilbudsavis.etasdk.Utils.Api;
 
 public class PageStat {
 	
-	public static final String TAG = PageStat.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + PageStat.class.getSimpleName();
 
 	private static final boolean LOG = false;
 	

@@ -20,7 +20,7 @@ import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoTapListener;
 
 public class DoublePageFragment extends PageFragment {
 	
-	public static final String TAG = DoublePageFragment.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + DoublePageFragment.class.getSimpleName();
 
 	private Object LOCK = new Object();
 	private AtomicInteger mCount = new AtomicInteger();

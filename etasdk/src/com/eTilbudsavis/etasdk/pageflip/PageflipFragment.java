@@ -32,7 +32,7 @@ import com.eTilbudsavis.etasdk.request.impl.CatalogObjectRequest.CatalogAutoFill
 
 public class PageflipFragment extends Fragment implements PageCallback, OnPageChangeListener {
 	
-	public static final String TAG = PageflipFragment.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + PageflipFragment.class.getSimpleName();
 	
 	private static final double PAGER_SCROLL_FACTOR = 0.5d;
 	

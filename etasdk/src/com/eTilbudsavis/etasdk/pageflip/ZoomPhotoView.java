@@ -8,13 +8,16 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.photoview.PhotoView;
 
 public class ZoomPhotoView extends PhotoView {
 	
+	public static final String TAG = Eta.TAG_PREFIX + ZoomPhotoView.class.getSimpleName();
+	
 	private static final String STATE_DISPLAY_MATRIX = "state_display_matrix";
 	private static final float MIN_SCALE_EPSILON = 0.1f;
-
+	
 	private boolean mZoomed = false;
 	private OnZoomChangeListener mZoomChangeListener;
 	private OnMatrixChangedListener mMatrixChangedListener;

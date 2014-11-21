@@ -28,7 +28,7 @@ import com.eTilbudsavis.etasdk.pageflip.ZoomPhotoView.OnZoomChangeListener;
 
 public abstract class PageFragment extends Fragment {
 	
-	public static final String TAG = PageFragment.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + PageFragment.class.getSimpleName();
 
 	protected static final int FADE_IN_DURATION = 150;
 	protected static final float MAX_SCALE = 3.0f;

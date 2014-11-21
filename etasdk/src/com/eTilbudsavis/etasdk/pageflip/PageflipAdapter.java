@@ -1,12 +1,14 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
+import com.eTilbudsavis.etasdk.Eta;
+
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 public class PageflipAdapter extends FragmentStatePagerAdapter {
 	
-	public static final String TAG = PageflipAdapter.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + PageflipAdapter.class.getSimpleName();
 	
 	private PageCallback mCallback;
 	private int mViewCount = 0;
