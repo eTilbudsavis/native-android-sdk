@@ -183,70 +183,67 @@ public class DoublePageFragment extends PageFragment {
 		
 	}
 	
-	public class DoublePageDecoder extends LowMemoryDecoder {
-		
-		private boolean mLeft;
-		
-		public DoublePageDecoder(Context c, boolean left) {
-			super(c);
-			mLeft = left;
-		}
-		
-		@Override
-		public Bitmap decode(ImageRequest ir, byte[] image) {
-			
-			BitmapFactory.Options o = new BitmapFactory.Options();
-			
-			setMutable(o);
-			
-		    setSampleSize(image, o);
-		    
-		    int ss = (o.inSampleSize<1?1:o.inSampleSize);
-		    int w = (o.outWidth/ss);
-		    int h = (o.outHeight/ss);
-		    
-		    createDoublePageIfNeeded(w, h);
-		    o.inBitmap = mPage;
-		    
-		    // Perform actual decoding
-			Bitmap b = BitmapFactory.decodeByteArray(image, 0, image.length, o);
-			return b;
-		}
-
-		private void createDoublePageIfNeeded(int w, int h) {
-			
-			boolean allowRetry = true;
-			while (mPage==null && allowRetry) {
-				
-				try {
-					mPage = Bitmap.createBitmap(w*2, h, Config.ARGB_8888);
-				} catch (OutOfMemoryError e) {
-					
-					if (allowRetry) {
-						allowRetry = false;
-						EtaLog.e(TAG, e.getMessage(), e);
-						try {
-							// Try to clear up some memory
-							Eta.getInstance().getRequestQueue().clear();
-							ImageLoader.getInstance().getMemoryCache().clear();
-							// 'force' a GC
-							Runtime.getRuntime().gc();
-							// Wait, and hope for the best
-							Thread.sleep(1000);
-						} catch (InterruptedException e1) {
-							EtaLog.e(TAG, "Sleep failed");
-						}
-					} else {
-						throw e;
-					}
-					
-				}
-				
-			}
-			
-		}
-		
-	}
+//	public class DoublePageDecoder extends LowMemoryDecoder {
+//		
+//		public DoublePageDecoder(Context c) {
+//			super(c);
+//		}
+//
+//		@Override
+//		public Bitmap decode(ImageRequest ir, byte[] image) {
+//			
+//			BitmapFactory.Options o = new BitmapFactory.Options();
+//			
+//			setMutable(o);
+//			
+//		    setSampleSize(image, o);
+//		    
+//		    int ss = (o.inSampleSize<1?1:o.inSampleSize);
+//		    int w = (o.outWidth/ss);
+//		    int h = (o.outHeight/ss);
+//		    
+//		    createDoublePageIfNeeded(w, h);
+//		    o.inBitmap = mPage;
+//		    
+//		    // Perform actual decoding
+//			Bitmap b = BitmapFactory.decodeByteArray(image, 0, image.length, o);
+//			return b;
+//		}
+//
+//		private void createDoublePageIfNeeded(int w, int h) {
+//			
+//			boolean allowRetry = true;
+//			while (mPage==null && allowRetry) {
+//				
+//				try {
+//					mPage = Bitmap.createBitmap(w*2, h, Config.ARGB_8888);
+//				} catch (OutOfMemoryError e) {
+//					
+//					if (allowRetry) {
+//						allowRetry = false;
+//						EtaLog.e(TAG, e.getMessage(), e);
+//						try {
+//							// Try to clear up some memory
+//							Eta.getInstance().getRequestQueue().clear();
+//							ImageLoader.getInstance().getMemoryCache().clear();
+//							// 'force' a GC
+//							Runtime.getRuntime().gc();
+//							// Wait, and hope for the best
+//							Thread.sleep(1000);
+//						} catch (InterruptedException e1) {
+//							EtaLog.e(TAG, "Sleep failed");
+//						}
+//					} else {
+//						throw e;
+//					}
+//					
+//				}
+//				
+//			}
+//			
+//		}
+//		
+//	}
 	
 	public class DoublePageDisplayer extends PageFadeBitmapDisplayer {
 

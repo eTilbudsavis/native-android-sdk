@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
+import com.eTilbudsavis.etasdk.ImageLoader.FileNameGenerator;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageDebugger;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
@@ -21,11 +22,7 @@ import com.eTilbudsavis.etasdk.Log.EtaLog;
  */
 public class PU {
 	
-	public static final long KILO_BYTE = 0x400;
-	
-	private PU() {
-		
-	}
+	private PU() { }
 	
 	public static ImageDebugger getSimpleDebugger(final String tag) {
 		return new ImageDebugger() {
@@ -94,6 +91,16 @@ public class PU {
 			}
 		});
 	}
-	
+
+	public static class PageflipFileNameGenerator implements FileNameGenerator {
+
+		public String getFileName(ImageRequest ir) {
+			String s[] = ir.getUrl().split("/");
+			int l = s.length-1;
+			return s[l-1] + "-" + s[l];
+		}
+		
+	}
 	
 }
+

@@ -2,6 +2,7 @@ package com.eTilbudsavis.etasdk.pageflip;
 
 import android.view.View;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoDoubleClickListener;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoLongClickListener;
@@ -9,12 +10,12 @@ import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoTapListener;
 
 public class SinglePageFragment extends PageFragment {
 	
-	public static final String TAG = SinglePageFragment.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + SinglePageFragment.class.getSimpleName();
 	
 	public void onResume() {
 		super.onResume();
 		getPhotoView().setOnPhotoTapListener(new OnPhotoTapListener() {
-
+			
 			public void onPhotoTap(View view, float x, float y) {
 				onSingleClick(getFirstNum(), x, y);
 			}

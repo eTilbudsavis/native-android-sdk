@@ -14,7 +14,7 @@ import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
 public class LowMemoryDecoder implements BitmapDecoder {
 	
 	public static final String TAG = Eta.TAG_PREFIX + LowMemoryDecoder.class.getSimpleName();
-
+	
 	// Variable kept across all PageFragment, to save some work and mem
 	private Point mDisplay;
 	

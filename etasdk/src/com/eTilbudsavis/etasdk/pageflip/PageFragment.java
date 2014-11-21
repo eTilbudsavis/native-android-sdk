@@ -35,6 +35,8 @@ public abstract class PageFragment extends Fragment {
 	
 	protected static final String ARG_PAGE = Eta.ARG_PREFIX + "pagefragment.page";
 	protected static final String ARG_POSITION = Eta.ARG_PREFIX + "pagefragment.position";
+
+	private static final Object HOTSPOT_LOCK = new Object();
 	
 	private int[] mPages;
 	private ZoomPhotoView mPhotoView;
@@ -44,7 +46,8 @@ public abstract class PageFragment extends Fragment {
 	private boolean mDebugRects = false;
 	private TextAnimLoader mTextLoader;
 	private PageStat mStats;
-	boolean mPageVisible = false;
+	private boolean mPageVisible = false;
+	private int mPosition = -1;
 	
 	private void updateBranding() {
 		PageCallback cb = getCallback();
@@ -77,7 +80,6 @@ public abstract class PageFragment extends Fragment {
 		return f;
 	}
 	
-	private int mPosition = -1;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		if (getArguments()!=null) {
@@ -206,8 +208,14 @@ public abstract class PageFragment extends Fragment {
 		return mPages[1];
 	}
 	
+	/**
+	 * When called, start loading view images into the {@link ZoomPhotoView}.
+	 */
 	public abstract void loadView();
 
+	/**
+	 * When called, start loading zoom images into the {@link ZoomPhotoView}.
+	 */
 	public abstract void loadZoom();
 	
 	private void loadImage() {
@@ -228,10 +236,17 @@ public abstract class PageFragment extends Fragment {
 		super.onResume();
 	}
 	
+	/**
+	 * Tell if the fragment is current visible in the {@link PageflipViewPager}.
+	 * @return true if visible, else false.
+	 */
 	public boolean isPageVisible() {
 		return mPageVisible;
 	}
 	
+	/**
+	 * called once the {@link PageFragment} becomes visible in the {@link PageflipViewPager}
+	 */
 	public void onVisible() {
 		updateBranding();
 		loadImage();
@@ -243,7 +258,10 @@ public abstract class PageFragment extends Fragment {
 		}
 		mPageVisible = true;
 	}
-	
+
+	/**
+	 * called once the {@link PageFragment} becomes invisible in the {@link PageflipViewPager}
+	 */
 	public void onInvisible() {
 		getStat().collectView();
 		mPageVisible = false;
@@ -256,8 +274,7 @@ public abstract class PageFragment extends Fragment {
 		onInvisible();
 		super.onPause();
 	}
-
-	private static final Object HOTSPOT_LOCK = new Object();
+	
 	public class PageBitmapProcessor implements BitmapProcessor {
 		
 		int page = 0;
@@ -298,6 +315,9 @@ public abstract class PageFragment extends Fragment {
 		
 	}
 	
+	/**
+	 * A displayer to show images at the correct time in the {@link ZoomPhotoView}
+	 */
 	public class PageFadeBitmapDisplayer implements BitmapDisplayer {
 
 		private boolean mFadeFromMemory = true;
