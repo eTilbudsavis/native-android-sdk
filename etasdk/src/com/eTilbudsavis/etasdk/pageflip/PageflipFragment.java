@@ -53,7 +53,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	private FrameLayout mFrame;
 	private TextView mProgress;
 	private PageflipViewPager mPager;
-	private PageflipAdapter mAdapter;
+	private PageAdapter mAdapter;
 	
 	// State
 	private int mCurrentPosition = 0;
@@ -270,7 +270,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		
 		public void run() {
 			
-			mAdapter = new PageflipAdapter(getChildFragmentManager(), PageflipFragment.this);
+			mAdapter = new PageAdapter(getChildFragmentManager(), PageflipFragment.this);
 			mPager.setAdapter(mAdapter);
 			
 			// force the first page change if needed
@@ -399,7 +399,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	/**
 	 * Method for determining if the {@link PageflipFragment} is ready.
-	 * It checks if the {@link PageflipViewPager} has an {@link PageflipAdapter} attached.
+	 * It checks if the {@link PageflipViewPager} has an {@link PageAdapter} attached.
 	 * @return true if the fragment if ready, else false.
 	 */
 	public boolean isReady() {

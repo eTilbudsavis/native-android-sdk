@@ -142,7 +142,6 @@ public abstract class PageFragment extends Fragment {
 	
 	protected void addRequest(ImageRequest ir) {
 		ir.setMemoryCache(false);
-		ir.setFileName(new PageflipFileNameGenerator());
 		ImageLoader.getInstance().displayImage(ir);
 	}
 	

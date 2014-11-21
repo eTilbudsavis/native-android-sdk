@@ -6,14 +6,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-public class PageflipAdapter extends FragmentStatePagerAdapter {
+public class PageAdapter extends FragmentStatePagerAdapter {
 	
-	public static final String TAG = Eta.TAG_PREFIX + PageflipAdapter.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + PageAdapter.class.getSimpleName();
 	
 	private PageCallback mCallback;
 	private int mViewCount = 0;
 	
-	public PageflipAdapter(FragmentManager fm, PageCallback callback) {
+	public PageAdapter(FragmentManager fm, PageCallback callback) {
 		super(fm);
 		mCallback = callback;
 		if (mCallback.isLandscape()) {
