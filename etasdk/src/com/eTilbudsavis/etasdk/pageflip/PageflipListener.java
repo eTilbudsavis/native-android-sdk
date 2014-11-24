@@ -2,7 +2,6 @@ package com.eTilbudsavis.etasdk.pageflip;
 
 import java.util.List;
 
-import android.support.v4.view.ViewPager;
 import android.view.View;
 
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
