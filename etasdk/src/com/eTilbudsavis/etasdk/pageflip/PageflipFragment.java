@@ -117,14 +117,14 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		EtaLog.d(TAG, "onCreate: " + (savedInstanceState==null?"null":"savedInstanceState"));
+//		EtaLog.d(TAG, "onCreate: " + (savedInstanceState==null?"null":"savedInstanceState"));
 		mHandler = new Handler();
 		mLowMemory = PageflipUtils.hasLowMemory(getActivity());
 		mLandscape = PageflipUtils.isLandscape(getActivity());
 
 		if (savedInstanceState!=null) {
 
-			EtaLog.d(TAG, "onCreateView: savedState");
+//			EtaLog.d(TAG, "onCreateView: savedState");
 			
 			setPage(savedInstanceState.getInt(ARG_PAGE, mCurrentPosition));
 			setCatalog((Catalog) savedInstanceState.getSerializable(ARG_CATALOG));
@@ -133,7 +133,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 			
 		} else if ( mCatalogId==null && getArguments() != null) {
 
-			EtaLog.d(TAG, "onCreateView: arguments");
+//			EtaLog.d(TAG, "onCreateView: arguments");
 			
 			Bundle b = getArguments();
 			setPage(b.getInt(ARG_PAGE, 1));
@@ -158,7 +158,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
 
-		EtaLog.d(TAG, "onCreateView: " + (savedInstanceState==null?"null":"savedInstanceState"));
+//		EtaLog.d(TAG, "onCreateView: " + (savedInstanceState==null?"null":"savedInstanceState"));
 		mInflater = inflater;
 		mContainer = container;
 		setUpView(true);
@@ -243,7 +243,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		
 		boolean needHotspots = mCatalog.getHotspots()==null;
 		boolean needPages = mCatalog.getPages()==null;
-		EtaLog.d(TAG, String.format("hotspots: %s, pages: %s", needHotspots, needPages));
 		CatalogAutoFill caf = new CatalogAutoFill();
 		caf.setLoadHotspots(needHotspots);
 		caf.setLoadPages(needPages);
@@ -307,7 +306,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		EtaLog.d(TAG, "onConfigurationChanged");
+//		EtaLog.d(TAG, "onConfigurationChanged");
 		boolean land = PageflipUtils.isLandscape(newConfig);
 		if (land != mLandscape) {
 			EtaLog.d(TAG, "onConfigurationChanged[orientation.landscape[" + mLandscape + "->" + land + "]");

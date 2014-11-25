@@ -265,11 +265,9 @@ public abstract class PageFragment extends Fragment {
 	 * called once the {@link PageFragment} becomes invisible in the {@link PageflipViewPager}
 	 */
 	public void onInvisible() {
-		EtaLog.d(TAG, String.format("pos: %s, onInvisible, isAdded: %s", mPosition, isAdded()));
+//		EtaLog.d(TAG, String.format("pos: %s, onInvisible, isAdded: %s", mPosition, isAdded()));
 		if (mCallback!=null) {
 			getStat().collectView();
-		} else {
-			EtaLog.d(TAG, String.format("pos: %s, no-collect", mPosition));
 		}
 		mPageVisible = false;
 	}

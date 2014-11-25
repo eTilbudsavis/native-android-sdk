@@ -19,15 +19,20 @@ import java.util.List;
 
 import org.json.JSONArray;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.Eta;
@@ -41,38 +46,47 @@ import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.pageflip.PageGridOverview;
 import com.eTilbudsavis.etasdk.pageflip.PageflipFragment;
 import com.eTilbudsavis.etasdk.pageflip.PageflipListener;
+import com.eTilbudsavis.etasdk.pageflip.PageflipUtils;
 
 public class CatalogViewer extends FragmentActivity {
 
 	public static final String TAG = CatalogViewer.class.getSimpleName();
+
+    private static final int MENU_PAGEOVERVIEW = 1;
+    
 	PageflipFragment mPageflip;
-	Catalog mCatalog;
 	ProgressDialog mProgressDialog;
-	Bundle args;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.catalog_viewer);
-        Eta.createInstance(Keys.API_KEY, Keys.API_SECRET, this);
+        
+        // If your activity ignores configuration changes, don't do this
         if (savedInstanceState!=null) {
         	mPageflip = PageflipFragment.newInstance(savedInstanceState);
         }
+        
     }
     
     @Override
     public void onResume() {
     	super.onResume();
     	Eta.getInstance().onResume();
-    	mProgressDialog = ProgressDialog.show(CatalogViewer.this, "", "Getting catalog list...", true, true);
-    	if (mCatalog == null) {
-        	JsonArrayRequest catalogReq = new JsonArrayRequest(Endpoint.CATALOG_LIST, catalogListener);
-        	// This debugger prints most relevant information about a request
-//        	catalogReq.setDebugger(new DefaultDebugger());
-        	Eta.getInstance().add(catalogReq);
+    	
+    	if (mPageflip == null) {
+    		
+    		// First load, get a fresh list of catalogs for our area
+        	mProgressDialog = ProgressDialog.show(CatalogViewer.this, "", "Getting catalog list...", true, true);
+        	getCatalogList();
+        	
     	} else {
+    		
+    		// No need to load content again, as PageflipFragment have been setup from the saved instance state
     		setupPageflip();
+    		
     	}
+    	
     }
     
     @Override
@@ -81,48 +95,59 @@ public class CatalogViewer extends FragmentActivity {
     	Eta.getInstance().onPause();
     }
     
-	// A catalogs listener, 
-    Listener<JSONArray> catalogListener = new Listener<JSONArray>() {
+    private void getCatalogList() {
 
-		@Override
-		public void onComplete(JSONArray response, EtaError error) {
-			
-			mProgressDialog.dismiss();
+        Listener<JSONArray> mCatalogListener = new Listener<JSONArray>() {
 
-			/* If the request is a success and one or more catalogs is returned,
-			 * show the first catalog in a pageflip. */
-			if (response != null && !(response.length() == 0) ) {
-				
-				List<Catalog> catalogs = Catalog.fromJSON(response);
-				mCatalog = catalogs.get(0);
-				
-				setupPageflip();
-				
-			} else {
-				
-				EtaLog.e(TAG, "", error);
-				
-			}
-		}
-	};
-	
+    		@Override
+    		public void onComplete(JSONArray response, EtaError error) {
+
+    			if (mProgressDialog!=null) {
+    				mProgressDialog.dismiss();
+    			}
+    			
+    			if (response != null && response.length()>0 ) {
+    				
+    				// The request was a success, take the first catalog and display it
+    				List<Catalog> catalogs = Catalog.fromJSON(response);
+    				mPageflip = PageflipFragment.newInstance(catalogs.get(0));
+    				setupPageflip();
+    				
+    			} else {
+    				
+    				dialog("No catalogs", "Try changing the SDK location, or distance.");
+    				EtaLog.e(TAG, "", error);
+    				
+    			}
+    		}
+    	};
+    	
+    	JsonArrayRequest catalogReq = new JsonArrayRequest(Endpoint.CATALOG_LIST, mCatalogListener);
+    	// This debugger prints most relevant information about a request
+//    	catalogReq.setDebugger(new DefaultDebugger());
+    	Eta.getInstance().add(catalogReq);
+    	
+    }
+    
 	private void setupPageflip() {
 		
-		if (mPageflip == null) {
-			mPageflip = PageflipFragment.newInstance(mCatalog);
-		}
-		
-		mPageflip.setPageflipListener(pfl);
-		
+		mPageflip.setPageflipListener(mPageflipListener);
 		FragmentManager fm = getSupportFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
 		ft.replace(R.id.pageflip, mPageflip);
 		ft.commit();
 		
 	}
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        // If your activity ignores configuration changes, don't do this
+    	mPageflip.onSaveInstanceState(outState);
+    	super.onSaveInstanceState(outState);
+    }
     
 	// Pageflip listener, triggered on callbacks from the pageflip.
-    PageflipListener pfl = new PageflipListener() {
+    PageflipListener mPageflipListener = new PageflipListener() {
 		
 		@Override
 		public void onZoom(View v, int[] pages, boolean zoonIn) {
@@ -137,15 +162,13 @@ public class CatalogViewer extends FragmentActivity {
 		
 		@Override
 		public void onReady() {
-			if (mProgressDialog != null) {
-				mProgressDialog.dismiss();
-			}
 			Toast.makeText(CatalogViewer.this, "onReady", Toast.LENGTH_SHORT).show();
 		}
 		
 		@Override
 		public void onPageChange(int[] pages) {
-			Toast.makeText(CatalogViewer.this, "onPageChange", Toast.LENGTH_SHORT).show();
+			String text = "onPageChange: " + PageflipUtils.join("-", pages);
+			Toast.makeText(CatalogViewer.this, text, Toast.LENGTH_SHORT).show();
 		}
 		
 		@Override
@@ -161,14 +184,12 @@ public class CatalogViewer extends FragmentActivity {
 		
 		@Override
 		public void onError(EtaError error) {
-			if (mProgressDialog != null) {
-				mProgressDialog.dismiss();
-			}
 			Toast.makeText(CatalogViewer.this, "onError", Toast.LENGTH_SHORT).show();
 		}
 		
 		@Override
 		public void onDragStateChanged(int state) {
+			// Called too often - will spam the toast queue
 //			Toast.makeText(CatalogViewer.this, "onDragStateChanged", Toast.LENGTH_SHORT).show();
 		}
 		
@@ -179,19 +200,25 @@ public class CatalogViewer extends FragmentActivity {
 		}
 	};
 	
+	private void dialog(String title, String message) {
+		AlertDialog.Builder b = new Builder(CatalogViewer.this);
+		b.setTitle(title);
+		b.setMessage(message);
+		b.setPositiveButton("OK", new OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		b.show();
+		
+	}
+	
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
-    menu.add(Menu.NONE, 0, 0, "Sideoversigt");
-
-    return super.onCreateOptionsMenu(menu); 
-    }
-    
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-    	Log.d(TAG, "onSaveInstanceState");
-    	mPageflip.onSaveInstanceState(outState);
-    	super.onSaveInstanceState(outState);
+	    menu.add(Menu.NONE, MENU_PAGEOVERVIEW, Menu.NONE, "Pageoverview");
+	    return super.onCreateOptionsMenu(menu); 
     }
     
     @Override
@@ -199,9 +226,21 @@ public class CatalogViewer extends FragmentActivity {
 
     	switch (item.getItemId()) {
 
-    	case 0:
+    	case MENU_PAGEOVERVIEW:
+    		// We have created a simple DialogFragment - ready to use
+    		
+    		// The first element of the array returned in getPages is (almost) guaranteed to be set
     		int page = mPageflip.getPages()[0];
-    		PageGridOverview.newInstance(mCatalog, page);
+    		Catalog catalog = mPageflip.getCatalog();
+    		PageGridOverview f = PageGridOverview.newInstance(catalog, page);
+    		f.setOnItemClickListener(new OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+					mPageflip.setPage(position);
+				}
+			});
+    		f.show(getSupportFragmentManager(), "PageGridOverview");
     		break;
     		
     	}

@@ -18,9 +18,12 @@ package com.eTilbudsavis.sdkdemo;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaLocation;
@@ -30,15 +33,17 @@ import com.eTilbudsavis.etasdk.Log.EtaLog;
 public class Main extends Activity {
 	
 	public static final String TAG = Main.class.getSimpleName();
-	
-	Button btnCatalogs;
-	Button btnSearch;
+
+    private static final int MENU_LOCATION = 1;
+    
+    private Button mBtnCatalogs;
+	private Button mBtnSearch;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
+        
         /* 
          * 
          */
@@ -65,16 +70,19 @@ public class Main extends Activity {
          * Set the location (This could also be set via LocationManager)
          */
         EtaLocation loc = eta.getLocation();
-        loc.setLatitude(55.63105);
-        loc.setLongitude(12.5766);
+        loc.setLatitude(Constants.ETA_HQ.lat);
+        loc.setLongitude(Constants.ETA_HQ.lng);
+        
+        // Avoid using large distances in production, it's bad for performance (longer queries)
+        // the 700km reaius here is just for demonstration purposes - we recommend 100km or less
         loc.setRadius(700000);
         loc.setSensor(false);
         
         /*
          * You are now done setting up the SDK, the rest is just Android stuff
          */
-        btnCatalogs= (Button)findViewById(R.id.btnCatalogs);
-        btnCatalogs.setOnClickListener(new OnClickListener() {
+        mBtnCatalogs= (Button)findViewById(R.id.btnCatalogs);
+        mBtnCatalogs.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
@@ -83,8 +91,8 @@ public class Main extends Activity {
 			}
 		});
         
-        btnSearch = (Button)findViewById(R.id.btnSearch);
-        btnSearch.setOnClickListener(new OnClickListener() {
+        mBtnSearch = (Button)findViewById(R.id.btnSearch);
+        mBtnSearch.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
@@ -92,7 +100,25 @@ public class Main extends Activity {
 				startActivity(i);
 			}
 		});
-
+        
     }
     
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+    	menu.add(Menu.NONE, MENU_LOCATION, Menu.NONE, "Choose location");
+    	return super.onCreateOptionsMenu(menu);
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+		case MENU_LOCATION:
+			Toast.makeText(Main.this, "not implemented yet", Toast.LENGTH_SHORT).show();
+			break;
+
+		default:
+			break;
+		}
+    	return super.onOptionsItemSelected(item);
+    }
 }
