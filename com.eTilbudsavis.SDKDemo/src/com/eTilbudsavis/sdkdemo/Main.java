@@ -28,9 +28,9 @@ import com.eTilbudsavis.etasdk.Log.DevLogger;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class Main extends Activity {
-
-	public static final String TAG = "Main";
-
+	
+	public static final String TAG = Main.class.getSimpleName();
+	
 	Button btnCatalogs;
 	Button btnSearch;
 	

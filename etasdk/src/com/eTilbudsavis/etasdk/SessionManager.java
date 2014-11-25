@@ -33,6 +33,7 @@ import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Network.Request.Priority;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
+import com.eTilbudsavis.etasdk.Network.Impl.DefaultDebugger;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Api.Param;
@@ -129,6 +130,7 @@ public class SessionManager {
 		synchronized (LOCK) {
 			r.setPriority(Priority.HIGH);
 			mSessionQueue.add(r);
+			r.setDebugger(new DefaultDebugger());
 			runQueue();
 		}
 		

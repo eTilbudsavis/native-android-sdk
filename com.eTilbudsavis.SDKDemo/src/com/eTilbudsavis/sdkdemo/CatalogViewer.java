@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,25 +44,35 @@ import com.eTilbudsavis.etasdk.pageflip.PageflipListener;
 
 public class CatalogViewer extends FragmentActivity {
 
-	public static final String TAG = "CatalogViewer";
+	public static final String TAG = CatalogViewer.class.getSimpleName();
 	PageflipFragment mPageflip;
 	Catalog mCatalog;
-	ProgressDialog mPd;
+	ProgressDialog mProgressDialog;
+	Bundle args;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.catalog_viewer);
-        
+        Eta.createInstance(Keys.API_KEY, Keys.API_SECRET, this);
+        if (savedInstanceState!=null) {
+        	mPageflip = PageflipFragment.newInstance(savedInstanceState);
+        }
     }
     
     @Override
     public void onResume() {
     	super.onResume();
     	Eta.getInstance().onResume();
-    	mPd = ProgressDialog.show(CatalogViewer.this, "", "Getting catalogs...", true, true);
-    	JsonArrayRequest catalogReq = new JsonArrayRequest(Endpoint.CATALOG_LIST, catalogListener);
-    	Eta.getInstance().add(catalogReq);
+    	mProgressDialog = ProgressDialog.show(CatalogViewer.this, "", "Getting catalog list...", true, true);
+    	if (mCatalog == null) {
+        	JsonArrayRequest catalogReq = new JsonArrayRequest(Endpoint.CATALOG_LIST, catalogListener);
+        	// This debugger prints most relevant information about a request
+//        	catalogReq.setDebugger(new DefaultDebugger());
+        	Eta.getInstance().add(catalogReq);
+    	} else {
+    		setupPageflip();
+    	}
     }
     
     @Override
@@ -76,18 +87,16 @@ public class CatalogViewer extends FragmentActivity {
 		@Override
 		public void onComplete(JSONArray response, EtaError error) {
 			
-			mPd.dismiss();
+			mProgressDialog.dismiss();
 
 			/* If the request is a success and one or more catalogs is returned,
 			 * show the first catalog in a pageflip. */
 			if (response != null && !(response.length() == 0) ) {
 				
 				List<Catalog> catalogs = Catalog.fromJSON(response);
-				Catalog c = catalogs.get(0);
+				mCatalog = catalogs.get(0);
 				
-				mPd = ProgressDialog.show(CatalogViewer.this, "", "Loading catalog into pageflip...", true, true);
-				
-				setupPageflip(c);
+				setupPageflip();
 				
 			} else {
 				
@@ -97,28 +106,17 @@ public class CatalogViewer extends FragmentActivity {
 		}
 	};
 	
-	private void setupPageflip(Catalog c) {
+	private void setupPageflip() {
 		
 		if (mPageflip == null) {
-			if (getArguments().containsKey(Arg.CATALOG)) {
-				
-				Catalog c = (Catalog) getArguments().getSerializable(Arg.CATALOG);
-				mPageflip = PageflipFragment.newInstance(c, mPages[0]);
-				
-			} else {
-				
-				String id = getArguments().getString(Arg.CATALOG_ID);
-				mPageflip = PageflipFragment.newInstance(id, mPages[0]);
-				
-			}
-			
+			mPageflip = PageflipFragment.newInstance(mCatalog);
 		}
 		
 		mPageflip.setPageflipListener(pfl);
-		get
-		FragmentManager fm = getChildFragmentManager();
+		
+		FragmentManager fm = getSupportFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
-		ft.replace(R.id.pageflip_container, mPageflip);
+		ft.replace(R.id.pageflip, mPageflip);
 		ft.commit();
 		
 	}
@@ -139,6 +137,9 @@ public class CatalogViewer extends FragmentActivity {
 		
 		@Override
 		public void onReady() {
+			if (mProgressDialog != null) {
+				mProgressDialog.dismiss();
+			}
 			Toast.makeText(CatalogViewer.this, "onReady", Toast.LENGTH_SHORT).show();
 		}
 		
@@ -160,12 +161,15 @@ public class CatalogViewer extends FragmentActivity {
 		
 		@Override
 		public void onError(EtaError error) {
+			if (mProgressDialog != null) {
+				mProgressDialog.dismiss();
+			}
 			Toast.makeText(CatalogViewer.this, "onError", Toast.LENGTH_SHORT).show();
 		}
 		
 		@Override
 		public void onDragStateChanged(int state) {
-			Toast.makeText(CatalogViewer.this, "onDragStateChanged", Toast.LENGTH_SHORT).show();
+//			Toast.makeText(CatalogViewer.this, "onDragStateChanged", Toast.LENGTH_SHORT).show();
 		}
 		
 		@Override
@@ -182,7 +186,14 @@ public class CatalogViewer extends FragmentActivity {
 
     return super.onCreateOptionsMenu(menu); 
     }
-
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+    	Log.d(TAG, "onSaveInstanceState");
+    	mPageflip.onSaveInstanceState(outState);
+    	super.onSaveInstanceState(outState);
+    }
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 

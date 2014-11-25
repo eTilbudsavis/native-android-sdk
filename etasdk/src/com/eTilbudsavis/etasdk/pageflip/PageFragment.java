@@ -137,6 +137,7 @@ public abstract class PageFragment extends Fragment {
 	
 	private PageStat getStat() {
 		if (mStats==null) {
+//			EtaLog.d(TAG, "stat.ViewSession: " + mCallback.getViewSession());
 			mStats = new PageStat(mCallback.getCatalog().getId(), mCallback.getViewSession(), mPages, land());
 		}
 		return mStats;
@@ -226,6 +227,7 @@ public abstract class PageFragment extends Fragment {
 	
 	@Override
 	public void onResume() {
+//		EtaLog.d(TAG, String.format("pos: %s, onResume", mPosition));
 		updateBranding();
 		
 		if (getCallback()!=null) {
@@ -263,12 +265,18 @@ public abstract class PageFragment extends Fragment {
 	 * called once the {@link PageFragment} becomes invisible in the {@link PageflipViewPager}
 	 */
 	public void onInvisible() {
-		getStat().collectView();
+		EtaLog.d(TAG, String.format("pos: %s, onInvisible, isAdded: %s", mPosition, isAdded()));
+		if (mCallback!=null) {
+			getStat().collectView();
+		} else {
+			EtaLog.d(TAG, String.format("pos: %s, no-collect", mPosition));
+		}
 		mPageVisible = false;
 	}
 	
 	@Override
 	public void onPause() {
+//		EtaLog.d(TAG, String.format("pos: %s, onPause", mPosition));
 		mTextLoader.stop();
 		mPhotoView.recycle();
 		onInvisible();
