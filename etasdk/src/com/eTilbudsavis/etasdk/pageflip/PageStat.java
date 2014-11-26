@@ -75,7 +75,7 @@ public class PageStat {
 		JsonObjectRequest r = new JsonObjectRequest(Method.POST, url, body, new Listener<JSONObject>() {
 
 			public void onComplete(JSONObject response, EtaError error) {
-				print(body, response, error);
+//				print(body, response, error);
 			}
 		});
 		Eta.getInstance().add(r);

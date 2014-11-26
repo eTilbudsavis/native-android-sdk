@@ -62,6 +62,8 @@ public class CatalogViewer extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.catalog_viewer);
         
+        Eta.createInstance(Keys.API_KEY, Keys.API_SECRET, this);
+        
         // If your activity ignores configuration changes, don't do this
         if (savedInstanceState!=null) {
         	mPageflip = PageflipFragment.newInstance(savedInstanceState);
@@ -156,9 +158,14 @@ public class CatalogViewer extends FragmentActivity {
 		}
 		
 		@Override
-		public void onSingleClick(View v, int page, float x, float y,
-				List<Hotspot> hotspots) {
-			Toast.makeText(CatalogViewer.this, "onSingleClick", Toast.LENGTH_SHORT).show();
+		public void onSingleClick(View v, int page, float x, float y, List<Hotspot> hotspots) {
+			if (hotspots.isEmpty()) {
+				Toast.makeText(CatalogViewer.this, "onSingleClick", Toast.LENGTH_SHORT).show();
+			} else if (hotspots.size() == 1) {
+				Toast.makeText(CatalogViewer.this, "onSingleClick (" + hotspots.get(0).getOffer().getHeading() + ")", Toast.LENGTH_SHORT).show();
+			} else {
+				Toast.makeText(CatalogViewer.this, "onSingleClick (" + hotspots.size() + ")", Toast.LENGTH_SHORT).show();
+			}
 		}
 		
 		@Override
