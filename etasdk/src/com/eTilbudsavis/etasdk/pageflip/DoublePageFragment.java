@@ -249,15 +249,22 @@ public class DoublePageFragment extends PageFragment {
 		public void display(ImageRequest ir) {
 			
 			if (mCount.getAndIncrement()==1) {
+
+				// Find the current bitmap, so we can recycle it later
+				Bitmap b = null; 
 				if (mClearBitmap) {
 					mClearBitmap = false;
-					Bitmap b = getPhotoView().getBitmap();
-					if (b!=null && !b.isRecycled()) {
-						b.recycle();
-					}
+					b = getPhotoView().getBitmap();
 				}
+				
+				// Display the new bitmap while the old one isn't recycled to keep the DisplayMatrix intact
 				ir.setBitmap(mPage);
 				super.display(ir);
+
+				// Recycle the old bitmap if needed
+				if (mClearBitmap && b!=null && !b.isRecycled()) {
+					b.recycle();
+				}
 			}
 			
 		}

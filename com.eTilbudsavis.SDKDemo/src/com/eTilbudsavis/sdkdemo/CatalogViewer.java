@@ -151,7 +151,8 @@ public class CatalogViewer extends FragmentActivity {
 		
 		@Override
 		public void onZoom(View v, int[] pages, boolean zoonIn) {
-			Toast.makeText(CatalogViewer.this, "onZoom", Toast.LENGTH_SHORT).show();
+			String text = "zoom " + (zoonIn ? "in" : "out");
+			Toast.makeText(CatalogViewer.this, text, Toast.LENGTH_SHORT).show();
 		}
 		
 		@Override

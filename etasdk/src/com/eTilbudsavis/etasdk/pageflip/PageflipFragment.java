@@ -157,7 +157,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
-
+		
 //		EtaLog.d(TAG, "onCreateView: " + (savedInstanceState==null?"null":"savedInstanceState"));
 		mInflater = inflater;
 		mContainer = container;
