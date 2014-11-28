@@ -129,7 +129,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 			setPage(savedInstanceState.getInt(ARG_PAGE, mCurrentPosition));
 			setCatalog((Catalog) savedInstanceState.getSerializable(ARG_CATALOG));
 			mHasCatalogView = savedInstanceState.getBoolean(ARG_CATALOG_VIEW, false);
-			mViewSessionUuid = savedInstanceState.getString(ARG_VIEWSESSION, Utils.createUUID());
+			mViewSessionUuid = savedInstanceState.getString(ARG_VIEWSESSION);
 			
 		} else if ( mCatalogId==null && getArguments() != null) {
 
@@ -143,12 +143,16 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 				setCatalogId(b.getString(ARG_CATALOG_ID));
 			}
 			mHasCatalogView = b.getBoolean(ARG_CATALOG_VIEW, false);
-			mViewSessionUuid = b.getString(ARG_VIEWSESSION, Utils.createUUID());
+			mViewSessionUuid = b.getString(ARG_VIEWSESSION);
 			
 		} else {
 			
 			// This is possible from XML - then what
 			
+		}
+		
+		if (mViewSessionUuid==null) {
+			mViewSessionUuid = Utils.createUUID();
 		}
 		
 		super.onCreate(savedInstanceState);
