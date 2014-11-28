@@ -220,7 +220,7 @@ public abstract class PageFragment extends Fragment {
 	public abstract void loadZoom();
 	
 	private void loadImage() {
-		if ( !mPhotoView.isBitmapValid() && mCallback!=null && mCallback.isPositionSet() ) {
+		if ( mPhotoView!=null && !mPhotoView.isBitmapValid() && mCallback!=null && mCallback.isPositionSet() ) {
 			loadView();
 		}
 	}
