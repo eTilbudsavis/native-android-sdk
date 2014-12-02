@@ -253,7 +253,7 @@ public abstract class PageFragment extends Fragment {
 		updateBranding();
 		loadImage();
 		if (!mPageVisible) {
-			if (mPhotoView.getBitmap()!=null) {
+			if (mPhotoView != null && mPhotoView.getBitmap()!=null) {
 				getStat().startView();
 			}
 			// TODO do performance stuff, low memory devices can start loading here instead of onResume
