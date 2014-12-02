@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
+import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
@@ -34,6 +35,7 @@ import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Network.Request.Priority;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Api.Param;
 import com.eTilbudsavis.etasdk.Utils.Utils;
@@ -91,8 +93,6 @@ public class SessionManager {
 
 			public void onComplete(JSONObject response, EtaError error) {
 				
-//				EtaLog.d(TAG, "Session", response, error);
-				
 				synchronized (LOCK) {
 					
 					mReqInFlight = null;
@@ -128,6 +128,9 @@ public class SessionManager {
 		
 		synchronized (LOCK) {
 			r.setPriority(Priority.HIGH);
+			if (mSession.getClientId()!=null) {
+				r.getParameters().put(Api.JsonKey.CLIENT_ID, mSession.getClientId());
+			}
 			mSessionQueue.add(r);
 			runQueue();
 		}

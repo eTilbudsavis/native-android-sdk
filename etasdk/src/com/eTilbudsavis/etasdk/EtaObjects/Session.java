@@ -36,11 +36,13 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private String mToken = null;
+	private String mToken;
 	private Date mExpires = new Date(1000);
 	private User mUser = new User();
-	private Permission mPermission = null;
-	private String mProvider = null;
+	private Permission mPermission;
+	private String mProvider;
+	private String mClientId;
+	private String mReference;
 	
 	public static Session fromJSON(JSONObject session) {
 		Session s = new Session();
@@ -50,6 +52,8 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 		
 		s.setToken(Json.valueOf(session, JsonKey.TOKEN));
 		s.setExpires(Json.valueOf(session, JsonKey.EXPIRES));
+		s.setClientId(Json.valueOf(session, JsonKey.CLIENT_ID));
+		s.setReference(Json.valueOf(session, JsonKey.REFERENCE));
 		
 		JSONObject user = null;
 		if (!session.isNull(JsonKey.USER)) {
@@ -86,6 +90,8 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 			o.put(JsonKey.USER, getUser().getUserId() == User.NO_USER ? JSONObject.NULL : getUser().toJSON());
 			o.put(JsonKey.PERMISSIONS, Json.toJson(getPermission()));
 			o.put(JsonKey.PROVIDER, Json.nullCheck(getProvider()));
+			o.put(JsonKey.CLIENT_ID, Json.nullCheck(mClientId));
+			o.put(JsonKey.REFERENCE, Json.nullCheck(mReference));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -103,6 +109,22 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 	public Session setToken(String token) {
 		mToken = token;
 		return this;
+	}
+
+	public String getClientId() {
+		return mClientId;
+	}
+
+	public void setClientId(String clientId) {
+		mClientId = clientId;
+	}
+
+	public String getReference() {
+		return mReference;
+	}
+
+	public void setReference(String reference) {
+		mReference = reference;
 	}
 	
 	public User getUser() {
@@ -145,31 +167,40 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 	public Date getExpire() {
 		return mExpires;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
+		result = prime * result
+				+ ((mClientId == null) ? 0 : mClientId.hashCode());
 		result = prime * result
 				+ ((mExpires == null) ? 0 : mExpires.hashCode());
 		result = prime * result
 				+ ((mPermission == null) ? 0 : mPermission.hashCode());
 		result = prime * result
 				+ ((mProvider == null) ? 0 : mProvider.hashCode());
+		result = prime * result
+				+ ((mReference == null) ? 0 : mReference.hashCode());
 		result = prime * result + ((mToken == null) ? 0 : mToken.hashCode());
 		result = prime * result + ((mUser == null) ? 0 : mUser.hashCode());
 		return result;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		Session other = (Session) obj;
+		if (mClientId == null) {
+			if (other.mClientId != null)
+				return false;
+		} else if (!mClientId.equals(other.mClientId))
+			return false;
 		if (mExpires == null) {
 			if (other.mExpires != null)
 				return false;
@@ -184,6 +215,11 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 			if (other.mProvider != null)
 				return false;
 		} else if (!mProvider.equals(other.mProvider))
+			return false;
+		if (mReference == null) {
+			if (other.mReference != null)
+				return false;
+		} else if (!mReference.equals(other.mReference))
 			return false;
 		if (mToken == null) {
 			if (other.mToken != null)

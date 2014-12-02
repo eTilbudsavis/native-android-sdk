@@ -118,7 +118,9 @@ public final class Api {
 		public static final String CATEGORY_IDS = "category_ids";
 		public static final String OFFER = "offer";
 		public static final String LOCATIONS = "locations";
-
+		public static final String CLIENT_ID = "client_id";
+		public static final String REFERENCE = "reference";
+		
 	}
 
 	/**
