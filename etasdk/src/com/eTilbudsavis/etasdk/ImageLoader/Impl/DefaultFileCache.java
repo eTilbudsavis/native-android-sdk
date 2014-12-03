@@ -16,6 +16,7 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.FileCache;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.FileUtils;
 import com.eTilbudsavis.etasdk.Utils.PermissionUtils;
 
 public class DefaultFileCache implements FileCache {
@@ -26,40 +27,10 @@ public class DefaultFileCache implements FileCache {
 	private ExecutorService mExecutor;
 	
 	public DefaultFileCache(Context context, ExecutorService executor){
-		mCacheDir = getCacheDirectory(context, true);
+		mCacheDir = FileUtils.getCacheDirectory(context, true);
 		mExecutor = executor;
 		EtaLog.v(TAG, "CacheDir: " + mCacheDir.getAbsolutePath());
 		cleanup();
-	}
-	
-	public static File getCacheDirectory(Context context, boolean preferExternal) {
-		File cacheDir = null;
-		if (preferExternal &&
-				MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) &&
-					PermissionUtils.hasWriteExternalStorage(context)) {
-			cacheDir = getExternalCacheDir(context);
-		}
-		
-		if (cacheDir == null) {
-			cacheDir = context.getCacheDir();
-		}
-		
-		if (cacheDir == null) {
-			String filesDir = context.getFilesDir().getPath();
-			cacheDir = new File(filesDir + context.getPackageName() + "/cache/");
-		}
-		
-		return cacheDir;
-	}
-	
-	private static File getExternalCacheDir(Context context) {
-		File dataDir = new File(Environment.getExternalStorageDirectory(), "Android/data");
-		File cacheDir = new File(new File(dataDir, context.getPackageName()), "cache");
-		if (!cacheDir.exists() && !cacheDir.mkdirs()) {
-			EtaLog.w(TAG, "External directory couldn't be created");
-			return null;
-		}
-		return cacheDir;
 	}
 	
 	public void save(final ImageRequest ir, final byte[] b) {

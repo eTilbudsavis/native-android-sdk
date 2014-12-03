@@ -29,8 +29,8 @@ import com.eTilbudsavis.etasdk.SessionManager;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.Utils.HashUtils;
 import com.eTilbudsavis.etasdk.Utils.HeaderUtils;
-import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class NetworkDispatcher extends Thread {
 
@@ -180,7 +180,7 @@ public class NetworkDispatcher extends Thread {
         	Map<String, String> headers = new HashMap<String, String>();
         	String token = mEta.getSessionManager().getSession().getToken();
         	headers.put(HeaderUtils.X_TOKEN, token);
-        	String sha256 = Utils.generateSHA256(mEta.getApiSecret() + token);
+        	String sha256 = HashUtils.sha256(mEta.getApiSecret() + token);
         	headers.put(HeaderUtils.X_SIGNATURE, sha256);
         	request.setHeaders(headers);
         	

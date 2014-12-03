@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
-import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
@@ -34,6 +33,7 @@ import com.eTilbudsavis.etasdk.Network.Request;
 import com.eTilbudsavis.etasdk.Network.Request.Method;
 import com.eTilbudsavis.etasdk.Network.Request.Priority;
 import com.eTilbudsavis.etasdk.Network.Response.Listener;
+import com.eTilbudsavis.etasdk.Network.Impl.DefaultDebugger;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
@@ -74,16 +74,10 @@ public class SessionManager {
 	public SessionManager(Eta eta) {
 		
 		mEta = eta;
+		
 		JSONObject session = mEta.getSettings().getSessionJson();
-		
-		if (session == null) {
-			mSession = new Session();
-		} else {
-			mSession = Session.fromJSON(session);
-		}
-		
-		// Make sure, that the session isn't null - we really don't want this to be null
-		mSession = (mSession == null ? new Session() : mSession);
+		mSession = Session.fromJSON(session);
+		CidSaver.updateCid(mSession, mEta.getContext());
 		
 	}
 	
@@ -199,6 +193,7 @@ public class SessionManager {
 			}
 			
 			mSession = s;
+			CidSaver.updateCid(mSession, mEta.getContext());
 			mEta.getSettings().setSessionJson(session);
 			
 			// Reset session retry boolean
@@ -271,6 +266,7 @@ public class SessionManager {
 			}
 		}
 		
+		CidSaver.updateCid(mSession, mEta.getContext());
 	}
 	
 	public void onPause() {
@@ -472,6 +468,7 @@ public class SessionManager {
 	public void invalidate() {
 		synchronized (LOCK) {
 			mSession = new Session();
+			CidSaver.updateCid(mSession, mEta.getContext());
 			mEta.getSettings().setSessionJson(mSession.toJSON());
 			clearUser();
 			notifySubscribers();

@@ -81,37 +81,6 @@ public final class Utils {
 		return UUID.randomUUID().toString();
 	}
 	
-    /**
-     * Generate a SHA256 checksum of a string.
-     * 
-     * @param string to SHA256
-     * @return A SHA256 string
-     */
-	public static String generateSHA256(String string) {
-		
-	    MessageDigest digest=null;
-	    String hash = "";
-	    try {
-	        digest = MessageDigest.getInstance("SHA-256");
-	        digest.update(string.getBytes());
-	        byte[] bytes = digest.digest();
-	        
-	        StringBuffer sb = new StringBuffer();
-	        for (int i = 0; i < bytes.length; i++) {
-	            String hex = Integer.toHexString(0xFF & bytes[i]);
-	            if (hex.length() == 1) {
-	                sb.append('0');
-	            }
-	            sb.append(hex);
-	        }
-	        hash = sb.toString();
-
-	    } catch (NoSuchAlgorithmException e1) {
-	        e1.printStackTrace();
-	    }
-	    return hash;
-	}
-	
 	/**
 	 * Builds a url + query string.<br>
 	 * e.g.: https://api.etilbudsavis.dk/v2/catalogs?order_by=popular
