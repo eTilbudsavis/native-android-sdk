@@ -77,7 +77,7 @@ public class SessionManager {
 		
 		JSONObject session = mEta.getSettings().getSessionJson();
 		mSession = Session.fromJSON(session);
-		CidSaver.updateCid(mSession, mEta.getContext());
+		ClientIdStore.updateCid(mSession, mEta.getContext());
 		
 	}
 	
@@ -125,6 +125,7 @@ public class SessionManager {
 			if (mSession.getClientId()!=null) {
 				r.getParameters().put(Api.JsonKey.CLIENT_ID, mSession.getClientId());
 			}
+//			r.setDebugger(new DefaultDebugger());
 			mSessionQueue.add(r);
 			runQueue();
 		}
@@ -193,7 +194,7 @@ public class SessionManager {
 			}
 			
 			mSession = s;
-			CidSaver.updateCid(mSession, mEta.getContext());
+			ClientIdStore.updateCid(mSession, mEta.getContext());
 			mEta.getSettings().setSessionJson(session);
 			
 			// Reset session retry boolean
@@ -266,7 +267,7 @@ public class SessionManager {
 			}
 		}
 		
-		CidSaver.updateCid(mSession, mEta.getContext());
+		ClientIdStore.updateCid(mSession, mEta.getContext());
 	}
 	
 	public void onPause() {
@@ -468,7 +469,7 @@ public class SessionManager {
 	public void invalidate() {
 		synchronized (LOCK) {
 			mSession = new Session();
-			CidSaver.updateCid(mSession, mEta.getContext());
+			ClientIdStore.updateCid(mSession, mEta.getContext());
 			mEta.getSettings().setSessionJson(mSession.toJSON());
 			clearUser();
 			notifySubscribers();
