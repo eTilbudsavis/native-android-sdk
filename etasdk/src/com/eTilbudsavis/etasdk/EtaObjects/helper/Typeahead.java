@@ -23,6 +23,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.Html;
 import android.text.Spanned;
 import android.widget.AutoCompleteTextView;
@@ -32,8 +34,6 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
-import android.os.Parcelable;
-import android.os.Parcel;
 
 /**
  * <p>
@@ -241,6 +241,38 @@ public class Typeahead implements EtaObject<JSONObject>, Serializable, Parcelabl
 			
 		}
 		
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + mLength;
+		result = prime * result + mOffset;
+		result = prime * result
+				+ ((mSubject == null) ? 0 : mSubject.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Typeahead other = (Typeahead) obj;
+		if (mLength != other.mLength)
+			return false;
+		if (mOffset != other.mOffset)
+			return false;
+		if (mSubject == null) {
+			if (other.mSubject != null)
+				return false;
+		} else if (!mSubject.equals(other.mSubject))
+			return false;
+		return true;
 	}
 
 	private Typeahead(Parcel in) {

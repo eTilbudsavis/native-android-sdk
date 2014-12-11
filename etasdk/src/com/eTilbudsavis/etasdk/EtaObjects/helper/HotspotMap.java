@@ -11,6 +11,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.graphics.Color;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
@@ -19,8 +21,6 @@ import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
-import android.os.Parcelable;
-import android.os.Parcel;
 
 public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements EtaObject<JSONArray>, Serializable, Parcelable {
 	
@@ -159,6 +159,28 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements EtaOb
 	
 	public JSONArray toJSON() {
 		return null;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + (mIsNormalized ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		HotspotMap other = (HotspotMap) obj;
+		if (mIsNormalized != other.mIsNormalized)
+			return false;
+		return true;
 	}
 
 	private HotspotMap(Parcel in) {

@@ -7,7 +7,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
 import com.eTilbudsavis.etasdk.ImageLoader.FileNameGenerator;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageDebugger;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
@@ -44,7 +44,7 @@ public class PU {
 				ImageRequest v = null;
 				ImageRequest z = null;
 				
-				for (Page p : c.getPages()) {
+				for (Images i : c.getPages()) {
 					
 					while ((t != null && v != null && z != null) &&
 							(!t.isFinished() || !v.isFinished() || !z.isFinished())) {
@@ -58,9 +58,9 @@ public class PU {
 					count++;
 					
 					// Get thumb
-					t = display(p.getThumb(), ctx);
-					v = display(p.getView(), ctx);
-					z = display(p.getZoom(), ctx);
+					t = display(i.getThumb(), ctx);
+					v = display(i.getView(), ctx);
+					z = display(i.getZoom(), ctx);
 					
 					// Give feedback
 					String s = String.format("%s / %s", count, c.getPageCount());

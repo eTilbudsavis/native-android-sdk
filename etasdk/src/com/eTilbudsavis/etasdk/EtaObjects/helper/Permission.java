@@ -24,11 +24,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import android.os.Parcelable;
-import android.os.Parcel;
 
 public class Permission implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
@@ -98,7 +99,7 @@ public class Permission implements EtaObject<JSONObject>, Serializable, Parcelab
 				o.put(name, jArray);
 			}
 		} catch (JSONException e) {
-			EtaLog.e(TAG, "", e);
+			EtaLog.e(TAG, e.getMessage(), e);
 		}
 		return o;
 	}
@@ -125,6 +126,32 @@ public class Permission implements EtaObject<JSONObject>, Serializable, Parcelab
 		return this;
 	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((mPermissions == null) ? 0 : mPermissions.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Permission other = (Permission) obj;
+		if (mPermissions == null) {
+			if (other.mPermissions != null)
+				return false;
+		} else if (!mPermissions.equals(other.mPermissions))
+			return false;
+		return true;
+	}
+
 	private Permission(Parcel in) {
 		this.mPermissions = (HashMap<String,ArrayList<String>>) in.readSerializable();
 	}

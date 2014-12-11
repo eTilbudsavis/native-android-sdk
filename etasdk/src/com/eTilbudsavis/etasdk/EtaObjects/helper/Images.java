@@ -16,7 +16,10 @@
 package com.eTilbudsavis.etasdk.EtaObjects.helper;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,6 +53,18 @@ public class Images implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	public Images() {
 		
+	}
+	
+	public static List<Images> fromJSON(JSONArray images) {
+		List<Images> list = new ArrayList<Images>();
+		for (int i = 0 ; i < images.length() ; i++) {
+			try {
+				list.add(fromJSON(images.getJSONObject(i)));
+			} catch (JSONException e) {
+				EtaLog.e(TAG, e.getMessage(), e);
+			}
+		}
+		return list;
 	}
 	
 	public static Images fromJSON(JSONObject image) {

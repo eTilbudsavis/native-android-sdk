@@ -20,13 +20,14 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
-import android.os.Parcelable;
-import android.os.Parcel;
 
 public class Size implements EtaObject<JSONObject>, Serializable, Parcelable {
 
@@ -90,11 +91,11 @@ public class Size implements EtaObject<JSONObject>, Serializable, Parcelable {
 		mTo = to;
 		return this;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
 		long temp;
 		temp = Double.doubleToLongBits(mFrom);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
@@ -107,7 +108,7 @@ public class Size implements EtaObject<JSONObject>, Serializable, Parcelable {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;

@@ -7,12 +7,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.graphics.Color;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import android.os.Parcelable;
-import android.os.Parcel;
 
 public class Hotspot implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
@@ -207,6 +207,81 @@ public class Hotspot implements EtaObject<JSONObject>, Serializable, Parcelable 
 		String offer = (mOffer==null?"null":mOffer.getHeading());
 		String text = "hotspot[offer:%s, t:%.2f, r:%.2f, b:%.2f, l:%.2f, absT:%.2f, absR:%.2f, absB:%.2f, absL:%.2f]";
 		return String.format(text, offer, mTop, mRight, mBottom, mLeft, mAbsTop, mAbsRight, mAbsBottom, mAbsLeft);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		long temp;
+		temp = Double.doubleToLongBits(mAbsBottom);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(mAbsLeft);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(mAbsRight);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(mAbsTop);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(mBottom);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + mColor;
+		result = prime * result + (mIsSpanningTwoPages ? 1231 : 1237);
+		temp = Double.doubleToLongBits(mLeft);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((mOffer == null) ? 0 : mOffer.hashCode());
+		result = prime * result + mPage;
+		temp = Double.doubleToLongBits(mRight);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(mTop);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Hotspot other = (Hotspot) obj;
+		if (Double.doubleToLongBits(mAbsBottom) != Double
+				.doubleToLongBits(other.mAbsBottom))
+			return false;
+		if (Double.doubleToLongBits(mAbsLeft) != Double
+				.doubleToLongBits(other.mAbsLeft))
+			return false;
+		if (Double.doubleToLongBits(mAbsRight) != Double
+				.doubleToLongBits(other.mAbsRight))
+			return false;
+		if (Double.doubleToLongBits(mAbsTop) != Double
+				.doubleToLongBits(other.mAbsTop))
+			return false;
+		if (Double.doubleToLongBits(mBottom) != Double
+				.doubleToLongBits(other.mBottom))
+			return false;
+		if (mColor != other.mColor)
+			return false;
+		if (mIsSpanningTwoPages != other.mIsSpanningTwoPages)
+			return false;
+		if (Double.doubleToLongBits(mLeft) != Double
+				.doubleToLongBits(other.mLeft))
+			return false;
+		if (mOffer == null) {
+			if (other.mOffer != null)
+				return false;
+		} else if (!mOffer.equals(other.mOffer))
+			return false;
+		if (mPage != other.mPage)
+			return false;
+		if (Double.doubleToLongBits(mRight) != Double
+				.doubleToLongBits(other.mRight))
+			return false;
+		if (Double.doubleToLongBits(mTop) != Double
+				.doubleToLongBits(other.mTop))
+			return false;
+		return true;
 	}
 
 	private Hotspot(Parcel in) {

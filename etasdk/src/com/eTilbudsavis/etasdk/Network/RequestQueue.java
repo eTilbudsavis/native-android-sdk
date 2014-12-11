@@ -31,7 +31,6 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaLocation;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Log.EventLog;
-import com.eTilbudsavis.etasdk.Network.Impl.DefaultDebugger;
 import com.eTilbudsavis.etasdk.Network.Impl.HandlerDelivery;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Api.Param;

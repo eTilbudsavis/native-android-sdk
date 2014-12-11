@@ -1,7 +1,5 @@
 package com.eTilbudsavis.etasdk.ImageLoader.Impl;
 
-import static android.os.Environment.MEDIA_MOUNTED;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -10,14 +8,12 @@ import java.io.RandomAccessFile;
 import java.util.concurrent.ExecutorService;
 
 import android.content.Context;
-import android.os.Environment;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ImageLoader.FileCache;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.FileUtils;
-import com.eTilbudsavis.etasdk.Utils.PermissionUtils;
 
 public class DefaultFileCache implements FileCache {
 

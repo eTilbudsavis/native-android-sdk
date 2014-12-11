@@ -17,7 +17,7 @@ import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.HotspotMap;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapDisplayer;
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapProcessor;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
@@ -180,16 +180,16 @@ public abstract class PageFragment extends Fragment {
 		return mPages;
 	}
 	
-	protected Page getPage(int page) {
+	protected Images getPage(int page) {
 		// Offset the given page number by one. Real-world to array number
 		return mCallback.getCatalog().getPages().get(page-1);
 	}
 
-	protected Page getFirst() {
+	protected Images getFirst() {
 		return getPage(getFirstNum());
 	}
 
-	protected Page getSecond() {
+	protected Images getSecond() {
 		return getPage(getSecondNum());
 	}
 

@@ -16,7 +16,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.ICatalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.HotspotMap;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
+import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Delivery;
 import com.eTilbudsavis.etasdk.Network.EtaError;
@@ -283,7 +283,7 @@ public abstract class RequestAutoFill<T> {
 			
 			public void onComplete(JSONArray response, EtaError error) {
 				if (response != null) {
-					c.setPages(Page.fromJSON(response));
+					c.setPages(Images.fromJSON(response));
 				} else {
 					EtaLog.d(TAG, error.toJSON().toString());
 				}

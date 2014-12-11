@@ -25,6 +25,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.graphics.pdf.PdfDocument.Page;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -37,7 +38,6 @@ import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.HotspotMap;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Page;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
@@ -83,7 +83,7 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 	private String mPdfUrl;
 	
 	// From separate queries
-	private List<Page> mPages;
+	private List<Images> mPages;
 	private Dealer mDealer;
 	private Store mStore;
 	private HotspotMap mHotspots;
@@ -450,7 +450,7 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 	 * {@link Catalog#setPages(Page) set} manually by the developer. </p>
 	 * @return
 	 */
-	public List<Page> getPages() {
+	public List<Images> getPages() {
 		return mPages;
 	}
 	
@@ -458,7 +458,7 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 	 * Method for setting the {@link Page} associated with this catalog
 	 * @param pages A pages object
 	 */
-	public void setPages(List<Page> pages) {
+	public void setPages(List<Images> pages) {
 		mPages = pages;
 	}
 	
@@ -724,8 +724,8 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 		this.mImages = in.readParcelable(Images.class.getClassLoader());
 		this.mCatrgoryIds = (HashSet<String>) in.readSerializable();
 		this.mPdfUrl = in.readString();
-		this.mPages = new ArrayList<Page>();
-		in.readTypedList(mPages, Page.CREATOR);
+		this.mPages = new ArrayList<Images>();
+		in.readTypedList(mPages, Images.CREATOR);
 		this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
 		this.mStore = in.readParcelable(Store.class.getClassLoader());
 		this.mHotspots = in.readParcelable(HotspotMap.class.getClassLoader());
