@@ -218,7 +218,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(") VALUES (")
 		.append(escape(sl.getId())).append(",")
 		.append(escape(sl.getErn())).append(",")
-		.append(escape(Utils.parseDate(sl.getModified()))).append(",")
+		.append(escape(Utils.dateToString(sl.getModified()))).append(",")
 		.append(escape(sl.getName())).append(",")
 		.append(escape(sl.getAccess())).append(",")
 		.append(escape(sl.getState())).append(",")
@@ -239,7 +239,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		ShoppinglistItem sli = new ShoppinglistItem();
 		sli.setId(c.getString(c.getColumnIndex(ID)));
 		sli.setErn(c.getString(c.getColumnIndex(ERN)));
-		sli.setModified(Utils.parseDate(c.getString(c.getColumnIndex(MODIFIED))));
+		sli.setModified(Utils.stringToDate(c.getString(c.getColumnIndex(MODIFIED))));
 		sli.setDescription(c.getString(c.getColumnIndex(DESCRIPTION)));
 		sli.setCount(c.getInt(c.getColumnIndex(COUNT)));
 		sli.setTick(0 < c.getInt(c.getColumnIndex(TICK)));
@@ -283,7 +283,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		.append(") VALUES (")
 		.append(escape(sli.getId())).append(",")
 		.append(escape(sli.getErn())).append(",")
-		.append(escape(Utils.parseDate(sli.getModified()))).append(",")
+		.append(escape(Utils.dateToString(sli.getModified()))).append(",")
 		.append(escape(sli.getDescription())).append(",")
 		.append(escape(sli.getCount())).append(",")
 		.append(escape(sli.isTicked())).append(",")

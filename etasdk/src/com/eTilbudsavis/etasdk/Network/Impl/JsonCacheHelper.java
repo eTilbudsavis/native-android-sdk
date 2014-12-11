@@ -41,7 +41,7 @@ public class JsonCacheHelper {
     	
 		JSONArray jArray = new JSONArray();
 		// Check if we've previously done this exact call
-		Cache.Item cacheList = c.get(Utils.buildQueryString(r));
+		Cache.Item cacheList = c.get(Utils.requestToUrlAndQueryString(r));
 		if (cacheList != null && cacheList.object instanceof LinkedList<?>) {
 			
 			LinkedList<?> cacheListLinkedList = (LinkedList<?>)cacheList.object;
@@ -160,7 +160,7 @@ public class JsonCacheHelper {
 			return;
 		}
 		
-		r.getCache().put(Utils.buildQueryString(r), new Cache.Item(ernlist, r.getCacheTTL()));
+		r.getCache().put(Utils.requestToUrlAndQueryString(r), new Cache.Item(ernlist, r.getCacheTTL()));
 		
 	}
 	

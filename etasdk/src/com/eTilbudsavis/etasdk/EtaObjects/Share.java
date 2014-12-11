@@ -24,6 +24,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
@@ -31,7 +33,7 @@ import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>, Serializable {
+public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	public static final String TAG = Eta.TAG_PREFIX + Share.class.getSimpleName();
 	
@@ -241,7 +243,7 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 		return 0;
 	}
 	
-	public static Comparator<Share> EmailAscending  = new Comparator<Share>() {
+	public static Comparator<Share> EMAIL_ASCENDING  = new Comparator<Share>() {
 		
 		@SuppressLint("DefaultLocale")
 		public int compare(Share item1, Share item2) {
@@ -254,6 +256,15 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 			
 		}
 		
+	};
+
+	public static Parcelable.Creator<Share> CREATOR = new Parcelable.Creator<Share>(){
+		public Share createFromParcel(Parcel source) {
+			return new Share(source);
+		}
+		public Share[] newArray(int size) {
+			return new Share[size];
+		}
 	};
 
 	@Override
@@ -310,5 +321,27 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 		return true;
 	}
 
+	private Share(Parcel in) {
+		this.mName = in.readString();
+		this.mEmail = in.readString();
+		this.mAccess = in.readString();
+		this.mShoppinglistId = in.readString();
+		this.mAccepted = in.readByte() != 0;
+		this.mAcceptUrl = in.readString();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mName);
+		dest.writeString(this.mEmail);
+		dest.writeString(this.mAccess);
+		dest.writeString(this.mShoppinglistId);
+		dest.writeByte(mAccepted ? (byte) 1 : (byte) 0);
+		dest.writeString(this.mAcceptUrl);
+	}
+    
 }
 

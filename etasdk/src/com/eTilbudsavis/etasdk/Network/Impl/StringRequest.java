@@ -84,7 +84,7 @@ public class StringRequest extends Request<String> {
             string = new String(response.data);
         }
         
-        String url = Utils.buildQueryString(this);
+        String url = Utils.requestToUrlAndQueryString(this);
         Cache.Item c = new Cache.Item(string, getCacheTTL());
 		getCache().put(url, c);
 		
@@ -95,7 +95,7 @@ public class StringRequest extends Request<String> {
 
 	@Override
 	protected Response<String> parseCache(Cache c) {
-		String url = Utils.buildQueryString(this);
+		String url = Utils.requestToUrlAndQueryString(this);
 		Cache.Item ci = c.get(url);
 		if (ci != null && ci.object instanceof String ) {
 			return Response.fromSuccess((String)ci.object, null);

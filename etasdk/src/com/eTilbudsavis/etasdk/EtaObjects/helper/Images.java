@@ -20,13 +20,16 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Images implements EtaObject<JSONObject>, Serializable {
+public class Images implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -35,6 +38,19 @@ public class Images implements EtaObject<JSONObject>, Serializable {
 	private String mView;
 	private String mZoom;
 	private String mThumb;
+
+	public static Parcelable.Creator<Images> CREATOR = new Parcelable.Creator<Images>(){
+		public Images createFromParcel(Parcel source) {
+			return new Images(source);
+		}
+		public Images[] newArray(int size) {
+			return new Images[size];
+		}
+	};
+	
+	public Images() {
+		
+	}
 	
 	public static Images fromJSON(JSONObject image) {
 		Images i = new Images();
@@ -88,18 +104,18 @@ public class Images implements EtaObject<JSONObject>, Serializable {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
 		result = prime * result + ((mThumb == null) ? 0 : mThumb.hashCode());
 		result = prime * result + ((mView == null) ? 0 : mView.hashCode());
 		result = prime * result + ((mZoom == null) ? 0 : mZoom.hashCode());
 		return result;
 	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -122,5 +138,20 @@ public class Images implements EtaObject<JSONObject>, Serializable {
 		return true;
 	}
 
-	
+	private Images(Parcel in) {
+		this.mView = in.readString();
+		this.mZoom = in.readString();
+		this.mThumb = in.readString();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mView);
+		dest.writeString(this.mZoom);
+		dest.writeString(this.mThumb);
+	}
+
 }

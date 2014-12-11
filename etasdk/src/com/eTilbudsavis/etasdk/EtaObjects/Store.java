@@ -22,6 +22,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
@@ -43,7 +46,7 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Store implements Ern<Store>, EtaObject<JSONObject>, IDealer<Store>, Serializable {
+public class Store implements Ern<Store>, EtaObject<JSONObject>, IDealer<Store>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 4105775934027363052L;
 
@@ -65,6 +68,19 @@ public class Store implements Ern<Store>, EtaObject<JSONObject>, IDealer<Store>,
 	private String mContact;
 	
 	private Dealer mDealer;
+
+	public static Parcelable.Creator<Store> CREATOR = new Parcelable.Creator<Store>(){
+		public Store createFromParcel(Parcel source) {
+			return new Store(source);
+		}
+		public Store[] newArray(int size) {
+			return new Store[size];
+		}
+	};
+	
+	public Store() {
+		
+	}
 	
 	public static ArrayList<Store> fromJSON(JSONArray stores) {
 		ArrayList<Store> list = new ArrayList<Store>();
@@ -329,5 +345,40 @@ public class Store implements Ern<Store>, EtaObject<JSONObject>, IDealer<Store>,
 			return false;
 		return true;
 	}
-	
+
+    private Store(Parcel in) {
+		this.mId = in.readString();
+		this.mErn = in.readString();
+		this.mStreet = in.readString();
+		this.mCity = in.readString();
+		this.mZipcode = in.readString();
+		this.mCountry = in.readParcelable(Country.class.getClassLoader());
+		this.mLatitude = in.readDouble();
+		this.mLongitude = in.readDouble();
+		this.mDealerUrl = in.readString();
+		this.mDealerId = in.readString();
+		this.mBranding = in.readParcelable(Branding.class.getClassLoader());
+		this.mContact = in.readString();
+		this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mId);
+		dest.writeString(this.mErn);
+		dest.writeString(this.mStreet);
+		dest.writeString(this.mCity);
+		dest.writeString(this.mZipcode);
+		dest.writeParcelable(this.mCountry, flags);
+		dest.writeDouble(this.mLatitude);
+		dest.writeDouble(this.mLongitude);
+		dest.writeString(this.mDealerUrl);
+		dest.writeString(this.mDealerId);
+		dest.writeParcelable(this.mBranding, flags);
+		dest.writeString(this.mContact);
+		dest.writeParcelable(this.mDealer, flags);
+	}
 }

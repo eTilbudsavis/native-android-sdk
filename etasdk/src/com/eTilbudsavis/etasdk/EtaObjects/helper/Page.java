@@ -28,8 +28,10 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
+import android.os.Parcelable;
+import android.os.Parcel;
 
-public class Page implements EtaObject<JSONObject>, Serializable {
+public class Page implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = -1467489830915012500L;
 
@@ -38,6 +40,19 @@ public class Page implements EtaObject<JSONObject>, Serializable {
 	private String mThumb;
 	private String mView;
 	private String mZoom;
+
+	public static Parcelable.Creator<Page> CREATOR = new Parcelable.Creator<Page>(){
+		public Page createFromParcel(Parcel source) {
+			return new Page(source);
+		}
+		public Page[] newArray(int size) {
+			return new Page[size];
+		}
+	};
+	
+	public Page() {
+		
+	}
 	
 	public static List<Page> fromJSON(JSONArray pages) {
 		List<Page> list = new ArrayList<Page>();
@@ -138,6 +153,22 @@ public class Page implements EtaObject<JSONObject>, Serializable {
 		} else if (!mZoom.equals(other.mZoom))
 			return false;
 		return true;
+	}
+
+	private Page(Parcel in) {
+		this.mThumb = in.readString();
+		this.mView = in.readString();
+		this.mZoom = in.readString();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mThumb);
+		dest.writeString(this.mView);
+		dest.writeString(this.mZoom);
 	}
 	
 	

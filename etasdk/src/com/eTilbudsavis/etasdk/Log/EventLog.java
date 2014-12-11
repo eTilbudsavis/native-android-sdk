@@ -222,7 +222,7 @@ public class EventLog {
 		public JSONObject toJSON(boolean rawTime) {
 			JSONObject o = new JSONObject();
 			try {
-				o.put("timestamp", (rawTime ? time : Utils.parseDate(new Date(time))) );
+				o.put("timestamp", (rawTime ? time : Utils.dateToString(new Date(time))) );
 				o.put("type", type);
 				o.put("token", token);
 				o.put("userid", user);

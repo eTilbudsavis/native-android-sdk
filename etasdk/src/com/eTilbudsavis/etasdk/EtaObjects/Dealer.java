@@ -17,12 +17,15 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.graphics.Color;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
@@ -43,7 +46,7 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable {
+public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -59,6 +62,10 @@ public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable 
 	private String mLogo;
 	private Integer mColor;
 	private Pageflip mPageflip;
+	
+	public Dealer() {
+		
+	}
 	
 	public static ArrayList<Dealer> fromJSON(JSONArray dealers) {
 		ArrayList<Dealer> list = new ArrayList<Dealer>();
@@ -193,6 +200,39 @@ public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable 
 		return mPageflip;
 	}
 
+	/**
+	 * Compare object, that uses {@link Dealer#getName() name} to compare two lists.
+	 */
+	public static Comparator<Dealer> NAME_COMPARATOR  = new Comparator<Dealer>() {
+
+		public int compare(Dealer item1, Dealer item2) {
+
+			if (item1 == null || item2 == null) {
+				return item1 == null ? (item2 == null ? 0 : 1) : -1;
+			} else {
+				String t1 = item1.getName();
+				String t2 = item2.getName();
+				if (t1 == null || t2 == null) {
+					return t1 == null ? (t2 == null ? 0 : 1) : -1;
+				}
+				
+				//ascending order
+				return t1.compareToIgnoreCase(t2);
+			}
+			
+		}
+
+	};
+
+	public static Parcelable.Creator<Dealer> CREATOR = new Parcelable.Creator<Dealer>(){
+		public Dealer createFromParcel(Parcel source) {
+			return new Dealer(source);
+		}
+		public Dealer[] newArray(int size) {
+			return new Dealer[size];
+		}
+	};
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -261,6 +301,32 @@ public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable 
 		} else if (!mWebsite.equals(other.mWebsite))
 			return false;
 		return true;
+	}
+
+	private Dealer(Parcel in) {
+		this.mId = in.readString();
+		this.mErn = in.readString();
+		this.mName = in.readString();
+		this.mUrlName = in.readString();
+		this.mWebsite = in.readString();
+		this.mLogo = in.readString();
+		this.mColor = (Integer)in.readValue(Integer.class.getClassLoader());
+		this.mPageflip = in.readParcelable(Pageflip.class.getClassLoader());
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mId);
+		dest.writeString(this.mErn);
+		dest.writeString(this.mName);
+		dest.writeString(this.mUrlName);
+		dest.writeString(this.mWebsite);
+		dest.writeString(this.mLogo);
+		dest.writeValue(this.mColor);
+		dest.writeParcelable(this.mPageflip, flags);
 	}
 	
 }

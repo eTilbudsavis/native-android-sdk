@@ -25,8 +25,10 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
+import android.os.Parcelable;
+import android.os.Parcel;
 
-public class Pricing implements EtaObject<JSONObject>, Serializable {
+public class Pricing implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -35,6 +37,19 @@ public class Pricing implements EtaObject<JSONObject>, Serializable {
 	private double mPrice = 1.0d;
 	private Double mPrePrice;
 	private String mCurrency;
+
+	public static Parcelable.Creator<Pricing> CREATOR = new Parcelable.Creator<Pricing>(){
+		public Pricing createFromParcel(Parcel source) {
+			return new Pricing(source);
+		}
+		public Pricing[] newArray(int size) {
+			return new Pricing[size];
+		}
+	};
+	
+	public Pricing() {
+		
+	}
 	
 	public static Pricing fromJSON(JSONObject pricing) {
 		Pricing p = new Pricing();
@@ -128,6 +143,22 @@ public class Pricing implements EtaObject<JSONObject>, Serializable {
 				.doubleToLongBits(other.mPrice))
 			return false;
 		return true;
+	}
+
+	private Pricing(Parcel in) {
+		this.mPrice = in.readDouble();
+		this.mPrePrice = (Double)in.readValue(Double.class.getClassLoader());
+		this.mCurrency = in.readString();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeDouble(this.mPrice);
+		dest.writeValue(this.mPrePrice);
+		dest.writeString(this.mCurrency);
 	}
 
 	

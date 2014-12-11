@@ -11,8 +11,10 @@ import android.graphics.Color;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import android.os.Parcelable;
+import android.os.Parcel;
 
-public class Hotspot implements EtaObject<JSONObject>, Serializable {
+public class Hotspot implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 7068341225117028048L;
 
@@ -28,30 +30,43 @@ public class Hotspot implements EtaObject<JSONObject>, Serializable {
 	private boolean mIsSpanningTwoPages = false;
 	
 	/** The top most part of the hotspot, relative to the catalog.dimensions */
-	public double top = Double.MIN_VALUE;
+	public double mTop = Double.MIN_VALUE;
 
 	/** The bottom most part of the hotspot, relative to the catalog.dimensions */
-	public double bottom = Double.MIN_VALUE;
+	public double mBottom = Double.MIN_VALUE;
 
 	/** The left most part of the hotspot, relative to the catalog.dimensions */
-	public double left = Double.MIN_VALUE;
+	public double mLeft = Double.MIN_VALUE;
 
 	/** The top most part of the hotspot, relative to the catalog.dimensions */
-	public double right = Double.MIN_VALUE;
+	public double mRight = Double.MIN_VALUE;
 
 	/** The top most part of the hotspot. This is the absolute value */
-	public double absTop = Double.MIN_VALUE;
+	public double mAbsTop = Double.MIN_VALUE;
 
 	/** The bottom most part of the hotspot. This is the absolute value */
-	public double absBottom = Double.MIN_VALUE;
+	public double mAbsBottom = Double.MIN_VALUE;
 
 	/** The left most part of the hotspot. This is the absolute value */
-	public double absLeft = Double.MIN_VALUE;
+	public double mAbsLeft = Double.MIN_VALUE;
 
 	/** The top most part of the hotspot. This is the absolute value */
-	public double absRight = Double.MIN_VALUE;
+	public double mAbsRight = Double.MIN_VALUE;
 	
 	private int mColor = Color.TRANSPARENT;
+
+	public static Parcelable.Creator<Hotspot> CREATOR = new Parcelable.Creator<Hotspot>(){
+		public Hotspot createFromParcel(Parcel source) {
+			return new Hotspot(source);
+		}
+		public Hotspot[] newArray(int size) {
+			return new Hotspot[size];
+		}
+	};
+	
+	public Hotspot() {
+		
+	}
 	
 	public static Hotspot fromJSON(JSONArray jHotspot) {
 		Hotspot h = new Hotspot();
@@ -78,28 +93,28 @@ public class Hotspot implements EtaObject<JSONObject>, Serializable {
 				double x = Double.valueOf(point.getString(0));
 				double y = Double.valueOf(point.getString(1));
 				
-				if (h.absLeft == Double.MIN_VALUE) {
+				if (h.mAbsLeft == Double.MIN_VALUE) {
 					// Nothing set yet
-					h.absLeft = x;
-				} else if (h.absLeft > x) {
+					h.mAbsLeft = x;
+				} else if (h.mAbsLeft > x) {
 					// switch values
-					h.absRight = h.absLeft;
-					h.absLeft = x;
+					h.mAbsRight = h.mAbsLeft;
+					h.mAbsLeft = x;
 				} else {
 					// no other options left
-					h.absRight = x;
+					h.mAbsRight = x;
 				}
 				
-				if (h.absTop == Double.MIN_VALUE) {
+				if (h.mAbsTop == Double.MIN_VALUE) {
 					// Nothing set yet
-					h.absTop = y;
-				} else if (h.absTop > y) {
+					h.mAbsTop = y;
+				} else if (h.mAbsTop > y) {
 					// switch values
-					h.absBottom = h.absTop;
-					h.absTop = y;
+					h.mAbsBottom = h.mAbsTop;
+					h.mAbsTop = y;
 				} else {
 					// no other options left
-					h.absBottom = y;
+					h.mAbsBottom = y;
 				}
 				
 			} catch (JSONException e) {
@@ -111,10 +126,10 @@ public class Hotspot implements EtaObject<JSONObject>, Serializable {
 	}
 	
 	public void normalize(Dimension d) {
-		top = absTop/d.getHeight();
-		right = absRight/d.getWidth();
-		bottom = absBottom/d.getHeight();
-		left = absLeft/d.getWidth();
+		mTop = mAbsTop/d.getHeight();
+		mRight = mAbsRight/d.getWidth();
+		mBottom = mAbsBottom/d.getHeight();
+		mLeft = mAbsLeft/d.getWidth();
 	}
 	
 	public boolean inBounds(double x, double y, double minArea, boolean landscape) {
@@ -122,7 +137,7 @@ public class Hotspot implements EtaObject<JSONObject>, Serializable {
 	}
 	
 	public boolean inBounds(double x, double y) {
-		return top < y && y < bottom && left < x && x < right;
+		return mTop < y && y < mBottom && mLeft < x && x < mRight;
 	}
 	
 	public boolean isAreaSignificant(boolean landscape) {
@@ -137,16 +152,16 @@ public class Hotspot implements EtaObject<JSONObject>, Serializable {
 	}
 	
 	public double getArea() {
-		return Math.abs(top-bottom) * Math.abs(left-right);
+		return Math.abs(mTop-mBottom) * Math.abs(mLeft-mRight);
 	}
 	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put("left", left);
-			o.put("top", top);
-			o.put("right", right);
-			o.put("bottom", bottom);
+			o.put("left", mLeft);
+			o.put("top", mTop);
+			o.put("right", mRight);
+			o.put("bottom", mBottom);
 			String offer = (mOffer==null?"null":mOffer.getHeading());
 			o.put("offer", offer);
 		} catch (JSONException e) {
@@ -191,7 +206,41 @@ public class Hotspot implements EtaObject<JSONObject>, Serializable {
 	public String toString() {
 		String offer = (mOffer==null?"null":mOffer.getHeading());
 		String text = "hotspot[offer:%s, t:%.2f, r:%.2f, b:%.2f, l:%.2f, absT:%.2f, absR:%.2f, absB:%.2f, absL:%.2f]";
-		return String.format(text, offer, top, right, bottom, left, absTop, absRight, absBottom, absLeft);
+		return String.format(text, offer, mTop, mRight, mBottom, mLeft, mAbsTop, mAbsRight, mAbsBottom, mAbsLeft);
+	}
+
+	private Hotspot(Parcel in) {
+		this.mPage = in.readInt();
+		this.mOffer = in.readParcelable(Offer.class.getClassLoader());
+		this.mIsSpanningTwoPages = in.readByte() != 0;
+		this.mTop = in.readDouble();
+		this.mBottom = in.readDouble();
+		this.mLeft = in.readDouble();
+		this.mRight = in.readDouble();
+		this.mAbsTop = in.readDouble();
+		this.mAbsBottom = in.readDouble();
+		this.mAbsLeft = in.readDouble();
+		this.mAbsRight = in.readDouble();
+		this.mColor = in.readInt();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(this.mPage);
+		dest.writeParcelable(this.mOffer, flags);
+		dest.writeByte(mIsSpanningTwoPages ? (byte) 1 : (byte) 0);
+		dest.writeDouble(this.mTop);
+		dest.writeDouble(this.mBottom);
+		dest.writeDouble(this.mLeft);
+		dest.writeDouble(this.mRight);
+		dest.writeDouble(this.mAbsTop);
+		dest.writeDouble(this.mAbsBottom);
+		dest.writeDouble(this.mAbsLeft);
+		dest.writeDouble(this.mAbsRight);
+		dest.writeInt(this.mColor);
 	}
 	
 }

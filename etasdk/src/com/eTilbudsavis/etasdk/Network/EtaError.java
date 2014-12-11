@@ -82,7 +82,7 @@ public class EtaError extends Exception {
     public static EtaError fromJSON(JSONObject apiError) {
     	
 		try {
-			EtaLog.d(TAG, apiError.toString());
+			
 			// Not using Json-class to parse data, as we'd rather want it to fail
 			String id = apiError.getString(ID);
 			int code = apiError.getInt(CODE);

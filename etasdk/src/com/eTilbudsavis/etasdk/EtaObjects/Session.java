@@ -22,6 +22,9 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Permission;
@@ -30,7 +33,7 @@ import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Session implements EtaObject<JSONObject>, Serializable {
+public class Session implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	public static final String TAG = Eta.TAG_PREFIX + Session.class.getSimpleName();
 	
@@ -43,6 +46,19 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 	private String mProvider;
 	private String mClientId;
 	private String mReference;
+
+	public static Parcelable.Creator<Session> CREATOR = new Parcelable.Creator<Session>(){
+		public Session createFromParcel(Parcel source) {
+			return new Session(source);
+		}
+		public Session[] newArray(int size) {
+			return new Session[size];
+		}
+	};
+	
+	public Session() {
+		
+	}
 	
 	public static Session fromJSON(JSONObject session) {
 		Session s = new Session();
@@ -86,7 +102,7 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 		JSONObject o = new JSONObject();
 		try {
 			o.put(JsonKey.TOKEN, Json.nullCheck(getToken()));
-			o.put(JsonKey.EXPIRES, Json.nullCheck(Utils.parseDate(getExpire())));
+			o.put(JsonKey.EXPIRES, Json.nullCheck(Utils.dateToString(getExpire())));
 			o.put(JsonKey.USER, getUser().getUserId() == User.NO_USER ? JSONObject.NULL : getUser().toJSON());
 			o.put(JsonKey.PERMISSIONS, Json.toJson(getPermission()));
 			o.put(JsonKey.PROVIDER, Json.nullCheck(getProvider()));
@@ -155,7 +171,7 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 	}
 	
 	public Session setExpires(String time) {
-	    mExpires = Utils.parseDate(time);
+	    mExpires = Utils.stringToDate(time);
 	    return this;
 	}
 	
@@ -233,5 +249,30 @@ public class Session implements EtaObject<JSONObject>, Serializable {
 			return false;
 		return true;
 	}
-	
+
+    private Session(Parcel in) {
+		this.mToken = in.readString();
+		long tmpMExpires = in.readLong(); 
+		this.mExpires = tmpMExpires == -1 ? null : new Date(tmpMExpires);
+		this.mUser = in.readParcelable(User.class.getClassLoader());
+		this.mPermission = in.readParcelable(Permission.class.getClassLoader());
+		this.mProvider = in.readString();
+		this.mClientId = in.readString();
+		this.mReference = in.readString();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mToken);
+		dest.writeLong(mExpires != null ? mExpires.getTime() : -1);
+		dest.writeParcelable(this.mUser, flags);
+		dest.writeParcelable(this.mPermission, flags);
+		dest.writeString(this.mProvider);
+		dest.writeString(this.mClientId);
+		dest.writeString(this.mReference);
+	}
+    
 }

@@ -19,8 +19,10 @@ import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
+import android.os.Parcelable;
+import android.os.Parcel;
 
-public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements EtaObject<JSONArray>, Serializable {
+public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements EtaObject<JSONArray>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = -4654824845675092954L;
 
@@ -38,6 +40,19 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements EtaOb
 		Color.YELLOW, 
 		Color.MAGENTA 
 	};
+
+	public static Parcelable.Creator<HotspotMap> CREATOR = new Parcelable.Creator<HotspotMap>(){
+		public HotspotMap createFromParcel(Parcel source) {
+			return new HotspotMap(source);
+		}
+		public HotspotMap[] newArray(int size) {
+			return new HotspotMap[size];
+		}
+	};
+	
+	public HotspotMap() {
+		
+	}
 	
 	public static HotspotMap fromJSON(Dimension d, JSONArray jHotspots) {
 		
@@ -144,6 +159,18 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements EtaOb
 	
 	public JSONArray toJSON() {
 		return null;
+	}
+
+	private HotspotMap(Parcel in) {
+		this.mIsNormalized = in.readByte() != 0;
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeByte(mIsNormalized ? (byte) 1 : (byte) 0);
 	}
 	
 }

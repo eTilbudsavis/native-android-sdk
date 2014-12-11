@@ -20,13 +20,16 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Quantity implements EtaObject<JSONObject>, Serializable {
+public class Quantity implements EtaObject<JSONObject>, Serializable, Parcelable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -35,6 +38,19 @@ public class Quantity implements EtaObject<JSONObject>, Serializable {
 	private Unit mUnit;
 	private Size mSize;
 	private Pieces mPieces;
+
+	public static Parcelable.Creator<Quantity> CREATOR = new Parcelable.Creator<Quantity>(){
+		public Quantity createFromParcel(Parcel source) {
+			return new Quantity(source);
+		}
+		public Quantity[] newArray(int size) {
+			return new Quantity[size];
+		}
+	};
+
+	public Quantity() {
+		
+	}
 	
 	public static Quantity fromJSON(JSONObject quantity) {
 		Quantity q = new Quantity();
@@ -94,7 +110,7 @@ public class Quantity implements EtaObject<JSONObject>, Serializable {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
 		result = prime * result + ((mPieces == null) ? 0 : mPieces.hashCode());
 		result = prime * result + ((mSize == null) ? 0 : mSize.hashCode());
 		result = prime * result + ((mUnit == null) ? 0 : mUnit.hashCode());
@@ -105,7 +121,7 @@ public class Quantity implements EtaObject<JSONObject>, Serializable {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -127,6 +143,21 @@ public class Quantity implements EtaObject<JSONObject>, Serializable {
 			return false;
 		return true;
 	}
-	
+
+	private Quantity(Parcel in) {
+		this.mUnit = in.readParcelable(Unit.class.getClassLoader());
+		this.mSize = in.readParcelable(Size.class.getClassLoader());
+		this.mPieces = in.readParcelable(Pieces.class.getClassLoader());
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeParcelable(this.mUnit, flags);
+		dest.writeParcelable(this.mSize, flags);
+		dest.writeParcelable(this.mPieces, flags);
+	}
 	
 }

@@ -20,6 +20,9 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
@@ -40,7 +43,7 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class User implements Ern<User>, EtaObject<JSONObject>, Serializable {
+public class User implements Ern<User>, EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	public static final String TAG = Eta.TAG_PREFIX + User.class.getSimpleName();
 	
@@ -57,7 +60,16 @@ public class User implements Ern<User>, EtaObject<JSONObject>, Serializable {
 	private String mName;
 	private String mEmail;
 	private Permission mPermissions;
-	
+
+	public static Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>(){
+		public User createFromParcel(Parcel source) {
+			return new User(source);
+		}
+		public User[] newArray(int size) {
+			return new User[size];
+		}
+	};
+
 	/**
 	 * Default constructor
 	 */
@@ -333,5 +345,29 @@ public class User implements Ern<User>, EtaObject<JSONObject>, Serializable {
 			return false;
 		return true;
 	}
+	
+    private User(Parcel in) {
+		this.mId = in.readString();
+		this.mErn = in.readString();
+		this.mGender = in.readString();
+		this.mBirthYear = in.readInt();
+		this.mName = in.readString();
+		this.mEmail = in.readString();
+		this.mPermissions = in.readParcelable(Permission.class.getClassLoader());
+	}
 
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mId);
+		dest.writeString(this.mErn);
+		dest.writeString(this.mGender);
+		dest.writeInt(this.mBirthYear);
+		dest.writeString(this.mName);
+		dest.writeString(this.mEmail);
+		dest.writeParcelable(this.mPermissions, flags);
+	}
+    
 }

@@ -18,11 +18,15 @@ package com.eTilbudsavis.etasdk.EtaObjects;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
@@ -51,7 +55,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Catalog>, IStore<Catalog>, Serializable {
+public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Catalog>, IStore<Catalog>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -75,7 +79,7 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 	private String mStoreUrl;
 	private Dimension mDimension;
 	private Images mImages;
-	private List<String> mCatrgoryIds;
+	private HashSet<String> mCatrgoryIds;
 	private String mPdfUrl;
 	
 	// From separate queries
@@ -83,7 +87,19 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 	private Dealer mDealer;
 	private Store mStore;
 	private HotspotMap mHotspots;
-	private int mOfferOnPage = 1;
+
+	public static Parcelable.Creator<Catalog> CREATOR = new Parcelable.Creator<Catalog>(){
+		public Catalog createFromParcel(Parcel source) {
+			return new Catalog(source);
+		}
+		public Catalog[] newArray(int size) {
+			return new Catalog[size];
+		}
+	};
+
+	public Catalog() {
+		
+	}
 	
 	/**
 	 * Convert a {@link JSONArray} into a {@link List};.
@@ -113,48 +129,40 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 			return catalog;
 		}
 		
-		if (jCatalog.has(JsonKey.STORE_ID) && jCatalog.has(JsonKey.OFFER_COUNT)) {
-			// if we have a full catalog
-			try {
-				catalog.setId(Json.valueOf(jCatalog, JsonKey.ID));
-				catalog.setErn(Json.valueOf(jCatalog, JsonKey.ERN));
-				catalog.setLabel(Json.valueOf(jCatalog, JsonKey.LABEL));
-				catalog.setBackground(Json.valueOf(jCatalog, JsonKey.BACKGROUND));
-				Date runFrom = Utils.parseDate(Json.valueOf(jCatalog, JsonKey.RUN_FROM));
-				catalog.setRunFrom(runFrom);
-				Date runTill = Utils.parseDate(Json.valueOf(jCatalog, JsonKey.RUN_TILL));
-				catalog.setRunTill(runTill);
-				catalog.setPageCount(Json.valueOf(jCatalog, JsonKey.PAGE_COUNT, 0));
-				catalog.setOfferCount(Json.valueOf(jCatalog, JsonKey.OFFER_COUNT, 0));
-				catalog.setBranding(Branding.fromJSON(jCatalog.getJSONObject(JsonKey.BRANDING)));
-				catalog.setDealerId(Json.valueOf(jCatalog, JsonKey.DEALER_ID));
-				catalog.setDealerUrl(Json.valueOf(jCatalog, JsonKey.DEALER_URL));
-				catalog.setStoreId(Json.valueOf(jCatalog, JsonKey.STORE_ID));
-				catalog.setStoreUrl(Json.valueOf(jCatalog, JsonKey.STORE_URL));
-				catalog.setDimension(Dimension.fromJSON(jCatalog.getJSONObject(JsonKey.DIMENSIONS)));
-				catalog.setImages(Images.fromJSON(jCatalog.getJSONObject(JsonKey.IMAGES)));
-				
-				if (jCatalog.has(JsonKey.CATEGORY_IDS)) {
-					JSONArray jCats = jCatalog.getJSONArray(JsonKey.CATEGORY_IDS);
-					List<String> cat = new ArrayList<String>();
-					for (int i = 0 ; i < jCats.length() ; i++) {
-						cat.add(jCats.getString(i));
-					}
-					catalog.setCatrgoryIds(cat);
+		try {
+			catalog.setId(Json.valueOf(jCatalog, JsonKey.ID));
+			catalog.setErn(Json.valueOf(jCatalog, JsonKey.ERN));
+			catalog.setLabel(Json.valueOf(jCatalog, JsonKey.LABEL));
+			catalog.setBackground(Json.valueOf(jCatalog, JsonKey.BACKGROUND));
+			Date runFrom = Utils.stringToDate(Json.valueOf(jCatalog, JsonKey.RUN_FROM));
+			catalog.setRunFrom(runFrom);
+			Date runTill = Utils.stringToDate(Json.valueOf(jCatalog, JsonKey.RUN_TILL));
+			catalog.setRunTill(runTill);
+			catalog.setPageCount(Json.valueOf(jCatalog, JsonKey.PAGE_COUNT, 0));
+			catalog.setOfferCount(Json.valueOf(jCatalog, JsonKey.OFFER_COUNT, 0));
+			catalog.setBranding(Branding.fromJSON(jCatalog.getJSONObject(JsonKey.BRANDING)));
+			catalog.setDealerId(Json.valueOf(jCatalog, JsonKey.DEALER_ID));
+			catalog.setDealerUrl(Json.valueOf(jCatalog, JsonKey.DEALER_URL));
+			catalog.setStoreId(Json.valueOf(jCatalog, JsonKey.STORE_ID));
+			catalog.setStoreUrl(Json.valueOf(jCatalog, JsonKey.STORE_URL));
+			catalog.setDimension(Dimension.fromJSON(jCatalog.getJSONObject(JsonKey.DIMENSIONS)));
+			catalog.setImages(Images.fromJSON(jCatalog.getJSONObject(JsonKey.IMAGES)));
+			
+			if (jCatalog.has(JsonKey.CATEGORY_IDS)) {
+				JSONArray jCats = jCatalog.getJSONArray(JsonKey.CATEGORY_IDS);
+				HashSet<String> cat = new HashSet<String>(jCats.length());
+				for (int i = 0 ; i < jCats.length() ; i++) {
+					cat.add(jCats.getString(i));
 				}
-				
-				catalog.setPdfUrl(Json.valueOf(jCatalog, JsonKey.PDF_URL));
-				
-			} catch (JSONException e) {
-				EtaLog.e(TAG, "", e);
+				catalog.setCatrgoryIds(cat);
 			}
 			
-		} else if (jCatalog.has(JsonKey.ID) && jCatalog.has(JsonKey.PAGE)) {
-			// If it is a partial catalog
-			catalog.setId(Json.valueOf(jCatalog, JsonKey.ID));
-			catalog.setOfferOnPage(Json.valueOf(jCatalog, JsonKey.PAGE, 1));
+			catalog.setPdfUrl(Json.valueOf(jCatalog, JsonKey.PDF_URL));
 			
+		} catch (JSONException e) {
+			EtaLog.e(TAG, "", e);
 		}
+			
 		return catalog;
 	}
 	
@@ -165,8 +173,8 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 			o.put(JsonKey.ERN, Json.nullCheck(getErn()));
 			o.put(JsonKey.LABEL, Json.nullCheck(getLabel()));
 			o.put(JsonKey.BACKGROUND, Json.nullCheck(getBackground()));
-			o.put(JsonKey.RUN_FROM, Json.nullCheck(Utils.parseDate(getRunFrom())));
-			o.put(JsonKey.RUN_TILL, Json.nullCheck(Utils.parseDate(getRunTill())));
+			o.put(JsonKey.RUN_FROM, Json.nullCheck(Utils.dateToString(getRunFrom())));
+			o.put(JsonKey.RUN_TILL, Json.nullCheck(Utils.dateToString(getRunTill())));
 			o.put(JsonKey.PAGE_COUNT, getPageCount());
 			o.put(JsonKey.OFFER_COUNT, getOfferCount());
 			o.put(JsonKey.BRANDING, Json.nullCheck(getBranding().toJSON()));
@@ -455,26 +463,6 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 	}
 	
 	/**
-	 * Set the page number of a specific {@link Offer}.
-	 * <p>This is a use case for e.g. {@link PageflipWebview}</p>
-	 * @param offerOnPage A page number of an offer
-	 * @return This object
-	 */
-	public Catalog setOfferOnPage(Integer offerOnPage) {
-		this.mOfferOnPage = offerOnPage;
-		return this;
-	}
-
-	/**
-	 * Get the page number of a specific {@link Offer}.
-	 * <p>This is a use case for e.g. {@link PageflipWebview}</p>
-	 * @return A page number of a specific {@link Offer} to display
-	 */
-	public int getOfferOnPage() {
-		return mOfferOnPage;
-	}
-
-	/**
 	 * Method for setting the {@link Store} associated with this catalog
 	 * @param store A Store object
 	 */
@@ -538,7 +526,7 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 	 * Get the category id's for this catalog
 	 * @return A list of categories, or null
 	 */
-	public List<String> getCatrgoryIds() {
+	public HashSet<String> getCatrgoryIds() {
 		return mCatrgoryIds;
 	}
 	
@@ -546,7 +534,7 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 	 * Set the list of categories for this catalog.
 	 * @param catrgoryIds A list of categories
 	 */
-	public void setCatrgoryIds(List<String> catrgoryIds) {
+	public void setCatrgoryIds(HashSet<String> catrgoryIds) {
 		mCatrgoryIds = catrgoryIds;
 	}
 	
@@ -590,7 +578,6 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 		result = prime * result + ((mImages == null) ? 0 : mImages.hashCode());
 		result = prime * result + ((mLabel == null) ? 0 : mLabel.hashCode());
 		result = prime * result + mOfferCount;
-		result = prime * result + mOfferOnPage;
 		result = prime * result + mPageCount;
 		result = prime * result + ((mPages == null) ? 0 : mPages.hashCode());
 		result = prime * result + ((mPdfUrl == null) ? 0 : mPdfUrl.hashCode());
@@ -677,8 +664,6 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 			return false;
 		if (mOfferCount != other.mOfferCount)
 			return false;
-		if (mOfferOnPage != other.mOfferOnPage)
-			return false;
 		if (mPageCount != other.mPageCount)
 			return false;
 		if (mPages == null) {
@@ -719,5 +704,59 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 		return true;
 	}
 	
+    private Catalog(Parcel in) {
+		this.mId = in.readString();
+		this.mErn = in.readString();
+		this.mLabel = in.readString();
+		this.mBackground = in.readString();
+		long tmpMRunFrom = in.readLong(); 
+		this.mRunFrom = tmpMRunFrom == -1 ? null : new Date(tmpMRunFrom);
+		long tmpMRunTill = in.readLong(); 
+		this.mRunTill = tmpMRunTill == -1 ? null : new Date(tmpMRunTill);
+		this.mPageCount = in.readInt();
+		this.mOfferCount = in.readInt();
+		this.mBranding = in.readParcelable(Branding.class.getClassLoader());
+		this.mDealerId = in.readString();
+		this.mDealerUrl = in.readString();
+		this.mStoreId = in.readString();
+		this.mStoreUrl = in.readString();
+		this.mDimension = in.readParcelable(Dimension.class.getClassLoader());
+		this.mImages = in.readParcelable(Images.class.getClassLoader());
+		this.mCatrgoryIds = (HashSet<String>) in.readSerializable();
+		this.mPdfUrl = in.readString();
+		this.mPages = new ArrayList<Page>();
+		in.readTypedList(mPages, Page.CREATOR);
+		this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
+		this.mStore = in.readParcelable(Store.class.getClassLoader());
+		this.mHotspots = in.readParcelable(HotspotMap.class.getClassLoader());
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mId);
+		dest.writeString(this.mErn);
+		dest.writeString(this.mLabel);
+		dest.writeString(this.mBackground);
+		dest.writeLong(mRunFrom != null ? mRunFrom.getTime() : -1);
+		dest.writeLong(mRunTill != null ? mRunTill.getTime() : -1);
+		dest.writeInt(this.mPageCount);
+		dest.writeInt(this.mOfferCount);
+		dest.writeParcelable(this.mBranding, flags);
+		dest.writeString(this.mDealerId);
+		dest.writeString(this.mDealerUrl);
+		dest.writeString(this.mStoreId);
+		dest.writeString(this.mStoreUrl);
+		dest.writeParcelable(this.mDimension, flags);
+		dest.writeParcelable(this.mImages, flags);
+		dest.writeSerializable(this.mCatrgoryIds);
+		dest.writeString(this.mPdfUrl);
+		dest.writeTypedList(mPages);
+		dest.writeParcelable(this.mDealer, flags);
+		dest.writeParcelable(this.mStore, flags);
+		dest.writeParcelable(this.mHotspots, flags);
+	}
 	
 }

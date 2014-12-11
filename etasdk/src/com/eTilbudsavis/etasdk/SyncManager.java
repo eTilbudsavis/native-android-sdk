@@ -638,7 +638,7 @@ public class SyncManager {
 						try {
 							String modified = response.getString(Api.JsonKey.MODIFIED);
 							// If local list has been modified before the server list, then sync items
-							if (sl.getModified().before(Utils.parseDate(modified))) {
+							if (sl.getModified().before(Utils.stringToDate(modified))) {
 								// If there are changes, update items (this will update list-state in DB)
 								syncItems(sl, user);
 							} else {
@@ -988,7 +988,7 @@ public class SyncManager {
 		String url = Endpoint.list(user.getUserId(), sl.getId());
 		
 		JsonObjectRequest listReq = new JsonObjectRequest(Method.DELETE, url, null, listListener);
-		listReq.getParameters().put(Param.MODIFIED, Utils.parseDate(sl.getModified()));
+		listReq.getParameters().put(Param.MODIFIED, Utils.dateToString(sl.getModified()));
 		addRequest(listReq);
 		
 	}
@@ -1126,7 +1126,7 @@ public class SyncManager {
 		
 		String url = Endpoint.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
 		JsonObjectRequest itemReq = new JsonObjectRequest(Method.DELETE, url, null, itemListener);
-		itemReq.getParameters().put(Param.MODIFIED, Utils.parseDate(sli.getModified()));
+		itemReq.getParameters().put(Param.MODIFIED, Utils.dateToString(sli.getModified()));
 		addRequest(itemReq);
 		
 	}
@@ -1171,7 +1171,7 @@ public class SyncManager {
 					
 					List<ShoppinglistItem> items = db.getItems(sl, user, true);
 					if (!items.isEmpty()) {
-						Collections.sort(items, ShoppinglistItem.ModifiedDescending);
+						Collections.sort(items, ShoppinglistItem.MODIFIED_DESCENDING);
 						ShoppinglistItem newestItem = items.get(0);
 						sl.setModified(newestItem.getModified());
 						db.editList(sl, user);

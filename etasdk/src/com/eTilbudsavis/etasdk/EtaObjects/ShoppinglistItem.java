@@ -25,6 +25,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
@@ -35,7 +38,7 @@ import com.eTilbudsavis.etasdk.Utils.Api.MetaKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements EtaObject<JSONObject>, Serializable {
+public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements EtaObject<JSONObject>, Serializable, Parcelable {
 
 	public static final String TAG = Eta.TAG_PREFIX + ShoppinglistItem.class.getSimpleName();
 
@@ -131,7 +134,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 		sli.setErn(Json.valueOf(jSli, JsonKey.ERN));
 		sli.setCreator(Json.valueOf(jSli, JsonKey.CREATOR));
 		String date = Json.valueOf(jSli, JsonKey.MODIFIED, Utils.DATE_EPOC);
-		sli.setModified( Utils.parseDate(date) );
+		sli.setModified( Utils.stringToDate(date) );
 		sli.setPreviousId(Json.valueOf(jSli, JsonKey.PREVIOUS_ID, null));
 		
 		// A whole lot of 'saving my ass from exceptions' for meta
@@ -166,7 +169,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 			o.put(JsonKey.DESCRIPTION, Json.nullCheck(getDescription()));
 			o.put(JsonKey.SHOPPINGLIST_ID, Json.nullCheck(getShoppinglistId()));
 			o.put(JsonKey.CREATOR, Json.nullCheck(getCreator()));
-			o.put(JsonKey.MODIFIED, Json.nullCheck(Utils.parseDate(getModified())));
+			o.put(JsonKey.MODIFIED, Json.nullCheck(Utils.dateToString(getModified())));
 			o.put(JsonKey.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
 			o.put(JsonKey.META, Json.nullCheck(getMeta()));
 		} catch (JSONException e) {
@@ -493,14 +496,14 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 	 * to compare two items.
 	 */
 	public int compareTo(ShoppinglistItem another) {
-		return TitleAscending.compare(this, another);
+		return TITLE_ASCENDING.compare(this, another);
 	}
 
 	/**
 	 * Compare object, that uses the {@link ShoppinglistItem#getDescription() description}
 	 * to compare two items.
 	 */
-	public static Comparator<ShoppinglistItem> TitleAscending  = new Comparator<ShoppinglistItem>() {
+	public static Comparator<ShoppinglistItem> TITLE_ASCENDING  = new Comparator<ShoppinglistItem>() {
 
 		public int compare(ShoppinglistItem item1, ShoppinglistItem item2) {
 			
@@ -525,7 +528,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 	 * Compare object, that uses {@link ShoppinglistItem#getModified() modified}
 	 * to compare two items.
 	 */
-	public static Comparator<ShoppinglistItem> ModifiedDescending  = new Comparator<ShoppinglistItem>() {
+	public static Comparator<ShoppinglistItem> MODIFIED_DESCENDING  = new Comparator<ShoppinglistItem>() {
 
 		public int compare(ShoppinglistItem item1, ShoppinglistItem item2) {
 			
@@ -544,6 +547,15 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 			
 		}
 
+	};
+
+	public static Parcelable.Creator<ShoppinglistItem> CREATOR = new Parcelable.Creator<ShoppinglistItem>(){
+		public ShoppinglistItem createFromParcel(Parcel source) {
+			return new ShoppinglistItem(source);
+		}
+		public ShoppinglistItem[] newArray(int size) {
+			return new ShoppinglistItem[size];
+		}
 	};
 	
 	@Override
@@ -647,4 +659,41 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 		return true;
 	}
 
+    private ShoppinglistItem(Parcel in) {
+		this.mId = in.readString();
+		this.mErn = in.readString();
+		this.mTick = in.readByte() != 0;
+		this.mOfferId = in.readString();
+		this.mCount = in.readInt();
+		this.mDescription = in.readString();
+		this.mCreator = in.readString();
+		long tmpMModified = in.readLong(); 
+		this.mModified = tmpMModified == -1 ? null : new Date(tmpMModified);
+		this.mOffer = in.readParcelable(Offer.class.getClassLoader());
+		this.mShoppinglistId = in.readString();
+		this.mPrevId = in.readString();
+		this.mMeta = in.readString();
+		this.mUserId = in.readInt();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mId);
+		dest.writeString(this.mErn);
+		dest.writeByte(mTick ? (byte) 1 : (byte) 0);
+		dest.writeString(this.mOfferId);
+		dest.writeInt(this.mCount);
+		dest.writeString(this.mDescription);
+		dest.writeString(this.mCreator);
+		dest.writeLong(mModified != null ? mModified.getTime() : -1);
+		dest.writeParcelable(this.mOffer, flags);
+		dest.writeString(this.mShoppinglistId);
+		dest.writeString(this.mPrevId);
+		dest.writeString(this.mMeta);
+		dest.writeInt(this.mUserId);
+	}
+    
 }

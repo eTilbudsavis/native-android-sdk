@@ -71,7 +71,7 @@ public class PrettyPrint {
 			title = title.substring(0, 8);
 		}
 		String resp = "item[%-8s] prev[%s] id[%s] modified[%s]";
-		resp = String.format(resp, title, prev, id, Utils.parseDate(sli.getModified()));
+		resp = String.format(resp, title, prev, id, Utils.dateToString(sli.getModified()));
 		return resp;
 	}
 	

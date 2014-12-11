@@ -120,7 +120,8 @@ public final class Api {
 		public static final String LOCATIONS = "locations";
 		public static final String CLIENT_ID = "client_id";
 		public static final String REFERENCE = "reference";
-		
+		public static final String SUBSCRIBED = "subscribed";
+
 	}
 
 	/**
@@ -406,7 +407,9 @@ public final class Api {
 		public static final String STORE_ID = "/v2/stores/";
 		public static final String STORE_SEARCH = "/v2/stores/search";
 		public static final String STORE_QUICK_SEARCH = "/v2/stores/quicksearch";
-
+		
+		public static final String FAVORITES_DEALERS = "/v2/favorites/dealers/";
+		
 		public static final String SESSIONS = "/v2/sessions";
 
 		public static final String USER = "/v2/users";
@@ -416,7 +419,9 @@ public final class Api {
 		public static final String CATEGORIES	= "/v2/categories";
 
 		public static final String COUNTRIES = "/v2/countries";
-
+		
+		public static final String PUSH_PAYLOAD_ID = "/v2/push/payloads/";
+		
 		/**
 		 * Get the current host to use. This can be changed by editing Endpoint.API_HOST_PREFIX.
 		 * https://{prefix}.etilbudsavis.dk
@@ -526,6 +531,11 @@ public final class Api {
 		/** /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified */
 		public static String listitemModifiedById(int userId, String listId, String itemId) {
 			return String.format("/v2/users/%s/shoppinglists/%s/items/%s/modified", userId, listId, itemId);
+		}
+
+		/** /v2/push/payloads/{payload_id} */
+		public static String pushPayload(int payloadId) {
+			return String.format("/v2/push/payloads/%s", payloadId);
 		}
 
 	}

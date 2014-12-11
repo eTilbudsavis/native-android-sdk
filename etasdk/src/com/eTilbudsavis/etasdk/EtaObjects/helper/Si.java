@@ -25,8 +25,10 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
+import android.os.Parcelable;
+import android.os.Parcel;
 
-public class Si implements EtaObject<JSONObject>, Serializable {
+public class Si implements EtaObject<JSONObject>, Serializable, Parcelable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -34,6 +36,19 @@ public class Si implements EtaObject<JSONObject>, Serializable {
 	
 	private String mSymbol;
 	private double mFactor = 1.0d;
+
+	public static Parcelable.Creator<Si> CREATOR = new Parcelable.Creator<Si>(){
+		public Si createFromParcel(Parcel source) {
+			return new Si(source);
+		}
+		public Si[] newArray(int size) {
+			return new Si[size];
+		}
+	};
+	
+	public Si() {
+		
+	}
 	
 	public static Si fromJSON(JSONObject si) {
 		Si s = new Si();
@@ -103,6 +118,20 @@ public class Si implements EtaObject<JSONObject>, Serializable {
 		} else if (!mSymbol.equals(other.mSymbol))
 			return false;
 		return true;
+	}
+
+	private Si(Parcel in) {
+		this.mSymbol = in.readString();
+		this.mFactor = in.readDouble();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mSymbol);
+		dest.writeDouble(this.mFactor);
 	}
 	
 	

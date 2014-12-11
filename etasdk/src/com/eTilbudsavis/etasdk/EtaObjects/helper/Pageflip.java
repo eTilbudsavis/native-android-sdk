@@ -27,8 +27,10 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
+import android.os.Parcelable;
+import android.os.Parcel;
 
-public class Pageflip implements EtaObject<JSONObject>, Serializable {
+public class Pageflip implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -36,8 +38,18 @@ public class Pageflip implements EtaObject<JSONObject>, Serializable {
 	
 	private String mLogo;
 	private int mColor = 0;
+
+	public static Parcelable.Creator<Pageflip> CREATOR = new Parcelable.Creator<Pageflip>(){
+		public Pageflip createFromParcel(Parcel source) {
+			return new Pageflip(source);
+		}
+		public Pageflip[] newArray(int size) {
+			return new Pageflip[size];
+		}
+	};
 	
 	public Pageflip() {
+		
 	}
 	
 	public Pageflip(int color) {
@@ -116,6 +128,20 @@ public class Pageflip implements EtaObject<JSONObject>, Serializable {
 		} else if (!mLogo.equals(other.mLogo))
 			return false;
 		return true;
+	}
+
+	private Pageflip(Parcel in) {
+		this.mLogo = in.readString();
+		this.mColor = in.readInt();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mLogo);
+		dest.writeInt(this.mColor);
 	}
 	
 	

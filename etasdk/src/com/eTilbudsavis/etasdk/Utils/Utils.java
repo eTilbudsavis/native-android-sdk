@@ -9,8 +9,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.nio.charset.IllegalCharsetNameException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,6 +63,10 @@ public final class Utils {
 	public static final String DATE_EPOC = "1970-01-01T00:00:00+0000";
 
 	public static final String APP_VERSION_FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([+-][0-9A-Za-z-.]*)?";
+
+	public static final String xAPP_VERSION_FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([-]([0-9A-Za-z-.]+)*)?";
+	
+	//           \d+\.\d+\.\d+(\-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?
 	
 	/** Single instance of SimpleDateFormat to save time and memory */
 	private static SimpleDateFormat mSdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
@@ -87,14 +90,21 @@ public final class Utils {
 	 * @param r to build from
 	 * @return
 	 */
-	public static String buildQueryString(Request<?> r) {
-		return r.getParameters().isEmpty() ? r.getUrl() : r.getUrl() + "?" + buildQueryString(r.getParameters(), r.getParamsEncoding());
+	public static String requestToUrlAndQueryString(Request<?> r) {
+		if (r==null || r.getUrl()==null) {
+			return null;
+		}
+		if (r.getParameters() == null || r.getParameters().isEmpty()) {
+			return r.getUrl();
+		}
+		return r.getUrl() + "?" + mapToQueryString(r.getParameters(), r.getParamsEncoding());
 	}
 
 	/**
 	 * Returns a string of parameters, ordered alfabetically (for better cache performance)
 	 * @param apiParams to convert into query parameters
 	 * @return a string of parameters
+	 * @deprecated Method is depricated, refer to {@link Utils#mapToQueryString(Map, String)} instead.
 	 */
 	public static String buildQueryString(Bundle apiParams, String encoding) {
 		StringBuilder sb = new StringBuilder();
@@ -118,13 +128,16 @@ public final class Utils {
 		
 		return query;
 	}
-
+	
 	/**
 	 * Returns a string of parameters, ordered alfabetically (for better cache performance)
 	 * @param apiParams to convert into query parameters
 	 * @return a string of parameters
 	 */
-	public static String buildQueryString(Map<String, String> apiParams, String encoding) {
+	public static String mapToQueryString(Map<String, String> apiParams, String encoding) {
+		if (apiParams==null) {
+			return "";
+		}
 		StringBuilder sb = new StringBuilder();
 		LinkedList<String> keys = new LinkedList<String>(apiParams.keySet());
 		Collections.sort(keys);
@@ -190,40 +203,11 @@ public final class Utils {
 		try {
 			value = URLEncoder.encode(value, encoding);
 		} catch (UnsupportedEncodingException e) {
-			EtaLog.e(TAG, null, e);
+			value = URLEncoder.encode(value);
+		} catch (IllegalCharsetNameException e) {
 			value = URLEncoder.encode(value);
 		}
 		return value;
-	}
-	
-	/**
-	 * Builds the block of JavaScript parameters for injecting into a WebView.
-	 *
-	 * @param data The Map to process
-	 * @return A String in JavaScript format
-	 */
-	@SuppressWarnings("unchecked")
-	public static String mapToJavaScript(Map<String, Object> data) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("{ ");
-		boolean firstTime = true;
-		for (String s : data.keySet()) {
-			if (firstTime) {
-				firstTime = false;
-			} else {
-				sb.append(", ");
-			}
-			sb.append(s);
-			if (data.get(s) instanceof Map<?, ?>) {
-				sb.append(": ");
-				sb.append( mapToJavaScript( (Map<String, Object>)data.get(s) ) );
-			} else {
-				sb.append(": '");
-				sb.append(data.get(s).toString());
-				sb.append("'");
-			}
-		}
-		return sb.append(" }").toString();
 	}
 	
 	/**
@@ -233,7 +217,7 @@ public final class Utils {
 	 * @return
 	 */
 	public static boolean isBirthyearValid(Integer birthyear) {
-		return birthyear > 1900 ? (birthyear < 2013) : false ;
+		return birthyear >= 1900 ? (birthyear <= 2013) : false ;
 	}
 	
 	/**
@@ -253,8 +237,11 @@ public final class Utils {
 	 * @return
 	 */
 	public static boolean isGenderValid(String gender) {
-		gender = gender.toLowerCase();
-		return (gender.equals("male") || gender.equals("female") );
+		if (gender==null) {
+			return false;
+		}
+		String g = gender.toLowerCase().trim();
+		return (g.equals("male") || g.equals("female") );
 	}
 	
 	/**
@@ -262,13 +249,12 @@ public final class Utils {
 	 * @param date to convert
 	 * @return a Date object
 	 */
-	public static Date parseDate(String date) {
+	public static Date stringToDate(String date) {
 		synchronized (mSdf) {
 			try {
 				return mSdf.parse(date);
 			} catch (ParseException e) {
-				EtaLog.e(TAG, null, e);
-				return new Date(1000);
+				return new Date(0);
 			}
 		}
 	}
@@ -279,12 +265,12 @@ public final class Utils {
 	 * @param date to convert
 	 * @return a string
 	 */
-	public static String parseDate(Date date) {
+	public static String dateToString(Date date) {
 		synchronized (mSdf) {
 			try {
 				return mSdf.format(date);
 			} catch (NullPointerException e) {
-				return null;
+				return DATE_EPOC;
 			}
 		}
 	}
@@ -304,6 +290,9 @@ public final class Utils {
 	 * @return true, if the version matched the regex
 	 */
 	public static boolean validVersion(String version) {
+		if (version == null) {
+			return false;
+		}
 	    return Pattern.compile(APP_VERSION_FORMAT).matcher(version).matches();
 	}
 	

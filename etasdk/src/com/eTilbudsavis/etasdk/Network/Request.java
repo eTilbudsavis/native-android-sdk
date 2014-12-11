@@ -598,7 +598,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 */
 	@Override
 	public String toString() {
-		return mMethod.toString() + ": " + Utils.buildQueryString(this);
+		return mMethod.toString() + ": " + Utils.requestToUrlAndQueryString(this);
 	}
 	
 }

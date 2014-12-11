@@ -27,8 +27,10 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
+import android.os.Parcelable;
+import android.os.Parcel;
 
-public class Branding implements EtaObject<JSONObject>, Serializable {
+public class Branding implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -41,6 +43,19 @@ public class Branding implements EtaObject<JSONObject>, Serializable {
 	private Integer mLogoBackground;
 	private Integer mColor;
 	private Pageflip mPageflip;
+
+	public static Parcelable.Creator<Branding> CREATOR = new Parcelable.Creator<Branding>(){
+		public Branding createFromParcel(Parcel source) {
+			return new Branding(source);
+		}
+		public Branding[] newArray(int size) {
+			return new Branding[size];
+		}
+	};
+	
+	public Branding() {
+		
+	}
 	
 	public static Branding fromJSON(JSONObject branding) {
 		Branding b = new Branding();
@@ -206,6 +221,30 @@ public class Branding implements EtaObject<JSONObject>, Serializable {
 		} else if (!mWebsite.equals(other.mWebsite))
 			return false;
 		return true;
+	}
+
+	private Branding(Parcel in) {
+		this.mName = in.readString();
+		this.mUrlName = in.readString();
+		this.mWebsite = in.readString();
+		this.mLogo = in.readString();
+		this.mLogoBackground = (Integer)in.readValue(Integer.class.getClassLoader());
+		this.mColor = (Integer)in.readValue(Integer.class.getClassLoader());
+		this.mPageflip = in.readParcelable(Pageflip.class.getClassLoader());
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mName);
+		dest.writeString(this.mUrlName);
+		dest.writeString(this.mWebsite);
+		dest.writeString(this.mLogo);
+		dest.writeValue(this.mLogoBackground);
+		dest.writeValue(this.mColor);
+		dest.writeParcelable(this.mPageflip, flags);
 	}
 	
 	

@@ -83,8 +83,18 @@ public class Offer implements Ern<Offer>, EtaObject<JSONObject>, ICatalog<Offer>
 	private Catalog mCatalog;
 	private Dealer mDealer;
 	private Store mStore;
-	
+
+	public static Parcelable.Creator<Offer> CREATOR = new Parcelable.Creator<Offer>(){
+		public Offer createFromParcel(Parcel source) {
+			return new Offer(source);
+		}
+		public Offer[] newArray(int size) {
+			return new Offer[size];
+		}
+	};
+
 	public Offer() {
+		
 	}
 	
 	/**
@@ -99,7 +109,7 @@ public class Offer implements Ern<Offer>, EtaObject<JSONObject>, ICatalog<Offer>
 				list.add(Offer.fromJSON((JSONObject) offers.get(i)));
 			}
 		} catch (JSONException e) {
-			EtaLog.e(TAG, "", e);
+			EtaLog.e(TAG, e.getMessage(), e);
 		}
 		return list;
 	}
@@ -123,9 +133,9 @@ public class Offer implements Ern<Offer>, EtaObject<JSONObject>, ICatalog<Offer>
 			offer.setHeading(Json.valueOf(jOffer, JsonKey.HEADING));
 			offer.setPricing(Pricing.fromJSON(jOffer.getJSONObject(JsonKey.PRICING)));
 			offer.setQuantity(Quantity.fromJSON(jOffer.getJSONObject(JsonKey.QUANTITY)));
-			Date runFrom = Utils.parseDate(Json.valueOf(jOffer, JsonKey.RUN_FROM));
+			Date runFrom = Utils.stringToDate(Json.valueOf(jOffer, JsonKey.RUN_FROM));
 			offer.setRunFrom(runFrom);
-			Date runTill = Utils.parseDate(Json.valueOf(jOffer, JsonKey.RUN_TILL));
+			Date runTill = Utils.stringToDate(Json.valueOf(jOffer, JsonKey.RUN_TILL));
 			offer.setRunTill(runTill);
 			
 			// TODO: What about the publish key, found in hotspots?
@@ -163,8 +173,8 @@ public class Offer implements Ern<Offer>, EtaObject<JSONObject>, ICatalog<Offer>
 			o.put(JsonKey.QUANTITY, Json.toJson(getQuantity()));
 			o.put(JsonKey.IMAGES, Json.toJson(getImages()));
 			o.put(JsonKey.LINKS, Json.toJson(getLinks()));
-			o.put(JsonKey.RUN_FROM, Json.nullCheck(Utils.parseDate(getRunFrom())));
-			o.put(JsonKey.RUN_TILL, Json.nullCheck(Utils.parseDate(getRunTill())));
+			o.put(JsonKey.RUN_FROM, Json.nullCheck(Utils.dateToString(getRunFrom())));
+			o.put(JsonKey.RUN_TILL, Json.nullCheck(Utils.dateToString(getRunTill())));
 			o.put(JsonKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
 			o.put(JsonKey.DEALER_ID, Json.nullCheck(getDealerId()));
 			o.put(JsonKey.STORE_URL, Json.nullCheck(getStoreUrl()));
@@ -666,8 +676,9 @@ public class Offer implements Ern<Offer>, EtaObject<JSONObject>, ICatalog<Offer>
 		if (mId == null) {
 			if (other.mId != null)
 				return false;
-		} else if (!mId.equals(other.mId))
+		} else if (!mId.equals(other.mId)) {
 			return false;
+		}
 		if (mImages == null) {
 			if (other.mImages != null)
 				return false;
@@ -716,64 +727,56 @@ public class Offer implements Ern<Offer>, EtaObject<JSONObject>, ICatalog<Offer>
 		return true;
 	}
 
-	public int describeContents() {
-		return 0;
+	private Offer(Parcel in) {
+		this.mId = in.readString();
+		this.mErn = in.readString();
+		this.mHeading = in.readString();
+		this.mDescription = in.readString();
+		this.mCatalogPage = in.readInt();
+		this.mPricing = in.readParcelable(Pricing.class.getClassLoader());
+		this.mQuantity = in.readParcelable(Quantity.class.getClassLoader());
+		this.mImages = in.readParcelable(Images.class.getClassLoader());
+		this.mLinks = in.readParcelable(Links.class.getClassLoader());
+		long tmpMRunFrom = in.readLong(); 
+		this.mRunFrom = tmpMRunFrom == -1 ? null : new Date(tmpMRunFrom);
+		long tmpMRunTill = in.readLong(); 
+		this.mRunTill = tmpMRunTill == -1 ? null : new Date(tmpMRunTill);
+		this.mDealerUrl = in.readString();
+		this.mDealerId = in.readString();
+		this.mStoreUrl = in.readString();
+		this.mStoreId = in.readString();
+		this.mCatalogUrl = in.readString();
+		this.mCatalogId = in.readString();
+		this.mCatalog = in.readParcelable(Catalog.class.getClassLoader());
+		this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
+		this.mStore = in.readParcelable(Store.class.getClassLoader());
 	}
-	
+
+	public int describeContents() { 
+		return 0; 
+	}
+
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(mId);
-		dest.writeString(mErn);
-		dest.writeString(mHeading);
-		dest.writeString(mDescription);
-		dest.writeInt(mCatalogPage);
-		dest.writeValue(mPricing);
-		dest.writeValue(mQuantity);
-		dest.writeValue(mImages);
-		dest.writeValue(mLinks);
-		dest.writeValue(mRunFrom);
-		dest.writeValue(mRunTill);
-		dest.writeString(mDealerUrl);
-		dest.writeString(mDealerId);
-		dest.writeString(mStoreUrl);
-		dest.writeString(mStoreId);
-		dest.writeString(mCatalogUrl);
-		dest.writeString(mCatalogId);
-		dest.writeValue(mCatalog);
-		dest.writeValue(mDealer);
-		dest.writeValue(mStore);
+		dest.writeString(this.mId);
+		dest.writeString(this.mErn);
+		dest.writeString(this.mHeading);
+		dest.writeString(this.mDescription);
+		dest.writeInt(this.mCatalogPage);
+		dest.writeParcelable(this.mPricing, flags);
+		dest.writeParcelable(this.mQuantity, flags);
+		dest.writeParcelable(this.mImages, flags);
+		dest.writeParcelable(this.mLinks, flags);
+		dest.writeLong(mRunFrom != null ? mRunFrom.getTime() : -1);
+		dest.writeLong(mRunTill != null ? mRunTill.getTime() : -1);
+		dest.writeString(this.mDealerUrl);
+		dest.writeString(this.mDealerId);
+		dest.writeString(this.mStoreUrl);
+		dest.writeString(this.mStoreId);
+		dest.writeString(this.mCatalogUrl);
+		dest.writeString(this.mCatalogId);
+		dest.writeParcelable(this.mCatalog, flags);
+		dest.writeParcelable(this.mDealer, flags);
+		dest.writeParcelable(this.mStore, flags);
 	}
-	
-    private Offer(Parcel in) {
-    	mId = in.readString();
-    	mErn = in.readString();
-    	mHeading = in.readString();
-		mDescription = in.readString();
-		mCatalogPage = in.readInt();
-		mPricing = (Pricing) in.readValue(Pricing.class.getClassLoader());
-		mQuantity = (Quantity)in.readValue(Quantity.class.getClassLoader());
-		mImages = (Images)in.readValue(Images.class.getClassLoader());
-		mLinks = (Links)in.readValue(Links.class.getClassLoader());
-		mRunFrom = (Date)in.readValue(Date.class.getClassLoader());
-		mRunTill = (Date)in.readValue(Date.class.getClassLoader());
-		mDealerUrl = in.readString();
-		mDealerId = in.readString();
-		mStoreUrl = in.readString();
-		mStoreId = in.readString();
-		mCatalogUrl = in.readString();
-		mCatalogId = in.readString();
-		mCatalog = (Catalog)in.readValue(Catalog.class.getClassLoader());
-		mDealer = (Dealer)in.readValue(Dealer.class.getClassLoader());
-		mStore = (Store)in.readValue(Store.class.getClassLoader());
-    }
-
-    public static final Parcelable.Creator<Offer> CREATOR = new Parcelable.Creator<Offer>() {
-        public Offer createFromParcel(Parcel in) {
-            return new Offer(in);
-        }
-
-        public Offer[] newArray(int size) {
-            return new Offer[size];
-        }
-    };
     
 }

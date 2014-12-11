@@ -25,24 +25,39 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
+import android.os.Parcelable;
+import android.os.Parcel;
 
-public class Dimension implements EtaObject<JSONObject>, Serializable {
+public class Dimension implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = Eta.TAG_PREFIX + Dimension.class.getSimpleName();
 	
-	public static final double DEF_VALUE = -1d;
+	public static final double DEF_DIMENSION = -1d;
 	
-	private double mWidth = DEF_VALUE;
-	private double mHeight = DEF_VALUE;
+	private double mWidth = DEF_DIMENSION;
+	private double mHeight = DEF_DIMENSION;
+
+	public static Parcelable.Creator<Dimension> CREATOR = new Parcelable.Creator<Dimension>(){
+		public Dimension createFromParcel(Parcel source) {
+			return new Dimension(source);
+		}
+		public Dimension[] newArray(int size) {
+			return new Dimension[size];
+		}
+	};
+	
+	public Dimension() {
+		
+	}
 	
 	public static Dimension fromJSON(JSONObject dimension) {
 		Dimension d = new Dimension();
 		if (dimension == null) return d;
 		
-		d.setWidth(Json.valueOf(dimension, JsonKey.WIDTH, DEF_VALUE));
-		d.setHeight(Json.valueOf(dimension, JsonKey.HEIGHT, DEF_VALUE));
+		d.setWidth(Json.valueOf(dimension, JsonKey.WIDTH, DEF_DIMENSION));
+		d.setHeight(Json.valueOf(dimension, JsonKey.HEIGHT, DEF_DIMENSION));
 		
 		return d;
 	}
@@ -77,7 +92,7 @@ public class Dimension implements EtaObject<JSONObject>, Serializable {
 	}
 	
 	public boolean isSet() {
-		return mWidth>DEF_VALUE && mHeight>DEF_VALUE;
+		return mWidth>DEF_DIMENSION && mHeight>DEF_DIMENSION;
 	}
 	
 	@Override
@@ -108,6 +123,20 @@ public class Dimension implements EtaObject<JSONObject>, Serializable {
 				.doubleToLongBits(other.mWidth))
 			return false;
 		return true;
+	}
+
+	private Dimension(Parcel in) {
+		this.mWidth = in.readDouble();
+		this.mHeight = in.readDouble();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeDouble(this.mWidth);
+		dest.writeDouble(this.mHeight);
 	}
 	
 	

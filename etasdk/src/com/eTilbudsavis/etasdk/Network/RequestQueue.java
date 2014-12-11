@@ -308,12 +308,12 @@ public class RequestQueue {
     	
 		try {
 			log.put("method", r.getMethod().toString());
-			log.put("url", Utils.buildQueryString(r));
+			log.put("url", Utils.requestToUrlAndQueryString(r));
 			log.put(HTTP.CONTENT_TYPE, r.getBodyContentType());
 			log.put("headers", new JSONObject(r.getHeaders()));
-			log.put("time", Utils.parseDate(new Date()));
+			log.put("time", Utils.dateToString(new Date()));
 		} catch (JSONException e) {
-			EtaLog.e(TAG, "", e);
+			EtaLog.e(TAG, e.getMessage(), e);
 		}
 		
     }

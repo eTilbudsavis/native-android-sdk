@@ -32,6 +32,8 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
+import android.os.Parcelable;
+import android.os.Parcel;
 
 /**
  * <p>
@@ -46,7 +48,7 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Typeahead implements EtaObject<JSONObject>, Serializable {
+public class Typeahead implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -55,6 +57,15 @@ public class Typeahead implements EtaObject<JSONObject>, Serializable {
 	private int mLength = 0;
 	private int mOffset = 0;
 	private String mSubject;
+
+	public static Parcelable.Creator<Typeahead> CREATOR = new Parcelable.Creator<Typeahead>(){
+		public Typeahead createFromParcel(Parcel source) {
+			return new Typeahead(source);
+		}
+		public Typeahead[] newArray(int size) {
+			return new Typeahead[size];
+		}
+	};
 
 	/**
 	 * Default constructor for Typeahead.
@@ -230,6 +241,22 @@ public class Typeahead implements EtaObject<JSONObject>, Serializable {
 			
 		}
 		
+	}
+
+	private Typeahead(Parcel in) {
+		this.mLength = in.readInt();
+		this.mOffset = in.readInt();
+		this.mSubject = in.readString();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(this.mLength);
+		dest.writeInt(this.mOffset);
+		dest.writeString(this.mSubject);
 	}
 	
 }

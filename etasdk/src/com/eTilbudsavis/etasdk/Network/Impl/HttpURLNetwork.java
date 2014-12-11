@@ -45,7 +45,7 @@ public class HttpURLNetwork implements HttpStack {
 	
 	public HttpResponse performNetworking(Request<?> request) throws ClientProtocolException, IOException {
 		
-		URL url = new URL(Utils.buildQueryString(request));
+		URL url = new URL(Utils.requestToUrlAndQueryString(request));
 		HttpURLConnection connection = openConnection(url, request);
 		setHeaders(request, connection);
 		setRequestMethod(connection, request);

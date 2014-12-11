@@ -24,6 +24,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
@@ -32,7 +34,7 @@ import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Country implements Ern<Country>, EtaObject<JSONObject>, Serializable {
+public class Country implements Ern<Country>, EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	public static final String TAG = Eta.TAG_PREFIX + Country.class.getSimpleName();
 
@@ -43,6 +45,19 @@ public class Country implements Ern<Country>, EtaObject<JSONObject>, Serializabl
 	private String mId;
 	private String mErn;
 	private String mUnsubscribeUrl;
+
+	public static Parcelable.Creator<Country> CREATOR = new Parcelable.Creator<Country>(){
+		public Country createFromParcel(Parcel source) {
+			return new Country(source);
+		}
+		public Country[] newArray(int size) {
+			return new Country[size];
+		}
+	};
+
+	public Country() {
+		
+	}
 	
 	/**
 	 * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
@@ -146,5 +161,21 @@ public class Country implements Ern<Country>, EtaObject<JSONObject>, Serializabl
 	public String getUnsubscribePrintUrl() {
 		return mUnsubscribeUrl;
 	}
-	
+
+	private Country(Parcel in) {
+		this.mId = in.readString();
+		this.mErn = in.readString();
+		this.mUnsubscribeUrl = in.readString();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mId);
+		dest.writeString(this.mErn);
+		dest.writeString(this.mUnsubscribeUrl);
+	}
+    
 }

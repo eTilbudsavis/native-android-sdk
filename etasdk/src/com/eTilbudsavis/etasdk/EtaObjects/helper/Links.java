@@ -20,19 +20,35 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Links implements EtaObject<JSONObject>, Serializable {
+public class Links implements EtaObject<JSONObject>, Serializable, Parcelable {
 
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = Eta.TAG_PREFIX + Links.class.getSimpleName();
 
 	private String mWebshop;
+
+	public static Parcelable.Creator<Links> CREATOR = new Parcelable.Creator<Links>(){
+		public Links createFromParcel(Parcel source) {
+			return new Links(source);
+		}
+		public Links[] newArray(int size) {
+			return new Links[size];
+		}
+	};
+	
+	public Links() {
+		
+	}
 	
 	public static Links fromJSON(JSONObject links) {
 		Links l = new Links();
@@ -66,7 +82,7 @@ public class Links implements EtaObject<JSONObject>, Serializable {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
 		result = prime * result
 				+ ((mWebshop == null) ? 0 : mWebshop.hashCode());
 		return result;
@@ -76,7 +92,7 @@ public class Links implements EtaObject<JSONObject>, Serializable {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -89,5 +105,16 @@ public class Links implements EtaObject<JSONObject>, Serializable {
 		return true;
 	}
 
-	
+	private Links(Parcel in) {
+		this.mWebshop = in.readString();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mWebshop);
+	}
+
 }

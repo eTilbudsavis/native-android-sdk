@@ -63,7 +63,7 @@ public class NetworkImpl implements Network {
 			return r;
 			
 		} catch (Exception e) {
-			EtaLog.e(TAG, "", e);
+			EtaLog.e(TAG, e.getMessage(), e);
 			throw new NetworkError(e);
 		}
 		

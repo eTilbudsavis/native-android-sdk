@@ -96,7 +96,7 @@ public class DefaultHttpNetwork implements HttpStack {
 	
 	private HttpRequestBase createRequest(Request<?> request) {
 		
-		String url = Utils.buildQueryString(request);
+		String url = Utils.requestToUrlAndQueryString(request);
 		
 		switch (request.getMethod()) {
 		case POST: 

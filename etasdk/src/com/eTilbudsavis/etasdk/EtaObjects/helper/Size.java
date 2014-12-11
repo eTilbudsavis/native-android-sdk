@@ -25,8 +25,10 @@ import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
+import android.os.Parcelable;
+import android.os.Parcel;
 
-public class Size implements EtaObject<JSONObject>, Serializable {
+public class Size implements EtaObject<JSONObject>, Serializable, Parcelable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -34,6 +36,19 @@ public class Size implements EtaObject<JSONObject>, Serializable {
 	
 	private double mFrom = 1.0d;
 	private double mTo = 1.0d;
+	
+	public static Parcelable.Creator<Size> CREATOR = new Parcelable.Creator<Size>(){
+		public Size createFromParcel(Parcel source) {
+			return new Size(source);
+		}
+		public Size[] newArray(int size) {
+			return new Size[size];
+		}
+	};
+	
+	public Size() {
+		
+	}
 	
 	public static Size fromJSON(JSONObject size) {
 		Size s = new Size();
@@ -104,6 +119,19 @@ public class Size implements EtaObject<JSONObject>, Serializable {
 			return false;
 		return true;
 	}
-	
+
+	private Size(Parcel in) {
+		this.mFrom = in.readDouble();
+		this.mTo = in.readDouble();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeDouble(this.mFrom);
+		dest.writeDouble(this.mTo);
+	}
 	
 }

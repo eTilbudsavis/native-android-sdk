@@ -27,6 +27,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
@@ -42,7 +45,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Shoppinglist>, EtaObject<JSONObject>, Serializable {
+public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Shoppinglist>, EtaObject<JSONObject>, Serializable, Parcelable {
 
 	public static final String TAG = Eta.TAG_PREFIX + Shoppinglist.class.getSimpleName();
 
@@ -85,7 +88,7 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 	private String mPrevId;
 	private String mType;
 	private String mMeta;
-	private Map<String, Share> mShares = new HashMap<String, Share>(1);
+	private HashMap<String, Share> mShares = new HashMap<String, Share>(1);
 	private int mUserId = -1;
 	
 	private Shoppinglist() {
@@ -142,7 +145,7 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 			shoppinglist.setName(Json.valueOf(jShoppinglist, JsonKey.NAME));
 			shoppinglist.setAccess(Json.valueOf(jShoppinglist, JsonKey.ACCESS));
 			String modified = Json.valueOf(jShoppinglist, JsonKey.MODIFIED, Utils.DATE_EPOC);
-			shoppinglist.setModified(Utils.parseDate(modified));
+			shoppinglist.setModified(Utils.stringToDate(modified));
 			shoppinglist.setPreviousId(Json.valueOf(jShoppinglist, JsonKey.PREVIOUS_ID));
 			shoppinglist.setType(Json.valueOf(jShoppinglist, JsonKey.TYPE));
 			
@@ -182,7 +185,7 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 			o.put(JsonKey.ERN, Json.nullCheck(getErn()));
 			o.put(JsonKey.NAME, Json.nullCheck(getName()));
 			o.put(JsonKey.ACCESS, Json.nullCheck(getAccess()));
-			o.put(JsonKey.MODIFIED, Json.nullCheck(Utils.parseDate(getModified())));
+			o.put(JsonKey.MODIFIED, Json.nullCheck(Utils.dateToString(getModified())));
 			o.put(JsonKey.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
 			o.put(JsonKey.TYPE, Json.nullCheck(getType()));
 			o.put(JsonKey.META, Json.nullCheck(getMeta()));
@@ -294,7 +297,7 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 	 * @return This object
 	 */
 	public Shoppinglist setModified(String time) {
-		mModified = Utils.parseDate(time);
+		mModified = Utils.stringToDate(time);
 		return this;
 	}
 	
@@ -382,7 +385,7 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 	 * Get a {@link Map} of all shares in this {@link Shoppinglist}
 	 * @return All shares
 	 */
-	public Map<String, Share> getShares() {
+	public HashMap<String, Share> getShares() {
 		return mShares;
 	}
 	
@@ -554,7 +557,7 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 	 * Compare object, that uses {@link Shoppinglist#getName() name}
 	 * to compare two lists.
 	 */
-	public static Comparator<Shoppinglist> NameComparator  = new Comparator<Shoppinglist>() {
+	public static Comparator<Shoppinglist> NAME_COMPARATOR  = new Comparator<Shoppinglist>() {
 
 		public int compare(Shoppinglist item1, Shoppinglist item2) {
 
@@ -574,7 +577,16 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 		}
 
 	};
-	
+
+	public static Parcelable.Creator<Shoppinglist> CREATOR = new Parcelable.Creator<Shoppinglist>(){
+		public Shoppinglist createFromParcel(Parcel source) {
+			return new Shoppinglist(source);
+		}
+		public Shoppinglist[] newArray(int size) {
+			return new Shoppinglist[size];
+		}
+	};
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -659,6 +671,37 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 			return false;
 		return true;
 	}
-	
+
+    private Shoppinglist(Parcel in) {
+		this.mId = in.readString();
+		this.mErn = in.readString();
+		this.mName = in.readString();
+		this.mAccess = in.readString();
+		long tmpMModified = in.readLong(); 
+		this.mModified = tmpMModified == -1 ? null : new Date(tmpMModified);
+		this.mPrevId = in.readString();
+		this.mType = in.readString();
+		this.mMeta = in.readString();
+		this.mShares = (HashMap<String,Share>) in.readSerializable();
+		this.mUserId = in.readInt();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mId);
+		dest.writeString(this.mErn);
+		dest.writeString(this.mName);
+		dest.writeString(this.mAccess);
+		dest.writeLong(mModified != null ? mModified.getTime() : -1);
+		dest.writeString(this.mPrevId);
+		dest.writeString(this.mType);
+		dest.writeString(this.mMeta);
+		dest.writeSerializable(this.mShares);
+		dest.writeInt(this.mUserId);
+	}
+    
 }
 

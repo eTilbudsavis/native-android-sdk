@@ -27,14 +27,29 @@ import org.json.JSONObject;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import android.os.Parcelable;
+import android.os.Parcel;
 
-public class Permission implements EtaObject<JSONObject>, Serializable {
+public class Permission implements EtaObject<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 
 	public static final String TAG = Eta.TAG_PREFIX + Permission.class.getSimpleName();
 	
 	private HashMap<String, ArrayList<String>> mPermissions = new HashMap<String, ArrayList<String>>();
+
+	public static Parcelable.Creator<Permission> CREATOR = new Parcelable.Creator<Permission>(){
+		public Permission createFromParcel(Parcel source) {
+			return new Permission(source);
+		}
+		public Permission[] newArray(int size) {
+			return new Permission[size];
+		}
+	};
+	
+	public Permission() {
+		
+	}
 	
 	public static Permission fromJSON(JSONObject permission) {
 		Permission p = new Permission();
@@ -108,6 +123,18 @@ public class Permission implements EtaObject<JSONObject>, Serializable {
 	public Permission putAll(HashMap<String, ArrayList<String>> permissions) {
 		mPermissions.putAll(permissions);
 		return this;
+	}
+	
+	private Permission(Parcel in) {
+		this.mPermissions = (HashMap<String,ArrayList<String>>) in.readSerializable();
+	}
+	
+	public int describeContents() { 
+		return 0; 
+	}
+	
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeSerializable(this.mPermissions);
 	}
 	
 }

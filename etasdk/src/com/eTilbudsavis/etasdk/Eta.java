@@ -110,12 +110,12 @@ public class Eta {
 	 * Default constructor, this is private to allow us to create a singleton instance
 	 * @param apiKey An API v2 apiKey
 	 * @param apiSecret An API v2 apiSecret (matching the apiKey)
-	 * @param applicationContext A context - to avoid memory leaks use the ApplicationContext
+	 * @param context A context
 	 */
-	private Eta(String apiKey, String apiSecret, Context applicationContext) {
+	private Eta(String apiKey, String apiSecret, Context context) {
 		
 		// Get a context that isn't likely to disappear with an activity.
-		mContext = applicationContext.getApplicationContext();
+		mContext = context.getApplicationContext();
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
 		

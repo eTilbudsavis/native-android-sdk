@@ -115,9 +115,9 @@ public class ListUtils {
 		items.clear();
 		
 		/* Sort the lists we're uncertain about by their title (this is as good as any sort) */
-		Collections.sort(first, ShoppinglistItem.TitleAscending);
-		Collections.sort(nil, ShoppinglistItem.TitleAscending);
-		Collections.sort(orphan, ShoppinglistItem.TitleAscending);
+		Collections.sort(first, ShoppinglistItem.TITLE_ASCENDING);
+		Collections.sort(nil, ShoppinglistItem.TITLE_ASCENDING);
+		Collections.sort(orphan, ShoppinglistItem.TITLE_ASCENDING);
 		
 		/* All items that need to have their  */
 		List<ShoppinglistItem> newItems = new ArrayList<ShoppinglistItem>(size);

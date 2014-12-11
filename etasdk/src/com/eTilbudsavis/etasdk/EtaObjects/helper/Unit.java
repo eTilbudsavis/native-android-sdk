@@ -20,13 +20,16 @@ import java.io.Serializable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Unit implements EtaObject<JSONObject>, Serializable {
+public class Unit implements EtaObject<JSONObject>, Serializable, Parcelable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -34,6 +37,19 @@ public class Unit implements EtaObject<JSONObject>, Serializable {
 	
 	private String mSymbol;
 	private Si mSi;
+
+	public static Parcelable.Creator<Unit> CREATOR = new Parcelable.Creator<Unit>(){
+		public Unit createFromParcel(Parcel source) {
+			return new Unit(source);
+		}
+		public Unit[] newArray(int size) {
+			return new Unit[size];
+		}
+	};
+	
+	public Unit() {
+		
+	}
 	
 	public static Unit fromJSON(JSONObject unit) {
 		Unit u = new Unit();
@@ -110,6 +126,19 @@ public class Unit implements EtaObject<JSONObject>, Serializable {
 			return false;
 		return true;
 	}
-	
+
+	private Unit(Parcel in) {
+		this.mSymbol = in.readString();
+		this.mSi = (Si) in.readSerializable();
+	}
+
+	public int describeContents() { 
+		return 0; 
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.mSymbol);
+		dest.writeSerializable(this.mSi);
+	}
 	
 }
