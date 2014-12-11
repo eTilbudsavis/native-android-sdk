@@ -7,7 +7,11 @@ import java.util.List;
 
 import android.graphics.Color;
 
+import com.eTilbudsavis.etasdk.EtaObjects.Country;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
+import com.eTilbudsavis.etasdk.EtaObjects.Share;
+import com.eTilbudsavis.etasdk.EtaObjects.Store;
+import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
@@ -38,6 +42,62 @@ public class ObjectCreator {
 	
 	private static String getID(String type, String id) {
 		return String.format("%s-%s", type, id);
+	}
+
+	public static Country getCountry() {
+		return getCountry("89azf82");
+	}
+	
+	public static Country getCountry(String id) {
+		Country c = new Country();
+		c.setId(id);
+		c.setUnsubscribePrintUrl(getUrl(id));
+		return c;
+	}
+
+	public static Store getStore() {
+		return getStore("fds893r");
+	}
+	
+	public static Store getStore(String id) {
+		Store s = new Store();
+		s.setBranding(getBranding());
+		s.setCity("fake-city");
+		s.setContact("fake-email@fake.com");
+		s.setCountry(getCountry(id));
+		String dealerId = getID("dealer", id);
+		s.setDealerId(dealerId);
+		s.setDealerUrl(getUrl(dealerId));
+		s.setId(id);
+		s.setLatitude(12.5d);
+		s.setLongitude(9.5d);
+		s.setStreet("fake-street");
+		s.setZipcode("fake-zipcode");
+		return s;
+	}
+
+	public static Share getShare() {
+		return getShare("fake-mail@eta.dk", Share.ACCESS_OWNER, "fake-accept-url");
+	}
+	
+	public static Share getShare(String email, String access, String acceptUrl) {
+		Share s = new Share(email, access, acceptUrl);
+		return s;
+	}
+
+	public static User getUser() {
+		return getUser(1932, "fake-mail@eta.dk", "female", "fake-user-name", getPermission(), 1992);
+	}
+	
+	public static User getUser(int year, String email, String gender, String name, Permission permissions, int id) {
+		User u = new User();
+		u.setBirthYear(year);
+		u.setEmail(email);
+		u.setGender(gender);
+		u.setName(name);
+		u.setPermissions(permissions);
+		u.setUserId(id);
+		return u;
 	}
 
 	public static Branding getBranding() {

@@ -7,7 +7,11 @@ import org.json.JSONObject;
 
 import android.os.Parcel;
 
+import com.eTilbudsavis.etasdk.EtaObjects.Country;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
+import com.eTilbudsavis.etasdk.EtaObjects.Share;
+import com.eTilbudsavis.etasdk.EtaObjects.Store;
+import com.eTilbudsavis.etasdk.EtaObjects.User;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
 import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
@@ -44,11 +48,123 @@ public class ObjectTest {
 		testPageflip();
 		testHotspot();
 		testDimension();
+		testCountry();
 		// The following have dependencies to other eta classes - they run last
 		testHotspotMap();
 		testQuantity();
 		testBranding();
+		testShare();
+		testUser();
+		testStore();
 		testOffer();
+	}
+
+	public static void testStore() {
+		Store obj = ObjectCreator.getStore();
+		
+		// Parcelable
+        Parcel parcel = Parcel.obtain();
+        obj.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        Store parceledObj = Store.CREATOR.createFromParcel(parcel);
+        Assert.assertEquals(obj, parceledObj);
+        
+        // JSON
+        JSONObject jObj = obj.toJSON();
+        Store jsonObj = Store.fromJSON(jObj);
+        Assert.assertEquals(obj, jsonObj);
+        try {
+            jObj.put(JsonKey.STREET, "fake-street-new");
+        } catch (JSONException e) {
+        }
+        jsonObj = Store.fromJSON(jObj);
+        Assert.assertNotSame(obj, jsonObj);
+        
+        // getters and setters
+        
+        EtaSdkTest.log(TAG, "Country");
+        
+	}
+
+	public static void testCountry() {
+		Country obj = ObjectCreator.getCountry();
+		
+		// Parcelable
+        Parcel parcel = Parcel.obtain();
+        obj.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        Country parceledObj = Country.CREATOR.createFromParcel(parcel);
+        Assert.assertEquals(obj, parceledObj);
+        
+        // JSON
+        JSONObject jObj = obj.toJSON();
+        Country jsonObj = Country.fromJSON(jObj);
+        Assert.assertEquals(obj, jsonObj);
+        try {
+            jObj.put(JsonKey.ID, "1234567");
+        } catch (JSONException e) {
+        }
+        jsonObj = Country.fromJSON(jObj);
+        Assert.assertNotSame(obj, jsonObj);
+        
+        // getters and setters
+        
+        EtaSdkTest.log(TAG, "Country");
+        
+	}
+
+	public static void testShare() {
+		Share obj = ObjectCreator.getShare();
+		
+		// Parcelable
+        Parcel parcel = Parcel.obtain();
+        obj.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        Share parceledObj = Share.CREATOR.createFromParcel(parcel);
+        Assert.assertEquals(obj, parceledObj);
+        
+        // JSON
+        JSONObject jObj = obj.toJSON();
+        Share jsonObj = Share.fromJSON(jObj);
+        Assert.assertEquals(obj, jsonObj);
+        try {
+            jObj.put(JsonKey.EMAIL, "fake-wrong-email@nomail.org");
+        } catch (JSONException e) {
+        }
+        jsonObj = Share.fromJSON(jObj);
+        Assert.assertNotSame(obj, jsonObj);
+        
+        // getters and setters
+        
+        EtaSdkTest.log(TAG, "Share");
+        
+	}
+
+	public static void testUser() {
+		User obj = ObjectCreator.getUser();
+		
+		// Parcelable
+        Parcel parcel = Parcel.obtain();
+        obj.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        User parceledObj = User.CREATOR.createFromParcel(parcel);
+        Assert.assertEquals(obj, parceledObj);
+        
+        // JSON
+        JSONObject jObj = obj.toJSON();
+        User jsonObj = User.fromJSON(jObj);
+        Assert.assertEquals(obj, jsonObj);
+        try {
+            jObj.put(JsonKey.GENDER, "male");
+        } catch (JSONException e) {
+        }
+        jsonObj = User.fromJSON(jObj);
+        Assert.assertNotSame(obj, jsonObj);
+        
+        // getters and setters
+        
+        EtaSdkTest.log(TAG, "User");
+        
 	}
 
 	public static void testBranding() {

@@ -127,10 +127,11 @@ public class User implements Ern<User>, EtaObject<JSONObject>, Serializable, Par
 		return mEmail != null && getUserId() > NO_USER;
 	}
 	
-	@Deprecated
+	/**
+	 * 	@Deprecated Use {@link User#setUserId(int)} instead.
+	 */
 	public User setId(String id) {
-		mId = id;
-		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		setUserId(Integer.valueOf(id));
 		return this;
 	}
 	
@@ -166,7 +167,8 @@ public class User implements Ern<User>, EtaObject<JSONObject>, Serializable, Par
 	 * @return This object
 	 */
 	public User setUserId(int id) {
-		setId(String.valueOf(id));
+		mId = String.valueOf(id);
+		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
 		return this;
 	}
 	
@@ -299,13 +301,15 @@ public class User implements Ern<User>, EtaObject<JSONObject>, Serializable, Par
 		return this;
 	}
 	
-	@Override
+    @Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
 		result = prime * result + mBirthYear;
 		result = prime * result + ((mEmail == null) ? 0 : mEmail.hashCode());
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
 		result = prime * result + ((mGender == null) ? 0 : mGender.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
 		result = prime * result
 				+ ((mPermissions == null) ? 0 : mPermissions.hashCode());
@@ -316,7 +320,7 @@ public class User implements Ern<User>, EtaObject<JSONObject>, Serializable, Par
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -328,10 +332,20 @@ public class User implements Ern<User>, EtaObject<JSONObject>, Serializable, Par
 				return false;
 		} else if (!mEmail.equals(other.mEmail))
 			return false;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
 		if (mGender == null) {
 			if (other.mGender != null)
 				return false;
 		} else if (!mGender.equals(other.mGender))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
 			return false;
 		if (mName == null) {
 			if (other.mName != null)
@@ -345,8 +359,8 @@ public class User implements Ern<User>, EtaObject<JSONObject>, Serializable, Par
 			return false;
 		return true;
 	}
-	
-    private User(Parcel in) {
+
+	private User(Parcel in) {
 		this.mId = in.readString();
 		this.mErn = in.readString();
 		this.mGender = in.readString();
