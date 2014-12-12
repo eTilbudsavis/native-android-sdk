@@ -7,7 +7,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
+import com.eTilbudsavis.etasdk.EtaObjects.Images;
 import com.eTilbudsavis.etasdk.ImageLoader.FileNameGenerator;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageDebugger;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;

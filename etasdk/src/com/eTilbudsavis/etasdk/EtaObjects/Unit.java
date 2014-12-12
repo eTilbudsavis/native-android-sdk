@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects.helper;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
@@ -24,67 +24,84 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Links implements EtaObject<JSONObject>, Serializable, Parcelable {
+public class Unit implements IJson<JSONObject>, Serializable, Parcelable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Eta.TAG_PREFIX + Links.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Unit.class.getSimpleName();
+	
+	private String mSymbol;
+	private Si mSi;
 
-	private String mWebshop;
-
-	public static Parcelable.Creator<Links> CREATOR = new Parcelable.Creator<Links>(){
-		public Links createFromParcel(Parcel source) {
-			return new Links(source);
+	public static Parcelable.Creator<Unit> CREATOR = new Parcelable.Creator<Unit>(){
+		public Unit createFromParcel(Parcel source) {
+			return new Unit(source);
 		}
-		public Links[] newArray(int size) {
-			return new Links[size];
+		public Unit[] newArray(int size) {
+			return new Unit[size];
 		}
 	};
 	
-	public Links() {
+	public Unit() {
 		
 	}
 	
-	public static Links fromJSON(JSONObject links) {
-		Links l = new Links();
-		if (links == null) {
-			return l;
+	public static Unit fromJSON(JSONObject unit) {
+		Unit u = new Unit();
+		if (unit == null) {
+			return u;
+		}
+
+		u.setSymbol(Json.valueOf(unit, JsonKey.SYMBOL));
+		try {
+			u.setSi(Si.fromJSON(unit.getJSONObject(JsonKey.SI)));
+		} catch (JSONException e) {
+			EtaLog.e(TAG, "", e);
 		}
 		
-		l.setWebshop(Json.valueOf(links, JsonKey.WEBSHOP));
-		
-		return l;
+		return u;
 	}
 	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(JsonKey.WEBSHOP, Json.nullCheck(getWebshop()));
+			o.put(JsonKey.SYMBOL, Json.nullCheck(getSymbol()));
+			o.put(JsonKey.SI, Json.toJson(getSi()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
 	
-	public void setWebshop(String url) {
-		mWebshop = url;
+	public String getSymbol() {
+		return mSymbol;
 	}
-	
-	public String getWebshop() {
-		return mWebshop;
+
+	public Unit setSymbol(String symbol) {
+		mSymbol = symbol;
+		return this;
+	}
+
+	public Si getSi() {
+		return mSi;
+	}
+
+	public Unit setSi(Si si) {
+		mSi = si;
+		return this;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((mWebshop == null) ? 0 : mWebshop.hashCode());
+		result = prime * result + ((mSi == null) ? 0 : mSi.hashCode());
+		result = prime * result + ((mSymbol == null) ? 0 : mSymbol.hashCode());
 		return result;
 	}
 
@@ -96,17 +113,23 @@ public class Links implements EtaObject<JSONObject>, Serializable, Parcelable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Links other = (Links) obj;
-		if (mWebshop == null) {
-			if (other.mWebshop != null)
+		Unit other = (Unit) obj;
+		if (mSi == null) {
+			if (other.mSi != null)
 				return false;
-		} else if (!mWebshop.equals(other.mWebshop))
+		} else if (!mSi.equals(other.mSi))
+			return false;
+		if (mSymbol == null) {
+			if (other.mSymbol != null)
+				return false;
+		} else if (!mSymbol.equals(other.mSymbol))
 			return false;
 		return true;
 	}
 
-	private Links(Parcel in) {
-		this.mWebshop = in.readString();
+	private Unit(Parcel in) {
+		this.mSymbol = in.readString();
+		this.mSi = (Si) in.readSerializable();
 	}
 
 	public int describeContents() { 
@@ -114,7 +137,8 @@ public class Links implements EtaObject<JSONObject>, Serializable, Parcelable {
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(this.mWebshop);
+		dest.writeString(this.mSymbol);
+		dest.writeSerializable(this.mSi);
 	}
-
+	
 }

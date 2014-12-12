@@ -382,5 +382,16 @@ public final class Utils {
 	    float dp = (float)px / c.getResources().getDisplayMetrics().density;
 	    return (int)dp;
 	}
-
+	
+	/**
+	 * Method returns a eTilbudsavis API friendly color string.
+	 * <li>Color.WHITE = "FFFFFF"</li>
+	 * <li>Color.BLACK = "000000"</li>
+	 * <li>Color.BLUE = "0000FF"</li>
+	 * @return A string
+	 */
+	public static String colorToString(int color) {
+		return String.format("%06X", 0xFFFFFF & color);
+	}
+	
 }

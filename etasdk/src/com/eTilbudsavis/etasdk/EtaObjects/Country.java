@@ -28,13 +28,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Country implements Ern<Country>, EtaObject<JSONObject>, Serializable, Parcelable {
+public class Country implements IErn<Country>, IJson<JSONObject>, Serializable, Parcelable {
 	
 	public static final String TAG = Eta.TAG_PREFIX + Country.class.getSimpleName();
 
@@ -160,6 +160,44 @@ public class Country implements Ern<Country>, EtaObject<JSONObject>, Serializabl
 	 */
 	public String getUnsubscribePrintUrl() {
 		return mUnsubscribeUrl;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
+		result = prime * result
+				+ ((mUnsubscribeUrl == null) ? 0 : mUnsubscribeUrl.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Country other = (Country) obj;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
+			return false;
+		if (mUnsubscribeUrl == null) {
+			if (other.mUnsubscribeUrl != null)
+				return false;
+		} else if (!mUnsubscribeUrl.equals(other.mUnsubscribeUrl))
+			return false;
+		return true;
 	}
 
 	private Country(Parcel in) {

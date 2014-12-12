@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects.helper;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,10 +28,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 
-public class Permission implements EtaObject<JSONObject>, Serializable, Parcelable {
+public class Permission implements IJson<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 

@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects.helper;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
@@ -24,80 +24,85 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Si implements EtaObject<JSONObject>, Serializable, Parcelable {
-
+public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
+	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Eta.TAG_PREFIX + Si.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Pageflip.class.getSimpleName();
 	
-	private String mSymbol;
-	private double mFactor = 1.0d;
+	private String mLogo;
+	private int mColor = 0;
 
-	public static Parcelable.Creator<Si> CREATOR = new Parcelable.Creator<Si>(){
-		public Si createFromParcel(Parcel source) {
-			return new Si(source);
+	public static Parcelable.Creator<Pageflip> CREATOR = new Parcelable.Creator<Pageflip>(){
+		public Pageflip createFromParcel(Parcel source) {
+			return new Pageflip(source);
 		}
-		public Si[] newArray(int size) {
-			return new Si[size];
+		public Pageflip[] newArray(int size) {
+			return new Pageflip[size];
 		}
 	};
 	
-	public Si() {
+	public Pageflip() {
 		
 	}
 	
-	public static Si fromJSON(JSONObject si) {
-		Si s = new Si();
-		if (si == null) return s;
+	public Pageflip(int color) {
+		mColor = color;
+	}
+	
+	public static Pageflip fromJSON(JSONObject pageflip) {
+		Pageflip p = new Pageflip();
+		if (pageflip == null) {
+			return p;
+		}
 		
-		s.setSymbol(Json.valueOf(si, JsonKey.SYMBOL));
-		s.setFactor(Json.valueOf(si, JsonKey.FACTOR, 1.0d));
+		p.setLogo(Json.valueOf(pageflip, JsonKey.LOGO));
+		p.setColor(Json.colorValueOf(pageflip, JsonKey.COLOR, "7b9119"));
 		
-		return s;
+		return p;
 	}
 	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(JsonKey.SYMBOL, Json.nullCheck(getSymbol()));
-			o.put(JsonKey.FACTOR, Json.nullCheck(getFactor()));
+			o.put(JsonKey.LOGO, Json.nullCheck(getLogo()));
+			o.put(JsonKey.COLOR, Json.nullCheck(Utils.colorToString(mColor)));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
 	
-	public String getSymbol() {
-		return mSymbol;
-	}
-
-	public Si setSymbol(String symbol) {
-		mSymbol = symbol;
-		return this;
-	}
-
-	public double getFactor() {
-		return mFactor;
+	public String getLogo() {
+		return mLogo;
 	}
 	
-	public Si setFactor(double factor) {
-		mFactor = factor;
+	public Pageflip setLogo(String url) {
+		mLogo = url;
 		return this;
 	}
-
+	
+	public int getColor() {
+		return mColor;
+	}
+	
+	public Pageflip setColor(int color) {
+		mColor = color;
+		return this;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		long temp;
-		temp = Double.doubleToLongBits(mFactor);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((mSymbol == null) ? 0 : mSymbol.hashCode());
+		result = prime * result + mColor;
+		result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
 		return result;
 	}
 
@@ -109,21 +114,20 @@ public class Si implements EtaObject<JSONObject>, Serializable, Parcelable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Si other = (Si) obj;
-		if (Double.doubleToLongBits(mFactor) != Double
-				.doubleToLongBits(other.mFactor))
+		Pageflip other = (Pageflip) obj;
+		if (mColor != other.mColor)
 			return false;
-		if (mSymbol == null) {
-			if (other.mSymbol != null)
+		if (mLogo == null) {
+			if (other.mLogo != null)
 				return false;
-		} else if (!mSymbol.equals(other.mSymbol))
+		} else if (!mLogo.equals(other.mLogo))
 			return false;
 		return true;
 	}
 
-	private Si(Parcel in) {
-		this.mSymbol = in.readString();
-		this.mFactor = in.readDouble();
+	private Pageflip(Parcel in) {
+		this.mLogo = in.readString();
+		this.mColor = in.readInt();
 	}
 
 	public int describeContents() { 
@@ -131,8 +135,8 @@ public class Si implements EtaObject<JSONObject>, Serializable, Parcelable {
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(this.mSymbol);
-		dest.writeDouble(this.mFactor);
+		dest.writeString(this.mLogo);
+		dest.writeInt(this.mColor);
 	}
 	
 	

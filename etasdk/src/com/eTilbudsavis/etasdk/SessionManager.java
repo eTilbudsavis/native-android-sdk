@@ -454,7 +454,8 @@ public class SessionManager {
 			
 			if (mSession.getToken() == null || !mSession.getToken().equals(headerToken) ) {
 				mSession.setToken(headerToken);
-				mSession.setExpires(headerExpires);
+				Date exp = Utils.stringToDate(headerExpires);
+				mSession.setExpires(exp);
 				mEta.getSettings().setSessionJson(mSession.toJSON());
 			}
 		}

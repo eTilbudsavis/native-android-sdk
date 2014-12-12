@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.Assert;
+import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Request;
@@ -267,7 +268,8 @@ public class UtilsTest {
 			actual = Utils.stringToDate(s);
 			Assert.assertEquals(epoch, actual);
 		}
-		
+
+		EtaSdkTest.log(TAG, "StringToDate");
 	}
 	
 	public static void testDateToString() {
@@ -295,7 +297,27 @@ public class UtilsTest {
 		c.set(2000, 1, 1, 1, 1, 1);
 		actual = Utils.dateToString(c.getTime());
 		Assert.assertNotSame("2100-12-12T23:59:59+0000", actual);
-		
+
+		EtaSdkTest.log(TAG, "DateToString");
 	}
 	
+	public static void testColorToString() {
+
+		Assert.assertEquals("000000", Utils.colorToString(Color.BLACK));
+		Assert.assertEquals("FFFFFF", Utils.colorToString(Color.WHITE));
+		Assert.assertEquals("FF0000", Utils.colorToString(Color.RED));
+		Assert.assertEquals("00FF00", Utils.colorToString(Color.GREEN));
+		Assert.assertEquals("0000FF", Utils.colorToString(Color.BLUE));
+
+		Assert.assertNotSame("0000FF", Utils.colorToString(Color.LTGRAY));
+		Assert.assertNotSame("0000FF", Utils.colorToString(Color.CYAN));
+		Assert.assertNotSame("0000FF", Utils.colorToString(Color.MAGENTA));
+		Assert.assertNotSame("0000FF", Utils.colorToString(Color.YELLOW));
+		Assert.assertNotSame("danny", Utils.colorToString(24));
+		Assert.assertNotSame("bente", Utils.colorToString(78));
+		Assert.assertNotSame(null, Utils.colorToString(78));
+		Assert.assertNotSame("", Utils.colorToString(78));
+		
+		EtaSdkTest.log(TAG, "ColorToString");
+	}
 }

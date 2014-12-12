@@ -17,9 +17,12 @@ package com.eTilbudsavis.etasdk.Utils;
 
 import org.json.JSONObject;
 
+import android.graphics.Color;
+
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 
 /**
  * Helper class designed to simplify working with JSON in Android - specifically the eTilbudsavis Android SDK.
@@ -149,7 +152,7 @@ public class Json {
 	 * Typically {@link #JSOBObject.NULL JSOBObject.NULL} or null is used for this purpose
 	 * @return A JSONObject, or defValue
 	 */
-	public static Object toJson(EtaObject<?> object, Object defValue) {
+	public static Object toJson(IJson<?> object, Object defValue) {
 		return object == null ? defValue : object.toJSON();
 	}
 
@@ -158,7 +161,7 @@ public class Json {
 	 * @param object The EtaObject to convert
 	 * @return A JSONObject, or JSONObject.NULL
 	 */
-	public static Object toJson(EtaObject<?> object) {
+	public static Object toJson(IJson<?> object) {
 		return toJson(object, JSONObject.NULL);
 	}
 	
@@ -172,6 +175,47 @@ public class Json {
 	 */
 	public static <T> Object nullCheck(T object) {
 		return object == null ? JSONObject.NULL : object;
+	}
+
+	/**
+	 * This method calls {@link Json#colorValueOf(JSONObject, String, String)},
+	 * with the defValue set to Color.TRANSPARENT.
+	 * @see {@link Json#colorValueOf(JSONObject, String, String)}
+	 */
+	public static int colorValueOf(JSONObject object, String key) {
+		return colorValueOf(object, key, null);
+	}
+
+	/**
+	 * Searches the JSONObject for the key and returns the matching value if it exists.
+	 * @param object An object to get data from
+	 * @param key A key to map to a value
+	 * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
+	 */
+	public static int colorValueOf(JSONObject object, String key, int color) {
+		return colorValueOf(object, key, Utils.colorToString(color));
+	}
+	
+	/**
+	 * Searches the JSONObject for the key and returns the matching value if it exists.
+	 * @param object An object to get data from
+	 * @param key A key to map to a value
+	 * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
+	 */
+	public static int colorValueOf(JSONObject object, String key, String defValue) {
+		// Ensure, and clean the default value
+		if (defValue==null) {
+			defValue = Utils.colorToString(Color.TRANSPARENT);
+		}
+		defValue = defValue.replace("#", "");
+		// fetch the string
+		String rawColor = Json.valueOf(object, JsonKey.COLOR, defValue);
+		// generate a valid color string
+		String color = "#" + rawColor;
+		// parse color string
+		return Color.parseColor(color);
 	}
 	
 }

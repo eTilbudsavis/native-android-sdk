@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects.helper;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
@@ -10,11 +10,10 @@ import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 
-public class Hotspot implements EtaObject<JSONObject>, Serializable, Parcelable {
+public class Hotspot implements IJson<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 7068341225117028048L;
 

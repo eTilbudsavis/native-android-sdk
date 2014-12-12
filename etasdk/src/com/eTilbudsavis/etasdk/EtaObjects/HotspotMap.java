@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.EtaObjects.helper;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,15 +14,14 @@ import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements EtaObject<JSONArray>, Serializable, Parcelable {
+public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson<JSONArray>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = -4654824845675092954L;
 

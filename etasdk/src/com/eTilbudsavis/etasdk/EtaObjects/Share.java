@@ -28,12 +28,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.SyncState;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>, Serializable, Parcelable {
+public class Share implements Comparable<Share>,  SyncState<Share>, IJson<JSONObject>, Serializable, Parcelable {
 	
 	public static final String TAG = Eta.TAG_PREFIX + Share.class.getSimpleName();
 	
@@ -49,6 +50,7 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 	private String mShoppinglistId;
 	private boolean mAccepted;
 	private String mAcceptUrl;
+	private int mSyncState = SyncState.TO_SYNC;
 	
 	public Share(String email, String access, String acceptUrl) {
 		mName = email;
@@ -238,7 +240,16 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 		mShoppinglistId = id;
 		return this;
 	}
-	
+
+	public int getState() {
+		return mSyncState;
+	}
+
+	public Share setState(int state) {
+		mSyncState = state;
+		return this;
+	}
+    
 	public int compareTo(Share another) {
 		return 0;
 	}
@@ -266,7 +277,48 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 			return new Share[size];
 		}
 	};
-
+	
+	public boolean same(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Share other = (Share) obj;
+		if (mAcceptUrl == null) {
+			if (other.mAcceptUrl != null)
+				return false;
+		} else if (!mAcceptUrl.equals(other.mAcceptUrl))
+			return false;
+		if (mAccepted != other.mAccepted)
+			return false;
+		if (mAccess == null) {
+			if (other.mAccess != null)
+				return false;
+		} else if (!mAccess.equals(other.mAccess))
+			return false;
+		if (mEmail == null) {
+			if (other.mEmail != null)
+				return false;
+		} else if (!mEmail.equals(other.mEmail))
+			return false;
+		if (mName == null) {
+			if (other.mName != null)
+				return false;
+		} else if (!mName.equals(other.mName))
+			return false;
+		if (mShoppinglistId == null) {
+			if (other.mShoppinglistId != null)
+				return false;
+		} else if (!mShoppinglistId.equals(other.mShoppinglistId))
+			return false;
+		
+		// Removed SynsState
+		
+		return true;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -279,6 +331,7 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
 		result = prime * result
 				+ ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
+		result = prime * result + mSyncState;
 		return result;
 	}
 
@@ -318,6 +371,8 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 				return false;
 		} else if (!mShoppinglistId.equals(other.mShoppinglistId))
 			return false;
+		if (mSyncState != other.mSyncState)
+			return false;
 		return true;
 	}
 
@@ -328,6 +383,7 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 		this.mShoppinglistId = in.readString();
 		this.mAccepted = in.readByte() != 0;
 		this.mAcceptUrl = in.readString();
+		this.mSyncState = in.readInt();
 	}
 
 	public int describeContents() { 
@@ -341,7 +397,8 @@ public class Share extends EtaListObject<Share> implements EtaObject<JSONObject>
 		dest.writeString(this.mShoppinglistId);
 		dest.writeByte(mAccepted ? (byte) 1 : (byte) 0);
 		dest.writeString(this.mAcceptUrl);
+		dest.writeInt(this.mSyncState);
 	}
-    
+	
 }
 

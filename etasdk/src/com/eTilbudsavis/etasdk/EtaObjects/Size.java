@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects.helper;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
@@ -24,84 +24,83 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Unit implements EtaObject<JSONObject>, Serializable, Parcelable {
+public class Size implements IJson<JSONObject>, Serializable, Parcelable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Eta.TAG_PREFIX + Unit.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Size.class.getSimpleName();
 	
-	private String mSymbol;
-	private Si mSi;
-
-	public static Parcelable.Creator<Unit> CREATOR = new Parcelable.Creator<Unit>(){
-		public Unit createFromParcel(Parcel source) {
-			return new Unit(source);
+	private double mFrom = 1.0d;
+	private double mTo = 1.0d;
+	
+	public static Parcelable.Creator<Size> CREATOR = new Parcelable.Creator<Size>(){
+		public Size createFromParcel(Parcel source) {
+			return new Size(source);
 		}
-		public Unit[] newArray(int size) {
-			return new Unit[size];
+		public Size[] newArray(int size) {
+			return new Size[size];
 		}
 	};
 	
-	public Unit() {
+	public Size() {
 		
 	}
 	
-	public static Unit fromJSON(JSONObject unit) {
-		Unit u = new Unit();
-		if (unit == null) {
-			return u;
-		}
-
-		u.setSymbol(Json.valueOf(unit, JsonKey.SYMBOL));
-		try {
-			u.setSi(Si.fromJSON(unit.getJSONObject(JsonKey.SI)));
-		} catch (JSONException e) {
-			EtaLog.e(TAG, "", e);
+	public static Size fromJSON(JSONObject size) {
+		Size s = new Size();
+		if (size == null) {
+			return s;
 		}
 		
-		return u;
+		s.setFrom(Json.valueOf(size, JsonKey.FROM, 1.0d));
+		s.setTo(Json.valueOf(size, JsonKey.TO, 1.0d));
+		
+		return s;
 	}
 	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(JsonKey.SYMBOL, Json.nullCheck(getSymbol()));
-			o.put(JsonKey.SI, Json.toJson(getSi()));
+			o.put(JsonKey.FROM, getFrom());
+			o.put(JsonKey.TO, getTo());
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
 	
-	public String getSymbol() {
-		return mSymbol;
+	public double getFrom() {
+		return mFrom;
 	}
-
-	public Unit setSymbol(String symbol) {
-		mSymbol = symbol;
+	
+	public Size setFrom(double from) {
+		mFrom = from;
 		return this;
 	}
-
-	public Si getSi() {
-		return mSi;
+	
+	public double getTo() {
+		return mTo;
 	}
-
-	public Unit setSi(Si si) {
-		mSi = si;
+	
+	public Size setTo(double to) {
+		mTo = to;
 		return this;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((mSi == null) ? 0 : mSi.hashCode());
-		result = prime * result + ((mSymbol == null) ? 0 : mSymbol.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(mFrom);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(mTo);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
 
@@ -113,23 +112,18 @@ public class Unit implements EtaObject<JSONObject>, Serializable, Parcelable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Unit other = (Unit) obj;
-		if (mSi == null) {
-			if (other.mSi != null)
-				return false;
-		} else if (!mSi.equals(other.mSi))
+		Size other = (Size) obj;
+		if (Double.doubleToLongBits(mFrom) != Double
+				.doubleToLongBits(other.mFrom))
 			return false;
-		if (mSymbol == null) {
-			if (other.mSymbol != null)
-				return false;
-		} else if (!mSymbol.equals(other.mSymbol))
+		if (Double.doubleToLongBits(mTo) != Double.doubleToLongBits(other.mTo))
 			return false;
 		return true;
 	}
 
-	private Unit(Parcel in) {
-		this.mSymbol = in.readString();
-		this.mSi = (Si) in.readSerializable();
+	private Size(Parcel in) {
+		this.mFrom = in.readDouble();
+		this.mTo = in.readDouble();
 	}
 
 	public int describeContents() { 
@@ -137,8 +131,8 @@ public class Unit implements EtaObject<JSONObject>, Serializable, Parcelable {
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(this.mSymbol);
-		dest.writeSerializable(this.mSi);
+		dest.writeDouble(this.mFrom);
+		dest.writeDouble(this.mTo);
 	}
 	
 }

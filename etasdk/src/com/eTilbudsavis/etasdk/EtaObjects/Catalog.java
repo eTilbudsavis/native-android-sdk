@@ -30,14 +30,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.HotspotMap;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
@@ -55,7 +51,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Catalog>, IStore<Catalog>, Serializable, Parcelable {
+public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalog>, IStore<Catalog>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -67,7 +63,7 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 	private String mId;
 	private String mErn;
 	private String mLabel;
-	private String mBackground;
+	private int mBackground;
 	private Date mRunFrom;
 	private Date mRunTill;
 	private int mPageCount = 0;
@@ -133,7 +129,7 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 			catalog.setId(Json.valueOf(jCatalog, JsonKey.ID));
 			catalog.setErn(Json.valueOf(jCatalog, JsonKey.ERN));
 			catalog.setLabel(Json.valueOf(jCatalog, JsonKey.LABEL));
-			catalog.setBackground(Json.valueOf(jCatalog, JsonKey.BACKGROUND));
+			catalog.setBackground(Json.colorValueOf(jCatalog, JsonKey.BACKGROUND));
 			Date runFrom = Utils.stringToDate(Json.valueOf(jCatalog, JsonKey.RUN_FROM));
 			catalog.setRunFrom(runFrom);
 			Date runTill = Utils.stringToDate(Json.valueOf(jCatalog, JsonKey.RUN_TILL));
@@ -224,11 +220,16 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 		return this;
 	}
 	
-	public String getBackground() {
+	/**
+	 * Get the background color for this catalog.<br>
+	 * For displaying the catalog, in a reader fashion, please use the color found in {@link Pageflip}.
+	 * @return A color
+	 */
+	public int getBackground() {
 		return mBackground;
 	}
-
-	public Catalog setBackground(String background) {
+	
+	public Catalog setBackground(int background) {
 		mBackground = background;
 		return this;
 	}
@@ -553,13 +554,12 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 	public void setPdfUrl(String pdfUrl) {
 		mPdfUrl = pdfUrl;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((mBackground == null) ? 0 : mBackground.hashCode());
+		result = prime * result + mBackground;
 		result = prime * result
 				+ ((mBranding == null) ? 0 : mBranding.hashCode());
 		result = prime * result
@@ -602,10 +602,7 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 		if (getClass() != obj.getClass())
 			return false;
 		Catalog other = (Catalog) obj;
-		if (mBackground == null) {
-			if (other.mBackground != null)
-				return false;
-		} else if (!mBackground.equals(other.mBackground))
+		if (mBackground != other.mBackground)
 			return false;
 		if (mBranding == null) {
 			if (other.mBranding != null)
@@ -703,12 +700,12 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 			return false;
 		return true;
 	}
-	
-    private Catalog(Parcel in) {
+
+	private Catalog(Parcel in) {
 		this.mId = in.readString();
 		this.mErn = in.readString();
 		this.mLabel = in.readString();
-		this.mBackground = in.readString();
+		this.mBackground = in.readInt();
 		long tmpMRunFrom = in.readLong(); 
 		this.mRunFrom = tmpMRunFrom == -1 ? null : new Date(tmpMRunFrom);
 		long tmpMRunTill = in.readLong(); 
@@ -739,7 +736,7 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 		dest.writeString(this.mId);
 		dest.writeString(this.mErn);
 		dest.writeString(this.mLabel);
-		dest.writeString(this.mBackground);
+		dest.writeInt(this.mBackground);
 		dest.writeLong(mRunFrom != null ? mRunFrom.getTime() : -1);
 		dest.writeLong(mRunTill != null ? mRunTill.getTime() : -1);
 		dest.writeInt(this.mPageCount);
@@ -758,5 +755,5 @@ public class Catalog implements Ern<Catalog>, EtaObject<JSONObject>, IDealer<Cat
 		dest.writeParcelable(this.mStore, flags);
 		dest.writeParcelable(this.mHotspots, flags);
 	}
-	
+
 }

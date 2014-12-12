@@ -32,8 +32,9 @@ import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ListManager;
-import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.SyncState;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
@@ -45,7 +46,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Shoppinglist>, EtaObject<JSONObject>, Serializable, Parcelable {
+public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppinglist>, IErn<Shoppinglist>, IJson<JSONObject>, Serializable, Parcelable {
 
 	public static final String TAG = Eta.TAG_PREFIX + Shoppinglist.class.getSimpleName();
 
@@ -90,6 +91,7 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 	private String mMeta;
 	private HashMap<String, Share> mShares = new HashMap<String, Share>(1);
 	private int mUserId = -1;
+	private int mSyncState = SyncState.TO_SYNC;
 	
 	private Shoppinglist() {
 		setId(Utils.createUUID());
@@ -285,19 +287,6 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 	 */
 	public Shoppinglist setModified(Date time) {
 		mModified = Utils.roundTime(time);
-		return this;
-	}
-	
-	/**
-	 * Set the latest modified date for this {@link Shoppinglist}.
-	 * 
-	 * <p>If you are using the {@link ListManager} this will implicitly be
-	 * handled for you.</p>
-	 * @param time A date string for the latest edit to the list
-	 * @return This object
-	 */
-	public Shoppinglist setModified(String time) {
-		mModified = Utils.stringToDate(time);
 		return this;
 	}
 	
@@ -535,6 +524,15 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 		return this;
 	}
 
+	public int getState() {
+		return mSyncState;
+	}
+
+	public Shoppinglist setState(int state) {
+		mSyncState = state;
+		return this;
+	}
+    
 	/**
 	 * Compare method, that uses the {@link Shoppinglist#getName() name}
 	 * to compare two lists.
@@ -586,34 +584,11 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 			return new Shoppinglist[size];
 		}
 	};
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((mAccess == null) ? 0 : mAccess.hashCode());
-		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
-		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
-		result = prime * result
-				+ ((mModified == null) ? 0 : mModified.hashCode());
-		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
-		result = prime * result + ((mPrevId == null) ? 0 : mPrevId.hashCode());
-		result = prime * result + ((mShares == null) ? 0 : mShares.hashCode());
-		result = prime * result + ((mType == null) ? 0 : mType.hashCode());
-		result = prime * result + mUserId;
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return equals(obj, false, false);
-	}
 	
-	public boolean equals(Object obj, boolean skipModified, boolean skipSync) {
+	public boolean same(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -638,14 +613,8 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 				return false;
 		} else if (!mMeta.equals(other.mMeta))
 			return false;
-
-		if (!skipModified) {
-			if (mModified == null) {
-				if (other.mModified != null)
-					return false;
-			} else if (!mModified.equals(other.mModified))
-				return false;
-		}
+		
+		// Removed modified
 		
 		if (mName == null) {
 			if (other.mName != null)
@@ -662,6 +631,89 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 				return false;
 		} else if (!mShares.equals(other.mShares))
 			return false;
+		
+		// Removed SyncState
+		
+		if (mType == null) {
+			if (other.mType != null)
+				return false;
+		} else if (!mType.equals(other.mType))
+			return false;
+		if (mUserId != other.mUserId)
+			return false;
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((mAccess == null) ? 0 : mAccess.hashCode());
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
+		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
+		result = prime * result
+				+ ((mModified == null) ? 0 : mModified.hashCode());
+		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
+		result = prime * result + ((mPrevId == null) ? 0 : mPrevId.hashCode());
+		result = prime * result + ((mShares == null) ? 0 : mShares.hashCode());
+		result = prime * result + mSyncState;
+		result = prime * result + ((mType == null) ? 0 : mType.hashCode());
+		result = prime * result + mUserId;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Shoppinglist other = (Shoppinglist) obj;
+		if (mAccess == null) {
+			if (other.mAccess != null)
+				return false;
+		} else if (!mAccess.equals(other.mAccess))
+			return false;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
+			return false;
+		if (mMeta == null) {
+			if (other.mMeta != null)
+				return false;
+		} else if (!mMeta.equals(other.mMeta))
+			return false;
+		if (mModified == null) {
+			if (other.mModified != null)
+				return false;
+		} else if (!mModified.equals(other.mModified))
+			return false;
+		if (mName == null) {
+			if (other.mName != null)
+				return false;
+		} else if (!mName.equals(other.mName))
+			return false;
+		if (mPrevId == null) {
+			if (other.mPrevId != null)
+				return false;
+		} else if (!mPrevId.equals(other.mPrevId))
+			return false;
+		if (mShares == null) {
+			if (other.mShares != null)
+				return false;
+		} else if (!mShares.equals(other.mShares))
+			return false;
+		if (mSyncState != other.mSyncState)
+			return false;
 		if (mType == null) {
 			if (other.mType != null)
 				return false;
@@ -672,7 +724,7 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 		return true;
 	}
 
-    private Shoppinglist(Parcel in) {
+	private Shoppinglist(Parcel in) {
 		this.mId = in.readString();
 		this.mErn = in.readString();
 		this.mName = in.readString();
@@ -684,6 +736,7 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 		this.mMeta = in.readString();
 		this.mShares = (HashMap<String,Share>) in.readSerializable();
 		this.mUserId = in.readInt();
+		this.mSyncState = in.readInt();
 	}
 
 	public int describeContents() { 
@@ -701,7 +754,8 @@ public class Shoppinglist extends EtaListObject<Shoppinglist> implements Ern<Sho
 		dest.writeString(this.mMeta);
 		dest.writeSerializable(this.mShares);
 		dest.writeInt(this.mUserId);
+		dest.writeInt(this.mSyncState);
 	}
-    
+	
 }
 

@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects.helper;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
@@ -24,72 +24,76 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Size implements EtaObject<JSONObject>, Serializable, Parcelable {
-
+public class Dimension implements IJson<JSONObject>, Serializable, Parcelable {
+	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Eta.TAG_PREFIX + Size.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + Dimension.class.getSimpleName();
 	
-	private double mFrom = 1.0d;
-	private double mTo = 1.0d;
+	public static final double DEF_DIMENSION = -1d;
 	
-	public static Parcelable.Creator<Size> CREATOR = new Parcelable.Creator<Size>(){
-		public Size createFromParcel(Parcel source) {
-			return new Size(source);
+	private double mWidth = DEF_DIMENSION;
+	private double mHeight = DEF_DIMENSION;
+
+	public static Parcelable.Creator<Dimension> CREATOR = new Parcelable.Creator<Dimension>(){
+		public Dimension createFromParcel(Parcel source) {
+			return new Dimension(source);
 		}
-		public Size[] newArray(int size) {
-			return new Size[size];
+		public Dimension[] newArray(int size) {
+			return new Dimension[size];
 		}
 	};
 	
-	public Size() {
+	public Dimension() {
 		
 	}
 	
-	public static Size fromJSON(JSONObject size) {
-		Size s = new Size();
-		if (size == null) {
-			return s;
-		}
+	public static Dimension fromJSON(JSONObject dimension) {
+		Dimension d = new Dimension();
+		if (dimension == null) return d;
 		
-		s.setFrom(Json.valueOf(size, JsonKey.FROM, 1.0d));
-		s.setTo(Json.valueOf(size, JsonKey.TO, 1.0d));
+		d.setWidth(Json.valueOf(dimension, JsonKey.WIDTH, DEF_DIMENSION));
+		d.setHeight(Json.valueOf(dimension, JsonKey.HEIGHT, DEF_DIMENSION));
 		
-		return s;
+		return d;
 	}
 	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(JsonKey.FROM, getFrom());
-			o.put(JsonKey.TO, getTo());
+			o.put(JsonKey.HEIGHT, Json.nullCheck(getHeight()));
+			o.put(JsonKey.WIDTH, Json.nullCheck(getWidth()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
 	
-	public double getFrom() {
-		return mFrom;
+	public Double getWidth() {
+		return mWidth;
 	}
-	
-	public Size setFrom(double from) {
-		mFrom = from;
+
+	public Dimension setWidth(double width) {
+		mWidth = width;
+		return this;
+	}
+
+	public Double getHeight() {
+		return mHeight;
+	}
+
+	public Dimension setHeight(double height) {
+		mHeight = height;
 		return this;
 	}
 	
-	public double getTo() {
-		return mTo;
-	}
-	
-	public Size setTo(double to) {
-		mTo = to;
-		return this;
+	public boolean isSet() {
+		return mWidth>DEF_DIMENSION && mHeight>DEF_DIMENSION;
 	}
 	
 	@Override
@@ -97,9 +101,9 @@ public class Size implements EtaObject<JSONObject>, Serializable, Parcelable {
 		final int prime = 31;
 		int result = 1;
 		long temp;
-		temp = Double.doubleToLongBits(mFrom);
+		temp = Double.doubleToLongBits(mHeight);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(mTo);
+		temp = Double.doubleToLongBits(mWidth);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
@@ -112,18 +116,19 @@ public class Size implements EtaObject<JSONObject>, Serializable, Parcelable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Size other = (Size) obj;
-		if (Double.doubleToLongBits(mFrom) != Double
-				.doubleToLongBits(other.mFrom))
+		Dimension other = (Dimension) obj;
+		if (Double.doubleToLongBits(mHeight) != Double
+				.doubleToLongBits(other.mHeight))
 			return false;
-		if (Double.doubleToLongBits(mTo) != Double.doubleToLongBits(other.mTo))
+		if (Double.doubleToLongBits(mWidth) != Double
+				.doubleToLongBits(other.mWidth))
 			return false;
 		return true;
 	}
 
-	private Size(Parcel in) {
-		this.mFrom = in.readDouble();
-		this.mTo = in.readDouble();
+	private Dimension(Parcel in) {
+		this.mWidth = in.readDouble();
+		this.mHeight = in.readDouble();
 	}
 
 	public int describeContents() { 
@@ -131,8 +136,9 @@ public class Size implements EtaObject<JSONObject>, Serializable, Parcelable {
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeDouble(this.mFrom);
-		dest.writeDouble(this.mTo);
+		dest.writeDouble(this.mWidth);
+		dest.writeDouble(this.mHeight);
 	}
+	
 	
 }

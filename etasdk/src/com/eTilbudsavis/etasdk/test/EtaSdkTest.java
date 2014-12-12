@@ -11,7 +11,6 @@ public class EtaSdkTest {
 		long start = System.currentTimeMillis();
 
 		UtilsTest.test();
-		
 		ObjectTest.test();
 		log(TAG, "All test passed (" + (System.currentTimeMillis()-start) + "ms)");
 		

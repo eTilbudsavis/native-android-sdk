@@ -30,7 +30,8 @@ import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ListManager;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.SyncState;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
@@ -38,7 +39,7 @@ import com.eTilbudsavis.etasdk.Utils.Api.MetaKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements EtaObject<JSONObject>, Serializable, Parcelable {
+public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState<ShoppinglistItem>, IJson<JSONObject>, Serializable, Parcelable {
 
 	public static final String TAG = Eta.TAG_PREFIX + ShoppinglistItem.class.getSimpleName();
 
@@ -59,6 +60,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 	private String mPrevId;
 	private String mMeta;
 	private int mUserId = -1;
+	private int mSyncState = SyncState.TO_SYNC;
 	
 	/**
 	 * Default constructor, this will create a new UUID as this objects id, and
@@ -490,7 +492,16 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 		}
 		return this;
 	}
-	
+
+	public int getState() {
+		return mSyncState;
+	}
+
+	public ShoppinglistItem setState(int state) {
+		mSyncState = state;
+		return this;
+	}
+    
 	/**
 	 * Compare method, that uses the {@link ShoppinglistItem#getTitle() title}
 	 * to compare two items.
@@ -558,40 +569,11 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 		}
 	};
 	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + mCount;
-		result = prime * result
-				+ ((mCreator == null) ? 0 : mCreator.hashCode());
-		result = prime * result
-				+ ((mDescription == null) ? 0 : mDescription.hashCode());
-		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
-		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
-		result = prime * result
-				+ ((mModified == null) ? 0 : mModified.hashCode());
-		result = prime * result + ((mOffer == null) ? 0 : mOffer.hashCode());
-		result = prime * result
-				+ ((mOfferId == null) ? 0 : mOfferId.hashCode());
-		result = prime * result + ((mPrevId == null) ? 0 : mPrevId.hashCode());
-		result = prime * result
-				+ ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
-		result = prime * result + (mTick ? 1231 : 1237);
-		result = prime * result + mUserId;
-		return result;
-	}
+	public boolean same(Object obj) {
 
-	@Override
-	public boolean equals(Object obj) {
-		return equals(obj, false, false);
-	}
-	
-	public boolean equals(Object obj, boolean skipModified, boolean skipSyncState) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -624,13 +606,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 		} else if (!mMeta.equals(other.mMeta))
 			return false;
 		
-		if (!skipModified) {
-			if (mModified == null) {
-				if (other.mModified != null)
-					return false;
-			} else if (!mModified.equals(other.mModified))
-				return false;
-		}
+		// Removed modified
 		
 		if (mOffer == null) {
 			if (other.mOffer != null)
@@ -652,6 +628,105 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 				return false;
 		} else if (!mShoppinglistId.equals(other.mShoppinglistId))
 			return false;
+		
+		// Removed sync state
+		
+		if (mTick != other.mTick)
+			return false;
+		if (mUserId != other.mUserId)
+			return false;
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + mCount;
+		result = prime * result
+				+ ((mCreator == null) ? 0 : mCreator.hashCode());
+		result = prime * result
+				+ ((mDescription == null) ? 0 : mDescription.hashCode());
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
+		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
+		result = prime * result
+				+ ((mModified == null) ? 0 : mModified.hashCode());
+		result = prime * result + ((mOffer == null) ? 0 : mOffer.hashCode());
+		result = prime * result
+				+ ((mOfferId == null) ? 0 : mOfferId.hashCode());
+		result = prime * result + ((mPrevId == null) ? 0 : mPrevId.hashCode());
+		result = prime * result
+				+ ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
+		result = prime * result + mSyncState;
+		result = prime * result + (mTick ? 1231 : 1237);
+		result = prime * result + mUserId;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ShoppinglistItem other = (ShoppinglistItem) obj;
+		if (mCount != other.mCount)
+			return false;
+		if (mCreator == null) {
+			if (other.mCreator != null)
+				return false;
+		} else if (!mCreator.equals(other.mCreator))
+			return false;
+		if (mDescription == null) {
+			if (other.mDescription != null)
+				return false;
+		} else if (!mDescription.equals(other.mDescription))
+			return false;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
+			return false;
+		if (mMeta == null) {
+			if (other.mMeta != null)
+				return false;
+		} else if (!mMeta.equals(other.mMeta))
+			return false;
+		if (mModified == null) {
+			if (other.mModified != null)
+				return false;
+		} else if (!mModified.equals(other.mModified))
+			return false;
+		if (mOffer == null) {
+			if (other.mOffer != null)
+				return false;
+		} else if (!mOffer.equals(other.mOffer))
+			return false;
+		if (mOfferId == null) {
+			if (other.mOfferId != null)
+				return false;
+		} else if (!mOfferId.equals(other.mOfferId))
+			return false;
+		if (mPrevId == null) {
+			if (other.mPrevId != null)
+				return false;
+		} else if (!mPrevId.equals(other.mPrevId))
+			return false;
+		if (mShoppinglistId == null) {
+			if (other.mShoppinglistId != null)
+				return false;
+		} else if (!mShoppinglistId.equals(other.mShoppinglistId))
+			return false;
+		if (mSyncState != other.mSyncState)
+			return false;
 		if (mTick != other.mTick)
 			return false;
 		if (mUserId != other.mUserId)
@@ -659,7 +734,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 		return true;
 	}
 
-    private ShoppinglistItem(Parcel in) {
+	private ShoppinglistItem(Parcel in) {
 		this.mId = in.readString();
 		this.mErn = in.readString();
 		this.mTick = in.readByte() != 0;
@@ -674,6 +749,7 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 		this.mPrevId = in.readString();
 		this.mMeta = in.readString();
 		this.mUserId = in.readInt();
+		this.mSyncState = in.readInt();
 	}
 
 	public int describeContents() { 
@@ -694,6 +770,9 @@ public class ShoppinglistItem extends EtaListObject<ShoppinglistItem> implements
 		dest.writeString(this.mPrevId);
 		dest.writeString(this.mMeta);
 		dest.writeInt(this.mUserId);
+		dest.writeInt(this.mSyncState);
 	}
-    
+
+//	public boolean equals(Object obj, boolean skipModified, boolean skipSyncState) {
+	
 }

@@ -28,11 +28,11 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 
-import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject.State;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.SyncState;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.ListUtils;
@@ -128,14 +128,14 @@ public class ListManager {
 			
 		}
 		
-		sl.setPreviousId(ShoppinglistItem.FIRST_ITEM);
-		sl.setState(Shoppinglist.State.TO_SYNC);
+		sl.setPreviousId(ListUtils.FIRST_ITEM);
+		sl.setState(SyncState.TO_SYNC);
 		
 		Shoppinglist first = db.getFirstList(user);
 		if (first != null) {
 			first.setPreviousId(sl.getId());
 			first.setModified(new Date());
-			first.setState(Shoppinglist.State.TO_SYNC);
+			first.setState(SyncState.TO_SYNC);
 			db.editList(first, user);
 		}
 		
@@ -176,7 +176,7 @@ public class ListManager {
 		 */
 		if (!slShares.containsKey(user.getEmail())) {
 			Share dbShare = dbShares.get(user.getEmail());
-			dbShare.setState(Share.State.DELETE);
+			dbShare.setState(SyncState.DELETE);
 			db.editShare(dbShare, user);
 			mNotification.del(sl);
 			sendNotification(mNotification);
@@ -207,7 +207,7 @@ public class ListManager {
 					Share slShare = slShares.get(shareId);
 					
 					if (!dbShare.equals(slShare)) {
-						slShare.setState(Share.State.TO_SYNC);
+						slShare.setState(SyncState.TO_SYNC);
 						db.editShare(slShare, user);
 						mNotification.edit(sl);
 					}
@@ -218,7 +218,7 @@ public class ListManager {
 						EtaLog.i(TAG, "Owner cannot be removed from lists, owner will be reattached");
 					} else {
 						if (user.isLoggedIn()) {
-							dbShare.setState(Share.State.DELETE);
+							dbShare.setState(SyncState.DELETE);
 							db.editShare(dbShare, user);
 						} else {
 							db.deleteShare(dbShare, user);
@@ -243,7 +243,7 @@ public class ListManager {
 		Date now = new Date();
 		
 		sl.setModified(now);
-		sl.setState(Shoppinglist.State.TO_SYNC);
+		sl.setState(SyncState.TO_SYNC);
 		
 		// Check for changes in previous item, and update surrounding
 		Shoppinglist oldList = db.getList(sl.getId(), user);
@@ -259,7 +259,7 @@ public class ListManager {
 			if (slAfter != null) {
 				slAfter.setPreviousId(oldList.getPreviousId());
 				slAfter.setModified(now);
-				slAfter.setState(State.TO_SYNC);
+				slAfter.setState(SyncState.TO_SYNC);
 				db.editList(slAfter, user);
 				mNotification.edit(slAfter);
 			}
@@ -269,7 +269,7 @@ public class ListManager {
 			if (slSamePointer != null) {
 				slSamePointer.setPreviousId(sl.getId());
 				slSamePointer.setModified(now);
-				slSamePointer.setState(State.TO_SYNC);
+				slSamePointer.setState(SyncState.TO_SYNC);
 				db.editList(slSamePointer, user);
 				mNotification.edit(slSamePointer);
 			}
@@ -313,7 +313,7 @@ public class ListManager {
 		if (after != null) {
 			after.setPreviousId(sl.getPreviousId());
 			after.setModified(now);
-			after.setState(State.TO_SYNC);
+			after.setState(SyncState.TO_SYNC);
 			db.editList(after, user);
 			mNotification.edit(after);
 		}
@@ -325,20 +325,20 @@ public class ListManager {
 		if (mEta.getUser().isLoggedIn()) {
 			
 			for (ShoppinglistItem sli : items) {
-				sli.setState(ShoppinglistItem.State.DELETE);
+				sli.setState(SyncState.DELETE);
 				sli.setModified(now);
 				db.editItem(sli, user);
 				mNotification.del(sli);
 			}
 			 
 			// Update local version of shoppinglist
-			sl.setState(Shoppinglist.State.DELETE);
+			sl.setState(SyncState.DELETE);
 			count = db.editList(sl, user);
 			
 		} else {
 
 			for (ShoppinglistItem sli : items) {
-				sli.setState(ShoppinglistItem.State.DELETE);
+				sli.setState(SyncState.DELETE);
 				sli.setModified(now);
 				mNotification.del(sli);
 			}
@@ -418,7 +418,7 @@ public class ListManager {
 		
 		Date now = new Date();
 		sli.setModified(now);
-		sli.setState(ShoppinglistItem.State.TO_SYNC);
+		sli.setState(SyncState.TO_SYNC);
 		
 		// If the item exists in DB, then just increase count and edit the item
 		if (incrementCount) {
@@ -461,12 +461,12 @@ public class ListManager {
 			}
 		}
 		
-		sli.setPreviousId(ShoppinglistItem.FIRST_ITEM);
+		sli.setPreviousId(ListUtils.FIRST_ITEM);
 		ShoppinglistItem first = db.getFirstItem(sli.getShoppinglistId(), user);
 		if (first != null) {
 			first.setPreviousId(sli.getId());
 			first.setModified(now);
-			first.setState(ShoppinglistItem.State.TO_SYNC);
+			first.setState(SyncState.TO_SYNC);
 			db.editItem(first, user);
 			mNotification.edit(first);
 		}
@@ -529,7 +529,7 @@ public class ListManager {
 		
 		Date now = new Date();
 		sli.setModified(now);
-		sli.setState(ShoppinglistItem.State.TO_SYNC);
+		sli.setState(SyncState.TO_SYNC);
 		
 		// Check for changes in previous item, and update surrounding
 		ShoppinglistItem oldItem = db.getItem(sli.getId(), user);
@@ -619,7 +619,7 @@ public class ListManager {
         List<ShoppinglistItem> list = getItems(sl);
         int count = 0;
 
-		String preGoodId = ShoppinglistItem.FIRST_ITEM;
+		String preGoodId = ListUtils.FIRST_ITEM;
 		
 		for (ShoppinglistItem sli : list) {
 			if (stateToDelete == null) {
@@ -632,7 +632,7 @@ public class ListManager {
 				if (!sli.getPreviousId().equals(preGoodId)) {
 					sli.setPreviousId(preGoodId);
 					sli.setModified(now);
-					sli.setState(ShoppinglistItem.State.TO_SYNC);
+					sli.setState(SyncState.TO_SYNC);
 					db.editItem(sli, user);
 				}
 				preGoodId = sli.getId();
@@ -641,7 +641,7 @@ public class ListManager {
 		
 		if (mEta.getUser().isLoggedIn()) {
 			for (ShoppinglistItem sli : mNotification.getDeletedItems()) {
-				sli.setState(ShoppinglistItem.State.DELETE);
+				sli.setState(SyncState.DELETE);
 				sli.setModified(now);
 				count += db.editItem(sli, user);
 			}
@@ -697,7 +697,7 @@ public class ListManager {
 		
 		int count = 0;
 		if (user.getUserId() != User.NO_USER) {
-			sli.setState(ShoppinglistItem.State.DELETE);
+			sli.setState(SyncState.DELETE);
 			count = db.editItem(sli, user);
 		} else {
 			count = db.deleteItem(sli, user);

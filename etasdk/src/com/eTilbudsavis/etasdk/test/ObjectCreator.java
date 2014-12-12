@@ -1,37 +1,50 @@
 package com.eTilbudsavis.etasdk.test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.graphics.Color;
 
+import com.eTilbudsavis.etasdk.EtaObjects.Branding;
+import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Country;
+import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
+import com.eTilbudsavis.etasdk.EtaObjects.Dimension;
+import com.eTilbudsavis.etasdk.EtaObjects.Hotspot;
+import com.eTilbudsavis.etasdk.EtaObjects.HotspotMap;
+import com.eTilbudsavis.etasdk.EtaObjects.Images;
+import com.eTilbudsavis.etasdk.EtaObjects.Links;
 import com.eTilbudsavis.etasdk.EtaObjects.Offer;
+import com.eTilbudsavis.etasdk.EtaObjects.Pageflip;
+import com.eTilbudsavis.etasdk.EtaObjects.Permission;
+import com.eTilbudsavis.etasdk.EtaObjects.Pieces;
+import com.eTilbudsavis.etasdk.EtaObjects.Pricing;
+import com.eTilbudsavis.etasdk.EtaObjects.Quantity;
+import com.eTilbudsavis.etasdk.EtaObjects.Session;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
+import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
+import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.EtaObjects.Si;
+import com.eTilbudsavis.etasdk.EtaObjects.Size;
 import com.eTilbudsavis.etasdk.EtaObjects.Store;
+import com.eTilbudsavis.etasdk.EtaObjects.Subscription;
+import com.eTilbudsavis.etasdk.EtaObjects.Typeahead;
+import com.eTilbudsavis.etasdk.EtaObjects.Unit;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.HotspotMap;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Links;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Pageflip;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Permission;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Pieces;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Pricing;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Quantity;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Si;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Size;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Subscription;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Typeahead;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Unit;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.SyncState;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ObjectCreator {
-
+	
+	// TODO All objects that are time sensitive must take this into account
+	
 	private static String getUrl(String id, String path) {
 		return String.format("https://eta.dk/%s/%s", id, path);
 	}
@@ -45,7 +58,7 @@ public class ObjectCreator {
 	}
 
 	public static Country getCountry() {
-		return getCountry("89azf82");
+		return getCountry("DK");
 	}
 	
 	public static Country getCountry(String id) {
@@ -64,7 +77,7 @@ public class ObjectCreator {
 		s.setBranding(getBranding());
 		s.setCity("fake-city");
 		s.setContact("fake-email@fake.com");
-		s.setCountry(getCountry(id));
+		s.setCountry(getCountry());
 		String dealerId = getID("dealer", id);
 		s.setDealerId(dealerId);
 		s.setDealerUrl(getUrl(dealerId));
@@ -301,6 +314,149 @@ public class ObjectCreator {
 		q.setUnit(unit);
 		q.setSize(size);
 		return q;
+	}
+
+	public static HashSet<String> getCategoryIds() {
+		return getCategoryIds(new String[]{"discount","pets","fashion","sport"});
+	}
+	
+	public static HashSet<String> getCategoryIds(String[] ids) {
+		HashSet<String> s = new HashSet<String>();
+		s.addAll(Arrays.asList(ids));
+		return s;
+	}
+
+	public static ShoppinglistItem getShoppinglistItem() {
+		return getShoppinglistItem("89azf82", "pizza");
+	}
+
+	public static ShoppinglistItem getShoppinglistItem(String id, String description) {
+		Shoppinglist sl = getShoppinglist();
+		ShoppinglistItem s = new ShoppinglistItem(sl, description);
+		s.setComment("fake-comment");
+		s.setCount(187);
+		s.setCreator("fake-user@eta.dk");
+		s.setDescription("fake-description");
+		s.setId(id);
+		JSONObject o = new JSONObject();
+		try {
+			o.put("metadata", "foobar");
+		} catch (JSONException e) {
+			
+		}
+		s.setMeta(o);
+		long exp = System.currentTimeMillis() - Utils.HOUR_IN_MILLIS;
+		s.setModified(new Date(exp));
+		s.setOffer(getOffer());
+		s.setOfferId(s.getOffer().getId());
+		s.setPreviousId(Utils.createUUID());
+		s.setShoppinglistId(sl.getId());
+		s.setState(SyncState.TO_SYNC);
+		s.setTick(true);
+		s.setUserId(187);
+		return s;
+	}
+
+	public static Shoppinglist getShoppinglist() {
+		return getShoppinglist("489efdb2", "bents liste");
+	}
+	
+	public static Shoppinglist getShoppinglist(String id, String name) {
+		Shoppinglist s = Shoppinglist.fromName(name);
+		s.setAccess(Shoppinglist.ACCESS_PRIVATE);
+		s.setId(id);
+		JSONObject o = new JSONObject();
+		try {
+			o.put("metadata", "foobar");
+		} catch (JSONException e) {
+			
+		}
+		s.setMeta(o);
+		long exp = System.currentTimeMillis() - Utils.HOUR_IN_MILLIS;
+		s.setModified(new Date(exp));
+		s.setName(name);
+		s.setPreviousId(Utils.createUUID());
+		List<Share> shares = new ArrayList<Share>(10);
+		for (int i = 0; i < 10 ; i++) {
+			String email = String.format("danny%s@eta.dk", i);
+			shares.add(getShare(email, Share.ACCESS_READWRITE, getUrl(id)));
+		}
+		s.setShares(shares);
+		s.setState(SyncState.TO_SYNC);
+		s.setType(Shoppinglist.TYPE_SHOPPING_LIST);
+		s.setUserId(187);
+		return s;
+	}
+
+	public static Session getSession() {
+		return getSession("token-bafa555b");
+	}
+
+	public static Session getSession(String token) {
+		Session s = new Session();
+		s.setClientId("fake-cid");
+		long exp = System.currentTimeMillis() + Utils.HOUR_IN_MILLIS;
+		s.setExpires(new Date(exp));
+		s.setPermission(getPermission());
+		s.setProvider("fake-provider");
+		s.setReference("fake-reference");
+		s.setToken(token);
+		s.setUser(getUser());
+		return s;
+	}
+	
+	public static Dealer getDealer() {
+		return getDealer("bcd825a", "fake-netto");
+	}
+	
+	public static Dealer getDealer(String id, String name) {
+		Dealer d = new Dealer();
+		d.setColor(Color.MAGENTA);
+		d.setId(id);
+		d.setLogo(getUrl(id, "fake-logo"));
+		d.setName(name);
+		d.setPageflip(getPageflip());
+		d.setUrlName(getUrl(id, "name"));
+		d.setWebsite(getUrl(id, "website"));
+		return d;
+	}
+
+	public static Catalog getCatalog() {
+		return getCatalog("156fab7");
+	}
+
+	public static Catalog getCatalog(String id) {
+		Catalog c = new Catalog();
+		c.setBackground(Color.TRANSPARENT);
+		c.setBranding(getBranding());
+		c.setCatrgoryIds(getCategoryIds());
+		c.setDimension(getDimension());
+		c.setId(id);
+		c.setHotspots(getHotspotMap());
+		c.setImages(getImages());
+		c.setLabel("fake-label");
+		c.setOfferCount(32);
+		c.setPageCount(9);
+		List<Images> images = new ArrayList<Images>(10);
+		for (int i = 0; i < 10; i++) {
+			images.add(getImages(id));
+		}
+		c.setPages(images);
+		c.setPdfUrl(getUrl("pdf"));
+
+		long now = System.currentTimeMillis();
+		c.setRunFrom(new Date(now - (Utils.DAY_IN_MILLIS*3)));
+		c.setRunTill(new Date(now + (Utils.DAY_IN_MILLIS*3)));
+		
+		String dealerId = getID("dealer", id);
+		c.setDealerId(dealerId);
+		c.setDealerUrl(getUrl(dealerId));
+		
+		String storeId = getID("store", id);
+		c.setStoreId(storeId);
+		c.setStoreUrl(getUrl(storeId));
+		
+		return c;
 	}
 	
 	public static Offer getOffer() {

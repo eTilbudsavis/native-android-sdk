@@ -31,12 +31,11 @@ import android.os.HandlerThread;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.SessionManager.OnSessionChangeListener;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject.State;
 import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.SyncState;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Log.SyncLog;
 import com.eTilbudsavis.etasdk.Network.Delivery;
@@ -492,7 +491,7 @@ public class SyncManager {
 			 * before inserting into the DB, as this is actually correct
 			 */
 			for (Share share : sl.getShares().values()) {
-				share.setState(State.SYNCED);
+				share.setState(SyncState.SYNCED);
 			}
 			
 		}
@@ -533,7 +532,7 @@ public class SyncManager {
 					Shoppinglist serverSl = serverMap.get(key);
 					
 					if (localSl.getModified().before(serverSl.getModified())) {
-						serverSl.setState(State.SYNCED);
+						serverSl.setState(SyncState.SYNCED);
 						mNotification.edit(serverSl);
 						db.editList(serverSl, user);
 						db.cleanShares(serverSl, user);
@@ -553,7 +552,7 @@ public class SyncManager {
 			} else {
 				
 				Shoppinglist add = serverMap.get(key);
-				add.setState(State.TO_SYNC);
+				add.setState(SyncState.TO_SYNC);
 				mNotification.add(add);
 				db.insertList(add, user);
 				
@@ -612,19 +611,19 @@ public class SyncManager {
 		for (final Shoppinglist sl : localLists) {
 			
 			// If they are in the state of processing, then skip
-			if (sl.getState() == State.SYNCING) {
+			if (sl.getState() == SyncState.SYNCING) {
 				continue;
 			}
 			
 			// If it obviously needs to sync, then just do it
-			if (sl.getState() == State.TO_SYNC) {
+			if (sl.getState() == SyncState.TO_SYNC) {
 				// New shopping lists must always sync
 				syncItems(sl, user);
 				continue;
 			}
 			
 			// Run the check 
-			sl.setState(State.SYNCING);
+			sl.setState(SyncState.SYNCING);
 			db.editList(sl, user);
 			
 			Listener<JSONObject> modifiedListener = new Listener<JSONObject>() {
@@ -634,7 +633,7 @@ public class SyncManager {
 
 					if (response != null) {
 						
-						sl.setState(State.SYNCED);
+						sl.setState(SyncState.SYNCED);
 						try {
 							String modified = response.getString(Api.JsonKey.MODIFIED);
 							// If local list has been modified before the server list, then sync items
@@ -676,7 +675,7 @@ public class SyncManager {
 
 		final DbHelper db = DbHelper.getInstance();
 		
-		sl.setState(State.SYNCING);
+		sl.setState(SyncState.SYNCING);
 		db.editList(sl, user);
 		
 		Listener<JSONArray> itemListener = new Listener<JSONArray>() {
@@ -685,7 +684,7 @@ public class SyncManager {
 				
 				if (response != null) {
 					
-					sl.setState(State.SYNCED);
+					sl.setState(SyncState.SYNCED);
 					db.editList(sl, user);
 					
 					// Get ALL items including deleted, to avoid adding them again
@@ -696,7 +695,7 @@ public class SyncManager {
 					Collections.reverse(serverItems);
 
 					for (ShoppinglistItem sli : serverItems) {
-						sli.setState(State.SYNCED);
+						sli.setState(SyncState.SYNCED);
 					}
 					
 					mergeItemsToDb(serverItems, localItems, user);
@@ -709,13 +708,13 @@ public class SyncManager {
 					if (Eta.getInstance().getListManager().canEdit(sl, user)) {
 						
 						/* Update previous_id's, modified and state if needed */
-						String tmp = EtaListObject.FIRST_ITEM;
+						String tmp = ListUtils.FIRST_ITEM;
 						for (ShoppinglistItem sli : localItems) {
 							
 							if (!tmp.equals(sli.getPreviousId())) {
 								sli.setPreviousId(tmp);
 								sli.setModified(new Date());
-								sli.setState(State.TO_SYNC);
+								sli.setState(SyncState.TO_SYNC);
 								
 								/* If it's a new item, it's already in the added list,
 								 * then we'll override it else add it to the edited
@@ -798,7 +797,7 @@ public class SyncManager {
 					
 				} else {
 					ShoppinglistItem delSli = localMap.get(key);
-					if (delSli.getState() == State.TO_SYNC) {
+					if (delSli.getState() == SyncState.TO_SYNC) {
 						/* 
 						 * Item have been added while request was in flight
 						 * ignore it for now
@@ -831,15 +830,15 @@ public class SyncManager {
 
 			switch (sl.getState()) {
 
-			case State.TO_SYNC:
+			case SyncState.TO_SYNC:
 				putList(sl, user);
 				break;
 
-			case State.DELETE:
+			case SyncState.DELETE:
 				delList(sl, user);
 				break;
 
-			case State.ERROR:
+			case SyncState.ERROR:
 				revertList(sl, user);
 				break;
 
@@ -868,15 +867,15 @@ public class SyncManager {
 		for (ShoppinglistItem sli : items) {
 
 			switch (sli.getState()) {
-			case State.TO_SYNC:
+			case SyncState.TO_SYNC:
 				putItem(sli, user);
 				break;
 
-			case State.DELETE:
+			case SyncState.DELETE:
 				delItem(sli, user);
 				break;
 
-			case State.ERROR:
+			case SyncState.ERROR:
 				revertItem(sli, user);
 				break;
 
@@ -895,7 +894,7 @@ public class SyncManager {
 
 		final DbHelper db = DbHelper.getInstance();
 		
-		sl.setState(State.SYNCING);
+		sl.setState(SyncState.SYNCING);
 		db.editList(sl, user);
 		
 		Listener<JSONObject> listListener = new Listener<JSONObject>() {
@@ -912,7 +911,7 @@ public class SyncManager {
 					Shoppinglist serverSl = Shoppinglist.fromJSON(response);
 					Shoppinglist localSl = db.getList(serverSl.getId(), user);
 					if (localSl != null && !serverSl.getModified().equals(localSl.getModified()) ) {
-						serverSl.setState(State.SYNCED);
+						serverSl.setState(SyncState.SYNCED);
 						// If server haven't delivered an prev_id, then use old id
 						serverSl.setPreviousId(serverSl.getPreviousId() == null ? sl.getPreviousId() : serverSl.getPreviousId());
 						db.editList(serverSl, user);
@@ -997,8 +996,8 @@ public class SyncManager {
 		
 		final DbHelper db = DbHelper.getInstance();
 		
-		if (sl.getState() != State.ERROR) {
-			sl.setState(State.ERROR);
+		if (sl.getState() != SyncState.ERROR) {
+			sl.setState(SyncState.ERROR);
 			db.editList(sl, user);
 		}
 		
@@ -1008,7 +1007,7 @@ public class SyncManager {
 				
 				if (response != null) {
 					Shoppinglist serverSl = Shoppinglist.fromJSON(response);
-					serverSl.setState(State.SYNCED);
+					serverSl.setState(SyncState.SYNCED);
 					serverSl.setPreviousId(serverSl.getPreviousId() == null ? sl.getPreviousId() : serverSl.getPreviousId());
 					db.editList(serverSl, user);
 					mNotification.add(serverSl);
@@ -1032,7 +1031,7 @@ public class SyncManager {
 		
 		final DbHelper db = DbHelper.getInstance();
 		
-		sli.setState(State.SYNCING);
+		sli.setState(SyncState.SYNCING);
 		db.editItem(sli, user);
 		
 		Listener<JSONObject> itemListener = new Listener<JSONObject>() {
@@ -1047,7 +1046,7 @@ public class SyncManager {
 					if (local != null && !local.getModified().equals(server.getModified()) ) {
 						
 						// The server has a 'better' state, we should use this
-						server.setState(State.SYNCED);
+						server.setState(SyncState.SYNCED);
 						// If server havent delivered an prev_id, then use old id
 						if (server.getPreviousId() == null) {
 							server.setPreviousId(sli.getPreviousId());
@@ -1135,8 +1134,8 @@ public class SyncManager {
 		
 		final DbHelper db = DbHelper.getInstance();
 		
-		if (sli.getState() != State.ERROR) {
-			sli.setState(State.ERROR);
+		if (sli.getState() != SyncState.ERROR) {
+			sli.setState(SyncState.ERROR);
 			db.editItem(sli, user);
 		}
 		
@@ -1148,7 +1147,7 @@ public class SyncManager {
 					
 					// Take server response, insert it into DB, post notification
 					ShoppinglistItem serverSli = ShoppinglistItem.fromJSON(response);
-					serverSli.setState(State.SYNCED);
+					serverSli.setState(SyncState.SYNCED);
 					serverSli.setPreviousId(serverSli.getPreviousId() == null ? sli.getPreviousId() : serverSli.getPreviousId());
 //					EtaLog.d(TAG, "affected: " + db.editItem(serverSli, user));
 //					EtaLog.d(TAG, serverSli.toJSON().toString());
@@ -1202,15 +1201,15 @@ public class SyncManager {
 			
 			switch (s.getState()) {
 			
-				case State.TO_SYNC:
+				case SyncState.TO_SYNC:
 					putShare(s, user);
 					break;
 					
-				case State.DELETE:
+				case SyncState.DELETE:
 					delShare(s, user);
 					break;
 					
-				case State.ERROR:
+				case SyncState.ERROR:
 					revertShare(s, user);
 					break;
 					
@@ -1230,7 +1229,7 @@ public class SyncManager {
 
 		final DbHelper db = DbHelper.getInstance();
 		
-		s.setState(State.SYNCING);
+		s.setState(SyncState.SYNCING);
 		db.editShare(s, user);
 		
 		Listener<JSONObject> shareListener = new Listener<JSONObject>() {
@@ -1239,7 +1238,7 @@ public class SyncManager {
 
 				if (response != null) {
 					Share serverShare = Share.fromJSON(response);
-					serverShare.setState(State.SYNCED);
+					serverShare.setState(SyncState.SYNCED);
 					serverShare.setShoppinglistId(s.getShoppinglistId());
 					db.editShare(serverShare, user);
 					popRequest();
@@ -1346,8 +1345,8 @@ public class SyncManager {
 		
 		final DbHelper db = DbHelper.getInstance();
 		
-		if (s.getState() != State.ERROR) {
-			s.setState(State.ERROR);
+		if (s.getState() != SyncState.ERROR) {
+			s.setState(SyncState.ERROR);
 			db.editShare(s, user);
 		}
 		
@@ -1358,7 +1357,7 @@ public class SyncManager {
 				if (response != null) {
 					
 					Share serverShare = Share.fromJSON(response);
-					serverShare.setState(State.SYNCED);
+					serverShare.setState(SyncState.SYNCED);
 					serverShare.setShoppinglistId(s.getShoppinglistId());
 					db.editShare(serverShare, user);
 

@@ -13,24 +13,24 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects.helper;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Branding implements EtaObject<JSONObject>, Serializable, Parcelable {
+public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -68,10 +68,8 @@ public class Branding implements EtaObject<JSONObject>, Serializable, Parcelable
 			b.setUrlName(Json.valueOf(branding, JsonKey.URL_NAME));
 			b.setWebsite(Json.valueOf(branding, JsonKey.WEBSITE));
 			b.setLogo(Json.valueOf(branding, JsonKey.LOGO));
-			String color = Json.valueOf(branding, JsonKey.COLOR, "ffffff");
-			b.setColor(Color.parseColor("#"+color));
-			String logoColor = Json.valueOf(branding, JsonKey.LOGO_BACKGROUND, color);
-			b.setLogoBackground(Color.parseColor("#"+logoColor));
+			b.setColor(Json.colorValueOf(branding, JsonKey.COLOR, "ffffff"));
+			b.setLogoBackground(Json.colorValueOf(branding, JsonKey.LOGO_BACKGROUND, b.getColor()));
 			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(JsonKey.PAGEFLIP)));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
@@ -86,7 +84,7 @@ public class Branding implements EtaObject<JSONObject>, Serializable, Parcelable
 			o.put(JsonKey.URL_NAME, Json.nullCheck(getUrlName()));
 			o.put(JsonKey.WEBSITE, Json.nullCheck(getWebsite()));
 			o.put(JsonKey.LOGO, Json.nullCheck(getLogo()));
-			o.put(JsonKey.COLOR, Json.nullCheck(getColorString()));
+			o.put(JsonKey.COLOR, Json.nullCheck(Utils.colorToString(getColor())));
 			o.put(JsonKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
@@ -151,11 +149,7 @@ public class Branding implements EtaObject<JSONObject>, Serializable, Parcelable
 	public Integer getColor() {
 		return mColor;
 	}
-
-	public String getColorString() {
-		return String.format("%06X", 0xFFFFFF & mColor);
-	}
-
+	
 	public Branding setPageflip(Pageflip pageflip) {
 		mPageflip = pageflip;
 		return this;

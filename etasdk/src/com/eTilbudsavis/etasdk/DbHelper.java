@@ -32,7 +32,9 @@ import com.eTilbudsavis.etasdk.EtaObjects.Share;
 import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
 import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.SyncState;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.ListUtils;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class DbHelper extends SQLiteOpenHelper {
@@ -180,7 +182,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		Shoppinglist sl = Shoppinglist.fromName(c.getString(c.getColumnIndex(NAME)));
 		sl.setId(c.getString(c.getColumnIndex(ID)));
 		sl.setErn(c.getString(c.getColumnIndex(ERN)));
-		sl.setModified(c.getString(c.getColumnIndex(MODIFIED)));
+		String mod = c.getString(c.getColumnIndex(MODIFIED));
+		sl.setModified(Utils.stringToDate(mod));
 		sl.setAccess(c.getString(c.getColumnIndex(ACCESS)));
 		sl.setState(c.getInt(c.getColumnIndex(STATE)));
 		sl.setPreviousId(c.getString(c.getColumnIndex(PREVIOUS_ID)));
@@ -363,7 +366,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public Shoppinglist getList(String id, User user) {
 		id = escape(id);
-		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s!=%s", LIST_TABLE, ID, id, USER, user.getUserId(), STATE, Shoppinglist.State.DELETE);
+		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s!=%s", LIST_TABLE, ID, id, USER, user.getUserId(), STATE, SyncState.DELETE);
 		Cursor c = null;
 		Shoppinglist sl = null;
 		try {
@@ -400,7 +403,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		if (includeDeleted) {
 			q = String.format("SELECT * FROM %s WHERE %s=%s", LIST_TABLE, USER, user.getUserId());
 		} else {
-			q = String.format("SELECT * FROM %s WHERE %s!=%s AND %s=%s", LIST_TABLE, STATE, Shoppinglist.State.DELETE, USER, user.getUserId());
+			q = String.format("SELECT * FROM %s WHERE %s!=%s AND %s=%s", LIST_TABLE, STATE, SyncState.DELETE, USER, user.getUserId());
 		}
 		Cursor c = null;
 		List<Shoppinglist> tmp = new ArrayList<Shoppinglist>();
@@ -535,7 +538,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		if (includeDeleted) {
 			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, USER, user.getUserId());
 		} else {
-			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, STATE, ShoppinglistItem.State.DELETE, USER, user.getUserId());
+			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, STATE, SyncState.DELETE, USER, user.getUserId());
 		}
 		List<ShoppinglistItem> items = new ArrayList<ShoppinglistItem>();
 		Cursor c = null;
@@ -555,7 +558,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 
 	public ShoppinglistItem getFirstItem(String shoppinglistId, User user) {
-		return getItemPrevious(shoppinglistId, ShoppinglistItem.FIRST_ITEM, user);
+		return getItemPrevious(shoppinglistId, ListUtils.FIRST_ITEM, user);
 	}
 	
 	public ShoppinglistItem getItemPrevious(String shoppinglistId, String previousId, User user) {
@@ -578,7 +581,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 
 	public Shoppinglist getFirstList(User user) {
-		return getListPrevious(Shoppinglist.FIRST_ITEM, user);
+		return getListPrevious(ListUtils.FIRST_ITEM, user);
 	}
 	
 	public Shoppinglist getListPrevious(String previousId, User user) {
@@ -655,7 +658,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		if (includeDeleted) {
 			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, USER, user.getUserId());
 		} else {
-			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, STATE, Share.State.DELETE, USER, user.getUserId());
+			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, STATE, SyncState.DELETE, USER, user.getUserId());
 		}
 		
 		List<Share> shares = new ArrayList<Share>();

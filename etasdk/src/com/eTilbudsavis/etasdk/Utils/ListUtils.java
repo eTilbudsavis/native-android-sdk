@@ -13,7 +13,9 @@ import com.eTilbudsavis.etasdk.Log.EtaLog;
 public class ListUtils {
 	
 	public static final String TAG = Eta.TAG_PREFIX + ListUtils.class.getSimpleName();
-
+	
+	public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
+	
 	public static void printItem(String tag, ShoppinglistItem s) {
 		EtaLog.d(tag, "Item " + s.getDescription() + " prevId( " + s.getPreviousId() + ") - modified( " + s.getModified().toGMTString() + " ) ");
 	}
@@ -39,7 +41,7 @@ public class ListUtils {
 		
 		boolean isFirst = prevPos < 0;
 		ShoppinglistItem prev = isFirst ? null : list.get(prevPos);
-		String prevId = isFirst ? ShoppinglistItem.FIRST_ITEM : prev.getId();
+		String prevId = isFirst ? FIRST_ITEM : prev.getId();
 		
 		for (ShoppinglistItem sli : list) {
 			if (sli.getPreviousId().equals(prevId)) {
@@ -101,7 +103,7 @@ public class ListUtils {
 			
 			if (prevId == null) {
 				nil.add(sli);
-			} else if (prevId.equals(ShoppinglistItem.FIRST_ITEM)) {
+			} else if (prevId.equals(FIRST_ITEM)) {
 				first.add(sli);
 			} else if ( !prevItems.containsKey(prevId) && allId.contains(prevId)) {
 				prevItems.put(prevId, sli);

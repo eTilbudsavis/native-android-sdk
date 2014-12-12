@@ -26,14 +26,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Permission;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 import com.eTilbudsavis.etasdk.Utils.Utils;
 
-public class Session implements EtaObject<JSONObject>, Serializable, Parcelable {
+public class Session implements IJson<JSONObject>, Serializable, Parcelable {
 	
 	public static final String TAG = Eta.TAG_PREFIX + Session.class.getSimpleName();
 	
@@ -67,7 +66,8 @@ public class Session implements EtaObject<JSONObject>, Serializable, Parcelable 
 		}
 		
 		s.setToken(Json.valueOf(session, JsonKey.TOKEN));
-		s.setExpires(Json.valueOf(session, JsonKey.EXPIRES));
+		String exp = Json.valueOf(session, JsonKey.EXPIRES);
+		s.setExpires(Utils.stringToDate(exp));
 		s.setClientId(Json.valueOf(session, JsonKey.CLIENT_ID));
 		s.setReference(Json.valueOf(session, JsonKey.REFERENCE));
 		
@@ -170,11 +170,6 @@ public class Session implements EtaObject<JSONObject>, Serializable, Parcelable 
 		return mProvider;
 	}
 	
-	public Session setExpires(String time) {
-	    mExpires = Utils.stringToDate(time);
-	    return this;
-	}
-	
 	public Session setExpires(Date time) {
 	    mExpires = time;
 	    return this;
@@ -184,7 +179,7 @@ public class Session implements EtaObject<JSONObject>, Serializable, Parcelable 
 		return mExpires;
 	}
 
-	@Override
+    @Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -250,7 +245,7 @@ public class Session implements EtaObject<JSONObject>, Serializable, Parcelable 
 		return true;
 	}
 
-    private Session(Parcel in) {
+	private Session(Parcel in) {
 		this.mToken = in.readString();
 		long tmpMExpires = in.readLong(); 
 		this.mExpires = tmpMExpires == -1 ? null : new Date(tmpMExpires);

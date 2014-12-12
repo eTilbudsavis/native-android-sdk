@@ -14,10 +14,10 @@ import android.widget.TextView;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.R;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Dimension;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.HotspotMap;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
+import com.eTilbudsavis.etasdk.EtaObjects.Dimension;
+import com.eTilbudsavis.etasdk.EtaObjects.Hotspot;
+import com.eTilbudsavis.etasdk.EtaObjects.HotspotMap;
+import com.eTilbudsavis.etasdk.EtaObjects.Images;
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapDisplayer;
 import com.eTilbudsavis.etasdk.ImageLoader.BitmapProcessor;
 import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;

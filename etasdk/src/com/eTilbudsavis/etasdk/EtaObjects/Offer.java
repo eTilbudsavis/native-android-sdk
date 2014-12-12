@@ -28,15 +28,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.ICatalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Images;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Links;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Pricing;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Quantity;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
@@ -53,7 +49,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Offer implements Ern<Offer>, EtaObject<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>, Serializable, Parcelable {
+public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 	

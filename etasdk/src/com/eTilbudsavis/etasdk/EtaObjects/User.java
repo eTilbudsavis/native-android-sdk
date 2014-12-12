@@ -24,9 +24,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Permission;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
@@ -43,7 +42,7 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class User implements Ern<User>, EtaObject<JSONObject>, Serializable, Parcelable {
+public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcelable {
 	
 	public static final String TAG = Eta.TAG_PREFIX + User.class.getSimpleName();
 	

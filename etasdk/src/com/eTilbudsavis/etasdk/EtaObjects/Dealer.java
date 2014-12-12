@@ -23,17 +23,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Pageflip;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 /**
  * <p>This class is a representation of a dealer as the API v2 exposes it</p>
@@ -46,7 +45,7 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable, Parcelable {
+public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -60,7 +59,7 @@ public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable,
 	private String mUrlName;
 	private String mWebsite;
 	private String mLogo;
-	private Integer mColor;
+	private int mColor;
 	private Pageflip mPageflip;
 	
 	public Dealer() {
@@ -89,12 +88,11 @@ public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable,
 		try {
 			d.setId(Json.valueOf(dealer, JsonKey.ID));
 			d.setErn(Json.valueOf(dealer, JsonKey.ERN));
-			d.setErn(Json.valueOf(dealer, JsonKey.ERN));
 			d.setName(Json.valueOf(dealer, JsonKey.NAME));
 			d.setUrlName(Json.valueOf(dealer, JsonKey.URL_NAME));
 			d.setWebsite(Json.valueOf(dealer, JsonKey.WEBSITE));
 			d.setLogo(Json.valueOf(dealer, JsonKey.LOGO));
-			d.setColor(Color.parseColor("#"+Json.valueOf(dealer, JsonKey.COLOR)));
+			d.setColor(Json.colorValueOf(dealer, JsonKey.COLOR));
 			d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(JsonKey.PAGEFLIP)));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
@@ -111,7 +109,7 @@ public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable,
 			o.put(JsonKey.URL_NAME, Json.nullCheck(getUrlName()));
 			o.put(JsonKey.WEBSITE, Json.nullCheck(getWebsite()));
 			o.put(JsonKey.LOGO, Json.nullCheck(getLogo()));
-			o.put(JsonKey.COLOR, Json.nullCheck(getColorString()));
+			o.put(JsonKey.COLOR, Json.nullCheck(Utils.colorToString(getColor())));
 			o.put(JsonKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
@@ -187,10 +185,6 @@ public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable,
 		return mColor;
 	}
 	
-	public String getColorString() {
-		return String.format("%06X", 0xFFFFFF & mColor);
-	}
-
 	public Dealer setPageflip(Pageflip pageflip) {
 		mPageflip = pageflip;
 		return this;
@@ -237,7 +231,7 @@ public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable,
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((mColor == null) ? 0 : mColor.hashCode());
+		result = prime * result + mColor;
 		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
 		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
@@ -260,10 +254,7 @@ public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable,
 		if (getClass() != obj.getClass())
 			return false;
 		Dealer other = (Dealer) obj;
-		if (mColor == null) {
-			if (other.mColor != null)
-				return false;
-		} else if (!mColor.equals(other.mColor))
+		if (mColor != other.mColor)
 			return false;
 		if (mErn == null) {
 			if (other.mErn != null)
@@ -310,7 +301,7 @@ public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable,
 		this.mUrlName = in.readString();
 		this.mWebsite = in.readString();
 		this.mLogo = in.readString();
-		this.mColor = (Integer)in.readValue(Integer.class.getClassLoader());
+		this.mColor = in.readInt();
 		this.mPageflip = in.readParcelable(Pageflip.class.getClassLoader());
 	}
 
@@ -325,8 +316,8 @@ public class Dealer implements Ern<Dealer>, EtaObject<JSONObject>, Serializable,
 		dest.writeString(this.mUrlName);
 		dest.writeString(this.mWebsite);
 		dest.writeString(this.mLogo);
-		dest.writeValue(this.mColor);
+		dest.writeInt(this.mColor);
 		dest.writeParcelable(this.mPageflip, flags);
 	}
-	
+
 }

@@ -26,10 +26,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.ErnObject.Ern;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Branding;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
@@ -46,7 +45,7 @@ import com.eTilbudsavis.etasdk.Utils.Json;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Store implements Ern<Store>, EtaObject<JSONObject>, IDealer<Store>, Serializable, Parcelable {
+public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 4105775934027363052L;
 
@@ -262,10 +261,10 @@ public class Store implements Ern<Store>, EtaObject<JSONObject>, IDealer<Store>,
 		return mDealer;
 	}
 
-	@Override
+    @Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
 		result = prime * result
 				+ ((mBranding == null) ? 0 : mBranding.hashCode());
 		result = prime * result + ((mCity == null) ? 0 : mCity.hashCode());
@@ -273,10 +272,13 @@ public class Store implements Ern<Store>, EtaObject<JSONObject>, IDealer<Store>,
 				+ ((mContact == null) ? 0 : mContact.hashCode());
 		result = prime * result
 				+ ((mCountry == null) ? 0 : mCountry.hashCode());
+		result = prime * result + ((mDealer == null) ? 0 : mDealer.hashCode());
 		result = prime * result
 				+ ((mDealerId == null) ? 0 : mDealerId.hashCode());
 		result = prime * result
 				+ ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
+		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
+		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		long temp;
 		temp = Double.doubleToLongBits(mLatitude);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
@@ -292,7 +294,7 @@ public class Store implements Ern<Store>, EtaObject<JSONObject>, IDealer<Store>,
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -317,6 +319,11 @@ public class Store implements Ern<Store>, EtaObject<JSONObject>, IDealer<Store>,
 				return false;
 		} else if (!mCountry.equals(other.mCountry))
 			return false;
+		if (mDealer == null) {
+			if (other.mDealer != null)
+				return false;
+		} else if (!mDealer.equals(other.mDealer))
+			return false;
 		if (mDealerId == null) {
 			if (other.mDealerId != null)
 				return false;
@@ -326,6 +333,16 @@ public class Store implements Ern<Store>, EtaObject<JSONObject>, IDealer<Store>,
 			if (other.mDealerUrl != null)
 				return false;
 		} else if (!mDealerUrl.equals(other.mDealerUrl))
+			return false;
+		if (mErn == null) {
+			if (other.mErn != null)
+				return false;
+		} else if (!mErn.equals(other.mErn))
+			return false;
+		if (mId == null) {
+			if (other.mId != null)
+				return false;
+		} else if (!mId.equals(other.mId))
 			return false;
 		if (Double.doubleToLongBits(mLatitude) != Double
 				.doubleToLongBits(other.mLatitude))
@@ -346,7 +363,7 @@ public class Store implements Ern<Store>, EtaObject<JSONObject>, IDealer<Store>,
 		return true;
 	}
 
-    private Store(Parcel in) {
+	private Store(Parcel in) {
 		this.mId = in.readString();
 		this.mErn = in.readString();
 		this.mStreet = in.readString();

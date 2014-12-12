@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.EtaObjects.helper;
+package com.eTilbudsavis.etasdk.EtaObjects;
 
 import java.io.Serializable;
 
@@ -24,82 +24,67 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.EtaObject;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class Pieces implements EtaObject<JSONObject>, Serializable, Parcelable {
+public class Links implements IJson<JSONObject>, Serializable, Parcelable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Eta.TAG_PREFIX + Pieces.class.getSimpleName();
-	
-	private int mFrom = 1;
-	private int mTo = 1;
+	public static final String TAG = Eta.TAG_PREFIX + Links.class.getSimpleName();
 
-	public static Parcelable.Creator<Pieces> CREATOR = new Parcelable.Creator<Pieces>(){
-		public Pieces createFromParcel(Parcel source) {
-			return new Pieces(source);
+	private String mWebshop;
+
+	public static Parcelable.Creator<Links> CREATOR = new Parcelable.Creator<Links>(){
+		public Links createFromParcel(Parcel source) {
+			return new Links(source);
 		}
-		public Pieces[] newArray(int size) {
-			return new Pieces[size];
+		public Links[] newArray(int size) {
+			return new Links[size];
 		}
 	};
 	
-	public Pieces() {
+	public Links() {
 		
 	}
 	
-	public static Pieces fromJSON(JSONObject pieces) {
-		Pieces p = new Pieces();
-		if (pieces == null) {
-			return p;
+	public static Links fromJSON(JSONObject links) {
+		Links l = new Links();
+		if (links == null) {
+			return l;
 		}
 		
-		p.setFrom(Json.valueOf(pieces, JsonKey.FROM, 1));
-		p.setTo(Json.valueOf(pieces, JsonKey.TO, 1));
+		l.setWebshop(Json.valueOf(links, JsonKey.WEBSHOP));
 		
-		return p;
+		return l;
 	}
 	
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
-			o.put(JsonKey.FROM, Json.nullCheck(getFrom()));
-			o.put(JsonKey.TO, Json.nullCheck(getTo()));
+			o.put(JsonKey.WEBSHOP, Json.nullCheck(getWebshop()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
 		return o;
 	}
 	
-	public int getFrom() {
-		return mFrom;
+	public void setWebshop(String url) {
+		mWebshop = url;
 	}
 	
-	public Pieces setFrom(int from) {
-		mFrom = from;
-		return this;
-	}
-
-
-	public int getTo() {
-		return mTo;
-	}
-
-
-	public Pieces setTo(int to) {
-		mTo = to;
-		return this;
+	public String getWebshop() {
+		return mWebshop;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + mFrom;
-		result = prime * result + mTo;
+		result = prime * result
+				+ ((mWebshop == null) ? 0 : mWebshop.hashCode());
 		return result;
 	}
 
@@ -111,17 +96,17 @@ public class Pieces implements EtaObject<JSONObject>, Serializable, Parcelable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Pieces other = (Pieces) obj;
-		if (mFrom != other.mFrom)
-			return false;
-		if (mTo != other.mTo)
+		Links other = (Links) obj;
+		if (mWebshop == null) {
+			if (other.mWebshop != null)
+				return false;
+		} else if (!mWebshop.equals(other.mWebshop))
 			return false;
 		return true;
 	}
 
-	private Pieces(Parcel in) {
-		this.mFrom = in.readInt();
-		this.mTo = in.readInt();
+	private Links(Parcel in) {
+		this.mWebshop = in.readString();
 	}
 
 	public int describeContents() { 
@@ -129,9 +114,7 @@ public class Pieces implements EtaObject<JSONObject>, Serializable, Parcelable {
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeInt(this.mFrom);
-		dest.writeInt(this.mTo);
+		dest.writeString(this.mWebshop);
 	}
-	
-	
+
 }
