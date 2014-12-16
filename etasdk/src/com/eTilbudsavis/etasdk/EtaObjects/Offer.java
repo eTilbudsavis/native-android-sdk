@@ -55,7 +55,6 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	
 	public static final String TAG = Eta.TAG_PREFIX + Offer.class.getSimpleName();
 	
-	private String mId;
 	private String mErn;
 	private String mHeading;
 	private String mDescription;
@@ -208,22 +207,23 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 		}
 		return o;
 	}
-	
+
 	public Offer setId(String id) {
-		mId = id;
-		mErn = String.format("ern:%s:%s", getErnType(), id);
+		setErn((id==null) ? null : String.format("ern:%s:%s", getErnType(), id));
 		return this;
 	}
 	
 	public String getId() {
-		return mId;
+		if (mErn==null) {
+			return null;
+		}
+		String[] parts = mErn.split(":");
+		return parts[parts.length-1];
 	}
 	
 	public Offer setErn(String ern) {
-		if (ern != null) {
+		if (ern==null || ( ern.startsWith("ern:") && ern.split(":").length==3 && ern.contains(getErnType()) )) {
 			mErn = ern;
-			String[] parts = mErn.split(":");
-			mId = parts[parts.length-1];
 		}
 		return this;
 	}
@@ -623,7 +623,6 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
 		result = prime * result
 				+ ((mHeading == null) ? 0 : mHeading.hashCode());
-		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mImages == null) ? 0 : mImages.hashCode());
 		result = prime * result + ((mLinks == null) ? 0 : mLinks.hashCode());
 		result = prime * result
@@ -698,12 +697,6 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 				return false;
 		} else if (!mHeading.equals(other.mHeading))
 			return false;
-		if (mId == null) {
-			if (other.mId != null)
-				return false;
-		} else if (!mId.equals(other.mId)) {
-			return false;
-		}
 		if (mImages == null) {
 			if (other.mImages != null)
 				return false;
@@ -753,7 +746,6 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	}
 
 	private Offer(Parcel in) {
-		this.mId = in.readString();
 		this.mErn = in.readString();
 		this.mHeading = in.readString();
 		this.mDescription = in.readString();
@@ -782,7 +774,6 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(this.mId);
 		dest.writeString(this.mErn);
 		dest.writeString(this.mHeading);
 		dest.writeString(this.mDescription);

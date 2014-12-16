@@ -49,8 +49,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcel
 	private static final long serialVersionUID = 1L;
 	
 	public static final int NO_USER = -1;
-
-	private String mId;
+	
 	private String mErn;
 	private String mGender;
 	private int mBirthYear = 0;
@@ -130,20 +129,20 @@ public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcel
 	 * 	@Deprecated Use {@link User#setUserId(int)} instead.
 	 */
 	public User setId(String id) {
-		setUserId(Integer.valueOf(id));
+		setUserId((id==null) ? NO_USER : Integer.valueOf(id));
 		return this;
 	}
 	
 	@Deprecated
 	public String getId() {
-		return mId;
+		return String.valueOf(getUserId());
 	}
 	
 	public User setErn(String ern) {
-		if (ern != null) {
+		if (ern == null) {
+			setUserId(NO_USER);
+		} else if ( ern.startsWith("ern:") && ern.split(":").length==3 && ern.contains(getErnType()) ) {
 			mErn = ern;
-			String[] parts = mErn.split(":");
-			mId = parts[parts.length-1];
 		}
 		return this;
 	}
@@ -161,7 +160,11 @@ public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcel
 	 * @return A user id
 	 */
 	public int getUserId() {
-		return Integer.valueOf(getId());
+		if (mErn==null) {
+			setUserId(NO_USER);
+		}
+		String[] parts = mErn.split(":");
+		return Integer.valueOf(parts[parts.length-1]);
 	}
 	
 	/**
@@ -170,8 +173,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcel
 	 * @return This object
 	 */
 	public User setUserId(int id) {
-		mId = String.valueOf(id);
-		mErn = String.format("ern:%s:%s", getErnType(), id);
+		setErn(String.format("ern:%s:%s", getErnType(), id));
 		return this;
 	}
 	
@@ -312,7 +314,6 @@ public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcel
 		result = prime * result + ((mEmail == null) ? 0 : mEmail.hashCode());
 		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
 		result = prime * result + ((mGender == null) ? 0 : mGender.hashCode());
-		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
 		result = prime * result
 				+ ((mPermissions == null) ? 0 : mPermissions.hashCode());
@@ -345,11 +346,6 @@ public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcel
 				return false;
 		} else if (!mGender.equals(other.mGender))
 			return false;
-		if (mId == null) {
-			if (other.mId != null)
-				return false;
-		} else if (!mId.equals(other.mId))
-			return false;
 		if (mName == null) {
 			if (other.mName != null)
 				return false;
@@ -364,7 +360,6 @@ public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcel
 	}
 
 	private User(Parcel in) {
-		this.mId = in.readString();
 		this.mErn = in.readString();
 		this.mGender = in.readString();
 		this.mBirthYear = in.readInt();
@@ -378,7 +373,6 @@ public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcel
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(this.mId);
 		dest.writeString(this.mErn);
 		dest.writeString(this.mGender);
 		dest.writeInt(this.mBirthYear);

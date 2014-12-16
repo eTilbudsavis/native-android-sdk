@@ -39,8 +39,7 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Serializable, 
 	public static final String TAG = Eta.TAG_PREFIX + Country.class.getSimpleName();
 
 	private static final long serialVersionUID = 1L;
-
-	private String mId;
+	
 	private String mErn;
 	private String mUnsubscribeUrl;
 
@@ -110,7 +109,11 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Serializable, 
 	 * @return A String if id exists, or null
 	 */
 	public String getId() {
-		return mId;
+		if (mErn==null) {
+			return null;
+		}
+		String[] parts = mErn.split(":");
+		return parts[parts.length-1];
 	}
 	
 	/**
@@ -120,9 +123,10 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Serializable, 
 	 */
 	@SuppressLint("DefaultLocale")
 	public Country setId(String id) {
-		if (id != null && id.length() == 2) {
-			mId = id.toUpperCase();
-			mErn = String.format("ern:%s:%s", getErnType(), id);
+		if (id == null) {
+			setErn(null);
+		} else if (id.length() == 2) {
+			setErn(String.format("ern:%s:%s", getErnType(), id.toUpperCase()));
 		} else {
 			EtaLog.i(TAG, "The country code: " + id + " isn't allowed, see documentation for more details");
 		}
@@ -130,10 +134,8 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Serializable, 
 	}
 	
 	public Country setErn(String ern) {
-		if (ern != null) {
+		if (ern==null || ( ern.startsWith("ern:") && ern.split(":").length==3 && ern.contains(getErnType()) )) {
 			mErn = ern;
-			String[] parts = mErn.split(":");
-			mId = parts[parts.length-1];
 		}
 		return this;
 	}
@@ -169,7 +171,6 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Serializable, 
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result
 				+ ((mUnsubscribeUrl == null) ? 0 : mUnsubscribeUrl.hashCode());
 		return result;
@@ -189,11 +190,6 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Serializable, 
 				return false;
 		} else if (!mErn.equals(other.mErn))
 			return false;
-		if (mId == null) {
-			if (other.mId != null)
-				return false;
-		} else if (!mId.equals(other.mId))
-			return false;
 		if (mUnsubscribeUrl == null) {
 			if (other.mUnsubscribeUrl != null)
 				return false;
@@ -203,7 +199,6 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Serializable, 
 	}
 
 	private Country(Parcel in) {
-		this.mId = in.readString();
 		this.mErn = in.readString();
 		this.mUnsubscribeUrl = in.readString();
 	}
@@ -213,7 +208,6 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Serializable, 
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(this.mId);
 		dest.writeString(this.mErn);
 		dest.writeString(this.mUnsubscribeUrl);
 	}

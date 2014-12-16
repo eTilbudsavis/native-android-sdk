@@ -33,6 +33,7 @@ import com.eTilbudsavis.etasdk.EtaObjects.Subscription;
 import com.eTilbudsavis.etasdk.EtaObjects.Typeahead;
 import com.eTilbudsavis.etasdk.EtaObjects.Unit;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.SyncState;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 
@@ -116,6 +117,9 @@ public class ObjectTest {
 		Shoppinglist tmp = ObjectCreator.getShoppinglist();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
+
+		testIErn(obj, null);
+		testIErn(obj, "12fakeid56");
 		
 		// They must be the 'same' despite state, but not 'equal'
 		obj.setState(SyncState.SYNCED);
@@ -186,6 +190,9 @@ public class ObjectTest {
 		Dealer tmp = ObjectCreator.getDealer();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
+
+		testIErn(obj, null);
+		testIErn(obj, "12fakeid56");
 		
 		// Parcelable
         Parcel parcel = Parcel.obtain();
@@ -217,12 +224,45 @@ public class ObjectTest {
         EtaSdkTest.logTest(TAG, "Dealer");
         
 	}
-
+	
+	public static void testIErn(IErn<?> obj, String fakeId) {
+		testIErn(obj, fakeId, null, null);
+	}
+	
+	public static void testIErn(IErn<?> obj, String fakeId, String fakeExpectedId, String fakeExpectedErn) {
+		
+		String origId = obj.getId();
+		if (origId!=null) {
+			Assert.assertTrue(obj.getErn().startsWith("ern:"));
+			// if there is an id, there must also be a type (or the id)
+			Assert.assertNotNull(obj.getErnType());
+		} else {
+			Assert.assertEquals(null, obj.getErn());
+		}
+		
+		if (fakeId == null) {
+			obj.setId(null);
+			Assert.assertEquals(fakeExpectedId, obj.getId());
+			Assert.assertEquals(fakeExpectedErn, obj.getErn());
+		} else {
+			obj.setId(fakeId);
+			Assert.assertTrue(obj.getErn().startsWith("ern:"));
+			Assert.assertTrue(obj.getErn().contains(fakeId));
+			Assert.assertTrue(obj.getErn().contains(obj.getErnType()));
+		}
+		
+		obj.setId(origId);
+		
+	}
+	
 	public static void testCatalog() {
 		Catalog obj = ObjectCreator.getCatalog();
 		Catalog tmp = ObjectCreator.getCatalog();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
+		
+		testIErn(obj, null);
+		testIErn(obj, "12fakeid56");
 		
 		// Parcelable
         Parcel parcel = Parcel.obtain();
@@ -265,6 +305,9 @@ public class ObjectTest {
 		Store tmp = ObjectCreator.getStore();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
+
+		testIErn(obj, null);
+		testIErn(obj, "12fakeid56");
 		
 		// Parcelable
         Parcel parcel = Parcel.obtain();
@@ -295,6 +338,9 @@ public class ObjectTest {
 		Country tmp = ObjectCreator.getCountry();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
+
+		testIErn(obj, null);
+		testIErn(obj, "EU");
 		
 		// Parcelable
         Parcel parcel = Parcel.obtain();
@@ -360,6 +406,11 @@ public class ObjectTest {
 		User tmp = ObjectCreator.getUser();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
+		
+		String fakeUser = String.valueOf(User.NO_USER);
+		String fakeErn = "ern:user:" + fakeUser;
+		testIErn(obj, null, fakeUser, fakeErn);
+		testIErn(obj, "1569");
 		
 		// Parcelable
         Parcel parcel = Parcel.obtain();
@@ -873,6 +924,9 @@ public class ObjectTest {
 		Offer tmp = ObjectCreator.getOffer();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
+
+		testIErn(obj, null);
+		testIErn(obj, "12fakeid56");
 		
 		// Parcelable
         Parcel parcel = Parcel.obtain();

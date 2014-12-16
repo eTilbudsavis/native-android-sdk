@@ -58,7 +58,6 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	public static final String TAG = Eta.TAG_PREFIX + Catalog.class.getSimpleName();
 	
 	// From JSON blob
-	private String mId;
 	private String mErn;
 	private String mLabel;
 	private Integer mBackground;
@@ -227,20 +226,21 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	}
 
 	public Catalog setId(String id) {
-		mId = id;
-		mErn = String.format("ern:%s:%s", getErnType(), id);
+		setErn((id==null) ? null : String.format("ern:%s:%s", getErnType(), id));
 		return this;
 	}
 	
 	public String getId() {
-		return mId;
+		if (mErn==null) {
+			return null;
+		}
+		String[] parts = mErn.split(":");
+		return parts[parts.length-1];
 	}
 	
 	public Catalog setErn(String ern) {
-		if (ern != null) {
+		if (ern==null || ( ern.startsWith("ern:") && ern.split(":").length==3 && ern.contains(getErnType()) )) {
 			mErn = ern;
-			String[] parts = mErn.split(":");
-			mId = parts[parts.length-1];
 		}
 		return this;
 	}
@@ -248,9 +248,9 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	public String getErn() {
 		return mErn;
 	}
-	
+
 	public String getErnType() {
-		return IErn.TYPE_CATALOG;
+		return IErn.TYPE_DEALER;
 	}
 	
 	public String getLabel() {
@@ -617,7 +617,6 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
 		result = prime * result
 				+ ((mHotspots == null) ? 0 : mHotspots.hashCode());
-		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mImages == null) ? 0 : mImages.hashCode());
 		result = prime * result + ((mLabel == null) ? 0 : mLabel.hashCode());
 		result = prime * result + mOfferCount;
@@ -690,11 +689,6 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 				return false;
 		} else if (!mHotspots.equals(other.mHotspots))
 			return false;
-		if (mId == null) {
-			if (other.mId != null)
-				return false;
-		} else if (!mId.equals(other.mId))
-			return false;
 		if (mImages == null) {
 			if (other.mImages != null)
 				return false;
@@ -748,7 +742,6 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	}
 
 	private Catalog(Parcel in) {
-		this.mId = in.readString();
 		this.mErn = in.readString();
 		this.mLabel = in.readString();
 		this.mBackground = (Integer)in.readValue(Integer.class.getClassLoader());
@@ -779,7 +772,6 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(this.mId);
 		dest.writeString(this.mErn);
 		dest.writeString(this.mLabel);
 		dest.writeValue(this.mBackground);

@@ -51,7 +51,6 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 
 	public static final String TAG = Eta.TAG_PREFIX + Store.class.getSimpleName();
 
-	private String mId;
 	private String mErn;
 	private String mStreet;
 	private String mCity;
@@ -149,20 +148,21 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 	}
 
 	public Store setId(String id) {
-		mId = id;
-		mErn = String.format("ern:%s:%s", getErnType(), id);
+		setErn((id==null) ? null : String.format("ern:%s:%s", getErnType(), id));
 		return this;
 	}
 	
 	public String getId() {
-		return mId;
+		if (mErn==null) {
+			return null;
+		}
+		String[] parts = mErn.split(":");
+		return parts[parts.length-1];
 	}
 	
 	public Store setErn(String ern) {
-		if (ern != null) {
+		if (ern==null || ( ern.startsWith("ern:") && ern.split(":").length==3 && ern.contains(getErnType()) )) {
 			mErn = ern;
-			String[] parts = mErn.split(":");
-			mId = parts[parts.length-1];
 		}
 		return this;
 	}
@@ -170,7 +170,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 	public String getErn() {
 		return mErn;
 	}
-
+	
 	public String getErnType() {
 		return IErn.TYPE_STORE;
 	}
@@ -291,7 +291,6 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 		result = prime * result
 				+ ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
 		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		long temp;
 		temp = Double.doubleToLongBits(mLatitude);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
@@ -352,11 +351,6 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 				return false;
 		} else if (!mErn.equals(other.mErn))
 			return false;
-		if (mId == null) {
-			if (other.mId != null)
-				return false;
-		} else if (!mId.equals(other.mId))
-			return false;
 		if (Double.doubleToLongBits(mLatitude) != Double
 				.doubleToLongBits(other.mLatitude))
 			return false;
@@ -377,7 +371,6 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 	}
 
 	private Store(Parcel in) {
-		this.mId = in.readString();
 		this.mErn = in.readString();
 		this.mStreet = in.readString();
 		this.mCity = in.readString();
@@ -397,7 +390,6 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(this.mId);
 		dest.writeString(this.mErn);
 		dest.writeString(this.mStreet);
 		dest.writeString(this.mCity);

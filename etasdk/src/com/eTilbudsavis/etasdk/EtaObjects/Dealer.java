@@ -51,7 +51,6 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 	
 	public static final String TAG = Eta.TAG_PREFIX + Dealer.class.getSimpleName();
 	
-	private String mId;
 	private String mErn;
 	private String mName;
 	private String mUrlName;
@@ -114,22 +113,23 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 		}
 		return o;
 	}
-	
+
 	public Dealer setId(String id) {
-		mId = id;
-		mErn = String.format("ern:%s:%s", getErnType(), id);
+		setErn((id==null) ? null : String.format("ern:%s:%s", getErnType(), id));
 		return this;
 	}
 	
 	public String getId() {
-		return mId;
+		if (mErn==null) {
+			return null;
+		}
+		String[] parts = mErn.split(":");
+		return parts[parts.length-1];
 	}
 	
 	public Dealer setErn(String ern) {
-		if (ern != null) {
+		if (ern==null || ( ern.startsWith("ern:") && ern.split(":").length==3 && ern.contains(getErnType()) )) {
 			mErn = ern;
-			String[] parts = mErn.split(":");
-			mId = parts[parts.length-1];
 		}
 		return this;
 	}
@@ -235,7 +235,6 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 		int result = 1;
 		result = prime * result + ((mColor == null) ? 0 : mColor.hashCode());
 		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
 		result = prime * result
@@ -266,11 +265,6 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 				return false;
 		} else if (!mErn.equals(other.mErn))
 			return false;
-		if (mId == null) {
-			if (other.mId != null)
-				return false;
-		} else if (!mId.equals(other.mId))
-			return false;
 		if (mLogo == null) {
 			if (other.mLogo != null)
 				return false;
@@ -300,7 +294,6 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 	}
 
 	private Dealer(Parcel in) {
-		this.mId = in.readString();
 		this.mErn = in.readString();
 		this.mName = in.readString();
 		this.mUrlName = in.readString();
@@ -315,7 +308,6 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(this.mId);
 		dest.writeString(this.mErn);
 		dest.writeString(this.mName);
 		dest.writeString(this.mUrlName);

@@ -79,7 +79,6 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 	 */
 	public static final String ACCESS_PUBLIC = "public";
 
-	private String mId;
 	private String mErn;
 	private String mName = "";
 	private String mAccess = ACCESS_PRIVATE;
@@ -201,20 +200,21 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 	}
 
 	public Shoppinglist setId(String id) {
-		mId = id;
-		mErn = String.format("ern:%s:%s", getErnType(), id);
+		setErn((id==null) ? null : String.format("ern:%s:%s", getErnType(), id));
 		return this;
 	}
 	
 	public String getId() {
-		return mId;
+		if (mErn==null) {
+			return null;
+		}
+		String[] parts = mErn.split(":");
+		return parts[parts.length-1];
 	}
 	
 	public Shoppinglist setErn(String ern) {
-		if (ern != null) {
+		if (ern==null || ( ern.startsWith("ern:") && ern.split(":").length==4 && ern.contains(getErnType()) )) {
 			mErn = ern;
-			String[] parts = mErn.split(":");
-			mId = parts[parts.length-1];
 		}
 		return this;
 	}
@@ -609,11 +609,6 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 				return false;
 		} else if (!mErn.equals(other.mErn))
 			return false;
-		if (mId == null) {
-			if (other.mId != null)
-				return false;
-		} else if (!mId.equals(other.mId))
-			return false;
 		if (mMeta == null) {
 			if (other.mMeta != null)
 				return false;
@@ -671,7 +666,6 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 		int result = 1;
 		result = prime * result + ((mAccess == null) ? 0 : mAccess.hashCode());
 		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
 		result = prime * result
 				+ ((mModified == null) ? 0 : mModified.hashCode());
@@ -690,7 +684,6 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 	}
 
 	private Shoppinglist(Parcel in) {
-		this.mId = in.readString();
 		this.mErn = in.readString();
 		this.mName = in.readString();
 		this.mAccess = in.readString();
@@ -709,7 +702,6 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(this.mId);
 		dest.writeString(this.mErn);
 		dest.writeString(this.mName);
 		dest.writeString(this.mAccess);
