@@ -44,6 +44,8 @@ public class ObjectTest {
 	public static void test() {
 		
 		EtaSdkTest.start(TAG);
+		
+		// The first set of objects, have no dependencies to other objects
 		testSi();
 		testSize();
 		testPieces();
@@ -58,7 +60,8 @@ public class ObjectTest {
 		testHotspot();
 		testDimension();
 		testCountry();
-		// The following have dependencies to other eta classes - they run last
+		
+		// The following have dependencies to other ETA classes - order is important to make life easier
 		testHotspotMap();
 		testQuantity();
 		testBranding();
@@ -73,6 +76,36 @@ public class ObjectTest {
 		testOffer();
 	}
 
+	public static void testIErn(IErn<?> obj, String fakeId) {
+		testIErn(obj, fakeId, null, null);
+	}
+	
+	public static void testIErn(IErn<?> obj, String fakeId, String fakeExpectedId, String fakeExpectedErn) {
+		
+		String origId = obj.getId();
+		if (origId!=null) {
+			Assert.assertTrue(obj.getErn().startsWith("ern:"));
+			// if there is an id, there must also be a type (or the id)
+			Assert.assertNotNull(obj.getErnType());
+		} else {
+			Assert.assertEquals(null, obj.getErn());
+		}
+		
+		if (fakeId == null) {
+			obj.setId(null);
+			Assert.assertEquals(fakeExpectedId, obj.getId());
+			Assert.assertEquals(fakeExpectedErn, obj.getErn());
+		} else {
+			obj.setId(fakeId);
+			Assert.assertTrue(obj.getErn().startsWith("ern:"));
+			Assert.assertTrue(obj.getErn().contains(fakeId));
+			Assert.assertTrue(obj.getErn().contains(obj.getErnType()));
+		}
+		
+		obj.setId(origId);
+		
+	}
+	
 	public static void testShoppinglistitem() {
 		ShoppinglistItem obj = ObjectCreator.getShoppinglistItem();
 		ShoppinglistItem tmp = ObjectCreator.getShoppinglistItem();
@@ -223,36 +256,6 @@ public class ObjectTest {
         
         EtaSdkTest.logTest(TAG, "Dealer");
         
-	}
-	
-	public static void testIErn(IErn<?> obj, String fakeId) {
-		testIErn(obj, fakeId, null, null);
-	}
-	
-	public static void testIErn(IErn<?> obj, String fakeId, String fakeExpectedId, String fakeExpectedErn) {
-		
-		String origId = obj.getId();
-		if (origId!=null) {
-			Assert.assertTrue(obj.getErn().startsWith("ern:"));
-			// if there is an id, there must also be a type (or the id)
-			Assert.assertNotNull(obj.getErnType());
-		} else {
-			Assert.assertEquals(null, obj.getErn());
-		}
-		
-		if (fakeId == null) {
-			obj.setId(null);
-			Assert.assertEquals(fakeExpectedId, obj.getId());
-			Assert.assertEquals(fakeExpectedErn, obj.getErn());
-		} else {
-			obj.setId(fakeId);
-			Assert.assertTrue(obj.getErn().startsWith("ern:"));
-			Assert.assertTrue(obj.getErn().contains(fakeId));
-			Assert.assertTrue(obj.getErn().contains(obj.getErnType()));
-		}
-		
-		obj.setId(origId);
-		
 	}
 	
 	public static void testCatalog() {
