@@ -569,8 +569,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 		}
 	};
 	
-	public boolean same(Object obj) {
-
+	private boolean compare(Object obj, boolean modified, boolean offer, boolean user, boolean syncState) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -606,13 +605,25 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 		} else if (!mMeta.equals(other.mMeta))
 			return false;
 		
-		// Removed modified
 		
-		if (mOffer == null) {
-			if (other.mOffer != null)
+		if (modified) {
+			if (mModified == null) {
+			if (other.mModified != null)
 				return false;
-		} else if (!mOffer.equals(other.mOffer))
+		} else if (!mModified.equals(other.mModified))
 			return false;
+		}
+		
+		
+		if (offer) {
+			if (mOffer == null) {
+				if (other.mOffer != null)
+					return false;
+			} else if (!mOffer.equals(other.mOffer))
+				return false;	
+		}
+		
+		
 		if (mOfferId == null) {
 			if (other.mOfferId != null)
 				return false;
@@ -629,13 +640,27 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 		} else if (!mShoppinglistId.equals(other.mShoppinglistId))
 			return false;
 		
-		// Removed sync state
+		
+		if (syncState) {
+			if (mSyncState != other.mSyncState)
+				return false;
+		}
+		
 		
 		if (mTick != other.mTick)
 			return false;
-		if (mUserId != other.mUserId)
-			return false;
+		
+		
+		if (user) {
+			if (mUserId != other.mUserId)
+				return false;
+		}
+		
 		return true;
+	}
+	
+	public boolean same(Object obj) {
+		return compare(obj, false, false, false, false);
 	}
 	
 	@Override
@@ -666,72 +691,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ShoppinglistItem other = (ShoppinglistItem) obj;
-		if (mCount != other.mCount)
-			return false;
-		if (mCreator == null) {
-			if (other.mCreator != null)
-				return false;
-		} else if (!mCreator.equals(other.mCreator))
-			return false;
-		if (mDescription == null) {
-			if (other.mDescription != null)
-				return false;
-		} else if (!mDescription.equals(other.mDescription))
-			return false;
-		if (mErn == null) {
-			if (other.mErn != null)
-				return false;
-		} else if (!mErn.equals(other.mErn))
-			return false;
-		if (mId == null) {
-			if (other.mId != null)
-				return false;
-		} else if (!mId.equals(other.mId))
-			return false;
-		if (mMeta == null) {
-			if (other.mMeta != null)
-				return false;
-		} else if (!mMeta.equals(other.mMeta))
-			return false;
-		if (mModified == null) {
-			if (other.mModified != null)
-				return false;
-		} else if (!mModified.equals(other.mModified))
-			return false;
-		if (mOffer == null) {
-			if (other.mOffer != null)
-				return false;
-		} else if (!mOffer.equals(other.mOffer))
-			return false;
-		if (mOfferId == null) {
-			if (other.mOfferId != null)
-				return false;
-		} else if (!mOfferId.equals(other.mOfferId))
-			return false;
-		if (mPrevId == null) {
-			if (other.mPrevId != null)
-				return false;
-		} else if (!mPrevId.equals(other.mPrevId))
-			return false;
-		if (mShoppinglistId == null) {
-			if (other.mShoppinglistId != null)
-				return false;
-		} else if (!mShoppinglistId.equals(other.mShoppinglistId))
-			return false;
-		if (mSyncState != other.mSyncState)
-			return false;
-		if (mTick != other.mTick)
-			return false;
-		if (mUserId != other.mUserId)
-			return false;
-		return true;
+		return compare(obj, true, true, true, true);
 	}
 
 	private ShoppinglistItem(Parcel in) {

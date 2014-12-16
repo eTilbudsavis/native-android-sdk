@@ -26,8 +26,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
@@ -50,8 +50,6 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 	private static final long serialVersionUID = 4105775934027363052L;
 
 	public static final String TAG = Eta.TAG_PREFIX + Store.class.getSimpleName();
-
-	private static final String ERN_CLASS = "store";
 
 	private String mId;
 	private String mErn;
@@ -112,6 +110,12 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 			s.setDealerId(Json.valueOf(store, JsonKey.DEALER_ID));
 			s.setBranding(Branding.fromJSON(store.getJSONObject(JsonKey.BRANDING)));
 			s.setContact(Json.valueOf(store, JsonKey.CONTACT));
+
+			if (store.has(JsonKey.SDK_DEALER)) {
+				JSONObject jDealer = Json.getObject(store, JsonKey.SDK_DEALER, null);
+				s.setDealer(Dealer.fromJSON(jDealer));
+			}
+			
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -133,6 +137,11 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 			o.put(JsonKey.DEALER_ID, Json.nullCheck(getDealerId()));
 			o.put(JsonKey.BRANDING, Json.nullCheck(getBranding().toJSON()));
 			o.put(JsonKey.CONTACT, Json.nullCheck(getContact()));
+
+			if (mDealer!=null) {
+				o.put(JsonKey.SDK_DEALER, Json.toJson(mDealer));
+			}
+			
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -141,7 +150,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 
 	public Store setId(String id) {
 		mId = id;
-		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		mErn = String.format("ern:%s:%s", getErnType(), id);
 		return this;
 	}
 	
@@ -160,6 +169,10 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 	
 	public String getErn() {
 		return mErn;
+	}
+
+	public String getErnType() {
+		return IErn.TYPE_STORE;
 	}
 	
 	public Store setStreet(String street) {

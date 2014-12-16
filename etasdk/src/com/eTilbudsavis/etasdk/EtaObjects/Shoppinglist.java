@@ -50,8 +50,6 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 
 	public static final String TAG = Eta.TAG_PREFIX + Shoppinglist.class.getSimpleName();
 
-	private static final String ERN_CLASS = "shopping:list";
-	
 	private static final long serialVersionUID = 5718447151312028262L;
 	
 	/**
@@ -204,7 +202,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 
 	public Shoppinglist setId(String id) {
 		mId = id;
-		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		mErn = String.format("ern:%s:%s", getErnType(), id);
 		return this;
 	}
 	
@@ -223,6 +221,10 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 	
 	public String getErn() {
 		return mErn;
+	}
+	
+	public String getErnType() {
+		return IErn.TYPE_SHOPPINGLIST;
 	}
 	
 	/**
@@ -462,7 +464,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 			try {
 				return new JSONObject(mMeta);
 			} catch (JSONException e) {
-				EtaLog.e(TAG, "", e);
+				EtaLog.e(TAG, e.getMessage(), e);
 			}
 		}
 		return new JSONObject();
@@ -584,8 +586,12 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 			return new Shoppinglist[size];
 		}
 	};
-	
+
 	public boolean same(Object obj) {
+		return compare(obj, false, false, false);
+	}
+	
+	public boolean compare(Object obj, boolean modified, boolean syncState, boolean user) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -614,7 +620,13 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 		} else if (!mMeta.equals(other.mMeta))
 			return false;
 		
-		// Removed modified
+		if (modified) {
+			if (mModified == null) {
+				if (other.mModified != null)
+					return false;
+			} else if (!mModified.equals(other.mModified))
+				return false;
+		}
 		
 		if (mName == null) {
 			if (other.mName != null)
@@ -632,15 +644,24 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 		} else if (!mShares.equals(other.mShares))
 			return false;
 		
-		// Removed SyncState
+		
+		if (syncState) {
+			if (mSyncState != other.mSyncState)
+				return false;
+		}
+		
 		
 		if (mType == null) {
 			if (other.mType != null)
 				return false;
 		} else if (!mType.equals(other.mType))
 			return false;
-		if (mUserId != other.mUserId)
-			return false;
+		
+		if (user) {
+			if (mUserId != other.mUserId)
+				return false;
+		}
+		
 		return true;
 	}
 	
@@ -665,63 +686,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Shoppinglist other = (Shoppinglist) obj;
-		if (mAccess == null) {
-			if (other.mAccess != null)
-				return false;
-		} else if (!mAccess.equals(other.mAccess))
-			return false;
-		if (mErn == null) {
-			if (other.mErn != null)
-				return false;
-		} else if (!mErn.equals(other.mErn))
-			return false;
-		if (mId == null) {
-			if (other.mId != null)
-				return false;
-		} else if (!mId.equals(other.mId))
-			return false;
-		if (mMeta == null) {
-			if (other.mMeta != null)
-				return false;
-		} else if (!mMeta.equals(other.mMeta))
-			return false;
-		if (mModified == null) {
-			if (other.mModified != null)
-				return false;
-		} else if (!mModified.equals(other.mModified))
-			return false;
-		if (mName == null) {
-			if (other.mName != null)
-				return false;
-		} else if (!mName.equals(other.mName))
-			return false;
-		if (mPrevId == null) {
-			if (other.mPrevId != null)
-				return false;
-		} else if (!mPrevId.equals(other.mPrevId))
-			return false;
-		if (mShares == null) {
-			if (other.mShares != null)
-				return false;
-		} else if (!mShares.equals(other.mShares))
-			return false;
-		if (mSyncState != other.mSyncState)
-			return false;
-		if (mType == null) {
-			if (other.mType != null)
-				return false;
-		} else if (!mType.equals(other.mType))
-			return false;
-		if (mUserId != other.mUserId)
-			return false;
-		return true;
+		return compare(obj, true, true, true);
 	}
 
 	private Shoppinglist(Parcel in) {

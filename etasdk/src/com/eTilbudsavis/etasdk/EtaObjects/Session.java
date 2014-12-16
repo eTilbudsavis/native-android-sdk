@@ -71,28 +71,12 @@ public class Session implements IJson<JSONObject>, Serializable, Parcelable {
 		s.setClientId(Json.valueOf(session, JsonKey.CLIENT_ID));
 		s.setReference(Json.valueOf(session, JsonKey.REFERENCE));
 		
-		JSONObject user = null;
-		if (!session.isNull(JsonKey.USER)) {
-			try {
-				user = session.getJSONObject(JsonKey.USER);
-			} catch (JSONException e) {
-				EtaLog.e(TAG, "", e);
-			}
-		}
-		s.setUser(user == null ? new User() : User.fromJSON(user));
+		JSONObject user = Json.getObject(session, JsonKey.USER);
+		s.setUser(User.fromJSON(user));
 
-		JSONObject perm = null;
-		if (session.isNull(JsonKey.PERMISSIONS)) {
-			try {
-				if (!session.isNull(JsonKey.PERMISSIONS)) {
-					perm = session.getJSONObject(JsonKey.PERMISSIONS);
-				}
-			} catch (JSONException e) {
-				EtaLog.e(TAG, "", e);
-			}
-		}
-		s.setPermission(perm == null ? new Permission() : Permission.fromJSON(perm)) ;
-		 
+		JSONObject perm = Json.getObject(session, JsonKey.PERMISSIONS);
+		s.setPermission(Permission.fromJSON(perm));
+		
 		s.setProvider(Json.valueOf(session, JsonKey.PROVIDER));
 		
 		return s;

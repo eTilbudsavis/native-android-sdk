@@ -51,15 +51,13 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 	
 	public static final String TAG = Eta.TAG_PREFIX + Dealer.class.getSimpleName();
 	
-	private static final String ERN_CLASS = "dealer";
-
 	private String mId;
 	private String mErn;
 	private String mName;
 	private String mUrlName;
 	private String mWebsite;
 	private String mLogo;
-	private int mColor;
+	private Integer mColor;
 	private Pageflip mPageflip;
 	
 	public Dealer() {
@@ -119,7 +117,7 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 	
 	public Dealer setId(String id) {
 		mId = id;
-		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		mErn = String.format("ern:%s:%s", getErnType(), id);
 		return this;
 	}
 	
@@ -138,6 +136,10 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 	
 	public String getErn() {
 		return mErn;
+	}
+
+	public String getErnType() {
+		return IErn.TYPE_DEALER;
 	}
 	
 	public Dealer setName(String name) {
@@ -176,12 +178,12 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 		return mLogo;
 	}
 
-	public Dealer setColor(int color) {
+	public Dealer setColor(Integer color) {
 		mColor = color;
 		return this;
 	}
 
-	public int getColor() {
+	public Integer getColor() {
 		return mColor;
 	}
 	
@@ -231,7 +233,7 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + mColor;
+		result = prime * result + ((mColor == null) ? 0 : mColor.hashCode());
 		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
 		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
 		result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
@@ -254,7 +256,10 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 		if (getClass() != obj.getClass())
 			return false;
 		Dealer other = (Dealer) obj;
-		if (mColor != other.mColor)
+		if (mColor == null) {
+			if (other.mColor != null)
+				return false;
+		} else if (!mColor.equals(other.mColor))
 			return false;
 		if (mErn == null) {
 			if (other.mErn != null)
@@ -301,7 +306,7 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 		this.mUrlName = in.readString();
 		this.mWebsite = in.readString();
 		this.mLogo = in.readString();
-		this.mColor = in.readInt();
+		this.mColor = (Integer)in.readValue(Integer.class.getClassLoader());
 		this.mPageflip = in.readParcelable(Pageflip.class.getClassLoader());
 	}
 
@@ -316,8 +321,8 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 		dest.writeString(this.mUrlName);
 		dest.writeString(this.mWebsite);
 		dest.writeString(this.mLogo);
-		dest.writeInt(this.mColor);
+		dest.writeValue(this.mColor);
 		dest.writeParcelable(this.mPageflip, flags);
 	}
-
+	
 }

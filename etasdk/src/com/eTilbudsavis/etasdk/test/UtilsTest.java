@@ -21,6 +21,8 @@ public class UtilsTest {
 	public static final String REGEX_UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 	
 	public static void test() {
+		
+		EtaSdkTest.start(TAG);
 		testCreateUUID();
 		testMapToQueryString();
 		testRequestToUrlAndQueryString();
@@ -28,9 +30,11 @@ public class UtilsTest {
 		testIsGenderValid();
 		testIsSuccess();
 		testValidVersion();
+		testColorToString();
+		testStringToColor();
 //		testStringToDate();
 //		testDateToString();
-		EtaSdkTest.log(TAG, "UtilsTest");
+		
 	}
 	
 	public static void testCreateUUID() {
@@ -54,7 +58,7 @@ public class UtilsTest {
 		String uuidFake = "83g24023-3225-4392-9362-332619620638";
 		Assert.assertFalse(uuidFake.matches(REGEX_UUID));
 		
-		EtaSdkTest.log(TAG, "CreateUUID");
+		EtaSdkTest.logTest(TAG, "CreateUUID");
 		
 	}
 	
@@ -107,7 +111,7 @@ public class UtilsTest {
 		expected = "a=red&b=blue&d=green";
 		Assert.assertEquals(expected, actual);
 		
-		EtaSdkTest.log(TAG, "MapToQueryString");
+		EtaSdkTest.logTest(TAG, "MapToQueryString");
 		
 	}
 	
@@ -138,7 +142,7 @@ public class UtilsTest {
 		actual = Utils.requestToUrlAndQueryString(r);
 		Assert.assertEquals(expected, actual);
 		
-		EtaSdkTest.log(TAG, "RequestToUrlAndQueryString");
+		EtaSdkTest.logTest(TAG, "RequestToUrlAndQueryString");
 	}
 
 	public static void testIsBirthYearValid() {
@@ -154,7 +158,7 @@ public class UtilsTest {
 		}
 		Assert.assertFalse(Utils.isBirthyearValid(Integer.MAX_VALUE));
 		
-		EtaSdkTest.log(TAG, "IsBirthYesrValid");
+		EtaSdkTest.logTest(TAG, "IsBirthYesrValid");
 	}
 
 	public static void testIsGenderValid() {
@@ -171,7 +175,7 @@ public class UtilsTest {
 		Assert.assertTrue(Utils.isGenderValid("female"));
 		Assert.assertTrue(Utils.isGenderValid("male"));
 		
-		EtaSdkTest.log(TAG, "IsGenderValid");
+		EtaSdkTest.logTest(TAG, "IsGenderValid");
 	}
 
 	public static void testIsSuccess() {
@@ -195,7 +199,7 @@ public class UtilsTest {
 		}
 		Assert.assertFalse(Utils.isSuccess(Integer.MAX_VALUE));
 		
-		EtaSdkTest.log(TAG, "IsGenderValid");
+		EtaSdkTest.logTest(TAG, "IsGenderValid");
 	}
 	
 	public static void testValidVersion() {
@@ -216,11 +220,13 @@ public class UtilsTest {
 			Assert.assertFalse(Utils.validVersion(s));
 		}
 
-		EtaSdkTest.log(TAG, "ValidVersion");
+		EtaSdkTest.logTest(TAG, "ValidVersion");
 	}
 
 	@SuppressWarnings("deprecation")
 	public static void testStringToDate() {
+
+		// TODO How do we handle date tests
 		
 		// "yyyy-MM-dd'T'HH:mm:ssZZZZ"
 		
@@ -269,10 +275,12 @@ public class UtilsTest {
 			Assert.assertEquals(epoch, actual);
 		}
 
-		EtaSdkTest.log(TAG, "StringToDate");
+		EtaSdkTest.logTest(TAG, "StringToDate");
 	}
 	
 	public static void testDateToString() {
+		
+		// TODO How do we handle date tests
 		
 		Calendar c = GregorianCalendar.getInstance();
 		
@@ -298,17 +306,18 @@ public class UtilsTest {
 		actual = Utils.dateToString(c.getTime());
 		Assert.assertNotSame("2100-12-12T23:59:59+0000", actual);
 
-		EtaSdkTest.log(TAG, "DateToString");
+		EtaSdkTest.logTest(TAG, "DateToString");
 	}
-	
-	public static void testColorToString() {
 
+	public static void testColorToString() {
+		
 		Assert.assertEquals("000000", Utils.colorToString(Color.BLACK));
 		Assert.assertEquals("FFFFFF", Utils.colorToString(Color.WHITE));
 		Assert.assertEquals("FF0000", Utils.colorToString(Color.RED));
 		Assert.assertEquals("00FF00", Utils.colorToString(Color.GREEN));
 		Assert.assertEquals("0000FF", Utils.colorToString(Color.BLUE));
-
+		Assert.assertEquals(null, Utils.colorToString(null));
+		
 		Assert.assertNotSame("0000FF", Utils.colorToString(Color.LTGRAY));
 		Assert.assertNotSame("0000FF", Utils.colorToString(Color.CYAN));
 		Assert.assertNotSame("0000FF", Utils.colorToString(Color.MAGENTA));
@@ -317,7 +326,27 @@ public class UtilsTest {
 		Assert.assertNotSame("bente", Utils.colorToString(78));
 		Assert.assertNotSame(null, Utils.colorToString(78));
 		Assert.assertNotSame("", Utils.colorToString(78));
+		Assert.assertNotSame("thisColor", Utils.colorToString(null));
 		
-		EtaSdkTest.log(TAG, "ColorToString");
+		EtaSdkTest.logTest(TAG, "ColorToString");
 	}
+
+	public static void testStringToColor() {
+		
+		
+		Assert.assertEquals(Integer.valueOf(Color.BLACK), Utils.stringToColor("000000"));
+		Assert.assertEquals(Integer.valueOf(Color.WHITE), Utils.stringToColor("FFFFFF"));
+		Assert.assertEquals(Integer.valueOf(Color.RED), Utils.stringToColor("FF0000"));
+		Assert.assertEquals(Integer.valueOf(Color.GREEN), Utils.stringToColor("00FF00"));
+		Assert.assertEquals(Integer.valueOf(Color.BLUE), Utils.stringToColor("0000FF"));
+		
+		Assert.assertNotSame(Color.BLACK, Utils.stringToColor("00FFF0"));
+		Assert.assertNotSame(1, Utils.stringToColor("00FFF0"));
+		Assert.assertNotSame(Color.MAGENTA, Utils.stringToColor("000000"));
+		Assert.assertNotSame(Color.MAGENTA, Utils.stringToColor(""));
+		Assert.assertNotSame(Color.MAGENTA, Utils.stringToColor(null));
+		
+		EtaSdkTest.logTest(TAG, "StringToColor");
+	}
+	
 }

@@ -22,6 +22,8 @@ public class Hotspot implements IJson<JSONObject>, Serializable, Parcelable {
 	/** The default significant area */
 	public static final double SIGNIFICANT_AREA = 0.01d;
 	
+	private String mType;
+	
 	private int mPage = 0;
 	
 	private Offer mOffer;
@@ -192,7 +194,15 @@ public class Hotspot implements IJson<JSONObject>, Serializable, Parcelable {
 	public void setOffer(Offer offer) {
 		mOffer = offer;
 	}
+
+	public String getType() {
+		return mType;
+	}
 	
+	public void setType(String type) {
+		mType = type;
+	}
+
 	public int getColor() {
 		return mColor;
 	}

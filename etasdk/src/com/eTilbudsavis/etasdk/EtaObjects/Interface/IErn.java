@@ -1,6 +1,14 @@
 package com.eTilbudsavis.etasdk.EtaObjects.Interface;
 
 public interface IErn<T> {
+
+	public static final String TYPE_CATALOG = "catalog";
+	public static final String TYPE_DEALER = "dealer";
+	public static final String TYPE_OFFER = "offer";
+	public static final String TYPE_SHOPPINGLIST = "shopping:list";
+	public static final String TYPE_STORE = "store";
+	public static final String TYPE_USER = "user";
+	public static final String TYPE_COUNTRY = "country";
 	
 	/**
 	 * Get the id for this object.
@@ -30,5 +38,11 @@ public interface IErn<T> {
 	 * @return
 	 */
 	public T setErn(String ern);
+	
+	/**
+	 * Returns the ERN type for a given Ern object.
+	 * @return A ern-type string
+	 */
+	public String getErnType();
 	
 }

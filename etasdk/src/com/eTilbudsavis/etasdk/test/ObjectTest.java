@@ -41,6 +41,8 @@ public class ObjectTest {
 	public static final String TAG = ObjectTest.class.getSimpleName();
 	
 	public static void test() {
+		
+		EtaSdkTest.start(TAG);
 		testSi();
 		testSize();
 		testPieces();
@@ -92,7 +94,10 @@ public class ObjectTest {
         // JSON
         JSONObject jObj = obj.toJSON();
         ShoppinglistItem jsonObj = ShoppinglistItem.fromJSON(jObj);
-        Assert.assertEquals(obj, jsonObj);
+        
+        Assert.assertNotSame(obj, jsonObj);
+        Assert.assertTrue(obj.same(jsonObj));
+        
         try {
             jObj.put(JsonKey.DESCRIPTION, "not-pizza");
         } catch (JSONException e) {
@@ -102,7 +107,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "ShoppinglistItem");
+        EtaSdkTest.logTest(TAG, "ShoppinglistItem");
         
 	}
 
@@ -128,7 +133,10 @@ public class ObjectTest {
         // JSON
         JSONObject jObj = obj.toJSON();
         Shoppinglist jsonObj = Shoppinglist.fromJSON(jObj);
-        Assert.assertEquals(obj, jsonObj);
+        
+        Assert.assertNotSame(obj, jsonObj);
+        Assert.assertTrue(obj.same(jsonObj));
+        
         try {
             jObj.put(JsonKey.NAME, "not bents list anymore");
         } catch (JSONException e) {
@@ -138,7 +146,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Shoppinglist");
+        EtaSdkTest.logTest(TAG, "Shoppinglist");
         
 	}
 
@@ -155,18 +163,11 @@ public class ObjectTest {
         Session parceledObj = Session.CREATOR.createFromParcel(parcel);
         Assert.assertEquals(obj, parceledObj);
         
-
-        // TODO ERROR json conversion fails
-		boolean t = true;
-		if (t) {
-			return;
-		}
-		
-        
         // JSON
         JSONObject jObj = obj.toJSON();
         Session jsonObj = Session.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
+        
         try {
             jObj.put(JsonKey.TOKEN, "new-fake-token");
         } catch (JSONException e) {
@@ -176,7 +177,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Session - NO TESTING DONE");
+        EtaSdkTest.logTest(TAG, "Session");
         
 	}
 
@@ -193,6 +194,13 @@ public class ObjectTest {
         Dealer parceledObj = Dealer.CREATOR.createFromParcel(parcel);
         Assert.assertEquals(obj, parceledObj);
         
+        obj.setColor(null);
+        parcel = Parcel.obtain();
+        obj.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        parceledObj = Dealer.CREATOR.createFromParcel(parcel);
+        Assert.assertEquals(obj, parceledObj);
+        
         // JSON
         JSONObject jObj = obj.toJSON();
         Dealer jsonObj = Dealer.fromJSON(jObj);
@@ -206,7 +214,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Dealer");
+        EtaSdkTest.logTest(TAG, "Dealer");
         
 	}
 
@@ -216,12 +224,6 @@ public class ObjectTest {
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
-        // TODO ERROR parcellable conversion fails
-		boolean t = true;
-		if (t) {
-			return;
-		}
-		
 		// Parcelable
         Parcel parcel = Parcel.obtain();
         obj.writeToParcel(parcel, 0);
@@ -229,10 +231,22 @@ public class ObjectTest {
         Catalog parceledObj = Catalog.CREATOR.createFromParcel(parcel);
         Assert.assertEquals(obj, parceledObj);
         
+        obj.setBackground(null);
+        parcel = Parcel.obtain();
+        obj.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        parceledObj = Catalog.CREATOR.createFromParcel(parcel);
+        Assert.assertEquals(obj, parceledObj);
+        
         // JSON
         JSONObject jObj = obj.toJSON();
         Catalog jsonObj = Catalog.fromJSON(jObj);
+        
+        // TODO Fix HotspotMap - then remove this
+        obj.setHotspots(null);
+        
         Assert.assertEquals(obj, jsonObj);
+        
         try {
             jObj.put(JsonKey.OFFER_COUNT, 0);
         } catch (JSONException e) {
@@ -242,7 +256,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Catalog - NO TESTING DONE");
+        EtaSdkTest.logTest(TAG, "Catalog - NO TEST OF HOTSPOTMAP");
         
 	}
 
@@ -272,7 +286,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Store");
+        EtaSdkTest.logTest(TAG, "Store");
         
 	}
 
@@ -294,7 +308,7 @@ public class ObjectTest {
         Country jsonObj = Country.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.ID, "1234567");
+            jObj.put(JsonKey.ID, "US");
         } catch (JSONException e) {
         }
         jsonObj = Country.fromJSON(jObj);
@@ -302,7 +316,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Country");
+        EtaSdkTest.logTest(TAG, "Country");
         
 	}
 
@@ -324,18 +338,10 @@ public class ObjectTest {
         parcel.setDataPosition(0);
         Share parceledObj = Share.CREATOR.createFromParcel(parcel);
         Assert.assertEquals(obj, parceledObj);
-
-        // TODO ERROR json conversion fails
-		boolean t = true;
-		if (t) {
-			return;
-		}
-		
         
         // JSON
         JSONObject jObj = obj.toJSON();
         Share jsonObj = Share.fromJSON(jObj);
-//        Assert.assertEquals(obj, jsonObj);
         try {
             jObj.put(JsonKey.EMAIL, "fake-wrong-email@nomail.org");
         } catch (JSONException e) {
@@ -345,7 +351,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Share - NO TESTING DONE");
+        EtaSdkTest.logTest(TAG, "Share");
         
 	}
 
@@ -361,18 +367,11 @@ public class ObjectTest {
         parcel.setDataPosition(0);
         User parceledObj = User.CREATOR.createFromParcel(parcel);
         Assert.assertEquals(obj, parceledObj);
-
-        // TODO ERROR json conversion fails
-		boolean t = true;
-		if (t) {
-			return;
-		}
-		
         
         // JSON
         JSONObject jObj = obj.toJSON();
         User jsonObj = User.fromJSON(jObj);
-//        Assert.assertEquals(obj, jsonObj);
+        Assert.assertEquals(obj, jsonObj);
         try {
             jObj.put(JsonKey.GENDER, "male");
         } catch (JSONException e) {
@@ -382,7 +381,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "User - NO TESTING DONE");
+        EtaSdkTest.logTest(TAG, "User");
         
 	}
 
@@ -399,6 +398,14 @@ public class ObjectTest {
         Branding parceledObj = Branding.CREATOR.createFromParcel(parcel);
         Assert.assertEquals(obj, parceledObj);
         
+        obj.setColor(null);
+        obj.setLogoBackground(null);
+        parcel = Parcel.obtain();
+        obj.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        parceledObj = Branding.CREATOR.createFromParcel(parcel);
+        Assert.assertEquals(obj, parceledObj);
+        
         // JSON
         JSONObject jObj = obj.toJSON();
         Branding jsonObj = Branding.fromJSON(jObj);
@@ -412,7 +419,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Branding");
+        EtaSdkTest.logTest(TAG, "Branding");
         
 	}
 
@@ -442,7 +449,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Dimension - NO TESTING DONE");
+        EtaSdkTest.logTest(TAG, "Dimension");
         
 	}
 
@@ -472,7 +479,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Hotspot - NO TESTING DONE");
+        EtaSdkTest.logTest(TAG, "Hotspot - NO JSON TESTING DONE");
         
 	}
 
@@ -482,29 +489,22 @@ public class ObjectTest {
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
-		// TODO HotspotMap is broken, it needs to be fixed
-		
 		// Parcelable
-//        Parcel parcel = Parcel.obtain();
-//        obj.writeToParcel(parcel, 0);
-//        parcel.setDataPosition(0);
-//        HotspotMap parceledObj = HotspotMap.CREATOR.createFromParcel(parcel);
-//        Assert.assertEquals(obj, parceledObj);
+        Parcel parcel = Parcel.obtain();
+        obj.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        HotspotMap parceledObj = HotspotMap.CREATOR.createFromParcel(parcel);
+        Assert.assertEquals(obj, parceledObj);
         
         // TODO This contains json array JSON
-//        JSONObject jObj = obj.toJSON();
-//        HotspotMap jsonObj = HotspotMap.fromJSON(jObj);
+//        JSONArray jObj = obj.toJSON();
+//        Dimension d = ObjectCreator.getDimension();
+//        HotspotMap jsonObj = HotspotMap.fromJSON(d, jObj);
 //        Assert.assertEquals(obj, jsonObj);
-//        try {
-//            jObj.put(JsonKey.LOGO, "fake-logo-url-new");
-//        } catch (JSONException e) {
-//        }
-//        jsonObj = HotspotMap.fromJSON(jObj);
-//        Assert.assertNotSame(obj, jsonObj);
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "HotspotMap - NO TESTING DONE");
+        EtaSdkTest.logTest(TAG, "HotspotMap - NO JSON TESTING DONE");
         
 	}
 
@@ -520,6 +520,13 @@ public class ObjectTest {
         parcel.setDataPosition(0);
         Pageflip parceledObj = Pageflip.CREATOR.createFromParcel(parcel);
         Assert.assertEquals(obj, parceledObj);
+
+        obj.setColor(null);
+        parcel = Parcel.obtain();
+        obj.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        parceledObj = Pageflip.CREATOR.createFromParcel(parcel);
+        Assert.assertEquals(obj, parceledObj);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -534,7 +541,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Pageflip");
+        EtaSdkTest.logTest(TAG, "Pageflip");
         
 	}
 
@@ -559,7 +566,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Permission");
+        EtaSdkTest.logTest(TAG, "Permission");
         
 	}
 
@@ -589,7 +596,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Typeahead");
+        EtaSdkTest.logTest(TAG, "Typeahead");
         
 	}
 
@@ -619,7 +626,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Subscription");
+        EtaSdkTest.logTest(TAG, "Subscription");
         
 	}
 
@@ -649,7 +656,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Pricing");
+        EtaSdkTest.logTest(TAG, "Pricing");
         
 	}
 
@@ -680,7 +687,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Links");
+        EtaSdkTest.logTest(TAG, "Links");
         
 	}
 
@@ -711,7 +718,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Images");
+        EtaSdkTest.logTest(TAG, "Images");
         
 	}
 
@@ -741,7 +748,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Si");
+        EtaSdkTest.logTest(TAG, "Si");
         
 	}
 
@@ -771,7 +778,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Unit");
+        EtaSdkTest.logTest(TAG, "Unit");
         
 	}
 
@@ -801,7 +808,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Pieces");
+        EtaSdkTest.logTest(TAG, "Pieces");
         
 	}
 
@@ -831,7 +838,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Size");
+        EtaSdkTest.logTest(TAG, "Size");
         
 	}
 
@@ -855,7 +862,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.log(TAG, "Quantity");
+        EtaSdkTest.logTest(TAG, "Quantity");
         
 	}
 
@@ -895,7 +902,7 @@ public class ObjectTest {
         jsonObj = Offer.fromJSON(jOffer);
         Assert.assertNotSame(obj, jsonObj);
         
-        EtaSdkTest.log(TAG, "Offer");
+        EtaSdkTest.logTest(TAG, "Offer");
         // getters and setters
 		
     }

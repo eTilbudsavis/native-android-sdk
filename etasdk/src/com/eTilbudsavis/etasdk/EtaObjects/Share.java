@@ -87,6 +87,7 @@ public class Share implements Comparable<Share>,  SyncState<Share>, IJson<JSONOb
 			
 			s.setAccess(Json.valueOf(share, JsonKey.ACCESS));
 			s.setAccepted(Json.valueOf(share, JsonKey.ACCEPTED, false));
+			s.setAcceptUrl(Json.valueOf(share, JsonKey.ACCEPT_URL, null));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -279,6 +280,10 @@ public class Share implements Comparable<Share>,  SyncState<Share>, IJson<JSONOb
 	};
 	
 	public boolean same(Object obj) {
+		return compare(obj, false);
+	}
+	
+	public boolean compare(Object obj, boolean syncState) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -314,10 +319,13 @@ public class Share implements Comparable<Share>,  SyncState<Share>, IJson<JSONOb
 		} else if (!mShoppinglistId.equals(other.mShoppinglistId))
 			return false;
 		
-		// Removed SynsState
-		
+		if (syncState) {
+			if (mSyncState != other.mSyncState)
+				return false;
+		}
 		return true;
 	}
+
 	
 	@Override
 	public int hashCode() {
@@ -337,43 +345,7 @@ public class Share implements Comparable<Share>,  SyncState<Share>, IJson<JSONOb
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Share other = (Share) obj;
-		if (mAcceptUrl == null) {
-			if (other.mAcceptUrl != null)
-				return false;
-		} else if (!mAcceptUrl.equals(other.mAcceptUrl))
-			return false;
-		if (mAccepted != other.mAccepted)
-			return false;
-		if (mAccess == null) {
-			if (other.mAccess != null)
-				return false;
-		} else if (!mAccess.equals(other.mAccess))
-			return false;
-		if (mEmail == null) {
-			if (other.mEmail != null)
-				return false;
-		} else if (!mEmail.equals(other.mEmail))
-			return false;
-		if (mName == null) {
-			if (other.mName != null)
-				return false;
-		} else if (!mName.equals(other.mName))
-			return false;
-		if (mShoppinglistId == null) {
-			if (other.mShoppinglistId != null)
-				return false;
-		} else if (!mShoppinglistId.equals(other.mShoppinglistId))
-			return false;
-		if (mSyncState != other.mSyncState)
-			return false;
-		return true;
+		return compare(obj, true);
 	}
 
 	private Share(Parcel in) {

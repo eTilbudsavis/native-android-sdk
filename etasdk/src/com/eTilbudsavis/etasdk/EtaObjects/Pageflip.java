@@ -37,7 +37,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 	public static final String TAG = Eta.TAG_PREFIX + Pageflip.class.getSimpleName();
 	
 	private String mLogo;
-	private int mColor = 0;
+	private Integer mColor = 0;
 
 	public static Parcelable.Creator<Pageflip> CREATOR = new Parcelable.Creator<Pageflip>(){
 		public Pageflip createFromParcel(Parcel source) {
@@ -47,7 +47,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 			return new Pageflip[size];
 		}
 	};
-	
+
 	public Pageflip() {
 		
 	}
@@ -63,7 +63,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 		}
 		
 		p.setLogo(Json.valueOf(pageflip, JsonKey.LOGO));
-		p.setColor(Json.colorValueOf(pageflip, JsonKey.COLOR, "7b9119"));
+		p.setColor(Json.colorValueOf(pageflip, JsonKey.COLOR));
 		
 		return p;
 	}
@@ -92,7 +92,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 		return mColor;
 	}
 	
-	public Pageflip setColor(int color) {
+	public Pageflip setColor(Integer color) {
 		mColor = color;
 		return this;
 	}
@@ -101,7 +101,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + mColor;
+		result = prime * result + ((mColor == null) ? 0 : mColor.hashCode());
 		result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
 		return result;
 	}
@@ -115,7 +115,10 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 		if (getClass() != obj.getClass())
 			return false;
 		Pageflip other = (Pageflip) obj;
-		if (mColor != other.mColor)
+		if (mColor == null) {
+			if (other.mColor != null)
+				return false;
+		} else if (!mColor.equals(other.mColor))
 			return false;
 		if (mLogo == null) {
 			if (other.mLogo != null)
@@ -127,7 +130,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 
 	private Pageflip(Parcel in) {
 		this.mLogo = in.readString();
-		this.mColor = in.readInt();
+		this.mColor = (Integer)in.readValue(Integer.class.getClassLoader());
 	}
 
 	public int describeContents() { 
@@ -136,8 +139,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(this.mLogo);
-		dest.writeInt(this.mColor);
+		dest.writeValue(this.mColor);
 	}
-	
 	
 }

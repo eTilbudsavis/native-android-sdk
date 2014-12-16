@@ -38,8 +38,6 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Serializable, 
 	
 	public static final String TAG = Eta.TAG_PREFIX + Country.class.getSimpleName();
 
-	private static final String ERN_CLASS = "country";
-	
 	private static final long serialVersionUID = 1L;
 
 	private String mId;
@@ -124,13 +122,13 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Serializable, 
 	public Country setId(String id) {
 		if (id != null && id.length() == 2) {
 			mId = id.toUpperCase();
-			mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+			mErn = String.format("ern:%s:%s", getErnType(), id);
 		} else {
 			EtaLog.i(TAG, "The country code: " + id + " isn't allowed, see documentation for more details");
 		}
 		return this;
 	}
-
+	
 	public Country setErn(String ern) {
 		if (ern != null) {
 			mErn = ern;
@@ -142,6 +140,10 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Serializable, 
 	
 	public String getErn() {
 		return mErn;
+	}
+
+	public String getErnType() {
+		return IErn.TYPE_COUNTRY;
 	}
 	
 	/**

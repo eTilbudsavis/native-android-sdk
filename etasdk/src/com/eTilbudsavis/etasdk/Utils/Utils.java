@@ -25,6 +25,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Eta;
@@ -390,8 +391,33 @@ public final class Utils {
 	 * <li>Color.BLUE = "0000FF"</li>
 	 * @return A string
 	 */
-	public static String colorToString(int color) {
+	public static String colorToString(Integer color) {
+		if (color==null) {
+			return null;
+		}
 		return String.format("%06X", 0xFFFFFF & color);
+	}
+	
+	/**
+	 * Converts a given string to a color
+	 * <li>"FFFFFF" = Color.WHITE</li>
+	 * <li>"000000" = Color.BLACK</li>
+	 * <li>"0000FF" = Color.BLUE</li>
+	 * @return A string
+	 */
+	public static Integer stringToColor(String color) {
+		if (color==null) {
+			return null;
+		}
+		if (!color.startsWith("#")) {
+			color = "#" + color;
+		}
+		try {
+			return Color.parseColor(color);
+		} catch (NumberFormatException e) {
+//			EtaLog.e(TAG, e.getMessage(), e);
+		}
+		return null;
 	}
 	
 }

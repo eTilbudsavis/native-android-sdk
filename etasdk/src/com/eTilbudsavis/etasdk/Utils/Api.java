@@ -29,6 +29,12 @@ public final class Api {
 	 */
 	public class JsonKey {
 		
+
+		public static final String SDK_DEALER = "sdk_dealer";
+		public static final String SDK_STORE = "sdk_store";
+		public static final String SDK_CATALOG = "sdk_catalog";
+		public static final String SDK_PAGES = "sdk_pages";
+		
 		public static final String ID = "id";
 		public static final String ERN = "ern";
 		public static final String NAME = "name";

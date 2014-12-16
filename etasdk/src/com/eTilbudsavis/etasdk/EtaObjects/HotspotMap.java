@@ -39,7 +39,7 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson
 		Color.YELLOW, 
 		Color.MAGENTA 
 	};
-
+	
 	public static Parcelable.Creator<HotspotMap> CREATOR = new Parcelable.Creator<HotspotMap>(){
 		public HotspotMap createFromParcel(Parcel source) {
 			return new HotspotMap(source);
@@ -92,6 +92,7 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson
 						
 						h.setPage(page);
 						h.setOffer(o);
+						h.setType(type);
 						h.setColor(color);
 						h.setDualPage(keys.size()>1);
 						map.get(page).add(h);
@@ -157,6 +158,9 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson
 	}
 	
 	public JSONArray toJSON() {
+		
+		JSONArray a = new JSONArray();
+		
 		return null;
 	}
 	
@@ -184,14 +188,16 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson
 
 	private HotspotMap(Parcel in) {
 		this.mIsNormalized = in.readByte() != 0;
+		this.putAll( (HotspotMap) in.readSerializable() );
 	}
 
 	public int describeContents() { 
 		return 0; 
 	}
-
+	
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeByte(mIsNormalized ? (byte) 1 : (byte) 0);
+		dest.writeSerializable(this);
 	}
 	
 }

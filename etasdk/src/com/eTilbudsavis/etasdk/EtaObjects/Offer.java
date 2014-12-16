@@ -28,9 +28,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.ICatalog;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -55,8 +55,6 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	
 	public static final String TAG = Eta.TAG_PREFIX + Offer.class.getSimpleName();
 	
-	private static final String ERN_CLASS = "offer";
-
 	private String mId;
 	private String mErn;
 	private String mHeading;
@@ -150,6 +148,21 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 				offer.setCatalogId(Json.valueOf(jOffer, JsonKey.CATALOG_ID));
 			}
 			
+			if (jOffer.has(JsonKey.SDK_DEALER)) {
+				JSONObject jDealer = Json.getObject(jOffer, JsonKey.SDK_DEALER, null);
+				offer.setDealer(Dealer.fromJSON(jDealer));
+			}
+			
+			if (jOffer.has(JsonKey.SDK_STORE)) {
+				JSONObject jStore = Json.getObject(jOffer, JsonKey.SDK_STORE, null);
+				offer.setStore(Store.fromJSON(jStore));
+			}
+			
+			if (jOffer.has(JsonKey.SDK_CATALOG)) {
+				JSONObject jCatalog = Json.getObject(jOffer, JsonKey.SDK_CATALOG, null);
+				offer.setCatalog(Catalog.fromJSON(jCatalog));
+			}
+			
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -177,7 +190,19 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 			o.put(JsonKey.STORE_ID, Json.nullCheck(getStoreId()));
 			o.put(JsonKey.CATALOG_URL, Json.nullCheck(getCatalogUrl()));
 			o.put(JsonKey.CATALOG_ID, Json.nullCheck(getCatalogId()));
+
+			if (mCatalog!=null) {
+				o.put(JsonKey.SDK_CATALOG, Json.toJson(mCatalog));
+			}
+
+			if (mDealer!=null) {
+				o.put(JsonKey.SDK_DEALER, Json.toJson(mDealer));
+			}
 			
+			if (mStore!=null) {
+				o.put(JsonKey.SDK_STORE, Json.toJson(mStore));
+			}
+
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -186,7 +211,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	
 	public Offer setId(String id) {
 		mId = id;
-		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		mErn = String.format("ern:%s:%s", getErnType(), id);
 		return this;
 	}
 	
@@ -205,6 +230,10 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	
 	public String getErn() {
 		return mErn;
+	}
+	
+	public String getErnType() {
+		return IErn.TYPE_OFFER;
 	}
 	
 	/**

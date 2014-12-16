@@ -47,8 +47,6 @@ public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcel
 	public static final String TAG = Eta.TAG_PREFIX + User.class.getSimpleName();
 	
 	private static final long serialVersionUID = 1L;
-
-	private static final String ERN_CLASS = "user";
 	
 	public static final int NO_USER = -1;
 
@@ -102,6 +100,8 @@ public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcel
 	public JSONObject toJSON() {
 		JSONObject o = new JSONObject();
 		try {
+			o.put(JsonKey.ID, getUserId());
+			o.put(JsonKey.ERN, Json.nullCheck(getErn()));
 			o.put(JsonKey.GENDER, Json.nullCheck(getGender()));
 			o.put(JsonKey.BIRTH_YEAR, Json.nullCheck(getBirthYear()));
 			o.put(JsonKey.NAME, Json.nullCheck(getName()));
@@ -151,6 +151,10 @@ public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcel
 	public String getErn() {
 		return mErn;
 	}
+
+	public String getErnType() {
+		return IErn.TYPE_USER;
+	}
 	
 	/**
 	 * Get the user id
@@ -167,7 +171,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcel
 	 */
 	public User setUserId(int id) {
 		mId = String.valueOf(id);
-		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		mErn = String.format("ern:%s:%s", getErnType(), id);
 		return this;
 	}
 	

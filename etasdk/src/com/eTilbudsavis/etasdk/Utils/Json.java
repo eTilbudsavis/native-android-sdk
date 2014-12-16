@@ -15,14 +15,13 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.Utils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 
 /**
  * Helper class designed to simplify working with JSON in Android - specifically the eTilbudsavis Android SDK.
@@ -34,6 +33,62 @@ import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 public class Json {
 
 	public static final String TAG = Eta.TAG_PREFIX + Json.class.getSimpleName();
+
+	/**
+	 * Searches the JSONObject for the key and returns the matching value if it exists.
+	 * @param object An object to get data from
+	 * @param key A key to map to a value
+	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else null.
+	 */
+	public static JSONArray getArray(JSONObject object, String key) {
+		return getArray(object, key, null);
+	}
+	
+	/**
+	 * Searches the JSONObject for the key and returns the matching value if it exists.
+	 * @param object An object to get data from
+	 * @param key A key to map to a value
+	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else null.
+	 */
+	public static JSONArray getArray(JSONObject object, String key, JSONArray defValue) {
+		if (object == null || key == null) {
+			return null;
+		}
+		try {
+			return object.isNull(key) ? null : object.getJSONArray(key);
+		} catch (JSONException e) {
+			EtaLog.e(TAG, e.getMessage(), e);
+		}
+		return defValue;
+	}
+	
+	/**
+	 * Searches the JSONObject for the key and returns the matching value if it exists.
+	 * @param object An object to get data from
+	 * @param key A key to map to a value
+	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else null.
+	 */
+	public static JSONObject getObject(JSONObject object, String key) {
+		return getObject(object, key, null);
+	}
+
+	/**
+	 * Searches the JSONObject for the key and returns the matching value if it exists.
+	 * @param object An object to get data from
+	 * @param key A key to map to a value
+	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else null.
+	 */
+	public static JSONObject getObject(JSONObject object, String key, JSONObject defValue) {
+		if (object == null || key == null) {
+			return null;
+		}
+		try {
+			return object.isNull(key) ? null : object.getJSONObject(key);
+		} catch (JSONException e) {
+			EtaLog.e(TAG, e.getMessage(), e);
+		}
+		return defValue;
+	}
 	
 	/**
 	 * Searches the JSONObject for the key and returns the matching value if it exists.
@@ -182,7 +237,7 @@ public class Json {
 	 * with the defValue set to Color.TRANSPARENT.
 	 * @see {@link Json#colorValueOf(JSONObject, String, String)}
 	 */
-	public static int colorValueOf(JSONObject object, String key) {
+	public static Integer colorValueOf(JSONObject object, String key) {
 		return colorValueOf(object, key, null);
 	}
 
@@ -193,7 +248,7 @@ public class Json {
 	 * @param defValue A default value to return, if key doesn't exist or causes a JSONException
 	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
 	 */
-	public static int colorValueOf(JSONObject object, String key, int color) {
+	public static Integer colorValueOf(JSONObject object, String key, int color) {
 		return colorValueOf(object, key, Utils.colorToString(color));
 	}
 	
@@ -204,18 +259,9 @@ public class Json {
 	 * @param defValue A default value to return, if key doesn't exist or causes a JSONException
 	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
 	 */
-	public static int colorValueOf(JSONObject object, String key, String defValue) {
-		// Ensure, and clean the default value
-		if (defValue==null) {
-			defValue = Utils.colorToString(Color.TRANSPARENT);
-		}
-		defValue = defValue.replace("#", "");
-		// fetch the string
-		String rawColor = Json.valueOf(object, JsonKey.COLOR, defValue);
-		// generate a valid color string
-		String color = "#" + rawColor;
-		// parse color string
-		return Color.parseColor(color);
+	public static Integer colorValueOf(JSONObject object, String key, String defValue) {
+		String rawColor = Json.valueOf(object, key, defValue);
+		return Utils.stringToColor(rawColor);
 	}
 	
 }

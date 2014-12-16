@@ -245,13 +245,16 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	private void runCatalogFiller() {
 		
+		EtaLog.d(TAG, mCatalog.toJSON().toString());
+		
 		boolean needHotspots = mCatalog.getHotspots()==null;
-		boolean needPages = mCatalog.getPages()==null;
+		boolean needPages = (mCatalog.getPages()==null || mCatalog.getPages().isEmpty()) ;
 		CatalogAutoFill caf = new CatalogAutoFill();
 		caf.setLoadHotspots(needHotspots);
 		caf.setLoadPages(needPages);
 		caf.prepare(new AutoFillParams(), mCatalog, null, mCatListener);
 		caf.execute(Eta.getInstance().getRequestQueue());
+		
 	}
 
 	Listener<Catalog> mCatListener = new Listener<Catalog>() {
@@ -263,6 +266,9 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 			}
 			
 			if ( c!=null && c.getPages()!=null && c.getHotspots()!=null ) {
+				
+				EtaLog.d(TAG, mCatalog.toJSON().toString());
+				
 				Looper main = Looper.getMainLooper();
 				if (main == Looper.myLooper()) {
 					mOnCatalogComplete.run();

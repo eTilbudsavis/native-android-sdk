@@ -2,7 +2,9 @@ package com.eTilbudsavis.etasdk.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,7 +45,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class ObjectCreator {
 	
-	// TODO All objects that are time sensitive must take this into account
+	public static final String UUID_V4_FAKE = "de305d54-75b4-431b-adb2-eb6b9e546013";
 	
 	private static String getUrl(String id, String path) {
 		return String.format("https://eta.dk/%s/%s", id, path);
@@ -56,7 +58,23 @@ public class ObjectCreator {
 	private static String getID(String type, String id) {
 		return String.format("%s-%s", type, id);
 	}
-
+	
+	/**
+	 * Returns a date, that has been rounded to the nearest day (set to 16:00:00)
+	 * @param dayOffset
+	 * @return
+	 */
+	public static Date getDate(int dayOffset) {
+		Calendar c = GregorianCalendar.getInstance();
+		int day = c.get(Calendar.DAY_OF_MONTH) + dayOffset;
+		c.set(Calendar.DAY_OF_MONTH, day);
+		c.set(Calendar.HOUR_OF_DAY, 16);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		return c.getTime();
+	}
+	
 	public static Country getCountry() {
 		return getCountry("DK");
 	}
@@ -170,7 +188,7 @@ public class ObjectCreator {
 	}
 
 	public static Pageflip getPageflip() {
-		return getPageflip("fake-logo-url", Color.GREEN);
+		return getPageflip(getUrl("fake-id"), Color.GREEN);
 	}
 	
 	public static Pageflip getPageflip(String logoUrl, int color) {
@@ -345,11 +363,10 @@ public class ObjectCreator {
 			
 		}
 		s.setMeta(o);
-		long exp = System.currentTimeMillis() - Utils.HOUR_IN_MILLIS;
-		s.setModified(new Date(exp));
+		s.setModified(getDate(1));
 		s.setOffer(getOffer());
 		s.setOfferId(s.getOffer().getId());
-		s.setPreviousId(Utils.createUUID());
+		s.setPreviousId(UUID_V4_FAKE);
 		s.setShoppinglistId(sl.getId());
 		s.setState(SyncState.TO_SYNC);
 		s.setTick(true);
@@ -371,11 +388,10 @@ public class ObjectCreator {
 		} catch (JSONException e) {
 			
 		}
-		s.setMeta(o);
-		long exp = System.currentTimeMillis() - Utils.HOUR_IN_MILLIS;
-		s.setModified(new Date(exp));
+		s.setMeta(o);		
+		s.setModified(getDate(1));
 		s.setName(name);
-		s.setPreviousId(Utils.createUUID());
+		s.setPreviousId(UUID_V4_FAKE);
 		List<Share> shares = new ArrayList<Share>(10);
 		for (int i = 0; i < 10 ; i++) {
 			String email = String.format("danny%s@eta.dk", i);
@@ -387,15 +403,15 @@ public class ObjectCreator {
 		s.setUserId(187);
 		return s;
 	}
-
+	
 	public static Session getSession() {
-		return getSession("token-bafa555b");
+		return getSession(getDate(1).getTime(), "token-bafa555b");
 	}
-
-	public static Session getSession(String token) {
+	
+	public static Session getSession(long expires, String token) {
 		Session s = new Session();
 		s.setClientId("fake-cid");
-		long exp = System.currentTimeMillis() + Utils.HOUR_IN_MILLIS;
+		long exp = expires + Utils.HOUR_IN_MILLIS;
 		s.setExpires(new Date(exp));
 		s.setPermission(getPermission());
 		s.setProvider("fake-provider");
@@ -443,10 +459,9 @@ public class ObjectCreator {
 		}
 		c.setPages(images);
 		c.setPdfUrl(getUrl("pdf"));
-
-		long now = System.currentTimeMillis();
-		c.setRunFrom(new Date(now - (Utils.DAY_IN_MILLIS*3)));
-		c.setRunTill(new Date(now + (Utils.DAY_IN_MILLIS*3)));
+		
+		c.setRunFrom(getDate(-3));
+		c.setRunTill(getDate(3));
 		
 		String dealerId = getID("dealer", id);
 		c.setDealerId(dealerId);
@@ -479,9 +494,8 @@ public class ObjectCreator {
 		o.setPricing(getPricing());
 		o.setQuantity(getQuantity());
 		
-		long now = System.currentTimeMillis();
-		o.setRunFrom(new Date(now - (Utils.DAY_IN_MILLIS*3)));
-		o.setRunTill(new Date(now + (Utils.DAY_IN_MILLIS*3)));
+		o.setRunFrom(getDate(-3));
+		o.setRunTill(getDate(3));
 		
 		String catalogId = getID("catalog", id);
 		o.setCatalogId(catalogId);

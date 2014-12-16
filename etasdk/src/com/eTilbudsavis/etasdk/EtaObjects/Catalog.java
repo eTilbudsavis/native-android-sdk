@@ -30,8 +30,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
@@ -57,13 +57,11 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	
 	public static final String TAG = Eta.TAG_PREFIX + Catalog.class.getSimpleName();
 	
-	private static final String ERN_CLASS = "catalog";
-	
 	// From JSON blob
 	private String mId;
 	private String mErn;
 	private String mLabel;
-	private int mBackground;
+	private Integer mBackground;
 	private Date mRunFrom;
 	private Date mRunTill;
 	private int mPageCount = 0;
@@ -154,6 +152,27 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 			}
 			
 			catalog.setPdfUrl(Json.valueOf(jCatalog, JsonKey.PDF_URL));
+
+			if (jCatalog.has(JsonKey.SDK_DEALER)) {
+				JSONObject jDealer = Json.getObject(jCatalog, JsonKey.SDK_DEALER, null);
+				catalog.setDealer(Dealer.fromJSON(jDealer));
+			}
+
+			if (jCatalog.has(JsonKey.SDK_STORE)) {
+				JSONObject jStore = Json.getObject(jCatalog, JsonKey.SDK_STORE, null);
+				catalog.setStore(Store.fromJSON(jStore));
+			}
+			
+			if (jCatalog.has(JsonKey.SDK_PAGES)) {
+				JSONArray jPages = Json.getArray(jCatalog, JsonKey.SDK_PAGES);
+				List<Images> pages = new ArrayList<Images>(jPages.length());
+				for (int i = 0; i < jPages.length(); i++) {
+					pages.add(Images.fromJSON(jPages.getJSONObject(i)));
+				}
+				catalog.setPages(pages);
+			}
+			
+			// TODO Fix HotspotsMap so it can be JSON'ed
 			
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
@@ -168,7 +187,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 			o.put(JsonKey.ID, Json.nullCheck(getId()));
 			o.put(JsonKey.ERN, Json.nullCheck(getErn()));
 			o.put(JsonKey.LABEL, Json.nullCheck(getLabel()));
-			o.put(JsonKey.BACKGROUND, Json.nullCheck(getBackground()));
+			o.put(JsonKey.BACKGROUND, Json.nullCheck(Utils.colorToString(getBackground())));
 			o.put(JsonKey.RUN_FROM, Json.nullCheck(Utils.dateToString(getRunFrom())));
 			o.put(JsonKey.RUN_TILL, Json.nullCheck(Utils.dateToString(getRunTill())));
 			o.put(JsonKey.PAGE_COUNT, getPageCount());
@@ -180,8 +199,27 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 			o.put(JsonKey.STORE_URL, Json.nullCheck(getStoreUrl()));
 			o.put(JsonKey.DIMENSIONS, Json.nullCheck(getDimension().toJSON()));
 			o.put(JsonKey.IMAGES, Json.nullCheck(getImages().toJSON()));
-			o.put(JsonKey.CATEGORY_IDS, Json.nullCheck(getCatrgoryIds()));
+			o.put(JsonKey.CATEGORY_IDS, new JSONArray(getCatrgoryIds()));
 			o.put(JsonKey.PDF_URL, Json.nullCheck(getPdfUrl()));
+
+			if (mDealer!=null) {
+				o.put(JsonKey.SDK_DEALER, Json.toJson(mDealer));
+			}
+
+			if (mStore!=null) {
+				o.put(JsonKey.SDK_STORE, Json.toJson(mStore));
+			}
+
+			if (mPages!=null) {
+				JSONArray jPages = new JSONArray();
+				for (Images i : mPages) {
+					jPages.put(i.toJSON());
+				}
+				o.put(JsonKey.SDK_PAGES, Json.nullCheck(jPages));
+			}
+			
+			// TODO Fix HotspotsMap so it can be JSON'ed
+			
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -190,7 +228,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 
 	public Catalog setId(String id) {
 		mId = id;
-		mErn = String.format("ern:%s:%s", ERN_CLASS, id);
+		mErn = String.format("ern:%s:%s", getErnType(), id);
 		return this;
 	}
 	
@@ -211,6 +249,10 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 		return mErn;
 	}
 	
+	public String getErnType() {
+		return IErn.TYPE_CATALOG;
+	}
+	
 	public String getLabel() {
 		return mLabel;
 	}
@@ -225,11 +267,11 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	 * For displaying the catalog, in a reader fashion, please use the color found in {@link Pageflip}.
 	 * @return A color
 	 */
-	public int getBackground() {
+	public Integer getBackground() {
 		return mBackground;
 	}
 	
-	public Catalog setBackground(int background) {
+	public Catalog setBackground(Integer background) {
 		mBackground = background;
 		return this;
 	}
@@ -559,7 +601,8 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + mBackground;
+		result = prime * result
+				+ ((mBackground == null) ? 0 : mBackground.hashCode());
 		result = prime * result
 				+ ((mBranding == null) ? 0 : mBranding.hashCode());
 		result = prime * result
@@ -602,7 +645,10 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 		if (getClass() != obj.getClass())
 			return false;
 		Catalog other = (Catalog) obj;
-		if (mBackground != other.mBackground)
+		if (mBackground == null) {
+			if (other.mBackground != null)
+				return false;
+		} else if (!mBackground.equals(other.mBackground))
 			return false;
 		if (mBranding == null) {
 			if (other.mBranding != null)
@@ -705,7 +751,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 		this.mId = in.readString();
 		this.mErn = in.readString();
 		this.mLabel = in.readString();
-		this.mBackground = in.readInt();
+		this.mBackground = (Integer)in.readValue(Integer.class.getClassLoader());
 		long tmpMRunFrom = in.readLong(); 
 		this.mRunFrom = tmpMRunFrom == -1 ? null : new Date(tmpMRunFrom);
 		long tmpMRunTill = in.readLong(); 
@@ -736,7 +782,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 		dest.writeString(this.mId);
 		dest.writeString(this.mErn);
 		dest.writeString(this.mLabel);
-		dest.writeInt(this.mBackground);
+		dest.writeValue(this.mBackground);
 		dest.writeLong(mRunFrom != null ? mRunFrom.getTime() : -1);
 		dest.writeLong(mRunTill != null ? mRunTill.getTime() : -1);
 		dest.writeInt(this.mPageCount);
@@ -755,5 +801,5 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 		dest.writeParcelable(this.mStore, flags);
 		dest.writeParcelable(this.mHotspots, flags);
 	}
-
+	
 }
