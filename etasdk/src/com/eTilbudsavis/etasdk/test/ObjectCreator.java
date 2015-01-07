@@ -443,7 +443,7 @@ public class ObjectCreator {
 
 	public static Catalog getCatalog(String id) {
 		Catalog c = new Catalog();
-		c.setBackground(Color.TRANSPARENT);
+		c.setBackground(Color.BLACK);
 		c.setBranding(getBranding());
 		c.setCatrgoryIds(getCategoryIds());
 		c.setDimension(getDimension());

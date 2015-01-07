@@ -383,18 +383,53 @@ public final class Utils {
 	    float dp = (float)px / c.getResources().getDisplayMetrics().density;
 	    return (int)dp;
 	}
+
+	public static Integer colorSanitize(Integer color) {
+		return colorSanitize(color, true);
+	}
+
+	public static Integer colorSanitize(Integer color, boolean showWarning) {
+		if (color!=null) {
+			if (showWarning && Color.alpha(color)<255) {
+				EtaLog.w(TAG, "eTilbudsavis API v2, doesn't support aplha colors - alpha will be stripped");
+			}
+			color |= 0x00000000ff000000;
+		}
+		return color;
+	}
 	
 	/**
-	 * Method returns a eTilbudsavis API friendly color string.
+	 * Method returns a eTilbudsavis API friendly color string.<br>
+	 * Alpha isn't supported, and will be stripped. Warnings will be logged to console 
 	 * <li>Color.WHITE = "FFFFFF"</li>
 	 * <li>Color.BLACK = "000000"</li>
 	 * <li>Color.BLUE = "0000FF"</li>
-	 * @return A string
+	 * @param color The color to parse
+	 * @return A string, or null
 	 */
 	public static String colorToString(Integer color) {
+		return colorToString(color, true);
+	}
+	
+	/**
+	 * 
+	/**
+	 * Method returns a eTilbudsavis API friendly color string.<br>
+	 * Alpha isn't supported, and will be stripped. This will be logged as a warning in console 
+	 * if ignoreWarnings is false.
+	 * <li>Color.WHITE = "FFFFFF"</li>
+	 * <li>Color.BLACK = "000000"</li>
+	 * <li>Color.BLUE = "0000FF"</li>
+	 * 
+	 * @param color The color to parse
+	 * @param ignoreWarnings - set to true to ignore alpha warnings
+	 * @return A string, or null
+	 */
+	public static String colorToString(Integer color, boolean showWarning) {
 		if (color==null) {
 			return null;
 		}
+		color = colorSanitize(color, showWarning);
 		return String.format("%06X", 0xFFFFFF & color);
 	}
 	

@@ -450,6 +450,11 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	 */
 	public Offer setDealerId(String dealerId) {
 		mDealerId = dealerId;
+		if (mDealerId == null) {
+			mDealer = null;
+		} else if (mDealer != null && !mDealerId.equals(mDealer.getId()) ) {
+			mDealer = null;
+		}
 		return this;
 	}
 
@@ -490,6 +495,11 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	 */
 	public Offer setStoreId(String storeId) {
 		mStoreId = storeId;
+		if (mStoreId == null) {
+			mStore = null;
+		} else if (mStore != null && !mStoreId.equals(mStore.getId()) ) {
+			mStore = null;
+		}
 		return this;
 	}
 	
@@ -530,6 +540,11 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	 */
 	public Offer setCatalogId(String catalogId) {
 		mCatalogId = catalogId;
+		if (mCatalogId == null) {
+			mCatalog = null;
+		} else if (mCatalog != null && !mCatalogId.equals(mCatalog.getId()) ) {
+			mCatalog = null;
+		}
 		return this;
 	}
 	
@@ -553,6 +568,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	 */
 	public Offer setCatalog(Catalog catalog) {
 		mCatalog = catalog;
+		mCatalogId = (mCatalog==null ? null : mCatalog.getId());
 		return this;
 	}
 
@@ -576,6 +592,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	 */
 	public Offer setDealer(Dealer dealer) {
 		mDealer = dealer;
+		mDealerId = (mDealer==null ? null : mDealer.getId());
 		return this;
 	}
 
@@ -599,6 +616,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	 */
 	public Offer setStore(Store store) {
 		mStore = store;
+		mStoreId = (mStore==null ? null : mStore.getId());
 		return this;
 	}
 	

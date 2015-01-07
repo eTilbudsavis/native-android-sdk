@@ -19,58 +19,50 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
 import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.Network.Impl.ApiError;
 import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.Network.Impl.ParseError;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
-public class EtaError extends Exception {
+public class EtaError extends Exception implements IJson<JSONObject> {
 
 	public static final String TAG = Eta.TAG_PREFIX + EtaError.class.getSimpleName();
 	
 	private static final long serialVersionUID = 1L;
-
-    protected static final String ID = "id";
-    protected static final String CODE = "code";
-    protected static final String MESSAGE = "message";
-    protected static final String DETAILS = "details";
-    protected static final String FAILED_ON_FIELD = "failed_on_field";
-    
+	
+	private static final String DEF_MESSAGE = "Unknown error";
+	private static final String DEF_DETAILS = "Unknown error. No information available. Please contact support.";
+	
     private final String mId;
     private final int mCode;
-    private final String mMessage;
     private final String mDetails;
     private final String mFailedOnField;
-    
-    public EtaError() {
-    	this(Code.UNKNOWN, "Unknown error","Unknown error, there is no "
-    			+ "information available. Please contact support.");
-	}
-    
-    public EtaError(int code, String message, String details) {
-    	this(code, message, "null", details, null);
+
+    public EtaError(Throwable t, int code, String message, String id, String details, String failedOnField) {
+    	super(message, t);
+    	mCode = code;
+    	mId = id;
+    	mDetails = details;
+    	mFailedOnField = failedOnField;
 	}
     
     public EtaError(int code, String message, String id, String details, String failedOnField) {
-    	super();
-    	mCode = code;
-    	mId = id;
-    	mMessage = message;
-    	mDetails = details;
-    	mFailedOnField = failedOnField;
+    	this(null, code, message, id, details, failedOnField);
+	}
+    
+    public EtaError() {
+    	this(null, Code.UNKNOWN, DEF_MESSAGE, null, DEF_DETAILS, null);
+	}
+    
+    public EtaError(int code, String message, String details) {
+    	this(null, code, message, null, details, null);
 	}
     
     public EtaError(Throwable t, int code, String message, String details) {
-    	this(t, code, message, "null", details, null);
-	}
-    
-    public EtaError(Throwable t, int code, String message, String id, String details, String failedOnField) {
-    	super(t);
-    	mCode = code;
-    	mId = id;
-    	mMessage = message;
-    	mDetails = details;
-    	mFailedOnField = failedOnField;
+    	this(t, code, message, null, details, null);
+    	
 	}
     
     /**
@@ -81,21 +73,13 @@ public class EtaError extends Exception {
      */
     public static EtaError fromJSON(JSONObject apiError) {
     	
-		try {
-			
-			// Not using Json-class to parse data, as we'd rather want it to fail
-			String id = apiError.getString(ID);
-			int code = apiError.getInt(CODE);
-			String message = apiError.getString(MESSAGE);
-			String details = apiError.getString(DETAILS);
-			String failedOnField = apiError.has(FAILED_ON_FIELD) ? apiError.getString(FAILED_ON_FIELD) : null;
-            return new ApiError(code, message, id, details, failedOnField);
-            
-		} catch (Exception e) {
-			EtaLog.e(TAG, "", e);
-			return new ParseError(e, ApiError.class);
-		}
-		
+    	String id = Json.valueOf(apiError, JsonKey.ID);
+		int code = Json.valueOf(apiError, JsonKey.CODE, Code.UNKNOWN);
+		String message = Json.valueOf(apiError, JsonKey.MESSAGE, DEF_MESSAGE);
+		String details = Json.valueOf(apiError, JsonKey.DETAILS, DEF_DETAILS);
+		String failedOnField = Json.valueOf(apiError, JsonKey.FAILED_ON_FIELD);
+        return new ApiError(code, message, id, details, failedOnField);
+        
     }
     
     /**
@@ -121,17 +105,17 @@ public class EtaError extends Exception {
     }
     
 	public JSONObject toJSON() {
-		JSONObject e = new JSONObject();
+		JSONObject o = new JSONObject();
 		try {
-			e.put(ID, mId);
-			e.put(CODE, mCode);
-			e.put(MESSAGE, mMessage);
-			e.put(DETAILS, mDetails);
-			e.put(FAILED_ON_FIELD, mFailedOnField);
-		} catch (JSONException e1) {
-			e1.printStackTrace();
+			o.put(JsonKey.ID, Json.nullCheck(mId));
+			o.put(JsonKey.CODE, Json.nullCheck(mCode));
+			o.put(JsonKey.MESSAGE, Json.nullCheck(getMessage()));
+			o.put(JsonKey.DETAILS, Json.nullCheck(mDetails));
+			o.put(JsonKey.FAILED_ON_FIELD, Json.nullCheck(mFailedOnField));
+		} catch (JSONException e) {
+			EtaLog.e(TAG, e.getMessage(), e);
 		}
-		return e;
+		return o;
 	}
 	
 	public boolean isSdk() {
@@ -142,6 +126,14 @@ public class EtaError extends Exception {
 	public boolean isApi() {
 		int code = getCode();
 		return 1000 <= code && code < 10000;
+	}
+	
+	/**
+	 * Prints the JSON representation of this object
+	 */
+	@Override
+	public String toString() {
+		return toJSON().toString();
 	}
 	
 	public class Code {

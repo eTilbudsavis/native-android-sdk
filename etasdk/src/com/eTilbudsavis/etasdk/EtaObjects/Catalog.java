@@ -272,7 +272,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	}
 	
 	public Catalog setBackground(Integer background) {
-		mBackground = background;
+		mBackground = Utils.colorSanitize(background);
 		return this;
 	}
 
@@ -385,6 +385,11 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	 */
 	public Catalog setDealerId(String dealerId) {
 		this.mDealerId = dealerId;
+		if (mDealerId == null) {
+			mDealer = null;
+		} else if (mDealer != null && !mDealerId.equals(mDealer.getId()) ) {
+			mDealer = null;
+		}
 		return this;
 	}
 	
@@ -421,6 +426,11 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	 */
 	public Catalog setStoreId(String storeId) {
 		mStoreId = storeId;
+		if (mStoreId == null) {
+			mStore = null;
+		} else if (mStore != null && !mStoreId.equals(mStore.getId()) ) {
+			mStore = null;
+		}
 		return this;
 	}
 
@@ -511,6 +521,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	 */
 	public Catalog setStore(Store store) {
 		mStore = store;
+		mStoreId = (mStore==null ? null : mStore.getId());
 		return this;
 	}
 
@@ -531,6 +542,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	 */
 	public Catalog setDealer(Dealer dealer) {
 		this.mDealer = dealer;
+		mDealerId = (mDealer==null ? null : mDealer.getId());
 		return this;
 	}
 
@@ -596,7 +608,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	public void setPdfUrl(String pdfUrl) {
 		mPdfUrl = pdfUrl;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -645,8 +657,9 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 			return false;
 		Catalog other = (Catalog) obj;
 		if (mBackground == null) {
-			if (other.mBackground != null)
+			if (other.mBackground != null) {
 				return false;
+			}
 		} else if (!mBackground.equals(other.mBackground))
 			return false;
 		if (mBranding == null) {

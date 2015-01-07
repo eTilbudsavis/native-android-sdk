@@ -5,20 +5,29 @@ import com.eTilbudsavis.etasdk.Log.EtaLog;
 public class EtaSdkTest {
 	
 	public static final String TAG = EtaSdkTest.class.getSimpleName();
+	private static final boolean LOG = false;
 	private static String mCurrentTitle;
-	private static long mStartGlobal = 0;
 	private static long mStartScoped = 0;
 	
 	public static void test() {
 		
-		mStartGlobal = System.currentTimeMillis();
+		long start = System.currentTimeMillis();
+		
 		UtilsTest.test();
 		ObjectTest.test();
 		
+		String ok = "*   All test passed (" + (System.currentTimeMillis()-start) + "ms)   *";
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < ok.length() ; i++) {
+			sb.append("*");
+		}
+		String header = sb.toString();
+		
 		EtaLog.d(TAG, "Done: " + mCurrentTitle + " (" + (System.currentTimeMillis()-mStartScoped) + "ms)");
-		EtaLog.d(TAG, "**************************************");
-		EtaLog.d(TAG, " All test passed (" + (System.currentTimeMillis()-mStartGlobal) + "ms)");
-		EtaLog.d(TAG, "**************************************");
+		EtaLog.d(TAG, header);
+		EtaLog.d(TAG, ok);
+		EtaLog.d(TAG, header);
+		mCurrentTitle = null;
 		
 	}
 	
@@ -38,7 +47,9 @@ public class EtaSdkTest {
 	}
 	
 	protected static void logTest(String tag, String testName) {
-		EtaLog.d(tag, " - " + testName);
+		if (LOG) {
+			EtaLog.d(tag, " - " + testName);
+		}
 	}
 	
 	

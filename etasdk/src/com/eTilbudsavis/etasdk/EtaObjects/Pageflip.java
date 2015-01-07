@@ -53,7 +53,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 	}
 	
 	public Pageflip(int color) {
-		mColor = color;
+		mColor = Utils.colorSanitize(color);
 	}
 	
 	public static Pageflip fromJSON(JSONObject pageflip) {
@@ -93,7 +93,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 	}
 	
 	public Pageflip setColor(Integer color) {
-		mColor = color;
+		mColor = Utils.colorSanitize(color);
 		return this;
 	}
 	

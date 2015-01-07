@@ -240,6 +240,11 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 
 	public Store setDealerId(String dealer) {
 		mDealerId = dealer;
+		if (mDealerId == null) {
+			mDealer = null;
+		} else if (mDealer != null && !mDealerId.equals(mDealer.getId()) ) {
+			mDealer = null;
+		}
 		return this;
 	}
 
@@ -267,6 +272,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 
 	public Store setDealer(Dealer d) {
 		mDealer = d;
+		mDealerId = (mDealer==null ? null : mDealer.getId());
 		return this;
 	}
 	

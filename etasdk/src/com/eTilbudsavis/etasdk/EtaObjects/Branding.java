@@ -135,7 +135,7 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 	}
 
 	public Branding setLogoBackground(Integer color) {
-		mLogoBackground = color;
+		mLogoBackground = Utils.colorSanitize(color);
 		return this;
 	}
 	
@@ -144,7 +144,7 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 	}
 	
 	public Branding setColor(Integer color) {
-		mColor = color;
+		mColor = Utils.colorSanitize(color);
 		return this;
 	}
 

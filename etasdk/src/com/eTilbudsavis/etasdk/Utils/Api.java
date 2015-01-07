@@ -88,6 +88,7 @@ public final class Api {
 		public static final String CODE = "code";
 		public static final String MESSAGE = "message";
 		public static final String DETAILS = "details";
+	    public static final String FAILED_ON_FIELD = "failed_on_field";
 		public static final String VIEW = "view";
 		public static final String ZOOM = "zoom";
 		public static final String THUMB = "thumb";
@@ -127,7 +128,11 @@ public final class Api {
 		public static final String CLIENT_ID = "client_id";
 		public static final String REFERENCE = "reference";
 		public static final String SUBSCRIBED = "subscribed";
-
+		public static final String PAYLOAD = "payload";
+		public static final String DEALER = "dealer";
+		public static final String CATALOGS = "catalogs";
+		public static final String PAYLOAD_TYPE = "payload_type";
+	    
 	}
 
 	/**
@@ -414,7 +419,8 @@ public final class Api {
 		public static final String STORE_SEARCH = "/v2/stores/search";
 		public static final String STORE_QUICK_SEARCH = "/v2/stores/quicksearch";
 		
-		public static final String FAVORITES_DEALERS = "/v2/favorites/dealers/";
+		public static final String FAVORITES_DEALERS_ID = "/v2/favorites/dealers/";
+		public static final String FAVORITES_DEALERS_LIST = "/v2/favorites/dealers";
 		
 		public static final String SESSIONS = "/v2/sessions";
 
@@ -427,6 +433,8 @@ public final class Api {
 		public static final String COUNTRIES = "/v2/countries";
 		
 		public static final String PUSH_PAYLOAD_ID = "/v2/push/payloads/";
+
+		public static final String PUSH_DEVICE_ID = "/v2/push/devices";
 		
 		/**
 		 * Get the current host to use. This can be changed by editing Endpoint.API_HOST_PREFIX.

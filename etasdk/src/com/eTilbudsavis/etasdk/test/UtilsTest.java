@@ -30,8 +30,9 @@ public class UtilsTest {
 		testIsGenderValid();
 		testIsSuccess();
 		testValidVersion();
-		testColorToString();
+		testColorToString(false);
 		testStringToColor();
+		testColorSanitize(false);
 //		testStringToDate();
 //		testDateToString();
 		
@@ -309,7 +310,7 @@ public class UtilsTest {
 		EtaSdkTest.logTest(TAG, "DateToString");
 	}
 
-	public static void testColorToString() {
+	public static void testColorToString(boolean showWarnings) {
 		
 		Assert.assertEquals("000000", Utils.colorToString(Color.BLACK));
 		Assert.assertEquals("FFFFFF", Utils.colorToString(Color.WHITE));
@@ -322,11 +323,15 @@ public class UtilsTest {
 		Assert.assertNotSame("0000FF", Utils.colorToString(Color.CYAN));
 		Assert.assertNotSame("0000FF", Utils.colorToString(Color.MAGENTA));
 		Assert.assertNotSame("0000FF", Utils.colorToString(Color.YELLOW));
-		Assert.assertNotSame("danny", Utils.colorToString(24));
-		Assert.assertNotSame("bente", Utils.colorToString(78));
-		Assert.assertNotSame(null, Utils.colorToString(78));
-		Assert.assertNotSame("", Utils.colorToString(78));
+		
 		Assert.assertNotSame("thisColor", Utils.colorToString(null));
+		
+		Assert.assertNotSame("danny", Utils.colorToString(24, showWarnings));
+		Assert.assertNotSame("bente", Utils.colorToString(78, showWarnings));
+		Assert.assertNotSame(null, Utils.colorToString(78, showWarnings));
+		Assert.assertNotSame("", Utils.colorToString(78, showWarnings));
+		Assert.assertEquals("000000", Utils.colorToString(Color.TRANSPARENT, showWarnings));
+		Assert.assertNotSame("00000000", Utils.colorToString(Color.TRANSPARENT, showWarnings));
 		
 		EtaSdkTest.logTest(TAG, "ColorToString");
 	}
@@ -347,6 +352,24 @@ public class UtilsTest {
 		Assert.assertNotSame(Color.MAGENTA, Utils.stringToColor(null));
 		
 		EtaSdkTest.logTest(TAG, "StringToColor");
+	}
+
+	public static void testColorSanitize(boolean showWarnings) {
+		
+		Assert.assertTrue(null == Utils.colorSanitize(null));
+		
+		Assert.assertTrue(Color.BLUE == Utils.colorSanitize(Color.BLUE));
+		Assert.assertTrue(Color.RED == Utils.colorSanitize(Color.RED));
+		Assert.assertTrue(Color.GREEN == Utils.colorSanitize(Color.GREEN));
+		
+		// Removing transparency
+		Assert.assertFalse(Color.TRANSPARENT == Utils.colorSanitize(Color.TRANSPARENT, showWarnings));
+		Assert.assertTrue(Color.BLACK == Utils.colorSanitize(Color.TRANSPARENT, showWarnings));
+		
+		int alphaRed = Color.parseColor("#55FF0000");
+		Assert.assertFalse(alphaRed == Utils.colorSanitize(alphaRed, showWarnings));
+		
+		EtaSdkTest.logTest(TAG, "ColorSanitize");
 	}
 	
 }

@@ -33,7 +33,10 @@ import com.eTilbudsavis.etasdk.EtaObjects.Subscription;
 import com.eTilbudsavis.etasdk.EtaObjects.Typeahead;
 import com.eTilbudsavis.etasdk.EtaObjects.Unit;
 import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.ICatalog;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.IErn;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
 import com.eTilbudsavis.etasdk.EtaObjects.Interface.SyncState;
 import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
 
@@ -76,36 +79,6 @@ public class ObjectTest {
 		testOffer();
 	}
 
-	public static void testIErn(IErn<?> obj, String fakeId) {
-		testIErn(obj, fakeId, null, null);
-	}
-	
-	public static void testIErn(IErn<?> obj, String fakeId, String fakeExpectedId, String fakeExpectedErn) {
-		
-		String origId = obj.getId();
-		if (origId!=null) {
-			Assert.assertTrue(obj.getErn().startsWith("ern:"));
-			// if there is an id, there must also be a type (or the id)
-			Assert.assertNotNull(obj.getErnType());
-		} else {
-			Assert.assertEquals(null, obj.getErn());
-		}
-		
-		if (fakeId == null) {
-			obj.setId(null);
-			Assert.assertEquals(fakeExpectedId, obj.getId());
-			Assert.assertEquals(fakeExpectedErn, obj.getErn());
-		} else {
-			obj.setId(fakeId);
-			Assert.assertTrue(obj.getErn().startsWith("ern:"));
-			Assert.assertTrue(obj.getErn().contains(fakeId));
-			Assert.assertTrue(obj.getErn().contains(obj.getErnType()));
-		}
-		
-		obj.setId(origId);
-		
-	}
-	
 	public static void testShoppinglistitem() {
 		ShoppinglistItem obj = ObjectCreator.getShoppinglistItem();
 		ShoppinglistItem tmp = ObjectCreator.getShoppinglistItem();
@@ -298,6 +271,9 @@ public class ObjectTest {
         Assert.assertNotSame(obj, jsonObj);
         
         // getters and setters
+
+        testIDealer(obj);
+        testIStore(obj);
         
         EtaSdkTest.logTest(TAG, "Catalog - NO TEST OF HOTSPOTMAP");
         
@@ -331,6 +307,7 @@ public class ObjectTest {
         Assert.assertNotSame(obj, jsonObj);
         
         // getters and setters
+        testIDealer(obj);
         
         EtaSdkTest.logTest(TAG, "Store");
         
@@ -959,9 +936,84 @@ public class ObjectTest {
         jsonObj = Offer.fromJSON(jOffer);
         Assert.assertNotSame(obj, jsonObj);
         
+        testIDealer(obj);
+        testIStore(obj);
+        testICatalog(obj);
+        
         EtaSdkTest.logTest(TAG, "Offer");
         // getters and setters
 		
     }
 	
+	
+	/*
+	 * 
+	 * HELPERS TO TEST OBJECTS THAT IMPLEMENT CERTAIN TYPES OC INTERFACES
+	 * 
+	 */
+	
+	
+	private static void testICatalog(ICatalog<?> obj) {
+
+        String catalogId = obj.getCatalogId();
+        obj.setCatalog(ObjectCreator.getCatalog());
+        Assert.assertNotSame(catalogId, obj.getCatalogId());
+        Assert.assertEquals(obj.getCatalogId(), obj.getCatalog().getId());
+        obj.setCatalog(null);
+        Assert.assertNull(obj.getCatalogId());
+        
+	}
+
+	private static void testIStore(IStore<?> obj) {
+
+        String storeId = obj.getStoreId();
+        obj.setStore(ObjectCreator.getStore());
+        Assert.assertNotSame(storeId, obj.getStoreId());
+        Assert.assertEquals(obj.getStoreId(), obj.getStore().getId());
+        obj.setStore(null);
+        Assert.assertNull(obj.getStoreId());
+        
+	}
+
+	private static void testIDealer(IDealer<?> obj) {
+
+        String dealerId = obj.getDealerId();
+        obj.setDealer(ObjectCreator.getDealer());
+        Assert.assertNotSame(dealerId, obj.getDealerId());
+        Assert.assertEquals(obj.getDealerId(), obj.getDealer().getId());
+        obj.setDealer(null);
+        Assert.assertNull(obj.getDealerId());
+        
+	}
+
+	public static void testIErn(IErn<?> obj, String fakeId) {
+		testIErn(obj, fakeId, null, null);
+	}
+	
+	public static void testIErn(IErn<?> obj, String fakeId, String fakeExpectedId, String fakeExpectedErn) {
+		
+		String origId = obj.getId();
+		if (origId!=null) {
+			Assert.assertTrue(obj.getErn().startsWith("ern:"));
+			// if there is an id, there must also be a type (or the id)
+			Assert.assertNotNull(obj.getErnType());
+		} else {
+			Assert.assertEquals(null, obj.getErn());
+		}
+		
+		if (fakeId == null) {
+			obj.setId(null);
+			Assert.assertEquals(fakeExpectedId, obj.getId());
+			Assert.assertEquals(fakeExpectedErn, obj.getErn());
+		} else {
+			obj.setId(fakeId);
+			Assert.assertTrue(obj.getErn().startsWith("ern:"));
+			Assert.assertTrue(obj.getErn().contains(fakeId));
+			Assert.assertTrue(obj.getErn().contains(obj.getErnType()));
+		}
+		
+		obj.setId(origId);
+		
+	}
+
 }

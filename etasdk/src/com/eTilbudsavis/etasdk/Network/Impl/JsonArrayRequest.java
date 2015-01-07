@@ -100,7 +100,6 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
             return r;
             
         } catch (Exception e) {
-        	
             return Response.fromError(new ParseError(e, JSONArray.class));
         }
 	}

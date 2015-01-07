@@ -179,7 +179,7 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 	}
 
 	public Dealer setColor(Integer color) {
-		mColor = color;
+		mColor = Utils.colorSanitize(color);
 		return this;
 	}
 
