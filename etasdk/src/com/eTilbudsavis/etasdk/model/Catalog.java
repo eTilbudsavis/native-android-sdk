@@ -250,7 +250,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	}
 
 	public String getErnType() {
-		return IErn.TYPE_DEALER;
+		return IErn.TYPE_CATALOG;
 	}
 	
 	public String getLabel() {
