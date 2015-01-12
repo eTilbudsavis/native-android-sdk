@@ -28,13 +28,14 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 
-import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.model.Share;
-import com.eTilbudsavis.etasdk.model.Shoppinglist;
-import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
-import com.eTilbudsavis.etasdk.model.User;
-import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
-import com.eTilbudsavis.etasdk.utils.ListUtils;
+import com.eTilbudsavis.etasdk.EtaObjects.Share;
+import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
+import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.SyncState;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Utils.ListUtils;
 
 /**
  * This class provides methods, for easily handling of

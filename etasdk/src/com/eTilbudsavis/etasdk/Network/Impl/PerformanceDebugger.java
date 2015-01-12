@@ -1,8 +1,9 @@
-package com.eTilbudsavis.etasdk.network.impl;
+package com.eTilbudsavis.etasdk.Network.Impl;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.network.RequestDebugger;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.RequestDebugger;
 
 public class PerformanceDebugger implements RequestDebugger {
 	

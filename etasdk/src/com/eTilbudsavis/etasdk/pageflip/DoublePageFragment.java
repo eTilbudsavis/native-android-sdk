@@ -9,9 +9,9 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.imageloader.ImageLoader;
-import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
-import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
+import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoDoubleClickListener;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoLongClickListener;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoTapListener;

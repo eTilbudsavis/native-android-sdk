@@ -16,8 +16,7 @@
 package com.eTilbudsavis.etasdk.request;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.network.EtaError;
-import com.eTilbudsavis.etasdk.network.EtaError.Code;
+import com.eTilbudsavis.etasdk.Network.EtaError;
 
 
 public class AutoLoadError extends EtaError {

@@ -13,9 +13,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.network.impl;
+package com.eTilbudsavis.etasdk.Network.Impl;
 
-import com.eTilbudsavis.etasdk.network.EtaError;
+import com.eTilbudsavis.etasdk.Network.EtaError;
 
 
 public class ApiError extends EtaError {

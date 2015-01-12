@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.network;
+package com.eTilbudsavis.etasdk.Network;
 
 import java.io.Serializable;
 

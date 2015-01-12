@@ -1,6 +1,6 @@
 package com.eTilbudsavis.etasdk.test;
 
-import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class EtaSdkTest {
 	

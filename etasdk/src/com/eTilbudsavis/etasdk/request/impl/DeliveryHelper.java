@@ -4,10 +4,11 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.network.Delivery;
-import com.eTilbudsavis.etasdk.network.EtaError;
-import com.eTilbudsavis.etasdk.network.Response;
-import com.eTilbudsavis.etasdk.network.Delivery.DeliveryRunnable;
+import com.eTilbudsavis.etasdk.Network.Delivery;
+import com.eTilbudsavis.etasdk.Network.EtaError;
+import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.Response;
+import com.eTilbudsavis.etasdk.Network.Response.Listener;
 
 public class DeliveryHelper<T> implements Delivery {
 	

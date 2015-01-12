@@ -30,18 +30,19 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.eTilbudsavis.etasdk.imageloader.ImageLoader;
-import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.model.Shoppinglist;
-import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
-import com.eTilbudsavis.etasdk.model.User;
-import com.eTilbudsavis.etasdk.network.HttpStack;
-import com.eTilbudsavis.etasdk.network.RequestQueue;
-import com.eTilbudsavis.etasdk.network.impl.DefaultHttpNetwork;
-import com.eTilbudsavis.etasdk.network.impl.HttpURLNetwork;
-import com.eTilbudsavis.etasdk.network.impl.MemoryCache;
-import com.eTilbudsavis.etasdk.network.impl.NetworkImpl;
-import com.eTilbudsavis.etasdk.utils.Utils;
+import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
+import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.EtaObjects.User;
+import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Network.HttpStack;
+import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.RequestQueue;
+import com.eTilbudsavis.etasdk.Network.Impl.DefaultHttpNetwork;
+import com.eTilbudsavis.etasdk.Network.Impl.HttpURLNetwork;
+import com.eTilbudsavis.etasdk.Network.Impl.MemoryCache;
+import com.eTilbudsavis.etasdk.Network.Impl.NetworkImpl;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 /**
  * 

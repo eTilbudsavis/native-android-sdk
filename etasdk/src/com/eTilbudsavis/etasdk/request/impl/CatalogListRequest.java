@@ -6,12 +6,14 @@ import java.util.Set;
 
 import org.json.JSONArray;
 
-import com.eTilbudsavis.etasdk.model.Catalog;
-import com.eTilbudsavis.etasdk.network.EtaError;
+import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
+import com.eTilbudsavis.etasdk.Network.EtaError;
+import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.Response.Listener;
+import com.eTilbudsavis.etasdk.Utils.Api;
+import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 import com.eTilbudsavis.etasdk.request.RequestParameter;
-import com.eTilbudsavis.etasdk.utils.Api;
-import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 
 public class CatalogListRequest extends ListRequest<List<Catalog>> {
 	

@@ -9,9 +9,10 @@ import java.util.Map;
 import junit.framework.Assert;
 import android.graphics.Color;
 
-import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.utils.Utils;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class UtilsTest {
 	

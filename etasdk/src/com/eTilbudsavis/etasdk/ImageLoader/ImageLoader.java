@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.imageloader;
+package com.eTilbudsavis.etasdk.ImageLoader;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -12,11 +12,11 @@ import android.os.Looper;
 import android.widget.ImageView;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.imageloader.impl.DefaultBitmapDecoder;
-import com.eTilbudsavis.etasdk.imageloader.impl.DefaultFileCache;
-import com.eTilbudsavis.etasdk.imageloader.impl.DefaultImageDownloader;
-import com.eTilbudsavis.etasdk.imageloader.impl.LruMemoryCache;
-import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultBitmapDecoder;
+import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultFileCache;
+import com.eTilbudsavis.etasdk.ImageLoader.Impl.DefaultImageDownloader;
+import com.eTilbudsavis.etasdk.ImageLoader.Impl.LruMemoryCache;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 public class ImageLoader {
 

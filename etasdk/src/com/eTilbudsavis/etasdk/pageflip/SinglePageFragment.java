@@ -3,7 +3,7 @@ package com.eTilbudsavis.etasdk.pageflip;
 import android.view.View;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
+import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoDoubleClickListener;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoLongClickListener;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoTapListener;

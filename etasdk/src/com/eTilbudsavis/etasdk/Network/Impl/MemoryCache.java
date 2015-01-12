@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.network.impl;
+package com.eTilbudsavis.etasdk.Network.Impl;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -22,9 +22,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.network.Cache;
-import com.eTilbudsavis.etasdk.network.Response;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Network.Cache;
+import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.Request.Method;
+import com.eTilbudsavis.etasdk.Network.Response;
 
 public class MemoryCache implements Cache {
 	

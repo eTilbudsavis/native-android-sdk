@@ -1,5 +1,6 @@
 package com.eTilbudsavis.etasdk.request;
 
+import com.eTilbudsavis.etasdk.Network.Request;
 
 public abstract class Builder<T extends Request<?>> {
 	

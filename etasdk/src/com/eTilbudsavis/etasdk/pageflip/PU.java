@@ -6,12 +6,13 @@ import android.os.Looper;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.eTilbudsavis.etasdk.imageloader.FileNameGenerator;
-import com.eTilbudsavis.etasdk.imageloader.ImageDebugger;
-import com.eTilbudsavis.etasdk.imageloader.ImageLoader;
-import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
-import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.model.Catalog;
+import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
+import com.eTilbudsavis.etasdk.EtaObjects.Images;
+import com.eTilbudsavis.etasdk.ImageLoader.FileNameGenerator;
+import com.eTilbudsavis.etasdk.ImageLoader.ImageDebugger;
+import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
+import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
 
 /**
  * Methods in this class <b>CHANGES A LOT</b>, and will break your stuff.

@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.imageloader;
+package com.eTilbudsavis.etasdk.ImageLoader;
 
 /**
  * Interface for displaying a bitmap in an ImageView

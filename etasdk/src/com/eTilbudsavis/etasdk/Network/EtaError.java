@@ -13,18 +13,18 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.network;
+package com.eTilbudsavis.etasdk.Network;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.model.interfaces.IJson;
-import com.eTilbudsavis.etasdk.network.impl.ApiError;
-import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
-import com.eTilbudsavis.etasdk.utils.Json;
+import com.eTilbudsavis.etasdk.EtaObjects.Interface.IJson;
+import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.Network.Impl.ApiError;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.Utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Utils.Json;
 
 public class EtaError extends Exception implements IJson<JSONObject> {
 

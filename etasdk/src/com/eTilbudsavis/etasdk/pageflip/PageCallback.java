@@ -1,6 +1,6 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
-import com.eTilbudsavis.etasdk.model.Catalog;
+import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
 
 public interface PageCallback {
 

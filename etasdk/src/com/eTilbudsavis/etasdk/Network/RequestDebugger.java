@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.network;
+package com.eTilbudsavis.etasdk.Network;
 
 public interface RequestDebugger {
 

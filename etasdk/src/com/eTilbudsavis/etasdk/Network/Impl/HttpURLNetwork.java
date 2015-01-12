@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.network.impl;
+package com.eTilbudsavis.etasdk.Network.Impl;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -34,9 +34,10 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.network.HttpStack;
-import com.eTilbudsavis.etasdk.utils.HeaderUtils;
-import com.eTilbudsavis.etasdk.utils.Utils;
+import com.eTilbudsavis.etasdk.Network.HttpStack;
+import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Utils.HeaderUtils;
+import com.eTilbudsavis.etasdk.Utils.Utils;
 
 public class HttpURLNetwork implements HttpStack {
 	

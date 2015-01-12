@@ -11,13 +11,15 @@ import org.json.JSONArray;
 
 import android.text.TextUtils;
 
-import com.eTilbudsavis.etasdk.network.Delivery;
-import com.eTilbudsavis.etasdk.network.EtaError;
-import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.Network.Delivery;
+import com.eTilbudsavis.etasdk.Network.EtaError;
+import com.eTilbudsavis.etasdk.Network.Request;
+import com.eTilbudsavis.etasdk.Network.Response.Listener;
+import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.Utils.Api;
 import com.eTilbudsavis.etasdk.request.ParameterBuilder;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
-import com.eTilbudsavis.etasdk.utils.Api;
 
 public abstract class ListRequest<T> extends JsonArrayRequest {
 	
