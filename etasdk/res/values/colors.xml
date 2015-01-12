@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- eTilbudsavis Green -->
+    <color name="eta_sdk_green">#7b9119</color>
+    
+    <!-- Text colors -->
+    <color name="etasdk_text_light">#a0ffffff</color>
+    <color name="etasdk_text_dark">#a0000000</color>
+    
+</resources>

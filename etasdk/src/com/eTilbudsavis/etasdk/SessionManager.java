@@ -26,22 +26,22 @@ import org.json.JSONObject;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Session;
-import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Network.Request.Method;
-import com.eTilbudsavis.etasdk.Network.Request.Priority;
-import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Param;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Session;
+import com.eTilbudsavis.etasdk.network.EtaError;
+import com.eTilbudsavis.etasdk.network.Request;
+import com.eTilbudsavis.etasdk.network.Request.Method;
+import com.eTilbudsavis.etasdk.network.Request.Priority;
+import com.eTilbudsavis.etasdk.network.Response.Listener;
+import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.utils.Api;
+import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.utils.Api.Param;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class SessionManager {
 	
-	public static final String TAG = "SessionManager";
+	public static final String TAG = Eta.TAG_PREFIX + SessionManager.class.getSimpleName();
 	
     public static final String ETA_COOKIE_DOMAIN = "etilbudsavis.dk";
     public static final String COOKIE_AUTH_ID = "auth[id]";
@@ -73,16 +73,10 @@ public class SessionManager {
 	public SessionManager(Eta eta) {
 		
 		mEta = eta;
+		
 		JSONObject session = mEta.getSettings().getSessionJson();
-		
-		if (session == null) {
-			mSession = new Session();
-		} else {
-			mSession = Session.fromJSON(session);
-		}
-		
-		// Make sure, that the session isn't null - we really don't want this to be null
-		mSession = (mSession == null ? new Session() : mSession);
+		mSession = Session.fromJSON(session);
+		ClientIdStore.updateCid(mSession, mEta.getContext());
 		
 	}
 	
@@ -91,8 +85,6 @@ public class SessionManager {
 		Listener<JSONObject> sessionListener = new Listener<JSONObject>() {
 
 			public void onComplete(JSONObject response, EtaError error) {
-				
-//				EtaLog.d(TAG, "Session", response, error);
 				
 				synchronized (LOCK) {
 					
@@ -129,6 +121,10 @@ public class SessionManager {
 		
 		synchronized (LOCK) {
 			r.setPriority(Priority.HIGH);
+			if (mSession.getClientId()!=null) {
+				r.getParameters().put(Api.JsonKey.CLIENT_ID, mSession.getClientId());
+			}
+//			r.setDebugger(new DefaultDebugger());
 			mSessionQueue.add(r);
 			runQueue();
 		}
@@ -197,6 +193,7 @@ public class SessionManager {
 			}
 			
 			mSession = s;
+			ClientIdStore.updateCid(mSession, mEta.getContext());
 			mEta.getSettings().setSessionJson(session);
 			
 			// Reset session retry boolean
@@ -269,6 +266,7 @@ public class SessionManager {
 			}
 		}
 		
+		ClientIdStore.updateCid(mSession, mEta.getContext());
 	}
 	
 	public void onPause() {
@@ -375,12 +373,21 @@ public class SessionManager {
 	 */
 	public void signout(final Listener<JSONObject> l) {
 		
-		final User u = mSession.getUser();
-        mEta.getListManager().clear(u.getUserId());
-        Map<String, String> args = new HashMap<String, String>();
-        args.put(Param.EMAIL, "");
-        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
-        addRequest(req);
+		if (Eta.getInstance().isOnline()) {
+	        mEta.getListManager().clear(mSession.getUser().getUserId());
+	        Map<String, String> args = new HashMap<String, String>();
+	        args.put(Param.EMAIL, "");
+	        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
+	        addRequest(req);
+		} else {
+			invalidate();
+			Eta.getInstance().getHandler().post(new Runnable() {
+				
+				public void run() {
+					l.onComplete(mSession.toJSON(), null);
+				}
+			});
+		}
         
 	}
 	
@@ -447,7 +454,8 @@ public class SessionManager {
 			
 			if (mSession.getToken() == null || !mSession.getToken().equals(headerToken) ) {
 				mSession.setToken(headerToken);
-				mSession.setExpires(headerExpires);
+				Date exp = Utils.stringToDate(headerExpires);
+				mSession.setExpires(exp);
 				mEta.getSettings().setSessionJson(mSession.toJSON());
 			}
 		}
@@ -461,8 +469,10 @@ public class SessionManager {
 	public void invalidate() {
 		synchronized (LOCK) {
 			mSession = new Session();
+			ClientIdStore.updateCid(mSession, mEta.getContext());
 			mEta.getSettings().setSessionJson(mSession.toJSON());
 			clearUser();
+			notifySubscribers();
 		}
 	}
 	
@@ -500,12 +510,8 @@ public class SessionManager {
 						}
 					});
 				} catch (Exception e) {
-					EtaLog.e(TAG, e);
+					EtaLog.e(TAG, "", e);
 				}
-			}
-			
-			for (PageflipWebview p : PageflipWebview.pageflips) {
-				p.updateSession();
 			}
 			
 		}

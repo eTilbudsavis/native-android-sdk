@@ -28,14 +28,14 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 
-import com.eTilbudsavis.etasdk.EtaObjects.EtaListObject.State;
-import com.eTilbudsavis.etasdk.EtaObjects.EtaObject.ServerKey;
-import com.eTilbudsavis.etasdk.EtaObjects.Share;
-import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
-import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
-import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Share;
+import com.eTilbudsavis.etasdk.model.Shoppinglist;
+import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.model.User;
+import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
+import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.utils.ListUtils;
 
 /**
  * This class provides methods, for easily handling of
@@ -49,7 +49,7 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  */
 public class ListManager {
 	
-	public static final String TAG = "ListManager";
+	public static final String TAG = Eta.TAG_PREFIX + ListManager.class.getSimpleName();
 	
 	/** The global {@link Eta} object */
 	private Eta mEta;
@@ -110,14 +110,14 @@ public class ListManager {
 			JSONObject o = new JSONObject();
 			try {
 				JSONObject u = new JSONObject();
-				u.put(ServerKey.EMAIL, mEta.getUser().getEmail());
-				u.put(ServerKey.NAME, mEta.getUser().getName());
-				o.put(ServerKey.USER, u);
-				o.put(ServerKey.ACCEPTED, true);
-				o.put(ServerKey.ACCESS, Share.ACCESS_OWNER);
+				u.put(JsonKey.EMAIL, mEta.getUser().getEmail());
+				u.put(JsonKey.NAME, mEta.getUser().getName());
+				o.put(JsonKey.USER, u);
+				o.put(JsonKey.ACCEPTED, true);
+				o.put(JsonKey.ACCESS, Share.ACCESS_OWNER);
 				owner = Share.fromJSON(o);
 			} catch (JSONException e) {
-				EtaLog.e(TAG, e);
+				EtaLog.e(TAG, null, e);
 			}
 			List<Share> shares = new ArrayList<Share>(1);
 			shares.add(owner);
@@ -128,14 +128,14 @@ public class ListManager {
 			
 		}
 		
-		sl.setPreviousId(ShoppinglistItem.FIRST_ITEM);
-		sl.setState(Shoppinglist.State.TO_SYNC);
+		sl.setPreviousId(ListUtils.FIRST_ITEM);
+		sl.setState(SyncState.TO_SYNC);
 		
 		Shoppinglist first = db.getFirstList(user);
 		if (first != null) {
 			first.setPreviousId(sl.getId());
 			first.setModified(new Date());
-			first.setState(Shoppinglist.State.TO_SYNC);
+			first.setState(SyncState.TO_SYNC);
 			db.editList(first, user);
 		}
 		
@@ -176,7 +176,7 @@ public class ListManager {
 		 */
 		if (!slShares.containsKey(user.getEmail())) {
 			Share dbShare = dbShares.get(user.getEmail());
-			dbShare.setState(Share.State.DELETE);
+			dbShare.setState(SyncState.DELETE);
 			db.editShare(dbShare, user);
 			mNotification.del(sl);
 			sendNotification(mNotification);
@@ -184,7 +184,7 @@ public class ListManager {
 		}
 		
 		if (!canEdit(sl, slShares.get(user.getEmail()))) {
-			EtaLog.d(TAG, String.format("User [%s], doesn't have rights to edit this list", user.getEmail()));
+			EtaLog.i(TAG, String.format("User [%s], doesn't have rights to edit this list", user.getEmail()));
 			return false;
 		}
 		
@@ -207,7 +207,7 @@ public class ListManager {
 					Share slShare = slShares.get(shareId);
 					
 					if (!dbShare.equals(slShare)) {
-						slShare.setState(Share.State.TO_SYNC);
+						slShare.setState(SyncState.TO_SYNC);
 						db.editShare(slShare, user);
 						mNotification.edit(sl);
 					}
@@ -215,10 +215,10 @@ public class ListManager {
 				} else {
 					if (dbShare.getAccess().equals(Share.ACCESS_OWNER)) {
 						owner = dbShare;
-						EtaLog.d(TAG, "Owner cannot be removed from lists, owner will be reattached");
+						EtaLog.i(TAG, "Owner cannot be removed from lists, owner will be reattached");
 					} else {
 						if (user.isLoggedIn()) {
-							dbShare.setState(Share.State.DELETE);
+							dbShare.setState(SyncState.DELETE);
 							db.editShare(dbShare, user);
 						} else {
 							db.deleteShare(dbShare, user);
@@ -243,12 +243,12 @@ public class ListManager {
 		Date now = new Date();
 		
 		sl.setModified(now);
-		sl.setState(Shoppinglist.State.TO_SYNC);
+		sl.setState(SyncState.TO_SYNC);
 		
 		// Check for changes in previous item, and update surrounding
 		Shoppinglist oldList = db.getList(sl.getId(), user);
 		if (oldList == null) {
-			EtaLog.d(TAG, "No such list exists in DB, considder addList() instead");
+			EtaLog.i(TAG, "No such list exists in the database. To add new items, use addList().");
 			return false;
 		}
 		
@@ -259,7 +259,7 @@ public class ListManager {
 			if (slAfter != null) {
 				slAfter.setPreviousId(oldList.getPreviousId());
 				slAfter.setModified(now);
-				slAfter.setState(State.TO_SYNC);
+				slAfter.setState(SyncState.TO_SYNC);
 				db.editList(slAfter, user);
 				mNotification.edit(slAfter);
 			}
@@ -269,7 +269,7 @@ public class ListManager {
 			if (slSamePointer != null) {
 				slSamePointer.setPreviousId(sl.getId());
 				slSamePointer.setModified(now);
-				slSamePointer.setState(State.TO_SYNC);
+				slSamePointer.setState(SyncState.TO_SYNC);
 				db.editList(slSamePointer, user);
 				mNotification.edit(slSamePointer);
 			}
@@ -313,7 +313,7 @@ public class ListManager {
 		if (after != null) {
 			after.setPreviousId(sl.getPreviousId());
 			after.setModified(now);
-			after.setState(State.TO_SYNC);
+			after.setState(SyncState.TO_SYNC);
 			db.editList(after, user);
 			mNotification.edit(after);
 		}
@@ -325,20 +325,20 @@ public class ListManager {
 		if (mEta.getUser().isLoggedIn()) {
 			
 			for (ShoppinglistItem sli : items) {
-				sli.setState(ShoppinglistItem.State.DELETE);
+				sli.setState(SyncState.DELETE);
 				sli.setModified(now);
 				db.editItem(sli, user);
 				mNotification.del(sli);
 			}
 			 
 			// Update local version of shoppinglist
-			sl.setState(Shoppinglist.State.DELETE);
+			sl.setState(SyncState.DELETE);
 			count = db.editList(sl, user);
 			
 		} else {
 
 			for (ShoppinglistItem sli : items) {
-				sli.setState(ShoppinglistItem.State.DELETE);
+				sli.setState(SyncState.DELETE);
 				sli.setModified(now);
 				mNotification.del(sli);
 			}
@@ -375,7 +375,7 @@ public class ListManager {
 	 */
 	public List<ShoppinglistItem> getItems(Shoppinglist sl) {
 		List<ShoppinglistItem> items = DbHelper.getInstance().getItems(sl, user());
-		Utils.sortItems(items);
+		ListUtils.sortItems(items);
 		return items;
 	}
 	
@@ -404,12 +404,12 @@ public class ListManager {
 	public boolean addItem(ShoppinglistItem sli, boolean incrementCount, User user) {
 		
 		if (!canEdit(sli.getShoppinglistId(), user)) {
-			EtaLog.d(TAG, "The user cannot edit the given ShoppinglistItem");
+			EtaLog.i(TAG, "The user cannot edit the given ShoppinglistItem");
 			return false;
 		}
 		
 		if (sli.getOfferId() == null && sli.getDescription() == null) {
-			EtaLog.d(TAG, "The ShoppinglistItem neither has offerId, or"
+			EtaLog.i(TAG, "The ShoppinglistItem neither has offerId, or"
 					+ "description, one or the other this is required by the API");
 			return false;
 		}
@@ -418,7 +418,7 @@ public class ListManager {
 		
 		Date now = new Date();
 		sli.setModified(now);
-		sli.setState(ShoppinglistItem.State.TO_SYNC);
+		sli.setState(SyncState.TO_SYNC);
 		
 		// If the item exists in DB, then just increase count and edit the item
 		if (incrementCount) {
@@ -447,7 +447,7 @@ public class ListManager {
 		Shoppinglist sl = getList(sli.getShoppinglistId());
 
 		if (sl == null) {
-			EtaLog.d(TAG, "The shoppinglist id on the shoppinglist item, could"
+			EtaLog.i(TAG, "The shoppinglist id on the shoppinglist item, could"
 					+ "not be found, please add a shoppinglist before adding items");
 			return false;
 		}
@@ -461,12 +461,12 @@ public class ListManager {
 			}
 		}
 		
-		sli.setPreviousId(ShoppinglistItem.FIRST_ITEM);
+		sli.setPreviousId(ListUtils.FIRST_ITEM);
 		ShoppinglistItem first = db.getFirstItem(sli.getShoppinglistId(), user);
 		if (first != null) {
 			first.setPreviousId(sli.getId());
 			first.setModified(now);
-			first.setState(ShoppinglistItem.State.TO_SYNC);
+			first.setState(SyncState.TO_SYNC);
 			db.editItem(first, user);
 			mNotification.edit(first);
 		}
@@ -493,8 +493,31 @@ public class ListManager {
 	 */
 	public boolean editItem(ShoppinglistItem sli) {
 		User u = user();
+		boolean result = editItemImpl(u, sli);
+		sendNotification(mNotification);
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @param items
+	 * @return
+	 */
+	public int editItems(List<ShoppinglistItem> items) {
+		User u = user();
+		int count = 0;
+		for (ShoppinglistItem sli : items) {
+			if (editItemImpl(u, sli)) {
+				count++;
+			}
+		}
+		sendNotification(mNotification);
+		return count;
+	}
+	
+	private boolean editItemImpl(User u, ShoppinglistItem sli) {
 		if (!canEdit(sli.getShoppinglistId(), u)) {
-			EtaLog.d(TAG, "The user cannot edit the given ShoppinglistItem");
+			EtaLog.i(TAG, "The user cannot edit the given ShoppinglistItem");
 			return false;
 		}
 		return editItem(sli, u);
@@ -502,45 +525,19 @@ public class ListManager {
 	
 	private boolean editItem(final ShoppinglistItem sli, User user) {
 		
-		
 		DbHelper db = DbHelper.getInstance();
 		
 		Date now = new Date();
 		sli.setModified(now);
-		sli.setState(ShoppinglistItem.State.TO_SYNC);
+		sli.setState(SyncState.TO_SYNC);
 		
 		// Check for changes in previous item, and update surrounding
 		ShoppinglistItem oldItem = db.getItem(sli.getId(), user);
 		if (oldItem == null) {
-			EtaLog.d(TAG, "No such item exists, considder addItem() instead: " + sli.toString());
+			EtaLog.i(TAG, "No such item exists, considder addItem() instead: " + sli.toString());
 			return false;
 		}
 		
-		if (!oldItem.getPreviousId().equals(sli.getPreviousId())) {
-			
-			String sl = sli.getShoppinglistId();
-			
-			// If there is an item pointing at sli, it needs to point at the oldSli.prev
-			ShoppinglistItem sliAfter = db.getItemPrevious(sl, sli.getId(), user);
-			if (sliAfter != null) {
-				sliAfter.setPreviousId(oldItem.getPreviousId());
-				sliAfter.setModified(now);
-				sliAfter.setState(ShoppinglistItem.State.TO_SYNC);
-				db.editItem(sliAfter, user);
-				mNotification.edit(sliAfter);
-			}
-			
-			// If some another sli was pointing at the same item, it should be pointing at sli
-			ShoppinglistItem sliSamePointer = db.getItemPrevious(sl, sli.getPreviousId(), user);
-			if (sliSamePointer != null) {
-				sliSamePointer.setPreviousId(sli.getId());
-				sliSamePointer.setModified(now);
-				sliSamePointer.setState(ShoppinglistItem.State.TO_SYNC);
-				db.editItem(sliSamePointer, user);
-				mNotification.edit(sliSamePointer);
-			}
-			
-		}
 		boolean success = (db.editItem(sli, user) == 1);
 		if (success) {
 			/* Update SL info, but not state. This will prevent sync, and API
@@ -552,9 +549,11 @@ public class ListManager {
 			mNotification.edit(sl);
 			mNotification.edit(sli);
 		}
-		sendNotification(mNotification);
+		
 		return success;
 	}
+	
+	
 
 	/**
 	 * Delete all {@link ShoppinglistItem ShoppinglistItems} from a
@@ -620,7 +619,7 @@ public class ListManager {
         List<ShoppinglistItem> list = getItems(sl);
         int count = 0;
 
-		String preGoodId = ShoppinglistItem.FIRST_ITEM;
+		String preGoodId = ListUtils.FIRST_ITEM;
 		
 		for (ShoppinglistItem sli : list) {
 			if (stateToDelete == null) {
@@ -633,7 +632,7 @@ public class ListManager {
 				if (!sli.getPreviousId().equals(preGoodId)) {
 					sli.setPreviousId(preGoodId);
 					sli.setModified(now);
-					sli.setState(ShoppinglistItem.State.TO_SYNC);
+					sli.setState(SyncState.TO_SYNC);
 					db.editItem(sli, user);
 				}
 				preGoodId = sli.getId();
@@ -642,7 +641,7 @@ public class ListManager {
 		
 		if (mEta.getUser().isLoggedIn()) {
 			for (ShoppinglistItem sli : mNotification.getDeletedItems()) {
-				sli.setState(ShoppinglistItem.State.DELETE);
+				sli.setState(SyncState.DELETE);
 				sli.setModified(now);
 				count += db.editItem(sli, user);
 			}
@@ -673,7 +672,7 @@ public class ListManager {
 	public boolean deleteItem(ShoppinglistItem sli) {
 		User u = user();
 		if (!canEdit(sli.getShoppinglistId(), u)){
-			EtaLog.d(TAG, "The user cannot edit the given ShoppinglistItem");
+			EtaLog.i(TAG, "The user cannot edit the given ShoppinglistItem");
 			return false;
 		}
 		return deleteItem(sli, u);
@@ -698,7 +697,7 @@ public class ListManager {
 		
 		int count = 0;
 		if (user.getUserId() != User.NO_USER) {
-			sli.setState(ShoppinglistItem.State.DELETE);
+			sli.setState(SyncState.DELETE);
 			count = db.editItem(sli, user);
 		} else {
 			count = db.deleteItem(sli, user);
@@ -807,8 +806,10 @@ public class ListManager {
 	 * @param l A {@link OnChangeListener} for receiving events
 	 */
 	public void setOnChangeListener(OnChangeListener l) {
-		if (!mListSubscribers.contains(l)) {
-			mListSubscribers.add(l);
+		synchronized (mListSubscribers) {
+			if (!mListSubscribers.contains(l)) {
+				mListSubscribers.add(l);
+			}
 		}
 	}
 	
@@ -818,12 +819,18 @@ public class ListManager {
 	 * @param l The {@link OnChangeListener} to remove
 	 */
 	public void removeOnChangeListener(OnChangeListener l) {
-		mListSubscribers.remove(l);
+		synchronized (mListSubscribers) {
+			mListSubscribers.remove(l);
+		}
 	}
 	
 	private void sendNotification(ListNotification n) {
-		notifySubscribers(n);
-		mNotification = new ListNotification(false);
+		boolean p = Eta.getInstance().getSyncManager().isPaused();
+		EtaLog.d(TAG, "sendNotification-paused: " + p);
+		if (!p) {
+			notifySubscribers(n);
+			mNotification = new ListNotification(false);
+		}
 	}
 	
 	/**
@@ -833,28 +840,30 @@ public class ListManager {
 	 */
 	public void notifySubscribers(final ListNotification n) {
 		
-		for (final OnChangeListener s : mListSubscribers) {
+		synchronized (mListSubscribers) {
+			for (final OnChangeListener s : mListSubscribers) {
 
-			Eta.getInstance().getHandler().post(new Runnable() {
-				
-				public void run() {
+				Eta.getInstance().getHandler().post(new Runnable() {
 					
-					if (n.isFirstSync()) {
-						s.onFirstSync();
-					}
-					
-					if (n.hasListNotifications()) {
-						s.onListUpdate(n.isServer(), n.getAddedLists(), n.getDeletedLists(), n.getEditedLists());
-					}
+					public void run() {
 						
-					if (n.hasItemNotifications()) {
-						s.onItemUpdate(n.isServer(), n.getAddedItems(), n.getDeletedItems(), n.getEditedItems());
+						if (n.isFirstSync()) {
+							s.onFirstSync();
+						}
+						
+						if (n.hasListNotifications()) {
+							s.onListUpdate(n.isServer(), n.getAddedLists(), n.getDeletedLists(), n.getEditedLists());
+						}
+							
+						if (n.hasItemNotifications()) {
+							s.onItemUpdate(n.isServer(), n.getAddedItems(), n.getDeletedItems(), n.getEditedItems());
+						}
+						
 					}
 					
-				}
+				});
 				
-			});
-			
+			}
 		}
 		
 	}

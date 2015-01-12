@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="etasdk_app_name">eTilbudsavis</string>
+    <string name="etasdk_pageflip_load">Couldn\'t load\npage %1$s</string>
+    
+</resources>

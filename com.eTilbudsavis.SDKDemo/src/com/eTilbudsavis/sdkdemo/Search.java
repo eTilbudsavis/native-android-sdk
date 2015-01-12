@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -33,50 +34,46 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.Utils.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Param;
-import com.etilbudsavis.sdkdemo.R;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Offer;
+import com.eTilbudsavis.etasdk.network.EtaError;
+import com.eTilbudsavis.etasdk.network.Response.Listener;
+import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.utils.Api.Param;
 
 public class Search extends Activity {
 
 	public static final String TAG = "Search";
 	
-	public static final String P_OFFERS = "offers";
-	public static final String P_QUERY = "query";
+	public static final String ARG_OFFERS = "offers";
+	public static final String ARG_QUERY = "query";
 	
 	EditText mQuery;
-	ProgressDialog mPd;
 	List<Offer> mOffers;
-	ListView mResultDisplayer;
+	
+	ProgressDialog mPd;
+	ListView mListView;
 	Eta mEta;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search);
-        
-        /*
-         *  Because we 'set' Eta in the Main activity, it's not necessarily to
-         *  do it again. And therefore you can just call Eta.getInstance() when
-         *  ever you need the SDK
-         */
+
+        Eta.createInstance(Keys.API_KEY, Keys.API_SECRET, this);
         
         // Find views
         mQuery = (EditText) findViewById(R.id.etQuery);
-        mResultDisplayer = (ListView) findViewById(R.id.lvResult);
+        mListView = (ListView) findViewById(R.id.lvResult);
         
         // Check for any saved state
-        if (savedInstanceState != null) {
-        	mOffers = (List<Offer>)savedInstanceState.getSerializable(P_OFFERS);
+        if (savedInstanceState != null && savedInstanceState.containsKey(ARG_OFFERS) && savedInstanceState.containsKey(ARG_QUERY)) {
+        	mOffers = (List<Offer>)savedInstanceState.getSerializable(ARG_OFFERS);
         	if (mOffers != null) {
-            	mResultDisplayer.setAdapter(new SearchAdapter());
+            	mListView.setAdapter(new SearchAdapter());
         	}
-        	String q = savedInstanceState.getString(P_QUERY);
+        	String q = savedInstanceState.getString(ARG_QUERY);
         	if (q != null) {
             	mQuery.setText(q);
             	mQuery.setSelection(q.length());
@@ -146,14 +143,14 @@ public class Search extends Activity {
 					 * in the Offer object.
 					 */
 					mOffers = Offer.fromJSON(response);
-					mResultDisplayer.setAdapter(new SearchAdapter());
+					mListView.setAdapter(new SearchAdapter());
 					
 				} else {
 					
 					/*
 					 * If the request failed, you can print the error message
 					 */
-					EtaLog.d(TAG, error.toJSON().toString());
+					EtaLog.d(TAG, "", error);
 				}
 				
 			}
@@ -173,8 +170,8 @@ public class Search extends Activity {
     
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-    	outState.putSerializable(P_OFFERS, (Serializable) mOffers);
-    	outState.putString(P_QUERY, mQuery.getText().toString());
+    	outState.putSerializable(ARG_OFFERS, (Serializable) mOffers);
+    	outState.putString(ARG_QUERY, mQuery.getText().toString());
     }
     
     @Override
@@ -190,10 +187,10 @@ public class Search extends Activity {
     }
     
     class SearchAdapter extends BaseAdapter {
-
+    	
 		@Override
 		public int getCount() {
-			return mOffers.size();
+			return mOffers == null ? 0 : mOffers.size();
 		}
 
 		@Override
@@ -205,11 +202,12 @@ public class Search extends Activity {
 		public long getItemId(int position) {
 			return position;
 		}
-
+		
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			Offer o = mOffers.get(position);
-			TextView tv = new TextView(getApplicationContext());
+			LayoutInflater i = LayoutInflater.from(Search.this); 
+			TextView tv = (TextView) i.inflate(android.R.layout.simple_list_item_1, parent, false);
 			tv.setText(o.getHeading());
 			return tv;
 		}

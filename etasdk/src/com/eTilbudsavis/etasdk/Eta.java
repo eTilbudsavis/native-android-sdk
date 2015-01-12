@@ -15,6 +15,11 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
@@ -25,18 +30,19 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
-import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
-import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.Network.Cache;
-import com.eTilbudsavis.etasdk.Network.HttpStack;
-import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Network.RequestQueue;
-import com.eTilbudsavis.etasdk.Network.Impl.DefaultHttpNetwork;
-import com.eTilbudsavis.etasdk.Network.Impl.HttpURLNetwork;
-import com.eTilbudsavis.etasdk.Network.Impl.NetworkImpl;
-import com.eTilbudsavis.etasdk.Utils.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.imageloader.ImageLoader;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Shoppinglist;
+import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.model.User;
+import com.eTilbudsavis.etasdk.network.HttpStack;
+import com.eTilbudsavis.etasdk.network.Request;
+import com.eTilbudsavis.etasdk.network.RequestQueue;
+import com.eTilbudsavis.etasdk.network.impl.DefaultHttpNetwork;
+import com.eTilbudsavis.etasdk.network.impl.HttpURLNetwork;
+import com.eTilbudsavis.etasdk.network.impl.MemoryCache;
+import com.eTilbudsavis.etasdk.network.impl.NetworkImpl;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 /**
  * 
@@ -47,8 +53,14 @@ import com.eTilbudsavis.etasdk.Utils.Utils;
  *
  */
 public class Eta {
+
+	public static final String TAG_PREFIX = "EtaSdk-";
+	public static final String ARG_PREFIX = "com.eTilbudsavis.etasdk.";
 	
-	public static final String TAG = "ETA";
+	public static final String TAG = TAG_PREFIX + Eta.class.getSimpleName();
+	
+	private static final int DEFAULT_THREAD_COUNT = 3;
+	private static final String DEFAULT_THREAD_NAME = "etasdk-";
 	
 	/** The Eta singleton */
 	private static Eta mEta;
@@ -72,7 +84,7 @@ public class Eta {
 	private SessionManager mSessionManager;
 	
 	/** The current location that the SDK is aware of */
-	private EtaLocation mLocation;
+	private final EtaLocation mLocation;
 	
 	/** Manager for handling all {@link Shoppinglist}, and {@link ShoppinglistItem} */
 	private ListManager mListManager;
@@ -89,23 +101,27 @@ public class Eta {
 	/** A {@link RequestQueue} implementation to handle all API requests */
 	private RequestQueue mRequestQueue;
 	
-	/** System manager for getting the connectivity status */
-	private ConnectivityManager mConnectivityManager;
+	/** My go to executor service */
+	private ExecutorService mExecutor;
+	
+	private static Object INSTANCE_LOCK = new Object();
 	
 	/**
 	 * Default constructor, this is private to allow us to create a singleton instance
 	 * @param apiKey An API v2 apiKey
 	 * @param apiSecret An API v2 apiSecret (matching the apiKey)
-	 * @param ctx A context
+	 * @param context A context
 	 */
-	private Eta(String apiKey, String apiSecret, Context ctx) {
+	private Eta(String apiKey, String apiSecret, Context context) {
 		
 		// Get a context that isn't likely to disappear with an activity.
-		mContext = ctx.getApplicationContext();
+		mContext = context.getApplicationContext();
 		mApiKey = apiKey;
 		mApiSecret = apiSecret;
 		
 		mHandler = new Handler(Looper.getMainLooper());
+		ThreadFactory tf = new DefaultThreadFactory(DEFAULT_THREAD_NAME);
+		mExecutor = Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT, tf);
 		
 		HttpStack stack = null;
         if (Build.VERSION.SDK_INT > 8) {
@@ -114,24 +130,23 @@ public class Eta {
             stack = new DefaultHttpNetwork();
         }
         
-		mRequestQueue = new RequestQueue(this, new Cache(), new NetworkImpl(stack));
+		mRequestQueue = new RequestQueue(this, new MemoryCache(), new NetworkImpl(stack));
 		mRequestQueue.start();
-		
-		mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 		
 		try {
 			String name = mContext.getPackageName();
 			String version = mContext.getPackageManager().getPackageInfo(name, 0 ).versionName;
 			setAppVersion(version);
 		} catch (NameNotFoundException e) {
-			EtaLog.e(TAG, e);
+			EtaLog.e(TAG, null, e);
 		}
 		
 		mSettings = new Settings(mContext);
-		mLocation = new EtaLocation(this);
-		mSessionManager = new SessionManager(this);
-		mListManager = new ListManager(this);
-		mSyncManager = new SyncManager(this);
+		mLocation = mSettings.getLocation();
+		mSessionManager = new SessionManager(Eta.this);
+		mListManager = new ListManager(Eta.this);
+		mSyncManager = new SyncManager(Eta.this);
+        ImageLoader.init(Eta.this);
 		
 	}
 	
@@ -144,11 +159,13 @@ public class Eta {
 	 * @throws IllegalStateException If {@link Eta} no instance is available
 	 */
 	public static Eta getInstance() {
-		if (mEta == null) {
-			throw new IllegalStateException("Eta.createInstance() needs to be"
-					+ "called before Eta.getInstance()");
+		synchronized (INSTANCE_LOCK) {
+			if (mEta == null) {
+				throw new IllegalStateException("Eta.createInstance() needs to be"
+						+ "called before Eta.getInstance()");
+			}
+			return mEta;
 		}
-		return mEta;
 	}
 	
 	/**
@@ -165,7 +182,7 @@ public class Eta {
 	public static void createInstance(String apiKey, String apiSecret, Context ctx) {
 		
 		if (mEta == null) {
-			synchronized (Eta.class) {
+			synchronized (INSTANCE_LOCK) {
 				if (mEta == null) {
 					mEta = new Eta(apiKey, apiSecret, ctx);
 				}
@@ -182,7 +199,17 @@ public class Eta {
 	 * @return {@code true} if Eta is instantiated, else {@code false}
 	 */
 	public static boolean isInstanciated() {
-		return mEta != null;
+		synchronized (INSTANCE_LOCK) {
+			return mEta != null;
+		}
+	}
+	
+	/**
+	 * This returns a pool of threads for executing various SDK tasks on a thread.
+	 * @return An {@link ExecutorService}
+	 */
+	public ExecutorService getExecutor() {
+		return mExecutor;
 	}
 	
 	/**
@@ -190,7 +217,8 @@ public class Eta {
 	 * @return true if network connectivity exists, false otherwise.
 	 */
 	public boolean isOnline() {
-		NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
+		ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo netInfo = cm.getActiveNetworkInfo();
 		return netInfo != null && netInfo.isConnected();
 	}
 
@@ -227,7 +255,9 @@ public class Eta {
 		if (Utils.validVersion(appVersion)) {
 			mAppVersion = appVersion;
 		}
-		EtaLog.d(TAG, "AppVersion: " + (mAppVersion == null ? "version not valid" : mAppVersion));
+		EtaLog.v(TAG, mAppVersion == null ? 
+				("invalid version format: " + appVersion) : 
+					("AppVersion: " + mAppVersion) );
 	}
 
 	/**
@@ -256,7 +286,7 @@ public class Eta {
 	 * @param request to be performed
 	 * @return the request
 	 */
-	public <T> Request<T> add(Request<T> request) {
+	public Request<?> add(Request<?> request) {
 		return mRequestQueue.add(request);
 	}
 	
@@ -327,15 +357,24 @@ public class Eta {
 	}
 	
 	/**
+	 * @deprecated
+	 */
+	public void destroyInstance() {
+		destroy();
+	}
+
+	/**
 	 * First clears all preferences with {@link #clear()}, and then {@code null's}
 	 * this instance of Eta
 	 * 
 	 * <p>For further use of {@link Eta} after this, you must invoke
-	 * {@link #createInstance(String, String, Context) set()} it again.</p>
+	 * {@link #createInstance(String, String, Context)} it again.</p>
 	 */
-	public void destroyInstance() {
-		clear();
-		mEta = null;
+	public void destroy() {
+		synchronized (INSTANCE_LOCK) {
+			clear();
+			mEta = null;
+		}
 	}
 	
 	/**
@@ -351,7 +390,7 @@ public class Eta {
 		mLocation.clear();
 		mRequestQueue.clear();
 		mListManager.clear();
-		EtaLog.getExceptionLog().clear();
+		EtaLog.getLogger().getLog().clear();
 	}
 	
 	/**
@@ -369,14 +408,55 @@ public class Eta {
 	public void onPause() {
 		if (mResumed) {
 			mResumed = false;
+			mSettings.saveLocation(mLocation);
 			mListManager.onPause();
 			mSyncManager.onPause();
 			mSessionManager.onPause();
-			for (PageflipWebview p : PageflipWebview.pageflips) {
-				p.onPause();
-			}
 			mSettings.setLastUsageNow();
 		}
+		
+	}
+	
+	Runnable termination = new Runnable() {
+		
+		public void run() {
+			if (mResumed) {
+				EtaLog.i(TAG, "Eta has been resumed, bail out");
+				return;
+			}
+			EtaLog.i(TAG, "Finalizing long running tasks...");
+			int retries = 0;
+			mRequestQueue.stop();
+			mExecutor.shutdown();
+			while (true && retries < 5) {
+				retries ++;
+				try {
+					if (mExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+						break;
+					}
+				} catch (InterruptedException e) {
+					// Ignore
+				}
+			}
+			finalCleanup();
+			EtaLog.i(TAG, "SDK cleanup complete");
+		}
+	};
+	
+	private void finalCleanup() {
+		// TODO don't need to null everything
+		mApiKey = null;
+		mApiSecret = null;
+		mAppVersion = null;
+		mContext = null;
+		mEta = null;
+		mExecutor = null;
+		mHandler = null;
+		mListManager = null;
+		mRequestQueue = null;
+		mSessionManager = null;
+		mSettings = null;
+		mSyncManager = null;
 	}
 	
 	/**
@@ -389,9 +469,6 @@ public class Eta {
 			mSessionManager.onResume();
 			mListManager.onResume();
 			mSyncManager.onResume();
-			for (PageflipWebview p : PageflipWebview.pageflips) {
-				p.onResume();
-			}
 		}
 	}
 
