@@ -21,7 +21,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
-import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class CupcakeGestureDetector implements GestureDetector {
 	

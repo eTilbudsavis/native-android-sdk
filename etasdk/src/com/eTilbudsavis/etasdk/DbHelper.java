@@ -28,14 +28,13 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Share;
-import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
-import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
-import com.eTilbudsavis.etasdk.EtaObjects.User;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.SyncState;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.ListUtils;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Share;
+import com.eTilbudsavis.etasdk.model.Shoppinglist;
+import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.model.User;
+import com.eTilbudsavis.etasdk.utils.ListUtils;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class DbHelper extends SQLiteOpenHelper {
 
@@ -300,7 +299,6 @@ public class DbHelper extends SQLiteOpenHelper {
 		return sb.toString();
 	}
 	
-
 	public static Share cursorToShare(Cursor c, Shoppinglist sl) {
 		String email = c.getString(c.getColumnIndex(EMAIL));
 		String acceptUrl = c.getString(c.getColumnIndex(ACCEPT_URL));

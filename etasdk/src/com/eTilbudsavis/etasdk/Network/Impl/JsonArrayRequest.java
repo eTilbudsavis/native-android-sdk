@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.Network.Impl;
+package com.eTilbudsavis.etasdk.network.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -24,15 +24,13 @@ import org.json.JSONObject;
 
 import android.text.TextUtils;
 
-import com.eTilbudsavis.etasdk.Network.Cache;
-import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.NetworkResponse;
-import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Network.Response;
-import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.Api;
-import com.eTilbudsavis.etasdk.Utils.Api.Param;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.network.Cache;
+import com.eTilbudsavis.etasdk.network.EtaError;
+import com.eTilbudsavis.etasdk.network.NetworkResponse;
+import com.eTilbudsavis.etasdk.network.Response;
+import com.eTilbudsavis.etasdk.utils.Api;
+import com.eTilbudsavis.etasdk.utils.Api.Param;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class JsonArrayRequest extends JsonRequest<JSONArray> {
 

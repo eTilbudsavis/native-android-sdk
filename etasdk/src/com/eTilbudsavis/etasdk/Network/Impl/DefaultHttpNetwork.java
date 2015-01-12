@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.Network.Impl;
+package com.eTilbudsavis.etasdk.network.impl;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -42,10 +42,9 @@ import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.params.HttpConnectionParams;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Network.HttpStack;
-import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Utils.HeaderUtils;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.network.HttpStack;
+import com.eTilbudsavis.etasdk.utils.HeaderUtils;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class DefaultHttpNetwork implements HttpStack {
 

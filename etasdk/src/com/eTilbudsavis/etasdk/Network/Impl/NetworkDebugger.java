@@ -1,9 +1,8 @@
-package com.eTilbudsavis.etasdk.Network.Impl;
+package com.eTilbudsavis.etasdk.network.impl;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Network.RequestDebugger;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.network.RequestDebugger;
 
 public class NetworkDebugger implements RequestDebugger{
 	

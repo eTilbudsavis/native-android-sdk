@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.Network;
+package com.eTilbudsavis.etasdk.network;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,11 +26,10 @@ import android.os.Process;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.SessionManager;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Network.Request.Method;
-import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.HashUtils;
-import com.eTilbudsavis.etasdk.Utils.HeaderUtils;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.utils.HashUtils;
+import com.eTilbudsavis.etasdk.utils.HeaderUtils;
 
 public class NetworkDispatcher extends Thread {
 

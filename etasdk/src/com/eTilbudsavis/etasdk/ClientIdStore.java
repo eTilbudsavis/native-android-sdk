@@ -10,9 +10,8 @@ import java.io.RandomAccessFile;
 import android.content.Context;
 import android.os.Environment;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Session;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Utils.PermissionUtils;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.utils.PermissionUtils;
 
 public class ClientIdStore {
 	

@@ -4,8 +4,8 @@ import java.util.List;
 
 import android.view.View;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Hotspot;
-import com.eTilbudsavis.etasdk.Network.EtaError;
+import com.eTilbudsavis.etasdk.model.Hotspot;
+import com.eTilbudsavis.etasdk.network.EtaError;
 
 public interface PageflipListener {
 	

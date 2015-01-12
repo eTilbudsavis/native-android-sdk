@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk.Network.Impl;
+package com.eTilbudsavis.etasdk.network.impl;
 
 import java.io.UnsupportedEncodingException;
 
@@ -21,12 +21,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Network.Cache;
-import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.NetworkResponse;
-import com.eTilbudsavis.etasdk.Network.Response;
-import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.network.Cache;
+import com.eTilbudsavis.etasdk.network.EtaError;
+import com.eTilbudsavis.etasdk.network.NetworkResponse;
+import com.eTilbudsavis.etasdk.network.Response;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class JsonObjectRequest extends JsonRequest<JSONObject>{
 

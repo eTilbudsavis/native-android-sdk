@@ -14,16 +14,15 @@ import android.widget.TextView;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.R;
-import com.eTilbudsavis.etasdk.EtaObjects.Dimension;
-import com.eTilbudsavis.etasdk.EtaObjects.Hotspot;
-import com.eTilbudsavis.etasdk.EtaObjects.HotspotMap;
-import com.eTilbudsavis.etasdk.EtaObjects.Images;
-import com.eTilbudsavis.etasdk.ImageLoader.BitmapDisplayer;
-import com.eTilbudsavis.etasdk.ImageLoader.BitmapProcessor;
-import com.eTilbudsavis.etasdk.ImageLoader.ImageLoader;
-import com.eTilbudsavis.etasdk.ImageLoader.ImageRequest;
-import com.eTilbudsavis.etasdk.ImageLoader.LoadSource;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.imageloader.BitmapDisplayer;
+import com.eTilbudsavis.etasdk.imageloader.BitmapProcessor;
+import com.eTilbudsavis.etasdk.imageloader.ImageLoader;
+import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
+import com.eTilbudsavis.etasdk.imageloader.LoadSource;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Dimension;
+import com.eTilbudsavis.etasdk.model.Hotspot;
+import com.eTilbudsavis.etasdk.model.HotspotMap;
 import com.eTilbudsavis.etasdk.pageflip.ZoomPhotoView.OnZoomChangeListener;
 
 public abstract class PageFragment extends Fragment {

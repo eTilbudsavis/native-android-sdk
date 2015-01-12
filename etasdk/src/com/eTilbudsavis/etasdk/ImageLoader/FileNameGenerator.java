@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.ImageLoader;
+package com.eTilbudsavis.etasdk.imageloader;
 
 public interface FileNameGenerator {
 	

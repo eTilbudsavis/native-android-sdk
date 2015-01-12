@@ -1,11 +1,11 @@
-package com.eTilbudsavis.etasdk.Network.Impl;
+package com.eTilbudsavis.etasdk.network.impl;
 
 import android.os.Handler;
 import android.os.Looper;
 
-import com.eTilbudsavis.etasdk.Network.Delivery;
-import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Network.Response;
+import com.eTilbudsavis.etasdk.network.Delivery;
+import com.eTilbudsavis.etasdk.network.Response;
+import com.eTilbudsavis.etasdk.network.Delivery.DeliveryRunnable;
 
 public class HandlerDelivery implements Delivery {
 	
