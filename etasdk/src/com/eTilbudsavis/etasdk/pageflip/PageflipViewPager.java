@@ -90,7 +90,6 @@ public class PageflipViewPager extends ViewPager {
 	            final int lastItemIndex = getAdapter().getCount() - 1;
 	            final int currentItem = getCurrentItem();
 	            
-	            // TODO do callbacks to fragment
 	            if ( deltaX < 0 && currentItem == 0) {
 	            	if (mPageflipListener!=null) {
 	            		mPageflipListener.onOutOfBounds(true);

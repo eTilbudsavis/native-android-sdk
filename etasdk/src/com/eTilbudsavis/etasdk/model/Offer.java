@@ -131,8 +131,6 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 			Date runTill = Utils.stringToDate(Json.valueOf(jOffer, JsonKey.RUN_TILL));
 			offer.setRunTill(runTill);
 			
-			// TODO: What about the publish key, found in hotspots?
-			
 			// The rest isn't in the hotspots and is discarded
 			if ( jOffer.has(JsonKey.DESCRIPTION) && jOffer.has(JsonKey.CATALOG_ID) ) {
 				offer.setDescription(Json.valueOf(jOffer, JsonKey.DESCRIPTION));

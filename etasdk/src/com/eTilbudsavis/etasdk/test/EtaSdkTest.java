@@ -45,11 +45,15 @@ public class EtaSdkTest {
 		mCurrentTitle = testName;
 		
 	}
-	
+
 	protected static void logTest(String tag, String testName) {
 		if (LOG) {
 			EtaLog.d(tag, " - " + testName);
 		}
+	}
+	
+	protected static void logTestWarning(String tag, String testName, String warning) {
+		EtaLog.w(tag, " - " + testName + " - " + warning);
 	}
 	
 	

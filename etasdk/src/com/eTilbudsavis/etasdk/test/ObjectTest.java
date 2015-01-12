@@ -498,6 +498,8 @@ public class ObjectTest {
         Assert.assertEquals(obj, parceledObj);
         
         // TODO This contains json array JSON
+        EtaSdkTest.logTestWarning(TAG, "Hotspot", "NO JSON TESTING DONE - Json will fail");
+        
 //        JSONObject jObj = obj.toJSON();
 //        Hotspot jsonObj = Hotspot.fromJSON(jObj);
 //        Assert.assertEquals(obj, jsonObj);
@@ -510,8 +512,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.logTest(TAG, "Hotspot - NO JSON TESTING DONE");
-        
+        EtaSdkTest.logTest(TAG, "Hotspot");
 	}
 
 	public static void testHotspotMap() {
@@ -528,6 +529,7 @@ public class ObjectTest {
         Assert.assertEquals(obj, parceledObj);
         
         // TODO This contains json array JSON
+        EtaSdkTest.logTestWarning(TAG, "HotspotMap", "NO JSON TESTING DONE - Json will fail");
 //        JSONArray jObj = obj.toJSON();
 //        Dimension d = ObjectCreator.getDimension();
 //        HotspotMap jsonObj = HotspotMap.fromJSON(d, jObj);
@@ -535,7 +537,7 @@ public class ObjectTest {
         
         // getters and setters
         
-        EtaSdkTest.logTest(TAG, "HotspotMap - NO JSON TESTING DONE");
+        EtaSdkTest.logTest(TAG, "HotspotMap");
         
 	}
 

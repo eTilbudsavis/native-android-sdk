@@ -159,8 +159,6 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson
 	
 	public JSONArray toJSON() {
 		
-		JSONArray a = new JSONArray();
-		
 		return null;
 	}
 	

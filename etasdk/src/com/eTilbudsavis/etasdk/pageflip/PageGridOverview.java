@@ -208,17 +208,14 @@ public class PageGridOverview extends DialogFragment {
 		}
 
 		public Object[] getSections() {
-			// TODO Auto-generated method stub
 			return sections;
 		}
 
 		public int getPositionForSection(int sectionIndex) {
-			// TODO Auto-generated method stub
 			return sectionIndex;
 		}
 
 		public int getSectionForPosition(int position) {
-			// TODO Auto-generated method stub
 			return position;
 		}
 		
