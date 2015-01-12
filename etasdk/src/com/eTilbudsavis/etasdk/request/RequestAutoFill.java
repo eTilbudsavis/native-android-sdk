@@ -9,27 +9,27 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
-import com.eTilbudsavis.etasdk.EtaObjects.HotspotMap;
-import com.eTilbudsavis.etasdk.EtaObjects.Images;
-import com.eTilbudsavis.etasdk.EtaObjects.Store;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.ICatalog;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.IDealer;
-import com.eTilbudsavis.etasdk.EtaObjects.Interface.IStore;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Network.Delivery;
-import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Network.RequestDebugger;
-import com.eTilbudsavis.etasdk.Network.RequestQueue;
-import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.Network.Impl.ThreadDelivery;
-import com.eTilbudsavis.etasdk.Utils.Api;
-import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Api.Param;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Catalog;
+import com.eTilbudsavis.etasdk.model.Dealer;
+import com.eTilbudsavis.etasdk.model.HotspotMap;
+import com.eTilbudsavis.etasdk.model.Images;
+import com.eTilbudsavis.etasdk.model.Store;
+import com.eTilbudsavis.etasdk.model.interfaces.ICatalog;
+import com.eTilbudsavis.etasdk.model.interfaces.IDealer;
+import com.eTilbudsavis.etasdk.model.interfaces.IStore;
+import com.eTilbudsavis.etasdk.network.Delivery;
+import com.eTilbudsavis.etasdk.network.EtaError;
+import com.eTilbudsavis.etasdk.network.Request;
+import com.eTilbudsavis.etasdk.network.RequestDebugger;
+import com.eTilbudsavis.etasdk.network.RequestQueue;
+import com.eTilbudsavis.etasdk.network.Response.Listener;
+import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.network.impl.ThreadDelivery;
+import com.eTilbudsavis.etasdk.utils.Api;
+import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.utils.Api.Param;
 
 public abstract class RequestAutoFill<T> {
 	

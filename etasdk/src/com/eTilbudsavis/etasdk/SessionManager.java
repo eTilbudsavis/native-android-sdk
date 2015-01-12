@@ -26,18 +26,18 @@ import org.json.JSONObject;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Session;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Network.Request.Method;
-import com.eTilbudsavis.etasdk.Network.Request.Priority;
-import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.Utils.Api;
-import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Api.Param;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Session;
+import com.eTilbudsavis.etasdk.network.EtaError;
+import com.eTilbudsavis.etasdk.network.Request;
+import com.eTilbudsavis.etasdk.network.Request.Method;
+import com.eTilbudsavis.etasdk.network.Request.Priority;
+import com.eTilbudsavis.etasdk.network.Response.Listener;
+import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.utils.Api;
+import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.utils.Api.Param;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class SessionManager {
 	

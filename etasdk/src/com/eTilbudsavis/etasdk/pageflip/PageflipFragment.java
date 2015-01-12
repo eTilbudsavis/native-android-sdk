@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.json.JSONObject;
 
+import android.R;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,17 +19,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.R;
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.Hotspot;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Utils;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Catalog;
+import com.eTilbudsavis.etasdk.model.Hotspot;
+import com.eTilbudsavis.etasdk.network.EtaError;
+import com.eTilbudsavis.etasdk.network.Response.Listener;
+import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
 import com.eTilbudsavis.etasdk.request.impl.CatalogObjectRequest.CatalogAutoFill;
+import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class PageflipFragment extends Fragment implements PageCallback, OnPageChangeListener {
 	

@@ -40,7 +40,7 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.photoview.gestures.GestureDetector;
 import com.eTilbudsavis.etasdk.photoview.gestures.OnGestureListener;
 import com.eTilbudsavis.etasdk.photoview.gestures.VersionedGestureDetector;

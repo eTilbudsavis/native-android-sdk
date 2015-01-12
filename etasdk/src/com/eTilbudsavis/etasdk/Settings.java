@@ -23,7 +23,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class Settings {
 

@@ -4,7 +4,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class DefaultThreadFactory implements ThreadFactory {
 	

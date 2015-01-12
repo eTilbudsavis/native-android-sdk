@@ -2,11 +2,11 @@ package com.eTilbudsavis.etasdk.request.impl;
 
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Network.Delivery;
-import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.network.Delivery;
+import com.eTilbudsavis.etasdk.network.EtaError;
+import com.eTilbudsavis.etasdk.network.Request;
+import com.eTilbudsavis.etasdk.network.Response.Listener;
+import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
 

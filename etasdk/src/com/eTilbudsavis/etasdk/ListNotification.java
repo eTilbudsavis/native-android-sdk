@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Shoppinglist;
-import com.eTilbudsavis.etasdk.EtaObjects.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.model.Shoppinglist;
+import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 
 public class ListNotification {
 	

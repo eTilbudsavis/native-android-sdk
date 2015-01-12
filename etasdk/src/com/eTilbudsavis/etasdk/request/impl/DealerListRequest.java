@@ -6,12 +6,12 @@ import java.util.Set;
 
 import org.json.JSONArray;
 
-import com.eTilbudsavis.etasdk.EtaObjects.Dealer;
-import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.Request;
-import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Utils.Api;
-import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.model.Dealer;
+import com.eTilbudsavis.etasdk.network.EtaError;
+import com.eTilbudsavis.etasdk.network.Request;
+import com.eTilbudsavis.etasdk.network.Response.Listener;
+import com.eTilbudsavis.etasdk.utils.Api;
+import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 
 public class DealerListRequest extends ListRequest<List<Dealer>> {
 	

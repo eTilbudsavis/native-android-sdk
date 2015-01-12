@@ -3,6 +3,7 @@ package com.eTilbudsavis.etasdk.pageflip;
 import java.util.Arrays;
 import java.util.List;
 
+import android.R;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -19,10 +20,9 @@ import android.view.Display;
 import android.view.WindowManager;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.R;
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.Hotspot;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Catalog;
+import com.eTilbudsavis.etasdk.model.Hotspot;
 
 public class PageflipUtils {
 	
