@@ -14,9 +14,9 @@ import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Session;
 import com.eTilbudsavis.etasdk.utils.PermissionUtils;
 
-public class ClientIdStore {
+public class ExternalClientIdStore {
 	
-	public static final String TAG = ClientIdStore.class.getSimpleName();
+	public static final String TAG = ExternalClientIdStore.class.getSimpleName();
 	
 	public static void updateCid(Session s, Context c) {
 		

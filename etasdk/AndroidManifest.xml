@@ -13,7 +13,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.eTilbudsavis.etasdk">
-	<application/>
-	<uses-sdk android:minSdkVersion="7" android:targetSdkVersion="19"/>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.eTilbudsavis.etasdk"
+    android:versionCode="202000"
+    android:versionName="2.2.0" >
+    
+	<uses-sdk android:minSdkVersion="10" android:targetSdkVersion="19"/>
+	
 </manifest>
