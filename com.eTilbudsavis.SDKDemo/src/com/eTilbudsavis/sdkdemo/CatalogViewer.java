@@ -36,17 +36,17 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Catalog;
-import com.eTilbudsavis.etasdk.EtaObjects.helper.Hotspot;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Catalog;
+import com.eTilbudsavis.etasdk.model.Hotspot;
+import com.eTilbudsavis.etasdk.network.EtaError;
+import com.eTilbudsavis.etasdk.network.Response.Listener;
+import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.pageflip.PageGridOverview;
 import com.eTilbudsavis.etasdk.pageflip.PageflipFragment;
 import com.eTilbudsavis.etasdk.pageflip.PageflipListener;
 import com.eTilbudsavis.etasdk.pageflip.PageflipUtils;
+import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 
 public class CatalogViewer extends FragmentActivity {
 

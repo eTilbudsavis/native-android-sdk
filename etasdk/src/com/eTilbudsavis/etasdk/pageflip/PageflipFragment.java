@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.json.JSONObject;
 
-import android.R;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Catalog;
 import com.eTilbudsavis.etasdk.model.Hotspot;

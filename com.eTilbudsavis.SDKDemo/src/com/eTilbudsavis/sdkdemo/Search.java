@@ -34,13 +34,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.EtaObjects.Offer;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
-import com.eTilbudsavis.etasdk.Network.EtaError;
-import com.eTilbudsavis.etasdk.Network.Response.Listener;
-import com.eTilbudsavis.etasdk.Network.Impl.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.Utils.Api.Endpoint;
-import com.eTilbudsavis.etasdk.Utils.Api.Param;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Offer;
+import com.eTilbudsavis.etasdk.network.EtaError;
+import com.eTilbudsavis.etasdk.network.Response.Listener;
+import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
+import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
+import com.eTilbudsavis.etasdk.utils.Api.Param;
 
 public class Search extends Activity {
 

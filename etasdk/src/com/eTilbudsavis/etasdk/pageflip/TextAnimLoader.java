@@ -1,10 +1,11 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
-import android.R;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
+
+import com.eTilbudsavis.etasdk.R;
 
 public class TextAnimLoader implements Runnable {
 	

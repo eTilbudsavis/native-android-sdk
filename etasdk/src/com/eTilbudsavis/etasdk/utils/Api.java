@@ -548,7 +548,7 @@ public final class Api {
 		}
 
 		/** /v2/push/payloads/{payload_id} */
-		public static String pushPayload(int payloadId) {
+		public static String pushPayload(String payloadId) {
 			return String.format("/v2/push/payloads/%s", payloadId);
 		}
 

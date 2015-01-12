@@ -2,7 +2,6 @@ package com.eTilbudsavis.etasdk.pageflip;
 
 import java.util.List;
 
-import android.R;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,6 +13,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.imageloader.BitmapDisplayer;
 import com.eTilbudsavis.etasdk.imageloader.BitmapProcessor;
 import com.eTilbudsavis.etasdk.imageloader.ImageLoader;

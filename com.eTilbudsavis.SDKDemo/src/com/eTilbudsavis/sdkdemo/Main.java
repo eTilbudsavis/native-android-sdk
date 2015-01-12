@@ -27,8 +27,8 @@ import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaLocation;
-import com.eTilbudsavis.etasdk.Log.DevLogger;
-import com.eTilbudsavis.etasdk.Log.EtaLog;
+import com.eTilbudsavis.etasdk.log.DevLogger;
+import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class Main extends Activity {
 	
