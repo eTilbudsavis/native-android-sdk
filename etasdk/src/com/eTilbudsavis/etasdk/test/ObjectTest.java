@@ -124,8 +124,8 @@ public class ObjectTest {
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
-		testIErn(obj, null);
-		testIErn(obj, "12fakeid56");
+		testIErn(obj, null, null);
+		testIErn(obj, IErn.TYPE_SHOPPINGLIST, "12fakeid56");
 		
 		// They must be the 'same' despite state, but not 'equal'
 		obj.setState(SyncState.SYNCED);
@@ -197,8 +197,8 @@ public class ObjectTest {
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
-		testIErn(obj, null);
-		testIErn(obj, "12fakeid56");
+		testIErn(obj, null, null);
+		testIErn(obj, IErn.TYPE_DEALER, "12fakeid56");
 		
 		// Parcelable
         Parcel parcel = Parcel.obtain();
@@ -237,8 +237,8 @@ public class ObjectTest {
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
-		testIErn(obj, null);
-		testIErn(obj, "12fakeid56");
+		testIErn(obj, null, null);
+		testIErn(obj, IErn.TYPE_CATALOG, "12fakeid56");
 		
 		// Parcelable
         Parcel parcel = Parcel.obtain();
@@ -285,8 +285,8 @@ public class ObjectTest {
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
-		testIErn(obj, null);
-		testIErn(obj, "12fakeid56");
+		testIErn(obj, null, null);
+		testIErn(obj, IErn.TYPE_STORE, "12fakeid56");
 		
 		// Parcelable
         Parcel parcel = Parcel.obtain();
@@ -319,8 +319,8 @@ public class ObjectTest {
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
-		testIErn(obj, null);
-		testIErn(obj, "EU");
+		testIErn(obj, null, null);
+		testIErn(obj, IErn.TYPE_COUNTRY, "EU");
 		
 		// Parcelable
         Parcel parcel = Parcel.obtain();
@@ -389,8 +389,8 @@ public class ObjectTest {
 		
 		String fakeUser = String.valueOf(User.NO_USER);
 		String fakeErn = "ern:user:" + fakeUser;
-		testIErn(obj, null, fakeUser, fakeErn);
-		testIErn(obj, "1569");
+		testIErn(obj, null, null, fakeUser, fakeErn);
+		testIErn(obj, IErn.TYPE_USER, "1569");
 		
 		// Parcelable
         Parcel parcel = Parcel.obtain();
@@ -907,8 +907,8 @@ public class ObjectTest {
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
-		testIErn(obj, null);
-		testIErn(obj, "12fakeid56");
+		testIErn(obj, null, null);
+		testIErn(obj, IErn.TYPE_OFFER, "12fakeid56");
 		
 		// Parcelable
         Parcel parcel = Parcel.obtain();
@@ -988,19 +988,25 @@ public class ObjectTest {
         
 	}
 
-	public static void testIErn(IErn<?> obj, String fakeId) {
-		testIErn(obj, fakeId, null, null);
+	public static void testIErn(IErn<?> obj, String type, String fakeId) {
+		testIErn(obj, type, fakeId, null, null);
 	}
 	
-	public static void testIErn(IErn<?> obj, String fakeId, String fakeExpectedId, String fakeExpectedErn) {
+	public static void testIErn(IErn<?> obj, String type, String fakeId, String fakeExpectedId, String fakeExpectedErn) {
 		
 		String origId = obj.getId();
 		if (origId!=null) {
 			Assert.assertTrue(obj.getErn().startsWith("ern:"));
-			// if there is an id, there must also be a type (or the id)
-			Assert.assertNotNull(obj.getErnType());
 		} else {
 			Assert.assertEquals(null, obj.getErn());
+		}
+		
+		// The type must always exist
+		Assert.assertNotNull(obj.getErnType());
+		if (type!=null) {
+			Assert.assertEquals(type, obj.getErnType());
+		} else {
+			Assert.assertNotSame(type, obj.getErnType());
 		}
 		
 		if (fakeId == null) {
