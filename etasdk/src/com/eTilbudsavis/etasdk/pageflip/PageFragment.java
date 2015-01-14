@@ -92,6 +92,8 @@ public abstract class PageFragment extends Fragment {
 		mPhotoView = (ZoomPhotoView) v.findViewById(R.id.etasdk_layout_page_photoview);
 		mLoader = (LoadingTextView) v.findViewById(R.id.etasdk_layout_page_pagenum);
 		
+		EtaLog.d(TAG, "loader==null: " + (mLoader == null));
+		
 		mPhotoView.setMaximumScale(MAX_SCALE);
 		mPhotoView.setOnZoomListener(new OnZoomChangeListener() {
 			

@@ -45,7 +45,7 @@ import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.pageflip.PageOverviewDialog;
 import com.eTilbudsavis.etasdk.pageflip.PageflipFragment;
 import com.eTilbudsavis.etasdk.pageflip.PageflipListener;
-import com.eTilbudsavis.etasdk.pageflip.PageflipUtils;
+import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 
 public class CatalogViewer extends FragmentActivity {
@@ -64,7 +64,6 @@ public class CatalogViewer extends FragmentActivity {
         
         Eta.createInstance(Keys.API_KEY, Keys.API_SECRET, this);
         
-        // If your activity ignores configuration changes, don't do this
         if (savedInstanceState!=null) {
         	mPageflip = PageflipFragment.newInstance(savedInstanceState);
         }
@@ -117,7 +116,7 @@ public class CatalogViewer extends FragmentActivity {
     				
     			} else {
     				
-    				dialog("No catalogs", "Try changing the SDK location, or distance.");
+    				dialog("No catalogs", "Try changing the SDK location, or increase the radius.");
     				EtaLog.e(TAG, "", error);
     				
     			}
@@ -125,7 +124,7 @@ public class CatalogViewer extends FragmentActivity {
     	};
     	
     	JsonArrayRequest catalogReq = new JsonArrayRequest(Endpoint.CATALOG_LIST, mCatalogListener);
-    	// This debugger prints most relevant information about a request
+    	// This debugger prints relevant information about a request
 //    	catalogReq.setDebugger(new DefaultDebugger());
     	Eta.getInstance().add(catalogReq);
     	
@@ -143,7 +142,6 @@ public class CatalogViewer extends FragmentActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        // If your activity ignores configuration changes, don't do this
     	mPageflip.onSaveInstanceState(outState);
     	super.onSaveInstanceState(outState);
     }
