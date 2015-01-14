@@ -27,12 +27,13 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.imageloader.ImageLoader;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
 import com.eTilbudsavis.etasdk.model.Catalog;
+import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
 @SuppressWarnings("deprecation")
-public class PageGridOverview extends DialogFragment {
+public class PageOverviewDialog extends DialogFragment {
 	
-	public static final String TAG = Eta.TAG_PREFIX + PageGridOverview.class.getSimpleName();
+	public static final String TAG = Eta.TAG_PREFIX + PageOverviewDialog.class.getSimpleName();
 	
 	private static final String ARG_CATALOG = Eta.ARG_PREFIX + "pageGridOverview.catalog";
 	private static final String ARG_PAGE = Eta.ARG_PREFIX + "pageGridOverview.page";
@@ -42,11 +43,11 @@ public class PageGridOverview extends DialogFragment {
 	GridView mGrid;
 	OnItemClickListener mListener;
 	
-	public static PageGridOverview newInstance(Catalog c, int page) {
+	public static PageOverviewDialog newInstance(Catalog c, int page) {
 		Bundle b = new Bundle();
 		b.putSerializable(ARG_CATALOG, c);
 		b.putInt(ARG_PAGE, page);
-		PageGridOverview f = new PageGridOverview();
+		PageOverviewDialog f = new PageOverviewDialog();
 		f.setArguments(b);
 		return f;
 	}

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
     
-    <com.eTilbudsavis.etasdk.pageflip.ZoomPhotoView
+    <com.eTilbudsavis.etasdk.pageflip.widget.ZoomPhotoView
         android:id="@+id/etasdk_layout_page_photoview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

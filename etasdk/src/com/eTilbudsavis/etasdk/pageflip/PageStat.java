@@ -9,6 +9,7 @@ import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.Request.Method;
 import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
 import com.eTilbudsavis.etasdk.utils.Api;
 
 public class PageStat {

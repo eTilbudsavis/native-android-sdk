@@ -23,7 +23,10 @@ import com.eTilbudsavis.etasdk.model.Dimension;
 import com.eTilbudsavis.etasdk.model.Hotspot;
 import com.eTilbudsavis.etasdk.model.HotspotMap;
 import com.eTilbudsavis.etasdk.model.Images;
-import com.eTilbudsavis.etasdk.pageflip.ZoomPhotoView.OnZoomChangeListener;
+import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
+import com.eTilbudsavis.etasdk.pageflip.widget.LoadingTextView;
+import com.eTilbudsavis.etasdk.pageflip.widget.ZoomPhotoView;
+import com.eTilbudsavis.etasdk.pageflip.widget.ZoomPhotoView.OnZoomChangeListener;
 
 public abstract class PageFragment extends Fragment {
 	

@@ -8,7 +8,7 @@ import android.view.View;
 
 import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.Request;
-import com.eTilbudsavis.etasdk.pageflip.PageflipUtils;
+import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
 
 public class RandomLog {
 	

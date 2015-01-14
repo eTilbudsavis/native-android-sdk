@@ -25,6 +25,8 @@ import com.eTilbudsavis.etasdk.model.Hotspot;
 import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
+import com.eTilbudsavis.etasdk.pageflip.widget.LoadingTextView;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
 import com.eTilbudsavis.etasdk.request.impl.CatalogObjectRequest.CatalogAutoFill;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;

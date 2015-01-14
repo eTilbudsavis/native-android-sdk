@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.pageflip;
+package com.eTilbudsavis.etasdk.pageflip.utils;
 
 import android.content.Context;
 import android.os.Handler;

@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.pageflip;
+package com.eTilbudsavis.etasdk.pageflip.widget;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
 import com.eTilbudsavis.etasdk.photoview.PhotoView;
 
 public class ZoomPhotoView extends PhotoView {

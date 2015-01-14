@@ -42,7 +42,7 @@ import com.eTilbudsavis.etasdk.model.Hotspot;
 import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
-import com.eTilbudsavis.etasdk.pageflip.PageGridOverview;
+import com.eTilbudsavis.etasdk.pageflip.PageOverviewDialog;
 import com.eTilbudsavis.etasdk.pageflip.PageflipFragment;
 import com.eTilbudsavis.etasdk.pageflip.PageflipListener;
 import com.eTilbudsavis.etasdk.pageflip.PageflipUtils;
@@ -240,7 +240,7 @@ public class CatalogViewer extends FragmentActivity {
     		// The first element of the array returned in getPages is (almost) guaranteed to be set
     		int page = mPageflip.getPages()[0];
     		Catalog catalog = mPageflip.getCatalog();
-    		PageGridOverview f = PageGridOverview.newInstance(catalog, page);
+    		PageOverviewDialog f = PageOverviewDialog.newInstance(catalog, page);
     		f.setOnItemClickListener(new OnItemClickListener() {
 
 				@Override

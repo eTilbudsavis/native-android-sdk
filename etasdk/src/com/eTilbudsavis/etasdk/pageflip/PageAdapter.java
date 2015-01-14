@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
 
 public class PageAdapter extends FragmentStatePagerAdapter {
 	

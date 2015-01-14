@@ -1,4 +1,4 @@
-package com.eTilbudsavis.etasdk.pageflip;
+package com.eTilbudsavis.etasdk.pageflip.utils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +23,7 @@ import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Catalog;
 import com.eTilbudsavis.etasdk.model.Hotspot;
+import com.eTilbudsavis.etasdk.pageflip.PageflipViewPager;
 
 public class PageflipUtils {
 	
