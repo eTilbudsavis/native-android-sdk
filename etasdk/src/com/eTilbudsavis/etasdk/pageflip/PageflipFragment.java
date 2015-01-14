@@ -14,12 +14,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Branding;
 import com.eTilbudsavis.etasdk.model.Catalog;
 import com.eTilbudsavis.etasdk.model.Hotspot;
 import com.eTilbudsavis.etasdk.network.EtaError;
@@ -36,22 +36,24 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	private static final double PAGER_SCROLL_FACTOR = 0.5d;
 	
-	private static final String ARG_CATALOG = Eta.ARG_PREFIX + "pageflipfragment.catalog";
-	private static final String ARG_CATALOG_ID = Eta.ARG_PREFIX + "pageflipfragment.catalog-id";
-	private static final String ARG_PAGE = Eta.ARG_PREFIX + "pageflipfragment.page";
-	private static final String ARG_CATALOG_VIEW = Eta.ARG_PREFIX + "pageflipfragment.catalog-view";
-	private static final String ARG_VIEWSESSION = Eta.ARG_PREFIX + "pageflipfragment.view-session";
+	public static final String ARG_CATALOG = Eta.ARG_PREFIX + "pageflipfragment.catalog";
+	public static final String ARG_CATALOG_ID = Eta.ARG_PREFIX + "pageflipfragment.catalog-id";
+	public static final String ARG_PAGE = Eta.ARG_PREFIX + "pageflipfragment.page";
+//	public static final String ARG_CATALOG_VIEW = Eta.ARG_PREFIX + "pageflipfragment.catalog-view";
+	public static final String ARG_VIEWSESSION = Eta.ARG_PREFIX + "pageflipfragment.view-session";
+	public static final String ARG_BRANDING = Eta.ARG_PREFIX + "pageflipfragment.branding";
 	
 	// Need this
 	private Catalog mCatalog;
 	private String mCatalogId;
-	private boolean mHasCatalogView = false;
+//	private boolean mHasCatalogView = false;
+	private Branding mBranding;
 	
 	// Views
 	private LayoutInflater mInflater;
 	private ViewGroup mContainer;
 	private FrameLayout mFrame;
-	private TextView mProgress;
+	private LoadingTextView mLoader;
 	private PageflipViewPager mPager;
 	private PageAdapter mAdapter;
 	
@@ -65,14 +67,13 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	// Callbacks and stats
 	private PageflipListenerWrapper mWrapperListener = new PageflipListenerWrapper();
 	private String mViewSessionUuid;
-	private TextAnimLoader mLoader;
 	private Handler mHandler;
 	
 	// Out of bounds detector stuff
 	int mOutOfBoundsPX = 0;
 	int mOutOfBoundsCount = 0;
 	boolean mOutOfBoundsCalled = false;
-	
+
 	/**
 	 * Creates a new instance of {@link PageflipFragment}, to replace or insert into a current layout.
 	 * @param c The catalog to show
@@ -94,7 +95,16 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		b.putInt(ARG_PAGE, page);
 		return newInstance(b);
 	}
-
+	
+	/**
+	 * Creates a new instance of {@link PageflipFragment}, to replace or insert into a current layout.
+	 * @param catalogId The id of the catalog to display
+	 * @return A Fragment
+	 */
+	public static PageflipFragment newInstance(String catalogId) {
+		return newInstance(catalogId, 1);
+	}
+	
 	/**
 	 * Creates a new instance of {@link PageflipFragment}, to replace or insert into a current layout.
 	 * @param catalogId The is of the catalog to show
@@ -102,67 +112,71 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	 * @return A Fragment
 	 */
 	public static PageflipFragment newInstance(String catalogId, int page) {
+		return newInstance(catalogId, page, null);
+	}
+
+	/**
+	 * Creates a new instance of {@link PageflipFragment}, to replace or insert into a current layout.
+	 * @param catalogId The is of the catalog to show
+	 * @param page the page number to start at
+	 * @return A Fragment
+	 */
+	public static PageflipFragment newInstance(String catalogId, int page, Branding initialBranding) {
 		Bundle b = new Bundle();
 		b.putString(ARG_CATALOG_ID, catalogId);
 		b.putInt(ARG_PAGE, page);
+		b.putParcelable(ARG_BRANDING, initialBranding);
 		return newInstance(b);
 	}
-
+	
 	public static PageflipFragment newInstance(Bundle args) {
 		PageflipFragment f = new PageflipFragment();
 		f.setArguments(args);
-//		f.setRetainInstance(true);
+		if (!f.getArguments().containsKey(ARG_VIEWSESSION)) {
+			f.getArguments().putString(ARG_VIEWSESSION, Utils.createUUID());
+		}
 		return f;
+	}
+	
+	private static void throwNoCatalogException() {
+		String err = "No catalog or catalog-id given as argument to PageflipFragment. See PageflipFragment.newInstance()";
+		throw new IllegalArgumentException(err);
 	}
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-//		EtaLog.d(TAG, "onCreate: " + (savedInstanceState==null?"null":"savedInstanceState"));
 		mHandler = new Handler();
 		mLowMemory = PageflipUtils.hasLowMemory(getActivity());
 		mLandscape = PageflipUtils.isLandscape(getActivity());
-
-		if (savedInstanceState!=null) {
-
-//			EtaLog.d(TAG, "onCreateView: savedState");
-			
-			setPage(savedInstanceState.getInt(ARG_PAGE, mCurrentPosition));
-			setCatalog((Catalog) savedInstanceState.getSerializable(ARG_CATALOG));
-			mHasCatalogView = savedInstanceState.getBoolean(ARG_CATALOG_VIEW, false);
-			mViewSessionUuid = savedInstanceState.getString(ARG_VIEWSESSION);
-			
-		} else if ( mCatalogId==null && getArguments() != null) {
-
-//			EtaLog.d(TAG, "onCreateView: arguments");
-			
-			Bundle b = getArguments();
-			setPage(b.getInt(ARG_PAGE, 1));
-			if (b.containsKey(ARG_CATALOG)) {
-				setCatalog((Catalog) b.getSerializable(ARG_CATALOG));
-			} else if (b.containsKey(ARG_CATALOG_ID)) {
-				setCatalogId(b.getString(ARG_CATALOG_ID));
-			}
-			mHasCatalogView = b.getBoolean(ARG_CATALOG_VIEW, false);
-			mViewSessionUuid = b.getString(ARG_VIEWSESSION);
-			
+		setUp(savedInstanceState == null ? getArguments() : savedInstanceState);
+		super.onCreate(savedInstanceState);
+	}
+	
+	private void setUp(Bundle args) {
+		
+		setPage(args.getInt(ARG_PAGE, 1));
+		if (args.containsKey(ARG_CATALOG)) {
+			setCatalog((Catalog) args.getSerializable(ARG_CATALOG));
+		} else if (args.containsKey(ARG_CATALOG_ID)) {
+			setCatalogId(args.getString(ARG_CATALOG_ID));
 		} else {
-			
-			// This is possible from XML - then what
-			
+			throwNoCatalogException();
 		}
 		
-		if (mViewSessionUuid==null) {
+		mBranding = args.getParcelable(ARG_BRANDING);
+//		mHasCatalogView = b.getBoolean(ARG_CATALOG_VIEW, false);
+		mViewSessionUuid = args.getString(ARG_VIEWSESSION);
+		
+		if (mViewSessionUuid == null) {
 			mViewSessionUuid = Utils.createUUID();
 		}
 		
-		super.onCreate(savedInstanceState);
 	}
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
 		
-//		EtaLog.d(TAG, "onCreateView: " + (savedInstanceState==null?"null":"savedInstanceState"));
 		mInflater = inflater;
 		mContainer = container;
 		setUpView(true);
@@ -185,24 +199,186 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 				parent.removeView(mFrame);
 			}
 		}
-		mProgress = (TextView) mFrame.findViewById(R.id.etasdk_layout_pageflip_loader);
+		
+		mLoader = (LoadingTextView) mFrame.findViewById(R.id.etasdk_layout_pageflip_loader);
 		mPager = (PageflipViewPager) mFrame.findViewById(R.id.etasdk_layout_pageflip_viewpager);
 		mPager.setScrollDurationFactor(PAGER_SCROLL_FACTOR);
 		mPager.setOnPageChangeListener(this);
 		mPager.setPageflipListener(mWrapperListener);
-		mProgress.setVisibility(View.VISIBLE);
-		mPager.setVisibility(View.INVISIBLE);
 		
-		if (mLoader == null) {
-			mLoader = new TextAnimLoader(mProgress);
+		mLoader.setVisibility(View.VISIBLE);
+		mPager.setVisibility(View.INVISIBLE);
+		setBranding(mBranding);
+		mLoader.start();
+		
+	}
+
+	private void removeRunners() {
+		mLoader.stop();
+		mHandler.removeCallbacks(mOnCatalogComplete);
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		boolean land = PageflipUtils.isLandscape(newConfig);
+		if (land != mLandscape) {
+			pause();
+			// Get the old page
+			int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
+			// switch to landscape mode
+			mLandscape = land;
+			// set new current position accordingly
+			mCurrentPosition = PageflipUtils.pageToPosition(pages[0], mLandscape);
+			
+			setUpView(false);
+			start();
 		}
-		mLoader.run();
+	}
+	
+	/**
+	 * Get the {@link PageflipListener}.
+	 * @return The listener, or <code>null</code>.
+	 */
+	public PageflipListener getListener() {
+		return mWrapperListener.getListener();
+	}
+	
+	/**
+	 * Get the {@link PageflipFragment} wrapper listener, primarily used for debugging.
+	 * @return The wrapper listener
+	 */
+	public PageflipListener getWrapperListener() {
+		return mWrapperListener;
+	}
+	
+	/**
+	 * Set a listener to call on {@link PageflipFragment} events.
+	 * @param l The listener
+	 */
+	public void setPageflipListener(PageflipListener l) {
+		mWrapperListener.setListener(l);;
+	}
+	
+	/**
+	 * Get the pages currently being displayed in the {@link PageflipFragment}.
+	 * @return An array of pages being displayed
+	 */
+	public int[] getPages() {
+		return PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
+	}
+	
+	/**
+	 * Set the {@link PageflipFragment} to show the given page number in the catalog.
+	 * Note that page number doesn't directly correlate to the position of the {@link PageflipViewPager}.
+	 * @param page The page to turn to
+	 */
+	public void setPage(int page) {
+		if (PageflipUtils.isValidPage(mCatalog, page)) {
+			setPosition(PageflipUtils.pageToPosition(page, mLandscape));
+		}
+	}
+	
+	/**
+	 * Get the current position of the {@link PageflipViewPager}.
+	 * @return The current position
+	 */
+	public int getPosition() {
+		return mCurrentPosition;
+	}
+	
+	/**
+	 * Set the position of the {@link PageflipViewPager}. 
+	 * Note that this does not correlate directly to the catalog page number.
+	 * @param position A position
+	 */
+	public void setPosition(int position) {
+		mCurrentPosition = position;
+		if (mPager != null) {
+			mPager.setCurrentItem(mCurrentPosition);
+		}
+	}
+	
+	/**
+	 * Go to the next page in the catalog
+	 */
+	public void nextPage() {
+		mPager.setCurrentItem(mCurrentPosition+1, true);
+	}
+	
+	/**
+	 * Go to the previous page in the catalog
+	 */
+	public void previousPage() {
+		mPager.setCurrentItem(mCurrentPosition-1, true);
+	}
+	
+	private void setBranding(Branding b) {
+		
+		if (b==null) {
+			return;
+		}
+		
+		mBranding = b;
+		mLoader.setLoadingText(mBranding.getName());
+		int text = PageflipUtils.getTextColor(mBranding.getColor(), getActivity());
+		mLoader.setTextColor(text);
+		mFrame.setBackgroundColor(mBranding.getColor());
+		mContainer.setBackgroundColor(mBranding.getColor());
 		
 	}
 	
-	private void runCatalogView() {
+	/**
+	 * Method for determining if the {@link PageflipFragment} is ready.
+	 * It checks if the {@link PageflipViewPager} has an {@link PageAdapter} attached.
+	 * @return true if the fragment if ready, else false.
+	 */
+	public boolean isReady() {
+		return mAdapter != null;
+	}
+
+	/**
+	 * Set the {@link Catalog} that you want to display.
+	 * This is unnecessary if you have created the fragment with one of the provided 
+	 * {@link PageflipFragment} newInstance methods.
+	 * @param c A catalog to display
+	 */
+	public void setCatalog(Catalog c) {
+		if (c != null) {
+			mCatalog = c;
+			mCatalogId = mCatalog.getId();
+		}
+	}
+	
+	/**
+	 * Set the id of the {@link Catalog#getId() catalog} that you want to display.
+	 * This is unnecessary if you have created the fragment with one of the provided 
+	 * {@link PageflipFragment} newInstance methods.
+	 * @param catalogId A catalog id
+	 */
+	public void setCatalogId(String catalogId) {
+		mCatalogId = catalogId;
+	}
+	
+	/**
+	 * Method for instantiating the {@link PageflipFragment}. 
+	 * This will perform all needed actions in order to get the show started. 
+	 */
+	public void start() {
 		
-		if ( mCatalog != null && mHasCatalogView ) {
+		synchronized (this) {
+			if (mPageflipStarted) {
+				return;
+			}
+			mPageflipStarted = true;
+		}
+		ensureCatalog();
+	}
+
+	private void ensureCatalog() {
+		
+		if (mCatalog!=null) {
+			setBrandingAndFillCatalog();
 			return;
 		}
 		
@@ -210,13 +386,15 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 			
 			public void onComplete(JSONObject response, EtaError error) {
 				
-				mHasCatalogView = response != null;
-				
+//				mHasCatalogView = response != null;
+				if (!isAdded()) {
+					// Ignore callback
+					return;
+				}
+					
 				if (response != null) {
-					if (mCatalog == null) {
-						setCatalog(Catalog.fromJSON(response));
-						onceWeHaveACatalog();
-					}
+					setCatalog(Catalog.fromJSON(response));
+					setBrandingAndFillCatalog();
 				} else {
 					mLoader.error();
 				}
@@ -228,19 +406,17 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		JsonObjectRequest r = new JsonObjectRequest(url, l);
 		r.setIgnoreCache(true);
 		Eta.getInstance().add(r);
+		EtaLog.d(TAG, "getting catalog");
 		
 	}
 	
-	private void onceWeHaveACatalog() {
+	private void setBrandingAndFillCatalog() {
 		
 		if (mCatalog != null) {
-			mLoader.setText(mCatalog.getBranding().getName());
-			int branding = mCatalog.getBranding().getColor();
-			int text = PageflipUtils.getTextColor(branding, getActivity());
-			mProgress.setTextColor(text);
-			mFrame.setBackgroundColor(branding);
+			setBranding(mCatalog.getBranding());
 			runCatalogFiller();
 		}
+		
 	}
 	
 	private void runCatalogFiller() {
@@ -295,7 +471,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 			} else {
 				mWrapperListener.onPageChange(PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape));
 			}
-			mProgress.setVisibility(View.GONE);
+			mLoader.setVisibility(View.GONE);
 			mPager.setVisibility(View.VISIBLE);
 			
 			mWrapperListener.onReady();
@@ -304,168 +480,15 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		
 	};
 	
-	private void removeRunners() {
-		mLoader.stop();
-		mHandler.removeCallbacks(mOnCatalogComplete);
-	}
-	
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
-//		EtaLog.d(TAG, "onConfigurationChanged");
-		boolean land = PageflipUtils.isLandscape(newConfig);
-		if (land != mLandscape) {
-			EtaLog.d(TAG, "onConfigurationChanged[orientation.landscape[" + mLandscape + "->" + land + "]");
-			removeRunners();
-			mPagesReady = false;
-			mPageflipStarted = false;
-			// Get the old page
-			int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
-			// switch to landscape mode
-			mLandscape = land;
-			// set new current position accordingly
-			mCurrentPosition = PageflipUtils.pageToPosition(pages[0], mLandscape);
-			
-			setUpView(false);
-			start();
-		}
-	}
-	
-	/**
-	 * Get the {@link PageflipListener}.
-	 * @return The listener, or <code>null</code>.
-	 */
-	public PageflipListener getListener() {
-		return mWrapperListener.getListener();
-	}
-	
-	/**
-	 * Get the {@link PageflipFragment} wrapper listener, primarily used for debugging.
-	 * @return The wrapper listener
-	 */
-	public PageflipListener getWrapperListener() {
-		return mWrapperListener;
-	}
-	
-	/**
-	 * Set a listener to call on {@link PageflipFragment} events.
-	 * @param l The listener
-	 */
-	public void setPageflipListener(PageflipListener l) {
-		mWrapperListener.setListener(l);;
-	}
-	
-	/**
-	 * Get the pages currently being displayed in the {@link PageflipFragment}.
-	 * @return An array of pages being displayed
-	 */
-	public int[] getPages() {
-		return PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
-	}
-	
-	/**
-	 * Set the {@link PageflipFragment} to show the given page number in the catalog.
-	 * Note that page number doesn't directly correlate to the position of the {@link PageflipViewPager}.
-	 * @param page The page to turn to
-	 */
-	public void setPage(int page) {
-		if (PageflipUtils.isValidPage(mCatalog, page)) {
-			setPosition(PageflipUtils.pageToPosition(page, mLandscape));
-		} else {
-			EtaLog.i(TAG, "Not a valid page number");
-		}
-	}
-	
-	/**
-	 * Get the current position of the {@link PageflipViewPager}.
-	 * @return The current position
-	 */
-	public int getPosition() {
-		return mCurrentPosition;
-	}
-	
-	/**
-	 * Set the position of the {@link PageflipViewPager}. 
-	 * Note that this does not correlate directly to the catalog page number.
-	 * @param position A position
-	 */
-	public void setPosition(int position) {
-		mCurrentPosition = position;
-		if (mPager != null) {
-			mPager.setCurrentItem(mCurrentPosition);
-		}
-	}
-	
-	/**
-	 * Go to the next page in the catalog
-	 */
-	public void nextPage() {
-		mPager.setCurrentItem(mCurrentPosition+1, true);
-	}
-	
-	/**
-	 * Go to the previous page in the catalog
-	 */
-	public void previousPage() {
-		mPager.setCurrentItem(mCurrentPosition-1, true);
-	}
-	
-	/**
-	 * Method for determining if the {@link PageflipFragment} is ready.
-	 * It checks if the {@link PageflipViewPager} has an {@link PageAdapter} attached.
-	 * @return true if the fragment if ready, else false.
-	 */
-	public boolean isReady() {
-		return mAdapter != null;
-	}
-
-	/**
-	 * Set the {@link Catalog} that you want to display.
-	 * This is unnecessary if you have created the fragment with one of the provided 
-	 * {@link PageflipFragment} newInstance methods.
-	 * @param c A catalog to display
-	 */
-	public void setCatalog(Catalog c) {
-		if (c != null) {
-			mCatalog = c;
-			mCatalogId = mCatalog.getId();
-		}
-	}
-	
-	/**
-	 * Set the id of the {@link Catalog#getId() catalog} that you want to display.
-	 * This is unnecessary if you have created the fragment with one of the provided 
-	 * {@link PageflipFragment} newInstance methods.
-	 * @param catalogId A catalog id
-	 */
-	public void setCatalogId(String catalogId) {
-		mCatalogId = catalogId;
-	}
-	
-	/**
-	 * Method for instantiating the {@link PageflipFragment}. 
-	 * This will perform all needed actions in order to get the show started. 
-	 */
-	public void start() {
-		
-		if (mPageflipStarted) {
-			return;
-		}
-		mPageflipStarted = true;
-		if (mCatalog!=null) {
-			onceWeHaveACatalog();
-		} else {
-			runCatalogView();
-		}
-	}
-	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
 		outState.putInt(ARG_PAGE, pages[0]);
 		outState.putSerializable(ARG_CATALOG, mCatalog);
-		outState.putBoolean(ARG_CATALOG_VIEW, mHasCatalogView);
+		outState.putSerializable(ARG_CATALOG_ID, mCatalogId);
+//		outState.putBoolean(ARG_CATALOG_VIEW, mHasCatalogView);
 		outState.putString(ARG_VIEWSESSION, mViewSessionUuid);
+		outState.putParcelable(ARG_BRANDING, mBranding);
 		super.onSaveInstanceState(outState);
 	}
 	
@@ -477,10 +500,14 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	@Override
 	public void onPause() {
+		pause();
+		super.onPause();
+	}
+	
+	private void pause() {
 		removeRunners();
 		mPagesReady = false;
 		mPageflipStarted = false;
-		super.onPause();
 	}
 	
 	/**

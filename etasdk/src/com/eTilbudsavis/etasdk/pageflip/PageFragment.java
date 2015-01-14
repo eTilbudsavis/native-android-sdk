@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.TextView;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.R;
@@ -40,11 +39,10 @@ public abstract class PageFragment extends Fragment {
 	
 	private int[] mPages;
 	private ZoomPhotoView mPhotoView;
-	private TextView mPageNum;
+	private LoadingTextView mLoader;
 	private PageCallback mCallback;
 	private boolean mHasZoomImage = false;
 	private boolean mDebugRects = false;
-	private TextAnimLoader mTextLoader;
 	private PageStat mStats;
 	private boolean mPageVisible = false;
 	private int mPosition = -1;
@@ -56,19 +54,13 @@ public abstract class PageFragment extends Fragment {
 		}
 		int brandingColor = getCallback().getCatalog().getBranding().getColor();
 		int complimentColor = PageflipUtils.getTextColor(brandingColor, getActivity());
-		mPageNum.setTextColor(complimentColor);
+		mLoader.setTextColor(complimentColor);
 	}
 	
 	private void runLoader() {
-		
 		updateBranding();
-		
-		if (mTextLoader==null) {
-			mTextLoader = new TextAnimLoader(mPageNum);
-		}
-		mTextLoader.stop();
-		mTextLoader.setText(PageflipUtils.join("-", mPages));
-		mTextLoader.run();
+		mLoader.setLoadingText(PageflipUtils.join("-", mPages));
+		mLoader.start();
 	}
 	
 	public static PageFragment newInstance(int position, int[] pages) {
@@ -95,7 +87,7 @@ public abstract class PageFragment extends Fragment {
 
 		View v = inflater.inflate(R.layout.etasdk_layout_page, container, false);
 		mPhotoView = (ZoomPhotoView) v.findViewById(R.id.etasdk_layout_page_photoview);
-		mPageNum = (TextView) v.findViewById(R.id.etasdk_layout_page_pagenum);
+		mLoader = (LoadingTextView) v.findViewById(R.id.etasdk_layout_page_pagenum);
 		
 		mPhotoView.setMaximumScale(MAX_SCALE);
 		mPhotoView.setOnZoomListener(new OnZoomChangeListener() {
@@ -123,7 +115,7 @@ public abstract class PageFragment extends Fragment {
 		int content = isLoading ? View.GONE : View.VISIBLE;
 		int loader = isLoading ? View.VISIBLE : View.INVISIBLE;
 		mPhotoView.setVisibility(content);
-		mPageNum.setVisibility(loader);
+		mLoader.setVisibility(loader);
 		if (isLoading) {
 			runLoader();
 		}
@@ -275,7 +267,7 @@ public abstract class PageFragment extends Fragment {
 	@Override
 	public void onPause() {
 //		EtaLog.d(TAG, String.format("pos: %s, onPause", mPosition));
-		mTextLoader.stop();
+		mLoader.stop();
 		mPhotoView.recycle();
 		onInvisible();
 		super.onPause();
@@ -340,7 +332,7 @@ public abstract class PageFragment extends Fragment {
 				mPhotoView.setImageBitmap(ir.getBitmap());
 				toggleContentVisibility(false);
 			} else {
-				mTextLoader.error();
+				mLoader.error();
 			}
 			
 //			} else if (ir.getPlaceholderError() != 0) {

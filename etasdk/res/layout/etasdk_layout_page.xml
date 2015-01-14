@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <TextView
+    <com.eTilbudsavis.etasdk.pageflip.LoadingTextView
         android:id="@+id/etasdk_layout_page_pagenum"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
