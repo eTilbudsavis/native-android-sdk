@@ -157,13 +157,14 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		setPage(args.getInt(ARG_PAGE, 1));
 		if (args.containsKey(ARG_CATALOG)) {
 			setCatalog((Catalog) args.getSerializable(ARG_CATALOG));
+			mBranding = mCatalog.getBranding();
 		} else if (args.containsKey(ARG_CATALOG_ID)) {
 			setCatalogId(args.getString(ARG_CATALOG_ID));
+			mBranding = args.getParcelable(ARG_BRANDING);
 		} else {
 			throwNoCatalogException();
 		}
 		
-		mBranding = args.getParcelable(ARG_BRANDING);
 //		mHasCatalogView = b.getBoolean(ARG_CATALOG_VIEW, false);
 		mViewSessionUuid = args.getString(ARG_VIEWSESSION);
 		
@@ -326,6 +327,14 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		mFrame.setBackgroundColor(mBranding.getColor());
 		mContainer.setBackgroundColor(mBranding.getColor());
 		
+	}
+	
+	/**
+	 * Return the current branding, used by {@link PageflipFragment}.
+	 * @return A {@link Branding}
+	 */
+	public Branding getBranding() {
+		return mBranding;
 	}
 	
 	/**
