@@ -462,6 +462,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 				
 				EtaLog.d(TAG, error.toJSON().toString());
 				// TODO improve error stuff 1 == network error
+				mLoader.error();
 				mWrapperListener.onError(error);
 				
 			}
