@@ -24,7 +24,7 @@ public class ExternalClientIdStore {
 		
 		if (s.getClientId() == null) {
 			
-			s.setClientId("randomjunkid");
+//			s.setClientId("randomjunkid");
 			
 		} else if (!s.getClientId().equals(extCid)) {
 			
