@@ -35,7 +35,7 @@ public class Dimension implements IJson<JSONObject>, Serializable, Parcelable {
 
 	public static final String TAG = Eta.TAG_PREFIX + Dimension.class.getSimpleName();
 	
-	public static final double DEF_DIMENSION = -1d;
+	public static final double DEF_DIMENSION = 1d;
 	
 	private double mWidth = DEF_DIMENSION;
 	private double mHeight = DEF_DIMENSION;
