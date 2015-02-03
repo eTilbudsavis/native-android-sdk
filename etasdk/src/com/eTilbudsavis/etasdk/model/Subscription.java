@@ -24,7 +24,7 @@ public class Subscription implements IJson<JSONObject>, Serializable, Parcelable
 	
 	private String mDealerId;
 	private boolean mSubscribed = false;
-
+	
 	public static Parcelable.Creator<Subscription> CREATOR = new Parcelable.Creator<Subscription>(){
 		public Subscription createFromParcel(Parcel source) {
 			return new Subscription(source);

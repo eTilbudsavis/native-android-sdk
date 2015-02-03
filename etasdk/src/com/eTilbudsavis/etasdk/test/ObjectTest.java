@@ -133,6 +133,12 @@ public class ObjectTest {
 		Assert.assertNotSame(obj, tmp);
 		Assert.assertTrue(obj.same(tmp));
 		
+		// Type can never be null (null == shoppinglist)
+		Assert.assertNotNull(obj.getType());
+		obj.setType(null);
+		Assert.assertNotNull(obj.getType());
+		Assert.assertEquals(Shoppinglist.TYPE_SHOPPING_LIST, obj.getType());
+		
 		// Parcelable
         Parcel parcel = Parcel.obtain();
         obj.writeToParcel(parcel, 0);

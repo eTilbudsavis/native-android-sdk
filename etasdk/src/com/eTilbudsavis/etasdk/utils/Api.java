@@ -390,10 +390,10 @@ public final class Api {
 		public class Prefix {
 
 			public static final String API_PRODUCTION = "https://api.etilbudsavis.dk";
-			public static final String API_EDGE = "https://edge.etilbudsavis.dk";
+			public static final String API_EDGE = "https://edge.api.etilbudsavis.dk";
 
 			public static final String THEMES_PRODUCTION = "https://etilbudsavis.dk";
-			public static final String THEMES_STAGING = "https://staging.etilbudsavis.dk";
+			public static final String THEMES_STAGING = "https://staging.api.etilbudsavis.dk";
 
 		}
 		
