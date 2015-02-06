@@ -192,7 +192,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 		}
 		
     	mFinished = true;
-    	mRequestQueue.finish(this);
+    	if (mRequestQueue!=null) {
+        	mRequestQueue.finish(this);
+    	}
     	
     	if (mDebugger != null) {
     		mDebugger.onFinish(this);

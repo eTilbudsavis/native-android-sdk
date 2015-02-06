@@ -35,9 +35,9 @@ import com.eTilbudsavis.etasdk.utils.Api.Param;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class JsonArrayRequest extends JsonRequest<JSONArray> {
-
+	
 	private static final String ERROR_OFFSET_NEGATIVE = "Offset may not be negative";
-
+	
 	private static final String ERROR_LIMIT_NEGATIVE = "Limit may not be negative";
 	
 	/**  
@@ -130,8 +130,10 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 * @return
 	 */
 	public Request<?> setOrderBy(List<String> order) {
-		String tmp = TextUtils.join(",",order);
-		getParameters().put(Api.Param.ORDER_BY, tmp);
+		if (!order.isEmpty()) {
+			String tmp = TextUtils.join(",",order);
+			getParameters().put(Api.Param.ORDER_BY, tmp);
+		}
 		return this;
 	}
 	
@@ -198,8 +200,10 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	 * @return	this object
 	 */
 	public Request<?> setIds(String type, Set<String> ids) {
-		String idList = TextUtils.join(",",ids);
-		getParameters().put(type, idList);
+		if (!ids.isEmpty()) {
+			String idList = TextUtils.join(",",ids);
+			getParameters().put(type, idList);
+		}
 		return this;
 	}
 	

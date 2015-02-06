@@ -21,8 +21,6 @@ public class LimitedLruMemoryCache implements MemoryCache {
 	 */
 	private Map<String, Bitmap> mCache = Collections.synchronizedMap(new LinkedHashMap<String, Bitmap>(10,1.5f,true));
 	
-	private static final int MAX_DIMEN = 130;
-	
 	/** The currently allocated size of cache */
 	private long mSize = 0;
 	

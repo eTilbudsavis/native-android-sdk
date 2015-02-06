@@ -14,12 +14,13 @@ public class DefaultThreadFactory implements ThreadFactory {
 	
 	private static final AtomicInteger poolNumber = new AtomicInteger(1);
 	
-	private static UncaughtExceptionHandler ueh = new UncaughtExceptionHandler() {
+	private static UncaughtExceptionHandler mExceptionHandler = new UncaughtExceptionHandler() {
 		
 		public void uncaughtException(Thread thread, Throwable ex) {
 			EtaLog.e(TAG, thread.getName() + " crashed", ex);
 		}
 	};
+	
 	private final ThreadGroup group;
 	private final AtomicInteger threadNumber = new AtomicInteger(1);
 	private final String namePrefix;
@@ -40,7 +41,7 @@ public class DefaultThreadFactory implements ThreadFactory {
 		Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
 		if (t.isDaemon()) t.setDaemon(false);
 		t.setPriority(threadPriority);
-//		t.setUncaughtExceptionHandler(ueh);
+//		t.setUncaughtExceptionHandler(mExceptionHandler);
 		return t;
 	}
 	
