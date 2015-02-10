@@ -50,6 +50,24 @@ public abstract class PageFragment extends Fragment {
 	private boolean mPageVisible = false;
 	private int mPosition = -1;
 	
+	OnZoomChangeListener mZoomListener = new OnZoomChangeListener() {
+		
+		public void onZoomChange(boolean isZoomed) {
+			if (isZoomed && !mHasZoomImage) {
+				mHasZoomImage = true;
+				loadZoom();
+			}
+			
+			if (isZoomed) {
+				getStat().startZoom();
+			} else {
+				getStat().collectZoom();
+			}
+			
+			getCallback().getWrapperListener().onZoom(mPhotoView, mPages, isZoomed);
+		}
+	};
+	
 	private void updateBranding() {
 		PageCallback cb = getCallback();
 		if (!isAdded() || cb==null || cb.getCatalog()==null) {
@@ -92,26 +110,8 @@ public abstract class PageFragment extends Fragment {
 		mPhotoView = (ZoomPhotoView) v.findViewById(R.id.etasdk_layout_page_photoview);
 		mLoader = (LoadingTextView) v.findViewById(R.id.etasdk_layout_page_pagenum);
 		
-		EtaLog.d(TAG, "loader==null: " + (mLoader == null));
-		
 		mPhotoView.setMaximumScale(MAX_SCALE);
-		mPhotoView.setOnZoomListener(new OnZoomChangeListener() {
-			
-			public void onZoomChange(boolean isZoomed) {
-				if (isZoomed && !mHasZoomImage) {
-					mHasZoomImage = true;
-					loadZoom();
-				}
-				
-				if (isZoomed) {
-					getStat().startZoom();
-				} else {
-					getStat().collectZoom();
-				}
-				
-				getCallback().getWrapperListener().onZoom(mPhotoView, mPages, isZoomed);
-			}
-		});
+		mPhotoView.setOnZoomListener(mZoomListener);
 		toggleContentVisibility(true);
 		return v;
 	}
@@ -148,7 +148,6 @@ public abstract class PageFragment extends Fragment {
 	protected void onSingleClick(int page, float x, float y) {
 		List<Hotspot> list = mCallback.getCatalog().getHotspots().getHotspots(page, x, y, mCallback.isLandscape());
 		getCallback().getWrapperListener().onSingleClick(mPhotoView, page, x, y, list);
-		
 	}
 	
 	protected void onDoubleClick(int page, float x, float y) {
@@ -285,10 +284,9 @@ public abstract class PageFragment extends Fragment {
 		public PageBitmapProcessor(int page) {
 			this.page = page;
 		}
-
+		
 		private Dimension createDimension(Bitmap b) {
 			Dimension d = new Dimension();
-			d.setWidth(1); // magic number... always one
 			double h = (double)((float)b.getHeight()/(float)b.getWidth());
 			d.setHeight(h);
 			return d;
