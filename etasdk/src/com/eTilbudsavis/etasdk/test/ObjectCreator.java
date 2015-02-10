@@ -316,8 +316,7 @@ public class ObjectCreator {
 	}
 	
 	public static Subscription getSubscription(String dealerId, boolean subscribed) {
-		Subscription s = new Subscription();
-		s.setDealerId(dealerId);
+		Subscription s = new Subscription(dealerId);
 		s.setSubscribed(subscribed);
 		return s;
 	}
