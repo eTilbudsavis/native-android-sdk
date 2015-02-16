@@ -38,7 +38,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 	
 	private String mLogo;
 	private Integer mColor = 0;
-
+	
 	public static Parcelable.Creator<Pageflip> CREATOR = new Parcelable.Creator<Pageflip>(){
 		public Pageflip createFromParcel(Parcel source) {
 			return new Pageflip(source);

@@ -143,9 +143,6 @@ public class SyncManager {
 	/** The Handler instantiated on the sync Thread */
 	private Handler mHandler;
 	
-	/** A user object, for identifying the current user during a request cycle */
-	private User mUser;
-	
 	/** 
 	 * Variable to determine if offline lists should automatically be
 	 * synchronized if certain criterias are met.
@@ -165,9 +162,9 @@ public class SyncManager {
 	
 	/** Listening for session changes, starting and stopping sync as needed */
 	private OnSessionChangeListener sessionListener = new OnSessionChangeListener() {
-
-		public void onChange() {
-			if (mUser == null || mUser.getUserId() != mEta.getUser().getUserId()) {
+		
+		public void onSessionChange(int oldUserId, int newUserId) {
+			if (oldUserId != newUserId) {
 				mHasFirstSync = false;
 				mSyncCount = 0;
 				forceSync();
@@ -180,10 +177,9 @@ public class SyncManager {
 		
 		public void run() {
 			
-			mUser = mEta.getUser();
-			
+			User u = mEta.getUser();
 			// If it's an offline user, then just quit it
-			if ( !mUser.isLoggedIn() ) {
+			if ( !u.isLoggedIn() ) {
 				SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (NotLoggedIn)");
 				return;
 			}
@@ -212,7 +208,7 @@ public class SyncManager {
 			}
 			
 			// Perform the actual sync cycle
-			performSyncCycle(mUser);
+			performSyncCycle(u);
 			
 		}
 		

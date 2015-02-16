@@ -31,8 +31,8 @@ public class CatalogThumbBitmapProcessor implements BitmapProcessor {
 			throw new IllegalArgumentException("Dimension cannot be null");
 		}
 		
-		if ( mDimension.getWidth() <= 0 && mDimension.getHeight() <= 0 ) {
-			throw new IllegalArgumentException("Dimension.width and Dimension.height cannot be <= 0");
+		if ( mDimension.getWidth() < 0 && mDimension.getHeight() < 0 ) {
+			throw new IllegalArgumentException("Dimension.width and Dimension.height cannot be < 0");
 		}
 		
 		if ( mDimension == null || equal(mDimension.getHeight(), mDimension.getWidth()) ) {

@@ -192,6 +192,9 @@ public class SessionManager {
 				return false;
 			}
 			
+			int oldId = mSession.getUser().getUserId();
+			int newId = s.getUser().getUserId();
+			
 			mSession = s;
 			ExternalClientIdStore.updateCid(mSession, mEta.getContext());
 			mEta.getSettings().setSessionJson(session);
@@ -200,7 +203,7 @@ public class SessionManager {
 			mTryToRecover = true;
 			
 			// Send out notifications
-			notifySubscribers();
+			notifySubscribers(oldId, newId);
 			
 			return true;
 			
@@ -468,11 +471,12 @@ public class SessionManager {
 	 */
 	public void invalidate() {
 		synchronized (LOCK) {
+			int oldUserId = mSession.getUser().getUserId();
 			mSession = new Session();
 			ExternalClientIdStore.updateCid(mSession, mEta.getContext());
 			mEta.getSettings().setSessionJson(mSession.toJSON());
 			clearUser();
-			notifySubscribers();
+			notifySubscribers(oldUserId, mSession.getUser().getUserId());
 		}
 	}
 	
@@ -499,14 +503,14 @@ public class SessionManager {
 		}
 	}
 	
-	public SessionManager notifySubscribers() {
+	public SessionManager notifySubscribers(final int oldUserId,final int newUserId) {
 		synchronized (mSubscribers) {
 			for (final OnSessionChangeListener sl : mSubscribers) {
 				try {
 					mEta.getHandler().post(new Runnable() {
 						
 						public void run() {
-							sl.onChange();
+							sl.onSessionChange(oldUserId, newUserId);
 						}
 					});
 				} catch (Exception e) {
@@ -519,7 +523,7 @@ public class SessionManager {
 	}
 
 	public interface OnSessionChangeListener {
-		public void onChange();
+		public void onSessionChange(int oldUserId, int newUserId);
 	}
 	
 }
