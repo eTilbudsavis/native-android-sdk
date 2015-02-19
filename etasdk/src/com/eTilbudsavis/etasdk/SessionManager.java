@@ -504,6 +504,9 @@ public class SessionManager {
 	}
 	
 	public SessionManager notifySubscribers(final int oldUserId,final int newUserId) {
+		
+		EtaLog.i(TAG, "onSessionChange: " + oldUserId + " -> " + newUserId);
+		
 		synchronized (mSubscribers) {
 			for (final OnSessionChangeListener sl : mSubscribers) {
 				try {
@@ -512,6 +515,7 @@ public class SessionManager {
 						public void run() {
 							sl.onSessionChange(oldUserId, newUserId);
 						}
+						
 					});
 				} catch (Exception e) {
 					EtaLog.e(TAG, "", e);
