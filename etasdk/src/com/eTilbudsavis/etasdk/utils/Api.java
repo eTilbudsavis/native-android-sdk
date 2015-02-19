@@ -399,7 +399,7 @@ public final class Api {
 		
 		public static String API_HOST_PREFIX = Prefix.API_PRODUCTION;
 		public static String THEMES_HOST_PREFIX = Prefix.THEMES_PRODUCTION;
-
+		
 		public static final String CATALOG_LIST = "/v2/catalogs";
 		public static final String CATALOG_ID = "/v2/catalogs/";
 		public static final String CATALOG_SEARCH = "/v2/catalogs/search";
@@ -551,7 +551,12 @@ public final class Api {
 		public static String pushPayload(String payloadId) {
 			return String.format("/v2/push/payloads/%s", payloadId);
 		}
-
+		
+		/** https://etilbudsavis.dk/ern/{ern}/ */
+		public static String shareERN(String ern) {
+			return String.format("https://etilbudsavis.dk/ern/%s/", ern);
+		}
+		
 	}
 
 
