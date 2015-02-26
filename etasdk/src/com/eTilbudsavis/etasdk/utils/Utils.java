@@ -228,7 +228,7 @@ public final class Utils {
 	 * @return true if email is valid, else false
 	 */
 	public static boolean isEmailValid(String email) {
-		return email.contains("@") && email.split("@").length > 1; 
+		return email != null && email.contains("@") && email.split("@").length > 1; 
 	}
 
 	/**

@@ -399,7 +399,7 @@ public final class Api {
 		
 		public static String API_HOST_PREFIX = Prefix.API_PRODUCTION;
 		public static String THEMES_HOST_PREFIX = Prefix.THEMES_PRODUCTION;
-		
+
 		public static final String CATALOG_LIST = "/v2/catalogs";
 		public static final String CATALOG_ID = "/v2/catalogs/";
 		public static final String CATALOG_SEARCH = "/v2/catalogs/search";
