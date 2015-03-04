@@ -38,6 +38,7 @@ import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
 import com.eTilbudsavis.etasdk.utils.Utils;
+import com.eTilbudsavis.etasdk.utils.Validator;
 
 public class SessionManager {
 	
@@ -361,7 +362,6 @@ public class SessionManager {
 	 * @param l
 	 */
 	public void loginFacebook(String facebookAccessToken, Listener<JSONObject> l) {
-		
 		Map<String, String> args = new HashMap<String, String>();
 		args.put(Param.FACEBOOK_TOKEN, facebookAccessToken);
 		mEta.getSettings().setSessionFacebook(facebookAccessToken);
@@ -406,12 +406,19 @@ public class SessionManager {
 	 */
 	public void createUser(String email, String password, String name, int birthYear, String gender, String locale, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
 		
+		if (
+				Validator.isEmailValid(email) && 
+				Validator.isBirthyearValid(birthYear) && 
+				Validator.isGenderValid(gender)) {
+			// TODO Should we validate in the SDK?
+		}
+		
 		Map<String, String> args = new HashMap<String, String>();
-		args.put(Param.EMAIL, email);
+		args.put(Param.EMAIL, email.trim());
 		args.put(Param.PASSWORD, password);
-		args.put(Param.NAME, name);
+		args.put(Param.NAME, name.trim());
 		args.put(Param.BIRTH_YEAR, String.valueOf(birthYear));
-		args.put(Param.GENDER, gender);
+		args.put(Param.GENDER, gender.trim());
 		args.put(Param.SUCCESS_REDIRECT, successRedirect);
 		args.put(Param.ERROR_REDIRECT, errorRedirect);
 		args.put(Param.LOCALE, locale);

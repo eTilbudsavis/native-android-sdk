@@ -12,7 +12,8 @@ public class EtaSdkTest {
 	public static void test() {
 		
 		long start = System.currentTimeMillis();
-		
+
+		ValidatorTest.test();
 		UtilsTest.test();
 		ObjectTest.test();
 		CatalogThumbBitmapProcessorTest.test();

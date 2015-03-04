@@ -63,12 +63,6 @@ public final class Utils {
 	/** String representation of epoc */
 	public static final String DATE_EPOC = "1970-01-01T00:00:00+0000";
 
-	public static final String APP_VERSION_FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([+-][0-9A-Za-z-.]*)?";
-	
-	public static final String xAPP_VERSION_FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([-]([0-9A-Za-z-.]+)*)?";
-	
-	//           \d+\.\d+\.\d+(\-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?
-	
 	/** Single instance of SimpleDateFormat to save time and memory */
 	private static SimpleDateFormat mSdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
 	
@@ -212,40 +206,6 @@ public final class Utils {
 	}
 	
 	/**
-	 * Checks if a given integer is a valid birth year.<br>
-	 * Requirements: birth year is in the span 1900 - 2013.
-	 * @param birthyear
-	 * @return
-	 */
-	public static boolean isBirthyearValid(Integer birthyear) {
-		return birthyear >= 1900 ? (birthyear <= 2013) : false ;
-	}
-	
-	/**
-	 * A very naive implementation of email validation.<br>
-	 * Requirement: String must contains a '@', and that there is at least one char before and after the '@'
-	 * @param email to check
-	 * @return true if email is valid, else false
-	 */
-	public static boolean isEmailValid(String email) {
-		return email != null && email.contains("@") && email.split("@").length > 1; 
-	}
-
-	/**
-	 * Checks if a given string is a valid gender.<br>
-	 * Requirements: String is either 'male' or 'female' (not case sensitive).
-	 * @param birthyear
-	 * @return
-	 */
-	public static boolean isGenderValid(String gender) {
-		if (gender==null) {
-			return false;
-		}
-		String g = gender.toLowerCase().trim();
-		return (g.equals("male") || g.equals("female") );
-	}
-	
-	/**
 	 * Convert an API date of the format "2013-03-03T13:37:00+0000" into a Date object.
 	 * @param date to convert
 	 * @return a Date object
@@ -283,18 +243,6 @@ public final class Utils {
 	 */
 	public static boolean isSuccess(int statusCode) {
 		return 200 <= statusCode && statusCode < 300 || statusCode == 304;
-	}
-	
-	/**
-	 * A simple regular expression to check if the app-version string can be accepted by the API
-	 * @param version to check
-	 * @return true, if the version matched the regex
-	 */
-	public static boolean validVersion(String version) {
-		if (version == null) {
-			return false;
-		}
-	    return Pattern.compile(APP_VERSION_FORMAT).matcher(version).matches();
 	}
 	
 	/**

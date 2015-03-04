@@ -26,10 +26,7 @@ public class UtilsTest {
 		testCreateUUID();
 		testMapToQueryString();
 		testRequestToUrlAndQueryString();
-		testIsBirthYearValid();
-		testIsGenderValid();
 		testIsSuccess();
-		testValidVersion();
 		testColorToString(false);
 		testStringToColor();
 		testColorSanitize(false);
@@ -146,39 +143,6 @@ public class UtilsTest {
 		EtaSdkTest.logTest(TAG, "RequestToUrlAndQueryString");
 	}
 
-	public static void testIsBirthYearValid() {
-		Assert.assertFalse(Utils.isBirthyearValid(Integer.MIN_VALUE));
-		for (int i = -1000; i < 1900; i++) {
-			Assert.assertFalse(Utils.isBirthyearValid(i));
-		}
-		for (int i = 1900; i < 2014; i++) {
-			Assert.assertTrue(Utils.isBirthyearValid(i));
-		}
-		for (int i = 2014; i < 3000; i++) {
-			Assert.assertFalse(Utils.isBirthyearValid(i));
-		}
-		Assert.assertFalse(Utils.isBirthyearValid(Integer.MAX_VALUE));
-		
-		EtaSdkTest.logTest(TAG, "IsBirthYesrValid");
-	}
-
-	public static void testIsGenderValid() {
-		Assert.assertFalse(Utils.isGenderValid(null));
-		Assert.assertFalse(Utils.isGenderValid(""));
-		Assert.assertFalse(Utils.isGenderValid("danny"));
-		Assert.assertFalse(Utils.isGenderValid("fe male"));
-		Assert.assertFalse(Utils.isGenderValid("  ma le  "));
-		Assert.assertFalse(Utils.isGenderValid("males"));
-		Assert.assertFalse(Utils.isGenderValid("females"));
-		
-		Assert.assertTrue(Utils.isGenderValid("  male  "));
-		Assert.assertTrue(Utils.isGenderValid("  female  "));
-		Assert.assertTrue(Utils.isGenderValid("female"));
-		Assert.assertTrue(Utils.isGenderValid("male"));
-		
-		EtaSdkTest.logTest(TAG, "IsGenderValid");
-	}
-
 	public static void testIsSuccess() {
 		// 200 <= statusCode && statusCode < 300 || statusCode == 304
 		
@@ -203,27 +167,6 @@ public class UtilsTest {
 		EtaSdkTest.logTest(TAG, "IsGenderValid");
 	}
 	
-	public static void testValidVersion() {
-		
-		String[] valid = { "2.0.0", "2.0.0-rc.2", "2.0.0-rc.1", "1.0.0", "1.0.0-beta", 
-				"1.0.0-b", "1.0.0-beta", "1.0.0-chocolate", "1.0.0-15948", "1.0.0-rc-1" };
-		
-		
-		// Out regex haven't covered the case "1.0.0-" 
-		String[] invalid = { null, "jens", "", ".", "v", "v.1", "v1.0", "v1.0.0",
-				"1.", "1.0", "1.0.", "1.0.0.0", "v1.0.0-beta.2.2", "v1-beta" };
-		
-		for (String s : valid) {
-			Assert.assertTrue(Utils.validVersion(s));
-		}
-
-		for (String s : invalid) {
-			Assert.assertFalse(Utils.validVersion(s));
-		}
-
-		EtaSdkTest.logTest(TAG, "ValidVersion");
-	}
-
 	@SuppressWarnings("deprecation")
 	public static void testStringToDate() {
 

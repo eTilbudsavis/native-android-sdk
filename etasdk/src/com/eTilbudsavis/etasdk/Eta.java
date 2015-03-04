@@ -42,7 +42,7 @@ import com.eTilbudsavis.etasdk.network.impl.DefaultHttpNetwork;
 import com.eTilbudsavis.etasdk.network.impl.HttpURLNetwork;
 import com.eTilbudsavis.etasdk.network.impl.MemoryCache;
 import com.eTilbudsavis.etasdk.network.impl.NetworkImpl;
-import com.eTilbudsavis.etasdk.utils.Utils;
+import com.eTilbudsavis.etasdk.utils.Validator;
 
 /**
  * 
@@ -252,7 +252,7 @@ public class Eta {
 	 * @return API key as String
 	 */
 	public void setAppVersion(String appVersion) {
-		if (Utils.validVersion(appVersion)) {
+		if (Validator.isAppVersionValid(appVersion)) {
 			mAppVersion = appVersion;
 		}
 		EtaLog.v(TAG, mAppVersion == null ? 
