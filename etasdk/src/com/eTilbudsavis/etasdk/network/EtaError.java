@@ -216,12 +216,27 @@ public class EtaError extends Exception implements IJson<JSONObject> {
 	    /** Request invalid due to missing information. */
 	    public static final int MISSING_INFORMATION			= 1400;
 
-	    /** This call requires a request location. See documentation. */
+	    /** This endpoint requires a request location. See documentation. */
 	    public static final int MISSING_LOCATION			= 1401;
 
-	    /** This call requires a request radius. See documentation. */
+	    /** This endpoint requires a request radius. See documentation. */
 	    public static final int MISSING_RADIUS				= 1402;
 
+	    /** the email field is missing from Facebook user data. */
+	    public static final int FACEBOOK_MISSING_EMAIL		= 1431;
+
+	    /** the birthday field is missing from Facebook user data. */
+	    public static final int FACEBOOK_MISSING_BIRTHDAY	= 1432;
+
+	    /** the gender field is missing from Facebook user data. */
+	    public static final int FACEBOOK_MISSING_GENDER		= 1433;
+
+	    /** the locale field is missing from Facebook user data. */
+	    public static final int FACEBOOK_MISSING_LOCALE		= 1434;
+
+	    /** the name field is missing from Facebook user data. */
+	    public static final int FACEBOOK_MISSING_NAME		= 1435;
+	    
 	    /** Invalid information */
 	    public static final int INVALID_INFORMATION			= 1500;
 
@@ -231,6 +246,9 @@ public class EtaError extends Exception implements IJson<JSONObject> {
 	    /** Dublication of resource */
 	    public static final int DUBLICATION_OF_RESOURCE		= 1530;
 
+	    /** The user (email) already exists, use another login method */
+	    public static final int USER_EXISTS					= 1531;
+	    
 	    /** 
 	     * Ensure body data is of valid syntax, and that you send a correct
 	     * Content-Type header
