@@ -96,6 +96,12 @@ public class SessionManager {
 						setSession(response);
 						runQueue();
 						
+					} else if (error.getCode() == EtaError.Code.NETWORK_ERROR) {
+						
+						// We cannot really do anything.
+						// we'll just prevent the session from being destroyed
+						runQueue();
+						
 					} else if (mTryToRecover && recoverableError(error) ) {
 						
 						mTryToRecover = false;
@@ -371,12 +377,21 @@ public class SessionManager {
 	}
 	
 	/**
+	 * Tell if current session is from facebook.
+	 * @return
+	 */
+	public boolean isFacebookSession() {
+		return mEta.getSettings().getSessionFacebook() != null;
+	}
+	
+	/**
 	 * Signs a user out, and cleans all references to the user.<br><br>
 	 * A new {@link #login(String, String) login} is needed to get access to user stuff again.
 	 */
 	public void signout(final Listener<JSONObject> l) {
 		
 		if (Eta.getInstance().isOnline()) {
+	        mEta.getSettings().setSessionFacebook(null);
 	        mEta.getListManager().clear(mSession.getUser().getUserId());
 	        Map<String, String> args = new HashMap<String, String>();
 	        args.put(Param.EMAIL, "");
