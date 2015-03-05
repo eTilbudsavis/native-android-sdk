@@ -245,9 +245,6 @@ public class EtaError extends Exception implements IJson<JSONObject> {
 
 	    /** Dublication of resource */
 	    public static final int DUBLICATION_OF_RESOURCE		= 1530;
-
-	    /** The user (email) already exists, use another login method */
-	    public static final int USER_EXISTS					= 1531;
 	    
 	    /** 
 	     * Ensure body data is of valid syntax, and that you send a correct
