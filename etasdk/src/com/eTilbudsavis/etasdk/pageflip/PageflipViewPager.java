@@ -55,6 +55,8 @@ public class PageflipViewPager extends ViewPager {
 			mLastMotionX = ev.getX();
 		} catch (IllegalArgumentException e) {
 			// Bug in Eclair - ignore any exceptions
+		} catch (ArrayIndexOutOfBoundsException e) {
+			// Don't know why this is being thrown
 		}
 		return mIsBeingDragged;
 	}
@@ -70,6 +72,8 @@ public class PageflipViewPager extends ViewPager {
 			
 		} catch (IllegalArgumentException e) {
 			// Bug in Eclair - ignore any exceptions
+		} catch (ArrayIndexOutOfBoundsException e) {
+			// Don't know why this is being thrown
 		}
 		
         return isWorking;
