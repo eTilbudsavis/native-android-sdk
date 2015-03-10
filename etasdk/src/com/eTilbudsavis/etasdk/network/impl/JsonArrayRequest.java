@@ -194,9 +194,9 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	/**
 	 * Set a parameter for what specific id's to get from a given endpoint.<br><br>
 	 * 
-	 * E.g.: setIds(Catalog.PARAM_IDS, new String[]{"eecdA5g","b4Aea5h"});
-	 * @param	type of the endpoint parameter e.g. Catalog.PARAM_IDS
-	 * @param	ids to filter by
+	 * 
+	 * @param	type The id type, e.g. Api.Param.CATALOG_IDS
+	 * @param	ids The id's to get
 	 * @return	this object
 	 */
 	public Request<?> setIds(String type, Set<String> ids) {
