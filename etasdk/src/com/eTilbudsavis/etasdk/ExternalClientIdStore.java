@@ -18,19 +18,27 @@ public class ExternalClientIdStore {
 	
 	public static final String TAG = ExternalClientIdStore.class.getSimpleName();
 	
+	private static final String CID_RANDOMJUNK = "randomjunkid";
+	
 	public static void updateCid(Session s, Context c) {
 		
 		String extCid = getCid(c);
+		String cid = s.getClientId();
 		
-		if (s.getClientId() == null) {
-			
-//			s.setClientId("randomjunkid");
-			
-		} else if (!s.getClientId().equals(extCid)) {
-			
-			extCid = s.getClientId();
-			saveCid(extCid, c);
-			
+
+		// Previously used this hardcoded cid in beta, recover it
+		if (CID_RANDOMJUNK.equals(cid) || CID_RANDOMJUNK.equals(extCid)) {
+			s.setClientId(null);
+			deleteCid(c);
+			return;
+		}
+		
+		if (cid == null) {
+			// No ClientID is set, try to get from disk
+			s.setClientId(extCid);
+		} else if (!cid.equals(extCid)) {
+			// ClientID have changed, write changes to disk
+			saveCid(cid, c);
 		}
 		
 	}
@@ -90,7 +98,7 @@ public class ExternalClientIdStore {
 				// Ignore
 			}
         }
-	        
+        
 		return null;
     }
 	
