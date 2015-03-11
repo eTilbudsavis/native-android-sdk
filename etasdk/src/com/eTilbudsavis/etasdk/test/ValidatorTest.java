@@ -23,14 +23,14 @@ public class ValidatorTest extends TestCase {
 
 	public static void testIsEmailVaild() {
 
-		String[] inValid = new String[]{ null, "", "@", "@@", "d@@h", "d@k@h", "@hvam", " @ ", "null", "danny@"};
+		String[] inValid = new String[]{ null, "", "@", "@@", "d@@h", "d@k@h", "@hvam", " @ ", "null", "danny@", " d@h.dk ", "d@h.dk ", " d@h.dk"};
 		for (String s : inValid) {
-			assertFalse(Validator.isGenderValid(s));
+			assertFalse(Validator.isEmailValid(s));
 		}
 		
-		String[] valid = new String[]{"danny@hvam.dk", "d@h", "d @ h", " d@h ", "d@h.dk", "4321@fdsafd", "[]{}()@[]{}()", "∂∑˙∆´∫∑@˙¨ˆ∂∑∆" };
+		String[] valid = new String[]{"danny@hvam.dk", "d@h", "d @ h", "d@h.dk", "4321@fdsafd", "[]{}()@[]{}()", "∂∑˙∆´∫∑@˙¨ˆ∂∑∆" };
 		for (String s : valid) {
-			assertTrue(Validator.isGenderValid(s));
+			assertTrue(Validator.isEmailValid(s));
 		}
 		
 		EtaSdkTest.logTest(TAG, "IsEmailValid");

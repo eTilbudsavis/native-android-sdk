@@ -4,6 +4,8 @@ import java.util.regex.Pattern;
 
 public class Validator {
 	
+	public static final String TAG = Validator.class.getSimpleName();
+	
 	public static final String APP_VERSION_FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([+-][0-9A-Za-z-.]*)?";
 	
 	public static final String xAPP_VERSION_FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([-]([0-9A-Za-z-.]+)*)?";
@@ -22,12 +24,39 @@ public class Validator {
 	
 	/**
 	 * A very naive implementation of email validation.<br>
-	 * Requirement: String must contains a single '@' char, and that there is at least one char before and after the '@'
+	 * Requirement: 
+	 * <li>Email != null</li>
+	 * <li>must contain a single '@' char</li>
+	 * <li>At least one char before and after the '@'</li>
+	 * <li>email.trim() must be equal to email</li>
+	 * <br />
+	 * But why not just use an email RegEx, like android.util.Patterns.EMAIL_ADDRESS?
+	 * <br />
+	 * Simple: it doesn't comply with RFC 2822. <br />
+	 * Our {@link Validator} doesn't either. But it's better to let the API decide if it's valid. 
 	 * @param email to check
 	 * @return true if email is valid, else false
 	 */
 	public static boolean isEmailValid(String email) {
-		return email != null && email.trim().split("@").length == 2;
+		
+		if (email == null) {
+			return false;
+		}
+		
+		String[] split = email.split("@"); 
+		if (split.length != 2) {
+			return false;
+		}
+		if (split[0].length() == 0 || split[1].length() == 0) {
+			return false;
+		}
+		
+		String trim = email.trim();
+		if (!trim.equals(email)) {
+			return false;
+		}
+		
+		return true;
 	}
 
 	/**
