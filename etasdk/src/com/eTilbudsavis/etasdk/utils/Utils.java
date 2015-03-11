@@ -196,6 +196,9 @@ public final class Utils {
 	private static String encode(String value, String encoding) {
 		try {
 			value = URLEncoder.encode(value, encoding);
+		} catch (NullPointerException e) {
+			// Happens on older devices (HTC Sense)?
+			value = URLEncoder.encode(value);
 		} catch (UnsupportedEncodingException e) {
 			value = URLEncoder.encode(value);
 		} catch (IllegalCharsetNameException e) {
