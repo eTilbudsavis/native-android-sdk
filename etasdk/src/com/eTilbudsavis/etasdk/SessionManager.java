@@ -38,7 +38,6 @@ import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
 import com.eTilbudsavis.etasdk.utils.Utils;
-import com.eTilbudsavis.etasdk.utils.Validator;
 
 public class SessionManager {
 	
@@ -421,13 +420,6 @@ public class SessionManager {
 	 * @return true if all arguments are valid, false otherwise
 	 */
 	public JsonObjectRequest createUser(String email, String password, String name, int birthYear, String gender, String locale, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
-		
-		if (
-				Validator.isEmailValid(email) && 
-				Validator.isBirthyearValid(birthYear) && 
-				Validator.isGenderValid(gender)) {
-			// TODO Should we validate in the SDK?
-		}
 		
 		Map<String, String> args = new HashMap<String, String>();
 		args.put(Param.EMAIL, email.trim());
