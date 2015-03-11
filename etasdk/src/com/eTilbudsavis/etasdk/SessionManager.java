@@ -188,7 +188,7 @@ public class SessionManager {
 	 * @param session to update from
 	 * @return true if session was updated
 	 */
-	public boolean setSession(JSONObject session) {
+	private boolean setSession(JSONObject session) {
 		
 		synchronized (LOCK) {
 			
@@ -350,15 +350,14 @@ public class SessionManager {
 	 * @param password for user
 	 * @param l for callback on complete
 	 */
-	public void login(String email, String password, Listener<JSONObject> l) {
-		
+	public JsonObjectRequest login(String email, String password, Listener<JSONObject> l) {
 		Map<String, Object> args = new HashMap<String, Object>();
 		args.put(Param.EMAIL, email);
 		args.put(Param.PASSWORD, password);
 		mEta.getSettings().setSessionUser(email);
 		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
 		addRequest(req);
-		
+		return req;
 	}
 	
 	/**
@@ -367,13 +366,13 @@ public class SessionManager {
 	 * @param facebookAccessToken
 	 * @param l
 	 */
-	public void loginFacebook(String facebookAccessToken, Listener<JSONObject> l) {
+	public JsonObjectRequest loginFacebook(String facebookAccessToken, Listener<JSONObject> l) {
 		Map<String, String> args = new HashMap<String, String>();
 		args.put(Param.FACEBOOK_TOKEN, facebookAccessToken);
 		mEta.getSettings().setSessionFacebook(facebookAccessToken);
 		JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
 		addRequest(req);
-		
+		return req;
 	}
 	
 	/**
@@ -388,24 +387,26 @@ public class SessionManager {
 	 * Signs a user out, and cleans all references to the user.<br><br>
 	 * A new {@link #login(String, String) login} is needed to get access to user stuff again.
 	 */
-	public void signout(final Listener<JSONObject> l) {
+	public JsonObjectRequest signout(final Listener<JSONObject> l) {
 		
-		if (Eta.getInstance().isOnline()) {
+		
+//		if (Eta.getInstance().isOnline()) {
 	        mEta.getSettings().setSessionFacebook(null);
 	        mEta.getListManager().clear(mSession.getUser().getUserId());
 	        Map<String, String> args = new HashMap<String, String>();
 	        args.put(Param.EMAIL, "");
 	        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
 	        addRequest(req);
-		} else {
-			invalidate();
-			Eta.getInstance().getHandler().post(new Runnable() {
-				
-				public void run() {
-					l.onComplete(mSession.toJSON(), null);
-				}
-			});
-		}
+	        return req;
+//		} else {
+//			invalidate();
+//			Eta.getInstance().getHandler().post(new Runnable() {
+//				
+//				public void run() {
+//					l.onComplete(mSession.toJSON(), null);
+//				}
+//			});
+//		}
         
 	}
 	
@@ -419,7 +420,7 @@ public class SessionManager {
 	 * @param errorRedirect
 	 * @return true if all arguments are valid, false otherwise
 	 */
-	public void createUser(String email, String password, String name, int birthYear, String gender, String locale, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
+	public JsonObjectRequest createUser(String email, String password, String name, int birthYear, String gender, String locale, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
 		
 		if (
 				Validator.isEmailValid(email) && 
@@ -439,6 +440,7 @@ public class SessionManager {
 		args.put(Param.LOCALE, locale);
 		JsonObjectRequest req = new JsonObjectRequest(Method.POST, Endpoint.USER, new JSONObject(args), l);
 		mEta.add(req);
+		return req;
 		
 	}
 	
@@ -449,7 +451,7 @@ public class SessionManager {
 	 * @param errorRedirect
 	 * @param l
 	 */
-	public void forgotPassword(String email, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
+	public JsonObjectRequest forgotPassword(String email, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
 		
 		Map<String, String> args = new HashMap<String, String>();
 		args.put(Param.EMAIL, email);
@@ -457,6 +459,7 @@ public class SessionManager {
 		args.put(Param.ERROR_REDIRECT, errorRedirect);
 		JsonObjectRequest req = new JsonObjectRequest(Method.POST, Endpoint.USER_RESET, new JSONObject(args), l);
 		mEta.add(req);
+		return req;
 		
 	}
 	
@@ -497,6 +500,7 @@ public class SessionManager {
 			mSession = new Session();
 			ExternalClientIdStore.updateCid(mSession, mEta.getContext());
 			mEta.getSettings().setSessionJson(mSession.toJSON());
+			mEta.getSettings().setSessionFacebook(null);
 			clearUser();
 			notifySubscribers(oldUserId, mSession.getUser().getUserId());
 		}
@@ -519,10 +523,11 @@ public class SessionManager {
 		return this;
 	}
 	
-	public void unSubscribe(OnSessionChangeListener l) {
+	public SessionManager unSubscribe(OnSessionChangeListener l) {
 		synchronized (mSubscribers) {
 			mSubscribers.remove(l);
 		}
+		return this;
 	}
 	
 	public SessionManager notifySubscribers(final int oldUserId,final int newUserId) {
