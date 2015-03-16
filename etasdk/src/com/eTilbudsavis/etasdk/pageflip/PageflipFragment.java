@@ -7,7 +7,6 @@ import org.json.JSONObject;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
@@ -348,6 +347,22 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		return mAdapter != null;
 	}
 
+	private boolean isHotspotsReady() {
+		return mCatalog != null && mCatalog.getHotspots() != null;
+	}
+	
+	private boolean isPagesReady() {
+		return mCatalog != null && mCatalog.getPages() != null && !mCatalog.getPages().isEmpty();
+	}
+	
+	/**
+	 * Method for determining if the caralog is ready;
+	 * @return true, if the catalog is fully loaded, including pages and hotspots
+	 */
+	public boolean isCatalogReady() {
+		return isPagesReady() && isHotspotsReady();
+	}
+	
 	/**
 	 * Set the {@link Catalog} that you want to display.
 	 * This is unnecessary if you have created the fragment with one of the provided 
@@ -432,11 +447,9 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	
 	private void runCatalogFiller() {
 		
-		boolean needHotspots = mCatalog.getHotspots()==null;
-		boolean needPages = (mCatalog.getPages()==null || mCatalog.getPages().isEmpty()) ;
 		CatalogAutoFill caf = new CatalogAutoFill();
-		caf.setLoadHotspots(needHotspots);
-		caf.setLoadPages(needPages);
+		caf.setLoadHotspots(!isHotspotsReady());
+		caf.setLoadPages(!isPagesReady());
 		caf.prepare(new AutoFillParams(), mCatalog, null, mCatListener);
 		caf.execute(Eta.getInstance().getRequestQueue());
 		
@@ -452,13 +465,9 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 			
 			if ( c!=null && c.getPages()!=null && c.getHotspots()!=null ) {
 				
-				Looper main = Looper.getMainLooper();
-				if (main == Looper.myLooper()) {
-					mOnCatalogComplete.run();
-				} else {
-					mHandler.post(mOnCatalogComplete);
-				}
-			} else if (error!=null ){
+				getActivity().runOnUiThread(mOnCatalogComplete);
+				
+			} else if (error != null ){
 				
 				EtaLog.d(TAG, error.toJSON().toString());
 				// TODO improve error stuff 1 == network error
@@ -466,6 +475,13 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 				mWrapperListener.onError(error);
 				
 			}
+			
+			if (!isCatalogReady()) {
+				// If a catalog object have been given, that have expired we won't be able to get any data
+				mLoader.error();
+				mWrapperListener.onError(error);
+			}
+			
 		}
 	};
 	
