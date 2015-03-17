@@ -31,7 +31,7 @@ public class CatalogThumbBitmapProcessorTest {
 		d.setHeight(2);
 		d.setWidth(1);
 		CatalogThumbBitmapProcessor p = new CatalogThumbBitmapProcessor(d);
-		p.setPrint(true);
+//		p.setPrint(true);
 		Bitmap tmp = p.process(b);
 		Assert.assertEquals(106, tmp.getWidth());
 		Assert.assertEquals(HEIGHT, tmp.getHeight());
