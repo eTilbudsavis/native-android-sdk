@@ -1,9 +1,6 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
@@ -11,9 +8,11 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -34,14 +33,18 @@ import com.eTilbudsavis.etasdk.utils.Utils;
 public class PageOverviewDialog extends DialogFragment {
 	
 	public static final String TAG = Eta.TAG_PREFIX + PageOverviewDialog.class.getSimpleName();
-	
+
 	private static final String ARG_CATALOG = Eta.ARG_PREFIX + "pageGridOverview.catalog";
 	private static final String ARG_PAGE = Eta.ARG_PREFIX + "pageGridOverview.page";
+
+	private static final int MAX_WIDTH = 177;
+	private static final int MAX_HEIGHT = 212;
+	private static final int MAX_COLUMNS = 3;
 	
-	Catalog mCatalog;
-	int mPage = 1;
-	GridView mGrid;
-	OnItemClickListener mListener;
+	private Catalog mCatalog;
+	private int mPage = 1;
+	private GridView mGrid;
+	private OnItemClickListener mListener;
 	
 	public static PageOverviewDialog newInstance(Catalog c, int page) {
 		Bundle b = new Bundle();
@@ -61,24 +64,13 @@ public class PageOverviewDialog extends DialogFragment {
 		super.onCreate(savedInstanceState);
 	}
 	
-	public void setOnItemClickListener(OnItemClickListener l) {
-		mListener = l;
-	}
-	
 	@Override
-	public Dialog onCreateDialog(Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		
-		setUpGrid();
-		AlertDialog.Builder b = new Builder(getActivity());
-		b.setView(mGrid);
-		return b.create();
-	}
-	
-	private static final int MAX_WIDTH = 177;
-	private static final int MAX_HEIGHT = 212;
-	private static final int MAX_COLUMNS = 3;
-	
-	private void setUpGrid() {
+		if (getDialog() != null) {
+			getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+		}
 		
 		int spacePx = Utils.convertDpToPx(6, getActivity());
 		
@@ -125,6 +117,11 @@ public class PageOverviewDialog extends DialogFragment {
 			}, 300);
 		}
 		
+		return mGrid;
+	}
+
+	public void setOnItemClickListener(OnItemClickListener l) {
+		mListener = l;
 	}
 	
 	public void setCatalog(Catalog c) {
@@ -141,27 +138,33 @@ public class PageOverviewDialog extends DialogFragment {
 		super.dismiss();
 	}
 	
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (mCatalog.getPages() == null || mCatalog.getPages().isEmpty()) {
+			dismiss();
+		}
+	}
+	
 	public class GalleryAdapter extends BaseAdapter implements SectionIndexer {
 		
 		
 		String[] sections;
-		int count = 0;
 		Activity a;
 		
 		public GalleryAdapter() {
 			
 			a = getActivity();
-			count = mCatalog.getPageCount();
 			
-			sections = new String[count];
-			for (int i = 0 ; i < count ; i++ ) {
+			sections = new String[getCount()];
+			for (int i = 0 ; i < getCount() ; i++ ) {
 				sections[i] = String.valueOf(i+1);
 			}
 			
 		}
 		
 		public int getCount() {
-			return count;
+			return mCatalog.getPages() == null ? 0 : mCatalog.getPages().size();
 		}
 
 		public Object getItem(int position) {
