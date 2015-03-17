@@ -281,7 +281,7 @@ public class ObjectTest {
         testIDealer(obj);
         testIStore(obj);
         
-        EtaSdkTest.logTest(TAG, "Catalog - NO TEST OF HOTSPOTMAP");
+        EtaSdkTest.logTestWarning(TAG, "Catalog", "NO TEST OF HOTSPOTMAP, see HotspotMap test");
         
 	}
 

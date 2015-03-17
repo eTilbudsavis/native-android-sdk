@@ -17,6 +17,7 @@ public class EtaSdkTest {
 		UtilsTest.test();
 		ObjectTest.test();
 		CatalogThumbBitmapProcessorTest.test();
+		SerializationSpeedTest.test();
 		
 		String ok = "*   All test passed (" + (System.currentTimeMillis()-start) + "ms)   *";
 		StringBuilder sb = new StringBuilder();
@@ -57,6 +58,5 @@ public class EtaSdkTest {
 	protected static void logTestWarning(String tag, String testName, String warning) {
 		EtaLog.w(tag, " - " + testName + " - " + warning);
 	}
-	
 	
 }
