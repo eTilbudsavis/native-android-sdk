@@ -264,6 +264,14 @@ public class EtaError extends Exception implements IJson<JSONObject> {
 	    /** Error message describes problem */
 	    public static final int ACTION_DOES_NOT_EXIST		= 4000;
 	    
+	    /** Service is unavailable. We are working on it. */
+	    public static final int SERVICE_UNAVAILABLE			= 5000;
+	    
+	    /** Service is down for maintenance, The entire service is down, don't send requests */
+	    public static final int SERVICE_DOWN_MAINTENANCE	= 5010;
+	    
+	    /** Feature is down for maintenance. Dont send same request again. */
+	    public static final int FEATURE_DOWN_MAINTENANCE	= 5020; 
 	    
 	}
 	
