@@ -50,11 +50,8 @@ public class Main extends Activity {
         EtaLog.setLogger(new DevLogger());
         
         /* 
-         * You MUST create an Eta instance before invoking Eta.getinstance.
-         * 
-         * You can do this in Application (global state), that way the
-         * singleton will be available in all activities even if your app
-         * gets garbage collected by the system.
+         * Eta.createInstance() must be invoked once, to instantiate the SDK
+         * prior to calling Eta.getInstance(). This can be done in Application.onCreate().
          * 
          * ApiKey and ApiSecret are not included in the demo/SDK, but you can
          * get your own at https://etilbudsavis.dk/developers/ :-)
@@ -74,14 +71,14 @@ public class Main extends Activity {
         loc.setLongitude(Constants.ETA_HQ.lng);
         
         // Avoid using large distances in production, it's bad for performance (longer queries)
-        // the 700km reaius here is just for demonstration purposes - we recommend 100km or less
+        // the 700km radius here is just for demonstration purposes - we recommend 100km or less
         loc.setRadius(700000);
         loc.setSensor(false);
         
         /*
          * You are now done setting up the SDK, the rest is just Android stuff
          */
-        mBtnCatalogs= (Button)findViewById(R.id.btnCatalogs);
+        mBtnCatalogs = (Button)findViewById(R.id.btnCatalogs);
         mBtnCatalogs.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -114,9 +111,6 @@ public class Main extends Activity {
     	switch (item.getItemId()) {
 		case MENU_LOCATION:
 			Toast.makeText(Main.this, "not implemented yet", Toast.LENGTH_SHORT).show();
-			break;
-
-		default:
 			break;
 		}
     	return super.onOptionsItemSelected(item);

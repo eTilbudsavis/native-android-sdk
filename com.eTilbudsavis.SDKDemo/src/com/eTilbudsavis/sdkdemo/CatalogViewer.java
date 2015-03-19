@@ -62,8 +62,6 @@ public class CatalogViewer extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.catalog_viewer);
         
-        Eta.createInstance(Keys.API_KEY, Keys.API_SECRET, this);
-        
         if (savedInstanceState!=null) {
         	mPageflip = PageflipFragment.newInstance(savedInstanceState);
         }
@@ -71,9 +69,14 @@ public class CatalogViewer extends FragmentActivity {
     }
     
     @Override
+    protected void onStart() {
+    	super.onStart();
+    	Eta.getInstance().onStart();
+    }
+    
+    @Override
     public void onResume() {
     	super.onResume();
-    	Eta.getInstance().onResume();
     	
     	if (mPageflip == null) {
     		
@@ -91,9 +94,9 @@ public class CatalogViewer extends FragmentActivity {
     }
     
     @Override
-    public void onPause() {
-    	super.onPause();
-    	Eta.getInstance().onPause();
+    protected void onStop() {
+    	super.onStop();
+    	Eta.getInstance().onStop();
     }
     
     private void getCatalogList() {
@@ -125,7 +128,7 @@ public class CatalogViewer extends FragmentActivity {
     	
     	JsonArrayRequest catalogReq = new JsonArrayRequest(Endpoint.CATALOG_LIST, mCatalogListener);
     	// This debugger prints relevant information about a request
-//    	catalogReq.setDebugger(new DefaultDebugger());
+//    	catalogReq.setDebugger(new NetworkDebugger());
     	Eta.getInstance().add(catalogReq);
     	
     }

@@ -60,8 +60,6 @@ public class Search extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search);
-
-        Eta.createInstance(Keys.API_KEY, Keys.API_SECRET, this);
         
         // Find views
         mQuery = (EditText) findViewById(R.id.etQuery);
@@ -175,15 +173,16 @@ public class Search extends Activity {
     }
     
     @Override
-    public void onResume() {
-    	super.onResume();
-    	Eta.getInstance().onResume();
+    protected void onStart() {
+    	super.onStart();
+    	Eta.getInstance().onStart();
+    	
     }
     
     @Override
-    public void onPause() {
-    	super.onPause();
-    	Eta.getInstance().onPause();
+    protected void onStop() {
+    	super.onStop();
+    	Eta.getInstance().onStop();
     }
     
     class SearchAdapter extends BaseAdapter {

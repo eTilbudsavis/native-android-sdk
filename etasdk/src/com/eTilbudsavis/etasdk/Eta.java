@@ -19,8 +19,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -95,14 +95,14 @@ public class Eta {
 	/** A static handler for usage in the SDK, this will help prevent leaks */
 	private static Handler mHandler;
 	
-	/** The current state of the SDK */
-	private boolean mResumed = false;
-	
 	/** A {@link RequestQueue} implementation to handle all API requests */
 	private RequestQueue mRequestQueue;
 	
 	/** My go to executor service */
 	private ExecutorService mExecutor;
+	
+	/** Counting the number of active activities, to determine when to stop any long running activities */
+	private AtomicInteger mActivityCounter = new AtomicInteger();
 	
 	private static Object INSTANCE_LOCK = new Object();
 	
@@ -398,29 +398,13 @@ public class Eta {
 	 * @return {@code true} if in resumed state, else {@code false}
 	 */
 	public boolean isResumed() {
-		return mResumed;
-	}
-
-	/**
-	 * Method must be called when the current activity is put to background
-	 */
-	@SuppressLint("NewApi")
-	public void onPause() {
-		if (mResumed) {
-			mResumed = false;
-			mSettings.saveLocation(mLocation);
-			mListManager.onPause();
-			mSyncManager.onPause();
-			mSessionManager.onPause();
-			mSettings.setLastUsageNow();
-		}
-		
+		return mActivityCounter.get() > 0;
 	}
 	
 	Runnable termination = new Runnable() {
 		
 		public void run() {
-			if (mResumed) {
+			if (isResumed()) {
 				EtaLog.i(TAG, "Eta has been resumed, bail out");
 				return;
 			}
@@ -459,17 +443,28 @@ public class Eta {
 		mSyncManager = null;
 	}
 	
-	/**
-	 * Method must be called when the activity is resuming
-	 */
-	@SuppressLint("NewApi")
-	public void onResume() {
-		if (!mResumed) {
-			mResumed = true;
+	public void onStart() {
+		int init = mActivityCounter.getAndIncrement();
+		EtaLog.d(TAG, "count: " + mActivityCounter.get());
+		if (init == 0 && isResumed()) {
+			EtaLog.d(TAG, "performing start");
 			mSessionManager.onResume();
 			mListManager.onResume();
 			mSyncManager.onResume();
 		}
 	}
-
+	
+	public void onStop() {
+		mActivityCounter.decrementAndGet();
+		EtaLog.d(TAG, "count: " + mActivityCounter.get());
+		if (!isResumed()) {
+			EtaLog.d(TAG, "performing stop");
+			mSettings.saveLocation(mLocation);
+			mListManager.onPause();
+			mSyncManager.onPause();
+			mSessionManager.onPause();
+			mSettings.setLastUsageNow();
+		}
+	}
+	
 }
