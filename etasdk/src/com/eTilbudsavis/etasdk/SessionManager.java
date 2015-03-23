@@ -256,7 +256,7 @@ public class SessionManager {
 	 * does exist, and it's been more than 2 hours since last usage it will put
 	 * for an session update</p>
 	 */
-	public void onResume() {
+	public void onStart() {
 		
 		if (mSession.getToken() == null) {
 			// If no session exists post for new
@@ -277,7 +277,7 @@ public class SessionManager {
 		ExternalClientIdStore.updateCid(mSession, mEta.getContext());
 	}
 	
-	public void onPause() {
+	public void onStop() {
 		
 	}
 	

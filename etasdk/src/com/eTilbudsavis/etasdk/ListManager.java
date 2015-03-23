@@ -790,14 +790,14 @@ public class ListManager {
 	 * Method to call on all onResume events.
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
-	public void onResume() {
+	public void onStart() {
 	}
 	
 	/**
 	 * Method to call on all onPause events.
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
-	public void onPause() {
+	public void onStop() {
 	}
 	
 	/**

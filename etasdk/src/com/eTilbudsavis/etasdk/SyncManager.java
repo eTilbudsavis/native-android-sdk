@@ -102,7 +102,7 @@ import com.eTilbudsavis.etasdk.utils.Utils;
  * </p>
  * 
  * <p>
- * When {@link #onPause()} is triggered, all local pending changes are pushed to
+ * When {@link #onStop()} is triggered, all local pending changes are pushed to
  * the API if possible to ensure a correct state on the server (and other devices).
  * </p>
  * @author Danny Hvam - danny@etilbudsavis.dk
@@ -343,7 +343,7 @@ public class SyncManager {
 	 * Method to call on all onResume events.
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
-	public void onResume() {
+	public void onStart() {
 		mEta.getSessionManager().subscribe(sessionListener);
 		forceSync();
 	}
@@ -352,7 +352,7 @@ public class SyncManager {
 	 * Method to call on all onPause events.
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
-	public void onPause() {
+	public void onStop() {
 		forceSync();
 		mEta.getSessionManager().unSubscribe(sessionListener);
 		mHasFirstSync = false;

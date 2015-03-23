@@ -448,9 +448,9 @@ public class Eta {
 		EtaLog.d(TAG, "count: " + mActivityCounter.get());
 		if (init == 0 && isResumed()) {
 			EtaLog.d(TAG, "performing start");
-			mSessionManager.onResume();
-			mListManager.onResume();
-			mSyncManager.onResume();
+			mSessionManager.onStart();
+			mListManager.onStart();
+			mSyncManager.onStart();
 		}
 	}
 	
@@ -460,9 +460,9 @@ public class Eta {
 		if (!isResumed()) {
 			EtaLog.d(TAG, "performing stop");
 			mSettings.saveLocation(mLocation);
-			mListManager.onPause();
-			mSyncManager.onPause();
-			mSessionManager.onPause();
+			mListManager.onStop();
+			mSyncManager.onStop();
+			mSessionManager.onStop();
 			mSettings.setLastUsageNow();
 		}
 	}
