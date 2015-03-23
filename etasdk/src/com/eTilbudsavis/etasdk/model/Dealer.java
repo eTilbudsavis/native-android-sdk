@@ -53,7 +53,6 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 	
 	private String mErn;
 	private String mName;
-	private String mUrlName;
 	private String mWebsite;
 	private String mLogo;
 	private Integer mColor;
@@ -86,7 +85,6 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 			d.setId(Json.valueOf(dealer, JsonKey.ID));
 			d.setErn(Json.valueOf(dealer, JsonKey.ERN));
 			d.setName(Json.valueOf(dealer, JsonKey.NAME));
-			d.setUrlName(Json.valueOf(dealer, JsonKey.URL_NAME));
 			d.setWebsite(Json.valueOf(dealer, JsonKey.WEBSITE));
 			d.setLogo(Json.valueOf(dealer, JsonKey.LOGO));
 			d.setColor(Json.colorValueOf(dealer, JsonKey.COLOR));
@@ -103,7 +101,6 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 			o.put(JsonKey.ID, Json.nullCheck(getId()));
 			o.put(JsonKey.ERN, Json.nullCheck(getErn()));
 			o.put(JsonKey.NAME, Json.nullCheck(getName()));
-			o.put(JsonKey.URL_NAME, Json.nullCheck(getUrlName()));
 			o.put(JsonKey.WEBSITE, Json.nullCheck(getWebsite()));
 			o.put(JsonKey.LOGO, Json.nullCheck(getLogo()));
 			o.put(JsonKey.COLOR, Json.nullCheck(Utils.colorToString(getColor())));
@@ -149,15 +146,6 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 
 	public String getName() {
 		return mName;
-	}
-
-	public Dealer setUrlName(String url) {
-		mUrlName = url;
-		return this;
-	}
-
-	public String getUrlName() {
-		return mUrlName;
 	}
 
 	public Dealer setWebsite(String website) {
@@ -228,7 +216,7 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 			return new Dealer[size];
 		}
 	};
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -239,8 +227,6 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
 		result = prime * result
 				+ ((mPageflip == null) ? 0 : mPageflip.hashCode());
-		result = prime * result
-				+ ((mUrlName == null) ? 0 : mUrlName.hashCode());
 		result = prime * result
 				+ ((mWebsite == null) ? 0 : mWebsite.hashCode());
 		return result;
@@ -280,11 +266,6 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 				return false;
 		} else if (!mPageflip.equals(other.mPageflip))
 			return false;
-		if (mUrlName == null) {
-			if (other.mUrlName != null)
-				return false;
-		} else if (!mUrlName.equals(other.mUrlName))
-			return false;
 		if (mWebsite == null) {
 			if (other.mWebsite != null)
 				return false;
@@ -296,7 +277,6 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 	private Dealer(Parcel in) {
 		this.mErn = in.readString();
 		this.mName = in.readString();
-		this.mUrlName = in.readString();
 		this.mWebsite = in.readString();
 		this.mLogo = in.readString();
 		this.mColor = (Integer)in.readValue(Integer.class.getClassLoader());
@@ -310,7 +290,6 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(this.mErn);
 		dest.writeString(this.mName);
-		dest.writeString(this.mUrlName);
 		dest.writeString(this.mWebsite);
 		dest.writeString(this.mLogo);
 		dest.writeValue(this.mColor);

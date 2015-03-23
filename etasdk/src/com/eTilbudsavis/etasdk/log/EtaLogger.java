@@ -1,7 +1,6 @@
 package com.eTilbudsavis.etasdk.log;
 
 
-
 public interface EtaLogger {
 	
 	/**

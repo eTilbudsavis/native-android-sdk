@@ -37,10 +37,8 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 	public static final String TAG = Eta.TAG_PREFIX + Branding.class.getSimpleName();
 	
 	private String mName;
-	private String mUrlName;
 	private String mWebsite;
 	private String mLogo;
-	private Integer mLogoBackground;
 	private Integer mColor;
 	private Pageflip mPageflip;
 
@@ -65,16 +63,9 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 		
 		try {
 			b.setName(Json.valueOf(branding, JsonKey.NAME));
-			b.setUrlName(Json.valueOf(branding, JsonKey.URL_NAME));
 			b.setWebsite(Json.valueOf(branding, JsonKey.WEBSITE));
 			b.setLogo(Json.valueOf(branding, JsonKey.LOGO));
-			Integer c = Json.colorValueOf(branding, JsonKey.COLOR);
-			b.setColor(c);
-			if (c!=null) {
-				b.setLogoBackground(Json.colorValueOf(branding, JsonKey.LOGO_BACKGROUND, b.getColor()));
-			} else {
-				b.setLogoBackground(Json.colorValueOf(branding, JsonKey.LOGO_BACKGROUND, null));
-			}
+			b.setColor(Json.colorValueOf(branding, JsonKey.COLOR));
 			b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(JsonKey.PAGEFLIP)));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
@@ -86,11 +77,9 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 		JSONObject o = new JSONObject();
 		try {
 			o.put(JsonKey.NAME, Json.nullCheck(getName()));
-			o.put(JsonKey.URL_NAME, Json.nullCheck(getUrlName()));
 			o.put(JsonKey.WEBSITE, Json.nullCheck(getWebsite()));
 			o.put(JsonKey.LOGO, Json.nullCheck(getLogo()));
 			o.put(JsonKey.COLOR, Json.nullCheck(Utils.colorToString(getColor())));
-			o.put(JsonKey.LOGO_BACKGROUND, Json.nullCheck(Utils.colorToString(getLogoBackground())));
 			o.put(JsonKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
@@ -105,15 +94,6 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 
 	public String getName() {
 		return mName;
-	}
-
-	public Branding setUrlName(String urlName) {
-		mUrlName = urlName;
-		return this;
-	}
-
-	public String getUrlName() {
-		return mUrlName;
 	}
 
 	public Branding setWebsite(String website) {
@@ -134,15 +114,6 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 		return mLogo;
 	}
 
-	public Branding setLogoBackground(Integer color) {
-		mLogoBackground = Utils.colorSanitize(color);
-		return this;
-	}
-	
-	public Integer getLogoBackground() {
-		return mLogoBackground;
-	}
-	
 	public Branding setColor(Integer color) {
 		mColor = Utils.colorSanitize(color);
 		return this;
@@ -160,20 +131,16 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 	public Pageflip getPageflip() {
 		return mPageflip;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((mColor == null) ? 0 : mColor.hashCode());
 		result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
-		result = prime * result
-				+ ((mLogoBackground == null) ? 0 : mLogoBackground.hashCode());
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
 		result = prime * result
 				+ ((mPageflip == null) ? 0 : mPageflip.hashCode());
-		result = prime * result
-				+ ((mUrlName == null) ? 0 : mUrlName.hashCode());
 		result = prime * result
 				+ ((mWebsite == null) ? 0 : mWebsite.hashCode());
 		return result;
@@ -198,11 +165,6 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 				return false;
 		} else if (!mLogo.equals(other.mLogo))
 			return false;
-		if (mLogoBackground == null) {
-			if (other.mLogoBackground != null)
-				return false;
-		} else if (!mLogoBackground.equals(other.mLogoBackground))
-			return false;
 		if (mName == null) {
 			if (other.mName != null)
 				return false;
@@ -212,11 +174,6 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 			if (other.mPageflip != null)
 				return false;
 		} else if (!mPageflip.equals(other.mPageflip))
-			return false;
-		if (mUrlName == null) {
-			if (other.mUrlName != null)
-				return false;
-		} else if (!mUrlName.equals(other.mUrlName))
 			return false;
 		if (mWebsite == null) {
 			if (other.mWebsite != null)
@@ -228,10 +185,8 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 
 	private Branding(Parcel in) {
 		this.mName = in.readString();
-		this.mUrlName = in.readString();
 		this.mWebsite = in.readString();
 		this.mLogo = in.readString();
-		this.mLogoBackground = (Integer)in.readValue(Integer.class.getClassLoader());
 		this.mColor = (Integer)in.readValue(Integer.class.getClassLoader());
 		this.mPageflip = in.readParcelable(Pageflip.class.getClassLoader());
 	}
@@ -242,10 +197,8 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(this.mName);
-		dest.writeString(this.mUrlName);
 		dest.writeString(this.mWebsite);
 		dest.writeString(this.mLogo);
-		dest.writeValue(this.mLogoBackground);
 		dest.writeValue(this.mColor);
 		dest.writeParcelable(this.mPageflip, flags);
 	}

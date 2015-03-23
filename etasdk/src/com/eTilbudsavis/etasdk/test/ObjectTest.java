@@ -436,7 +436,6 @@ public class ObjectTest {
         Assert.assertEquals(obj, parceledObj);
         
         obj.setColor(null);
-        obj.setLogoBackground(null);
         parcel = Parcel.obtain();
         obj.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);

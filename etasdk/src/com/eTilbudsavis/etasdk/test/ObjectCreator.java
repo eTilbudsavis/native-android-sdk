@@ -132,19 +132,17 @@ public class ObjectCreator {
 	}
 
 	public static Branding getBranding() {
-		return getBranding(Color.GREEN, "fake-logo-url", Color.GREEN, "fake-branding-name", 
-				getPageflip(), "fake-url-name", "fake-website-url");
+		return getBranding(Color.GREEN, "fake-logo-url", "fake-branding-name", 
+				getPageflip(), "fake-website-url");
 	}
 	
-	public static Branding getBranding(int color, String logoUrl, int logoBgColor, String name, 
-			Pageflip pageflip, String urlName, String website) {
+	public static Branding getBranding(int color, String logoUrl, String name, 
+			Pageflip pageflip, String website) {
 		Branding b = new Branding();
 		b.setColor(color);
 		b.setLogo(logoUrl);
-		b.setLogoBackground(logoBgColor);
 		b.setName(name);
 		b.setPageflip(pageflip);
-		b.setUrlName(urlName);
 		b.setWebsite(website);
 		return b;
 	}
@@ -431,7 +429,6 @@ public class ObjectCreator {
 		d.setLogo(getUrl(id, "fake-logo"));
 		d.setName(name);
 		d.setPageflip(getPageflip());
-		d.setUrlName(getUrl(id, "name"));
 		d.setWebsite(getUrl(id, "website"));
 		return d;
 	}
