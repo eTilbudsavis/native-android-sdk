@@ -13,6 +13,7 @@ import android.os.Environment;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Session;
 import com.eTilbudsavis.etasdk.utils.PermissionUtils;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class ExternalClientIdStore {
 	
@@ -25,15 +26,11 @@ public class ExternalClientIdStore {
 		String extCid = getCid(c);
 		String cid = s.getClientId();
 		
-
 		// Previously used this hardcoded cid in beta, recover it
 		if (CID_RANDOMJUNK.equals(cid) || CID_RANDOMJUNK.equals(extCid)) {
-			s.setClientId(null);
-			deleteCid(c);
-			return;
-		}
-		
-		if (cid == null) {
+			s.setClientId(Utils.createUUID());
+			saveCid(s.getClientId(), c);
+		} else if (cid == null) {
 			// No ClientID is set, try to get from disk
 			s.setClientId(extCid);
 		} else if (!cid.equals(extCid)) {

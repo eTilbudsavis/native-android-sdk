@@ -77,7 +77,6 @@ public class SessionManager {
 		JSONObject session = mEta.getSettings().getSessionJson();
 		mSession = Session.fromJSON(session);
 		ExternalClientIdStore.updateCid(mSession, mEta.getContext());
-		
 	}
 	
 	private Listener<JSONObject> getSessionListener(final Listener<JSONObject> l) {
@@ -130,7 +129,7 @@ public class SessionManager {
 			if (mSession.getClientId()!=null) {
 				r.getParameters().put(Api.JsonKey.CLIENT_ID, mSession.getClientId());
 			}
-//			r.setDebugger(new DefaultDebugger());
+//			r.setDebugger(new NetworkDebugger());
 			mSessionQueue.add(r);
 			runQueue();
 		}
