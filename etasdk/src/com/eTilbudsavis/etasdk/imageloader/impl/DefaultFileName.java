@@ -1,5 +1,5 @@
 package com.eTilbudsavis.etasdk.imageloader.impl;
-
+import com.eTilbudsavis.etasdk.Constants;
 import java.net.URLEncoder;
 
 import com.eTilbudsavis.etasdk.Eta;
@@ -9,7 +9,7 @@ import com.eTilbudsavis.etasdk.utils.HashUtils;
 
 public class DefaultFileName implements FileNameGenerator {
 	
-	public static final String TAG = Eta.TAG_PREFIX + DefaultFileName.class.getSimpleName();
+	public static final String TAG = Constants.getTag(DefaultFileName.class);
 	
 	public String getFileName(ImageRequest ir) {
 		return HashUtils.md5(ir.getUrl());

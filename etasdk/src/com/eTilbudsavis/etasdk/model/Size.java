@@ -27,13 +27,14 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 
 public class Size implements IJson<JSONObject>, Serializable, Parcelable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Eta.TAG_PREFIX + Size.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Size.class);
 	
 	private double mFrom = 1.0d;
 	private double mTo = 1.0d;

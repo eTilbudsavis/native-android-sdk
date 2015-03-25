@@ -6,9 +6,9 @@ import android.os.Looper;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.imageloader.FileNameGenerator;
 import com.eTilbudsavis.etasdk.imageloader.ImageDebugger;
-import com.eTilbudsavis.etasdk.imageloader.ImageLoader;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Catalog;
@@ -79,7 +79,7 @@ public class PU {
 	private static ImageRequest display(String url, Context ctx) {
 		ImageRequest ir = new ImageRequest(url, new ImageView(ctx));
 		ir.setFileName(new PageflipFileNameGenerator());
-		ImageLoader.getInstance().displayImage(ir);
+		Eta.getInstance().getImageloader().displayImage(ir);
 		return ir;
 	}
 	

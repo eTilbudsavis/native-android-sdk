@@ -1,5 +1,5 @@
 package com.eTilbudsavis.etasdk.imageloader.impl;
-
+import com.eTilbudsavis.etasdk.Constants;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -17,7 +17,7 @@ import com.eTilbudsavis.etasdk.utils.FileUtils;
 
 public class DefaultFileCache implements FileCache {
 
-	public static final String TAG = Eta.TAG_PREFIX + DefaultFileCache.class.getSimpleName();
+	public static final String TAG = Constants.getTag(DefaultFileCache.class);
 	
 	private File mCacheDir;
 	private ExecutorService mExecutor;

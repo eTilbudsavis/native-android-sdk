@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 
 public class ListUtils {
 	
-	public static final String TAG = Eta.TAG_PREFIX + ListUtils.class.getSimpleName();
+	public static final String TAG = Constants.getTag(ListUtils.class);
 	
 	public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
 	

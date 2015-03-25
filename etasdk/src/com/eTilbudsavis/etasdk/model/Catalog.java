@@ -37,6 +37,7 @@ import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.model.interfaces.IStore;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
@@ -55,7 +56,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final String TAG = Eta.TAG_PREFIX + Catalog.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Catalog.class);
 	
 	// From JSON blob
 	private String mErn;

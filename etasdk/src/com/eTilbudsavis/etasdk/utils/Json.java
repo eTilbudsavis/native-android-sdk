@@ -19,7 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 
@@ -32,7 +32,7 @@ import com.eTilbudsavis.etasdk.model.interfaces.IJson;
  */
 public class Json {
 
-	public static final String TAG = Eta.TAG_PREFIX + Json.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Json.class);
 
 	/**
 	 * Searches the JSONObject for the key and returns the matching value if it exists.

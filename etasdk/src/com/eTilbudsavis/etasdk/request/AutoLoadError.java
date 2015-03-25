@@ -15,13 +15,13 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.request;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.network.EtaError;
 
 
 public class AutoLoadError extends EtaError {
 	
-	public static final String TAG = Eta.TAG_PREFIX + AutoLoadError.class.getSimpleName();
+	public static final String TAG = Constants.getTag(AutoLoadError.class);
 	
 	private static final long serialVersionUID = 1L;
 	

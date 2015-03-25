@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.log.EtaLog;
@@ -33,16 +34,16 @@ import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class PageflipFragment extends Fragment implements PageCallback, OnPageChangeListener {
 	
-	public static final String TAG = Eta.TAG_PREFIX + PageflipFragment.class.getSimpleName();
+	public static final String TAG = Constants.getTag(PageflipFragment.class);
 	
 	private static final double PAGER_SCROLL_FACTOR = 0.5d;
 	
-	public static final String ARG_CATALOG = Eta.ARG_PREFIX + "pageflipfragment.catalog";
-	public static final String ARG_CATALOG_ID = Eta.ARG_PREFIX + "pageflipfragment.catalog-id";
-	public static final String ARG_PAGE = Eta.ARG_PREFIX + "pageflipfragment.page";
+	public static final String ARG_CATALOG = Constants.getArg("pageflipfragment.catalog");
+	public static final String ARG_CATALOG_ID = Constants.getArg("pageflipfragment.catalog-id");
+	public static final String ARG_PAGE = Constants.getArg("pageflipfragment.page");
 //	public static final String ARG_CATALOG_VIEW = Eta.ARG_PREFIX + "pageflipfragment.catalog-view";
-	public static final String ARG_VIEWSESSION = Eta.ARG_PREFIX + "pageflipfragment.view-session";
-	public static final String ARG_BRANDING = Eta.ARG_PREFIX + "pageflipfragment.branding";
+	public static final String ARG_VIEWSESSION = Constants.getArg("pageflipfragment.view-session");
+	public static final String ARG_BRANDING = Constants.getArg("pageflipfragment.branding");
 	
 	// Need this
 	private Catalog mCatalog;

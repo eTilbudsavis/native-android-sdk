@@ -36,12 +36,13 @@ import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.Api.MetaKey;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState<ShoppinglistItem>, IJson<JSONObject>, Serializable, Parcelable {
 
-	public static final String TAG = Eta.TAG_PREFIX + ShoppinglistItem.class.getSimpleName();
+	public static final String TAG = Constants.getTag(ShoppinglistItem.class);
 
 	private static final String ERN_CLASS = "shoppinglist:item";
 	

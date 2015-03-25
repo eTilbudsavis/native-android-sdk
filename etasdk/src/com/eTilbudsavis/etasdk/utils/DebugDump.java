@@ -27,6 +27,7 @@ import org.apache.http.protocol.HTTP;
 
 import android.os.AsyncTask;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
 
 /**
@@ -36,18 +37,18 @@ import com.eTilbudsavis.etasdk.Eta;
  */
 public class DebugDump extends AsyncTask<Void, Void, Integer> {
 
-	public static final String TAG = Eta.TAG_PREFIX + DebugDump.class.getSimpleName();
+	public static final String TAG = Constants.getTag(DebugDump.class);
 	
 	private String mUrl;
 	private LinkedList<NameValuePair> mQuery = new LinkedList<NameValuePair>();
 	private OnCompleteListener mListener;
 	
-	public DebugDump(String url, String exception, String data) {
+	public DebugDump(Eta eta, String url, String exception, String data) {
 		
 		mUrl = url;
 		
 		try {
-			String appVersion = Eta.getInstance().getAppVersion();
+			String appVersion = eta.getAppVersion();
 			mQuery.add(new BasicNameValuePair("version", (appVersion == null ? "null" : appVersion) ));
 			mQuery.add(new BasicNameValuePair("exception", exception));
 			mQuery.add(new BasicNameValuePair("model", Device.getModel()));
@@ -61,8 +62,8 @@ public class DebugDump extends AsyncTask<Void, Void, Integer> {
 		
 	}
 	
-	public DebugDump(String url, String exception, String data, OnCompleteListener l) {
-		this(url, exception, data);
+	public DebugDump(Eta eta, String url, String exception, String data, OnCompleteListener l) {
+		this(eta, url, exception, data);
 		mListener = l;
 	}
 	

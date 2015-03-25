@@ -23,7 +23,7 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.log.EventLog;
 import com.eTilbudsavis.etasdk.network.Response.Listener;
@@ -32,7 +32,7 @@ import com.eTilbudsavis.etasdk.utils.Utils;
 @SuppressWarnings("rawtypes")
 public abstract class Request<T> implements Comparable<Request<T>> {
 	
-	public static final String TAG = Eta.TAG_PREFIX + Request.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Request.class);
 	
 	/** Default encoding for POST or PUT parameters. See {@link #getParamsEncoding()}. */
 	protected static final String DEFAULT_PARAMS_ENCODING = "utf-8";

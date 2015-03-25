@@ -26,7 +26,7 @@ import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 
 public class ListNotification {
 	
-	public static final String TAG = Eta.TAG_PREFIX + ListNotification.class.getSimpleName();
+	public static final String TAG = Constants.getTag(ListNotification.class);
 	
 	/* 
 	 * Lists for collecting individual changes in items and lists, to do a single

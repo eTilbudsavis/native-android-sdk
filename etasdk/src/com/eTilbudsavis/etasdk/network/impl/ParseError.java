@@ -15,13 +15,13 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network.impl;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.network.EtaError;
 
 
 public class ParseError extends EtaError {
 	
-	public static final String TAG = Eta.TAG_PREFIX + ParseError.class.getSimpleName();
+	public static final String TAG = Constants.getTag(ParseError.class);
 	
 	private static final long serialVersionUID = 1L;
 	

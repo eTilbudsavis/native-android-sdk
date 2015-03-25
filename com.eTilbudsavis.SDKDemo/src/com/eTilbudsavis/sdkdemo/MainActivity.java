@@ -15,7 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.sdkdemo;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -30,9 +29,9 @@ import com.eTilbudsavis.etasdk.EtaLocation;
 import com.eTilbudsavis.etasdk.log.DevLogger;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 
-public class Main extends Activity {
+public class MainActivity extends BaseActivity {
 	
-	public static final String TAG = Main.class.getSimpleName();
+	public static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int MENU_LOCATION = 1;
     
@@ -44,19 +43,7 @@ public class Main extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        /* 
-         * 
-         */
         EtaLog.setLogger(new DevLogger());
-        
-        /* 
-         * Eta.createInstance() must be invoked once, to instantiate the SDK
-         * prior to calling Eta.getInstance(). This can be done in Application.onCreate().
-         * 
-         * ApiKey and ApiSecret are not included in the demo/SDK, but you can
-         * get your own at https://etilbudsavis.dk/developers/ :-)
-         */
-        Eta.createInstance(Keys.API_KEY, Keys.API_SECRET, this);
         
         /*
          * Eta is a singleton you interact with via this method
@@ -83,7 +70,7 @@ public class Main extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(Main.this, CatalogViewer.class);
+				Intent i = new Intent(MainActivity.this, CatalogViewerActivity.class);
 				startActivity(i);
 			}
 		});
@@ -93,7 +80,7 @@ public class Main extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(Main.this, Search.class);
+				Intent i = new Intent(MainActivity.this, SearchActivity.class);
 				startActivity(i);
 			}
 		});
@@ -110,7 +97,7 @@ public class Main extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
 		case MENU_LOCATION:
-			Toast.makeText(Main.this, "not implemented yet", Toast.LENGTH_SHORT).show();
+			Toast.makeText(MainActivity.this, "not implemented yet", Toast.LENGTH_SHORT).show();
 			break;
 		}
     	return super.onOptionsItemSelected(item);

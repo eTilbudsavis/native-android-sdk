@@ -1,5 +1,5 @@
 package com.eTilbudsavis.etasdk.imageloader.impl;
-
+import com.eTilbudsavis.etasdk.Constants;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -15,7 +15,7 @@ import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
 
 public class DefaultImageDownloader implements ImageDownloader {
 	
-	public static final String TAG = Eta.TAG_PREFIX + ImageDownloader.class.getSimpleName();
+	public static final String TAG = Constants.getTag(ImageDownloader.class);
 	
 	private static final int BUFFER_SIZE = 0x10000;
 	private static final int TIMEOUT = 20000;

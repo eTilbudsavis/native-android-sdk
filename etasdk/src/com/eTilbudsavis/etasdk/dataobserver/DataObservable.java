@@ -1,8 +1,10 @@
 package com.eTilbudsavis.etasdk.dataobserver;
 
+import com.eTilbudsavis.etasdk.Constants;
+
 public class DataObservable extends Observable<DataObserver> {
 	
-	public static final String TAG = DataObservable.class.getSimpleName();
+	public static final String TAG = Constants.getTag(DataObservable.class);
 	
 	/**
      * Invokes {@link DataObservable#onChanged} on each observer.

@@ -23,7 +23,7 @@ import org.json.JSONObject;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
@@ -34,7 +34,7 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Eta.TAG_PREFIX + Branding.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Branding.class);
 	
 	private String mName;
 	private String mWebsite;

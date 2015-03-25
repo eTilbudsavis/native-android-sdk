@@ -5,13 +5,16 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.ImageView;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
+import com.eTilbudsavis.etasdk.EtaThreadFactory;
 import com.eTilbudsavis.etasdk.imageloader.impl.DefaultBitmapDecoder;
 import com.eTilbudsavis.etasdk.imageloader.impl.DefaultFileCache;
 import com.eTilbudsavis.etasdk.imageloader.impl.DefaultImageDownloader;
@@ -19,8 +22,10 @@ import com.eTilbudsavis.etasdk.imageloader.impl.LruMemoryCache;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class ImageLoader {
-
-	public static final String TAG = Eta.TAG_PREFIX + ImageLoader.class.getSimpleName();
+	
+//	public static final String TAG = Constants.getTag(
+	
+	public static final String TAG = Constants.getTag(ImageLoader.class);
 	
 	private Map<ImageView, String> mImageViews=Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
 	private MemoryCache mMemoryCache;
@@ -29,28 +34,20 @@ public class ImageLoader {
 	private ImageDownloader mDownloader;
 	private Handler mHandler;
 	
-	private static ImageLoader mImageloader;
+	public ImageLoader(Context c) {
+		this(c, Executors.newFixedThreadPool(3, new EtaThreadFactory("eta-il-")));
+	}
 	
-	private ImageLoader(Eta e) {
-		mExecutor = e.getExecutor();
-		mMemoryCache = new LruMemoryCache();
-		mFileCache = new DefaultFileCache(e.getContext(), mExecutor);
-		mDownloader = new DefaultImageDownloader();
+	public ImageLoader(Context c, ExecutorService executor) {
+		this(executor, new LruMemoryCache(), new DefaultFileCache(c, executor), new DefaultImageDownloader());
+	}
+	
+	public ImageLoader(ExecutorService executor, MemoryCache mamoryCache, FileCache fileCache, ImageDownloader downloader) {
+		mExecutor = executor;
+		mMemoryCache = mamoryCache;
+		mFileCache = fileCache;
+		mDownloader = downloader;
 		mHandler = new Handler(Looper.getMainLooper());
-	}
-	
-	public synchronized static void init(Eta e) {
-		if (mImageloader == null) {
-			mImageloader = new ImageLoader(e);
-		}
-	}
-	
-	public static ImageLoader getInstance() {
-		if (mImageloader == null) {
-			throw new IllegalStateException("ImageLoader.init() must be called"
-					+ "prior to getting the instance"); 
-		}
-		return mImageloader;
 	}
 	
 	public void displayImage(ImageRequest ir) {

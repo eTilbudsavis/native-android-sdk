@@ -12,7 +12,7 @@ import org.json.JSONObject;
 
 import android.text.TextUtils;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.network.Cache;
 import com.eTilbudsavis.etasdk.network.Cache.Item;
@@ -23,7 +23,7 @@ import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class JsonCacheHelper {
 	
-	public static final String TAG = Eta.TAG_PREFIX + JsonCacheHelper.class.getSimpleName();
+	public static final String TAG = Constants.getTag(JsonCacheHelper.class);
 	
     private static final String ERN_FORMAT = "ern:%s:%s";
 	private static Set<String> mErnTypes = new HashSet<String>();

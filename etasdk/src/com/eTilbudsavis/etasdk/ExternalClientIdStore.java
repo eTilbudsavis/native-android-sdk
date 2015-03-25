@@ -17,7 +17,7 @@ import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class ExternalClientIdStore {
 	
-	public static final String TAG = ExternalClientIdStore.class.getSimpleName();
+	public static final String TAG = Constants.getTag(ExternalClientIdStore.class);
 	
 	private static final String CID_RANDOMJUNK = "randomjunkid";
 	

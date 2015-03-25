@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.DecelerateInterpolator;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.imageloader.BitmapDisplayer;
@@ -30,13 +31,13 @@ import com.eTilbudsavis.etasdk.pageflip.widget.ZoomPhotoView.OnZoomChangeListene
 
 public abstract class PageFragment extends Fragment {
 	
-	public static final String TAG = Eta.TAG_PREFIX + PageFragment.class.getSimpleName();
+	public static final String TAG = Constants.getTag(PageFragment.class);
 
 	protected static final int FADE_IN_DURATION = 150;
 	protected static final float MAX_SCALE = 3.0f;
 	
-	protected static final String ARG_PAGE = Eta.ARG_PREFIX + "pagefragment.page";
-	protected static final String ARG_POSITION = Eta.ARG_PREFIX + "pagefragment.position";
+	protected static final String ARG_PAGE = Constants.getArg("pagefragment.page");
+	protected static final String ARG_POSITION = Constants.getArg("pagefragment.position");
 
 	private static final Object HOTSPOT_LOCK = new Object();
 	
@@ -142,7 +143,7 @@ public abstract class PageFragment extends Fragment {
 	
 	protected void addRequest(ImageRequest ir) {
 		ir.setMemoryCache(false);
-		ImageLoader.getInstance().displayImage(ir);
+		Eta.getInstance().getImageloader().displayImage(ir);
 	}
 	
 	protected void onSingleClick(int page, float x, float y) {

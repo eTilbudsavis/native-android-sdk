@@ -3,6 +3,7 @@ package com.eTilbudsavis.etasdk.request.impl;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.network.Delivery;
 import com.eTilbudsavis.etasdk.network.EtaError;
@@ -12,7 +13,7 @@ import com.eTilbudsavis.etasdk.network.Response.Listener;
 
 public class DeliveryHelper<T> implements Delivery {
 	
-	public static final String TAG = Eta.TAG_PREFIX + DeliveryHelper.class.getSimpleName();
+	public static final String TAG = Constants.getTag(DeliveryHelper.class);
 
 	private Request<?> mRequest;
 	private Listener<T> mListener;

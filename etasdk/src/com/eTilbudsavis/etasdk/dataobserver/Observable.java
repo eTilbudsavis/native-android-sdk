@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class Observable<T> {
 	
-	public static final String TAG = Eta.TAG_PREFIX + Observable.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Observable.class);
 	
 	protected final List<T> mObservers = Collections.synchronizedList(new ArrayList<T>());
 	

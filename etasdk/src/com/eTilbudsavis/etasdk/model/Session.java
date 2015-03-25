@@ -29,12 +29,13 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class Session implements IJson<JSONObject>, Serializable, Parcelable {
 	
-	public static final String TAG = Eta.TAG_PREFIX + Session.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Session.class);
 	
 	private static final long serialVersionUID = 1L;
 	

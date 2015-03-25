@@ -22,7 +22,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
@@ -38,8 +37,8 @@ import com.eTilbudsavis.etasdk.utils.ListUtils;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class DbHelper extends SQLiteOpenHelper {
-
-	public static final String TAG = Eta.TAG_PREFIX + DbHelper.class.getSimpleName();
+	
+	public static final String TAG = Constants.getTag(DbHelper.class);
 	
 	private static final String DB_NAME = "shoppinglist.db";
 	private static final int DB_VERSION = 5;
@@ -119,9 +118,11 @@ public class DbHelper extends SQLiteOpenHelper {
 	
 	private static DbHelper mDbHelper;
 	private SQLiteDatabase mDatabase;
+	private Eta mEta;
 	
-	private DbHelper(Context context) {
-		super(context, DB_NAME, null, DB_VERSION);
+	private DbHelper(Eta eta) {
+		super(eta.getContext(), DB_NAME, null, DB_VERSION);
+		mEta = eta;
 	}
 	
 	@Override
@@ -134,10 +135,10 @@ public class DbHelper extends SQLiteOpenHelper {
 		}
 		
 	}
-
+	
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+		
 		EtaLog.i(TAG, "Upgrading database from version " + oldVersion + " to "
 				+ newVersion + ", which will destroy all old data");
 		
@@ -149,10 +150,10 @@ public class DbHelper extends SQLiteOpenHelper {
 		
 		onCreate(db);
 	}
-
-	public static DbHelper getInstance() {
+	
+	public static DbHelper getInstance(Eta eta) {
 		if (mDbHelper == null) {
-			mDbHelper = new DbHelper(Eta.getInstance().getContext());
+			mDbHelper = new DbHelper(eta);
 		}
 		return mDbHelper;
 	}
@@ -772,7 +773,7 @@ public class DbHelper extends SQLiteOpenHelper {
 			
 			closeCursor(c);
 			
-			if (!Eta.getInstance().isResumed()) {
+			if (!mEta.isStarted()) {
 				mDatabase.close();
 			}
 			

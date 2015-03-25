@@ -1,16 +1,16 @@
 package com.eTilbudsavis.etasdk.imageloader.impl;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.imageloader.BitmapDecoder;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
 
 public class DefaultBitmapDecoder implements BitmapDecoder {
 	
-	public static final String TAG = DefaultBitmapDecoder.class.getSimpleName();
+	public static final String TAG = Constants.getTag(DefaultBitmapDecoder.class);
 	
 	public Bitmap decode(ImageRequest ir, byte[] image) {
 		

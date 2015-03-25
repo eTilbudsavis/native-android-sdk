@@ -3,6 +3,7 @@ package com.eTilbudsavis.etasdk.pageflip;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.network.EtaError;
@@ -14,7 +15,7 @@ import com.eTilbudsavis.etasdk.utils.Api;
 
 public class PageStat {
 	
-	public static final String TAG = Eta.TAG_PREFIX + PageStat.class.getSimpleName();
+	public static final String TAG = Constants.getTag(PageStat.class);
 
 	private static final boolean LOG = false;
 	

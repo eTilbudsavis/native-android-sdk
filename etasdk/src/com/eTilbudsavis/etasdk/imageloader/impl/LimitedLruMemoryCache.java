@@ -1,5 +1,5 @@
 package com.eTilbudsavis.etasdk.imageloader.impl;
-
+import com.eTilbudsavis.etasdk.Constants;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -14,7 +14,7 @@ import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class LimitedLruMemoryCache implements MemoryCache {
 	
-	public static final String TAG = Eta.TAG_PREFIX + LimitedLruMemoryCache.class.getSimpleName();
+	public static final String TAG = Constants.getTag(LimitedLruMemoryCache.class);
 	
 	/**
 	 * The map containing the actual cache. Last argument true for LRU ordering

@@ -9,7 +9,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.ByteArrayBuffer;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.HttpStack;
@@ -19,7 +19,7 @@ import com.eTilbudsavis.etasdk.network.Request;
 
 public class NetworkImpl implements Network {
 	
-	public static final String TAG = Eta.TAG_PREFIX + NetworkImpl.class.getSimpleName();
+	public static final String TAG = Constants.getTag(NetworkImpl.class);
 	
 	private static final int BUFFER_SIZE = 0x1000; // 4K
 	

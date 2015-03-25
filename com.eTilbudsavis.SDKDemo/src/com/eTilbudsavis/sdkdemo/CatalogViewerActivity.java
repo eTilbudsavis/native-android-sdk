@@ -25,7 +25,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
@@ -48,9 +47,9 @@ import com.eTilbudsavis.etasdk.pageflip.PageflipListener;
 import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 
-public class CatalogViewer extends FragmentActivity {
+public class CatalogViewerActivity extends BaseActivity {
 
-	public static final String TAG = CatalogViewer.class.getSimpleName();
+	public static final String TAG = CatalogViewerActivity.class.getSimpleName();
 
     private static final int MENU_PAGEOVERVIEW = 1;
     
@@ -81,7 +80,7 @@ public class CatalogViewer extends FragmentActivity {
     	if (mPageflip == null) {
     		
     		// First load, get a fresh list of catalogs for our area
-        	mProgressDialog = ProgressDialog.show(CatalogViewer.this, "", "Getting catalog list...", true, true);
+        	mProgressDialog = ProgressDialog.show(CatalogViewerActivity.this, "", "Getting catalog list...", true, true);
         	getCatalogList();
         	
     	} else {
@@ -155,45 +154,45 @@ public class CatalogViewer extends FragmentActivity {
 		@Override
 		public void onZoom(View v, int[] pages, boolean zoonIn) {
 			String text = "zoom " + (zoonIn ? "in" : "out");
-			Toast.makeText(CatalogViewer.this, text, Toast.LENGTH_SHORT).show();
+			Toast.makeText(CatalogViewerActivity.this, text, Toast.LENGTH_SHORT).show();
 		}
 		
 		@Override
 		public void onSingleClick(View v, int page, float x, float y, List<Hotspot> hotspots) {
 			if (hotspots.isEmpty()) {
-				Toast.makeText(CatalogViewer.this, "onSingleClick", Toast.LENGTH_SHORT).show();
+				Toast.makeText(CatalogViewerActivity.this, "onSingleClick", Toast.LENGTH_SHORT).show();
 			} else if (hotspots.size() == 1) {
-				Toast.makeText(CatalogViewer.this, "onSingleClick (" + hotspots.get(0).getOffer().getHeading() + ")", Toast.LENGTH_SHORT).show();
+				Toast.makeText(CatalogViewerActivity.this, "onSingleClick (" + hotspots.get(0).getOffer().getHeading() + ")", Toast.LENGTH_SHORT).show();
 			} else {
-				Toast.makeText(CatalogViewer.this, "onSingleClick (" + hotspots.size() + ")", Toast.LENGTH_SHORT).show();
+				Toast.makeText(CatalogViewerActivity.this, "onSingleClick (" + hotspots.size() + ")", Toast.LENGTH_SHORT).show();
 			}
 		}
 		
 		@Override
 		public void onReady() {
-			Toast.makeText(CatalogViewer.this, "onReady", Toast.LENGTH_SHORT).show();
+			Toast.makeText(CatalogViewerActivity.this, "onReady", Toast.LENGTH_SHORT).show();
 		}
 		
 		@Override
 		public void onPageChange(int[] pages) {
 			String text = "onPageChange: " + PageflipUtils.join("-", pages);
-			Toast.makeText(CatalogViewer.this, text, Toast.LENGTH_SHORT).show();
+			Toast.makeText(CatalogViewerActivity.this, text, Toast.LENGTH_SHORT).show();
 		}
 		
 		@Override
 		public void onOutOfBounds(boolean left) {
-			Toast.makeText(CatalogViewer.this, "onOutOfBounds", Toast.LENGTH_SHORT).show();
+			Toast.makeText(CatalogViewerActivity.this, "onOutOfBounds", Toast.LENGTH_SHORT).show();
 		}
 		
 		@Override
 		public void onLongClick(View v, int page, float x, float y,
 				List<Hotspot> hotspots) {
-			Toast.makeText(CatalogViewer.this, "onLongClick", Toast.LENGTH_SHORT).show();
+			Toast.makeText(CatalogViewerActivity.this, "onLongClick", Toast.LENGTH_SHORT).show();
 		}
 		
 		@Override
 		public void onError(EtaError error) {
-			Toast.makeText(CatalogViewer.this, "onError", Toast.LENGTH_SHORT).show();
+			Toast.makeText(CatalogViewerActivity.this, "onError", Toast.LENGTH_SHORT).show();
 		}
 		
 		@Override
@@ -205,12 +204,12 @@ public class CatalogViewer extends FragmentActivity {
 		@Override
 		public void onDoubleClick(View v, int page, float x, float y,
 				List<Hotspot> hotspots) {
-			Toast.makeText(CatalogViewer.this, "onDoubleClick", Toast.LENGTH_SHORT).show();
+			Toast.makeText(CatalogViewerActivity.this, "onDoubleClick", Toast.LENGTH_SHORT).show();
 		}
 	};
 	
 	private void dialog(String title, String message) {
-		AlertDialog.Builder b = new Builder(CatalogViewer.this);
+		AlertDialog.Builder b = new Builder(CatalogViewerActivity.this);
 		b.setTitle(title);
 		b.setMessage(message);
 		b.setPositiveButton("OK", new OnClickListener() {

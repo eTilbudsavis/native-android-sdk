@@ -10,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.FixedArrayList;
 import com.eTilbudsavis.etasdk.utils.Utils;
@@ -24,14 +25,14 @@ import com.eTilbudsavis.etasdk.utils.Utils;
  */
 public class EventLog {
 	
-	public static final String TAG = Eta.TAG_PREFIX + EventLog.class.getSimpleName();
+	public static final String TAG = Constants.getTag(EventLog.class);
 	
 	public static final String TYPE_REQUEST = "request";
 	public static final String TYPE_EXCEPTION = "exception";
 	public static final String TYPE_VIEW = "view";
 	public static final String TYPE_LOG = "log";
 	
-	List<Event> mEvents;
+	private List<Event> mEvents;
 	
 	/**
 	 * Create a new EventLog, with no size limitations. Please be aware that
@@ -69,7 +70,7 @@ public class EventLog {
 	public void add(String type, JSONObject data) {
 		add(type, type, data);
 	}
-	
+
 	/**
 	 * 
 	 * @param name
@@ -77,13 +78,27 @@ public class EventLog {
 	 * @param data
 	 */
 	private void add(String name, String type, JSONObject data) {
-		long time = System.currentTimeMillis();
-		String user = "none";
-		String token = "no-token";
-		if (Eta.isInstanciated()) {
+		String user = "null";
+		String token = "null";
+		if (Eta.getInstance().isStarted()) {
 			user = Eta.getInstance().getUser().getErn();
 			token = Eta.getInstance().getSessionManager().getSession().getToken();
 		}
+		add(name, type, data, user, token);
+	}
+	
+	
+	
+	/**
+	 * 
+	 * @param name
+	 * @param type
+	 * @param data
+	 */
+	private void add(String name, String type, JSONObject data, String user, String token) {
+		long time = System.currentTimeMillis();
+		user = String.valueOf(user);
+		token = String.valueOf(token);
 		add(new Event(name, time, type, user, token, data));
 	}
 	

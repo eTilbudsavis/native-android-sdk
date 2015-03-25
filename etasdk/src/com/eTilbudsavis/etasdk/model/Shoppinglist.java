@@ -37,6 +37,7 @@ import com.eTilbudsavis.etasdk.model.interfaces.IErn;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
@@ -48,7 +49,7 @@ import com.eTilbudsavis.etasdk.utils.Utils;
  */
 public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppinglist>, IErn<Shoppinglist>, IJson<JSONObject>, Serializable, Parcelable {
 
-	public static final String TAG = Eta.TAG_PREFIX + Shoppinglist.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Shoppinglist.class);
 
 	private static final long serialVersionUID = 5718447151312028262L;
 	

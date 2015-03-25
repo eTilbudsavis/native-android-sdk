@@ -27,6 +27,7 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
@@ -34,7 +35,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Eta.TAG_PREFIX + Pageflip.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Pageflip.class);
 	
 	private String mLogo;
 	private Integer mColor = 0;

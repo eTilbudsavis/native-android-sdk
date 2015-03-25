@@ -5,7 +5,7 @@ import java.util.List;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.imageloader.impl.DefaultBitmapDisplayer;
 import com.eTilbudsavis.etasdk.imageloader.impl.DefaultFileName;
 import com.eTilbudsavis.etasdk.log.EtaLog;
@@ -18,7 +18,7 @@ import com.eTilbudsavis.etasdk.log.EventLog.Event;
  */
 public class ImageRequest {
 	
-	public static final String TAG = Eta.TAG_PREFIX + ImageRequest.class.getSimpleName();
+	public static final String TAG = Constants.getTag(ImageRequest.class);
 	
 	private final String mUrl;
 	private final ImageView mImageView;

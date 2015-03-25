@@ -10,11 +10,11 @@ import android.view.MotionEvent;
 import android.view.animation.Interpolator;
 import android.widget.Scroller;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 
 public class PageflipViewPager extends ViewPager {
 	
-	public static final String TAG = Eta.TAG_PREFIX + PageflipViewPager.class.getSimpleName();
+	public static final String TAG = Constants.getTag(PageflipViewPager.class);
 	
 	private PageflipListener mPageflipListener;
 	private ScrollerCustomDuration mScroller = null;

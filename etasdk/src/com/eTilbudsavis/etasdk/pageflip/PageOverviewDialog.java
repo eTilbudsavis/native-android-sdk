@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.imageloader.ImageLoader;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
@@ -32,10 +33,10 @@ import com.eTilbudsavis.etasdk.utils.Utils;
 @SuppressWarnings("deprecation")
 public class PageOverviewDialog extends DialogFragment {
 	
-	public static final String TAG = Eta.TAG_PREFIX + PageOverviewDialog.class.getSimpleName();
+	public static final String TAG = Constants.getTag(PageOverviewDialog.class);
 
-	private static final String ARG_CATALOG = Eta.ARG_PREFIX + "pageGridOverview.catalog";
-	private static final String ARG_PAGE = Eta.ARG_PREFIX + "pageGridOverview.page";
+	private static final String ARG_CATALOG = Constants.getArg("pageGridOverview.catalog");
+	private static final String ARG_PAGE = Constants.getArg("pageGridOverview.page");
 
 	private static final int MAX_WIDTH = 177;
 	private static final int MAX_HEIGHT = 212;
@@ -206,7 +207,7 @@ public class PageOverviewDialog extends DialogFragment {
 			fl.addView(tv);
 			
 			String url = mCatalog.getPages().get(position).getThumb();
-			ImageLoader.getInstance().displayImage(new ImageRequest(url, iv));
+			Eta.getInstance().getImageloader().displayImage(new ImageRequest(url, iv));
 			
 			return fl;
 		}

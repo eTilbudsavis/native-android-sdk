@@ -31,6 +31,7 @@ import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IErn;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
@@ -49,7 +50,7 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Pa
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final String TAG = Eta.TAG_PREFIX + Dealer.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Dealer.class);
 	
 	private String mErn;
 	private String mName;

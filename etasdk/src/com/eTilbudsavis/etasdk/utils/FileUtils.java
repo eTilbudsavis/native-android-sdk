@@ -7,11 +7,12 @@ import java.io.File;
 import android.content.Context;
 import android.os.Environment;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class FileUtils {
 	
-	public static final String TAG = FileUtils.class.getSimpleName();
+	public static final String TAG = Constants.getTag(FileUtils.class);
 
 	public static final long KB = 1024;
 	public static final long MB = KB * KB;

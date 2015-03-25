@@ -1,7 +1,7 @@
 package com.eTilbudsavis.etasdk.imageloader.impl;
-
 import android.graphics.Bitmap;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.imageloader.BitmapProcessor;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Catalog;
@@ -9,7 +9,7 @@ import com.eTilbudsavis.etasdk.model.Dimension;
 
 public class CatalogThumbBitmapProcessor implements BitmapProcessor {
 	
-	public static final String TAG = CatalogThumbBitmapProcessor.class.getSimpleName();
+	public static final String TAG = Constants.getTag(CatalogThumbBitmapProcessor.class);
 	Dimension mDimension;
 	boolean mPrint = false;
 

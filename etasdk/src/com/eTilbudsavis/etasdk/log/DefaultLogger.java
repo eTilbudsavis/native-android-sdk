@@ -2,11 +2,11 @@ package com.eTilbudsavis.etasdk.log;
 
 import android.util.Log;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 
 public class DefaultLogger implements EtaLogger {
 	
-	public static final String TAG = Eta.TAG_PREFIX + DefaultLogger.class.getSimpleName();
+	public static final String TAG = Constants.getTag(DefaultLogger.class);
 	
 	/** Variable to control the size of the exception log */
 	public static final int DEFAULT_EXCEPTION_LOG_SIZE = 16;

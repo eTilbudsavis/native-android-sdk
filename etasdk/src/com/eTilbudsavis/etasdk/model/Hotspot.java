@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 
@@ -17,7 +18,7 @@ public class Hotspot implements IJson<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 7068341225117028048L;
 
-	public static final String TAG = Hotspot.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Hotspot.class);
 	
 	/** The default significant area */
 	public static final double SIGNIFICANT_AREA = 0.01d;

@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
@@ -19,7 +20,7 @@ import com.eTilbudsavis.etasdk.utils.Json;
 
 public class Subscription implements IJson<JSONObject>, Serializable, Parcelable {
 	
-	public static final String TAG = Subscription.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Subscription.class);
 	
 	private static final long serialVersionUID = 1548862774286265086L;
 	

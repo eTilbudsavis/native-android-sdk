@@ -41,7 +41,7 @@ import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class SessionManager {
 	
-	public static final String TAG = Eta.TAG_PREFIX + SessionManager.class.getSimpleName();
+	public static final String TAG = Constants.getTag(SessionManager.class);
 	
     public static final String ETA_COOKIE_DOMAIN = "etilbudsavis.dk";
     public static final String COOKIE_AUTH_ID = "auth[id]";
@@ -73,7 +73,6 @@ public class SessionManager {
 	public SessionManager(Eta eta) {
 		
 		mEta = eta;
-		
 		JSONObject session = mEta.getSettings().getSessionJson();
 		mSession = Session.fromJSON(session);
 		ExternalClientIdStore.updateCid(mSession, mEta.getContext());
@@ -523,7 +522,7 @@ public class SessionManager {
 	
 	public SessionManager notifySubscribers(final int oldUserId,final int newUserId) {
 		
-		EtaLog.i(TAG, "onSessionChange: " + oldUserId + " -> " + newUserId);
+		EtaLog.v(TAG, "onSessionChange: " + oldUserId + " -> " + newUserId);
 		
 		synchronized (mSubscribers) {
 			for (final OnSessionChangeListener sl : mSubscribers) {

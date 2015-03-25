@@ -4,12 +4,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
 
 public class PageAdapter extends FragmentStatePagerAdapter {
 	
-	public static final String TAG = Eta.TAG_PREFIX + PageAdapter.class.getSimpleName();
+	public static final String TAG = Constants.getTag(PageAdapter.class);
 	
 	private PageCallback mCallback;
 	private int mViewCount = 0;

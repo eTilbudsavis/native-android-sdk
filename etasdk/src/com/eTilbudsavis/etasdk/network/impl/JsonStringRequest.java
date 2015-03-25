@@ -23,7 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.network.Cache;
 import com.eTilbudsavis.etasdk.network.EtaError;
@@ -35,7 +35,7 @@ import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class JsonStringRequest extends JsonRequest<String>{
 
-	public static final String TAG = Eta.TAG_PREFIX + JsonStringRequest.class.getSimpleName();
+	public static final String TAG = Constants.getTag(JsonStringRequest.class);
 
 	// Define catchable types
 	private static Map<String, String> mFilterTypes = new HashMap<String, String>();

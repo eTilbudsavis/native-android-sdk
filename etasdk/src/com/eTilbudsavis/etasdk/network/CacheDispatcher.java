@@ -19,9 +19,11 @@ import java.util.concurrent.BlockingQueue;
 
 import android.os.Process;
 
-public class CacheDispatcher extends Thread {
+import com.eTilbudsavis.etasdk.Constants;
 
-	public static final String TAG = "CacheDispatcher";
+public class CacheDispatcher extends Thread {
+	
+	public static final String TAG = Constants.getTag(CacheDispatcher.class);
 	
 	/** The queue of requests to service. */
 	private final BlockingQueue<Request<?>> mQueue;

@@ -39,7 +39,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.photoview.gestures.GestureDetector;
 import com.eTilbudsavis.etasdk.photoview.gestures.OnGestureListener;
@@ -48,7 +48,7 @@ import com.eTilbudsavis.etasdk.photoview.scrollerproxy.ScrollerProxy;
 
 public class PhotoView extends ImageView implements View.OnTouchListener, OnGestureListener, ViewTreeObserver.OnGlobalLayoutListener {
 	
-	public static final String TAG = Eta.TAG_PREFIX + PhotoView.class.getSimpleName();
+	public static final String TAG = Constants.getTag(PhotoView.class);
 	
 	private static final boolean DEBUG = false;
 	

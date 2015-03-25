@@ -17,16 +17,18 @@ package com.eTilbudsavis.etasdk;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -42,25 +44,60 @@ import com.eTilbudsavis.etasdk.network.impl.DefaultHttpNetwork;
 import com.eTilbudsavis.etasdk.network.impl.HttpURLNetwork;
 import com.eTilbudsavis.etasdk.network.impl.MemoryCache;
 import com.eTilbudsavis.etasdk.network.impl.NetworkImpl;
+import com.eTilbudsavis.etasdk.utils.Utils;
 import com.eTilbudsavis.etasdk.utils.Validator;
 
 /**
  * 
- * The main class for interacting with the eTilbudsavis SDK / API
+ * Eta is the main class for interacting with the eTilbudsavis SDK / API.
+ * 
+ * Eta is a singleton, that will have to be created with a context, from there on out
+ * you can invoke with the static method getInstance.
+ * 
+ * <h3>Requirements</h3>
+ * There is only a few requirements to get going. You will need to get an
+ * API key, and API secret. You can request a set at 
+ * <a href="https://etilbudsavis.dk/developers/"> etilbudsavis.dk </a>
+ * (look for "Apply for Developer Program" in the top right corner).
+ * 
+ * 
+ * You will have to add the API key and API secret as meta data in your AndroidManifest, in the following way:
+ * 
+ * <pre>
+ * &lt;meta-data android:name="com.eTilbudsavis.etasdk.api_key" android:value="YOUR_API_KEY" /&gt;
+ * &lt;meta-data android:name="com.eTilbudsavis.etasdk.api_secret" android:value="YOUR_API_SECRET" /&gt;
+ * </pre>
+ * 
+ * <pre>
+ * &lt;meta-data android:name="com.eTilbudsavis.etasdk.develop.api_key" android:value="YOUR_DEVELOP_API_KEY" /&gt;
+ * &lt;meta-data android:name="com.eTilbudsavis.etasdk.develop.api_secret" android:value="YOUR_DEVELOP_API_SECRET" /&gt;
+ * </pre>
+ * 
+ * 
+ * 
+ * <ul>
+ * 	<li> First invoke Eta.create(Context context)
+ * 	<li> Then call Eta.getInstance() to get the current instance of Eta
+ * </ul>
+ * 
+ * 
+ * <h3>Usage</h3>
+ * 
+ * <ol>
+ * 	<li> First invoke Eta.create(Context context)
+ * 	<li> Then call Eta.getInstance() to get the current instance of Eta
+ * </ol>
+ * 
  * 
  * @author Danny Hvam - danny@etilbudsavis.dk
  * @version 2.1.0
  *
  */
 public class Eta {
-
-	public static final String TAG_PREFIX = "EtaSdk-";
-	public static final String ARG_PREFIX = "com.eTilbudsavis.etasdk.";
 	
-	public static final String TAG = TAG_PREFIX + Eta.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Eta.class);
 	
 	private static final int DEFAULT_THREAD_COUNT = 3;
-	private static final String DEFAULT_THREAD_NAME = "etasdk-";
 	
 	/** The Eta singleton */
 	private static Eta mEta;
@@ -73,7 +110,7 @@ public class Eta {
 	
 	/** The developers APIsecret */
 	private String mApiSecret;
-
+	
 	/** The developers app version, this isn't strictly necessary */
 	private String mAppVersion;
 	
@@ -84,7 +121,7 @@ public class Eta {
 	private SessionManager mSessionManager;
 	
 	/** The current location that the SDK is aware of */
-	private final EtaLocation mLocation;
+	private EtaLocation mLocation;
 	
 	/** Manager for handling all {@link Shoppinglist}, and {@link ShoppinglistItem} */
 	private ListManager mListManager;
@@ -102,7 +139,13 @@ public class Eta {
 	private ExecutorService mExecutor;
 	
 	/** Counting the number of active activities, to determine when to stop any long running activities */
-	private AtomicInteger mActivityCounter = new AtomicInteger();
+	private AtomicInteger mActivityCounter;
+	
+	/** The ImageLoader for use by clients, and SDK */
+	private ImageLoader mImageLoader;
+
+	/** The development flag, indicating the app is in development */
+	private boolean mDevelop = false;
 	
 	private static Object INSTANCE_LOCK = new Object();
 	
@@ -112,16 +155,21 @@ public class Eta {
 	 * @param apiSecret An API v2 apiSecret (matching the apiKey)
 	 * @param context A context
 	 */
-	private Eta(String apiKey, String apiSecret, Context context) {
+	private Eta(Context context) {
 		
 		// Get a context that isn't likely to disappear with an activity.
 		mContext = context.getApplicationContext();
-		mApiKey = apiKey;
-		mApiSecret = apiSecret;
+		mActivityCounter = new AtomicInteger();
+		init();
+	}
+	
+	private void init() {
 		
+		setAppVersion(Utils.getAppVersion(mContext));
 		mHandler = new Handler(Looper.getMainLooper());
-		ThreadFactory tf = new DefaultThreadFactory(DEFAULT_THREAD_NAME);
-		mExecutor = Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT, tf);
+		mExecutor = Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT, new EtaThreadFactory());
+		mImageLoader = new ImageLoader(mContext, mExecutor);
+		mSettings = new Settings(mContext);
 		
 		HttpStack stack = null;
         if (Build.VERSION.SDK_INT > 8) {
@@ -130,23 +178,17 @@ public class Eta {
             stack = new DefaultHttpNetwork();
         }
         
-		mRequestQueue = new RequestQueue(this, new MemoryCache(), new NetworkImpl(stack));
+		mRequestQueue = new RequestQueue(Eta.this, new MemoryCache(), new NetworkImpl(stack));
 		mRequestQueue.start();
 		
-		try {
-			String name = mContext.getPackageName();
-			String version = mContext.getPackageManager().getPackageInfo(name, 0 ).versionName;
-			setAppVersion(version);
-		} catch (NameNotFoundException e) {
-			EtaLog.e(TAG, null, e);
-		}
-		
-		mSettings = new Settings(mContext);
 		mLocation = mSettings.getLocation();
+		
+		// Session manager implicitly requires Settings
 		mSessionManager = new SessionManager(Eta.this);
-		mListManager = new ListManager(Eta.this);
-		mSyncManager = new SyncManager(Eta.this);
-        ImageLoader.init(Eta.this);
+		
+		DbHelper db = DbHelper.getInstance(Eta.this);
+		mListManager = new ListManager(Eta.this, db);
+		mSyncManager = new SyncManager(Eta.this, db);
 		
 	}
 	
@@ -161,8 +203,7 @@ public class Eta {
 	public static Eta getInstance() {
 		synchronized (INSTANCE_LOCK) {
 			if (mEta == null) {
-				throw new IllegalStateException("Eta.createInstance() needs to be"
-						+ "called before Eta.getInstance()");
+				throw new IllegalStateException("Eta.create() needs to be invoked prior to Eta.getInstance()");
 			}
 			return mEta;
 		}
@@ -172,23 +213,19 @@ public class Eta {
 	 * Creates a new instance of {@link Eta}.
 	 * 
 	 * <p>This method will instantiate a new instance of {@link Eta}, than can be
-	 * used throughout your app. But you can only create one instance pr. context
-	 * (or app), this amongst others ensures some session and user safety.</p>
+	 * used throughout your app.</p>
 	 * 
-	 * @param apiKey An API v2 apiKey
-	 * @param apiSecret An API v2 apiSecret (matching the apiKey)
 	 * @param ctx A context
 	 */
-	public static void createInstance(String apiKey, String apiSecret, Context ctx) {
+	public static Eta create(Context ctx) {
 		
-		if (mEta == null) {
-			synchronized (INSTANCE_LOCK) {
-				if (mEta == null) {
-					mEta = new Eta(apiKey, apiSecret, ctx);
-				}
+		synchronized (INSTANCE_LOCK) {
+			if (isCreated()) {
+				EtaLog.v(TAG, "Eta instance already created - ignoring");	
+			} else {
+				mEta = new Eta(ctx);
 			}
-		} else {
-			EtaLog.d(TAG, "Eta instance already created");
+			return mEta;
 		}
 		
 	}
@@ -198,7 +235,7 @@ public class Eta {
 	 * <p>To instantiate an instance use {@link #createInstance(String, String, Context)}</p>
 	 * @return {@code true} if Eta is instantiated, else {@code false}
 	 */
-	public static boolean isInstanciated() {
+	public static boolean isCreated() {
 		synchronized (INSTANCE_LOCK) {
 			return mEta != null;
 		}
@@ -255,9 +292,7 @@ public class Eta {
 		if (Validator.isAppVersionValid(appVersion)) {
 			mAppVersion = appVersion;
 		}
-		EtaLog.v(TAG, mAppVersion == null ? 
-				("invalid version format: " + appVersion) : 
-					("AppVersion: " + mAppVersion) );
+		EtaLog.v(TAG, "AppVersion: " + String.valueOf(mAppVersion));
 	}
 
 	/**
@@ -279,6 +314,10 @@ public class Eta {
 	 */
 	public String getApiSecret() {
 		return mApiSecret;
+	}
+	
+	public ImageLoader getImageloader() {
+		return mImageLoader;
 	}
 	
 	/**
@@ -357,21 +396,97 @@ public class Eta {
 	}
 	
 	/**
-	 * @deprecated
+	 * Get the current state of the Eta instance
+	 * @return {@code true} if in resumed state, else {@code false}
 	 */
-	public void destroyInstance() {
-		destroy();
+	public boolean isStarted() {
+		return mActivityCounter.get() > 0;
+	}
+
+	/**
+	 * Set the ETA SDK to use development options, such as development API key/secret.
+	 * This must be called prior to calling start.
+	 * @param develop <code>true</code> to set development state.
+	 */
+	public void setDevelop(boolean develop) {
+		mDevelop = develop;
+		if (isStarted()) {
+			EtaLog.i(TAG, "Re-registering apiKey and apiSecret");
+			setupKeys(mContext);
+		}
+	}
+	
+	/**
+	 * Indicates whether the SDK is in develop state, and is using development keys.
+	 * @return true is in develop state, else false
+	 */
+	public boolean isDevelop() {
+		return mDevelop;
+	}
+	
+	private void setupKeys(Context c) {
+		
+		Bundle b = getMetaBundle(c);
+		if (b == null) {
+			EtaLog.w(TAG, "Meta data from AndroidManifest.xml not available.");
+			return;
+		}
+		
+		String apiKey = b.getString(Constants.META_API_KEY);
+		String apiSecret = b.getString(Constants.META_API_SECRET);
+		
+		boolean hasKeys = (apiKey != null) && (apiSecret != null);
+		
+		if (mDevelop) {
+			
+			String apiKeyDebug = b.getString(Constants.META_DEVELOP_API_KEY);
+			String apiSecretDebug = b.getString(Constants.META_DEVELOP_API_SECRET);
+			boolean hasDebugKeys = (apiKeyDebug != null) && (apiSecretDebug != null);
+			
+			if (hasDebugKeys) {
+				mApiKey = apiKeyDebug;
+				mApiSecret = apiSecretDebug;
+				EtaLog.i(TAG, "Eta SDK is using developkeys");
+				return;
+			} else {
+				mDevelop = false;
+				EtaLog.w(TAG, "Delevop flag set, but no develop keys found in AndroidManifest.xml - continuing with regulare keys");
+			}
+			
+		}
+		
+		if (hasKeys) {
+			mApiKey = apiKey;
+			mApiSecret = apiSecret;
+		} else {
+			EtaLog.w(TAG, "No API key/secret found in AndroidManifest.xml");
+		}
+		
+	}
+	
+	private Bundle getMetaBundle(Context c) {
+		
+		try {
+			PackageManager pm = c.getPackageManager();
+		    ApplicationInfo ai = pm.getApplicationInfo(c.getPackageName(), PackageManager.GET_META_DATA);
+		    return ai.metaData;
+		} catch (NameNotFoundException e) {
+			// ignore
+		}
+		return null;
 	}
 
 	/**
 	 * First clears all preferences with {@link #clear()}, and then {@code null's}
 	 * this instance of Eta
 	 * 
-	 * <p>For further use of {@link Eta} after this, you must invoke
-	 * {@link #createInstance(String, String, Context)} it again.</p>
+	 * <p>Further use of {@link Eta} after this, you must invoke
+	 * {@link #create(Context)} it again.</p>
 	 */
 	public void destroy() {
 		synchronized (INSTANCE_LOCK) {
+			mActivityCounter.set(0);
+			onStop();
 			clear();
 			mEta = null;
 		}
@@ -385,26 +500,20 @@ public class Eta {
 	 * cache, e.t.c.</p>
 	 */
 	public void clear() {
-		mSessionManager.invalidate();
-		mSettings.clear();
-		mLocation.clear();
-		mRequestQueue.clear();
-		mListManager.clear();
-		EtaLog.getLogger().getLog().clear();
-	}
-	
-	/**
-	 * Get the current state of the Eta instance
-	 * @return {@code true} if in resumed state, else {@code false}
-	 */
-	public boolean isResumed() {
-		return mActivityCounter.get() > 0;
+		if (!isStarted()) {
+			mSessionManager.invalidate();
+			mSettings.clear();
+			mLocation.clear();
+			mRequestQueue.clear();
+			mListManager.clear();
+			EtaLog.getLogger().getLog().clear();
+		}
 	}
 	
 	Runnable termination = new Runnable() {
 		
 		public void run() {
-			if (isResumed()) {
+			if (isStarted()) {
 				EtaLog.i(TAG, "Eta has been resumed, bail out");
 				return;
 			}
@@ -429,41 +538,46 @@ public class Eta {
 	
 	private void finalCleanup() {
 		// TODO don't need to null everything
-		mApiKey = null;
-		mApiSecret = null;
-		mAppVersion = null;
-		mContext = null;
-		mEta = null;
-		mExecutor = null;
-		mHandler = null;
-		mListManager = null;
-		mRequestQueue = null;
-		mSessionManager = null;
-		mSettings = null;
-		mSyncManager = null;
+		synchronized (INSTANCE_LOCK) {
+			mEta = null;
+			mApiKey = null;
+			mApiSecret = null;
+			mAppVersion = null;
+			mContext = null;
+			mExecutor = null;
+			mHandler = null;
+			mListManager = null;
+			mRequestQueue = null;
+			mSessionManager = null;
+			mSettings = null;
+			mSyncManager = null;
+			mActivityCounter = null;
+		}
 	}
 	
 	public void onStart() {
 		int init = mActivityCounter.getAndIncrement();
-		EtaLog.d(TAG, "count: " + mActivityCounter.get());
-		if (init == 0 && isResumed()) {
-			EtaLog.d(TAG, "performing start");
+		if (init == 0 && isStarted()) {
+			mHandler.removeCallbacks(termination);
+			setupKeys(mContext);
 			mSessionManager.onStart();
 			mListManager.onStart();
 			mSyncManager.onStart();
+			EtaLog.v(TAG, "SDK has been started");
 		}
 	}
 	
 	public void onStop() {
 		mActivityCounter.decrementAndGet();
-		EtaLog.d(TAG, "count: " + mActivityCounter.get());
-		if (!isResumed()) {
-			EtaLog.d(TAG, "performing stop");
+		if (!isStarted()) {
 			mSettings.saveLocation(mLocation);
 			mListManager.onStop();
 			mSyncManager.onStop();
 			mSessionManager.onStop();
 			mSettings.setLastUsageNow();
+			mActivityCounter.set(0);
+			mHandler.postDelayed(termination, Utils.SECOND_IN_MILLIS * 5);
+			EtaLog.v(TAG, "SDK has been stopped");
 		}
 	}
 	

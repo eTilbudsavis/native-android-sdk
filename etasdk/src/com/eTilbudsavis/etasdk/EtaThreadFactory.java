@@ -6,10 +6,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.eTilbudsavis.etasdk.log.EtaLog;
 
-public class DefaultThreadFactory implements ThreadFactory {
+public class EtaThreadFactory implements ThreadFactory {
 	
-	public static final String TAG = Eta.TAG_PREFIX + DefaultThreadFactory.class.getSimpleName();
+	public static final String TAG = Constants.getTag(EtaThreadFactory.class);
 	
+	private static final String DEFAULT_THREAD_NAME = "etasdk-";
 	private static final int DEFAULT_THREAD_PRIORITY = Thread.NORM_PRIORITY-1;
 	
 	private static final AtomicInteger poolNumber = new AtomicInteger(1);
@@ -25,12 +26,16 @@ public class DefaultThreadFactory implements ThreadFactory {
 	private final AtomicInteger threadNumber = new AtomicInteger(1);
 	private final String namePrefix;
 	private final int threadPriority;
+
+	public EtaThreadFactory() {
+		this(DEFAULT_THREAD_NAME);
+	}
 	
-	public DefaultThreadFactory(String threadNamePrefix) {
+	public EtaThreadFactory(String threadNamePrefix) {
 		this(DEFAULT_THREAD_PRIORITY, threadNamePrefix);
 	}
 	
-	public DefaultThreadFactory(int threadPriority, String threadNamePrefix) {
+	public EtaThreadFactory(int threadPriority, String threadNamePrefix) {
 		this.threadPriority = threadPriority;
 		SecurityManager s = System.getSecurityManager();
 		group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();

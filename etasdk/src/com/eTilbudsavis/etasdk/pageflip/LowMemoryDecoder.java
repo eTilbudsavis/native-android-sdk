@@ -7,14 +7,14 @@ import android.graphics.Point;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.imageloader.BitmapDecoder;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
 import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
 
 public class LowMemoryDecoder implements BitmapDecoder {
 	
-	public static final String TAG = Eta.TAG_PREFIX + LowMemoryDecoder.class.getSimpleName();
+	public static final String TAG = Constants.getTag(LowMemoryDecoder.class);
 	
 	// Variable kept across all PageFragment, to save some work and mem
 	private Point mDisplay;

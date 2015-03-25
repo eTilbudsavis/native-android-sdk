@@ -27,7 +27,7 @@ import org.json.JSONObject;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 
@@ -35,7 +35,7 @@ public class Permission implements IJson<JSONObject>, Serializable, Parcelable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String TAG = Eta.TAG_PREFIX + Permission.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Permission.class);
 	
 	private HashMap<String, ArrayList<String>> mPermissions = new HashMap<String, ArrayList<String>>();
 

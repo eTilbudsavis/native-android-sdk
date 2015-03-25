@@ -8,8 +8,8 @@ import android.graphics.Canvas;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.imageloader.ImageLoader;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoDoubleClickListener;
@@ -18,7 +18,7 @@ import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoTapListener;
 
 public class DoublePageFragment extends PageFragment {
 	
-	public static final String TAG = Eta.TAG_PREFIX + DoublePageFragment.class.getSimpleName();
+	public static final String TAG = Constants.getTag(DoublePageFragment.class);
 
 	private Object LOCK = new Object();
 	private AtomicInteger mCount = new AtomicInteger();
@@ -161,7 +161,7 @@ public class DoublePageFragment extends PageFragment {
 						try {
 							// Try to clear up some memory
 							Eta.getInstance().getRequestQueue().clear();
-							ImageLoader.getInstance().getMemoryCache().clear();
+							Eta.getInstance().getImageloader().getMemoryCache().clear();
 							// 'force' a GC
 							Runtime.getRuntime().gc();
 							// Wait, and hope for the best
@@ -223,7 +223,7 @@ public class DoublePageFragment extends PageFragment {
 //						try {
 //							// Try to clear up some memory
 //							Eta.getInstance().getRequestQueue().clear();
-//							ImageLoader.getInstance().getMemoryCache().clear();
+//							Eta.getInstance().getImageloader().getMemoryCache().clear();
 //							// 'force' a GC
 //							Runtime.getRuntime().gc();
 //							// Wait, and hope for the best

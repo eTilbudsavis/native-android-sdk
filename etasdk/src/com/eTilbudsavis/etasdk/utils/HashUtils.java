@@ -3,11 +3,12 @@ package com.eTilbudsavis.etasdk.utils;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class HashUtils {
 	
-	public static final String TAG = HashUtils.class.getSimpleName();
+	public static final String TAG = Constants.getTag(HashUtils.class);
 
     /**
      * Generate a SHA256 checksum of a string.

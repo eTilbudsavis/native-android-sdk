@@ -27,6 +27,7 @@ import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.EtaLocation;
 import com.eTilbudsavis.etasdk.log.EtaLog;
@@ -38,7 +39,7 @@ import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class RequestQueue {
 	
-	public static final String TAG = Eta.TAG_PREFIX + RequestQueue.class.getSimpleName();
+	public static final String TAG = Constants.getTag(RequestQueue.class);
 	
     /** Number of network request dispatcher threads to start. */
     private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;
@@ -364,13 +365,13 @@ public class RequestQueue {
 			request.setUrl(preUrl + url);
 		}
 		
-		String version = Eta.getInstance().getAppVersion();
+		String version = mEta.getAppVersion();
 		if (version != null) {
 			request.getParameters().put(Param.API_AV, version);
 		}
 		
 		if (request.useLocation()) {
-			appendLocationParams(request.getParameters(), Eta.getInstance().getLocation());
+			appendLocationParams(request.getParameters(), mEta.getLocation());
 		}
 		
 	}

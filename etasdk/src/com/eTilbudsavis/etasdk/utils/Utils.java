@@ -24,16 +24,17 @@ import java.util.Map;
 import java.util.UUID;
 
 import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Color;
 import android.os.Bundle;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.network.Request;
 
 public final class Utils {
 	
-	public static final String TAG = Eta.TAG_PREFIX + Utils.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Utils.class);
 	
 	/** A second in milliseconds */
 	public static final long SECOND_IN_MILLIS = 1000;
@@ -64,9 +65,12 @@ public final class Utils {
 
 	/** Single instance of SimpleDateFormat to save time and memory */
 	private static SimpleDateFormat mSdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
-	
+
 	static {
 		
+	}
+	
+	private Utils() {
 	}
 	
 	/**
@@ -401,6 +405,16 @@ public final class Utils {
 			return Color.parseColor(color);
 		} catch (NumberFormatException e) {
 //			EtaLog.e(TAG, e.getMessage(), e);
+		}
+		return null;
+	}
+	
+	public static String getAppVersion(Context c) {
+		
+		try {
+			return c.getPackageManager().getPackageInfo(c.getPackageName(), 0 ).versionName;
+		} catch (NameNotFoundException e) {
+			EtaLog.e(TAG, null, e);
 		}
 		return null;
 	}

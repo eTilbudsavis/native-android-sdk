@@ -31,6 +31,7 @@ import com.eTilbudsavis.etasdk.model.interfaces.IDealer;
 import com.eTilbudsavis.etasdk.model.interfaces.IErn;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 
 
@@ -49,7 +50,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 	
 	private static final long serialVersionUID = 4105775934027363052L;
 
-	public static final String TAG = Eta.TAG_PREFIX + Store.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Store.class);
 
 	private String mErn;
 	private String mStreet;

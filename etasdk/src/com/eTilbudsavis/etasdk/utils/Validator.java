@@ -2,9 +2,11 @@ package com.eTilbudsavis.etasdk.utils;
 
 import java.util.regex.Pattern;
 
+import com.eTilbudsavis.etasdk.Constants;
+
 public class Validator {
 	
-	public static final String TAG = Validator.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Validator.class);
 	
 	public static final String APP_VERSION_FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([+-][0-9A-Za-z-.]*)?";
 	

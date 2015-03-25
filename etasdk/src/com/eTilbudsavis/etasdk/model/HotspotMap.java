@@ -14,6 +14,7 @@ import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api;
@@ -25,7 +26,7 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson
 	
 	private static final long serialVersionUID = -4654824845675092954L;
 
-	public static final String TAG = HotspotMap.class.getSimpleName();
+	public static final String TAG = Constants.getTag(HotspotMap.class);
 	
 	private static final String TYPE_OFFER = "offer";
 	

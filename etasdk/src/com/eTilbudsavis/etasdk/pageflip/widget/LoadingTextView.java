@@ -8,11 +8,12 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.TextView;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.R;
 
 public class LoadingTextView extends TextView {
 
-	public static final String TAG = LoadingTextView.class.getSimpleName();
+	public static final String TAG = Constants.getTag(LoadingTextView.class);
 	
 	public static final int DELAY = 350;
 	public static final int NUM_DOTS = 5;

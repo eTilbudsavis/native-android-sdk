@@ -1,10 +1,11 @@
 package com.eTilbudsavis.etasdk.test;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class EtaSdkTest {
 	
-	public static final String TAG = EtaSdkTest.class.getSimpleName();
+	public static final String TAG = Constants.getTag(EtaSdkTest.class);
 	private static final boolean LOG = false;
 	private static String mCurrentTitle;
 	private static long mStartScoped = 0;

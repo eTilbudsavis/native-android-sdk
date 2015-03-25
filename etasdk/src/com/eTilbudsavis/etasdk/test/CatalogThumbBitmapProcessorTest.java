@@ -3,12 +3,13 @@ package com.eTilbudsavis.etasdk.test;
 import junit.framework.Assert;
 import android.graphics.Bitmap;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.imageloader.impl.CatalogThumbBitmapProcessor;
 import com.eTilbudsavis.etasdk.model.Dimension;
 
 public class CatalogThumbBitmapProcessorTest {
 	
-	public static final String TAG = CatalogThumbBitmapProcessorTest.class.getSimpleName();
+	public static final String TAG = Constants.getTag(CatalogThumbBitmapProcessorTest.class);
 	
 	/** The current default height from the API */
 	public static final int HEIGHT = 212;

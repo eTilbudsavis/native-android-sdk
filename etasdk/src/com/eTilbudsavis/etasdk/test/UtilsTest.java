@@ -9,6 +9,7 @@ import java.util.Map;
 import junit.framework.Assert;
 import android.graphics.Color;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
@@ -16,7 +17,7 @@ import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class UtilsTest {
 	
-	public static final String TAG = UtilsTest.class.getSimpleName();
+	public static final String TAG = Constants.getTag(UtilsTest.class);
 	
 	public static final String REGEX_UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 	

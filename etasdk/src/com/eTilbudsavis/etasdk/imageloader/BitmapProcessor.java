@@ -2,12 +2,12 @@ package com.eTilbudsavis.etasdk.imageloader;
 
 import android.graphics.Bitmap;
 
-import com.eTilbudsavis.etasdk.DefaultThreadFactory;
+import com.eTilbudsavis.etasdk.EtaThreadFactory;
 
 /**
  * Interface that allows pre/post processing of Bitmaps while the ImageLoader
  * is performing the request. This method will be called from a thread in the
- * ExecutorService pool, so by using {@link DefaultThreadFactory} the interface
+ * ExecutorService pool, so by using {@link EtaThreadFactory} the interface
  * will be running on a low-priority thread.
  * 
  * @author Danny Hvam - danny@etilbudsavis.dk

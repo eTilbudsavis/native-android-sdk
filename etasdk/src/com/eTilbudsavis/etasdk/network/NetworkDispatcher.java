@@ -24,6 +24,7 @@ import org.json.JSONObject;
 
 import android.os.Process;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.SessionManager;
 import com.eTilbudsavis.etasdk.log.EtaLog;
@@ -34,7 +35,7 @@ import com.eTilbudsavis.etasdk.utils.HeaderUtils;
 
 public class NetworkDispatcher extends Thread {
 
-	public static final String TAG = Eta.TAG_PREFIX + NetworkDispatcher.class.getSimpleName();
+	public static final String TAG = Constants.getTag(NetworkDispatcher.class);
 	
     /** Eta object controlling the whole lot */
     private final Eta mEta;

@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import android.os.Parcel;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.model.Branding;
 import com.eTilbudsavis.etasdk.model.Catalog;
 import com.eTilbudsavis.etasdk.model.Country;
@@ -42,7 +43,7 @@ import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 
 public class ObjectTest {
 	
-	public static final String TAG = ObjectTest.class.getSimpleName();
+	public static final String TAG = Constants.getTag(ObjectTest.class);
 	
 	public static void test() {
 		

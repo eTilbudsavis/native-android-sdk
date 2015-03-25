@@ -15,11 +15,12 @@ import com.eTilbudsavis.etasdk.dataobserver.DataObserver;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Store;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 
 public class EtaLocation extends Location {
 
-	public static final String TAG = Eta.TAG_PREFIX + EtaLocation.class.getSimpleName();
+	public static final String TAG = Constants.getTag(EtaLocation.class);
 	
 	private static final String ERROR_RADIUS = "Radius must be within range %s to %s, provided radius: %s";
 	

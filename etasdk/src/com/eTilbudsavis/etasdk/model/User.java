@@ -28,6 +28,7 @@ import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IErn;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 
 
@@ -44,7 +45,7 @@ import com.eTilbudsavis.etasdk.utils.Json;
  */
 public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcelable {
 	
-	public static final String TAG = Eta.TAG_PREFIX + User.class.getSimpleName();
+	public static final String TAG = Constants.getTag(User.class);
 	
 	private static final long serialVersionUID = 1L;
 	

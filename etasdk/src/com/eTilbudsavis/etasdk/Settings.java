@@ -22,12 +22,13 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class Settings {
 
-	public static final String TAG = Eta.TAG_PREFIX + Settings.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Settings.class);
 	
 	/** Name for the SDK SharedPreferences file */
 	private static final String PREFS_NAME = "eta_sdk";

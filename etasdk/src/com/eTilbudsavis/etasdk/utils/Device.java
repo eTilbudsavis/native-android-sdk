@@ -21,11 +21,11 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 
 public class Device {
 	
-	public static final String TAG = Eta.TAG_PREFIX + Device.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Device.class);
 	
 	public static final long KB = 1024;
 	public static final long MB = KB * KB;

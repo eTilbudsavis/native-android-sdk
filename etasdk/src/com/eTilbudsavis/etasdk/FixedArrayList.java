@@ -20,7 +20,7 @@ import java.util.Collection;
 
 public class FixedArrayList<E> extends ArrayList<E> {
 	
-	public static final String TAG = Eta.TAG_PREFIX + FixedArrayList.class.getSimpleName();
+	public static final String TAG = Constants.getTag(FixedArrayList.class);
 	
 	private static final long serialVersionUID = -2709268219112197508L;
 	

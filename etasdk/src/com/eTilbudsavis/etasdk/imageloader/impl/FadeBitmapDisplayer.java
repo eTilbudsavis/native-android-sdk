@@ -1,5 +1,5 @@
 package com.eTilbudsavis.etasdk.imageloader.impl;
-
+import com.eTilbudsavis.etasdk.Constants;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.DecelerateInterpolator;
 
@@ -10,7 +10,7 @@ import com.eTilbudsavis.etasdk.imageloader.LoadSource;
 
 public class FadeBitmapDisplayer implements BitmapDisplayer {
 	
-	public static final String TAG = Eta.TAG_PREFIX + FadeBitmapDisplayer.class.getSimpleName();
+	public static final String TAG = Constants.getTag(FadeBitmapDisplayer.class);
 	
 	int mDuration = 100;
 	private boolean mFadeFromMemory = true;

@@ -1,11 +1,11 @@
 package com.eTilbudsavis.etasdk.log;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 
 
 public class SyncLog {
 
-	public static final String TAG = Eta.TAG_PREFIX + SyncLog.class.getSimpleName();
+	public static final String TAG = Constants.getTag(SyncLog.class);
 
 	private static boolean mLogSyncCycle = false;
 	private static boolean mSyncCycle = false;

@@ -5,11 +5,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Parcelable.Creator;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
 
 public class SerializationSpeedTest {
 	
-	public static final String TAG = SerializationSpeedTest.class.getSimpleName();
+	public static final String TAG = Constants.getTag(SerializationSpeedTest.class);
 
 	public static void test() {
 		test(100);

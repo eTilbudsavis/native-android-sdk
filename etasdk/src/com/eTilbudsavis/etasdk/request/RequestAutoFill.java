@@ -8,6 +8,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Catalog;
@@ -33,15 +34,20 @@ import com.eTilbudsavis.etasdk.utils.Api.Param;
 
 public abstract class RequestAutoFill<T> {
 	
-	public static final String TAG = Eta.TAG_PREFIX + RequestAutoFill.class.getSimpleName();
+	public static final String TAG = Constants.getTag(RequestAutoFill.class);
 	
 	private Listener<T> mListener;
 	private T mData;
 	private EtaError mError;
 	private AutoFillParams mParams;
 	private List<Request<?>> mRequests = new ArrayList<Request<?>>();
+	private Eta mEta;
 	
 	public abstract List<Request<?>> createRequests(T data);
+	
+	public RequestAutoFill() {
+		mEta = Eta.getInstance();
+	}
 	
 	public void prepare(AutoFillParams params, T data, Listener<T> l) {
 		prepare(params, data, null, l);
@@ -62,7 +68,7 @@ public abstract class RequestAutoFill<T> {
 			for (Request<?> r : mRequests) {
 				r.addEvent("executed-by-autofiller");
 				mParams.applyParams(r);
-				r.setDelivery(new ThreadDelivery(Eta.getInstance().getExecutor()));
+				r.setDelivery(new ThreadDelivery(mEta.getExecutor()));
 				rq.add(r);
 			}
 		} else if (mError==null) {
@@ -147,7 +153,7 @@ public abstract class RequestAutoFill<T> {
 				
 			}
 		});
-		req.setDelivery(new ThreadDelivery(Eta.getInstance().getExecutor()));
+		req.setDelivery(new ThreadDelivery(mEta.getExecutor()));
 		req.setIds(Param.DEALER_IDS, ids);
 		return req;
 	}
@@ -166,7 +172,7 @@ public abstract class RequestAutoFill<T> {
 				done();
 			}
 		});
-		r.setDelivery(new ThreadDelivery(Eta.getInstance().getExecutor()));
+		r.setDelivery(new ThreadDelivery(mEta.getExecutor()));
 		return r;
 	}
 
@@ -199,7 +205,7 @@ public abstract class RequestAutoFill<T> {
 				
 			}
 		});
-		req.setDelivery(new ThreadDelivery(Eta.getInstance().getExecutor()));
+		req.setDelivery(new ThreadDelivery(mEta.getExecutor()));
 		req.setIds(Param.STORE_IDS, ids);
 		return req;
 	}
@@ -218,7 +224,7 @@ public abstract class RequestAutoFill<T> {
 				done();
 			}
 		});
-		r.setDelivery(new ThreadDelivery(Eta.getInstance().getExecutor()));
+		r.setDelivery(new ThreadDelivery(mEta.getExecutor()));
 		return r;
 	}
 
@@ -254,7 +260,7 @@ public abstract class RequestAutoFill<T> {
 		};
 		
 		JsonArrayRequest req = new JsonArrayRequest(Endpoint.CATALOG_LIST, l);
-		req.setDelivery(new ThreadDelivery(Eta.getInstance().getExecutor()));
+		req.setDelivery(new ThreadDelivery(mEta.getExecutor()));
 		req.setIds(Param.CATALOG_IDS, ids);
 		return req;
 	}
@@ -273,7 +279,7 @@ public abstract class RequestAutoFill<T> {
 				done();
 			}
 		});
-		r.setDelivery(new ThreadDelivery(Eta.getInstance().getExecutor()));
+		r.setDelivery(new ThreadDelivery(mEta.getExecutor()));
 		return r;
 	}
 

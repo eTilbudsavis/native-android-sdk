@@ -35,6 +35,7 @@ import com.eTilbudsavis.etasdk.model.interfaces.IErn;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.model.interfaces.IStore;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
@@ -53,7 +54,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final String TAG = Eta.TAG_PREFIX + Offer.class.getSimpleName();
+	public static final String TAG = Constants.getTag(Offer.class);
 	
 	private String mErn;
 	private String mHeading;

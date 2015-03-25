@@ -3,11 +3,12 @@ package com.eTilbudsavis.etasdk.test;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Validator;
 
 public class ValidatorTest extends TestCase {
 	
-	public static final String TAG = ValidatorTest.class.getSimpleName();
+	public static final String TAG = Constants.getTag(ValidatorTest.class);
 	// TODO override all appropriate methods
 	
 

@@ -49,10 +49,11 @@ import com.eTilbudsavis.etasdk.utils.ListUtils;
  */
 public class ListManager {
 	
-	public static final String TAG = Eta.TAG_PREFIX + ListManager.class.getSimpleName();
+	public static final String TAG = Constants.getTag(ListManager.class);
 	
 	/** The global {@link Eta} object */
 	private Eta mEta;
+	private DbHelper mDb;
 	
 	/** Subscriber queue for shopping list changes */
 	private List<OnChangeListener> mListSubscribers = Collections.synchronizedList(new ArrayList<OnChangeListener>());
@@ -65,8 +66,9 @@ public class ListManager {
 	 * Default constructor for ListManager.
 	 * @param eta The {@link Eta} instance to use
 	 */
-	public ListManager(Eta eta) {
+	public ListManager(Eta eta, DbHelper db) {
 		mEta = eta;
+		mDb = db;
 	}
 	
 	/**
@@ -75,7 +77,7 @@ public class ListManager {
 	 * @return A shopping list, or {@code null}
 	 */
 	public Shoppinglist getList(String id) {
-		return DbHelper.getInstance().getList(id, user());
+		return mDb.getList(id, user());
 	}
 	
 	/**
@@ -84,7 +86,7 @@ public class ListManager {
 	 * @return A {@link List} of {@link Shoppinglist}, for current {@link User}
 	 */
 	public List<Shoppinglist> getLists() {
-		return DbHelper.getInstance().getLists(user()); 
+		return mDb.getLists(user()); 
 	}
 	
 	/**
@@ -98,8 +100,6 @@ public class ListManager {
 	 * @param sl A shoppinglist to add to the database
 	 */
 	public boolean addList(final Shoppinglist sl) {
-		
-		DbHelper db = DbHelper.getInstance();
 		
 		sl.setModified(new Date());
 		
@@ -124,22 +124,22 @@ public class ListManager {
 			sl.putShares(shares);
 
 			owner.setShoppinglistId(sl.getId());
-			db.insertShare(owner, user);
+			mDb.insertShare(owner, user);
 			
 		}
 		
 		sl.setPreviousId(ListUtils.FIRST_ITEM);
 		sl.setState(SyncState.TO_SYNC);
 		
-		Shoppinglist first = db.getFirstList(user);
+		Shoppinglist first = mDb.getFirstList(user);
 		if (first != null) {
 			first.setPreviousId(sl.getId());
 			first.setModified(new Date());
 			first.setState(SyncState.TO_SYNC);
-			db.editList(first, user);
+			mDb.editList(first, user);
 		}
 		
-		int count = db.insertList(sl, user);
+		int count = mDb.insertList(sl, user);
 		boolean success = count == 1;
 		if (success) {
 			mNotification.add(sl);
@@ -162,10 +162,8 @@ public class ListManager {
 	
 	private boolean editList(Shoppinglist sl, User user) {
 		
-		DbHelper db = DbHelper.getInstance();
-		
 		Map<String, Share> dbShares = new HashMap<String, Share>();
-		for (Share s : db.getShares(sl, user, false)) {
+		for (Share s : mDb.getShares(sl, user, false)) {
 			dbShares.put(s.getEmail(), s);
 		}
 		
@@ -177,7 +175,7 @@ public class ListManager {
 		if (!slShares.containsKey(user.getEmail())) {
 			Share dbShare = dbShares.get(user.getEmail());
 			dbShare.setState(SyncState.DELETE);
-			db.editShare(dbShare, user);
+			mDb.editShare(dbShare, user);
 			mNotification.del(sl);
 			sendNotification(mNotification);
 			return true;
@@ -208,7 +206,7 @@ public class ListManager {
 					
 					if (!dbShare.equals(slShare)) {
 						slShare.setState(SyncState.TO_SYNC);
-						db.editShare(slShare, user);
+						mDb.editShare(slShare, user);
 						mNotification.edit(sl);
 					}
 					
@@ -219,9 +217,9 @@ public class ListManager {
 					} else {
 						if (user.isLoggedIn()) {
 							dbShare.setState(SyncState.DELETE);
-							db.editShare(dbShare, user);
+							mDb.editShare(dbShare, user);
 						} else {
-							db.deleteShare(dbShare, user);
+							mDb.deleteShare(dbShare, user);
 						}
 						mNotification.edit(sl);
 					}
@@ -229,7 +227,7 @@ public class ListManager {
 				
 			} else {
 				Share slShare = slShares.get(shareId);
-				db.insertShare(slShare, user);
+				mDb.insertShare(slShare, user);
 				mNotification.edit(sl);
 			}
 			
@@ -246,7 +244,7 @@ public class ListManager {
 		sl.setState(SyncState.TO_SYNC);
 		
 		// Check for changes in previous item, and update surrounding
-		Shoppinglist oldList = db.getList(sl.getId(), user);
+		Shoppinglist oldList = mDb.getList(sl.getId(), user);
 		if (oldList == null) {
 			EtaLog.i(TAG, "No such list exists in the database. To add new items, use addList().");
 			return false;
@@ -255,28 +253,28 @@ public class ListManager {
 		if (oldList.getPreviousId() != null && !oldList.getPreviousId().equals(sl.getPreviousId())) {
 			
 			// If there is an item pointing at sl, it needs to point at the oldList.prev
-			Shoppinglist slAfter = db.getListPrevious(sl.getId(), user);
+			Shoppinglist slAfter = mDb.getListPrevious(sl.getId(), user);
 			if (slAfter != null) {
 				slAfter.setPreviousId(oldList.getPreviousId());
 				slAfter.setModified(now);
 				slAfter.setState(SyncState.TO_SYNC);
-				db.editList(slAfter, user);
+				mDb.editList(slAfter, user);
 				mNotification.edit(slAfter);
 			}
 			
 			// If some another sl was pointing at the same item, it should be pointing at sl
-			Shoppinglist slSamePointer = db.getListPrevious(sl.getPreviousId(), user);
+			Shoppinglist slSamePointer = mDb.getListPrevious(sl.getPreviousId(), user);
 			if (slSamePointer != null) {
 				slSamePointer.setPreviousId(sl.getId());
 				slSamePointer.setModified(now);
 				slSamePointer.setState(SyncState.TO_SYNC);
-				db.editList(slSamePointer, user);
+				mDb.editList(slSamePointer, user);
 				mNotification.edit(slSamePointer);
 			}
 			
 		}
 		
-		int count = db.editList(sl, user);
+		int count = mDb.editList(sl, user);
 		boolean success = count == 1;
 		if (success) {
 			mNotification.edit(sl);
@@ -302,19 +300,17 @@ public class ListManager {
 	
 	private boolean deleteList(Shoppinglist sl, User user) {
 		
-		DbHelper db = DbHelper.getInstance();
-		
 		Date now = new Date();
 		
 		sl.setModified(now);
 		
 		// Update previous pointer, to preserve order
-		Shoppinglist after = db.getListPrevious(sl.getId(), user);
+		Shoppinglist after = mDb.getListPrevious(sl.getId(), user);
 		if (after != null) {
 			after.setPreviousId(sl.getPreviousId());
 			after.setModified(now);
 			after.setState(SyncState.TO_SYNC);
-			db.editList(after, user);
+			mDb.editList(after, user);
 			mNotification.edit(after);
 		}
 		
@@ -327,13 +323,13 @@ public class ListManager {
 			for (ShoppinglistItem sli : items) {
 				sli.setState(SyncState.DELETE);
 				sli.setModified(now);
-				db.editItem(sli, user);
+				mDb.editItem(sli, user);
 				mNotification.del(sli);
 			}
 			 
 			// Update local version of shoppinglist
 			sl.setState(SyncState.DELETE);
-			count = db.editList(sl, user);
+			count = mDb.editList(sl, user);
 			
 		} else {
 
@@ -343,10 +339,10 @@ public class ListManager {
 				mNotification.del(sli);
 			}
 			
-			count = db.deleteList(sl, user);
+			count = mDb.deleteList(sl, user);
 			// Actually delete the items in the offline version
-			db.deleteShares(sl, user);
-			db.deleteItems(sl.getId(), null, user);
+			mDb.deleteShares(sl, user);
+			mDb.deleteItems(sl.getId(), null, user);
 			
 		}
 		
@@ -364,7 +360,7 @@ public class ListManager {
 	 * @return A shopping list item, or {@code null}
 	 */
 	public ShoppinglistItem getItem(String id) {
-		return DbHelper.getInstance().getItem(id, user());
+		return mDb.getItem(id, user());
 	}
 	
 	/**
@@ -374,7 +370,7 @@ public class ListManager {
 	 * @return A list of {@link ShoppinglistItem ShoppinglistItems}
 	 */
 	public List<ShoppinglistItem> getItems(Shoppinglist sl) {
-		List<ShoppinglistItem> items = DbHelper.getInstance().getItems(sl, user());
+		List<ShoppinglistItem> items = mDb.getItems(sl, user());
 		ListUtils.sortItems(items);
 		return items;
 	}
@@ -414,8 +410,6 @@ public class ListManager {
 			return false;
 		}
 		
-		DbHelper db = DbHelper.getInstance();
-		
 		Date now = new Date();
 		sli.setModified(now);
 		sli.setState(SyncState.TO_SYNC);
@@ -423,7 +417,7 @@ public class ListManager {
 		// If the item exists in DB, then just increase count and edit the item
 		if (incrementCount) {
 			
-			List<ShoppinglistItem> items = db.getItems(sli.getShoppinglistId(), user, false);
+			List<ShoppinglistItem> items = mDb.getItems(sli.getShoppinglistId(), user, false);
 			
 			if (sli.getOfferId() != null) {
 				for (ShoppinglistItem s : items) {
@@ -462,22 +456,22 @@ public class ListManager {
 		}
 		
 		sli.setPreviousId(ListUtils.FIRST_ITEM);
-		ShoppinglistItem first = db.getFirstItem(sli.getShoppinglistId(), user);
+		ShoppinglistItem first = mDb.getFirstItem(sli.getShoppinglistId(), user);
 		if (first != null) {
 			first.setPreviousId(sli.getId());
 			first.setModified(now);
 			first.setState(SyncState.TO_SYNC);
-			db.editItem(first, user);
+			mDb.editItem(first, user);
 			mNotification.edit(first);
 		}
 		
-		int count = db.insertItem(sli, user);
+		int count = mDb.insertItem(sli, user);
 		boolean success = count == 1;
 		if (success) {
 			/* Update SL info, but not state. This will prevent sync, and API
 			 * will auto update the modified tag, nice! */
 			sl.setModified(now);
-			db.editList(sl, user);
+			mDb.editList(sl, user);
 			mNotification.edit(sl);
 			mNotification.add(sli);
 		}
@@ -525,27 +519,25 @@ public class ListManager {
 	
 	private boolean editItem(final ShoppinglistItem sli, User user) {
 		
-		DbHelper db = DbHelper.getInstance();
-		
 		Date now = new Date();
 		sli.setModified(now);
 		sli.setState(SyncState.TO_SYNC);
 		
 		// Check for changes in previous item, and update surrounding
-		ShoppinglistItem oldItem = db.getItem(sli.getId(), user);
+		ShoppinglistItem oldItem = mDb.getItem(sli.getId(), user);
 		if (oldItem == null) {
 			EtaLog.i(TAG, "No such item exists, considder addItem() instead: " + sli.toString());
 			return false;
 		}
 		
-		boolean success = (db.editItem(sli, user) == 1);
+		boolean success = (mDb.editItem(sli, user) == 1);
 		if (success) {
 			/* Update SL info, but not state. This will prevent sync, and API
 			 * will auto update the modified tag, nice!
 			 */
 			Shoppinglist sl = getList(sli.getShoppinglistId());
 			sl.setModified(now);
-			db.editList(sl, user);
+			mDb.editList(sl, user);
 			mNotification.edit(sl);
 			mNotification.edit(sli);
 		}
@@ -612,8 +604,6 @@ public class ListManager {
 		if (!canEdit(sl, user))
 			return false;
 		
-		DbHelper db = DbHelper.getInstance();
-		
 		Date now = new Date();
 		
         List<ShoppinglistItem> list = getItems(sl);
@@ -633,7 +623,7 @@ public class ListManager {
 					sli.setPreviousId(preGoodId);
 					sli.setModified(now);
 					sli.setState(SyncState.TO_SYNC);
-					db.editItem(sli, user);
+					mDb.editItem(sli, user);
 				}
 				preGoodId = sli.getId();
 			}
@@ -643,10 +633,10 @@ public class ListManager {
 			for (ShoppinglistItem sli : mNotification.getDeletedItems()) {
 				sli.setState(SyncState.DELETE);
 				sli.setModified(now);
-				count += db.editItem(sli, user);
+				count += mDb.editItem(sli, user);
 			}
 		} else {
-			count = db.deleteItems(sl.getId(), stateToDelete, user) ;
+			count = mDb.deleteItems(sl.getId(), stateToDelete, user) ;
 		}
 		
 		boolean success = count == mNotification.getDeletedItems().size();
@@ -655,7 +645,7 @@ public class ListManager {
 			 * will auto update the modified tag, nice!
 			 */
 			sl.setModified(now);
-			db.editList(sl, user);
+			mDb.editList(sl, user);
 			mNotification.edit(sl);
 		}
 		
@@ -680,27 +670,25 @@ public class ListManager {
 	
 	private boolean deleteItem(ShoppinglistItem sli, User user) {
 		
-		DbHelper db = DbHelper.getInstance();
-		
 		Date now = new Date();
 		
 		sli.setModified(now);
 
 		// Update previous pointer
-		ShoppinglistItem after = db.getItemPrevious(sli.getShoppinglistId(), sli.getId(), user);
+		ShoppinglistItem after = mDb.getItemPrevious(sli.getShoppinglistId(), sli.getId(), user);
 		if (after != null) {
 			after.setPreviousId(sli.getPreviousId());
 			after.setModified(now);
-			db.editItem(after, user);
+			mDb.editItem(after, user);
 			mNotification.edit(after);
 		}
 		
 		int count = 0;
 		if (user.getUserId() != User.NO_USER) {
 			sli.setState(SyncState.DELETE);
-			count = db.editItem(sli, user);
+			count = mDb.editItem(sli, user);
 		} else {
-			count = db.deleteItem(sli, user);
+			count = mDb.deleteItem(sli, user);
 		}
 		boolean success = count == 1;
 		if (success) {
@@ -710,7 +698,7 @@ public class ListManager {
 			 */
 			Shoppinglist sl = getList(sli.getShoppinglistId());
 			sl.setModified(now);
-			db.editList(sl, user);
+			mDb.editList(sl, user);
 			mNotification.edit(sl);
 			
 			mNotification.del(sli);
@@ -725,7 +713,7 @@ public class ListManager {
 	 * @return A {@link User}
 	 */
 	private User user() {
-		return Eta.getInstance().getUser();
+		return mEta.getUser();
 	}
 	
 	/**
@@ -738,7 +726,7 @@ public class ListManager {
 		if (shoppinglistId == null || user == null) {
 			return false;
 		}
-		Shoppinglist sl = DbHelper.getInstance().getList(shoppinglistId, user());
+		Shoppinglist sl = mDb.getList(shoppinglistId, user());
 		return sl == null ? false : canEdit(sl, user);
 	}
 	
@@ -775,7 +763,7 @@ public class ListManager {
 	 * Deletes all rows in the {@link DbHelper database}.
 	 */
 	public void clear() {
-		DbHelper.getInstance().clear();
+		mDb.clear();
 	}
 
 	/**
@@ -783,7 +771,7 @@ public class ListManager {
 	 * given{@link User}.
 	 */
 	public void clear(int userId) {
-		DbHelper.getInstance().clear(userId);
+		mDb.clear(userId);
 	}
 	
 	/**
@@ -825,7 +813,7 @@ public class ListManager {
 	}
 	
 	private void sendNotification(ListNotification n) {
-		boolean p = Eta.getInstance().getSyncManager().isPaused();
+		boolean p = mEta.getSyncManager().isPaused();
 		EtaLog.d(TAG, "sendNotification-paused: " + p);
 		if (!p) {
 			notifySubscribers(n);
@@ -842,8 +830,8 @@ public class ListManager {
 		
 		synchronized (mListSubscribers) {
 			for (final OnChangeListener s : mListSubscribers) {
-
-				Eta.getInstance().getHandler().post(new Runnable() {
+				
+				mEta.getHandler().post(new Runnable() {
 					
 					public void run() {
 						

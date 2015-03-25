@@ -18,4 +18,14 @@
     <string name="app_name">eTilbudsavis SDK Demo</string>
     <string name="title_activity_main">eTilbudsavis SDK Demo</string>
     
+    <!--
+    API key and secret are not included in the demo, but you can grab your own at
+    https://etilbudsavis.dk/developers/ and get started :-)	
+     -->
+    <string name="eta_sdk_api_key">add_your_key</string>
+    <string name="eta_sdk_api_secret">add_your_key</string>
+    
+    <string name="eta_sdk_api_key_debug">add_your_key</string>
+    <string name="eta_sdk_api_secret_debug">add_your_key</string>
+    
 </resources>

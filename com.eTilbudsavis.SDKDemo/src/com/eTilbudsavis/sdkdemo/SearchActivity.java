@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.json.JSONArray;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -42,9 +41,9 @@ import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
 
-public class Search extends Activity {
-
-	public static final String TAG = "Search";
+public class SearchActivity extends BaseActivity {
+	
+	public static final String TAG = SearchActivity.class.getSimpleName();
 	
 	public static final String ARG_OFFERS = "offers";
 	public static final String ARG_QUERY = "query";
@@ -91,7 +90,7 @@ public class Search extends Activity {
 				
 				if (query.length() > 0) {
 					
-					mPd = ProgressDialog.show(Search.this, "", "Searching...", true, true);
+					mPd = ProgressDialog.show(SearchActivity.this, "", "Searching...", true, true);
 					performSearch(query);
 					
 				}
@@ -205,7 +204,7 @@ public class Search extends Activity {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			Offer o = mOffers.get(position);
-			LayoutInflater i = LayoutInflater.from(Search.this); 
+			LayoutInflater i = LayoutInflater.from(SearchActivity.this); 
 			TextView tv = (TextView) i.inflate(android.R.layout.simple_list_item_1, parent, false);
 			tv.setText(o.getHeading());
 			return tv;

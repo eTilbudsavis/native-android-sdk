@@ -21,11 +21,12 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class CupcakeGestureDetector implements GestureDetector {
 	
-    public static final String TAG = CupcakeGestureDetector.class.getSimpleName();
+    public static final String TAG = Constants.getTag(CupcakeGestureDetector.class);
     
     protected OnGestureListener mListener;
     float mLastTouchX;

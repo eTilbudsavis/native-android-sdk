@@ -18,7 +18,7 @@ import android.os.Build.VERSION_CODES;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Catalog;
@@ -27,7 +27,7 @@ import com.eTilbudsavis.etasdk.pageflip.PageflipViewPager;
 
 public class PageflipUtils {
 	
-	public static final String TAG = Eta.TAG_PREFIX + PageflipUtils.class.getSimpleName();
+	public static final String TAG = Constants.getTag(PageflipUtils.class);
 
 	private static final long LOW_MEMORY_BOUNDARY = 42;
 	
