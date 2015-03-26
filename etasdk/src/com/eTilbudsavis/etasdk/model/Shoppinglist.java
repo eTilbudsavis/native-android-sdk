@@ -30,14 +30,13 @@ import org.json.JSONObject;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IErn;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
-import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
 

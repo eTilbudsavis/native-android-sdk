@@ -1,5 +1,4 @@
 package com.eTilbudsavis.etasdk.imageloader.impl;
-import com.eTilbudsavis.etasdk.Constants;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -9,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 
 import android.content.Context;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.imageloader.FileCache;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
 import com.eTilbudsavis.etasdk.log.EtaLog;

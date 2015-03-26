@@ -29,11 +29,10 @@ import android.text.Html;
 import android.text.Spanned;
 import android.widget.AutoCompleteTextView;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
-import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 
 /**

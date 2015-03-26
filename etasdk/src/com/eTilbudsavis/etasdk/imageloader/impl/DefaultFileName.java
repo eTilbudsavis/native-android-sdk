@@ -1,8 +1,7 @@
 package com.eTilbudsavis.etasdk.imageloader.impl;
-import com.eTilbudsavis.etasdk.Constants;
 import java.net.URLEncoder;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.imageloader.FileNameGenerator;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
 import com.eTilbudsavis.etasdk.utils.HashUtils;

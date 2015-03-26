@@ -15,7 +15,6 @@ import com.eTilbudsavis.etasdk.dataobserver.DataObserver;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Store;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
-import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
 
 public class EtaLocation extends Location {

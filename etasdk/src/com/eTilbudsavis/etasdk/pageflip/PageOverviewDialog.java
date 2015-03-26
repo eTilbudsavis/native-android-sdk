@@ -24,7 +24,6 @@ import android.widget.TextView;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.imageloader.ImageLoader;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
 import com.eTilbudsavis.etasdk.model.Catalog;
 import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;

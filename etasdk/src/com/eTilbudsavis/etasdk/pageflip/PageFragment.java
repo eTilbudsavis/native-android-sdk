@@ -16,7 +16,6 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.R;
 import com.eTilbudsavis.etasdk.imageloader.BitmapDisplayer;
 import com.eTilbudsavis.etasdk.imageloader.BitmapProcessor;
-import com.eTilbudsavis.etasdk.imageloader.ImageLoader;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
 import com.eTilbudsavis.etasdk.imageloader.LoadSource;
 import com.eTilbudsavis.etasdk.log.EtaLog;

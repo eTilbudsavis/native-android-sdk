@@ -22,7 +22,6 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.eTilbudsavis.etasdk.log.EtaLog;
 

@@ -435,6 +435,7 @@ public final class Api {
 
 		private static final String HTTP = "http://";
 		private static final String HTTPS = "https://";
+		private static final String pathPrefix = "/";
 		
 		private String mEnvironment;
 		
@@ -482,7 +483,6 @@ public final class Api {
 				return path;
 			}
 			
-			String pathPrefix = "/";
 			if (!path.startsWith(pathPrefix)) {
 				path = pathPrefix+path;
 			}

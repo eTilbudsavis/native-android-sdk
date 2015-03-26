@@ -1,9 +1,8 @@
 package com.eTilbudsavis.etasdk.imageloader.impl;
-import com.eTilbudsavis.etasdk.Constants;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.DecelerateInterpolator;
 
-import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.imageloader.BitmapDisplayer;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
 import com.eTilbudsavis.etasdk.imageloader.LoadSource;
