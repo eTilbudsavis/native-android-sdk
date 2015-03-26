@@ -19,6 +19,7 @@ public class EtaSdkTest {
 		ObjectTest.test();
 		CatalogThumbBitmapProcessorTest.test();
 		SerializationSpeedTest.test();
+		EnvironmentTest.test();
 		
 		String ok = "*   All test passed (" + (System.currentTimeMillis()-start) + "ms)   *";
 		StringBuilder sb = new StringBuilder();

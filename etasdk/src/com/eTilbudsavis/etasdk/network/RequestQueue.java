@@ -33,6 +33,7 @@ import com.eTilbudsavis.etasdk.EtaLocation;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.log.EventLog;
 import com.eTilbudsavis.etasdk.network.impl.HandlerDelivery;
+import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
 import com.eTilbudsavis.etasdk.utils.Utils;
@@ -358,12 +359,9 @@ public class RequestQueue {
 	private void prepareRequest(Request<?> request) {
 		
 		request.addEvent("preparing-sdk-parameters");
-		// Append HOST if needed
-		String url = request.getUrl();
-		if (!url.startsWith("http")) {
-			String preUrl = Endpoint.getHost();
-			request.setUrl(preUrl + url);
-		}
+		
+		// Apply etilbudsavis environment, if needed
+		request.setUrl(Api.getEnvironment().apply(request.getUrl()));
 		
 		String version = mEta.getAppVersion();
 		if (version != null) {

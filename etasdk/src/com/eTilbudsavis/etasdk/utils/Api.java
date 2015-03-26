@@ -15,6 +15,46 @@ import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
  */
 public final class Api {
 	
+	/** The current API environment in use */
+	private static Environment mEnvironment = Environment.PRODUCTION;
+	
+	/** The current API environment in use for themes (used for e.g. shoppinglists */
+	private static ThemeEnvironment mThemeEnvironment = ThemeEnvironment.PRODUCTION;
+	
+	/**
+	 * Set the API environment the API should use.
+	 * 
+	 * <p>The environment will only be used, if you do not prefix your url's with another domain name.
+	 * it's therefore advised to use the url's exposed in {@link Endpoint}.</p>
+	 * @param e An {@link Environment}
+	 */
+	public static void setEnvironment(Environment e) {
+		mEnvironment = e;
+	}
+	
+	/**
+	 * Returns the current {@link Environment} in use.
+	 * @return The current {@link Environment}
+	 */
+	public static Environment getEnvironment() {
+		return mEnvironment;
+	}
+
+	/**
+	 * Set the {@link ThemeEnvironment} the SDK will be using.
+	 */
+	public static void setThemeEnvironment(ThemeEnvironment e) {
+		mThemeEnvironment = e;
+	}
+
+	/**
+	 * Returns the current {@link ThemeEnvironment} in use.
+	 * @return The current {@link Environment}
+	 */
+	public static ThemeEnvironment getThemeEnvironment() {
+		return mThemeEnvironment;
+	}
+	
 	/**
 	 * The delimiter used for separating multiple variables given to one parameter
 	 */
@@ -375,29 +415,137 @@ public final class Api {
 		public static final String ADDRESS  = "address";
 
 	}
+	
+	public enum Environment {
+		
+		PRODUCTION("https://api.etilbudsavis.dk"),
+		EDGE("https://edge.api.etilbudsavis.dk"),
+		STAGING("https://staging.api.etilbudsavis.dk"),
+		CUSTOM("https://api.etilbudsavis.dk");
 
+		private static final String HTTP = "http://";
+		private static final String HTTPS = "https://";
+		
+		private String mEnvironment;
+		
+		private Environment(String env) {
+			mEnvironment = env;
+		}
+		
+		@Override
+		public String toString() {
+			return mEnvironment;
+		}
+		
+		public static void setCustom(String env) {
+			if (env == null || env.isEmpty()) {
+				CUSTOM.mEnvironment = PRODUCTION.mEnvironment;
+			} else {
+				CUSTOM.mEnvironment = env;
+			}
+		}
+		
+		/**
+		 * Apply the environment to a given path/url.
+		 * 
+		 * <p>
+		 * The {@link Environment} will only be applied, if the url given is only the path of an url.
+		 * In a {@link Environment#PRODUCTION PRODUCTION} environment we will translate as follows: 
+		 * <ul>
+		 * 		<li>"/v2/catalogs" -> "https://api.etilbudsavis.dk/v2/catalogs"
+		 * 		<li><code>null</code> -> "https://api.etilbudsavis.dk/"
+		 * 		<li>"" -> "https://api.etilbudsavis.dk/"
+		 * </ul>
+		 * </p>
+		 * 
+		 * @param path
+		 * @return
+		 */
+		public String apply(String path) {
+			
+			if (path == null) {
+				path = "";
+			}
+			
+			if ( path.startsWith(HTTP) || path.startsWith(HTTPS) ) {
+				// cannot prefix environment to existing full url
+				return path;
+			}
+			
+			String pathPrefix = "/";
+			if (!path.startsWith(pathPrefix)) {
+				path = pathPrefix+path;
+			}
+			
+			return mEnvironment + path;
+			
+		}
+		
+		/**
+		 * Convert a string into an {@link Environment}.
+		 * @param env An environment string
+		 * @return A matching {@link Environment} or {@link Environment#PRODUCTION} if no match was found
+		 */
+		public static Environment fromString(String env) {
+			if (env != null) {
+				for (Environment e : Environment.values()) {
+					if (env.equalsIgnoreCase(e.mEnvironment)) {
+						return e;
+					}
+				}
+			}
+			Environment.setCustom(env);
+			return CUSTOM;
+		}
+		
+	};
+
+	public enum ThemeEnvironment {
+		
+		PRODUCTION("https://api.etilbudsavis.dk"),
+		STAGING("https://staging.api.etilbudsavis.dk");
+		
+		private final String mEnvironment;
+		
+		private ThemeEnvironment(String theme) {
+			mEnvironment = theme;
+		}
+		
+		@Override
+		public String toString() {
+			return mEnvironment;
+		}
+		
+		public String build(String path) {
+			return mEnvironment + path;
+		}
+
+		/**
+		 * Convert a string into an {@link ThemeEnvironment}.
+		 * @param env An environment string
+		 * @return A matching {@link ThemeEnvironment} or {@link ThemeEnvironment#PRODUCTION} if no match was found
+		 */
+		public static ThemeEnvironment fromString(String env) {
+			if (env != null) {
+				for (ThemeEnvironment e : ThemeEnvironment.values()) {
+					if (env.equalsIgnoreCase(e.mEnvironment)) {
+						return e;
+					}
+				}
+			}
+			return PRODUCTION;
+		}
+		
+	};
+	
 	/**
-	 * This class contains a sub-set of URL's needed to request data from the eTilbudsavis API,
-	 * and has factory methods to generate URL's, that dependent on information from objects (id's e.t.c).
+	 * This class contains a sub-set of paths needed to request data from the eTilbudsavis API,
+	 * and has methods to generate paths, that dependent on information from objects (id's e.t.c).
 	 * 
 	 * @author Danny Hvam - danny@etilbudsavis.dk
 	 */
 	public static class Endpoint {
 		
-		public class Prefix {
-
-			public static final String API_PRODUCTION = "https://api.etilbudsavis.dk";
-			public static final String API_EDGE = "https://edge.api.etilbudsavis.dk";
-			public static final String API_STAGING = "https://staging.api.etilbudsavis.dk";
-			
-			public static final String THEMES_PRODUCTION = "https://etilbudsavis.dk";
-			public static final String THEMES_STAGING = "https://staging.api.etilbudsavis.dk";
-
-		}
-		
-		public static String API_HOST_PREFIX = Prefix.API_PRODUCTION;
-		public static String THEMES_HOST_PREFIX = Prefix.THEMES_PRODUCTION;
-
 		public static final String CATALOG_LIST = "/v2/catalogs";
 		public static final String CATALOG_ID = "/v2/catalogs/";
 		public static final String CATALOG_SEARCH = "/v2/catalogs/search";
@@ -434,20 +582,6 @@ public final class Api {
 
 		public static final String PUSH_DEVICE_ID = "/v2/push/devices";
 		
-		/**
-		 * Get the current host to use. This can be changed by editing Endpoint.API_HOST_PREFIX.
-		 * https://{prefix}.etilbudsavis.dk
-		 * @return A string
-		 */
-		public static String getHost() {
-			return API_HOST_PREFIX;
-		}
-
-		/** {theme_host_prefix}/utils/ajax/lists/themes/ */
-		public static String themes() {
-			return String.format("%s/utils/ajax/lists/themes/", THEMES_HOST_PREFIX);
-		}
-
 		/** /v2/offers/{offer_id} */
 		public static String offerId(String offerId) {
 			return String.format("/v2/offers/%s", offerId);
