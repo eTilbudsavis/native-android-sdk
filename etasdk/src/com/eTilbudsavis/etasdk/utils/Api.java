@@ -4,11 +4,10 @@ import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 
 /**
- * The {@link Api} class is a static class, that contains miscellaneous helper variables, and
- * classes, that is needed when sending and recieving data to and from the eTilbudsavis API.
+ * The {@link Api} class contains miscellaneous helper variables, and classes, which comes very handy when interacting with the API.
  * 
  * <p>For a complete set of keys and their respective parameters, as well as detailed documentation,
- * in a given context, we will refer you to the <a href="http://engineering.etilbudsavis.dk/eta-api/">API documentation</a></p>
+ * in a given context, we will refer you to the <a href="http://docs.api.etilbudsavis.dk/">API documentation</a></p>
  * 
  * @author Danny Hvam - danny@eTilbudsavis.dk
  *
@@ -474,8 +473,8 @@ public final class Api {
 		 */
 		public String apply(String path) {
 			
-			if (path == null) {
-				path = "";
+			if (path == null || path.isEmpty()) {
+				return mEnvironment;
 			}
 			
 			if ( path.startsWith(HTTP) || path.startsWith(HTTPS) ) {

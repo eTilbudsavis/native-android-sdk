@@ -4,42 +4,57 @@ import junit.framework.TestCase;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Api.Environment;
-import com.eTilbudsavis.etasdk.utils.Validator;
 
 public class EnvironmentTest extends TestCase {
 	
 	public static final String TAG = Constants.getTag(EnvironmentTest.class);
-	// TODO override all appropriate methods
+
+	private static final String PROD = "https://api.etilbudsavis.dk";
+	private static final String EDGE = "https://edge.api.etilbudsavis.dk";
+	private static final String STAG = "https://staging.api.etilbudsavis.dk";
 	
 	public static void test() {
 		
 		EtaSdkTest.start(TAG);
+		testEnvironment();
 		testApply();
 		testFromString();
 		
 	}
+	
+	public static void testEnvironment() {
 
-	public static void testApply() {
+		assertEquals(Environment.PRODUCTION.toString(), PROD);
+		assertEquals(Environment.EDGE.toString(), EDGE);
+		assertEquals(Environment.STAGING.toString(), STAG);
+		// CUSTOM, can be anything, but null
+		assertNotNull(Environment.CUSTOM.toString());
+
+		EtaSdkTest.logTest(TAG, "Environment");
 		
-		String path = "/some/path";
-		String noSlashPath = "some/path";
-		String production = "https://api.etilbudsavis.dk/";
-
-		String etaApiUrl = "https://api.etilbudsavis.dk/some/path";
-		String httpUrl = "http://www.jubii.dk/";
-		String httpsUrl = "https://www.jubii.dk/";
+	}
+	
+	public static void testApply() {
 		
 		Environment e = Environment.PRODUCTION;
 		
 		// null 
 		String nul = e.apply(null);
-		assertEquals(production, nul);
+		assertEquals(PROD, nul);
 		
 		// empty
 		String empty = e.apply("");
-		assertEquals(production, empty);
+		assertEquals(PROD, empty);
 
+		String etaApiUrl = "https://api.etilbudsavis.dk/some/path";
+		
+		// Standard case
+		String path = "/some/path";
+		String standard = e.apply(path);
+		assertEquals(etaApiUrl, standard);
+		
 		// non prefixed path
+		String noSlashPath = "some/path";
 		String noSlash = e.apply(noSlashPath);
 		assertEquals(etaApiUrl, noSlash);
 
@@ -48,20 +63,16 @@ public class EnvironmentTest extends TestCase {
 		assertEquals(etaApiUrl, fullBuild);
 
 		// Any http prefixed url
+		String httpUrl = "http://www.jubii.dk/";
 		String http = e.apply(httpUrl);
 		assertEquals(httpUrl, http);
 
 		// Any https prefixed url
+		String httpsUrl = "https://www.jubii.dk/";
 		String https = e.apply(httpsUrl);
 		assertEquals(httpsUrl, https);
 		
-		// Standard case
-		String standard = e.apply(path);
-		assertEquals(etaApiUrl, standard);
-		
 		EtaSdkTest.logTest(TAG, "Apply");
-		
-		
 		
 	}
 
@@ -135,26 +146,4 @@ public class EnvironmentTest extends TestCase {
 		
 	}
 
-	public static void testValidVersion() {
-		
-		String[] valid = { "2.0.0", "2.0.0-rc.2", "2.0.0-rc.1", "1.0.0", "1.0.0-beta", 
-				"1.0.0-b", "1.0.0-beta", "1.0.0-chocolate", "1.0.0-15948", "1.0.0-rc-1" };
-		
-		
-		// Out regex haven't covered the case "1.0.0-" 
-		String[] invalid = { null, "jens", "", ".", "v", "v.1", "v1.0", "v1.0.0",
-				"1.", "1.0", "1.0.", "1.0.0.0", "v1.0.0-beta.2.2", "v1-beta" };
-		
-		for (String s : valid) {
-			assertTrue(Validator.isAppVersionValid(s));
-		}
-
-		for (String s : invalid) {
-			assertFalse(Validator.isAppVersionValid(s));
-		}
-
-		EtaSdkTest.logTest(TAG, "ValidVersion");
-	}
-
-	
 }
