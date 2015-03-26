@@ -1,6 +1,5 @@
 package com.eTilbudsavis.etasdk.test;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import com.eTilbudsavis.etasdk.Constants;
@@ -71,7 +70,9 @@ public class EnvironmentTest extends TestCase {
 		String prod = "https://api.etilbudsavis.dk";
 		String edge = "https://edge.api.etilbudsavis.dk";
 		String staging = "https://staging.api.etilbudsavis.dk";
-
+		
+		String customOriginal = Environment.CUSTOM.toString();
+		
 		// enums must match them selves
 		String prod1 = Environment.PRODUCTION.toString();
 		assertEquals(Environment.PRODUCTION, Environment.fromString(prod1));
@@ -126,6 +127,9 @@ public class EnvironmentTest extends TestCase {
 		assertNotSame(Environment.EDGE, Environment.STAGING);
 		assertNotSame(Environment.EDGE, Environment.CUSTOM);
 		assertNotSame(Environment.STAGING, Environment.CUSTOM);
+		
+		// Set CUSTOM to it's original value
+		Environment.setCustom(customOriginal);
 		
 		EtaSdkTest.logTest(TAG, "FromString");
 		
