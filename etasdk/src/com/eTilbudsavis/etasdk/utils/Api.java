@@ -416,6 +416,17 @@ public final class Api {
 
 	}
 	
+	/**
+	 * The {@link Environment} contains information on how (and where) to contact the eTilbudsavis API.
+	 * It by default contains three predefined settings, which maps directly to it's counterparts in our API.
+	 * And furthermore there is an option to set a {@link Environment#CUSTOM} environment, this is for local
+	 * delevopment and testing.
+	 * 
+	 * By default, the {@link Environment} is set to {@link Environment#PRODUCTION}.
+	 * 
+	 * @author Danny Hvam - danny@etilbudsavis.dk
+	 *
+	 */
 	public enum Environment {
 		
 		PRODUCTION("https://api.etilbudsavis.dk"),
@@ -519,7 +530,7 @@ public final class Api {
 		public String build(String path) {
 			return mEnvironment + path;
 		}
-
+		
 		/**
 		 * Convert a string into an {@link ThemeEnvironment}.
 		 * @param env An environment string
