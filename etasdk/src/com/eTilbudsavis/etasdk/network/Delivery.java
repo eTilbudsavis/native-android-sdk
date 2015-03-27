@@ -15,8 +15,7 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network;
 
-
-
+@SuppressWarnings("rawtypes")
 public interface Delivery {
 	
     /**
@@ -29,7 +28,7 @@ public interface Delivery {
     
     public class DeliveryRunnable implements Runnable {
     	
-        private final Request mRequest;
+		private final Request mRequest;
         private final Response mResponse;
         
         public DeliveryRunnable(Request request, Response response) {

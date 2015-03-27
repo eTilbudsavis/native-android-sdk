@@ -57,7 +57,7 @@ public class CacheDispatcher extends Thread {
 	@Override
 	public void run() {
 		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-		Request request;
+		Request<?> request;
 		while (true) {
 			try {
 				// Take a request from the queue.
@@ -79,7 +79,7 @@ public class CacheDispatcher extends Thread {
 			}
 			
 			if (!request.ignoreCache()) {
-				Response response = request.parseCache(mCache);
+				Response<?> response = request.parseCache(mCache);
 				// if the cache is valid, then return it
 				if ( response != null  ) {
 					request.addEvent("post-cache-item");

@@ -3,9 +3,6 @@ package com.eTilbudsavis.etasdk.pageflip.widget;
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.view.View;
-import android.view.ViewTreeObserver;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.TextView;
 
 import com.eTilbudsavis.etasdk.Constants;
@@ -39,21 +36,6 @@ public class LoadingTextView extends TextView {
 
 	public void init() {
 		mHandler = new Handler();
-//		obs();
-	}
-	
-	private void obs() {
-		final ViewTreeObserver vto = getViewTreeObserver();
-		vto.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-			
-		  public void onGlobalLayout() {
-		    if (getVisibility() == View.GONE) {
-		    	stop();
-		    } else {
-		    	start();
-		    }
-		  }
-		});
 	}
 	
 	public void setLoadingText(String header) {

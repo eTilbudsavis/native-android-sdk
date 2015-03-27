@@ -38,7 +38,7 @@ public class PageOverviewDialog extends DialogFragment {
 	private static final String ARG_PAGE = Constants.getArg("pageGridOverview.page");
 
 	private static final int MAX_WIDTH = 177;
-	private static final int MAX_HEIGHT = 212;
+//	private static final int MAX_HEIGHT = 212;
 	private static final int MAX_COLUMNS = 3;
 	
 	private Catalog mCatalog;

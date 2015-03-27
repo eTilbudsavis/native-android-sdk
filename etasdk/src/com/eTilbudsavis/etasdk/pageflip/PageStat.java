@@ -84,16 +84,6 @@ public class PageStat {
 		
 	}
 	
-	private void print(JSONObject body, JSONObject response, EtaError error) {
-		String format = null;
-		if (response== null) {
-			format = "ERROR - %s";
-		} else {
-			format = "OK - %s";
-		}
-		EtaLog.d(TAG, String.format(format, body.toString()));
-	}
-	
 	private JSONObject getCollectData(boolean isView, long ms) {
 		JSONObject o = new JSONObject();
 		try {

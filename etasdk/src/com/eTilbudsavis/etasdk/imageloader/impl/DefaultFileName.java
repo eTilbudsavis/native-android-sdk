@@ -1,6 +1,4 @@
 package com.eTilbudsavis.etasdk.imageloader.impl;
-import java.net.URLEncoder;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.imageloader.FileNameGenerator;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
@@ -13,10 +11,10 @@ public class DefaultFileName implements FileNameGenerator {
 	public String getFileName(ImageRequest ir) {
 		return HashUtils.md5(ir.getUrl());
 	}
-
-	@SuppressWarnings("deprecation")
-	private static String getName(String url) {
-		return URLEncoder.encode(url);
-	}
+	
+//	@SuppressWarnings("deprecation")
+//	private static String getName(String url) {
+//		return URLEncoder.encode(url);
+//	}
 	
 }

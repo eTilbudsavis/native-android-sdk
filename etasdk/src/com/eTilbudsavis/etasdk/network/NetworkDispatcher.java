@@ -77,7 +77,7 @@ public class NetworkDispatcher extends Thread {
 	@Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        Request request;
+        Request<?> request;
         while (true) {
             try {
                 // Take a request from the queue.
@@ -161,7 +161,7 @@ public class NetworkDispatcher extends Thread {
 	 * @param request to check
 	 * @return true if session-endpoint, eler false 
 	 */
-	private boolean isSessionEndpoint(Request request) {
+	private boolean isSessionEndpoint(Request<?> request) {
 		return request.getUrl().contains(Endpoint.SESSIONS);
 	}
 	
@@ -189,7 +189,7 @@ public class NetworkDispatcher extends Thread {
         
 	}
 	
-	private void appendLogging(Request req, NetworkResponse resp) {
+	private void appendLogging(Request<?> req, NetworkResponse resp) {
 
 		try {
 			

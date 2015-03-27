@@ -168,7 +168,6 @@ public class UtilsTest {
 		EtaSdkTest.logTest(TAG, "IsGenderValid");
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static void testStringToDate() {
 
 		// TODO How do we handle date tests
