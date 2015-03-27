@@ -130,7 +130,7 @@ public class Eta {
 	private SyncManager mSyncManager;
 	
 	/** A static handler for usage in the SDK, this will help prevent leaks */
-	private static Handler mHandler;
+	private final Handler mHandler = new Handler(Looper.getMainLooper());
 	
 	/** A {@link RequestQueue} implementation to handle all API requests */
 	private RequestQueue mRequestQueue;
@@ -139,15 +139,13 @@ public class Eta {
 	private ExecutorService mExecutor;
 	
 	/** Counting the number of active activities, to determine when to stop any long running activities */
-	private AtomicInteger mActivityCounter;
+	private final AtomicInteger mActivityCounter = new AtomicInteger();;
 	
 	/** The ImageLoader for use by clients, and SDK */
 	private ImageLoader mImageLoader;
 
 	/** The development flag, indicating the app is in development */
 	private boolean mDevelop = false;
-	
-	private static Object INSTANCE_LOCK = new Object();
 	
 	/**
 	 * Default constructor, this is private to allow us to create a singleton instance
@@ -159,14 +157,12 @@ public class Eta {
 		
 		// Get a context that isn't likely to disappear with an activity.
 		mContext = context.getApplicationContext();
-		mActivityCounter = new AtomicInteger();
 		init();
 	}
 	
 	private void init() {
 		
 		setAppVersion(Utils.getAppVersion(mContext));
-		mHandler = new Handler(Looper.getMainLooper());
 		mExecutor = Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT, new EtaThreadFactory());
 		mImageLoader = new ImageLoader(mContext, mExecutor);
 		mSettings = new Settings(mContext);
@@ -201,7 +197,7 @@ public class Eta {
 	 * @throws IllegalStateException If {@link Eta} no instance is available
 	 */
 	public static Eta getInstance() {
-		synchronized (INSTANCE_LOCK) {
+		synchronized (Eta.class) {
 			if (mEta == null) {
 				throw new IllegalStateException("Eta.create() needs to be invoked prior to Eta.getInstance()");
 			}
@@ -219,7 +215,7 @@ public class Eta {
 	 */
 	public static Eta create(Context ctx) {
 		
-		synchronized (INSTANCE_LOCK) {
+		synchronized (Eta.class) {
 			if (isCreated()) {
 				EtaLog.v(TAG, "Eta instance already created - ignoring");	
 			} else {
@@ -236,7 +232,7 @@ public class Eta {
 	 * @return {@code true} if Eta is instantiated, else {@code false}
 	 */
 	public static boolean isCreated() {
-		synchronized (INSTANCE_LOCK) {
+		synchronized (Eta.class) {
 			return mEta != null;
 		}
 	}
@@ -484,8 +480,8 @@ public class Eta {
 	 * {@link #create(Context)} it again.</p>
 	 */
 	public void destroy() {
-		synchronized (INSTANCE_LOCK) {
-			mActivityCounter.set(0);
+		synchronized (Eta.class) {
+			mActivityCounter.set(1);
 			onStop();
 			clear();
 			mEta = null;
@@ -538,47 +534,52 @@ public class Eta {
 	
 	private void finalCleanup() {
 		// TODO don't need to null everything
-		synchronized (INSTANCE_LOCK) {
+		synchronized (Eta.class) {
 			mEta = null;
 			mApiKey = null;
 			mApiSecret = null;
 			mAppVersion = null;
 			mContext = null;
 			mExecutor = null;
-			mHandler = null;
 			mListManager = null;
 			mRequestQueue = null;
 			mSessionManager = null;
 			mSettings = null;
 			mSyncManager = null;
-			mActivityCounter = null;
 		}
 	}
 	
 	public void onStart() {
-		int init = mActivityCounter.getAndIncrement();
-		if (init == 0 && isStarted()) {
-			mHandler.removeCallbacks(termination);
-			setupKeys(mContext);
-			mSessionManager.onStart();
-			mListManager.onStart();
-			mSyncManager.onStart();
-			EtaLog.v(TAG, "SDK has been started");
+		if (mActivityCounter.getAndIncrement() == 0) {
+			internalStart();
 		}
+	}
+	
+	private void internalStart() {
+//		mHandler.removeCallbacks(termination);
+		setupKeys(mContext);
+		mSessionManager.onStart();
+		mListManager.onStart();
+		mSyncManager.onStart();
+		EtaLog.v(TAG, "SDK has been started");
 	}
 	
 	public void onStop() {
 		mActivityCounter.decrementAndGet();
 		if (!isStarted()) {
-			mSettings.saveLocation(mLocation);
-			mListManager.onStop();
-			mSyncManager.onStop();
-			mSessionManager.onStop();
-			mSettings.setLastUsageNow();
-			mActivityCounter.set(0);
-			mHandler.postDelayed(termination, Utils.SECOND_IN_MILLIS * 5);
-			EtaLog.v(TAG, "SDK has been stopped");
+			internalStop();
 		}
+	}
+	
+	private void internalStop() {
+		mSettings.saveLocation(mLocation);
+		mListManager.onStop();
+		mSyncManager.onStop();
+		mSessionManager.onStop();
+		mSettings.setLastUsageNow();
+		mActivityCounter.set(0);
+//		mHandler.postDelayed(termination, Utils.SECOND_IN_MILLIS * 5);
+		EtaLog.v(TAG, "SDK has been stopped");
 	}
 	
 }
