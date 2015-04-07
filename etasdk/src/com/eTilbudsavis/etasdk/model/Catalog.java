@@ -516,7 +516,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	}
 	
 	/**
-	 * Method for setting the {@link Store} associated with this catalog
+	 * Method for setting the {@link Store} associated with this catalog, and updates the {@link Catalog#getStoreId() store id} to match the new {@link Store} object.
 	 * @param store A Store object
 	 */
 	public Catalog setStore(Store store) {
@@ -537,7 +537,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	}
 
 	/**
-	 * Method for setting the {@link Dealer} associated with this catalog
+	 * Method for setting the {@link Dealer} associated with this catalog, and updates the {@link Catalog#getDealerId() dealer id} to match the new {@link Dealer} object.
 	 * @param store A Dealer object
 	 */
 	public Catalog setDealer(Dealer dealer) {

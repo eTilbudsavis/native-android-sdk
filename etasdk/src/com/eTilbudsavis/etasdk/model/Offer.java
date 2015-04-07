@@ -560,7 +560,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	}
 	
 	/**
-	 * Set a {@link Catalog} on this offer
+	 * Set a {@link Catalog} on this offer, and updates the {@link Offer#getCatalogId() catalog id} to match the new {@link Catalog} object.
 	 * @param catalog A {@link Catalog} (preferably related to this offer)
 	 * @return This object
 	 */
@@ -584,7 +584,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	}
 
 	/**
-	 * Set a {@link Dealer} on this offer
+	 * Set a {@link Dealer} on this offer, and updates the {@link Offer#getDealerId() dealer id} to match the new {@link Dealer} object.
 	 * @param dealer A {@link Dealer} (preferably related to this offer)
 	 * @return This object
 	 */
@@ -608,7 +608,8 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	}
 
 	/**
-	 * Set a {@link Store} on this offer
+	 * Set a {@link Store} on this offer, and updates the {@link Offer#getStoreId() store id} to match the new {@link Store} object.
+	 *  
 	 * @param store A {@link Store} (preferably related to this offer)
 	 * @return This object
 	 */

@@ -174,72 +174,144 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 	public String getErnType() {
 		return IErn.TYPE_STORE;
 	}
-	
+
+	/**
+	 * Set a street for this {@link Store}.
+	 * @param street A street
+	 * @return this object
+	 */
 	public Store setStreet(String street) {
 		mStreet = street;
 		return this;
 	}
 
+	/**
+	 * Get the street for this {@link Store}
+	 * @return A street, or <code>null</code>
+	 */
 	public String getStreet() {
 		return mStreet;
 	}
 
+	/**
+	 * Set a city for this {@link Store}.
+	 * @param city A city
+	 * @return this object
+	 */
 	public Store setCity(String city) {
 		mCity = city;
 		return this;
 	}
 
+	/**
+	 * Get the city for this {@link Store}
+	 * @return A city, or <code>null</code>
+	 */
 	public String getCity() {
 		return mCity;
 	}
-
+	
+	/**
+	 * Set a zipcode for this {@link Store}.
+	 * @param zipcode A zipcode
+	 * @return this object
+	 */
 	public Store setZipcode(String zipcode) {
 		mZipcode = zipcode;
 		return this;
 	}
-
+	
+	/**
+	 * Get the zip code for this {@link Store}
+	 * @return A zipcode, or <code>null</code>
+	 */
 	public String getZipcode() {
 		return mZipcode;
 	}
-
+	
+	/**
+	 * Set the {@link Country} object for this {@link Store}
+	 * @param country A {@link Country}
+	 * @return this object
+	 */
 	public Store setCountry(Country country) {
 		mCountry = country;
 		return this;
 	}
-
+	
+	/**
+	 * Get the country for this object
+	 * @return A {@link Country}, or <code>null</code>
+	 */
 	public Country getCountry() {
 		return mCountry;
 	}
 
+	/**
+	 * Set the latitude for this {@link Store}
+	 * @param latitude
+	 * @return this object
+	 */
 	public Store setLatitude(Double latitude) {
 		mLatitude = latitude;
 		return this;
 	}
-
+	
+	/**
+	 * Set the latitude for this {@link Store}
+	 * @return A latitude, or 0.0d if no latitude was provided for this {@link Store}
+	 */
 	public Double getLatitude() {
 		return mLatitude;
 	}
 
+	/**
+	 * Set the longitude for this {@link Store}
+	 * @param longitude
+	 * @return this object
+	 */
 	public Store setLongitude(Double longitude) {
 		mLongitude = longitude;
 		return this;
 	}
 
+	/**
+	 * Set the longitude for this {@link Store}
+	 * @return A longitude, or 0.0d if no longitude was provided for this {@link Store}
+	 */
 	public Double getLongitude() {
 		return mLongitude;
 	}
 
+	/**
+	 * Get the URL that points directly to the {@link Dealer} resource of this
+	 * {@link Store}, this is for convenience only.
+	 * <p>e.g.: "https://api.etilbudsavis.dk/v2/dealers/9bc61"</p>
+	 * @return A {@link String}, or <code>null</code>
+	 */
 	public String getDealerUrl() {
 		return mDealerUrl;
 	}
-
+	
+	/**
+	 * Set an URL of the {@link Dealer} resource of this {@link Store}.
+	 * <p>This is most likely decided by the API</p>
+	 * @param url An URL to a dealer resource
+	 * @return This object
+	 */
 	public Store setDealerUrl(String url) {
 		mDealerUrl = url;
 		return this;
 	}
-
-	public Store setDealerId(String dealer) {
-		mDealerId = dealer;
+	
+	/**
+	 * Set the id for a {@link Dealer} resource related to this {@link Store}.
+	 * <p>This is most likely to be set by the API, not the client</p>
+	 * @param dealerId A secure id - as provided by the API
+	 * @return This object
+	 */
+	public Store setDealerId(String dealerId) {
+		mDealerId = dealerId;
 		if (mDealerId == null) {
 			mDealer = null;
 		} else if (mDealer != null && !mDealerId.equals(mDealer.getId()) ) {
@@ -248,34 +320,68 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Se
 		return this;
 	}
 
+	/**
+	 * Get the id for a {@link Dealer} resource related to this {@link Store}. 
+	 * @return An id, or <code>null</code>
+	 */
 	public String getDealerId() {
 		return mDealerId;
 	}
-
+	
+	/**
+	 * The {@link Branding} that is specific for this {@link Store}
+	 * @return A {@link Branding}, or <code>null</code>
+	 */
 	public Branding getBranding() {
 		return mBranding;
 	}
-
+	
+	/**
+	 * Set a {@link Branding} that is specific for this store.
+	 * @param branding A {@link Branding}
+	 * @return this object
+	 */
 	public Store setBranding(Branding branding) {
 		mBranding = branding;
 		return this;
 	}
-
+	
+	/**
+	 * This is (for now) unused by the API. Please ignore.
+	 */
 	public Store setContact(String contact) {
 		mContact = contact;
 		return this;
 	}
-	
+
+	/**
+	 * This is (for now) unused by the API. Please ignore.
+	 * @return A string, or <code>null</code>
+	 */
 	public String getContact() {
 		return mContact;
 	}
 
+	/**
+	 * Set a {@link Dealer} on this {@link Store}, and updates the {@link Store#getDealerId() dealer id} to match the new {@link Dealer} object.
+	 * @param dealer A {@link Dealer} (preferably related to this store)
+	 * @return This object
+	 */
 	public Store setDealer(Dealer d) {
 		mDealer = d;
 		mDealerId = (mDealer==null ? null : mDealer.getId());
 		return this;
 	}
-	
+
+	/**
+	 * Get the {@link Dealer} which is (or rather should be, but this is not
+	 * guaranteed) related to this store.
+	 * 
+	 * <p>The dealer-object <b>is not</b> automatically set by the SDK.
+	 * The developer, needs to get the dealer resource from {@link #getDealerUrl()},
+	 * and then add it with {@link #setDealer(Dealer)}.</p>
+	 * @return A {@link Dealer}, or null if developer have not set the resource
+	 */
 	public Dealer getDealer() {
 		return mDealer;
 	}
