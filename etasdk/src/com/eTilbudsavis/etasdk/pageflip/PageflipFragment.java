@@ -9,8 +9,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -32,7 +34,7 @@ import com.eTilbudsavis.etasdk.request.impl.CatalogObjectRequest.CatalogAutoFill
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
-public class PageflipFragment extends Fragment implements PageCallback, OnPageChangeListener {
+public class PageflipFragment extends Fragment implements PageCallback, OnPageChangeListener, OnKeyListener {
 	
 	public static final String TAG = Constants.getTag(PageflipFragment.class);
 	
@@ -183,6 +185,8 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		mInflater = inflater;
 		mContainer = container;
 		setUpView(true);
+//		mFrame.setFocusableInTouchMode(true);
+//		mFrame.setOnKeyListener(this);
 		return mFrame;
 		
 	}
@@ -545,6 +549,14 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	 * @return false
 	 */
 	public boolean onBackPressed() {
+		return false;
+	}
+
+	public boolean onKey(View v, int keyCode, KeyEvent event) {
+
+		if (event != null && event.getAction() == KeyEvent.ACTION_UP) {
+			EtaLog.d(TAG, "KeyCode: " + keyCode);
+		}
 		return false;
 	}
 	

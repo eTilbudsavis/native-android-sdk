@@ -25,6 +25,7 @@ import android.widget.TextView;
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
+import com.eTilbudsavis.etasdk.imageloader.impl.FadeBitmapDisplayer;
 import com.eTilbudsavis.etasdk.model.Catalog;
 import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
 import com.eTilbudsavis.etasdk.utils.Utils;
@@ -201,12 +202,16 @@ public class PageOverviewDialog extends DialogFragment {
 			int vpad = Utils.convertDpToPx(0, a);
 			int hpad = Utils.convertDpToPx(5, a);
 			tv.setPadding(hpad, vpad, hpad, vpad);
-			
-			tv.setBackgroundColor(Color.parseColor("#a0000000"));
+
+			int c = mCatalog.getBranding().getColor();
+			int alphaColor = (c & 0xffffff) | (160 << 24);
+			tv.setBackgroundColor(alphaColor);
 			fl.addView(tv);
 			
 			String url = mCatalog.getPages().get(position).getThumb();
-			Eta.getInstance().getImageloader().displayImage(new ImageRequest(url, iv));
+			ImageRequest ir = new ImageRequest(url, iv);
+			ir.setBitmapDisplayer(new FadeBitmapDisplayer(100, false, true, true));
+			Eta.getInstance().getImageloader().displayImage(ir);
 			
 			return fl;
 		}
