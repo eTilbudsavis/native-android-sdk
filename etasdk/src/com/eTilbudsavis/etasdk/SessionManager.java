@@ -222,7 +222,15 @@ public class SessionManager {
 	 * @return true if SessionManager can recover from this error, else false
 	 */
 	public static boolean recoverableError(EtaError e) {
-		return ( e != null && ( e.getCode() == 1101 || e.getCode() == 1104 || e.getCode() == 1108) );
+		if (e != null) {
+			if (e.getCode() == EtaError.Code.TOKEN_EXPIRED || 
+					e.getCode() == EtaError.Code.INVALID_SIGNATURE || 
+					e.getCode() == EtaError.Code.MISSING_TOKEN || 
+					e.getCode() == EtaError.Code.INVALID_TOKEN) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
