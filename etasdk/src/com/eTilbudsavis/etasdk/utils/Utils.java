@@ -25,7 +25,6 @@ import java.util.UUID;
 
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Color;
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Constants;
@@ -337,7 +336,12 @@ public final class Utils {
 	    float dp = (float)px / c.getResources().getDisplayMetrics().density;
 	    return (int)dp;
 	}
-
+	
+	/**
+	 * Get the version name contained in the AndroidManifest
+	 * @param c A {@link Context} to get the the info from
+	 * @return A version name string, or <code>null</code>
+	 */
 	public static String getAppVersion(Context c) {
 		
 		try {

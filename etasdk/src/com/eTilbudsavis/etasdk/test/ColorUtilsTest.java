@@ -42,8 +42,7 @@ public class ColorUtilsTest {
 		// Even though we have a large number to represent alpha
 		// the first 8 bits are 0 and therefore useless, so no alpha will be applied
 		Assert.assertEquals(c, whiteTransparent);
-
-		EtaSdkTest.logTest(TAG, "ApplyAlpha");
+		EtaSdkTest.logTest(TAG, (new MethodNameHelper(){}).getName());
 	}
 	
 	public static void testColorToString(boolean showWarnings) {
@@ -87,7 +86,7 @@ public class ColorUtilsTest {
 		colorString = ColorUtils.toString(Color.BLACK, showWarnings, true);
 		Assert.assertNotSame("000000", colorString);
 		
-		EtaSdkTest.logTest(TAG, "ColorToString");
+		EtaSdkTest.logTest(TAG, (new MethodNameHelper(){}).getName());
 	}
 
 	public static void testStringToColor() {
@@ -105,7 +104,7 @@ public class ColorUtilsTest {
 		Assert.assertNotSame(Color.MAGENTA, ColorUtils.toColor(""));
 		Assert.assertNotSame(Color.MAGENTA, ColorUtils.toColor(null));
 		
-		EtaSdkTest.logTest(TAG, "StringToColor");
+		EtaSdkTest.logTest(TAG, (new MethodNameHelper(){}).getName());
 	}
 
 	public static void testColorSanitize(boolean showWarnings) {
@@ -123,7 +122,7 @@ public class ColorUtilsTest {
 		int alphaRed = Color.parseColor("#55FF0000");
 		Assert.assertFalse(alphaRed == ColorUtils.stripAlpha(alphaRed, showWarnings));
 		
-		EtaSdkTest.logTest(TAG, "ColorSanitize");
+		EtaSdkTest.logTest(TAG, (new MethodNameHelper(){}).getName());
 	}
 	
 }
