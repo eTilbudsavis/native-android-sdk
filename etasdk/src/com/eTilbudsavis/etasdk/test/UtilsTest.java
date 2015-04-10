@@ -13,6 +13,7 @@ import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.utils.ColorUtils;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class UtilsTest {
@@ -28,9 +29,6 @@ public class UtilsTest {
 		testMapToQueryString();
 		testRequestToUrlAndQueryString();
 		testIsSuccess();
-		testColorToString(false);
-		testStringToColor();
-		testColorSanitize(false);
 //		testStringToDate();
 //		testDateToString();
 		
@@ -253,66 +251,4 @@ public class UtilsTest {
 		EtaSdkTest.logTest(TAG, "DateToString");
 	}
 
-	public static void testColorToString(boolean showWarnings) {
-		
-		Assert.assertEquals("000000", Utils.colorToString(Color.BLACK));
-		Assert.assertEquals("FFFFFF", Utils.colorToString(Color.WHITE));
-		Assert.assertEquals("FF0000", Utils.colorToString(Color.RED));
-		Assert.assertEquals("00FF00", Utils.colorToString(Color.GREEN));
-		Assert.assertEquals("0000FF", Utils.colorToString(Color.BLUE));
-		Assert.assertEquals(null, Utils.colorToString(null));
-		
-		Assert.assertNotSame("0000FF", Utils.colorToString(Color.LTGRAY));
-		Assert.assertNotSame("0000FF", Utils.colorToString(Color.CYAN));
-		Assert.assertNotSame("0000FF", Utils.colorToString(Color.MAGENTA));
-		Assert.assertNotSame("0000FF", Utils.colorToString(Color.YELLOW));
-		
-		Assert.assertNotSame("thisColor", Utils.colorToString(null));
-		
-		Assert.assertNotSame("danny", Utils.colorToString(24, showWarnings));
-		Assert.assertNotSame("bente", Utils.colorToString(78, showWarnings));
-		Assert.assertNotSame(null, Utils.colorToString(78, showWarnings));
-		Assert.assertNotSame("", Utils.colorToString(78, showWarnings));
-		Assert.assertEquals("000000", Utils.colorToString(Color.TRANSPARENT, showWarnings));
-		Assert.assertNotSame("00000000", Utils.colorToString(Color.TRANSPARENT, showWarnings));
-		
-		EtaSdkTest.logTest(TAG, "ColorToString");
-	}
-
-	public static void testStringToColor() {
-		
-		
-		Assert.assertEquals(Integer.valueOf(Color.BLACK), Utils.stringToColor("000000"));
-		Assert.assertEquals(Integer.valueOf(Color.WHITE), Utils.stringToColor("FFFFFF"));
-		Assert.assertEquals(Integer.valueOf(Color.RED), Utils.stringToColor("FF0000"));
-		Assert.assertEquals(Integer.valueOf(Color.GREEN), Utils.stringToColor("00FF00"));
-		Assert.assertEquals(Integer.valueOf(Color.BLUE), Utils.stringToColor("0000FF"));
-		
-		Assert.assertNotSame(Color.BLACK, Utils.stringToColor("00FFF0"));
-		Assert.assertNotSame(1, Utils.stringToColor("00FFF0"));
-		Assert.assertNotSame(Color.MAGENTA, Utils.stringToColor("000000"));
-		Assert.assertNotSame(Color.MAGENTA, Utils.stringToColor(""));
-		Assert.assertNotSame(Color.MAGENTA, Utils.stringToColor(null));
-		
-		EtaSdkTest.logTest(TAG, "StringToColor");
-	}
-
-	public static void testColorSanitize(boolean showWarnings) {
-		
-		Assert.assertTrue(null == Utils.colorSanitize(null));
-		
-		Assert.assertTrue(Color.BLUE == Utils.colorSanitize(Color.BLUE));
-		Assert.assertTrue(Color.RED == Utils.colorSanitize(Color.RED));
-		Assert.assertTrue(Color.GREEN == Utils.colorSanitize(Color.GREEN));
-		
-		// Removing transparency
-		Assert.assertFalse(Color.TRANSPARENT == Utils.colorSanitize(Color.TRANSPARENT, showWarnings));
-		Assert.assertTrue(Color.BLACK == Utils.colorSanitize(Color.TRANSPARENT, showWarnings));
-		
-		int alphaRed = Color.parseColor("#55FF0000");
-		Assert.assertFalse(alphaRed == Utils.colorSanitize(alphaRed, showWarnings));
-		
-		EtaSdkTest.logTest(TAG, "ColorSanitize");
-	}
-	
 }

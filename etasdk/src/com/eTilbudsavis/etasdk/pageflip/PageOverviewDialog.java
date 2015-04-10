@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -28,6 +29,7 @@ import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
 import com.eTilbudsavis.etasdk.imageloader.impl.FadeBitmapDisplayer;
 import com.eTilbudsavis.etasdk.model.Catalog;
 import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
+import com.eTilbudsavis.etasdk.utils.ColorUtils;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
 @SuppressWarnings("deprecation")
@@ -202,10 +204,8 @@ public class PageOverviewDialog extends DialogFragment {
 			int vpad = Utils.convertDpToPx(0, a);
 			int hpad = Utils.convertDpToPx(5, a);
 			tv.setPadding(hpad, vpad, hpad, vpad);
-
-			int c = mCatalog.getBranding().getColor();
-			int alphaColor = (c & 0xffffff) | (160 << 24);
-			tv.setBackgroundColor(alphaColor);
+			
+			tv.setBackgroundDrawable(getDrawable());
 			fl.addView(tv);
 			
 			String url = mCatalog.getPages().get(position).getThumb();
@@ -215,7 +215,20 @@ public class PageOverviewDialog extends DialogFragment {
 			
 			return fl;
 		}
-
+		
+		private GradientDrawable getDrawable() {
+			int color = mCatalog.getBranding().getColor();
+			color = ColorUtils.applyAlpha(color, 160);
+			
+			float radius = Utils.convertDpToPx(3, getActivity());
+			
+			GradientDrawable gd = new GradientDrawable();
+			gd.setColor(color);
+			gd.setCornerRadius(radius);
+			gd.setStroke(1, 0x80303030);
+			return gd;
+		}
+		
 		public Object[] getSections() {
 			return sections;
 		}

@@ -249,7 +249,7 @@ public class Json {
 	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
 	 */
 	public static Integer colorValueOf(JSONObject object, String key, int color) {
-		return colorValueOf(object, key, Utils.colorToString(color));
+		return colorValueOf(object, key, ColorUtils.toString(color));
 	}
 	
 	/**
@@ -261,7 +261,7 @@ public class Json {
 	 */
 	public static Integer colorValueOf(JSONObject object, String key, String defValue) {
 		String rawColor = Json.valueOf(object, key, defValue);
-		return Utils.stringToColor(rawColor);
+		return ColorUtils.toColor(rawColor);
 	}
 	
 }

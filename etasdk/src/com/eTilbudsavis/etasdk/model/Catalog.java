@@ -37,6 +37,7 @@ import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.model.interfaces.IStore;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.utils.ColorUtils;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
@@ -186,7 +187,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 			o.put(JsonKey.ID, Json.nullCheck(getId()));
 			o.put(JsonKey.ERN, Json.nullCheck(getErn()));
 			o.put(JsonKey.LABEL, Json.nullCheck(getLabel()));
-			o.put(JsonKey.BACKGROUND, Json.nullCheck(Utils.colorToString(getBackground())));
+			o.put(JsonKey.BACKGROUND, Json.nullCheck(ColorUtils.toString(getBackground())));
 			o.put(JsonKey.RUN_FROM, Json.nullCheck(Utils.dateToString(getRunFrom())));
 			o.put(JsonKey.RUN_TILL, Json.nullCheck(Utils.dateToString(getRunTill())));
 			o.put(JsonKey.PAGE_COUNT, getPageCount());
@@ -272,7 +273,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 	}
 	
 	public Catalog setBackground(Integer background) {
-		mBackground = Utils.colorSanitize(background);
+		mBackground = ColorUtils.stripAlpha(background);
 		return this;
 	}
 

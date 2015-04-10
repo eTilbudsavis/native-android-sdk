@@ -16,6 +16,7 @@ public class EtaSdkTest {
 
 		ValidatorTest.test();
 		UtilsTest.test();
+		ColorUtilsTest.test();
 		ObjectTest.test();
 		CatalogThumbBitmapProcessorTest.test();
 		SerializationSpeedTest.test();

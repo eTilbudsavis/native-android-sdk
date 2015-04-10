@@ -27,6 +27,7 @@ import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.utils.ColorUtils;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
@@ -79,7 +80,7 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 			o.put(JsonKey.NAME, Json.nullCheck(getName()));
 			o.put(JsonKey.WEBSITE, Json.nullCheck(getWebsite()));
 			o.put(JsonKey.LOGO, Json.nullCheck(getLogo()));
-			o.put(JsonKey.COLOR, Json.nullCheck(Utils.colorToString(getColor())));
+			o.put(JsonKey.COLOR, Json.nullCheck(ColorUtils.toString(getColor())));
 			o.put(JsonKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
@@ -115,7 +116,7 @@ public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 	}
 
 	public Branding setColor(Integer color) {
-		mColor = Utils.colorSanitize(color);
+		mColor = ColorUtils.stripAlpha(color);
 		return this;
 	}
 

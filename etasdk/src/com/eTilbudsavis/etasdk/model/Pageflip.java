@@ -27,8 +27,8 @@ import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.utils.ColorUtils;
 import com.eTilbudsavis.etasdk.utils.Json;
-import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 	
@@ -53,7 +53,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 	}
 	
 	public Pageflip(int color) {
-		mColor = Utils.colorSanitize(color);
+		mColor = ColorUtils.stripAlpha(color);
 	}
 	
 	public static Pageflip fromJSON(JSONObject pageflip) {
@@ -72,7 +72,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 		JSONObject o = new JSONObject();
 		try {
 			o.put(JsonKey.LOGO, Json.nullCheck(getLogo()));
-			o.put(JsonKey.COLOR, Json.nullCheck(Utils.colorToString(mColor)));
+			o.put(JsonKey.COLOR, Json.nullCheck(ColorUtils.toString(mColor)));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -93,7 +93,7 @@ public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
 	}
 	
 	public Pageflip setColor(Integer color) {
-		mColor = Utils.colorSanitize(color);
+		mColor = ColorUtils.stripAlpha(color);
 		return this;
 	}
 	
