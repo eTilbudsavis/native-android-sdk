@@ -313,6 +313,9 @@ public final class Api {
 		/** Parameter for catalog id's */
 		public static final String CATALOG_IDS = "catalog_ids";
 
+		/** Parameter for catalog id's */
+		public static final String CATALOG_ID = "catalog_id";
+
 		/** Parameter for store id's */
 		public static final String STORE_IDS = "store_ids";
 

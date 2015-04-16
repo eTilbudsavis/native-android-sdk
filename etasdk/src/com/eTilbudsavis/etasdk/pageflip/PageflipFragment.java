@@ -649,6 +649,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		
 		public void onError(EtaError error) {
 			log("onError: " + (error == null ? "null" : error.toJSON().toString()));
+			error = (error == null) ? new EtaError(0, "Unknown Error", "No details available") : error;
 			if (post()) mListener.onError(error);
 		}
 		
