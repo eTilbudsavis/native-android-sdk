@@ -5,7 +5,7 @@ import junit.framework.Assert;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.model.Branding;
@@ -40,6 +40,7 @@ import com.eTilbudsavis.etasdk.model.interfaces.IErn;
 import com.eTilbudsavis.etasdk.model.interfaces.IStore;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class ObjectTest {
 	
@@ -93,11 +94,7 @@ public class ObjectTest {
 		Assert.assertTrue(obj.same(tmp));
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        ShoppinglistItem parceledObj = ShoppinglistItem.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, ShoppinglistItem.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -141,11 +138,7 @@ public class ObjectTest {
 		Assert.assertEquals(Shoppinglist.TYPE_SHOPPING_LIST, obj.getType());
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Shoppinglist parceledObj = Shoppinglist.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Shoppinglist.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -174,11 +167,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Session parceledObj = Session.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Session.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -208,18 +197,10 @@ public class ObjectTest {
 		testIErn(obj, IErn.TYPE_DEALER, "12fakeid56");
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Dealer parceledObj = Dealer.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Dealer.CREATOR);
         
         obj.setColor(null);
-        parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        parceledObj = Dealer.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Dealer.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -248,18 +229,10 @@ public class ObjectTest {
 		testIErn(obj, IErn.TYPE_CATALOG, "12fakeid56");
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Catalog parceledObj = Catalog.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Catalog.CREATOR);
         
         obj.setBackground(null);
-        parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        parceledObj = Catalog.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Catalog.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -296,11 +269,7 @@ public class ObjectTest {
 		testIErn(obj, IErn.TYPE_STORE, "12fakeid56");
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Store parceledObj = Store.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Store.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -330,11 +299,7 @@ public class ObjectTest {
 		testIErn(obj, IErn.TYPE_COUNTRY, "EU");
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Country parceledObj = Country.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Country.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -366,11 +331,7 @@ public class ObjectTest {
 		Assert.assertTrue(obj.same(tmp));
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Share parceledObj = Share.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Share.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -400,11 +361,7 @@ public class ObjectTest {
 		testIErn(obj, IErn.TYPE_USER, "1569");
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        User parceledObj = User.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, User.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -430,18 +387,10 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Branding parceledObj = Branding.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Branding.CREATOR);
         
         obj.setColor(null);
-        parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        parceledObj = Branding.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Branding.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -467,11 +416,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Dimension parceledObj = Dimension.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Dimension.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -497,11 +442,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Hotspot parceledObj = Hotspot.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Hotspot.CREATOR);
         
         // TODO This contains json array JSON
         EtaSdkTest.logTestWarning(TAG, "Hotspot", "NO JSON TESTING DONE - Json will fail");
@@ -528,11 +469,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        HotspotMap parceledObj = HotspotMap.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, HotspotMap.CREATOR);
         
         // TODO This contains json array JSON
         EtaSdkTest.logTestWarning(TAG, "HotspotMap", "NO JSON TESTING DONE - Json will fail");
@@ -554,18 +491,10 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Pageflip parceledObj = Pageflip.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
-
+		testParcelable(obj, Pageflip.CREATOR);
+		
         obj.setColor(null);
-        parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        parceledObj = Pageflip.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Pageflip.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -592,11 +521,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Permission parceledObj = Permission.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Permission.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -616,11 +541,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Typeahead parceledObj = Typeahead.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Typeahead.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -629,6 +550,7 @@ public class ObjectTest {
         try {
             jObj.put(JsonKey.SUBJECT, "fake-subject-new");
         } catch (JSONException e) {
+        	
         }
         jsonObj = Typeahead.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -646,11 +568,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Subscription parceledObj = Subscription.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Subscription.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -676,11 +594,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Pricing parceledObj = Pricing.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Pricing.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -707,11 +621,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Links parceledObj = Links.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Links.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -738,11 +648,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Images parceledObj = Images.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Images.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -768,12 +674,8 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Si parceledObj = Si.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
-        
+		testParcelable(obj, Si.CREATOR);
+		
         // JSON
         JSONObject jObj = obj.toJSON();
         Si jsonObj = Si.fromJSON(jObj);
@@ -790,7 +692,7 @@ public class ObjectTest {
         EtaSdkTest.logTest(TAG, "Si");
         
 	}
-
+	
 	public static void testUnit() {
 		Unit obj = ObjectCreator.getUnit();
 		Unit tmp = ObjectCreator.getUnit();
@@ -798,11 +700,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Unit parceledObj = Unit.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Unit.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -828,11 +726,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Pieces parceledObj = Pieces.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Pieces.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -858,11 +752,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Size parceledObj = Size.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Size.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -888,11 +778,7 @@ public class ObjectTest {
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Quantity parceledObj = Quantity.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledObj);
+		testParcelable(obj, Quantity.CREATOR);
         
         // JSON
         JSONObject jObj = obj.toJSON();
@@ -917,11 +803,7 @@ public class ObjectTest {
 		testIErn(obj, IErn.TYPE_OFFER, "12fakeid56");
 		
 		// Parcelable
-        Parcel parcel = Parcel.obtain();
-        obj.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-        Offer parceledobj = Offer.CREATOR.createFromParcel(parcel);
-        Assert.assertEquals(obj, parceledobj);
+		testParcelable(obj, Offer.CREATOR);
         
         // TODO Can't run thing yet, uncomment when moved to junit project
 		// Parcelable - false
@@ -1030,4 +912,12 @@ public class ObjectTest {
 		
 	}
 
+	public static <T extends Parcelable> void testParcelable(T obj, Parcelable.Creator<T> creator) {
+		T copy = Utils.copyParcelable(obj, creator);
+		// May not refer to the same object
+		Assert.assertNotSame(obj, copy);
+		// Must be equal
+		Assert.assertEquals(obj, copy);
+	}
+	
 }

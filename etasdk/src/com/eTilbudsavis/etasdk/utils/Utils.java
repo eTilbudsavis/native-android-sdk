@@ -26,6 +26,8 @@ import java.util.UUID;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
@@ -350,6 +352,20 @@ public final class Utils {
 			EtaLog.e(TAG, null, e);
 		}
 		return null;
+	}
+	
+	/**
+	 * Create a deep copy of any {@link Parcelable} implementation.
+	 *  
+	 * @param obj An object to clone
+	 * @param creator The creator to clone from
+	 * @return A clone of the obj
+	 */
+	public static <T extends Parcelable> T copyParcelable(T obj, Parcelable.Creator<T> creator) {
+        Parcel parcel = Parcel.obtain();
+        obj.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        return creator.createFromParcel(parcel);
 	}
 	
 }

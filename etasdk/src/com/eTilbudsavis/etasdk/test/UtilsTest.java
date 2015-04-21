@@ -7,13 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.Assert;
-import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Si;
 import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.utils.ColorUtils;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class UtilsTest {
@@ -31,6 +30,7 @@ public class UtilsTest {
 		testIsSuccess();
 //		testStringToDate();
 //		testDateToString();
+		testCopy();
 		
 	}
 	
@@ -251,4 +251,35 @@ public class UtilsTest {
 		EtaSdkTest.logTest(TAG, "DateToString");
 	}
 
+	public static void testCopy() {
+		
+		/*
+		 * We are assuming (at this point) that Si class is okay.
+		 * Si will be unit testet later, so don't worry
+		 */
+		Si obj = new Si();
+		Si copy = Utils.copyParcelable(obj, Si.CREATOR);
+		Assert.assertNotSame(obj, null);
+		Assert.assertNotSame(obj, copy);
+		Assert.assertEquals(obj, copy);
+		
+		copy = Utils.copyParcelable(obj, Si.CREATOR);
+		// They must not refer to the same object (as it's been deep copied)
+		Assert.assertNotSame(obj, copy);
+		// But they must be equal
+		Assert.assertEquals(obj,  copy);
+		obj.setSymbol("USD");
+		Assert.assertNotSame(obj, copy);
+		Assert.assertFalse(obj.equals(copy));
+		
+		copy = Utils.copyParcelable(obj, Si.CREATOR);
+		// They must not refer to the same object (as it's been deep copied)
+		Assert.assertNotSame(obj, copy);
+		// But they must be equal
+		Assert.assertEquals(obj,  copy);
+		
+		EtaSdkTest.logTest(TAG, "Copy");
+		
+	}
+	
 }
