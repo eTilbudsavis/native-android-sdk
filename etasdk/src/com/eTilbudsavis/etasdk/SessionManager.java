@@ -93,10 +93,10 @@ public class SessionManager {
 						setSession(response);
 						runQueue();
 						
-					} else if (error.getCode() == EtaError.Code.NETWORK_ERROR) {
+					} else if (error.isSdk()) {
 						
-						// We cannot really do anything.
-						// we'll just prevent the session from being destroyed
+						// Only API responses should result in a session update.
+						// We'll prevent the session from being destroyed, and 'ignore' the problem
 						runQueue();
 						
 					} else if (mTryToRecover && recoverableError(error) ) {
@@ -244,7 +244,7 @@ public class SessionManager {
 	public static boolean isSessionError(EtaError e) {
 		return ( e != null && ( 1100 <= e.getCode() && e.getCode() < 1200 ) );
 	}
-
+	
 	public Request<?> getRequestInFlight() {
 		synchronized (LOCK) {
 			return mReqInFlight;
