@@ -154,8 +154,7 @@ public class Eta {
 	 * @param context A context
 	 */
 	private Eta(Context context) {
-		
-		// Get a context that isn't likely to disappear with an activity.
+		// Get application context, to avoid memory leaks (e.g. holding a reference to an Activity)
 		mContext = context.getApplicationContext();
 		init();
 	}
@@ -420,42 +419,45 @@ public class Eta {
 		return mDevelop;
 	}
 	
+	private boolean isKeySecretOk() {
+		if (mApiKey == null || mApiSecret == null) {
+			// Reset both to keep sane state
+			mApiKey = null;
+			mApiSecret = null;
+		}
+		return mApiKey != null && mApiSecret != null;
+	}
+	
 	private void setupKeys(Context c) {
 		
 		Bundle b = getMetaBundle(c);
 		if (b == null) {
-			EtaLog.w(TAG, "Meta data from AndroidManifest.xml not available.");
-			return;
+			throw new IllegalStateException("Package meta data not available.");
 		}
 		
-		String apiKey = b.getString(Constants.META_API_KEY);
-		String apiSecret = b.getString(Constants.META_API_SECRET);
-		
-		boolean hasKeys = (apiKey != null) && (apiSecret != null);
-		
-		if (mDevelop) {
+		if (isDevelop()) {
 			
-			String apiKeyDebug = b.getString(Constants.META_DEVELOP_API_KEY);
-			String apiSecretDebug = b.getString(Constants.META_DEVELOP_API_SECRET);
-			boolean hasDebugKeys = (apiKeyDebug != null) && (apiSecretDebug != null);
+			mApiKey = b.getString(Constants.META_DEVELOP_API_KEY);
+			mApiSecret = b.getString(Constants.META_DEVELOP_API_SECRET);
 			
-			if (hasDebugKeys) {
-				mApiKey = apiKeyDebug;
-				mApiSecret = apiSecretDebug;
-				EtaLog.i(TAG, "Eta SDK is using developkeys");
-				return;
+			if (isKeySecretOk()) {
+				EtaLog.i(TAG, "Using development key/secret");
+				if (BuildConfig.DEBUG) {
+					EtaLog.w(TAG, "Caution, please avoid using development key/secrets in production builds");
+				}
 			} else {
-				mDevelop = false;
-				EtaLog.w(TAG, "Delevop flag set, but no develop keys found in AndroidManifest.xml - continuing with regulare keys");
+				EtaLog.w(TAG, "Debug flag set, but no develop keys found.");
 			}
 			
 		}
 		
-		if (hasKeys) {
-			mApiKey = apiKey;
-			mApiSecret = apiSecret;
-		} else {
-			EtaLog.w(TAG, "No API key/secret found in AndroidManifest.xml");
+		if (!isKeySecretOk()) {
+			mApiKey = b.getString(Constants.META_API_KEY);
+			mApiSecret = b.getString(Constants.META_API_SECRET);
+		}
+		
+		if (!isKeySecretOk()) {
+			throw new IllegalStateException("API key/secret missing from AndroidManifest.xml");
 		}
 		
 	}
@@ -481,8 +483,7 @@ public class Eta {
 	 */
 	public void destroy() {
 		synchronized (Eta.class) {
-			mActivityCounter.set(1);
-			onStop();
+			internalStop();
 			clear();
 			mEta = null;
 		}
