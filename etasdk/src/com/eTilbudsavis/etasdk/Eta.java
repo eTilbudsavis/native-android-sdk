@@ -22,9 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -90,7 +87,7 @@ import com.eTilbudsavis.etasdk.utils.Validator;
  * 
  * 
  * @author Danny Hvam - danny@etilbudsavis.dk
- * @version 2.1.0
+ * @version 2.2.1
  *
  */
 public class Eta {
@@ -139,7 +136,7 @@ public class Eta {
 	private ExecutorService mExecutor;
 	
 	/** Counting the number of active activities, to determine when to stop any long running activities */
-	private final AtomicInteger mActivityCounter = new AtomicInteger();;
+	private final AtomicInteger mActivityCounter = new AtomicInteger();
 	
 	/** The ImageLoader for use by clients, and SDK */
 	private ImageLoader mImageLoader;
@@ -430,7 +427,7 @@ public class Eta {
 	
 	private void setupKeys(Context c) {
 		
-		Bundle b = getMetaBundle(c);
+		Bundle b = Utils.getMetaData(c);
 		if (b == null) {
 			throw new IllegalStateException("Package meta data not available.");
 		}
@@ -442,9 +439,6 @@ public class Eta {
 			
 			if (isKeySecretOk()) {
 				EtaLog.i(TAG, "Using development key/secret");
-				if (BuildConfig.DEBUG) {
-					EtaLog.w(TAG, "Caution, please avoid using development key/secrets in production builds");
-				}
 			} else {
 				EtaLog.w(TAG, "Debug flag set, but no develop keys found.");
 			}
@@ -462,18 +456,6 @@ public class Eta {
 		
 	}
 	
-	private Bundle getMetaBundle(Context c) {
-		
-		try {
-			PackageManager pm = c.getPackageManager();
-		    ApplicationInfo ai = pm.getApplicationInfo(c.getPackageName(), PackageManager.GET_META_DATA);
-		    return ai.metaData;
-		} catch (NameNotFoundException e) {
-			// ignore
-		}
-		return null;
-	}
-
 	/**
 	 * First clears all preferences with {@link #clear()}, and then {@code null's}
 	 * this instance of Eta

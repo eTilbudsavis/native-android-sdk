@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -368,4 +370,23 @@ public final class Utils {
         return creator.createFromParcel(parcel);
 	}
 	
+	/**
+	 * Method for getting the meta data from a given {@link Context}
+	 * @param c A context
+	 * @return A {@link Bundle} or <code>null</code>
+	 */
+	public static Bundle getMetaData(Context c) {
+		
+		try {
+			PackageManager pm = c.getPackageManager();
+		    ApplicationInfo ai = pm.getApplicationInfo(c.getPackageName(), PackageManager.GET_META_DATA);
+		    return ai.metaData;
+		} catch (NameNotFoundException e) {
+			// ignore
+		} catch (NullPointerException e) {
+			// ignore
+		}
+		return null;
+	}
+
 }
