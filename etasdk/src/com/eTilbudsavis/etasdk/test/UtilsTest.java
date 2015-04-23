@@ -1,9 +1,11 @@
 package com.eTilbudsavis.etasdk.test;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.Assert;
@@ -30,7 +32,7 @@ public class UtilsTest {
 		testIsSuccess();
 //		testStringToDate();
 //		testDateToString();
-		testCopy();
+		testCopyParcelable();
 		
 	}
 	
@@ -51,7 +53,7 @@ public class UtilsTest {
 		otherUuid = otherUuid.replace("a", "2").replace("b", "2").replace("c", "2").replace("d", "2").replace("e", "2").replace("f", "2");
 		Assert.assertTrue(otherUuid.matches(REGEX_UUID));
 		
-		// G is not in a uuid
+		// G is not a valid char in a UUID
 		String uuidFake = "83g24023-3225-4392-9362-332619620638";
 		Assert.assertFalse(uuidFake.matches(REGEX_UUID));
 		
@@ -250,8 +252,8 @@ public class UtilsTest {
 
 		EtaSdkTest.logTest(TAG, "DateToString");
 	}
-
-	public static void testCopy() {
+	
+	public static void testCopyParcelable() {
 		
 		/*
 		 * We are assuming (at this point) that Si class is okay.
@@ -277,6 +279,13 @@ public class UtilsTest {
 		Assert.assertNotSame(obj, copy);
 		// But they must be equal
 		Assert.assertEquals(obj,  copy);
+		
+		List<Si> list = new ArrayList<Si>();
+		list.add(new Si());
+		list.add(new Si());
+		list.add(new Si());
+		
+		List<Si> listCopy = Utils.copyParcelable(list, Si.CREATOR);
 		
 		EtaSdkTest.logTest(TAG, "Copy");
 		

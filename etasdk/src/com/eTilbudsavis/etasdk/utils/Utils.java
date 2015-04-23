@@ -371,7 +371,21 @@ public final class Utils {
 	}
 	
 	/**
-	 * Method for getting the meta data from a given {@link Context}
+	 * Create a deep copy of any {@link List} containing {@link Parcelable} 
+	 * @param list A list to clone
+	 * @param creator The creator to clone from
+	 * @return A cloned list
+	 */
+	public static <T extends Parcelable> List<T> copyParcelable(List<T> list, Parcelable.Creator<T> creator) {
+		ArrayList<T> tmp = new ArrayList<T>();
+		for (T t : list) {
+			tmp.add(copyParcelable(t, creator));
+		}
+		return tmp;
+	}
+	
+	/**
+	 * Method for getting the meta data from a {@link Context}
 	 * @param c A context
 	 * @return A {@link Bundle} or <code>null</code>
 	 */
