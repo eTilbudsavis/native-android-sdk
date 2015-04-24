@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/etasdk_layout_pageflip_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    
+    <com.eTilbudsavis.etasdk.pageflip.PageflipViewPager
+        android:id="@+id/etasdk_layout_pageflip_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    
+    <com.eTilbudsavis.etasdk.pageflip.widget.LoadingTextView
+        android:id="@+id/etasdk_layout_pageflip_loader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:text="Bilka\n..."
+        android:textSize="30sp" />
+    
+</FrameLayout><!-- From: file:/Users/oizo/AndroidStudioProjects/native-android-sdk/etasdk/src/main/res/layout/etasdk_layout_pageflip.xml --><!-- From: file:/Users/oizo/AndroidStudioProjects/native-android-sdk/etaSdkDemo/build/intermediates/exploded-aar/native-android-sdk/etasdk/unspecified/res/layout/etasdk_layout_pageflip.xml -->

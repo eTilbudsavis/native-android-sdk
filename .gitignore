@@ -18,16 +18,10 @@ com.eTilbudsavis.SDKDemo/res/values/strings_keys.xml
 # Local configuration file (sdk path, etc)
 local.properties
 
-
 # Android Studio
-.idea/
 .gradle
-/*/local.properties
-/*/out
-/*/*/build
-/*/*/production
-*.iml
-*.iws
-*.ipr
-*~
-*.swp
+local.properties
+.idea/workspace.xml
+.idea/libraries
+.DS_Store
+build

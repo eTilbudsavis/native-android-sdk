@@ -1,0 +1,96 @@
+-- Merging decision tree log ---
+manifest
+ADDED from AndroidManifest.xml:16:1
+	package
+		ADDED from AndroidManifest.xml:17:5
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	android:versionName
+		ADDED from AndroidManifest.xml:19:5
+	android:versionCode
+		ADDED from AndroidManifest.xml:18:5
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	xmlns:android
+		ADDED from AndroidManifest.xml:16:11
+uses-sdk
+ADDED from AndroidManifest.xml:21:5
+MERGED from native-android-sdk:etasdk:unspecified:22:5
+MERGED from com.android.support:support-v4:20.0.0:16:5
+MERGED from com.android.support:support-v4:20.0.0:16:5
+	android:targetSdkVersion
+		ADDED from AndroidManifest.xml:23:9
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	android:minSdkVersion
+		ADDED from AndroidManifest.xml:22:9
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+uses-permission#android.permission.INTERNET
+ADDED from AndroidManifest.xml:25:5
+	android:name
+		ADDED from AndroidManifest.xml:25:22
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from AndroidManifest.xml:26:5
+	android:name
+		ADDED from AndroidManifest.xml:26:22
+application
+ADDED from AndroidManifest.xml:28:5
+MERGED from com.android.support:support-v4:20.0.0:17:5
+MERGED from com.android.support:support-v4:20.0.0:17:5
+	android:label
+		ADDED from AndroidManifest.xml:30:9
+	android:allowBackup
+		ADDED from AndroidManifest.xml:31:9
+	android:icon
+		ADDED from AndroidManifest.xml:29:9
+	android:theme
+		ADDED from AndroidManifest.xml:32:9
+meta-data#com.eTilbudsavis.etasdk.api_key
+ADDED from AndroidManifest.xml:34:9
+	android:value
+		ADDED from AndroidManifest.xml:36:13
+	android:name
+		ADDED from AndroidManifest.xml:35:13
+meta-data#com.eTilbudsavis.etasdk.api_secret
+ADDED from AndroidManifest.xml:37:9
+	android:value
+		ADDED from AndroidManifest.xml:39:13
+	android:name
+		ADDED from AndroidManifest.xml:38:13
+meta-data#com.eTilbudsavis.etasdk.develop.api_key
+ADDED from AndroidManifest.xml:40:9
+	android:value
+		ADDED from AndroidManifest.xml:42:7
+	android:name
+		ADDED from AndroidManifest.xml:41:7
+meta-data#com.eTilbudsavis.etasdk.develop.api_secret
+ADDED from AndroidManifest.xml:43:9
+	android:value
+		ADDED from AndroidManifest.xml:45:7
+	android:name
+		ADDED from AndroidManifest.xml:44:7
+activity#com.eTilbudsavis.sdkdemo.MainActivity
+ADDED from AndroidManifest.xml:47:9
+	android:label
+		ADDED from AndroidManifest.xml:49:13
+	android:name
+		ADDED from AndroidManifest.xml:48:13
+intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
+ADDED from AndroidManifest.xml:50:13
+action#android.intent.action.MAIN
+ADDED from AndroidManifest.xml:51:17
+	android:name
+		ADDED from AndroidManifest.xml:51:25
+category#android.intent.category.LAUNCHER
+ADDED from AndroidManifest.xml:52:17
+	android:name
+		ADDED from AndroidManifest.xml:52:27
+activity#com.eTilbudsavis.sdkdemo.CatalogViewerActivity
+ADDED from AndroidManifest.xml:56:9
+	android:name
+		ADDED from AndroidManifest.xml:56:19
+activity#com.eTilbudsavis.sdkdemo.SearchActivity
+ADDED from AndroidManifest.xml:58:9
+	android:name
+		ADDED from AndroidManifest.xml:58:19

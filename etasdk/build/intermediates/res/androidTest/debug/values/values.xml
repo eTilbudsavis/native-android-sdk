@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- From: file:/Users/oizo/AndroidStudioProjects/native-android-sdk/etasdk/build/intermediates/bundles/debug/res/values/values.xml -->
+    <eat-comment/>
+    <color name="eta_sdk_green">#7b9119</color>
+    <color name="etasdk_text_dark">#a0000000</color>
+    <color name="etasdk_text_light">#a0ffffff</color>
+    <string name="etasdk_app_name">eTilbudsavis</string>
+    <string name="etasdk_pageflip_load">Couldn\'t load\npage %1$s</string>
+</resources>

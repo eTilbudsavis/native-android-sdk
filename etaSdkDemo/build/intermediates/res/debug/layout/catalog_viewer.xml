@@ -14,5 +14,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<lint>
-</lint>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    
+    <FrameLayout 
+        android:id="@+id/pageflip"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    
+</RelativeLayout>
+<!-- From: file:/Users/oizo/AndroidStudioProjects/native-android-sdk/etaSdkDemo/src/main/res/layout/catalog_viewer.xml -->

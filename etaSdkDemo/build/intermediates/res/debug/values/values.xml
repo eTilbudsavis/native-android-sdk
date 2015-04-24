@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- From: file:/Users/oizo/AndroidStudioProjects/native-android-sdk/etaSdkDemo/build/intermediates/exploded-aar/native-android-sdk/etasdk/unspecified/res/values/values.xml -->
+    <eat-comment/>
+    <color name="eta_sdk_green">#7b9119</color>
+    <color name="etasdk_text_dark">#a0000000</color>
+    <color name="etasdk_text_light">#a0ffffff</color>
+    <!-- From: file:/Users/oizo/AndroidStudioProjects/native-android-sdk/etaSdkDemo/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="app_name">eTilbudsavis SDK Demo</string>
+    <string name="eta_sdk_api_key">add_your_key</string>
+    <string name="eta_sdk_api_key_debug">add_your_key</string>
+    <string name="eta_sdk_api_secret">add_your_key</string>
+    <string name="eta_sdk_api_secret_debug">add_your_key</string>
+    <!-- From: file:/Users/oizo/AndroidStudioProjects/native-android-sdk/etaSdkDemo/build/intermediates/exploded-aar/native-android-sdk/etasdk/unspecified/res/values/values.xml -->
+    <eat-comment/>
+    <string name="etasdk_app_name">eTilbudsavis</string>
+    <string name="etasdk_pageflip_load">Couldn\'t load\npage %1$s</string>
+    <!-- From: file:/Users/oizo/AndroidStudioProjects/native-android-sdk/etaSdkDemo/src/main/res/values/strings.xml -->
+    <eat-comment/>
+    <string name="title_activity_main">eTilbudsavis SDK Demo</string>
+    <!-- From: file:/Users/oizo/AndroidStudioProjects/native-android-sdk/etaSdkDemo/src/main/res/values/styles.xml -->
+    <eat-comment/>
+    <style name="AppTheme" parent="android:Theme.Light"/>
+</resources>
