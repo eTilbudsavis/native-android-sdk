@@ -29,7 +29,6 @@ import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.ColorUtils;
 import com.eTilbudsavis.etasdk.utils.Json;
-import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class Branding implements IJson<JSONObject>, Serializable, Parcelable {
 	
