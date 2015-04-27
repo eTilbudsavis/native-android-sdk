@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- From: file:/Users/oizo/AndroidStudioProjects/native-android-sdk/etasdk/build/intermediates/bundles/debug/res/values-da/values.xml -->
-    <eat-comment/>
-    <string name="etasdk_app_name">eTilbudsavis</string>
-    <string name="etasdk_pageflip_load">Kunne ikke indlæse\nside %1$s</string>
-</resources>
