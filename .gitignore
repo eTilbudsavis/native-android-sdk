@@ -29,8 +29,10 @@ Thumbs.db
 
 # IDEA/Android Studio project files, because
 # the project can be imported from settings.gradle
-.idea
+#.idea
 *.iml
+.idea/workspace.xml
+.idea/libraries
 
 # Old-style IDEA project files
 *.ipr
