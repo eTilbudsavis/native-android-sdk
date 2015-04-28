@@ -42,14 +42,14 @@ import com.eTilbudsavis.etasdk.utils.Utils;
 public class SessionManager {
 	
 	public static final String TAG = Constants.getTag(SessionManager.class);
-	
+
     public static final String ETA_COOKIE_DOMAIN = "etilbudsavis.dk";
     public static final String COOKIE_AUTH_ID = "auth[id]";
     public static final String COOKIE_AUTH_TIME = "auth[time]";
     public static final String COOKIE_AUTH_HASH = "auth[hash]";
     
 	/** Token time to live in seconds. Default for Android SDK is 45 days */
-    public static int TTL = 3888000;
+    public static long TTL = Utils.DAY_IN_MILLIS * 45;
     
     /** Reference to Eta instance */
 	private Eta mEta;
@@ -58,7 +58,7 @@ public class SessionManager {
 	private Session mSession;
 	
 	/** The lock object to use when requiring synchronization locks in SessionManager*/
-	private Object LOCK = new Object();
+	private final Object LOCK = new Object();
 	
 	/** weather or not, the SessionManager should recover from a bad session request */
 	boolean mTryToRecover = true;
@@ -68,7 +68,7 @@ public class SessionManager {
 	
 	private Request<?> mReqInFlight;
 	
-	private ArrayList<OnSessionChangeListener> mSubscribers = new ArrayList<OnSessionChangeListener>();
+	private final ArrayList<OnSessionChangeListener> mSubscribers = new ArrayList<OnSessionChangeListener>();
 	
 	public SessionManager(Eta eta) {
 		
@@ -275,7 +275,8 @@ public class SessionManager {
 			 */
 			Date now = new Date();
 			long delta = now.getTime() - mEta.getSettings().getLastUsage();
-			boolean shouldPut = delta > (2 * Utils.HOUR_IN_MILLIS);
+            boolean shouldPut = delta > (2 * Utils.HOUR_IN_MILLIS);
+//            boolean shouldPut = delta > (20 * Utils.SECOND_IN_MILLIS);
 			if (shouldPut) {
 				putSession(null);
 			}
@@ -368,8 +369,8 @@ public class SessionManager {
 	/**
 	 * Login to eTilbudsavis, using a Facebook token.<br>
 	 * This requires you to implement the Facebook SDK, and relay the Facebook token.
-	 * @param facebookAccessToken
-	 * @param l
+	 * @param facebookAccessToken A facebook access token
+	 * @param l lister for callbacks
 	 */
 	public JsonObjectRequest loginFacebook(String facebookAccessToken, Listener<JSONObject> l) {
 		Map<String, String> args = new HashMap<String, String>();
@@ -382,7 +383,7 @@ public class SessionManager {
 	
 	/**
 	 * Tell if current session is from facebook.
-	 * @return
+	 * @return true if current session is a facebook session, else false
 	 */
 	public boolean isFacebookSession() {
 		return mEta.getSettings().getSessionFacebook() != null;
@@ -416,13 +417,15 @@ public class SessionManager {
 	}
 	
 	/**
-	 * @param email
-	 * @param password
-	 * @param name
-	 * @param birthYear
-	 * @param gender
-	 * @param successRedirect
-	 * @param errorRedirect
+     * Create a new eTilbudsavis user.
+     *
+	 * @param email An email
+	 * @param password A password
+	 * @param name A name
+	 * @param birthYear A birthyear
+	 * @param gender A gender
+	 * @param successRedirect An URL to include in the validation email, given registration succeeded
+	 * @param errorRedirectAn URL to include in the validation email, given registration failed
 	 * @return true if all arguments are valid, false otherwise
 	 */
 	public JsonObjectRequest createUser(String email, String password, String name, int birthYear, String gender, String locale, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
@@ -445,9 +448,9 @@ public class SessionManager {
 	/**
 	 * Method for requesting a password reset.
 	 * @param email of the user
-	 * @param successRedirect 
-	 * @param errorRedirect
-	 * @param l
+     * @param successRedirect An URL to include in the validation email, given registration succeeded
+     * @param errorRedirectAn URL to include in the validation email, given registration failed
+     * @param l lister for callbacks
 	 */
 	public JsonObjectRequest forgotPassword(String email, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
 		
@@ -471,8 +474,8 @@ public class SessionManager {
 	
 	/**
 	 * Update current session, with new headers from server (these are given as return headers, on all requests)
-	 * @param headerToken
-	 * @param headerExpires
+	 * @param headerToken X-Token received in headers from from eta api
+	 * @param headerExpires The expires string received in headers from from eta api
 	 */
 	public void updateTokens(String headerToken, String headerExpires) {
 		
