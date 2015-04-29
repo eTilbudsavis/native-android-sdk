@@ -10,12 +10,52 @@ import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
 
-public class RandomLog {
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+public class EtaLogHelper {
 	
-	private RandomLog() {
+	private EtaLogHelper() {
 	}
-	
-	public static void logInvalidSignature(String tag, Request<?> request, EtaError e) {
+
+    /**
+     * Print a debug log message to LogCat.
+     * @param tag A tag
+     * @param name A name identifying this print
+     * @param response A {@link org.json.JSONObject} (Eta SDK response), this may be {@code null}
+     * @param error An {@link EtaError}, this may be {@code null}
+     */
+    public static void d(String tag, String name, JSONObject response, EtaError error) {
+        String resp = response == null ? "null" : response.toString();
+        d(tag, name, resp, error);
+    }
+
+    /**
+     * Print a debug log message to LogCat.
+     * @param tag A tag
+     * @param name A name identifying this print
+     * @param response A {@link org.json.JSONArray} (Eta SDK response), this may be {@code null}
+     * @param error An {@link EtaError}, this may be {@code null}
+     */
+    public static void d(String tag, String name, JSONArray response, EtaError error) {
+        String resp = response == null ? "null" : ("size:" + response.length());
+        d(tag, name, resp, error);
+    }
+
+    /**
+     * Print a debug log message to LogCat.
+     * @param tag A tag
+     * @param name A name identifying this print
+     * @param response A {@link String} (Eta SDK response), this may be {@code null}
+     * @param error An {@link EtaError}, this may be {@code null}
+     */
+    public static void d(String tag, String name, String response, EtaError error) {
+        String e = error == null ? "null" : error.toJSON().toString();
+        String s = response == null ? "null" : response;
+        EtaLog.d(tag, name + ": Response[" + s + "], Error[" + e + "]");
+    }
+
+    public static void logInvalidSignature(String tag, Request<?> request, EtaError e) {
 
     	if (e.getCode() == 1104) {
     		

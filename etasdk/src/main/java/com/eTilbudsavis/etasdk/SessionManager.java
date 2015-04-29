@@ -15,18 +15,11 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
-import org.json.JSONObject;
-
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
 import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.log.EtaLogHelper;
 import com.eTilbudsavis.etasdk.model.Session;
 import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.Request;
@@ -39,6 +32,14 @@ import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+
 public class SessionManager {
 	
 	public static final String TAG = Constants.getTag(SessionManager.class);
@@ -48,8 +49,11 @@ public class SessionManager {
     public static final String COOKIE_AUTH_TIME = "auth[time]";
     public static final String COOKIE_AUTH_HASH = "auth[hash]";
     
-	/** Token time to live in seconds. Default for Android SDK is 45 days */
-    public static long TTL = Utils.DAY_IN_MILLIS * 45;
+	/**
+     * Token time to live in seconds. Default for Android SDK is 45 days.
+     * Must be in seconds
+     */
+    public static long TTL = 3888000;
     
     /** Reference to Eta instance */
 	private Eta mEta;
@@ -85,7 +89,7 @@ public class SessionManager {
 			public void onComplete(JSONObject response, EtaError error) {
 				
 				synchronized (LOCK) {
-					
+
 					mReqInFlight = null;
 					
 					if (response != null) {
