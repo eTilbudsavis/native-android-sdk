@@ -109,7 +109,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	
 	/**
 	 * A factory method for converting {@link JSONObject} into a POJO.
-	 * @param offer A {@link JSONObject} in the format of a valid API v2 offer response
+	 * @param jOffer A {@link JSONObject} in the format of a valid API v2 offer response
 	 * @return An Offer object
 	 */
 	public static Offer fromJSON(JSONObject jOffer) {
@@ -488,7 +488,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	/**
 	 * Set the id for a {@link Store} resource related to this offer.
 	 * <p>This is most likely to be set by the API, not the client</p>
-	 * @param dealerId An id
+	 * @param storeId An id
 	 * @return This object
 	 */
 	public Offer setStoreId(String storeId) {
@@ -533,7 +533,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 	/**
 	 * Set the id for a {@link Catalog} resource related to this offer.
 	 * <p>This is most likely to be set by the API, not the client</p>
-	 * @param dealerId An id
+	 * @param catalogId An id
 	 * @return This object
 	 */
 	public Offer setCatalogId(String catalogId) {
