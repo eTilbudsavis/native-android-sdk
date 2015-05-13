@@ -18,6 +18,7 @@ package com.eTilbudsavis.etasdk;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
+import com.eTilbudsavis.etasdk.bus.SessionEvent;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.log.EtaLogHelper;
 import com.eTilbudsavis.etasdk.model.Session;
@@ -39,6 +40,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+
+import de.greenrobot.event.EventBus;
 
 public class SessionManager {
 	
@@ -71,9 +74,7 @@ public class SessionManager {
 	private LinkedList<Request<?>> mSessionQueue = new LinkedList<Request<?>>();
 	
 	private Request<?> mReqInFlight;
-	
-	private final ArrayList<OnSessionChangeListener> mSubscribers = new ArrayList<OnSessionChangeListener>();
-	
+
 	public SessionManager(Eta eta) {
 		
 		mEta = eta;
@@ -211,7 +212,7 @@ public class SessionManager {
 			mTryToRecover = true;
 			
 			// Send out notifications
-			notifySubscribers(oldId, newId);
+            EventBus.getDefault().post(new SessionEvent(oldId, newId));
 			
 			return true;
 			
@@ -507,7 +508,7 @@ public class SessionManager {
 			mEta.getSettings().setSessionJson(mSession.toJSON());
 			mEta.getSettings().setSessionFacebook(null);
 			clearUser();
-			notifySubscribers(oldUserId, mSession.getUser().getUserId());
+            EventBus.getDefault().post(new SessionEvent(oldUserId, mSession.getUser().getUserId()));
 		}
 	}
 	
@@ -518,48 +519,5 @@ public class SessionManager {
 		mEta.getSettings().setSessionUser(null);
 		mEta.getSettings().setSessionFacebook(null);
 	}
-	
-	public SessionManager subscribe(OnSessionChangeListener l) {
-		synchronized (mSubscribers) {
-			if (!mSubscribers.contains(l)) {
-				mSubscribers.add(l);
-			}
-		}
-		return this;
-	}
-	
-	public SessionManager unSubscribe(OnSessionChangeListener l) {
-		synchronized (mSubscribers) {
-			mSubscribers.remove(l);
-		}
-		return this;
-	}
-	
-	public SessionManager notifySubscribers(final int oldUserId,final int newUserId) {
-		
-		EtaLog.v(TAG, "onSessionChange: " + oldUserId + " -> " + newUserId);
-		
-		synchronized (mSubscribers) {
-			for (final OnSessionChangeListener sl : mSubscribers) {
-				try {
-					mEta.getHandler().post(new Runnable() {
-						
-						public void run() {
-							sl.onSessionChange(oldUserId, newUserId);
-						}
-						
-					});
-				} catch (Exception e) {
-					EtaLog.e(TAG, "", e);
-				}
-			}
-			
-		}
-		return this;
-	}
 
-	public interface OnSessionChangeListener {
-		public void onSessionChange(int oldUserId, int newUserId);
-	}
-	
 }

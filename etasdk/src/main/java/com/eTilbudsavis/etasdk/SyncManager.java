@@ -15,22 +15,11 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Stack;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 
-import com.eTilbudsavis.etasdk.SessionManager.OnSessionChangeListener;
+import com.eTilbudsavis.etasdk.bus.SessionEvent;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.log.SyncLog;
 import com.eTilbudsavis.etasdk.model.Share;
@@ -53,6 +42,19 @@ import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
 import com.eTilbudsavis.etasdk.utils.ListUtils;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Stack;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * The {@link SyncManager} class performs asynchronous synchronization with the
@@ -161,19 +163,7 @@ public class SyncManager {
 	private ListNotification mNotification = new ListNotification(true);
 
 	private Delivery mDelivery;
-	
-	/** Listening for session changes, starting and stopping sync as needed */
-	private OnSessionChangeListener sessionListener = new OnSessionChangeListener() {
-		
-		public void onSessionChange(int oldUserId, int newUserId) {
-			if (oldUserId != newUserId) {
-				mHasFirstSync = false;
-				mSyncCount = 0;
-				forceSync();
-			}
-		}
-	};
-	
+
 	/** The actual sync loop running every x seconds*/
 	private Runnable mSyncLoop = new Runnable() {
 		
@@ -215,7 +205,16 @@ public class SyncManager {
 		}
 		
 	};
-	
+
+    /** Listening for session changes, starting and stopping sync as needed */
+    public void onEvent(SessionEvent e) {
+        if (e.isNewUser()) {
+            mHasFirstSync = false;
+            mSyncCount = 0;
+            forceSync();
+        }
+    }
+
 	private void performSyncCycle(User user) {
 		
 		// If there are local changes to a list, then syncLocalListChanges will handle it: return
@@ -347,7 +346,7 @@ public class SyncManager {
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
 	public void onStart() {
-		mEta.getSessionManager().subscribe(sessionListener);
+        EventBus.getDefault().register(this);
 		forceSync();
 	}
 
@@ -357,7 +356,7 @@ public class SyncManager {
 	 */
 	public void onStop() {
 		forceSync();
-		mEta.getSessionManager().unSubscribe(sessionListener);
+        EventBus.getDefault().unregister(this);
 		mHasFirstSync = false;
 		mSyncCount = -1;
 	}

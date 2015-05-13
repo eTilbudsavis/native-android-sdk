@@ -39,22 +39,22 @@ public class EtaLocation extends Location {
 	private double mBoundEast = DEFAULT_COORDINATE;
 	private double mBoundSouth = DEFAULT_COORDINATE;
 	private double mBoundWest = DEFAULT_COORDINATE;
-	
-	private final DataObservable mObservers = new DataObservable();
-	
-	public void notifyDataChanged() {
-		mObservers.notifyChanged();
-	}
-	
-	public void registerObserver(DataObserver observer) {
-		mObservers.registerObserver(observer);
-	}
-	
-	public void unregisterObserver(DataObserver observer) {
-		mObservers.unregisterObserver(observer);
-	}
-	
-	public EtaLocation() {
+
+    private final DataObservable mObservers = new DataObservable();
+
+    public void notifyDataChanged() {
+        mObservers.notifyChanged();
+    }
+
+    public void registerObserver(DataObserver observer) {
+        mObservers.registerObserver(observer);
+    }
+
+    public void unregisterObserver(DataObserver observer) {
+        mObservers.unregisterObserver(observer);
+    }
+
+    public EtaLocation() {
 		super(ETA_PROVIDER);
 	}
 	
@@ -151,7 +151,6 @@ public class EtaLocation extends Location {
 	 * Set the current search radius.
 	 * @param radius in meters <li> Min value = 0 <li> Max value = 700000
 	 * @throws IllegalArgumentException if radius is out of bounds
-	 * @return this Object, for easy chaining of set methods.
 	 */
 	public void setRadius(int radius) {
 		if (radius < RADIUS_MIN || radius > RADIUS_MAX) {
@@ -190,7 +189,7 @@ public class EtaLocation extends Location {
 	 * Set whether the location has been set by sensor.<br>
 	 * Sensor is automatically set to true if location is set via {@link #set(Location) setLocation(Location l)}
 	 * and the given location is from a sensor (network, or GPS).
-	 * @param sensor
+	 * @param sensor true if it's a device sensor, else false
 	 */
 	public void setSensor(boolean sensor) {
 		mSensor = sensor;
@@ -206,8 +205,8 @@ public class EtaLocation extends Location {
 	}
 	
 	/**
-	 * 
-	 * @param address
+	 * Set a new address on the location
+	 * @param address An address
 	 */
 	public void setAddress(String address) {
 		mAddress = address;
@@ -233,12 +232,11 @@ public class EtaLocation extends Location {
 
 	/**
 	 * Method for validating an location's latitude and longitude
-	 * @param lat to check
-	 * @param lng to check
-	 * @return true, if lat != 0.0 and lng != 0.0
+	 * @param location A location to check
+	 * @return true, if location.lat != 0.0 and location.lng != 0.0
 	 */
-	public static boolean isValidLocation(Location l) {
-		return isValid(l.getLatitude()) && isValid(l.getLongitude());
+	public static boolean isValidLocation(Location location) {
+		return isValid(location.getLatitude()) && isValid(location.getLongitude());
 	}
 
 	/**
@@ -278,15 +276,15 @@ public class EtaLocation extends Location {
 		float dist = distanceTo(tmp);
 		return (int)dist;
 	}
-	
-	/**
-	 * Set the bounds for your search.
-	 * All parameters should be GPS coordinates.
-	 * @param boundEast
-	 * @param boundWest
-	 * @param boundEast
-	 * @param boundEast
-	 */
+
+    /**
+     * Set the bounds for queries
+     * All parameters should be GPS coordinates.
+     * @param boundNorth A northern boundary
+     * @param boundEast A eastern boundary
+     * @param boundSouth A southern boundary
+     * @param boundWest A western boundary
+     */
 	public void setBounds(double boundNorth, double boundEast, double boundSouth, double boundWest) {
 		mBoundEast = boundEast;
 		mBoundNorth = boundNorth;
