@@ -274,7 +274,7 @@ public class SyncManager {
         
 	}
 	
-	Object RESUME_LOCK = new Object();
+	final Object RESUME_LOCK = new Object();
 	
 	boolean isPaused = false;
 	
