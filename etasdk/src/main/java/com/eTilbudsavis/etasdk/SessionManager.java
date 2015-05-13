@@ -395,7 +395,7 @@ public class SessionManager {
 	
 	/**
 	 * Signs a user out, and cleans all references to the user.<br><br>
-	 * A new {@link #login(String, String) login} is needed to get access to user stuff again.
+	 * A new {@link #login(String, String, com.eTilbudsavis.etasdk.network.Response.Listener)} login} is needed to get access to user stuff again.
 	 */
 	public JsonObjectRequest signout(final Listener<JSONObject> l) {
 		
@@ -429,7 +429,7 @@ public class SessionManager {
 	 * @param birthYear A birthyear
 	 * @param gender A gender
 	 * @param successRedirect An URL to include in the validation email, given registration succeeded
-	 * @param errorRedirectAn URL to include in the validation email, given registration failed
+	 * @param errorRedirect An URL to include in the validation email, given registration failed
 	 * @return true if all arguments are valid, false otherwise
 	 */
 	public JsonObjectRequest createUser(String email, String password, String name, int birthYear, String gender, String locale, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
@@ -453,7 +453,7 @@ public class SessionManager {
 	 * Method for requesting a password reset.
 	 * @param email of the user
      * @param successRedirect An URL to include in the validation email, given registration succeeded
-     * @param errorRedirectAn URL to include in the validation email, given registration failed
+     * @param errorRedirect An URL to include in the validation email, given registration failed
      * @param l lister for callbacks
 	 */
 	public JsonObjectRequest forgotPassword(String email, String successRedirect, String errorRedirect, Listener<JSONObject> l) {

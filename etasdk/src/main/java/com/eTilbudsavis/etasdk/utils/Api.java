@@ -13,7 +13,11 @@ import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
  *
  */
 public final class Api {
-	
+
+    private Api() {
+        // empty
+    }
+
 	/** The current API environment in use */
 	private static Environment mEnvironment = Environment.PRODUCTION;
 	
@@ -472,8 +476,8 @@ public final class Api {
 		 * </ul>
 		 * </p>
 		 * 
-		 * @param path
-		 * @return
+		 * @param path The path to apply the given Environment to
+		 * @return A url
 		 */
 		public String apply(String path) {
 			
@@ -511,7 +515,7 @@ public final class Api {
 			return CUSTOM;
 		}
 		
-	};
+	}
 
 	public enum ThemeEnvironment {
 		
@@ -549,7 +553,7 @@ public final class Api {
 			return PRODUCTION;
 		}
 		
-	};
+	}
 	
 	/**
 	 * This class contains a sub-set of paths needed to request data from the eTilbudsavis API,
