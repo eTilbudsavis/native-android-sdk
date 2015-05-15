@@ -23,8 +23,8 @@ public class ShoppinglistEvent extends EtaEvent {
      * Lists for collecting individual changes in items and lists, to do a single
      * notification to any subscribers
      */
-    public Map<String, ItemState<ShoppinglistItem>> mItems = Collections.synchronizedMap(new HashMap<String, ItemState<ShoppinglistItem>>());
-    public Map<String, ItemState<Shoppinglist>> mLists = Collections.synchronizedMap(new HashMap<String, ItemState<Shoppinglist>>());
+    public Map<String, StateWrapper<ShoppinglistItem>> mItems = Collections.synchronizedMap(new HashMap<String, StateWrapper<ShoppinglistItem>>());
+    public Map<String, StateWrapper<Shoppinglist>> mLists = Collections.synchronizedMap(new HashMap<String, StateWrapper<Shoppinglist>>());
     boolean mIsServer = false;
     boolean mFirstSync = false;
 
@@ -48,43 +48,35 @@ public class ShoppinglistEvent extends EtaEvent {
      * Add new notification items to the maps
      */
     public void add(Shoppinglist s) {
-        mLists.put(s.getId(), new ItemState<Shoppinglist>(ItemState.Action.ADDED, s));
+        mLists.put(s.getId(), new StateWrapper<Shoppinglist>(StateWrapper.Action.ADDED, s));
     }
 
     public void del(Shoppinglist s) {
-        mLists.put(s.getId(), new ItemState<Shoppinglist>(ItemState.Action.DELETED, s));
+        mLists.put(s.getId(), new StateWrapper<Shoppinglist>(StateWrapper.Action.DELETED, s));
     }
 
     public void edit(Shoppinglist s) {
-        mLists.put(s.getId(), new ItemState<Shoppinglist>(ItemState.Action.EDITED, s));
+        mLists.put(s.getId(), new StateWrapper<Shoppinglist>(StateWrapper.Action.EDITED, s));
     }
 
     public void add(ShoppinglistItem s) {
-        mItems.put(s.getId(), new ItemState<ShoppinglistItem>(ItemState.Action.ADDED, s));
+        mItems.put(s.getId(), new StateWrapper<ShoppinglistItem>(StateWrapper.Action.ADDED, s));
     }
 
     public void del(ShoppinglistItem s) {
-        mItems.put(s.getId(), new ItemState<ShoppinglistItem>(ItemState.Action.DELETED, s));
+        mItems.put(s.getId(), new StateWrapper<ShoppinglistItem>(StateWrapper.Action.DELETED, s));
     }
 
     public void edit(ShoppinglistItem s) {
-        mItems.put(s.getId(), new ItemState<ShoppinglistItem>(ItemState.Action.EDITED, s));
+        mItems.put(s.getId(), new StateWrapper<ShoppinglistItem>(StateWrapper.Action.EDITED, s));
     }
 
-    public static <T> List<T> getValues(Map<String, ItemState<T>> map, int action) {
-        List<T> list = new ArrayList<T>();
-        for (Map.Entry<String, ItemState<T>> e : map.entrySet()) {
-            if (e.getValue().getAction() == action) {
+    public static <T> List<T> getValues(Map<String, StateWrapper<T>> map, int action) {
+        List<T> list = new ArrayList<T>(map.size());
+        for (Map.Entry<String, StateWrapper<T>> e : map.entrySet()) {
+            if (e.getValue().getAction() == action || action == StateWrapper.Action.ALL) {
                 list.add(e.getValue().getItem());
             }
-        }
-        return list;
-    }
-
-    public static <T> List<T> getValues(Map<String, ItemState<T>> map) {
-        List<T> list = new ArrayList<T>();
-        for (Map.Entry<String, ItemState<T>> e : map.entrySet()) {
-            list.add(e.getValue().getItem());
         }
         return list;
     }
@@ -99,46 +91,58 @@ public class ShoppinglistEvent extends EtaEvent {
         }
     }
 
-    public static List<ShoppinglistItem> getCleanValues(Map<String, ItemState<ShoppinglistItem>> map, int action, String shoppinglistId) {
+    public static List<ShoppinglistItem> getCleanValues(Map<String, StateWrapper<ShoppinglistItem>> map, int action, String shoppinglistId) {
         List<ShoppinglistItem> list = getValues(map, action);
         cleanItems(list, shoppinglistId);
         return list;
     }
 
+    public List<ShoppinglistItem> getItems() {
+        return getValues(mItems, StateWrapper.Action.ALL);
+    }
+
+    public List<ShoppinglistItem> getItems(String shoppinglistId) {
+        return getCleanValues(mItems, StateWrapper.Action.ALL, shoppinglistId);
+    }
+
     public List<ShoppinglistItem> getAddedItems() {
-        return getValues(mItems, ItemState.Action.ADDED);
+        return getValues(mItems, StateWrapper.Action.ADDED);
     }
 
     public List<ShoppinglistItem> getAddedItems(String shoppinglistId) {
-        return getCleanValues(mItems, ItemState.Action.ADDED, shoppinglistId);
+        return getCleanValues(mItems, StateWrapper.Action.ADDED, shoppinglistId);
     }
 
     public List<ShoppinglistItem> getDeletedItems() {
-        return getValues(mItems, ItemState.Action.DELETED);
+        return getValues(mItems, StateWrapper.Action.DELETED);
     }
 
     public List<ShoppinglistItem> getDeletedItems(String shoppinglistId) {
-        return getCleanValues(mItems, ItemState.Action.DELETED, shoppinglistId);
+        return getCleanValues(mItems, StateWrapper.Action.DELETED, shoppinglistId);
     }
 
     public List<ShoppinglistItem> getEditedItems() {
-        return getValues(mItems, ItemState.Action.EDITED);
+        return getValues(mItems, StateWrapper.Action.EDITED);
     }
 
     public List<ShoppinglistItem> getEditedItems(String shoppinglistId) {
-        return getCleanValues(mItems, ItemState.Action.EDITED, shoppinglistId);
+        return getCleanValues(mItems, StateWrapper.Action.EDITED, shoppinglistId);
+    }
+
+    public List<Shoppinglist> getLists() {
+        return getValues(mLists, StateWrapper.Action.ALL);
     }
 
     public List<Shoppinglist> getAddedLists() {
-        return getValues(mLists, ItemState.Action.ADDED);
+        return getValues(mLists, StateWrapper.Action.ADDED);
     }
 
     public List<Shoppinglist> getDeletedLists() {
-        return getValues(mLists, ItemState.Action.DELETED);
+        return getValues(mLists, StateWrapper.Action.DELETED);
     }
 
     public List<Shoppinglist> getEditedLists() {
-        return getValues(mLists, ItemState.Action.EDITED);
+        return getValues(mLists, StateWrapper.Action.EDITED);
     }
 
     public boolean hasListNotifications() {
@@ -149,18 +153,19 @@ public class ShoppinglistEvent extends EtaEvent {
         return !mItems.isEmpty();
     }
 
-    public static class ItemState<T> {
+    public static class StateWrapper<T> {
 
         int mAction = -1;
         T mItem;
 
         public interface Action {
-            int DELETED = 0;
+            int ALL = 0;
             int EDITED = 1;
             int ADDED = 2;
+            int DELETED = 4;
         }
 
-        public ItemState(int action, T item) {
+        public StateWrapper(int action, T item) {
             this.mAction = action;
             this.mItem = item;
         }
