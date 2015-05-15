@@ -20,6 +20,7 @@ import android.os.HandlerThread;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.bus.SessionEvent;
+import com.eTilbudsavis.etasdk.bus.ShoppinglistEvent;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.log.SyncLog;
 import com.eTilbudsavis.etasdk.model.Share;
@@ -134,7 +135,7 @@ public class SyncManager {
 	/** Has sync got the first sync */
 	private boolean mHasFirstSync = false;
 	
-	private Stack<Request<?>> mCurrentRequests = new Stack<Request<?>>();
+	private final Stack<Request<?>> mCurrentRequests = new Stack<Request<?>>();
 	
 	/** Reference to the {@link Eta} object */
 	private Eta mEta;
@@ -149,7 +150,7 @@ public class SyncManager {
 	
 	/** 
 	 * Variable to determine if offline lists should automatically be
-	 * synchronized if certain criterias are met.
+	 * synchronized if certain criteria are met.
 	 */
 	private boolean mMigrateOfflineLists = false;
 	
@@ -160,7 +161,7 @@ public class SyncManager {
 	private Object mRequestTag = new Object();
 	
 	/** The notification object, used to combine and collect notifications */
-	private ListNotification mNotification = new ListNotification(true);
+	private ShoppinglistEvent.Builder mBuilder = new ShoppinglistEvent.Builder(true);
 
 	private Delivery mDelivery;
 
@@ -393,7 +394,7 @@ public class SyncManager {
 	/**
 	 * True if "offline" {@link Shoppinglist} will be migrated on first sync with
 	 * a new "online" user's {@link Shoppinglist shoppinglists}.
-	 * @return
+	 * @return true if the SyncManager will migrate any offline lists, else false
 	 */
 	public boolean isMigratingOfflineLists() {
 		return mMigrateOfflineLists;
@@ -460,11 +461,11 @@ public class SyncManager {
 						}
 						
 						mHasFirstSync = true;
-						mNotification.setFirstSync(true);
+						mBuilder.firstSync = true;
 						
 					}
 					
-					popRequestAndPushNotifications();
+					popRequestAndPostShoppinglistEvent();
 					
 				} else {
 					popRequest();
@@ -528,7 +529,7 @@ public class SyncManager {
 					
 					if (localSl.getModified().before(serverSl.getModified())) {
 						serverSl.setState(SyncState.SYNCED);
-						mNotification.edit(serverSl);
+						mBuilder.edit(serverSl);
 						mDb.editList(serverSl, user);
 						mDb.cleanShares(serverSl, user);
 					} else {
@@ -536,9 +537,9 @@ public class SyncManager {
 					}
 					
 				} else {
-					mNotification.del(localSl);
+					mBuilder.del(localSl);
 					for (ShoppinglistItem sli : mDb.getItems(localSl, user)) {
-						mNotification.del(sli);
+						mBuilder.del(sli);
 					}
 					mDb.deleteItems(localSl.getId(), null, user);
 					mDb.deleteList(localSl, user);
@@ -548,18 +549,18 @@ public class SyncManager {
 				
 				Shoppinglist add = serverMap.get(key);
 				add.setState(SyncState.TO_SYNC);
-				mNotification.add(add);
+				mBuilder.add(add);
 				mDb.insertList(add, user);
 				
 			}
 			
 		}
 		
-		for (Shoppinglist sl : mNotification.getAddedLists()) {
+		for (Shoppinglist sl : mBuilder.getAddedLists()) {
 			syncItems(sl, user);
 		}
-			
-		for (Shoppinglist sl : mNotification.getEditedLists()) {
+
+		for (Shoppinglist sl : mBuilder.getEditedLists()) {
 			syncItems(sl, user);
 		}
 		
@@ -641,7 +642,7 @@ public class SyncManager {
 							// error? just write new state to DB, next iteration will fix it
 							mDb.editList(sl, user);
 						}
-						popRequestAndPushNotifications();
+						popRequestAndPostShoppinglistEvent();
 						
 					} else {
 						
@@ -709,10 +710,10 @@ public class SyncManager {
 								/* If it's a new item, it's already in the added list,
 								 * then we'll override it else add it to the edited
 								 * as a new item to the edited list */
-								if (mNotification.mItemAdded.containsKey(sli.getId())) {
-									mNotification.add(sli);
+								if (mBuilder.items.containsKey(sli.getId())) {
+									mBuilder.add(sli);
 								} else {
-									mNotification.edit(sli);
+									mBuilder.edit(sli);
 								}
 								
 								mDb.editItem(sli, user);
@@ -721,7 +722,7 @@ public class SyncManager {
 						}
 					}
 					
-					popRequestAndPushNotifications();
+					popRequestAndPostShoppinglistEvent();
 					
 				} else {
 					popRequest();
@@ -772,12 +773,12 @@ public class SyncManager {
 					ShoppinglistItem serverSli = serverMap.get(key);
 					
 					if (localSli.getModified().before(serverSli.getModified())) {
-						mNotification.edit(serverSli);
+						mBuilder.edit(serverSli);
 						mDb.editItem(serverSli, user);
 						
 					} else if (!localSli.getMeta().toString().equals(serverSli.getMeta().toString())) {
 						// Migration code, to get comments into the DB
-						mNotification.edit(serverSli);
+						mBuilder.edit(serverSli);
 						mDb.editItem(serverSli, user);
 					} else if (localSli.equals(serverSli)) {
 						EtaLog.d(TAG, "We have a mismatch");
@@ -792,14 +793,14 @@ public class SyncManager {
 						 */
 					} else {
 						/* Else delete the item */
-						mNotification.del(delSli);
+						mBuilder.del(delSli);
 						mDb.deleteItem(delSli, user);
 					}
 				}
 				
 			} else {
 				ShoppinglistItem serverSli = serverMap.get(key);
-				mNotification.add(serverSli);
+				mBuilder.add(serverSli);
 				mDb.insertItem(serverSli, user);
 			}
 		}
@@ -900,7 +901,7 @@ public class SyncManager {
 						// If server haven't delivered an prev_id, then use old id
 						serverSl.setPreviousId(serverSl.getPreviousId() == null ? sl.getPreviousId() : serverSl.getPreviousId());
 						mDb.editList(serverSl, user);
-						mNotification.edit(serverSl);
+						mBuilder.edit(serverSl);
 					}
 					popRequest();
 					syncLocalItemChanges(sl, user);
@@ -991,13 +992,13 @@ public class SyncManager {
 					serverSl.setState(SyncState.SYNCED);
 					serverSl.setPreviousId(serverSl.getPreviousId() == null ? sl.getPreviousId() : serverSl.getPreviousId());
 					mDb.editList(serverSl, user);
-					mNotification.add(serverSl);
+					mBuilder.add(serverSl);
 					syncLocalItemChanges(sl, user);
 				} else {
 					mDb.deleteList(sl, user);
-					mNotification.del(sl);
+					mBuilder.del(sl);
 				}
-				popRequestAndPushNotifications();
+				popRequestAndPostShoppinglistEvent();
 			}
 		};
 		
@@ -1031,11 +1032,11 @@ public class SyncManager {
 							server.setPreviousId(sli.getPreviousId());
 						}
 						mDb.editItem(server, user);
-						mNotification.edit(server);
+						mBuilder.edit(server);
 						
 					}
 					
-					popRequestAndPushNotifications();
+					popRequestAndPostShoppinglistEvent();
 					
 				} else {
 					
@@ -1126,13 +1127,13 @@ public class SyncManager {
 					serverSli.setPreviousId(serverSli.getPreviousId() == null ? sli.getPreviousId() : serverSli.getPreviousId());
 //					EtaLog.d(TAG, "affected: " + db.editItem(serverSli, user));
 //					EtaLog.d(TAG, serverSli.toJSON().toString());
-					mNotification.edit(serverSli);
+					mBuilder.edit(serverSli);
 					
 				} else {
 					
 					// Something bad happened, delete item to keep DB sane
 					mDb.deleteItem(sli, user);
-					mNotification.del(sli);
+					mBuilder.del(sli);
 					
 				}
 				
@@ -1149,12 +1150,12 @@ public class SyncManager {
 						ShoppinglistItem newestItem = items.get(0);
 						sl.setModified(newestItem.getModified());
 						mDb.editList(sl, user);
-						mNotification.edit(sl);
+						mBuilder.edit(sl);
 					}
 					
 				}
 				
-				popRequestAndPushNotifications();
+				popRequestAndPostShoppinglistEvent();
 				
 			}
 		};
@@ -1225,8 +1226,8 @@ public class SyncManager {
 						Shoppinglist sl = mDb.getList(s.getShoppinglistId(), user);
 						if (sl != null) {
 							sl.removeShare(s);
-							mNotification.edit(sl);
-							popRequestAndPushNotifications();
+							mBuilder.edit(sl);
+							popRequestAndPostShoppinglistEvent();
 						} else {
 							popRequest();
 							/* Nothing, shoppinglist might have been deleted */
@@ -1334,8 +1335,8 @@ public class SyncManager {
 					if (sl != null) {
 						
 						sl.removeShare(s);
-						mNotification.edit(sl);
-						popRequestAndPushNotifications();
+						mBuilder.edit(sl);
+						popRequestAndPostShoppinglistEvent();
 						
 					} else {
 						
@@ -1364,19 +1365,14 @@ public class SyncManager {
 	 * Pops one request off the request-stack, and sends out a notification if 
 	 * the stack is empty (all requests are done, and all notifications are ready)
 	 */
-	private void popRequestAndPushNotifications() {
-		
-		popRequest();
-		if (mCurrentRequests.isEmpty()) {
-			boolean p = isPaused();
-//			EtaLog.d(TAG, "popRequestAndPushNotifications-paused: " + p);
-			if (!p) {
-				mEta.getListManager().notifySubscribers(mNotification);
-				mNotification = new ListNotification(true);
-			}
-			
-		}
-		
-	}
+	private void popRequestAndPostShoppinglistEvent() {
+
+        popRequest();
+        if (mCurrentRequests.isEmpty() && !isPaused() && mBuilder.hasChanges()) {
+            EventBus.getDefault().post(mBuilder.build());
+            mBuilder = new ShoppinglistEvent.Builder(true);
+        }
+
+    }
 	
 }

@@ -15,19 +15,9 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 
+import com.eTilbudsavis.etasdk.bus.ShoppinglistEvent;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Share;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
@@ -36,6 +26,18 @@ import com.eTilbudsavis.etasdk.model.User;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.ListUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * This class provides methods, for easily handling of
@@ -54,13 +56,10 @@ public class ListManager {
 	/** The global {@link Eta} object */
 	private Eta mEta;
 	private DbHelper mDb;
-	
-	/** Subscriber queue for shopping list changes */
-	private List<OnChangeListener> mListSubscribers = Collections.synchronizedList(new ArrayList<OnChangeListener>());
-	
+
 	/** The notification service for ListManager, this allows for bundling
 	 * list and item notifications, to avoid multiple updates for a single operation */
-	private ListNotification mNotification = new ListNotification(false);
+	private ShoppinglistEvent.Builder mBuilder = new ShoppinglistEvent.Builder(false);
 	
 	/**
 	 * Default constructor for ListManager.
@@ -107,7 +106,8 @@ public class ListManager {
 		
 		Share owner = sl.getOwner();
 		if (owner == null || owner.getEmail() == null) {
-			JSONObject o = new JSONObject();
+
+            JSONObject o = new JSONObject();
 			try {
 				JSONObject u = new JSONObject();
 				u.put(JsonKey.EMAIL, mEta.getUser().getEmail());
@@ -115,10 +115,11 @@ public class ListManager {
 				o.put(JsonKey.USER, u);
 				o.put(JsonKey.ACCEPTED, true);
 				o.put(JsonKey.ACCESS, Share.ACCESS_OWNER);
-				owner = Share.fromJSON(o);
 			} catch (JSONException e) {
 				EtaLog.e(TAG, null, e);
 			}
+            owner = Share.fromJSON(o);
+
 			List<Share> shares = new ArrayList<Share>(1);
 			shares.add(owner);
 			sl.putShares(shares);
@@ -142,9 +143,9 @@ public class ListManager {
 		int count = mDb.insertList(sl, user);
 		boolean success = count == 1;
 		if (success) {
-			mNotification.add(sl);
+			mBuilder.add(sl);
 		}
-		sendNotification(mNotification);
+		postShoppinglistEvent();
 		return success;
 	}
 	
@@ -176,8 +177,8 @@ public class ListManager {
 			Share dbShare = dbShares.get(user.getEmail());
 			dbShare.setState(SyncState.DELETE);
 			mDb.editShare(dbShare, user);
-			mNotification.del(sl);
-			sendNotification(mNotification);
+			mBuilder.del(sl);
+			postShoppinglistEvent();
 			return true;
 		}
 		
@@ -207,7 +208,7 @@ public class ListManager {
 					if (!dbShare.equals(slShare)) {
 						slShare.setState(SyncState.TO_SYNC);
 						mDb.editShare(slShare, user);
-						mNotification.edit(sl);
+						mBuilder.edit(sl);
 					}
 					
 				} else {
@@ -221,14 +222,14 @@ public class ListManager {
 						} else {
 							mDb.deleteShare(dbShare, user);
 						}
-						mNotification.edit(sl);
+						mBuilder.edit(sl);
 					}
 				}
 				
 			} else {
 				Share slShare = slShares.get(shareId);
 				mDb.insertShare(slShare, user);
-				mNotification.edit(sl);
+				mBuilder.edit(sl);
 			}
 			
 		}
@@ -259,7 +260,7 @@ public class ListManager {
 				slAfter.setModified(now);
 				slAfter.setState(SyncState.TO_SYNC);
 				mDb.editList(slAfter, user);
-				mNotification.edit(slAfter);
+				mBuilder.edit(slAfter);
 			}
 			
 			// If some another sl was pointing at the same item, it should be pointing at sl
@@ -269,7 +270,7 @@ public class ListManager {
 				slSamePointer.setModified(now);
 				slSamePointer.setState(SyncState.TO_SYNC);
 				mDb.editList(slSamePointer, user);
-				mNotification.edit(slSamePointer);
+				mBuilder.edit(slSamePointer);
 			}
 			
 		}
@@ -277,9 +278,9 @@ public class ListManager {
 		int count = mDb.editList(sl, user);
 		boolean success = count == 1;
 		if (success) {
-			mNotification.edit(sl);
+			mBuilder.edit(sl);
 		}
-		sendNotification(mNotification);
+		postShoppinglistEvent();
 		return success;
 	}
 	
@@ -311,7 +312,7 @@ public class ListManager {
 			after.setModified(now);
 			after.setState(SyncState.TO_SYNC);
 			mDb.editList(after, user);
-			mNotification.edit(after);
+			mBuilder.edit(after);
 		}
 		
 		int count = 0;
@@ -324,7 +325,7 @@ public class ListManager {
 				sli.setState(SyncState.DELETE);
 				sli.setModified(now);
 				mDb.editItem(sli, user);
-				mNotification.del(sli);
+				mBuilder.del(sli);
 			}
 			 
 			// Update local version of shoppinglist
@@ -336,7 +337,7 @@ public class ListManager {
 			for (ShoppinglistItem sli : items) {
 				sli.setState(SyncState.DELETE);
 				sli.setModified(now);
-				mNotification.del(sli);
+				mBuilder.del(sli);
 			}
 			
 			count = mDb.deleteList(sl, user);
@@ -348,9 +349,9 @@ public class ListManager {
 		
 		boolean success = count == 1;
 		if (success) {
-			mNotification.del(sl);
+			mBuilder.del(sl);
 		}
-		sendNotification(mNotification);
+		postShoppinglistEvent();
 		return success;
 	}
 
@@ -462,7 +463,7 @@ public class ListManager {
 			first.setModified(now);
 			first.setState(SyncState.TO_SYNC);
 			mDb.editItem(first, user);
-			mNotification.edit(first);
+			mBuilder.edit(first);
 		}
 		
 		int count = mDb.insertItem(sli, user);
@@ -472,10 +473,10 @@ public class ListManager {
 			 * will auto update the modified tag, nice! */
 			sl.setModified(now);
 			mDb.editList(sl, user);
-			mNotification.edit(sl);
-			mNotification.add(sli);
+			mBuilder.edit(sl);
+			mBuilder.add(sli);
 		}
-		sendNotification(mNotification);
+		postShoppinglistEvent();
 		return success;
 	}
 	
@@ -488,7 +489,7 @@ public class ListManager {
 	public boolean editItem(ShoppinglistItem sli) {
 		User u = user();
 		boolean result = editItemImpl(u, sli);
-		sendNotification(mNotification);
+		postShoppinglistEvent();
 		return result;
 	}
 	
@@ -505,7 +506,7 @@ public class ListManager {
 				count++;
 			}
 		}
-		sendNotification(mNotification);
+		postShoppinglistEvent();
 		return count;
 	}
 	
@@ -538,8 +539,8 @@ public class ListManager {
 			Shoppinglist sl = getList(sli.getShoppinglistId());
 			sl.setModified(now);
 			mDb.editList(sl, user);
-			mNotification.edit(sl);
-			mNotification.edit(sli);
+			mBuilder.edit(sl);
+			mBuilder.edit(sli);
 		}
 		
 		return success;
@@ -614,10 +615,10 @@ public class ListManager {
 		for (ShoppinglistItem sli : list) {
 			if (stateToDelete == null) {
 				// Delete all items
-				mNotification.del(sli);
+				mBuilder.del(sli);
 			} else if (sli.isTicked() == stateToDelete) {
 				// Delete if ticked matches the requested state
-				mNotification.del(sli);
+				mBuilder.del(sli);
 			} else {
 				if (!sli.getPreviousId().equals(preGoodId)) {
 					sli.setPreviousId(preGoodId);
@@ -630,7 +631,7 @@ public class ListManager {
 		}
 		
 		if (mEta.getUser().isLoggedIn()) {
-			for (ShoppinglistItem sli : mNotification.getDeletedItems()) {
+			for (ShoppinglistItem sli : mBuilder.getDeletedItems()) {
 				sli.setState(SyncState.DELETE);
 				sli.setModified(now);
 				count += mDb.editItem(sli, user);
@@ -639,17 +640,17 @@ public class ListManager {
 			count = mDb.deleteItems(sl.getId(), stateToDelete, user) ;
 		}
 		
-		boolean success = count == mNotification.getDeletedItems().size();
+		boolean success = count == mBuilder.getDeletedItems().size();
 		if (success) {
 			/* Update SL info, but not state. This will prevent sync, and API
 			 * will auto update the modified tag, nice!
 			 */
 			sl.setModified(now);
 			mDb.editList(sl, user);
-			mNotification.edit(sl);
+			mBuilder.edit(sl);
 		}
 		
-		sendNotification(mNotification);
+		postShoppinglistEvent();
 		return success;
 	}
 	
@@ -680,7 +681,7 @@ public class ListManager {
 			after.setPreviousId(sli.getPreviousId());
 			after.setModified(now);
 			mDb.editItem(after, user);
-			mNotification.edit(after);
+			mBuilder.edit(after);
 		}
 		
 		int count = 0;
@@ -699,11 +700,11 @@ public class ListManager {
 			Shoppinglist sl = getList(sli.getShoppinglistId());
 			sl.setModified(now);
 			mDb.editList(sl, user);
-			mNotification.edit(sl);
+			mBuilder.edit(sl);
 			
-			mNotification.del(sli);
+			mBuilder.del(sli);
 		}
-		sendNotification(mNotification);
+		postShoppinglistEvent();
 		return success;
 	}
 	
@@ -758,7 +759,7 @@ public class ListManager {
 		boolean isInList = share.getShoppinglistId().equals(sl.getId());
 		return isInList && ( share.getAccess().equals(Share.ACCESS_OWNER) || share.getAccess().equals(Share.ACCESS_READWRITE) );
 	}
-	
+
 	/**
 	 * Deletes all rows in the {@link DbHelper database}.
 	 */
@@ -787,125 +788,12 @@ public class ListManager {
 	 */
 	public void onStop() {
 	}
-	
-	/**
-	 * Method for subscribing to changes in {@link Shoppinglist Shoppinglists}
-	 * and {@link ShoppinglistItem ShoppinglistItems}.
-	 * @param l A {@link OnChangeListener} for receiving events
-	 */
-	public void setOnChangeListener(OnChangeListener l) {
-		synchronized (mListSubscribers) {
-			if (!mListSubscribers.contains(l)) {
-				mListSubscribers.add(l);
-			}
+
+	private void postShoppinglistEvent() {
+		if (!mEta.getSyncManager().isPaused() && mBuilder.hasChanges()) {
+            EventBus.getDefault().post(mBuilder.build());
+			mBuilder = new ShoppinglistEvent.Builder(false);
 		}
 	}
-	
-	/**
-	 * Unsubscribe from changes in {@link Shoppinglist} and {@link ShoppinglistItem}
-	 * states.
-	 * @param l The {@link OnChangeListener} to remove
-	 */
-	public void removeOnChangeListener(OnChangeListener l) {
-		synchronized (mListSubscribers) {
-			mListSubscribers.remove(l);
-		}
-	}
-	
-	private void sendNotification(ListNotification n) {
-		boolean p = mEta.getSyncManager().isPaused();
-		EtaLog.d(TAG, "sendNotification-paused: " + p);
-		if (!p) {
-			notifySubscribers(n);
-			mNotification = new ListNotification(false);
-		}
-	}
-	
-	/**
-	 * Method for notifying all {@link OnChangeListener subscribers} on a given
-	 * set of events.
-	 * @param n A set of changes in {@link Shoppinglist} and {@link ShoppinglistItem}
-	 */
-	public void notifySubscribers(final ListNotification n) {
-		
-		synchronized (mListSubscribers) {
-			for (final OnChangeListener s : mListSubscribers) {
-				
-				mEta.getHandler().post(new Runnable() {
-					
-					public void run() {
-						
-						if (n.isFirstSync()) {
-							s.onFirstSync();
-						}
-						
-						if (n.hasListNotifications()) {
-							s.onListUpdate(n.isServer(), n.getAddedLists(), n.getDeletedLists(), n.getEditedLists());
-						}
-							
-						if (n.hasItemNotifications()) {
-							s.onItemUpdate(n.isServer(), n.getAddedItems(), n.getDeletedItems(), n.getEditedItems());
-						}
-						
-					}
-					
-				});
-				
-			}
-		}
-		
-	}
-	
-	/**
-	 * Interface for receiving notifications on list, and item changes.
-	 * 
-	 * @author Danny Hvam - danny@etilbudsavis.dk
-	 */
-	public interface OnChangeListener {
-		
-        /**
-         * Callback method for receiving updates on {@link Shoppinglist} updates.
-         * 
-         * @param isServer 
-         * 			True if changes are from the API, else false
-         * @param added 
-         * 			A list of added {@link Shoppinglist}
-         * @param deleted
-         * 			A list of deleted {@link Shoppinglist}
-         * @param edited 
-         * 			A list of edited {@link Shoppinglist}. Edits might not be
-         * significant (e.g. name or share changes), but can happen when an item
-         * it has a reference to changes (so tick/untick on an item, also forces
-         * modified on the containing {@link Shoppinglist} to update, hence an
-         * edited list).
-         */
-		public void onListUpdate(boolean isServer, List<Shoppinglist> added, List<Shoppinglist> deleted, List<Shoppinglist> edited);
-		
-		/**
-         * Callback method for receiving updates on {@link ShoppinglistItem} updates.
-         * Updates to items, will also be reflected in the callback
-         * {{@link #onListUpdate(boolean, List, List, List)} where the
-         * {@link Shoppinglist}(s) containing any of the added/deleted/edited
-         * {@link ShoppinglistItem} will also have been edited.
-         * 
-		 * @param isServer
-		 * 			True if changes are from the API, else false
-		 * @param added
-         * 			A list of the added {@link ShoppinglistItem}
-		 * @param deleted
-         * 			A list of the deleted {@link ShoppinglistItem}
-		 * @param edited
-         * 			A list of the edited {@link ShoppinglistItem}
-		 */
-		public void onItemUpdate(boolean isServer, List<ShoppinglistItem> added, List<ShoppinglistItem> deleted, List<ShoppinglistItem> edited);
-		
-		/**
-		 * Callback method notifying of the first successful synchronization
-		 * iteration. And only if the {@link OnChangeListener} was subscribed
-		 * prior to the first successful iteration.
-		 */
-		public void onFirstSync();
-			
-	}
-	
+
 }

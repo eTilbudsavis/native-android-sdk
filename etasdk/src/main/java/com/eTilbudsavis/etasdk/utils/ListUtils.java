@@ -147,6 +147,14 @@ public class ListUtils {
 		}
 		
 	}
-	
-	
+
+
+    public static long getLargestTimeStamp(List<ShoppinglistItem> list) {
+        long t = 0;
+        for (ShoppinglistItem sli : list) {
+            t = Math.max(sli.getModified().getTime(), t);
+        }
+        return t;
+    }
+
 }
