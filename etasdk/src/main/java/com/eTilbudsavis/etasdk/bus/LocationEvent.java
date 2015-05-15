@@ -1,4 +1,5 @@
 package com.eTilbudsavis.etasdk.bus;
 
-public class LocationEvent {
+public class LocationEvent extends EtaEvent {
+
 }

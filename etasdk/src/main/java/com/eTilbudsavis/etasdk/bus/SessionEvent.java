@@ -3,7 +3,7 @@ package com.eTilbudsavis.etasdk.bus;
 /**
  * Created by Danny Hvam - danny@etilbudsavis.dk on 13/05/15.
  */
-public class SessionEvent {
+public class SessionEvent extends EtaEvent {
 
     private int mOldUser = 0;
     private int mNewUser = 0;

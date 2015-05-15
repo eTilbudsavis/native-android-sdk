@@ -44,6 +44,8 @@ public class EtaLocation extends Location {
 	private double mBoundWest = DEFAULT_COORDINATE;
 
     public void notifyDataChanged() {
+        // It shouldn't be a responsibility for this object to determine when to post events.
+        // But the method is there so we'll keep using it for now
         EventBus.getDefault().post(new LocationEvent());
     }
 
