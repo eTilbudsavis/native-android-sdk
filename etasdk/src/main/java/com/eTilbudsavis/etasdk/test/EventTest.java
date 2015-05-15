@@ -32,7 +32,17 @@ public class EventTest {
     public static void testShoppinglistEvent() {
 
         ShoppinglistEvent.Builder b = new ShoppinglistEvent.Builder(true);
+        // check the constructor
         Assert.assertTrue(b.isServer);
+
+        // Shouldn't have any changes at this point
+        Assert.assertFalse(b.hasChanges());
+        Assert.assertFalse(!b.firstSync);
+
+        b.firstSync = true;
+        // This is a change, should now have changes
+        Assert.assertTrue(b.hasChanges());
+        b.firstSync = false;
 
         Shoppinglist added = Shoppinglist.fromName("added");
         added.setType(Shoppinglist.TYPE_WISH_LIST);
@@ -45,6 +55,9 @@ public class EventTest {
         Shoppinglist deleted = Shoppinglist.fromName("deleted");
         deleted.setType(Shoppinglist.TYPE_WISH_LIST);
         b.del(deleted);
+
+        // Even though we reset firstSync to false, there should still be changes at this point
+        Assert.assertTrue(b.hasChanges());
 
         List<Shoppinglist> list = b.getLists();
         // We added three items

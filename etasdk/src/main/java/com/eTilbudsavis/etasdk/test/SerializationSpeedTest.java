@@ -22,7 +22,7 @@ public class SerializationSpeedTest {
 		EtaSdkTest.logTest(TAG, "testing " + count + " iterations of serilization");
 		
 		long start = System.currentTimeMillis();
-		test(count, ObjectCreator.getShoppinglist(), Shoppinglist.CREATOR);
+		test(count, ModelCreator.getShoppinglist(), Shoppinglist.CREATOR);
 		print("Shoppinglist", count, start);
 		
 	}
@@ -49,7 +49,7 @@ public class SerializationSpeedTest {
 	
 	private static void testShoppinglistSerilization(int count) {
 		
-		Shoppinglist sl = ObjectCreator.getShoppinglist();
+		Shoppinglist sl = ModelCreator.getShoppinglist();
 		for (int i = 0; i < count; i++) {
 			Parcel parcel = Parcel.obtain();
 			sl.writeToParcel(parcel, 0);

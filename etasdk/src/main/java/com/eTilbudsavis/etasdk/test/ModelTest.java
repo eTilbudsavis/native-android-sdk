@@ -42,9 +42,9 @@ import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
-public class ObjectTest {
+public class ModelTest {
 	
-	public static final String TAG = Constants.getTag(ObjectTest.class);
+	public static final String TAG = Constants.getTag(ModelTest.class);
 	
 	public static void test() {
 		
@@ -82,8 +82,8 @@ public class ObjectTest {
 	}
 
 	public static void testShoppinglistitem() {
-		ShoppinglistItem obj = ObjectCreator.getShoppinglistItem();
-		ShoppinglistItem tmp = ObjectCreator.getShoppinglistItem();
+		ShoppinglistItem obj = ModelCreator.getShoppinglistItem();
+		ShoppinglistItem tmp = ModelCreator.getShoppinglistItem();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
@@ -117,8 +117,8 @@ public class ObjectTest {
 	}
 
 	public static void testShoppinglist() {
-		Shoppinglist obj = ObjectCreator.getShoppinglist();
-		Shoppinglist tmp = ObjectCreator.getShoppinglist();
+		Shoppinglist obj = ModelCreator.getShoppinglist();
+		Shoppinglist tmp = ModelCreator.getShoppinglist();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
@@ -161,8 +161,8 @@ public class ObjectTest {
 	}
 
 	public static void testSession() {
-		Session obj = ObjectCreator.getSession();
-		Session tmp = ObjectCreator.getSession();
+		Session obj = ModelCreator.getSession();
+		Session tmp = ModelCreator.getSession();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -188,8 +188,8 @@ public class ObjectTest {
 	}
 
 	public static void testDealer() {
-		Dealer obj = ObjectCreator.getDealer();
-		Dealer tmp = ObjectCreator.getDealer();
+		Dealer obj = ModelCreator.getDealer();
+		Dealer tmp = ModelCreator.getDealer();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
@@ -220,8 +220,8 @@ public class ObjectTest {
 	}
 	
 	public static void testCatalog() {
-		Catalog obj = ObjectCreator.getCatalog();
-		Catalog tmp = ObjectCreator.getCatalog();
+		Catalog obj = ModelCreator.getCatalog();
+		Catalog tmp = ModelCreator.getCatalog();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -260,8 +260,8 @@ public class ObjectTest {
 	}
 
 	public static void testStore() {
-		Store obj = ObjectCreator.getStore();
-		Store tmp = ObjectCreator.getStore();
+		Store obj = ModelCreator.getStore();
+		Store tmp = ModelCreator.getStore();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
@@ -290,8 +290,8 @@ public class ObjectTest {
 	}
 
 	public static void testCountry() {
-		Country obj = ObjectCreator.getCountry();
-		Country tmp = ObjectCreator.getCountry();
+		Country obj = ModelCreator.getCountry();
+		Country tmp = ModelCreator.getCountry();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
@@ -319,8 +319,8 @@ public class ObjectTest {
 	}
 
 	public static void testShare() {
-		Share obj = ObjectCreator.getShare();
-		Share tmp = ObjectCreator.getShare();
+		Share obj = ModelCreator.getShare();
+		Share tmp = ModelCreator.getShare();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
@@ -350,8 +350,8 @@ public class ObjectTest {
 	}
 
 	public static void testUser() {
-		User obj = ObjectCreator.getUser();
-		User tmp = ObjectCreator.getUser();
+		User obj = ModelCreator.getUser();
+		User tmp = ModelCreator.getUser();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -381,8 +381,8 @@ public class ObjectTest {
 	}
 
 	public static void testBranding() {
-		Branding obj = ObjectCreator.getBranding();
-		Branding tmp = ObjectCreator.getBranding();
+		Branding obj = ModelCreator.getBranding();
+		Branding tmp = ModelCreator.getBranding();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -410,8 +410,8 @@ public class ObjectTest {
 	}
 
 	public static void testDimension() {
-		Dimension obj = ObjectCreator.getDimension();
-		Dimension tmp = ObjectCreator.getDimension();
+		Dimension obj = ModelCreator.getDimension();
+		Dimension tmp = ModelCreator.getDimension();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -436,8 +436,8 @@ public class ObjectTest {
 	}
 
 	public static void testHotspot() {
-		Hotspot obj = ObjectCreator.getHotspot();
-		Hotspot tmp = ObjectCreator.getHotspot();
+		Hotspot obj = ModelCreator.getHotspot();
+		Hotspot tmp = ModelCreator.getHotspot();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -463,8 +463,8 @@ public class ObjectTest {
 	}
 
 	public static void testHotspotMap() {
-		HotspotMap obj = ObjectCreator.getHotspotMap();
-		HotspotMap tmp = ObjectCreator.getHotspotMap();
+		HotspotMap obj = ModelCreator.getHotspotMap();
+		HotspotMap tmp = ModelCreator.getHotspotMap();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -485,8 +485,8 @@ public class ObjectTest {
 	}
 
 	public static void testPageflip() {
-		Pageflip obj = ObjectCreator.getPageflip();
-		Pageflip tmp = ObjectCreator.getPageflip();
+		Pageflip obj = ModelCreator.getPageflip();
+		Pageflip tmp = ModelCreator.getPageflip();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -515,8 +515,8 @@ public class ObjectTest {
 
 	public static void testPermission() {
 		
-		Permission obj = ObjectCreator.getPermission();
-		Permission tmp = ObjectCreator.getPermission();
+		Permission obj = ModelCreator.getPermission();
+		Permission tmp = ModelCreator.getPermission();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -535,8 +535,8 @@ public class ObjectTest {
 	}
 
 	public static void testTypeahead() {
-		Typeahead obj = ObjectCreator.getTypeahead();
-		Typeahead tmp = ObjectCreator.getTypeahead();
+		Typeahead obj = ModelCreator.getTypeahead();
+		Typeahead tmp = ModelCreator.getTypeahead();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -562,8 +562,8 @@ public class ObjectTest {
 	}
 
 	public static void testSubscription() {
-		Subscription obj = ObjectCreator.getSubscription();
-		Subscription tmp = ObjectCreator.getSubscription();
+		Subscription obj = ModelCreator.getSubscription();
+		Subscription tmp = ModelCreator.getSubscription();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -588,8 +588,8 @@ public class ObjectTest {
 	}
 
 	public static void testPricing() {
-		Pricing obj = ObjectCreator.getPricing();
-		Pricing tmp = ObjectCreator.getPricing();
+		Pricing obj = ModelCreator.getPricing();
+		Pricing tmp = ModelCreator.getPricing();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -615,8 +615,8 @@ public class ObjectTest {
 
 	public static void testLinks() {
 		String id = "fake-id";
-		Links obj = ObjectCreator.getLinks(id);
-		Links tmp = ObjectCreator.getLinks(id);
+		Links obj = ModelCreator.getLinks(id);
+		Links tmp = ModelCreator.getLinks(id);
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -642,8 +642,8 @@ public class ObjectTest {
 
 	public static void testImages() {
 		String id = "fake-id";
-		Images obj = ObjectCreator.getImages(id);
-		Images tmp = ObjectCreator.getImages(id);
+		Images obj = ModelCreator.getImages(id);
+		Images tmp = ModelCreator.getImages(id);
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
@@ -668,8 +668,8 @@ public class ObjectTest {
 	}
 
 	public static void testSi() {
-		Si obj = ObjectCreator.getSi();
-		Si tmp = ObjectCreator.getSi();
+		Si obj = ModelCreator.getSi();
+		Si tmp = ModelCreator.getSi();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
@@ -694,8 +694,8 @@ public class ObjectTest {
 	}
 	
 	public static void testUnit() {
-		Unit obj = ObjectCreator.getUnit();
-		Unit tmp = ObjectCreator.getUnit();
+		Unit obj = ModelCreator.getUnit();
+		Unit tmp = ModelCreator.getUnit();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
@@ -720,8 +720,8 @@ public class ObjectTest {
 	}
 
 	public static void testPieces() {
-		Pieces obj = ObjectCreator.getPieces();
-		Pieces tmp = ObjectCreator.getPieces();
+		Pieces obj = ModelCreator.getPieces();
+		Pieces tmp = ModelCreator.getPieces();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 		
@@ -746,8 +746,8 @@ public class ObjectTest {
 	}
 
 	public static void testSize() {
-		Size obj = ObjectCreator.getSize();
-		Size tmp = ObjectCreator.getSize();
+		Size obj = ModelCreator.getSize();
+		Size tmp = ModelCreator.getSize();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
@@ -772,8 +772,8 @@ public class ObjectTest {
 	}
 
 	public static void testQuantity() {
-		Quantity obj = ObjectCreator.getQuantity();
-		Quantity tmp = ObjectCreator.getQuantity();
+		Quantity obj = ModelCreator.getQuantity();
+		Quantity tmp = ModelCreator.getQuantity();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
@@ -794,8 +794,8 @@ public class ObjectTest {
 	public static void testOffer() {
 		
 		// Test my generator
-		Offer obj = ObjectCreator.getOffer();
-		Offer tmp = ObjectCreator.getOffer();
+		Offer obj = ModelCreator.getOffer();
+		Offer tmp = ModelCreator.getOffer();
 		Assert.assertEquals(obj, tmp);
 		Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 
@@ -846,7 +846,7 @@ public class ObjectTest {
 	private static void testICatalog(ICatalog<?> obj) {
 
         String catalogId = obj.getCatalogId();
-        obj.setCatalog(ObjectCreator.getCatalog());
+        obj.setCatalog(ModelCreator.getCatalog());
         Assert.assertNotSame(catalogId, obj.getCatalogId());
         Assert.assertEquals(obj.getCatalogId(), obj.getCatalog().getId());
         obj.setCatalog(null);
@@ -857,7 +857,7 @@ public class ObjectTest {
 	private static void testIStore(IStore<?> obj) {
 
         String storeId = obj.getStoreId();
-        obj.setStore(ObjectCreator.getStore());
+        obj.setStore(ModelCreator.getStore());
         Assert.assertNotSame(storeId, obj.getStoreId());
         Assert.assertEquals(obj.getStoreId(), obj.getStore().getId());
         obj.setStore(null);
@@ -868,7 +868,7 @@ public class ObjectTest {
 	private static void testIDealer(IDealer<?> obj) {
 
         String dealerId = obj.getDealerId();
-        obj.setDealer(ObjectCreator.getDealer());
+        obj.setDealer(ModelCreator.getDealer());
         Assert.assertNotSame(dealerId, obj.getDealerId());
         Assert.assertEquals(obj.getDealerId(), obj.getDealer().getId());
         obj.setDealer(null);

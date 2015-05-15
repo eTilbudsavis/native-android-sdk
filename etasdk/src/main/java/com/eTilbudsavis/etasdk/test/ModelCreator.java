@@ -43,7 +43,7 @@ import com.eTilbudsavis.etasdk.model.User;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
-public class ObjectCreator {
+public class ModelCreator {
 	
 	public static final String UUID_V4_FAKE = "de305d54-75b4-431b-adb2-eb6b9e546013";
 	
