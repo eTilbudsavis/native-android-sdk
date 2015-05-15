@@ -15,14 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,6 +23,14 @@ import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.Json;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Images implements IJson<JSONObject>, Serializable, Parcelable {
 	

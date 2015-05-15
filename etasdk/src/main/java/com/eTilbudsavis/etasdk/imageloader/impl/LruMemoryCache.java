@@ -1,15 +1,16 @@
 package com.eTilbudsavis.etasdk.imageloader.impl;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import android.graphics.Bitmap;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.imageloader.MemoryCache;
 import com.eTilbudsavis.etasdk.log.EtaLog;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class LruMemoryCache implements MemoryCache {
 	

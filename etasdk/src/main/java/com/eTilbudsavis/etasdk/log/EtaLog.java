@@ -1,10 +1,10 @@
 package com.eTilbudsavis.etasdk.log;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class EtaLog {

@@ -1,12 +1,5 @@
 package com.eTilbudsavis.etasdk;
 
-import static android.os.Environment.MEDIA_MOUNTED;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
 import android.content.Context;
 import android.os.Environment;
 
@@ -14,6 +7,13 @@ import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Session;
 import com.eTilbudsavis.etasdk.utils.PermissionUtils;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
+import static android.os.Environment.MEDIA_MOUNTED;
 
 public class ExternalClientIdStore {
 	

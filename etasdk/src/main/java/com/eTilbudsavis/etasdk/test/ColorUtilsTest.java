@@ -1,10 +1,11 @@
 package com.eTilbudsavis.etasdk.test;
 
-import junit.framework.Assert;
 import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.ColorUtils;
+
+import junit.framework.Assert;
 
 public class ColorUtilsTest {
 

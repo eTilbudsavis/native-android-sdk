@@ -15,21 +15,21 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class Permission implements IJson<JSONObject>, Serializable, Parcelable {
 	

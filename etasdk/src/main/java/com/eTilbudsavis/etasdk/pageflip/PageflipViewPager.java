@@ -1,7 +1,5 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
-import java.lang.reflect.Field;
-
 import android.content.Context;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
@@ -11,6 +9,8 @@ import android.view.animation.Interpolator;
 import android.widget.Scroller;
 
 import com.eTilbudsavis.etasdk.Constants;
+
+import java.lang.reflect.Field;
 
 public class PageflipViewPager extends ViewPager {
 	

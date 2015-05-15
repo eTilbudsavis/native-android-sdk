@@ -15,16 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -38,6 +28,16 @@ import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.Api.MetaKey;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 
 public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState<ShoppinglistItem>, IJson<JSONObject>, Serializable, Parcelable {
 

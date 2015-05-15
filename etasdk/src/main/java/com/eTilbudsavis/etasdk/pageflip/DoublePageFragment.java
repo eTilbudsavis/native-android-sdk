@@ -1,7 +1,5 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -15,6 +13,8 @@ import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoDoubleClickListener;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoLongClickListener;
 import com.eTilbudsavis.etasdk.photoview.PhotoView.OnPhotoTapListener;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DoublePageFragment extends PageFragment {
 	

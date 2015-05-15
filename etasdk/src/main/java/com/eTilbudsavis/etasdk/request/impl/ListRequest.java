@@ -1,14 +1,5 @@
 package com.eTilbudsavis.etasdk.request.impl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.json.JSONArray;
-
 import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.network.Delivery;
@@ -20,6 +11,15 @@ import com.eTilbudsavis.etasdk.request.ParameterBuilder;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
 import com.eTilbudsavis.etasdk.utils.Api;
+
+import org.json.JSONArray;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class ListRequest<T> extends JsonArrayRequest {
 	

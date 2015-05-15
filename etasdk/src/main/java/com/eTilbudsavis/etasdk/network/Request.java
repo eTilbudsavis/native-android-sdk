@@ -15,12 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Bundle;
 
 import com.eTilbudsavis.etasdk.Constants;
@@ -28,6 +22,12 @@ import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.log.EventLog;
 import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("rawtypes")
 public abstract class Request<T> implements Comparable<Request<T>> {

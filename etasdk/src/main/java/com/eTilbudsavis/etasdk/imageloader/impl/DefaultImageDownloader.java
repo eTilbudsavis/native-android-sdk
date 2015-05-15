@@ -1,16 +1,17 @@
 package com.eTilbudsavis.etasdk.imageloader.impl;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import org.apache.http.util.ByteArrayBuffer;
 
 import android.graphics.Bitmap;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.imageloader.ImageDownloader;
 import com.eTilbudsavis.etasdk.imageloader.ImageRequest;
+
+import org.apache.http.util.ByteArrayBuffer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class DefaultImageDownloader implements ImageDownloader {
 	

@@ -15,18 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,6 +27,18 @@ import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class is a representation of the eTilbudsavis API v2 shopppinglist.

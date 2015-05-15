@@ -15,14 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -33,6 +25,14 @@ import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.Json;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 public class Share implements Comparable<Share>,  SyncState<Share>, IJson<JSONObject>, Serializable, Parcelable {
 	

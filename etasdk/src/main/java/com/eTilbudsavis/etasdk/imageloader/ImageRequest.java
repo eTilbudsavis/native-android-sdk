@@ -1,7 +1,5 @@
 package com.eTilbudsavis.etasdk.imageloader;
 
-import java.util.List;
-
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 
@@ -11,6 +9,8 @@ import com.eTilbudsavis.etasdk.imageloader.impl.DefaultFileName;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.log.EventLog;
 import com.eTilbudsavis.etasdk.log.EventLog.Event;
+
+import java.util.List;
 
 /**
  * The class for requesting images via the ImageLoader.

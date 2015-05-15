@@ -15,13 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.Constants;
@@ -32,6 +25,13 @@ import com.eTilbudsavis.etasdk.network.Request.Method;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.HashUtils;
 import com.eTilbudsavis.etasdk.utils.HeaderUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 public class NetworkDispatcher extends Thread {
 

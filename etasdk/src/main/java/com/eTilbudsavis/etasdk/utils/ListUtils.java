@@ -1,14 +1,14 @@
 package com.eTilbudsavis.etasdk.utils;
 
+import com.eTilbudsavis.etasdk.Constants;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-
-import com.eTilbudsavis.etasdk.Constants;
-import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 
 public class ListUtils {
 	

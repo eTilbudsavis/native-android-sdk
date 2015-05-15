@@ -1,10 +1,10 @@
 package com.eTilbudsavis.etasdk.utils;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class HashUtils {
 	

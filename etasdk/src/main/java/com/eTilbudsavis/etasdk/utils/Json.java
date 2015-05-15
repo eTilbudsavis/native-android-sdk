@@ -15,13 +15,13 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.utils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Helper class designed to simplify working with JSON in Android - specifically the eTilbudsavis Android SDK.

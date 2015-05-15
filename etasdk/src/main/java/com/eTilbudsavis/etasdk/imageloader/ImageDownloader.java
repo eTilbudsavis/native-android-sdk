@@ -1,8 +1,8 @@
 package com.eTilbudsavis.etasdk.imageloader;
 
-import java.io.IOException;
-
 import android.graphics.Bitmap;
+
+import java.io.IOException;
 
 /**
  * Interface for downloading images from web.

@@ -1,8 +1,5 @@
 package com.eTilbudsavis.etasdk.pageflip.utils;
 
-import java.util.Arrays;
-import java.util.List;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -24,6 +21,9 @@ import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Catalog;
 import com.eTilbudsavis.etasdk.model.Hotspot;
 import com.eTilbudsavis.etasdk.pageflip.PageflipViewPager;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class PageflipUtils {
 	

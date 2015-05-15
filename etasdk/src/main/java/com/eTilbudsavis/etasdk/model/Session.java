@@ -16,12 +16,6 @@
 package com.eTilbudsavis.etasdk.model;
 
 
-import java.io.Serializable;
-import java.util.Date;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,6 +25,12 @@ import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.Date;
 
 public class Session implements IJson<JSONObject>, Serializable, Parcelable {
 	

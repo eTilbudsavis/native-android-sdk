@@ -1,11 +1,12 @@
 package com.eTilbudsavis.etasdk.test;
 
-import junit.framework.Assert;
 import android.graphics.Bitmap;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.imageloader.impl.CatalogThumbBitmapProcessor;
 import com.eTilbudsavis.etasdk.model.Dimension;
+
+import junit.framework.Assert;
 
 public class CatalogThumbBitmapProcessorTest {
 	

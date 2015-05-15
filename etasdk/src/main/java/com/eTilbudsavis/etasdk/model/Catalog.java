@@ -15,16 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.graphics.pdf.PdfDocument.Page;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -40,6 +30,16 @@ import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.ColorUtils;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * <p>This class is a representation of a catalog as the API v2 exposes it</p>

@@ -15,18 +15,18 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network.impl;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.network.Cache;
 import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.network.Request.Method;
 import com.eTilbudsavis.etasdk.network.Response;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class MemoryCache implements Cache {
 	

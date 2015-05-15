@@ -1,13 +1,10 @@
 package com.eTilbudsavis.etasdk.test;
 
-import android.graphics.Color;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.bus.SessionEvent;
 import com.eTilbudsavis.etasdk.bus.ShoppinglistEvent;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
-import com.eTilbudsavis.etasdk.utils.ColorUtils;
 
 import junit.framework.Assert;
 

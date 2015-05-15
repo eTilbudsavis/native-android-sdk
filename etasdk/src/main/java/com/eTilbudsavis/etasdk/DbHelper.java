@@ -15,13 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
@@ -35,6 +28,13 @@ import com.eTilbudsavis.etasdk.model.User;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.ListUtils;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class DbHelper extends SQLiteOpenHelper {
 	

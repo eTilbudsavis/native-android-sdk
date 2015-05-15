@@ -1,11 +1,11 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
-import java.util.List;
-
 import android.view.View;
 
 import com.eTilbudsavis.etasdk.model.Hotspot;
 import com.eTilbudsavis.etasdk.network.EtaError;
+
+import java.util.List;
 
 public interface PageflipListener {
 	

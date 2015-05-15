@@ -1,11 +1,5 @@
 package com.eTilbudsavis.etasdk.request.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import org.json.JSONArray;
-
 import com.eTilbudsavis.etasdk.model.Catalog;
 import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.Request;
@@ -14,6 +8,12 @@ import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 import com.eTilbudsavis.etasdk.request.RequestParameter;
 import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
+
+import org.json.JSONArray;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class CatalogListRequest extends ListRequest<List<Catalog>> {
 	

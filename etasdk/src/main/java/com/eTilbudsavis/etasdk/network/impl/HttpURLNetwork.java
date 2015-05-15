@@ -15,14 +15,11 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network.impl;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
+import com.eTilbudsavis.etasdk.Constants;
+import com.eTilbudsavis.etasdk.network.HttpStack;
+import com.eTilbudsavis.etasdk.network.Request;
+import com.eTilbudsavis.etasdk.utils.HeaderUtils;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -33,11 +30,14 @@ import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
 
-import com.eTilbudsavis.etasdk.Constants;
-import com.eTilbudsavis.etasdk.network.HttpStack;
-import com.eTilbudsavis.etasdk.network.Request;
-import com.eTilbudsavis.etasdk.utils.HeaderUtils;
-import com.eTilbudsavis.etasdk.utils.Utils;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class HttpURLNetwork implements HttpStack {
 	

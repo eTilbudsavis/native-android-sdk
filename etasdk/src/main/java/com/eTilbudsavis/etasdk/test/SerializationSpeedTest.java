@@ -1,12 +1,13 @@
 package com.eTilbudsavis.etasdk.test;
 
-import junit.framework.Assert;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Parcelable.Creator;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
+
+import junit.framework.Assert;
 
 public class SerializationSpeedTest {
 	

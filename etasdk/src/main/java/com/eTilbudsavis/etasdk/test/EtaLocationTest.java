@@ -2,15 +2,9 @@ package com.eTilbudsavis.etasdk.test;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.EtaLocation;
-import com.eTilbudsavis.etasdk.bus.SessionEvent;
-import com.eTilbudsavis.etasdk.bus.ShoppinglistEvent;
-import com.eTilbudsavis.etasdk.model.Shoppinglist;
-import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
 import junit.framework.Assert;
-
-import java.util.List;
 
 /**
  * Created by oizo on 15/05/15.

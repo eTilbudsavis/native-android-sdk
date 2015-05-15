@@ -1,7 +1,5 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
-import java.util.List;
-
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -27,6 +25,8 @@ import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
 import com.eTilbudsavis.etasdk.pageflip.widget.LoadingTextView;
 import com.eTilbudsavis.etasdk.pageflip.widget.ZoomPhotoView;
 import com.eTilbudsavis.etasdk.pageflip.widget.ZoomPhotoView.OnZoomChangeListener;
+
+import java.util.List;
 
 public abstract class PageFragment extends Fragment {
 	

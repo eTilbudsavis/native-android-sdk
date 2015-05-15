@@ -15,13 +15,13 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network.impl;
 
-import java.io.UnsupportedEncodingException;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.network.RequestQueue;
 import com.eTilbudsavis.etasdk.network.Response.Listener;
+
+import java.io.UnsupportedEncodingException;
 
 public abstract class JsonRequest<T> extends Request<T> {
 

@@ -1,5 +1,14 @@
 package com.eTilbudsavis.etasdk.test;
 
+import com.eTilbudsavis.etasdk.Constants;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Si;
+import com.eTilbudsavis.etasdk.network.Request;
+import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.utils.Utils;
+
+import junit.framework.Assert;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -7,15 +16,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import junit.framework.Assert;
-
-import com.eTilbudsavis.etasdk.Constants;
-import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.model.Si;
-import com.eTilbudsavis.etasdk.network.Request;
-import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.utils.Utils;
 
 public class UtilsTest {
 	

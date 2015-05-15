@@ -18,9 +18,6 @@
  *******************************************************************************/
 package com.eTilbudsavis.etasdk.photoview;
 
-import static android.view.MotionEvent.ACTION_CANCEL;
-import static android.view.MotionEvent.ACTION_DOWN;
-import static android.view.MotionEvent.ACTION_UP;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -45,6 +42,10 @@ import com.eTilbudsavis.etasdk.photoview.gestures.GestureDetector;
 import com.eTilbudsavis.etasdk.photoview.gestures.OnGestureListener;
 import com.eTilbudsavis.etasdk.photoview.gestures.VersionedGestureDetector;
 import com.eTilbudsavis.etasdk.photoview.scrollerproxy.ScrollerProxy;
+
+import static android.view.MotionEvent.ACTION_CANCEL;
+import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_UP;
 
 public class PhotoView extends ImageView implements View.OnTouchListener, OnGestureListener, ViewTreeObserver.OnGlobalLayoutListener {
 	

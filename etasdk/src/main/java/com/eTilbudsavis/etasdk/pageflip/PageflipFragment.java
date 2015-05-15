@@ -1,9 +1,5 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
-import java.util.List;
-
-import org.json.JSONObject;
-
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,6 +29,10 @@ import com.eTilbudsavis.etasdk.request.RequestAutoFill.AutoFillParams;
 import com.eTilbudsavis.etasdk.request.impl.CatalogObjectRequest.CatalogAutoFill;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONObject;
+
+import java.util.List;
 
 public class PageflipFragment extends Fragment implements PageCallback, OnPageChangeListener, OnKeyListener {
 	

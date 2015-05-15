@@ -1,19 +1,19 @@
 package com.eTilbudsavis.etasdk.log;
 
-import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import com.eTilbudsavis.etasdk.Constants;
+import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.FixedArrayList;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.eTilbudsavis.etasdk.Constants;
-import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.FixedArrayList;
-import com.eTilbudsavis.etasdk.utils.Utils;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * EventLog class have been created to simplify logging within the ETA SDK.

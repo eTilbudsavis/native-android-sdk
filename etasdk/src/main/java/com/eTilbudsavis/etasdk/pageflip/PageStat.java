@@ -1,8 +1,5 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.log.EtaLog;
@@ -12,6 +9,9 @@ import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
 import com.eTilbudsavis.etasdk.utils.Api;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class PageStat {
 	

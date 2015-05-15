@@ -1,13 +1,13 @@
 package com.eTilbudsavis.etasdk.request.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.eTilbudsavis.etasdk.model.Catalog;
 import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.request.RequestAutoFill;
 import com.eTilbudsavis.etasdk.utils.Api;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CatalogObjectRequest extends ObjectRequest<Catalog> {
 	

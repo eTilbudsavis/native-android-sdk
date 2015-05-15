@@ -1,15 +1,5 @@
 package com.eTilbudsavis.etasdk.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -21,6 +11,16 @@ import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson<JSONArray>, Serializable, Parcelable {
 	

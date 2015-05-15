@@ -15,15 +15,15 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk;
 
-import java.util.Date;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.eTilbudsavis.etasdk.log.EtaLog;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Date;
 
 public class Settings {
 

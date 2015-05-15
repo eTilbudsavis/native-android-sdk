@@ -15,11 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network.impl;
 
-import java.io.UnsupportedEncodingException;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.network.Cache;
 import com.eTilbudsavis.etasdk.network.EtaError;
@@ -27,6 +22,11 @@ import com.eTilbudsavis.etasdk.network.NetworkResponse;
 import com.eTilbudsavis.etasdk.network.Response;
 import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 
 public class JsonObjectRequest extends JsonRequest<JSONObject>{
 

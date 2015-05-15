@@ -1,15 +1,5 @@
 package com.eTilbudsavis.etasdk.network.impl;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.Constants;
@@ -20,6 +10,16 @@ import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.network.Response;
 import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
 
 public class JsonCacheHelper {
 	

@@ -15,9 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
@@ -25,6 +22,9 @@ import com.eTilbudsavis.etasdk.network.impl.ApiError;
 import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.Json;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class EtaError extends Exception implements IJson<JSONObject> {
 

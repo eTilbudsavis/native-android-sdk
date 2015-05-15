@@ -15,11 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import android.app.Application;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -43,6 +38,11 @@ import com.eTilbudsavis.etasdk.network.impl.MemoryCache;
 import com.eTilbudsavis.etasdk.network.impl.NetworkImpl;
 import com.eTilbudsavis.etasdk.utils.Utils;
 import com.eTilbudsavis.etasdk.utils.Validator;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 

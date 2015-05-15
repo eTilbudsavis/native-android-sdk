@@ -15,13 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-import java.util.Set;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import android.text.TextUtils;
 
 import com.eTilbudsavis.etasdk.network.Cache;
@@ -33,6 +26,13 @@ import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Set;
 
 public class JsonArrayRequest extends JsonRequest<JSONArray> {
 	

@@ -1,9 +1,9 @@
 package com.eTilbudsavis.etasdk.network;
 
-import java.io.IOException;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+
+import java.io.IOException;
 
 public interface HttpStack {
 	

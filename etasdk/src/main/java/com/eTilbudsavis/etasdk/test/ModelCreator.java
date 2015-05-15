@@ -1,17 +1,5 @@
 package com.eTilbudsavis.etasdk.test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.model.Branding;
@@ -42,6 +30,18 @@ import com.eTilbudsavis.etasdk.model.Unit;
 import com.eTilbudsavis.etasdk.model.User;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 public class ModelCreator {
 	

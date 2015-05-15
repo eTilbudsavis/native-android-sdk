@@ -1,14 +1,14 @@
 package com.eTilbudsavis.etasdk.utils;
 
-import static android.os.Environment.MEDIA_MOUNTED;
-
-import java.io.File;
-
 import android.content.Context;
 import android.os.Environment;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
+
+import java.io.File;
+
+import static android.os.Environment.MEDIA_MOUNTED;
 
 public class FileUtils {
 	

@@ -15,14 +15,14 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.utils;
 
-import java.util.List;
-
-import org.json.JSONObject;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.network.EtaError;
+
+import org.json.JSONObject;
+
+import java.util.List;
 
 /**
  * A class to help print debug messages.

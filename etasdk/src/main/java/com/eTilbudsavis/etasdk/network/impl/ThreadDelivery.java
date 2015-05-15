@@ -15,13 +15,13 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network.impl;
 
-import java.util.concurrent.ExecutorService;
-
 import android.os.Handler;
 
 import com.eTilbudsavis.etasdk.network.Delivery;
 import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.network.Response;
+
+import java.util.concurrent.ExecutorService;
 
 public class ThreadDelivery implements Delivery {
 	

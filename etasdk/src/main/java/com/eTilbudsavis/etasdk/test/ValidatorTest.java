@@ -1,10 +1,10 @@
 package com.eTilbudsavis.etasdk.test;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Validator;
+
+import junit.framework.Assert;
+import junit.framework.TestCase;
 
 public class ValidatorTest extends TestCase {
 	

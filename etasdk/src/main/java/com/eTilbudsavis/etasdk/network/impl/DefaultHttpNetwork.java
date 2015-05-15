@@ -15,11 +15,11 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network.impl;
 
-import java.io.IOException;
-import java.util.HashMap;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
+import com.eTilbudsavis.etasdk.Constants;
+import com.eTilbudsavis.etasdk.network.HttpStack;
+import com.eTilbudsavis.etasdk.network.Request;
+import com.eTilbudsavis.etasdk.utils.HeaderUtils;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -41,11 +41,11 @@ import org.apache.http.impl.conn.DefaultHttpRoutePlanner;
 import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.params.HttpConnectionParams;
 
-import com.eTilbudsavis.etasdk.Constants;
-import com.eTilbudsavis.etasdk.network.HttpStack;
-import com.eTilbudsavis.etasdk.network.Request;
-import com.eTilbudsavis.etasdk.utils.HeaderUtils;
-import com.eTilbudsavis.etasdk.utils.Utils;
+import java.io.IOException;
+import java.util.HashMap;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
 
 public class DefaultHttpNetwork implements HttpStack {
 

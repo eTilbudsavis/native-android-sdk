@@ -1,10 +1,5 @@
 package com.eTilbudsavis.etasdk.test;
 
-import junit.framework.Assert;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Constants;
@@ -41,6 +36,11 @@ import com.eTilbudsavis.etasdk.model.interfaces.IStore;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import junit.framework.Assert;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ModelTest {
 	

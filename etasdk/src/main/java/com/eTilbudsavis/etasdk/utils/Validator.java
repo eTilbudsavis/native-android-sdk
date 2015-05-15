@@ -1,8 +1,8 @@
 package com.eTilbudsavis.etasdk.utils;
 
-import java.util.regex.Pattern;
-
 import com.eTilbudsavis.etasdk.Constants;
+
+import java.util.regex.Pattern;
 
 public class Validator {
 	

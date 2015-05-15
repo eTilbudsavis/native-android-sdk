@@ -1,11 +1,5 @@
 package com.eTilbudsavis.etasdk.model;
 
-import java.io.Serializable;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -13,6 +7,12 @@ import android.os.Parcelable;
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
 
 public class Hotspot implements IJson<JSONObject>, Serializable, Parcelable {
 	

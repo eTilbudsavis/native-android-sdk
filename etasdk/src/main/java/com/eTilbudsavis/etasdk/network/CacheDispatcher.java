@@ -15,11 +15,11 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network;
 
-import java.util.concurrent.BlockingQueue;
-
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.Constants;
+
+import java.util.concurrent.BlockingQueue;
 
 public class CacheDispatcher extends Thread {
 	

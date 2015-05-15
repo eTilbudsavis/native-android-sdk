@@ -1,9 +1,9 @@
 package com.eTilbudsavis.etasdk.test;
 
-import junit.framework.TestCase;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Api.Environment;
+
+import junit.framework.TestCase;
 
 public class EnvironmentTest extends TestCase {
 	

@@ -5,6 +5,18 @@
  */
 package com.eTilbudsavis.etasdk.utils;
 
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.eTilbudsavis.etasdk.Constants;
+import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.network.Request;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -22,18 +34,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import com.eTilbudsavis.etasdk.Constants;
-import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.network.Request;
 
 public final class Utils {
 	

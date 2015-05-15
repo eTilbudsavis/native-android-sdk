@@ -1,13 +1,5 @@
 package com.eTilbudsavis.etasdk.request;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.log.EtaLog;
@@ -31,6 +23,14 @@ import com.eTilbudsavis.etasdk.network.impl.ThreadDelivery;
 import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public abstract class RequestAutoFill<T> {
 	

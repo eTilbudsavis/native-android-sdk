@@ -1,12 +1,5 @@
 package com.eTilbudsavis.etasdk.imageloader;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
@@ -20,6 +13,13 @@ import com.eTilbudsavis.etasdk.imageloader.impl.DefaultFileCache;
 import com.eTilbudsavis.etasdk.imageloader.impl.DefaultImageDownloader;
 import com.eTilbudsavis.etasdk.imageloader.impl.LruMemoryCache;
 import com.eTilbudsavis.etasdk.log.EtaLog;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ImageLoader {
 	

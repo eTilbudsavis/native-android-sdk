@@ -15,8 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.network.impl;
 
-import java.io.UnsupportedEncodingException;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.network.Cache;
@@ -25,6 +23,8 @@ import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.network.Response;
 import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import java.io.UnsupportedEncodingException;
 
 public class StringRequest extends Request<String> {
 	

@@ -20,7 +20,6 @@ import android.webkit.CookieSyncManager;
 
 import com.eTilbudsavis.etasdk.bus.SessionEvent;
 import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.log.EtaLogHelper;
 import com.eTilbudsavis.etasdk.model.Session;
 import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.Request;
@@ -35,7 +34,6 @@ import com.eTilbudsavis.etasdk.utils.Utils;
 
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
