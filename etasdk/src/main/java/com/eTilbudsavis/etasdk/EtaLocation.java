@@ -9,13 +9,18 @@ import org.json.JSONObject;
 
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-import com.eTilbudsavis.etasdk.dataobserver.DataObservable;
-import com.eTilbudsavis.etasdk.dataobserver.DataObserver;
+import com.eTilbudsavis.etasdk.bus.LocationEvent;
+import com.eTilbudsavis.eTilbudsavis.dataobserver.DataObservable;
+import com.eTilbudsavis.eTilbudsavis.dataobserver.DataObserver;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Store;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
 import com.eTilbudsavis.etasdk.utils.Json;
+
+import de.greenrobot.event.EventBus;
 
 public class EtaLocation extends Location {
 
@@ -40,18 +45,8 @@ public class EtaLocation extends Location {
 	private double mBoundSouth = DEFAULT_COORDINATE;
 	private double mBoundWest = DEFAULT_COORDINATE;
 
-    private final DataObservable mObservers = new DataObservable();
-
     public void notifyDataChanged() {
-        mObservers.notifyChanged();
-    }
-
-    public void registerObserver(DataObserver observer) {
-        mObservers.registerObserver(observer);
-    }
-
-    public void unregisterObserver(DataObserver observer) {
-        mObservers.unregisterObserver(observer);
+        EventBus.getDefault().post(new LocationEvent());
     }
 
     public EtaLocation() {
@@ -214,8 +209,7 @@ public class EtaLocation extends Location {
 	}
 	
 	/**
-	 * Returns an address, of this location if the address have previously been set 
-	 * with {@link #set(String, double, double) set(String address, double latitude, double longitude)}.
+	 * Returns an address, of this location if the address have previously been set with {@link #setAddress(String)}.
 	 * @return an address if one was given, else null
 	 */
 	public String getAddress() {
@@ -375,11 +369,53 @@ public class EtaLocation extends Location {
 
 		if (mSensor != other.mSensor)
 			return false;
-		
+
 		if (distanceTo(other) > 1)
 			return false;
-		
+
 		return true;
 	}
-	
+
+    protected EtaLocation(Parcel in) {
+        super(ETA_PROVIDER);
+        set(Location.CREATOR.createFromParcel(in));
+        mRadius = in.readInt();
+        mSensor = in.readByte() != 0x00;
+        mAddress = in.readString();
+        mBoundNorth = in.readDouble();
+        mBoundEast = in.readDouble();
+        mBoundSouth = in.readDouble();
+        mBoundWest = in.readDouble();
+    }
+
+    @Override
+    public int describeContents() {
+        return super.describeContents();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeInt(mRadius);
+        dest.writeByte((byte) (mSensor ? 0x01 : 0x00));
+        dest.writeString(mAddress);
+        dest.writeDouble(mBoundNorth);
+        dest.writeDouble(mBoundEast);
+        dest.writeDouble(mBoundSouth);
+        dest.writeDouble(mBoundWest);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<EtaLocation> CREATOR = new Parcelable.Creator<EtaLocation>() {
+        @Override
+        public EtaLocation createFromParcel(Parcel in) {
+            return new EtaLocation(in);
+        }
+
+        @Override
+        public EtaLocation[] newArray(int size) {
+            return new EtaLocation[size];
+        }
+    };
+
 }

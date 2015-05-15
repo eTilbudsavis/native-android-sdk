@@ -37,7 +37,7 @@ public class EventTest {
 
         // Shouldn't have any changes at this point
         Assert.assertFalse(b.hasChanges());
-        Assert.assertFalse(!b.firstSync);
+        Assert.assertFalse(b.firstSync);
 
         b.firstSync = true;
         // This is a change, should now have changes

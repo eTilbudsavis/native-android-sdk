@@ -22,6 +22,7 @@ public class EtaSdkTest {
 		SerializationSpeedTest.test();
 		EnvironmentTest.test();
         EventTest.test();
+        EtaLocationTest.test();
 		
 		String ok = "*   All test passed (" + (System.currentTimeMillis()-start) + "ms)   *";
 		StringBuilder sb = new StringBuilder();
