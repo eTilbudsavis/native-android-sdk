@@ -4,21 +4,19 @@
  */
 package com.eTilbudsavis.etasdk;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.bus.LocationEvent;
-import com.eTilbudsavis.eTilbudsavis.dataobserver.DataObservable;
-import com.eTilbudsavis.eTilbudsavis.dataobserver.DataObserver;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Store;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
 import com.eTilbudsavis.etasdk.utils.Json;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import de.greenrobot.event.EventBus;
 
