@@ -462,13 +462,35 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 
                     getActivity().runOnUiThread(mOnCatalogComplete);
 
-                } else {
+                } else if (error != null ){
 
                     // TODO improve error stuff 1 == network error
                     mLoader.error();
                     mWrapperListener.onError(error);
 
-                }
+                } else {
+
+					EtaError e = null;
+					if (mCatalog != null) {
+
+						if (mCatalog.getPages() != null && mCatalog.getPages().isEmpty()) {
+							// Got empty pages again, this shouldn't ever happen
+							String message = "Catalog pages missing.";
+							String details = "The api didn't return a valid set of pages for catalog " + mCatalog.getErn();
+							e = new EtaError(EtaError.Code.PAGEFLIP_LOADING_PAGES_FAILED, message, details);
+						}
+
+					}
+
+					if (e == null) {
+						e = new EtaError(EtaError.Code.PAGEFLIP_CATALOG_LOADING_FAILED, "Unknown error", "An error occoured while loading data for pageflip");
+					}
+
+					// TODO improve error stuff 1 == network error
+					mLoader.error();
+					mWrapperListener.onError(e);
+
+				}
 
             }
 

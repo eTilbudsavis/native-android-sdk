@@ -156,10 +156,17 @@ public class EtaError extends Exception implements IJson<JSONObject> {
 		 */
 	    public static final int NETWORK_ERROR				= 10200;
 
-		/**
-		 * Auto loading of objects failed
-		 */
-	    public static final int AUTO_LOAD_ERROR				= 10300;
+		/** Auto loading of objects failed */
+		public static final int AUTO_LOAD_ERROR				= 10300;
+
+		/** Pageflip failed, reason unknown */
+		public static final int PAGEFLIP					= 10400;
+
+		/** Loading data for the catalog to display failed */
+		public static final int PAGEFLIP_CATALOG_LOADING_FAILED	= 10401;
+
+		/** Loading of pages for pageflip to display failed */
+		public static final int PAGEFLIP_LOADING_PAGES_FAILED	= 10402;
 
 		/**
 		 * Out of memory error occurred, no further work possible
