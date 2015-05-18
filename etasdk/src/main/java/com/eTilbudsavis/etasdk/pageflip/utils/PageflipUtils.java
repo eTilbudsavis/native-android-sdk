@@ -54,57 +54,6 @@ public class PageflipUtils {
 		return c.orientation == Configuration.ORIENTATION_LANDSCAPE;
 	}
 
-	private static final boolean LANDSCAPE = true;
-	private static final boolean PORTRAIT = false;
-	
-	/**
-	 * Simple testing of the pageToPosition and positionToPage
-	 */
-	public static void test() {
-		
-		EtaLog.d(TAG, "Running page/position tests");
-		
-		testPageToPosition(1, LANDSCAPE, 0);
-		testPageToPosition(2, LANDSCAPE, 1);
-		testPageToPosition(3, LANDSCAPE, 1);
-		testPageToPosition(4, LANDSCAPE, 2);
-		testPageToPosition(5, LANDSCAPE, 2);
-		
-		int PAGE_COUNT = 8;
-		testPositionToPage(0, PAGE_COUNT, LANDSCAPE, new int[]{1});
-		testPositionToPage(1, PAGE_COUNT, LANDSCAPE, new int[]{2,3});
-		testPositionToPage(2, PAGE_COUNT, LANDSCAPE, new int[]{4,5});
-		testPositionToPage(3, PAGE_COUNT, LANDSCAPE, new int[]{6,7});
-		testPositionToPage(4, PAGE_COUNT, LANDSCAPE, new int[]{8});
-		
-		testPageToPosition(1, PORTRAIT, 0);
-		testPageToPosition(2, PORTRAIT, 1);
-		testPageToPosition(3, PORTRAIT, 2);
-		testPageToPosition(4, PORTRAIT, 3);
-
-		PAGE_COUNT = 4;
-		testPositionToPage(0, PAGE_COUNT, PORTRAIT, new int[]{1});
-		testPositionToPage(1, PAGE_COUNT, PORTRAIT, new int[]{2});
-		testPositionToPage(2, PAGE_COUNT, PORTRAIT, new int[]{3});
-		testPositionToPage(3, PAGE_COUNT, PORTRAIT, new int[]{4});
-		testPositionToPage(4, PAGE_COUNT, PORTRAIT, new int[]{5});
-		
-		EtaLog.d(TAG, "Done page/position tests");
-	}
-	
-	private static void testPageToPosition(int page, boolean land, int expectedPos) {
-		if ( pageToPosition(page, land) != expectedPos ) {
-			EtaLog.e(TAG, "pageToPosition[page:" + page + ", land:" + land + ", expected:" + expectedPos);
-		}
-	}
-	
-	private static void testPositionToPage(int pos, int pageCount, boolean land, int[] expectedPages) {
-		int[] pages = positionToPages(pos, pageCount, land);
-		if ( !Arrays.equals(pages, expectedPages) ) {
-			EtaLog.e(TAG, "positionToPage[pos:" + pos + ", land:" + land + ", expected:" + join(",", expectedPages) + ", got:" + join(",", pages));
-		}
-	}
-	
 	/**
 	 * Get the max available heap size
 	 * @param c A context
@@ -136,11 +85,8 @@ public class PageflipUtils {
 	 */
 	public static String join(CharSequence delimiter, int[] tokens) {
 		StringBuilder sb = new StringBuilder();
-		boolean firstTime = true;
 		for (Object token: tokens) {
-			if (firstTime) {
-				firstTime = false;
-			} else {
+			if (sb.length() != 0) {
 				sb.append(delimiter);
 			}
 			sb.append(token);
@@ -322,5 +268,32 @@ public class PageflipUtils {
 		}
 		return p;
 	}
-	
+
+	/**
+	 * Method for determining if the caralog is ready;
+	 * @return true, if the catalog is fully loaded, including pages and hotspots
+	 */
+	public static boolean isCatalogReady(Catalog c) {
+		return c != null && isPagesReady(c) && isHotspotsReady(c);
+	}
+
+	/**
+	 * Check if the given catalog has a list of valid Hotspots
+	 * @param c A catalog
+	 * @return <code>true</code> if the catalog has hotspots, else <code>false</code>
+	 */
+	public static boolean isHotspotsReady(Catalog c) {
+		return c != null && c.getHotspots() != null;
+	}
+
+	/**
+	 * Check if a given {@link Catalog} has a valid list of {@link com.eTilbudsavis.etasdk.model.Images}
+	 * @param c A catalog
+	 * @return <code>true</code> if the catalog has pages, else <code>false</code>
+	 */
+	public static boolean isPagesReady(Catalog c) {
+		return c != null && c.getPages() != null && !c.getPages().isEmpty();
+	}
+
+
 }

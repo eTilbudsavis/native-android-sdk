@@ -310,7 +310,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	 * Go to the next page in the catalog
 	 */
 	public void nextPage() {
-		mPager.setCurrentItem(mCurrentPosition+1, true);
+		mPager.setCurrentItem(mCurrentPosition + 1, true);
 	}
 	
 	/**
@@ -352,20 +352,12 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		return mAdapter != null;
 	}
 
-	private boolean isHotspotsReady() {
-		return mCatalog != null && mCatalog.getHotspots() != null;
-	}
-	
-	private boolean isPagesReady() {
-		return mCatalog != null && mCatalog.getPages() != null && !mCatalog.getPages().isEmpty();
-	}
-	
 	/**
-	 * Method for determining if the caralog is ready;
+	 * Method for determining if the catalog is ready;
 	 * @return true, if the catalog is fully loaded, including pages and hotspots
 	 */
 	public boolean isCatalogReady() {
-		return isPagesReady() && isHotspotsReady();
+		return PageflipUtils.isCatalogReady(mCatalog);
 	}
 	
 	/**
@@ -453,8 +445,8 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	private void runCatalogFiller() {
 		
 		CatalogAutoFill caf = new CatalogAutoFill();
-		caf.setLoadHotspots(!isHotspotsReady());
-		caf.setLoadPages(!isPagesReady());
+		caf.setLoadHotspots(!PageflipUtils.isHotspotsReady(mCatalog));
+		caf.setLoadPages(!PageflipUtils.isPagesReady(mCatalog));
 		caf.prepare(new AutoFillParams(), mCatalog, null, mCatListener);
 		caf.execute(Eta.getInstance().getRequestQueue());
 		
@@ -464,29 +456,22 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		
 		public void onComplete(Catalog c, EtaError error) {
 
-			if (!isAdded()) {
-				return;
-			}
-			
-			if ( c!=null && c.getPages()!=null && c.getHotspots()!=null ) {
-				
-				getActivity().runOnUiThread(mOnCatalogComplete);
-				
-			} else if (error != null ){
-				
-				EtaLog.d(TAG, error.toJSON().toString());
-				// TODO improve error stuff 1 == network error
-				mLoader.error();
-				mWrapperListener.onError(error);
-				
-			}
-			
-			if (!isCatalogReady()) {
-				// If a catalog object have been given, that have expired we won't be able to get any data
-				mLoader.error();
-				mWrapperListener.onError(error);
-			}
-			
+			if (isAdded()) {
+
+                if ( isCatalogReady() ) {
+
+                    getActivity().runOnUiThread(mOnCatalogComplete);
+
+                } else {
+
+                    // TODO improve error stuff 1 == network error
+                    mLoader.error();
+                    mWrapperListener.onError(error);
+
+                }
+
+            }
+
 		}
 	};
 	
@@ -648,8 +633,8 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		}
 		
 		public void onError(EtaError error) {
-			log("onError: " + (error == null ? "null" : error.toJSON().toString()));
-			error = (error == null) ? new EtaError(0, "Unknown Error", "No details available") : error;
+            error = (error == null) ? new EtaError(0, "Unknown Error", "No details available") : error;
+			log("onError: " + error.toJSON().toString());
 			if (post()) mListener.onError(error);
 		}
 		

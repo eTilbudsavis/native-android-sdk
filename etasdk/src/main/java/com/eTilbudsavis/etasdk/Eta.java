@@ -146,8 +146,6 @@ public class Eta {
 	
 	/**
 	 * Default constructor, this is private to allow us to create a singleton instance
-	 * @param apiKey An API v2 apiKey
-	 * @param apiSecret An API v2 apiSecret (matching the apiKey)
 	 * @param context A context
 	 */
 	private Eta(Context context) {
@@ -157,7 +155,8 @@ public class Eta {
 	}
 	
 	private void init() {
-		
+
+		setupKeys(mContext);
 		setAppVersion(Utils.getAppVersion(mContext));
 		mExecutor = Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT, new EtaThreadFactory());
 		mImageLoader = new ImageLoader(mContext, mExecutor);
@@ -187,7 +186,7 @@ public class Eta {
 	/**
 	 * Singleton access to a {@link Eta} object.
 	 * 
-	 * <p>Be sure to {@link Eta#createInstance(String, String, Context) create an
+	 * <p>Be sure to {@link Eta#create(Context)} create an
 	 * instance} before invoking this method, or bad things will happen.</p>
 	 * 
 	 * @throws IllegalStateException If {@link Eta} no instance is available
@@ -224,7 +223,7 @@ public class Eta {
 	
 	/**
 	 * Check if the instance have been instantiated.
-	 * <p>To instantiate an instance use {@link #createInstance(String, String, Context)}</p>
+	 * <p>To instantiate an instance use {@link #create(Context)}</p>
 	 * @return {@code true} if Eta is instantiated, else {@code false}
 	 */
 	public static boolean isCreated() {
@@ -268,6 +267,9 @@ public class Eta {
 	 * @return API key as String
 	 */
 	public String getApiKey() {
+        if (!isKeySecretOk()) {
+            setupKeys(mContext);
+        }
 		return mApiKey;
 	}
 
@@ -277,8 +279,7 @@ public class Eta {
 	 * <li> 1.0.0
 	 * <li> 1.0.0-beta
 	 * <li> 1.0.0-rc.1
-	 * 
-	 * @return API key as String
+	 *
 	 */
 	public void setAppVersion(String appVersion) {
 		if (Validator.isAppVersionValid(appVersion)) {
@@ -305,6 +306,9 @@ public class Eta {
 	 * @return API secret as String
 	 */
 	public String getApiSecret() {
+        if (!isKeySecretOk()) {
+            setupKeys(mContext);
+        }
 		return mApiSecret;
 	}
 	
@@ -324,7 +328,7 @@ public class Eta {
 	/**
 	 * Get the current instance of request queue. This is the queue 
 	 * responsible for any API request passed into the SDK.
-	 * @return
+	 * @return The current RequestQueue
 	 */
 	public RequestQueue getRequestQueue() {
 		return mRequestQueue;
@@ -431,25 +435,28 @@ public class Eta {
 		if (b == null) {
 			throw new IllegalStateException("Package meta data not available.");
 		}
-		
+
+        // If the develop flag has been set, then try to get the matching keys
 		if (isDevelop()) {
-			
+
 			mApiKey = b.getString(Constants.META_DEVELOP_API_KEY);
 			mApiSecret = b.getString(Constants.META_DEVELOP_API_SECRET);
 			
 			if (isKeySecretOk()) {
 				EtaLog.i(TAG, "Using development key/secret");
 			} else {
-				EtaLog.w(TAG, "Debug flag set, but no develop keys found.");
+				EtaLog.w(TAG, "Debug flag set, but no develop keys found in AndroidManifest.");
 			}
 			
 		}
-		
+
+        // If no develop keys were found, then get the production keys
 		if (!isKeySecretOk()) {
 			mApiKey = b.getString(Constants.META_API_KEY);
 			mApiSecret = b.getString(Constants.META_API_SECRET);
 		}
-		
+
+        // If no keys were found at all, then die
 		if (!isKeySecretOk()) {
 			throw new IllegalStateException("API key/secret missing from AndroidManifest.xml");
 		}
@@ -489,50 +496,51 @@ public class Eta {
 		}
 	}
 	
-	Runnable termination = new Runnable() {
-		
-		public void run() {
-			if (isStarted()) {
-				EtaLog.i(TAG, "Eta has been resumed, bail out");
-				return;
-			}
-			EtaLog.i(TAG, "Finalizing long running tasks...");
-			int retries = 0;
-			mRequestQueue.stop();
-			mExecutor.shutdown();
-			while (true && retries < 5) {
-				retries ++;
-				try {
-					if (mExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-						break;
-					}
-				} catch (InterruptedException e) {
-					// Ignore
-				}
-			}
-			finalCleanup();
-			EtaLog.i(TAG, "SDK cleanup complete");
-		}
-	};
+//	Runnable termination = new Runnable() {
+//
+//		public void run() {
+//			if (isStarted()) {
+//				EtaLog.i(TAG, "Eta has been resumed, bail out");
+//				return;
+//			}
+//			EtaLog.i(TAG, "Finalizing long running tasks...");
+//			int retries = 0;
+//			mRequestQueue.stop();
+//			mExecutor.shutdown();
+//			while (retries < 5) {
+//				retries ++;
+//				try {
+//					if (mExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+//						break;
+//					}
+//				} catch (InterruptedException e) {
+//					// Ignore
+//				}
+//			}
+//			finalCleanup();
+//			EtaLog.i(TAG, "SDK cleanup complete");
+//		}
+//	};
 	
-	private void finalCleanup() {
-		// TODO don't need to null everything
-		synchronized (Eta.class) {
-			mEta = null;
-			mApiKey = null;
-			mApiSecret = null;
-			mAppVersion = null;
-			mContext = null;
-			mExecutor = null;
-			mListManager = null;
-			mRequestQueue = null;
-			mSessionManager = null;
-			mSettings = null;
-			mSyncManager = null;
-		}
-	}
+//	private void finalCleanup() {
+//		// TODO don't need to null everything
+//		synchronized (Eta.class) {
+//			mEta = null;
+//			mApiKey = null;
+//			mApiSecret = null;
+//			mAppVersion = null;
+//			mContext = null;
+//			mExecutor = null;
+//			mListManager = null;
+//			mRequestQueue = null;
+//			mSessionManager = null;
+//			mSettings = null;
+//			mSyncManager = null;
+//		}
+//	}
 	
 	public void onStart() {
+		setupKeys(mContext);
 		if (mActivityCounter.getAndIncrement() == 0) {
 			internalStart();
 		}
@@ -540,7 +548,6 @@ public class Eta {
 	
 	private void internalStart() {
 //		mHandler.removeCallbacks(termination);
-		setupKeys(mContext);
 		mSessionManager.onStart();
 		mListManager.onStart();
 		mSyncManager.onStart();

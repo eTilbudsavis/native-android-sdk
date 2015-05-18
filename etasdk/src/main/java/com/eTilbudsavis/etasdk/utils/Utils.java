@@ -390,14 +390,11 @@ public final class Utils {
 	 * @return A {@link Bundle} or <code>null</code>
 	 */
 	public static Bundle getMetaData(Context c) {
-		
 		try {
 			PackageManager pm = c.getPackageManager();
 		    ApplicationInfo ai = pm.getApplicationInfo(c.getPackageName(), PackageManager.GET_META_DATA);
 		    return ai.metaData;
-		} catch (NameNotFoundException e) {
-			// ignore
-		} catch (NullPointerException e) {
+		} catch (Exception e) {
 			// ignore
 		}
 		return null;
