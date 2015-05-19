@@ -537,9 +537,11 @@ public class ListManager {
 			 * will auto update the modified tag, nice!
 			 */
 			Shoppinglist sl = getList(sli.getShoppinglistId());
-			sl.setModified(now);
-			mDb.editList(sl, user);
-			mBuilder.edit(sl);
+			if (sl != null) {
+				sl.setModified(now);
+				mDb.editList(sl, user);
+				mBuilder.edit(sl);
+			}
 			mBuilder.edit(sli);
 		}
 		
