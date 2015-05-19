@@ -18,6 +18,7 @@ package com.eTilbudsavis.etasdk;
 import android.annotation.SuppressLint;
 
 import com.eTilbudsavis.etasdk.bus.ShoppinglistEvent;
+import com.eTilbudsavis.etasdk.database.DbHelper;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Share;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;

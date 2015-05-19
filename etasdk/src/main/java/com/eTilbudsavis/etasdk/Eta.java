@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.eTilbudsavis.etasdk.database.DbHelper;
 import com.eTilbudsavis.etasdk.imageloader.ImageLoader;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
@@ -41,7 +42,6 @@ import com.eTilbudsavis.etasdk.utils.Validator;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**

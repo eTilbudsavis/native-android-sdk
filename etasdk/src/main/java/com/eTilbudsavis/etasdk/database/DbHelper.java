@@ -13,13 +13,15 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-package com.eTilbudsavis.etasdk;
+package com.eTilbudsavis.etasdk.database;
 
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.eTilbudsavis.etasdk.Constants;
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Share;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
@@ -67,8 +69,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String EMAIL = "email";
 	public static final String ACCEPTED = "accepted";
 	public static final String ACCEPT_URL = "accept_url";
-	
-	
+
 	private Object LOCK = new Object();
 	
 	private static final String CREATE_LIST_TABLE = 

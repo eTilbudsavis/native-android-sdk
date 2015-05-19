@@ -21,6 +21,7 @@ import android.os.Process;
 
 import com.eTilbudsavis.etasdk.bus.SessionEvent;
 import com.eTilbudsavis.etasdk.bus.ShoppinglistEvent;
+import com.eTilbudsavis.etasdk.database.DbHelper;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.log.SyncLog;
 import com.eTilbudsavis.etasdk.model.Share;
