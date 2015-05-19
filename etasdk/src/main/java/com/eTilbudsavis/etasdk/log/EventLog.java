@@ -80,15 +80,13 @@ public class EventLog {
 	private void add(String name, String type, JSONObject data) {
 		String user = "null";
 		String token = "null";
-		if (Eta.getInstance().isStarted()) {
+		if (Eta.isCreated()) {
 			user = Eta.getInstance().getUser().getErn();
 			token = Eta.getInstance().getSessionManager().getSession().getToken();
 		}
 		add(name, type, data, user, token);
 	}
-	
-	
-	
+
 	/**
 	 * 
 	 * @param name
