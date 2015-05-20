@@ -46,11 +46,15 @@ public class ShoppinglistItemSQLiteHelper extends DatabaseHelper {
     }
 
     public static void create(SQLiteDatabase db) {
+        db.acquireReference();
         db.execSQL(CREATE_TABLE);
+        db.releaseReference();
     }
 
     public static void upgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.acquireReference();
         db.execSQL("DROP TABLE IF EXISTS " + TABLE);
+        db.releaseReference();
     }
 
     public static List<ShoppinglistItem> cursorToList(Cursor c) {
