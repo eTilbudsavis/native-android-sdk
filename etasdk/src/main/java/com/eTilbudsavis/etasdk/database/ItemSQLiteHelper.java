@@ -42,19 +42,27 @@ public class ItemSQLiteHelper extends DatabaseHelper {
 
     public static void bind(SQLiteStatement s, ShoppinglistItem sli, String userId) {
         ContentValues cv = objectToContentValues(sli, userId);
-        s.bindString(1, cv.getAsString(ID));
-        s.bindString(2, cv.getAsString(ERN));
-        s.bindString(3, cv.getAsString(MODIFIED));
-        s.bindString(4, cv.getAsString(DESCRIPTION));
-        s.bindString(5, cv.getAsString(COUNT));
-        s.bindString(6, cv.getAsString(TICK));
-        s.bindString(7, cv.getAsString(OFFER_ID));
-        s.bindString(8, cv.getAsString(CREATOR));
-        s.bindString(9, cv.getAsString(SHOPPINGLIST_ID));
-        s.bindString(10, cv.getAsString(STATE));
-        s.bindString(11, cv.getAsString(PREVIOUS_ID));
-        s.bindString(12, cv.getAsString(META));
-        s.bindString(13, cv.getAsString(USER));
+        bindOrNull(s, 1, cv.getAsString(ID));
+        bindOrNull(s, 2, cv.getAsString(ERN));
+        bindOrNull(s, 3, cv.getAsString(MODIFIED));
+        bindOrNull(s, 4, cv.getAsString(DESCRIPTION));
+        bindOrNull(s, 5, cv.getAsString(COUNT));
+        bindOrNull(s, 6, cv.getAsString(TICK));
+        bindOrNull(s, 7, cv.getAsString(OFFER_ID));
+        bindOrNull(s, 8, cv.getAsString(CREATOR));
+        bindOrNull(s, 9, cv.getAsString(SHOPPINGLIST_ID));
+        bindOrNull(s, 10, cv.getAsString(STATE));
+        bindOrNull(s, 11, cv.getAsString(PREVIOUS_ID));
+        bindOrNull(s, 12, cv.getAsString(META));
+        bindOrNull(s, 13, cv.getAsString(USER));
+    }
+
+    private static void bindOrNull(SQLiteStatement s, int index, String value) {
+        if (value == null) {
+            s.bindNull(index);
+        } else {
+            s.bindString(index, value);
+        }
     }
 
     public ItemSQLiteHelper(Context context) {
@@ -114,7 +122,7 @@ public class ItemSQLiteHelper extends DatabaseHelper {
         cv.put(MODIFIED, Utils.dateToString(sli.getModified()));
         cv.put(DESCRIPTION, sli.getDescription());
         cv.put(COUNT, sli.getCount());
-        cv.put(TICK, sli.isTicked());
+        cv.put(TICK, (sli.isTicked() ? 1 : 0));
         cv.put(OFFER_ID, sli.getOfferId());
         cv.put(CREATOR, sli.getCreator());
         cv.put(SHOPPINGLIST_ID, sli.getShoppinglistId());
