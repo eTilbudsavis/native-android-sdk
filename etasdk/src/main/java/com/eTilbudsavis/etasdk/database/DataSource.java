@@ -222,7 +222,7 @@ public class DataSource {
         int count = 0;
         try {
             StringBuilder sb = new StringBuilder();
-            sb.append("INSERT INTO OR REPLACE INTO ").append(ItemSQLiteHelper.TABLE).append(" VALUES (");
+            sb.append("INSERT OR REPLACE INTO ").append(ItemSQLiteHelper.TABLE).append(" VALUES (");
             ContentValues cv = ItemSQLiteHelper.objectToContentValues(list.get(0), userId);
             for (int i = 0; i < cv.size(); i++) {
                 sb.append((i > 0) ? ",?" : "?");
