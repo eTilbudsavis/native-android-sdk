@@ -16,80 +16,75 @@
 package com.eTilbudsavis.etasdk.database;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Share;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.model.User;
-import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.ListUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class DbHelper {
 	
 	public static final String TAG = Constants.getTag(DbHelper.class);
 
-	private Object LOCK = new Object();
-
 	private static DbHelper mDbHelper;
-	private SQLiteDatabase mDatabase;
-	private Eta mEta;
+    private DataSource mDataSource;
 
-    private ShoppinglistDataSource mListSource;
-    private ShoppinglistItemDataSource mItemSource;
-    private ShareDataSource mShareSource;
-	
-	private DbHelper(Eta eta) {
-		mEta = eta;
-        Context c = mEta.getContext();
-        mListSource = new ShoppinglistDataSource(c);
-        mItemSource = new ShoppinglistItemDataSource(c);
-        mShareSource = new ShareDataSource(c);
+    private DbHelper(Context c) {
+        mDataSource = new DataSource(c);
+    }
+
+    public static DbHelper getInstance(Context c) {
+        if (mDbHelper == null) {
+            mDbHelper = new DbHelper(c);
+        }
+        return mDbHelper;
+    }
+
+    public static DbHelper getInstance(Eta eta) {
+        return getInstance(eta.getContext());
 	}
 
-	public static DbHelper getInstance(Eta eta) {
-		if (mDbHelper == null) {
-			mDbHelper = new DbHelper(eta);
-		}
-		return mDbHelper;
-	}
-	
-	/**
+    public void onStart() {
+        mDataSource.open();
+    }
+
+    public void onStop() {
+        mDataSource.close();
+    }
+
+    private boolean success(long id) {
+        return id > -1;
+    }
+
+    /**
 	 * Clears the whole DB. This cannot be undone.
 	 */
 	public int clear() {
-        int result = mListSource.clear();
-        result += mItemSource.clear();
-        result += mShareSource.clear();
-        return result;
+        return mDataSource.clear();
 	}
 
 	public int clear(int userId) {
-        int result = mListSource.clear(userId);
-        result += mItemSource.clear(userId);
-        result += mShareSource.clear(userId);
-        return result;
+        return mDataSource.clear(userId);
 	}
 
 	/**
 	 * Insert new shopping list into DB
 	 * @param sl to insert
-	 * @return number of affected rows
+	 * @return true if success, else false
 	 */
-	public long insertList(Shoppinglist sl, User user) {
-        long id = mListSource.insertList(sl, user);
+	public boolean insertList(Shoppinglist sl, User user) {
+        long id = mDataSource.insertList(sl, String.valueOf(user.getUserId()));
 		if (id > -1) {
 			cleanShares(sl, user);
 		}
-		return id;
+        return success(id);
 	}
 
 	/**
@@ -98,10 +93,15 @@ public class DbHelper {
 	 * @return A shoppinglist or null if no march is found
 	 */
 	public Shoppinglist getList(String id, User user) {
-        Shoppinglist sl = mListSource.getList(id, user);
+        Shoppinglist sl = mDataSource.getList(id, String.valueOf(user.getUserId()));
 		if (sl != null) {
 			sl.putShares(getShares(sl, user, false));
-			sl = sl.getShares().containsKey(user.getEmail()) ? sl : null;
+            /* Remove the list, if the user isn't in the shares.
+            This happens when the user, have removed him/her self from shares,
+            or deletes a list, and the action haven't been synced to the API yet */
+            if (!sl.getShares().containsKey(user.getEmail())) {
+                return null;
+            }
 		}
 		return sl;
 	}
@@ -112,77 +112,70 @@ public class DbHelper {
 	 */
 	public List<Shoppinglist> getLists(User user) {
 		return getLists(user, false);
-	}
-	
-	/**
-	 * 
-	 * @param userId
-	 * @param includeDeleted
-	 * @return A list of shoppinglists
+    }
+
+    /**
+     *
+     * @param user The user to fetch lists from
+	 * @param includeDeleted Whether to include deleted items
+	 * @return A list of Shoppinglist
 	 */
 	public List<Shoppinglist> getLists(User user, boolean includeDeleted) {
-		String q = null;
-		if (includeDeleted) {
-			q = String.format("SELECT * FROM %s WHERE %s=%s", LIST_TABLE, USER, user.getUserId());
-		} else {
-			q = String.format("SELECT * FROM %s WHERE %s!=%s AND %s=%s", LIST_TABLE, STATE, SyncState.DELETE, USER, user.getUserId());
-		}
-		Cursor c = null;
-		List<Shoppinglist> tmp = new ArrayList<Shoppinglist>();
-		try {
-			c = execQuery(q);
-			if (c.moveToFirst()) {
-				do { 
-					tmp.add(cursorToSl(c));
-				} while (c.moveToNext());
-			}
-		} catch (IllegalStateException e) {
-			EtaLog.d(TAG, e.getMessage(), e);
-		} finally {
-			closeCursorAndDB(c);
-		}
-		
-		List<Shoppinglist> lists = new ArrayList<Shoppinglist>(tmp.size());
-		for (Shoppinglist sl : tmp) {
+		List<Shoppinglist> lists = mDataSource.getLists(String.valueOf(user.getUserId()), includeDeleted);
+		Iterator<Shoppinglist> it = lists.iterator();
+		while (it.hasNext()) {
+			Shoppinglist sl = it.next();
 			sl.putShares(getShares(sl, user, includeDeleted));
-			// Only add list, if list has user as share
-			if (sl.getShares().containsKey(user.getEmail())) {
-				lists.add(sl);
+            /* Remove the list, if the user isn't in the shares.
+            This happens when the user, have removed him/her self from shares,
+            or deletes a list, and the action haven't been synced to the API yet */
+			if (!sl.getShares().containsKey(user.getEmail())) {
+				it.remove();
 			}
 		}
-		Collections.sort(lists);
+        // they should be sorted from the DB
+//		Collections.sort(lists);
 		return lists;
 	}
 
-	/**
-	 * Delete a list, from the db
-	 * @param shoppinglistId to delete
-	 * @return number of affected rows
-	 */
+    /**
+     * Delete a (all) shoppinglist where both the Shoppinglist.id, and user.id matches
+     * @param sl A shoppinglist
+     * @param user A user
+     * @return number of affected rows
+     */
 	public int deleteList(Shoppinglist sl, User user) {
 		return deleteList(sl.getId(), user);
 	}
-	
-	/**
-	 * Delete a list, from the db
-	 * @param shoppinglistId to delete
-	 * @return number of affected rows
-	 */
-	public int deleteList(String shoppinglistId, User user) {
-		String id = escape(shoppinglistId);
-		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", LIST_TABLE, ID, id, USER, user.getUserId());
-		return execQueryWithChangesCount(q);
-	}
 
-	/**
+    /**
+     * Delete a (all) shoppinglist where both the Shoppinglist.id, and user.id matches
+     * @param shoppinglistId A shoppinglist id
+     * @param user A user id
+     * @return number of affected rows
+     */
+    public int deleteList(String shoppinglistId, User user) {
+        return deleteList(shoppinglistId, String.valueOf(user.getUserId()));
+    }
+
+    /**
+     * Delete a list, from the db
+     * @param shoppinglistId to delete
+     * @return number of affected rows
+     */
+    public int deleteList(String shoppinglistId, String userId) {
+        // TODO: Do we need to remove shares?
+        return mDataSource.deleteList(shoppinglistId, userId);
+    }
+
+    /**
 	 * Replaces a shoppinglist, that have been updated in some way
 	 * @param sl that have been edited
 	 * @return number of affected rows
 	 */
-	public int editList(Shoppinglist sl, User user) {
-		String q = String.format("REPLACE INTO %s %s", LIST_TABLE, listToValues(sl, user.getUserId()));
-		int count = execQueryWithChangesCount(q);
-		return count;
+	public boolean editList(Shoppinglist sl, User user) {
+        long id = mDataSource.insertList(sl, String.valueOf(user.getUserId()));
+        return success(id);
 	}
 
 	/**
@@ -190,9 +183,9 @@ public class DbHelper {
 	 * @param sli to add to db
 	 * @return number of affected rows
 	 */
-	public int insertItem(ShoppinglistItem sli, User user) {
-		String q = String.format("INSERT OR REPLACE INTO %s %s", ITEM_TABLE, itemToValues(sli, user.getUserId()));
-		return execQueryWithChangesCount(q);
+	public boolean insertItem(ShoppinglistItem sli, User user) {
+        long id = mDataSource.insertItem(sli, String.valueOf(user.getUserId()));
+        return success(id);
 	}
 	
 	/**
@@ -201,11 +194,15 @@ public class DbHelper {
 	 * @return number of affected rows
 	 */
 	public int insertItems(ArrayList<ShoppinglistItem> items, User user) {
-		int count = 0;
-		for (ShoppinglistItem sli : items) {
-			count += insertItem(sli, user);
-		}
-		return count;
+//        // Old method
+//		int count = 0;
+//		for (ShoppinglistItem sli : items) {
+//			count += insertItem(sli, user);
+//		}
+//		return count;
+
+        // new method
+        return mDataSource.insertItem(items, String.valueOf(user.getUserId()));
 	}
 
 	/**
@@ -214,21 +211,7 @@ public class DbHelper {
 	 * @return A shoppinglistitem or null if no match is found
 	 */
 	public ShoppinglistItem getItem(String itemId, User user) {
-		itemId = escape(itemId);
-		String q = String.format("SELECT * FROM %s WHERE %s=%s AND  %s=%s", ITEM_TABLE, ID, itemId, USER , user.getUserId());
-		Cursor c = null;
-		ShoppinglistItem sli = null;
-		try {
-			c = execQuery(q);
-			if (c.moveToFirst()) {
-				sli = cursorToSli(c);
-			}
-		} catch (IllegalStateException e) {
-			EtaLog.d(TAG, e.getMessage(), e);
-		} finally {
-			closeCursorAndDB(c);
-		}
-		return sli;
+        return mDataSource.getItem(itemId, String.valueOf(user.getUserId()));
 	}
 	
 	/**
@@ -237,7 +220,7 @@ public class DbHelper {
 	 * @return A list of shoppinglistitems
 	 */
 	public List<ShoppinglistItem> getItems(Shoppinglist sl, User user) {
-		return getItems(sl.getId(), user, false);
+        return getItems(sl.getId(), user, false);
 	}
 
 	/**
@@ -255,28 +238,7 @@ public class DbHelper {
 	 * @return A list of shoppinglistitems
 	 */
 	public List<ShoppinglistItem> getItems(String shoppinglistId, User user, boolean includeDeleted) {
-		String id = escape(shoppinglistId);
-		String q = null;
-		if (includeDeleted) {
-			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, USER, user.getUserId());
-		} else {
-			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, STATE, SyncState.DELETE, USER, user.getUserId());
-		}
-		List<ShoppinglistItem> items = new ArrayList<ShoppinglistItem>();
-		Cursor c = null;
-		try {
-			c = execQuery(q);
-			if (c.moveToFirst() ) {
-				do { 
-					items.add(cursorToSli(c));
-				} while (c.moveToNext());
-			}
-		} catch (IllegalStateException e) {
-			EtaLog.d(TAG, e.getMessage(), e);
-		} finally {
-			closeCursorAndDB(c);
-		}
-		return items;
+        return mDataSource.getItems(shoppinglistId, String.valueOf(user.getUserId()), includeDeleted);
 	}
 
 	public ShoppinglistItem getFirstItem(String shoppinglistId, User user) {
@@ -284,22 +246,7 @@ public class DbHelper {
 	}
 	
 	public ShoppinglistItem getItemPrevious(String shoppinglistId, String previousId, User user) {
-		String id = escape(shoppinglistId);
-		String prev = escape(previousId);
-		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, id, PREVIOUS_ID, prev, USER, user.getUserId());
-		ShoppinglistItem sli = null;
-		Cursor c = null;
-		try {
-			c = execQuery(q);
-			if (c.moveToFirst()) {
-				sli = cursorToSli(c);
-			}
-		} catch (IllegalStateException e) {
-			EtaLog.d(TAG, e.getMessage(), e);
-		} finally {
-			closeCursorAndDB(c);
-		}
-		return sli;
+        return mDataSource.getItemPrevious(shoppinglistId, previousId, String.valueOf(user.getUserId()));
 	}
 
 	public Shoppinglist getFirstList(User user) {
@@ -307,32 +254,16 @@ public class DbHelper {
 	}
 	
 	public Shoppinglist getListPrevious(String previousId, User user) {
-		String prev = escape(previousId);
-		String q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", LIST_TABLE, PREVIOUS_ID, prev, USER, user.getUserId());
-		Shoppinglist sl = null;
-		Cursor c = null;
-		try {
-			c = execQuery(q);
-			if (c.moveToFirst()) {
-				sl = cursorToSl(c); 
-			}
-		} catch (IllegalStateException e) {
-			EtaLog.d(TAG, e.getMessage(), e);
-		} finally {
-			closeCursorAndDB(c);
-		}
-		return sl;
+        return mDataSource.getListPrevious(previousId, String.valueOf(user.getUserId()));
 	}
 	
 	/**
 	 * Deletes an {@link ShoppinglistItem} from db
-	 * @param id of the item to delete
+	 * @param sli An item to delete
 	 * @return the number of rows affected
 	 */
 	public int deleteItem(ShoppinglistItem sli, User user) {
-		String id = escape(sli.getId());
-		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, ID, id, USER, user.getUserId());
-		return execQueryWithChangesCount(q);
+        return mDataSource.deleteItem(sli.getId(), String.valueOf(user.getUserId()));
 	}
 
 	/**
@@ -349,12 +280,7 @@ public class DbHelper {
 	 * @return number of affected rows
 	 */
 	public int deleteItems(String shoppinglistId, Boolean state, User user) {
-		shoppinglistId = escape(shoppinglistId);
-		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", ITEM_TABLE, SHOPPINGLIST_ID, shoppinglistId, USER, user.getUserId());
-		if (state != null) {
-			q += String.format(" AND %s=%s", TICK, escape(state));
-		}
-		return execQueryWithChangesCount(q);
+        return mDataSource.deleteItems(shoppinglistId, state, String.valueOf(user.getUserId()));
 	}
 
 	/**
@@ -362,150 +288,57 @@ public class DbHelper {
 	 * @param sli to insert
 	 * @return number of affected rows
 	 */
-	public int editItem(ShoppinglistItem sli, User user) {
-		String q = String.format("REPLACE INTO %s %s", ITEM_TABLE,  itemToValues(sli, user.getUserId()));
-		return execQueryWithChangesCount(q);
+	public boolean editItem(ShoppinglistItem sli, User user) {
+        long id = mDataSource.insertItem(sli, String.valueOf(user.getUserId()));
+        return success(id);
 	}
 	
 	/**
 	 * 
-	 * @param sl
-	 * @param userId
-	 * @param includeDeleted
-	 * @return
+	 * @param sl A shoppinglist
+	 * @param user A user
+	 * @param includeDeleted Whether to include deleted shares
+	 * @return A list of Share
 	 */
 	public List<Share> getShares(Shoppinglist sl, User user, boolean includeDeleted) {
-		String slId = escape(sl.getId());
-		String q = null;
-		if (includeDeleted) {
-			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, USER, user.getUserId());
-		} else {
-			q = String.format("SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, STATE, SyncState.DELETE, USER, user.getUserId());
-		}
-		
-		List<Share> shares = new ArrayList<Share>();
-		Cursor c = null;
-		try {
-			c = execQuery(q);
-			if (c.moveToFirst() ) {
-				do {
-					shares.add(cursorToShare(c, sl));
-				} while (c.moveToNext());
-			}
-		} catch (IllegalStateException e) {
-			EtaLog.d(TAG, e.getMessage(), e);
-		} finally {
-			closeCursorAndDB(c);
-		}
-		
-		return shares;
-	}
-	
-	public int cleanShares(Shoppinglist sl, User user) {
-		deleteShares(sl, user);
-		int count = 0;
-		for (Share s: sl.getShares().values())
-			count += editShare(s, user);
-		return count;
-	}
-	
-	public int insertShare(Share s, User user) {
-		String q = String.format("INSERT OR REPLACE INTO %s %s", SHARE_TABLE, shareToValues(s, user.getUserId()));
-		return execQueryWithChangesCount(q);
+        return mDataSource.getShares(sl.getId(), String.valueOf(user.getUserId()), includeDeleted);
 	}
 
-	public int editShare(Share s, User user) {
+    public boolean insertShare(Share s, User user) {
+        long id = mDataSource.insertShare(s, String.valueOf(user.getUserId()));
+        return success(id);
+    }
+
+    public int cleanShares(Shoppinglist sl, User user) {
+		deleteShares(sl, user);
+		int count = 0;
+		for (Share s: sl.getShares().values()) {
+            if (editShare(s, user) ) {
+                count++;
+            }
+        }
+		return count;
+	}
+
+	public boolean editShare(Share s, User user) {
 		deleteShare(s, user);
 		return insertShare(s, user);
 	}
 	
 	public int deleteShare(Share s, User user) {
-		String email = escape(s.getEmail());
-		String slId = escape(s.getShoppinglistId());
-		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, EMAIL, email, USER, user.getUserId());
-		return execQueryWithChangesCount(q);
+        return mDataSource.deleteShare(s, user);
 	}
 
 	public int deleteShares(Shoppinglist sl, User user) {
-		return deleteShares(sl.getId(), user);
-	}
-	
-	public int deleteShares(String shoppinglistId, User user) {
-		String slId = escape(shoppinglistId);
-		String q = String.format("DELETE FROM %s WHERE %s=%s AND %s=%s", SHARE_TABLE, SHOPPINGLIST_ID, slId, USER, user.getUserId());
-		return execQueryWithChangesCount(q);
+        return deleteShares(sl.getId(), String.valueOf(user.getUserId()));
 	}
 
-	private int execQueryWithChangesCount(String query) {
-		
-		int i = 0;
-		
-		synchronized (LOCK) {
-			
-			Cursor c = null;
-			
-			// Get the actual query out of the way...
-			try {
-				c = execQuery(query);
-				if (c != null) {
-					c.moveToFirst();
-				}
-			} catch (IllegalStateException e) {
-				EtaLog.d(TAG, e.getMessage(), e);
-			} finally {
-				closeCursor(c);
-			}
-			
-			// Get number of affected rows in last statement (query)
-			try {
-				c = execQuery("SELECT changes() AS 'changes'");
-				if (c != null && c.moveToFirst()) {
-					i = c.getInt(0);
-				}
-			} catch (IllegalStateException e) {
-				EtaLog.d(TAG, e.getMessage(), e);
-			} finally {
-				closeCursorAndDB(c);
-			}
-			
-		}
-		
-		return i;
-	}
-	
-	private Cursor execQuery(String query) {
-		
-		synchronized (LOCK) {
-			
-			// If we are resuming the activity
-			if (mDatabase == null || !mDatabase.isOpen()) {
-				mDatabase = getWritableDatabase();
-			}
-			
-			return mDatabase.rawQueryWithFactory(null, query, null, null);
-			
-		}
-		
-	}
+    public int deleteShares(String shoppinglistId, User user) {
+        return deleteShares(shoppinglistId, String.valueOf(user.getUserId()));
+    }
 
-	private void closeCursorAndDB(Cursor c) {
-
-		synchronized (LOCK) {
-			
-			closeCursor(c);
-			
-			if (!mEta.isStarted()) {
-				mDatabase.close();
-			}
-			
-		}
-		
-	}
-	
-	private void closeCursor(Cursor c) {
-		if (c != null) {
-			c.close();
-		}
-	}
+    public int deleteShares(String shoppinglistId, String userId) {
+        return mDataSource.deleteShares(shoppinglistId, userId);
+    }
 
 }

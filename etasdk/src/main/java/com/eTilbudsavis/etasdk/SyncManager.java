@@ -34,11 +34,13 @@ import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.EtaError.Code;
 import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.network.Request.Method;
+import com.eTilbudsavis.etasdk.network.RequestDebugger;
 import com.eTilbudsavis.etasdk.network.RequestQueue;
 import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.network.impl.HandlerDelivery;
 import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.network.impl.NetworkDebugger;
 import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
@@ -128,7 +130,7 @@ public class SyncManager {
 	}
 	
 	/** The current sync speed */
-	private int mSyncSpeed = 3000;
+	private int mSyncSpeed = SyncSpeed.SLOW;
 	
 	/** Sync iteration counter */
 	private int mSyncCount = 0;
@@ -348,6 +350,7 @@ public class SyncManager {
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
 	public void onStart() {
+		mDb.onStart();
         EventBus.getDefault().register(this);
 		forceSync();
 	}
@@ -357,6 +360,7 @@ public class SyncManager {
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
 	public void onStop() {
+		mDb.onStop();
 		forceSync();
         EventBus.getDefault().unregister(this);
 		mHasFirstSync = false;
@@ -372,6 +376,8 @@ public class SyncManager {
 	public void setSyncSpeed(int time) {
 		if (time == SyncSpeed.SLOW || time == SyncSpeed.MEDIUM || time == SyncSpeed.FAST ) {
 			mSyncSpeed = time;
+		} else {
+			mSyncSpeed = SyncSpeed.SLOW;
 		}
 	}
 	
@@ -412,7 +418,17 @@ public class SyncManager {
 		r.setDelivery(mDelivery);
 		
 		r.setTag(mRequestTag);
-		
+		r.setDebugger(new RequestDebugger() {
+			@Override
+			public void onFinish(Request<?> r) {
+				EtaLog.d(TAG, r.getUrl());
+			}
+
+			@Override
+			public void onDelivery(Request<?> r) {
+
+			}
+		});
 		mEta.add(r);
 		
 //		boolean isPullRequest = r.getUrl().contains("modified") || r.getUrl().endsWith("shoppinglists") || r.getUrl().endsWith("items");
@@ -423,7 +439,9 @@ public class SyncManager {
 //		}
 		
 	}
-	
+
+
+
 	private void popRequest() {
 		synchronized (mCurrentRequests) {
 			try {
@@ -623,7 +641,6 @@ public class SyncManager {
 			Listener<JSONObject> modifiedListener = new Listener<JSONObject>() {
 
 				public void onComplete( JSONObject response, EtaError error) {
-					
 
 					if (response != null) {
 						

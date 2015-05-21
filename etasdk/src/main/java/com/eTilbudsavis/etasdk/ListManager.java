@@ -140,9 +140,8 @@ public class ListManager {
 			first.setState(SyncState.TO_SYNC);
 			mDb.editList(first, user);
 		}
-		
-		int count = mDb.insertList(sl, user);
-		boolean success = count == 1;
+
+		boolean success = mDb.insertList(sl, user);
 		if (success) {
 			mBuilder.add(sl);
 		}
@@ -275,9 +274,8 @@ public class ListManager {
 			}
 			
 		}
-		
-		int count = mDb.editList(sl, user);
-		boolean success = count == 1;
+
+		boolean success = mDb.editList(sl, user);
 		if (success) {
 			mBuilder.edit(sl);
 		}
@@ -331,8 +329,10 @@ public class ListManager {
 			 
 			// Update local version of shoppinglist
 			sl.setState(SyncState.DELETE);
-			count = mDb.editList(sl, user);
-			
+			if (mDb.editList(sl, user)) {
+				count++;
+			}
+
 		} else {
 
 			for (ShoppinglistItem sli : items) {
@@ -466,9 +466,8 @@ public class ListManager {
 			mDb.editItem(first, user);
 			mBuilder.edit(first);
 		}
-		
-		int count = mDb.insertItem(sli, user);
-		boolean success = count == 1;
+
+		boolean success = mDb.insertItem(sli, user);
 		if (success) {
 			/* Update SL info, but not state. This will prevent sync, and API
 			 * will auto update the modified tag, nice! */
@@ -496,7 +495,7 @@ public class ListManager {
 	
 	/**
 	 * 
-	 * @param items
+	 * @param items A list of ShoppinglistItem to edit
 	 * @return
 	 */
 	public int editItems(List<ShoppinglistItem> items) {
@@ -532,7 +531,7 @@ public class ListManager {
 			return false;
 		}
 		
-		boolean success = (mDb.editItem(sli, user) == 1);
+		boolean success = mDb.editItem(sli, user);
 		if (success) {
 			/* Update SL info, but not state. This will prevent sync, and API
 			 * will auto update the modified tag, nice!
@@ -637,7 +636,9 @@ public class ListManager {
 			for (ShoppinglistItem sli : mBuilder.getDeletedItems()) {
 				sli.setState(SyncState.DELETE);
 				sli.setModified(now);
-				count += mDb.editItem(sli, user);
+				if (mDb.editItem(sli, user)) {
+					count++;
+				}
 			}
 		} else {
 			count = mDb.deleteItems(sl.getId(), stateToDelete, user) ;
@@ -690,7 +691,9 @@ public class ListManager {
 		int count = 0;
 		if (user.getUserId() != User.NO_USER) {
 			sli.setState(SyncState.DELETE);
-			count = mDb.editItem(sli, user);
+			if (mDb.editItem(sli, user)) {
+				count++;
+			}
 		} else {
 			count = mDb.deleteItem(sli, user);
 		}
@@ -731,7 +734,7 @@ public class ListManager {
 			return false;
 		}
 		Shoppinglist sl = mDb.getList(shoppinglistId, user());
-		return sl == null ? false : canEdit(sl, user);
+		return sl != null && canEdit(sl, user);
 	}
 	
 	/**
@@ -745,7 +748,7 @@ public class ListManager {
 			return false;
 		}
 		Share s = sl.getShares().get(user.getEmail());
-		return s == null ? false : canEdit(sl, s);
+		return s != null && canEdit(sl, s);
 	}
 
 	/**
@@ -783,6 +786,7 @@ public class ListManager {
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
 	public void onStart() {
+		mDb.onStart();
 	}
 	
 	/**
@@ -790,6 +794,7 @@ public class ListManager {
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
 	public void onStop() {
+		mDb.onStop();
 	}
 
 	private void postShoppinglistEvent() {

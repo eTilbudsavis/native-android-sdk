@@ -53,10 +53,10 @@ public class ShareSQLiteHelper extends DatabaseHelper {
         db.releaseReference();
     }
 
-    public static List<Share> cursorToList(Cursor c, Shoppinglist sl) {
+    public static List<Share> cursorToList(Cursor c, String shoppinglistId) {
         ArrayList<Share> list = new ArrayList<Share>();
         for (ContentValues cv : DbUtils.cursorToContentValues(c)) {
-            Share s = ShareSQLiteHelper.contentValuesToObject(cv, sl);
+            Share s = ShareSQLiteHelper.contentValuesToObject(cv, shoppinglistId);
             if (s!=null) {
                 list.add(s);
             }
@@ -64,19 +64,19 @@ public class ShareSQLiteHelper extends DatabaseHelper {
         return list;
     }
 
-    public static Share contentValuesToObject(ContentValues cv, Shoppinglist sl) {
+    public static Share contentValuesToObject(ContentValues cv, String shoppinglistId) {
         String email = cv.getAsString(EMAIL);
         String acceptUrl = cv.getAsString(ACCEPT_URL);
         String access = cv.getAsString(ACCESS);
         Share s = new Share(email, access, acceptUrl);
-        s.setShoppinglistId(sl.getId());
+        s.setShoppinglistId(shoppinglistId);
         s.setName(cv.getAsString(NAME));
         s.setAccepted(0 < cv.getAsInteger(ACCEPTED));
         s.setState(cv.getAsInteger(STATE));
         return s;
     }
 
-    public static ContentValues objectToContentValues(Share s, int userId) {
+    public static ContentValues objectToContentValues(Share s, String userId) {
         ContentValues cv = new ContentValues();
         cv.put(SHOPPINGLIST_ID, s.getShoppinglistId());
         cv.put(USER, userId);

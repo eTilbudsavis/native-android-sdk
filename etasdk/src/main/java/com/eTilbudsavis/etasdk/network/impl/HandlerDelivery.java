@@ -35,11 +35,11 @@ public class HandlerDelivery implements Delivery {
      */
     public void postResponse(Request<?> request, Response<?> response) {
     	request.addEvent("post-response");
-    	
-    	// TODO fix the issue of recursive calls to the handler delivery
-    	if (request.getDelivery() != null) {
-        	mHandler.post(new DeliveryRunnable(request, response));
-    	} else {
+
+    	if (request.getDelivery() != null && !HandlerDelivery.this.equals(request.getDelivery())) {
+			// If there isn't a check, you'll end up in an infinite loop
+        	request.getDelivery().postResponse(request, response);
+		} else {
         	mHandler.post(new DeliveryRunnable(request, response));
     	}
     	

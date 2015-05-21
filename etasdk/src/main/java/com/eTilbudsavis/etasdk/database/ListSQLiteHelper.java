@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.model.Catalog;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Utils;
@@ -16,12 +15,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-public class ShoppinglistSQLiteHelper extends DatabaseHelper {
+public class ListSQLiteHelper extends DatabaseHelper {
 
-    public static final String TAG = Constants.getTag(ShoppinglistSQLiteHelper.class);
+    public static final String TAG = Constants.getTag(ListSQLiteHelper.class);
 
     public static final String TABLE = "shoppinglists";
 
@@ -39,7 +37,7 @@ public class ShoppinglistSQLiteHelper extends DatabaseHelper {
                     USER + " integer not null " +
                     ");";
 
-    public ShoppinglistSQLiteHelper(Context context) {
+    public ListSQLiteHelper(Context context) {
         super(context);
     }
 
@@ -58,7 +56,7 @@ public class ShoppinglistSQLiteHelper extends DatabaseHelper {
     public static List<Shoppinglist> cursorToList(Cursor c) {
         ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
         for (ContentValues cv : DbUtils.cursorToContentValues(c)) {
-            Shoppinglist sl = ShoppinglistSQLiteHelper.contentValuesToObject(cv);
+            Shoppinglist sl = ListSQLiteHelper.contentValuesToObject(cv);
             if (sl!=null) {
                 list.add(sl);
             }
@@ -87,7 +85,7 @@ public class ShoppinglistSQLiteHelper extends DatabaseHelper {
         return sl;
     }
 
-    public static ContentValues objectToContentValues(Shoppinglist sl, int userId) {
+    public static ContentValues objectToContentValues(Shoppinglist sl, String userId) {
         ContentValues cv = new ContentValues();
         cv.put(ID, sl.getId());
         cv.put(ERN, sl.getErn());

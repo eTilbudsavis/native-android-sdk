@@ -11,26 +11,33 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class DbUtils {
 
     public static JSONArray dumpTable(SQLiteDatabase db, String table) {
-        Cursor c = db.query(table, null, null, null, null, null, null);
-        List<ContentValues> list = cursorToContentValues(c);
-        JSONArray jTable = new JSONArray();
-        for (ContentValues cv : list) {
-            try {
-                JSONObject jRow = new JSONObject();
-                for (String name : cv.keySet()) {
-                    String value = cv.getAsString(name);
-                    jRow.put(name, value);
+        Cursor c = null;
+        db.acquireReference();
+        try {
+            c = db.query(table, null, null, null, null, null, null);
+            List<ContentValues> list = cursorToContentValues(c);
+            JSONArray jTable = new JSONArray();
+            for (ContentValues cv : list) {
+                try {
+                    JSONObject jRow = new JSONObject();
+                    for (Map.Entry<String, Object> e : cv.valueSet()) {
+                        jRow.put(e.getKey(), String.valueOf(e.getValue()));
+                    }
+                    jTable.put(jRow);
+                } catch (JSONException e) {
+                    // ignore
                 }
-                jTable.put(jRow);
-            } catch (JSONException e) {
-                // ignore
             }
+            return jTable;
+
+        } finally {
+            db.releaseReference();
         }
-        return jTable;
     }
 
     /**
@@ -52,6 +59,16 @@ public class DbUtils {
             c.close();
         }
         return list;
+    }
+
+    /**
+     * Safely close a cursor
+     * @param c A cursor
+     */
+    public static void closeCursor(Cursor c) {
+        if (c != null) {
+            c.close();
+        }
     }
 
 }

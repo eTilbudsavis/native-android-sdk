@@ -4,12 +4,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
-import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
 import org.json.JSONException;
@@ -18,9 +17,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShoppinglistItemSQLiteHelper extends DatabaseHelper {
+public class ItemSQLiteHelper extends DatabaseHelper {
 
-    public static final String TAG = Constants.getTag(ShoppinglistItemSQLiteHelper.class);
+    public static final String TAG = Constants.getTag(ItemSQLiteHelper.class);
 
     public static final String TABLE = "shoppinglistitems";
 
@@ -41,7 +40,24 @@ public class ShoppinglistItemSQLiteHelper extends DatabaseHelper {
                     USER + "  integer not null " +
                     ");";
 
-    public ShoppinglistItemSQLiteHelper(Context context) {
+    public static void bind(SQLiteStatement s, ShoppinglistItem sli, String userId) {
+        ContentValues cv = objectToContentValues(sli, userId);
+        s.bindString(1, cv.getAsString(ID));
+        s.bindString(2, cv.getAsString(ERN));
+        s.bindString(3, cv.getAsString(MODIFIED));
+        s.bindString(4, cv.getAsString(DESCRIPTION));
+        s.bindString(5, cv.getAsString(COUNT));
+        s.bindString(6, cv.getAsString(TICK));
+        s.bindString(7, cv.getAsString(OFFER_ID));
+        s.bindString(8, cv.getAsString(CREATOR));
+        s.bindString(9, cv.getAsString(SHOPPINGLIST_ID));
+        s.bindString(10, cv.getAsString(STATE));
+        s.bindString(11, cv.getAsString(PREVIOUS_ID));
+        s.bindString(12, cv.getAsString(META));
+        s.bindString(13, cv.getAsString(USER));
+    }
+
+    public ItemSQLiteHelper(Context context) {
         super(context);
     }
 
@@ -60,7 +76,7 @@ public class ShoppinglistItemSQLiteHelper extends DatabaseHelper {
     public static List<ShoppinglistItem> cursorToList(Cursor c) {
         ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
         for (ContentValues cv : DbUtils.cursorToContentValues(c)) {
-            ShoppinglistItem sli = ShoppinglistItemSQLiteHelper.contentValuesToObject(cv);
+            ShoppinglistItem sli = ItemSQLiteHelper.contentValuesToObject(cv);
             if (sli!=null) {
                 list.add(sli);
             }
@@ -91,7 +107,7 @@ public class ShoppinglistItemSQLiteHelper extends DatabaseHelper {
         return sli;
     }
 
-    public static ContentValues objectToContentValues(ShoppinglistItem sli, int userId) {
+    public static ContentValues objectToContentValues(ShoppinglistItem sli, String userId) {
         ContentValues cv = new ContentValues();
         cv.put(ID, sli.getId());
         cv.put(ERN, sli.getErn());

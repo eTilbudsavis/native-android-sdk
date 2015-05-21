@@ -1,11 +1,11 @@
 package com.eTilbudsavis.etasdk.database;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.eTilbudsavis.etasdk.Constants;
-import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -43,8 +43,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         // call all classes that extends this class, to let them know there has been an update
-        ShoppinglistSQLiteHelper.create(db);
-        ShoppinglistItemSQLiteHelper.create(db);
+        ListSQLiteHelper.create(db);
+        ItemSQLiteHelper.create(db);
         ShareSQLiteHelper.create(db);
     }
 
@@ -53,10 +53,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // call all classes that extends this class, to let them know there has been an update
         String format = "Upgrading database from version %s to %s. Calling static methods in subclasses";
         EtaLog.i(TAG, String.format(format, oldVersion, newVersion));
-        ShoppinglistSQLiteHelper.upgrade(db, oldVersion, newVersion);
-        ShoppinglistItemSQLiteHelper.upgrade(db, oldVersion, newVersion);
+        ListSQLiteHelper.upgrade(db, oldVersion, newVersion);
+        ItemSQLiteHelper.upgrade(db, oldVersion, newVersion);
         ShareSQLiteHelper.upgrade(db, oldVersion, newVersion);
     }
-
 
 }
