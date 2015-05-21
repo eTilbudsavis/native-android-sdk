@@ -24,43 +24,52 @@ import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.model.User;
 import com.eTilbudsavis.etasdk.utils.ListUtils;
+import com.eTilbudsavis.etasdk.utils.PermissionUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class DbHelper {
+public class DatabaseWrapper {
 	
-	public static final String TAG = Constants.getTag(DbHelper.class);
+	public static final String TAG = Constants.getTag(DatabaseWrapper.class);
 
-	private static DbHelper mDbHelper;
+	private static DatabaseWrapper mWrapper;
     private DataSource mDataSource;
 
-    private DbHelper(Context c) {
+    private DatabaseWrapper(Context c) {
         mDataSource = new DataSource(c);
     }
 
-    public static DbHelper getInstance(Context c) {
-        if (mDbHelper == null) {
-            mDbHelper = new DbHelper(c);
+    public static DatabaseWrapper getInstance(Context c) {
+        if (mWrapper == null) {
+            mWrapper = new DatabaseWrapper(c);
         }
-        return mDbHelper;
+        return mWrapper;
     }
 
-    public static DbHelper getInstance(Eta eta) {
+    public static DatabaseWrapper getInstance(Eta eta) {
         return getInstance(eta.getContext());
 	}
 
-    public void onStart() {
+    public void open() {
         mDataSource.open();
     }
 
-    public void onStop() {
+    public void close() {
         mDataSource.close();
     }
 
-    private boolean success(long id) {
+    private boolean successId(long id) {
         return id > -1;
+    }
+
+    private boolean successCount(int count) {
+        return count > 0;
     }
 
     /**
@@ -77,14 +86,14 @@ public class DbHelper {
 	/**
 	 * Insert new shopping list into DB
 	 * @param sl to insert
-	 * @return true if success, else false
+     * @return true, if operation succeeded, else false
 	 */
 	public boolean insertList(Shoppinglist sl, User user) {
         long id = mDataSource.insertList(sl, String.valueOf(user.getUserId()));
 		if (id > -1) {
 			cleanShares(sl, user);
 		}
-        return success(id);
+        return successId(id);
 	}
 
 	/**
@@ -142,9 +151,9 @@ public class DbHelper {
      * Delete a (all) shoppinglist where both the Shoppinglist.id, and user.id matches
      * @param sl A shoppinglist
      * @param user A user
-     * @return number of affected rows
+     * @return true, if operation succeeded, else false
      */
-	public int deleteList(Shoppinglist sl, User user) {
+	public boolean deleteList(Shoppinglist sl, User user) {
 		return deleteList(sl.getId(), user);
 	}
 
@@ -152,40 +161,41 @@ public class DbHelper {
      * Delete a (all) shoppinglist where both the Shoppinglist.id, and user.id matches
      * @param shoppinglistId A shoppinglist id
      * @param user A user id
-     * @return number of affected rows
+     * @return true, if operation succeeded, else false
      */
-    public int deleteList(String shoppinglistId, User user) {
+    public boolean deleteList(String shoppinglistId, User user) {
         return deleteList(shoppinglistId, String.valueOf(user.getUserId()));
     }
 
     /**
      * Delete a list, from the db
      * @param shoppinglistId to delete
-     * @return number of affected rows
+     * @return true, if operation succeeded, else false
      */
-    public int deleteList(String shoppinglistId, String userId) {
+    public boolean deleteList(String shoppinglistId, String userId) {
         // TODO: Do we need to remove shares?
-        return mDataSource.deleteList(shoppinglistId, userId);
+        int count = mDataSource.deleteList(shoppinglistId, userId);
+        return successCount(count);
     }
 
     /**
 	 * Replaces a shoppinglist, that have been updated in some way
 	 * @param sl that have been edited
-	 * @return number of affected rows
+     * @return true, if operation succeeded, else false
 	 */
 	public boolean editList(Shoppinglist sl, User user) {
         long id = mDataSource.insertList(sl, String.valueOf(user.getUserId()));
-        return success(id);
+        return successId(id);
 	}
 
 	/**
 	 * Adds item to db, IF it does not yet exist, else nothing
 	 * @param sli to add to db
-	 * @return number of affected rows
+     * @return true, if operation succeeded, else false
 	 */
 	public boolean insertItem(ShoppinglistItem sli, User user) {
         long id = mDataSource.insertItem(sli, String.valueOf(user.getUserId()));
-        return success(id);
+        return successId(id);
 	}
 	
 	/**
@@ -260,10 +270,11 @@ public class DbHelper {
 	/**
 	 * Deletes an {@link ShoppinglistItem} from db
 	 * @param sli An item to delete
-	 * @return the number of rows affected
+     * @return true, if operation succeeded, else false
 	 */
-	public int deleteItem(ShoppinglistItem sli, User user) {
-        return mDataSource.deleteItem(sli.getId(), String.valueOf(user.getUserId()));
+	public boolean deleteItem(ShoppinglistItem sli, User user) {
+        int count = mDataSource.deleteItem(sli.getId(), String.valueOf(user.getUserId()));
+        return successCount(count);
 	}
 
 	/**
@@ -283,17 +294,26 @@ public class DbHelper {
         return mDataSource.deleteItems(shoppinglistId, state, String.valueOf(user.getUserId()));
 	}
 
-	/**
-	 * replaces an item in db
-	 * @param sli to insert
-	 * @return number of affected rows
-	 */
-	public boolean editItem(ShoppinglistItem sli, User user) {
+    /**
+     * replaces an item in db
+     * @param sli to insert
+     * @return true, if operation succeeded, else false
+     */
+    public boolean editItem(ShoppinglistItem sli, User user) {
         long id = mDataSource.insertItem(sli, String.valueOf(user.getUserId()));
-        return success(id);
-	}
-	
-	/**
+        return successId(id);
+    }
+
+    /**
+     * replaces an item in db
+     * @param list to insert
+     * @return number of affected rows
+     */
+    public int editItem(List<ShoppinglistItem> list, User user) {
+        return mDataSource.insertItem(list, String.valueOf(user.getUserId()));
+    }
+
+    /**
 	 * 
 	 * @param sl A shoppinglist
 	 * @param user A user
@@ -306,10 +326,10 @@ public class DbHelper {
 
     public boolean insertShare(Share s, User user) {
         long id = mDataSource.insertShare(s, String.valueOf(user.getUserId()));
-        return success(id);
+        return successId(id);
     }
 
-    public int cleanShares(Shoppinglist sl, User user) {
+    private int cleanShares(Shoppinglist sl, User user) {
 		deleteShares(sl, user);
 		int count = 0;
 		for (Share s: sl.getShares().values()) {
@@ -339,6 +359,49 @@ public class DbHelper {
 
     public int deleteShares(String shoppinglistId, String userId) {
         return mDataSource.deleteShares(shoppinglistId, userId);
+    }
+
+    public void allowEditOrThrow(ShoppinglistItem sli, User user) {
+        allowEditOrThrow(sli.getShoppinglistId(), user);
+    }
+
+
+    public void allowEditOrThrow(Shoppinglist sl, User user) {
+        allowEditOrThrow(sl.getId(), user);
+    }
+
+    public void allowEditOrThrow(String shoppinglistId, User user) {
+        Shoppinglist sl = getList(shoppinglistId, user);
+        PermissionUtils.allowEditOrThrow(sl, user);
+    }
+
+    public void allowEditItemsOrThrow(List<ShoppinglistItem> items, User user) {
+        HashSet<String> ids = new HashSet<>(items.size());
+        for (ShoppinglistItem sli : items) {
+            ids.add(sli.getShoppinglistId());
+        }
+        allowEditOrThrow(ids, user);
+    }
+
+    public void allowEditListOrThrow(List<Shoppinglist> lists, User user) {
+        HashSet<String> ids = new HashSet<>(lists.size());
+        for (Shoppinglist sl : lists) {
+            ids.add(sl.getId());
+        }
+        allowEditOrThrow(ids, user);
+    }
+
+    public void allowEditOrThrow(Set<String> shoppinglistIds, User user) {
+        HashMap<String, Shoppinglist> map = new HashMap<>(shoppinglistIds.size());
+        for (String id : shoppinglistIds) {
+            if (!map.containsKey(id)) {
+                Shoppinglist sl = getList(id, user);
+                map.put(sl.getId(), sl);
+            }
+        }
+        for (Map.Entry<String, Shoppinglist> e : map.entrySet()) {
+            PermissionUtils.allowEditOrThrow(e.getValue(), user);
+        }
     }
 
 }

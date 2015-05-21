@@ -48,11 +48,11 @@ public class DataSource {
             if (mDb == null || !mDb.isOpen()) {
                 mDb = mHelper.getWritableDatabase();
                 mRefCount.set(0);
-                logRef("getWritableDatabase");
+//                logRef("getWritableDatabase");
             }
             mDb.acquireReference();
             mRefCount.incrementAndGet();
-            logRef("acquireDb");
+//            logRef("acquireDb");
             return mDb;
         }
     }
@@ -62,15 +62,15 @@ public class DataSource {
             mDb.releaseReference();
             if (mRefCount.decrementAndGet() == 0) {
                 mHelper.close();
-                logRef("close");
+//                logRef("close");
             }
-            logRef("releaseDb");
+//            logRef("releaseDb");
         }
     }
 
-    public void logRef(String action) {
-        EtaLog.d(TAG, String.format("Thread: %s, Action: %s, RefCount: %s", Thread.currentThread().getName(), action, mRefCount.get()));
-    }
+//    public void logRef(String action) {
+//        EtaLog.d(TAG, String.format("Thread: %s, Action: %s, RefCount: %s", Thread.currentThread().getName(), action, mRefCount.get()));
+//    }
 
     public void log(String tag, Exception e) {
         EtaLog.e(tag, e.getMessage(), e);

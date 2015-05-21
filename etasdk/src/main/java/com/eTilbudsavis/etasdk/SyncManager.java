@@ -21,7 +21,7 @@ import android.os.Process;
 
 import com.eTilbudsavis.etasdk.bus.SessionEvent;
 import com.eTilbudsavis.etasdk.bus.ShoppinglistEvent;
-import com.eTilbudsavis.etasdk.database.DbHelper;
+import com.eTilbudsavis.etasdk.database.DatabaseWrapper;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.log.SyncLog;
 import com.eTilbudsavis.etasdk.model.Share;
@@ -40,7 +40,6 @@ import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.network.impl.HandlerDelivery;
 import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.network.impl.NetworkDebugger;
 import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
@@ -63,7 +62,7 @@ import de.greenrobot.event.EventBus;
 /**
  * The {@link SyncManager} class performs asynchronous synchronization with the
  * eTilbudsavis API, to propagate all {@link Shoppinglist} and {@link ShoppinglistItem}
- * changes that a user may have done in the {@link DbHelper database}.
+ * changes that a user may have done in the {@link DatabaseWrapper database}.
  * 
  * <p>
  * Notifications about {@link Shoppinglist} and {@link ShoppinglistItem}
@@ -143,7 +142,7 @@ public class SyncManager {
 	/** Reference to the {@link Eta} object */
 	private Eta mEta;
 	
-	private DbHelper mDb;
+	private DatabaseWrapper mDb;
 	
 	/** Thread running the options */
 	HandlerThread mThread;
@@ -304,7 +303,7 @@ public class SyncManager {
 	 * Default constructor for the {@link SyncManager}
 	 * @param eta An Eta instance
 	 */
-	public SyncManager(Eta eta, DbHelper db) {
+	public SyncManager(Eta eta, DatabaseWrapper db) {
 		mEta = eta;
 		mDb = db;
 		SyncLog.setLog(LOG);
@@ -350,7 +349,7 @@ public class SyncManager {
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
 	public void onStart() {
-		mDb.onStart();
+		mDb.open();
         EventBus.getDefault().register(this);
 		forceSync();
 	}
@@ -360,7 +359,7 @@ public class SyncManager {
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
 	public void onStop() {
-		mDb.onStop();
+		mDb.close();
 		forceSync();
         EventBus.getDefault().unregister(this);
 		mHasFirstSync = false;
