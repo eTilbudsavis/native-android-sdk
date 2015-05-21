@@ -5,6 +5,12 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.eTilbudsavis.etasdk.ListManager;
+import com.eTilbudsavis.etasdk.model.Shoppinglist;
+import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
+import com.eTilbudsavis.etasdk.model.User;
+import com.eTilbudsavis.etasdk.utils.Utils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,6 +75,54 @@ public class DbUtils {
         if (c != null) {
             c.close();
         }
+    }
+
+    /**
+     * This method will migrate any {@link Shoppinglist}, and their {@link ShoppinglistItem} from
+     * the offline state, to the currently logged in {@link User}, and they will at a later point
+     * in time be synchronized to the eTilbudsavis API.
+     * @param manager A {@link ListManager}
+     * @param db A {@link DatabaseWrapper}
+     * @param delete <code>true</code> if you want to have the offline {@link Shoppinglist} and
+     * {@link ShoppinglistItem} deleted on a successful migration completion, else <code>false</code>.
+     * @return the number of migrated lists
+     */
+    public static int migrateOfflineLists(ListManager manager, DatabaseWrapper db, boolean delete) {
+
+        User offlineUser = new User();
+        List<Shoppinglist> offlineUserLists = db.getLists(offlineUser);
+
+        if (offlineUserLists.isEmpty()) {
+            return 0;
+        }
+
+        for (Shoppinglist sl : offlineUserLists) {
+
+            List<ShoppinglistItem> noUserItems = db.getItems(sl, offlineUser);
+            if (noUserItems.isEmpty()) {
+                continue;
+            }
+
+            // Create a new list, with a new ID to avoid conflicts in the database
+            Shoppinglist tmpSl = Shoppinglist.fromName(sl.getName());
+            tmpSl.setType(sl.getType());
+
+            manager.addList(tmpSl);
+
+            for (ShoppinglistItem sli : noUserItems) {
+                sli.setShoppinglistId(tmpSl.getId());
+                sli.setId(Utils.createUUID());
+                manager.addItem(sli);
+            }
+
+            if (delete) {
+                db.deleteList(sl, offlineUser);
+                db.deleteItems(sl.getId(), null, offlineUser);
+            }
+
+        }
+
+        return offlineUserLists.size();
     }
 
 }

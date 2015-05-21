@@ -329,7 +329,7 @@ public class DatabaseWrapper {
         return successId(id);
     }
 
-    private int cleanShares(Shoppinglist sl, User user) {
+    public int cleanShares(Shoppinglist sl, User user) {
 		deleteShares(sl, user);
 		int count = 0;
 		for (Share s: sl.getShares().values()) {
