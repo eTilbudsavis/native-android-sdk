@@ -501,11 +501,14 @@ public class ListManager {
 	public int editItems(List<ShoppinglistItem> items) {
 		User u = user();
 		int count = 0;
+        long s = System.currentTimeMillis();
 		for (ShoppinglistItem sli : items) {
 			if (editItemImpl(u, sli)) {
 				count++;
 			}
 		}
+        long f = System.currentTimeMillis() - s;
+        EtaLog.d(TAG, String.format("Edited %s items in %s ms", items.size(), f));
 		postShoppinglistEvent();
 		return count;
 	}
