@@ -95,7 +95,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	 */
 	public static PageflipFragment newInstance(Catalog c, int page) {
 		Bundle b = new Bundle();
-		b.putSerializable(ARG_CATALOG, c);
+		b.putParcelable(ARG_CATALOG, c);
 		b.putInt(ARG_PAGE, page);
 		return newInstance(b);
 	}
@@ -160,7 +160,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		
 		setPage(args.getInt(ARG_PAGE, 1));
 		if (args.containsKey(ARG_CATALOG)) {
-			setCatalog((Catalog) args.getSerializable(ARG_CATALOG));
+			setCatalog((Catalog) args.getParcelable(ARG_CATALOG));
 			mBranding = mCatalog.getBranding();
 		} else if (args.containsKey(ARG_CATALOG_ID)) {
 			setCatalogId(args.getString(ARG_CATALOG_ID));
@@ -524,8 +524,8 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	public void onSaveInstanceState(Bundle outState) {
 		int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
 		outState.putInt(ARG_PAGE, pages[0]);
-		outState.putSerializable(ARG_CATALOG, mCatalog);
-		outState.putSerializable(ARG_CATALOG_ID, mCatalogId);
+		outState.putParcelable(ARG_CATALOG, mCatalog);
+		outState.putString(ARG_CATALOG_ID, mCatalogId);
 //		outState.putBoolean(ARG_CATALOG_VIEW, mHasCatalogView);
 		outState.putString(ARG_VIEWSESSION, mViewSessionUuid);
 		outState.putParcelable(ARG_BRANDING, mBranding);

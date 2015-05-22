@@ -51,7 +51,7 @@ public class PageOverviewDialog extends DialogFragment {
 	
 	public static PageOverviewDialog newInstance(Catalog c, int page) {
 		Bundle b = new Bundle();
-		b.putSerializable(ARG_CATALOG, c);
+		b.putParcelable(ARG_CATALOG, c);
 		b.putInt(ARG_PAGE, page);
 		PageOverviewDialog f = new PageOverviewDialog();
 		f.setArguments(b);
@@ -61,7 +61,8 @@ public class PageOverviewDialog extends DialogFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		if (getArguments()!=null) {
-			setCatalog((Catalog) getArguments().getSerializable(ARG_CATALOG));
+			Catalog c = getArguments().getParcelable(ARG_CATALOG);
+			setCatalog(c);
 			setPage(getArguments().getInt(ARG_PAGE));
 		}
 		super.onCreate(savedInstanceState);
