@@ -77,10 +77,10 @@ public class DataSource {
     }
 
     public int clear() {
-        String[] whereArgs = new String[]{"1"};
-        int count = delete(ItemSQLiteHelper.TABLE, null, whereArgs);
-        count += delete(ListSQLiteHelper.TABLE, null, whereArgs);
-        count += delete(ShareSQLiteHelper.TABLE, null, whereArgs);
+        String whereClause = "1";
+        int count = delete(ItemSQLiteHelper.TABLE, whereClause, null);
+        count += delete(ListSQLiteHelper.TABLE, whereClause, null);
+        count += delete(ShareSQLiteHelper.TABLE, whereClause, null);
         return count;
     }
 

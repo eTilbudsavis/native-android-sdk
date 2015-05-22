@@ -66,13 +66,7 @@ public class CatalogViewerActivity extends BaseActivity {
         }
         
     }
-    
-    @Override
-    protected void onStart() {
-    	super.onStart();
-    	Eta.getInstance().onStart();
-    }
-    
+
     @Override
     public void onResume() {
     	super.onResume();
@@ -91,13 +85,7 @@ public class CatalogViewerActivity extends BaseActivity {
     	}
     	
     }
-    
-    @Override
-    protected void onStop() {
-    	super.onStop();
-    	Eta.getInstance().onStop();
-    }
-    
+
     private void getCatalogList() {
 
         Listener<JSONArray> mCatalogListener = new Listener<JSONArray>() {

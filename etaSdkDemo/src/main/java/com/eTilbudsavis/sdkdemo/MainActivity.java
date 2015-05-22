@@ -36,8 +36,32 @@ public class MainActivity extends BaseActivity {
     private static final int MENU_LOCATION = 1;
     
     private Button mBtnCatalogs;
-	private Button mBtnSearch;
-	
+    private Button mBtnSearch;
+    private Button mBtnDbSpeedTest;
+
+    OnClickListener mListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+            switch (v.getId()) {
+
+                case R.id.btnCatalogs:
+                    Intent cva = new Intent(MainActivity.this, CatalogViewerActivity.class);
+                    startActivity(cva);
+                    break;
+                case R.id.btnPerformSearch:
+                    Intent sa = new Intent(MainActivity.this, SearchActivity.class);
+                    startActivity(sa);
+                    break;
+                case R.id.btnDbSpeedTest:
+                    Intent dbsta = new Intent(MainActivity.this, DBSpeedTestActivity.class);
+                    startActivity(dbsta);
+                    break;
+            }
+
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,25 +90,14 @@ public class MainActivity extends BaseActivity {
          * You are now done setting up the SDK, the rest is just Android stuff
          */
         mBtnCatalogs = (Button)findViewById(R.id.btnCatalogs);
-        mBtnCatalogs.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				Intent i = new Intent(MainActivity.this, CatalogViewerActivity.class);
-				startActivity(i);
-			}
-		});
-        
-        mBtnSearch = (Button)findViewById(R.id.btnSearch);
-        mBtnSearch.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				Intent i = new Intent(MainActivity.this, SearchActivity.class);
-				startActivity(i);
-			}
-		});
-        
+        mBtnCatalogs.setOnClickListener(mListener);
+
+        mBtnSearch = (Button) findViewById(R.id.btnSearch);
+        mBtnSearch.setOnClickListener(mListener);
+
+        mBtnDbSpeedTest = (Button)findViewById(R.id.btnDbSpeedTest);
+        mBtnDbSpeedTest.setOnClickListener(mListener);
+
     }
     
     @Override

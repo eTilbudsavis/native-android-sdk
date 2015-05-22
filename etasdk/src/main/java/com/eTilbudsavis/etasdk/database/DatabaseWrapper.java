@@ -204,15 +204,7 @@ public class DatabaseWrapper {
 	 * @param items to insert
 	 * @return number of affected rows
 	 */
-	public int insertItems(ArrayList<ShoppinglistItem> items, User user) {
-//        // Old method
-//		int count = 0;
-//		for (ShoppinglistItem sli : items) {
-//			count += insertItem(sli, user);
-//		}
-//		return count;
-
-        // new method
+	public int insertItems(List<ShoppinglistItem> items, User user) {
         return mDataSource.insertItem(items, String.valueOf(user.getUserId()));
 	}
 
