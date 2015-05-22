@@ -303,17 +303,7 @@ public class DatabaseWrapper {
      * @return number of affected rows
      */
     public int editItem(List<ShoppinglistItem> list, User user) {
-        long s = System.currentTimeMillis();
-        int count = 0;
-        for (ShoppinglistItem sli : list) {
-            if (editItem(sli, user)) {
-                count++;
-            }
-        }
-        long f = System.currentTimeMillis() - s;
-        EtaLog.d(TAG, String.format("Edited %s items in %s ms", list.size(), f));
-        return count;
-//        return mDataSource.insertItem(list, String.valueOf(user.getUserId()));
+        return mDataSource.insertItem(list, String.valueOf(user.getUserId()));
     }
 
     /**

@@ -111,8 +111,8 @@ public class ListManager {
             JSONObject o = new JSONObject();
 			try {
 				JSONObject u = new JSONObject();
-				u.put(JsonKey.EMAIL, mEta.getUser().getEmail());
-				u.put(JsonKey.NAME, mEta.getUser().getName());
+				u.put(JsonKey.EMAIL, user.getEmail());
+				u.put(JsonKey.NAME, user.getName());
 				o.put(JsonKey.USER, u);
 				o.put(JsonKey.ACCEPTED, true);
 				o.put(JsonKey.ACCESS, Share.ACCESS_OWNER);
@@ -320,7 +320,7 @@ public class ListManager {
 		
 		List<ShoppinglistItem> items = getItems(sl);
 		
-		if (mEta.getUser().isLoggedIn()) {
+		if (user.isLoggedIn()) {
 			
 			for (ShoppinglistItem sli : items) {
 				sli.setState(SyncState.DELETE);
@@ -621,7 +621,7 @@ public class ListManager {
 			}
 		}
 		
-		if (mEta.getUser().isLoggedIn()) {
+		if (user.isLoggedIn()) {
 			for (ShoppinglistItem sli : mBuilder.getDeletedItems()) {
 				sli.setState(SyncState.DELETE);
 				sli.setModified(now);

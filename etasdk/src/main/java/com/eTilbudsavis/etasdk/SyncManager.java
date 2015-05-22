@@ -17,6 +17,7 @@ package com.eTilbudsavis.etasdk;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.bus.SessionEvent;
@@ -1360,8 +1361,14 @@ public class SyncManager {
 
         popRequest();
         if (mCurrentRequests.isEmpty() && !isPaused() && mBuilder.hasChanges()) {
-            EventBus.getDefault().post(mBuilder.build());
-            mBuilder = new ShoppinglistEvent.Builder(true);
+			final ShoppinglistEvent e = mBuilder.build();
+			mBuilder = new ShoppinglistEvent.Builder(true);
+			new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    EventBus.getDefault().post(e);
+                }
+            });
         }
 
     }

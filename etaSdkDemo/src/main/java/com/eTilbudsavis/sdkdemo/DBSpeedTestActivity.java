@@ -99,7 +99,6 @@ public class DBSpeedTestActivity extends BaseActivity {
 		// Dont do this!
 		mTesting = true;
 		mExecutor.execute(new DbTest(1000));
-		mDrawUI.run();
 
 	}
 
@@ -126,6 +125,7 @@ public class DBSpeedTestActivity extends BaseActivity {
 
 			mItems = getItems(mTestSize, mList, mUser);
 
+			logCount("Test size", mTestSize);
 			logTime("db.clear", prep());
 			logTime("list.insert", insertList());
 			logTime("item.insert.slow", insertItemsSlow(mItems, mUser));
