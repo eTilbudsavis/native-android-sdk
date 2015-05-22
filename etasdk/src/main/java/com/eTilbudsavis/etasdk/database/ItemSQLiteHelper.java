@@ -3,6 +3,7 @@ package com.eTilbudsavis.etasdk.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
@@ -42,27 +43,19 @@ public class ItemSQLiteHelper extends DatabaseHelper {
 
     public static void bind(SQLiteStatement s, ShoppinglistItem sli, String userId) {
         ContentValues cv = objectToContentValues(sli, userId);
-        bindOrNull(s, 1, cv.getAsString(ID));
-        bindOrNull(s, 2, cv.getAsString(ERN));
-        bindOrNull(s, 3, cv.getAsString(MODIFIED));
-        bindOrNull(s, 4, cv.getAsString(DESCRIPTION));
-        bindOrNull(s, 5, cv.getAsString(COUNT));
-        bindOrNull(s, 6, cv.getAsString(TICK));
-        bindOrNull(s, 7, cv.getAsString(OFFER_ID));
-        bindOrNull(s, 8, cv.getAsString(CREATOR));
-        bindOrNull(s, 9, cv.getAsString(SHOPPINGLIST_ID));
-        bindOrNull(s, 10, cv.getAsString(STATE));
-        bindOrNull(s, 11, cv.getAsString(PREVIOUS_ID));
-        bindOrNull(s, 12, cv.getAsString(META));
-        bindOrNull(s, 13, cv.getAsString(USER));
-    }
-
-    private static void bindOrNull(SQLiteStatement s, int index, String value) {
-        if (value == null) {
-            s.bindNull(index);
-        } else {
-            s.bindString(index, value);
-        }
+        DbUtils.bindOrNull(s, 1, cv.getAsString(ID));
+        DbUtils.bindOrNull(s, 2, cv.getAsString(ERN));
+        DbUtils.bindOrNull(s, 3, cv.getAsString(MODIFIED));
+        DbUtils.bindOrNull(s, 4, cv.getAsString(DESCRIPTION));
+        s.bindLong(5, cv.getAsInteger(COUNT));
+        s.bindLong(6, cv.getAsInteger(TICK));
+        DbUtils.bindOrNull(s, 7, cv.getAsString(OFFER_ID));
+        DbUtils.bindOrNull(s, 8, cv.getAsString(CREATOR));
+        DbUtils.bindOrNull(s, 9, cv.getAsString(SHOPPINGLIST_ID));
+        DbUtils.bindOrNull(s, 10, cv.getAsString(STATE));
+        DbUtils.bindOrNull(s, 11, cv.getAsString(PREVIOUS_ID));
+        DbUtils.bindOrNull(s, 12, cv.getAsString(META));
+        DbUtils.bindOrNull(s, 13, cv.getAsString(USER));
     }
 
     public ItemSQLiteHelper(Context context) {
@@ -99,7 +92,7 @@ public class ItemSQLiteHelper extends DatabaseHelper {
         sli.setModified(Utils.stringToDate(cv.getAsString(MODIFIED)));
         sli.setDescription(cv.getAsString(DESCRIPTION));
         sli.setCount(cv.getAsInteger(COUNT));
-        sli.setTick(0 < cv.getAsInteger(TICK));
+        sli.setTick(DbUtils.intToBool(cv.getAsInteger(TICK)));
         sli.setOfferId(cv.getAsString(OFFER_ID));
         sli.setCreator(cv.getAsString(CREATOR));
         sli.setShoppinglistId(cv.getAsString(SHOPPINGLIST_ID));
@@ -122,7 +115,7 @@ public class ItemSQLiteHelper extends DatabaseHelper {
         cv.put(MODIFIED, Utils.dateToString(sli.getModified()));
         cv.put(DESCRIPTION, sli.getDescription());
         cv.put(COUNT, sli.getCount());
-        cv.put(TICK, (sli.isTicked() ? 1 : 0));
+        cv.put(TICK, DbUtils.boolToInt(sli.isTicked()));
         cv.put(OFFER_ID, sli.getOfferId());
         cv.put(CREATOR, sli.getCreator());
         cv.put(SHOPPINGLIST_ID, sli.getShoppinglistId());

@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 
 import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
@@ -123,6 +124,22 @@ public class DbUtils {
         }
 
         return offlineUserLists.size();
+    }
+
+    public static boolean intToBool(int i) {
+        return i == 1;
+    }
+
+    public static int boolToInt(boolean b) {
+        return b ? 1 : 0;
+    }
+
+    public static void bindOrNull(SQLiteStatement s, int index, String value) {
+        if (value == null) {
+            s.bindNull(index);
+        } else {
+            s.bindString(index, value);
+        }
     }
 
 }
