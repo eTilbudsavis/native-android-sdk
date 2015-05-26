@@ -58,6 +58,12 @@ public class ItemSQLiteHelper extends DatabaseHelper {
         DbUtils.bindOrNull(s, 13, cv.getAsString(USER));
     }
 
+    public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    public static SQLiteStatement getInsertStatement(SQLiteDatabase db) {
+        return db.compileStatement(INSERT_STATEMENT);
+    }
+
     public ItemSQLiteHelper(Context context) {
         super(context);
     }

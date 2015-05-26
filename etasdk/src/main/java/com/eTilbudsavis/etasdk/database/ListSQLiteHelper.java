@@ -4,10 +4,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
+import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
@@ -51,6 +53,26 @@ public class ListSQLiteHelper extends DatabaseHelper {
         db.acquireReference();
         db.execSQL("DROP TABLE IF EXISTS " + TABLE);
         db.releaseReference();
+    }
+
+    public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?,?)";
+
+    public static SQLiteStatement getInsertStatement(SQLiteDatabase db) {
+        return db.compileStatement(INSERT_STATEMENT);
+    }
+
+    public static void bind(SQLiteStatement s, Shoppinglist sl, String userId) {
+        DbUtils.bindOrNull(s, 1, sl.getId());
+        DbUtils.bindOrNull(s, 2, sl.getErn());
+        DbUtils.bindOrNull(s, 3, Utils.dateToString(sl.getModified()));
+        DbUtils.bindOrNull(s, 4, sl.getName());
+        DbUtils.bindOrNull(s, 5, sl.getAccess());
+        s.bindLong(6, sl.getState());
+        DbUtils.bindOrNull(s, 7, sl.getPreviousId());
+        DbUtils.bindOrNull(s, 8, sl.getType());
+        String meta = sl.getMeta() == null ? null : sl.getMeta().toString();
+        DbUtils.bindOrNull(s, 9, meta);
+        DbUtils.bindOrNull(s, 10, userId);
     }
 
     public static List<Shoppinglist> cursorToList(Cursor c) {

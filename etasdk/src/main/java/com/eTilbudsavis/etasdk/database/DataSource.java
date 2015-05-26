@@ -4,7 +4,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteProgram;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
@@ -15,65 +18,16 @@ import com.eTilbudsavis.etasdk.model.User;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class DataSource {
+public class DataSource extends SQLDataSource {
 
     public static final String TAG = Constants.getTag(DataSource.class);
 
-    private final Object LOCK = new Object();
-    private DatabaseHelper mHelper;
-    private SQLiteDatabase mDb;
-    private AtomicInteger mRefCount = new AtomicInteger();
-
-    public DataSource(DatabaseHelper sqLiteHelper) {
-        this.mHelper = sqLiteHelper;
-    }
-
     public DataSource(Context c) {
-        this(new DatabaseHelper(c));
-    }
-
-    public void open() {
-        acquireDb();
-    }
-
-    public void close() {
-        releaseDb();
-    }
-
-    protected SQLiteDatabase acquireDb() {
-        synchronized (LOCK) {
-            if (mDb == null || !mDb.isOpen()) {
-                mDb = mHelper.getWritableDatabase();
-                mRefCount.set(0);
-//                logRef("getWritableDatabase");
-            }
-            mDb.acquireReference();
-            mRefCount.incrementAndGet();
-//            logRef("acquireDb");
-            return mDb;
-        }
-    }
-
-    protected void releaseDb() {
-        synchronized (LOCK) {
-            mDb.releaseReference();
-            if (mRefCount.decrementAndGet() == 0) {
-                mHelper.close();
-//                logRef("close");
-            }
-//            logRef("releaseDb");
-        }
-    }
-
-//    public void logRef(String action) {
-//        EtaLog.d(TAG, String.format("Thread: %s, Action: %s, RefCount: %s", Thread.currentThread().getName(), action, mRefCount.get()));
-//    }
-
-    public void log(String tag, Exception e) {
-        EtaLog.e(tag, e.getMessage(), e);
+        super(new DatabaseHelper(c));
     }
 
     public int clear() {
@@ -115,16 +69,45 @@ public class DataSource {
      *
      * @param sl A shoppinglist
      * @param userId A user
-     * @return the row ID of the newly inserted row OR -1 if any error
+     * @return number of affected rows
      */
-    public long insertList(Shoppinglist sl, String userId) {
+    public int insertList(Shoppinglist sl, String userId) {
+        List<Shoppinglist> list = new ArrayList<Shoppinglist>(1);
+        list.add(sl);
+        return insertList(list, userId);
+    }
+
+    /**
+     * Insert new shopping list into DB
+     *
+     * @param list A list of Shoppinglist
+     * @param userId A user
+     * @return number of affected rows
+     */
+    public int insertList(List<Shoppinglist> list, String userId) {
+        if (list.isEmpty()) {
+            return 0;
+        }
+        SQLiteDatabase db = acquireDb();
         try {
-            ContentValues cv = ListSQLiteHelper.objectToContentValues(sl, userId);
-            return acquireDb().insertWithOnConflict(ListSQLiteHelper.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+            int count = 0;
+            db.beginTransaction();
+            SQLiteStatement s = ListSQLiteHelper.getInsertStatement(db);
+            for (Shoppinglist sl : list) {
+                ListSQLiteHelper.bind(s, sl, userId);
+                if (s.executeInsert() > -1) {
+                    deleteShares(sl.getId(), userId);
+                    insertSharesTransactionLess(db, sl.getShares().values(), userId);
+                    count++;
+                }
+            }
+            db.setTransactionSuccessful();
+            return count;
         } catch (IllegalStateException e) {
             log(TAG, e);
             return -1;
         } finally {
+            db.endTransaction();
             releaseDb();
         }
     }
@@ -138,7 +121,7 @@ public class DataSource {
     public Shoppinglist getList(String id, String userId) {
         String selection = DatabaseHelper.ID + "=? AND " + DatabaseHelper.USER + "=? AND " + DatabaseHelper.STATE + "!=?";
         String[] selectionArgs = new String[]{id, userId, String.valueOf(SyncState.DELETE)};
-        List<Shoppinglist> list = getLists(selection, selectionArgs);
+        List<Shoppinglist> list = getLists(selection, selectionArgs, userId);
         return list.isEmpty() ? null : list.get(0);
     }
 
@@ -154,19 +137,28 @@ public class DataSource {
             selection = DatabaseHelper.USER + "=?";
             selectionArgs = new String[]{userId};
         }
-        return getLists(selection, selectionArgs);
+        return getLists(selection, selectionArgs, userId);
     }
 
-    private List<Shoppinglist> getLists(String selection, String[] selectionArgs) {
+    private List<Shoppinglist> getLists(String selection, String[] selectionArgs, String userId) {
         Cursor c = null;
+        SQLiteDatabase db = acquireDb();
         try {
-            c = acquireDb().query(false, ListSQLiteHelper.TABLE, null, selection, selectionArgs, null, null, DatabaseHelper.NAME, null);
-            return ListSQLiteHelper.cursorToList(c);
+            db.beginTransaction();
+            c = db.query(false, ListSQLiteHelper.TABLE, null, selection, selectionArgs, null, null, DatabaseHelper.NAME, null);
+            List<Shoppinglist> lists = ListSQLiteHelper.cursorToList(c);
+            for (Shoppinglist sl : lists) {
+                List<Share> shares = getShares(sl.getId(), userId, false);
+                sl.setShares(shares);
+            }
+            db.setTransactionSuccessful();
+            return lists;
         } catch (IllegalStateException e) {
             log(TAG, e);
             return new ArrayList<Shoppinglist>();
         } finally {
             DbUtils.closeCursor(c);
+            db.endTransaction();
             releaseDb();
         }
     }
@@ -186,7 +178,7 @@ public class DataSource {
     public Shoppinglist getListPrevious( String previousId, String userId) {
         String selection = DatabaseHelper.PREVIOUS_ID + "=? AND " + DatabaseHelper.USER + "=?";
         String[] selectionArgs = new String[]{previousId, userId};
-        List<Shoppinglist> list = getLists(selection, selectionArgs);
+        List<Shoppinglist> list = getLists(selection, selectionArgs, userId);
         return list.isEmpty() ? null : list.get(0);
     }
 
@@ -221,14 +213,7 @@ public class DataSource {
         db.beginTransaction();
         int count = 0;
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("INSERT OR REPLACE INTO ").append(ItemSQLiteHelper.TABLE).append(" VALUES (");
-            ContentValues cv = ItemSQLiteHelper.objectToContentValues(list.get(0), userId);
-            for (int i = 0; i < cv.size(); i++) {
-                sb.append((i > 0) ? ",?" : "?");
-            }
-            sb.append(")");
-            SQLiteStatement s = db.compileStatement(sb.toString());
+            SQLiteStatement s = ItemSQLiteHelper.getInsertStatement(db);
             for (ShoppinglistItem sli : list) {
                 ItemSQLiteHelper.bind(s, sli, userId);
                 if (s.executeInsert() > -1) {
@@ -325,9 +310,53 @@ public class DataSource {
             return acquireDb().insertWithOnConflict(ShareSQLiteHelper.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
         } catch (IllegalStateException e) {
             log(TAG, e);
+            Log.d(TAG, s.toJSON().toString());
             return -1;
         } finally {
             releaseDb();
+        }
+    }
+
+    /**
+     * Insert new shopping list into DB
+     *
+     * @param sl A shoppinglist
+     * @param userId A user
+     * @return the row ID of the newly inserted row OR -1 if any error
+     */
+    public int insertShares(Shoppinglist sl, String userId) {
+        SQLiteDatabase db = acquireDb();
+        db.beginTransaction();
+        try {
+            int count = insertSharesTransactionLess(db, sl.getShares().values(), userId);
+            db.setTransactionSuccessful();
+            return count;
+        } catch (IllegalStateException e) {
+            log(TAG, e);
+            return -1;
+        } finally {
+            db.endTransaction();
+            releaseDb();
+        }
+    }
+
+    private int insertSharesTransactionLess(SQLiteDatabase db, Collection<Share> shares, String userId) {
+        db.acquireReference();
+        try {
+            int count = 0;
+            SQLiteStatement s = ShareSQLiteHelper.getInsertStatement(db);
+            for(Share share : shares) {
+                ShareSQLiteHelper.bind(s, share, userId);
+                if (s.executeInsert() > -1) {
+                    count++;
+                }
+            }
+            return count;
+        } catch (IllegalStateException e) {
+            log(TAG, e);
+            return 0;
+        } finally {
+            db.releaseReference();
         }
     }
 
@@ -370,6 +399,5 @@ public class DataSource {
         String[] whereArgs = new String[]{ shoppinglistId, userId };
         return delete(ShareSQLiteHelper.TABLE, whereClause, whereArgs);
     }
-
 
 }

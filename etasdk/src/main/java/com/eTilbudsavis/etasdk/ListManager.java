@@ -100,48 +100,35 @@ public class ListManager {
 	 * @param sl A shoppinglist to add to the database
 	 */
 	public boolean addList(final Shoppinglist sl) {
-		
+
+        List<Shoppinglist> lists = new ArrayList<Shoppinglist>();
+        lists.add(sl);
+
 		sl.setModified(new Date());
 		
 		final User user = user();
 		
 		Share owner = sl.getOwner();
 		if (owner == null || owner.getEmail() == null) {
+            owner = new Share(user.getEmail(), Share.ACCESS_OWNER, null);
+            owner.setName(user.getName());
+            owner.setAccepted(true);
+            owner.setShoppinglistId(sl.getId());
+            sl.putShare(owner);
+        }
 
-            JSONObject o = new JSONObject();
-			try {
-				JSONObject u = new JSONObject();
-				u.put(JsonKey.EMAIL, user.getEmail());
-				u.put(JsonKey.NAME, user.getName());
-				o.put(JsonKey.USER, u);
-				o.put(JsonKey.ACCEPTED, true);
-				o.put(JsonKey.ACCESS, Share.ACCESS_OWNER);
-			} catch (JSONException e) {
-				EtaLog.e(TAG, null, e);
-			}
-            owner = Share.fromJSON(o);
-
-			List<Share> shares = new ArrayList<Share>(1);
-			shares.add(owner);
-			sl.putShares(shares);
-
-			owner.setShoppinglistId(sl.getId());
-			mDatabase.insertShare(owner, user);
-			
-		}
-		
-		sl.setPreviousId(ListUtils.FIRST_ITEM);
+        sl.setPreviousId(ListUtils.FIRST_ITEM);
 		sl.setState(SyncState.TO_SYNC);
-		
+
 		Shoppinglist first = mDatabase.getFirstList(user);
 		if (first != null) {
 			first.setPreviousId(sl.getId());
 			first.setModified(new Date());
 			first.setState(SyncState.TO_SYNC);
-			mDatabase.editList(first, user);
+            lists.add(first);
 		}
 
-		boolean success = mDatabase.insertList(sl, user);
+		boolean success = mDatabase.insertLists(lists, user);
 		if (success) {
 			mBuilder.add(sl);
 		}
@@ -162,12 +149,15 @@ public class ListManager {
 	}
 	
 	private boolean editList(Shoppinglist sl, User user) {
-		
-		Map<String, Share> dbShares = new HashMap<String, Share>();
-		for (Share s : mDatabase.getShares(sl, user, false)) {
-			dbShares.put(s.getEmail(), s);
-		}
-		
+
+        Shoppinglist oldList = mDatabase.getList(sl.getId(), user);
+        // Check for changes in previous item, and update surrounding
+        if (oldList == null) {
+            EtaLog.i(TAG, "No such list exists in the database. To add new items, use addList().");
+            return false;
+        }
+
+        Map<String, Share> dbShares = oldList.getShares();
 		Map<String, Share> slShares = sl.getShares();
 		
 		/* User have remove it self. Then only set the DELETE state on the share,
@@ -246,14 +236,10 @@ public class ListManager {
 		
 		sl.setModified(now);
 		sl.setState(SyncState.TO_SYNC);
-		
-		// Check for changes in previous item, and update surrounding
-		Shoppinglist oldList = mDatabase.getList(sl.getId(), user);
-		if (oldList == null) {
-			EtaLog.i(TAG, "No such list exists in the database. To add new items, use addList().");
-			return false;
-		}
-		
+
+        List<Shoppinglist> lists = new ArrayList<Shoppinglist>();
+        // TODO add lists to list and bulk edit, rather than separate queries
+
 		if (oldList.getPreviousId() != null && !oldList.getPreviousId().equals(sl.getPreviousId())) {
 			
 			// If there is an item pointing at sl, it needs to point at the oldList.prev

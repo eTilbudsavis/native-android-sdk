@@ -16,6 +16,7 @@
 package com.eTilbudsavis.sdkdemo;
 
 import android.app.ProgressDialog;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,6 +34,7 @@ import com.eTilbudsavis.etasdk.EtaThreadFactory;
 import com.eTilbudsavis.etasdk.database.DatabaseWrapper;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Offer;
+import com.eTilbudsavis.etasdk.model.Share;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.model.User;
@@ -102,6 +104,41 @@ public class DBSpeedTestActivity extends BaseActivity {
 
 	}
 
+    private long insertItemsSlow(DatabaseWrapper db, List<ShoppinglistItem> items, User u) {
+        long s = System.currentTimeMillis();
+        for (ShoppinglistItem sli : items) {
+            db.insertItem(sli, u);
+        }
+        return System.currentTimeMillis() - s;
+    }
+
+    private long insertList(DatabaseWrapper db, Shoppinglist sl, User u) {
+        long s = System.currentTimeMillis();
+        db.insertList(sl, u);
+        return System.currentTimeMillis() - s;
+    }
+
+    private long getList(DatabaseWrapper db, User u) {
+        long s = System.currentTimeMillis();
+        List<Shoppinglist> lists = db.getLists(u);
+        for (Shoppinglist sl : lists) {
+            sl.putShares(db.getShares(sl, u, true));
+        }
+        return System.currentTimeMillis() - s;
+    }
+
+//    private long insertList(DatabaseWrapper db, List<Shoppinglist> lists, User u) {
+//        long s = System.currentTimeMillis();
+//
+//        return System.currentTimeMillis() - s;
+//    }
+
+    private long prep(DatabaseWrapper db) {
+        long s = System.currentTimeMillis();
+        db.clear();
+        return System.currentTimeMillis() - s;
+    }
+
 	public class DbTest implements Runnable {
 
 		int mTestSize = 1000;
@@ -126,49 +163,51 @@ public class DBSpeedTestActivity extends BaseActivity {
 			mItems = getItems(mTestSize, mList, mUser);
 
 			logCount("Test size", mTestSize);
-			logTime("db.clear", prep());
-			logTime("list.insert", insertList());
-			logTime("item.insert.slow", insertItemsSlow(mItems, mUser));
+			logTime("db.clear", prep(mDatabase));
+			logTime("list.insert", insertList(mDatabase, mList, mUser));
+			logTime("item.insert.slow", insertItemsSlow(mDatabase, mItems, mUser));
 			logCount("item.inserted.count", getItems(mList, mUser).size());
 
-			logTime("db.clear", prep());
-			logTime("list.insert", insertList());
+			logTime("db.clear", prep(mDatabase));
+            logTime("list.insert", insertList(mDatabase, mList, mUser));
 			logTime("Insert ItemFast", insertItemsFast(mItems, mUser));
 			logCount("Items inserted", getItems(mList, mUser).size());
 
-			logTime("db.clear", prep());
+			logTime("db.clear", prep(mDatabase));
+            List<Shoppinglist> lists = new ArrayList<Shoppinglist>();
+            for (int i = 0; i < mTestSize; i++) {
+                String idName = "list" + i;
+                Shoppinglist sl = ModelCreator.getShoppinglist(idName, idName);
+
+                List<Share> shareList = new ArrayList<Share>();
+                Share share = ModelCreator.getShare(mUser.getEmail(), Share.ACCESS_OWNER, "eta.dk");
+                share.setShoppinglistId(sl.getId());
+                sl.setShares(shareList);
+
+                lists.add(sl);
+            }
+
+            long time = 0;
+            for (Shoppinglist sl : lists) {
+                time += insertList(mDatabase, sl, mUser);
+            }
+
+            logTime("list.insert", time);
+
+            logTime("list.getAll", getList(mDatabase, mUser));
+
 			mTesting = false;
 			runOnUiThread(mDrawUI);
 
 		}
 
-		private long prep() {
-			long s = System.currentTimeMillis();
-			mDatabase.clear();
-			return System.currentTimeMillis() - s;
-		}
-
-		private long insertList() {
-			long s = System.currentTimeMillis();
-			mDatabase.insertList(mList, mUser);
-			return System.currentTimeMillis() - s;
-		}
-
 		private List<ShoppinglistItem> getItems(int size, Shoppinglist sl, User u) {
 			List<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
-			for (int i = 0; i < mTestSize; i++) {
+			for (int i = 0; i < mTestSize/10; i++) {
 				ShoppinglistItem sli = generateItem(i, mList, mUser);
 				list.add(sli);
 			}
 			return list;
-		}
-
-		private long insertItemsSlow(List<ShoppinglistItem> items, User u) {
-			long s = System.currentTimeMillis();
-			for (ShoppinglistItem sli : items) {
-				mDatabase.insertItem(sli, u);
-			}
-			return System.currentTimeMillis() - s;
 		}
 
 		private long insertItemsFast(List<ShoppinglistItem> items, User u) {

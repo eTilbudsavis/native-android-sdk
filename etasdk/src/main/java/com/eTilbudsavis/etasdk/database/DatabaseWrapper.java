@@ -91,11 +91,16 @@ public class DatabaseWrapper {
 	 */
 	public boolean insertList(Shoppinglist sl, User user) {
         long id = mDataSource.insertList(sl, String.valueOf(user.getUserId()));
-		if (id > -1) {
-			cleanShares(sl, user);
-		}
         return successId(id);
 	}
+
+    public boolean insertLists(List<Shoppinglist> lists, User user) {
+        if (lists.isEmpty()) {
+            return true;
+        }
+        int count = mDataSource.insertList(lists, String.valueOf(user.getUserId()));
+        return count == lists.size();
+    }
 
 	/**
 	 * Get a shoppinglist by it's id
@@ -105,7 +110,6 @@ public class DatabaseWrapper {
 	public Shoppinglist getList(String id, User user) {
         Shoppinglist sl = mDataSource.getList(id, String.valueOf(user.getUserId()));
 		if (sl != null) {
-			sl.putShares(getShares(sl, user, false));
             /* Remove the list, if the user isn't in the shares.
             This happens when the user, have removed him/her self from shares,
             or deletes a list, and the action haven't been synced to the API yet */
@@ -135,7 +139,6 @@ public class DatabaseWrapper {
 		Iterator<Shoppinglist> it = lists.iterator();
 		while (it.hasNext()) {
 			Shoppinglist sl = it.next();
-			sl.putShares(getShares(sl, user, includeDeleted));
             /* Remove the list, if the user isn't in the shares.
             This happens when the user, have removed him/her self from shares,
             or deletes a list, and the action haven't been synced to the API yet */
@@ -185,8 +188,7 @@ public class DatabaseWrapper {
      * @return true, if operation succeeded, else false
 	 */
 	public boolean editList(Shoppinglist sl, User user) {
-        long id = mDataSource.insertList(sl, String.valueOf(user.getUserId()));
-        return successId(id);
+        return insertList(sl, user);
 	}
 
 	/**
