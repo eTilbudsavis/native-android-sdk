@@ -26,8 +26,10 @@ import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.model.User;
 import com.eTilbudsavis.etasdk.utils.ListUtils;
 import com.eTilbudsavis.etasdk.utils.PermissionUtils;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -72,6 +74,9 @@ public class DatabaseWrapper {
     private boolean successCount(int count) {
         return count > 0;
     }
+    private boolean successCount(int count, List list) {
+        return count == list.size();
+    }
 
     /**
 	 * Clears the whole DB. This cannot be undone.
@@ -99,7 +104,7 @@ public class DatabaseWrapper {
             return true;
         }
         int count = mDataSource.insertList(lists, String.valueOf(user.getUserId()));
-        return count == lists.size();
+        return successCount(count, lists);
     }
 
 	/**
@@ -206,8 +211,9 @@ public class DatabaseWrapper {
 	 * @param items to insert
 	 * @return number of affected rows
 	 */
-	public int insertItems(List<ShoppinglistItem> items, User user) {
-        return mDataSource.insertItem(items, String.valueOf(user.getUserId()));
+	public boolean insertItems(List<ShoppinglistItem> items, User user) {
+        int count = mDataSource.insertItem(items, String.valueOf(user.getUserId()));
+        return successCount(count, items);
 	}
 
 	/**
@@ -294,7 +300,7 @@ public class DatabaseWrapper {
      * @param sli to insert
      * @return true, if operation succeeded, else false
      */
-    public boolean editItem(ShoppinglistItem sli, User user) {
+    public boolean editItems(ShoppinglistItem sli, User user) {
         long id = mDataSource.insertItem(sli, String.valueOf(user.getUserId()));
         return successId(id);
     }
@@ -302,14 +308,46 @@ public class DatabaseWrapper {
     /**
      * replaces an item in db
      * @param list to insert
-     * @return number of affected rows
+     * @return true if edit was successful, else false
      */
-    public int editItem(List<ShoppinglistItem> list, User user) {
-        return mDataSource.insertItem(list, String.valueOf(user.getUserId()));
+    public boolean editItems(List<ShoppinglistItem> list, User user) {
+        int count = mDataSource.insertItem(list, String.valueOf(user.getUserId()));
+        return successCount(count, list);
     }
 
     /**
-	 * 
+     * replaces an item in db
+     * @param list to insert
+     * @return true if edit was successful, else false
+     */
+    public boolean editItemState(List<ShoppinglistItem> list, User user, Date modified, int syncState) {
+        Map<String, List<ShoppinglistItem>> map = new HashMap<String, List<ShoppinglistItem>>();
+        for (ShoppinglistItem sli : list) {
+            String key = sli.getShoppinglistId();
+            if (!map.containsKey(key)) {
+                map.put(key, new ArrayList<ShoppinglistItem>());
+            }
+            map.get(key).add(sli);
+        }
+        int count = 0;
+        for (Map.Entry<String, List<ShoppinglistItem>> e : map.entrySet()) {
+            count += mDataSource.editItemState(e.getKey(), user.getId(), modified, syncState);
+        }
+        return successCount(count, list);
+    }
+
+    /**
+     * replaces an item in db
+     * @param list to insert
+     * @return number of rows affected
+     */
+    public int editItemState(Shoppinglist sl, User user, Date modified, int syncState) {
+        modified = Utils.roundTime(modified);
+        return mDataSource.editItemState(sl.getId(), user.getId(), modified, syncState);
+    }
+
+    /**
+	 *
 	 * @param sl A shoppinglist
 	 * @param user A user
 	 * @param includeDeleted Whether to include deleted shares
@@ -359,7 +397,6 @@ public class DatabaseWrapper {
     public void allowEditOrThrow(ShoppinglistItem sli, User user) {
         allowEditOrThrow(sli.getShoppinglistId(), user);
     }
-
 
     public void allowEditOrThrow(Shoppinglist sl, User user) {
         allowEditOrThrow(sl.getId(), user);

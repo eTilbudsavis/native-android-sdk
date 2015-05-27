@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ItemSQLiteHelper extends DatabaseHelper {
@@ -129,6 +130,13 @@ public class ItemSQLiteHelper extends DatabaseHelper {
         cv.put(PREVIOUS_ID, sli.getPreviousId());
         cv.put(META, sli.getMeta().toString());
         cv.put(USER, userId);
+        return cv;
+    }
+
+    public static ContentValues stateToContentValues(Date modified, int syncState) {
+        ContentValues cv = new ContentValues();
+        cv.put(MODIFIED, Utils.dateToString(modified));
+        cv.put(STATE, syncState);
         return cv;
     }
 

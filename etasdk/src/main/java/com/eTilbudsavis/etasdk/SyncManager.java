@@ -36,7 +36,6 @@ import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.EtaError.Code;
 import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.network.Request.Method;
-import com.eTilbudsavis.etasdk.network.RequestDebugger;
 import com.eTilbudsavis.etasdk.network.RequestQueue;
 import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.network.impl.HandlerDelivery;
@@ -708,7 +707,7 @@ public class SyncManager {
 									mBuilder.edit(sli);
 								}
 								
-								mDatabase.editItem(sli, user);
+								mDatabase.editItems(sli, user);
 							}
 							tmp = sli.getId();
 						}
@@ -766,12 +765,12 @@ public class SyncManager {
 					
 					if (localSli.getModified().before(serverSli.getModified())) {
 						mBuilder.edit(serverSli);
-						mDatabase.editItem(serverSli, user);
+						mDatabase.editItems(serverSli, user);
 						
 					} else if (!localSli.getMeta().toString().equals(serverSli.getMeta().toString())) {
 						// Migration code, to get comments into the DB
 						mBuilder.edit(serverSli);
-						mDatabase.editItem(serverSli, user);
+						mDatabase.editItems(serverSli, user);
 					} else if (localSli.equals(serverSli)) {
 						EtaLog.d(TAG, "We have a mismatch");
 					}
@@ -1004,7 +1003,7 @@ public class SyncManager {
 	private void putItem(final ShoppinglistItem sli, final User user) {
 		
 		sli.setState(SyncState.SYNCING);
-		mDatabase.editItem(sli, user);
+		mDatabase.editItems(sli, user);
 		
 		Listener<JSONObject> itemListener = new Listener<JSONObject>() {
 			
@@ -1023,7 +1022,7 @@ public class SyncManager {
 						if (server.getPreviousId() == null) {
 							server.setPreviousId(sli.getPreviousId());
 						}
-						mDatabase.editItem(server, user);
+						mDatabase.editItems(server, user);
 						mBuilder.edit(server);
 						
 					}
@@ -1104,7 +1103,7 @@ public class SyncManager {
 		
 		if (sli.getState() != SyncState.ERROR) {
 			sli.setState(SyncState.ERROR);
-			mDatabase.editItem(sli, user);
+			mDatabase.editItems(sli, user);
 		}
 		
 		Listener<JSONObject> itemListener = new Listener<JSONObject>() {

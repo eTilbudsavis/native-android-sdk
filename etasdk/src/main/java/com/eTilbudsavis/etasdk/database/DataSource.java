@@ -19,6 +19,7 @@ import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -189,6 +190,28 @@ public class DataSource extends SQLDataSource {
      **********************************************************************************************/
 
     /**
+     * Method for updating a state for all ShoppinglistItem with a given User and Shoppinglist.id
+     * @param shoppinglistId A shoppinglist.id
+     * @param userId A userid
+     * @param modified The new Modified for the items
+     * @param syncState The new SyncState for the items
+     * @return the number of rows affected
+     */
+    public int editItemState(String shoppinglistId, String userId, Date modified, int syncState) {
+        try {
+            ContentValues cv = ItemSQLiteHelper.stateToContentValues(modified, syncState);
+            String whereClause = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=? ";
+            String[] whereArgs = new String[]{ shoppinglistId, userId };
+            return acquireDb().updateWithOnConflict(ItemSQLiteHelper.TABLE, cv, whereClause, whereArgs, SQLiteDatabase.CONFLICT_REPLACE);
+        } catch (IllegalStateException e) {
+            log(TAG, e);
+            return 0;
+        } finally {
+            releaseDb();
+        }
+    }
+
+    /**
      * Adds item to db, IF it does not yet exist, else nothing
      * @param sli to add to db
      * @return number of affected rows
@@ -199,7 +222,7 @@ public class DataSource extends SQLDataSource {
             return acquireDb().insertWithOnConflict(ItemSQLiteHelper.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
         } catch (IllegalStateException e) {
             log(TAG, e);
-            return -1;
+            return 0;
         } finally {
             releaseDb();
         }
@@ -224,7 +247,7 @@ public class DataSource extends SQLDataSource {
             return count;
         } catch (IllegalStateException e) {
             log(TAG, e);
-            return -1;
+            return count;
         } finally {
             db.endTransaction();
             releaseDb();

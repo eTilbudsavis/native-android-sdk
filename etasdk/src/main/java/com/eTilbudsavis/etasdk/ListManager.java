@@ -25,16 +25,12 @@ import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.model.User;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
-import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.ListUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -150,14 +146,14 @@ public class ListManager {
 	
 	private boolean editList(Shoppinglist sl, User user) {
 
-        Shoppinglist oldList = mDatabase.getList(sl.getId(), user);
+        Shoppinglist original = mDatabase.getList(sl.getId(), user);
         // Check for changes in previous item, and update surrounding
-        if (oldList == null) {
+        if (original == null) {
             EtaLog.i(TAG, "No such list exists in the database. To add new items, use addList().");
             return false;
         }
 
-        Map<String, Share> dbShares = oldList.getShares();
+        Map<String, Share> dbShares = original.getShares();
 		Map<String, Share> slShares = sl.getShares();
 		
 		/* User have remove it self. Then only set the DELETE state on the share,
@@ -178,78 +174,60 @@ public class ListManager {
 			}
 		}
 
+        // Do edit check after the share check, the user should always be allowed to remove it self
 		mDatabase.allowEditOrThrow(sl, user);
 
 		HashSet<String> union = new HashSet<String>();
 		union.addAll(slShares.keySet());
 		union.addAll(dbShares.keySet());
-		
-		/* Variable for owner. If it has been removed from the sl-shares-list
-		 * then we need to re-add it from the DB
-		 */
-		Share owner = null;
-		
+
 		for (String shareId : union) {
 			
 			if (dbShares.containsKey(shareId)) {
 				
 				Share dbShare = dbShares.get(shareId);
 				
-				if (slShares.containsKey(shareId)) {
-					Share slShare = slShares.get(shareId);
-					
-					if (!dbShare.equals(slShare)) {
-						slShare.setState(SyncState.TO_SYNC);
-						mDatabase.editShare(slShare, user);
-						mBuilder.edit(sl);
-					}
-					
-				} else {
-					if (dbShare.getAccess().equals(Share.ACCESS_OWNER)) {
-						owner = dbShare;
-						EtaLog.i(TAG, "Owner cannot be removed from lists, owner will be reattached");
-					} else {
-						if (user.isLoggedIn()) {
-							dbShare.setState(SyncState.DELETE);
-							mDatabase.editShare(dbShare, user);
-						} else {
-							mDatabase.deleteShare(dbShare, user);
-						}
-						mBuilder.edit(sl);
-					}
-				}
-				
-			} else {
-				Share slShare = slShares.get(shareId);
-				mDatabase.insertShare(slShare, user);
-				mBuilder.edit(sl);
-			}
-			
-		}
-		
-		// If owner was removed, then re-insert it.
-		if (owner != null) {
-			sl.putShare(owner);
-		}
+                if (slShares.containsKey(shareId)) {
 
-		Date now = new Date();
-		
-		sl.setModified(now);
-		sl.setState(SyncState.TO_SYNC);
+                    Share slShare = slShares.get(shareId);
+                    if (!dbShare.equals(slShare)) {
+                        slShare.setState(SyncState.TO_SYNC);
+                        // mDatabase.editShare(slShare, user);
+                    }
+
+                } else if (dbShare.getAccess().equals(Share.ACCESS_OWNER)) {
+                    // If owner was removed, then re-insert it.
+                    sl.putShare(dbShare);
+                    EtaLog.i(TAG, "Owner cannot be removed from lists, owner will be reattached");
+                } else if (user.isLoggedIn()) {
+                    // We'll have to add the share (in deleted state) to have it updated in the DB
+                    // it should be removed as soon as the list have been inserted to DB.
+                    dbShare.setState(SyncState.DELETE);
+                    //mDatabase.editShare(dbShare, user);
+                    sl.putShare(dbShare);
+                }
+				
+			}
+
+		}
 
         List<Shoppinglist> lists = new ArrayList<Shoppinglist>();
-        // TODO add lists to list and bulk edit, rather than separate queries
+        lists.add(sl);
 
-		if (oldList.getPreviousId() != null && !oldList.getPreviousId().equals(sl.getPreviousId())) {
+        Date now = new Date();
+        sl.setModified(now);
+        sl.setState(SyncState.TO_SYNC);
+
+		if (original.getPreviousId() != null && !original.getPreviousId().equals(sl.getPreviousId())) {
+            // lucky for us, this shouldn't happen too often, so the double query to DB isn't gonna kill us
 			
 			// If there is an item pointing at sl, it needs to point at the oldList.prev
 			Shoppinglist slAfter = mDatabase.getListPrevious(sl.getId(), user);
 			if (slAfter != null) {
-				slAfter.setPreviousId(oldList.getPreviousId());
+				slAfter.setPreviousId(original.getPreviousId());
 				slAfter.setModified(now);
 				slAfter.setState(SyncState.TO_SYNC);
-				mDatabase.editList(slAfter, user);
-				mBuilder.edit(slAfter);
+                lists.add(slAfter);
 			}
 			
 			// If some another sl was pointing at the same item, it should be pointing at sl
@@ -258,20 +236,33 @@ public class ListManager {
 				slSamePointer.setPreviousId(sl.getId());
 				slSamePointer.setModified(now);
 				slSamePointer.setState(SyncState.TO_SYNC);
-				mDatabase.editList(slSamePointer, user);
-				mBuilder.edit(slSamePointer);
+                lists.add(slSamePointer);
 			}
 			
 		}
 
-		boolean success = mDatabase.editList(sl, user);
-		if (success) {
-			mBuilder.edit(sl);
-		}
-		postShoppinglistEvent();
-		return success;
+        try {
+            boolean success = mDatabase.insertLists(lists, user);
+            if (success) {
+                for (Shoppinglist edited : lists) {
+                    mBuilder.edit(edited);
+                }
+            }
+
+            // Clean up the shares we have added to have their state updated in the DB
+            for(Iterator<Map.Entry<String, Share>> it = sl.getShares().entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<String, Share> entry = it.next();
+                if(entry.getValue().getState() == SyncState.DELETE) {
+                    it.remove();
+                }
+            }
+
+            return success;
+        } finally {
+            postShoppinglistEvent();
+        }
 	}
-	
+
 	/**
 	 * Delete a shopping list
 	 * <p>The {@link Shoppinglist shoppinglist} is deleted from the local database,
@@ -287,10 +278,11 @@ public class ListManager {
 	}
 	
 	private boolean deleteList(Shoppinglist sl, User user) {
-		
+
+        List<Shoppinglist> editedLists = new ArrayList<Shoppinglist>();
 		Date now = new Date();
-		
 		sl.setModified(now);
+        editedLists.add(sl);
 		
 		// Update previous pointer, to preserve order
 		Shoppinglist after = mDatabase.getListPrevious(sl.getId(), user);
@@ -298,46 +290,32 @@ public class ListManager {
 			after.setPreviousId(sl.getPreviousId());
 			after.setModified(now);
 			after.setState(SyncState.TO_SYNC);
-			mDatabase.editList(after, user);
+            editedLists.add(after);
 			mBuilder.edit(after);
 		}
 
-		boolean success = false;
-		
-		List<ShoppinglistItem> items = getItems(sl);
-		
-		if (user.isLoggedIn()) {
-			
-			for (ShoppinglistItem sli : items) {
-				sli.setState(SyncState.DELETE);
-				sli.setModified(now);
-				mDatabase.editItem(sli, user);
-				mBuilder.del(sli);
-			}
-			 
-			// Update local version of shoppinglist
-			sl.setState(SyncState.DELETE);
-			success = mDatabase.editList(sl, user);
+        // Read items, edit items, and re-insert items (a bit redundant, but we need them for the callback)
+		List<ShoppinglistItem> items = getItems(sl, user);
+        for (ShoppinglistItem sli : items) {
+            sli.setState(SyncState.DELETE);
+            sli.setModified(now);
+        }
+        boolean success = mDatabase.editItems(items, user);
+        if (success) {
+            for (ShoppinglistItem sli : items) {
+                mBuilder.del(sli);
+            }
+        }
 
-		} else {
+        // Update local version of shoppinglist
+        sl.setState(SyncState.DELETE);
+        success = mDatabase.insertLists(editedLists, user);
+        if (success) {
+            for (Shoppinglist s : editedLists) {
+                mBuilder.del(s);
+            }
+        }
 
-			for (ShoppinglistItem sli : items) {
-				sli.setState(SyncState.DELETE);
-				sli.setModified(now);
-				mBuilder.del(sli);
-			}
-
-			success = mDatabase.deleteList(sl, user);
-
-			// Actually delete the items in the offline version
-			mDatabase.deleteShares(sl, user);
-			mDatabase.deleteItems(sl.getId(), null, user);
-			
-		}
-
-		if (success) {
-			mBuilder.del(sl);
-		}
 		postShoppinglistEvent();
 		return success;
 	}
@@ -357,13 +335,19 @@ public class ListManager {
 	 * @param sl A {@link Shoppinglist} to get {@link ShoppinglistItem ShoppinglistItems} from
 	 * @return A list of {@link ShoppinglistItem ShoppinglistItems}
 	 */
-	public List<ShoppinglistItem> getItems(Shoppinglist sl) {
-		List<ShoppinglistItem> items = mDatabase.getItems(sl, user());
-		ListUtils.sortItems(items);
-		return items;
-	}
-	
-	/**
+    public List<ShoppinglistItem> getItems(Shoppinglist sl) {
+        return getItems(sl, user());
+    }
+
+    private List<ShoppinglistItem> getItems(Shoppinglist sl, User user) {
+        List<ShoppinglistItem> items = mDatabase.getItems(sl, user);
+        ListUtils.sortItems(items);
+        return items;
+    }
+
+
+
+    /**
 	 * Add a {@link ShoppinglistItem} to a {@link Shoppinglist}
 	 * 
 	 * <p>{@link ShoppinglistItem ShoppinglistItems} are inserted into the
@@ -394,43 +378,40 @@ public class ListManager {
 					+ "description, one or the other this is required by the API");
 			return false;
 		}
-		
-		Date now = new Date();
-		sli.setModified(now);
-		sli.setState(SyncState.TO_SYNC);
-		
+
 		// If the item exists in DB, then just increase count and edit the item
 		if (incrementCount) {
-			
-			List<ShoppinglistItem> items = mDatabase.getItems(sli.getShoppinglistId(), user, false);
-			
-			if (sli.getOfferId() != null) {
-				for (ShoppinglistItem s : items) {
-					if (sli.getOfferId().equals(s.getOfferId())) {
-						s.setCount(s.getCount() + 1);
-						return editItem(s);
-					}
-				}
-			} else {
-				for (ShoppinglistItem s : items) {
-					String oldDesc = s.getDescription();
-					String newDesc = sli.getDescription().toLowerCase();
-					if (oldDesc != null && newDesc.equals(oldDesc.toLowerCase())) {
-						s.setCount(s.getCount() + 1);
-						return editItem(s);
-					}
-				}
-			}
+
+            List<ShoppinglistItem> items = mDatabase.getItems(sli.getShoppinglistId(), user, false);
+            for (ShoppinglistItem s : items) {
+                String des = s.getDescription();
+                String desOld = sli.getDescription();
+                boolean equalDes = des != null && des.equalsIgnoreCase(desOld);
+                boolean equalId = sli.getOfferId() != null && sli.getOfferId().equals(s.getOfferId());
+                if (equalId || equalDes) {
+                    s.setCount(s.getCount() + 1);
+                    return editItem(s);
+                }
+            }
+
 		}
 
-		Shoppinglist sl = getList(sli.getShoppinglistId());
+		Shoppinglist sl = mDatabase.getList(sli.getShoppinglistId(), user);
 
 		if (sl == null) {
 			EtaLog.i(TAG, "The shoppinglist id on the shoppinglist item, could"
 					+ "not be found, please add a shoppinglist before adding items");
 			return false;
 		}
-		
+
+        List<ShoppinglistItem> editedItems = new ArrayList<ShoppinglistItem>();
+
+        Date now = new Date();
+        sli.setModified(now);
+        sli.setState(SyncState.TO_SYNC);
+
+        editedItems.add(sli);
+
 		// Set the creator of not done yet
 		if (sli.getCreator() == null) {
 			if (user.getName() != null && user.getName().length() > 0) {
@@ -446,11 +427,11 @@ public class ListManager {
 			first.setPreviousId(sli.getId());
 			first.setModified(now);
 			first.setState(SyncState.TO_SYNC);
-			mDatabase.editItem(first, user);
+            editedItems.add(first);
 			mBuilder.edit(first);
 		}
 
-		boolean success = mDatabase.insertItem(sli, user);
+		boolean success = mDatabase.insertItems(editedItems, user);
 		if (success) {
 			/* Update SL info, but not state. This will prevent sync, and API
 			 * will auto update the modified tag, nice! */
@@ -470,32 +451,41 @@ public class ListManager {
 	 * @param sli An edited {@link ShoppinglistItem}
 	 */
 	public boolean editItem(ShoppinglistItem sli) {
-		User u = user();
-		boolean result = editItemImpl(u, sli);
-		postShoppinglistEvent();
-		return result;
+        try {
+            return editItem(sli, user());
+        } finally {
+            postShoppinglistEvent();
+        }
 	}
 	
 	/**
 	 * Replace an item, in the database
 	 * @param items A list of ShoppinglistItem to edit
-	 * @return number of affected rows
+	 * @return true if the ShoppinglistItems was edited successful
 	 */
-	public int editItems(List<ShoppinglistItem> items) {
+	public boolean editItems(List<ShoppinglistItem> items) {
 		User u = user();
 		mDatabase.allowEditItemsOrThrow(items, u);
-		int count = mDatabase.editItem(items, u);
-		postShoppinglistEvent();
-		return count;
+        // TODO there is absolutely no validation on this method yet
+        try {
+            return mDatabase.editItems(items, u);
+        } finally {
+            postShoppinglistEvent();
+        }
 	}
-	
-	private boolean editItemImpl(User u, ShoppinglistItem sli) {
-		mDatabase.allowEditOrThrow(sli.getShoppinglistId(), u);
-		return editItem(sli, u);
-	}
-	
-	private boolean editItem(final ShoppinglistItem sli, User user) {
-		
+
+    private void log(long start, String tag) {
+        EtaLog.d(TAG, tag + ", " + (System.currentTimeMillis()-start) + "ms");
+    }
+
+	private boolean editItem(ShoppinglistItem sli, User user) {
+
+        long s = System.currentTimeMillis();
+
+        mDatabase.allowEditOrThrow(sli.getShoppinglistId(), user);
+
+        log(s, "allowEditOrThrow");
+
 		Date now = new Date();
 		sli.setModified(now);
 		sli.setState(SyncState.TO_SYNC);
@@ -506,22 +496,32 @@ public class ListManager {
 			EtaLog.i(TAG, "No such item exists, considder addItem() instead: " + sli.toString());
 			return false;
 		}
-		
-		boolean success = mDatabase.editItem(sli, user);
-		if (success) {
+
+        log(s, "oldItem valid");
+
+        boolean success = mDatabase.editItems(sli, user);
+
+        log(s, "editItems");
+
+        if (success) {
 			/* Update SL info, but not state. This will prevent sync, and API
 			 * will auto update the modified tag, nice!
 			 */
-			Shoppinglist sl = getList(sli.getShoppinglistId());
-			if (sl != null) {
+			Shoppinglist sl = mDatabase.getList(sli.getShoppinglistId(), user);
+
+            log(s, "getList");
+
+            if (sl != null) {
 				sl.setModified(now);
 				mDatabase.editList(sl, user);
 				mBuilder.edit(sl);
 			}
 			mBuilder.edit(sli);
 		}
-		
-		return success;
+
+        log(s, "editList");
+
+        return success;
 	}
 	
 	
@@ -583,43 +583,31 @@ public class ListManager {
 		mDatabase.allowEditOrThrow(sl.getId(), user);
 
 		Date now = new Date();
-		
-        List<ShoppinglistItem> list = getItems(sl);
-        int count = 0;
+
+        // get it from this manager, to preserve order
+        List<ShoppinglistItem> list = getItems(sl, user);
 
 		String preGoodId = ListUtils.FIRST_ITEM;
+        List<ShoppinglistItem> edited = new ArrayList<ShoppinglistItem>();
 		
 		for (ShoppinglistItem sli : list) {
-			if (stateToDelete == null) {
-				// Delete all items
-				mBuilder.del(sli);
-			} else if (sli.isTicked() == stateToDelete) {
-				// Delete if ticked matches the requested state
-				mBuilder.del(sli);
+			if (stateToDelete == null || sli.isTicked() == stateToDelete) {
+				// Delete all items (null), or ones where ticked matches the requested state
+                sli.setState(SyncState.DELETE);
+                sli.setModified(now);
+                edited.add(sli);
 			} else {
 				if (!sli.getPreviousId().equals(preGoodId)) {
 					sli.setPreviousId(preGoodId);
 					sli.setModified(now);
 					sli.setState(SyncState.TO_SYNC);
-					mDatabase.editItem(sli, user);
+                    edited.add(sli);
 				}
 				preGoodId = sli.getId();
 			}
 		}
-		
-		if (user.isLoggedIn()) {
-			for (ShoppinglistItem sli : mBuilder.getDeletedItems()) {
-				sli.setState(SyncState.DELETE);
-				sli.setModified(now);
-				if (mDatabase.editItem(sli, user)) {
-					count++;
-				}
-			}
-		} else {
-			count = mDatabase.deleteItems(sl.getId(), stateToDelete, user) ;
-		}
-		
-		boolean success = count == mBuilder.getDeletedItems().size();
+
+		boolean success = mDatabase.editItems(edited, user);
 		if (success) {
 			/* Update SL info, but not state. This will prevent sync, and API
 			 * will auto update the modified tag, nice!
@@ -627,6 +615,13 @@ public class ListManager {
 			sl.setModified(now);
 			mDatabase.editList(sl, user);
 			mBuilder.edit(sl);
+            for (ShoppinglistItem sli : edited) {
+                if (sli.getState() == SyncState.DELETE) {
+                    mBuilder.del(sli);
+                } else {
+                    mBuilder.edit(sli);
+                }
+            }
 		}
 		
 		postShoppinglistEvent();
@@ -648,26 +643,23 @@ public class ListManager {
 	private boolean deleteItem(ShoppinglistItem sli, User user) {
 		
 		Date now = new Date();
-		
-		sli.setModified(now);
+
+        List<ShoppinglistItem> edited = new ArrayList<ShoppinglistItem>();
+
+        sli.setModified(now);
+        sli.setState(SyncState.DELETE);
+        edited.add(sli);
 
 		// Update previous pointer
 		ShoppinglistItem after = mDatabase.getItemPrevious(sli.getShoppinglistId(), sli.getId(), user);
 		if (after != null) {
 			after.setPreviousId(sli.getPreviousId());
 			after.setModified(now);
-			mDatabase.editItem(after, user);
+            edited.add(after);
 			mBuilder.edit(after);
 		}
 
-		boolean success = false;
-		if (user.getUserId() != User.NO_USER) {
-			sli.setState(SyncState.DELETE);
-			success = mDatabase.editItem(sli, user);
-		} else {
-			success = mDatabase.deleteItem(sli, user);
-		}
-
+		boolean success = mDatabase.editItems(edited, user);
 		if (success) {
 			/* Update shoppinglist modified, but not state, so we have correct
 			 * state but won't have to sync changes to API.
@@ -677,7 +669,6 @@ public class ListManager {
 			sl.setModified(now);
 			mDatabase.editList(sl, user);
 			mBuilder.edit(sl);
-			
 			mBuilder.del(sli);
 		}
 		postShoppinglistEvent();
