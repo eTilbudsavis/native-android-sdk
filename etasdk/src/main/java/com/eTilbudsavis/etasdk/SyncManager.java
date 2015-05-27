@@ -17,6 +17,7 @@ package com.eTilbudsavis.etasdk;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Process;
 
 import com.eTilbudsavis.etasdk.bus.SessionEvent;
@@ -127,7 +128,7 @@ public class SyncManager {
 	}
 	
 	/** The current sync speed */
-	private int mSyncSpeed = 3000;
+	private int mSyncSpeed = SyncSpeed.MEDIUM;
 	
 	/** Sync iteration counter */
 	private int mSyncCount = 0;
@@ -1369,8 +1370,14 @@ public class SyncManager {
 
         popRequest();
         if (mCurrentRequests.isEmpty() && !isPaused() && mBuilder.hasChanges()) {
-            EventBus.getDefault().post(mBuilder.build());
+            final ShoppinglistEvent e = mBuilder.build();
             mBuilder = new ShoppinglistEvent.Builder(true);
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    EventBus.getDefault().post(e);
+                }
+            });
         }
 
     }
