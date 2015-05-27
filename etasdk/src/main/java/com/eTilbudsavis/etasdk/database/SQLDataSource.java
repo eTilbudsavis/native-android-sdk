@@ -54,9 +54,9 @@ public class SQLDataSource {
         }
     }
 
-//    public void logRef(String action) {
-//        EtaLog.d(TAG, String.format("Thread: %s, Action: %s, RefCount: %s", Thread.currentThread().getName(), action, mRefCount.get()));
-//    }
+    protected void logRef(String action) {
+        EtaLog.d(TAG, String.format("Thread: %s, Action: %s, RefCount: %s", Thread.currentThread().getName(), action, mRefCount.get()));
+    }
 
     public void log(String tag, Exception e) {
         EtaLog.e(tag, e.getMessage(), e);

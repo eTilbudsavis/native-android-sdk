@@ -36,6 +36,7 @@ import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.EtaError.Code;
 import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.network.Request.Method;
+import com.eTilbudsavis.etasdk.network.RequestDebugger;
 import com.eTilbudsavis.etasdk.network.RequestQueue;
 import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.network.impl.HandlerDelivery;
@@ -56,7 +57,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import de.greenrobot.event.EventBus;
@@ -238,13 +241,6 @@ public class SyncManager {
 		
 		// Skip further sync if we just posted our own changes
 		if (hasLocalChanges) {
-//			pauseSync();
-//			mHandler.postDelayed(new Runnable() {
-//				
-//				public void run() {
-//					resumeSync();
-//				}
-//			}, 3500);
 			SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - hasLocalChanges");
 			return;
 		}
@@ -588,70 +584,81 @@ public class SyncManager {
 		
 	}
 
-	
-	private void syncListsModified(final User user) {
-		
-		List<Shoppinglist> localLists = mDatabase.getLists(user);
-		
-		for (final Shoppinglist sl : localLists) {
-			
-			// If they are in the state of processing, then skip
-			if (sl.getState() == SyncState.SYNCING) {
-				continue;
-			}
-			
-			// If it obviously needs to sync, then just do it
-			if (sl.getState() == SyncState.TO_SYNC) {
-				// New shopping lists must always sync
-				syncItems(sl, user);
-				continue;
-			}
-			
-			// Run the check 
-			sl.setState(SyncState.SYNCING);
-			mDatabase.editList(sl, user);
-			
-			Listener<JSONObject> modifiedListener = new Listener<JSONObject>() {
 
-				public void onComplete( JSONObject response, EtaError error) {
+    private void syncListsModified(final User user) {
 
-					if (response != null) {
-						
-						sl.setState(SyncState.SYNCED);
-						try {
-							String modified = response.getString(Api.JsonKey.MODIFIED);
-							// If local list has been modified before the server list, then sync items
-							if (sl.getModified().before(Utils.stringToDate(modified))) {
-								// If there are changes, update items (this will update list-state in DB)
-								syncItems(sl, user);
-							} else {
-								// if no changes, just write new state to DB
-								mDatabase.editList(sl, user);
-							}
-						} catch (JSONException e) {
-							EtaLog.e(TAG, "", e);
-							// error? just write new state to DB, next iteration will fix it
-							mDatabase.editList(sl, user);
-						}
-						popRequestAndPostShoppinglistEvent();
-						
-					} else {
-						
-						popRequest();
-						revertList(sl, user);
-						
-					}
-					
-					
-				}
-			};
-			
-			JsonObjectRequest modifiedRequest = new JsonObjectRequest(Endpoint.listModified(user.getUserId(), sl.getId()), modifiedListener);
-			modifiedRequest.setSaveNetworkLog(SAVE_NETWORK_LOG);
-			addRequest(modifiedRequest);
-			
-		}
-				
+        List<Shoppinglist> lists = mDatabase.getLists(user);
+        Iterator<Shoppinglist> it = lists.iterator();
+
+        while (it.hasNext()) {
+            Shoppinglist sl = it.next();
+
+            // If they are in the state of processing, then skip
+            if (sl.getState() == SyncState.SYNCING) {
+                it.remove();
+            }
+
+            // If it obviously needs to sync, then just do it
+            if (sl.getState() == SyncState.TO_SYNC) {
+                // New shopping lists must always sync
+                syncItems(sl, user);
+                it.remove();
+            }
+
+            // Run the check
+            sl.setState(SyncState.SYNCING);
+
+        }
+
+        mDatabase.insertLists(lists, user);
+
+        for (Shoppinglist sl : lists) {
+            requestListsModified(sl, user);
+        }
+
+    }
+
+	private void requestListsModified(final Shoppinglist sl, final User user) {
+
+        Listener<JSONObject> modifiedListener = new Listener<JSONObject>() {
+
+            public void onComplete( JSONObject response, EtaError error) {
+
+                if (response != null) {
+
+                    sl.setState(SyncState.SYNCED);
+                    try {
+                        String modified = response.getString(Api.JsonKey.MODIFIED);
+                        // If local list has been modified before the server list, then sync items
+                        if (sl.getModified().before(Utils.stringToDate(modified))) {
+                            // If there are changes, update items (this will update list-state in DB)
+                            syncItems(sl, user);
+                        } else {
+                            // if no changes, just write new state to DB
+                            mDatabase.editList(sl, user);
+                        }
+                    } catch (JSONException e) {
+                        EtaLog.e(TAG, "", e);
+                        // error? just write new state to DB, next iteration will fix it
+                        mDatabase.editList(sl, user);
+                    }
+                    popRequestAndPostShoppinglistEvent();
+
+                } else {
+
+                    popRequest();
+                    revertList(sl, user);
+
+                }
+
+
+            }
+        };
+
+        JsonObjectRequest modifiedRequest = new JsonObjectRequest(Endpoint.listModified(user.getUserId(), sl.getId()), modifiedListener);
+        modifiedRequest.setSaveNetworkLog(SAVE_NETWORK_LOG);
+        addRequest(modifiedRequest);
+
 	}
 	
 	
