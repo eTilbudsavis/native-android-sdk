@@ -39,7 +39,9 @@ import java.util.List;
 public class DbHelper extends SQLiteOpenHelper {
 	
 	public static final String TAG = Constants.getTag(DbHelper.class);
-	
+
+    public static final int BUF_SIZE = 512;
+
 	private static final String DB_NAME = "shoppinglist.db";
 	private static final int DB_VERSION = 5;
 	
@@ -67,8 +69,8 @@ public class DbHelper extends SQLiteOpenHelper {
 	public static final String EMAIL = "email";
 	public static final String ACCEPTED = "accepted";
 	public static final String ACCEPT_URL = "accept_url";
-	
-	
+
+
 	private Object LOCK = new Object();
 	
 	private static final String CREATE_LIST_TABLE = 
@@ -207,7 +209,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public static String listToValues(Shoppinglist sl, int userId) {
 		
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(BUF_SIZE);
 		sb.append("(")
 		.append(ID).append(",")
 		.append(ERN).append(",")
@@ -269,7 +271,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 * @return a string of the format: (column1, column2) VALUES (value1, value2)
 	 */
 	public static String itemToValues(ShoppinglistItem sli, int userId) {
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(BUF_SIZE);
 		sb.append("(")
 		.append(ID).append(",")
 		.append(ERN).append(",")
@@ -322,7 +324,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	 */
 	public static String shareToValues(Share share, int userId) {
 		
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(BUF_SIZE);
 		sb.append("(")
 		.append(SHOPPINGLIST_ID).append(",")
 		.append(USER).append(",")
