@@ -18,6 +18,7 @@ package com.eTilbudsavis.etasdk;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
+import com.eTilbudsavis.etasdk.bus.Bus;
 import com.eTilbudsavis.etasdk.bus.SessionEvent;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Session;
@@ -38,8 +39,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-
-import de.greenrobot.event.EventBus;
 
 public class SessionManager {
 	

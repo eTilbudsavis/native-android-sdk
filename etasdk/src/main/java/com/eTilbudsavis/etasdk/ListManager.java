@@ -37,8 +37,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import de.greenrobot.event.EventBus;
-
 /**
  * This class provides methods, for easily handling of
  * {@link Shoppinglist Shoppinglists}, {@link ShoppinglistItem ShoppinglistItems},

@@ -56,8 +56,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Stack;
 
-import de.greenrobot.event.EventBus;
-
 /**
  * The {@link SyncManager} class performs asynchronous synchronization with the
  * eTilbudsavis API, to propagate all {@link Shoppinglist} and {@link ShoppinglistItem}

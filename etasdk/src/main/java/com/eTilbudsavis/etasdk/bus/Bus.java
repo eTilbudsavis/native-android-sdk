@@ -1,7 +1,6 @@
 package com.eTilbudsavis.etasdk.bus;
 
 import de.greenrobot.event.EventBus;
-import de.greenrobot.event.EventBusBuilder;
 import de.greenrobot.event.EventBusException;
 
 public class Bus {

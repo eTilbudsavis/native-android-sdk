@@ -19,8 +19,6 @@ import com.eTilbudsavis.etasdk.utils.Json;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.greenrobot.event.EventBus;
-
 public class EtaLocation extends Location {
 
 	public static final String TAG = Constants.getTag(EtaLocation.class);
