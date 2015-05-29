@@ -20,6 +20,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
 
+import com.eTilbudsavis.etasdk.bus.Bus;
 import com.eTilbudsavis.etasdk.bus.SessionEvent;
 import com.eTilbudsavis.etasdk.bus.ShoppinglistEvent;
 import com.eTilbudsavis.etasdk.log.EtaLog;
