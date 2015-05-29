@@ -9,6 +9,7 @@ import android.location.LocationManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.eTilbudsavis.etasdk.bus.Bus;
 import com.eTilbudsavis.etasdk.bus.LocationEvent;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Store;
@@ -46,7 +47,7 @@ public class EtaLocation extends Location {
     public void notifyDataChanged() {
         // It shouldn't be a responsibility for this object to determine when to post events.
         // But the method is there so we'll keep using it for now
-        EventBus.getDefault().post(new LocationEvent());
+        Bus.getInstance().post(new LocationEvent());
     }
 
     public EtaLocation() {

@@ -348,7 +348,7 @@ public class SyncManager {
 	 * <p>This is implicitly handled by the {@link Eta} instance</p>
 	 */
 	public void onStart() {
-        EventBus.getDefault().register(this);
+        Bus.getInstance().register(this);
 		forceSync();
 	}
 
@@ -358,7 +358,7 @@ public class SyncManager {
 	 */
 	public void onStop() {
 		forceSync();
-        EventBus.getDefault().unregister(this);
+        Bus.getInstance().unregister(this);
 		mHasFirstSync = false;
 		mSyncCount = -1;
 	}
@@ -1375,7 +1375,7 @@ public class SyncManager {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                    EventBus.getDefault().post(e);
+                    Bus.getInstance().post(e);
                 }
             });
         }

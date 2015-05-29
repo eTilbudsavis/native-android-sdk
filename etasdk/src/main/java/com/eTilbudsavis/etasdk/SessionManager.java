@@ -210,7 +210,7 @@ public class SessionManager {
 			mTryToRecover = true;
 			
 			// Send out notifications
-            EventBus.getDefault().post(new SessionEvent(oldId, newId));
+            Bus.getInstance().post(new SessionEvent(oldId, newId));
 			
 			return true;
 			
@@ -506,7 +506,7 @@ public class SessionManager {
 			mEta.getSettings().setSessionJson(mSession.toJSON());
 			mEta.getSettings().setSessionFacebook(null);
 			clearUser();
-            EventBus.getDefault().post(new SessionEvent(oldUserId, mSession.getUser().getUserId()));
+            Bus.getInstance().post(new SessionEvent(oldUserId, mSession.getUser().getUserId()));
 		}
 	}
 	

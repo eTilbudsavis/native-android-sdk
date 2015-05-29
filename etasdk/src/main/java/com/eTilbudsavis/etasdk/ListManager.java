@@ -796,7 +796,7 @@ public class ListManager {
 
 	private void postShoppinglistEvent() {
 		if (!mEta.getSyncManager().isPaused() && mBuilder.hasChanges()) {
-            EventBus.getDefault().post(mBuilder.build());
+            Bus.getInstance().post(mBuilder.build());
 			mBuilder = new ShoppinglistEvent.Builder(false);
 		}
 	}
