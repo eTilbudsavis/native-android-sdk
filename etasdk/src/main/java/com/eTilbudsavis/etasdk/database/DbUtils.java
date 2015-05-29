@@ -63,9 +63,28 @@ public class DbUtils {
                 } while(c.moveToNext());
             }
         } finally {
-            c.close();
+            closeCursor(c);
         }
         return list;
+    }
+
+    /**
+     * Read the cursor into a {@link ContentValues} object, and close the {@link Cursor} when finished
+     * @param c A cursor
+     * @return A {@link List} of {@link ContentValues}
+     */
+    public static ContentValues cursorToContentValuesSingle(Cursor c) {
+        try {
+            ContentValues map = new ContentValues();
+            if(c.moveToFirst()) {
+                DatabaseUtils.cursorRowToContentValues(c, map);
+            }
+            return map;
+        } catch (IllegalStateException e) {
+            return new ContentValues();
+        } finally {
+            closeCursor(c);
+        }
     }
 
     /**
@@ -139,6 +158,25 @@ public class DbUtils {
             s.bindNull(index);
         } else {
             s.bindString(index, value);
+        }
+    }
+
+
+    public static List<String> cursorToStrings(Cursor c, String column) {
+        try {
+            List<String> list = new ArrayList<String>(c.getCount());
+            if (c.moveToFirst()) {
+                int index = c.getColumnIndex(column);
+                do {
+                    list.add(c.getString(index));
+                } while (c.moveToNext());
+            }
+            return list;
+        } catch (IllegalStateException e) {
+            // ignore
+            return new ArrayList<String>();
+        } finally {
+            closeCursor(c);
         }
     }
 

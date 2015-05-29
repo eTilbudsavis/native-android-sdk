@@ -29,6 +29,10 @@ public class SQLDataSource {
         releaseDb();
     }
 
+    public boolean isOpen() {
+        return mRefCount.get() > 0;
+    }
+
     protected SQLiteDatabase acquireDb() {
         synchronized (LOCK) {
             if (mDatabase == null || !mDatabase.isOpen()) {
