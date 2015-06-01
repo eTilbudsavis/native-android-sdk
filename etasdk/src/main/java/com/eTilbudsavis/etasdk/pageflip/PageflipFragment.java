@@ -78,6 +78,9 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	int mOutOfBoundsCount = 0;
 	boolean mOutOfBoundsCalled = false;
 
+    // Requests
+    CatalogAutoFill mCatalogAutoFill;
+
 	/**
 	 * Creates a new instance of {@link PageflipFragment}, to replace or insert into a current layout.
 	 * @param c The catalog to show
@@ -220,11 +223,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		
 	}
 
-	private void removeRunners() {
-		mLoader.stop();
-		mHandler.removeCallbacks(mOnCatalogComplete);
-	}
-	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
@@ -443,13 +441,11 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	}
 	
 	private void runCatalogFiller() {
-		
-		CatalogAutoFill caf = new CatalogAutoFill();
-		caf.setLoadHotspots(!PageflipUtils.isHotspotsReady(mCatalog));
-		caf.setLoadPages(!PageflipUtils.isPagesReady(mCatalog));
-		caf.prepare(new AutoFillParams(), mCatalog, null, mCatListener);
-		caf.execute(Eta.getInstance().getRequestQueue());
-		
+        mCatalogAutoFill = new CatalogAutoFill();
+		mCatalogAutoFill.setLoadHotspots(!PageflipUtils.isHotspotsReady(mCatalog));
+		mCatalogAutoFill.setLoadPages(!PageflipUtils.isPagesReady(mCatalog));
+		mCatalogAutoFill.prepare(new AutoFillParams(), mCatalog, null, mCatListener);
+		mCatalogAutoFill.execute(Eta.getInstance().getRequestQueue());
 	}
 
 	Listener<Catalog> mCatListener = new Listener<Catalog>() {
@@ -545,7 +541,9 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 	}
 	
 	private void pause() {
-		removeRunners();
+        mLoader.stop();
+        mHandler.removeCallbacks(mOnCatalogComplete);
+        mCatalogAutoFill.cancel();
 		mPagesReady = false;
 		mPageflipStarted = false;
 	}
