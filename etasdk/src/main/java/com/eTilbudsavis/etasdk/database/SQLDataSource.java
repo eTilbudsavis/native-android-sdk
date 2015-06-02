@@ -16,24 +16,37 @@ public class SQLDataSource {
     private SQLiteOpenHelper mHelper;
     private SQLiteDatabase mDatabase;
     private AtomicInteger mRefCount = new AtomicInteger();
+    private boolean mOpen = false;
 
     public SQLDataSource(SQLiteOpenHelper sqLiteHelper) {
         mHelper = sqLiteHelper;
     }
 
     public void open() {
-        acquireDb();
+        synchronized (LOCK) {
+            if (!mOpen) {
+                acquireDb();
+            }
+            mOpen = true;
+        }
     }
 
     public void close() {
-        releaseDb();
+        synchronized (LOCK) {
+            if (mOpen) {
+                releaseDb();
+            }
+            mOpen = false;
+        }
     }
 
     public boolean isOpen() {
-        return mRefCount.get() > 0;
+        synchronized (LOCK) {
+            return mRefCount.get() > 0;
+        }
     }
 
-    protected SQLiteDatabase acquireDb() {
+    protected synchronized SQLiteDatabase acquireDb() {
         synchronized (LOCK) {
             if (mDatabase == null || !mDatabase.isOpen()) {
                 mDatabase = mHelper.getWritableDatabase();
@@ -47,7 +60,7 @@ public class SQLDataSource {
         }
     }
 
-    protected void releaseDb() {
+    protected synchronized void releaseDb() {
         synchronized (LOCK) {
             mDatabase.releaseReference();
             if (mRefCount.decrementAndGet() == 0) {
