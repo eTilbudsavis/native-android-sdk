@@ -92,7 +92,7 @@ public class DbUtils {
      * @param c A cursor
      */
     public static void closeCursor(Cursor c) {
-        if (c != null) {
+        if (c != null && !c.isClosed()) {
             c.close();
         }
     }
