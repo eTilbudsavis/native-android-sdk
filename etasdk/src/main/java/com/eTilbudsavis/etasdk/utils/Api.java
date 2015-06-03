@@ -678,7 +678,7 @@ public final class Api {
 
 		/** /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email} */
 		public static String listShareEmail(int userId, String listId, String email) {
-			return String.format("/v2/users/%s/shoppinglists/%s/shares/%s", userId, listId, email);
+			return String.format("/v2/users/%s/shoppinglists/%s/shares/%s", userId, listId, Utils.encode(email, "UTF-8"));
 		}
 
 		/** /v2/users/{user_id}/shoppinglists/{list_uuid}/items */

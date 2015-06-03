@@ -98,7 +98,7 @@ public final class Utils {
 		if (r.getParameters() == null || r.getParameters().isEmpty()) {
 			return r.getUrl();
 		}
-		return encode(r.getUrl(), r.getParamsEncoding()) + "?" + mapToQueryString(r.getParameters(), r.getParamsEncoding());
+		return r.getUrl() + "?" + mapToQueryString(r.getParameters(), r.getParamsEncoding());
 	}
 
 	/**
@@ -200,7 +200,7 @@ public final class Utils {
 	 * @return an URL-encoded string
 	 */
 	@SuppressWarnings("deprecation")
-	private static String encode(String value, String encoding) {
+	public static String encode(String value, String encoding) {
 		try {
 			value = URLEncoder.encode(value, encoding);
 		} catch (NullPointerException e) {
