@@ -518,9 +518,9 @@ public final class Api {
 	}
 
 	public enum ThemeEnvironment {
-		
-		PRODUCTION("https://api.etilbudsavis.dk"),
-		STAGING("https://staging.api.etilbudsavis.dk");
+
+        PRODUCTION("https://etilbudsavis.dk/rest/v1/lists/themes/"),
+		STAGING("https://staging.etilbudsavis.dk/rest/v1/lists/themes/");
 		
 		private final String mEnvironment;
 		
