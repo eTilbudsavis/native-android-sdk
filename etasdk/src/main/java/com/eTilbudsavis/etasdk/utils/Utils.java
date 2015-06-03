@@ -98,7 +98,7 @@ public final class Utils {
 		if (r.getParameters() == null || r.getParameters().isEmpty()) {
 			return r.getUrl();
 		}
-		return r.getUrl() + "?" + mapToQueryString(r.getParameters(), r.getParamsEncoding());
+		return encode(r.getUrl(), r.getParamsEncoding()) + "?" + mapToQueryString(r.getParameters(), r.getParamsEncoding());
 	}
 
 	/**
