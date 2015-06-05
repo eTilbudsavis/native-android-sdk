@@ -474,7 +474,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 	 * @return This object
 	 */
 	public Shoppinglist setMeta(JSONObject meta) {
-        mMeta = meta;
+        mMeta = meta == null ? new JSONObject() : meta;
 		return this;
 	}
 
