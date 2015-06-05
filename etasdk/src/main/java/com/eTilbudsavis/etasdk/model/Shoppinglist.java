@@ -665,7 +665,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 		int result = 1;
 		result = prime * result + ((mAccess == null) ? 0 : mAccess.hashCode());
 		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-		result = prime * result + ((mMeta == null) ? 0 : Json.jsonObjectHashCode(mMeta));
+		result = prime * result + Json.jsonObjectHashCode(mMeta);
 		result = prime * result
 				+ ((mModified == null) ? 0 : mModified.hashCode());
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());

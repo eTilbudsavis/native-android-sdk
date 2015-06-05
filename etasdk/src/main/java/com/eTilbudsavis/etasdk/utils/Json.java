@@ -59,10 +59,10 @@ public class Json {
 	 */
 	public static JSONArray getArray(JSONObject object, String key, JSONArray defValue) {
 		if (object == null || key == null) {
-			return null;
+			return defValue;
 		}
 		try {
-			return object.isNull(key) ? null : object.getJSONArray(key);
+			return object.isNull(key) ? defValue : object.getJSONArray(key);
 		} catch (JSONException e) {
 			EtaLog.e(TAG, e.getMessage(), e);
 		}
@@ -87,10 +87,10 @@ public class Json {
 	 */
 	public static JSONObject getObject(JSONObject object, String key, JSONObject defValue) {
 		if (object == null || key == null) {
-			return null;
+			return defValue;
 		}
 		try {
-			return object.isNull(key) ? null : object.getJSONObject(key);
+			return object.isNull(key) ? defValue : object.getJSONObject(key);
 		} catch (JSONException e) {
 			EtaLog.e(TAG, e.getMessage(), e);
 		}
@@ -104,9 +104,6 @@ public class Json {
 	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else null.
 	 */
 	public static String valueOf(JSONObject object, String key) {
-		if (object == null || key == null) {
-			return null;
-		}
 		return valueOf(object, key, null);
 	}
 	
@@ -256,7 +253,7 @@ public class Json {
 	 * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
 	 */
 	public static Integer colorValueOf(JSONObject object, String key, int color) {
-		return colorValueOf(object, key, ColorUtils.toString(color));
+		return colorValueOf(object, key, ColorUtils.toString(color, false, false));
 	}
 	
 	/**

@@ -575,7 +575,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 		if (mMeta == null) {
 			if (other.mMeta != null)
 				return false;
-		} else if (!mMeta.equals(other.mMeta))
+		} else if (!Json.jsonObjectEquals(mMeta, other.mMeta))
 			return false;
 		
 		
@@ -647,7 +647,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 				+ ((mDescription == null) ? 0 : mDescription.hashCode());
 		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
 		result = prime * result + ((mId == null) ? 0 : mId.hashCode());
-		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
+        result = prime * result + Json.jsonObjectHashCode(mMeta);
 		result = prime * result
 				+ ((mModified == null) ? 0 : mModified.hashCode());
 		result = prime * result + ((mOffer == null) ? 0 : mOffer.hashCode());
