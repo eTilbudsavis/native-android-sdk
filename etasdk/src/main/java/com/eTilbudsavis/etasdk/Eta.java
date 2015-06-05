@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.eTilbudsavis.etasdk.database.DatabaseWrapper;
 import com.eTilbudsavis.etasdk.imageloader.ImageLoader;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
@@ -176,7 +177,7 @@ public class Eta {
 		// Session manager implicitly requires Settings
 		mSessionManager = new SessionManager(Eta.this);
 		
-		DbHelper db = DbHelper.getInstance(Eta.this);
+		DatabaseWrapper db = DatabaseWrapper.getInstance(Eta.this);
 		mListManager = new ListManager(Eta.this, db);
 		mSyncManager = new SyncManager(Eta.this, db);
 		

@@ -54,9 +54,11 @@
         </activity>
         
         <activity android:name="com.eTilbudsavis.sdkdemo.CatalogViewerActivity" />
-        
+
         <activity android:name="com.eTilbudsavis.sdkdemo.SearchActivity" />
-        
+
+        <activity android:name="com.eTilbudsavis.sdkdemo.DBSpeedTestActivity" />
+
     </application>
 
 </manifest>

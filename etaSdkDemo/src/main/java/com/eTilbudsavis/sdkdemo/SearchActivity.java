@@ -170,20 +170,7 @@ public class SearchActivity extends BaseActivity {
     	outState.putSerializable(ARG_OFFERS, (Serializable) mOffers);
     	outState.putString(ARG_QUERY, mQuery.getText().toString());
     }
-    
-    @Override
-    protected void onStart() {
-    	super.onStart();
-    	Eta.getInstance().onStart();
-    	
-    }
-    
-    @Override
-    protected void onStop() {
-    	super.onStop();
-    	Eta.getInstance().onStop();
-    }
-    
+
     class SearchAdapter extends BaseAdapter {
     	
 		@Override

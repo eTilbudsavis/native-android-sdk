@@ -15,6 +15,8 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.utils;
 
+import android.util.Log;
+
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
@@ -265,7 +267,7 @@ public class Json {
 	 */
 	public static Integer colorValueOf(JSONObject object, String key, String defValue) {
 		String rawColor = Json.valueOf(object, key, defValue);
-		return ColorUtils.toColor(rawColor);
+        return ColorUtils.toColor(rawColor);
 	}
 
     /**
