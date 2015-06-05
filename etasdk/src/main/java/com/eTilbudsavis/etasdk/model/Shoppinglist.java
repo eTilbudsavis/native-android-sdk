@@ -478,6 +478,11 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 		return this;
 	}
 
+    /**
+     * Method for getting and setting a theme for a shoppinglist.
+     * @param id A theme id
+     * @return this object
+     */
     public Shoppinglist setTheme(String id) {
         try {
             getMeta().put(Api.MetaKey.THEME, id);
@@ -487,6 +492,10 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
         return this;
     }
 
+    /**
+     * Get the shoppinglist theme id.
+     * @return A theme id. If no id have been set it returns 'default'.
+     */
     public String getTheme() {
         try {
             return getMeta().getString(Api.MetaKey.THEME);
