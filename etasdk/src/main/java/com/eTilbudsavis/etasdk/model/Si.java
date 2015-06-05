@@ -29,9 +29,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 
-public class Si implements IJson<JSONObject>, Serializable, Parcelable {
-
-	private static final long serialVersionUID = 1L;
+public class Si implements IJson<JSONObject>, Parcelable {
 
 	public static final String TAG = Constants.getTag(Si.class);
 	

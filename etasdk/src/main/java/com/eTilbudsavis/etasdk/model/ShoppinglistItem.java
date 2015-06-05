@@ -39,13 +39,11 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState<ShoppinglistItem>, IJson<JSONObject>, Serializable, Parcelable {
+public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState<ShoppinglistItem>, IJson<JSONObject>, Parcelable {
 
 	public static final String TAG = Constants.getTag(ShoppinglistItem.class);
 
 	private static final String ERN_CLASS = "shoppinglist:item";
-	
-	private static final long serialVersionUID = -8186715532715467496L;
 
 	private String mId;
 	private String mErn;

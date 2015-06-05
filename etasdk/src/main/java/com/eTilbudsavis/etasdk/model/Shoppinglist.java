@@ -19,11 +19,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Constants;
+import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IErn;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
+import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Api.JsonKey;
 import com.eTilbudsavis.etasdk.utils.Json;
 import com.eTilbudsavis.etasdk.utils.Utils;
@@ -34,9 +36,12 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -46,12 +51,10 @@ import java.util.Map;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppinglist>, IErn<Shoppinglist>, IJson<JSONObject>, Serializable, Parcelable {
+public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppinglist>, IErn<Shoppinglist>, IJson<JSONObject>, Parcelable {
 
 	public static final String TAG = Constants.getTag(Shoppinglist.class);
 
-	private static final long serialVersionUID = 5718447151312028262L;
-	
 	/**
 	 * The default {@link Shoppinglist} type
 	 */
@@ -85,7 +88,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 	private Date mModified;
 	private String mPrevId;
 	private String mType;
-	private String mMeta;
+	private JSONObject mMeta;
 	private HashMap<String, Share> mShares = new HashMap<String, Share>(1);
 	private int mUserId = -1;
 	private int mSyncState = SyncState.TO_SYNC;
@@ -127,7 +130,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 
 	/**
 	 * A factory method for converting {@link JSONObject} into a POJO.
-	 * @param shoppinglist A {@link JSONObject} in the format of a valid API v
+	 * @param jShoppinglist A {@link JSONObject} in the format of a valid API v
 	 *                       shoppinglist response
 	 * @return An {@link Shoppinglist} object
 	 */
@@ -150,25 +153,16 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 			
 			// A whole lot of 'saving my ass from exceptions' for meta
 			String metaString = Json.valueOf(jShoppinglist, JsonKey.META, "{}").trim();
-			// If it looks like a JSONObject, try parsing it
-			if (metaString.startsWith("{") && metaString.endsWith("}")) {
-				
-				try {
-					// Try to parse the json string
-					shoppinglist.setMeta(new JSONObject(metaString));
-				} catch (JSONException e) {
-					EtaLog.e(TAG, "", e);
-					// Meta parsing failed, so we'll do a recovery
-					shoppinglist.setMeta(new JSONObject());
-					shoppinglist.setModified(new Date());
-				}
-				
-			} else {
-				// String doesn't look like json, so we'll do a recovery
-				shoppinglist.setMeta(new JSONObject());
-				shoppinglist.setModified(new Date());
-			}
-			
+            try {
+                // Try to parse the json string
+                shoppinglist.setMeta(new JSONObject(metaString));
+            } catch (JSONException e) {
+                EtaLog.e(TAG, "", e);
+                // Meta parsing failed, so we'll do a recovery
+                shoppinglist.setMeta(new JSONObject());
+                shoppinglist.setModified(new Date());
+            }
+
 			shoppinglist.putShares(Share.fromJSON(jShoppinglist.getJSONArray(JsonKey.SHARES)));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
@@ -298,7 +292,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 	 * this user, when you display the lists to the user.
 	 * 
 	 * <p>If there are no {@link Shoppinglist} above this one the value will be
-	 * {@link EtaListObject#FIRST_ITEM}</p>
+	 * {@link com.eTilbudsavis.etasdk.utils.ListUtils#FIRST_ITEM}</p>
 	 * 
 	 * @return An {@link Shoppinglist#getId() id}
 	 */
@@ -313,7 +307,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 	 * this user, when you display the lists to the user.
 	 * 
 	 * <p>If there are no {@link Shoppinglist} above this one the value will be
-	 * {@link EtaListObject#FIRST_ITEM}</p>
+	 * {@link com.eTilbudsavis.etasdk.utils.ListUtils#FIRST_ITEM}</p>
 	 * 
 	 * <p><b>important</b> if you are using {@link ListManager} other
 	 * {@link Shoppinglist shoppinglists} will have their
@@ -443,10 +437,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 	
 	/**
 	 * Get the meta information for this {@link Shoppinglist}.
-	 * 
-	 * <p>If you edit the object, remember to use {@link #setMeta(JSONObject)}
-	 * or your changes will not be saved to local DB.</p>
-	 * 
+	 *
 	 * <p>Meta doesn't currently have any restrictions other that it must
 	 * be a {@link JSONObject}, what goes inside is completely up to you.</p>
 	 * 
@@ -459,15 +450,10 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 	 */
 	public JSONObject getMeta() {
 		if (mMeta == null) {
-			return new JSONObject();
-		} else {
-			try {
-				return new JSONObject(mMeta);
-			} catch (JSONException e) {
-				EtaLog.e(TAG, e.getMessage(), e);
-			}
+            mMeta = new JSONObject();
+            setModified(new Date());
 		}
-		return new JSONObject();
+        return mMeta;
 	}
 	
 	/**
@@ -488,10 +474,28 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 	 * @return This object
 	 */
 	public Shoppinglist setMeta(JSONObject meta) {
-		mMeta = meta == null ? "{}" : meta.toString();
+        mMeta = meta;
 		return this;
 	}
-	
+
+    public Shoppinglist setTheme(String id) {
+        try {
+            getMeta().put(Api.MetaKey.THEME, id);
+        } catch (JSONException e) {
+            // ignore
+        }
+        return this;
+    }
+
+    public String getTheme() {
+        try {
+            return getMeta().getString(Api.MetaKey.THEME);
+        } catch (JSONException e) {
+            // ignore
+        }
+        return "default";
+    }
+
 	/**
 	 * Get the {@link Share owner} of the {@link Shoppinglist}
 	 * @return A {@link Share} that is the owner, or {@code null}
@@ -590,7 +594,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 	public boolean same(Object obj) {
 		return compare(obj, false, false, false);
 	}
-	
+
 	public boolean compare(Object obj, boolean modified, boolean syncState, boolean user) {
 		if (this == obj)
 			return true;
@@ -609,12 +613,13 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 				return false;
 		} else if (!mErn.equals(other.mErn))
 			return false;
-		if (mMeta == null) {
+
+        if (mMeta == null) {
 			if (other.mMeta != null)
 				return false;
-		} else if (!mMeta.equals(other.mMeta))
+		} else if (!Json.jsonObjectEquals(mMeta, other.mMeta))
 			return false;
-		
+
 		if (modified) {
 			if (mModified == null) {
 				if (other.mModified != null)
@@ -666,7 +671,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 		int result = 1;
 		result = prime * result + ((mAccess == null) ? 0 : mAccess.hashCode());
 		result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-		result = prime * result + ((mMeta == null) ? 0 : mMeta.hashCode());
+		result = prime * result + ((mMeta == null) ? 0 : Json.jsonObjectHashCode(mMeta));
 		result = prime * result
 				+ ((mModified == null) ? 0 : mModified.hashCode());
 		result = prime * result + ((mName == null) ? 0 : mName.hashCode());
@@ -691,8 +696,17 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 		this.mModified = tmpMModified == -1 ? null : new Date(tmpMModified);
 		this.mPrevId = in.readString();
 		this.mType = in.readString();
-		this.mMeta = in.readString();
-		this.mShares = (HashMap<String,Share>) in.readSerializable();
+        String json = in.readString();
+        try {
+            this.mMeta = new JSONObject(json);
+        } catch (JSONException e) {
+            this.mMeta = new JSONObject();
+        }
+        ArrayList<Share> list = new ArrayList<Share>();
+        in.readTypedList(list, Share.CREATOR);
+        for (Share s : list) {
+            this.mShares.put(s.getEmail(), s);
+        }
 		this.mUserId = in.readInt();
 		this.mSyncState = in.readInt();
 	}
@@ -708,8 +722,8 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 		dest.writeLong(mModified != null ? mModified.getTime() : -1);
 		dest.writeString(this.mPrevId);
 		dest.writeString(this.mType);
-		dest.writeString(this.mMeta);
-		dest.writeSerializable(this.mShares);
+		dest.writeString(this.mMeta.toString());
+        dest.writeTypedList(new ArrayList<Share>(mShares.values()));
 		dest.writeInt(this.mUserId);
 		dest.writeInt(this.mSyncState);
 	}

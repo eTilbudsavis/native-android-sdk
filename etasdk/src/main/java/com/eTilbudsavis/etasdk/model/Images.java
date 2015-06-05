@@ -28,13 +28,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Images implements IJson<JSONObject>, Serializable, Parcelable {
-	
-	private static final long serialVersionUID = 1L;
+public class Images implements IJson<JSONObject>, Parcelable {
 
 	public static final String TAG = Constants.getTag(Images.class);
 	

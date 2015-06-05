@@ -45,9 +45,7 @@ import java.util.ArrayList;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Serializable, Parcelable {
-	
-	private static final long serialVersionUID = 4105775934027363052L;
+public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Parcelable {
 
 	public static final String TAG = Constants.getTag(Store.class);
 

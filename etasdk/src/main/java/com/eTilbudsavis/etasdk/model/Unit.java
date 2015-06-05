@@ -29,9 +29,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 
-public class Unit implements IJson<JSONObject>, Serializable, Parcelable {
-
-	private static final long serialVersionUID = 1L;
+public class Unit implements IJson<JSONObject>, Parcelable {
 
 	public static final String TAG = Constants.getTag(Unit.class);
 	
@@ -129,7 +127,7 @@ public class Unit implements IJson<JSONObject>, Serializable, Parcelable {
 
 	private Unit(Parcel in) {
 		this.mSymbol = in.readString();
-		this.mSi = (Si) in.readSerializable();
+		this.mSi = in.readParcelable(Si.class.getClassLoader());
 	}
 
 	public int describeContents() { 
@@ -138,7 +136,7 @@ public class Unit implements IJson<JSONObject>, Serializable, Parcelable {
 
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(this.mSymbol);
-		dest.writeSerializable(this.mSi);
+		dest.writeParcelable(mSi, flags);
 	}
 	
 }

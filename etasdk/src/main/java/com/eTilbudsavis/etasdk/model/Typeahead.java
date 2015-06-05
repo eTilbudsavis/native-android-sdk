@@ -48,9 +48,7 @@ import java.util.List;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Typeahead implements IJson<JSONObject>, Serializable, Parcelable {
-	
-	private static final long serialVersionUID = 1L;
+public class Typeahead implements IJson<JSONObject>, Parcelable {
 
 	public static final String TAG = Constants.getTag(Typeahead.class);
 	

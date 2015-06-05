@@ -30,7 +30,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -45,10 +44,8 @@ import java.util.Comparator;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Serializable, Parcelable {
-	
-	private static final long serialVersionUID = 1L;
-	
+public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
+
 	public static final String TAG = Constants.getTag(Dealer.class);
 	
 	private String mErn;

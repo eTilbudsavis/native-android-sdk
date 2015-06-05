@@ -35,7 +35,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -52,10 +51,8 @@ import java.util.List;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalog>, IStore<Catalog>, Serializable, Parcelable {
-	
-	private static final long serialVersionUID = 1L;
-	
+public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalog>, IStore<Catalog>, Parcelable {
+
 	public static final String TAG = Constants.getTag(Catalog.class);
 	
 	// From JSON blob

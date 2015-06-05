@@ -18,12 +18,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class Subscription implements IJson<JSONObject>, Serializable, Parcelable {
+public class Subscription implements IJson<JSONObject>, Parcelable {
 	
 	public static final String TAG = Constants.getTag(Subscription.class);
-	
-	private static final long serialVersionUID = 1548862774286265086L;
-	
+
 	private Dealer mDealer;
 	private String mDealerId;
 	private boolean mSubscribed = false;

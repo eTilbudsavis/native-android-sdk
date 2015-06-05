@@ -30,16 +30,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Country implements IErn<Country>, IJson<JSONObject>, Serializable, Parcelable {
+public class Country implements IErn<Country>, IJson<JSONObject>, Parcelable {
 	
 	public static final String TAG = Constants.getTag(Country.class);
 
-	private static final long serialVersionUID = 1L;
-	
 	private String mErn;
 	private String mUnsubscribeUrl;
 

@@ -33,7 +33,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -49,10 +48,8 @@ import java.util.List;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>, Serializable, Parcelable {
-	
-	private static final long serialVersionUID = 1L;
-	
+public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>, Parcelable {
+
 	public static final String TAG = Constants.getTag(Offer.class);
 	
 	private String mErn;

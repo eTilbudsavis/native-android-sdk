@@ -42,12 +42,10 @@ import java.io.Serializable;
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
  */
-public class User implements IErn<User>, IJson<JSONObject>, Serializable, Parcelable {
+public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 	
 	public static final String TAG = Constants.getTag(User.class);
-	
-	private static final long serialVersionUID = 1L;
-	
+
 	public static final int NO_USER = -1;
 	
 	private String mErn;

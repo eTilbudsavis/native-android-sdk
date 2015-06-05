@@ -34,12 +34,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class Share implements Comparable<Share>,  SyncState<Share>, IJson<JSONObject>, Serializable, Parcelable {
+public class Share implements Comparable<Share>,  SyncState<Share>, IJson<JSONObject>, Parcelable {
 	
 	public static final String TAG = Constants.getTag(Share.class);
-	
-	private static final long serialVersionUID = -9184865445908448266L;
-	
+
 	public static final String ACCESS_OWNER = "owner";
 	public static final String ACCESS_READWRITE = "rw";
 	public static final String ACCESS_READONLY = "r";
@@ -165,6 +163,22 @@ public class Share implements Comparable<Share>,  SyncState<Share>, IJson<JSONOb
 	public String getAccess() {
 		return mAccess;
 	}
+
+    public boolean isAccessOwner() {
+        return ACCESS_OWNER.equals(mAccess);
+    }
+
+    public boolean isAccessReadWrite() {
+        return ACCESS_READWRITE.equals(mAccess);
+    }
+
+    public boolean isAccessReadOnly() {
+        return ACCESS_READONLY.equals(mAccess);
+    }
+
+    public boolean haveAcceptedInvite() {
+        return !(mEmail == null || mName == null) && !mEmail.equals(mName);
+    }
 
 	/**
 	 * Set the access level for this share.

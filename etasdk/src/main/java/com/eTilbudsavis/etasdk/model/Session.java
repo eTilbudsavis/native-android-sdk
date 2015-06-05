@@ -32,12 +32,10 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.util.Date;
 
-public class Session implements IJson<JSONObject>, Serializable, Parcelable {
+public class Session implements IJson<JSONObject>, Parcelable {
 	
 	public static final String TAG = Constants.getTag(Session.class);
-	
-	private static final long serialVersionUID = 1L;
-	
+
 	private String mToken;
 	private Date mExpires = new Date(1000);
 	private User mUser = new User();

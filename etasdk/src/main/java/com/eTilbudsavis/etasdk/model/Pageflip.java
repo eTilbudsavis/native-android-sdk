@@ -28,11 +28,7 @@ import com.eTilbudsavis.etasdk.utils.Json;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
-
-public class Pageflip implements IJson<JSONObject>, Serializable, Parcelable {
-	
-	private static final long serialVersionUID = 1L;
+public class Pageflip implements IJson<JSONObject>, Parcelable {
 
 	public static final String TAG = Constants.getTag(Pageflip.class);
 	
