@@ -56,7 +56,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 	private Offer mOffer = null;
 	private String mShoppinglistId;
 	private String mPrevId;
-	private String mMeta;
+	private JSONObject mMeta;
 	private int mUserId = -1;
 	private int mSyncState = SyncState.TO_SYNC;
 	
@@ -114,7 +114,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 
 	/**
 	 * A factory method for converting {@link JSONObject} into a POJO.
-	 * @param shoppinglistItem A {@link JSONObject} in the format of a valid API v2 shoppinglistItem response
+	 * @param jSli A {@link JSONObject} in the format of a valid API v2 shoppinglistItem response
 	 * @return An ShoppinglistItem object
 	 */
 	public static ShoppinglistItem fromJSON(JSONObject jSli) {
@@ -134,27 +134,11 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 		sli.setErn(Json.valueOf(jSli, JsonKey.ERN));
 		sli.setCreator(Json.valueOf(jSli, JsonKey.CREATOR));
 		String date = Json.valueOf(jSli, JsonKey.MODIFIED, Utils.DATE_EPOC);
-		sli.setModified( Utils.stringToDate(date) );
+		sli.setModified(Utils.stringToDate(date));
 		sli.setPreviousId(Json.valueOf(jSli, JsonKey.PREVIOUS_ID, null));
-		
-		// A whole lot of 'saving my ass from exceptions' for meta
-		String metaString = Json.valueOf(jSli, JsonKey.META, "{}").trim();
-		// If it looks like a JSONObject, try parsing it
-		if (metaString.startsWith("{") && metaString.endsWith("}")) {
-			
-			try {
-				sli.setMeta(new JSONObject(metaString));
-			} catch (JSONException e) {
-				EtaLog.e(TAG, "", e);
-				sli.setMeta(new JSONObject());
-				sli.setModified(new Date());
-			}
-			
-		} else {
-			sli.setMeta(new JSONObject());
-			sli.setModified(new Date());
-		}
-		
+
+        sli.setMeta(Json.getObject(jSli, JsonKey.META, new JSONObject()));
+
 		return sli;
 	}
 	
@@ -340,7 +324,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 	 * <p>{@code previous_id} is used primarily for drawing the ShoppinglistItems
 	 * in the correct order when presenting the items for the user.
 	 * The first item to draw will have the {@code previous_id} 
-	 * {@link EtaListObject#FIRST_ITEM FIRST_ITEM}, the next item should then
+	 * {@link com.eTilbudsavis.etasdk.utils.ListUtils#FIRST_ITEM FIRST_ITEM}, the next item should then
 	 * point at this items {@link #getId() id}, and so on</p>
 	 * @return The previous id, or {@code null}
 	 */
@@ -356,9 +340,9 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 	 * <p>{@code previous_id} is used primarily for drawing the ShoppinglistItems
 	 * in the correct order when presenting the items for the user.
 	 * The first item to draw will have the {@code previous_id} 
-	 * {@link EtaListObject#FIRST_ITEM FIRST_ITEM}, the next item should then
+	 * {@link com.eTilbudsavis.etasdk.utils.ListUtils#FIRST_ITEM FIRST_ITEM}, the next item should then
 	 * point at this items {@link #getId() id}, and so on</p>
-	 * @param id
+	 * @param id An id
 	 * @return
 	 */
 	public ShoppinglistItem setPreviousId(String id) {
@@ -412,15 +396,10 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 	 */
 	public JSONObject getMeta() {
 		if (mMeta == null) {
-			return new JSONObject();
-		} else {
-			try {
-				return new JSONObject(mMeta);
-			} catch (JSONException e) {
-				EtaLog.e(TAG, "", e);
-			}
+            mMeta = new JSONObject();
+            mModified = new Date();
 		}
-		return new JSONObject();
+        return mMeta;
 	}
 	
 	/**
@@ -434,7 +413,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 	 * @return
 	 */
 	public ShoppinglistItem setMeta(JSONObject meta) {
-		mMeta = meta == null ? "{}" : meta.toString();
+        mMeta = meta == null ? new JSONObject() : meta;
 		return this;
 	}
 	
@@ -467,9 +446,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 	 * @return A comment, or {@code null}
 	 */
 	public String getComment() {
-		String comment = Json.valueOf(getMeta(), Api.MetaKey.COMMENT);
-		comment = (comment != null && comment.length() > 0) ? comment : null;
-		return comment;
+		return Json.valueOf(getMeta(), Api.MetaKey.COMMENT);
 	}
 	
 	/**
@@ -482,11 +459,9 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 	 */
 	public ShoppinglistItem setComment(String comment) {
 		try {
-			JSONObject meta = getMeta();
-			meta.put(MetaKey.COMMENT, comment);
-			setMeta(meta);
+            getMeta().put(MetaKey.COMMENT, comment);
 		} catch (JSONException e) {
-			EtaLog.e(TAG, "", e);
+            // ignore
 		}
 		return this;
 	}
@@ -705,7 +680,12 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 		this.mOffer = in.readParcelable(Offer.class.getClassLoader());
 		this.mShoppinglistId = in.readString();
 		this.mPrevId = in.readString();
-		this.mMeta = in.readString();
+        String json = in.readString();
+        try {
+            this.mMeta = new JSONObject(json);
+        } catch (JSONException e) {
+            this.mMeta = new JSONObject();
+        }
 		this.mUserId = in.readInt();
 		this.mSyncState = in.readInt();
 	}
@@ -726,7 +706,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 		dest.writeParcelable(this.mOffer, flags);
 		dest.writeString(this.mShoppinglistId);
 		dest.writeString(this.mPrevId);
-		dest.writeString(this.mMeta);
+		dest.writeString(this.mMeta.toString());
 		dest.writeInt(this.mUserId);
 		dest.writeInt(this.mSyncState);
 	}

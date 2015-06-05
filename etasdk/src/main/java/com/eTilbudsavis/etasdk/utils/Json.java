@@ -330,9 +330,11 @@ public class Json {
             return false;
         }
 
+        // Set of elements that have been comparedand found equal
+        // and therefore cannot be used again
         Set<Integer> used = new HashSet<Integer>(two.length());
-        // bubble sort check for equals isn't very efficient
 
+        // bubble sort check for equals isn't very efficient
         outerloop:
         for (int i = 0; i < one.length(); i++) {
 

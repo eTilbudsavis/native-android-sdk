@@ -182,7 +182,9 @@ public final class Api {
 	 * @author Danny Hvam - danny@etilbudsavis.dk
 	 */
 	public class MetaKey {
+        /** for comments on shoppinglistitems */
 		public static final String COMMENT = "eta_comment";
+        /** for themes on shoppinglists */
 		public static final String THEME = "eta_theme";
 	}
 

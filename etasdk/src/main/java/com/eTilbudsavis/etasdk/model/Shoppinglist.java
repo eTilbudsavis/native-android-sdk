@@ -150,20 +150,10 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 			shoppinglist.setModified(Utils.stringToDate(modified));
 			shoppinglist.setPreviousId(Json.valueOf(jShoppinglist, JsonKey.PREVIOUS_ID));
 			shoppinglist.setType(Json.valueOf(jShoppinglist, JsonKey.TYPE));
-			
-			// A whole lot of 'saving my ass from exceptions' for meta
-			String metaString = Json.valueOf(jShoppinglist, JsonKey.META, "{}").trim();
-            try {
-                // Try to parse the json string
-                shoppinglist.setMeta(new JSONObject(metaString));
-            } catch (JSONException e) {
-                EtaLog.e(TAG, "", e);
-                // Meta parsing failed, so we'll do a recovery
-                shoppinglist.setMeta(new JSONObject());
-                shoppinglist.setModified(new Date());
-            }
 
-			shoppinglist.putShares(Share.fromJSON(jShoppinglist.getJSONArray(JsonKey.SHARES)));
+            shoppinglist.setMeta(Json.getObject(jShoppinglist, JsonKey.META, new JSONObject()));
+
+            shoppinglist.putShares(Share.fromJSON(jShoppinglist.getJSONArray(JsonKey.SHARES)));
 		} catch (JSONException e) {
 			EtaLog.e(TAG, "", e);
 		}
@@ -497,12 +487,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      * @return A theme id. If no id have been set it returns 'default'.
      */
     public String getTheme() {
-        try {
-            return getMeta().getString(Api.MetaKey.THEME);
-        } catch (JSONException e) {
-            // ignore
-        }
-        return "default";
+        return Json.valueOf(getMeta(), Api.MetaKey.THEME, "default");
     }
 
 	/**
