@@ -29,6 +29,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class Permission implements IJson<JSONObject>, Parcelable {
 
@@ -150,7 +151,13 @@ public class Permission implements IJson<JSONObject>, Parcelable {
 	}
 
 	private Permission(Parcel in) {
-		this.mPermissions = (HashMap<String,ArrayList<String>>) in.readSerializable();
+        int size = in.readInt();
+        for (int i = 0; i < size; i++) {
+            String key = in.readString();
+            ArrayList<String> value = new ArrayList<String>();
+            in.readStringList(value);
+            mPermissions.put(key, value);
+        }
 	}
 	
 	public int describeContents() { 
@@ -158,7 +165,11 @@ public class Permission implements IJson<JSONObject>, Parcelable {
 	}
 	
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeSerializable(this.mPermissions);
+        dest.writeInt(mPermissions.size());
+        for (Map.Entry<String, ArrayList<String>> e : mPermissions.entrySet()) {
+            dest.writeString(e.getKey());
+            dest.writeStringList(e.getValue());
+        }
 	}
 	
 }

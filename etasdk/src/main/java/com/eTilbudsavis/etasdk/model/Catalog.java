@@ -769,7 +769,11 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 		this.mStoreUrl = in.readString();
 		this.mDimension = in.readParcelable(Dimension.class.getClassLoader());
 		this.mImages = in.readParcelable(Images.class.getClassLoader());
-		this.mCatrgoryIds = (HashSet<String>) in.readSerializable();
+        int size = in.readInt();
+        mCatrgoryIds = new HashSet<String>();
+        for (int i = 0; i < size; i++) {
+            mCatrgoryIds.add(in.readString());
+        }
 		this.mPdfUrl = in.readString();
 		this.mPages = new ArrayList<Images>();
 		in.readTypedList(mPages, Images.CREATOR);
@@ -797,7 +801,10 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 		dest.writeString(this.mStoreUrl);
 		dest.writeParcelable(this.mDimension, flags);
 		dest.writeParcelable(this.mImages, flags);
-		dest.writeSerializable(this.mCatrgoryIds);
+        dest.writeInt(mCatrgoryIds.size());
+        for (String s : mCatrgoryIds) {
+            dest.writeString(s);
+        }
 		dest.writeString(this.mPdfUrl);
 		dest.writeTypedList(mPages);
 		dest.writeParcelable(this.mDealer, flags);
