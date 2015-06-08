@@ -20,9 +20,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson<JSONArray>, Serializable, Parcelable {
+public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson<JSONArray>, Parcelable {
 	
 	private static final long serialVersionUID = -4654824845675092954L;
 
@@ -187,7 +188,13 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson
 
 	private HotspotMap(Parcel in) {
 		this.mIsNormalized = in.readByte() != 0;
-		this.putAll( (HotspotMap) in.readSerializable() );
+        int size = in.readInt();
+        for (int i = 0; i < size; i++) {
+            Integer key = in.readInt();
+            List<Hotspot> value = new ArrayList<Hotspot>();
+            in.readTypedList(value, Hotspot.CREATOR);
+            this.put(key, value);
+        }
 	}
 
 	public int describeContents() { 
@@ -196,7 +203,11 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson
 	
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeByte(mIsNormalized ? (byte) 1 : (byte) 0);
-		dest.writeSerializable(this);
+        dest.writeInt(size());
+        for (Map.Entry<Integer, List<Hotspot>> e : entrySet()) {
+            dest.writeInt(e.getKey());
+            dest.writeTypedList(e.getValue());
+        }
 	}
 	
 }
