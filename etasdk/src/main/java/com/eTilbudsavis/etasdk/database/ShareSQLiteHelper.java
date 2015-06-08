@@ -7,14 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.eTilbudsavis.etasdk.Constants;
-import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Share;
-import com.eTilbudsavis.etasdk.model.Shoppinglist;
-import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
-import com.eTilbudsavis.etasdk.utils.Utils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;

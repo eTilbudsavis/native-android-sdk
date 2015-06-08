@@ -19,7 +19,6 @@ import android.content.Context;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
-import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Share;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;

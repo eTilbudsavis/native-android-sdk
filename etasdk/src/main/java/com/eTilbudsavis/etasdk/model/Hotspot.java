@@ -12,8 +12,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
-
 public class Hotspot implements IJson<JSONObject>, Parcelable {
 	
 	private static final long serialVersionUID = 7068341225117028048L;

@@ -4,13 +4,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteProgram;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.eTilbudsavis.etasdk.Constants;
-import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Share;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
@@ -21,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class DataSource extends SQLDataSource {
 

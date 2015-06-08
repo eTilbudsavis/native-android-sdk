@@ -246,6 +246,7 @@ public class ModelTest {
         try {
             jObj.put(JsonKey.OFFER_COUNT, 0);
         } catch (JSONException e) {
+
         }
         jsonObj = Catalog.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);

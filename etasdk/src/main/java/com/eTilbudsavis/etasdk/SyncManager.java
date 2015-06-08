@@ -37,7 +37,6 @@ import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.EtaError.Code;
 import com.eTilbudsavis.etasdk.network.Request;
 import com.eTilbudsavis.etasdk.network.Request.Method;
-import com.eTilbudsavis.etasdk.network.RequestDebugger;
 import com.eTilbudsavis.etasdk.network.RequestQueue;
 import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.network.impl.HandlerDelivery;
@@ -60,10 +59,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * The {@link SyncManager} class performs asynchronous synchronization with the

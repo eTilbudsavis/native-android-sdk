@@ -27,8 +27,6 @@ import com.eTilbudsavis.etasdk.utils.Json;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
-
 public class Unit implements IJson<JSONObject>, Parcelable {
 
 	public static final String TAG = Constants.getTag(Unit.class);

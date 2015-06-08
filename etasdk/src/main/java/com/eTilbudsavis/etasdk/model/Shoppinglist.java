@@ -19,7 +19,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.eTilbudsavis.etasdk.Constants;
-import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IErn;
@@ -34,14 +33,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 

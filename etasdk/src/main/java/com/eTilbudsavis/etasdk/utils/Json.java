@@ -15,8 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.etasdk.utils;
 
-import android.util.Log;
-
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.interfaces.IJson;

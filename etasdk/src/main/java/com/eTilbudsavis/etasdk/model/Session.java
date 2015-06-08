@@ -29,7 +29,6 @@ import com.eTilbudsavis.etasdk.utils.Utils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.Date;
 
 public class Session implements IJson<JSONObject>, Parcelable {

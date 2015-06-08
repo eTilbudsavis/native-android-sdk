@@ -4,10 +4,8 @@ import android.graphics.Color;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.utils.Json;
-import com.eTilbudsavis.etasdk.utils.Utils;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 
 import org.json.JSONArray;
 import org.json.JSONException;

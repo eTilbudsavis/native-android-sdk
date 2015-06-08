@@ -1,7 +1,5 @@
 package com.eTilbudsavis.etasdk;
 
-import android.annotation.SuppressLint;
-
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.model.User;

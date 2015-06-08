@@ -9,7 +9,6 @@ import android.database.sqlite.SQLiteStatement;
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
-import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.Utils;
 

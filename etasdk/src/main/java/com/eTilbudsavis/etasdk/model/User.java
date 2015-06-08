@@ -28,8 +28,6 @@ import com.eTilbudsavis.etasdk.utils.Json;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
-
 
 /**
  * <p>This class is a representation of a user as the API v2 exposes it</p>
