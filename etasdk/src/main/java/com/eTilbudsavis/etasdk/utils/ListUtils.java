@@ -2,6 +2,7 @@ package com.eTilbudsavis.etasdk.utils;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
+import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 
 import java.util.ArrayList;
@@ -148,13 +149,38 @@ public class ListUtils {
 		
 	}
 
-
     public static long getLargestTimeStamp(List<ShoppinglistItem> list) {
         long t = 0;
         for (ShoppinglistItem sli : list) {
             t = Math.max(sli.getModified().getTime(), t);
         }
         return t;
+    }
+
+    /**
+     * Get a {@link java.util.Set} of  {@link Shoppinglist#getId()} from a list of {@link ShoppinglistItem}
+     * @param items A list of {@link ShoppinglistItem}
+     * @return A {@link java.util.Set} of ids
+     */
+    public static HashSet<String> getShoppinglistIdsFromItems(List<ShoppinglistItem> items) {
+        HashSet<String> ids = new HashSet<>(items.size());
+        for (ShoppinglistItem sli : items) {
+            ids.add(sli.getShoppinglistId());
+        }
+        return ids;
+    }
+
+    /**
+     * Get a {@link java.util.Set} of  {@link Shoppinglist#getId()} from a list of {@link Shoppinglist}
+     * @param lists A list of Shoppinglist
+     * @return A {@link java.util.Set} of ids
+     */
+    public static HashSet<String> getShoppinglistIdsFromLists(List<Shoppinglist> lists) {
+        HashSet<String> ids = new HashSet<>(lists.size());
+        for (Shoppinglist sl : lists) {
+            ids.add(sl.getId());
+        }
+        return ids;
     }
 
 }

@@ -30,6 +30,7 @@ import com.eTilbudsavis.etasdk.utils.ListUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -463,18 +464,62 @@ public class ListManager {
 	 * @return true if the ShoppinglistItems was edited successful
 	 */
 	public boolean editItems(List<ShoppinglistItem> items) {
-		User u = user();
-		mDatabase.allowEditItemsOrThrow(items, u);
-        // TODO there is absolutely no validation on this method yet
+        long s = System.currentTimeMillis();
         try {
-            return mDatabase.editItems(items, u);
+            return editItems(items, user());
         } finally {
-            postShoppinglistEvent();
+            EtaLog.d(TAG, "editItems.time: " + (System.currentTimeMillis()-s) + "ms");
         }
 	}
 
-    private void log(long start, String tag) {
-        EtaLog.d(TAG, tag + ", " + (System.currentTimeMillis()-start) + "ms");
+    private boolean editItems(List<ShoppinglistItem> items, User user) {
+
+        // Validate and get response in one step
+        List<Shoppinglist> lists = mDatabase.allowEditItemsOrThrow(items, user);
+
+        HashMap<String, ShoppinglistItem> dbItems = new HashMap<String, ShoppinglistItem>();
+        for (Shoppinglist sl : lists) {
+            for (ShoppinglistItem sli : getItems(sl, user)) {
+                dbItems.put(sli.getId(), sli);
+            }
+        }
+
+        Date now = new Date();
+        for (ShoppinglistItem sli : items) {
+
+            if (!dbItems.containsKey(sli.getId())) {
+                EtaLog.i(TAG, "No such item exists, consider addItem() instead: " + sli.toString());
+                return false;
+            }
+
+            sli.setModified(now);
+            sli.setState(SyncState.TO_SYNC);
+
+        }
+
+        try {
+
+            boolean success = mDatabase.editItems(items, user);
+
+            if (success) {
+
+                /* API will auto-update modified on the List, so we'll do the same and save a sync. */
+                for (Shoppinglist sl : lists) {
+                    // This is a bit expensive, if there is more than one shoppinglist
+                    sl.setModified(now);
+                    mDatabase.editList(sl, user);
+                    mBuilder.edit(sl);
+                }
+
+                for (ShoppinglistItem sli : items) {
+                    mBuilder.edit(sli);
+                }
+            }
+
+            return success;
+        } finally {
+            postShoppinglistEvent();
+        }
     }
 
 	private boolean editItem(ShoppinglistItem sli, User user) {
@@ -483,8 +528,6 @@ public class ListManager {
 
         mDatabase.allowEditOrThrow(sli.getShoppinglistId(), user);
 
-        log(s, "allowEditOrThrow");
-
 		Date now = new Date();
 		sli.setModified(now);
 		sli.setState(SyncState.TO_SYNC);
@@ -492,35 +535,31 @@ public class ListManager {
 		// Check for changes in previous item, and update surrounding
 		ShoppinglistItem oldItem = mDatabase.getItem(sli.getId(), user);
 		if (oldItem == null) {
-			EtaLog.i(TAG, "No such item exists, considder addItem() instead: " + sli.toString());
+			EtaLog.i(TAG, "No such item exists, consider addItem() instead: " + sli.toString());
 			return false;
 		}
 
-        log(s, "oldItem valid");
+        try {
 
-        boolean success = mDatabase.editItems(sli, user);
+            boolean success = mDatabase.editItems(sli, user);
 
-        log(s, "editItems");
+            if (success) {
 
-        if (success) {
-			/* Update SL info, but not state. This will prevent sync, and API
-			 * will auto update the modified tag, nice!
-			 */
-			Shoppinglist sl = mDatabase.getList(sli.getShoppinglistId(), user);
+                /* API will auto-update modified on the List, so we'll do the same and save a sync */
+                Shoppinglist sl = mDatabase.getList(sli.getShoppinglistId(), user);
 
-            log(s, "getList");
+                if (sl != null) {
+                    sl.setModified(now);
+                    mDatabase.editList(sl, user);
+                    mBuilder.edit(sl);
+                }
+                mBuilder.edit(sli);
+            }
 
-            if (sl != null) {
-				sl.setModified(now);
-				mDatabase.editList(sl, user);
-				mBuilder.edit(sl);
-			}
-			mBuilder.edit(sli);
-		}
-
-        log(s, "editList");
-
-        return success;
+            return success;
+        } finally {
+            postShoppinglistEvent();
+        }
 	}
 	
 	

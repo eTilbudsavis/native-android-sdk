@@ -168,6 +168,8 @@ public class ModelCreator {
 		h.mAbsTop = top;
 		h.mAbsLeft = left;
 		h.mAbsRight = right;
+        // A test failed on serialization due to Offer not being Seriliazable
+        h.setOffer(getOffer());
 		return h;
 	}
 	

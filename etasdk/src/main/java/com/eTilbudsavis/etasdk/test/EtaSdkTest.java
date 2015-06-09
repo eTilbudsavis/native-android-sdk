@@ -25,6 +25,7 @@ public class EtaSdkTest {
         EventTest.test();
         EtaLocationTest.test();
 		PageflipUtilsTest.test();
+        ListUtilsTest.test();
 		
 		String ok = "*   All test passed (" + (System.currentTimeMillis()-start) + "ms)   *";
 		StringBuilder sb = new StringBuilder();

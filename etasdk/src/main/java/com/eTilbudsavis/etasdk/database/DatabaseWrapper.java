@@ -393,36 +393,31 @@ public class DatabaseWrapper {
         return mDataSource.deleteShares(shoppinglistId, userId);
     }
 
-    public void allowEditOrThrow(ShoppinglistItem sli, User user) {
-        allowEditOrThrow(sli.getShoppinglistId(), user);
+    public Shoppinglist allowEditOrThrow(ShoppinglistItem sli, User user) {
+        return allowEditOrThrow(sli.getShoppinglistId(), user);
     }
 
-    public void allowEditOrThrow(Shoppinglist sl, User user) {
-        allowEditOrThrow(sl.getId(), user);
+    public Shoppinglist allowEditOrThrow(Shoppinglist sl, User user) {
+        return allowEditOrThrow(sl.getId(), user);
     }
 
-    public void allowEditOrThrow(String shoppinglistId, User user) {
+    public Shoppinglist allowEditOrThrow(String shoppinglistId, User user) {
         Shoppinglist sl = getList(shoppinglistId, user);
         PermissionUtils.allowEditOrThrow(sl, user);
+        return sl;
     }
 
-    public void allowEditItemsOrThrow(List<ShoppinglistItem> items, User user) {
-        HashSet<String> ids = new HashSet<>(items.size());
-        for (ShoppinglistItem sli : items) {
-            ids.add(sli.getShoppinglistId());
-        }
-        allowEditOrThrow(ids, user);
+    public List<Shoppinglist> allowEditItemsOrThrow(List<ShoppinglistItem> items, User user) {
+        HashSet<String> ids = ListUtils.getShoppinglistIdsFromItems(items);
+        return allowEditOrThrow(ids, user);
     }
 
-    public void allowEditListOrThrow(List<Shoppinglist> lists, User user) {
-        HashSet<String> ids = new HashSet<>(lists.size());
-        for (Shoppinglist sl : lists) {
-            ids.add(sl.getId());
-        }
-        allowEditOrThrow(ids, user);
+    public List<Shoppinglist> allowEditListOrThrow(List<Shoppinglist> lists, User user) {
+        HashSet<String> ids = ListUtils.getShoppinglistIdsFromLists(lists);
+        return allowEditOrThrow(ids, user);
     }
 
-    public void allowEditOrThrow(Set<String> shoppinglistIds, User user) {
+    public List<Shoppinglist> allowEditOrThrow(Set<String> shoppinglistIds, User user) {
         HashMap<String, Shoppinglist> map = new HashMap<>(shoppinglistIds.size());
         for (String id : shoppinglistIds) {
             if (!map.containsKey(id)) {
@@ -430,9 +425,11 @@ public class DatabaseWrapper {
                 map.put(sl.getId(), sl);
             }
         }
-        for (Map.Entry<String, Shoppinglist> e : map.entrySet()) {
-            PermissionUtils.allowEditOrThrow(e.getValue(), user);
+        List<Shoppinglist> lists = new ArrayList<Shoppinglist>(map.values());
+        for (Shoppinglist sl : lists) {
+            PermissionUtils.allowEditOrThrow(sl, user);
         }
+        return lists;
     }
 
 }
