@@ -155,6 +155,9 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 		mHandler = new Handler();
 		mLowMemory = PageflipUtils.hasLowMemory(getActivity());
 		mLandscape = PageflipUtils.isLandscape(getActivity());
+        if (savedInstanceState != null) {
+            savedInstanceState.putAll(getArguments());
+        }
 		setUp(savedInstanceState == null ? getArguments() : savedInstanceState);
 		super.onCreate(savedInstanceState);
 	}
