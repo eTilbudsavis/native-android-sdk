@@ -468,7 +468,7 @@ public class ListManager {
         try {
             return editItems(items, user());
         } finally {
-            EtaLog.d(TAG, "editItems.time: " + (System.currentTimeMillis()-s) + "ms");
+            EtaLog.d(TAG, "editItems.time: " + (System.currentTimeMillis() - s) + "ms");
         }
 	}
 
@@ -497,29 +497,25 @@ public class ListManager {
 
         }
 
-        try {
+        boolean success = mDatabase.editItems(items, user);
 
-            boolean success = mDatabase.editItems(items, user);
+        if (success) {
 
-            if (success) {
-
-                /* API will auto-update modified on the List, so we'll do the same and save a sync. */
-                for (Shoppinglist sl : lists) {
-                    // This is a bit expensive, if there is more than one shoppinglist
-                    sl.setModified(now);
-                    mDatabase.editList(sl, user);
-                    mBuilder.edit(sl);
-                }
-
-                for (ShoppinglistItem sli : items) {
-                    mBuilder.edit(sli);
-                }
+            /* API will auto-update modified on the List, so we'll do the same and save a sync. */
+            for (Shoppinglist sl : lists) {
+                // This is a bit expensive, if there is more than one shoppinglist
+                sl.setModified(now);
+                mDatabase.editList(sl, user);
+                mBuilder.edit(sl);
             }
 
-            return success;
-        } finally {
-            postShoppinglistEvent();
+            for (ShoppinglistItem sli : items) {
+                mBuilder.edit(sli);
+            }
         }
+
+        postShoppinglistEvent();
+        return success;
     }
 
 	private boolean editItem(ShoppinglistItem sli, User user) {
@@ -539,27 +535,23 @@ public class ListManager {
 			return false;
 		}
 
-        try {
+        boolean success = mDatabase.editItems(sli, user);
 
-            boolean success = mDatabase.editItems(sli, user);
+        if (success) {
 
-            if (success) {
+            /* API will auto-update modified on the List, so we'll do the same and save a sync */
+            Shoppinglist sl = mDatabase.getList(sli.getShoppinglistId(), user);
 
-                /* API will auto-update modified on the List, so we'll do the same and save a sync */
-                Shoppinglist sl = mDatabase.getList(sli.getShoppinglistId(), user);
-
-                if (sl != null) {
-                    sl.setModified(now);
-                    mDatabase.editList(sl, user);
-                    mBuilder.edit(sl);
-                }
-                mBuilder.edit(sli);
+            if (sl != null) {
+                sl.setModified(now);
+                mDatabase.editList(sl, user);
+                mBuilder.edit(sl);
             }
-
-            return success;
-        } finally {
-            postShoppinglistEvent();
+            mBuilder.edit(sli);
         }
+
+        postShoppinglistEvent();
+        return success;
 	}
 	
 	
