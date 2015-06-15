@@ -15,11 +15,6 @@
 *******************************************************************************/
 package com.eTilbudsavis.sdkdemo;
 
-import java.io.Serializable;
-import java.util.List;
-
-import org.json.JSONArray;
-
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -41,6 +36,10 @@ import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
 
+import org.json.JSONArray;
+
+import java.util.ArrayList;
+
 public class SearchActivity extends BaseActivity {
 	
 	public static final String TAG = SearchActivity.class.getSimpleName();
@@ -49,11 +48,10 @@ public class SearchActivity extends BaseActivity {
 	public static final String ARG_QUERY = "query";
 	
 	EditText mQuery;
-	List<Offer> mOffers;
+	ArrayList<Offer> mOffers;
 	
 	ProgressDialog mPd;
 	ListView mListView;
-	Eta mEta;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,7 +64,7 @@ public class SearchActivity extends BaseActivity {
         
         // Check for any saved state
         if (savedInstanceState != null && savedInstanceState.containsKey(ARG_OFFERS) && savedInstanceState.containsKey(ARG_QUERY)) {
-        	mOffers = (List<Offer>)savedInstanceState.getSerializable(ARG_OFFERS);
+        	mOffers = savedInstanceState.getParcelableArrayList(ARG_OFFERS);
         	if (mOffers != null) {
             	mListView.setAdapter(new SearchAdapter());
         	}
@@ -139,7 +137,7 @@ public class SearchActivity extends BaseActivity {
 					 * Generate object from the JSONArray, with the factory method
 					 * in the Offer object.
 					 */
-					mOffers = Offer.fromJSON(response);
+					mOffers = (ArrayList<Offer>)Offer.fromJSON(response);
 					mListView.setAdapter(new SearchAdapter());
 					
 				} else {
@@ -167,7 +165,7 @@ public class SearchActivity extends BaseActivity {
     
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-    	outState.putSerializable(ARG_OFFERS, (Serializable) mOffers);
+    	outState.putParcelableArrayList(ARG_OFFERS, mOffers);
     	outState.putString(ARG_QUERY, mQuery.getText().toString());
     }
 

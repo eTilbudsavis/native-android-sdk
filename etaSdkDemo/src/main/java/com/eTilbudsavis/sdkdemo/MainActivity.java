@@ -49,7 +49,7 @@ public class MainActivity extends BaseActivity {
                     Intent cva = new Intent(MainActivity.this, CatalogViewerActivity.class);
                     startActivity(cva);
                     break;
-                case R.id.btnPerformSearch:
+                case R.id.btnSearch:
                     Intent sa = new Intent(MainActivity.this, SearchActivity.class);
                     startActivity(sa);
                     break;

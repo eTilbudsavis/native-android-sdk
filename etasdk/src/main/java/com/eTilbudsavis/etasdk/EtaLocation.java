@@ -9,8 +9,6 @@ import android.location.LocationManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.eTilbudsavis.etasdk.bus.Bus;
-import com.eTilbudsavis.etasdk.bus.LocationEvent;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Store;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
@@ -41,12 +39,6 @@ public class EtaLocation extends Location {
 	private double mBoundEast = DEFAULT_COORDINATE;
 	private double mBoundSouth = DEFAULT_COORDINATE;
 	private double mBoundWest = DEFAULT_COORDINATE;
-
-    public void notifyDataChanged() {
-        // It shouldn't be a responsibility for this object to determine when to post events.
-        // But the method is there so we'll keep using it for now
-        Bus.getInstance().post(new LocationEvent());
-    }
 
     public EtaLocation() {
 		super(ETA_PROVIDER);
