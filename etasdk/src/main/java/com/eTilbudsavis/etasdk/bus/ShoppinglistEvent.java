@@ -41,8 +41,14 @@ public class ShoppinglistEvent extends EtaEvent {
         return mFirstSync;
     }
 
+    @Override
+    public String toString() {
+        String format = "%s[ isServer: %s, isFirstSync: %s, list.count: %s, item.count: %s ]";
+        return String.format(format, getType(), mIsServer, mFirstSync, mLists.size(), mItems.size());
+    }
+
     /*
-     * Add new notification items to the maps
+    Add new notification items to the maps
      */
     public void add(Shoppinglist s) {
         mLists.put(s.getId(), new StateWrapper<Shoppinglist>(StateWrapper.Action.ADDED, s));

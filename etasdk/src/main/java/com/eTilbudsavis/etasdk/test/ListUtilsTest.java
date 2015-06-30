@@ -4,7 +4,6 @@ import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.utils.ListUtils;
-import com.eTilbudsavis.etasdk.utils.Utils;
 
 import junit.framework.Assert;
 

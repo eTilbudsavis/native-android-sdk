@@ -6,6 +6,7 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.ListManager;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
@@ -21,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 public class DbUtils {
+
+    public static final String TAG = Constants.getTag(DbUtils.class);
 
     public static JSONArray dumpTable(SQLiteDatabase db, String table) {
         Cursor c = null;

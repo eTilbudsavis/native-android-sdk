@@ -25,4 +25,8 @@ public class SessionEvent extends EtaEvent {
         return mNewUser;
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s[ oldUser: %s, newUser: %s ]", getType(), mOldUser, mNewUser);
+    }
 }

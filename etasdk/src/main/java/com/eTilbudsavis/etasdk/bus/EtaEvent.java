@@ -12,4 +12,12 @@ public class EtaEvent {
         this.mTag = tag;
     }
 
+    public String getType() {
+        return getClass().getSimpleName();
+    }
+
+    @Override
+    public String toString() {
+        return getType();
+    }
 }
