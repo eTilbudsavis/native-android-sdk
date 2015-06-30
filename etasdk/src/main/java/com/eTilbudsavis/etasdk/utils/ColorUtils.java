@@ -2,11 +2,12 @@ package com.eTilbudsavis.etasdk.utils;
 
 import android.graphics.Color;
 
+import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class ColorUtils {
 	
-	public static final String TAG = ColorUtils.class.getSimpleName();
+	public static final String TAG = Constants.getTag(ColorUtils.class);
 	
 	private ColorUtils() {
 		// empty
