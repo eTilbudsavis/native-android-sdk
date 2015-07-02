@@ -37,6 +37,7 @@ import com.eTilbudsavis.etasdk.network.impl.DefaultHttpNetwork;
 import com.eTilbudsavis.etasdk.network.impl.HttpURLNetwork;
 import com.eTilbudsavis.etasdk.network.impl.MemoryCache;
 import com.eTilbudsavis.etasdk.network.impl.NetworkImpl;
+import com.eTilbudsavis.etasdk.utils.ActivityCounter;
 import com.eTilbudsavis.etasdk.utils.Utils;
 import com.eTilbudsavis.etasdk.utils.Validator;
 
@@ -136,7 +137,8 @@ public class Eta {
 	private ExecutorService mExecutor;
 	
 	/** Counting the number of active activities, to determine when to stop any long running activities */
-	private final AtomicInteger mActivityCounter = new AtomicInteger();
+//	private final AtomicInteger mActivityCounter = new AtomicInteger();
+    private final ActivityCounter mActivityCounter = new ActivityCounter();
 	
 	/** The ImageLoader for use by clients, and SDK */
 	private ImageLoader mImageLoader;
@@ -396,7 +398,7 @@ public class Eta {
 	 * @return {@code true} if in resumed state, else {@code false}
 	 */
 	public boolean isStarted() {
-		return mActivityCounter.get() > 0;
+		return mActivityCounter.isStarted();
 	}
 
 	/**
@@ -541,7 +543,7 @@ public class Eta {
 	
 	public void onStart() {
 		setupKeys(mContext);
-		if (mActivityCounter.getAndIncrement() == 0) {
+		if (mActivityCounter.increment()) {
 			internalStart();
 		}
 	}
@@ -555,8 +557,7 @@ public class Eta {
 	}
 	
 	public void onStop() {
-		mActivityCounter.decrementAndGet();
-		if (!isStarted()) {
+		if (mActivityCounter.decrement()) {
 			internalStop();
 		}
 	}
@@ -567,9 +568,9 @@ public class Eta {
 		mSyncManager.onStop();
 		mSessionManager.onStop();
 		mSettings.setLastUsageNow();
-		mActivityCounter.set(0);
+		mActivityCounter.reset();
 //		mHandler.postDelayed(termination, Utils.SECOND_IN_MILLIS * 5);
 		EtaLog.v(TAG, "SDK has been stopped");
 	}
-	
+
 }
