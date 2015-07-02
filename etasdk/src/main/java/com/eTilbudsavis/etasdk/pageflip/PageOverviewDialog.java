@@ -17,6 +17,7 @@
 package com.eTilbudsavis.etasdk.pageflip;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
@@ -24,6 +25,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,8 +55,11 @@ public class PageOverviewDialog extends DialogFragment {
 
     public static final String TAG = Constants.getTag(PageOverviewDialog.class);
 
-    private static final String ARG_CATALOG = Constants.getArg("pageGridOverview.catalog");
-    private static final String ARG_PAGE = Constants.getArg("pageGridOverview.page");
+    public static final int REQUEST_CODE = 6543654;
+    public static final String EXTRA_PAGE = Constants.getArg("pageOverviewDialog.page");
+
+    private static final String ARG_CATALOG = Constants.getArg("pageOverviewDialog.catalog");
+    private static final String ARG_PAGE = Constants.getArg("pageOverviewDialog.page");
 
     private static final int MAX_WIDTH = 177;
     //	private static final int MAX_HEIGHT = 212;
@@ -65,13 +70,30 @@ public class PageOverviewDialog extends DialogFragment {
     private GridView mGrid;
     private OnItemClickListener mListener;
 
-    public static PageOverviewDialog newInstance(Catalog c, int page) {
+
+    public static PageOverviewDialog newInstance(Fragment target, Catalog c, int page) {
         Bundle b = new Bundle();
         b.putParcelable(ARG_CATALOG, c);
         b.putInt(ARG_PAGE, page);
         PageOverviewDialog f = new PageOverviewDialog();
+        if (target != null) {
+            f.setTargetFragment(target, REQUEST_CODE);
+        }
         f.setArguments(b);
         return f;
+    }
+
+    public static PageOverviewDialog newInstance(Catalog c, int page) {
+        return newInstance(null, c, page);
+    }
+
+    public static int parseOnActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE) {
+            if (Activity.RESULT_OK == resultCode) {
+                return data.getExtras().getInt(EXTRA_PAGE);
+            }
+        }
+        return -1;
     }
 
     @Override

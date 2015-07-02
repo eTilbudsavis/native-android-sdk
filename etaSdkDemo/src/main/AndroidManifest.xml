@@ -45,13 +45,15 @@
             android:value="@string/eta_sdk_api_secret_debug"/>
 
         <activity
-            android:name="com.eTilbudsavis.sdkdemo.MainActivity"
+            android:name=".MainPreferenceActivity"
             android:label="@string/title_activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <activity android:name="com.eTilbudsavis.sdkdemo.CatalogListActivity"/>
 
         <activity android:name="com.eTilbudsavis.sdkdemo.CatalogViewerActivity"/>
 

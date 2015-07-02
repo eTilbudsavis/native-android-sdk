@@ -16,6 +16,7 @@
 
 package com.eTilbudsavis.etasdk.pageflip;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -644,6 +646,28 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 
     public String getViewSession() {
         return mViewSessionUuid;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        int page = PageOverviewDialog.parseOnActivityResult(requestCode, resultCode, data);
+        if (page != -1) {
+            setPage(page);
+        }
+    }
+
+    /**
+     * This will display a DialogFragment, that lets the user choose a page to go to.
+     * When an item has been selected, PageflipFragment, will automatically navigate to the
+     * selected page.
+     */
+    public void showPageOverview() {
+        if (isCatalogReady()) {
+            int page = getPages()[0];
+            PageOverviewDialog f = PageOverviewDialog.newInstance(mCatalog, page);
+            f.show(getChildFragmentManager(), PageOverviewDialog.TAG);
+        }
     }
 
     /**

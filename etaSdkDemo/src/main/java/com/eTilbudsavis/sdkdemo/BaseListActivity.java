@@ -16,22 +16,27 @@
 
 package com.eTilbudsavis.sdkdemo;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.preference.PreferenceActivity;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class BaseActivity extends FragmentActivity {
+public class BaseListActivity extends PreferenceActivity {
+
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        /* 
+        /*
          * Eta.create(Context ctx) must be invoked once, to instantiate the SDK
          * prior to calling Eta.getInstance().
-         * 
+         *
          * Calling Eta.create(Context ctx) can also be called from Application.onCreate().
-         * 
+         *
          * ApiKey and ApiSecret are not included in the demo/SDK, but you can
          * get your own at https://etilbudsavis.dk/developers/ :-)
          */
@@ -39,8 +44,8 @@ public class BaseActivity extends FragmentActivity {
 
             // Create your instance of Eta
             Eta.create(this);
-			
-			/* You can optionally set a develop flag. 
+
+			/* You can optionally set a develop flag.
 			 * I'm using BuildConfig, but you can choose what ever scheme you want.
 			 */
             Eta.getInstance().setDevelop(BuildConfig.DEBUG);
@@ -59,6 +64,35 @@ public class BaseActivity extends FragmentActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        hideProgress();
         Eta.getInstance().onStop();
     }
+
+    protected void showProgress(String message) {
+        if (mProgressDialog == null) {
+            mProgressDialog = ProgressDialog.show(this, "", message, true, true);
+        }
+    }
+
+    protected void hideProgress() {
+        if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
+        }
+    }
+
+    protected void showDislog(String title, String message) {
+        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        b.setTitle(title);
+        b.setMessage(message);
+        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        b.show();
+    }
+
 }

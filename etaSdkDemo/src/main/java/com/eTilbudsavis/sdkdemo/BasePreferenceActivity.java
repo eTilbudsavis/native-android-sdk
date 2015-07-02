@@ -17,21 +17,21 @@
 package com.eTilbudsavis.sdkdemo;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.preference.PreferenceActivity;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class BaseActivity extends FragmentActivity {
+public class BasePreferenceActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        /* 
+        /*
          * Eta.create(Context ctx) must be invoked once, to instantiate the SDK
          * prior to calling Eta.getInstance().
-         * 
+         *
          * Calling Eta.create(Context ctx) can also be called from Application.onCreate().
-         * 
+         *
          * ApiKey and ApiSecret are not included in the demo/SDK, but you can
          * get your own at https://etilbudsavis.dk/developers/ :-)
          */
@@ -39,8 +39,8 @@ public class BaseActivity extends FragmentActivity {
 
             // Create your instance of Eta
             Eta.create(this);
-			
-			/* You can optionally set a develop flag. 
+
+			/* You can optionally set a develop flag.
 			 * I'm using BuildConfig, but you can choose what ever scheme you want.
 			 */
             Eta.getInstance().setDevelop(BuildConfig.DEBUG);
@@ -61,4 +61,5 @@ public class BaseActivity extends FragmentActivity {
         super.onStop();
         Eta.getInstance().onStop();
     }
+
 }
