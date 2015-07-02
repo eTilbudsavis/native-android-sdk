@@ -22,7 +22,6 @@
     API key and secret are not included in the demo, but you can grab your own at
     https://etilbudsavis.dk/developers/ and get started :-)	
      -->
-
     <string name="eta_sdk_api_key">add_your_key</string>
     <string name="eta_sdk_api_secret">add_your_key</string>
 
