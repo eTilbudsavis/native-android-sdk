@@ -16,9 +16,11 @@
 package com.eTilbudsavis.etasdk.database;
 
 import android.content.Context;
+import android.os.Looper;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.model.Share;
 import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
@@ -26,6 +28,9 @@ import com.eTilbudsavis.etasdk.model.User;
 import com.eTilbudsavis.etasdk.utils.ListUtils;
 import com.eTilbudsavis.etasdk.utils.PermissionUtils;
 import com.eTilbudsavis.etasdk.utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -94,6 +99,7 @@ public class DatabaseWrapper {
      * @return true, if operation succeeded, else false
 	 */
 	public boolean insertList(Shoppinglist sl, User user) {
+
         long id = mDataSource.insertList(sl, String.valueOf(user.getUserId()));
         return successId(id);
 	}
@@ -147,6 +153,9 @@ public class DatabaseWrapper {
             This happens when the user, have removed him/her self from shares,
             or deletes a list, and the action haven't been synced to the API yet */
 			if (!sl.getShares().containsKey(user.getEmail())) {
+                String format = "Shoppinglist %s does not contain a share for %s, removing Shoppinglist from the final list.";
+                String text = String.format(format, sl.getName(), user.getEmail());
+                EtaLog.d(TAG, text);
 				it.remove();
 			}
 		}
@@ -337,8 +346,6 @@ public class DatabaseWrapper {
 
     /**
      * replaces an item in db
-     * @param list to insert
-     * @return number of rows affected
      */
     public int editItemState(Shoppinglist sl, User user, Date modified, int syncState) {
         modified = Utils.roundTime(modified);
@@ -369,11 +376,11 @@ public class DatabaseWrapper {
                 count++;
             }
         }
-		return count;
-	}
+        return count;
+    }
 
-	public boolean editShare(Share s, User user) {
-		deleteShare(s, user);
+    public boolean editShare(Share s, User user) {
+        deleteShare(s, user);
 		return insertShare(s, user);
 	}
 	
@@ -430,6 +437,18 @@ public class DatabaseWrapper {
             PermissionUtils.allowEditOrThrow(sl, user);
         }
         return lists;
+    }
+
+    public JSONArray dumpListTable() {
+        return mDataSource.dumpListTable();
+    }
+
+    public JSONArray dumpShareTable() {
+        return mDataSource.dumpShareTable();
+    }
+
+    public JSONArray dumpItemTable() {
+        return mDataSource.dumpItemTable();
     }
 
 }

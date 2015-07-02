@@ -28,6 +28,9 @@ import com.eTilbudsavis.etasdk.model.User;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 import com.eTilbudsavis.etasdk.utils.ListUtils;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -751,5 +754,17 @@ public class ListManager {
 			mBuilder = new ShoppinglistEvent.Builder(false);
 		}
 	}
+
+    public JSONArray dumpListTable() {
+        return mDatabase.dumpListTable();
+    }
+
+    public JSONArray dumpShareTable() {
+        return mDatabase.dumpShareTable();
+    }
+
+    public JSONArray dumpItemTable() {
+        return mDatabase.dumpItemTable();
+    }
 
 }

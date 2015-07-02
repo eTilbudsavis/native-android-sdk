@@ -14,6 +14,9 @@ import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.model.User;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -417,6 +420,29 @@ public class DataSource extends SQLDataSource {
         String whereClause = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=? ";
         String[] whereArgs = new String[]{ shoppinglistId, userId };
         return delete(ShareSQLiteHelper.TABLE, whereClause, whereArgs);
+    }
+
+    public JSONArray dumpListTable() {
+        return dumpTable(ListSQLiteHelper.TABLE);
+    }
+
+    public JSONArray dumpItemTable() {
+        return dumpTable(ItemSQLiteHelper.TABLE);
+    }
+
+    public JSONArray dumpShareTable() {
+        return dumpTable(ShareSQLiteHelper.TABLE);
+    }
+
+    private JSONArray dumpTable(String table) {
+        try {
+            return DbUtils.dumpTable(acquireDb(), table);
+        } catch (IllegalStateException e) {
+            log(TAG, e);
+            return new JSONArray();
+        } finally {
+            releaseDb();
+        }
     }
 
 }

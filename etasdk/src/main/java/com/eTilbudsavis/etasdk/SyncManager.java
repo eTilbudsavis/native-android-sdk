@@ -42,6 +42,7 @@ import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.network.impl.HandlerDelivery;
 import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
+import com.eTilbudsavis.etasdk.network.impl.NetworkDebugger;
 import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
@@ -120,7 +121,7 @@ public class SyncManager {
 	public static final String TAG = Constants.getTag(SyncManager.class);
 
 	private static final boolean SAVE_NETWORK_LOG = false;
-	private static final boolean LOG_SYNC = false;
+	private static final boolean LOG_SYNC = true;
 	private static final boolean LOG = false;
 
 	/** Supported sync speeds for {@link SyncManager} */
@@ -412,23 +413,10 @@ public class SyncManager {
 		r.setDelivery(mDelivery);
 		
 		r.setTag(mRequestTag);
-//		r.setDebugger(new RequestDebugger() {
-//			@Override
-//			public void onFinish(Request<?> r) {
-//				EtaLog.d(TAG, r.getUrl());
-//			}
-//
-//			@Override
-//			public void onDelivery(Request<?> r) {
-//
-//			}
-//		});
 		mEta.add(r);
 
 //		if (!isPullReq(r) && r.getMethod() != Request.Method.GET) {
 //			EtaLog.d(TAG, r.toString());
-//			r.debugNetwork(true);
-//			
 //		}
 		
 	}
@@ -443,7 +431,7 @@ public class SyncManager {
 			try {
 				mCurrentRequests.pop();
 			} catch (Exception e) {
-				EtaLog.e(TAG, "", e);
+				EtaLog.e(TAG, e.getMessage(), e);
 			}
 		}
 	}
@@ -635,7 +623,7 @@ public class SyncManager {
                             mDatabase.editList(sl, user);
                         }
                     } catch (JSONException e) {
-                        EtaLog.e(TAG, "", e);
+                        EtaLog.e(TAG, e.getMessage(), e);
                         // error? just write new state to DB, next iteration will fix it
                         mDatabase.editList(sl, user);
                     }
@@ -874,14 +862,14 @@ public class SyncManager {
 	}
 	
 	private void putList(final Shoppinglist sl, final User user) {
-		
+
 		sl.setState(SyncState.SYNCING);
 		mDatabase.editList(sl, user);
 		
 		Listener<JSONObject> listListener = new Listener<JSONObject>() {
 
 			public void onComplete(JSONObject response, EtaError error) {
-				
+
 				if (response != null) {
 
 					/* 
@@ -918,18 +906,17 @@ public class SyncManager {
 
 		String url = Endpoint.list(user.getUserId(), sl.getId());
 		JsonObjectRequest listReq = new JsonObjectRequest(Method.PUT, url, sl.toJSON(), listListener);
-		
 		addRequest(listReq);
 		
 	}
 
 	private void delList(final Shoppinglist sl, final User user) {
-		
-		Listener<JSONObject> listListener = new Listener<JSONObject>() {
+
+        Listener<JSONObject> listListener = new Listener<JSONObject>() {
 
 			public void onComplete(JSONObject response, EtaError error) {
 
-				if (response != null) {
+                if (response != null) {
 					
 					mDatabase.deleteList(sl, user);
 					mDatabase.deleteShares(sl, user);
@@ -972,8 +959,8 @@ public class SyncManager {
 	}
 
 	private void revertList(final Shoppinglist sl, final User user) {
-		
-		if (sl.getState() != SyncState.ERROR) {
+
+        if (sl.getState() != SyncState.ERROR) {
 			sl.setState(SyncState.ERROR);
 			mDatabase.editList(sl, user);
 		}
@@ -981,8 +968,8 @@ public class SyncManager {
 		Listener<JSONObject> listListener = new Listener<JSONObject>() {
 
 			public void onComplete(JSONObject response, EtaError error) {
-				
-				if (response != null) {
+
+                if (response != null) {
 					Shoppinglist serverSl = Shoppinglist.fromJSON(response);
 					serverSl.setState(SyncState.SYNCED);
 					serverSl.setPreviousId(serverSl.getPreviousId() == null ? sl.getPreviousId() : serverSl.getPreviousId());
@@ -999,7 +986,6 @@ public class SyncManager {
 		
 		String url = Endpoint.list(user.getUserId(), sl.getId());
 		JsonObjectRequest listReq = new JsonObjectRequest(url, listListener);
-		
 		addRequest(listReq);
 		
 	}
@@ -1120,8 +1106,6 @@ public class SyncManager {
 					ShoppinglistItem serverSli = ShoppinglistItem.fromJSON(response);
 					serverSli.setState(SyncState.SYNCED);
 					serverSli.setPreviousId(serverSli.getPreviousId() == null ? sli.getPreviousId() : serverSli.getPreviousId());
-//					EtaLog.d(TAG, "affected: " + db.editItem(serverSli, user));
-//					EtaLog.d(TAG, serverSli.toJSON().toString());
 					mBuilder.edit(serverSli);
 					
 				} else {
@@ -1168,7 +1152,25 @@ public class SyncManager {
 		int count = shares.size();
 		
 		for (Share s : shares) {
-			
+
+            if (s.isAccessOwner()) {
+                /*
+                The API doesn't allow the owner-share to be edited/deleted as it's technically
+                not a share in the API-share-table. So we will not be sending any request from
+                the owner to the API. But rather do a herd coding of the object.
+                 */
+                if (s.getState() == SyncState.DELETE) {
+                    mDatabase.deleteShare(s, user);
+                    EtaLog.v(TAG, "API doesn't allow owner to be 'deleted'. Deleting from own DB and ignoring.");
+                } else if (s.getState() != SyncState.SYNCED) {
+                    s.setState(SyncState.SYNCED);
+                    s.setShoppinglistId(sl.getId());
+                    mDatabase.editShare(s, user);
+                    EtaLog.v(TAG, "Owner cannot be edited. Resetting share.state and ignoring.");
+                }
+                continue;
+            }
+
 			switch (s.getState()) {
 			
 				case SyncState.TO_SYNC:
@@ -1199,12 +1201,12 @@ public class SyncManager {
 		
 		s.setState(SyncState.SYNCING);
 		mDatabase.editShare(s, user);
-		
+
 		Listener<JSONObject> shareListener = new Listener<JSONObject>() {
 
 			public void onComplete(JSONObject response, EtaError error) {
 
-				if (response != null) {
+                if (response != null) {
 					Share serverShare = Share.fromJSON(response);
 					serverShare.setState(SyncState.SYNCED);
 					serverShare.setShoppinglistId(s.getShoppinglistId());

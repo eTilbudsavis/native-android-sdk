@@ -263,8 +263,13 @@ public class Share implements Comparable<Share>,  SyncState<Share>, IJson<JSONOb
 		mSyncState = state;
 		return this;
 	}
-    
-	public int compareTo(Share another) {
+
+    @Override
+    public String toString() {
+        return toJSON().toString();
+    }
+
+    public int compareTo(Share another) {
 		return 0;
 	}
 	
