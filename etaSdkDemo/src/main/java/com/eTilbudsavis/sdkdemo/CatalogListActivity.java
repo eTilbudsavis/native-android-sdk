@@ -32,6 +32,7 @@ import com.eTilbudsavis.etasdk.network.Response;
 import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.network.impl.NetworkDebugger;
 import com.eTilbudsavis.etasdk.utils.Api;
+import com.eTilbudsavis.etasdk.utils.Utils;
 
 import org.json.JSONArray;
 
@@ -69,7 +70,8 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
         super.onResume();
         if (mCatalogs.isEmpty()) {
             showProgress("Fetching catalogs");
-            getCatalogList();
+            JsonArrayRequest catalogReq = new JsonArrayRequest(Api.Endpoint.CATALOG_LIST, mCatalogListener);
+            Eta.getInstance().add(catalogReq);
         }
     }
 
@@ -86,32 +88,37 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
 
             hideProgress();
 
-            if (response != null && response.length() > 0) {
+            if (response != null) {
 
-                // The request was a success, take the first catalog and display it
-                List<Catalog> catalogs = Catalog.fromJSON(response);
-                mCatalogs.addAll(catalogs);
-                ((CatalogAdapter)getListAdapter()).notifyDataSetChanged();
+                if (response.length() == 0) {
+
+                    // This is usually the case when either location or radius could use some adjustment.
+                    showDislog("No catalogs available", "Try changing the SDK location, or increase the radius.");
+
+                } else {
+
+                    // The request was a success, take the first catalog and display it
+                    List<Catalog> catalogs = Catalog.fromJSON(response);
+                    mCatalogs.addAll(catalogs);
+                    ((CatalogAdapter)getListAdapter()).notifyDataSetChanged();
+
+                }
 
             } else {
 
-                showDislog("No catalogs", "Try changing the SDK location, or increase the radius.");
+                // There could be a bunch of things wrong here.
+                // Please check the error code, and details for further information
+                String title = error.isApi() ? "API Error" : "SDK Error";
+                showDislog(title, error.toString());
                 EtaLog.e(TAG, error.getMessage(), error);
 
             }
         }
     };
 
-    private void getCatalogList() {
-
-        JsonArrayRequest catalogReq = new JsonArrayRequest(Api.Endpoint.CATALOG_LIST, mCatalogListener);
-        // This debugger prints relevant information about a request
-        catalogReq.setDebugger(new NetworkDebugger());
-        Eta.getInstance().add(catalogReq);
-
-    }
-
     public class CatalogAdapter extends BaseAdapter {
+
+        int mPadding = Utils.convertDpToPx(5, CatalogListActivity.this);
 
         @Override
         public int getCount() {
@@ -134,6 +141,8 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
             Catalog c = mCatalogs.get(position);
             tv.setText(c.getBranding().getName());
             tv.setTextSize(30);
+            tv.setPadding(mPadding, mPadding, mPadding, mPadding);
+            tv.setTextColor(c.getBranding().getColor());
             return tv;
         }
     }

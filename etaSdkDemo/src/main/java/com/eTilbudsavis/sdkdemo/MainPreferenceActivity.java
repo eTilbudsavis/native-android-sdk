@@ -64,8 +64,6 @@ public class MainPreferenceActivity extends BasePreferenceActivity implements Pr
         loc.setRadius(700000);
         loc.setSensor(false);
 
-        EtaLog.d(TAG, loc.toString());
-
         /*
          * You are now done setting up the SDK, the rest is just Android stuff
          */

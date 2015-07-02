@@ -68,8 +68,6 @@ public class PageOverviewDialog extends DialogFragment {
     private Catalog mCatalog;
     private int mPage = 1;
     private GridView mGrid;
-    private OnItemClickListener mListener;
-
 
     public static PageOverviewDialog newInstance(Fragment target, Catalog c, int page) {
         Bundle b = new Bundle();
@@ -141,9 +139,10 @@ public class PageOverviewDialog extends DialogFragment {
 
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 dismiss();
-                if (mListener != null) {
-                    int page = position + 1;
-                    mListener.onItemClick(parent, view, page, id);
+                if (getTargetFragment() != null) {
+                    Intent i = new Intent();
+                    i.putExtra(EXTRA_PAGE, position + 1);
+                    getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, i);
                 }
             }
         });
@@ -160,10 +159,6 @@ public class PageOverviewDialog extends DialogFragment {
         }
 
         return mGrid;
-    }
-
-    public void setOnItemClickListener(OnItemClickListener l) {
-        mListener = l;
     }
 
     public void setCatalog(Catalog c) {

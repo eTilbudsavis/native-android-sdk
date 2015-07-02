@@ -665,7 +665,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
     public void showPageOverview() {
         if (isCatalogReady()) {
             int page = getPages()[0];
-            PageOverviewDialog f = PageOverviewDialog.newInstance(mCatalog, page);
+            PageOverviewDialog f = PageOverviewDialog.newInstance(PageflipFragment.this, mCatalog, page);
             f.show(getChildFragmentManager(), PageOverviewDialog.TAG);
         }
     }
