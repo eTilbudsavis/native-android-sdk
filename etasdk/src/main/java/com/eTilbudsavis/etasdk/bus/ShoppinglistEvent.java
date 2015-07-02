@@ -29,16 +29,50 @@ public class ShoppinglistEvent extends EtaEvent {
         mIsServer = isServer;
     }
 
+    public static <T> List<T> getValues(Map<String, StateWrapper<T>> map, int action) {
+        List<T> list = new ArrayList<T>(map.size());
+        for (Map.Entry<String, StateWrapper<T>> e : map.entrySet()) {
+            if (e.getValue().getAction() == action || action == StateWrapper.Action.ALL) {
+                list.add(e.getValue().getItem());
+            }
+        }
+        return list;
+    }
+
+    public static List<ShoppinglistItem> getCleanItemValues(Map<String, StateWrapper<ShoppinglistItem>> map, int action, String shoppinglistId) {
+        List<ShoppinglistItem> list = getValues(map, action);
+        Iterator<ShoppinglistItem> i = list.iterator();
+        while (i.hasNext()) {
+            ShoppinglistItem item = i.next();
+            if (!item.getShoppinglistId().equals(shoppinglistId)) {
+                i.remove();
+            }
+        }
+        return list;
+    }
+
+    public static List<Shoppinglist> getCleanListValues(Map<String, StateWrapper<Shoppinglist>> map, int action, String shoppinglistId) {
+        List<Shoppinglist> list = getValues(map, action);
+        Iterator<Shoppinglist> i = list.iterator();
+        while (i.hasNext()) {
+            Shoppinglist item = i.next();
+            if (!item.getId().equals(shoppinglistId)) {
+                i.remove();
+            }
+        }
+        return list;
+    }
+
     public boolean isServer() {
         return mIsServer;
     }
 
-    public void setFirstSync(boolean firstSync) {
-        mFirstSync = firstSync;
-    }
-
     public boolean isFirstSync() {
         return mFirstSync;
+    }
+
+    public void setFirstSync(boolean firstSync) {
+        mFirstSync = firstSync;
     }
 
     @Override
@@ -72,40 +106,6 @@ public class ShoppinglistEvent extends EtaEvent {
 
     public void edit(ShoppinglistItem s) {
         mItems.put(s.getId(), new StateWrapper<ShoppinglistItem>(StateWrapper.Action.EDITED, s));
-    }
-
-    public static <T> List<T> getValues(Map<String, StateWrapper<T>> map, int action) {
-        List<T> list = new ArrayList<T>(map.size());
-        for (Map.Entry<String, StateWrapper<T>> e : map.entrySet()) {
-            if (e.getValue().getAction() == action || action == StateWrapper.Action.ALL) {
-                list.add(e.getValue().getItem());
-            }
-        }
-        return list;
-    }
-
-    public static List<ShoppinglistItem> getCleanItemValues(Map<String, StateWrapper<ShoppinglistItem>> map, int action, String shoppinglistId) {
-        List<ShoppinglistItem> list = getValues(map, action);
-        Iterator<ShoppinglistItem> i = list.iterator();
-        while (i.hasNext()) {
-            ShoppinglistItem item = i.next();
-            if (!item.getShoppinglistId().equals(shoppinglistId)) {
-                i.remove();
-            }
-        }
-        return list;
-    }
-
-    public static List<Shoppinglist> getCleanListValues(Map<String, StateWrapper<Shoppinglist>> map, int action, String shoppinglistId) {
-        List<Shoppinglist> list = getValues(map, action);
-        Iterator<Shoppinglist> i = list.iterator();
-        while (i.hasNext()) {
-            Shoppinglist item = i.next();
-            if (!item.getId().equals(shoppinglistId)) {
-                i.remove();
-            }
-        }
-        return list;
     }
 
     public List<ShoppinglistItem> getItems() {
@@ -185,13 +185,6 @@ public class ShoppinglistEvent extends EtaEvent {
         int mAction = -1;
         T mItem;
 
-        public interface Action {
-            int ALL = 0;
-            int EDITED = 1;
-            int ADDED = 2;
-            int DELETED = 4;
-        }
-
         public StateWrapper(int action, T item) {
             this.mAction = action;
             this.mItem = item;
@@ -203,6 +196,13 @@ public class ShoppinglistEvent extends EtaEvent {
 
         public T getItem() {
             return mItem;
+        }
+
+        public interface Action {
+            int ALL = 0;
+            int EDITED = 1;
+            int ADDED = 2;
+            int DELETED = 4;
         }
 
     }

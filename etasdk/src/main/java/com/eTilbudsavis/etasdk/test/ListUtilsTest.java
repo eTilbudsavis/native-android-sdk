@@ -29,9 +29,9 @@ public class ListUtilsTest {
         int count = 10;
         int modulo = 10;
         for (int i = 0; i < count; i++) {
-            int id = i%modulo;
-            ShoppinglistItem sli = ModelCreator.getShoppinglistItem("item-id-"+id, "description-"+id);
-            sli.setShoppinglistId("list-id-"+id);
+            int id = i % modulo;
+            ShoppinglistItem sli = ModelCreator.getShoppinglistItem("item-id-" + id, "description-" + id);
+            sli.setShoppinglistId("list-id-" + id);
             items.add(sli);
         }
         Set<String> listIds = ListUtils.getShoppinglistIdsFromItems(items);
@@ -41,9 +41,9 @@ public class ListUtilsTest {
         count = 10;
         modulo = 10;
         for (int i = 0; i < count; i++) {
-            int id = i%modulo;
-            ShoppinglistItem sli = ModelCreator.getShoppinglistItem("item-id-"+id, "description-"+id);
-            sli.setShoppinglistId("list-id-"+id);
+            int id = i % modulo;
+            ShoppinglistItem sli = ModelCreator.getShoppinglistItem("item-id-" + id, "description-" + id);
+            sli.setShoppinglistId("list-id-" + id);
             items.add(sli);
         }
         listIds = ListUtils.getShoppinglistIdsFromItems(items);
@@ -59,7 +59,7 @@ public class ListUtilsTest {
         List<Shoppinglist> lists = new ArrayList<Shoppinglist>();
         int count = 10;
         for (int i = 0; i < count; i++) {
-            Shoppinglist sl = ModelCreator.getShoppinglist("id"+i, "name-"+i);
+            Shoppinglist sl = ModelCreator.getShoppinglist("id" + i, "name-" + i);
             lists.add(sl);
         }
         Set<String> listIds = ListUtils.getShoppinglistIdsFromLists(lists);

@@ -30,6 +30,7 @@ public class ShareSQLiteHelper extends DatabaseHelper {
                     ACCEPT_URL + " text, " +
                     STATE + " integer " +
                     ");";
+    public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?)";
 
     public ShareSQLiteHelper(Context context) {
         super(context);
@@ -46,8 +47,6 @@ public class ShareSQLiteHelper extends DatabaseHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE);
         db.releaseReference();
     }
-
-    public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?)";
 
     public static SQLiteStatement getInsertStatement(SQLiteDatabase db) {
         return db.compileStatement(INSERT_STATEMENT);
@@ -68,7 +67,7 @@ public class ShareSQLiteHelper extends DatabaseHelper {
         ArrayList<Share> list = new ArrayList<Share>();
         for (ContentValues cv : DbUtils.cursorToContentValues(c)) {
             Share s = ShareSQLiteHelper.contentValuesToObject(cv, shoppinglistId);
-            if (s!=null) {
+            if (s != null) {
                 list.add(s);
             }
         }

@@ -14,12 +14,12 @@ public class Bus {
 
     private static final WeakEventBus BUS = new WeakEventBus();
 
-    public static EventBus getInstance() {
-        return BUS;
-    }
-
     private Bus() {
         // empty
+    }
+
+    public static EventBus getInstance() {
+        return BUS;
     }
 
     public static class WeakEventBus extends EventBus {

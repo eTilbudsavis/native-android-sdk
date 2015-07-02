@@ -52,18 +52,19 @@ public class DbUtils {
 
     /**
      * Read the cursor into a {@link ContentValues} object, and close the {@link Cursor} when finished
+     *
      * @param c A cursor
      * @return A {@link List} of {@link ContentValues}
      */
     public static List<ContentValues> cursorToContentValues(Cursor c) {
         ArrayList<ContentValues> list = new ArrayList<ContentValues>();
         try {
-            if(c.moveToFirst()) {
+            if (c.moveToFirst()) {
                 do {
                     ContentValues map = new ContentValues();
                     DatabaseUtils.cursorRowToContentValues(c, map);
                     list.add(map);
-                } while(c.moveToNext());
+                } while (c.moveToNext());
             }
         } finally {
             closeCursor(c);
@@ -73,13 +74,14 @@ public class DbUtils {
 
     /**
      * Read the cursor into a {@link ContentValues} object, and close the {@link Cursor} when finished
+     *
      * @param c A cursor
      * @return A {@link List} of {@link ContentValues}
      */
     public static ContentValues cursorToContentValuesSingle(Cursor c) {
         try {
             ContentValues map = new ContentValues();
-            if(c.moveToFirst()) {
+            if (c.moveToFirst()) {
                 DatabaseUtils.cursorRowToContentValues(c, map);
             }
             return map;
@@ -92,6 +94,7 @@ public class DbUtils {
 
     /**
      * Safely close a cursor
+     *
      * @param c A cursor
      */
     public static void closeCursor(Cursor c) {
@@ -104,10 +107,11 @@ public class DbUtils {
      * This method will migrate any {@link Shoppinglist}, and their {@link ShoppinglistItem} from
      * the offline state, to the currently logged in {@link User}, and they will at a later point
      * in time be synchronized to the eTilbudsavis API.
+     *
      * @param manager A {@link ListManager}
-     * @param db A {@link DatabaseWrapper}
-     * @param delete <code>true</code> if you want to have the offline {@link Shoppinglist} and
-     * {@link ShoppinglistItem} deleted on a successful migration completion, else <code>false</code>.
+     * @param db      A {@link DatabaseWrapper}
+     * @param delete  <code>true</code> if you want to have the offline {@link Shoppinglist} and
+     *                {@link ShoppinglistItem} deleted on a successful migration completion, else <code>false</code>.
      * @return the number of migrated lists
      */
     public static int migrateOfflineLists(ListManager manager, DatabaseWrapper db, boolean delete) {

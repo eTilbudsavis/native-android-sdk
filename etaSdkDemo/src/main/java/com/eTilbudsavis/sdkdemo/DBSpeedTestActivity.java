@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * ****************************************************************************
  * Copyright 2015 eTilbudsavis
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ * ****************************************************************************
+ */
 package com.eTilbudsavis.sdkdemo;
 
 import android.os.Bundle;
@@ -35,54 +37,54 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DBSpeedTestActivity extends BaseActivity {
-	
-	public static final String TAG = DBSpeedTestActivity.class.getSimpleName();
-	
-	public static final String ARG_OFFERS = "offers";
-	public static final String ARG_QUERY = "query";
-	
-	Button mButton;
-	TextView mTextView;
-	String mText = "";
-	boolean mTesting = false;
 
-	DatabaseWrapper mDatabase;
-	ExecutorService mExecutor = Executors.newFixedThreadPool(1);
+    public static final String TAG = DBSpeedTestActivity.class.getSimpleName();
 
-	Runnable mDrawUI = new Runnable() {
-		@Override
-		public void run() {
-			mTextView.setText(mText + (mTesting ? "\nRunning..." : "Done..."));
-		}
-	};
+    public static final String ARG_OFFERS = "offers";
+    public static final String ARG_QUERY = "query";
 
-	@Override
+    Button mButton;
+    TextView mTextView;
+    String mText = "";
+    boolean mTesting = false;
+
+    DatabaseWrapper mDatabase;
+    ExecutorService mExecutor = Executors.newFixedThreadPool(1);
+
+    Runnable mDrawUI = new Runnable() {
+        @Override
+        public void run() {
+            mTextView.setText(mText + (mTesting ? "\nRunning..." : "Done..."));
+        }
+    };
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dbspeedtest);
 
         // Find views
         mButton = (Button) findViewById(R.id.button);
-		mTextView = (TextView) findViewById(R.id.textView);
+        mTextView = (TextView) findViewById(R.id.textView);
 
-		mDatabase = DatabaseWrapper.getInstance(getApplicationContext());
+        mDatabase = DatabaseWrapper.getInstance(getApplicationContext());
 
-		mButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				runTest();
-			}
-		});
-        
+        mButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                runTest();
+            }
+        });
+
     }
 
-	private void runTest() {
+    private void runTest() {
 
-		// Dont do this!
-		mTesting = true;
-		mExecutor.execute(new DbTest(50, 20));
+        // Dont do this!
+        mTesting = true;
+        mExecutor.execute(new DbTest(50, 20));
 
-	}
+    }
 
     private long insertItemsSlow(DatabaseWrapper db, List<ShoppinglistItem> items, User u) {
         long s = System.currentTimeMillis();
@@ -122,24 +124,45 @@ public class DBSpeedTestActivity extends BaseActivity {
         return System.currentTimeMillis() - s;
     }
 
-	public class DbTest implements Runnable {
+    private ShoppinglistItem generateItem(int i, Shoppinglist sl, User u) {
+        ShoppinglistItem s = new ShoppinglistItem(sl, String.valueOf(i));
+        s.setCreator(u.getEmail());
+        s.setUserId(u.getUserId());
+        return s;
+    }
+
+    private void logTime(String msg, long time) {
+        log(msg + ": " + time + "ms");
+    }
+
+    private void logCount(String msg, int count) {
+        log(msg + ": " + count);
+    }
+
+    private void log(String s) {
+        mText += s + "\n";
+        Log.d(TAG, s);
+        runOnUiThread(mDrawUI);
+    }
+
+    public class DbTest implements Runnable {
 
         final int mItemCount;
         final int mListCount;
-		final User mUser;
+        final User mUser;
 
-		public DbTest() {
-			this(50, 20);
-		}
+        public DbTest() {
+            this(50, 20);
+        }
 
-		public DbTest(int listCount, int itemCount) {
-			mItemCount = itemCount;
+        public DbTest(int listCount, int itemCount) {
+            mItemCount = itemCount;
             mListCount = listCount;
-			mUser = ModelCreator.getUser(1980, "me@me.com", "male", "me", ModelCreator.getPermission(), User.NO_USER);
-		}
+            mUser = ModelCreator.getUser(1980, "me@me.com", "male", "me", ModelCreator.getPermission(), User.NO_USER);
+        }
 
-		@Override
-		public void run() {
+        @Override
+        public void run() {
 
             log(String.format("test[lists.size: %s, items.size: %s]", mListCount, mItemCount));
 
@@ -177,10 +200,10 @@ public class DBSpeedTestActivity extends BaseActivity {
 
             logTime("list.get.time", getListAll(mDatabase, mUser));
 
-			mTesting = false;
-			runOnUiThread(mDrawUI);
+            mTesting = false;
+            runOnUiThread(mDrawUI);
 
-		}
+        }
 
         private List<Shoppinglist> generateLists(int size, User u) {
             List<Shoppinglist> lists = new ArrayList<Shoppinglist>();
@@ -196,38 +219,17 @@ public class DBSpeedTestActivity extends BaseActivity {
             return lists;
         }
 
-		private List<ShoppinglistItem> generateItems(int size, Shoppinglist sl, User u) {
-			List<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
-			for (int i = 0; i < size; i++) {
-				ShoppinglistItem sli = generateItem(i, sl, u);
-				list.add(sli);
-			}
-			return list;
-		}
+        private List<ShoppinglistItem> generateItems(int size, Shoppinglist sl, User u) {
+            List<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
+            for (int i = 0; i < size; i++) {
+                ShoppinglistItem sli = generateItem(i, sl, u);
+                list.add(sli);
+            }
+            return list;
+        }
 
-		private List<ShoppinglistItem> generateItems(Shoppinglist sl, User u) {
-			return mDatabase.getItems(sl, u);
-		}
-	}
-
-	private ShoppinglistItem generateItem(int i, Shoppinglist sl, User u) {
-		ShoppinglistItem s = new ShoppinglistItem(sl, String.valueOf(i));
-		s.setCreator(u.getEmail());
-		s.setUserId(u.getUserId());
-		return s;
-	}
-
-	private void logTime(String msg, long time) {
-        log(msg + ": " + time + "ms");
-	}
-
-	private void logCount(String msg, int count) {
-        log(msg + ": " + count);
-	}
-
-    private void log(String s) {
-        mText += s + "\n";
-        Log.d(TAG, s);
-        runOnUiThread(mDrawUI);
+        private List<ShoppinglistItem> generateItems(Shoppinglist sl, User u) {
+            return mDatabase.getItems(sl, u);
+        }
     }
 }

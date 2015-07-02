@@ -100,7 +100,7 @@ public class JsonTest {
 
         Assert.assertEquals(integerValue, Json.valueOf(o, noKey, integerValue));
         Assert.assertEquals(integerValue, Json.valueOf(o, integerKey, 1564));
-        Assert.assertEquals(integerValue, (int)Integer.valueOf(Json.valueOf(o, integerKey, null)));
+        Assert.assertEquals(integerValue, (int) Integer.valueOf(Json.valueOf(o, integerKey, null)));
 
         Assert.assertEquals(longValue, Json.valueOf(o, noKey, longValue));
         Assert.assertEquals(longValue, Json.valueOf(o, longKey, longValue));
@@ -135,7 +135,7 @@ public class JsonTest {
 
         JSONObject one = null;
         JSONObject two = null;
-        Assert.assertTrue(Json.jsonObjectEquals(one,two));
+        Assert.assertTrue(Json.jsonObjectEquals(one, two));
         Assert.assertTrue(Json.jsonObjectHashCode(one) == Json.jsonObjectHashCode(two));
 
         one = new JSONObject();

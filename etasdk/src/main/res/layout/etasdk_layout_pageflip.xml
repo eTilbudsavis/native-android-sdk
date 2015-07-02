@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/etasdk_layout_pageflip_container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
-    
+<FrameLayout android:id="@+id/etasdk_layout_pageflip_container"
+             xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+
     <com.eTilbudsavis.etasdk.pageflip.PageflipViewPager
         android:id="@+id/etasdk_layout_pageflip_viewpager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-    
+        android:layout_height="match_parent"/>
+
     <com.eTilbudsavis.etasdk.pageflip.widget.LoadingTextView
         android:id="@+id/etasdk_layout_pageflip_loader"
         android:layout_width="wrap_content"
@@ -16,6 +16,6 @@
         android:layout_gravity="center"
         android:gravity="center_horizontal"
         android:text="Bilka\n..."
-        android:textSize="30sp" />
-    
+        android:textSize="30sp"/>
+
 </FrameLayout>

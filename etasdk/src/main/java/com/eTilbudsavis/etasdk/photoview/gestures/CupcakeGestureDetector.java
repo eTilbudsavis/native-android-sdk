@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * ****************************************************************************
  * Copyright 2011, 2012 Chris Banes.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *******************************************************************************/
+ * *****************************************************************************
+ */
 package com.eTilbudsavis.etasdk.photoview.gestures;
 
 import android.content.Context;
@@ -25,52 +27,55 @@ import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 
 public class CupcakeGestureDetector implements GestureDetector {
-	
+
     public static final String TAG = Constants.getTag(CupcakeGestureDetector.class);
-    
-    protected OnGestureListener mListener;
-    float mLastTouchX;
-    float mLastTouchY;
     final float mTouchSlop;
     final float mMinimumVelocity;
+    final android.view.GestureDetector mGestureDetector;
+    protected OnGestureListener mListener;
+    final android.view.GestureDetector.SimpleOnGestureListener mSimpleOnGestureListener =
+            new android.view.GestureDetector.SimpleOnGestureListener() {
+
+                public void onLongPress(MotionEvent e) {
+                    if (mListener != null) {
+                        mListener.onLongPress(e);
+                    }
+                }
+
+                ;
+
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    if (mListener != null) {
+                        return mListener.onDoubleTab(e);
+                    }
+                    return false;
+                }
+
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    if (mListener != null) {
+                        return mListener.onSingleTab(e);
+                    }
+                    return false;
+                }
+
+                ;
+
+            };
+    float mLastTouchX;
+    float mLastTouchY;
     private VelocityTracker mVelocityTracker;
     private boolean mIsDragging;
-    final android.view.GestureDetector mGestureDetector;
-    final android.view.GestureDetector.SimpleOnGestureListener mSimpleOnGestureListener = 
-    		new android.view.GestureDetector.SimpleOnGestureListener() {
-    	
-    	public void onLongPress(MotionEvent e) {
-    		if (mListener!=null) {
-        		mListener.onLongPress(e);
-    		}
-    	};
-    	
-    	@Override
-    	public boolean onDoubleTap(MotionEvent e) {
-    		if (mListener!=null) {
-        		return mListener.onDoubleTab(e);
-    		}
-    		return false;
-    	}
-    	
-    	public boolean onSingleTapConfirmed(MotionEvent e) {
-    		if (mListener!=null) {
-        		return mListener.onSingleTab(e);
-    		}
-    		return false;
-    	};
-    	
-    };
-    
-    public void setOnGestureListener(OnGestureListener listener) {
-        this.mListener = listener;
-    }
-    
+
     public CupcakeGestureDetector(Context context) {
-    	mGestureDetector = new android.view.GestureDetector(context, mSimpleOnGestureListener); 
+        mGestureDetector = new android.view.GestureDetector(context, mSimpleOnGestureListener);
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mTouchSlop = configuration.getScaledTouchSlop();
+    }
+
+    public void setOnGestureListener(OnGestureListener listener) {
+        this.mListener = listener;
     }
 
     float getActiveX(MotionEvent ev) {
@@ -84,7 +89,7 @@ public class CupcakeGestureDetector implements GestureDetector {
     public boolean isScaling() {
         return false;
     }
-    
+
     public boolean onTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN: {
@@ -113,9 +118,9 @@ public class CupcakeGestureDetector implements GestureDetector {
                 }
 
                 if (mIsDragging) {
-                	if (mListener!=null) {
+                    if (mListener != null) {
                         mListener.onDrag(dx, dy);
-                	}
+                    }
                     mLastTouchX = x;
                     mLastTouchY = y;
 
@@ -151,9 +156,9 @@ public class CupcakeGestureDetector implements GestureDetector {
                         // If the velocity is greater than minVelocity, call
                         // listener
                         if (Math.max(Math.abs(vX), Math.abs(vY)) >= mMinimumVelocity) {
-                        	if (mListener!=null) {
+                            if (mListener != null) {
                                 mListener.onFling(mLastTouchX, mLastTouchY, -vX, -vY);
-                        	}
+                            }
                         }
                     }
                 }
@@ -169,5 +174,5 @@ public class CupcakeGestureDetector implements GestureDetector {
         mGestureDetector.onTouchEvent(ev);
         return true;
     }
-    
+
 }

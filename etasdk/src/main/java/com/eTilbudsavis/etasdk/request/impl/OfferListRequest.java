@@ -14,226 +14,226 @@ import java.util.List;
 import java.util.Set;
 
 public class OfferListRequest extends ListRequest<List<Offer>> {
-	
-	private OfferListRequest(Listener<List<Offer>> l) {
-		super(Endpoint.OFFER_LIST, l);
-	}
-	
-	@Override
-	public void deliverResponse(JSONArray response, EtaError error) {
-		List<Offer> offers = null;
-		if (response != null) {
-			offers = Offer.fromJSON(response);
-		}
-		runAutoFill(offers, error);
-	}
-	
-	public static class Builder extends ListRequest.Builder<List<Offer>>{
-		
-		public Builder(Listener<List<Offer>> l) {
-			super(new OfferListRequest(l));
-		}
-		
-		public void setParameters(Parameter params) {
-			super.setParameters(params);
-		}
-		
-		public void setAutoFill(OfferListAutoFill filler) {
-			super.setAutoFiller(filler);
-		}
-		
-		@Override
-		public ListRequest<List<Offer>> build() {
-			
-			if (getParameters() == null) {
-				setParameters(new Parameter());
-			}
-			
-			if (getAutofill() == null) {
-				setAutoFiller(new OfferListAutoFill());
-			}
-			
-			return super.build();
-		}
-		
-	}
 
-	public static class Parameter extends ListRequest.ListParameterBuilder {
+    private OfferListRequest(Listener<List<Offer>> l) {
+        super(Endpoint.OFFER_LIST, l);
+    }
 
-		public Parameter() {
-			setDefaultOrder("-" + Api.Sort.POPULARITY);
-		}
-		
-		public void addOfferFilter(Set<String> offerIds) {
-			addFilter(Api.Param.OFFER_IDS, offerIds);
-		}
+    @Override
+    public void deliverResponse(JSONArray response, EtaError error) {
+        List<Offer> offers = null;
+        if (response != null) {
+            offers = Offer.fromJSON(response);
+        }
+        runAutoFill(offers, error);
+    }
 
-		public void addCatalogFilter(Set<String> catalogIds) {
-			addFilter(Api.Param.CATALOG_IDS, catalogIds);
-		}
-		
-		public void addDealerFilter(Set<String> dealerIds) {
-			addFilter(Api.Param.DEALER_IDS, dealerIds);
-		}
-		
-		public void addStoreFilter(Set<String> storeIds) {
-			addFilter(Api.Param.STORE_IDS, storeIds);
-		}
+    public static class Builder extends ListRequest.Builder<List<Offer>> {
 
-		public void addOfferFilter(String offerId) {
-			addFilter(Api.Param.OFFER_IDS, offerId);
-		}
-		
-		public void addCatalogFilter(String catalogId) {
-			addFilter(Api.Param.CATALOG_IDS, catalogId);
-		}
-		
-		public void addDealerFilter(String dealerId) {
-			addFilter(Api.Param.DEALER_IDS, dealerId);
-		}
-		
-		public void addStoreFilter(String storeId) {
-			addFilter(Api.Param.STORE_IDS, storeId);
-		}
-		
-		public void orderByPopularity(boolean enable, boolean descending) {
-			addOrder(Api.Sort.POPULARITY, descending);
-		}
+        public Builder(Listener<List<Offer>> l) {
+            super(new OfferListRequest(l));
+        }
 
-		public void removeOrderPopularity() {
-			remove(Api.Sort.POPULARITY);
-		}
+        public void setParameters(Parameter params) {
+            super.setParameters(params);
+        }
 
-		public void orderByPage(boolean enable, boolean descending) {
-			addOrder(Api.Sort.PAGE, descending);
-		}
+        public void setAutoFill(OfferListAutoFill filler) {
+            super.setAutoFiller(filler);
+        }
 
-		public void removeOrderPage() {
-			remove(Api.Sort.PAGE);
-		}
+        @Override
+        public ListRequest<List<Offer>> build() {
 
-		public void orderByCreated(boolean enable, boolean descending) {
-			addOrder(Api.Sort.CREATED, descending);
-		}
+            if (getParameters() == null) {
+                setParameters(new Parameter());
+            }
 
-		public void removeOrderCreated() {
-			remove(Api.Sort.CREATED);
-		}
+            if (getAutofill() == null) {
+                setAutoFiller(new OfferListAutoFill());
+            }
 
-		public void orderByPrice(boolean enable, boolean descending) {
-			addOrder(Api.Sort.PRICE, descending);
-		}
+            return super.build();
+        }
 
-		public void removeOrderPrice() {
-			remove(Api.Sort.PRICE);
-		}
+    }
 
-		public void orderBySavings(boolean enable, boolean descending) {
-			addOrder(Api.Sort.SAVINGS, descending);
-		}
+    public static class Parameter extends ListRequest.ListParameterBuilder {
 
-		public void removeOrderSavings() {
-			remove(Api.Sort.SAVINGS);
-		}
+        public Parameter() {
+            setDefaultOrder("-" + Api.Sort.POPULARITY);
+        }
 
-		public void orderByQuantity(boolean enable, boolean descending) {
-			addOrder(Api.Sort.QUANTITY, descending);
-		}
+        public void addOfferFilter(Set<String> offerIds) {
+            addFilter(Api.Param.OFFER_IDS, offerIds);
+        }
 
-		public void removeOrderQuantity() {
-			remove(Api.Sort.QUANTITY);
-		}
+        public void addCatalogFilter(Set<String> catalogIds) {
+            addFilter(Api.Param.CATALOG_IDS, catalogIds);
+        }
 
-		public void orderByCount(boolean enable, boolean descending) {
-			addOrder(Api.Sort.COUNT, descending);
-		}
+        public void addDealerFilter(Set<String> dealerIds) {
+            addFilter(Api.Param.DEALER_IDS, dealerIds);
+        }
 
-		public void removeOrderCount() {
-			remove(Api.Sort.COUNT);
-		}
+        public void addStoreFilter(Set<String> storeIds) {
+            addFilter(Api.Param.STORE_IDS, storeIds);
+        }
 
-		public void orderByExpirationDate(boolean enable, boolean descending) {
-			addOrder(Api.Sort.EXPIRATION_DATE, descending);
-		}
+        public void addOfferFilter(String offerId) {
+            addFilter(Api.Param.OFFER_IDS, offerId);
+        }
 
-		public void removeOrderExpirationDate() {
-			remove(Api.Sort.EXPIRATION_DATE);
-		}
-		
-		public void orderByPublicationDate(boolean enable, boolean descending) {
-			addOrder(Api.Sort.PUBLICATION_DATE, descending);
-		}
-		
-		public void removeOrderPublicationDate() {
-			remove(Api.Sort.PUBLICATION_DATE);
-		}
-		
-		public void orderByValidDate(boolean enable, boolean descending) {
-			addOrder(Api.Sort.VALID_DATE, descending);
-		}
-		
-		public void removeOrderValidDate() {
-			remove(Api.Sort.VALID_DATE);
-		}
-		
-		public void orderByDealer(boolean enable, boolean descending) {
-			addOrder(Api.Sort.DEALER, descending);
-		}
-		
-		public void removeOrderDealer() {
-			remove(Api.Sort.DEALER);
-		}
-		
-		public void orderByDistance(boolean enable, boolean descending) {
-			addOrder(Api.Sort.DISTANCE, descending);
-		}
-		
-		public void removeOrderDistance() {
-			remove(Api.Sort.DISTANCE);
-		}
+        public void addCatalogFilter(String catalogId) {
+            addFilter(Api.Param.CATALOG_IDS, catalogId);
+        }
 
-	}
-	
-	public static class OfferListAutoFill extends ListRequest.ListAutoFill<List<Offer>> {
-		
-		private boolean mCatalogs;
-		private boolean mDealer;
-		private boolean mStore;
-		
-		public OfferListAutoFill() {
-			this(false, false, false);
-		}
-		
-		public OfferListAutoFill(boolean catalogs, boolean dealer, boolean store) {
-			mCatalogs = catalogs;
-			mDealer = dealer;
-			mStore = store;
-		}
-		
-		@Override
-		public List<Request<?>> createRequests(List<Offer> data) {
-			
-			List<Request<?>> reqs = new ArrayList<Request<?>>();
-			
-			if (!data.isEmpty()) {
-				
-				if (mStore) {
-					reqs.add(getStoreRequest(data));
-				}
-				
-				if (mDealer) {
-					reqs.add(getDealerRequest(data));
-				}
-				
-				if (mCatalogs) {
-					reqs.add(getCatalogRequest(data));
-				}
-				
-			}
-			
-			return reqs;
-		}
+        public void addDealerFilter(String dealerId) {
+            addFilter(Api.Param.DEALER_IDS, dealerId);
+        }
 
-	}
+        public void addStoreFilter(String storeId) {
+            addFilter(Api.Param.STORE_IDS, storeId);
+        }
+
+        public void orderByPopularity(boolean enable, boolean descending) {
+            addOrder(Api.Sort.POPULARITY, descending);
+        }
+
+        public void removeOrderPopularity() {
+            remove(Api.Sort.POPULARITY);
+        }
+
+        public void orderByPage(boolean enable, boolean descending) {
+            addOrder(Api.Sort.PAGE, descending);
+        }
+
+        public void removeOrderPage() {
+            remove(Api.Sort.PAGE);
+        }
+
+        public void orderByCreated(boolean enable, boolean descending) {
+            addOrder(Api.Sort.CREATED, descending);
+        }
+
+        public void removeOrderCreated() {
+            remove(Api.Sort.CREATED);
+        }
+
+        public void orderByPrice(boolean enable, boolean descending) {
+            addOrder(Api.Sort.PRICE, descending);
+        }
+
+        public void removeOrderPrice() {
+            remove(Api.Sort.PRICE);
+        }
+
+        public void orderBySavings(boolean enable, boolean descending) {
+            addOrder(Api.Sort.SAVINGS, descending);
+        }
+
+        public void removeOrderSavings() {
+            remove(Api.Sort.SAVINGS);
+        }
+
+        public void orderByQuantity(boolean enable, boolean descending) {
+            addOrder(Api.Sort.QUANTITY, descending);
+        }
+
+        public void removeOrderQuantity() {
+            remove(Api.Sort.QUANTITY);
+        }
+
+        public void orderByCount(boolean enable, boolean descending) {
+            addOrder(Api.Sort.COUNT, descending);
+        }
+
+        public void removeOrderCount() {
+            remove(Api.Sort.COUNT);
+        }
+
+        public void orderByExpirationDate(boolean enable, boolean descending) {
+            addOrder(Api.Sort.EXPIRATION_DATE, descending);
+        }
+
+        public void removeOrderExpirationDate() {
+            remove(Api.Sort.EXPIRATION_DATE);
+        }
+
+        public void orderByPublicationDate(boolean enable, boolean descending) {
+            addOrder(Api.Sort.PUBLICATION_DATE, descending);
+        }
+
+        public void removeOrderPublicationDate() {
+            remove(Api.Sort.PUBLICATION_DATE);
+        }
+
+        public void orderByValidDate(boolean enable, boolean descending) {
+            addOrder(Api.Sort.VALID_DATE, descending);
+        }
+
+        public void removeOrderValidDate() {
+            remove(Api.Sort.VALID_DATE);
+        }
+
+        public void orderByDealer(boolean enable, boolean descending) {
+            addOrder(Api.Sort.DEALER, descending);
+        }
+
+        public void removeOrderDealer() {
+            remove(Api.Sort.DEALER);
+        }
+
+        public void orderByDistance(boolean enable, boolean descending) {
+            addOrder(Api.Sort.DISTANCE, descending);
+        }
+
+        public void removeOrderDistance() {
+            remove(Api.Sort.DISTANCE);
+        }
+
+    }
+
+    public static class OfferListAutoFill extends ListRequest.ListAutoFill<List<Offer>> {
+
+        private boolean mCatalogs;
+        private boolean mDealer;
+        private boolean mStore;
+
+        public OfferListAutoFill() {
+            this(false, false, false);
+        }
+
+        public OfferListAutoFill(boolean catalogs, boolean dealer, boolean store) {
+            mCatalogs = catalogs;
+            mDealer = dealer;
+            mStore = store;
+        }
+
+        @Override
+        public List<Request<?>> createRequests(List<Offer> data) {
+
+            List<Request<?>> reqs = new ArrayList<Request<?>>();
+
+            if (!data.isEmpty()) {
+
+                if (mStore) {
+                    reqs.add(getStoreRequest(data));
+                }
+
+                if (mDealer) {
+                    reqs.add(getDealerRequest(data));
+                }
+
+                if (mCatalogs) {
+                    reqs.add(getCatalogRequest(data));
+                }
+
+            }
+
+            return reqs;
+        }
+
+    }
 
 }

@@ -91,7 +91,8 @@ public class EventTest {
         // We added one item from a special list - this should be returned
         Assert.assertEquals(1, e.getAddedItems(id).size());
 
-        EtaSdkTest.logTest(TAG, (new MethodNameHelper(){}).getName());
+        EtaSdkTest.logTest(TAG, (new MethodNameHelper() {
+        }).getName());
     }
 
     public static void testSessionEvent() {
@@ -110,7 +111,8 @@ public class EventTest {
         Assert.assertEquals(newUser, e.getNewUser());
         Assert.assertFalse(e.isNewUser());
 
-        EtaSdkTest.logTest(TAG, (new MethodNameHelper() {}).getName());
+        EtaSdkTest.logTest(TAG, (new MethodNameHelper() {
+        }).getName());
     }
 
 }

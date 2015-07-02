@@ -10,101 +10,101 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CatalogObjectRequest extends ObjectRequest<Catalog> {
-	
-	private CatalogObjectRequest(String url, Listener<Catalog> l) {
-		super(url, l);
-	}
-	
-	public static abstract class Builder extends ObjectRequest.Builder<Catalog> {
-		
-		public Builder(String catalogId, Listener<Catalog> l) {
-			super(new CatalogObjectRequest(Api.Endpoint.catalogId(catalogId), l));
-		}
-		
-		public ObjectRequest<Catalog> build() {
-			ObjectRequest<Catalog> r = super.build();
-			if (getAutofill()==null) {
-				setAutoFiller(new CatalogAutoFill());
-			}
-			return r;
-		}
 
-		public void setAutoFill(CatalogAutoFill filler) {
-			super.setAutoFiller(filler);
-		}
-		
-	}
-	
-	public static class CatalogAutoFill extends RequestAutoFill<Catalog> {
-		
-		private boolean mPages = false;
-		private boolean mDealer = false;
-		private boolean mStore = false;
-		private boolean mHotspots = false;
-		
-		public CatalogAutoFill() {
-		}
-		
-		public boolean loadPages() {
-			return mPages;
-		}
+    private CatalogObjectRequest(String url, Listener<Catalog> l) {
+        super(url, l);
+    }
 
-		public void setLoadPages(boolean pages) {
-			mPages = pages;
-		}
+    public static abstract class Builder extends ObjectRequest.Builder<Catalog> {
 
-		public boolean loadDealer() {
-			return mDealer;
-		}
+        public Builder(String catalogId, Listener<Catalog> l) {
+            super(new CatalogObjectRequest(Api.Endpoint.catalogId(catalogId), l));
+        }
 
-		public void setLoadDealer(boolean dealer) {
-			mDealer = dealer;
-		}
+        public ObjectRequest<Catalog> build() {
+            ObjectRequest<Catalog> r = super.build();
+            if (getAutofill() == null) {
+                setAutoFiller(new CatalogAutoFill());
+            }
+            return r;
+        }
 
-		public boolean loadStore() {
-			return mStore;
-		}
+        public void setAutoFill(CatalogAutoFill filler) {
+            super.setAutoFiller(filler);
+        }
 
-		public void setLoadStore(boolean store) {
-			mStore = store;
-		}
+    }
 
-		public boolean loadHotspots() {
-			return mHotspots;
-		}
+    public static class CatalogAutoFill extends RequestAutoFill<Catalog> {
 
-		public void setLoadHotspots(boolean hotspots) {
-			mHotspots = hotspots;
-		}
+        private boolean mPages = false;
+        private boolean mDealer = false;
+        private boolean mStore = false;
+        private boolean mHotspots = false;
 
-		@Override
-		public List<Request<?>> createRequests(Catalog data) {
+        public CatalogAutoFill() {
+        }
 
-			List<Request<?>> reqs = new ArrayList<Request<?>>();
+        public boolean loadPages() {
+            return mPages;
+        }
 
-			if (data != null) {
+        public void setLoadPages(boolean pages) {
+            mPages = pages;
+        }
 
-				if (mStore) {
-					reqs.add(getStoreRequest(data));
-				}
-				
-				if (mDealer) {
-					reqs.add(getDealerRequest(data));
-				}
+        public boolean loadDealer() {
+            return mDealer;
+        }
 
-				if (mPages) {
-					reqs.add(getPagesRequest(data));
-				}
-				
-				if (mHotspots) {
-					reqs.add(getHotspotsRequest(data));
-				}
-				
-			}
-			
-			return reqs;
-		}
-		
-	}
+        public void setLoadDealer(boolean dealer) {
+            mDealer = dealer;
+        }
+
+        public boolean loadStore() {
+            return mStore;
+        }
+
+        public void setLoadStore(boolean store) {
+            mStore = store;
+        }
+
+        public boolean loadHotspots() {
+            return mHotspots;
+        }
+
+        public void setLoadHotspots(boolean hotspots) {
+            mHotspots = hotspots;
+        }
+
+        @Override
+        public List<Request<?>> createRequests(Catalog data) {
+
+            List<Request<?>> reqs = new ArrayList<Request<?>>();
+
+            if (data != null) {
+
+                if (mStore) {
+                    reqs.add(getStoreRequest(data));
+                }
+
+                if (mDealer) {
+                    reqs.add(getDealerRequest(data));
+                }
+
+                if (mPages) {
+                    reqs.add(getPagesRequest(data));
+                }
+
+                if (mHotspots) {
+                    reqs.add(getHotspotsRequest(data));
+                }
+
+            }
+
+            return reqs;
+        }
+
+    }
 
 }

@@ -40,6 +40,11 @@ public class ItemSQLiteHelper extends DatabaseHelper {
                     META + " text, " +
                     USER + "  integer not null " +
                     ");";
+    public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    public ItemSQLiteHelper(Context context) {
+        super(context);
+    }
 
     public static void bind(SQLiteStatement s, ShoppinglistItem sli, String userId) {
         ContentValues cv = objectToContentValues(sli, userId);
@@ -58,14 +63,8 @@ public class ItemSQLiteHelper extends DatabaseHelper {
         DbUtils.bindOrNull(s, 13, cv.getAsString(USER));
     }
 
-    public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
     public static SQLiteStatement getInsertStatement(SQLiteDatabase db) {
         return db.compileStatement(INSERT_STATEMENT);
-    }
-
-    public ItemSQLiteHelper(Context context) {
-        super(context);
     }
 
     public static void create(SQLiteDatabase db) {
@@ -84,7 +83,7 @@ public class ItemSQLiteHelper extends DatabaseHelper {
         ArrayList<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
         for (ContentValues cv : DbUtils.cursorToContentValues(c)) {
             ShoppinglistItem sli = ItemSQLiteHelper.contentValuesToObject(cv);
-            if (sli!=null) {
+            if (sli != null) {
                 list.add(sli);
             }
         }

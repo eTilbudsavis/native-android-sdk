@@ -9,11 +9,14 @@ import com.eTilbudsavis.etasdk.network.Response;
 
 public class HandlerDelivery implements Delivery {
 
-    /** Used for posting responses, typically to the main thread. */
+    /**
+     * Used for posting responses, typically to the main thread.
+     */
     private final Handler mHandler;
 
     /**
      * Creates a new response delivery interface, that delivers the response to the UI thread.
+     *
      * @param handler {@link Handler} to post responses on
      */
     public HandlerDelivery() {
@@ -22,6 +25,7 @@ public class HandlerDelivery implements Delivery {
 
     /**
      * Creates a new response delivery interface, that delivers the response to the thread attached to the delivery.
+     *
      * @param handler {@link Handler} to post responses on
      */
     public HandlerDelivery(Handler h) {
@@ -30,8 +34,9 @@ public class HandlerDelivery implements Delivery {
 
     /**
      * Post the Response to a Request, back to the UI-thread, and then trigger the listener waiting for the callback.
+     *
      * @param request made by the user
-     * @param a response response from the API fulfilling the Request
+     * @param a       response response from the API fulfilling the Request
      */
     public void postResponse(Request<?> request, Response<?> response) {
         request.addEvent("post-response");

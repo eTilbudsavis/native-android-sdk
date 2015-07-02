@@ -40,7 +40,7 @@ public class DataSource extends SQLDataSource {
 
     public int clear(int userId) {
         String whereClause = DatabaseHelper.USER + "=?";
-        String[] whereArgs = new String[]{ String.valueOf(userId) };
+        String[] whereArgs = new String[]{String.valueOf(userId)};
         int count = delete(ItemSQLiteHelper.TABLE, whereClause, whereArgs);
         count += delete(ListSQLiteHelper.TABLE, whereClause, whereArgs);
         count += delete(ShareSQLiteHelper.TABLE, whereClause, whereArgs);
@@ -67,7 +67,7 @@ public class DataSource extends SQLDataSource {
     /**
      * Insert new shopping list into DB
      *
-     * @param sl A shoppinglist
+     * @param sl     A shoppinglist
      * @param userId A user
      * @return number of affected rows
      */
@@ -80,7 +80,7 @@ public class DataSource extends SQLDataSource {
     /**
      * Insert new shopping list into DB
      *
-     * @param list A list of Shoppinglist
+     * @param list   A list of Shoppinglist
      * @param userId A user
      * @return number of affected rows
      */
@@ -114,7 +114,8 @@ public class DataSource extends SQLDataSource {
 
     /**
      * Get a Shoppinglist matching the given parameters
-     * @param id A Shoppinglist id
+     *
+     * @param id     A Shoppinglist id
      * @param userId A user id
      * @return A Shoppinglist if one exists in DB, else null;
      */
@@ -126,7 +127,7 @@ public class DataSource extends SQLDataSource {
     }
 
     /**
-     * @param userId A user-id that the lists must belong to
+     * @param userId         A user-id that the lists must belong to
      * @param includeDeleted Whether to include deleted items or not
      * @return A list of Shoppinglist
      */
@@ -165,17 +166,18 @@ public class DataSource extends SQLDataSource {
 
     /**
      * Delete a (all) shoppinglist where both the Shoppinglist.id, and user.id matches
+     *
      * @param shoppinglistId A shoppinglist id
-     * @param userId A user id
+     * @param userId         A user id
      * @return number of affected rows
      */
     public int deleteList(String shoppinglistId, String userId) {
         String whereClause = DatabaseHelper.ID + "=? AND " + DatabaseHelper.USER + "=? ";
-        String[] whereArgs = new String[]{ shoppinglistId, userId};
+        String[] whereArgs = new String[]{shoppinglistId, userId};
         return delete(ListSQLiteHelper.TABLE, whereClause, whereArgs);
     }
 
-    public Shoppinglist getListPrevious( String previousId, String userId) {
+    public Shoppinglist getListPrevious(String previousId, String userId) {
         String selection = DatabaseHelper.PREVIOUS_ID + "=? AND " + DatabaseHelper.USER + "=?";
         String[] selectionArgs = new String[]{previousId, userId};
         List<Shoppinglist> list = getLists(selection, selectionArgs, userId);
@@ -190,17 +192,18 @@ public class DataSource extends SQLDataSource {
 
     /**
      * Method for updating a state for all ShoppinglistItem with a given User and Shoppinglist.id
+     *
      * @param shoppinglistId A shoppinglist.id
-     * @param userId A userid
-     * @param modified The new Modified for the items
-     * @param syncState The new SyncState for the items
+     * @param userId         A userid
+     * @param modified       The new Modified for the items
+     * @param syncState      The new SyncState for the items
      * @return the number of rows affected
      */
     public int editItemState(String shoppinglistId, String userId, Date modified, int syncState) {
         try {
             ContentValues cv = ItemSQLiteHelper.stateToContentValues(modified, syncState);
             String whereClause = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=? ";
-            String[] whereArgs = new String[]{ shoppinglistId, userId };
+            String[] whereArgs = new String[]{shoppinglistId, userId};
             return acquireDb().updateWithOnConflict(ItemSQLiteHelper.TABLE, cv, whereClause, whereArgs, SQLiteDatabase.CONFLICT_REPLACE);
         } catch (IllegalStateException e) {
             log(TAG, e);
@@ -212,6 +215,7 @@ public class DataSource extends SQLDataSource {
 
     /**
      * Adds item to db, IF it does not yet exist, else nothing
+     *
      * @param sli to add to db
      * @return number of affected rows
      */
@@ -293,38 +297,40 @@ public class DataSource extends SQLDataSource {
 
     public int deleteItem(String itemId, String userId) {
         String whereClause = DatabaseHelper.ID + "=? AND " + DatabaseHelper.USER + "=? ";
-        String[] whereArgs = new String[]{ itemId, userId };
+        String[] whereArgs = new String[]{itemId, userId};
         return delete(ItemSQLiteHelper.TABLE, whereClause, whereArgs);
     }
 
     /**
      * Deletes all items, in a given state, from a {@link Shoppinglist}
-     *
+     * <p/>
      * <ul>
-     * 		<li>{@code true} - delete ticked items</li>
-     * 		<li>{@code false} - delete unticked items</li>
-     * 		<li>{@code null} - delete all items</li>
+     * <li>{@code true} - delete ticked items</li>
+     * <li>{@code false} - delete unticked items</li>
+     * <li>{@code null} - delete all items</li>
      * </ul>
      *
      * @param shoppinglistId to remove items from
-     * @param state that items must have to be removed
+     * @param state          that items must have to be removed
      * @return number of affected rows
      */
     public int deleteItems(String shoppinglistId, Boolean state, String userId) {
         String whereClause = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=? ";
-        String[] whereArgs = new String[]{ shoppinglistId, userId };
+        String[] whereArgs = new String[]{shoppinglistId, userId};
         if (state != null) {
             whereClause = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=?  AND " + DatabaseHelper.TICK + "=?";
-            whereArgs = new String[]{ shoppinglistId, userId, String.valueOf(state) };
+            whereArgs = new String[]{shoppinglistId, userId, String.valueOf(state)};
         }
         return delete(ItemSQLiteHelper.TABLE, whereClause, whereArgs);
     }
 
-    /***********************************************************************************************
-     *
-     *                                            SHARES
-     *
-     **********************************************************************************************/
+    /**
+     * ********************************************************************************************
+     * <p/>
+     * SHARES
+     * <p/>
+     * ********************************************************************************************
+     */
 
     public long insertShare(Share s, String userId) {
         try {
@@ -342,7 +348,7 @@ public class DataSource extends SQLDataSource {
     /**
      * Insert new shopping list into DB
      *
-     * @param sl A shoppinglist
+     * @param sl     A shoppinglist
      * @param userId A user
      * @return the row ID of the newly inserted row OR -1 if any error
      */
@@ -367,7 +373,7 @@ public class DataSource extends SQLDataSource {
         try {
             int count = 0;
             SQLiteStatement s = ShareSQLiteHelper.getInsertStatement(db);
-            for(Share share : shares) {
+            for (Share share : shares) {
                 ShareSQLiteHelper.bind(s, share, userId);
                 if (s.executeInsert() > -1) {
                     count++;
@@ -412,13 +418,13 @@ public class DataSource extends SQLDataSource {
 
     public int deleteShare(String shareEmail, String shareShoppinglistId, String userId) {
         String whereClause = DatabaseHelper.EMAIL + "=? AND " + DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=?";
-        String[] whereArgs = new String[]{ shareEmail, shareShoppinglistId, userId };
+        String[] whereArgs = new String[]{shareEmail, shareShoppinglistId, userId};
         return delete(ShareSQLiteHelper.TABLE, whereClause, whereArgs);
     }
 
     public int deleteShares(String shoppinglistId, String userId) {
         String whereClause = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=? ";
-        String[] whereArgs = new String[]{ shoppinglistId, userId };
+        String[] whereArgs = new String[]{shoppinglistId, userId};
         return delete(ShareSQLiteHelper.TABLE, whereClause, whereArgs);
     }
 

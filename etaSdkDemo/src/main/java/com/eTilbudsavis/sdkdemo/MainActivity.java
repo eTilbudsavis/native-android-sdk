@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * ****************************************************************************
  * Copyright 2014 eTilbudsavis
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *******************************************************************************/
+ * *****************************************************************************
+ */
 package com.eTilbudsavis.sdkdemo;
 
 import android.content.Intent;
@@ -35,11 +37,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int MENU_LOCATION = 1;
-
-    private Button mBtnCatalogs;
-    private Button mBtnSearch;
-    private Button mBtnDbSpeedTest;
-    private Button mBtnSDKUnitTest;
 
     @Override
     public void onClick(View v) {
@@ -64,7 +61,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
 
     };
-
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,16 +89,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         /*
          * You are now done setting up the SDK, the rest is just Android stuff
          */
-        mBtnCatalogs = (Button)findViewById(R.id.btnCatalogs);
+        Button mBtnCatalogs = (Button) findViewById(R.id.btnCatalogs);
         mBtnCatalogs.setOnClickListener(MainActivity.this);
 
-        mBtnSearch = (Button) findViewById(R.id.btnSearch);
+        Button mBtnSearch = (Button) findViewById(R.id.btnSearch);
         mBtnSearch.setOnClickListener(MainActivity.this);
 
-        mBtnDbSpeedTest = (Button)findViewById(R.id.btnDbSpeedTest);
+        Button mBtnDbSpeedTest = (Button) findViewById(R.id.btnDbSpeedTest);
         mBtnDbSpeedTest.setOnClickListener(MainActivity.this);
 
-        mBtnSDKUnitTest = (Button) findViewById(R.id.btnSdkUnitTest);
+        Button mBtnSDKUnitTest = (Button) findViewById(R.id.btnSDKUnitTest);
         mBtnSDKUnitTest.setOnClickListener(MainActivity.this);
 
     }
@@ -113,7 +110,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             @Override
             public void run() {
                 EtaSdkTest.test();
-                Toast.makeText(MainActivity.this, "SDK UnitTest completed successful", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "SDK Unit Test: Success", Toast.LENGTH_SHORT).show();
             }
         }).run();
     }

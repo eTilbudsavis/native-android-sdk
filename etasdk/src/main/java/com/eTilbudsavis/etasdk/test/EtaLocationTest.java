@@ -45,7 +45,8 @@ public class EtaLocationTest {
         Assert.assertEquals(l.getAddress(), pl.getAddress());
         Assert.assertEquals(l.getRadius(), pl.getRadius());
 
-        EtaSdkTest.logTest(TAG, (new MethodNameHelper() {}).getName());
+        EtaSdkTest.logTest(TAG, (new MethodNameHelper() {
+        }).getName());
     }
 
 }

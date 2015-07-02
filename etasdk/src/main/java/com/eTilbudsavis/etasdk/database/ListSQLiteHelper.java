@@ -37,6 +37,7 @@ public class ListSQLiteHelper extends DatabaseHelper {
                     META + " text, " +
                     USER + " integer not null " +
                     ");";
+    public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public ListSQLiteHelper(Context context) {
         super(context);
@@ -53,8 +54,6 @@ public class ListSQLiteHelper extends DatabaseHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE);
         db.releaseReference();
     }
-
-    public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static SQLiteStatement getInsertStatement(SQLiteDatabase db) {
         return db.compileStatement(INSERT_STATEMENT);
@@ -78,7 +77,7 @@ public class ListSQLiteHelper extends DatabaseHelper {
         ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
         for (ContentValues cv : DbUtils.cursorToContentValues(c)) {
             Shoppinglist sl = ListSQLiteHelper.contentValuesToObject(cv);
-            if (sl!=null) {
+            if (sl != null) {
                 list.add(sl);
             }
         }

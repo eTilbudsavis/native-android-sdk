@@ -13,6 +13,7 @@ public class ActivityCounter {
 
     /**
      * Reset the counter.
+     *
      * @return Current count
      */
     public int reset() {
@@ -22,6 +23,7 @@ public class ActivityCounter {
 
     /**
      * Increments the counter by one. And returns <code>true</code> if this event was the start event of this counter.
+     *
      * @return <code>true</code> if this was the start event, else <code>false</code>
      */
     public boolean increment() {
@@ -30,6 +32,7 @@ public class ActivityCounter {
 
     /**
      * Decrements the counter by one. And returns <code>true</code> if this event was the stop event of this counter.
+     *
      * @return <code>true</code> if this was the stop event, else <code>false</code>
      */
     public boolean decrement() {
@@ -38,6 +41,7 @@ public class ActivityCounter {
 
     /**
      * Test if the counter is started
+     *
      * @return <code>true</code> if <code>counter > 0</code> else <code>false</code>
      */
     public boolean isStarted() {

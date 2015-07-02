@@ -15,35 +15,35 @@
   limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="10dp"
-    android:orientation="vertical" >
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:padding="10dp">
 
     <Button
         android:id="@+id/btnCatalogs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Show catalog" />
+        android:text="Show catalog"/>
 
     <Button
         android:id="@+id/btnSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Search offers" />
+        android:text="Search offers"/>
 
     <Button
         android:id="@+id/btnSDKUnitTest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SDK Unit Test"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:text="SDK Unit Test"/>
 
     <Button
         android:id="@+id/btnDbSpeedTest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="DB Speed test"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:text="DB Speed test"/>
 
 </LinearLayout>
