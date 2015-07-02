@@ -1,5 +1,8 @@
 package com.eTilbudsavis.etasdk.bus;
 
+/**
+ * @author Danny Hvam - danny@etilbudsavis.dk
+ */
 public class EtaEvent {
     
     private Object mTag;
