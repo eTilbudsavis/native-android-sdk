@@ -33,6 +33,13 @@
         android:text="Search offers" />
 
     <Button
+        android:id="@+id/btnSDKUnitTest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SDK Unit Test"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
         android:id="@+id/btnDbSpeedTest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
