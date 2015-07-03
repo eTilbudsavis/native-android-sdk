@@ -16,7 +16,10 @@
 
 package com.eTilbudsavis.sdkdemo;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.support.v4.graphics.ColorUtils;
 
@@ -61,6 +64,19 @@ public class Tools {
 
     public static int getTextColor(int backgroundColor, int textLight, int textDark) {
         return ColorUtils.calculateLuminance(backgroundColor) < 0.5 ? textLight : textDark;
+    }
+
+    public static void showDialog(Activity a, String title, String message) {
+        AlertDialog.Builder b = new AlertDialog.Builder(a);
+        b.setTitle(title);
+        b.setMessage(message);
+        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        b.show();
     }
 
 }

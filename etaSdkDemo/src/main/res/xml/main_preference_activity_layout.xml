@@ -44,6 +44,14 @@
                 android:targetClass="com.eTilbudsavis.sdkdemo.OfferSearchActivity"/>
         </Preference>
 
+        <Preference
+            android:key="pref_main_session"
+            android:title="Session">
+            <intent
+                android:targetPackage="com.eTilbudsavis.sdkdemo"
+                android:targetClass="com.eTilbudsavis.sdkdemo.SessionActivity"/>
+        </Preference>
+
     </PreferenceCategory>
 
     <PreferenceCategory

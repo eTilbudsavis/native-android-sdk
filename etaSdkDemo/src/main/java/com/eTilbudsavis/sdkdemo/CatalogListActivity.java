@@ -94,7 +94,7 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
                 if (response.length() == 0) {
 
                     // This is usually the case when either location or radius could use some adjustment.
-                    showDialog("No catalogs available", "Try changing the SDK location, or increase the radius.");
+                    Tools.showDialog(CatalogListActivity.this, "No catalogs available", "Try changing the SDK location, or increase the radius.");
 
                 } else {
 
@@ -110,7 +110,7 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
                 // There could be a bunch of things wrong here.
                 // Please check the error code, and details for further information
                 String title = error.isApi() ? "API Error" : "SDK Error";
-                showDialog(title, error.toString());
+                Tools.showDialog(CatalogListActivity.this, title, error.toString());
                 EtaLog.e(TAG, error.getMessage(), error);
 
             }

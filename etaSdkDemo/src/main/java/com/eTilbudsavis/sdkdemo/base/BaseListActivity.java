@@ -61,18 +61,4 @@ public class BaseListActivity extends PreferenceActivity {
         }
     }
 
-    protected void showDialog(String title, String message) {
-        AlertDialog.Builder b = new AlertDialog.Builder(this);
-        b.setTitle(title);
-        b.setMessage(message);
-        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        b.show();
-    }
-
 }

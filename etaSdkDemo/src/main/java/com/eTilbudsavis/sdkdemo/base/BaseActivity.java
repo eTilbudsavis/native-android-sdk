@@ -16,6 +16,7 @@
 
 package com.eTilbudsavis.sdkdemo.base;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
@@ -23,6 +24,8 @@ import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.sdkdemo.Tools;
 
 public class BaseActivity extends FragmentActivity {
+
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +43,19 @@ public class BaseActivity extends FragmentActivity {
     protected void onStop() {
         super.onStop();
         Eta.getInstance().onStop();
+    }
+
+    protected void showProgress(String title, String message) {
+        if (mProgressDialog == null) {
+            mProgressDialog = ProgressDialog.show(this, title, message, true, true);
+        }
+    }
+
+    protected void hideProgress() {
+        if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
+        }
     }
 
 }
