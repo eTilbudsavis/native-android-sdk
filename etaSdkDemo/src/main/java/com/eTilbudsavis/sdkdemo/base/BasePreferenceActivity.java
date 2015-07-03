@@ -14,30 +14,32 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.eTilbudsavis.sdkdemo;
+package com.eTilbudsavis.sdkdemo.base;
 
-import java.util.HashMap;
-import java.util.Map;
+import android.os.Bundle;
+import android.preference.PreferenceActivity;
 
+import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.sdkdemo.Tools;
 
-public class Constants {
+public class BasePreferenceActivity extends PreferenceActivity {
 
-    public static final LatLng ETA_HQ = new LatLng(55.6310771f, 12.5771624f);
-    public static final LatLng AALBORG = new LatLng(57.0433192f, 9.9198792f);
-    public static final LatLng AARHUS = new LatLng(56.1499752f, 10.2009121f);
-    public static final LatLng ODENSE = new LatLng(55.3949f, 10.3915109f);
-
-    private Constants() {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        Tools.etaCreate(this);
+        super.onCreate(savedInstanceState);
     }
 
-    public static class LatLng {
-        float lat;
-        float lng;
+    @Override
+    protected void onStart() {
+        Eta.getInstance().onStart();
+        super.onStart();
+    }
 
-        public LatLng(float lat, float lng) {
-            this.lat = lat;
-            this.lng = lng;
-        }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Eta.getInstance().onStop();
     }
 
 }

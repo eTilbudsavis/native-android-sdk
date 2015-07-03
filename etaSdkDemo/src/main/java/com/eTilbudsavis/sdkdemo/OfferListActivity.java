@@ -18,7 +18,7 @@ package com.eTilbudsavis.sdkdemo;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.graphics.ColorUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -27,12 +27,11 @@ import android.widget.TextView;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.log.EtaLog;
-import com.eTilbudsavis.etasdk.model.Catalog;
+import com.eTilbudsavis.etasdk.model.Offer;
 import com.eTilbudsavis.etasdk.network.EtaError;
 import com.eTilbudsavis.etasdk.network.Response;
 import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.utils.Api;
-import com.eTilbudsavis.etasdk.utils.Utils;
 import com.eTilbudsavis.sdkdemo.base.BaseListActivity;
 
 import org.json.JSONArray;
@@ -40,28 +39,28 @@ import org.json.JSONArray;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CatalogListActivity extends BaseListActivity implements AdapterView.OnItemClickListener {
+public class OfferListActivity extends BaseListActivity implements AdapterView.OnItemClickListener {
 
-    public static final String TAG = CatalogListActivity.class.getSimpleName();
+    public static final String TAG = OfferListActivity.class.getSimpleName();
 
-    private static final String STATE_CATALOGS = "catalogs";
+    private static final String STATE_OFFERS = "offers";
 
-    private List<Catalog> mCatalogs = new ArrayList<Catalog>();
+    private List<Offer> mOffers = new ArrayList<Offer>();
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Catalog c = mCatalogs.get(position);
-        CatalogViewerActivity.launch(this, c);
+        Offer o = mOffers.get(position);
+        OfferViewActivity.launch(this, o);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
-            ArrayList<Catalog> tmp = savedInstanceState.getParcelableArrayList(STATE_CATALOGS);
-            mCatalogs.addAll(tmp);
+            ArrayList<Offer> tmp = savedInstanceState.getParcelableArrayList(STATE_OFFERS);
+            mOffers.addAll(tmp);
         }
-        setListAdapter(new CatalogAdapter());
+        setListAdapter(new OfferAdapter());
         getListView().setOnItemClickListener(this);
 
     }
@@ -69,20 +68,20 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
     @Override
     protected void onResume() {
         super.onResume();
-        if (mCatalogs.isEmpty()) {
+        if (mOffers.isEmpty()) {
             showProgress("Fetching catalogs");
-            JsonArrayRequest catalogReq = new JsonArrayRequest(Api.Endpoint.CATALOG_LIST, mCatalogListener);
-            Eta.getInstance().add(catalogReq);
+            JsonArrayRequest offerReq = new JsonArrayRequest(Api.Endpoint.OFFER_LIST, mOfferListener);
+            Eta.getInstance().add(offerReq);
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(STATE_CATALOGS, new ArrayList<Catalog>(mCatalogs));
+        outState.putParcelableArrayList(STATE_OFFERS, new ArrayList<Offer>(mOffers));
     }
 
-    Response.Listener<JSONArray> mCatalogListener = new Response.Listener<JSONArray>() {
+    Response.Listener<JSONArray> mOfferListener = new Response.Listener<JSONArray>() {
 
         @Override
         public void onComplete(JSONArray response, EtaError error) {
@@ -94,14 +93,14 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
                 if (response.length() == 0) {
 
                     // This is usually the case when either location or radius could use some adjustment.
-                    showDialog("No catalogs available", "Try changing the SDK location, or increase the radius.");
+                    showDialog("No offers available", "Try changing the SDK location, or increase the radius.");
 
                 } else {
 
                     // The request was a success, take the first catalog and display it
-                    List<Catalog> catalogs = Catalog.fromJSON(response);
-                    mCatalogs.addAll(catalogs);
-                    ((CatalogAdapter)getListAdapter()).notifyDataSetChanged();
+                    List<Offer> offers = Offer.fromJSON(response);
+                    mOffers.addAll(offers);
+                    ((OfferAdapter)getListAdapter()).notifyDataSetChanged();
 
                 }
 
@@ -117,18 +116,19 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
         }
     };
 
-    public class CatalogAdapter extends BaseAdapter {
+    public class OfferAdapter extends BaseAdapter {
 
-        private int mPadding = Utils.convertDpToPx(5, CatalogListActivity.this);
+        private int mDarkBackground = Color.argb(0x10, 0, 0, 0);
+        private LayoutInflater mInflater = LayoutInflater.from(OfferListActivity.this);
 
         @Override
         public int getCount() {
-            return mCatalogs.size();
+            return mOffers.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return mCatalogs.get(position);
+            return mOffers.get(position);
         }
 
         @Override
@@ -138,15 +138,21 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            TextView tv = new TextView(CatalogListActivity.this);
-            Catalog c = mCatalogs.get(position);
-            tv.setText(c.getBranding().getName());
-            tv.setTextSize(30);
-            tv.setPadding(mPadding, mPadding, mPadding, mPadding);
-            int color = c.getBranding().getColor();
-            tv.setBackgroundColor(color);
-            tv.setTextColor(Tools.getTextColor(color));
-            return tv;
+
+            Offer o = mOffers.get(position);
+
+            View v = mInflater.inflate(R.layout.offer_list_view, parent, false);
+            TextView heading = (TextView) v.findViewById(R.id.heading);
+            TextView price = (TextView) v.findViewById(R.id.price);
+
+            heading.setText(o.getHeading());
+            price.setText(o.getPricing().getPrice() + o.getPricing().getCurrency());
+
+            if (position%2==0) {
+                v.setBackgroundColor(mDarkBackground);
+            }
+
+            return v;
         }
 
     }

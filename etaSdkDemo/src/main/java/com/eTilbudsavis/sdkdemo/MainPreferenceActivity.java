@@ -25,6 +25,7 @@ import com.eTilbudsavis.etasdk.EtaLocation;
 import com.eTilbudsavis.etasdk.log.DevLogger;
 import com.eTilbudsavis.etasdk.log.EtaLog;
 import com.eTilbudsavis.etasdk.test.EtaSdkTest;
+import com.eTilbudsavis.sdkdemo.base.BasePreferenceActivity;
 
 public class MainPreferenceActivity extends BasePreferenceActivity implements Preference.OnPreferenceClickListener {
 

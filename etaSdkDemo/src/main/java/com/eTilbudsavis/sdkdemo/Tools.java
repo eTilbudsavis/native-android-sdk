@@ -16,49 +16,51 @@
 
 package com.eTilbudsavis.sdkdemo;
 
-import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.content.Context;
+import android.graphics.Color;
+import android.support.v4.graphics.ColorUtils;
 
 import com.eTilbudsavis.etasdk.Eta;
 
-public class BaseActivity extends FragmentActivity {
+public class Tools {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    private static int mTextColorLight = Color.argb(0xF0, 0xFF, 0xFF, 0xFF);
+    private static int mTextColorDark = ColorUtils.setAlphaComponent(Color.BLACK, 0xe0);
 
-        /* 
-         * Eta.create(Context ctx) must be invoked once, to instantiate the SDK
+    private Tools() {
+
+    }
+
+    public static void etaCreate(Context c) {
+
+        /*
+         * Eta.etaCreate(Context ctx) must be invoked once, to instantiate the SDK
          * prior to calling Eta.getInstance().
-         * 
-         * Calling Eta.create(Context ctx) can also be called from Application.onCreate().
-         * 
+         *
+         * Calling Eta.etaCreate(Context ctx) can also be called from Application.onCreate().
+         *
          * ApiKey and ApiSecret are not included in the demo/SDK, but you can
          * get your own at https://etilbudsavis.dk/developers/ :-)
          */
         if (!Eta.isCreated()) {
 
             // Create your instance of Eta
-            Eta.create(this);
-			
-			/* You can optionally set a develop flag. 
+            Eta.create(c);
+
+			/* You can optionally set a develop flag.
 			 * I'm using BuildConfig, but you can choose what ever scheme you want.
 			 */
             Eta.getInstance().setDevelop(BuildConfig.DEBUG);
         }
 
-        super.onCreate(savedInstanceState);
     }
 
-    @Override
-    protected void onStart() {
-        Eta.getInstance().onStart();
-        ApiCheck.checkKeys(Eta.getInstance());
-        super.onStart();
+    public static int getTextColor(int backgroundColor) {
+        return getTextColor(backgroundColor, mTextColorLight, mTextColorDark);
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Eta.getInstance().onStop();
+    public static int getTextColor(int backgroundColor, int textLight, int textDark) {
+        return ColorUtils.calculateLuminance(backgroundColor) < 0.5 ? textLight : textDark;
     }
+
 }

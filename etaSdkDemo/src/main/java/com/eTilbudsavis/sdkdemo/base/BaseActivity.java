@@ -14,25 +14,32 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.eTilbudsavis.sdkdemo;
+package com.eTilbudsavis.sdkdemo.base;
+
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
 import com.eTilbudsavis.etasdk.Eta;
+import com.eTilbudsavis.sdkdemo.Tools;
 
-public class ApiCheck {
+public class BaseActivity extends FragmentActivity {
 
-    public static final String DEF_KEY = "add_your_key";
-
-    private static final String ERR = "You must replace the API key, and API secret found in strings.xml " +
-            "with your own keys found here: https://etilbudsavis.dk/developers/apps/";
-
-    private ApiCheck() {
-
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        Tools.etaCreate(this);
+        super.onCreate(savedInstanceState);
     }
 
-    public static void checkKeys(Eta e) {
-        if (DEF_KEY.equals(e.getApiKey()) || DEF_KEY.equals(e.getApiSecret())) {
-            throw new IllegalArgumentException(ERR);
-        }
+    @Override
+    protected void onStart() {
+        Eta.getInstance().onStart();
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Eta.getInstance().onStop();
     }
 
 }

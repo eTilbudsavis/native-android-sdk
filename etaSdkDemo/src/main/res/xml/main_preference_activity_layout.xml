@@ -22,18 +22,26 @@
 
         <Preference
             android:key="pref_main_catalog_list"
-            android:title="Get catalog list">
+            android:title="Catalog list">
             <intent
                 android:targetPackage="com.eTilbudsavis.sdkdemo"
                 android:targetClass="com.eTilbudsavis.sdkdemo.CatalogListActivity"/>
         </Preference>
 
         <Preference
-            android:key="pref_main_search_offers"
-            android:title="Search Offers">
+            android:key="pref_main_offer_list"
+            android:title="Offer list">
             <intent
                 android:targetPackage="com.eTilbudsavis.sdkdemo"
-                android:targetClass="com.eTilbudsavis.sdkdemo.SearchActivity"/>
+                android:targetClass="com.eTilbudsavis.sdkdemo.OfferListActivity"/>
+        </Preference>
+
+        <Preference
+            android:key="pref_main_offer_search"
+            android:title="Offer search">
+            <intent
+                android:targetPackage="com.eTilbudsavis.sdkdemo"
+                android:targetClass="com.eTilbudsavis.sdkdemo.OfferSearchActivity"/>
         </Preference>
 
     </PreferenceCategory>

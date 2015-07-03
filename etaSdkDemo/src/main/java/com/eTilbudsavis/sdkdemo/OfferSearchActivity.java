@@ -17,15 +17,11 @@ package com.eTilbudsavis.sdkdemo;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.eTilbudsavis.etasdk.Eta;
 import com.eTilbudsavis.etasdk.log.EtaLog;
@@ -35,40 +31,34 @@ import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.Param;
+import com.eTilbudsavis.sdkdemo.base.BaseActivity;
 
 import org.json.JSONArray;
 
 import java.util.ArrayList;
 
-public class SearchActivity extends BaseActivity {
+public class OfferSearchActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
 
-    public static final String TAG = SearchActivity.class.getSimpleName();
+    public static final String TAG = OfferSearchActivity.class.getSimpleName();
 
-    public static final String ARG_OFFERS = "offers";
-    public static final String ARG_QUERY = "query";
+    public static final String STATE_OFFERS = "offers";
+    public static final String STATE_QUERY = "query";
 
-    EditText mQuery;
-    ArrayList<Offer> mOffers;
+    private EditText mQuery;
+    private ArrayList<Offer> mOffers = new ArrayList<Offer>();
 
-    ProgressDialog mPd;
-    ListView mListView;
+    private ProgressDialog mPd;
+    private OfferAdapter mAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.search);
-
-        // Find views
-        mQuery = (EditText) findViewById(R.id.etQuery);
-        mListView = (ListView) findViewById(R.id.lvResult);
 
         // Check for any saved state
-        if (savedInstanceState != null && savedInstanceState.containsKey(ARG_OFFERS) && savedInstanceState.containsKey(ARG_QUERY)) {
-            mOffers = savedInstanceState.getParcelableArrayList(ARG_OFFERS);
-            if (mOffers != null) {
-                mListView.setAdapter(new SearchAdapter());
-            }
-            String q = savedInstanceState.getString(ARG_QUERY);
+        if (savedInstanceState != null && savedInstanceState.containsKey(STATE_OFFERS) && savedInstanceState.containsKey(STATE_QUERY)) {
+            ArrayList<Offer> tmp = savedInstanceState.getParcelableArrayList(STATE_OFFERS);
+            mOffers.addAll(tmp);
+            String q = savedInstanceState.getString(STATE_QUERY);
             if (q != null) {
                 mQuery.setText(q);
                 mQuery.setSelection(q.length());
@@ -76,26 +66,18 @@ public class SearchActivity extends BaseActivity {
 
         }
 
-        System.out.print("Eta null: " + Eta.getInstance().getClass().toString());
+        setContentView(R.layout.search);
+
+        // Find views
+        mQuery = (EditText) findViewById(R.id.etQuery);
+        ListView listView = (ListView) findViewById(R.id.lvResult);
+
+        mAdapter = new OfferAdapter(this, mOffers);
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(this);
 
         Button search = (Button) findViewById(R.id.btnPerformSearch);
-        search.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-
-                String query = mQuery.getText().toString().trim();
-
-                if (query.length() > 0) {
-
-                    mPd = ProgressDialog.show(SearchActivity.this, "", "Searching...", true, true);
-                    performSearch(query);
-
-                }
-
-            }
-        });
-
+        search.setOnClickListener(this);
 
     }
 
@@ -136,8 +118,8 @@ public class SearchActivity extends BaseActivity {
 					 * Generate object from the JSONArray, with the factory method
 					 * in the Offer object.
 					 */
-                    mOffers = (ArrayList<Offer>) Offer.fromJSON(response);
-                    mListView.setAdapter(new SearchAdapter());
+                    mOffers.addAll(Offer.fromJSON(response));
+                    mAdapter.notifyDataSetChanged();
 
                 } else {
 					
@@ -164,36 +146,28 @@ public class SearchActivity extends BaseActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList(ARG_OFFERS, mOffers);
-        outState.putString(ARG_QUERY, mQuery.getText().toString());
+        outState.putParcelableArrayList(STATE_OFFERS, mOffers);
+        outState.putString(STATE_QUERY, mQuery.getText().toString());
     }
 
-    class SearchAdapter extends BaseAdapter {
+    @Override
+    public void onClick(View v) {
 
-        @Override
-        public int getCount() {
-            return mOffers == null ? 0 : mOffers.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return mOffers.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            Offer o = mOffers.get(position);
-            LayoutInflater i = LayoutInflater.from(SearchActivity.this);
-            TextView tv = (TextView) i.inflate(android.R.layout.simple_list_item_1, parent, false);
-            tv.setText(o.getHeading());
-            return tv;
+        switch (v.getId()) {
+            case R.id.btnPerformSearch:
+                String query = mQuery.getText().toString().trim();
+                if (query.length() > 0) {
+                    mPd = ProgressDialog.show(OfferSearchActivity.this, "", "Searching...", true, true);
+                    performSearch(query);
+                }
+                break;
         }
 
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Offer o = mOffers.get(position);
+        OfferViewActivity.launch(this, o);
+    }
 }

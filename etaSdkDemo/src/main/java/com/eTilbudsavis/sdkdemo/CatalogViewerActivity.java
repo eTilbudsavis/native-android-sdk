@@ -25,17 +25,15 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 
 import com.eTilbudsavis.etasdk.model.Catalog;
 import com.eTilbudsavis.etasdk.model.Hotspot;
 import com.eTilbudsavis.etasdk.network.EtaError;
-import com.eTilbudsavis.etasdk.pageflip.PageOverviewDialog;
 import com.eTilbudsavis.etasdk.pageflip.PageflipFragment;
 import com.eTilbudsavis.etasdk.pageflip.PageflipListener;
 import com.eTilbudsavis.etasdk.pageflip.utils.PageflipUtils;
+import com.eTilbudsavis.sdkdemo.base.BaseActivity;
 
 public class CatalogViewerActivity extends BaseActivity {
 

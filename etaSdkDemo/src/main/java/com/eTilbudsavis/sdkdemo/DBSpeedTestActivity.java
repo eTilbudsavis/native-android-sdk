@@ -28,6 +28,7 @@ import com.eTilbudsavis.etasdk.model.Shoppinglist;
 import com.eTilbudsavis.etasdk.model.ShoppinglistItem;
 import com.eTilbudsavis.etasdk.model.User;
 import com.eTilbudsavis.etasdk.test.ModelCreator;
+import com.eTilbudsavis.sdkdemo.base.BaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;

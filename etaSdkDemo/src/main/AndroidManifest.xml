@@ -53,13 +53,17 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.eTilbudsavis.sdkdemo.CatalogListActivity"/>
+        <activity android:name=".CatalogListActivity"/>
 
-        <activity android:name="com.eTilbudsavis.sdkdemo.CatalogViewerActivity"/>
+        <activity android:name=".OfferListActivity"/>
 
-        <activity android:name="com.eTilbudsavis.sdkdemo.SearchActivity"/>
+        <activity android:name=".CatalogViewerActivity"/>
 
-        <activity android:name="com.eTilbudsavis.sdkdemo.DBSpeedTestActivity"/>
+        <activity android:name=".OfferViewActivity"/>
+
+        <activity android:name=".OfferSearchActivity"/>
+
+        <activity android:name=".DBSpeedTestActivity"/>
 
     </application>
 
