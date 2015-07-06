@@ -638,7 +638,15 @@ public class ListManager {
             }
         }
 
-        boolean success = mDatabase.editItems(edited, user);
+
+        boolean success = false;
+        if (user.isLoggedIn()) {
+            success = mDatabase.editItems(edited, user);
+        } else {
+            int rows = mDatabase.deleteItems(sl.getId(), stateToDelete, user);
+            success = rows > 0;
+        }
+
         if (success) {
 			/* Update SL info, but not state. This will prevent sync, and API
 			 * will auto update the modified tag, nice!
@@ -690,7 +698,16 @@ public class ListManager {
             mBuilder.edit(after);
         }
 
-        boolean success = mDatabase.editItems(edited, user);
+        boolean success = false;
+        // Is user is logged in, then just delete the item completely
+        // if not, then mark it to be deleted by the sync manager.
+        if (user.isLoggedIn()) {
+            success = mDatabase.editItems(edited, user);
+        } else {
+            success = mDatabase.deleteItem(sli, user);
+            edited.remove(sli);
+        }
+
         if (success) {
 			/* Update shoppinglist modified, but not state, so we have correct
 			 * state but won't have to sync changes to API.
