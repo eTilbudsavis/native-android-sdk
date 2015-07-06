@@ -443,6 +443,34 @@ public class DataSource extends SQLDataSource {
         return delete(ShareSQLiteHelper.TABLE, whereClause, whereArgs);
     }
 
+    public int clean() {
+        int c = cleanItemsForOfflineUser();
+        c += cleanListssForOfflineUser();
+        return c;
+    }
+
+    private int cleanItemsForOfflineUser() {
+        /*
+        The ListManager didn't actually delete items from the tables. Possibly causing a lot of
+        shoppinglistitems to remain in the item table.
+        Cleanup by performing a delete WHERE user = -1 and state = DELETE
+         */
+        String whereClause = DatabaseHelper.USER + "=? AND " + DatabaseHelper.STATE + "=? ";
+        String[] whereArgs = new String[]{"-1", String.valueOf(SyncState.DELETE)};
+        return delete(ItemSQLiteHelper.TABLE, whereClause, whereArgs);
+    }
+
+    private int cleanListssForOfflineUser() {
+        /*
+        The ListManager didn't actually delete lists from the tables. Possibly causing a lot of
+        Shoppinglists to remain in the item table.
+        Cleanup by performing a delete WHERE user = -1 and state = DELETE
+         */
+        String whereClause = DatabaseHelper.USER + "=? AND " + DatabaseHelper.STATE + "=? ";
+        String[] whereArgs = new String[]{"-1", String.valueOf(SyncState.DELETE)};
+        return delete(ListSQLiteHelper.TABLE, whereClause, whereArgs);
+    }
+
     public JSONArray dumpListTable() {
         return dumpTable(ListSQLiteHelper.TABLE);
     }
