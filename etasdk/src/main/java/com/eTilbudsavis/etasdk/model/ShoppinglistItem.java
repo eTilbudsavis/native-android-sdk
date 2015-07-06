@@ -553,6 +553,11 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
         return this;
     }
 
+    @Override
+    public String toString() {
+        return toJSON().toString();
+    }
+
     /**
      * Compare method, that uses the {@link ShoppinglistItem#getTitle() title}
      * to compare two items.
