@@ -16,7 +16,6 @@
 package com.eTilbudsavis.etasdk.database;
 
 import android.content.Context;
-import android.os.Looper;
 
 import com.eTilbudsavis.etasdk.Constants;
 import com.eTilbudsavis.etasdk.Eta;
@@ -30,7 +29,6 @@ import com.eTilbudsavis.etasdk.utils.PermissionUtils;
 import com.eTilbudsavis.etasdk.utils.Utils;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;

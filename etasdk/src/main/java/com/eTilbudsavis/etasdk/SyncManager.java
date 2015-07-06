@@ -42,7 +42,6 @@ import com.eTilbudsavis.etasdk.network.Response.Listener;
 import com.eTilbudsavis.etasdk.network.impl.HandlerDelivery;
 import com.eTilbudsavis.etasdk.network.impl.JsonArrayRequest;
 import com.eTilbudsavis.etasdk.network.impl.JsonObjectRequest;
-import com.eTilbudsavis.etasdk.network.impl.NetworkDebugger;
 import com.eTilbudsavis.etasdk.utils.Api;
 import com.eTilbudsavis.etasdk.utils.Api.Endpoint;
 import com.eTilbudsavis.etasdk.utils.Api.Param;

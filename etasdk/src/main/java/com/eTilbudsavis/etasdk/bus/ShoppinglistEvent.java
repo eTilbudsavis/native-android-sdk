@@ -91,12 +91,6 @@ public class ShoppinglistEvent extends EtaEvent {
         mFirstSync = firstSync;
     }
 
-    @Override
-    public String toString() {
-        String format = "%s[ isServer: %s, isFirstSync: %s, list.count: %s, item.count: %s ]";
-        return String.format(format, getType(), mIsServer, mFirstSync, mLists.size(), mItems.size());
-    }
-
     /*
     Add new notification items to the maps
      */
@@ -221,6 +215,47 @@ public class ShoppinglistEvent extends EtaEvent {
             int DELETED = 4;
         }
 
+    }
+
+    @Override
+    public String toString() {
+        String format = "%s[ isServer: %s, isFirstSync: %s, list.count: %s, item.count: %s ]";
+        return String.format(format, getType(), mIsServer, mFirstSync, mLists.size(), mItems.size());
+    }
+
+    public String toString(boolean printAll) {
+        if (!printAll) {
+            return toString();
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("isServer: ").append(mIsServer).append("\n");
+        sb.append("isFirstSync: ").append(mFirstSync).append("\n");
+
+        if (hasListNotifications()) {
+            sb.append("# LISTS: ").append("\n");
+            buildList(sb, "List.Del", getDeletedLists());
+            buildList(sb, "List.Edit", getEditedLists());
+            buildList(sb, "List.Add", getAddedLists());
+        }
+        if (hasItemNotifications()) {
+            sb.append("# ITEMS: ").append("\n");
+            buildItem(sb, "Item.Del", getDeletedItems());
+            buildItem(sb, "Item.Edit", getEditedItems());
+            buildItem(sb, "Item.Add", getAddedItems());
+        }
+        return sb.toString();
+    }
+
+    private void buildItem(StringBuilder sb, String action, List<ShoppinglistItem> list) {
+        for (ShoppinglistItem sli : list) {
+            sb.append(action).append(": ").append(sli.toString()).append("\n");
+        }
+    }
+
+    private void buildList(StringBuilder sb, String action, List<Shoppinglist> list) {
+        for (Shoppinglist sli : list) {
+            sb.append(action).append(": ").append(sli.toString()).append("\n");
+        }
     }
 
     public static class Builder {
