@@ -31,7 +31,6 @@ import com.eTilbudsavis.etasdk.model.User;
 import com.eTilbudsavis.etasdk.model.interfaces.SyncState;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -335,7 +334,7 @@ public class DataSource extends SQLDataSource {
         String[] whereArgs = new String[]{shoppinglistId, userId};
         if (state != null) {
             whereClause = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=?  AND " + DatabaseHelper.TICK + "=?";
-            whereArgs = new String[]{shoppinglistId, userId, String.valueOf(state)};
+            whereArgs = new String[]{shoppinglistId, userId, DbUtils.unescape(state)};
         }
         return delete(ItemSQLiteHelper.TABLE, whereClause, whereArgs);
     }

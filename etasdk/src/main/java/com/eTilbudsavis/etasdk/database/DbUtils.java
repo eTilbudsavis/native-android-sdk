@@ -172,8 +172,12 @@ public class DbUtils {
         return i == 1;
     }
 
-    public static int boolToInt(boolean b) {
+    public static int unescape(boolean b) {
         return b ? 1 : 0;
+    }
+
+    public static String unescape(Boolean b) {
+        return (b != null && b) ? "1" : "0";
     }
 
     public static void bindOrNull(SQLiteStatement s, int index, String value) {

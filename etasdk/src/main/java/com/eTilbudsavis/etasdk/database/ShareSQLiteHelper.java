@@ -73,7 +73,7 @@ public class ShareSQLiteHelper extends DatabaseHelper {
         DbUtils.bindOrNull(s, 3, userId);
         DbUtils.bindOrNull(s, 4, share.getEmail());
         DbUtils.bindOrNull(s, 5, share.getName());
-        s.bindLong(6, DbUtils.boolToInt(share.getAccepted()));
+        s.bindLong(6, DbUtils.unescape(share.getAccepted()));
         DbUtils.bindOrNull(s, 7, share.getAccess());
         DbUtils.bindOrNull(s, 8, share.getAcceptUrl());
         s.bindLong(9, share.getState());

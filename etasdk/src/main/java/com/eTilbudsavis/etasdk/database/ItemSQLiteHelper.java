@@ -136,7 +136,7 @@ public class ItemSQLiteHelper extends DatabaseHelper {
         cv.put(MODIFIED, Utils.dateToString(sli.getModified()));
         cv.put(DESCRIPTION, sli.getDescription());
         cv.put(COUNT, sli.getCount());
-        cv.put(TICK, DbUtils.boolToInt(sli.isTicked()));
+        cv.put(TICK, DbUtils.unescape(sli.isTicked()));
         cv.put(OFFER_ID, sli.getOfferId());
         cv.put(CREATOR, sli.getCreator());
         cv.put(SHOPPINGLIST_ID, sli.getShoppinglistId());
