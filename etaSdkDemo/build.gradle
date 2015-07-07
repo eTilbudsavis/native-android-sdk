@@ -16,11 +16,17 @@
 
 apply plugin: 'com.android.application'
 
+def versionMajor = 1
+def versionMinor = 0
+def versionPatch = 0
+
 android {
     compileSdkVersion 20
     buildToolsVersion "22.0.1"
 
     defaultConfig {
+        versionCode versionMajor * 100000 + versionMinor * 1000 + versionPatch
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
         applicationId "com.eTilbudsavis.sdkdemo"
         minSdkVersion 10
         targetSdkVersion 19
