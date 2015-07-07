@@ -1143,6 +1143,7 @@ public class SyncManager {
                     mDatabase.editShare(s, user);
                     EtaLog.v(TAG, "Owner cannot be edited. Resetting share.state and ignoring.");
                 }
+                count--;
                 continue;
             }
 
