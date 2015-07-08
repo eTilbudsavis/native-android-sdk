@@ -120,7 +120,7 @@ public class SyncManager {
     public static final String TAG = Constants.getTag(SyncManager.class);
 
     private static final boolean SAVE_NETWORK_LOG = false;
-    private static final boolean LOG_SYNC = true;
+    private static final boolean LOG_SYNC = false;
     private static final boolean LOG = false;
     final Object RESUME_LOCK = new Object();
     private final Stack<Request<?>> mCurrentRequests = new Stack<Request<?>>();

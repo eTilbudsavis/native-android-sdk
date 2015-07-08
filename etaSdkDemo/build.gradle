@@ -21,7 +21,7 @@ def versionMinor = 0
 def versionPatch = 0
 
 android {
-    compileSdkVersion 20
+    compileSdkVersion 22
     buildToolsVersion "22.0.1"
 
     defaultConfig {
@@ -29,7 +29,7 @@ android {
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
         applicationId "com.eTilbudsavis.sdkdemo"
         minSdkVersion 10
-        targetSdkVersion 19
+        targetSdkVersion 22
     }
 
     buildTypes {
