@@ -180,7 +180,7 @@ public class ListUtils {
      * @return A {@link java.util.Set} of ids
      */
     public static HashSet<String> getShoppinglistIdsFromItems(List<ShoppinglistItem> items) {
-        HashSet<String> ids = new HashSet<>(items.size());
+        HashSet<String> ids = new HashSet<String>(items.size());
         for (ShoppinglistItem sli : items) {
             ids.add(sli.getShoppinglistId());
         }
@@ -194,7 +194,7 @@ public class ListUtils {
      * @return A {@link java.util.Set} of ids
      */
     public static HashSet<String> getShoppinglistIdsFromLists(List<Shoppinglist> lists) {
-        HashSet<String> ids = new HashSet<>(lists.size());
+        HashSet<String> ids = new HashSet<String>(lists.size());
         for (Shoppinglist sl : lists) {
             ids.add(sl.getId());
         }

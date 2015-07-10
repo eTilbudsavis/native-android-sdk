@@ -425,7 +425,7 @@ public class DatabaseWrapper {
     }
 
     public List<Shoppinglist> allowEditOrThrow(Set<String> shoppinglistIds, User user) {
-        HashMap<String, Shoppinglist> map = new HashMap<>(shoppinglistIds.size());
+        HashMap<String, Shoppinglist> map = new HashMap<String, Shoppinglist>(shoppinglistIds.size());
         for (String id : shoppinglistIds) {
             if (!map.containsKey(id)) {
                 Shoppinglist sl = getList(id, user);
