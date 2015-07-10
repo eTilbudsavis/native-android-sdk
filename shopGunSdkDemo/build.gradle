@@ -16,9 +16,9 @@
 
 apply plugin: 'com.android.application'
 
-def versionMajor = 1
+def versionMajor = 0
 def versionMinor = 0
-def versionPatch = 0
+def versionPatch = 1
 
 android {
     compileSdkVersion 22
@@ -46,6 +46,6 @@ android {
 }
 
 dependencies {
-    compile project(':etasdk')
+    compile project(':shopGunSdk')
     compile 'com.android.support:support-v4:22.2.0'
 }

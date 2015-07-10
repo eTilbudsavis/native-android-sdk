@@ -9,8 +9,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/etaSdkDemo" />
-            <option value="$PROJECT_DIR$/etasdk" />
+            <option value="$PROJECT_DIR$/shopGunSdk" />
+            <option value="$PROJECT_DIR$/shopGunSdkDemo" />
           </set>
         </option>
       </GradleProjectSettings>
