@@ -29,9 +29,9 @@ import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class EtaLogHelper {
+public class SgnLogHelper {
 
-    private EtaLogHelper() {
+    private SgnLogHelper() {
     }
 
     /**

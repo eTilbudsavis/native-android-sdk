@@ -25,11 +25,11 @@ import junit.framework.Assert;
 /**
  * Created by oizo on 15/05/15.
  */
-public class EtaLocationTest {
+public class SgnLocationTest {
 
-    public static final String TAG = Constants.getTag(EtaLocationTest.class);
+    public static final String TAG = Constants.getTag(SgnLocationTest.class);
 
-    private EtaLocationTest() {
+    private SgnLocationTest() {
         // empty
     }
 

@@ -39,7 +39,7 @@ public class SdkTest {
         SerializationSpeedTest.test();
         EnvironmentTest.test();
         EventTest.test();
-        EtaLocationTest.test();
+        SgnLocationTest.test();
         PageflipUtilsTest.test();
         ListUtilsTest.test();
 

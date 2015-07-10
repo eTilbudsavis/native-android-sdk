@@ -1,6 +1,12 @@
 eTilbudsavis - Android SDK
 ===
 
+This guide is out of date
+===
+
+We are working on a new version, please stay tuned. Until then you can refer to the Demo App, or email us with questions :-) 
+
+<!-- 
 The simple solution to querying for eTilbudsavis-data.
 
 [Before you begin](#before-you-begin)
@@ -232,3 +238,4 @@ If you have any feedback or comments feel free to contact danny@etilbudsavis.dk 
 plugin. 
 [developer site]:https://etilbudsavis.dk/developers/
 [Native Android SDK]:https://github.com/eTilbudsavis/native-android-sdk.git
+ -->
