@@ -1,7 +1,7 @@
 <component name="CopyrightManager">
-  <settings default="eTilbudsavis SDK">
+  <settings default="ShopGun SDK">
     <module2copyright>
-      <element module="All" copyright="eTilbudsavis SDK" />
+      <element module="All" copyright="ShopGun SDK" />
     </module2copyright>
     <LanguageOptions name="Groovy">
       <option name="separateBefore" value="true" />

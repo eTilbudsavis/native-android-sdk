@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright 2015 eTilbudsavis
+  Copyright 2015 ShopGun
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -24,32 +24,32 @@
             android:key="pref_main_catalog_list"
             android:title="Catalog list">
             <intent
-                android:targetPackage="com.eTilbudsavis.sdkdemo"
-                android:targetClass="com.eTilbudsavis.sdkdemo.CatalogListActivity"/>
+                android:targetPackage="com.shopgun.android.sdk.demo"
+                android:targetClass="com.shopgun.android.sdk.demo.CatalogListActivity"/>
         </Preference>
 
         <Preference
             android:key="pref_main_offer_list"
             android:title="Offer list">
             <intent
-                android:targetPackage="com.eTilbudsavis.sdkdemo"
-                android:targetClass="com.eTilbudsavis.sdkdemo.OfferListActivity"/>
+                android:targetPackage="com.shopgun.android.sdk.demo"
+                android:targetClass="com.shopgun.android.sdk.demo.OfferListActivity"/>
         </Preference>
 
         <Preference
             android:key="pref_main_offer_search"
             android:title="Offer search">
             <intent
-                android:targetPackage="com.eTilbudsavis.sdkdemo"
-                android:targetClass="com.eTilbudsavis.sdkdemo.OfferSearchActivity"/>
+                android:targetPackage="com.shopgun.android.sdk.demo"
+                android:targetClass="com.shopgun.android.sdk.demo.OfferSearchActivity"/>
         </Preference>
 
         <Preference
             android:key="pref_main_session"
             android:title="Session">
             <intent
-                android:targetPackage="com.eTilbudsavis.sdkdemo"
-                android:targetClass="com.eTilbudsavis.sdkdemo.SessionActivity"/>
+                android:targetPackage="com.shopgun.android.sdk.demo"
+                android:targetClass="com.shopgun.android.sdk.demo.SessionActivity"/>
         </Preference>
 
     </PreferenceCategory>
@@ -66,8 +66,8 @@
             android:title="SDK DB Speed"
             android:summary="Test the DB speed">
             <intent
-                android:targetPackage="com.eTilbudsavis.sdkdemo"
-                android:targetClass="com.eTilbudsavis.sdkdemo.DBSpeedTestActivity"/>
+                android:targetPackage="com.shopgun.android.sdk.demo"
+                android:targetClass="com.shopgun.android.sdk.demo.DBSpeedTestActivity"/>
         </Preference>
 
     </PreferenceCategory>

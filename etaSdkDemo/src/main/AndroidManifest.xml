@@ -1,5 +1,5 @@
 <!--
-  Copyright 2015 eTilbudsavis
+  Copyright 2015 ShopGun
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<manifest package="com.eTilbudsavis.sdkdemo"
+<manifest package="com.shopgun.android.sdk.demo"
           xmlns:android="http://schemas.android.com/apk/res/android"
           android:versionCode="200001"
           android:versionName="2.0.1">
@@ -32,17 +32,17 @@
         android:theme="@style/AppTheme">
 
         <meta-data
-            android:name="com.eTilbudsavis.etasdk.api_key"
-            android:value="@string/eta_sdk_api_key"/>
+            android:name="com.shopgun.android.sdk.api_key"
+            android:value="@string/shopgun_sdk_api_key"/>
         <meta-data
-            android:name="com.eTilbudsavis.etasdk.api_secret"
-            android:value="@string/eta_sdk_api_secret"/>
+            android:name="com.shopgun.android.sdk.api_secret"
+            android:value="@string/shopgun_sdk_api_secret"/>
         <meta-data
-            android:name="com.eTilbudsavis.etasdk.develop.api_key"
-            android:value="@string/eta_sdk_api_key_debug"/>
+            android:name="com.shopgun.android.sdk.develop.api_key"
+            android:value="@string/shopgun_sdk_api_key_debug"/>
         <meta-data
-            android:name="com.eTilbudsavis.etasdk.develop.api_secret"
-            android:value="@string/eta_sdk_api_secret_debug"/>
+            android:name="com.shopgun.android.sdk.develop.api_secret"
+            android:value="@string/shopgun_sdk_api_secret_debug"/>
 
         <activity
             android:name=".MainPreferenceActivity"

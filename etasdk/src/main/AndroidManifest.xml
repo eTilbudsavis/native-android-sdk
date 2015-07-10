@@ -1,5 +1,5 @@
 <!--
-  Copyright 2015 eTilbudsavis
+  Copyright 2015 ShopGun
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<manifest package="com.eTilbudsavis.etasdk"
+<manifest package="com.shopgun.android.sdk"
           xmlns:android="http://schemas.android.com/apk/res/android"
           android:versionCode="202000"
           android:versionName="2.2.0">

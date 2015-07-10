@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright 2015 eTilbudsavis
+  Copyright 2015 ShopGun
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 <resources>
 
-    <string name="etasdk_app_name">eTilbudsavis</string>
-    <string name="etasdk_pageflip_load">Kunne ikke indlæse\nside %1$s</string>
+    <string name="shopgun_sdk_app_name">eTilbudsavis</string>
+    <string name="shopgun_sdk_pageflip_load">Kunne ikke indlæse\nside %1$s</string>
 
 </resources>

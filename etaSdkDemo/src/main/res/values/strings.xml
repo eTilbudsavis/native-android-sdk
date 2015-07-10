@@ -1,5 +1,5 @@
 <!--
-  Copyright 2015 eTilbudsavis
+  Copyright 2015 ShopGun
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
   -->
 <resources>
 
-    <string name="app_name">eTilbudsavis SDK Demo</string>
-    <string name="title_activity_main">eTilbudsavis SDK Demo</string>
+    <string name="app_name">ShopGun SDK Demo</string>
+    <string name="title_activity_main">ShopGun SDK Demo</string>
 
     <!-- Remember to rab your own key/secret at https://etilbudsavis.dk/developers/ and get started :-) -->
-    <string name="eta_sdk_api_key">00ibm8b65trmxkmo6fy42nr5hyesj8o9</string>
-    <string name="eta_sdk_api_secret">00ibm8b65t6vgrgdjrel73okq0yxdb2a</string>
+    <string name="shopgun_sdk_api_key">00ibm8b65trmxkmo6fy42nr5hyesj8o9</string>
+    <string name="shopgun_sdk_api_secret">00ibm8b65t6vgrgdjrel73okq0yxdb2a</string>
 
-    <string name="eta_sdk_api_key_debug">00ibm8b65trmxkmo6fy42nr5hyesj8o9</string>
-    <string name="eta_sdk_api_secret_debug">00ibm8b65t6vgrgdjrel73okq0yxdb2a</string>
+    <string name="shopgun_sdk_api_key_debug">00ibm8b65trmxkmo6fy42nr5hyesj8o9</string>
+    <string name="shopgun_sdk_api_secret_debug">00ibm8b65t6vgrgdjrel73okq0yxdb2a</string>
 
 </resources>

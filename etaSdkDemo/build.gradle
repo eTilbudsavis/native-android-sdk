@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2015 eTilbudsavis
+ * Copyright 2015 ShopGun
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ android {
     defaultConfig {
         versionCode versionMajor * 100000 + versionMinor * 1000 + versionPatch
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
-        applicationId "com.eTilbudsavis.sdkdemo"
+        applicationId "com.shopgun.android.sdk.demo"
         minSdkVersion 10
         targetSdkVersion 22
     }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright 2015 eTilbudsavis
+  Copyright 2015 ShopGun
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 
 <resources>
 
-    <!-- eTilbudsavis Green -->
-    <color name="eta_sdk_green">#7b9119</color>
+    <!-- ShopGun Green -->
+    <color name="shopgun_sdk_green">#7b9119</color>
 
     <!-- Text colors -->
-    <color name="etasdk_text_light">#a0ffffff</color>
-    <color name="etasdk_text_dark">#a0000000</color>
+    <color name="shopgun_sdk_text_light">#a0ffffff</color>
+    <color name="shopgun_sdk_text_dark">#a0000000</color>
 
 </resources>
