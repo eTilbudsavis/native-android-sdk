@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.ColorUtils;
@@ -72,7 +72,7 @@ public class Branding implements IJson<JSONObject>, Parcelable {
             b.setColor(Json.colorValueOf(branding, JsonKey.COLOR));
             b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(JsonKey.PAGEFLIP)));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return b;
     }
@@ -86,7 +86,7 @@ public class Branding implements IJson<JSONObject>, Parcelable {
             o.put(JsonKey.COLOR, Json.nullCheck(ColorUtils.toString(getColor())));
             o.put(JsonKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return o;
     }

@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.test;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Si;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
@@ -41,7 +41,7 @@ public class UtilsTest {
 
     public static void test() {
 
-        EtaSdkTest.start(TAG);
+        SdkTest.start(TAG);
         testCreateUUID();
         testMapToQueryString();
         testRequestToUrlAndQueryString();
@@ -73,7 +73,7 @@ public class UtilsTest {
         String uuidFake = "83g24023-3225-4392-9362-332619620638";
         Assert.assertFalse(uuidFake.matches(REGEX_UUID));
 
-        EtaSdkTest.logTest(TAG, "CreateUUID");
+        SdkTest.logTest(TAG, "CreateUUID");
 
     }
 
@@ -126,7 +126,7 @@ public class UtilsTest {
         expected = "a=red&b=blue&d=green";
         Assert.assertEquals(expected, actual);
 
-        EtaSdkTest.logTest(TAG, "MapToQueryString");
+        SdkTest.logTest(TAG, "MapToQueryString");
 
     }
 
@@ -157,7 +157,7 @@ public class UtilsTest {
         actual = Utils.requestToUrlAndQueryString(r);
         Assert.assertEquals(expected, actual);
 
-        EtaSdkTest.logTest(TAG, "RequestToUrlAndQueryString");
+        SdkTest.logTest(TAG, "RequestToUrlAndQueryString");
     }
 
     public static void testIsSuccess() {
@@ -181,7 +181,7 @@ public class UtilsTest {
         }
         Assert.assertFalse(Utils.isSuccess(Integer.MAX_VALUE));
 
-        EtaSdkTest.logTest(TAG, "IsGenderValid");
+        SdkTest.logTest(TAG, "IsGenderValid");
     }
 
     public static void testStringToDate() {
@@ -225,8 +225,8 @@ public class UtilsTest {
             actual = Utils.stringToDate(s);
             Assert.assertNotSame(epoch, actual);
             String tmp = Utils.dateToString(new Date(actual.getTime() - offset));
-            EtaLog.d(TAG, "in:  " + s);
-            EtaLog.d(TAG, "out: " + tmp);
+            SgnLog.d(TAG, "in:  " + s);
+            SgnLog.d(TAG, "out: " + tmp);
             Assert.assertEquals(s, tmp);
         }
 
@@ -235,7 +235,7 @@ public class UtilsTest {
             Assert.assertEquals(epoch, actual);
         }
 
-        EtaSdkTest.logTest(TAG, "StringToDate");
+        SdkTest.logTest(TAG, "StringToDate");
     }
 
     public static void testDateToString() {
@@ -266,7 +266,7 @@ public class UtilsTest {
         actual = Utils.dateToString(c.getTime());
         Assert.assertNotSame("2100-12-12T23:59:59+0000", actual);
 
-        EtaSdkTest.logTest(TAG, "DateToString");
+        SdkTest.logTest(TAG, "DateToString");
     }
 
     public static void testCopyParcelable() {
@@ -303,7 +303,7 @@ public class UtilsTest {
 
         List<Si> listCopy = Utils.copyParcelable(list, Si.CREATOR);
 
-        EtaSdkTest.logTest(TAG, "Copy");
+        SdkTest.logTest(TAG, "Copy");
 
     }
 

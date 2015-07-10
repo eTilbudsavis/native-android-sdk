@@ -20,7 +20,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -88,11 +88,11 @@ public class SQLDataSource {
     }
 
     protected void logRef(String action) {
-        EtaLog.d(TAG, String.format("Thread: %s, Action: %s, RefCount: %s", Thread.currentThread().getName(), action, mRefCount.get()));
+        SgnLog.d(TAG, String.format("Thread: %s, Action: %s, RefCount: %s", Thread.currentThread().getName(), action, mRefCount.get()));
     }
 
     public void log(String tag, Exception e) {
-        EtaLog.e(tag, e.getMessage(), e);
+        SgnLog.e(tag, e.getMessage(), e);
     }
 
 }

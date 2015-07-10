@@ -42,7 +42,7 @@ public class DefaultImageDownloader implements ImageDownloader {
 
         ByteArrayBuffer bytes = new ByteArrayBuffer(init_buf);
         InputStream is = connection.getInputStream();
-//		EtaLog.d(TAG, "InputStream: " + is.getClass().getSimpleName());
+//		SgnLog.d(TAG, "InputStream: " + is.getClass().getSimpleName());
         if (is != null) {
 
             byte[] buf = new byte[init_buf];

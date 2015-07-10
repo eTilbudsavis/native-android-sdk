@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.network.impl;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.RequestQueue;
 import com.shopgun.android.sdk.network.Response.Listener;
@@ -44,7 +44,7 @@ public abstract class JsonRequest<T> extends Request<T> {
         super(method, url, listener);
         boolean nonBodyRequest = (method == Method.GET || method == Method.DELETE);
         if (nonBodyRequest && requestBody != null) {
-            EtaLog.i(TAG, "GET and DELETE requests doesn't take a body, and will be ignored.\n"
+            SgnLog.i(TAG, "GET and DELETE requests doesn't take a body, and will be ignored.\n"
                     + "Please append any GET and DELETE parameters to Request.putQueryParameters()");
         }
         mRequestBody = requestBody;
@@ -97,7 +97,7 @@ public abstract class JsonRequest<T> extends Request<T> {
      * {@link Request#getQueryParameters() query parameters}, before the request
      * is handed to the {@link RequestQueue}. So if you want to have the SDK/API
      * parameters appended as well in the string do:</p>
-     * <li>Eta.getInstance().add(Request)</li>
+     * <li>ShopGun.getInstance().add(Request)</li>
      * <p>and then call: </p>
      * <li>toString()</li>
      */

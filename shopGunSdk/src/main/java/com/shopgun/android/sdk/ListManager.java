@@ -21,7 +21,7 @@ import android.annotation.SuppressLint;
 import com.shopgun.android.sdk.bus.Bus;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -152,7 +152,7 @@ public class ListManager {
         Shoppinglist original = mDatabase.getList(sl.getId(), user);
         // Check for changes in previous item, and update surrounding
         if (original == null) {
-            EtaLog.i(TAG, "No such list exists in the database. To add new items, use addList().");
+            SgnLog.i(TAG, "No such list exists in the database. To add new items, use addList().");
             return false;
         }
 
@@ -201,7 +201,7 @@ public class ListManager {
                 } else if (dbShare.getAccess().equals(Share.ACCESS_OWNER)) {
                     // If owner was removed, then re-insert it.
                     sl.putShare(dbShare);
-                    EtaLog.i(TAG, "Owner cannot be removed from lists, owner will be reattached");
+                    SgnLog.i(TAG, "Owner cannot be removed from lists, owner will be reattached");
                 } else if (user.isLoggedIn()) {
                     // We'll have to add the share (in deleted state) to have it updated in the DB
                     // it should be removed as soon as the list have been inserted to DB.
@@ -376,7 +376,7 @@ public class ListManager {
         mDatabase.allowEditOrThrow(sli.getShoppinglistId(), user);
 
         if (sli.getOfferId() == null && sli.getDescription() == null) {
-            EtaLog.i(TAG, "The ShoppinglistItem neither has offerId, or"
+            SgnLog.i(TAG, "The ShoppinglistItem neither has offerId, or"
                     + "description, one or the other this is required by the API");
             return false;
         }
@@ -401,7 +401,7 @@ public class ListManager {
         Shoppinglist sl = mDatabase.getList(sli.getShoppinglistId(), user);
 
         if (sl == null) {
-            EtaLog.i(TAG, "The shoppinglist id on the shoppinglist item, could"
+            SgnLog.i(TAG, "The shoppinglist id on the shoppinglist item, could"
                     + "not be found, please add a shoppinglist before adding items");
             return false;
         }
@@ -470,7 +470,7 @@ public class ListManager {
         try {
             return editItems(items, user());
         } finally {
-            EtaLog.d(TAG, "editItems.time: " + (System.currentTimeMillis() - s) + "ms");
+            SgnLog.d(TAG, "editItems.time: " + (System.currentTimeMillis() - s) + "ms");
         }
     }
 
@@ -490,7 +490,7 @@ public class ListManager {
         for (ShoppinglistItem sli : items) {
 
             if (!dbItems.containsKey(sli.getId())) {
-                EtaLog.i(TAG, "No such item exists, consider addItem() instead: " + sli.toString());
+                SgnLog.i(TAG, "No such item exists, consider addItem() instead: " + sli.toString());
                 return false;
             }
 
@@ -533,7 +533,7 @@ public class ListManager {
         // Check for changes in previous item, and update surrounding
         ShoppinglistItem oldItem = mDatabase.getItem(sli.getId(), user);
         if (oldItem == null) {
-            EtaLog.i(TAG, "No such item exists, consider addItem() instead: " + sli.toString());
+            SgnLog.i(TAG, "No such item exists, consider addItem() instead: " + sli.toString());
             return false;
         }
 
@@ -725,7 +725,7 @@ public class ListManager {
 
     /**
      * Get the current user.
-     * <p>wrapper method for: Eta.getInstance().getUser()</p>
+     * <p>wrapper method for: ShopGun.getInstance().getUser()</p>
      * @return A {@link User}
      */
     private User user() {

@@ -39,7 +39,7 @@ public class EtaLogHelper {
      *
      * @param tag      A tag
      * @param name     A name identifying this print
-     * @param response A {@link org.json.JSONObject} (Eta SDK response), this may be {@code null}
+     * @param response A {@link org.json.JSONObject} (ShopGun SDK response), this may be {@code null}
      * @param error    An {@link ShopGunError}, this may be {@code null}
      */
     public static void d(String tag, String name, JSONObject response, ShopGunError error) {
@@ -52,7 +52,7 @@ public class EtaLogHelper {
      *
      * @param tag      A tag
      * @param name     A name identifying this print
-     * @param response A {@link org.json.JSONArray} (Eta SDK response), this may be {@code null}
+     * @param response A {@link org.json.JSONArray} (ShopGun SDK response), this may be {@code null}
      * @param error    An {@link ShopGunError}, this may be {@code null}
      */
     public static void d(String tag, String name, JSONArray response, ShopGunError error) {
@@ -65,13 +65,13 @@ public class EtaLogHelper {
      *
      * @param tag      A tag
      * @param name     A name identifying this print
-     * @param response A {@link String} (Eta SDK response), this may be {@code null}
+     * @param response A {@link String} (ShopGun SDK response), this may be {@code null}
      * @param error    An {@link ShopGunError}, this may be {@code null}
      */
     public static void d(String tag, String name, String response, ShopGunError error) {
         String e = error == null ? "null" : error.toJSON().toString();
         String s = response == null ? "null" : response;
-        EtaLog.d(tag, name + ": Response[" + s + "], Error[" + e + "]");
+        SgnLog.d(tag, name + ": Response[" + s + "], Error[" + e + "]");
     }
 
     public static void logInvalidSignature(String tag, Request<?> request, ShopGunError e) {
@@ -85,14 +85,14 @@ public class EtaLogHelper {
             sb.append("/n");
             sb.append(e.toJSON().toString());
 
-            EtaLog.d(tag, sb.toString());
+            SgnLog.d(tag, sb.toString());
         }
 
     }
 
     public static void printViewDimen(String tag, String viewName, View v) {
-        EtaLog.d(tag, viewName + ", getWidth: " + v.getWidth() + ", getHeight: " + v.getHeight());
-        EtaLog.d(tag, viewName + ", getMeasuredWidth: " + v.getMeasuredWidth() + ", getMeasuredHeight: " + v.getMeasuredHeight());
+        SgnLog.d(tag, viewName + ", getWidth: " + v.getWidth() + ", getHeight: " + v.getHeight());
+        SgnLog.d(tag, viewName + ", getMeasuredWidth: " + v.getMeasuredWidth() + ", getMeasuredHeight: " + v.getMeasuredHeight());
     }
 
     public static void printBitmapInfo(String tag, Bitmap b) {
@@ -111,19 +111,19 @@ public class EtaLogHelper {
             String format = "Bitmap[info:%s, w:%s, h:%s, %.2fmb]";
             text = String.format(format, infp, w, h, size);
         }
-        EtaLog.d(tag, text);
+        SgnLog.d(tag, text);
     }
 
     public static void printScreen(String tag, Context c) {
         Point p = PageflipUtils.getDisplayDimen(c);
         String out = String.format("ScreenSize[w:%s, h:%s]", p.x, p.y);
-        EtaLog.d(tag, out);
+        SgnLog.d(tag, out);
     }
 
     public static void printOptions(String tag, BitmapFactory.Options o) {
         String format = "Image[MimeType:%s, w:%s, h:%s]";
         String out = String.format(format, o.outMimeType, o.outWidth, o.outHeight);
-        EtaLog.d(tag, out);
+        SgnLog.d(tag, out);
     }
 
 }

@@ -35,8 +35,8 @@ public class SerializationSpeedTest {
 
     public static void test(int count) {
 
-        EtaSdkTest.start(TAG);
-        EtaSdkTest.logTest(TAG, "testing " + count + " iterations of serilization");
+        SdkTest.start(TAG);
+        SdkTest.logTest(TAG, "testing " + count + " iterations of serilization");
 
         long start = System.currentTimeMillis();
         test(count, ModelCreator.getShoppinglist(), Shoppinglist.CREATOR);
@@ -48,7 +48,7 @@ public class SerializationSpeedTest {
         long time = (System.currentTimeMillis() - start);
         float avg = (time) / (float) count;
         String format = "total: %sms, avg: %.2fms";
-        EtaSdkTest.logTest(TAG, String.format(format, time, avg));
+        SdkTest.logTest(TAG, String.format(format, time, avg));
 
     }
 

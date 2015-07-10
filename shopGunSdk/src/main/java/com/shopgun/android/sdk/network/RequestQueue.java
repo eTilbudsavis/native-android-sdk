@@ -19,7 +19,7 @@ package com.shopgun.android.sdk.network;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.SgnLocation;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.log.EventLog;
 import com.shopgun.android.sdk.network.impl.HandlerDelivery;
 import com.shopgun.android.sdk.utils.Api;
@@ -46,7 +46,7 @@ public class RequestQueue {
     /** Number of network request dispatcher threads to start. */
     private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 4;
 
-    /** Eta object controlling the whole lot */
+    /** ShopGun object controlling the whole lot */
     private final ShopGun mShopGun;
 
     /** All requests currently being handled by this request queue */
@@ -147,7 +147,7 @@ public class RequestQueue {
     public void runParkedQueue() {
 
         if (mShopGun.getSessionManager().isRequestInFlight()) {
-            EtaLog.i(TAG, "Cannot resume yet, session request still in flight.");
+            SgnLog.i(TAG, "Cannot resume yet, session request still in flight.");
             return;
         }
 
@@ -186,7 +186,7 @@ public class RequestQueue {
 //        		LinkedList<Request> waiting = mRequestParking.remove(url);
 //        		if (waiting != null) {
 //        			String msg = "Posting %d requests, waiting for %s";
-//        			EtaLog.d(TAG, String.format(msg, waiting.size(), url));
+//        			SgnLog.d(TAG, String.format(msg, waiting.size(), url));
 //        			mCacheQueue.addAll(waiting);
 //        		}
 //        		
@@ -197,7 +197,7 @@ public class RequestQueue {
     }
 
     /**
-     * This method have been depricated, please refer to {@link EtaLog#getLogger()}
+     * This method have been depricated, please refer to {@link SgnLog#getLogger()}
      * for a complete log of eta sdk.<br><br>
      *
      * Get the log of all requests that have passed through this RequestQueue.
@@ -207,7 +207,7 @@ public class RequestQueue {
      * @deprecated
      */
     public EventLog getLog() {
-        return EtaLog.getLogger().getLog();
+        return SgnLog.getLogger().getLog();
     }
 
     /**
@@ -263,7 +263,7 @@ public class RequestQueue {
             request.addEvent("added-to-queue");
 
             if (isSessionEndpoint(request) && request != mShopGun.getSessionManager().getRequestInFlight()) {
-                EtaLog.w(TAG, "Session changes should be handled by SessionManager. This request might cause problems");
+                SgnLog.w(TAG, "Session changes should be handled by SessionManager. This request might cause problems");
             }
 
 //        	synchronized (mRequestParking) {
@@ -308,7 +308,7 @@ public class RequestQueue {
             log.put("headers", new JSONObject(r.getHeaders()));
             log.put("time", Utils.dateToString(new Date()));
         } catch (JSONException e) {
-            EtaLog.e(TAG, e.getMessage(), e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
 
     }

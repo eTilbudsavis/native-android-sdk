@@ -21,7 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 
 import org.json.JSONArray;
@@ -110,7 +110,7 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
 
         // We expect the first JSONArray to have an additional 4 JSONArray's
         if (jHotspot.length() != 4) {
-            EtaLog.w(TAG, "Expected jHotspot.length == 4, actual length: " + jHotspot.length());
+            SgnLog.w(TAG, "Expected jHotspot.length == 4, actual length: " + jHotspot.length());
             return h;
         }
 
@@ -120,7 +120,7 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
 
                 JSONArray point = jHotspot.getJSONArray(i);
                 if (point.length() != 2) {
-                    EtaLog.w(TAG, "Expected hotspot.point.length == 2, actual length: " + point.length());
+                    SgnLog.w(TAG, "Expected hotspot.point.length == 2, actual length: " + point.length());
                     continue;
                 }
 
@@ -152,7 +152,7 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
                 }
 
             } catch (JSONException e) {
-                EtaLog.e(TAG, e.getMessage(), e);
+                SgnLog.e(TAG, e.getMessage(), e);
             }
         }
 
@@ -199,7 +199,7 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
             String offer = (mOffer == null ? "null" : mOffer.getHeading());
             o.put("offer", offer);
         } catch (JSONException e) {
-            EtaLog.e(TAG, e.getMessage(), e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return o;
     }

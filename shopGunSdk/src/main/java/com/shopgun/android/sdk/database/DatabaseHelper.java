@@ -21,7 +21,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -67,7 +67,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // call all classes that extends this class, to let them know there has been an update
         String format = "Upgrading database from version %s to %s. Calling static methods in subclasses";
-        EtaLog.i(TAG, String.format(format, oldVersion, newVersion));
+        SgnLog.i(TAG, String.format(format, oldVersion, newVersion));
         ListSQLiteHelper.upgrade(db, oldVersion, newVersion);
         ItemSQLiteHelper.upgrade(db, oldVersion, newVersion);
         ShareSQLiteHelper.upgrade(db, oldVersion, newVersion);

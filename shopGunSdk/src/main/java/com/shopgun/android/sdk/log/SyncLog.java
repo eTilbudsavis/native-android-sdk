@@ -36,11 +36,11 @@ public class SyncLog {
     }
 
     public static int sync(String tag, String msg) {
-        return (mLogSyncCycle ? EtaLog.v(tag, msg) : 0);
+        return (mLogSyncCycle ? SgnLog.v(tag, msg) : 0);
     }
 
     public static int log(String tag, String msg) {
-        return (mSyncCycle ? EtaLog.v(tag, msg) : 0);
+        return (mSyncCycle ? SgnLog.v(tag, msg) : 0);
     }
 
 }

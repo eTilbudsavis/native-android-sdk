@@ -23,8 +23,8 @@ import android.widget.Toast;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.SgnLocation;
 import com.shopgun.android.sdk.log.DevLogger;
-import com.shopgun.android.sdk.log.EtaLog;
-import com.shopgun.android.sdk.test.EtaSdkTest;
+import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.test.SdkTest;
 import com.shopgun.android.sdk.demo.base.BasePreferenceActivity;
 
 public class MainPreferenceActivity extends BasePreferenceActivity implements Preference.OnPreferenceClickListener {
@@ -37,7 +37,7 @@ public class MainPreferenceActivity extends BasePreferenceActivity implements Pr
         @Override
         public void run() {
             Toast.makeText(MainPreferenceActivity.this, "Running SDK Unit Test", Toast.LENGTH_SHORT).show();
-            EtaSdkTest.test();
+            SdkTest.test();
             Toast.makeText(MainPreferenceActivity.this, "SDK Unit Test: Success", Toast.LENGTH_SHORT).show();
         }
     };
@@ -46,10 +46,10 @@ public class MainPreferenceActivity extends BasePreferenceActivity implements Pr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        EtaLog.setLogger(new DevLogger());
+        SgnLog.setLogger(new DevLogger());
 
         /*
-         * Eta is a singleton you interact with via this method
+         * ShopGun is a singleton you interact with via this method
          */
         ShopGun shopGun = ShopGun.getInstance();
 

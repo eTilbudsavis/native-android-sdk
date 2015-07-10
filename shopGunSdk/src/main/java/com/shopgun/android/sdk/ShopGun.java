@@ -27,7 +27,7 @@ import android.os.Looper;
 
 import com.shopgun.android.sdk.database.DatabaseWrapper;
 import com.shopgun.android.sdk.imageloader.ImageLoader;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.model.User;
@@ -47,9 +47,9 @@ import java.util.concurrent.Executors;
 
 /**
  *
- * Eta is the main class for interacting with the eTilbudsavis SDK / API.
+ * ShopGun is the main class for interacting with the eTilbudsavis SDK / API.
  *
- * Eta is a singleton, that will have to be created with a context, from there on out
+ * ShopGun is a singleton, that will have to be created with a context, from there on out
  * you can invoke with the static method getInstance.
  *
  * <h3>Requirements</h3>
@@ -62,28 +62,28 @@ import java.util.concurrent.Executors;
  * You will have to add the API key and API secret as meta data in your AndroidManifest, in the following way:
  *
  * <pre>
- * &lt;meta-data android:name="com.eTilbudsavis.etasdk.api_key" android:value="YOUR_API_KEY" /&gt;
- * &lt;meta-data android:name="com.eTilbudsavis.etasdk.api_secret" android:value="YOUR_API_SECRET" /&gt;
+ * &lt;meta-data android:name="com.shopgun.android.sdk.api_key" android:value="YOUR_API_KEY" /&gt;
+ * &lt;meta-data android:name="com.shopgun.android.sdk.api_secret" android:value="YOUR_API_SECRET" /&gt;
  * </pre>
  *
  * <pre>
- * &lt;meta-data android:name="com.eTilbudsavis.etasdk.develop.api_key" android:value="YOUR_DEVELOP_API_KEY" /&gt;
- * &lt;meta-data android:name="com.eTilbudsavis.etasdk.develop.api_secret" android:value="YOUR_DEVELOP_API_SECRET" /&gt;
+ * &lt;meta-data android:name="com.shopgun.android.sdk.develop.api_key" android:value="YOUR_DEVELOP_API_KEY" /&gt;
+ * &lt;meta-data android:name="com.shopgun.android.sdk.develop.api_secret" android:value="YOUR_DEVELOP_API_SECRET" /&gt;
  * </pre>
  *
  *
  *
  * <ul>
- * 	<li> First invoke Eta.create(Context context)
- * 	<li> Then call Eta.getInstance() to get the current instance of Eta
+ * 	<li> First invoke ShopGun.create(Context context)
+ * 	<li> Then call ShopGun.getInstance() to get the current instance of ShopGun
  * </ul>
  *
  *
  * <h3>Usage</h3>
  *
  * <ol>
- * 	<li> First invoke Eta.create(Context context)
- * 	<li> Then call Eta.getInstance() to get the current instance of Eta
+ * 	<li> First invoke ShopGun.create(Context context)
+ * 	<li> Then call ShopGun.getInstance() to get the current instance of ShopGun
  * </ol>
  *
  *
@@ -97,7 +97,7 @@ public class ShopGun {
 
     private static final int DEFAULT_THREAD_COUNT = 3;
 
-    /** The Eta singleton */
+    /** The ShopGun singleton */
     private static ShopGun mShopGun;
     /** A static handler for usage in the SDK, this will help prevent leaks */
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -153,7 +153,7 @@ public class ShopGun {
     public static ShopGun getInstance() {
         synchronized (ShopGun.class) {
             if (mShopGun == null) {
-                throw new IllegalStateException("Eta.create() needs to be invoked prior to Eta.getInstance()");
+                throw new IllegalStateException("ShopGun.create() needs to be invoked prior to ShopGun.getInstance()");
             }
             return mShopGun;
         }
@@ -171,7 +171,7 @@ public class ShopGun {
 
         synchronized (ShopGun.class) {
             if (isCreated()) {
-                EtaLog.v(TAG, "Eta instance already created - ignoring");
+                SgnLog.v(TAG, "ShopGun instance already created - ignoring");
             } else {
                 mShopGun = new ShopGun(ctx);
             }
@@ -183,7 +183,7 @@ public class ShopGun {
     /**
      * Check if the instance have been instantiated.
      * <p>To instantiate an instance use {@link #create(Context)}</p>
-     * @return {@code true} if Eta is instantiated, else {@code false}
+     * @return {@code true} if ShopGun is instantiated, else {@code false}
      */
     public static boolean isCreated() {
         synchronized (ShopGun.class) {
@@ -286,7 +286,7 @@ public class ShopGun {
         if (Validator.isAppVersionValid(appVersion)) {
             mAppVersion = appVersion;
         }
-        EtaLog.v(TAG, "AppVersion: " + String.valueOf(mAppVersion));
+        SgnLog.v(TAG, "AppVersion: " + String.valueOf(mAppVersion));
     }
 
     /**
@@ -380,7 +380,7 @@ public class ShopGun {
     }
 
     /**
-     * Get the current state of the Eta instance
+     * Get the current state of the ShopGun instance
      * @return {@code true} if in resumed state, else {@code false}
      */
     public boolean isStarted() {
@@ -403,7 +403,7 @@ public class ShopGun {
     public void setDevelop(boolean develop) {
         mDevelop = develop;
         if (isStarted()) {
-            EtaLog.i(TAG, "Re-registering apiKey and apiSecret");
+            SgnLog.i(TAG, "Re-registering apiKey and apiSecret");
             setupKeys(mContext);
         }
     }
@@ -431,9 +431,9 @@ public class ShopGun {
             mApiSecret = b.getString(Constants.META_DEVELOP_API_SECRET);
 
             if (isKeySecretOk()) {
-                EtaLog.i(TAG, "Using development key/secret");
+                SgnLog.i(TAG, "Using development key/secret");
             } else {
-                EtaLog.w(TAG, "Debug flag set, but no develop keys found in AndroidManifest.");
+                SgnLog.w(TAG, "Debug flag set, but no develop keys found in AndroidManifest.");
             }
 
         }
@@ -453,7 +453,7 @@ public class ShopGun {
 
     /**
      * First clears all preferences with {@link #clear()}, and then {@code null's}
-     * this instance of Eta
+     * this instance of ShopGun
      *
      * <p>Further use of {@link ShopGun} after this, you must invoke
      * {@link #create(Context)} it again.</p>
@@ -480,7 +480,7 @@ public class ShopGun {
             mLocation.clear();
             mRequestQueue.clear();
             mListManager.clear();
-            EtaLog.getLogger().getLog().clear();
+            SgnLog.getLogger().getLog().clear();
         }
     }
 
@@ -488,10 +488,10 @@ public class ShopGun {
 //
 //		public void run() {
 //			if (isStarted()) {
-//				EtaLog.i(TAG, "Eta has been resumed, bail out");
+//				SgnLog.i(TAG, "ShopGun has been resumed, bail out");
 //				return;
 //			}
-//			EtaLog.i(TAG, "Finalizing long running tasks...");
+//			SgnLog.i(TAG, "Finalizing long running tasks...");
 //			int retries = 0;
 //			mRequestQueue.stop();
 //			mExecutor.shutdown();
@@ -506,13 +506,13 @@ public class ShopGun {
 //				}
 //			}
 //			finalCleanup();
-//			EtaLog.i(TAG, "SDK cleanup complete");
+//			SgnLog.i(TAG, "SDK cleanup complete");
 //		}
 //	};
 
 //	private void finalCleanup() {
 //		// TODO don't need to null everything
-//		synchronized (Eta.class) {
+//		synchronized (ShopGun.class) {
 //			mEta = null;
 //			mApiKey = null;
 //			mApiSecret = null;
@@ -539,7 +539,7 @@ public class ShopGun {
         mSessionManager.onStart();
         mListManager.onStart();
         mSyncManager.onStart();
-        EtaLog.v(TAG, "SDK has been started");
+        SgnLog.v(TAG, "SDK has been started");
     }
 
     public void onStop() {
@@ -556,7 +556,7 @@ public class ShopGun {
         mSettings.setLastUsageNow();
         mActivityCounter.reset();
 //		mHandler.postDelayed(termination, Utils.SECOND_IN_MILLIS * 5);
-        EtaLog.v(TAG, "SDK has been stopped");
+        SgnLog.v(TAG, "SDK has been stopped");
     }
 
 }

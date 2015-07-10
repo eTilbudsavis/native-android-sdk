@@ -23,7 +23,7 @@ public class SgnThreadFactory implements ThreadFactory {
 
     public static final String TAG = Constants.getTag(SgnThreadFactory.class);
 
-    private static final String DEFAULT_THREAD_NAME = "etasdk-";
+    private static final String DEFAULT_THREAD_NAME = "sgn-sdk-";
     private static final int DEFAULT_THREAD_PRIORITY = Thread.NORM_PRIORITY - 1;
 
     private static final AtomicInteger poolNumber = new AtomicInteger(1);
@@ -31,7 +31,7 @@ public class SgnThreadFactory implements ThreadFactory {
 //	private static UncaughtExceptionHandler mExceptionHandler = new UncaughtExceptionHandler() {
 //		
 //		public void uncaughtException(Thread thread, Throwable ex) {
-//			EtaLog.e(TAG, thread.getName() + " crashed", ex);
+//			SgnLog.e(TAG, thread.getName() + " crashed", ex);
 //		}
 //	};
 

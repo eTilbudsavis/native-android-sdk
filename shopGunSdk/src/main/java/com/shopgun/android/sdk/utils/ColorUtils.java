@@ -19,7 +19,7 @@ package com.shopgun.android.sdk.utils;
 import android.graphics.Color;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 
 public class ColorUtils {
 
@@ -64,13 +64,13 @@ public class ColorUtils {
      * Remove any transparency from a color. The eTilbudsavis v2 doesn't support alpha channel in colors.
      *
      * @param color       A color
-     * @param showWarning <code>true</code> to send warnings to {@link EtaLog}
+     * @param showWarning <code>true</code> to send warnings to {@link SgnLog}
      * @return A new color, or <code>null</code> if input color is null
      */
     public static Integer stripAlpha(Integer color, boolean showWarning) {
         if (color != null) {
             if (showWarning && Color.alpha(color) < 255) {
-                EtaLog.w(TAG, "eTilbudsavis API v2, doesn't support alpha colors - alpha will be stripped");
+                SgnLog.w(TAG, "eTilbudsavis API v2, doesn't support alpha colors - alpha will be stripped");
             }
             color |= 0x00000000ff000000;
         }
@@ -158,7 +158,7 @@ public class ColorUtils {
         try {
             return Color.parseColor(color);
         } catch (NumberFormatException e) {
-//			EtaLog.e(TAG, e.getMessage(), e);
+//			SgnLog.e(TAG, e.getMessage(), e);
         }
         return null;
     }

@@ -23,7 +23,7 @@ import android.text.Spanned;
 import android.widget.AutoCompleteTextView;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
@@ -96,7 +96,7 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
                 resp.add(Typeahead.fromJSON((JSONObject) typeaheads.get(i)));
             }
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return resp;
     }
@@ -128,7 +128,7 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
             o.put(JsonKey.LENGTH, getLength());
             o.put(JsonKey.OFFSET, getOffset());
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return o;
     }
@@ -238,7 +238,7 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
                 return Html.fromHtml(html);
 
             } catch (StringIndexOutOfBoundsException e) {
-                EtaLog.e(TAG, "", e);
+                SgnLog.e(TAG, "", e);
             }
 
             return Html.fromHtml(mSubject);

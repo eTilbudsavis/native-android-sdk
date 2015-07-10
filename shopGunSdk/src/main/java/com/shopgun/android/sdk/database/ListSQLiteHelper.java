@@ -23,7 +23,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.utils.Utils;
@@ -115,7 +115,7 @@ public class ListSQLiteHelper extends DatabaseHelper {
             String meta = cv.getAsString(META);
             sl.setMeta(meta == null ? null : new JSONObject(meta));
         } catch (JSONException e) {
-            EtaLog.e(TAG, null, e);
+            SgnLog.e(TAG, null, e);
         }
         sl.setUserId(cv.getAsInteger(USER));
         return sl;

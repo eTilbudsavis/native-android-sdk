@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.bus;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 
 import java.lang.reflect.Field;
 
@@ -59,7 +59,7 @@ public class Bus {
                 f.setAccessible(true);
                 f.set(this, value);
             } catch (Exception ex) {
-                EtaLog.d(TAG, ex.getMessage(), ex);
+                SgnLog.d(TAG, ex.getMessage(), ex);
             }
         }
 
@@ -114,7 +114,7 @@ public class Bus {
 
         private void log(Exception ex) {
             if (mLogcatEnabled) {
-                EtaLog.e(TAG, ex.getMessage(), ex);
+                SgnLog.e(TAG, ex.getMessage(), ex);
             }
         }
 

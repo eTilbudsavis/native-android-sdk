@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.network.impl;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
@@ -46,7 +46,7 @@ public class StringRequest extends Request<String> {
         super(method, url, listener);
         boolean nonBodyRequest = (method == Method.GET || method == Method.DELETE);
         if (nonBodyRequest && requestBody != null) {
-            EtaLog.i(TAG, "GET and DELETE requests doesn't take a body, and will be ignored.\n"
+            SgnLog.i(TAG, "GET and DELETE requests doesn't take a body, and will be ignored.\n"
                     + "Please append any parameters to Request.putQueryParameters()");
         }
         mRequestBody = requestBody;

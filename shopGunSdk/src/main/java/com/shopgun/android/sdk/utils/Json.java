@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.utils;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 
 import org.json.JSONArray;
@@ -65,7 +65,7 @@ public class Json {
         try {
             return object.isNull(key) ? defValue : object.getJSONArray(key);
         } catch (JSONException e) {
-            EtaLog.e(TAG, e.getMessage(), e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return defValue;
     }
@@ -93,7 +93,7 @@ public class Json {
         try {
             return object.isNull(key) ? defValue : object.getJSONObject(key);
         } catch (JSONException e) {
-            EtaLog.e(TAG, e.getMessage(), e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return defValue;
     }
@@ -119,7 +119,7 @@ public class Json {
         try {
             return object.isNull(key) ? defValue : object.getString(key);
         } catch (Exception e) {
-            EtaLog.e(TAG, null, e);
+            SgnLog.e(TAG, null, e);
         }
         return defValue;
     }
@@ -135,7 +135,7 @@ public class Json {
         try {
             return object.isNull(key) ? defValue : object.getInt(key);
         } catch (Exception e) {
-            EtaLog.e(TAG, null, e);
+            SgnLog.e(TAG, null, e);
         }
         return defValue;
     }
@@ -151,7 +151,7 @@ public class Json {
         try {
             return object.isNull(key) ? defValue : object.getDouble(key);
         } catch (Exception e) {
-            EtaLog.e(TAG, null, e);
+            SgnLog.e(TAG, null, e);
         }
         return defValue;
     }
@@ -167,8 +167,8 @@ public class Json {
         try {
             return object.isNull(key) ? defValue : (float) object.getDouble(key);
         } catch (Exception e) {
-            EtaLog.d(TAG, key + ", " + object.toString());
-            EtaLog.e(TAG, null, e);
+            SgnLog.d(TAG, key + ", " + object.toString());
+            SgnLog.e(TAG, null, e);
         }
         return defValue;
     }
@@ -184,7 +184,7 @@ public class Json {
         try {
             return object.isNull(key) ? defValue : object.getLong(key);
         } catch (Exception e) {
-            EtaLog.e(TAG, null, e);
+            SgnLog.e(TAG, null, e);
         }
         return defValue;
     }
@@ -200,7 +200,7 @@ public class Json {
         try {
             return object.isNull(key) ? defValue : object.getBoolean(key);
         } catch (Exception e) {
-            EtaLog.e(TAG, null, e);
+            SgnLog.e(TAG, null, e);
         }
         return defValue;
     }

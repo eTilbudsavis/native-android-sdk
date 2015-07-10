@@ -23,7 +23,7 @@ import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 
 public class CupcakeGestureDetector implements GestureDetector {
 
@@ -96,7 +96,7 @@ public class CupcakeGestureDetector implements GestureDetector {
                 if (null != mVelocityTracker) {
                     mVelocityTracker.addMovement(ev);
                 } else {
-                    EtaLog.i(TAG, "Velocity tracker is null");
+                    SgnLog.i(TAG, "Velocity tracker is null");
                 }
 
                 mLastTouchX = getActiveX(ev);

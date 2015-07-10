@@ -133,7 +133,7 @@ Without a valid location set, the API won't respond with any data, as the whole 
 To set a valid location, you must provide at least a **latitude**, **longitude** and a **radius**.
 If you are using `LocationManager` you can pass any new `location` objects directly into `EtaLocation`.
 
-`EtaLocation` will save the last known location to shared preferences, so a valid location is always accessible,
+`ShopGunLocation` will save the last known location to shared preferences, so a valid location is always accessible,
 once an initial location have been given.
 
 ## Request
@@ -198,12 +198,12 @@ This is on by default, and you don't have to do anything to harvest the benefits
 Cached callbacks can be identified, by the argument `isCache` present in the callback interface for the `Api` requests.
 The callback interface will actually give you both the cached result as well as the API data, unless you set a flag on the `Api` object, stating otherwise (`ONLY_RETURN_CACHE`).
 
-## Eta Objects
+## ShopGun Objects
 The SDK comes with a full set of Java Objects, to match responses from the API.
-Where the base Class is `EtaObject`, all other classes inherits from this class.
+Where the base Class is `ShopGunObject`, all other classes inherits from this class.
 
 There is a special group of identifiable classes, which has a unique identifier called `ern` as a key in the JSON response. 
-These objects extends from the `EtaErnObject` and are the "base" for all objects, in the sense that they are what you are actually quering the API for.
+These objects extends from the `ShopGunErnObject` and are the "base" for all objects, in the sense that they are what you are actually quering the API for.
 The objects are:
 
 - `Catalog`
@@ -212,7 +212,7 @@ The objects are:
 - `Store`
 - `Shoppinglist`
 - `ShoppinglistItem`
-- `EtaError`
+- `ShopGunError`
 
 The objects will in someway contain parts of all other objects, that have been included in this SDK.
 

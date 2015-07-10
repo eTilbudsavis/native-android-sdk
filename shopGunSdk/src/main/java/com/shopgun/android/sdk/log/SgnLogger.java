@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.log;
 
 
-public interface EtaLogger {
+public interface SgnLogger {
 
     /**
      * Get the current log of events

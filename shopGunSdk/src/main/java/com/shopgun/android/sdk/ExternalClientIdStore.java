@@ -19,7 +19,7 @@ package com.shopgun.android.sdk;
 import android.content.Context;
 import android.os.Environment;
 
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Session;
 import com.shopgun.android.sdk.utils.PermissionUtils;
 import com.shopgun.android.sdk.utils.Utils;
@@ -130,7 +130,7 @@ public class ExternalClientIdStore {
 
             File cacheDir = new File(Environment.getExternalStorageDirectory(), "cache");
             if (!cacheDir.exists() && !cacheDir.mkdirs()) {
-                EtaLog.w(TAG, "External directory couldn't be created");
+                SgnLog.w(TAG, "External directory couldn't be created");
                 return null;
             }
 
@@ -156,7 +156,7 @@ public class ExternalClientIdStore {
         Session s = new Session();
         updateCid(s, c);
         if (s.getClientId() != null || extCid != null) {
-            EtaLog.d(TAG, "ERROR: ClientId has been set: Session:" + s.getClientId() + ", mCid:" + extCid);
+            SgnLog.d(TAG, "ERROR: ClientId has been set: Session:" + s.getClientId() + ", mCid:" + extCid);
             didFail = true;
         }
 
@@ -164,11 +164,11 @@ public class ExternalClientIdStore {
         s.setClientId(first);
         updateCid(s, c);
         if (!first.equals(s.getClientId())) {
-            EtaLog.d(TAG, "ERROR: ClientId changed: Session:" + s.getClientId() + ", mCid:" + extCid);
+            SgnLog.d(TAG, "ERROR: ClientId changed: Session:" + s.getClientId() + ", mCid:" + extCid);
             didFail = true;
         }
         if (!s.getClientId().equals(extCid)) {
-            EtaLog.d(TAG, "ERROR: ClientId mismstch: Session:" + s.getClientId() + ", mCid:" + extCid);
+            SgnLog.d(TAG, "ERROR: ClientId mismstch: Session:" + s.getClientId() + ", mCid:" + extCid);
             didFail = true;
         }
 
@@ -176,12 +176,12 @@ public class ExternalClientIdStore {
         s.setClientId(second);
         updateCid(s, c);
         if (!second.equals(s.getClientId()) || !s.getClientId().equals(extCid)) {
-            EtaLog.d(TAG, "ERROR: ClientId mismstch: Session:" + s.getClientId() + ", mCid:" + extCid);
+            SgnLog.d(TAG, "ERROR: ClientId mismstch: Session:" + s.getClientId() + ", mCid:" + extCid);
             didFail = true;
         }
 
         deleteCid(c);
-        EtaLog.d(TAG, "Test: " + (didFail ? "failed" : "succeded") + ", in " + (System.currentTimeMillis() - start));
+        SgnLog.d(TAG, "Test: " + (didFail ? "failed" : "succeded") + ", in " + (System.currentTimeMillis() - start));
 
     }
 

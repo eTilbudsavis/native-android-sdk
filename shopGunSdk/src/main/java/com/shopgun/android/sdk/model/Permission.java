@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 
 import org.json.JSONArray;
@@ -88,7 +88,7 @@ public class Permission implements IJson<JSONObject>, Parcelable {
             }
 
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
 
         return p;
@@ -107,7 +107,7 @@ public class Permission implements IJson<JSONObject>, Parcelable {
                 o.put(name, jArray);
             }
         } catch (JSONException e) {
-            EtaLog.e(TAG, e.getMessage(), e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return o;
     }

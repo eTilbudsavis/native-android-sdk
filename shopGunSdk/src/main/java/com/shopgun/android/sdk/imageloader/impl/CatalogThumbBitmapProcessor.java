@@ -20,7 +20,7 @@ import android.graphics.Bitmap;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.imageloader.BitmapProcessor;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Dimension;
 
@@ -90,7 +90,7 @@ public class CatalogThumbBitmapProcessor implements BitmapProcessor {
         if (mPrint) {
             String format = "src[w:%s, h:%s], dst[w:%s, h:%s], dimen[w:%s, h:%s]";
             String text = String.format(format, src.getWidth(), src.getHeight(), dst.getWidth(), dst.getHeight(), d.getWidth(), d.getHeight());
-            EtaLog.d(TAG, text);
+            SgnLog.d(TAG, text);
         }
     }
 

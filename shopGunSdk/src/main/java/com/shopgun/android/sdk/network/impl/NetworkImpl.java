@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.network.impl;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.HttpStack;
 import com.shopgun.android.sdk.network.Network;
@@ -99,7 +99,7 @@ public class NetworkImpl implements Network {
             return r;
 
         } catch (Exception e) {
-            EtaLog.e(TAG, e.getMessage(), e);
+            SgnLog.e(TAG, e.getMessage(), e);
             throw new NetworkError(e);
         }
 

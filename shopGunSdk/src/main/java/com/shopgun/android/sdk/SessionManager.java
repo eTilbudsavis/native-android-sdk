@@ -21,7 +21,7 @@ import android.webkit.CookieSyncManager;
 
 import com.shopgun.android.sdk.bus.Bus;
 import com.shopgun.android.sdk.bus.SessionEvent;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Session;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.Request;
@@ -59,7 +59,7 @@ public class SessionManager {
     private final Object LOCK = new Object();
     /** weather or not, the SessionManager should recover from a bad session request */
     boolean mTryToRecover = true;
-    /** Reference to Eta instance */
+    /** Reference to ShopGun instance */
     private ShopGun mShopGun;
     /** The current user session */
     private Session mSession;
@@ -166,7 +166,7 @@ public class SessionManager {
     private void runQueue() {
 
         if (isRequestInFlight()) {
-            EtaLog.d(TAG, "Session in flight, waiting for session call to finish");
+            SgnLog.d(TAG, "Session in flight, waiting for session call to finish");
             return;
         }
 
@@ -394,7 +394,7 @@ public class SessionManager {
     public JsonObjectRequest signout(final Listener<JSONObject> l) {
 
 
-//		if (Eta.getInstance().isOnline()) {
+//		if (ShopGun.getInstance().isOnline()) {
         mShopGun.getSettings().setSessionFacebook(null);
         mShopGun.getListManager().clear(mSession.getUser().getUserId());
         Map<String, String> args = new HashMap<String, String>();
@@ -404,7 +404,7 @@ public class SessionManager {
         return req;
 //		} else {
 //			invalidate();
-//			Eta.getInstance().getHandler().post(new Runnable() {
+//			ShopGun.getInstance().getHandler().post(new Runnable() {
 //				
 //				public void run() {
 //					l.onComplete(mSession.toJSON(), null);

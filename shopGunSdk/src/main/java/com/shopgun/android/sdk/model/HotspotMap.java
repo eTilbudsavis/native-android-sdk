@@ -21,7 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Api;
 import com.shopgun.android.sdk.utils.Api.JsonKey;
@@ -125,7 +125,7 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson
                 }
 
             } catch (JSONException e) {
-                EtaLog.e(TAG, e.getMessage(), e);
+                SgnLog.e(TAG, e.getMessage(), e);
             }
         }
 

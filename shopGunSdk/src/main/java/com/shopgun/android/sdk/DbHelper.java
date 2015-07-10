@@ -21,7 +21,7 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -139,7 +139,7 @@ public class DbHelper extends SQLiteOpenHelper {
         try {
             sl.setMeta(meta == null ? null : new JSONObject(meta));
         } catch (JSONException e) {
-            EtaLog.e(TAG, null, e);
+            SgnLog.e(TAG, null, e);
         }
         sl.setUserId(c.getInt(c.getColumnIndex(USER)));
         return sl;
@@ -202,7 +202,7 @@ public class DbHelper extends SQLiteOpenHelper {
         try {
             sli.setMeta(meta == null ? null : new JSONObject(meta));
         } catch (JSONException e) {
-            EtaLog.e(TAG, null, e);
+            SgnLog.e(TAG, null, e);
         }
         sli.setUserId(c.getInt(c.getColumnIndex(USER)));
         return sli;
@@ -315,7 +315,7 @@ public class DbHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-        EtaLog.i(TAG, "Upgrading database from version " + oldVersion + " to "
+        SgnLog.i(TAG, "Upgrading database from version " + oldVersion + " to "
                 + newVersion + ", which will destroy all old data");
 
         synchronized (LOCK) {
@@ -376,7 +376,7 @@ public class DbHelper extends SQLiteOpenHelper {
             c = execQuery(q);
             sl = c.moveToFirst() ? cursorToSl(c) : null;
         } catch (IllegalStateException e) {
-            EtaLog.d(TAG, e.getMessage(), e);
+            SgnLog.d(TAG, e.getMessage(), e);
         } finally {
             closeCursorAndDB(c);
         }
@@ -418,7 +418,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 } while (c.moveToNext());
             }
         } catch (IllegalStateException e) {
-            EtaLog.d(TAG, e.getMessage(), e);
+            SgnLog.d(TAG, e.getMessage(), e);
         } finally {
             closeCursorAndDB(c);
         }
@@ -505,7 +505,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 sli = cursorToSli(c);
             }
         } catch (IllegalStateException e) {
-            EtaLog.d(TAG, e.getMessage(), e);
+            SgnLog.d(TAG, e.getMessage(), e);
         } finally {
             closeCursorAndDB(c);
         }
@@ -553,7 +553,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 } while (c.moveToNext());
             }
         } catch (IllegalStateException e) {
-            EtaLog.d(TAG, e.getMessage(), e);
+            SgnLog.d(TAG, e.getMessage(), e);
         } finally {
             closeCursorAndDB(c);
         }
@@ -576,7 +576,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 sli = cursorToSli(c);
             }
         } catch (IllegalStateException e) {
-            EtaLog.d(TAG, e.getMessage(), e);
+            SgnLog.d(TAG, e.getMessage(), e);
         } finally {
             closeCursorAndDB(c);
         }
@@ -598,7 +598,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 sl = cursorToSl(c);
             }
         } catch (IllegalStateException e) {
-            EtaLog.d(TAG, e.getMessage(), e);
+            SgnLog.d(TAG, e.getMessage(), e);
         } finally {
             closeCursorAndDB(c);
         }
@@ -674,7 +674,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 } while (c.moveToNext());
             }
         } catch (IllegalStateException e) {
-            EtaLog.d(TAG, e.getMessage(), e);
+            SgnLog.d(TAG, e.getMessage(), e);
         } finally {
             closeCursorAndDB(c);
         }
@@ -732,7 +732,7 @@ public class DbHelper extends SQLiteOpenHelper {
                     c.moveToFirst();
                 }
             } catch (IllegalStateException e) {
-                EtaLog.d(TAG, e.getMessage(), e);
+                SgnLog.d(TAG, e.getMessage(), e);
             } finally {
                 closeCursor(c);
             }
@@ -744,7 +744,7 @@ public class DbHelper extends SQLiteOpenHelper {
                     i = c.getInt(0);
                 }
             } catch (IllegalStateException e) {
-                EtaLog.d(TAG, e.getMessage(), e);
+                SgnLog.d(TAG, e.getMessage(), e);
             } finally {
                 closeCursorAndDB(c);
             }

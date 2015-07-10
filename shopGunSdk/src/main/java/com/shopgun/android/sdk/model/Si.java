@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
@@ -68,7 +68,7 @@ public class Si implements IJson<JSONObject>, Parcelable {
             o.put(JsonKey.SYMBOL, Json.nullCheck(getSymbol()));
             o.put(JsonKey.FACTOR, Json.nullCheck(getFactor()));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return o;
     }

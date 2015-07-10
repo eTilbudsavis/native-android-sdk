@@ -28,12 +28,12 @@ public class DatabaseTest {
 
     public static void test() {
 
-        EtaSdkTest.start(TAG);
+        SdkTest.start(TAG);
         testDBTest();
     }
 
     public static void testDBTest() {
-        EtaSdkTest.logTest(TAG, (new MethodNameHelper() {
+        SdkTest.logTest(TAG, (new MethodNameHelper() {
         }).getName());
     }
 

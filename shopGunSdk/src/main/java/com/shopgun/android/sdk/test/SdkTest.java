@@ -17,11 +17,11 @@
 package com.shopgun.android.sdk.test;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 
-public class EtaSdkTest {
+public class SdkTest {
 
-    public static final String TAG = Constants.getTag(EtaSdkTest.class);
+    public static final String TAG = Constants.getTag(SdkTest.class);
     private static final boolean LOG = false;
     private static String mCurrentTitle;
     private static long mStartScoped = 0;
@@ -50,10 +50,10 @@ public class EtaSdkTest {
         }
         String header = sb.toString();
 
-        EtaLog.d(TAG, "Done: " + mCurrentTitle + " (" + (System.currentTimeMillis() - mStartScoped) + "ms)");
-        EtaLog.d(TAG, header);
-        EtaLog.d(TAG, ok);
-        EtaLog.d(TAG, header);
+        SgnLog.d(TAG, "Done: " + mCurrentTitle + " (" + (System.currentTimeMillis() - mStartScoped) + "ms)");
+        SgnLog.d(TAG, header);
+        SgnLog.d(TAG, ok);
+        SgnLog.d(TAG, header);
         mCurrentTitle = null;
 
     }
@@ -62,11 +62,11 @@ public class EtaSdkTest {
 
         if (mCurrentTitle == null) {
             mStartScoped = System.currentTimeMillis();
-            EtaLog.d(TAG, "Performing: " + testName);
+            SgnLog.d(TAG, "Performing: " + testName);
         } else if (!mCurrentTitle.equals(testName)) {
-            EtaLog.d(TAG, "Done: " + mCurrentTitle + " (" + (System.currentTimeMillis() - mStartScoped) + "ms)");
+            SgnLog.d(TAG, "Done: " + mCurrentTitle + " (" + (System.currentTimeMillis() - mStartScoped) + "ms)");
             mStartScoped = System.currentTimeMillis();
-            EtaLog.d(TAG, "Performing: " + testName);
+            SgnLog.d(TAG, "Performing: " + testName);
         }
 
         mCurrentTitle = testName;
@@ -75,12 +75,12 @@ public class EtaSdkTest {
 
     protected static void logTest(String tag, String testName) {
         if (LOG) {
-            EtaLog.d(tag, " - " + testName);
+            SgnLog.d(tag, " - " + testName);
         }
     }
 
     protected static void logTestWarning(String tag, String testName, String warning) {
-        EtaLog.w(tag, " - " + testName + " - " + warning);
+        SgnLog.w(tag, " - " + testName + " - " + warning);
     }
 
 }

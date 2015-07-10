@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.network;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.network.impl.ApiError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
@@ -114,7 +114,7 @@ public class ShopGunError extends Exception implements IJson<JSONObject> {
             o.put(JsonKey.DETAILS, Json.nullCheck(mDetails));
             o.put(JsonKey.FAILED_ON_FIELD, Json.nullCheck(mFailedOnField));
         } catch (JSONException e) {
-            EtaLog.e(TAG, e.getMessage(), e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return o;
     }

@@ -40,7 +40,7 @@ public class CatalogThumbBitmapProcessorTest {
 
     public static void test() {
 
-        EtaSdkTest.start(TAG);
+        SdkTest.start(TAG);
         testCropBitmap();
 
     }
@@ -83,7 +83,7 @@ public class CatalogThumbBitmapProcessorTest {
 //		Assert.assertEquals(WIDTH, tmp.getWidth());
 //		Assert.assertEquals(0, tmp.getHeight());
 
-        EtaSdkTest.logTest(TAG, "CropBitmap");
+        SdkTest.logTest(TAG, "CropBitmap");
 
     }
 

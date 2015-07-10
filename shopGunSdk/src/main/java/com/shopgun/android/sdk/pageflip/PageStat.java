@@ -18,7 +18,7 @@ package com.shopgun.android.sdk.pageflip;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.Request.Method;
 import com.shopgun.android.sdk.network.Response.Listener;
@@ -109,14 +109,14 @@ public class PageStat {
             o.put("pages", PageflipUtils.join(",", mPages));
             o.put("view_session", mViewSession);
         } catch (JSONException e) {
-            EtaLog.d(TAG, e.getMessage(), e);
+            SgnLog.d(TAG, e.getMessage(), e);
         }
         return o;
     }
 
     private void log(String s) {
         if (LOG) {
-            EtaLog.d(TAG, "[" + PageflipUtils.join("-", mPages) + "] " + s);
+            SgnLog.d(TAG, "[" + PageflipUtils.join("-", mPages) + "] " + s);
         }
     }
 

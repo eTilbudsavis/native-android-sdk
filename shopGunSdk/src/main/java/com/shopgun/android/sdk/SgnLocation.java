@@ -25,7 +25,7 @@ import android.location.LocationManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Store;
 import com.shopgun.android.sdk.utils.Api.Param;
 import com.shopgun.android.sdk.utils.Json;
@@ -171,7 +171,7 @@ public class SgnLocation extends Location {
                 o.put(Param.BOUND_WEST, getBoundWest());
             }
         } catch (JSONException e) {
-            EtaLog.e(TAG, null, e);
+            SgnLog.e(TAG, null, e);
         }
         return o;
     }

@@ -40,7 +40,7 @@ public class PageflipUtilsTest {
 
     public static void test() {
 
-        EtaSdkTest.start(TAG);
+        SdkTest.start(TAG);
         testPageToPosition();
         testPositionToPage();
         testJoin();
@@ -61,7 +61,7 @@ public class PageflipUtilsTest {
         testPageToPosition(3, PORTRAIT, 2);
         testPageToPosition(4, PORTRAIT, 3);
 
-        EtaSdkTest.logTest(TAG, (new MethodNameHelper() {
+        SdkTest.logTest(TAG, (new MethodNameHelper() {
         }).getName());
 
     }
@@ -86,7 +86,7 @@ public class PageflipUtilsTest {
         testPositionToPage(3, PAGE_COUNT, PORTRAIT, new int[]{4});
         testPositionToPage(4, PAGE_COUNT, PORTRAIT, new int[]{5});
 
-        EtaSdkTest.logTest(TAG, (new MethodNameHelper() {
+        SdkTest.logTest(TAG, (new MethodNameHelper() {
         }).getName());
 
     }
@@ -101,7 +101,7 @@ public class PageflipUtilsTest {
         Assert.assertEquals("0,1,2", PageflipUtils.join(",", new int[]{0, 1, 2}));
         Assert.assertEquals("100,200,300", PageflipUtils.join(",", new int[]{100, 200, 300}));
 
-        EtaSdkTest.logTest(TAG, (new MethodNameHelper() {
+        SdkTest.logTest(TAG, (new MethodNameHelper() {
         }).getName());
 
     }
@@ -140,7 +140,7 @@ public class PageflipUtilsTest {
         Assert.assertTrue(PageflipUtils.isPagesReady(c));
         Assert.assertTrue(PageflipUtils.isCatalogReady(c));
 
-        EtaSdkTest.logTest(TAG, (new MethodNameHelper() {
+        SdkTest.logTest(TAG, (new MethodNameHelper() {
         }).getName());
 
     }

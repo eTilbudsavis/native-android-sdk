@@ -33,7 +33,7 @@ public class ListUtilsTest {
 
     public static void test() {
 
-        EtaSdkTest.start(TAG);
+        SdkTest.start(TAG);
         testGetShoppinglistIdsFromItems();
         testGetShoppinglistIdsFromLists();
 
@@ -65,7 +65,7 @@ public class ListUtilsTest {
         listIds = ListUtils.getShoppinglistIdsFromItems(items);
         Assert.assertEquals(modulo, listIds.size());
 
-        EtaSdkTest.logTest(TAG, "GetShoppinglistIdsFromItems");
+        SdkTest.logTest(TAG, "GetShoppinglistIdsFromItems");
 
     }
 
@@ -81,7 +81,7 @@ public class ListUtilsTest {
         Set<String> listIds = ListUtils.getShoppinglistIdsFromLists(lists);
         Assert.assertEquals(lists.size(), listIds.size());
 
-        EtaSdkTest.logTest(TAG, "GetShoppinglistIdsFromLists");
+        SdkTest.logTest(TAG, "GetShoppinglistIdsFromLists");
 
     }
 

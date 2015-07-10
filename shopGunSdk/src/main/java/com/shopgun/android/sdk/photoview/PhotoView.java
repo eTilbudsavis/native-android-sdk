@@ -35,7 +35,7 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.photoview.gestures.GestureDetector;
 import com.shopgun.android.sdk.photoview.gestures.OnGestureListener;
 import com.shopgun.android.sdk.photoview.gestures.VersionedGestureDetector;
@@ -429,7 +429,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
     public void setScale(float scale, float focalX, float focalY, boolean animate) {
         // Check to see if the scale is within bounds
         if (scale < mMinScale || scale > mMaxScale) {
-            EtaLog.i(TAG, "Scale must be within the range of minScale and maxScale");
+            SgnLog.i(TAG, "Scale must be within the range of minScale and maxScale");
             return;
         }
 
@@ -1000,7 +1000,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
                     if (null != parent)
                         parent.requestDisallowInterceptTouchEvent(true);
                     else
-                        EtaLog.i(TAG, "onTouch getParent() returned null");
+                        SgnLog.i(TAG, "onTouch getParent() returned null");
 
                     // If we're flinging, and the user presses down, cancel
                     // fling
@@ -1035,7 +1035,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
 
     private void log(String tag, String msg) {
         if (DEBUG)
-            EtaLog.d(tag, msg);
+            SgnLog.d(tag, msg);
     }
 
     /**

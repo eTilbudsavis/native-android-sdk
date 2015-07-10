@@ -26,7 +26,7 @@ import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
 import com.shopgun.android.sdk.database.DbUtils;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.log.SyncLog;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
@@ -196,7 +196,7 @@ public class SyncManager {
 
     /**
      * Default constructor for the {@link SyncManager}
-     * @param shopGun An Eta instance
+     * @param shopGun An ShopGun instance
      */
     public SyncManager(ShopGun shopGun, DatabaseWrapper db) {
         mShopGun = shopGun;
@@ -394,7 +394,7 @@ public class SyncManager {
         mShopGun.add(r);
 
 //		if (!isPullReq(r) && r.getMethod() != Request.Method.GET) {
-//			EtaLog.d(TAG, r.toString());
+//			SgnLog.d(TAG, r.toString());
 //		}
 
     }
@@ -409,7 +409,7 @@ public class SyncManager {
             try {
                 mCurrentRequests.pop();
             } catch (Exception e) {
-                EtaLog.e(TAG, e.getMessage(), e);
+                SgnLog.e(TAG, e.getMessage(), e);
             }
         }
     }
@@ -600,7 +600,7 @@ public class SyncManager {
                             mDatabase.editList(sl, user);
                         }
                     } catch (JSONException e) {
-                        EtaLog.e(TAG, e.getMessage(), e);
+                        SgnLog.e(TAG, e.getMessage(), e);
                         // error? just write new state to DB, next iteration will fix it
                         mDatabase.editList(sl, user);
                     }
@@ -740,7 +740,7 @@ public class SyncManager {
                         mBuilder.edit(serverSli);
                         mDatabase.editItems(serverSli, user);
                     } else if (localSli.equals(serverSli)) {
-                        EtaLog.d(TAG, "We have a mismatch");
+                        SgnLog.d(TAG, "We have a mismatch");
                     }
 
                 } else {
@@ -1018,7 +1018,7 @@ public class SyncManager {
 
         String url = Endpoint.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
         JsonObjectRequest itemReq = new JsonObjectRequest(Method.PUT, url, sli.toJSON(), itemListener);
-//		EtaLog.d(TAG, sli.toJSON().toString());
+//		SgnLog.d(TAG, sli.toJSON().toString());
         addRequest(itemReq);
 
     }
@@ -1137,12 +1137,12 @@ public class SyncManager {
                  */
                 if (s.getState() == SyncState.DELETE) {
                     mDatabase.deleteShare(s, user);
-                    EtaLog.v(TAG, "API doesn't allow owner to be 'deleted'. Deleting from own DB and ignoring.");
+                    SgnLog.v(TAG, "API doesn't allow owner to be 'deleted'. Deleting from own DB and ignoring.");
                 } else if (s.getState() != SyncState.SYNCED) {
                     s.setState(SyncState.SYNCED);
                     s.setShoppinglistId(sl.getId());
                     mDatabase.editShare(s, user);
-                    EtaLog.v(TAG, "Owner cannot be edited. Resetting share.state and ignoring.");
+                    SgnLog.v(TAG, "Owner cannot be edited. Resetting share.state and ignoring.");
                 }
                 count--;
                 continue;

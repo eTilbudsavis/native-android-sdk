@@ -42,7 +42,7 @@ public class PageAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-//		EtaLog.d(TAG, "getItem: " + position);
+//		SgnLog.d(TAG, "getItem: " + position);
         int[] pages = PageflipUtils.positionToPages(position, mCallback.getCatalog().getPageCount(), mCallback.isLandscape());
         PageFragment f = PageFragment.newInstance(position, pages);
         f.setPageCallback(mCallback);

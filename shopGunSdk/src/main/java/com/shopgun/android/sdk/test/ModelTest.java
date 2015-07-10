@@ -64,7 +64,7 @@ public class ModelTest {
 
     public static void test() {
 
-        EtaSdkTest.start(TAG);
+        SdkTest.start(TAG);
 
         // The first set of objects, have no dependencies to other objects
         testSi();
@@ -128,7 +128,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "ShoppinglistItem");
+        SdkTest.logTest(TAG, "ShoppinglistItem");
 
     }
 
@@ -172,7 +172,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Shoppinglist");
+        SdkTest.logTest(TAG, "Shoppinglist");
 
     }
 
@@ -199,7 +199,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Session");
+        SdkTest.logTest(TAG, "Session");
 
     }
 
@@ -231,7 +231,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Dealer");
+        SdkTest.logTest(TAG, "Dealer");
 
     }
 
@@ -272,7 +272,7 @@ public class ModelTest {
         testIDealer(obj);
         testIStore(obj);
 
-        EtaSdkTest.logTestWarning(TAG, "Catalog", "NO TEST OF HOTSPOTMAP, see HotspotMap test");
+        SdkTest.logTestWarning(TAG, "Catalog", "NO TEST OF HOTSPOTMAP, see HotspotMap test");
 
     }
 
@@ -302,7 +302,7 @@ public class ModelTest {
         // getters and setters
         testIDealer(obj);
 
-        EtaSdkTest.logTest(TAG, "Store");
+        SdkTest.logTest(TAG, "Store");
 
     }
 
@@ -331,7 +331,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Country");
+        SdkTest.logTest(TAG, "Country");
 
     }
 
@@ -362,7 +362,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Share");
+        SdkTest.logTest(TAG, "Share");
 
     }
 
@@ -393,7 +393,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "User");
+        SdkTest.logTest(TAG, "User");
 
     }
 
@@ -422,7 +422,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Branding");
+        SdkTest.logTest(TAG, "Branding");
 
     }
 
@@ -448,7 +448,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Dimension");
+        SdkTest.logTest(TAG, "Dimension");
 
     }
 
@@ -462,7 +462,7 @@ public class ModelTest {
         testParcelable(obj, Hotspot.CREATOR);
 
         // TODO This contains json array JSON
-        EtaSdkTest.logTestWarning(TAG, "Hotspot", "NO JSON TESTING DONE - Json will fail");
+        SdkTest.logTestWarning(TAG, "Hotspot", "NO JSON TESTING DONE - Json will fail");
 
 //        JSONObject jObj = obj.toJSON();
 //        Hotspot jsonObj = Hotspot.fromJSON(jObj);
@@ -476,7 +476,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Hotspot");
+        SdkTest.logTest(TAG, "Hotspot");
     }
 
     public static void testHotspotMap() {
@@ -489,7 +489,7 @@ public class ModelTest {
         testParcelable(obj, HotspotMap.CREATOR);
 
         // TODO This contains json array JSON
-        EtaSdkTest.logTestWarning(TAG, "HotspotMap", "NO JSON TESTING DONE - Json will fail");
+        SdkTest.logTestWarning(TAG, "HotspotMap", "NO JSON TESTING DONE - Json will fail");
 //        JSONArray jObj = obj.toJSON();
 //        Dimension d = ObjectCreator.getDimension();
 //        HotspotMap jsonObj = HotspotMap.fromJSON(d, jObj);
@@ -497,7 +497,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "HotspotMap");
+        SdkTest.logTest(TAG, "HotspotMap");
 
     }
 
@@ -526,7 +526,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Pageflip");
+        SdkTest.logTest(TAG, "Pageflip");
 
     }
 
@@ -547,7 +547,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Permission");
+        SdkTest.logTest(TAG, "Permission");
 
     }
 
@@ -574,7 +574,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Typeahead");
+        SdkTest.logTest(TAG, "Typeahead");
 
     }
 
@@ -600,7 +600,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Subscription");
+        SdkTest.logTest(TAG, "Subscription");
 
     }
 
@@ -626,7 +626,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Pricing");
+        SdkTest.logTest(TAG, "Pricing");
 
     }
 
@@ -653,7 +653,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Links");
+        SdkTest.logTest(TAG, "Links");
 
     }
 
@@ -680,7 +680,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Images");
+        SdkTest.logTest(TAG, "Images");
 
     }
 
@@ -706,7 +706,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Si");
+        SdkTest.logTest(TAG, "Si");
 
     }
 
@@ -732,7 +732,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Unit");
+        SdkTest.logTest(TAG, "Unit");
 
     }
 
@@ -758,7 +758,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Pieces");
+        SdkTest.logTest(TAG, "Pieces");
 
     }
 
@@ -784,7 +784,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Size");
+        SdkTest.logTest(TAG, "Size");
 
     }
 
@@ -804,7 +804,7 @@ public class ModelTest {
 
         // getters and setters
 
-        EtaSdkTest.logTest(TAG, "Quantity");
+        SdkTest.logTest(TAG, "Quantity");
 
     }
 
@@ -847,7 +847,7 @@ public class ModelTest {
         testIStore(obj);
         testICatalog(obj);
 
-        EtaSdkTest.logTest(TAG, "Offer");
+        SdkTest.logTest(TAG, "Offer");
         // getters and setters
 
     }

@@ -24,7 +24,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.Response;
@@ -109,7 +109,7 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
                 // Please check the error code, and details for further information
                 String title = error.isApi() ? "API Error" : "SDK Error";
                 Tools.showDialog(CatalogListActivity.this, title, error.toString());
-                EtaLog.e(TAG, error.getMessage(), error);
+                SgnLog.e(TAG, error.getMessage(), error);
 
             }
         }

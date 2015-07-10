@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.utils;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.network.ShopGunError;
 
@@ -45,7 +45,7 @@ public class PrettyPrint {
         for (ShoppinglistItem sli : items) {
             sb.append(shoppinglistItemToString(sli)).append("\n");
         }
-        EtaLog.d(TAG, name + "\n" + sb.toString());
+        SgnLog.d(TAG, name + "\n" + sb.toString());
     }
 
     /**
@@ -55,7 +55,7 @@ public class PrettyPrint {
      * @param sli A ShoppinglistItem to print
      */
     public static void printItem(String name, ShoppinglistItem sli) {
-        EtaLog.d(TAG, String.format("%s - %s", name, shoppinglistItemToString(sli)));
+        SgnLog.d(TAG, String.format("%s - %s", name, shoppinglistItemToString(sli)));
     }
 
     /**
@@ -86,16 +86,16 @@ public class PrettyPrint {
      */
     public static void printListenerCallback(String type, boolean isServer, List<?> added, List<?> deleted, List<?> edited) {
         String text = "type[%s], isServer[%s], added[%s], deleted[%s], edited[%s]";
-        EtaLog.d(TAG, String.format(text, type, isServer, added.size(), deleted.size(), edited.size()));
+        SgnLog.d(TAG, String.format(text, type, isServer, added.size(), deleted.size(), edited.size()));
     }
 
 
     public static void printResponse(String tag, String name, JSONObject response, ShopGunError error) {
 
         if (response != null) {
-            EtaLog.d(tag, name + " - " + response.toString());
+            SgnLog.d(tag, name + " - " + response.toString());
         } else {
-            EtaLog.d(tag, name + " - " + error.toJSON().toString());
+            SgnLog.d(tag, name + " - " + error.toJSON().toString());
         }
 
     }

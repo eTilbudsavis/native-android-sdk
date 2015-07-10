@@ -33,7 +33,7 @@ import android.widget.Toast;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Branding;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Hotspot;
@@ -510,7 +510,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
         JsonObjectRequest r = new JsonObjectRequest(url, l);
         r.setIgnoreCache(true);
         ShopGun.getInstance().add(r);
-        EtaLog.d(TAG, "getting catalog");
+        SgnLog.d(TAG, "getting catalog");
 
     }
 
@@ -576,7 +576,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
     public boolean onKey(View v, int keyCode, KeyEvent event) {
 
         if (event != null && event.getAction() == KeyEvent.ACTION_UP) {
-            EtaLog.d(TAG, "KeyCode: " + keyCode);
+            SgnLog.d(TAG, "KeyCode: " + keyCode);
         }
         return false;
     }
@@ -760,7 +760,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 
         private void log(String message) {
             if (LOG) {
-                EtaLog.d(TAG, message);
+                SgnLog.d(TAG, message);
             }
         }
 

@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.network.impl;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Request.Method;
@@ -74,7 +74,7 @@ public class MemoryCache implements Cache {
             throw new IllegalArgumentException("maxMemLimit cannot be more than max heap size");
         }
         mMaxItems = (int) (maxMemLimit / AVG_ITEM_SIZE);
-        EtaLog.v(TAG, "New memory limit: " + maxMemLimit / 1024 + "kb (approx " + mMaxItems + " items)");
+        SgnLog.v(TAG, "New memory limit: " + maxMemLimit / 1024 + "kb (approx " + mMaxItems + " items)");
     }
 
     public void put(Request<?> request, Response<?> response) {
@@ -111,7 +111,7 @@ public class MemoryCache implements Cache {
                 }
             }
 
-            EtaLog.d(TAG, "Cleaned " + TAG + " new size: " + mCache.size());
+            SgnLog.d(TAG, "Cleaned " + TAG + " new size: " + mCache.size());
 
         }
 

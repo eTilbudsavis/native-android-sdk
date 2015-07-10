@@ -21,7 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Api.JsonKey;
@@ -70,7 +70,7 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Parcelable {
                 list.add(Country.fromJSON(countries.getJSONObject(i)));
             }
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return list;
     }
@@ -100,7 +100,7 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Parcelable {
             o.put(JsonKey.ERN, Json.nullCheck(getErn()));
             o.put(JsonKey.UNSUBSCRIBE_PRINT_URL, Json.nullCheck(getUnsubscribePrintUrl()));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return o;
     }
@@ -130,7 +130,7 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Parcelable {
         } else if (id.length() == 2) {
             setErn(String.format("ern:%s:%s", getErnType(), id.toUpperCase()));
         } else {
-            EtaLog.i(TAG, "The country code: " + id + " isn't allowed, see documentation for more details");
+            SgnLog.i(TAG, "The country code: " + id + " isn't allowed, see documentation for more details");
         }
         return this;
     }

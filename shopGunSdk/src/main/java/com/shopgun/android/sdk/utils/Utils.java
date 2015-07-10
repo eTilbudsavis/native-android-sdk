@@ -30,7 +30,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Request;
 
 import java.io.PrintWriter;
@@ -158,7 +158,7 @@ public final class Utils {
                 sb.append(encode(key, encoding)).append("=").append(encode(value, encoding));
             } else {
 
-                EtaLog.w(TAG, String.format("Key: %s with value-type: %s is not allowed",
+                SgnLog.w(TAG, String.format("Key: %s with value-type: %s is not allowed",
                         key, o.getClass().getSimpleName()));
             }
         }
@@ -402,7 +402,7 @@ public final class Utils {
         try {
             return c.getPackageManager().getPackageInfo(c.getPackageName(), 0).versionName;
         } catch (NameNotFoundException e) {
-            EtaLog.e(TAG, null, e);
+            SgnLog.e(TAG, null, e);
         }
         return null;
     }

@@ -21,7 +21,7 @@ import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ListManager;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.utils.Api;
@@ -186,7 +186,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
                 list.add(s);
             }
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return list;
     }
@@ -236,7 +236,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
             o.put(JsonKey.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
             o.put(JsonKey.META, Json.nullCheck(getMeta()));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return o;
     }

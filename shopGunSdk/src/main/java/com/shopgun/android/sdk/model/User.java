@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Api.JsonKey;
@@ -96,7 +96,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
             user.setEmail(Json.valueOf(jUser, JsonKey.EMAIL));
             user.setPermissions(Permission.fromJSON(jUser.getJSONObject(JsonKey.PERMISSIONS)));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return user;
     }
@@ -112,7 +112,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
             o.put(JsonKey.EMAIL, Json.nullCheck(getEmail()));
             o.put(JsonKey.PERMISSIONS, Json.toJson(getPermissions()));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return o;
     }

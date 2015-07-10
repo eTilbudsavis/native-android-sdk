@@ -30,7 +30,7 @@ public class ValidatorTest extends TestCase {
 
     public static void test() {
 
-        EtaSdkTest.start(TAG);
+        SdkTest.start(TAG);
         testIsEmailVaild();
         testIsBirthYearValid();
         testIsGenderValid();
@@ -50,7 +50,7 @@ public class ValidatorTest extends TestCase {
             assertTrue(Validator.isEmailValid(s));
         }
 
-        EtaSdkTest.logTest(TAG, "IsEmailValid");
+        SdkTest.logTest(TAG, "IsEmailValid");
     }
 
     public static void testIsBirthYearValid() {
@@ -66,7 +66,7 @@ public class ValidatorTest extends TestCase {
         }
         Assert.assertFalse(Validator.isBirthyearValid(Integer.MAX_VALUE));
 
-        EtaSdkTest.logTest(TAG, "IsBirthYesrValid");
+        SdkTest.logTest(TAG, "IsBirthYesrValid");
     }
 
     public static void testIsGenderValid() {
@@ -81,7 +81,7 @@ public class ValidatorTest extends TestCase {
             assertTrue(Validator.isGenderValid(s));
         }
 
-        EtaSdkTest.logTest(TAG, "IsGenderValid");
+        SdkTest.logTest(TAG, "IsGenderValid");
     }
 
     public static void testValidVersion() {
@@ -102,7 +102,7 @@ public class ValidatorTest extends TestCase {
             Assert.assertFalse(Validator.isAppVersionValid(s));
         }
 
-        EtaSdkTest.logTest(TAG, "ValidVersion");
+        SdkTest.logTest(TAG, "ValidVersion");
     }
 
 

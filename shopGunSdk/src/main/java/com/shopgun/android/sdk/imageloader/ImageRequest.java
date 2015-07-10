@@ -22,7 +22,7 @@ import android.widget.ImageView;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.imageloader.impl.DefaultBitmapDisplayer;
 import com.shopgun.android.sdk.imageloader.impl.DefaultFileName;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.log.EventLog;
 import com.shopgun.android.sdk.log.EventLog.Event;
 
@@ -168,7 +168,7 @@ public class ImageRequest {
         if (mDebugger != null) {
             String[] parts = mUrl.split("/");
             List<Event> e = mLog.getEvents();
-            EtaLog.d(TAG, "alive[" + parts[parts.length - 1] + ", msg:" + msg + ", log:" + e.get(e.size() - 1).name + "]");
+            SgnLog.d(TAG, "alive[" + parts[parts.length - 1] + ", msg:" + msg + ", log:" + e.get(e.size() - 1).name + "]");
         }
 
     }

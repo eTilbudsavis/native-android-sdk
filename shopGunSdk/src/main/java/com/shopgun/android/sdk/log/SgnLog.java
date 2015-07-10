@@ -23,19 +23,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class EtaLog {
+public class SgnLog {
 
-    public static final String TAG = Constants.getTag(EtaLog.class);
+    public static final String TAG = Constants.getTag(SgnLog.class);
 
     private static final String LOG_D_CHUNK = "[chunk %s/%s] %s";
 
-    private static EtaLogger mLogger = new DefaultLogger();
+    private static SgnLogger mLogger = new DefaultLogger();
 
-    public static EtaLogger getLogger() {
+    public static SgnLogger getLogger() {
         return mLogger;
     }
 
-    public static void setLogger(EtaLogger l) {
+    public static void setLogger(SgnLogger l) {
         mLogger = l;
     }
 

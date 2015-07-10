@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
@@ -70,7 +70,7 @@ public class Dimension implements IJson<JSONObject>, Parcelable {
             o.put(JsonKey.HEIGHT, Json.nullCheck(getHeight()));
             o.put(JsonKey.WIDTH, Json.nullCheck(getWidth()));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return o;
     }

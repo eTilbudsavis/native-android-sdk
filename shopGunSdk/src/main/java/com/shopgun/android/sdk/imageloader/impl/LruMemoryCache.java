@@ -20,7 +20,7 @@ import android.graphics.Bitmap;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.imageloader.MemoryCache;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -73,7 +73,7 @@ public class LruMemoryCache implements MemoryCache {
             mSize += getSizeInBytes(b);
             checkSize();
         } catch (Throwable th) {
-            EtaLog.d(TAG, th.getMessage(), th);
+            SgnLog.d(TAG, th.getMessage(), th);
         }
 
     }
@@ -83,7 +83,7 @@ public class LruMemoryCache implements MemoryCache {
             //NullPointerException sometimes happen here http://code.google.com/p/osmdroid/issues/detail?id=78
             return mCache.get(id);
         } catch (NullPointerException e) {
-            EtaLog.d(TAG, e.getMessage(), e);
+            SgnLog.d(TAG, e.getMessage(), e);
         }
         return null;
     }
@@ -91,7 +91,7 @@ public class LruMemoryCache implements MemoryCache {
     private void checkSize() {
 
         if (mSize > mMemoryLimit) {
-            EtaLog.d(TAG, "cache-clear");
+            SgnLog.d(TAG, "cache-clear");
             Iterator<Entry<String, Bitmap>> iter = mCache.entrySet().iterator();
             while (iter.hasNext() && (mSize > mMemoryLimit)) {
                 Entry<String, Bitmap> entry = iter.next();
@@ -108,7 +108,7 @@ public class LruMemoryCache implements MemoryCache {
             mCache.clear();
             mSize = 0;
         } catch (NullPointerException ex) {
-            EtaLog.d(TAG, ex.getMessage(), ex);
+            SgnLog.d(TAG, ex.getMessage(), ex);
         }
     }
 

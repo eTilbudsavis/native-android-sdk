@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.utils;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 
@@ -34,7 +34,7 @@ public class ListUtils {
     public final static String FIRST_ITEM = "00000000-0000-0000-0000-000000000000";
 
     public static void printItem(String tag, ShoppinglistItem s) {
-        EtaLog.d(tag, "Item " + s.getDescription() + " prevId( " + s.getPreviousId() + ") - modified( " + s.getModified().toGMTString() + " ) ");
+        SgnLog.d(tag, "Item " + s.getDescription() + " prevId( " + s.getPreviousId() + ") - modified( " + s.getModified().toGMTString() + " ) ");
     }
 
     /**
@@ -53,7 +53,7 @@ public class ListUtils {
 
         ShoppinglistItem move = list.get(movePos);
 //		printItem(TAG, move);
-//		EtaLog.d(TAG, "list-size: " + list.size() + ", prevPos: " + prevPos + ", movePos: " + movePos);
+//		SgnLog.d(TAG, "list-size: " + list.size() + ", prevPos: " + prevPos + ", movePos: " + movePos);
 
         boolean isFirst = prevPos < 0;
         ShoppinglistItem prev = isFirst ? null : list.get(prevPos);

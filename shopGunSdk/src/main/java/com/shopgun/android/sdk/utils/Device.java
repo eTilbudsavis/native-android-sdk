@@ -38,7 +38,7 @@ public class Device {
 //		try {
 //			radio = (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) ? Build.RADIO : Build.getRadioVersion();
 //		} catch (Exception e) {
-//			EtaLog.e("Device", e);
+//			SgnLog.e("Device", e);
 //		}
         return radio;
     }

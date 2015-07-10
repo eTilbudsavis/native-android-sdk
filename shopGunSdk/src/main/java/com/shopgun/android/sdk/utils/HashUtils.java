@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.utils;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -71,7 +71,7 @@ public class HashUtils {
             return hexString.toString();
 
         } catch (NoSuchAlgorithmException e) {
-            EtaLog.e(TAG, e.getMessage(), e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return "";
     }

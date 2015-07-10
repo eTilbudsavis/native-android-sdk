@@ -19,7 +19,7 @@ package com.shopgun.android.sdk.network;
 import android.os.Bundle;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.log.EventLog;
 import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.utils.Utils;
@@ -148,7 +148,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     public Request finish(String reason) {
 
         if (mFinished) {
-            EtaLog.d(TAG, getClass().getSimpleName() + " - BAD is finished");
+            SgnLog.d(TAG, getClass().getSimpleName() + " - BAD is finished");
         }
 
         addEvent(reason);
@@ -156,12 +156,12 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         try {
             mNetworkLog.put("duration", getLog().getTotalDuration());
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
 
         if (mSaveNetworkLog) {
             // Append the request summary to the debugging log
-            EtaLog.getLogger().getLog().add(EventLog.TYPE_REQUEST, mNetworkLog);
+            SgnLog.getLogger().getLog().add(EventLog.TYPE_REQUEST, mNetworkLog);
         }
 
         mFinished = true;
@@ -540,7 +540,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Set a debugger to perform debugging when {@link Request} finishes.
-     * @see {@link #com.eTilbudsavis.etasdk.Utils.EtaLog EtaLog} for detalis about SDK Log.d output
+     * @see {@link SgnLog SgnLog} for detalis about SDK Log.d output
      * @param debugger A {@link RequestDebugger} to print/debug the {@link Request}
      * @return this object
      */
@@ -567,7 +567,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * {@link Request#getQueryParameters() query parameters}, before the request
      * is handed to the {@link RequestQueue}. So if you want to have the SDK/API
      * parameters appended as well in the string do:</p>
-     * <li>Eta.getInstance().add(Request)</li>
+     * <li>ShopGun.getInstance().add(Request)</li>
      * <p>and then call: </p>
      * <li>toString()</li>
      */

@@ -19,7 +19,7 @@ package com.shopgun.android.sdk.network.impl;
 import android.text.TextUtils;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.Cache.Item;
 import com.shopgun.android.sdk.network.Request;
@@ -169,7 +169,7 @@ public class JsonCacheHelper {
             }
 
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
 
         if (ernlist.isEmpty()) {
@@ -191,7 +191,7 @@ public class JsonCacheHelper {
                 return ern;
             }
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return null;
     }

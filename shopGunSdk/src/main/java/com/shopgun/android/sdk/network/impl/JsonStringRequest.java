@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.network.impl;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.NetworkResponse;
@@ -74,7 +74,7 @@ public class JsonStringRequest extends JsonRequest<String> {
                     JSONObject jObject = new JSONObject(jsonString);
                     JsonCacheHelper.cacheJSONObject(this, jObject);
                 } catch (JSONException e) {
-                    EtaLog.e(TAG, "", e);
+                    SgnLog.e(TAG, "", e);
                     return Response.fromError(new ParseError(e, JSONObject.class));
                 }
 
@@ -84,7 +84,7 @@ public class JsonStringRequest extends JsonRequest<String> {
                     JSONArray jArray = new JSONArray(jsonString);
                     JsonCacheHelper.cacheJSONArray(this, jArray);
                 } catch (JSONException e) {
-                    EtaLog.e(TAG, "", e);
+                    SgnLog.e(TAG, "", e);
                     return Response.fromError(new ParseError(e, JSONArray.class));
                 }
             }

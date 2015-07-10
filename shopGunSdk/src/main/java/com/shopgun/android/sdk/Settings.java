@@ -19,7 +19,7 @@ package com.shopgun.android.sdk;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -165,7 +165,7 @@ public class Settings {
                     return new SgnLocation(jLoc);
                 }
             } catch (JSONException e) {
-                EtaLog.e(TAG, "Not able to parse location json from SharedPreferances", e);
+                SgnLog.e(TAG, "Not able to parse location json from SharedPreferances", e);
             }
 
         }

@@ -23,7 +23,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.utils.Utils;
 
@@ -123,7 +123,7 @@ public class ItemSQLiteHelper extends DatabaseHelper {
             String meta = cv.getAsString(META);
             sli.setMeta(meta == null ? null : new JSONObject(meta));
         } catch (JSONException e) {
-            EtaLog.e(TAG, null, e);
+            SgnLog.e(TAG, null, e);
         }
         sli.setUserId(cv.getAsInteger(USER));
         return sli;

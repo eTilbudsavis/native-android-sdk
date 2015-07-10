@@ -21,7 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.utils.Api.JsonKey;
@@ -98,7 +98,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
             try {
                 list.add(Share.fromJSON(shares.getJSONObject(i)));
             } catch (JSONException e) {
-                EtaLog.e(TAG, "", e);
+                SgnLog.e(TAG, "", e);
             }
         }
         return list;
@@ -120,7 +120,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
             s.setAccepted(Json.valueOf(share, JsonKey.ACCEPTED, false));
             s.setAcceptUrl(Json.valueOf(share, JsonKey.ACCEPT_URL, null));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
 
         return s;
@@ -141,7 +141,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
                 o.put(JsonKey.ACCEPT_URL, getAcceptUrl());
             }
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return o;
     }

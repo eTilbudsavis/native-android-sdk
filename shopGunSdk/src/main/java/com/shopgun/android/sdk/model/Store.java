@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
@@ -96,7 +96,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
                 list.add(Store.fromJSON((JSONObject) stores.get(i)));
 
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return list;
     }
@@ -127,7 +127,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
             }
 
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return s;
     }
@@ -153,7 +153,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
             }
 
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return o;
     }

@@ -20,7 +20,7 @@ import android.content.Context;
 import android.os.Environment;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 
 import java.io.File;
 
@@ -65,7 +65,7 @@ public class FileUtils {
         File dataDir = new File(Environment.getExternalStorageDirectory(), "Android/data");
         File cacheDir = new File(new File(dataDir, context.getPackageName()), dir);
         if (!cacheDir.exists() && !cacheDir.mkdirs()) {
-            EtaLog.w(TAG, "External directory couldn't be created");
+            SgnLog.w(TAG, "External directory couldn't be created");
             return null;
         }
         return cacheDir;

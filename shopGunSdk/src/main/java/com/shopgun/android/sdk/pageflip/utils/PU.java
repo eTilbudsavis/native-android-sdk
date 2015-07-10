@@ -26,7 +26,7 @@ import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.imageloader.FileNameGenerator;
 import com.shopgun.android.sdk.imageloader.ImageDebugger;
 import com.shopgun.android.sdk.imageloader.ImageRequest;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Images;
 
@@ -45,7 +45,7 @@ public class PU {
         return new ImageDebugger() {
 
             public void debug(ImageRequest ir) {
-                EtaLog.d(tag, ir.getFileName() + ", " + ir.getLog().getTotalDuration());
+                SgnLog.d(tag, ir.getFileName() + ", " + ir.getLog().getTotalDuration());
             }
         };
     }
@@ -81,7 +81,7 @@ public class PU {
 
                     // Give feedback
                     String s = String.format("%s / %s", count, c.getPageCount());
-                    EtaLog.d(tag, s);
+                    SgnLog.d(tag, s);
                     if (count % 5 == 0) {
                         toast(ctx, s);
                     }

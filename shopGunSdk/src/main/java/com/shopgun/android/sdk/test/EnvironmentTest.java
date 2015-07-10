@@ -31,7 +31,7 @@ public class EnvironmentTest extends TestCase {
 
     public static void test() {
 
-        EtaSdkTest.start(TAG);
+        SdkTest.start(TAG);
         testEnvironment();
         testApply();
         testFromString();
@@ -46,7 +46,7 @@ public class EnvironmentTest extends TestCase {
         // CUSTOM, can be anything, but null
         assertNotNull(Environment.CUSTOM.toString());
 
-        EtaSdkTest.logTest(TAG, "Environment");
+        SdkTest.logTest(TAG, "Environment");
 
     }
 
@@ -88,7 +88,7 @@ public class EnvironmentTest extends TestCase {
         String https = e.apply(httpsUrl);
         assertEquals(httpsUrl, https);
 
-        EtaSdkTest.logTest(TAG, "Apply");
+        SdkTest.logTest(TAG, "Apply");
 
     }
 
@@ -158,7 +158,7 @@ public class EnvironmentTest extends TestCase {
         // Set CUSTOM to it's original value
         Environment.setCustom(customOriginal);
 
-        EtaSdkTest.logTest(TAG, "FromString");
+        SdkTest.logTest(TAG, "FromString");
 
     }
 

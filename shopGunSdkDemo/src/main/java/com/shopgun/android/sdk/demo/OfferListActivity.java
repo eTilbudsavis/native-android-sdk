@@ -26,7 +26,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Offer;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.Response;
@@ -110,7 +110,7 @@ public class OfferListActivity extends BaseListActivity implements AdapterView.O
                 // Please check the error code, and details for further information
                 String title = error.isApi() ? "API Error" : "SDK Error";
                 Tools.showDialog(OfferListActivity.this, title, error.toString());
-                EtaLog.e(TAG, error.getMessage(), error);
+                SgnLog.e(TAG, error.getMessage(), error);
 
             }
         }

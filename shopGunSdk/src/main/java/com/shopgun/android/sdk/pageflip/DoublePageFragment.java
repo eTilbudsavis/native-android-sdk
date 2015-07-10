@@ -25,7 +25,7 @@ import android.widget.ImageView;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.imageloader.ImageRequest;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.photoview.PhotoView.OnPhotoDoubleClickListener;
 import com.shopgun.android.sdk.photoview.PhotoView.OnPhotoLongClickListener;
 import com.shopgun.android.sdk.photoview.PhotoView.OnPhotoTapListener;
@@ -150,9 +150,9 @@ public class DoublePageFragment extends PageFragment {
             createDoublePageIfNeeded(b);
 
             if (mPage == null) {
-                EtaLog.d(TAG, "Can't draw on double-page-bitmap it's null");
+                SgnLog.d(TAG, "Can't draw on double-page-bitmap it's null");
             } else if (mPage.isRecycled()) {
-                EtaLog.d(TAG, "Can't draw on double-page-bitmap it's recycled");
+                SgnLog.d(TAG, "Can't draw on double-page-bitmap it's recycled");
             } else {
                 // Do the paint job
                 int left = (isLeft ? 0 : b.getWidth());
@@ -175,7 +175,7 @@ public class DoublePageFragment extends PageFragment {
 
                     if (allowRetry) {
                         allowRetry = false;
-                        EtaLog.e(TAG, e.getMessage(), e);
+                        SgnLog.e(TAG, e.getMessage(), e);
                         try {
                             // Try to clear up some memory
                             ShopGun.getInstance().getRequestQueue().clear();
@@ -185,7 +185,7 @@ public class DoublePageFragment extends PageFragment {
                             // Wait, and hope for the best
                             Thread.sleep(1000);
                         } catch (InterruptedException e1) {
-                            EtaLog.e(TAG, "Sleep failed");
+                            SgnLog.e(TAG, "Sleep failed");
                         }
                     } else {
                         throw e;
@@ -237,17 +237,17 @@ public class DoublePageFragment extends PageFragment {
 //					
 //					if (allowRetry) {
 //						allowRetry = false;
-//						EtaLog.e(TAG, e.getMessage(), e);
+//						SgnLog.e(TAG, e.getMessage(), e);
 //						try {
 //							// Try to clear up some memory
-//							Eta.getInstance().getRequestQueue().clear();
-//							Eta.getInstance().getImageloader().getMemoryCache().clear();
+//							ShopGun.getInstance().getRequestQueue().clear();
+//							ShopGun.getInstance().getImageloader().getMemoryCache().clear();
 //							// 'force' a GC
 //							Runtime.getRuntime().gc();
 //							// Wait, and hope for the best
 //							Thread.sleep(1000);
 //						} catch (InterruptedException e1) {
-//							EtaLog.e(TAG, "Sleep failed");
+//							SgnLog.e(TAG, "Sleep failed");
 //						}
 //					} else {
 //						throw e;

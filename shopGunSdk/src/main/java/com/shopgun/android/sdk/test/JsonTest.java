@@ -33,7 +33,7 @@ public class JsonTest {
 
     public static void test() {
 
-        EtaSdkTest.start(TAG);
+        SdkTest.start(TAG);
         testJsonUtils();
 
         try {
@@ -224,7 +224,7 @@ public class JsonTest {
         Assert.assertTrue(Json.jsonArrayHashCode(aOne) == Json.jsonArrayHashCode(aTwo));
         Assert.assertTrue(Json.jsonObjectHashCode(one) == Json.jsonObjectHashCode(two));
 
-        EtaSdkTest.logTest(TAG, "JsonEquals");
+        SdkTest.logTest(TAG, "JsonEquals");
 
     }
 

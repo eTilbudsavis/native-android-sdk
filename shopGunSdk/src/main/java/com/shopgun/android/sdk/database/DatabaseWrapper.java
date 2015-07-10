@@ -20,7 +20,7 @@ import android.content.Context;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -155,7 +155,7 @@ public class DatabaseWrapper {
             if (!sl.getShares().containsKey(user.getEmail())) {
                 String format = "Shoppinglist %s does not contain a share for %s, removing Shoppinglist from the final list.";
                 String text = String.format(format, sl.getName(), user.getEmail());
-                EtaLog.d(TAG, text);
+                SgnLog.d(TAG, text);
                 it.remove();
             }
         }

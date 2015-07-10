@@ -193,7 +193,7 @@ public class EventLog {
     public String getString(String name) {
 
         if (mEvents.isEmpty()) {
-            EtaLog.d(TAG, String.format("[%+6d ms] %s", 0, name));
+            SgnLog.d(TAG, String.format("[%+6d ms] %s", 0, name));
         }
 
         StringBuilder sb = new StringBuilder();
@@ -262,7 +262,7 @@ public class EventLog {
                 o.put("name", name);
                 o.put("data", data);
             } catch (JSONException e) {
-                EtaLog.e(TAG, null, e);
+                SgnLog.e(TAG, null, e);
             }
             return o;
         }

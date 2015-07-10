@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
@@ -125,7 +125,7 @@ public class Subscription implements IJson<JSONObject>, Parcelable {
                 list.add(Subscription.fromJSON((JSONObject) subscription.get(i)));
             }
         } catch (JSONException e) {
-            EtaLog.e(TAG, e.getMessage(), e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return list;
     }
@@ -141,7 +141,7 @@ public class Subscription implements IJson<JSONObject>, Parcelable {
             }
 
         } catch (JSONException e) {
-            EtaLog.e(TAG, e.getMessage(), e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return o;
     }

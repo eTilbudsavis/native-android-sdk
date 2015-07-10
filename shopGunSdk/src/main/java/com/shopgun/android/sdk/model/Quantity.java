@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
@@ -65,7 +65,7 @@ public class Quantity implements IJson<JSONObject>, Parcelable {
             q.setSize(quantity.isNull(JsonKey.SIZE) ? null : Size.fromJSON(quantity.getJSONObject(JsonKey.SIZE)));
             q.setPieces(quantity.isNull(JsonKey.PIECES) ? null : Pieces.fromJSON(quantity.getJSONObject(JsonKey.PIECES)));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return q;
     }
@@ -77,7 +77,7 @@ public class Quantity implements IJson<JSONObject>, Parcelable {
             o.put(JsonKey.SIZE, Json.toJson(getSize()));
             o.put(JsonKey.PIECES, Json.toJson(getPieces()));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return o;
     }

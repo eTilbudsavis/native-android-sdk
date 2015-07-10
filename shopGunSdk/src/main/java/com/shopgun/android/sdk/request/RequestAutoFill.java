@@ -18,7 +18,7 @@ package com.shopgun.android.sdk.request;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Dealer;
 import com.shopgun.android.sdk.model.HotspotMap;
@@ -164,7 +164,7 @@ public abstract class RequestAutoFill<T> {
                     }
 
                 } else {
-                    EtaLog.d(TAG, error.toJSON().toString());
+                    SgnLog.d(TAG, error.toJSON().toString());
                 }
 
                 done();
@@ -185,7 +185,7 @@ public abstract class RequestAutoFill<T> {
                 if (response != null) {
                     item.setDealer(Dealer.fromJSON(response));
                 } else {
-                    EtaLog.d(TAG, error.toJSON().toString());
+                    SgnLog.d(TAG, error.toJSON().toString());
                 }
                 done();
             }
@@ -217,7 +217,7 @@ public abstract class RequestAutoFill<T> {
                     }
 
                 } else {
-                    EtaLog.d(TAG, error.toJSON().toString());
+                    SgnLog.d(TAG, error.toJSON().toString());
                 }
                 done();
 
@@ -237,7 +237,7 @@ public abstract class RequestAutoFill<T> {
                 if (response != null) {
                     item.setStore(Store.fromJSON(response));
                 } else {
-                    EtaLog.d(TAG, error.toJSON().toString());
+                    SgnLog.d(TAG, error.toJSON().toString());
                 }
                 done();
             }
@@ -269,7 +269,7 @@ public abstract class RequestAutoFill<T> {
                     }
 
                 } else {
-                    EtaLog.d(TAG, error.toJSON().toString());
+                    SgnLog.d(TAG, error.toJSON().toString());
                 }
 
                 done();
@@ -292,7 +292,7 @@ public abstract class RequestAutoFill<T> {
                 if (response != null) {
                     item.setCatalog(Catalog.fromJSON(response));
                 } else {
-                    EtaLog.d(TAG, error.toJSON().toString());
+                    SgnLog.d(TAG, error.toJSON().toString());
                 }
                 done();
             }
@@ -309,7 +309,7 @@ public abstract class RequestAutoFill<T> {
                 if (response != null) {
                     c.setPages(Images.fromJSON(response));
                 } else {
-                    EtaLog.d(TAG, error.toJSON().toString());
+                    SgnLog.d(TAG, error.toJSON().toString());
                 }
                 done();
             }
@@ -327,7 +327,7 @@ public abstract class RequestAutoFill<T> {
                 if (response != null) {
                     c.setHotspots(HotspotMap.fromJSON(c.getDimension(), response));
                 } else {
-                    EtaLog.d(TAG, error.toJSON().toString());
+                    SgnLog.d(TAG, error.toJSON().toString());
                 }
                 done();
             }

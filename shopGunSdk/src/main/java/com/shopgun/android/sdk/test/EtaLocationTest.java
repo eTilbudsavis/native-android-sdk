@@ -35,7 +35,7 @@ public class EtaLocationTest {
 
     public static void test() {
 
-        EtaSdkTest.start(TAG);
+        SdkTest.start(TAG);
         testEtaLocation();
 
     }
@@ -61,7 +61,7 @@ public class EtaLocationTest {
         Assert.assertEquals(l.getAddress(), pl.getAddress());
         Assert.assertEquals(l.getRadius(), pl.getRadius());
 
-        EtaSdkTest.logTest(TAG, (new MethodNameHelper() {
+        SdkTest.logTest(TAG, (new MethodNameHelper() {
         }).getName());
     }
 

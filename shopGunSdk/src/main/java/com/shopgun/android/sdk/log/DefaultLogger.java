@@ -20,7 +20,7 @@ import android.util.Log;
 
 import com.shopgun.android.sdk.Constants;
 
-public class DefaultLogger implements EtaLogger {
+public class DefaultLogger implements SgnLogger {
 
     public static final String TAG = Constants.getTag(DefaultLogger.class);
 
@@ -79,7 +79,7 @@ public class DefaultLogger implements EtaLogger {
         if (msg == null || msg.length() == 0) {
             msg = tr.getMessage();
         }
-        mLog.add(EventLog.TYPE_EXCEPTION, EtaLog.exceptionToJson(tr));
+        mLog.add(EventLog.TYPE_EXCEPTION, SgnLog.exceptionToJson(tr));
         return Log.e(tag, msg, tr);
     }
 

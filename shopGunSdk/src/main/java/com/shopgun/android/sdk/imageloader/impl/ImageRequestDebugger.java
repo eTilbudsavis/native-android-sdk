@@ -19,14 +19,14 @@ package com.shopgun.android.sdk.imageloader.impl;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.imageloader.ImageDebugger;
 import com.shopgun.android.sdk.imageloader.ImageRequest;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 
 public class ImageRequestDebugger implements ImageDebugger {
 
     public static final String TAG = Constants.getTag(ImageRequestDebugger.class);
 
     public void debug(ImageRequest ir) {
-        EtaLog.d(TAG, ir.getLog().getString(ir.getUrl()));
+        SgnLog.d(TAG, ir.getLog().getString(ir.getUrl()));
     }
 
 }

@@ -21,7 +21,7 @@ import android.content.Context;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.imageloader.FileCache;
 import com.shopgun.android.sdk.imageloader.ImageRequest;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.FileUtils;
 
 import java.io.File;
@@ -52,7 +52,7 @@ public class DefaultFileCache implements FileCache {
                 }
             }
             if (count > 0) {
-                EtaLog.v(TAG, "Deleted " + count + " files from " + getClass().getSimpleName());
+                SgnLog.v(TAG, "Deleted " + count + " files from " + getClass().getSimpleName());
             }
         }
     };
@@ -61,7 +61,7 @@ public class DefaultFileCache implements FileCache {
     public DefaultFileCache(Context context, ExecutorService executor) {
         mCacheDir = FileUtils.getCacheDirectory(context, true);
         mExecutor = executor;
-        EtaLog.v(TAG, "CacheDir: " + mCacheDir.getAbsolutePath());
+        SgnLog.v(TAG, "CacheDir: " + mCacheDir.getAbsolutePath());
         cleanup();
     }
 
@@ -106,7 +106,7 @@ public class DefaultFileCache implements FileCache {
 
                     }
                 }
-//				EtaLog.d(TAG, "SaveByteArray: " + (System.currentTimeMillis()-start));
+//				SgnLog.d(TAG, "SaveByteArray: " + (System.currentTimeMillis()-start));
             }
         };
 

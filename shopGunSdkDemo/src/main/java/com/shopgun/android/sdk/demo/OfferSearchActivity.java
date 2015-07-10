@@ -25,7 +25,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Offer;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.Response.Listener;
@@ -127,7 +127,7 @@ public class OfferSearchActivity extends BaseActivity implements View.OnClickLis
 					/*
 					 * If the request failed, you can print the error message
 					 */
-                    EtaLog.d(TAG, "", error);
+                    SgnLog.d(TAG, "", error);
                 }
 
             }

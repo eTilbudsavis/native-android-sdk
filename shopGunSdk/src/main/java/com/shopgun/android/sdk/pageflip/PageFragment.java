@@ -31,7 +31,7 @@ import com.shopgun.android.sdk.imageloader.BitmapDisplayer;
 import com.shopgun.android.sdk.imageloader.BitmapProcessor;
 import com.shopgun.android.sdk.imageloader.ImageRequest;
 import com.shopgun.android.sdk.imageloader.LoadSource;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Dimension;
 import com.shopgun.android.sdk.model.Hotspot;
 import com.shopgun.android.sdk.model.HotspotMap;
@@ -149,7 +149,7 @@ public abstract class PageFragment extends Fragment {
 
     private PageStat getStat() {
         if (mStats == null) {
-//			EtaLog.d(TAG, "stat.ViewSession: " + mCallback.getViewSession());
+//			SgnLog.d(TAG, "stat.ViewSession: " + mCallback.getViewSession());
             mStats = new PageStat(mCallback.getCatalog().getId(), mCallback.getViewSession(), mPages, land());
         }
         return mStats;
@@ -238,7 +238,7 @@ public abstract class PageFragment extends Fragment {
 
     @Override
     public void onResume() {
-//		EtaLog.d(TAG, String.format("pos: %s, onResume", mPosition));
+//		SgnLog.d(TAG, String.format("pos: %s, onResume", mPosition));
         updateBranding();
 
         if (getCallback() != null) {
@@ -277,7 +277,7 @@ public abstract class PageFragment extends Fragment {
      * called once the {@link PageFragment} becomes invisible in the {@link PageflipViewPager}
      */
     public void onInvisible() {
-//		EtaLog.d(TAG, String.format("pos: %s, onInvisible, isAdded: %s", mPosition, isAdded()));
+//		SgnLog.d(TAG, String.format("pos: %s, onInvisible, isAdded: %s", mPosition, isAdded()));
         if (mCallback != null) {
             getStat().collectView();
         }
@@ -286,7 +286,7 @@ public abstract class PageFragment extends Fragment {
 
     @Override
     public void onPause() {
-//		EtaLog.d(TAG, String.format("pos: %s, onPause", mPosition));
+//		SgnLog.d(TAG, String.format("pos: %s, onPause", mPosition));
         mLoader.stop();
         mPhotoView.recycle();
         onInvisible();
@@ -324,7 +324,7 @@ public abstract class PageFragment extends Fragment {
                 try {
                     return PageflipUtils.drawDebugRects(getCallback().getCatalog(), page, getCallback().isLandscape(), b);
                 } catch (Exception e) {
-                    EtaLog.d(TAG, e.getMessage(), e);
+                    SgnLog.d(TAG, e.getMessage(), e);
                 }
             }
             return b;

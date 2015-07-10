@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
@@ -64,7 +64,7 @@ public class Images implements IJson<JSONObject>, Parcelable {
             try {
                 list.add(fromJSON(images.getJSONObject(i)));
             } catch (JSONException e) {
-                EtaLog.e(TAG, e.getMessage(), e);
+                SgnLog.e(TAG, e.getMessage(), e);
             }
         }
         return list;
@@ -90,7 +90,7 @@ public class Images implements IJson<JSONObject>, Parcelable {
             o.put(JsonKey.ZOOM, Json.nullCheck(getZoom()));
             o.put(JsonKey.THUMB, Json.nullCheck(getThumb()));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return o;
     }

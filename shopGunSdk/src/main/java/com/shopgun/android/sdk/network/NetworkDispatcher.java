@@ -21,7 +21,7 @@ import android.os.Process;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.SessionManager;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Request.Method;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
 import com.shopgun.android.sdk.utils.HashUtils;
@@ -38,7 +38,7 @@ public class NetworkDispatcher extends Thread {
 
     public static final String TAG = Constants.getTag(NetworkDispatcher.class);
 
-    /** Eta object controlling the whole lot */
+    /** ShopGun object controlling the whole lot */
     private final ShopGun mShopGun;
 
     /** The queue of requests to service. */
@@ -203,7 +203,7 @@ public class NetworkDispatcher extends Thread {
             req.getNetworkLog().put("response", r);
 
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
 
     }

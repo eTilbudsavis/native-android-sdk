@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
@@ -65,7 +65,7 @@ public class Pricing implements IJson<JSONObject>, Parcelable {
             p.setPrePrice(pricing.isNull(JsonKey.PREPRICE) ? null : pricing.getDouble(JsonKey.PREPRICE));
             p.setCurrency(Json.valueOf(pricing, JsonKey.CURRENCY));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return p;
     }
@@ -77,7 +77,7 @@ public class Pricing implements IJson<JSONObject>, Parcelable {
             o.put(JsonKey.PREPRICE, Json.nullCheck(getPrePrice()));
             o.put(JsonKey.CURRENCY, Json.nullCheck(getCurrency()));
         } catch (JSONException e) {
-            EtaLog.e(TAG, "", e);
+            SgnLog.e(TAG, "", e);
         }
         return o;
     }

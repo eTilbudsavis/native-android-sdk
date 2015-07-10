@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.network.impl;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.RequestDebugger;
 
@@ -26,12 +26,12 @@ public class NetworkDebugger implements RequestDebugger {
     public static final String TAG = Constants.getTag(NetworkDebugger.class);
 
     public void onFinish(Request<?> req) {
-        EtaLog.d(TAG, req.getNetworkLog().toString());
-        EtaLog.d(TAG, req.getLog().getString(getClass().getSimpleName()));
+        SgnLog.d(TAG, req.getNetworkLog().toString());
+        SgnLog.d(TAG, req.getLog().getString(getClass().getSimpleName()));
     }
 
     public void onDelivery(Request<?> r) {
-        EtaLog.d(TAG, "TotalDuration: " + r.getLog().getTotalDuration());
+        SgnLog.d(TAG, "TotalDuration: " + r.getLog().getTotalDuration());
     }
 
 }

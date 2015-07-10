@@ -28,7 +28,7 @@ import com.shopgun.android.sdk.imageloader.impl.DefaultBitmapDecoder;
 import com.shopgun.android.sdk.imageloader.impl.DefaultFileCache;
 import com.shopgun.android.sdk.imageloader.impl.DefaultImageDownloader;
 import com.shopgun.android.sdk.imageloader.impl.LruMemoryCache;
-import com.shopgun.android.sdk.log.EtaLog;
+import com.shopgun.android.sdk.log.SgnLog;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -268,7 +268,7 @@ public class ImageLoader {
                     mMemoryCache.clear();
                 } catch (IOException e) {
                     ir.add("download-failed");
-                    EtaLog.e(TAG, "Download error", e);
+                    SgnLog.e(TAG, "Download error", e);
                 }
                 addToCache(ir, image);
 
