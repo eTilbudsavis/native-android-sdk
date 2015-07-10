@@ -209,7 +209,7 @@ public class SessionManager {
     }
 
     /**
-     * Update current session with a JSONObject retrieved from eTilbudsavis API v2.
+     * Update current session with a JSONObject retrieved from ShopGun API v2.
      * @param session to update from
      * @return true if session was updated
      */
@@ -349,8 +349,8 @@ public class SessionManager {
     }
 
     /**
-     * Perform a standard login, using an existing eTilbudsavis user.
-     * @param email - etilbudsavis user name (e-mail)
+     * Perform a standard login, using an existing ShopGun user.
+     * @param email - ShopGun user name (e-mail)
      * @param password for user
      * @param l for callback on complete
      */
@@ -365,7 +365,7 @@ public class SessionManager {
     }
 
     /**
-     * Login to eTilbudsavis, using a Facebook token.<br>
+     * Login to ShopGun, using a Facebook token.<br>
      * This requires you to implement the Facebook SDK, and relay the Facebook token.
      * @param facebookAccessToken A facebook access token
      * @param l lister for callbacks
@@ -415,7 +415,7 @@ public class SessionManager {
     }
 
     /**
-     * Create a new eTilbudsavis user.
+     * Create a new ShopGun user.
      *
      * @param email An email
      * @param password A password

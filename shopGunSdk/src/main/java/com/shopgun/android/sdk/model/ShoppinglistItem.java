@@ -370,7 +370,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 
     /**
      * Set the creator of this list.
-     * <p>Creator must be an e-mail address, and must be a valid eTilbudsavis user</p>
+     * <p>Creator must be an e-mail address, and must be a valid ShopGun user</p>
      * @param creator The creator of this list
      * @return This object
      */

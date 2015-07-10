@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Helper class designed to simplify working with JSON in Android - specifically the eTilbudsavis Android SDK.
+ * Helper class designed to simplify working with JSON in Android - specifically the ShopGun Android SDK.
  * The class holds some static methods for converting data, and ensuring that valid data returns.
  *
  * @author Danny Hvam - danny@etilbudsavis.dk
@@ -206,8 +206,8 @@ public class Json {
     }
 
     /**
-     * Method for safely converting an EtaObject to JSON.
-     * @param object The EtaObject to convert
+     * Method for safely converting a ShopGun model object to JSON.
+     * @param object The ShopGun model object to convert
      * @param defValue The default value to return in case of errors.
      * Typically {@link JSONObject#NULL JSOBObject.NULL} or null is used for this purpose
      * @return A JSONObject, or defValue
@@ -217,8 +217,8 @@ public class Json {
     }
 
     /**
-     * Method for safely converting an EtaObject to JSON.
-     * @param object The EtaObject to convert
+     * Method for safely converting a ShopGun model object to JSON.
+     * @param object The ShopGun model object to convert
      * @return A JSONObject, or JSONObject.NULL
      */
     public static Object toJson(IJson<?> object) {
@@ -227,7 +227,7 @@ public class Json {
 
     /**
      * If an object is null, method will return JSONObject.NULL, else the object it self.
-     * This is useful, when sending data to the eTilbudsavis API v2 as some keys are required
+     * This is useful, when sending data to the ShopGun API v2 as some keys are required
      * by the API and they will be removed, when performing toString() on the object, if the value
      * mapped to the key is null.
      * @param object An object to check for null

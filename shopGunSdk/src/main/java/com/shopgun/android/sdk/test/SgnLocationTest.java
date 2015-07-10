@@ -36,11 +36,11 @@ public class SgnLocationTest {
     public static void test() {
 
         SdkTest.start(TAG);
-        testEtaLocation();
+        testSgnLocation();
 
     }
 
-    public static void testEtaLocation() {
+    public static void testSgnLocation() {
 
         double lat = 56.0d;
         double lng = 8.0d;

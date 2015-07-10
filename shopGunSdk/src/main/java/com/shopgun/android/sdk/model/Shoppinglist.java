@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class is a representation of the eTilbudsavis API v2 shopppinglist.
+ * This class is a representation of the ShopGun API v2 shopppinglist.
  *
  * @author Danny Hvam - danny@etilbudsavis.dk
  *
@@ -369,7 +369,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
     /**
      * Get the type of {@link Shoppinglist}
      *
-     * Currently eTilbudsavis are using the two types below, but you are free to
+     * Currently ShopGun are using the two types below, but you are free to
      * do other types too.
      * <ul>
      * <li> {@link Shoppinglist#TYPE_SHOPPING_LIST} </li>
@@ -387,7 +387,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
     /**
      * Set the type of {@link Shoppinglist}
      *
-     * Currently eTilbudsavis are using the two types below, but you are free to
+     * Currently ShopGun are using the two types below, but you are free to
      * do other types too.
      * <ul>
      * <li> {@link Shoppinglist#TYPE_SHOPPING_LIST} </li>
@@ -483,7 +483,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      *
      * <p>What being said, please ensure not to accidentally override any keys
      * that others may have set on the object. This can be done by name spacing
-     * your keys. Currently eTilbudsavis are using the <b>{@code eta_}</b> name space for
+     * your keys. Currently ShopGun are using the <b>{@code eta_}</b> name space for
      * our keys.</p>
      *
      * @return A {@link JSONObject}
@@ -507,7 +507,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      *
      * <p>What being said, please ensure not to accidentally override any keys
      * that others may have set on the object. This can be done by name spacing
-     * your keys. Currently eTilbudsavis are using the <b>{@code eta_}</b> name space for
+     * your keys. Currently ShopGun are using the <b>{@code eta_}</b> name space for
      * our keys.</p>
      *
      * @param meta The new meta date to use

@@ -7,7 +7,7 @@ This guide is out of date
 We are working on a new version, please stay tuned. Until then you can refer to the Demo App, or email us with questions :-) 
 
 <!-- 
-The simple solution to querying for eTilbudsavis-data.
+The simple solution to querying for ShopGun-data.
 
 [Before you begin](#before-you-begin)
 
@@ -183,7 +183,7 @@ The commonly used methods in the session are:
 - `login()` - For logging in a user
 - `loginFacebook()` - For loggingin via Facebook (This requires you to implement the Facebook Android SDK)
 - `forgotPassword()` - To retrieve a forgotton password
-- `createUser()` - Create a new eTilbudsavis user
+- `createUser()` - Create a new ShopGun user
 - `signout()` - Sign a user out.
 
 Furthermore the Session has a subscriber system, so anyone (class) who want's notification on state change will be notified via an `SessionListener`.

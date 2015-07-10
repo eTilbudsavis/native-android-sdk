@@ -42,7 +42,7 @@ import java.util.List;
  * </p>
  *
  * <p>
- * An object matching the responses from typeahead endpoints, in eTilbudsavis API v2.
+ * An object matching the responses from typeahead endpoints, in ShopGun API v2.
  * </p>
  *
  * @author Danny Hvam - danny@etilbudsavis.dk

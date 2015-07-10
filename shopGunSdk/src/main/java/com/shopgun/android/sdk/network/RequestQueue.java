@@ -82,9 +82,9 @@ public class RequestQueue {
 
     /**
      * Construct a new RequestQueue for processing requests.
-     * This RequestQueue is primarily aimed at fetching data from the eTilbudsavis API.
+     * This RequestQueue is primarily aimed at fetching data from the ShopGun API.
      *
-     * @param shopGun, the eTilbudsavis SDK object to use for requests
+     * @param shopGun, the ShopGun SDK object to use for requests
      * @param cache to use for this RequestQueue
      * @param network the implementation you want to use for this RequestQueue
      * @param poolSize, number of threads to do requests
@@ -99,8 +99,8 @@ public class RequestQueue {
     }
 
     /**
-     * Construct with default poolsize, and the eta handler running on main thread
-     * @param shopGun - the eTilbudsavis SDK object to use for requests
+     * Construct with default poolsize, and the ShopGun handler running on main thread
+     * @param shopGun - the ShopGun SDK object to use for requests
      * @param cache - to use for this RequestQueue
      * @param network - the implementation you want to use for this RequestQueue
      */
@@ -198,7 +198,7 @@ public class RequestQueue {
 
     /**
      * This method have been depricated, please refer to {@link SgnLog#getLogger()}
-     * for a complete log of eta sdk.<br><br>
+     * for a complete log of ShopGun sdk.<br><br>
      *
      * Get the log of all requests that have passed through this RequestQueue.
      * The log contains a summary of the request it self, and the response given by the API.
@@ -347,14 +347,14 @@ public class RequestQueue {
     }
 
     /**
-     * Method for adding required parameters for calling the eTilbudsavis.<br>
+     * Method for adding required parameters for calling the ShopGun.<br>
      * @param request
      */
     private void prepareRequest(Request<?> request) {
 
         request.addEvent("preparing-sdk-parameters");
 
-        // Apply etilbudsavis environment, if needed
+        // Apply ShopGun environment, if needed
         request.setUrl(Api.getEnvironment().apply(request.getUrl()));
 
         String version = mShopGun.getAppVersion();

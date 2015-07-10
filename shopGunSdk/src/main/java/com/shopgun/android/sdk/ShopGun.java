@@ -47,7 +47,7 @@ import java.util.concurrent.Executors;
 
 /**
  *
- * ShopGun is the main class for interacting with the eTilbudsavis SDK / API.
+ * ShopGun is the main class for interacting with the ShopGun SDK / API.
  *
  * ShopGun is a singleton, that will have to be created with a context, from there on out
  * you can invoke with the static method getInstance.
@@ -513,7 +513,7 @@ public class ShopGun {
 //	private void finalCleanup() {
 //		// TODO don't need to null everything
 //		synchronized (ShopGun.class) {
-//			mEta = null;
+//			mShopGun = null;
 //			mApiKey = null;
 //			mApiSecret = null;
 //			mAppVersion = null;

@@ -86,7 +86,7 @@ public final class Api {
 
 
     /**
-     * The {@link Environment} contains information on how (and where) to contact the eTilbudsavis API.
+     * The {@link Environment} contains information on how (and where) to contact the ShopGun API.
      * It by default contains three predefined settings, which maps directly to it's counterparts in our API.
      * And furthermore there is an option to set a {@link Environment#CUSTOM} environment, this is for local
      * delevopment and testing.
@@ -220,7 +220,7 @@ public final class Api {
     }
 
     /**
-     * This class contains a sub-set of paths needed to request data from the eTilbudsavis API,
+     * This class contains a sub-set of paths needed to request data from the ShopGun API,
      * and has methods to generate paths, that dependent on information from objects (id's e.t.c).
      *
      * @author Danny Hvam - danny@etilbudsavis.dk
@@ -413,7 +413,7 @@ public final class Api {
     }
 
     /**
-     * This class contains sub-set of strings, that eTilbudsavis API v2 uses as keys, for the JSON data
+     * This class contains sub-set of strings, that ShopGun API v2 uses as keys, for the JSON data
      * that is being send to and from the API.
      *
      * @author Danny Hvam - danny@etilbudsavis.dk
@@ -524,7 +524,7 @@ public final class Api {
     }
 
     /**
-     * <p>This class contains a sub-set of strings that eTilbudsavis uses as keys for the meta-object,
+     * <p>This class contains a sub-set of strings that ShopGun uses as keys for the meta-object,
      * found on {@link Shoppinglist#getMeta()}, and {@link ShoppinglistItem#getMeta()}.</p>
      *
      * @author Danny Hvam - danny@etilbudsavis.dk
@@ -541,7 +541,7 @@ public final class Api {
     }
 
     /**
-     * <p>This class contains a sub-set of strings that eTilbudsavis uses for sorting lists queries.
+     * <p>This class contains a sub-set of strings that ShopGun uses for sorting lists queries.
      * All sort types are in ascending order, but can be reverted to descending order by prepending
      * the string "-" to any of them.</p>
      *
@@ -607,7 +607,7 @@ public final class Api {
     }
 
     /**
-     * This class contains sub-set of strings, that eTilbudsavis API v2 uses as parameters,
+     * This class contains sub-set of strings, that ShopGun API v2 uses as parameters,
      * for queries to the API.
      *
      * @author Danny Hvam - danny@etilbudsavis.dk

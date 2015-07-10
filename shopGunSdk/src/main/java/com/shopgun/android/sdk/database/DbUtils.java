@@ -122,7 +122,7 @@ public class DbUtils {
     /**
      * This method will migrate any {@link Shoppinglist}, and their {@link ShoppinglistItem} from
      * the offline state, to the currently logged in {@link User}, and they will at a later point
-     * in time be synchronized to the eTilbudsavis API.
+     * in time be synchronized to the ShopGun API.
      *
      * @param manager A {@link ListManager}
      * @param db      A {@link DatabaseWrapper}

@@ -64,7 +64,7 @@ import java.util.Stack;
 
 /**
  * The {@link SyncManager} class performs asynchronous synchronization with the
- * eTilbudsavis API, to propagate all {@link Shoppinglist} and {@link ShoppinglistItem}
+ * ShopGun API, to propagate all {@link Shoppinglist} and {@link ShoppinglistItem}
  * changes that a user may have done in the {@link DatabaseWrapper database}.
  *
  * <p>

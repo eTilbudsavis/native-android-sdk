@@ -23,7 +23,7 @@
  * <p/>
  * <br/><br/>
  * <p/>
- * The classes and methods, in this package is intended for performing multiple requests against the eTilbudsavis API.
+ * The classes and methods, in this package is intended for performing multiple requests against the ShopGun API.
  * It's designed to be easy to use, and wrap some queries to make life easier.
  * <p/>
  * <br/><br/>

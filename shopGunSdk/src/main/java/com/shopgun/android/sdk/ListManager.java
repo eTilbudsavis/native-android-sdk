@@ -44,7 +44,7 @@ import java.util.Map;
  * {@link Shoppinglist Shoppinglists}, {@link ShoppinglistItem ShoppinglistItems},
  * and {@link Share Shares}, without having to worry about keeping a sane, and
  * synchronizing state with both the {@link DatabaseWrapper database} and, the
- * eTilbudsavis API.
+ * ShopGun API.
  *
  * @author Danny Hvam - danny@etilbudsavis.dk
  *

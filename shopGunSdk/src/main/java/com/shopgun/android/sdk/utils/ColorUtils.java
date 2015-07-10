@@ -51,7 +51,7 @@ public class ColorUtils {
     }
 
     /**
-     * Remove any transparency from a color. The eTilbudsavis v2 doesn't support alpha channel in colors.
+     * Remove any transparency from a color. The ShopGun v2 doesn't support alpha channel in colors.
      *
      * @param color A color
      * @return A new color, or <code>null</code> if input color is null
@@ -61,7 +61,7 @@ public class ColorUtils {
     }
 
     /**
-     * Remove any transparency from a color. The eTilbudsavis v2 doesn't support alpha channel in colors.
+     * Remove any transparency from a color. The ShopGun v2 doesn't support alpha channel in colors.
      *
      * @param color       A color
      * @param showWarning <code>true</code> to send warnings to {@link SgnLog}
@@ -78,7 +78,7 @@ public class ColorUtils {
     }
 
     /**
-     * Method returns a eTilbudsavis API friendly color string.<br>
+     * Method returns a ShopGun API friendly color string.<br>
      * Alpha isn't supported, and will be stripped. Warnings will be logged to console
      * <li>Color.WHITE = "FFFFFF"</li>
      * <li>Color.BLACK = "000000"</li>
@@ -92,7 +92,7 @@ public class ColorUtils {
     }
 
     /**
-     * Method returns a eTilbudsavis API friendly color string.<br>
+     * Method returns a ShopGun API friendly color string.<br>
      * Alpha isn't supported, and will be stripped. This will be logged as a warning in console
      * if ignoreWarnings is false.
      * <li>Color.WHITE = "FFFFFF"</li>
@@ -114,7 +114,7 @@ public class ColorUtils {
      * You can create two types of Strings:
      * <ol>
      * <li> A regular #ARGB string (e.g.: {@link Color#BLACK} = "#FF000000"), or
-     * <li> An eTilbudsavis API v2 compliant string, where alpha and '#' isn't allowed, e.g.: {@link Color#BLACK} = "000000")
+     * <li> An ShopGun API v2 compliant string, where alpha and '#' isn't allowed, e.g.: {@link Color#BLACK} = "000000")
      * </ol>
      * <p/>
      * <li>Color.WHITE = "FFFFFF"</li>
@@ -123,7 +123,7 @@ public class ColorUtils {
      *
      * @param color          The color to parse
      * @param ignoreWarnings - set to true to ignore alpha warnings
-     * @param apiCompliant   <code>true</code> to create a eTilbudsavis API v2 compliant string like "RGB".
+     * @param apiCompliant   <code>true</code> to create a ShopGun API v2 compliant string like "RGB".
      *                       <code>false</code> to get an "#ARGB"
      * @return A string, or <code>null</code> if input color is null
      */

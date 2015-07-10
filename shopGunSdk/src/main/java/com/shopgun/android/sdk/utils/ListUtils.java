@@ -78,7 +78,7 @@ public class ListUtils {
 
 
     /**
-     * Sorts {@link ShoppinglistItem}, according to what eTilbudsavis have defined
+     * Sorts {@link ShoppinglistItem}, according to what ShopGun have defined
      * the order of a list should look be. This method does <b>not</b> update
      * the objects (as in {@link ShoppinglistItem#getPreviousId() previous_id}
      * isn't updated automatically).

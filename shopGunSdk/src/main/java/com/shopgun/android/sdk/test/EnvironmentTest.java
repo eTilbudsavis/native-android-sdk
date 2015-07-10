@@ -74,7 +74,7 @@ public class EnvironmentTest extends TestCase {
         String noSlash = e.apply(noSlashPath);
         assertEquals(etaApiUrl, noSlash);
 
-        // full eTilbudsavis url
+        // full ShopGun url
         String fullBuild = e.apply(etaApiUrl);
         assertEquals(etaApiUrl, fullBuild);
 

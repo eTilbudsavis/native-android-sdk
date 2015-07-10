@@ -58,7 +58,7 @@ public interface PageCallback {
     public PageflipListener getWrapperListener();
 
     /**
-     * Get the current view-session. A variable used to give correct statistics to the eTilbudsavis API.
+     * Get the current view-session. A variable used to give correct statistics to the ShopGun API.
      *
      * @return A string representation of the view-session token
      */

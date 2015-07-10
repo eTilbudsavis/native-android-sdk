@@ -57,7 +57,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
     public static final String ARG_CATALOG = Constants.getArg("pageflipfragment.catalog");
     public static final String ARG_CATALOG_ID = Constants.getArg("pageflipfragment.catalog-id");
     public static final String ARG_PAGE = Constants.getArg("pageflipfragment.page");
-    //	public static final String ARG_CATALOG_VIEW = Eta.ARG_PREFIX + "pageflipfragment.catalog-view";
     public static final String ARG_VIEWSESSION = Constants.getArg("pageflipfragment.view-session");
     public static final String ARG_BRANDING = Constants.getArg("pageflipfragment.branding");
     private static final double PAGER_SCROLL_FACTOR = 0.5d;
