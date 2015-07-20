@@ -92,6 +92,9 @@ public class PermissionUtils {
      * @return {@code true} if the {@link User} can edit the list of {@link Shoppinglist}, else {@code false}
      */
     public static boolean allowEdit(List<Shoppinglist> list, User user) {
+        if (list == null || user == null) {
+            return false;
+        }
         for (Shoppinglist sl : list) {
             if (!allowEdit(sl, user)) {
                 return false;
@@ -108,7 +111,7 @@ public class PermissionUtils {
      * @return {@code true} if the {@link User} can edit the {@link Shoppinglist}, else {@code false}
      */
     public static boolean allowEdit(Shoppinglist sl, User user) {
-        return allowEdit(sl.getId(), sl.getShares().get(user.getEmail()));
+        return sl != null && sl.getShares() != null && user != null && allowEdit(sl.getId(), sl.getShares().get(user.getEmail()));
     }
 
     /**
@@ -120,7 +123,7 @@ public class PermissionUtils {
      * @return {@code true} if the email can edit the {@link Shoppinglist}, else {@code false}
      */
     public static boolean allowEdit(Shoppinglist sl, String email) {
-        return allowEdit(sl.getId(), sl.getShares().get(email));
+        return sl != null && sl.getShares() != null && allowEdit(sl.getId(), sl.getShares().get(email));
     }
 
     /**
@@ -132,7 +135,7 @@ public class PermissionUtils {
      * @return {@code true} if the {@link Share} can edit the list, else {@code false}
      */
     public static boolean allowEdit(Shoppinglist sl, Share share) {
-        return allowEdit(sl.getId(), share);
+        return sl != null && allowEdit(sl.getId(), share);
     }
 
     /**
@@ -147,7 +150,7 @@ public class PermissionUtils {
         if (share == null || shoppinglistId == null) {
             return false;
         }
-        if (!share.getShoppinglistId().equals(shoppinglistId)) {
+        if (!shoppinglistId.equals(share.getShoppinglistId())) {
             return false;
         }
         boolean owner = Share.ACCESS_OWNER.equals(share.getAccess());
