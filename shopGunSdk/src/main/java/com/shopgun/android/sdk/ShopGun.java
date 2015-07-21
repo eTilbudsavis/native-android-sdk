@@ -38,6 +38,8 @@ import com.shopgun.android.sdk.network.impl.DefaultHttpNetwork;
 import com.shopgun.android.sdk.network.impl.HttpURLNetwork;
 import com.shopgun.android.sdk.network.impl.MemoryCache;
 import com.shopgun.android.sdk.network.impl.NetworkImpl;
+import com.shopgun.android.sdk.shoppinglists.ListManager;
+import com.shopgun.android.sdk.shoppinglists.SyncManager;
 import com.shopgun.android.sdk.utils.ActivityCounter;
 import com.shopgun.android.sdk.utils.Utils;
 import com.shopgun.android.sdk.utils.Validator;
@@ -54,9 +56,8 @@ import java.util.concurrent.Executors;
  *
  * <h3>Requirements</h3>
  * There is only a few requirements to get going. You will need to get an
- * API key, and API secret. You can request a set at 
- * <a href="https://etilbudsavis.dk/developers/"> etilbudsavis.dk </a>
- * (look for "Apply for Developer Program" in the top right corner).
+ * API key, and API secret. You can request a set at
+ * <a href="https://etilbudsavis.dk/developers/">eTilbudsavis.dk</a>, under "Manage Apps".
  *
  *
  * You will have to add the API key and API secret as meta data in your AndroidManifest, in the following way:
@@ -71,21 +72,18 @@ import java.util.concurrent.Executors;
  * &lt;meta-data android:name="com.shopgun.android.sdk.develop.api_secret" android:value="YOUR_DEVELOP_API_SECRET" /&gt;
  * </pre>
  *
- *
- *
- * <ul>
- * 	<li> First invoke ShopGun.create(Context context)
- * 	<li> Then call ShopGun.getInstance() to get the current instance of ShopGun
- * </ul>
- *
- *
  * <h3>Usage</h3>
  *
- * <ol>
- * 	<li> First invoke ShopGun.create(Context context)
- * 	<li> Then call ShopGun.getInstance() to get the current instance of ShopGun
- * </ol>
+ * First instantiate the instance with {@link ShopGun#create(Context) ShopGun.create() create()}.
+ * Once {@link ShopGun#create(Context)} have been called, ShopGun have been setup and you can now
+ * refer to the singleton by calling {@link ShopGun#getInstance() ShopGun.getInstance()}.
  *
+ * <h3>Demo</h3>
+ * For further instructions on the usage of ShopGun, please refer to the ShopGun SDK Demo included in the SDK.
+ * The ShopGun SDK Demo, demonstrates some of the setup methods, and features included in the SDK.
+ *
+ * <br/>
+ * <br/>
  *
  * @author Danny Hvam - danny@etilbudsavis.dk
  * @version 2.2.1
@@ -102,7 +100,6 @@ public class ShopGun {
     /** A static handler for usage in the SDK, this will help prevent leaks */
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     /** Counting the number of active activities, to determine when to stop any long running activities */
-//	private final AtomicInteger mActivityCounter = new AtomicInteger();
     private final ActivityCounter mActivityCounter = new ActivityCounter();
     /** Application context for usage in the SDK */
     private Context mContext;

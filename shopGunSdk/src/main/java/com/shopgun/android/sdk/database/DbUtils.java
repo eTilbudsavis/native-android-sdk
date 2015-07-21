@@ -23,7 +23,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.ListManager;
+import com.shopgun.android.sdk.shoppinglists.ListManager;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.model.User;

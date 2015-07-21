@@ -14,13 +14,15 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk;
+package com.shopgun.android.sdk.shoppinglists;
 
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
 
+import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.bus.Bus;
 import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
