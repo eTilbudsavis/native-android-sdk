@@ -449,7 +449,7 @@ public class ShopGun {
     }
 
     /**
-     * First clears all preferences with {@link #clear()}, and then {@code null's}
+     * First clears all preferences with {@link #clear()}, and then {@code null}'s
      * this instance of ShopGun
      *
      * <p>Further use of {@link ShopGun} after this, you must invoke
