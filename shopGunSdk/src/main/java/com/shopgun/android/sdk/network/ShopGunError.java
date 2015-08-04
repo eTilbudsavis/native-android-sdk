@@ -16,6 +16,9 @@
 
 package com.shopgun.android.sdk.network;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
@@ -27,7 +30,7 @@ import com.shopgun.android.sdk.utils.Json;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ShopGunError extends Exception implements IJson<JSONObject> {
+public class ShopGunError extends Exception implements IJson<JSONObject>,Parcelable {
 
     public static final String TAG = Constants.getTag(ShopGunError.class);
 
@@ -283,4 +286,33 @@ public class ShopGunError extends Exception implements IJson<JSONObject> {
 
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.mId);
+        dest.writeInt(this.mCode);
+        dest.writeString(this.mDetails);
+        dest.writeString(this.mFailedOnField);
+    }
+
+    protected ShopGunError(Parcel in) {
+        this.mId = in.readString();
+        this.mCode = in.readInt();
+        this.mDetails = in.readString();
+        this.mFailedOnField = in.readString();
+    }
+
+    public static final Parcelable.Creator<ShopGunError> CREATOR = new Parcelable.Creator<ShopGunError>() {
+        public ShopGunError createFromParcel(Parcel source) {
+            return new ShopGunError(source);
+        }
+
+        public ShopGunError[] newArray(int size) {
+            return new ShopGunError[size];
+        }
+    };
 }
