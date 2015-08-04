@@ -54,7 +54,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
     /**
      * The default {@link Shoppinglist} type
      */
-    public static final String TYPE_SHOPPING_LIST = "";
+    public static final String TYPE_SHOPPING_LIST = "shopping_list";
 
     /**
      * A type used for wishlists, this could be for christmas, birthdays e.t.c.
@@ -378,7 +378,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      * @return A type
      */
     public String getType() {
-        if (mType == null) {
+        if (mType == null || mType.isEmpty()) {
             mType = TYPE_SHOPPING_LIST;
         }
         return mType;
@@ -396,7 +396,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      * @return This object
      */
     public Shoppinglist setType(String type) {
-        if (type == null) {
+        if (type == null || type.isEmpty()) {
             // it's a Shoppinglist
             mType = TYPE_SHOPPING_LIST;
         } else {
