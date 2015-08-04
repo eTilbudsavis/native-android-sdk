@@ -91,6 +91,15 @@ public class ListManager {
     }
 
     /**
+     * The complete set of {@link Shoppinglist Shoppinglists}, that a given {@link User} has
+     * @param user A {@link User}
+     * @return A {@link List} of {@link Shoppinglist}, for the given {@link User}
+     */
+    public List<Shoppinglist> getLists(User user) {
+        return mDatabase.getLists(user);
+    }
+
+    /**
      * Add a new {@link Shoppinglist} to the current {@link User}
      *
      * <p>If owner haven't been set, we will assume that it is the current
@@ -341,15 +350,28 @@ public class ListManager {
      * @return A list of {@link ShoppinglistItem ShoppinglistItems}
      */
     public List<ShoppinglistItem> getItems(Shoppinglist sl) {
-        return getItems(sl, user());
+        return getItems(sl.getId(), user());
+    }
+
+    /**
+     * Get all {@link ShoppinglistItem ShoppinglistItems} associated with a
+     * {@link Shoppinglist}.
+     * @param shoppinglistId A {@link Shoppinglist#getId()} shoppinglist.id} to get {@link ShoppinglistItem ShoppinglistItems} from
+     * @return A list of {@link ShoppinglistItem ShoppinglistItems}
+     */
+    public List<ShoppinglistItem> getItems(String shoppinglistId) {
+        return getItems(shoppinglistId, user());
     }
 
     private List<ShoppinglistItem> getItems(Shoppinglist sl, User user) {
-        List<ShoppinglistItem> items = mDatabase.getItems(sl, user);
+        return getItems(sl.getId(), user);
+    }
+
+    private List<ShoppinglistItem> getItems(String shoppinglistId, User user) {
+        List<ShoppinglistItem> items = mDatabase.getItems(shoppinglistId, user, false);
         ListUtils.sortItems(items);
         return items;
     }
-
 
     /**
      * Add a {@link ShoppinglistItem} to a {@link Shoppinglist}
