@@ -525,8 +525,8 @@ public class ShopGun {
 //	}
 
     public void onStart() {
-        setupKeys(mContext);
         if (mActivityCounter.increment()) {
+            setupKeys(mContext);
             internalStart();
         }
     }
