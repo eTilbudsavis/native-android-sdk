@@ -22,6 +22,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -47,7 +48,6 @@ import com.shopgun.android.sdk.imageloader.ImageRequest;
 import com.shopgun.android.sdk.imageloader.impl.FadeBitmapDisplayer;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
-import com.shopgun.android.sdk.utils.ColorUtils;
 import com.shopgun.android.sdk.utils.Utils;
 
 @SuppressWarnings("deprecation")
@@ -252,7 +252,8 @@ public class PageOverviewDialog extends DialogFragment {
 
         private GradientDrawable getDrawable() {
             int color = mCatalog.getBranding().getColor();
-            color = ColorUtils.applyAlpha(color, 160);
+            color = android.support.v4.graphics.ColorUtils.setAlphaComponent(color, 160);
+
 
             float radius = Utils.convertDpToPx(3, getActivity());
 

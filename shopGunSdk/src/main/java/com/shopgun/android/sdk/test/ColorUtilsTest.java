@@ -34,33 +34,10 @@ public class ColorUtilsTest {
     public static void test() {
 
         SdkTest.start(TAG);
-        testApplyAlpha();
         testColorToString(false);
         testStringToColor();
         testColorSanitize(false);
 
-    }
-
-    public static void testApplyAlpha() {
-
-        int whiteTransparent = 0x00ffffff;
-        int whiteOpaque = 0xffffffff;
-
-        // max alpha = 255 or 0b11111111
-        int maxAlpha = 0xff;
-        Assert.assertNotSame(whiteOpaque, whiteTransparent);
-        Assert.assertNotSame(whiteTransparent, Color.WHITE);
-        Assert.assertEquals(whiteOpaque, Color.WHITE);
-        Assert.assertTrue(ColorUtils.applyAlpha(whiteOpaque, maxAlpha) == Color.WHITE);
-        Assert.assertTrue(ColorUtils.applyAlpha(whiteTransparent, maxAlpha) == Color.WHITE);
-
-        int badAlpha = 0x100; // 256 or 0b100000000
-        int c = ColorUtils.applyAlpha(whiteTransparent, badAlpha);
-        // Even though we have a large number to represent alpha
-        // the first 8 bits are 0 and therefore useless, so no alpha will be applied
-        Assert.assertEquals(c, whiteTransparent);
-        SdkTest.logTest(TAG, (new MethodNameHelper() {
-        }).getName());
     }
 
     public static void testColorToString(boolean showWarnings) {
