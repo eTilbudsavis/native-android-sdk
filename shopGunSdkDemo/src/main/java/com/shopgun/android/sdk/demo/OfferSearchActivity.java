@@ -25,18 +25,20 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.demo.base.BaseActivity;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Offer;
-import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.Response.Listener;
+import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
 import com.shopgun.android.sdk.utils.Api.Param;
-import com.shopgun.android.sdk.demo.base.BaseActivity;
 
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OfferSearchActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
 
@@ -133,12 +135,12 @@ public class OfferSearchActivity extends BaseActivity implements View.OnClickLis
             }
         };
 
-        Bundle args = new Bundle();
-        args.putString(Param.QUERY, query);
+        Map<String, String> args = new HashMap<String, String>();
+        args.put(Param.QUERY, query);
 
         // Create the request
         JsonArrayRequest offerRequest = new JsonArrayRequest(Endpoint.OFFER_SEARCH, offerListener);
-        offerRequest.putQueryParameters(args);
+        offerRequest.putParameters(args);
 
         // Send the request to the SDK for execution
         ShopGun.getInstance().add(offerRequest);

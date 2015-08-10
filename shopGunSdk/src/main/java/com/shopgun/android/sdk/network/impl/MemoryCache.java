@@ -79,8 +79,8 @@ public class MemoryCache implements Cache {
 
     public void put(Request<?> request, Response<?> response) {
 
-        // If the request is cachable
-        if (request.getMethod() == Method.GET && request.isCachable() && !request.isCacheHit() && response.cache != null) {
+        // If the request is cacheable
+        if (request.getMethod() == Method.GET && request.isCacheable() && !request.isCacheHit() && response.cache != null) {
 
             request.addEvent("add-response-to-cache");
             synchronized (mCache) {

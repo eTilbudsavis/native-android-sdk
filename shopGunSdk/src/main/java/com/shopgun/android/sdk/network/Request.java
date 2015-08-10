@@ -16,11 +16,9 @@
 
 package com.shopgun.android.sdk.network;
 
-import android.os.Bundle;
-
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.log.EventLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.utils.Utils;
 
@@ -67,7 +65,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /** If true Request will return data from cache if exists */
     private boolean mIgnoreCache = false;
     /** Whether or not responses to this request should be cached. */
-    private boolean mIsCachable = true;
+    private boolean mIsCacheable = true;
     /** Whether or not this request has been canceled. */
     private boolean mCanceled = false;
     /** Indication if the request is finished */
@@ -226,19 +224,19 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     }
 
     /**
-     * returns whether this request is cachable or not
-     * @return true if the request is cachable
+     * returns whether this request is cacheable or not
+     * @return true if the request is cacheable
      */
-    public boolean isCachable() {
-        return mIsCachable;
+    public boolean isCacheable() {
+        return mIsCacheable;
     }
 
     /**
      * Whether this request should be added to cache.
-     * @param isResponseCachable
+     * @param cacheable <code>true</code> if the response is cacheable, else <code>false</code>
      */
-    protected void setCachable(boolean isResponseCachable) {
-        mIsCachable = isResponseCachable;
+    protected void setCacheable(boolean cacheable) {
+        mIsCacheable = cacheable;
     }
 
     /**
@@ -395,33 +393,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Get the query parameters that will be used to perform this query.<br>
      * @return the query parameters
      */
-    @Deprecated
-    public Bundle getQueryParameters() {
-        Bundle b = new Bundle();
-        for (String s : mParameters.keySet()) {
-            b.putString(s, mParameters.get(b));
-        }
-        return b;
-    }
-
-    /**
-     * Add request parameters to this request. The parameters will be appended
-     * as HTTP query parameters to the URL, when the SDK executes the request.
-     * Therefore you should <b>not</b> do nested structures, only simple key-value-pairs.
-     * This is <b>not the same as appending a body</b> to the request, when doing a PUT or POST request.
-     * @param query
-     * @return
-     */
-    @Deprecated
-    public Request putQueryParameters(Bundle query) {
-        mParameters.putAll(Utils.bundleToMap(query));
-        return Request.this;
-    }
-
-    /**
-     * Get the query parameters that will be used to perform this query.<br>
-     * @return the query parameters
-     */
     public Map<String, String> getParameters() {
         return mParameters;
     }
@@ -452,7 +423,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /**
      * Get the sequence number that this request have been given.
      * The sequence number reflects the order of which the request was handed to the
-     * {@link #com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue RequestQueue}.
+     * {@link RequestQueue RequestQueue}.
      * and can partially be used to determine the order of execution.
      * @return the sequence number (a non-negative number)
      */
@@ -462,7 +433,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Set a sequence number for when the request was received by
-     * {@link #com.eTilbudsavis.etasdk.NetworkInterface.RequestQueue RequestQueue}
+     * {@link RequestQueue RequestQueue}
      * in order to partially determine the order of execution of requests.
      * @param seq
      */
@@ -550,7 +521,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     }
 
     /**
-     * Use this method, to enable/disable saving summarys to
+     * Use this method, to enable/disable saving summary to
      * {@link RequestQueue#getLog() RequestQueue.getLogs()}.
      * @param saveNetworkLog True to save logs to global log
      */
@@ -564,7 +535,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * <li>GET: https://api.etilbudsavis.dk/v2/catalogs/{catalog_id}?param1=value1&amp;param2=value2</li>
      *
      * <p>The SDK/API parameters are not added to the
-     * {@link Request#getQueryParameters() query parameters}, before the request
+     * {@link Request#getParameters()}  query parameters}, before the request
      * is handed to the {@link RequestQueue}. So if you want to have the SDK/API
      * parameters appended as well in the string do:</p>
      * <li>ShopGun.getInstance().add(Request)</li>
