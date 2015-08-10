@@ -19,11 +19,11 @@ package com.shopgun.android.sdk.network.impl;
 import android.text.TextUtils;
 
 import com.shopgun.android.sdk.network.Cache;
-import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.Response.Listener;
+import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.utils.Api;
 import com.shopgun.android.sdk.utils.Api.Param;
 import com.shopgun.android.sdk.utils.Utils;

@@ -22,9 +22,9 @@ import android.widget.ImageView;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.imageloader.impl.DefaultBitmapDisplayer;
 import com.shopgun.android.sdk.imageloader.impl.DefaultFileName;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.log.EventLog;
 import com.shopgun.android.sdk.log.EventLog.Event;
+import com.shopgun.android.sdk.log.SgnLog;
 
 import java.util.List;
 

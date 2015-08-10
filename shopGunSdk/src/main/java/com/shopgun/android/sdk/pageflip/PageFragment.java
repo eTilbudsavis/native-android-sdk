@@ -26,6 +26,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.DecelerateInterpolator;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.imageloader.BitmapDisplayer;
 import com.shopgun.android.sdk.imageloader.BitmapProcessor;
@@ -40,7 +41,6 @@ import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView;
 import com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView.OnZoomChangeListener;
-import com.shopgun.android.sdk.R;
 
 import java.util.List;
 

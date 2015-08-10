@@ -17,8 +17,8 @@
 package com.shopgun.android.sdk.log;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.FixedArrayList;
+import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;

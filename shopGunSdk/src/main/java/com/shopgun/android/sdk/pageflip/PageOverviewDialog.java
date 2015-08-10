@@ -22,7 +22,6 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.RippleDrawable;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;

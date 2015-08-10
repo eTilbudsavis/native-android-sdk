@@ -18,11 +18,11 @@ package com.shopgun.android.sdk.network.impl;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.HttpStack;
 import com.shopgun.android.sdk.network.Network;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
+import com.shopgun.android.sdk.network.ShopGunError;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;

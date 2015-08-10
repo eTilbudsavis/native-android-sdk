@@ -22,8 +22,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.view.View;
 
-import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.Request;
+import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 
 import org.json.JSONArray;

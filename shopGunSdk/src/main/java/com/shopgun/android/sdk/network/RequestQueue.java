@@ -17,10 +17,10 @@
 package com.shopgun.android.sdk.network;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.SgnLocation;
-import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.EventLog;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.impl.HandlerDelivery;
 import com.shopgun.android.sdk.utils.Api;
 import com.shopgun.android.sdk.utils.Api.Endpoint;

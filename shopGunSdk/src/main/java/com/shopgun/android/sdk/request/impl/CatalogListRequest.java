@@ -17,9 +17,9 @@
 package com.shopgun.android.sdk.request.impl;
 
 import com.shopgun.android.sdk.model.Catalog;
-import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response.Listener;
+import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.request.RequestAutoFill;
 import com.shopgun.android.sdk.request.RequestParameter;
 import com.shopgun.android.sdk.utils.Api;

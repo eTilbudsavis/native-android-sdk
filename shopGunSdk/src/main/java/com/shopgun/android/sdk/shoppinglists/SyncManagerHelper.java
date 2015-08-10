@@ -1,6 +1,5 @@
 package com.shopgun.android.sdk.shoppinglists;
 
-import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.network.Request;
