@@ -140,7 +140,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
-     * @param catalog A {@link JSONObject} in the format of a valid API v2 catalog response
+     * @param jCatalog A {@link JSONObject} in the format of a valid API v2 catalog response
      * @return A Catalog object
      */
     public static Catalog fromJSON(JSONObject jCatalog) {
@@ -322,8 +322,8 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * @param date A {@link Date}
      * @return This object
      */
-    public Catalog setRunFrom(Date time) {
-        mRunFrom = Utils.roundTime(time);
+    public Catalog setRunFrom(Date date) {
+        mRunFrom = Utils.roundTime(date);
         return this;
     }
 
@@ -346,8 +346,8 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * @param date A {@link Date}
      * @return This object
      */
-    public Catalog setRunTill(Date time) {
-        mRunTill = Utils.roundTime(time);
+    public Catalog setRunTill(Date date) {
+        mRunTill = Utils.roundTime(date);
         return this;
     }
 
@@ -527,11 +527,34 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * Get the pages in this catalog.
      * <p>Pages isn't bundled in the catalog object by default. But should be
      * downloaded separately via the pages endpoint, and
-     * {@link Catalog#setPages(Page) set} manually by the developer. </p>
-     * @return
+     * {@link Catalog#setPages(List) set}  manually by the developer. </p>
+     * @return A list of {@link Images}
      */
     public List<Images> getPages() {
         return mPages;
+    }
+
+    /**
+     * Get the pages (urls) of a certain type, from this catalog.
+     * @param type A type
+     * @return A list of urls
+     */
+    public List<String> getPagesUrls(int type) {
+        List<String> urls = new ArrayList<String>(mPages.size());
+        for (Images i: mPages) {
+            switch (type) {
+                case Images.THUMB:
+                    urls.add(i.getThumb());
+                    break;
+                case Images.VIEW:
+                    urls.add(i.getView());
+                    break;
+                case Images.ZOOM:
+                    urls.add(i.getZoom());
+                    break;
+            }
+        }
+        return urls;
     }
 
     /**
@@ -576,7 +599,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 
     /**
      * Method for setting the {@link Dealer} associated with this catalog, and updates the {@link Catalog#getDealerId() dealer id} to match the new {@link Dealer} object.
-     * @param store A Dealer object
+     * @param dealer A Dealer object
      */
     public Catalog setDealer(Dealer dealer) {
         this.mDealer = dealer;

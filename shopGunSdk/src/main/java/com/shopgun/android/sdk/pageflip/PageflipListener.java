@@ -97,8 +97,8 @@ public interface PageflipListener {
      *
      * @param v      The view zoomed.
      * @param pages  The pages zoomed
-     * @param zoonIn true if it was a zoom-in event, false if it was returned to normal scale.
+     * @param zoomIn true if it was a zoom-in event, false if it was returned to normal scale.
      */
-    public void onZoom(View v, int[] pages, boolean zoonIn);
+    public void onZoom(View v, int[] pages, boolean zoomIn);
 
 }

@@ -19,13 +19,10 @@ package com.shopgun.android.sdk.pageflip;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -51,25 +48,22 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class PageflipFragment extends Fragment implements PageCallback, OnPageChangeListener, OnKeyListener {
+public class PageflipFragment extends Fragment {
 
     public static final String TAG = Constants.getTag(PageflipFragment.class);
-    public static final String ARG_CATALOG = Constants.getArg("pageflipfragment.catalog");
-    public static final String ARG_CATALOG_ID = Constants.getArg("pageflipfragment.catalog-id");
-    public static final String ARG_PAGE = Constants.getArg("pageflipfragment.page");
-    public static final String ARG_VIEWSESSION = Constants.getArg("pageflipfragment.view-session");
-    public static final String ARG_BRANDING = Constants.getArg("pageflipfragment.branding");
+    public static final String ARG_CATALOG = Constants.getArg(PageflipFragment.class, "catalog");
+    public static final String ARG_CATALOG_ID = Constants.getArg(PageflipFragment.class, "catalog-id");
+    public static final String ARG_PAGE = Constants.getArg(PageflipFragment.class, "page");
+    public static final String ARG_VIEW_SESSION = Constants.getArg(PageflipFragment.class, "view-session");
+    public static final String ARG_BRANDING = Constants.getArg(PageflipFragment.class, "branding");
+
     private static final double PAGER_SCROLL_FACTOR = 0.5d;
-    // Out of bounds detector stuff
-    int mOutOfBoundsPX = 0;
-    int mOutOfBoundsCount = 0;
-    boolean mOutOfBoundsCalled = false;
+
     // Requests
     CatalogAutoFill mCatalogAutoFill;
     // Need this
     private Catalog mCatalog;
     private String mCatalogId;
-    //	private boolean mHasCatalogView = false;
     private Branding mBranding;
     // Views
     private LayoutInflater mInflater;
@@ -84,15 +78,23 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
     private boolean mLowMemory = false;
     private boolean mPagesReady = false;
     private boolean mPageflipStarted = false;
+
+    private String mViewSessionUuid;
+
     // Callbacks and stats
     private PageflipListenerWrapper mWrapperListener = new PageflipListenerWrapper();
-    Runnable mOnCatalogComplete = new Runnable() {
+    private Runnable mOnCatalogComplete = new Runnable() {
 
         public void run() {
 
-            mAdapter = new PageAdapter(getChildFragmentManager(), PageflipFragment.this);
-            mPager.setAdapter(mAdapter);
+            if (!isAdded()) {
+                return;
+            }
 
+            SgnLog.d(TAG, "mOnCatalogComplete");
+
+            mAdapter = new PageAdapter(getChildFragmentManager(), mCatalogPageCallback, mLandscape);
+            mPager.setAdapter(mAdapter);
             // force the first page change if needed
             boolean doPageChange = (mPager.getCurrentItem() != mCurrentPosition);
             if (doPageChange) {
@@ -100,18 +102,20 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
             } else {
                 mWrapperListener.onPageChange(PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape));
             }
-            mLoader.setVisibility(View.GONE);
-            mPager.setVisibility(View.VISIBLE);
+            showContent(true);
 
             mWrapperListener.onReady();
 
         }
 
     };
-    Listener<Catalog> mCatListener = new Listener<Catalog>() {
+
+    private Listener<Catalog> mCatalogListener = new Listener<Catalog>() {
 
         public void onComplete(Catalog c, ShopGunError error) {
 
+            boolean added = isAdded();
+            boolean ready = isCatalogReady();
             if (isAdded()) {
 
                 if (isCatalogReady()) {
@@ -152,8 +156,91 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 
         }
     };
-    private String mViewSessionUuid;
-    private Handler mHandler;
+
+    private CatalogPageCallback mCatalogPageCallback = new CatalogPageCallback() {
+
+        @Override
+        public boolean isPositionSet() {
+            return mPager.getCurrentItem() == mCurrentPosition;
+        }
+
+        public void onReady(int position) {
+            if (position == mCurrentPosition) {
+                CatalogPageFragment old = getPage(position);
+                old.onVisible();
+                mPagesReady = true;
+            }
+        }
+
+        @Override
+        public void onSingleClick(View v, int page, float x, float y, List<Hotspot> hotspots) {
+            mWrapperListener.onSingleClick(v, page, x, y, hotspots);
+        }
+
+        @Override
+        public void onDoubleClick(View v, int page, float x, float y, List<Hotspot> hotspots) {
+            mWrapperListener.onDoubleClick(v, page, x, y, hotspots);
+        }
+
+        @Override
+        public void onLongClick(View v, int page, float x, float y, List<Hotspot> hotspots) {
+            mWrapperListener.onLongClick(v, page, x, y, hotspots);
+        }
+
+        @Override
+        public void onZoom(View v, int[] pages, boolean isZoomed) {
+            mWrapperListener.onZoom(v, pages, isZoomed);
+        }
+
+        @Override
+        public Catalog getCatalog() {
+            return mCatalog;
+        }
+
+        @Override
+        public String getViewSession() {
+            return mViewSessionUuid;
+        }
+    };
+
+    private OnPageChangeListener mOnPageChangeListener = new OnPageChangeListener() {
+
+        @Override
+        public void onPageSelected(int position) {
+            int oldPos = mCurrentPosition;
+            mCurrentPosition = position;
+            if (mPagesReady) {
+                CatalogPageFragment old = getPage(oldPos);
+                old.onInvisible();
+                CatalogPageFragment current = getPage(mCurrentPosition);
+                current.onVisible();
+            }
+            mWrapperListener.onPageChange(PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape));
+        }
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+            mWrapperListener.onDragStateChanged(state);
+        }
+
+    };
+
+    private PageflipViewPager.OnPageBoundListener mPageBoundListener = new PageflipViewPager.OnPageBoundListener() {
+        @Override
+        public void onLeftBound() {
+            mWrapperListener.onOutOfBounds(true);
+        }
+
+        @Override
+        public void onRightBound() {
+            mWrapperListener.onOutOfBounds(false);
+        }
+    };
 
     /**
      * Creates a new instance of {@link PageflipFragment}, to replace or insert into a current layout.
@@ -218,8 +305,8 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
     public static PageflipFragment newInstance(Bundle args) {
         PageflipFragment f = new PageflipFragment();
         f.setArguments(args);
-        if (!f.getArguments().containsKey(ARG_VIEWSESSION)) {
-            f.getArguments().putString(ARG_VIEWSESSION, Utils.createUUID());
+        if (!f.getArguments().containsKey(ARG_VIEW_SESSION)) {
+            f.getArguments().putString(ARG_VIEW_SESSION, Utils.createUUID());
         }
         return f;
     }
@@ -231,13 +318,15 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        mHandler = new Handler();
+
         mLowMemory = PageflipUtils.hasLowMemory(getActivity());
         mLandscape = PageflipUtils.isLandscape(getActivity());
         if (savedInstanceState != null) {
             savedInstanceState.putAll(getArguments());
+            setUp(savedInstanceState);
+        } else {
+            setUp(getArguments());
         }
-        setUp(savedInstanceState == null ? getArguments() : savedInstanceState);
         super.onCreate(savedInstanceState);
     }
 
@@ -254,8 +343,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
             throwNoCatalogException();
         }
 
-//		mHasCatalogView = b.getBoolean(ARG_CATALOG_VIEW, false);
-        mViewSessionUuid = args.getString(ARG_VIEWSESSION);
+        mViewSessionUuid = args.getString(ARG_VIEW_SESSION);
 
         if (mViewSessionUuid == null) {
             mViewSessionUuid = Utils.createUUID();
@@ -270,8 +358,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
         mInflater = inflater;
         mContainer = container;
         setUpView(true);
-//		mFrame.setFocusableInTouchMode(true);
-//		mFrame.setOnKeyListener(this);
         return mFrame;
 
     }
@@ -296,22 +382,31 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
         mLoader = (LoadingTextView) mFrame.findViewById(R.id.shopgun_sdk_layout_pageflip_loader);
         mPager = (PageflipViewPager) mFrame.findViewById(R.id.shopgun_sdk_layout_pageflip_viewpager);
         mPager.setScrollDurationFactor(PAGER_SCROLL_FACTOR);
-        mPager.setOnPageChangeListener(this);
-        mPager.setPageflipListener(mWrapperListener);
+        mPager.addOnPageChangeListener(mOnPageChangeListener);
+        mPager.setOnPageBound(mPageBoundListener);
 
-        mLoader.setVisibility(View.VISIBLE);
-        mPager.setVisibility(View.INVISIBLE);
+        showContent(false);
         setBranding(mBranding);
         mLoader.start();
 
     }
 
+    private void showContent(boolean show) {
+        mLoader.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
+        mPager.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+
+        SgnLog.d(TAG, "onConfigurationChanged");
         boolean land = PageflipUtils.isLandscape(newConfig);
         if (land != mLandscape) {
-            pause();
+            internalPause();
+
+            // TODO How to handle config changes?
+
             // Get the old page
             int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
             // switch to landscape mode
@@ -319,9 +414,15 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
             // set new current position accordingly
             mCurrentPosition = PageflipUtils.pageToPosition(pages[0], mLandscape);
 
+            mAdapter.clear();
+
             setUpView(false);
-            start();
+            internalStart();
         }
+    }
+
+    private void convertToNewConfig(Configuration c) {
+        mLandscape
     }
 
     /**
@@ -334,22 +435,12 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
     }
 
     /**
-     * Get the {@link PageflipFragment} wrapper listener, primarily used for debugging.
-     *
-     * @return The wrapper listener
-     */
-    public PageflipListener getWrapperListener() {
-        return mWrapperListener;
-    }
-
-    /**
      * Set a listener to call on {@link PageflipFragment} events.
      *
      * @param l The listener
      */
     public void setPageflipListener(PageflipListener l) {
         mWrapperListener.setListener(l);
-        ;
     }
 
     /**
@@ -467,8 +558,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
      * Method for instantiating the {@link PageflipFragment}.
      * This will perform all needed actions in order to get the show started.
      */
-    public void start() {
-
+    public void internalStart() {
         synchronized (this) {
             if (mPageflipStarted) {
                 return;
@@ -509,7 +599,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
         JsonObjectRequest r = new JsonObjectRequest(url, l);
         r.setIgnoreCache(true);
         ShopGun.getInstance().add(r);
-        SgnLog.d(TAG, "getting catalog");
 
     }
 
@@ -526,7 +615,7 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
         mCatalogAutoFill = new CatalogAutoFill();
         mCatalogAutoFill.setLoadHotspots(!PageflipUtils.isHotspotsReady(mCatalog));
         mCatalogAutoFill.setLoadPages(!PageflipUtils.isPagesReady(mCatalog));
-        mCatalogAutoFill.prepare(new AutoFillParams(), mCatalog, null, mCatListener);
+        mCatalogAutoFill.prepare(new AutoFillParams(), mCatalog, null, mCatalogListener);
         mCatalogAutoFill.execute(ShopGun.getInstance().getRequestQueue());
     }
 
@@ -536,84 +625,37 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
         outState.putInt(ARG_PAGE, pages[0]);
         outState.putParcelable(ARG_CATALOG, mCatalog);
         outState.putString(ARG_CATALOG_ID, mCatalogId);
-//		outState.putBoolean(ARG_CATALOG_VIEW, mHasCatalogView);
-        outState.putString(ARG_VIEWSESSION, mViewSessionUuid);
+        outState.putString(ARG_VIEW_SESSION, mViewSessionUuid);
         outState.putParcelable(ARG_BRANDING, mBranding);
+        mAdapter.clear();
         super.onSaveInstanceState(outState);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        start();
+        internalStart();
     }
 
     @Override
     public void onPause() {
-        pause();
+        internalPause();
         super.onPause();
     }
 
-    private void pause() {
+    private void internalPause() {
         mLoader.stop();
-        mHandler.removeCallbacks(mOnCatalogComplete);
         mCatalogAutoFill.cancel();
         mPagesReady = false;
         mPageflipStarted = false;
     }
 
-    /**
-     * Method for letting the fragment know of backpressed events.
-     * Currently this does nothing.
-     *
-     * @return false
-     */
-    public boolean onBackPressed() {
-        return false;
-    }
-
-    public boolean onKey(View v, int keyCode, KeyEvent event) {
-
-        if (event != null && event.getAction() == KeyEvent.ACTION_UP) {
-            SgnLog.d(TAG, "KeyCode: " + keyCode);
-        }
-        return false;
-    }
-
-    private PageFragment getPage(int position) {
-        return (PageFragment) mAdapter.instantiateItem(mContainer, position);
-    }
-
-    public void onReady(int position) {
-        if (position == mCurrentPosition) {
-            PageFragment old = getPage(position);
-            old.onVisible();
-            mPagesReady = true;
-        }
-    }
-
-    public void onPageSelected(int position) {
-        int oldPos = mCurrentPosition;
-        mCurrentPosition = position;
-        if (mPagesReady) {
-            PageFragment old = getPage(oldPos);
-            old.onInvisible();
-            PageFragment current = getPage(mCurrentPosition);
-            current.onVisible();
-        }
-        mWrapperListener.onPageChange(PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape));
-    }
-
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-    }
-
-    public void onPageScrollStateChanged(int state) {
-        mWrapperListener.onDragStateChanged(state);
-    }
-
     public Catalog getCatalog() {
         return mCatalog;
+    }
+
+    private CatalogPageFragment getPage(int position) {
+        return (CatalogPageFragment) mAdapter.instantiateItem(mContainer, position);
     }
 
     /**
@@ -628,22 +670,6 @@ public class PageflipFragment extends Fragment implements PageCallback, OnPageCh
             mCatalog = c;
             mCatalogId = mCatalog.getId();
         }
-    }
-
-    public boolean isLandscape() {
-        return mLandscape;
-    }
-
-    public boolean isPositionSet() {
-        return mPager.getCurrentItem() == mCurrentPosition;
-    }
-
-    public boolean isLowMemory() {
-        return mLowMemory;
-    }
-
-    public String getViewSession() {
-        return mViewSessionUuid;
     }
 
     @Override

@@ -19,34 +19,70 @@ package com.shopgun.android.sdk.pageflip;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
+import android.view.ViewGroup;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PageAdapter extends FragmentStatePagerAdapter {
 
     public static final String TAG = Constants.getTag(PageAdapter.class);
 
-    private PageCallback mCallback;
+    private CatalogPageCallback mCallback;
     private int mViewCount = 0;
+    private boolean mLandscape = false;
+    private FragmentManager mFragmentManager;
+    private List<Fragment> mFragments = new ArrayList<Fragment>();
 
-    public PageAdapter(FragmentManager fm, PageCallback callback) {
+    public PageAdapter(FragmentManager fm, CatalogPageCallback callback, boolean landscape) {
         super(fm);
+        mFragmentManager = fm;
         mCallback = callback;
-        if (mCallback.isLandscape()) {
-            mViewCount = (mCallback.getCatalog().getPageCount() / 2) + 1;
-        } else {
-            mViewCount = mCallback.getCatalog().getPageCount();
-        }
+        mLandscape = landscape;
+        int pc = mCallback.getCatalog().getPageCount();
+        mViewCount = mLandscape ? (pc/2)+1 : pc;
+        String f = "landscape:%s, pageCount:%s, viewCount:%s";
+        SgnLog.d(TAG, String.format(f, mLandscape, pc, mViewCount));
+    }
+
+    public void setCallback(CatalogPageCallback cb) {
+        mCallback = cb;
+    }
+
+    public void setLandscape(boolean landscape) {
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public Object instantiateItem(ViewGroup container, int position) {
+        return super.instantiateItem(container, position);
+    }
+
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+        super.destroyItem(container, position, object);
     }
 
     @Override
     public Fragment getItem(int position) {
-//		SgnLog.d(TAG, "getItem: " + position);
-        int[] pages = PageflipUtils.positionToPages(position, mCallback.getCatalog().getPageCount(), mCallback.isLandscape());
-        PageFragment f = PageFragment.newInstance(position, pages);
-        f.setPageCallback(mCallback);
+        int[] pages = PageflipUtils.positionToPages(position, mCallback.getCatalog().getPageCount(), mLandscape);
+        CatalogPageFragment f = CatalogPageFragment.newInstance(position, pages);
+        f.setCatalogPageCallback(mCallback);
+        mFragments.add(f);
         return f;
+    }
+
+    public void clear() {
+        FragmentTransaction ft = mFragmentManager.beginTransaction();
+        for (Fragment f : mFragments) {
+            ft.remove(f);
+        }
+        ft.commit();
     }
 
     @Override
