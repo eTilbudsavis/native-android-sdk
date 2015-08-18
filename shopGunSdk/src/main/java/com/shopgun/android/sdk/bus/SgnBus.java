@@ -24,13 +24,13 @@ import java.lang.reflect.Field;
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.EventBusException;
 
-public class Bus {
+public class SgnBus {
 
-    public static final String TAG = Constants.getTag(Bus.class);
+    public static final String TAG = Constants.getTag(SgnBus.class);
 
     private static final WeakEventBus BUS = new WeakEventBus();
 
-    private Bus() {
+    private SgnBus() {
         // empty
     }
 

@@ -20,7 +20,7 @@ import android.annotation.SuppressLint;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.bus.Bus;
+import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
 import com.shopgun.android.sdk.log.SgnLog;
@@ -789,7 +789,7 @@ public class ListManager {
 
     private void postShoppinglistEvent() {
         if (!mShopGun.getSyncManager().isPaused() && mBuilder.hasChanges()) {
-            Bus.getInstance().post(mBuilder.build());
+            SgnBus.getInstance().post(mBuilder.build());
             mBuilder = new ShoppinglistEvent.Builder(false);
         }
     }

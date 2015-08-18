@@ -19,7 +19,7 @@ package com.shopgun.android.sdk;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
-import com.shopgun.android.sdk.bus.Bus;
+import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Session;
@@ -235,7 +235,7 @@ public class SessionManager {
             mTryToRecover = true;
 
             // Send out notifications
-            Bus.getInstance().post(new SessionEvent(oldId, newId));
+            SgnBus.getInstance().post(new SessionEvent(oldId, newId));
 
             return true;
 
@@ -501,7 +501,7 @@ public class SessionManager {
             mShopGun.getSettings().setSessionJson(mSession.toJSON());
             mShopGun.getSettings().setSessionFacebook(null);
             clearUser();
-            Bus.getInstance().post(new SessionEvent(oldUserId, mSession.getUser().getUserId()));
+            SgnBus.getInstance().post(new SessionEvent(oldUserId, mSession.getUser().getUserId()));
         }
     }
 

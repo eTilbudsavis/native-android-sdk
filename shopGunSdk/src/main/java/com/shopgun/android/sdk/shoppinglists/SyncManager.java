@@ -23,7 +23,7 @@ import android.os.Process;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.bus.Bus;
+import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
@@ -326,7 +326,7 @@ public class SyncManager {
      */
     public void onStart() {
         mDatabase.open();
-        Bus.getInstance().register(this);
+        SgnBus.getInstance().register(this);
         forceSync();
     }
 
@@ -337,7 +337,7 @@ public class SyncManager {
     public void onStop() {
         mDatabase.close();
         forceSync();
-        Bus.getInstance().unregister(this);
+        SgnBus.getInstance().unregister(this);
         mHasFirstSync = false;
         mSyncCount = -1;
     }
@@ -1350,7 +1350,7 @@ public class SyncManager {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                    Bus.getInstance().post(e);
+                    SgnBus.getInstance().post(e);
                 }
             });
         }
