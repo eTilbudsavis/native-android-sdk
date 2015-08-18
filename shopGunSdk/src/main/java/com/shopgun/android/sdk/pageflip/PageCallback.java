@@ -68,7 +68,7 @@ public interface PageCallback {
      * Called by a {@link PageflipFragment} when it's ready to display catalog pages. This is used
      * to control events during configuration changes
      *
-     * @param position The position of the {@link PageFragment}
+     * @param position The position of the {@link CatalogPageFragment}
      */
     public void onReady(int position);
 

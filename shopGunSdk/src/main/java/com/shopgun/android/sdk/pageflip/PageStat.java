@@ -37,17 +37,15 @@ public class PageStat {
 
     private final String mCatalogId;
     private final String mViewSession;
-    private final boolean mLandscape;
     private final int[] mPages;
     private long mViewStart = 0;
     private long mZoomStart = 0;
     private long mZoomAccumulated = 0;
 
-    public PageStat(String catalogId, String viewSessionUuid, int[] pages, boolean landscape) {
+    public PageStat(String catalogId, String viewSessionUuid, int[] pages) {
         mCatalogId = catalogId;
         mViewSession = viewSessionUuid;
         mPages = pages;
-        mLandscape = landscape;
     }
 
     public void collectView() {
@@ -105,7 +103,7 @@ public class PageStat {
         try {
             o.put("type", isView ? "view" : "zoom");
             o.put("ms", ms);
-            o.put("orientation", mLandscape ? "landscape" : "portrait");
+            o.put("orientation", (mPages.length > 1) ? "landscape" : "portrait");
             o.put("pages", PageflipUtils.join(",", mPages));
             o.put("view_session", mViewSession);
         } catch (JSONException e) {

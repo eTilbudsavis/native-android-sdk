@@ -476,7 +476,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
      * Sets custom double tap listener, to intercept default given functions. To reset behavior to
      * default, you can just pass in "null" or public field of defaultOnDoubleTapListener
      *
-     * @param newOnDoubleTapListener custom OnDoubleTapListener to be set on ImageView
+     * @param gestureListener custom OnDoubleTapListener to be set on ImageView
      */
     public void setOnGestureListener(OnGestureListener.SimpleOnGestureListener gestureListener) {
         if (gestureListener != null) {
@@ -937,12 +937,12 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
         if (mPhotoDoubleClickListener != null) {
             PointF p = eventToPhotoCoordinate(e);
             if (p != null) {
-                mPhotoDoubleClickListener.onPhotoTap(this, p.x, p.y);
+                mPhotoDoubleClickListener.onPhotoDoubleTap(this, p.x, p.y);
             }
         }
 
         if (null != mViewDoubleClickListener) {
-            mViewDoubleClickListener.onViewTap(this, e.getX(), e.getY());
+            mViewDoubleClickListener.onViewDoubleTap(this, e.getX(), e.getY());
         }
 
         return handled;
@@ -953,12 +953,12 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
         if (mPhotoLongClickListener != null) {
             PointF p = eventToPhotoCoordinate(e);
             if (p != null) {
-                mPhotoLongClickListener.onPhotoTap(this, p.x, p.y);
+                mPhotoLongClickListener.onPhotoLongTap(this, p.x, p.y);
             }
         }
 
         if (null != mViewLongClickListener) {
-            mViewLongClickListener.onViewTap(this, e.getX(), e.getY());
+            mViewLongClickListener.onViewLongTap(this, e.getX(), e.getY());
         }
 
         return false;
@@ -1109,7 +1109,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
          * @param x    - where the user clicked from the of the Drawable, as percentage of the Drawable width.
          * @param y    - where the user clicked from the top of the Drawable, as percentage of the Drawable height.
          */
-        void onPhotoTap(View view, float x, float y);
+        void onPhotoLongTap(View view, float x, float y);
     }
 
     /**
@@ -1125,7 +1125,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
          * @param x    - where the user clicked from the left of the View.
          * @param y    - where the user clicked from the top of the View.
          */
-        void onViewTap(View view, float x, float y);
+        void onViewLongTap(View view, float x, float y);
     }
 
     /**
@@ -1141,7 +1141,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
          * @param x    - where the user clicked from the of the Drawable, as percentage of the Drawable width.
          * @param y    - where the user clicked from the top of the Drawable, as percentage of the Drawable height.
          */
-        void onPhotoTap(View view, float x, float y);
+        void onPhotoDoubleTap(View view, float x, float y);
     }
 
     /**
@@ -1157,7 +1157,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
          * @param x    - where the user clicked from the left of the View.
          * @param y    - where the user clicked from the top of the View.
          */
-        void onViewTap(View view, float x, float y);
+        void onViewDoubleTap(View view, float x, float y);
     }
 
     private class AnimatedZoomRunnable implements Runnable {

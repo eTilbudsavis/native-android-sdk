@@ -44,6 +44,11 @@ public class Images implements IJson<JSONObject>, Parcelable {
             return new Images[size];
         }
     };
+
+    public static final int THUMB = 0;
+    public static final int VIEW = 1;
+    public static final int ZOOM = 2;
+
     private String mView;
     private String mZoom;
     private String mThumb;

@@ -32,7 +32,7 @@ public class PageflipViewPager extends ViewPager {
 
     public static final String TAG = Constants.getTag(PageflipViewPager.class);
 
-    private PageflipListener mPageflipListener;
+    private OnPageBoundListener mOnPageBoundListener;
     private ScrollerCustomDuration mScroller = null;
     private boolean mIsBeingDragged = false;
     private float mLastMotionX;
@@ -59,8 +59,8 @@ public class PageflipViewPager extends ViewPager {
         setScroller();
     }
 
-    public void setPageflipListener(PageflipListener l) {
-        mPageflipListener = l;
+    public void setOnPageBound(OnPageBoundListener l) {
+        mOnPageBoundListener = l;
     }
 
     @Override
@@ -111,13 +111,13 @@ public class PageflipViewPager extends ViewPager {
                     final int currentItem = getCurrentItem();
 
                     if (deltaX < 0 && currentItem == 0) {
-                        if (mPageflipListener != null) {
-                            mPageflipListener.onOutOfBounds(true);
+                        if (mOnPageBoundListener != null) {
+                            mOnPageBoundListener.onLeftBound();
                         }
                         mOutOfBoundsCalled = true;
                     } else if (deltaX > 0 && currentItem == lastItemIndex) {
-                        if (mPageflipListener != null) {
-                            mPageflipListener.onOutOfBounds(false);
+                        if (mOnPageBoundListener != null) {
+                            mOnPageBoundListener.onRightBound();
                         }
                         mOutOfBoundsCalled = true;
                     }
@@ -166,9 +166,9 @@ public class PageflipViewPager extends ViewPager {
             super(context, interpolator);
         }
 
-        public ScrollerCustomDuration(Context context, Interpolator interpolator, boolean flywheel) {
-            super(context, interpolator, flywheel);
-        }
+//        public ScrollerCustomDuration(Context context, Interpolator interpolator, boolean flywheel) {
+//            super(context, interpolator, flywheel);
+//        }
 
         /**
          * Set the factor by which the duration will change
@@ -182,6 +182,11 @@ public class PageflipViewPager extends ViewPager {
             super.startScroll(startX, startY, dx, dy, (int) (duration * mScrollFactor));
         }
 
+    }
+
+    public interface OnPageBoundListener {
+        void onLeftBound();
+        void onRightBound();
     }
 
 //	public class HackPageChangeListener implements OnPageChangeListener {
