@@ -421,10 +421,6 @@ public class PageflipFragment extends Fragment {
         }
     }
 
-    private void convertToNewConfig(Configuration c) {
-        mLandscape
-    }
-
     /**
      * Get the {@link PageflipListener}.
      *
