@@ -16,6 +16,7 @@
 
 package com.shopgun.android.sdk.pageflip;
 
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -23,6 +24,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.ViewGroup;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.SgnLocation;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 
@@ -69,6 +71,12 @@ public class PageAdapter extends FragmentStatePagerAdapter {
     }
 
     @Override
+    public Parcelable saveState() {
+        clear();
+        return super.saveState();
+    }
+
+    @Override
     public Fragment getItem(int position) {
         int[] pages = PageflipUtils.positionToPages(position, mCallback.getCatalog().getPageCount(), mLandscape);
         CatalogPageFragment f = CatalogPageFragment.newInstance(position, pages);
@@ -78,11 +86,14 @@ public class PageAdapter extends FragmentStatePagerAdapter {
     }
 
     public void clear() {
+        SgnLog.d(TAG, "clear()");
         FragmentTransaction ft = mFragmentManager.beginTransaction();
         for (Fragment f : mFragments) {
             ft.remove(f);
         }
         ft.commit();
+        mFragmentManager.executePendingTransactions();
+        mFragments.clear();
     }
 
     @Override

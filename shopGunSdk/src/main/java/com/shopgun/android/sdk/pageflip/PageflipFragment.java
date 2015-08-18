@@ -48,7 +48,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class PageflipFragment extends Fragment {
+public class PageflipFragment extends BaseFragment {
 
     public static final String TAG = Constants.getTag(PageflipFragment.class);
     public static final String ARG_CATALOG = Constants.getArg(PageflipFragment.class, "catalog");
@@ -90,8 +90,6 @@ public class PageflipFragment extends Fragment {
             if (!isAdded()) {
                 return;
             }
-
-            SgnLog.d(TAG, "mOnCatalogComplete");
 
             mAdapter = new PageAdapter(getChildFragmentManager(), mCatalogPageCallback, mLandscape);
             mPager.setAdapter(mAdapter);
@@ -396,31 +394,6 @@ public class PageflipFragment extends Fragment {
         mPager.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        SgnLog.d(TAG, "onConfigurationChanged");
-        boolean land = PageflipUtils.isLandscape(newConfig);
-        if (land != mLandscape) {
-            internalPause();
-
-            // TODO How to handle config changes?
-
-            // Get the old page
-            int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
-            // switch to landscape mode
-            mLandscape = land;
-            // set new current position accordingly
-            mCurrentPosition = PageflipUtils.pageToPosition(pages[0], mLandscape);
-
-            mAdapter.clear();
-
-            setUpView(false);
-            internalStart();
-        }
-    }
-
     /**
      * Get the {@link PageflipListener}.
      *
@@ -550,20 +523,6 @@ public class PageflipFragment extends Fragment {
         mCatalogId = catalogId;
     }
 
-    /**
-     * Method for instantiating the {@link PageflipFragment}.
-     * This will perform all needed actions in order to get the show started.
-     */
-    public void internalStart() {
-        synchronized (this) {
-            if (mPageflipStarted) {
-                return;
-            }
-            mPageflipStarted = true;
-        }
-        ensureCatalog();
-    }
-
     private void ensureCatalog() {
 
         if (mCatalog != null) {
@@ -616,6 +575,32 @@ public class PageflipFragment extends Fragment {
     }
 
     @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        SgnLog.d(TAG, "onConfigurationChanged");
+
+        boolean land = PageflipUtils.isLandscape(newConfig);
+        if (land != mLandscape) {
+            internalPause();
+
+            // TODO How to handle config changes?
+
+            // Get the old page
+            int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
+            // switch to landscape mode
+            mLandscape = land;
+            // set new current position accordingly
+            mCurrentPosition = PageflipUtils.pageToPosition(pages[0], mLandscape);
+
+            mAdapter.clear();
+
+            setUpView(false);
+            internalStart();
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
         outState.putInt(ARG_PAGE, pages[0]);
@@ -623,7 +608,6 @@ public class PageflipFragment extends Fragment {
         outState.putString(ARG_CATALOG_ID, mCatalogId);
         outState.putString(ARG_VIEW_SESSION, mViewSessionUuid);
         outState.putParcelable(ARG_BRANDING, mBranding);
-        mAdapter.clear();
         super.onSaveInstanceState(outState);
     }
 
@@ -631,6 +615,20 @@ public class PageflipFragment extends Fragment {
     public void onResume() {
         super.onResume();
         internalStart();
+    }
+
+    /**
+     * Method for instantiating the {@link PageflipFragment}.
+     * This will perform all needed actions in order to get the show started.
+     */
+    private void internalStart() {
+        synchronized (this) {
+            if (mPageflipStarted) {
+                return;
+            }
+            mPageflipStarted = true;
+        }
+        ensureCatalog();
     }
 
     @Override
