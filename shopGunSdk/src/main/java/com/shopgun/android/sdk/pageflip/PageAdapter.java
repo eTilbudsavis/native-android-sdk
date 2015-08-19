@@ -16,15 +16,12 @@
 
 package com.shopgun.android.sdk.pageflip;
 
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.view.ViewGroup;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.SgnLocation;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 
@@ -48,32 +45,14 @@ public class PageAdapter extends FragmentStatePagerAdapter {
         mLandscape = landscape;
         int pc = mCallback.getCatalog().getPageCount();
         mViewCount = mLandscape ? (pc/2)+1 : pc;
+        SgnLog.d(TAG, toString());
+    }
+
+    @Override
+    public String toString() {
+        int pc = mCallback.getCatalog().getPageCount();
         String f = "landscape:%s, pageCount:%s, viewCount:%s";
-        SgnLog.d(TAG, String.format(f, mLandscape, pc, mViewCount));
-    }
-
-    public void setCallback(CatalogPageCallback cb) {
-        mCallback = cb;
-    }
-
-    public void setLandscape(boolean landscape) {
-        notifyDataSetChanged();
-    }
-
-    @Override
-    public Object instantiateItem(ViewGroup container, int position) {
-        return super.instantiateItem(container, position);
-    }
-
-    @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
-        super.destroyItem(container, position, object);
-    }
-
-    @Override
-    public Parcelable saveState() {
-        clear();
-        return super.saveState();
+        return String.format(f, mLandscape, pc, mViewCount);
     }
 
     @Override
@@ -86,13 +65,25 @@ public class PageAdapter extends FragmentStatePagerAdapter {
     }
 
     public void clear() {
-        SgnLog.d(TAG, "clear()");
+        clearDestroyItem();
+    }
+
+    public void clearFragmentManager() {
+        SgnLog.d(TAG, "clearFragmentManager()");
         FragmentTransaction ft = mFragmentManager.beginTransaction();
         for (Fragment f : mFragments) {
             ft.remove(f);
         }
         ft.commit();
         mFragmentManager.executePendingTransactions();
+        mFragments.clear();
+    }
+
+    public void clearDestroyItem() {
+        SgnLog.d(TAG, "clearDestroyItem()");
+        for (int i = 0; i < mFragments.size(); i++) {
+            destroyItem(null, i, mFragments.get(i));
+        }
         mFragments.clear();
     }
 

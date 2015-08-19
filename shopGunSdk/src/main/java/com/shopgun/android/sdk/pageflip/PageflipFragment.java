@@ -19,7 +19,6 @@ package com.shopgun.android.sdk.pageflip;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -608,6 +607,7 @@ public class PageflipFragment extends BaseFragment {
         outState.putString(ARG_CATALOG_ID, mCatalogId);
         outState.putString(ARG_VIEW_SESSION, mViewSessionUuid);
         outState.putParcelable(ARG_BRANDING, mBranding);
+        mAdapter.clear();
         super.onSaveInstanceState(outState);
     }
 
