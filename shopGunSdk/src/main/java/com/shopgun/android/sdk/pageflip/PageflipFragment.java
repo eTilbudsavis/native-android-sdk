@@ -19,6 +19,7 @@ package com.shopgun.android.sdk.pageflip;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,7 +48,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class PageflipFragment extends BaseFragment {
+public class PageflipFragment extends Fragment {
 
     public static final String TAG = Constants.getTag(PageflipFragment.class);
     public static final String ARG_CATALOG = Constants.getArg(PageflipFragment.class, "catalog");
@@ -55,6 +56,8 @@ public class PageflipFragment extends BaseFragment {
     public static final String ARG_PAGE = Constants.getArg(PageflipFragment.class, "page");
     public static final String ARG_VIEW_SESSION = Constants.getArg(PageflipFragment.class, "view-session");
     public static final String ARG_BRANDING = Constants.getArg(PageflipFragment.class, "branding");
+    public static final String ARG_LANDSCAPE = Constants.getArg(PageflipFragment.class, "landscape");
+
 
     private static final double PAGER_SCROLL_FACTOR = 0.5d;
 
@@ -70,7 +73,7 @@ public class PageflipFragment extends BaseFragment {
     private FrameLayout mFrame;
     private LoadingTextView mLoader;
     private PageflipViewPager mPager;
-    private PageAdapter mAdapter;
+    private CatalogPagerAdapter mAdapter;
     // State
     private int mCurrentPosition = 0;
     private boolean mLandscape = false;
@@ -90,11 +93,10 @@ public class PageflipFragment extends BaseFragment {
                 return;
             }
 
-            mAdapter = new PageAdapter(getChildFragmentManager(), mCatalogPageCallback, mLandscape);
+            mAdapter = new CatalogPagerAdapter(getChildFragmentManager(), mCatalogPageCallback, mLandscape);
             mPager.setAdapter(mAdapter);
             // force the first page change if needed
-            boolean doPageChange = (mPager.getCurrentItem() != mCurrentPosition);
-            if (doPageChange) {
+            if (mPager.getCurrentItem() != mCurrentPosition) {
                 mPager.setCurrentItem(mCurrentPosition);
             } else {
                 mWrapperListener.onPageChange(PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape));
@@ -111,8 +113,6 @@ public class PageflipFragment extends BaseFragment {
 
         public void onComplete(Catalog c, ShopGunError error) {
 
-            boolean added = isAdded();
-            boolean ready = isCatalogReady();
             if (isAdded()) {
 
                 if (isCatalogReady()) {
@@ -318,18 +318,22 @@ public class PageflipFragment extends BaseFragment {
 
         mLowMemory = PageflipUtils.hasLowMemory(getActivity());
         mLandscape = PageflipUtils.isLandscape(getActivity());
-        if (savedInstanceState != null) {
-            savedInstanceState.putAll(getArguments());
-            setUp(savedInstanceState);
-        } else {
-            setUp(getArguments());
+        Bundle b = new Bundle();
+        if (getArguments() != null) {
+            b.putAll(getArguments());
         }
+        if (savedInstanceState != null) {
+            b.putAll(savedInstanceState);
+        }
+        setState(b);
         super.onCreate(savedInstanceState);
     }
 
-    private void setUp(Bundle args) {
+    private void setState(Bundle args) {
 
-        setPage(args.getInt(ARG_PAGE, 1));
+        int page = args.getInt(ARG_PAGE, 1);
+        setPage(page);
+
         if (args.containsKey(ARG_CATALOG)) {
             setCatalog((Catalog) args.getParcelable(ARG_CATALOG));
             mBranding = mCatalog.getBranding();
@@ -337,7 +341,7 @@ public class PageflipFragment extends BaseFragment {
             setCatalogId(args.getString(ARG_CATALOG_ID));
             mBranding = args.getParcelable(ARG_BRANDING);
         } else {
-            throwNoCatalogException();
+            mLoader.error("No catalog provided");
         }
 
         mViewSessionUuid = args.getString(ARG_VIEW_SESSION);
@@ -494,7 +498,7 @@ public class PageflipFragment extends BaseFragment {
 
     /**
      * Method for determining if the {@link PageflipFragment} is ready.
-     * It checks if the {@link PageflipViewPager} has an {@link PageAdapter} attached.
+     * It checks if the {@link PageflipViewPager} has an {@link FragmentStatelessPagerAdapter} attached.
      *
      * @return true if the fragment if ready, else false.
      */
@@ -522,6 +526,62 @@ public class PageflipFragment extends BaseFragment {
         mCatalogId = catalogId;
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        boolean land = PageflipUtils.isLandscape(newConfig);
+        if (land != mLandscape) {
+            internalPause();
+
+            // Get the old page
+            int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
+            // switch to landscape mode
+            mLandscape = land;
+            // set new current position accordingly
+            mCurrentPosition = PageflipUtils.pageToPosition(pages[0], mLandscape);
+
+            mAdapter.clearState();
+            mPager.setAdapter(null);
+
+            setUpView(false);
+            internalResume();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putInt(ARG_PAGE, getPages()[0]);
+        outState.putBoolean(ARG_LANDSCAPE, mLandscape);
+        outState.putParcelable(ARG_CATALOG, mCatalog);
+        outState.putString(ARG_CATALOG_ID, mCatalogId);
+        outState.putString(ARG_VIEW_SESSION, mViewSessionUuid);
+        outState.putParcelable(ARG_BRANDING, mBranding);
+        mAdapter.clearState();
+        mPager.setAdapter(null);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        internalResume();
+    }
+
+    /**
+     * Method for instantiating the {@link PageflipFragment}.
+     * This will perform all needed actions in order to get the show started.
+     */
+    private void internalResume() {
+        synchronized (this) {
+            if (mPageflipStarted) {
+                return;
+            }
+            mPageflipStarted = true;
+        }
+        ensureCatalog();
+    }
+
     private void ensureCatalog() {
 
         if (mCatalog != null) {
@@ -533,7 +593,6 @@ public class PageflipFragment extends BaseFragment {
 
             public void onComplete(JSONObject response, ShopGunError error) {
 
-//				mHasCatalogView = response != null;
                 if (!isAdded()) {
                     // Ignore callback
                     return;
@@ -560,75 +619,13 @@ public class PageflipFragment extends BaseFragment {
 
         if (mCatalog != null) {
             setBranding(mCatalog.getBranding());
-            runCatalogFiller();
+            mCatalogAutoFill = new CatalogAutoFill();
+            mCatalogAutoFill.setLoadHotspots(!PageflipUtils.isHotspotsReady(mCatalog));
+            mCatalogAutoFill.setLoadPages(!PageflipUtils.isPagesReady(mCatalog));
+            mCatalogAutoFill.prepare(new AutoFillParams(), mCatalog, null, mCatalogListener);
+            mCatalogAutoFill.execute(ShopGun.getInstance().getRequestQueue());
         }
 
-    }
-
-    private void runCatalogFiller() {
-        mCatalogAutoFill = new CatalogAutoFill();
-        mCatalogAutoFill.setLoadHotspots(!PageflipUtils.isHotspotsReady(mCatalog));
-        mCatalogAutoFill.setLoadPages(!PageflipUtils.isPagesReady(mCatalog));
-        mCatalogAutoFill.prepare(new AutoFillParams(), mCatalog, null, mCatalogListener);
-        mCatalogAutoFill.execute(ShopGun.getInstance().getRequestQueue());
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        SgnLog.d(TAG, "onConfigurationChanged");
-
-        boolean land = PageflipUtils.isLandscape(newConfig);
-        if (land != mLandscape) {
-            internalPause();
-
-            // TODO How to handle config changes?
-
-            // Get the old page
-            int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
-            // switch to landscape mode
-            mLandscape = land;
-            // set new current position accordingly
-            mCurrentPosition = PageflipUtils.pageToPosition(pages[0], mLandscape);
-
-            mAdapter.clear();
-
-            setUpView(false);
-            internalStart();
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        int[] pages = PageflipUtils.positionToPages(mCurrentPosition, mCatalog.getPageCount(), mLandscape);
-        outState.putInt(ARG_PAGE, pages[0]);
-        outState.putParcelable(ARG_CATALOG, mCatalog);
-        outState.putString(ARG_CATALOG_ID, mCatalogId);
-        outState.putString(ARG_VIEW_SESSION, mViewSessionUuid);
-        outState.putParcelable(ARG_BRANDING, mBranding);
-        mAdapter.clear();
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        internalStart();
-    }
-
-    /**
-     * Method for instantiating the {@link PageflipFragment}.
-     * This will perform all needed actions in order to get the show started.
-     */
-    private void internalStart() {
-        synchronized (this) {
-            if (mPageflipStarted) {
-                return;
-            }
-            mPageflipStarted = true;
-        }
-        ensureCatalog();
     }
 
     @Override

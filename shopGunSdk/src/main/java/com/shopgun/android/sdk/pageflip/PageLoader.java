@@ -21,7 +21,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.Log;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
@@ -102,14 +101,14 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
 
     private void loadImages(int width, int height) {
 
-        SgnLog.d(TAG, "pages: " + PageflipUtils.join(",", mPages));
+//        SgnLog.d(TAG, "pages: " + PageflipUtils.join(",", mPages));
         for (int i = 0; i < mPages.length; i++) {
 
             int page = mPages[i];
             // convert from human readable to array index
-            page--;
-            SgnLog.d(TAG, "page: " + page);
-            String url = mUrls.get(page);
+            int pos = page-1;
+//            SgnLog.d(TAG, "page: " + page);
+            String url = mUrls.get(pos);
             PageTransformerTarget t = new PageTransformerTarget(page);
             mPageTransformerTargetReference.add(t);
             mPicasso.load(url)
@@ -194,7 +193,7 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
             mBitmapsLoadedCount++;
             if (isDoneLoading()) {
                 Bitmap b = mBitmap == null ? bitmap : mBitmap;
-                Log.d(TAG, "onBitmapLoaded bitmap.bytes: " + byteSizeOf(b) / (1024) + "kb");
+//                SgnLog.d(TAG, "onBitmapLoaded bitmap.bytes: " + byteSizeOf(b) / (1024) + "kb");
                 mImageView.setImageBitmap(b);
             }
 //            Log.d(TAG, "onBitmapLoaded page: " + mPage + ", from: " + from.name());
@@ -205,7 +204,7 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
 
         @Override
         public void onBitmapFailed(Drawable errorDrawable) {
-            Log.d(TAG, "onBitmapFailed");
+            SgnLog.d(TAG, "onBitmapFailed");
             if (mListener != null) {
                 mListener.onError();
             }
@@ -265,12 +264,21 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
         } else if (orig.isRecycled()) {
             SgnLog.d(TAG, "Can't draw on double-page-bitmap it's recycled");
         } else {
-            int pos = page%pages.length;
+            int pos = getPosition(page, pages);
             int widthOffset = pos * tmp.getWidth();
             Canvas c = new Canvas(orig);
             c.drawBitmap(tmp, widthOffset, 0, null);
         }
 
+    }
+
+    private static int getPosition(int page, int[] pages) {
+        for (int i = 0; i < pages.length; i++) {
+            if (page == pages[i]) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
