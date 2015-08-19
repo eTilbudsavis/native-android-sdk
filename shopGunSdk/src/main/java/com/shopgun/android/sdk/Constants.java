@@ -40,6 +40,7 @@ public class Constants {
     }
 
     public static String getArg(Class<?> clazz, String arg) {
+//        return arg;
         return ARG_PREFIX + clazz.getSimpleName() + "." + arg;
     }
 
