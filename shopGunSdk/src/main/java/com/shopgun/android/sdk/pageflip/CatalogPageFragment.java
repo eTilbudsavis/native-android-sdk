@@ -24,22 +24,18 @@ import android.view.ViewGroup;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
-import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.imageloader.ImageRequest;
 import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.model.Images;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView;
 import com.shopgun.android.sdk.photoview.PhotoView;
 
-import java.util.List;
-
 public class CatalogPageFragment extends Fragment implements
         PhotoView.OnPhotoTapListener,
         PhotoView.OnPhotoDoubleClickListener,
         PhotoView.OnPhotoLongClickListener,
-        ZoomPhotoView.OnZoomChangeListener {
+        ZoomPhotoView.OnZoomChangeListener,
+        PageLoader.PageLoaderListener{
 
     public static final String TAG = Constants.getTag(CatalogPageFragment.class);
 
@@ -48,36 +44,29 @@ public class CatalogPageFragment extends Fragment implements
 
     protected static final String ARG_PAGE = Constants.getArg(CatalogPageFragment.class, "page");
     protected static final String ARG_POSITION = Constants.getArg(CatalogPageFragment.class, "position");
+    protected static final String ARG_CONFIG = Constants.getArg(CatalogPageFragment.class, "config");
 
     private static final Object HOTSPOT_LOCK = new Object();
 
     private int[] mPages;
+    private int mPosition = -1;
+    private PageLoader.Config mConfig;
+
     private ZoomPhotoView mPhotoView;
     private LoadingTextView mLoader;
-    private boolean mHasZoomImage = false;
     private boolean mDebugRects = false;
     private PageStat mStats;
 
     private boolean mPageVisible = false;
-    private int mPosition = -1;
+    private PageLoader mPageLoader;
 
     private CatalogPageCallback mCallback;
 
-    private PageLoader.PageLoaderListener mPageLoaderListener = new PageLoader.PageLoaderListener() {
-        @Override
-        public void onComplete() {
-            toggleContentVisibility(false);
-        }
-
-        @Override
-        public void onError() {
-        }
-    };
-
-    public static CatalogPageFragment newInstance(int position, int[] pages) {
+    public static CatalogPageFragment newInstance(int position, int[] pages, PageLoader.Config config) {
         Bundle b = new Bundle();
         b.putIntArray(ARG_PAGE, pages);
         b.putInt(ARG_POSITION, position);
+        b.putParcelable(ARG_CONFIG, config);
         CatalogPageFragment f = new CatalogPageFragment();
         f.setArguments(b);
         return f;
@@ -88,6 +77,7 @@ public class CatalogPageFragment extends Fragment implements
         if (getArguments() != null) {
             mPages = getArguments().getIntArray(ARG_PAGE);
             mPosition = getArguments().getInt(ARG_POSITION, 0);
+            mConfig = getArguments().getParcelable(ARG_CONFIG);
         }
         super.onCreate(savedInstanceState);
     }
@@ -108,13 +98,20 @@ public class CatalogPageFragment extends Fragment implements
     }
 
     private void toggleContentVisibility(boolean isLoading) {
-        int content = isLoading ? View.INVISIBLE : View.VISIBLE;
-        int loader = isLoading ? View.VISIBLE : View.INVISIBLE;
-        mPhotoView.setVisibility(content);
-        mLoader.setVisibility(loader);
+        if (!isAdded()) {
+            return;
+        }
+        mPhotoView.setVisibility(isLoading ? View.INVISIBLE : View.VISIBLE);
+        mLoader.setVisibility(isLoading ? View.VISIBLE : View.INVISIBLE);
         if (isLoading) {
             runLoader();
         }
+    }
+
+    private void runLoader() {
+        updateBranding();
+        mLoader.setLoadingText(PageflipUtils.join("-", mPages));
+        mLoader.start();
     }
 
     private void updateBranding() {
@@ -123,12 +120,6 @@ public class CatalogPageFragment extends Fragment implements
             int complimentColor = PageflipUtils.getTextColor(brandingColor, getActivity());
             mLoader.setTextColor(complimentColor);
         }
-    }
-
-    private void runLoader() {
-        updateBranding();
-        mLoader.setLoadingText(PageflipUtils.join("-", mPages));
-        mLoader.start();
     }
 
     @Override
@@ -143,15 +134,6 @@ public class CatalogPageFragment extends Fragment implements
         return mStats;
     }
 
-    protected void addRequest(ImageRequest ir) {
-        ir.setMemoryCache(false);
-        ShopGun.getInstance().getImageloader().displayImage(ir);
-    }
-
-    protected ZoomPhotoView getPhotoView() {
-        return mPhotoView;
-    }
-
     public void setCatalogPageCallback(CatalogPageCallback callback) {
         mCallback = callback;
     }
@@ -160,12 +142,25 @@ public class CatalogPageFragment extends Fragment implements
         return mPages;
     }
 
-    PageLoader mViewLoader;
+    private boolean ensureLoader() {
+        if (mCallback != null && isAdded()) {
+            if (mPageLoader == null) {
+                if (mConfig == null) {
+                    mConfig = new PageLoader.Config(getActivity(), mPages, mCallback.getCatalog());
+                }
+                mPageLoader = new PageLoader(getActivity(), mConfig);
+                mPageLoader.setPageLoaderListener(this);
+                log(mConfig.toString());
+            }
+            return true;
+        }
+        return false;
+    }
 
     /**
      * When called, start loading view images into the {@link ZoomPhotoView}.
      */
-    public void loadView() {
+    private void loadView() {
         if (mPhotoView == null) {
             return;
         }
@@ -178,26 +173,29 @@ public class CatalogPageFragment extends Fragment implements
         if (!mCallback.isPositionSet()) {
             return;
         }
-        if (mViewLoader == null) {
-            List<String> urls = mCallback.getCatalog().getPagesUrls(Images.VIEW);
-            mViewLoader = new PageLoader(getActivity(), urls, mPages);
-            mViewLoader.setPageLoaderListener(mPageLoaderListener);
-            mViewLoader.into(mPhotoView);
+        if (ensureLoader()) {
+            mPageLoader.into(mPhotoView, PageLoader.Quality.MEDIUM);
         }
     }
 
     /**
      * When called, start loading zoom images into the {@link ZoomPhotoView}.
      */
-    public void loadZoom() {
-        List<String> urls = mCallback.getCatalog().getPagesUrls(Images.ZOOM);
-        PageLoader l = new PageLoader(getActivity(), urls, mPages);
-        l.into(mPhotoView);
+    private void loadZoom() {
+        if (mCallback == null) {
+            return;
+        }
+        if (!mCallback.isPositionSet()) {
+            return;
+        }
+        if (ensureLoader()) {
+            mPageLoader.into(mPhotoView, PageLoader.Quality.HIGH);
+        }
     }
 
     @Override
     public void onResume() {
-//		SgnLog.d(TAG, String.format("pos: %s, onResume", mPosition));
+        log(String.format("pos: %s, onResume", mPosition));
         updateBranding();
 
         mPhotoView.setOnPhotoDoubleClickListener(this);
@@ -225,13 +223,13 @@ public class CatalogPageFragment extends Fragment implements
      * called once the {@link CatalogPageFragment} becomes visible in the {@link PageflipViewPager}
      */
     public void onVisible() {
+        log("onVisible");
         updateBranding();
         loadView();
         if (!mPageVisible) {
             if (mPhotoView != null && mPhotoView.getBitmap() != null) {
                 getStat().startView();
             }
-            // TODO do performance stuff, low memory devices can start loading here instead of onResume
         }
         mPageVisible = true;
     }
@@ -240,7 +238,7 @@ public class CatalogPageFragment extends Fragment implements
      * called once the {@link CatalogPageFragment} becomes invisible in the {@link PageflipViewPager}
      */
     public void onInvisible() {
-//		SgnLog.d(TAG, String.format("pos: %s, onInvisible, isAdded: %s", mPosition, isAdded()));
+        log("onInvisible");
         if (mCallback != null) {
             getStat().collectView();
         }
@@ -249,10 +247,13 @@ public class CatalogPageFragment extends Fragment implements
 
     @Override
     public void onPause() {
-//		SgnLog.d(TAG, String.format("pos: %s, onPause", mPosition));
+        log("onPause");
         mLoader.stop();
         mPhotoView.recycle();
         onInvisible();
+        if (mPageLoader != null) {
+            mPageLoader.cancel();
+        }
         super.onPause();
     }
 
@@ -277,11 +278,7 @@ public class CatalogPageFragment extends Fragment implements
     }
 
     public void onZoomChange(boolean isZoomed) {
-        if (isZoomed && !mHasZoomImage) {
-            mHasZoomImage = true;
-            loadZoom();
-        }
-
+        loadZoom();
         if (isZoomed) {
             getStat().startZoom();
         } else {
@@ -291,8 +288,20 @@ public class CatalogPageFragment extends Fragment implements
         mCallback.onZoom(mPhotoView, mPages, isZoomed);
     }
 
+    @Override
+    public void onComplete() {
+        toggleContentVisibility(false);
+    }
+
+    @Override
+    public void onError() {
+
+    }
+
     private void log(String msg) {
-        SgnLog.d(TAG, "pages[" + PageflipUtils.join(",", mPages) + "] " + msg);
+        String format = "pos[%s], pages[%s] %s";
+        String text = String.format(format, mPosition, PageflipUtils.join(",", mPages), msg);
+        SgnLog.d(TAG, text);
     }
 
 }

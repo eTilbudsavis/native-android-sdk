@@ -3,6 +3,7 @@ package com.shopgun.android.sdk.pageflip;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 
+import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 
 public class CatalogPagerAdapter extends FragmentStatelessPagerAdapter {
@@ -12,19 +13,24 @@ public class CatalogPagerAdapter extends FragmentStatelessPagerAdapter {
     private CatalogPageCallback mCallback;
     private int mViewCount = 0;
     private boolean mLandscape = false;
+    private int mMaxHeap;
 
-    public CatalogPagerAdapter(FragmentManager fm, CatalogPageCallback callback, boolean landscape) {
+    public CatalogPagerAdapter(FragmentManager fm, int maxHeap, CatalogPageCallback callback, boolean landscape) {
         super(fm);
         mCallback = callback;
         mLandscape = landscape;
         int pc = mCallback.getCatalog().getPageCount();
         mViewCount = mLandscape ? (pc/2)+1 : pc;
+        mMaxHeap = maxHeap;
+//        SgnLog.d(TAG, toString());
     }
 
     @Override
     public Fragment getItem(int position) {
-        int[] pages = PageflipUtils.positionToPages(position, mCallback.getCatalog().getPageCount(), mLandscape);
-        CatalogPageFragment f = CatalogPageFragment.newInstance(position, pages);
+        Catalog c = mCallback.getCatalog();
+        int[] pages = PageflipUtils.positionToPages(position, c.getPageCount(), mLandscape);
+        PageLoader.Config config = new PageLoader.Config(mMaxHeap, pages, c);
+        CatalogPageFragment f = CatalogPageFragment.newInstance(position, pages, config);
         f.setCatalogPageCallback(mCallback);
         return f;
     }

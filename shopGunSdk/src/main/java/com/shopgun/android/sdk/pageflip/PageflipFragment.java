@@ -77,7 +77,6 @@ public class PageflipFragment extends Fragment {
     // State
     private int mCurrentPosition = 0;
     private boolean mLandscape = false;
-    private boolean mLowMemory = false;
     private boolean mPagesReady = false;
     private boolean mPageflipStarted = false;
 
@@ -93,7 +92,8 @@ public class PageflipFragment extends Fragment {
                 return;
             }
 
-            mAdapter = new CatalogPagerAdapter(getChildFragmentManager(), mCatalogPageCallback, mLandscape);
+            int heap = PageflipUtils.getMaxHeap(getActivity());
+            mAdapter = new CatalogPagerAdapter(getChildFragmentManager(), heap, mCatalogPageCallback, mLandscape);
             mPager.setAdapter(mAdapter);
             // force the first page change if needed
             if (mPager.getCurrentItem() != mCurrentPosition) {
@@ -316,7 +316,6 @@ public class PageflipFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
-        mLowMemory = PageflipUtils.hasLowMemory(getActivity());
         mLandscape = PageflipUtils.isLandscape(getActivity());
         Bundle b = new Bundle();
         if (getArguments() != null) {
@@ -557,7 +556,9 @@ public class PageflipFragment extends Fragment {
         outState.putString(ARG_CATALOG_ID, mCatalogId);
         outState.putString(ARG_VIEW_SESSION, mViewSessionUuid);
         outState.putParcelable(ARG_BRANDING, mBranding);
-        mAdapter.clearState();
+        if (mAdapter != null) {
+            mAdapter.clearState();
+        }
         mPager.setAdapter(null);
         super.onSaveInstanceState(outState);
     }

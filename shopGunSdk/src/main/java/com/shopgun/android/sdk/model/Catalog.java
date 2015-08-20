@@ -535,29 +535,6 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     }
 
     /**
-     * Get the pages (urls) of a certain type, from this catalog.
-     * @param type A type
-     * @return A list of urls
-     */
-    public List<String> getPagesUrls(int type) {
-        List<String> urls = new ArrayList<String>(mPages.size());
-        for (Images i: mPages) {
-            switch (type) {
-                case Images.THUMB:
-                    urls.add(i.getThumb());
-                    break;
-                case Images.VIEW:
-                    urls.add(i.getView());
-                    break;
-                case Images.ZOOM:
-                    urls.add(i.getZoom());
-                    break;
-            }
-        }
-        return urls;
-    }
-
-    /**
      * Method for setting the {@link Page} associated with this catalog
      * @param pages A pages object
      */

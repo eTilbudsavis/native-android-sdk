@@ -26,6 +26,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.view.Display;
@@ -42,8 +43,6 @@ import java.util.List;
 public class PageflipUtils {
 
     public static final String TAG = Constants.getTag(PageflipUtils.class);
-
-    private static final long LOW_MEMORY_BOUNDARY = 42;
 
     private PageflipUtils() {
         // Empty constructor
@@ -83,16 +82,6 @@ public class PageflipUtils {
         } else {
             return am.getMemoryClass();
         }
-    }
-
-    /**
-     * Method for checking if the device has a small heap size (42mb)
-     *
-     * @param c A context
-     * @return true if the heap size is small, else false
-     */
-    public static boolean hasLowMemory(Context c) {
-        return getMaxHeap(c) < LOW_MEMORY_BOUNDARY;
     }
 
     /**
@@ -326,5 +315,18 @@ public class PageflipUtils {
         return c != null && c.getPages() != null && !c.getPages().isEmpty();
     }
 
+
+    /**
+     * returns the bytesize of the give bitmap
+     */
+    public static int byteSizeOf(Bitmap bitmap) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            return bitmap.getAllocationByteCount();
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
+            return bitmap.getByteCount();
+        } else {
+            return bitmap.getRowBytes() * bitmap.getHeight();
+        }
+    }
 
 }
