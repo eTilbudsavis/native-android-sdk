@@ -35,7 +35,6 @@ public class SdkTest {
         JsonTest.test();
         ColorUtilsTest.test();
         ModelTest.test();
-        CatalogThumbBitmapProcessorTest.test();
         SerializationSpeedTest.test();
         EnvironmentTest.test();
         EventTest.test();

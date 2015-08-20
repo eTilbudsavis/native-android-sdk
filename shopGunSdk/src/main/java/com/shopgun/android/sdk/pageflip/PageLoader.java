@@ -128,9 +128,14 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
         if (mPicasso != null) {
             mPicasso.cancelTag(LOCK);
         }
+        if (mImageView != null) {
+            ViewTreeObserver vto = mImageView.getViewTreeObserver();
+            if (vto.isAlive()) {
+                vto.removeOnPreDrawListener(this);
+            }
+        }
         mPageTransformerTargetReference.clear();
         mBitmapsLoadedCount = 0;
-        mQuality = null;
         return this;
     }
 
@@ -201,8 +206,6 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
             return TAG + mPage + new Random().nextFloat();
         }
 
-        long start = 0;
-
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
             mBitmapsLoadedCount++;
@@ -210,8 +213,8 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
                 boolean bn = mBitmap == null;
                 Bitmap b = bn ? bitmap : mBitmap;
                 loadLog("onBitmapLoaded");
-                SgnLog.d(TAG, "- " + mConfig.toString());
-                SgnLog.d(TAG, "- mBitmap.bytes: " + PageflipUtils.byteSizeOf(b) / (1024) + "kb");
+                loadLog("- " + mConfig.toString());
+                loadLog("- mBitmap.bytes: " + PageflipUtils.byteSizeOf(b) / (1024) + "kb");
                 mImageView.setImageBitmap(b);
 
                 if (mListener != null) {
@@ -240,15 +243,8 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
         }
 
         private void loadLog(String s) {
-            long time = 0;
-            if (start == 0) {
-                start = System.currentTimeMillis();
-            } else {
-                time = (System.currentTimeMillis()-start);
-                start = 0;
-            }
-            String pages = PageflipUtils.join(",", mConfig.getPages());
-            SgnLog.d(TAG, String.format("%s, time[%s], pages[%s]", s, time, pages));
+//            String pages = PageflipUtils.join(",", mConfig.getPages());
+//            SgnLog.d(TAG, String.format("pages[%s], %s", pages, s));
         }
 
     };

@@ -26,7 +26,6 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.shopgun.android.sdk.database.DatabaseWrapper;
-import com.shopgun.android.sdk.imageloader.ImageLoader;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -123,8 +122,6 @@ public class ShopGun {
     private RequestQueue mRequestQueue;
     /** My go to executor service */
     private ExecutorService mExecutor;
-    /** The ImageLoader for use by clients, and SDK */
-    private ImageLoader mImageLoader;
 
     /** The development flag, indicating the app is in development */
     private boolean mDevelop = false;
@@ -193,7 +190,6 @@ public class ShopGun {
         setupKeys(mContext);
         setAppVersion(Utils.getAppVersion(mContext));
         mExecutor = Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT, new SgnThreadFactory());
-        mImageLoader = new ImageLoader(mContext, mExecutor);
         mSettings = new Settings(mContext);
 
         HttpStack stack = null;
@@ -295,10 +291,6 @@ public class ShopGun {
             setupKeys(mContext);
         }
         return mApiSecret;
-    }
-
-    public ImageLoader getImageloader() {
-        return mImageLoader;
     }
 
     /**

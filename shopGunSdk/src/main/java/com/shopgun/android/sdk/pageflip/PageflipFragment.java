@@ -56,8 +56,6 @@ public class PageflipFragment extends Fragment {
     public static final String ARG_PAGE = Constants.getArg(PageflipFragment.class, "page");
     public static final String ARG_VIEW_SESSION = Constants.getArg(PageflipFragment.class, "view-session");
     public static final String ARG_BRANDING = Constants.getArg(PageflipFragment.class, "branding");
-    public static final String ARG_LANDSCAPE = Constants.getArg(PageflipFragment.class, "landscape");
-
 
     private static final double PAGER_SCROLL_FACTOR = 0.5d;
 
@@ -299,18 +297,13 @@ public class PageflipFragment extends Fragment {
         return newInstance(b);
     }
 
-    public static PageflipFragment newInstance(Bundle args) {
+    private static PageflipFragment newInstance(Bundle args) {
         PageflipFragment f = new PageflipFragment();
         f.setArguments(args);
         if (!f.getArguments().containsKey(ARG_VIEW_SESSION)) {
             f.getArguments().putString(ARG_VIEW_SESSION, Utils.createUUID());
         }
         return f;
-    }
-
-    private static void throwNoCatalogException() {
-        String err = "No catalog or catalog-id given as argument to PageflipFragment. See PageflipFragment.newInstance()";
-        throw new IllegalArgumentException(err);
     }
 
     @Override
@@ -551,7 +544,6 @@ public class PageflipFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(ARG_PAGE, getPages()[0]);
-        outState.putBoolean(ARG_LANDSCAPE, mLandscape);
         outState.putParcelable(ARG_CATALOG, mCatalog);
         outState.putString(ARG_CATALOG_ID, mCatalogId);
         outState.putString(ARG_VIEW_SESSION, mViewSessionUuid);

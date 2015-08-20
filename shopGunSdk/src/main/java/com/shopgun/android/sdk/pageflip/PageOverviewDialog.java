@@ -43,11 +43,10 @@ import android.widget.TextView;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.imageloader.ImageRequest;
-import com.shopgun.android.sdk.imageloader.impl.FadeBitmapDisplayer;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.utils.Utils;
+import com.squareup.picasso.Picasso;
 
 @SuppressWarnings("deprecation")
 public class PageOverviewDialog extends DialogFragment {
@@ -242,10 +241,7 @@ public class PageOverviewDialog extends DialogFragment {
             fl.addView(tv);
 
             String url = mCatalog.getPages().get(position).getThumb();
-            ImageRequest ir = new ImageRequest(url, iv);
-            ir.setBitmapDisplayer(new FadeBitmapDisplayer(100, false, true, true));
-            ShopGun.getInstance().getImageloader().displayImage(ir);
-
+            Picasso.with(a).load(url).into(iv);
             return fl;
         }
 
