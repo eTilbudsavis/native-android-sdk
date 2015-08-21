@@ -169,6 +169,8 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
     public interface PageLoaderListener {
         void onComplete();
         void onError();
+        void normalizeCatalogDimensions(Bitmap b);
+        Bitmap draw(Bitmap b, int page);
     }
 
     public class PageTransformerTarget implements Transformation, Target {
@@ -181,6 +183,8 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
 
         @Override
         public Bitmap transform(Bitmap source) {
+            mListener.normalizeCatalogDimensions(source);
+            mListener.draw(source, mPage);
             if (mConfig.isSinglePage()) {
                 // We don't need to do work on this
                 mBitmap = source;
@@ -212,7 +216,6 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
             if (isDoneLoading()) {
                 boolean bn = mBitmap == null;
                 Bitmap b = bn ? bitmap : mBitmap;
-                SgnLog.d(TAG, "mBitmap.size: " + PageflipUtils.sizeOfKb(b) + "kb");
                 loadLog("onBitmapLoaded");
                 loadLog("- " + mConfig.toString());
                 loadLog("- mBitmap.bytes: " + PageflipUtils.sizeOfKb(b) + "kb");

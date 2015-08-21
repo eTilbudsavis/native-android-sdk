@@ -91,7 +91,7 @@ public class PageStat {
         JsonObjectRequest r = new JsonObjectRequest(Method.POST, url, body, new Listener<JSONObject>() {
 
             public void onComplete(JSONObject response, ShopGunError error) {
-//				print(body, response, error);
+				print(body, response, error);
             }
         });
         ShopGun.getInstance().add(r);
@@ -110,6 +110,12 @@ public class PageStat {
             SgnLog.d(TAG, e.getMessage(), e);
         }
         return o;
+    }
+
+    private void print(JSONObject body, JSONObject response, ShopGunError e) {
+        if (LOG) {
+            SgnLog.d(TAG, body.toString() + ", " + (e==null? response.toString() : e.toString()));
+        }
     }
 
     private void log(String s) {

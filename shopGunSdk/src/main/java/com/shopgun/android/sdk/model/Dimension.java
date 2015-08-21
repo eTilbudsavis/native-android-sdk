@@ -16,6 +16,7 @@
 
 package com.shopgun.android.sdk.model;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -45,8 +46,15 @@ public class Dimension implements IJson<JSONObject>, Parcelable {
     private double mWidth = DEF_DIMENSION;
     private double mHeight = DEF_DIMENSION;
 
-    public Dimension() {
+    public static Dimension fromBitmap(Bitmap b) {
+        Dimension d = new Dimension();
+        d.setWidth(1); // magic number... always one
+        double h = (double)((float)b.getHeight()/(float)b.getWidth());
+        d.setHeight(h);
+        return d;
+    }
 
+    public Dimension() {
     }
 
     private Dimension(Parcel in) {

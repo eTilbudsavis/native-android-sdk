@@ -16,6 +16,7 @@
 
 package com.shopgun.android.sdk.model;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -38,43 +39,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson<JSONArray>, Parcelable {
+public class HotspotMap implements IJson<JSONArray>,Parcelable {
 
     public static final String TAG = Constants.getTag(HotspotMap.class);
-    private static final long serialVersionUID = -4654824845675092954L;
-    private static final String TYPE_OFFER = "offer";
-    private static final int[] mRectColors = {
-            Color.BLACK,
-            Color.BLUE,
-            Color.GREEN,
-            Color.RED,
-            Color.YELLOW,
-            Color.MAGENTA
-    };
-    public static Parcelable.Creator<HotspotMap> CREATOR = new Parcelable.Creator<HotspotMap>() {
-        public HotspotMap createFromParcel(Parcel source) {
-            return new HotspotMap(source);
-        }
 
-        public HotspotMap[] newArray(int size) {
-            return new HotspotMap[size];
-        }
-    };
+    private static final String TYPE_OFFER = "offer";
+    private static final int[] mRectColors = { Color.BLACK, Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW, Color.MAGENTA };
+    private HashMap<Integer, List<Hotspot>> mMap = new HashMap<Integer, List<Hotspot>>();
     private boolean mIsNormalized = false;
 
     public HotspotMap() {
-
     }
 
-    private HotspotMap(Parcel in) {
-        this.mIsNormalized = in.readByte() != 0;
-        int size = in.readInt();
-        for (int i = 0; i < size; i++) {
-            Integer key = in.readInt();
-            List<Hotspot> value = new ArrayList<Hotspot>();
-            in.readTypedList(value, Hotspot.CREATOR);
-            this.put(key, value);
-        }
+    public void put(int page, List<Hotspot> list) {
+        mMap.put(page, list);
+    }
+
+    public List<Hotspot> get(int page) {
+        return mMap.get(page);
     }
 
     public static HotspotMap fromJSON(Dimension d, JSONArray jHotspots) {
@@ -108,7 +90,7 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson
                         Integer page = Integer.valueOf(key);
                         JSONArray rect = rectangleList.getJSONArray(key);
 
-                        if (!map.containsKey(page)) {
+                        if (!map.mMap.containsKey(page)) {
                             map.put(page, new ArrayList<Hotspot>());
                         }
 
@@ -134,18 +116,20 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson
         return map;
     }
 
-    public boolean isNormalized() {
-        return mIsNormalized;
+    public synchronized void normalize(Bitmap b) {
+        if (!mIsNormalized) {
+            normalize(Dimension.fromBitmap(b));
+        }
     }
 
-    public void normalize(Dimension d) {
+    public synchronized void normalize(Dimension d) {
 
-        if (!d.isSet()) {
+        if (mIsNormalized || !d.isSet()) {
             return;
         }
 
-        Set<Integer> keys = keySet();
-        if (keys == null || keys.isEmpty()) {
+        Set<Integer> keys = mMap.keySet();
+        if (keys.isEmpty()) {
             return;
         }
 
@@ -163,18 +147,18 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson
         mIsNormalized = true;
     }
 
-    public List<Hotspot> getHotspots(int page, double xPercent, double yPercent, boolean landscape) {
-        return getHotspots(page, xPercent, yPercent, Hotspot.SIGNIFICANT_AREA, landscape);
+    public List<Hotspot> getHotspots(int page, double xPercent, double yPercent, int[] pages) {
+        return getHotspots(page, xPercent, yPercent, Hotspot.SIGNIFICANT_AREA, pages);
     }
 
-    public List<Hotspot> getHotspots(int page, double xPercent, double yPercent, double minArea, boolean landscape) {
+    public List<Hotspot> getHotspots(int page, double xPercent, double yPercent, double minArea, int[] pages) {
         List<Hotspot> list = new ArrayList<Hotspot>();
-        List<Hotspot> lh = get(page);
+        List<Hotspot> lh = mMap.get(page);
         if (lh == null) {
             return list;
         }
         for (Hotspot h : lh) {
-            if (h.inBounds(xPercent, yPercent, minArea, landscape)) {
+            if (h.inBounds(xPercent, yPercent, minArea, pages)) {
                 list.add(h);
             }
         }
@@ -182,43 +166,61 @@ public class HotspotMap extends HashMap<Integer, List<Hotspot>> implements IJson
     }
 
     public JSONArray toJSON() {
-
         return null;
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        HotspotMap that = (HotspotMap) o;
+
+        if (mIsNormalized != that.mIsNormalized) return false;
+        return !(mMap != null ? !mMap.equals(that.mMap) : that.mMap != null);
+
+    }
+
+    @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + (mIsNormalized ? 1231 : 1237);
+        int result = mMap != null ? mMap.hashCode() : 0;
+        result = 31 * result + (mIsNormalized ? 1 : 0);
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        HotspotMap other = (HotspotMap) obj;
-        if (mIsNormalized != other.mIsNormalized)
-            return false;
-        return true;
-    }
-
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByte(mIsNormalized ? (byte) 1 : (byte) 0);
-        dest.writeInt(size());
-        for (Map.Entry<Integer, List<Hotspot>> e : entrySet()) {
+        dest.writeInt(mMap.size());
+        for (Map.Entry<Integer, List<Hotspot>> e : mMap.entrySet()) {
             dest.writeInt(e.getKey());
             dest.writeTypedList(e.getValue());
         }
+        dest.writeByte(mIsNormalized ? (byte) 1 : (byte) 0);
     }
 
+    protected HotspotMap(Parcel in) {
+        int size = in.readInt();
+        for (int i = 0; i < size; i++) {
+            Integer key = in.readInt();
+            List<Hotspot> value = new ArrayList<Hotspot>();
+            in.readTypedList(value, Hotspot.CREATOR);
+            this.put(key, value);
+        }
+        this.mIsNormalized = in.readByte() != 0;
+    }
+
+    public static final Parcelable.Creator<HotspotMap> CREATOR = new Parcelable.Creator<HotspotMap>() {
+        public HotspotMap createFromParcel(Parcel source) {
+            return new HotspotMap(source);
+        }
+
+        public HotspotMap[] newArray(int size) {
+            return new HotspotMap[size];
+        }
+    };
 }

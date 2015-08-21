@@ -198,11 +198,11 @@ public class PageflipUtils {
      *
      * @param catalog   A catalog
      * @param page      The page number
-     * @param landscape The device orientation
+     * @param pages     The set of pages being displayed
      * @param b         The bitmap to draw onto
      * @return A painted bitmap
      */
-    public static Bitmap drawDebugRects(Catalog catalog, int page, boolean landscape, Bitmap b) {
+    public static Bitmap drawDebugRects(Catalog catalog, int page, int[] pages, Bitmap b) {
 
         List<Hotspot> hotspots = catalog.getHotspots().get(page);
 
@@ -225,7 +225,7 @@ public class PageflipUtils {
             double bw = b.getWidth();
             double bh = b.getHeight();
             for (Hotspot h : hotspots) {
-                if (h.isAreaSignificant(landscape)) {
+                if (h.isAreaSignificant(pages)) {
                     p.setColor(h.getColor());
                     int left = (int) (h.mLeft * bw);
                     int top = (int) (h.mTop * bh);

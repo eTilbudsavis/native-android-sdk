@@ -35,7 +35,7 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
      * The default significant area
      */
     public static final double SIGNIFICANT_AREA = 0.01d;
-    private static final long serialVersionUID = 7068341225117028048L;
+
     public static Parcelable.Creator<Hotspot> CREATOR = new Parcelable.Creator<Hotspot>() {
         public Hotspot createFromParcel(Parcel source) {
             return new Hotspot(source);
@@ -166,23 +166,20 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
         mLeft = mAbsLeft / d.getWidth();
     }
 
-    public boolean inBounds(double x, double y, double minArea, boolean landscape) {
-        return inBounds(x, y) && isAreaSignificant(landscape);
+    public boolean inBounds(double x, double y, double minArea, int[] pages) {
+        return inBounds(x, y) && isAreaSignificant(pages);
     }
 
     public boolean inBounds(double x, double y) {
         return mTop < y && y < mBottom && mLeft < x && x < mRight;
     }
 
-    public boolean isAreaSignificant(boolean landscape) {
-        return isAreaSignificant(SIGNIFICANT_AREA, landscape);
+    public boolean isAreaSignificant(int[] pages) {
+        return isAreaSignificant(SIGNIFICANT_AREA, pages);
     }
 
-    public boolean isAreaSignificant(double minArea, boolean landscape) {
-        if (!landscape && mIsSpanningTwoPages) {
-            return getArea() > minArea;
-        }
-        return true;
+    public boolean isAreaSignificant(double minArea, int[] pages) {
+        return !(pages.length == 1 && mIsSpanningTwoPages) || getArea() > minArea;
     }
 
     public double getArea() {

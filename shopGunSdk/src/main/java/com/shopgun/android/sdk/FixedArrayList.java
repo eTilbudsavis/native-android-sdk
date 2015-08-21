@@ -23,8 +23,6 @@ public class FixedArrayList<E> extends ArrayList<E> {
 
     public static final String TAG = Constants.getTag(FixedArrayList.class);
 
-    private static final long serialVersionUID = -2709268219112197508L;
-
     int mMaxSize = 16;
 
     public FixedArrayList(int size) {

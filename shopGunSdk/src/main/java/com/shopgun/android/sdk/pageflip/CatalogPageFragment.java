@@ -16,6 +16,7 @@
 
 package com.shopgun.android.sdk.pageflip;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -24,6 +25,7 @@ import android.view.ViewGroup;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView;
@@ -38,14 +40,11 @@ public class CatalogPageFragment extends Fragment implements
 
     public static final String TAG = Constants.getTag(CatalogPageFragment.class);
 
-    protected static final int FADE_IN_DURATION = 150;
     protected static final float MAX_SCALE = 3.0f;
 
     protected static final String ARG_PAGE = Constants.getArg(CatalogPageFragment.class, "page");
     protected static final String ARG_POSITION = Constants.getArg(CatalogPageFragment.class, "position");
     protected static final String ARG_CONFIG = Constants.getArg(CatalogPageFragment.class, "config");
-
-    private static final Object HOTSPOT_LOCK = new Object();
 
     private int[] mPages;
     private int mPosition = -1;
@@ -194,7 +193,7 @@ public class CatalogPageFragment extends Fragment implements
 
     @Override
     public void onResume() {
-        log(String.format("pos: %s, onResume", mPosition));
+        log("onResume");
         updateBranding();
 
         mPhotoView.setOnPhotoDoubleClickListener(this);
@@ -225,10 +224,9 @@ public class CatalogPageFragment extends Fragment implements
         log("onVisible");
         updateBranding();
         loadView();
-        if (!mPageVisible) {
-            if (mPhotoView != null && mPhotoView.getBitmap() != null) {
-                getStat().startView();
-            }
+        if (!mPageVisible && mPhotoView != null && mPhotoView.getBitmap() != null) {
+            // first start if the page is visible, and has a bitmap
+            getStat().startView();
         }
         mPageVisible = true;
     }
@@ -238,9 +236,7 @@ public class CatalogPageFragment extends Fragment implements
      */
     public void onInvisible() {
         log("onInvisible");
-        if (mCallback != null) {
-            getStat().collectView();
-        }
+        getStat().collectView();
         mPageVisible = false;
     }
 
@@ -290,17 +286,39 @@ public class CatalogPageFragment extends Fragment implements
     @Override
     public void onComplete() {
         toggleContentVisibility(false);
+        if (mPageVisible) {
+            getStat().startView();
+        }
     }
 
     @Override
     public void onError() {
+        mLoader.stop();
+        mLoader.error("Couldn't load page: " + PageflipUtils.join("-", mPages));
+    }
 
+    @Override
+    public void normalizeCatalogDimensions(Bitmap b) {
+        mCallback.getCatalog().getHotspots().normalize(b);
+    }
+
+    @Override
+    public Bitmap draw(Bitmap b, int page) {
+
+        if (mDebugRects) {
+            try {
+                return PageflipUtils.drawDebugRects(mCallback.getCatalog(), page, mPages, b);
+            } catch (Exception e) {
+                SgnLog.d(TAG, e.getMessage(), e);
+            }
+        }
+        return b;
     }
 
     private void log(String msg) {
-//        String format = "pos[%s], pages[%s] %s";
-//        String text = String.format(format, mPosition, PageflipUtils.join(",", mPages), msg);
-//        SgnLog.d(TAG, text);
+        String format = "pos[%s], pages[%s] %s";
+        String text = String.format(format, mPosition, PageflipUtils.join(",", mPages), msg);
+        SgnLog.d(TAG, text);
     }
 
 }
