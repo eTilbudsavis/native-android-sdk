@@ -32,10 +32,12 @@ public class PageflipClickCoordinate {
 
         float pagesLength = (float)pages.length;
         float pageWidth = 1.0f/pagesLength;
-        this.page = (int)Math.ceil(x/pageWidth);
+        int position = (int)Math.floor(x/pageWidth);
+
+        this.page = pages[position];
         this.x = (x%pageWidth)*pagesLength;
         this.y = y;
-        list = c.getHotspots().getHotspots(page, x, y, pages);
+        this.list = c.getHotspots().getHotspots(page, x, y, pages);
 
     }
 

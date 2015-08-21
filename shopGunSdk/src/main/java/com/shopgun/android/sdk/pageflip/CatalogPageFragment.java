@@ -316,9 +316,9 @@ public class CatalogPageFragment extends Fragment implements
     }
 
     private void log(String msg) {
-        String format = "pos[%s], pages[%s] %s";
-        String text = String.format(format, mPosition, PageflipUtils.join(",", mPages), msg);
-        SgnLog.d(TAG, text);
+//        String format = "pos[%s], pages[%s] %s";
+//        String text = String.format(format, mPosition, PageflipUtils.join(",", mPages), msg);
+//        SgnLog.d(TAG, text);
     }
 
 }

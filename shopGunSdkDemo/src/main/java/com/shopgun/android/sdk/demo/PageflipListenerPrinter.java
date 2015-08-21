@@ -95,10 +95,12 @@ public class PageflipListenerPrinter implements PageflipListener {
         }
         StringBuilder sb = new StringBuilder();
         sb.append("Hotspots[");
+        boolean first = true;
         for(Hotspot h : list) {
-            if (sb.length()>0) {
-                sb.append(",");
+            if (!first) {
+                sb.append(", ");
             }
+            first = false;
             sb.append(h.getOffer().getHeading());
         }
         sb.append("]");
