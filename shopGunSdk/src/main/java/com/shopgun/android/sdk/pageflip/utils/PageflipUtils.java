@@ -315,11 +315,10 @@ public class PageflipUtils {
         return c != null && c.getPages() != null && !c.getPages().isEmpty();
     }
 
-
     /**
      * returns the bytesize of the give bitmap
      */
-    public static int byteSizeOf(Bitmap bitmap) {
+    public static int sizeOf(Bitmap bitmap) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             return bitmap.getAllocationByteCount();
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
@@ -327,6 +326,13 @@ public class PageflipUtils {
         } else {
             return bitmap.getRowBytes() * bitmap.getHeight();
         }
+    }
+
+    /**
+     * returns the kilobytesize of the give bitmap
+     */
+    public static int sizeOfKb(Bitmap bitmap) {
+        return sizeOf(bitmap) / 1024;
     }
 
 }
