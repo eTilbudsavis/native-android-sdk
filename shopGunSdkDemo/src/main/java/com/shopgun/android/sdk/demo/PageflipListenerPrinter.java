@@ -16,9 +16,11 @@
 
 package com.shopgun.android.sdk.demo;
 
-import android.util.Log;
+import android.content.Context;
 import android.view.View;
+import android.widget.Toast;
 
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Hotspot;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.pageflip.PageflipListener;
@@ -29,11 +31,17 @@ import java.util.List;
 public class PageflipListenerPrinter implements PageflipListener {
 
     private String mTag;
+    private Context mContext;
     private boolean mPrint = false;
 
-    public PageflipListenerPrinter(String mTag, boolean mPrint) {
-        this.mTag = mTag;
-        this.mPrint = mPrint;
+    public PageflipListenerPrinter(String tag, boolean print) {
+        this.mTag = tag;
+        this.mPrint = print;
+    }
+
+    public PageflipListenerPrinter(Context c, boolean print) {
+        this.mContext = c;
+        this.mPrint = print;
     }
 
     @Override
@@ -63,17 +71,17 @@ public class PageflipListenerPrinter implements PageflipListener {
 
     @Override
     public void onSingleClick(View v, int page, float x, float y, List<Hotspot> hotspots) {
-        log("onSingleClick " + hs(hotspots));
+        log("onSingleClick " + hotspotToString(hotspots));
     }
 
     @Override
     public void onDoubleClick(View v, int page, float x, float y, List<Hotspot> hotspots) {
-        log("onDoubleClick " + hs(hotspots));
+        log("onDoubleClick " + hotspotToString(hotspots));
     }
 
     @Override
     public void onLongClick(View v, int page, float x, float y, List<Hotspot> hotspots) {
-        log("onLongClick " + hs(hotspots));
+        log("onLongClick " + hotspotToString(hotspots));
     }
 
     @Override
@@ -81,15 +89,17 @@ public class PageflipListenerPrinter implements PageflipListener {
         log("onZoom: " + (zoomIn ? "zoom_in" : "zoom_out"));
     }
 
-    private String hs(List<Hotspot> hotspots) {
+    private String hotspotToString(List<Hotspot> list) {
+        if (list.isEmpty()) {
+            return "Hotspots[empty]";
+        }
         StringBuilder sb = new StringBuilder();
         sb.append("Hotspots[");
-        for (Hotspot h : hotspots) {
-            if (sb.length() != 0) {
+        for(Hotspot h : list) {
+            if (sb.length()>0) {
                 sb.append(",");
             }
             sb.append(h.getOffer().getHeading());
-
         }
         sb.append("]");
         return sb.toString();
@@ -97,7 +107,11 @@ public class PageflipListenerPrinter implements PageflipListener {
 
     private void log(String msg) {
         if (mPrint) {
-            Log.d(mTag, msg);
+            if (mTag != null) {
+                SgnLog.d(mTag, msg);
+            } else {
+                Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

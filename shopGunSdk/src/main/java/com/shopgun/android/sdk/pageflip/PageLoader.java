@@ -212,6 +212,7 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
             if (isDoneLoading()) {
                 boolean bn = mBitmap == null;
                 Bitmap b = bn ? bitmap : mBitmap;
+                SgnLog.d(TAG, "mBitmap.size: " + PageflipUtils.sizeOfKb(b) + "kb");
                 loadLog("onBitmapLoaded");
                 loadLog("- " + mConfig.toString());
                 loadLog("- mBitmap.bytes: " + PageflipUtils.sizeOfKb(b) + "kb");

@@ -63,7 +63,7 @@ public class CatalogViewerActivity extends BaseActivity {
     @Override
     public void onResume() {
         super.onResume();
-        mPageflip.setPageflipListener(new PageflipListenerPrinter(TAG, true));
+        mPageflip.setPageflipListener(new PageflipListenerPrinter(TAG, false));
     }
 
     @Override
