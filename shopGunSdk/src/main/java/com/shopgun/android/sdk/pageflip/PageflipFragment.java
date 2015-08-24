@@ -203,17 +203,19 @@ public class PageflipFragment extends Fragment {
 
         @Override
         public Bitmap onDrawPage(int page, int[] pages, Bitmap b) {
-            for (OnDrawPage odp : mDrawList) {
-                b = odp.onDraw(mCatalog, page, pages, b);
-            }
-            return b;
-        }
-
-        @Override
-        public void normalizeCatalogDimensions(Bitmap b) {
             synchronized (this) {
                 mCatalog.getHotspots().normalize(b);
             }
+            for (OnDrawPage odp : mDrawList) {
+                Bitmap tmp = odp.onDraw(mCatalog, page, pages, b);
+                if (tmp == b && b.isRecycled()) {
+                    throw new IllegalStateException("Original bitmap returned, but has been recycled.");
+                } else if (tmp != b && !b.isRecycled()) {
+                    throw new IllegalStateException("New bitmap returned, but source bitmap haven't been recycled.");
+                }
+                b = tmp;
+            }
+            return b;
         }
 
     };

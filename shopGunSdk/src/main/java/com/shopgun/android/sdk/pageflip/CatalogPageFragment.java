@@ -296,12 +296,7 @@ public class CatalogPageFragment extends Fragment implements
     }
 
     @Override
-    public void normalizeCatalogDimensions(Bitmap b) {
-        mCallback.normalizeCatalogDimensions(b);
-    }
-
-    @Override
-    public Bitmap draw(Bitmap b, int page) {
+    public Bitmap onTransform(Bitmap b, int page) {
         return mCallback.onDrawPage(page, mPages, b);
     }
 

@@ -27,17 +27,20 @@ import com.shopgun.android.sdk.model.Hotspot;
 import java.util.List;
 
 public class OnDrawDebugPage implements OnDrawPage {
+
+    public static final String TAG = OnDrawDebugPage.class.getSimpleName();
+
     @Override
     public Bitmap onDraw(Catalog catalog, int page, int[] pages, Bitmap b) {
+
         List<Hotspot> hotspots = catalog.getHotspots().get(page);
 
         if (hotspots != null && !hotspots.isEmpty()) {
 
             if (!b.isMutable()) {
-                // Memory inefficient but need to on older devices
+                // Memory inefficient but need
                 Bitmap tmp = b.copy(Bitmap.Config.RGB_565, true);
                 b.recycle();
-                System.gc();
                 b = tmp;
             }
 

@@ -43,28 +43,58 @@ public interface CatalogPageCallback {
      */
     void onReady(int position);
 
+    /**
+     * Called on a catalog page single-click
+     * @param v The view clicked
+     * @param page The page clicked. If displaying a two page layout, only the page clicked will be returned.
+     * @param x The x coordinate of the click (relative to the page returned)
+     * @param y The y coordinate of the click (relative to the page returned)
+     * @param hotspots A list of hotspots (empty if no hotspots was found)
+     */
     void onSingleClick(View v, int page, float x, float y, List<Hotspot> hotspots);
 
+    /**
+     * Called on a catalog page double-click
+     * @param v The view clicked
+     * @param page The page clicked. If displaying a two page layout, only the page clicked will be returned.
+     * @param x The x coordinate of the click (relative to the page returned)
+     * @param y The y coordinate of the click (relative to the page returned)
+     * @param hotspots A list of hotspots (empty if no hotspots was found)
+     */
     void onDoubleClick(View v, int page, float x, float y, List<Hotspot> hotspots);
 
+    /**
+     * Called on a catalog page long-click
+     * @param v The view clicked
+     * @param page The page clicked. If displaying a two page layout, only the page clicked will be returned.
+     * @param x The x coordinate of the click (relative to the page returned)
+     * @param y The y coordinate of the click (relative to the page returned)
+     * @param hotspots A list of hotspots (empty if no hotspots was found)
+     */
     void onLongClick(View v, int page, float x, float y, List<Hotspot> hotspots);
 
     void onZoom(View v, int[] pages, boolean isZoomed);
 
     /**
-     *
-     * @return
+     * Get the catalog currently being displayed
+     * @return A {@link Catalog}
      */
     Catalog getCatalog();
 
     /**
-     *
-     * @return
+     * Get the current view-session (for statistics purposes only)
+     * @return A view-session
      */
     String getViewSession();
 
+    /**
+     * Called when a {@link CatalogPageFragment} has a page that is ready to be drawn.
+     * Each page in a given array of pages will be called individually.
+     * @param page Human readable page number to be drawn
+     * @param pages The array of pages that this page will be drawn with
+     * @param b The page bitmap
+     * @return A bitmap.
+     */
     Bitmap onDrawPage(int page, int[] pages, Bitmap b);
-
-    void normalizeCatalogDimensions(Bitmap b);
 
 }

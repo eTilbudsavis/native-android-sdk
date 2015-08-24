@@ -402,7 +402,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
      * Get the id of the previous {@link ShoppinglistItem}.
      * <p>{@code previous_id} is used primarily for drawing the ShoppinglistItems
      * in the correct order when presenting the items for the user.
-     * The first item to draw will have the {@code previous_id}
+     * The first item to onTransform will have the {@code previous_id}
      * {@link com.shopgun.android.sdk.utils.ListUtils#FIRST_ITEM FIRST_ITEM}, the next item should then
      * point at this items {@link #getId() id}, and so on</p>
      * @return The previous id, or {@code null}
@@ -418,7 +418,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
      * using the SDK's {@link ListManager}, this should be handled automatically.</p>
      * <p>{@code previous_id} is used primarily for drawing the ShoppinglistItems
      * in the correct order when presenting the items for the user.
-     * The first item to draw will have the {@code previous_id}
+     * The first item to onTransform will have the {@code previous_id}
      * {@link com.shopgun.android.sdk.utils.ListUtils#FIRST_ITEM FIRST_ITEM}, the next item should then
      * point at this items {@link #getId() id}, and so on</p>
      * @param id An id
