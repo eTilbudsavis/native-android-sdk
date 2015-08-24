@@ -72,6 +72,11 @@ public class Dimension implements IJson<JSONObject>, Parcelable {
         return d;
     }
 
+    @Override
+    public String toString() {
+        return toJSON().toString();
+    }
+
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
