@@ -304,6 +304,7 @@ public abstract class PageFragment extends Fragment {
         private Dimension createDimension(Bitmap b) {
             Dimension d = new Dimension();
             double h = (double) ((float) b.getHeight() / (float) b.getWidth());
+            d.setWidth(1.0d);
             d.setHeight(h);
             return d;
         }

@@ -112,7 +112,7 @@ public abstract class RequestAutoFill<T> {
      *
      * @return true if all {@link RequestAutoFill} are finished, else false
      */
-    public boolean isFinished() {
+    public synchronized boolean isFinished() {
         for (Request<?> r : mRequests) {
             if (!r.isFinished()) {
                 return false;
