@@ -19,8 +19,8 @@ package com.shopgun.android.sdk;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
-import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.SessionEvent;
+import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Session;
 import com.shopgun.android.sdk.network.Request;
@@ -113,6 +113,8 @@ public class SessionManager {
             public void onComplete(JSONObject response, ShopGunError error) {
 
                 synchronized (LOCK) {
+
+//                    SgnLog.d(TAG, "session: " + (response == null ? error.toString() : response.toString()));
 
                     mReqInFlight = null;
 

@@ -24,12 +24,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.database.DatabaseWrapper;
+import com.shopgun.android.sdk.demo.base.BaseActivity;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.test.ModelCreator;
-import com.shopgun.android.sdk.demo.base.BaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;

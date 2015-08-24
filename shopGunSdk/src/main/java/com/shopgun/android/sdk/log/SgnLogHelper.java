@@ -24,7 +24,7 @@ import android.view.View;
 
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
+import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -115,7 +115,7 @@ public class SgnLogHelper {
     }
 
     public static void printScreen(String tag, Context c) {
-        Point p = PageflipUtils.getDisplayDimen(c);
+        Point p = Utils.getDisplayDimen(c);
         String out = String.format("ScreenSize[w:%s, h:%s]", p.x, p.y);
         SgnLog.d(tag, out);
     }

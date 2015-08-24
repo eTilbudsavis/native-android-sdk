@@ -29,6 +29,7 @@ import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Images;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
+import com.shopgun.android.sdk.utils.Utils;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.Target;
@@ -331,7 +332,7 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
         Bitmap.Config mConfig;
 
         public Config(Context ctx, int[] pages, Catalog c) {
-            int heap = PageflipUtils.getMaxHeap(ctx);
+            int heap = Utils.getMaxHeap(ctx);
             set(heap, pages, c);
         }
 

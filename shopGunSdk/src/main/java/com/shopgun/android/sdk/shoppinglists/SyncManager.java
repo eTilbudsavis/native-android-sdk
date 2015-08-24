@@ -23,8 +23,8 @@ import android.os.Process;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.SessionEvent;
+import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
 import com.shopgun.android.sdk.database.DbUtils;

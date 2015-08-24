@@ -24,7 +24,6 @@ import android.graphics.Color;
 import android.support.v4.graphics.ColorUtils;
 
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.demo.BuildConfig;
 
 public class Tools {
 

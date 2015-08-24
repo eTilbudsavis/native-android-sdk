@@ -20,12 +20,12 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.widget.Toast;
 
-import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.SgnLocation;
+import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.demo.base.BasePreferenceActivity;
 import com.shopgun.android.sdk.log.DevLogger;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.test.SdkTest;
-import com.shopgun.android.sdk.demo.base.BasePreferenceActivity;
 
 public class MainPreferenceActivity extends BasePreferenceActivity implements Preference.OnPreferenceClickListener {
 

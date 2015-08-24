@@ -24,7 +24,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.shopgun.android.sdk.demo.R;
 import com.shopgun.android.sdk.model.Offer;
 
 import java.util.List;

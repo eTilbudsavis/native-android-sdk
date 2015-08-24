@@ -14,26 +14,12 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.demo;
+package com.shopgun.android.sdk.pageflip;
 
-public class Constants {
+import android.graphics.Bitmap;
 
-    public static final LatLng ETA_HQ = new LatLng(55.6310771f, 12.5771624f);
-    public static final LatLng AALBORG = new LatLng(57.0433192f, 9.9198792f);
-    public static final LatLng AARHUS = new LatLng(56.1499752f, 10.2009121f);
-    public static final LatLng ODENSE = new LatLng(55.3949f, 10.3915109f);
+import com.shopgun.android.sdk.model.Catalog;
 
-    private Constants() {
-    }
-
-    public static class LatLng {
-        float lat;
-        float lng;
-
-        public LatLng(float lat, float lng) {
-            this.lat = lat;
-            this.lng = lng;
-        }
-    }
-
+public interface OnDrawPage {
+    Bitmap onDraw(Catalog catalog, int page, int[] pages, Bitmap b);
 }

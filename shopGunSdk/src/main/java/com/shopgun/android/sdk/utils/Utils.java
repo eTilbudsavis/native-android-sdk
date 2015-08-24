@@ -21,13 +21,18 @@
  */
 package com.shopgun.android.sdk.utils;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Point;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.Display;
+import android.view.WindowManager;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
@@ -451,6 +456,41 @@ public final class Utils {
             // ignore
         }
         return null;
+    }
+
+    /**
+     * Get the max available heap size
+     *
+     * @param c A context
+     * @return the maximum available heap size for the device
+     */
+    public static int getMaxHeap(Context c) {
+        ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            return am.getLargeMemoryClass();
+        } else {
+            return am.getMemoryClass();
+        }
+    }
+
+    /**
+     * Get the display dimensions from a given {@link Context}.
+     *
+     * @param c Context of the application/activity
+     * @return A point containing the screen dimens
+     */
+    @SuppressWarnings("deprecation")
+    public static Point getDisplayDimen(Context c) {
+        Point p = new Point();
+        WindowManager wm = (WindowManager) c.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            display.getSize(p);
+        } else {
+            p.y = display.getHeight();
+            p.x = display.getWidth();
+        }
+        return p;
     }
 
 }

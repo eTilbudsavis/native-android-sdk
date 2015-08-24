@@ -22,13 +22,13 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.demo.base.BaseActivity;
 import com.shopgun.android.sdk.model.Offer;
 import com.shopgun.android.sdk.model.Store;
-import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.Response;
+import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.utils.Api;
-import com.shopgun.android.sdk.demo.base.BaseActivity;
 
 import org.json.JSONObject;
 

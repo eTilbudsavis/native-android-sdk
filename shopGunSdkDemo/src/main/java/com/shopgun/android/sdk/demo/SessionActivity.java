@@ -23,9 +23,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.demo.base.BaseActivity;
+import com.shopgun.android.sdk.network.Response;
+import com.shopgun.android.sdk.network.ShopGunError;
 
 import org.json.JSONObject;
 

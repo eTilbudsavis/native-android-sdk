@@ -42,9 +42,7 @@ import android.widget.SectionIndexer;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.model.Catalog;
-import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.utils.Utils;
 import com.squareup.picasso.Picasso;
 
@@ -129,7 +127,7 @@ public class PageOverviewDialog extends DialogFragment {
         mGrid.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
         mGrid.setBackgroundColor(mCatalog.getBranding().getColor());
 
-        Point screen = PageflipUtils.getDisplayDimen(getActivity());
+        Point screen = Utils.getDisplayDimen(getActivity());
         int columns = (int) Math.floor(screen.x / MAX_WIDTH);
         mGrid.setNumColumns(Math.min(columns, MAX_COLUMNS));
 

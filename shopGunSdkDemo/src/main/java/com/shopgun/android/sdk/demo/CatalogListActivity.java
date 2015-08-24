@@ -24,14 +24,14 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.demo.base.BaseListActivity;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
-import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.Response;
+import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
 import com.shopgun.android.sdk.utils.Api;
 import com.shopgun.android.sdk.utils.Utils;
-import com.shopgun.android.sdk.demo.base.BaseListActivity;
 
 import org.json.JSONArray;
 

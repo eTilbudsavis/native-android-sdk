@@ -16,29 +16,14 @@
 
 package com.shopgun.android.sdk.pageflip.utils;
 
-import android.app.ActivityManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.os.Build;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
-import android.view.Display;
-import android.view.WindowManager;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.model.Catalog;
-import com.shopgun.android.sdk.model.Hotspot;
-import com.shopgun.android.sdk.pageflip.PageflipViewPager;
-
-import java.util.List;
 
 public class PageflipUtils {
 
@@ -46,42 +31,6 @@ public class PageflipUtils {
 
     private PageflipUtils() {
         // Empty constructor
-    }
-
-    /**
-     * Method for checking if a {@link Context} (device) is in
-     * {@link Configuration Configuration.ORIENTATION_LANDSCAPE}
-     *
-     * @param c A context
-     * @return true if landscape, else false
-     */
-    public static boolean isLandscape(Context c) {
-        return isLandscape(c.getResources().getConfiguration());
-    }
-
-    /**
-     * Method for checking if a configuration is in {@link Configuration Configuration.ORIENTATION_LANDSCAPE}
-     *
-     * @param c A configuration
-     * @return true if landscape, else false
-     */
-    public static boolean isLandscape(Configuration c) {
-        return c.orientation == Configuration.ORIENTATION_LANDSCAPE;
-    }
-
-    /**
-     * Get the max available heap size
-     *
-     * @param c A context
-     * @return the maximum available heap size for the device
-     */
-    public static int getMaxHeap(Context c) {
-        ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
-        if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB) {
-            return am.getLargeMemoryClass();
-        } else {
-            return am.getMemoryClass();
-        }
     }
 
     /**
@@ -100,74 +49,6 @@ public class PageflipUtils {
             sb.append(token);
         }
         return sb.toString();
-    }
-
-    /**
-     * Convert an array of pages into it's corresponding position in the {@link PageflipViewPager}.
-     *
-     * @param pages     Array to convert
-     * @param landscape The orientation of the device
-     * @return A position
-     */
-    public static int pageToPosition(int[] pages, boolean landscape) {
-        return pageToPosition(pages[0], landscape);
-    }
-
-    /**
-     * Convert an page into it's corresponding position in the {@link PageflipViewPager}.
-     *
-     * @param page      An int to convert
-     * @param landscape The orientation of the device
-     * @return A position
-     */
-    public static int pageToPosition(int page, boolean landscape) {
-        int pos = page - 1;
-        if (landscape && page > 1) {
-            if (page % 2 == 1) {
-                page--;
-            }
-            pos = page / 2;
-        }
-        return pos;
-    }
-
-    /**
-     * Convert a position of a {@link PageflipViewPager} into it's corresponding human readable pages.
-     *
-     * @param position  The {@link PageflipViewPager} position
-     * @param pageCount The number of pages in the {@link Catalog} being displayed in the {@link PageflipViewPager}
-     * @param landscape The orientation of the device
-     * @return An array of pages
-     */
-    public static int[] positionToPages(int position, int pageCount, boolean landscape) {
-        // default is offset by one
-        int page = 0;
-        if (landscape && position != 0) {
-            page = (position * 2);
-        } else {
-            page = position + 1;
-        }
-
-        int[] pages = null;
-        if (!landscape || page == 1 || page == pageCount) {
-            // first, last, and everything in portrait is single-page
-            pages = new int[]{page};
-        } else {
-            // Anything else is double page
-            pages = new int[]{page, (page + 1)};
-        }
-        return pages;
-    }
-
-    /**
-     * Check if a page is within a valid range
-     *
-     * @param c    A catalog
-     * @param page the page number
-     * @return true if valid, else false
-     */
-    public static boolean isValidPage(Catalog c, int page) {
-        return 1 <= page && (c == null || page <= c.getPageCount());
     }
 
     /**
@@ -194,54 +75,6 @@ public class PageflipUtils {
     }
 
     /**
-     * Method for drawing rectangles in the pages in a catalog.
-     *
-     * @param catalog   A catalog
-     * @param page      The page number
-     * @param pages     The set of pages being displayed
-     * @param b         The bitmap to draw onto
-     * @return A painted bitmap
-     */
-    public static Bitmap drawDebugRects(Catalog catalog, int page, int[] pages, Bitmap b) {
-
-        List<Hotspot> hotspots = catalog.getHotspots().get(page);
-
-        if (hotspots != null && !hotspots.isEmpty()) {
-
-            if (!b.isMutable()) {
-                // Memory inefficient but need to on older devices
-                Bitmap tmp = b.copy(Config.ARGB_8888, true);
-                b.recycle();
-                System.gc();
-                b = tmp;
-            }
-
-            Canvas c = new Canvas(b);
-
-            Paint p = new Paint();
-            p.setStyle(Paint.Style.STROKE);
-            p.setStrokeWidth(5);
-
-            double bw = b.getWidth();
-            double bh = b.getHeight();
-            for (Hotspot h : hotspots) {
-                if (h.isAreaSignificant(pages)) {
-                    p.setColor(h.getColor());
-                    int left = (int) (h.mLeft * bw);
-                    int top = (int) (h.mTop * bh);
-                    int right = (int) (h.mRight * bw);
-                    int bottom = (int) (h.mBottom * bh);
-                    Rect r = new Rect(left, top, right, bottom);
-                    c.drawRect(r, p);
-                }
-            }
-
-        }
-
-        return b;
-    }
-
-    /**
      * Get brightness of a specific color
      */
     public static Integer getBrightness(Integer color) {
@@ -264,26 +97,6 @@ public class PageflipUtils {
     public static Integer getTextColor(Integer color, Context c) {
         int resId = isBright(color) ? R.color.shopgun_sdk_text_dark : R.color.shopgun_sdk_text_light;
         return c.getResources().getColor(resId);
-    }
-
-    /**
-     * Get the display dimensions from a given {@link Context}.
-     *
-     * @param c Context of the application/activity
-     * @return A point containing the screen dimens
-     */
-    @SuppressWarnings("deprecation")
-    public static Point getDisplayDimen(Context c) {
-        Point p = new Point();
-        WindowManager wm = (WindowManager) c.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB_MR2) {
-            display.getSize(p);
-        } else {
-            p.y = display.getHeight();
-            p.x = display.getWidth();
-        }
-        return p;
     }
 
     /**

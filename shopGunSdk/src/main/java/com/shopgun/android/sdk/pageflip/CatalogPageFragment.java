@@ -25,7 +25,6 @@ import android.view.ViewGroup;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView;
@@ -52,7 +51,6 @@ public class CatalogPageFragment extends Fragment implements
 
     private ZoomPhotoView mPhotoView;
     private LoadingTextView mLoader;
-    private boolean mDebugRects = false;
     private PageStat mStats;
 
     private boolean mPageVisible = false;
@@ -299,20 +297,12 @@ public class CatalogPageFragment extends Fragment implements
 
     @Override
     public void normalizeCatalogDimensions(Bitmap b) {
-        mCallback.getCatalog().getHotspots().normalize(b);
+        mCallback.normalizeCatalogDimensions(b);
     }
 
     @Override
     public Bitmap draw(Bitmap b, int page) {
-
-        if (mDebugRects) {
-            try {
-                return PageflipUtils.drawDebugRects(mCallback.getCatalog(), page, mPages, b);
-            } catch (Exception e) {
-                SgnLog.d(TAG, e.getMessage(), e);
-            }
-        }
-        return b;
+        return mCallback.onDrawPage(page, mPages, b);
     }
 
     private void log(String msg) {

@@ -16,6 +16,7 @@
 
 package com.shopgun.android.sdk.pageflip;
 
+import android.graphics.Bitmap;
 import android.view.View;
 
 import com.shopgun.android.sdk.model.Catalog;
@@ -61,4 +62,9 @@ public interface CatalogPageCallback {
      * @return
      */
     String getViewSession();
+
+    Bitmap onDrawPage(int page, int[] pages, Bitmap b);
+
+    void normalizeCatalogDimensions(Bitmap b);
+
 }
