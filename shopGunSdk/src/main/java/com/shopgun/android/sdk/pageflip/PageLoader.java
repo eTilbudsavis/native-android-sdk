@@ -448,7 +448,7 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
         @Override
         public String toString() {
             String format = "%s[maxMem:%s, pages:%s, Bitmap.Config:%s, url.isSame:%s]";
-            return String.format(format, getClass().getSimpleName(), mMaxMem, PageflipUtils.join(",", mPages), mConfig.toString(), (mMedium == mHigh));
+            return String.format(format, TAG, mMaxMem, PageflipUtils.join(",", mPages), mConfig.toString(), (mMedium == mHigh));
         }
 
         @Override
