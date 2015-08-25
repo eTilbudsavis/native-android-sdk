@@ -16,7 +16,10 @@
 
 package com.shopgun.android.sdk.model;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -34,7 +37,8 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
     /**
      * The default significant area
      */
-    public static final double SIGNIFICANT_AREA = 0.01d;
+    public static final double SIGNIFICANT_AREA = 0.02d;
+    public static final double SIGNIFICANT_WH = 0.7d;
 
     public static Parcelable.Creator<Hotspot> CREATOR = new Parcelable.Creator<Hotspot>() {
         public Hotspot createFromParcel(Parcel source) {
@@ -175,12 +179,19 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
     }
 
     public boolean isAreaSignificant(int[] pages) {
-        return isAreaSignificant(SIGNIFICANT_AREA, pages);
+        return isAreaSignificant(SIGNIFICANT_AREA, SIGNIFICANT_WH, pages);
     }
 
-    public boolean isAreaSignificant(double minArea, int[] pages) {
+    public boolean isAreaSignificant(double minArea, double minWH, int[] pages) {
         return !(pages.length == 1 && mIsSpanningTwoPages) || getArea() > minArea;
     }
+
+//    public boolean isAreaSignificant(double minArea, double minWH, int[] pages) {
+//        if (!(pages.length == 1 && mIsSpanningTwoPages)) {
+//            return true;
+//        }
+//        return ((mAbsRight-mAbsLeft)>minWH) && ((mAbsBottom-mAbsTop)>minWH) && (getArea() > minArea);
+//    }
 
     public double getArea() {
         return Math.abs(mTop - mBottom) * Math.abs(mLeft - mRight);
@@ -239,6 +250,18 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
 
     public void setColor(int color) {
         mColor = color;
+    }
+
+    public Rect getRect(Bitmap b) {
+        int left = (int) (mLeft * b.getWidth());
+        int top = (int) (mTop * b.getHeight());
+        int right = (int) (mRight * b.getWidth());
+        int bottom = (int) (mBottom * b.getHeight());
+        return new Rect(left, top, right, bottom);
+    }
+
+    public RectF getRectF(Bitmap b) {
+        return new RectF(getRect(b));
     }
 
     @Override

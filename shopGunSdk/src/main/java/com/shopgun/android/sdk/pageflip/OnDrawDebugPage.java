@@ -19,7 +19,6 @@ package com.shopgun.android.sdk.pageflip;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
 
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Hotspot;
@@ -55,12 +54,7 @@ public class OnDrawDebugPage implements OnDrawPage {
             for (Hotspot h : hotspots) {
                 if (h.isAreaSignificant(pages)) {
                     p.setColor(h.getColor());
-                    int left = (int) (h.mLeft * bw);
-                    int top = (int) (h.mTop * bh);
-                    int right = (int) (h.mRight * bw);
-                    int bottom = (int) (h.mBottom * bh);
-                    Rect r = new Rect(left, top, right, bottom);
-                    c.drawRect(r, p);
+                    c.drawRect(h.getRect(b), p);
                 }
             }
 
