@@ -24,7 +24,6 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Share;
-import com.shopgun.android.sdk.model.ShoppinglistItem;
 
 import java.util.ArrayList;
 import java.util.List;
