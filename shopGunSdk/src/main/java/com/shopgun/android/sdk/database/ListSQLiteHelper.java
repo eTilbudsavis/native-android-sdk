@@ -34,6 +34,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for handling the {@link Shoppinglist} SQLite table.
+ */
 public class ListSQLiteHelper extends DatabaseHelper {
 
     public static final String TAG = Constants.getTag(ListSQLiteHelper.class);

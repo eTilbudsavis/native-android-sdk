@@ -24,6 +24,9 @@ import com.shopgun.android.sdk.log.SgnLog;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Class for handling the reference count to a {@link SQLiteDatabase}, and close the DB only when all queries are done.
+ */
 public class SQLDataSource {
 
     public static final String TAG = Constants.getTag(SQLDataSource.class);
@@ -38,30 +41,53 @@ public class SQLDataSource {
         mHelper = sqLiteHelper;
     }
 
+    /**
+     * Open the {@link SQLiteDatabase}
+     */
     public void open() {
         synchronized (LOCK) {
             if (!mOpen) {
+                // perform a acquireDb to bump refcount
                 acquireDb();
             }
             mOpen = true;
         }
     }
 
+    /**
+     * Close the {@link SQLiteDatabase}
+     */
     public void close() {
         synchronized (LOCK) {
             if (mOpen) {
+                // perform a acquireDb to un-bump refcount
                 releaseDb();
             }
             mOpen = false;
         }
     }
 
+    /**
+     * Ask if the {@link SQLiteDatabase} is still open for business
+     * @return <code>true</code> if DB is open, else <code>false</code>
+     */
     public boolean isOpen() {
         synchronized (LOCK) {
             return mRefCount.get() > 0;
         }
     }
 
+    /**
+     * Get the instance of the {@link SQLiteDatabase}. The DB will be created if it haven't already
+     * been instantiated. And the reference count will be incremented, ensuring that the SDK will not
+     * be able to close any connections until your reference is released again.<br/><br/>
+     *
+     * <b>IMPORTANT: </b> You must call {@link SQLDataSource#releaseDb()} once your DB transaction finishes.
+     * So for every call to {@link SQLDataSource#acquireDb()} you must at some point call
+     * {@link SQLDataSource#releaseDb()} (a one to one mapping)
+     * , or we are going to start leaking memory.
+     * @return A {@link SQLiteDatabase}
+     */
     protected synchronized SQLiteDatabase acquireDb() {
         synchronized (LOCK) {
             if (mDatabase == null || !mDatabase.isOpen()) {
@@ -76,6 +102,14 @@ public class SQLDataSource {
         }
     }
 
+    /**
+     * Release the instance of the {@link SQLiteDatabase} that you have {@link SQLDataSource#acquireDb() acquired}.
+     *
+     * <b>IMPORTANT: </b> You must call {@link SQLDataSource#releaseDb()} once your DB transaction finishes.
+     * So for every call to {@link SQLDataSource#acquireDb()} you must at some point call
+     * {@link SQLDataSource#releaseDb()} (a one to one mapping)
+     * , or we are going to start leaking memory.
+     */
     protected synchronized void releaseDb() {
         synchronized (LOCK) {
             mDatabase.releaseReference();

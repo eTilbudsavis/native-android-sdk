@@ -41,12 +41,31 @@ public class DbUtils {
 
     public static final String TAG = Constants.getTag(DbUtils.class);
 
-    public static JSONArray dumpTable(SQLiteDatabase db, String table) {
-        Cursor c = null;
+    /**
+     * Creates a full image of any data stored in the specific table in a specific database.
+     * @param db A {@link SQLiteDatabase}
+     * @param table A table in the DB
+     * @return A {@link JSONArray}
+     */
+    public static List<ContentValues> dumpTable(SQLiteDatabase db, String table) {
         db.acquireReference();
         try {
-            c = db.query(table, null, null, null, null, null, null);
-            List<ContentValues> list = cursorToContentValues(c);
+            Cursor c = db.query(table, null, null, null, null, null, null);
+            return cursorToContentValues(c);
+        } finally {
+            db.releaseReference();
+        }
+    }
+
+    /**
+     * Creates a full image of any data stored in the specific table in a specific database.
+     * @param db A {@link SQLiteDatabase}
+     * @param table A table in the DB
+     * @return A {@link JSONArray}
+     */
+    public static JSONArray dumpTableToJSONArray(SQLiteDatabase db, String table) {
+        try {
+            List<ContentValues> list = dumpTable(db, table);
             JSONArray jTable = new JSONArray();
             for (ContentValues cv : list) {
                 try {
@@ -60,7 +79,6 @@ public class DbUtils {
                 }
             }
             return jTable;
-
         } finally {
             db.releaseReference();
         }
@@ -168,18 +186,44 @@ public class DbUtils {
         return offlineUserLists.size();
     }
 
+    /**
+     * SDK default mapping between int and boolean.<br/><br/>
+     * returns <code>i == 1</code> so 1 is <code>true</code>, and all else is <code>false</code>
+     * @param i The integer to convert
+     * @return A boolean value
+     */
     public static boolean intToBool(int i) {
         return i == 1;
     }
 
+    /**
+     * SDK default mapping between int and boolean.<br/><br/>
+     * <code>true</code> returns 1, <code>false</code> returns 0;
+     *
+     * @param b The boolean to convert
+     * @return An integer
+     */
     public static int unescape(boolean b) {
         return b ? 1 : 0;
     }
 
+    /**
+     * SDK default mapping between string and boolean.<br/><br/>
+     * <code>true</code> returns 1, <code>null</code> and <code>false</code> returns 0;
+     *
+     * @param b The Boolean to convert
+     * @return A String
+     */
     public static String unescape(Boolean b) {
         return (b != null && b) ? "1" : "0";
     }
 
+    /**
+     * Safe binding of a String to a {@link SQLiteStatement}.
+     * @param s A {@link SQLiteStatement}
+     * @param index The index to bind to
+     * @param value The value to bind
+     */
     public static void bindOrNull(SQLiteStatement s, int index, String value) {
         if (value == null) {
             s.bindNull(index);
@@ -187,7 +231,6 @@ public class DbUtils {
             s.bindString(index, value);
         }
     }
-
 
     public static List<String> cursorToStrings(Cursor c, String column) {
         try {

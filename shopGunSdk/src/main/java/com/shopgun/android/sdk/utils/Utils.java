@@ -14,11 +14,6 @@
  * limitations under the License.
  ******************************************************************************/
 
-/**
- * @fileoverview Utilities.
- * @author Morten Bo <morten@etilbudsavis.dk>
- * @version 0.0.1
- */
 package com.shopgun.android.sdk.utils;
 
 import android.app.ActivityManager;
@@ -110,6 +105,8 @@ public final class Utils {
      */
     private static SimpleDateFormat mSdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
 
+    private static final Object DATE_LOCK = new Object();
+
     static {
 
     }
@@ -131,7 +128,7 @@ public final class Utils {
      * e.g.: https://api.etilbudsavis.dk/v2/catalogs?order_by=popular
      *
      * @param r to build from
-     * @return
+     * @return A String
      */
     public static String requestToUrlAndQueryString(Request<?> r) {
         if (r == null || r.getUrl() == null) {
@@ -144,11 +141,11 @@ public final class Utils {
     }
 
     /**
-     * Returns a string of parameters, ordered alfabetically (for better cache performance)
+     * Returns a string of parameters, ordered alphabetically (for better cache performance)
      *
      * @param apiParams to convert into query parameters
      * @return a string of parameters
-     * @deprecated Method is depricated, refer to {@link Utils#mapToQueryString(Map, String)} instead.
+     * @deprecated Method is deprecated, refer to {@link Utils#mapToQueryString(Map, String)} instead.
      */
     public static String buildQueryString(Bundle apiParams, String encoding) {
         StringBuilder sb = new StringBuilder();
@@ -167,10 +164,7 @@ public final class Utils {
                         key, o.getClass().getSimpleName()));
             }
         }
-
-        String query = sb.toString();
-
-        return query;
+        return sb.toString();
     }
 
     /**
@@ -198,9 +192,9 @@ public final class Utils {
     }
 
     /**
-     * Returns a string of parameters, ordered alfabetically (for better cache performance)
+     * Returns a string of parameters, ordered alphabetically (for better cache performance)
      *
-     * @param apiParams to convert into query parameters
+     * @param b A {@link Bundle} to convert into a {@link Map}
      * @return a string of parameters
      */
     public static Map<String, String> bundleToMap(Bundle b) {
@@ -236,8 +230,7 @@ public final class Utils {
      * @return s string where the empty string "" represents null
      */
     private static String valueIsNull(Object value) {
-        String s = value == null ? "" : value.toString();
-        return s;
+        return value == null ? "" : value.toString();
     }
 
     /**
@@ -269,7 +262,7 @@ public final class Utils {
      * @return a Date object
      */
     public static Date stringToDate(String date) {
-        synchronized (mSdf) {
+        synchronized (DATE_LOCK) {
             try {
                 return mSdf.parse(date);
             } catch (ParseException e) {
@@ -286,7 +279,7 @@ public final class Utils {
      * @return a string
      */
     public static String dateToString(Date date) {
-        synchronized (mSdf) {
+        synchronized (DATE_LOCK) {
             try {
                 return mSdf.format(date);
             } catch (NullPointerException e) {
@@ -312,7 +305,7 @@ public final class Utils {
      * <p/>
      * 1394021345625 -> 1394021345000
      *
-     * @param date
+     * @param date A date to round
      */
     public static Date roundTime(Date date) {
         if (date != null) {
@@ -361,13 +354,14 @@ public final class Utils {
     }
 
     /**
-     * @param iter
-     * @return
+     * Copy all elements from an iterator to a {@link List}
+     * @param it An {@link Iterator}
+     * @return A list containing all elements from the {@link Iterator}
      */
-    public static <T> List<T> copyIterator(Iterator<T> iter) {
+    public static <T> List<T> copyIterator(Iterator<T> it) {
         List<T> copy = new ArrayList<T>();
-        while (iter.hasNext()) {
-            copy.add(iter.next());
+        while (it.hasNext()) {
+            copy.add(it.next());
         }
         return copy;
     }

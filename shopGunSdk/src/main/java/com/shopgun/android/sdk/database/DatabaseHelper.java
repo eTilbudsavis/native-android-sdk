@@ -23,6 +23,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 
+/**
+ * The DatabaseHelper is a class for doing easy/clean database instantiation, and migration.
+ * DatabaseHelper calls static methods to sub-classes (each subclass essentially being a table)
+ * to do creation and upgrades. This way any sub-class can be instantiated and queried for data
+ * without having the trouble of database creation and upgrades.
+ */
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String TAG = Constants.getTag(DatabaseHelper.class);

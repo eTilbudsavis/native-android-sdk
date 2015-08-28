@@ -37,9 +37,6 @@ import org.json.JSONObject;
  * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/users.html">User Reference</a>
  * documentation, on the engineering blog.
  * </p>
- *
- * @author Danny Hvam - danny@etilbudsavis.dk
- *
  */
 public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 

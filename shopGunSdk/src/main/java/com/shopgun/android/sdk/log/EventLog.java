@@ -35,8 +35,6 @@ import java.util.List;
  * EventLog class have been created to simplify logging within the ETA SDK.
  * You will notice that this class is being used extensively throughout the SDK.
  * And have been especially useful, while debugging networking issues.
- *
- * @author Danny Hvam - danny@etilbudsavis.dk
  */
 public class EventLog {
 
@@ -231,8 +229,6 @@ public class EventLog {
 
     /**
      * Simple helper class, for usage in EventLog
-     *
-     * @author Danny Hvam - danny@etilbudsavis.dk
      */
     public static class Event {
 

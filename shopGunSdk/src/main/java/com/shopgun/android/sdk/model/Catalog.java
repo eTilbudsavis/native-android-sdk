@@ -48,9 +48,6 @@ import java.util.List;
  * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/catalogs.html">Catalog Reference</a>
  * documentation, on the engineering blog.
  * </p>
- *
- * @author Danny Hvam - danny@etilbudsavis.dk
- *
  */
 public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalog>, IStore<Catalog>, Parcelable {
 

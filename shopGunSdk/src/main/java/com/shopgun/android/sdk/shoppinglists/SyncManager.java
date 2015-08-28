@@ -115,8 +115,6 @@ import java.util.Stack;
  * When {@link #onStop()} is triggered, all local pending changes are pushed to
  * the API if possible to ensure a correct state on the server (and other devices).
  * </p>
- * @author Danny Hvam - danny@etilbudsavis.dk
- *
  */
 public class SyncManager {
 

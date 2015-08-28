@@ -43,9 +43,6 @@ import java.util.Map;
 
 /**
  * This class is a representation of the ShopGun API v2 shopppinglist.
- *
- * @author Danny Hvam - danny@etilbudsavis.dk
- *
  */
 public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppinglist>, IErn<Shoppinglist>, IJson<JSONObject>, Parcelable {
 

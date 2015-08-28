@@ -40,7 +40,7 @@ public class SgnBus {
 
     public static class WeakEventBus extends EventBus {
 
-        private boolean mLogcatEnabled = false;
+        private static final boolean DEBUG = false;
 
         private WeakEventBus() {
             enableLogging(false);
@@ -61,10 +61,6 @@ public class SgnBus {
             } catch (Exception ex) {
                 SgnLog.d(TAG, ex.getMessage(), ex);
             }
-        }
-
-        public void setLogcatEnabled(boolean enableLogcat) {
-            mLogcatEnabled = enableLogcat;
         }
 
         @Override
@@ -112,10 +108,9 @@ public class SgnBus {
             }
         }
 
+        private static final String MSG_FORMAT = "An %s was caught in %s, and suppressed.";
         private void log(Exception ex) {
-            if (mLogcatEnabled) {
-                SgnLog.e(TAG, ex.getMessage(), ex);
-            }
+            SgnLog.e(TAG, String.format(MSG_FORMAT, ex.getClass().getSimpleName(), TAG), ex);
         }
 
     }

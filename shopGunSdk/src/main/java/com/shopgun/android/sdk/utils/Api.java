@@ -24,8 +24,6 @@ import com.shopgun.android.sdk.model.ShoppinglistItem;
  * <p/>
  * <p>For a complete set of keys and their respective parameters, as well as detailed documentation,
  * in a given context, we will refer you to the <a href="http://docs.api.etilbudsavis.dk/">API documentation</a></p>
- *
- * @author Danny Hvam - danny@eTilbudsavis.dk
  */
 public final class Api {
 
@@ -89,11 +87,9 @@ public final class Api {
      * The {@link Environment} contains information on how (and where) to contact the ShopGun API.
      * It by default contains three predefined settings, which maps directly to it's counterparts in our API.
      * And furthermore there is an option to set a {@link Environment#CUSTOM} environment, this is for local
-     * delevopment and testing.
+     * development and testing.
      * <p/>
      * By default, the {@link Environment} is set to {@link Environment#PRODUCTION}.
-     *
-     * @author Danny Hvam - danny@etilbudsavis.dk
      */
     public enum Environment {
 
@@ -222,8 +218,6 @@ public final class Api {
     /**
      * This class contains a sub-set of paths needed to request data from the ShopGun API,
      * and has methods to generate paths, that dependent on information from objects (id's e.t.c).
-     *
-     * @author Danny Hvam - danny@etilbudsavis.dk
      */
     public static class Endpoint {
 
@@ -415,8 +409,6 @@ public final class Api {
     /**
      * This class contains sub-set of strings, that ShopGun API v2 uses as keys, for the JSON data
      * that is being send to and from the API.
-     *
-     * @author Danny Hvam - danny@etilbudsavis.dk
      */
     public class JsonKey {
 
@@ -526,8 +518,6 @@ public final class Api {
     /**
      * <p>This class contains a sub-set of strings that ShopGun uses as keys for the meta-object,
      * found on {@link Shoppinglist#getMeta()}, and {@link ShoppinglistItem#getMeta()}.</p>
-     *
-     * @author Danny Hvam - danny@etilbudsavis.dk
      */
     public class MetaKey {
         /**
@@ -544,8 +534,6 @@ public final class Api {
      * <p>This class contains a sub-set of strings that ShopGun uses for sorting lists queries.
      * All sort types are in ascending order, but can be reverted to descending order by prepending
      * the string "-" to any of them.</p>
-     *
-     * @author Danny Hvam - danny@etilbudsavis.dk
      */
     public class Sort {
 
@@ -609,8 +597,6 @@ public final class Api {
     /**
      * This class contains sub-set of strings, that ShopGun API v2 uses as parameters,
      * for queries to the API.
-     *
-     * @author Danny Hvam - danny@etilbudsavis.dk
      */
     public class Param {
 

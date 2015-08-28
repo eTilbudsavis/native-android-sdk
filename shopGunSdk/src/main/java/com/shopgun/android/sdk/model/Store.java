@@ -41,9 +41,6 @@ import java.util.ArrayList;
  * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/stores.html">Store Reference</a>
  * documentation, on the engineering blog.
  * </p>
- *
- * @author Danny Hvam - danny@etilbudsavis.dk
- *
  */
 public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Parcelable {
 

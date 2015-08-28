@@ -27,8 +27,6 @@ import java.util.List;
 
 /**
  * A class to help print debug messages.
- * @author Danny Hvam - danny@etilbudsavis.dk
- *
  */
 public class PrettyPrint {
 

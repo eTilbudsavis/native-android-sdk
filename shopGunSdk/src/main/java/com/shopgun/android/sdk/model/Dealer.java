@@ -41,9 +41,6 @@ import java.util.Comparator;
  * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/dealers.html">Dealer Reference</a>
  * documentation, on the engineering blog.
  * </p>
- *
- * @author Danny Hvam - danny@etilbudsavis.dk
- *
  */
 public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
 

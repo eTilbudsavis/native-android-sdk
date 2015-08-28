@@ -34,9 +34,6 @@ import java.util.Set;
 /**
  * Helper class designed to simplify working with JSON in Android - specifically the ShopGun Android SDK.
  * The class holds some static methods for converting data, and ensuring that valid data returns.
- *
- * @author Danny Hvam - danny@etilbudsavis.dk
- *
  */
 public class Json {
 

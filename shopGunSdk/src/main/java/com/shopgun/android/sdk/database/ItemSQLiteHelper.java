@@ -34,6 +34,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Class for handling the {@link ShoppinglistItem} SQLite table.
+ */
 public class ItemSQLiteHelper extends DatabaseHelper {
 
     public static final String TAG = Constants.getTag(ItemSQLiteHelper.class);

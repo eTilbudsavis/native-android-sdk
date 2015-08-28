@@ -45,9 +45,6 @@ import java.util.List;
  * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/offers.html">Offer Reference</a>
  * documentation, on the engineering blog.
  * </p>
- *
- * @author Danny Hvam - danny@etilbudsavis.dk
- *
  */
 public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>, Parcelable {
 

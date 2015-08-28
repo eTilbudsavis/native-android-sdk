@@ -47,9 +47,6 @@ import java.util.Map;
  * and {@link Share Shares}, without having to worry about keeping a sane, and
  * synchronizing state with both the {@link DatabaseWrapper database} and, the
  * ShopGun API.
- *
- * @author Danny Hvam - danny@etilbudsavis.dk
- *
  */
 public class ListManager {
 

@@ -40,6 +40,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A middle layer for performing certain transformations on the DB data, prior to returning it to the caller.
+ */
 public class DatabaseWrapper {
 
     public static final String TAG = Constants.getTag(DatabaseWrapper.class);

@@ -81,12 +81,6 @@ import java.util.concurrent.Executors;
  * For further instructions on the usage of ShopGun, please refer to the ShopGun SDK Demo included in the SDK.
  * The ShopGun SDK Demo, demonstrates some of the setup methods, and features included in the SDK.
  *
- * <br/>
- * <br/>
- *
- * @author Danny Hvam - danny@etilbudsavis.dk
- * @version 2.2.1
- *
  */
 public class ShopGun {
 

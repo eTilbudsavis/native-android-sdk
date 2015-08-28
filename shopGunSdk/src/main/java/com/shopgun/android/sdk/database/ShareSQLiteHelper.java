@@ -24,10 +24,14 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Share;
+import com.shopgun.android.sdk.model.ShoppinglistItem;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for handling the {@link Share} SQLite table.
+ */
 public class ShareSQLiteHelper extends DatabaseHelper {
 
     public static final String TAG = Constants.getTag(ShareSQLiteHelper.class);

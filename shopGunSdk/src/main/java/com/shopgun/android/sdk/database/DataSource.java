@@ -485,7 +485,7 @@ public class DataSource extends SQLDataSource {
 
     private JSONArray dumpTable(String table) {
         try {
-            return DbUtils.dumpTable(acquireDb(), table);
+            return DbUtils.dumpTableToJSONArray(acquireDb(), table);
         } catch (IllegalStateException e) {
             log(TAG, e);
             return new JSONArray();

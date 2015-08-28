@@ -18,7 +18,6 @@ package com.shopgun.android.sdk.utils;
 
 /**
  * Helper class for headers the ShopGun API uses
- * @author Danny Hvam - danny@etilbudsavis.dk
  */
 public class HeaderUtils {
 

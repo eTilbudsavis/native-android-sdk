@@ -17,20 +17,35 @@
 package com.shopgun.android.sdk.bus;
 
 /**
- * @author Danny Hvam - danny@etilbudsavis.dk
+ * An event from shopgun-android-sdk.
  */
 public class ShopGunEvent {
 
     private Object mTag;
 
+    /**
+     * The the <code>tag</code> associated with this event.
+     * @return An {@link Object}, or <code>null</code>
+     */
     public Object getTag() {
         return mTag;
     }
 
+    /**
+     * Set a <code>tag</code> to this event.
+     * @param tag An {@link Object}, or <code>null</code>
+     */
     public void setTag(Object tag) {
         this.mTag = tag;
     }
 
+    /**
+     * Get the type of event.
+     * <br/>
+     * <br/>
+     * This is equavelent to calling {@link Class#getSimpleName()}
+     * @return
+     */
     public String getType() {
         return getClass().getSimpleName();
     }
