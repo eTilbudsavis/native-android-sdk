@@ -78,6 +78,7 @@ public abstract class FragmentStatelessPagerAdapter extends FragmentStatePagerAd
         }
     }
 
+    @SuppressWarnings("ForLoopReplaceableByForEach")
     private boolean isEmpty() {
         for (int i = 0; i < mFragments.length; i++) {
             if (mFragments[i] != null) {

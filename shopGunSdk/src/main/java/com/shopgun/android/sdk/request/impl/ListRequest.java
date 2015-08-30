@@ -232,10 +232,7 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
         }
 
         protected boolean removeFilter(String filter, String id) {
-            if (mFilters.get(filter) != null) {
-                return mFilters.get(filter).remove(id);
-            }
-            return false;
+            return mFilters.get(filter) != null && mFilters.get(filter).remove(id);
         }
 
         protected boolean removeFilter(String filter) {

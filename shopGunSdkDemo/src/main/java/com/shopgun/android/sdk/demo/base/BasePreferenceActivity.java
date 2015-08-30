@@ -16,12 +16,14 @@
 
 package com.shopgun.android.sdk.demo.base;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.demo.Tools;
 
+@SuppressLint("Registered")
 public class BasePreferenceActivity extends PreferenceActivity {
 
     @Override

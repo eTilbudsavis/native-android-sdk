@@ -26,7 +26,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
@@ -86,7 +85,7 @@ public class HttpURLNetwork implements HttpStack {
         return entity;
     }
 
-    public HttpResponse performNetworking(Request<?> request) throws ClientProtocolException, IOException {
+    public HttpResponse performNetworking(Request<?> request) throws IOException {
 
         URL url = new URL(Utils.requestToUrlAndQueryString(request));
         HttpURLConnection connection = openConnection(url, request);

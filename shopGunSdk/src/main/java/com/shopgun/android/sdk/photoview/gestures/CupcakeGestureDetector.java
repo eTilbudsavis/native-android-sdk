@@ -39,26 +39,16 @@ public class CupcakeGestureDetector implements GestureDetector {
                     if (mListener != null) {
                         mListener.onLongPress(e);
                     }
-                }
-
-                ;
+                };
 
                 @Override
                 public boolean onDoubleTap(MotionEvent e) {
-                    if (mListener != null) {
-                        return mListener.onDoubleTab(e);
-                    }
-                    return false;
+                    return mListener != null && mListener.onDoubleTab(e);
                 }
 
                 public boolean onSingleTapConfirmed(MotionEvent e) {
-                    if (mListener != null) {
-                        return mListener.onSingleTab(e);
-                    }
-                    return false;
-                }
-
-                ;
+                    return mListener != null && mListener.onSingleTab(e);
+                };
 
             };
     float mLastTouchX;

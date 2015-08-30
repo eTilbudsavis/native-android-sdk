@@ -55,11 +55,6 @@ public class SinglePageReaderConfig extends ReaderConfig {
         return 0;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-    }
-
     protected SinglePageReaderConfig(Parcel in) {
         super(in);
     }

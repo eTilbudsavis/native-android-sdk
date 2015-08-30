@@ -67,7 +67,7 @@ public class NetworkImpl implements Network {
 
     public NetworkResponse performRequest(Request<?> request) throws ShopGunError {
 
-        byte[] content = null;
+        byte[] content;
         Map<String, String> responseHeaders = new HashMap<String, String>();
         try {
 

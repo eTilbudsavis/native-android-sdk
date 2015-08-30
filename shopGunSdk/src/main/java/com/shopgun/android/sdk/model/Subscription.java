@@ -224,6 +224,7 @@ public class Subscription implements IJson<JSONObject>, Parcelable {
             try {
                 o.put(JsonKey.SDK_DEALER, mDealer.getName());
             } catch (JSONException e) {
+                // ignore
             }
         }
         return o.toString();

@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center_horizontal"
-        android:text="2-3\n..."
+        android:text="@string/com_shopgun_android_sdk_pageflip_page_loading"
         android:textSize="30sp"/>
 
 </FrameLayout>

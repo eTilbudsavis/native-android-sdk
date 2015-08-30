@@ -75,11 +75,6 @@ public class TwoPageReaderConfig extends ReaderConfig {
         return 0;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-    }
-
     protected TwoPageReaderConfig(Parcel in) {
         super(in);
     }

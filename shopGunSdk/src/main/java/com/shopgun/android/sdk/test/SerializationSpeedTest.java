@@ -52,7 +52,7 @@ public class SerializationSpeedTest {
 
     }
 
-    private static <T extends Parcelable> void test(int count, T obj, Creator<? extends Object> c) {
+    private static <T extends Parcelable> void test(int count, T obj, Creator<?> c) {
 
         for (int i = 0; i < count; i++) {
             Parcel parcel = Parcel.obtain();

@@ -20,7 +20,7 @@ import com.shopgun.android.sdk.network.Request;
 
 public abstract class Builder<T extends Request<?>> {
 
-    private T mRequest;
+    private final T mRequest;
     private RequestParameter mParameters;
 
     public Builder(T r) {

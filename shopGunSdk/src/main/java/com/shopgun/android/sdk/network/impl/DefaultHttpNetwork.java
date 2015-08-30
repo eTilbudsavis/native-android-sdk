@@ -24,7 +24,6 @@ import com.shopgun.android.sdk.utils.Utils;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -61,7 +60,7 @@ public class DefaultHttpNetwork implements HttpStack {
         }
     }
 
-    public HttpResponse performNetworking(Request<?> request) throws ClientProtocolException, IOException {
+    public HttpResponse performNetworking(Request<?> request) throws IOException {
 
         // Start the interwebs work stuff
         DefaultHttpClient httpClient = new DefaultHttpClient();

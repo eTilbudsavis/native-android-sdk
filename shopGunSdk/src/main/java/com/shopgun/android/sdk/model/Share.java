@@ -370,6 +370,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         return result;
     }
 
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public boolean equals(Object obj) {
         return compare(obj, true);

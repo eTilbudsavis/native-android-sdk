@@ -18,8 +18,4 @@
           android:versionCode="203000"
           android:versionName="2.3.0">
 
-    <uses-sdk
-        android:minSdkVersion="10"
-        android:targetSdkVersion="19"/>
-
 </manifest>

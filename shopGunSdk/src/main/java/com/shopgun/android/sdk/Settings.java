@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.utils.SharedPreferencesUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,38 +32,29 @@ public class Settings {
     public static final String TAG = Constants.getTag(Settings.class);
 
     /** Name for the SDK SharedPreferences file */
-    private static final String PREFS_NAME = "eta_sdk";
-
-    private static final String SETTING_LAST_USAGE = "last_usage";
-
+    private static final String PREFS_NAME = "com.shopgun.android.sdk";
+    private static final String LAST_USED_VERSION = "last_used_version";
+    private static final String LAST_USED_TIME = "last_used_time";
+    private static final String USAGE_COUNT = "usage_count";
     private static final String SESSION_JSON = "session_json";
     private static final String SESSION_USER = "session_user";
     private static final String SESSION_FACEBOOK = "session_facebook";
     private static final String LOCATION = "location_json";
 
-    private static final String LOC_SENSOR = "loc_sensor";
-    private static final String LOC_LATITUDE = "loc_latitude";
-    private static final String LOC_LONGITUDE = "loc_longitude";
-    private static final String LOC_RADIUS = "loc_radius";
-    private static final String LOC_BOUND_EAST = "loc_b_east";
-    private static final String LOC_BOUND_NORTH = "loc_b_north";
-    private static final String LOC_BOUND_SOUTH = "loc_b_south";
-    private static final String LOC_BOUND_WEST = "loc_b_west";
-    private static final String LOC_ADDRESS = "loc_address";
-    private static final String LOC_TIME = "loc_time";
-
-    private static SharedPreferences mPrefs;
+    private SharedPreferences mSharedPrefs;
 
     public Settings(Context context) {
-        mPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferencesUtils.moveSharedPreferences(context, "eta_sdk", PREFS_NAME);
+        mSharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        performMigration();
     }
 
     public boolean clear() {
-        return mPrefs.edit().clear().commit();
+        return mSharedPrefs.edit().clear().commit();
     }
 
     public JSONObject getSessionJson() {
-        String json = mPrefs.getString(SESSION_JSON, null);
+        String json = mSharedPrefs.getString(SESSION_JSON, null);
         JSONObject session = null;
         if (json != null) {
             try {
@@ -74,104 +66,114 @@ public class Settings {
         return session;
     }
 
-    public long getLastUsage() {
-        return mPrefs.getLong(SETTING_LAST_USAGE, 0L);
+    public void incrementUsageCount() {
+        mSharedPrefs.edit().putInt(USAGE_COUNT, mSharedPrefs.getInt(USAGE_COUNT, 0)).apply();
     }
 
-    public boolean setLastUsageNow() {
-        Date now = new Date();
-        return mPrefs.edit().putLong(SETTING_LAST_USAGE, now.getTime()).commit();
+    public int getUsageCount() {
+        return mSharedPrefs.getInt(USAGE_COUNT, 0);
     }
 
-    public boolean setSessionJson(JSONObject session) {
-        return mPrefs.edit().putString(SESSION_JSON, session.toString()).commit();
+    public long getLastUsedTime() {
+        return mSharedPrefs.getLong(LAST_USED_TIME, 0L);
+    }
+
+    public void setLastUsedTimeNow() {
+        setLastUsedTime(new Date());
+    }
+
+    public void setLastUsedTime(Date lastUsed) {
+        mSharedPrefs.edit().putLong(LAST_USED_TIME, lastUsed.getTime()).apply();
+    }
+
+    public void setSessionJson(JSONObject session) {
+        mSharedPrefs.edit().putString(SESSION_JSON, session.toString()).apply();
     }
 
     public String getSessionUser() {
-        return mPrefs.getString(SESSION_USER, null);
+        return mSharedPrefs.getString(SESSION_USER, null);
     }
 
     public boolean setSessionUser(String user) {
-        return mPrefs.edit().putString(SESSION_USER, user).commit();
+        return mSharedPrefs.edit().putString(SESSION_USER, user).commit();
     }
 
     public boolean setSessionFacebook(String token) {
-        return mPrefs.edit().putString(SESSION_FACEBOOK, token).commit();
+        return mSharedPrefs.edit().putString(SESSION_FACEBOOK, token).commit();
     }
 
     public String getSessionFacebook() {
-        return mPrefs.getString(SESSION_FACEBOOK, null);
-    }
-
-    public SharedPreferences getPrefs() {
-        return mPrefs;
-    }
-
-    private SgnLocation migrateLocation() {
-
-        SgnLocation l = null;
-
-        if (mPrefs.contains(LOC_RADIUS) &&
-                mPrefs.contains(LOC_LATITUDE) &&
-                mPrefs.contains(LOC_LONGITUDE)) {
-
-            l = new SgnLocation();
-            l.setSensor(mPrefs.getBoolean(LOC_SENSOR, false));
-            l.setRadius(mPrefs.getInt(LOC_RADIUS, Integer.MAX_VALUE));
-            l.setLatitude(mPrefs.getFloat(LOC_LATITUDE, 0.0f));
-            l.setLongitude(mPrefs.getFloat(LOC_LONGITUDE, 0.0f));
-            double east = mPrefs.getFloat(LOC_BOUND_EAST, 0.0f);
-            double west = mPrefs.getFloat(LOC_BOUND_WEST, 0.0f);
-            double north = mPrefs.getFloat(LOC_BOUND_NORTH, 0.0f);
-            double south = mPrefs.getFloat(LOC_BOUND_SOUTH, 0.0f);
-            l.setBounds(north, east, south, west);
-            l.setAddress(mPrefs.getString(LOC_ADDRESS, null));
-            l.setTime(mPrefs.getLong(LOC_TIME, System.currentTimeMillis()));
-
-            mPrefs.edit()
-                    .remove(LOC_ADDRESS)
-                    .remove(LOC_BOUND_EAST)
-                    .remove(LOC_BOUND_NORTH)
-                    .remove(LOC_BOUND_SOUTH)
-                    .remove(LOC_BOUND_WEST)
-                    .remove(LOC_LATITUDE)
-                    .remove(LOC_LONGITUDE)
-                    .remove(LOC_RADIUS)
-                    .remove(LOC_SENSOR)
-                    .remove(LOC_TIME)
-                    .commit();
-
-            saveLocation(l);
-
-        }
-        return l;
-
+        return mSharedPrefs.getString(SESSION_FACEBOOK, null);
     }
 
     public boolean saveLocation(SgnLocation l) {
         String loc = l.toJSON().toString();
-        return mPrefs.edit().putString(LOCATION, loc).commit();
+        return mSharedPrefs.edit().putString(LOCATION, loc).commit();
     }
 
     public SgnLocation getLocation() {
-
-        if (mPrefs.contains(LOCATION)) {
-
-            try {
-                String loc = mPrefs.getString(LOCATION, null);
-
-                if (loc != null) {
-                    JSONObject jLoc = new JSONObject(loc);
-                    return new SgnLocation(jLoc);
-                }
-            } catch (JSONException e) {
-                SgnLog.e(TAG, "Not able to parse location json from SharedPreferances", e);
+        try {
+            String s = mSharedPrefs.getString(LOCATION, null);
+            if (s != null) {
+                return SgnLocation.fromJSON(new JSONObject(s));
             }
+        } catch (JSONException e) {
+            SgnLog.e(TAG, "Not able to parse location json from SharedPreferances", e);
+        }
+        return new SgnLocation();
+    }
 
+    private void performMigration() {
+        int mVersion = mSharedPrefs.getInt(LAST_USED_VERSION, 0);
+        if (mVersion == ShopGun.VERSION) {
+            // no migration needed
+            return;
+        }
+        SharedPreferences.Editor e = mSharedPrefs.edit();
+        if (mVersion == 0) {
+            // The first time we create s new setting with the shopgun namespace, there if no keys, hence
+            // the version number returned is 0. So we'll only have to run this code once.
+            migrateLocation();
+            // migrate last-used-key to a new name
+            e.putLong(LAST_USED_TIME, mSharedPrefs.getLong("last_usage", 0));
+            e.remove("last_usage");
+        }
+        e.putInt(LAST_USED_VERSION, ShopGun.VERSION);
+        e.apply();
+    }
+
+    private void migrateLocation() {
+
+        if (!mSharedPrefs.contains("loc_radius")) {
+            return;
         }
 
-        SgnLocation loc = migrateLocation();
-        return loc == null ? new SgnLocation() : loc;
+        SgnLocation l = new SgnLocation();
+        l.setSensor(mSharedPrefs.getBoolean("loc_sensor", false));
+        l.setRadius(mSharedPrefs.getInt("loc_radius", Integer.MAX_VALUE));
+        l.setLatitude(mSharedPrefs.getFloat("loc_latitude", 0.0f));
+        l.setLongitude(mSharedPrefs.getFloat("loc_longitude", 0.0f));
+        double east = mSharedPrefs.getFloat("loc_b_east", 0.0f);
+        double west = mSharedPrefs.getFloat("loc_b_west", 0.0f);
+        double north = mSharedPrefs.getFloat("loc_b_north", 0.0f);
+        double south = mSharedPrefs.getFloat("loc_b_south", 0.0f);
+        l.setBounds(north, east, south, west);
+        l.setAddress(mSharedPrefs.getString("loc_address", null));
+        l.setTime(mSharedPrefs.getLong("loc_time", System.currentTimeMillis()));
+        saveLocation(l);
+
+        SharedPreferences.Editor e = mSharedPrefs.edit();
+        e.remove("loc_address");
+        e.remove("loc_b_east");
+        e.remove("loc_b_north");
+        e.remove("loc_b_south");
+        e.remove("loc_b_west");
+        e.remove("loc_latitude");
+        e.remove("loc_longitude");
+        e.remove("loc_radius");
+        e.remove("loc_sensor");
+        e.remove("loc_time");
+        e.apply();
     }
 
 }

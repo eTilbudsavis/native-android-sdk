@@ -60,7 +60,7 @@ public class MemoryCache implements Cache {
      */
     public void setCleanLimit(int percentToClean) {
         if (percentToClean <= 0 || 100 <= percentToClean) {
-            new IllegalArgumentException("Percent a number between 0-100");
+            throw new IllegalArgumentException("Percent a number between 0-100");
         }
         mPercentToClean = percentToClean;
     }
@@ -83,7 +83,7 @@ public class MemoryCache implements Cache {
         if (request.getMethod() == Method.GET && request.isCacheable() && !request.isCacheHit() && response.cache != null) {
 
             request.addEvent("add-response-to-cache");
-            synchronized (mCache) {
+            synchronized (MemoryCache.class) {
                 mCache.putAll(response.cache);
                 checkSize();
             }
@@ -119,7 +119,7 @@ public class MemoryCache implements Cache {
 
     public Cache.Item get(String key) {
 
-        synchronized (mCache) {
+        synchronized (MemoryCache.class) {
 
             Cache.Item c = mCache.get(key);
             if (c == null) {
@@ -135,7 +135,7 @@ public class MemoryCache implements Cache {
     }
 
     public void clear() {
-        synchronized (mCache) {
+        synchronized (MemoryCache.class) {
             mCache.clear();
         }
     }

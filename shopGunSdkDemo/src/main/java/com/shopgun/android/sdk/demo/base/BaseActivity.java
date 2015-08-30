@@ -16,6 +16,7 @@
 
 package com.shopgun.android.sdk.demo.base;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -23,6 +24,7 @@ import android.support.v4.app.FragmentActivity;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.demo.Tools;
 
+@SuppressLint("Registered")
 public class BaseActivity extends FragmentActivity {
 
     private ProgressDialog mProgressDialog;

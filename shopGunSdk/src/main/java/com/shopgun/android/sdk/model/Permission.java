@@ -98,9 +98,10 @@ public class Permission implements IJson<JSONObject>, Parcelable {
         JSONObject o = new JSONObject();
         try {
             Iterator<String> it = getPermissions().keySet().iterator();
+            //noinspection WhileLoopReplaceableByForEach
             while (it.hasNext()) {
                 JSONArray jArray = new JSONArray();
-                String name = (String) it.next();
+                String name = it.next();
                 for (String value : getPermissions().get(name)) {
                     jArray.put(value);
                 }

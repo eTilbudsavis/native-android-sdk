@@ -80,7 +80,7 @@ public class LoadingTextView extends TextView {
     }
 
     public void error() {
-        error(getResources().getString(R.string.shopgun_sdk_pageflip_load, mLoadingText));
+        error(getResources().getString(R.string.com_shopgun_android_sdk_pageflip_page_error, mLoadingText));
     }
 
     public void error(String text) {

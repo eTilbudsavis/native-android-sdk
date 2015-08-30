@@ -17,7 +17,9 @@
 
 <resources>
 
-    <string name="shopgun_sdk_app_name">eTilbudsavis</string>
-    <string name="shopgun_sdk_pageflip_load">Kunne ikke indlæse\nside %1$s</string>
+    <string name="com_shopgun_android_sdk_name">eTilbudsavis</string>
+    <string name="com_shopgun_android_sdk_pageflip_page_error">Kunne ikke indlæse\nside %1$s</string>
+  <string name="com_shopgun_android_sdk_pageflip_loading">Tilbudsavis\n&#8230;</string>
+  <string name="com_shopgun_android_sdk_pageflip_page_loading">2&#8211;3\n&#8230;</string>
 
 </resources>

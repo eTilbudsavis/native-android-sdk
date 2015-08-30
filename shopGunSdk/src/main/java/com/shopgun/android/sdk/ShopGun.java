@@ -86,6 +86,11 @@ public class ShopGun {
 
     public static final String TAG = Constants.getTag(ShopGun.class);
 
+    /**
+     * Current version of the ShopGun SDK.
+     */
+    public static final int VERSION = 300000;
+
     private static final int DEFAULT_THREAD_COUNT = 3;
 
     /** The ShopGun singleton */
@@ -186,7 +191,7 @@ public class ShopGun {
         mExecutor = Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT, new SgnThreadFactory());
         mSettings = new Settings(mContext);
 
-        HttpStack stack = null;
+        HttpStack stack;
         if (Build.VERSION.SDK_INT > 8) {
             stack = new HttpURLNetwork();
         } else {
@@ -443,7 +448,7 @@ public class ShopGun {
      */
     public void destroy() {
         synchronized (ShopGun.class) {
-            internalStop();
+            mInternalStop.run();
             clear();
             mShopGun = null;
         }
@@ -512,6 +517,7 @@ public class ShopGun {
 
     public void onStart() {
         if (mActivityCounter.increment()) {
+            mHandler.removeCallbacks(mInternalStop);
             setupKeys(mContext);
             internalStart();
         }
@@ -522,24 +528,30 @@ public class ShopGun {
         mSessionManager.onStart();
         mListManager.onStart();
         mSyncManager.onStart();
+        mSettings.incrementUsageCount();
         SgnLog.v(TAG, "SDK has been started");
     }
 
     public void onStop() {
         if (mActivityCounter.decrement()) {
-            internalStop();
+            // We'll delay the stop signal by a second,
+            // to prevent lifecycle events to
+            mHandler.postDelayed(mInternalStop, 1000);
         }
     }
 
-    private void internalStop() {
-        mSettings.saveLocation(mLocation);
-        mListManager.onStop();
-        mSyncManager.onStop();
-        mSessionManager.onStop();
-        mSettings.setLastUsageNow();
-        mActivityCounter.reset();
+    Runnable mInternalStop = new Runnable() {
+        @Override
+        public void run() {
+            mSettings.saveLocation(mLocation);
+            mListManager.onStop();
+            mSyncManager.onStop();
+            mSessionManager.onStop();
+            mSettings.setLastUsedTimeNow();
+            mActivityCounter.reset();
 //		mHandler.postDelayed(termination, Utils.SECOND_IN_MILLIS * 5);
-        SgnLog.v(TAG, "SDK has been stopped");
-    }
+            SgnLog.v(TAG, "SDK has been stopped");
+        }
+    };
 
 }

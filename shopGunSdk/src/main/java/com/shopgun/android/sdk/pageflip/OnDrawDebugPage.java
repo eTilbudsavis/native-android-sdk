@@ -49,8 +49,6 @@ public class OnDrawDebugPage implements OnDrawPage {
             p.setStyle(Paint.Style.STROKE);
             p.setStrokeWidth(5);
 
-            double bw = b.getWidth();
-            double bh = b.getHeight();
             for (Hotspot h : hotspots) {
                 if (h.isAreaSignificant(pages)) {
                     p.setColor(h.getColor());

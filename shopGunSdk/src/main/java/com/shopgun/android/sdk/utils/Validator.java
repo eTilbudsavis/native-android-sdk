@@ -38,7 +38,7 @@ public class Validator {
      * @return
      */
     public static boolean isBirthyearValid(Integer birthyear) {
-        return birthyear >= 1900 ? (birthyear <= 2015) : false;
+        return birthyear >= 1900 && (birthyear <= 2015);
     }
 
     /**
@@ -71,12 +71,7 @@ public class Validator {
             return false;
         }
 
-        String trim = email.trim();
-        if (!trim.equals(email)) {
-            return false;
-        }
-
-        return true;
+        return email.trim().equals(email);
     }
 
     /**
@@ -101,10 +96,7 @@ public class Validator {
      * @return true, if the version matched the regex
      */
     public static boolean isAppVersionValid(String version) {
-        if (version == null) {
-            return false;
-        }
-        return Pattern.compile(APP_VERSION_FORMAT).matcher(version).matches();
+        return version != null && Pattern.compile(APP_VERSION_FORMAT).matcher(version).matches();
     }
 
 }

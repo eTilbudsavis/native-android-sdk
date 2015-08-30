@@ -78,14 +78,9 @@ public class SgnLogHelper {
 
         if (e.getCode() == 1104) {
 
-            StringBuilder sb = new StringBuilder();
-            sb.append(request.getNetworkLog().toString());
-            sb.append("/n");
-            sb.append(request.getLog().getString("Invalid Signature"));
-            sb.append("/n");
-            sb.append(e.toJSON().toString());
-
-            SgnLog.d(tag, sb.toString());
+            SgnLog.d(tag, request.getNetworkLog().toString() + "\n" +
+                    request.getLog().getString("Invalid Signature") + "\n" +
+                    e.toJSON().toString());
         }
 
     }
@@ -103,7 +98,7 @@ public class SgnLogHelper {
         int w = b.getWidth();
         int h = b.getHeight();
         float size = ((float) (w * h * 4) / (float) (1024 * 1024));
-        String text = null;
+        String text;
         if (infp == null) {
             String format = "Bitmap[w:%s, h:%s, %.2fmb]";
             text = String.format(format, w, h, size);

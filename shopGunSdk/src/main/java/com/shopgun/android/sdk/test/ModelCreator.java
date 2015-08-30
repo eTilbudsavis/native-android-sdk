@@ -198,7 +198,7 @@ public class ModelCreator {
         HotspotMap h = new HotspotMap();
         List<Hotspot> list = new ArrayList<Hotspot>();
         for (int i = 0; i < 10; i++) {
-            list.add(getHotspot(0 + i, 100 + i, 100 + i, 0 + i));
+            list.add(getHotspot(i, 100 + i, 100 + i, i));
         }
         h.put(1, list);
         return h;

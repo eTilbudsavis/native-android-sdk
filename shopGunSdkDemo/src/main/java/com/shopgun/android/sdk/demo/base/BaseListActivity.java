@@ -16,6 +16,7 @@
 
 package com.shopgun.android.sdk.demo.base;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
@@ -23,6 +24,7 @@ import android.preference.PreferenceActivity;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.demo.Tools;
 
+@SuppressLint("Registered")
 public class BaseListActivity extends PreferenceActivity {
 
     private ProgressDialog mProgressDialog;

@@ -73,24 +73,28 @@ public class SgnLocation extends Location {
         set(l);
     }
 
-    public SgnLocation(JSONObject o) {
-        this();
-        setAccuracy(Json.valueOf(o, Param.ACCURACY, getAccuracy()));
-        setAddress(Json.valueOf(o, Param.ADDRESS, getAddress()));
-        setAltitude(Json.valueOf(o, Param.ALTITUDE, getAltitude()));
-        setBearing(Json.valueOf(o, Param.BEARING, getBearing()));
-        setLatitude(Json.valueOf(o, Param.LATITUDE, getLatitude()));
-        setLongitude(Json.valueOf(o, Param.LONGITUDE, getLongitude()));
-        setProvider(Json.valueOf(o, Param.PROVIDER, getProvider()));
-        setRadius(Json.valueOf(o, Param.RADIUS, DEFAULT_RADIUS));
-        setSpeed(Json.valueOf(o, Param.SPEED, getSpeed()));
-        setTime(Json.valueOf(o, Param.TIME, getTime()));
-        setSensor(Json.valueOf(o, Param.SENSOR, false));
+    public static SgnLocation fromJSON(JSONObject o) {
+        SgnLocation l = new SgnLocation();
+        if (o == null) {
+            return l;
+        }
+        l.setAccuracy(Json.valueOf(o, Param.ACCURACY, l.getAccuracy()));
+        l.setAddress(Json.valueOf(o, Param.ADDRESS, l.getAddress()));
+        l.setAltitude(Json.valueOf(o, Param.ALTITUDE, l.getAltitude()));
+        l.setBearing(Json.valueOf(o, Param.BEARING, l.getBearing()));
+        l.setLatitude(Json.valueOf(o, Param.LATITUDE, l.getLatitude()));
+        l.setLongitude(Json.valueOf(o, Param.LONGITUDE, l.getLongitude()));
+        l.setProvider(Json.valueOf(o, Param.PROVIDER, l.getProvider()));
+        l.setRadius(Json.valueOf(o, Param.RADIUS, DEFAULT_RADIUS));
+        l.setSpeed(Json.valueOf(o, Param.SPEED, l.getSpeed()));
+        l.setTime(Json.valueOf(o, Param.TIME, l.getTime()));
+        l.setSensor(Json.valueOf(o, Param.SENSOR, false));
         double east = Json.valueOf(o, Param.BOUND_EAST, DEFAULT_COORDINATE);
         double west = Json.valueOf(o, Param.BOUND_WEST, DEFAULT_COORDINATE);
         double north = Json.valueOf(o, Param.BOUND_NORTH, DEFAULT_COORDINATE);
         double south = Json.valueOf(o, Param.BOUND_SOUTH, DEFAULT_COORDINATE);
-        setBounds(north, east, south, west);
+        l.setBounds(north, east, south, west);
+        return l;
     }
 
     protected SgnLocation(Parcel in) {
@@ -415,11 +419,6 @@ public class SgnLocation extends Location {
             return false;
 
         return true;
-    }
-
-    @Override
-    public int describeContents() {
-        return super.describeContents();
     }
 
     @Override

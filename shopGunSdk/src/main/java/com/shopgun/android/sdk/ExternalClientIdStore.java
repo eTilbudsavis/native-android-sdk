@@ -77,7 +77,7 @@ public class ExternalClientIdStore {
             try {
                 fos.close();
             } catch (Throwable t) {
-
+                // ignore
             }
         }
 
@@ -117,10 +117,7 @@ public class ExternalClientIdStore {
 
     private static boolean deleteCid(Context c) {
         File f = getCidFile(c);
-        if (f != null && f.exists()) {
-            return f.delete();
-        }
-        return true;
+        return f != null && f.exists() && f.delete();
     }
 
     private static File getCidFile(Context context) {

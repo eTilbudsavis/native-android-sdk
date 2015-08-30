@@ -144,6 +144,7 @@ public class PageflipViewPager extends ViewPager {
             mScroller = new ScrollerCustomDuration(getContext(), (Interpolator) interpolator.get(null));
             scroller.set(this, mScroller);
         } catch (Exception e) {
+            // ignore
         }
     }
 

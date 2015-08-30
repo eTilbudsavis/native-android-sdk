@@ -180,7 +180,7 @@ public class EventLog {
                 tmp.add(e);
             }
         }
-        return null;
+        return tmp;
     }
 
     /**

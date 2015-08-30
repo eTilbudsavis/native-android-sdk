@@ -17,6 +17,7 @@
 package com.shopgun.android.sdk.utils;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -94,19 +95,18 @@ public class Device {
      * @return a readable string with device info
      */
     public static String getDeviceInfo() {
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("model[").append(getModel()).append("]")
-                .append(", android[").append(getBuildVersion()).append("]")
-                .append(", baseBand[").append(getRadio()).append("]")
-                .append(", kernel[").append(getKernel()).append("]");
-        return sb.toString();
+        return "model[" + getModel() +
+                "], android[" + getBuildVersion() +
+                "], baseBand[" + getRadio() +
+                "], kernel[" + getKernel() + "]";
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static boolean hasLargeHeap(Context c) {
         return (c.getApplicationInfo().flags & ApplicationInfo.FLAG_LARGE_HEAP) != 0;
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static String getHeapInfo(Context c) {
 
         StringBuilder sb = new StringBuilder();

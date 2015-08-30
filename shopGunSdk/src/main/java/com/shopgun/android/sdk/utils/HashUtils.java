@@ -42,8 +42,8 @@ public class HashUtils {
             byte[] bytes = digest.digest();
 
             StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < bytes.length; i++) {
-                String hex = Integer.toHexString(0xFF & bytes[i]);
+            for (byte b : bytes) {
+                String hex = Integer.toHexString(0xFF & b);
                 if (hex.length() == 1) {
                     sb.append('0');
                 }
@@ -65,9 +65,10 @@ public class HashUtils {
             byte messageDigest[] = digest.digest();
 
             // Create Hex String
-            StringBuffer hexString = new StringBuffer();
-            for (int i = 0; i < messageDigest.length; i++)
-                hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : messageDigest) {
+                hexString.append(Integer.toHexString(0xFF & b));
+            }
             return hexString.toString();
 
         } catch (NoSuchAlgorithmException e) {

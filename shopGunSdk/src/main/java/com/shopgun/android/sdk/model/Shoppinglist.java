@@ -690,6 +690,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
         return result;
     }
 
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public boolean equals(Object obj) {
         return compare(obj, true, true, true);

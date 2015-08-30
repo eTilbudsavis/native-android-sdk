@@ -118,11 +118,6 @@ public class CatalogPageFragment extends Fragment implements
         }
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
     private PageStat getStat() {
         if (mStats == null) {
             mStats = new PageStat(mCallback.getCatalog().getId(), mCallback.getViewSession(), mPages);

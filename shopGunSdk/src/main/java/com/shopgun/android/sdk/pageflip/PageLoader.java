@@ -52,7 +52,8 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
     private PageLoaderListener mListener;
     private Quality mQuality;
     // Keep references to PageTransformerTarget to avoid GC
-    private List<PageTransformerTarget> mPageTransformerTargetReference = new ArrayList<PageTransformerTarget>();
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    private final List<PageTransformerTarget> mPageTransformerTargetReference = new ArrayList<PageTransformerTarget>();
 
     public PageLoader(Context ctx, int[] pages, Catalog c) {
         this(Picasso.with(ctx), new Config(ctx, pages, c));
@@ -390,6 +391,7 @@ public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
         public List<String> getPagesUrls(Catalog c, Quality q, int[] pages) {
             List<Images> images = c.getPages();
             List<String> urls = new ArrayList<String>(pages.length);
+            //noinspection ForLoopReplaceableByForEach
             for (int i = 0; i < pages.length; i++) {
                 int pos = pages[i]-1;
                 Images img = images.get(pos);

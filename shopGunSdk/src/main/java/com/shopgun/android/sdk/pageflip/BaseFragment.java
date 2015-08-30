@@ -31,7 +31,7 @@ import com.shopgun.android.sdk.log.SgnLog;
 
 public class BaseFragment extends Fragment {
 
-    private boolean mPrintMethods = true;
+    private final boolean mPrintMethods = true;
 
     /* Lifecycle related events */
 

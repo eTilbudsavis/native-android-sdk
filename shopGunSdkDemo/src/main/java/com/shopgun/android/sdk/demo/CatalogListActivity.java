@@ -44,7 +44,7 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
 
     private static final String STATE_CATALOGS = "catalogs";
 
-    private List<Catalog> mCatalogs = new ArrayList<Catalog>();
+    private final List<Catalog> mCatalogs = new ArrayList<Catalog>();
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -80,7 +80,7 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
         outState.putParcelableArrayList(STATE_CATALOGS, new ArrayList<Catalog>(mCatalogs));
     }
 
-    Response.Listener<JSONArray> mCatalogListener = new Response.Listener<JSONArray>() {
+    private final Response.Listener<JSONArray> mCatalogListener = new Response.Listener<JSONArray>() {
 
         @Override
         public void onComplete(JSONArray response, ShopGunError error) {
@@ -117,7 +117,7 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
 
     public class CatalogAdapter extends BaseAdapter {
 
-        private int mPadding = Utils.convertDpToPx(5, CatalogListActivity.this);
+        private final int mPadding = Utils.convertDpToPx(5, CatalogListActivity.this);
 
         @Override
         public int getCount() {

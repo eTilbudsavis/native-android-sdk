@@ -352,12 +352,11 @@ public class ModelTest {
 
         // JSON
         JSONObject jObj = obj.toJSON();
-        Share jsonObj = Share.fromJSON(jObj);
         try {
             jObj.put(JsonKey.EMAIL, "fake-wrong-email@nomail.org");
         } catch (JSONException e) {
         }
-        jsonObj = Share.fromJSON(jObj);
+        Share jsonObj = Share.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
 
         // getters and setters

@@ -254,7 +254,7 @@ public class UtilsTest {
         actual = Utils.dateToString(c.getTime());
         Assert.assertEquals("1970-01-01T00:00:00+0000", actual);
 
-        c.set(2013, 03, 03, 13, 37, 00);
+        c.set(2013, 3, 3, 13, 37, 0);
         actual = Utils.dateToString(c.getTime());
         Assert.assertEquals("2013-03-03T13:37:00+0000", actual);
 

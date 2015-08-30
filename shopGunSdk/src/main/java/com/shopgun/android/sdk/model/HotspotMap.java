@@ -16,6 +16,7 @@
 
 package com.shopgun.android.sdk.model;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Parcel;
@@ -45,6 +46,7 @@ public class HotspotMap implements IJson<JSONArray>,Parcelable {
 
     private static final String TYPE_OFFER = "offer";
     private static final int[] mRectColors = { Color.BLACK, Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW, Color.MAGENTA };
+    @SuppressLint("UseSparseArrays")
     private HashMap<Integer, List<Hotspot>> mMap = new HashMap<Integer, List<Hotspot>>();
     private boolean mIsNormalized = false;
 
@@ -176,8 +178,8 @@ public class HotspotMap implements IJson<JSONArray>,Parcelable {
 
         HotspotMap that = (HotspotMap) o;
 
-        if (mIsNormalized != that.mIsNormalized) return false;
-        return !(mMap != null ? !mMap.equals(that.mMap) : that.mMap != null);
+        return mIsNormalized == that.mIsNormalized &&
+                !(mMap != null ? !mMap.equals(that.mMap) : that.mMap != null);
 
     }
 

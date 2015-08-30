@@ -115,7 +115,7 @@ public class ColorUtils {
             return String.format("%06X", 0xFFFFFF & color);
         } else {
             // not eta api valid string
-            return String.format("#%08X", 0xFFFFFFFF & color);
+            return String.format("#%08X", color);
         }
     }
 

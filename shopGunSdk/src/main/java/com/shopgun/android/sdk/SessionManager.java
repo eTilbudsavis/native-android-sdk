@@ -274,7 +274,7 @@ public class SessionManager {
 			 * a session refresh, else ignore session refresh
 			 */
             Date now = new Date();
-            long delta = now.getTime() - mShopGun.getSettings().getLastUsage();
+            long delta = now.getTime() - mShopGun.getSettings().getLastUsedTime();
             boolean shouldPut = delta > (2 * Utils.HOUR_IN_MILLIS);
 //            boolean shouldPut = delta > (20 * Utils.SECOND_IN_MILLIS);
             if (shouldPut) {
@@ -286,7 +286,7 @@ public class SessionManager {
     }
 
     public void onStop() {
-
+        // empty, might be needed in the future
     }
 
     private void postSession(final Listener<JSONObject> l) {

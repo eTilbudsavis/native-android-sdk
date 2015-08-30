@@ -17,12 +17,11 @@
 package com.shopgun.android.sdk.network;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 
 import java.io.IOException;
 
 public interface HttpStack {
 
-    public abstract HttpResponse performNetworking(Request<?> request) throws ClientProtocolException, IOException;
+    public abstract HttpResponse performNetworking(Request<?> request) throws IOException;
 
 }

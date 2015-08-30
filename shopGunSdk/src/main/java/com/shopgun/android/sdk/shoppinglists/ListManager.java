@@ -543,8 +543,6 @@ public class ListManager {
 
     private boolean editItem(ShoppinglistItem sli, User user) {
 
-        long s = System.currentTimeMillis();
-
         mDatabase.allowEditOrThrow(sli.getShoppinglistId(), user);
 
         Date now = new Date();

@@ -66,7 +66,7 @@ public class JsonCacheHelper {
                 for (String string : erns) {
                     Cache.Item jObject = c.get(string);
                     if (jObject != null && jObject.object instanceof JSONObject) {
-                        jArray.put((JSONObject) jObject.object);
+                        jArray.put(jObject.object);
                     }
                 }
 
@@ -107,7 +107,7 @@ public class JsonCacheHelper {
             String ern = buildErn(type, id);
             Cache.Item cacheId = c.get(ern);
             if (cacheId != null) {
-                jArray.put((JSONObject) cacheId.object);
+                jArray.put(cacheId.object);
             }
         }
 

@@ -22,9 +22,6 @@ import com.shopgun.android.sdk.utils.Utils;
 
 import junit.framework.Assert;
 
-/**
- * Created by oizo on 15/05/15.
- */
 public class SgnLocationTest {
 
     public static final String TAG = Constants.getTag(SgnLocationTest.class);
