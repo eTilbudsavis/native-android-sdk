@@ -54,16 +54,13 @@ public class Settings {
     }
 
     public JSONObject getSessionJson() {
-        String json = mSharedPrefs.getString(SESSION_JSON, null);
-        JSONObject session = null;
-        if (json != null) {
-            try {
-                return new JSONObject(json);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        try {
+            String json = mSharedPrefs.getString(SESSION_JSON, null);
+            return json == null ? null : new JSONObject(json);
+        } catch (JSONException e) {
+            // ignore
         }
-        return session;
+        return null;
     }
 
     public void incrementUsageCount() {
@@ -124,13 +121,13 @@ public class Settings {
     }
 
     private void performMigration() {
-        int mVersion = mSharedPrefs.getInt(LAST_USED_VERSION, 0);
-        if (mVersion == ShopGun.VERSION) {
+        int version = mSharedPrefs.getInt(LAST_USED_VERSION, 0);
+        if (version == ShopGun.VERSION) {
             // no migration needed
             return;
         }
         SharedPreferences.Editor e = mSharedPrefs.edit();
-        if (mVersion == 0) {
+        if (version == 0) {
             // The first time we create s new setting with the shopgun namespace, there if no keys, hence
             // the version number returned is 0. So we'll only have to run this code once.
             migrateLocation();
