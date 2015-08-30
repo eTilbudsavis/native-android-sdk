@@ -115,7 +115,7 @@ public class Settings {
                 return SgnLocation.fromJSON(new JSONObject(s));
             }
         } catch (JSONException e) {
-            SgnLog.e(TAG, "Not able to parse location json from SharedPreferances", e);
+            SgnLog.e(TAG, "Not able to parse location json from SharedPreferences", e);
         }
         return new SgnLocation();
     }
