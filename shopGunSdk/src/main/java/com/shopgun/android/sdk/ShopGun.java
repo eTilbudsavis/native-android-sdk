@@ -186,7 +186,7 @@ public class ShopGun {
 
     private void init() {
 
-        setupKeys(mContext);
+        ensureKeys(mContext);
         setAppVersion(Utils.getAppVersion(mContext));
         mExecutor = Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT, new SgnThreadFactory());
         mSettings = new Settings(mContext);
@@ -248,7 +248,7 @@ public class ShopGun {
      */
     public String getApiKey() {
         if (!isKeySecretOk()) {
-            setupKeys(mContext);
+            ensureKeys(mContext);
         }
         return mApiKey;
     }
@@ -287,7 +287,7 @@ public class ShopGun {
      */
     public String getApiSecret() {
         if (!isKeySecretOk()) {
-            setupKeys(mContext);
+            ensureKeys(mContext);
         }
         return mApiSecret;
     }
@@ -392,7 +392,7 @@ public class ShopGun {
         mDevelop = develop;
         if (isStarted()) {
             SgnLog.i(TAG, "Re-registering apiKey and apiSecret");
-            setupKeys(mContext);
+            ensureKeys(mContext);
         }
     }
 
@@ -405,7 +405,7 @@ public class ShopGun {
         return mApiKey != null && mApiSecret != null;
     }
 
-    private void setupKeys(Context c) {
+    private void ensureKeys(Context c) {
 
         Bundle b = Utils.getMetaData(c);
         if (b == null) {
@@ -472,85 +472,44 @@ public class ShopGun {
         }
     }
 
-//	Runnable termination = new Runnable() {
-//
-//		public void run() {
-//			if (isStarted()) {
-//				SgnLog.i(TAG, "ShopGun has been resumed, bail out");
-//				return;
-//			}
-//			SgnLog.i(TAG, "Finalizing long running tasks...");
-//			int retries = 0;
-//			mRequestQueue.stop();
-//			mExecutor.shutdown();
-//			while (retries < 5) {
-//				retries ++;
-//				try {
-//					if (mExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-//						break;
-//					}
-//				} catch (InterruptedException e) {
-//					// Ignore
-//				}
-//			}
-//			finalCleanup();
-//			SgnLog.i(TAG, "SDK cleanup complete");
-//		}
-//	};
-
-//	private void finalCleanup() {
-//		// TODO don't need to null everything
-//		synchronized (ShopGun.class) {
-//			mShopGun = null;
-//			mApiKey = null;
-//			mApiSecret = null;
-//			mAppVersion = null;
-//			mContext = null;
-//			mExecutor = null;
-//			mListManager = null;
-//			mRequestQueue = null;
-//			mSessionManager = null;
-//			mSettings = null;
-//			mSyncManager = null;
-//		}
-//	}
-
     public void onStart() {
-        if (mActivityCounter.increment()) {
-            mHandler.removeCallbacks(mInternalStop);
-            setupKeys(mContext);
+        mHandler.removeCallbacks(mInternalStop);
+        mActivityCounter.increment();
+        if (mActivityCounter.shouldPerformStart()) {
             internalStart();
         }
+        mActivityCounter.setAwaitingTermination(false);
     }
 
     private void internalStart() {
-//		mHandler.removeCallbacks(termination);
+        ensureKeys(mContext);
         mSessionManager.onStart();
         mListManager.onStart();
         mSyncManager.onStart();
         mSettings.incrementUsageCount();
-        SgnLog.v(TAG, "SDK has been started");
+        SgnLog.v(TAG, "SDK start performed");
     }
 
     public void onStop() {
-        if (mActivityCounter.decrement()) {
-            // We'll delay the stop signal by a second,
-            // to prevent lifecycle events to
+        mActivityCounter.decrement();
+        if (!mActivityCounter.isStarted()) {
+            // Delay shutdown 1 second, to prevent extra load on e.g. orientation changes
             mHandler.postDelayed(mInternalStop, 1000);
+            mActivityCounter.setAwaitingTermination(true);
         }
     }
 
     Runnable mInternalStop = new Runnable() {
         @Override
         public void run() {
+            mActivityCounter.setAwaitingTermination(false);
             mSettings.saveLocation(mLocation);
             mListManager.onStop();
             mSyncManager.onStop();
             mSessionManager.onStop();
             mSettings.setLastUsedTimeNow();
             mActivityCounter.reset();
-//		mHandler.postDelayed(termination, Utils.SECOND_IN_MILLIS * 5);
-            SgnLog.v(TAG, "SDK has been stopped");
+            SgnLog.v(TAG, "SDK shutdown performed");
         }
     };
 

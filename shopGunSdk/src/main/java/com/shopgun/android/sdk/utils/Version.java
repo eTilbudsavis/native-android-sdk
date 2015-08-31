@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk;
+package com.shopgun.android.sdk.utils;
 
 /**
  * Version class is used for easier migration of various features in the SDK.<br/><br/>
@@ -50,9 +50,7 @@ public class Version {
         if (o == null || getClass() != o.getClass()) return false;
 
         Version version = (Version) o;
-
         return mVersion == version.mVersion;
-
     }
 
     @Override

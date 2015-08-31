@@ -32,7 +32,7 @@ public class Settings {
     public static final String TAG = Constants.getTag(Settings.class);
 
     /** Name for the SDK SharedPreferences file */
-    private static final String PREFS_NAME = "com.shopgun.android.sdk";
+    private static final String PREFS_NAME = "com.shopgun.android.sdk_preferences";
     private static final String LAST_USED_VERSION = "last_used_version";
     private static final String LAST_USED_TIME = "last_used_time";
     private static final String USAGE_COUNT = "usage_count";

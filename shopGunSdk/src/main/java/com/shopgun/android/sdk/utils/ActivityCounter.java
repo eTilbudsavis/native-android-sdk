@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ActivityCounter {
 
     private final AtomicInteger mCounter = new AtomicInteger(0);
+    private boolean mAwaitingTermination = false;
 
     /**
      * Reset the counter.
@@ -62,6 +63,18 @@ public class ActivityCounter {
      */
     public boolean isStarted() {
         return mCounter.get() > 0;
+    }
+
+    public void setAwaitingTermination(boolean waiting) {
+        mAwaitingTermination = waiting;
+    }
+
+    public boolean isAwaitingTermination() {
+        return mAwaitingTermination;
+    }
+
+    public boolean shouldPerformStart() {
+        return isStarted() && !mAwaitingTermination;
     }
 
 }

@@ -24,8 +24,8 @@ public class Constants {
     public static final String META_DEVELOP_API_KEY = "com.shopgun.android.sdk.develop.api_key";
     public static final String META_DEVELOP_API_SECRET = "com.shopgun.android.sdk.develop.api_secret";
 
-    public static final String TAG_PREFIX = "shopgun:sdk:";
-    public static final String ARG_PREFIX = "shopgun.sdk.";
+    public static final String TAG_PREFIX = "sgn:sdk:";
+    public static final String ARG_PREFIX = "sgn.sdk.";
 
     public static String getTag(Class<?> clazz) {
         return getTag(clazz.getSimpleName());

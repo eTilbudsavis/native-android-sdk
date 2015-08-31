@@ -16,6 +16,10 @@ public class SharedPreferencesUtils {
 
     }
 
+    public static String getDefaultSharedPreferencesName(Context context) {
+        return context.getPackageName() + "_preferences";
+    }
+
     public static void copySharedPreferences(SharedPreferences fromPreferences, SharedPreferences toPreferences) {
         copySharedPreferences(fromPreferences, toPreferences, true);
     }
