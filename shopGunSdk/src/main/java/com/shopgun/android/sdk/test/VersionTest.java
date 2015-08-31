@@ -34,14 +34,14 @@ public class VersionTest extends TestCase {
 
     public static void testVersion() {
 
-        int[] ints = new int[]{0, 1, 1000, 1001, 100000, 101000, 101001};
-        String[] strings = new String[]{ "0.0.0", "0.0.1", "0.1.0", "0.1.1", "1.1.0", "1.1.1"};
+        int[] versions = new int[]{0, 1, 1000, 1001, 100000, 101000, 101001};
+        String[] expected = new String[]{ "0.0.0", "0.0.1", "0.1.0", "0.1.1", "1.0.0", "1.1.0", "1.1.1"};
 
-        for (int i = 0; i < ints.length; i++) {
-            int intVersion = ints[i];
+        for (int i = 0; i < versions.length; i++) {
+            int intVersion = versions[i];
             Version v = new Version(intVersion);
             assertEquals(intVersion, v.getCode());
-            assertEquals(v.toString(), strings[i]);
+            assertEquals(expected[i], v.toString());
         }
 
         Version version = new Version(0);

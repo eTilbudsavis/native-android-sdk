@@ -10,6 +10,8 @@ package com.shopgun.android.sdk.utils;
  */
 public class Version {
 
+    public static final String TAG = Version.class.getSimpleName();
+
     public static final int MASK_MAJOR = 100000;
     public static final int MASK_MINOR = 1000;
 
@@ -32,11 +34,11 @@ public class Version {
     }
 
     public int getMinor() {
-        return mVersion-(getMajor()*MASK_MAJOR)/MASK_MINOR;
+        return (mVersion%MASK_MAJOR)/MASK_MINOR;
     }
 
     public int getPatch() {
-        return mVersion-(getMajor()*MASK_MAJOR)-(getMinor()*MASK_MINOR);
+        return (mVersion%MASK_MINOR);
     }
 
     @Override
