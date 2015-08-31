@@ -14,10 +14,6 @@
  * limitations under the License.
  ******************************************************************************/
 
-/**
- * @fileoverview Location.
- * @author Danny Hvam <danny@eTilbudsavis.dk>
- */
 package com.shopgun.android.sdk;
 
 import android.location.Location;

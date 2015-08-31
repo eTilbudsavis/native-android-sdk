@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Class created for easily counting number of start/stop events from activities
  *
- * @author Danny Hvam - danny@eTilbudsavis.dk
  */
 public class ActivityCounter {
 

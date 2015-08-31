@@ -1216,11 +1216,6 @@ public class SyncManager {
             }
         };
 
-		/* Hack for EDGE, where accept URL is required */
-        if (s.getAcceptUrl() == null) {
-            s.setAcceptUrl("https://www.etilbudsavis.dk/");
-        }
-
         String url = Endpoint.listShareEmail(user.getUserId(), s.getShoppinglistId(), s.getEmail());
         JsonObjectRequest shareReq = new JsonObjectRequest(Method.PUT, url, s.toJSON(), shareListener);
         addRequest(shareReq);
