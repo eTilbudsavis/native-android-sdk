@@ -302,13 +302,13 @@ public abstract class ListRequest<T> extends JsonArrayRequest {
             Map<String, String> map = super.getParameters();
 
             if (!mOrder.isEmpty()) {
-                map.put(Api.Param.ORDER_BY, TextUtils.join(Api.DELIMITER, mOrder));
+                map.put(Api.Param.ORDER_BY, TextUtils.join(",", mOrder));
             } else if (mOrderDefault != null) {
                 map.put(Api.Param.ORDER_BY, mOrderDefault);
             }
 
             for (String key : mFilters.keySet()) {
-                map.put(key, TextUtils.join(Api.DELIMITER, mFilters.get(key)));
+                map.put(key, TextUtils.join(",", mFilters.get(key)));
             }
 
             return map;

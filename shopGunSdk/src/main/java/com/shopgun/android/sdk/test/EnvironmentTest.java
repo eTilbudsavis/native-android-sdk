@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.test;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.utils.Api.Environment;
+import com.shopgun.android.sdk.api.Environment;
 
 import junit.framework.TestCase;
 
@@ -62,7 +62,7 @@ public class EnvironmentTest extends TestCase {
         String empty = e.apply("");
         assertEquals(PROD, empty);
 
-        String etaApiUrl = "https://api.etilbudsavis.dk/some/path";
+        String etaApiUrl = PROD + "/some/path";
 
         // Standard case
         String path = "/some/path";
@@ -94,10 +94,6 @@ public class EnvironmentTest extends TestCase {
 
     public static void testFromString() {
 
-        String prod = "https://api.etilbudsavis.dk";
-        String edge = "https://edge.api.etilbudsavis.dk";
-        String staging = "https://staging.api.etilbudsavis.dk";
-
         String customOriginal = Environment.CUSTOM.toString();
 
         // enums must match them selves
@@ -118,9 +114,9 @@ public class EnvironmentTest extends TestCase {
 
         // But allow pretty much any thing
         assertEquals(Environment.CUSTOM, Environment.fromString("random"));
-        assertEquals(Environment.CUSTOM, Environment.fromString("https://api.etilbudsavis.d"));
-        assertEquals(Environment.CUSTOM, Environment.fromString("https://api.etilbudsavis.dk/"));
-        assertEquals(Environment.CUSTOM, Environment.fromString("https://etilbudsavis.dk/"));
+        assertEquals(Environment.CUSTOM, Environment.fromString("https://api.shopgun.c"));
+        assertEquals(Environment.CUSTOM, Environment.fromString("https://api.shopgun.com/"));
+        assertEquals(Environment.CUSTOM, Environment.fromString("https://shopgun.com/"));
 
         // Only one custon environment allowed
         String first_url = "first_url";
@@ -144,9 +140,9 @@ public class EnvironmentTest extends TestCase {
         assertEquals(second_url, custom.toString());
 
         // Any string matching an environment must return the environment
-        assertEquals(Environment.PRODUCTION, Environment.fromString(prod));
-        assertEquals(Environment.EDGE, Environment.fromString(edge));
-        assertEquals(Environment.STAGING, Environment.fromString(staging));
+        assertEquals(Environment.PRODUCTION, Environment.fromString(PROD));
+        assertEquals(Environment.EDGE, Environment.fromString(EDGE));
+        assertEquals(Environment.STAGING, Environment.fromString(STAG));
 
         assertNotSame(Environment.PRODUCTION, Environment.EDGE);
         assertNotSame(Environment.PRODUCTION, Environment.STAGING);

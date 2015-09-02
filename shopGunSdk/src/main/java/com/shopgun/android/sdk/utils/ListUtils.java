@@ -133,7 +133,7 @@ public class ListUtils {
         // Clear the original items list, items in this list is to be restored shortly
         items.clear();
 		
-		/* Sort the lists we're uncertain about by their title (this is as good as any sort) */
+		/* SortBy the lists we're uncertain about by their title (this is as good as any sort) */
         Collections.sort(first, ShoppinglistItem.TITLE_ASCENDING);
         Collections.sort(nil, ShoppinglistItem.TITLE_ASCENDING);
         Collections.sort(orphan, ShoppinglistItem.TITLE_ASCENDING);

@@ -25,6 +25,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.shopgun.android.sdk.api.Environment;
+import com.shopgun.android.sdk.api.ThemeEnvironment;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
@@ -121,9 +123,12 @@ public class ShopGun {
     private RequestQueue mRequestQueue;
     /** My go to executor service */
     private ExecutorService mExecutor;
-
     /** The development flag, indicating the app is in development */
     private boolean mDevelop = false;
+    /** The current API environment in use */
+    private static Environment mEnvironment = Environment.PRODUCTION;
+    /** The current API environment in use for themes (used for e.g. shoppinglists */
+    private static ThemeEnvironment mThemeEnvironment = ThemeEnvironment.PRODUCTION;
 
     /**
      * Default constructor, this is private to allow us to create a singleton instance
@@ -290,6 +295,43 @@ public class ShopGun {
             ensureKeys(mContext);
         }
         return mApiSecret;
+    }
+
+    /**
+     * Returns the current {@link Environment} in use.
+     *
+     * @return The current {@link Environment}
+     */
+    public Environment getEnvironment() {
+        return mEnvironment;
+    }
+
+    /**
+     * Set the API environment the API should use.
+     * <p/>
+     * <p>The environment will only be used, if you do not prefix your url's with another domain name.
+     * it's therefore advised to use the url's exposed in {@link com.shopgun.android.sdk.api.Endpoints}.</p>
+     *
+     * @param e An {@link Environment}
+     */
+    public static void setEnvironment(Environment e) {
+        mEnvironment = e;
+    }
+
+    /**
+     * Returns the current {@link ThemeEnvironment} in use.
+     *
+     * @return The current {@link Environment}
+     */
+    public ThemeEnvironment getThemeEnvironment() {
+        return mThemeEnvironment;
+    }
+
+    /**
+     * Set the {@link ThemeEnvironment} the SDK will be using.
+     */
+    public void setThemeEnvironment(ThemeEnvironment e) {
+        mThemeEnvironment = e;
     }
 
     /**

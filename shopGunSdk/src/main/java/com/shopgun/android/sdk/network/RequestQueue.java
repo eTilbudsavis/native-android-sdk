@@ -22,7 +22,6 @@ import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.EventLog;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.impl.HandlerDelivery;
-import com.shopgun.android.sdk.utils.Api;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
 import com.shopgun.android.sdk.utils.Api.Param;
 import com.shopgun.android.sdk.utils.Utils;
@@ -355,7 +354,7 @@ public class RequestQueue {
         request.addEvent("preparing-sdk-parameters");
 
         // Apply ShopGun environment, if needed
-        request.setUrl(Api.getEnvironment().apply(request.getUrl()));
+        request.setUrl(mShopGun.getEnvironment().apply(request.getUrl()));
 
         String version = mShopGun.getAppVersion();
         if (version != null) {
