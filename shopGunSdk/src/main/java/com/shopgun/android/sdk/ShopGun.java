@@ -126,9 +126,9 @@ public class ShopGun {
     /** The development flag, indicating the app is in development */
     private boolean mDevelop = false;
     /** The current API environment in use */
-    private static Environment mEnvironment = Environment.PRODUCTION;
+    private Environment mEnvironment = Environment.PRODUCTION;
     /** The current API environment in use for themes (used for e.g. shoppinglists */
-    private static ThemeEnvironment mThemeEnvironment = ThemeEnvironment.PRODUCTION;
+    private ThemeEnvironment mThemeEnvironment = ThemeEnvironment.PRODUCTION;
 
     /**
      * Default constructor, this is private to allow us to create a singleton instance
@@ -314,7 +314,7 @@ public class ShopGun {
      *
      * @param e An {@link Environment}
      */
-    public static void setEnvironment(Environment e) {
+    public void setEnvironment(Environment e) {
         mEnvironment = e;
     }
 
