@@ -290,6 +290,10 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
+        if (!ShopGun.isCreated()) {
+            ShopGun.create(getActivity());
+        }
+
         Bundle b = new Bundle();
         if (getArguments() != null) {
             b.putAll(getArguments());
