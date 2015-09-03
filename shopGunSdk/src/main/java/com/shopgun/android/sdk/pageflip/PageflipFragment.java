@@ -31,17 +31,17 @@ import android.widget.Toast;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.filler.FillerRequest;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Branding;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Hotspot;
-import com.shopgun.android.sdk.network.Response.Listener;
+import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
-import com.shopgun.android.sdk.request.RequestAutoFill.AutoFillParams;
-import com.shopgun.android.sdk.request.impl.CatalogObjectRequest.CatalogAutoFill;
+import com.shopgun.android.sdk.filler.CatalogFillerRequest;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
 import com.shopgun.android.sdk.utils.Utils;
 
@@ -50,7 +50,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PageflipFragment extends Fragment {
+public class PageflipFragment extends Fragment implements FillerRequest.Listener<Catalog> {
 
     public static final String TAG = Constants.getTag(PageflipFragment.class);
     public static final String ARG_CATALOG = Constants.getArg(PageflipFragment.class, "catalog");
@@ -62,8 +62,6 @@ public class PageflipFragment extends Fragment {
 
     private static final double PAGER_SCROLL_FACTOR = 0.5d;
 
-    // Requests
-    CatalogAutoFill mCatalogAutoFill;
     // Need this
     private Catalog mCatalog;
     private String mCatalogId;
@@ -86,75 +84,8 @@ public class PageflipFragment extends Fragment {
 
     // Callbacks and stats
     private PageflipListenerWrapper mWrapperListener = new PageflipListenerWrapper();
-    private Runnable mOnCatalogComplete = new Runnable() {
 
-        public void run() {
-
-            if (!isAdded()) {
-                return;
-            }
-
-            int heap = Utils.getMaxHeap(getActivity());
-            mAdapter = new CatalogPagerAdapter(getChildFragmentManager(), heap, mCatalogPageCallback, mConfig);
-            mPager.setAdapter(mAdapter);
-            // force the first page change if needed
-            if (mPager.getCurrentItem() != mCurrentPosition) {
-                mPager.setCurrentItem(mCurrentPosition);
-            } else {
-                mWrapperListener.onPageChange(mConfig.positionToPages(mCurrentPosition, mCatalog.getPageCount()));
-            }
-            showContent(true);
-
-            mWrapperListener.onReady();
-
-        }
-
-    };
-
-    private Listener<Catalog> mCatalogListener = new Listener<Catalog>() {
-
-        public void onComplete(Catalog c, ShopGunError error) {
-
-            if (isAdded()) {
-
-                if (isCatalogReady()) {
-
-                    getActivity().runOnUiThread(mOnCatalogComplete);
-
-                } else if (error != null) {
-
-                    // TODO improve error stuff 1 == network error
-                    mLoader.error();
-                    mWrapperListener.onError(error);
-
-                } else {
-
-                    ShopGunError e = null;
-                    if (mCatalog != null) {
-
-                        if (mCatalog.getPages() != null && mCatalog.getPages().isEmpty()) {
-                            // Got empty pages again, this shouldn't ever happen
-                            String message = "Catalog pages missing.";
-                            String details = "The api didn't return a valid set of pages for catalog " + mCatalog.getErn();
-                            e = new ShopGunError(ShopGunError.Code.PAGEFLIP_LOADING_PAGES_FAILED, message, details);
-                        }
-
-                    }
-
-                    if (e == null) {
-                        e = new ShopGunError(ShopGunError.Code.PAGEFLIP_CATALOG_LOADING_FAILED, "Unknown error", "An error occoured while loading data for pageflip");
-                    }
-
-                    // TODO improve error stuff 1 == network error
-                    mLoader.error();
-                    mWrapperListener.onError(e);
-
-                }
-
-            }
-
-        }
-    };
+    private CatalogFillerRequest mCatalogFillRequest;
 
     private CatalogPageCallback mCatalogPageCallback = new CatalogPageCallback() {
 
@@ -642,7 +573,7 @@ public class PageflipFragment extends Fragment {
             return;
         }
 
-        Listener<JSONObject> l = new Listener<JSONObject>() {
+        Response.Listener<JSONObject> l = new Response.Listener<JSONObject>() {
 
             public void onComplete(JSONObject response, ShopGunError error) {
 
@@ -668,15 +599,46 @@ public class PageflipFragment extends Fragment {
 
     }
 
+    @Override
+    public void onFillComplete(Catalog response, List<ShopGunError> errors) {
+
+        if (!isAdded()) {
+            return;
+        }
+
+        if (!errors.isEmpty()) {
+
+            mLoader.error();
+            // doesn't matter which error we choose, so we'll just take the first one
+            mWrapperListener.onError(errors.get(0));
+
+        } else {
+
+            int heap = Utils.getMaxHeap(getActivity());
+            mAdapter = new CatalogPagerAdapter(getChildFragmentManager(), heap, mCatalogPageCallback, mConfig);
+            mPager.setAdapter(mAdapter);
+            // force the first page change if needed
+            if (mPager.getCurrentItem() != mCurrentPosition) {
+                mPager.setCurrentItem(mCurrentPosition);
+            } else {
+                mWrapperListener.onPageChange(mConfig.positionToPages(mCurrentPosition, mCatalog.getPageCount()));
+            }
+            showContent(true);
+
+            mWrapperListener.onReady();
+
+        }
+
+    }
+
     private void setBrandingAndFillCatalog() {
 
         if (mCatalog != null) {
             setBranding(mCatalog.getBranding());
-            mCatalogAutoFill = new CatalogAutoFill();
-            mCatalogAutoFill.setLoadHotspots(!PageflipUtils.isHotspotsReady(mCatalog));
-            mCatalogAutoFill.setLoadPages(!PageflipUtils.isPagesReady(mCatalog));
-            mCatalogAutoFill.prepare(new AutoFillParams(), mCatalog, null, mCatalogListener);
-            mCatalogAutoFill.execute(ShopGun.getInstance().getRequestQueue());
+            mCatalogFillRequest = new CatalogFillerRequest(mCatalog, this);
+            mCatalogFillRequest.appendHotspots(true);
+            mCatalogFillRequest.appendPages(true);
+            ShopGun.getInstance().add(mCatalogFillRequest);
         }
 
     }
@@ -689,7 +651,9 @@ public class PageflipFragment extends Fragment {
 
     private void internalPause() {
         mLoader.stop();
-        mCatalogAutoFill.cancel();
+        if (mCatalogFillRequest != null) {
+            mCatalogFillRequest.cancel();
+        }
         mPagesReady = false;
         mPageflipStarted = false;
     }

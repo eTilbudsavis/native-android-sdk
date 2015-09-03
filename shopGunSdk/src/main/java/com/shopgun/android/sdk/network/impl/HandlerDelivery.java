@@ -32,8 +32,6 @@ public class HandlerDelivery implements Delivery {
 
     /**
      * Creates a new response delivery interface, that delivers the response to the UI thread.
-     *
-     * @param handler {@link Handler} to post responses on
      */
     public HandlerDelivery() {
         this(new Handler(Looper.getMainLooper()));
@@ -44,8 +42,8 @@ public class HandlerDelivery implements Delivery {
      *
      * @param handler {@link Handler} to post responses on
      */
-    public HandlerDelivery(Handler h) {
-        mHandler = h;
+    public HandlerDelivery(Handler handler) {
+        mHandler = handler;
     }
 
     /**

@@ -45,7 +45,7 @@ public interface Delivery {
             if (mRequest.isCanceled()) {
                 mRequest.finish("cancelled-at-delivery");
             } else {
-                mRequest.finish("execution-finished-succesfully");
+                mRequest.finish("execution-finished-successfully");
                 mRequest.deliverResponse(mResponse.result, mResponse.error);
             }
 
