@@ -18,7 +18,7 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
 
     public static final String TAG = FillerRequest.class.getSimpleName();
 
-    private static final int ERROR_OK = Integer.MAX_VALUE;
+    private static final int INTERNAL_ERROR_OK_SIGNAL = Integer.MAX_VALUE;
 
     private final Listener<T> mListener;
     private final ArrayList<Request> mRequests = new ArrayList<Request>();
@@ -42,6 +42,8 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
     @Override
     public Request setRequestQueue(RequestQueue requestQueue) {
         if (getTag() == null) {
+            // Attach a tag if one haven't been provided
+            // This will be used at a cancellation signal
             setTag(new Object());
         }
         return super.setRequestQueue(requestQueue);
@@ -58,8 +60,9 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
     }
 
     private Response<T> getHackResponse() {
-        String s = "This technically isn't an error, but a fake OK signal to run the rest of the queue";
-        return Response.fromError(new ShopGunError(ERROR_OK, "Internal OK hack", s));
+        String message = String.format("%s internal OK", TAG);
+        String details = String.format("A %s internal signal to run the remaining %s request queue", TAG, TAG);
+        return Response.fromError(new ShopGunError(INTERNAL_ERROR_OK_SIGNAL, message, details));
     }
 
     /**
@@ -70,7 +73,7 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
 
     @Override
     public void deliverResponse(T response, ShopGunError error) {
-        if (error != null && error.getCode() == ERROR_OK) {
+        if (error != null && error.getCode() == INTERNAL_ERROR_OK_SIGNAL) {
             // Perform the rest of the request
             runFillerRequests();
         } else {
@@ -80,10 +83,15 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
     }
 
     private void runFillerRequests() {
-        mRequests.clear();
-        mRequests.addAll(createRequests());
-        for (Request r : mRequests) {
-            addRequest(r);
+        synchronized (mRequests) {
+            mRequests.addAll(createRequests());
+            if (mRequests.isEmpty()) {
+                postResponseMain();
+            } else {
+                for (Request r : mRequests) {
+                    addRequest(r);
+                }
+            }
         }
     }
 
@@ -101,10 +109,7 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
     @Override
     public void cancel() {
         synchronized (FillerRequest.class) {
-            super.cancel();
-            for (Request r : mRequests) {
-                r.cancel();
-            }
+            getRequestQueue().cancelAll(getTag());
         }
     }
 
@@ -116,23 +121,24 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
         new DeliveryRunnable(request,response).run();
 
         // Deliver catalog if needed
-        mRequests.remove(request);
-        if (mRequests.isEmpty() && !isFinished()) {
-            postResponseMain();
+        synchronized (mRequests) {
+            mRequests.remove(request);
+            if (mRequests.isEmpty()) {
+                postResponseMain();
+            }
         }
 
     }
 
     private void postResponseMain() {
-        finish("execution-finished-successfully");
         if (Looper.myLooper() == Looper.getMainLooper()) {
             internalDelivery();
         } else {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                    addEvent("request-on-new-thread");
-                    internalDelivery();
+                addEvent("request-on-new-thread");
+                internalDelivery();
                 }
             });
         }
@@ -142,6 +148,7 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
         if (isCanceled()) {
             finish("cancelled-at-delivery");
         } else {
+            finish("execution-finished-successfully");
             mListener.onFillComplete(mData, mErrors);
         }
     }
