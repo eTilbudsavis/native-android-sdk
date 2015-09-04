@@ -206,7 +206,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
      * @return A Fragment
      */
     public static PageflipFragment newInstance(Catalog c, int page) {
-        return newInstance(c, page, new TwoPageReaderConfig());
+        return newInstance(c, page, new DoublePageReaderConfig());
     }
 
     /**
@@ -246,7 +246,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
      * @return A Fragment
      */
     public static PageflipFragment newInstance(String catalogId, int page, Branding branding) {
-        return newInstance(catalogId, page, branding, new TwoPageReaderConfig());
+        return newInstance(catalogId, page, branding, new DoublePageReaderConfig());
     }
 
     /**
@@ -309,7 +309,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
         mConfig = args.getParcelable(ARG_READER_CONFIG);
         if (mConfig == null) {
-            mConfig = new TwoPageReaderConfig();
+            mConfig = new DoublePageReaderConfig();
         }
         mConfig.setConfiguration(getActivity().getResources().getConfiguration());
 
@@ -728,77 +728,40 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
         }
 
         public void onReady() {
-            log("onReady");
             if (post()) mListener.onReady();
         }
 
         public void onPageChange(int[] pages) {
-            log("onPageChange: " + PageflipUtils.join(",", pages));
             if (post()) mListener.onPageChange(pages);
         }
 
         public void onOutOfBounds(boolean left) {
-            log("onOutOfBounds." + (left ? "left" : "right"));
             if (post()) mListener.onOutOfBounds(left);
         }
 
         public void onError(ShopGunError error) {
             error = (error == null) ? new ShopGunError(0, "Unknown Error", "No details available") : error;
-            log("onError: " + error.toJSON().toString());
             if (post()) mListener.onError(error);
         }
 
         public void onDragStateChanged(int state) {
-            log("onDragStateChanged: " + state);
             if (post()) mListener.onDragStateChanged(state);
         }
 
         public void onSingleClick(View v, int page, float x, float y, List<Hotspot> hotspots) {
-            log("single", page, x, y, hotspots);
             if (post()) mListener.onSingleClick(v, page, x, y, hotspots);
         }
 
         public void onDoubleClick(View v, int page, float x, float y, List<Hotspot> hotspots) {
-            log("double", page, x, y, hotspots);
             if (post()) mListener.onDoubleClick(v, page, x, y, hotspots);
         }
 
         public void onLongClick(View v, int page, float x, float y, List<Hotspot> hotspots) {
-            log("long", page, x, y, hotspots);
             if (post()) mListener.onLongClick(v, page, x, y, hotspots);
         }
 
         public void onZoom(View v, int[] pages, boolean zoonIn) {
-            log("onZoom.pages: " + PageflipUtils.join(",", pages) + ", zoomIn: " + zoonIn);
             if (post()) mListener.onZoom(v, pages, zoonIn);
-        }
-
-        private void log(String method, int page, float x, float y, List<Hotspot> hotspots) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(method).append("[");
-            sb.append("page").append(page);
-//			sb.append(", x:").append(x).append(", y:").append(y);
-            sb.append(", hotspot:");
-            boolean first = true;
-            for (Hotspot h : hotspots) {
-                if (!first) {
-                    sb.append(", ");
-                }
-                first = false;
-                sb.append(h.getOffer().getHeading());
-            }
-            sb.append("]");
-            String msg = sb.toString();
-            log(msg);
-            if (LOG) {
-                Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        private void log(String message) {
-            if (LOG) {
-                SgnLog.d(TAG, message);
-            }
         }
 
     }

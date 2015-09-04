@@ -20,9 +20,9 @@ import android.os.Parcel;
 
 import com.shopgun.android.sdk.model.Catalog;
 
-public class TwoPageReaderConfig extends ReaderConfig {
+public class DoublePageReaderConfig extends ReaderConfig {
 
-    public TwoPageReaderConfig() {
+    public DoublePageReaderConfig() {
 
     }
 
@@ -67,7 +67,7 @@ public class TwoPageReaderConfig extends ReaderConfig {
 
     @Override
     public boolean isValidPage(Catalog c, int page) {
-        return 1 <= page && (c == null || page <= c.getPageCount());
+        return 1 <= page && (c != null && page <= c.getPageCount());
     }
 
     @Override
@@ -75,17 +75,17 @@ public class TwoPageReaderConfig extends ReaderConfig {
         return 0;
     }
 
-    protected TwoPageReaderConfig(Parcel in) {
+    protected DoublePageReaderConfig(Parcel in) {
         super(in);
     }
 
-    public static final Creator<TwoPageReaderConfig> CREATOR = new Creator<TwoPageReaderConfig>() {
-        public TwoPageReaderConfig createFromParcel(Parcel source) {
-            return new TwoPageReaderConfig(source);
+    public static final Creator<DoublePageReaderConfig> CREATOR = new Creator<DoublePageReaderConfig>() {
+        public DoublePageReaderConfig createFromParcel(Parcel source) {
+            return new DoublePageReaderConfig(source);
         }
 
-        public TwoPageReaderConfig[] newArray(int size) {
-            return new TwoPageReaderConfig[size];
+        public DoublePageReaderConfig[] newArray(int size) {
+            return new DoublePageReaderConfig[size];
         }
     };
 

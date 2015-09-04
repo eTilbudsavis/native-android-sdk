@@ -42,7 +42,7 @@ public class SinglePageReaderConfig extends ReaderConfig {
 
     @Override
     public boolean isValidPage(Catalog c, int page) {
-        return 1 <= page && (c == null || page <= c.getPageCount());
+        return 1 <= page && (c != null && page <= c.getPageCount());
     }
 
     @Override

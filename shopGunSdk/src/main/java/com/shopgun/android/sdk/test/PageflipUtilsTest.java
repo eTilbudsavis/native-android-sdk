@@ -17,7 +17,6 @@
 package com.shopgun.android.sdk.test;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.HotspotMap;
 import com.shopgun.android.sdk.model.Images;
@@ -41,61 +40,9 @@ public class PageflipUtilsTest {
     public static void test() {
 
         SdkTest.start(TAG);
-        testPageToPosition();
-        testPositionToPage();
         testJoin();
         testCatalogUtils();
 
-    }
-
-    public static void testPageToPosition() {
-
-        SgnLog.i(TAG, "testPageToPosition is not running");
-        testPageToPosition(1, LANDSCAPE, 0);
-        testPageToPosition(2, LANDSCAPE, 1);
-        testPageToPosition(3, LANDSCAPE, 1);
-        testPageToPosition(4, LANDSCAPE, 2);
-        testPageToPosition(5, LANDSCAPE, 2);
-
-        testPageToPosition(1, PORTRAIT, 0);
-        testPageToPosition(2, PORTRAIT, 1);
-        testPageToPosition(3, PORTRAIT, 2);
-        testPageToPosition(4, PORTRAIT, 3);
-
-        SdkTest.logTest(TAG, (new MethodNameHelper() {
-        }).getName());
-
-    }
-
-    private static void testPageToPosition(int page, boolean land, int expectedPos) {
-//        Assert.assertEquals(expectedPos, PageflipUtils.pageToPosition(page, land));
-    }
-
-    public static void testPositionToPage() {
-
-        SgnLog.i(TAG, "testPositionToPage is not running");
-        int PAGE_COUNT = 8;
-        testPositionToPage(0, PAGE_COUNT, LANDSCAPE, new int[]{1});
-        testPositionToPage(1, PAGE_COUNT, LANDSCAPE, new int[]{2, 3});
-        testPositionToPage(2, PAGE_COUNT, LANDSCAPE, new int[]{4, 5});
-        testPositionToPage(3, PAGE_COUNT, LANDSCAPE, new int[]{6, 7});
-        testPositionToPage(4, PAGE_COUNT, LANDSCAPE, new int[]{8});
-
-        PAGE_COUNT = 4;
-        testPositionToPage(0, PAGE_COUNT, PORTRAIT, new int[]{1});
-        testPositionToPage(1, PAGE_COUNT, PORTRAIT, new int[]{2});
-        testPositionToPage(2, PAGE_COUNT, PORTRAIT, new int[]{3});
-        testPositionToPage(3, PAGE_COUNT, PORTRAIT, new int[]{4});
-        testPositionToPage(4, PAGE_COUNT, PORTRAIT, new int[]{5});
-
-        SdkTest.logTest(TAG, (new MethodNameHelper() {
-        }).getName());
-
-    }
-
-    private static void testPositionToPage(int pos, int pageCount, boolean land, int[] expectedPages) {
-//        int[] pages = PageflipUtils.positionToPages(pos, pageCount, land);
-//        Assert.assertTrue(Arrays.equals(pages, expectedPages));
     }
 
     public static void testJoin() {

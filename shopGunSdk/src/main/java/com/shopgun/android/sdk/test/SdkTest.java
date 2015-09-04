@@ -42,6 +42,7 @@ public class SdkTest {
         PageflipUtilsTest.test();
         ListUtilsTest.test();
         VersionTest.test();
+        ReaderConfigTest.test();
 
         String ok = "*   All test passed (" + (System.currentTimeMillis() - start) + "ms)   *";
         StringBuilder sb = new StringBuilder();
