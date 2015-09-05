@@ -46,6 +46,7 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
             // This will be used at a cancellation signal
             setTag(new Object());
         }
+        setDelivery(this);
         return super.setRequestQueue(requestQueue);
     }
 
@@ -114,20 +115,29 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void postResponse(Request<?> request, Response<?> response) {
         request.addEvent("post-response");
 
-        // Update catalog (shouldn't be using network threads to deliver responses)
-        new DeliveryRunnable(request,response).run();
+        if (this.equals(request)) {
 
-        // Deliver catalog if needed
-        synchronized (mRequests) {
-            mRequests.remove(request);
-            if (mRequests.isEmpty()) {
-                postResponseMain();
+            // if it's this request
+            deliverResponse( (T)response.result, response.error);
+
+        } else {
+
+            // Update catalog (shouldn't be using network threads to deliver responses)
+            new DeliveryRunnable(request,response).run();
+
+            // Deliver catalog if needed
+            synchronized (mRequests) {
+                mRequests.remove(request);
+                if (mRequests.isEmpty()) {
+                    postResponseMain();
+                }
             }
-        }
 
+        }
     }
 
     private void postResponseMain() {
