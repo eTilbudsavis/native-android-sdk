@@ -72,18 +72,21 @@ public class DoublePageReaderConfigTest extends TestCase {
         r.setConfiguration(null);
         assertFalse(r.isLandscape());
 
-        r.setConfiguration(new Configuration());
-
-        r.getConfiguration().orientation = Configuration.ORIENTATION_LANDSCAPE;
+        Configuration c = new Configuration();
+        c.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        r.setConfiguration(c);
         assertTrue(r.isLandscape());
 
-        r.getConfiguration().orientation = Configuration.ORIENTATION_PORTRAIT;
+        c.orientation = Configuration.ORIENTATION_PORTRAIT;
+        r.setConfiguration(c);
         assertFalse(r.isLandscape());
 
-        r.getConfiguration().orientation = Configuration.ORIENTATION_UNDEFINED;
+        c.orientation = Configuration.ORIENTATION_UNDEFINED;
+        r.setConfiguration(c);
         assertFalse(r.isLandscape());
 
-        r.getConfiguration().orientation = Configuration.ORIENTATION_SQUARE;
+        c.orientation = Configuration.ORIENTATION_SQUARE;
+        r.setConfiguration(c);
         assertFalse(r.isLandscape());
 
         SdkTest.logTest(TAG, (new MethodNameHelper() {
@@ -93,7 +96,9 @@ public class DoublePageReaderConfigTest extends TestCase {
 
     public static void testPageToPosition(ReaderConfig r) {
 
-        r.getConfiguration().orientation = Configuration.ORIENTATION_LANDSCAPE;
+        Configuration c = new Configuration();
+        c.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        r.setConfiguration(c);
 
         SgnLog.i(TAG, "testPageToPosition is not running");
         testPageToPosition(r, 1, 0);
@@ -102,7 +107,8 @@ public class DoublePageReaderConfigTest extends TestCase {
         testPageToPosition(r, 4, 2);
         testPageToPosition(r, 5, 2);
 
-        r.getConfiguration().orientation = Configuration.ORIENTATION_PORTRAIT;
+        c.orientation = Configuration.ORIENTATION_PORTRAIT;
+        r.setConfiguration(c);
 
         testPageToPosition(r, 1, 0);
         testPageToPosition(r, 2, 1);
@@ -120,7 +126,10 @@ public class DoublePageReaderConfigTest extends TestCase {
 
     public static void testPositionToPage(ReaderConfig r) {
 
-        r.getConfiguration().orientation = Configuration.ORIENTATION_LANDSCAPE;
+        Configuration c = new Configuration();
+        c.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        r.setConfiguration(c);
+
         int PAGE_COUNT = 8;
         testPositionToPage(r, 0, PAGE_COUNT, new int[]{1});
         testPositionToPage(r, 1, PAGE_COUNT, new int[]{2, 3});
@@ -128,7 +137,9 @@ public class DoublePageReaderConfigTest extends TestCase {
         testPositionToPage(r, 3, PAGE_COUNT, new int[]{6, 7});
         testPositionToPage(r, 4, PAGE_COUNT, new int[]{8});
 
-        r.getConfiguration().orientation = Configuration.ORIENTATION_PORTRAIT;
+        c.orientation = Configuration.ORIENTATION_PORTRAIT;
+        r.setConfiguration(c);
+
         PAGE_COUNT = 4;
         testPositionToPage(r, 0, PAGE_COUNT, new int[]{1});
         testPositionToPage(r, 1, PAGE_COUNT, new int[]{2});

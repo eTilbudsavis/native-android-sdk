@@ -24,7 +24,7 @@ import com.shopgun.android.sdk.model.Catalog;
 
 public abstract class ReaderConfig implements Parcelable {
 
-    Configuration mConfig;
+    boolean mLandscape = false;
 
     public ReaderConfig() {
     }
@@ -69,17 +69,25 @@ public abstract class ReaderConfig implements Parcelable {
      * @return true if in landscape mode, else false
      */
     public boolean isLandscape() {
-        return mConfig != null && mConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
+        return mLandscape;
+    }
+
+    public void setLandscape(boolean landscape) {
+        mLandscape = landscape;
     }
 
     public void setConfiguration(Configuration config) {
-        mConfig = config;
+        setOrientation(config.orientation);
     }
 
-    public Configuration getConfiguration() {
-        return mConfig;
+    public void setOrientation(int orientation) {
+        setLandscape(orientation == Configuration.ORIENTATION_LANDSCAPE);
     }
 
+    @Override
+    public String toString() {
+        return "ReaderConfig[landscape:" + isLandscape() + "]";
+    }
 
     @Override
     public int describeContents() {
@@ -88,11 +96,11 @@ public abstract class ReaderConfig implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(this.mConfig, 0);
+        dest.writeByte(mLandscape ? (byte) 1 : (byte) 0);
     }
 
     protected ReaderConfig(Parcel in) {
-        this.mConfig = in.readParcelable(Configuration.class.getClassLoader());
+        this.mLandscape = in.readByte() != 0;
     }
 
 }
