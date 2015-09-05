@@ -240,8 +240,8 @@ public class LifecycleFragment extends Fragment {
     protected void printMethod(boolean print) {
         if (print) {
             StackTraceElement ste = Thread.currentThread().getStackTrace()[3];
-            String text = ste.getMethodName() + "(" + ste.getFileName() + ":" + ste.getLineNumber() + ")";
-            SgnLog.d(getClass().getSimpleName(), text);
+//            String text = ste.getMethodName() + "(" + ste.getFileName() + ":" + ste.getLineNumber() + ")";
+            SgnLog.d(getClass().getSimpleName(), ste.getMethodName());
         }
     }
 

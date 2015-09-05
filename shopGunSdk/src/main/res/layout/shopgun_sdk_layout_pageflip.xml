@@ -27,11 +27,11 @@
 
     <com.shopgun.android.sdk.pageflip.widget.LoadingTextView
         android:id="@+id/shopgun_sdk_layout_pageflip_loader"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:gravity="center_horizontal"
         android:text="@string/com_shopgun_android_sdk_pageflip_loading"
-        android:textSize="30sp"/>
+        android:textSize="30sp"
+        android:gravity="center"/>
 
 </FrameLayout>

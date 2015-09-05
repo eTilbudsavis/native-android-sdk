@@ -20,17 +20,17 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.api.Endpoints;
+import com.shopgun.android.sdk.filler.CatalogFillerRequest;
 import com.shopgun.android.sdk.filler.FillerRequest;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Branding;
@@ -41,8 +41,7 @@ import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
-import com.shopgun.android.sdk.filler.CatalogFillerRequest;
-import com.shopgun.android.sdk.utils.Api.Endpoint;
+import com.shopgun.android.sdk.utils.LifecycleFragment;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONObject;
@@ -50,7 +49,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PageflipFragment extends Fragment implements FillerRequest.Listener<Catalog> {
+public class PageflipFragment extends LifecycleFragment implements FillerRequest.Listener<Catalog> {
 
     public static final String TAG = Constants.getTag(PageflipFragment.class);
     public static final String ARG_CATALOG = Constants.getArg(PageflipFragment.class, "catalog");
@@ -67,7 +66,6 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     private String mCatalogId;
     private Branding mBranding;
     // Views
-    private LayoutInflater mInflater;
     private ViewGroup mContainer;
     private FrameLayout mFrame;
     private LoadingTextView mLoader;
@@ -288,24 +286,35 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
 
         if (!ShopGun.isCreated()) {
+            // Make sure, that ShopGun is running
             ShopGun.create(getActivity());
         }
+        onRestoreState(savedInstanceState);
 
-        Bundle b = new Bundle();
-        if (getArguments() != null) {
-            b.putAll(getArguments());
-        }
-        if (savedInstanceState != null) {
-            b.putAll(savedInstanceState);
-        }
-        setState(b);
-        super.onCreate(savedInstanceState);
+        mContainer = container;
+        mFrame = (FrameLayout) inflater.inflate(R.layout.shopgun_sdk_layout_pageflip, mContainer, false);
+        mLoader = (LoadingTextView) mFrame.findViewById(R.id.shopgun_sdk_layout_pageflip_loader);
+        mPager = (PageflipViewPager) mFrame.findViewById(R.id.shopgun_sdk_layout_pageflip_viewpager);
+        mPager.setScrollDurationFactor(PAGER_SCROLL_FACTOR);
+        mPager.addOnPageChangeListener(mOnPageChangeListener);
+        mPager.setOnPageBound(mPageBoundListener);
+
+        return mFrame;
     }
 
-    private void setState(Bundle args) {
+    private void onRestoreState(Bundle savedInstanceState) {
+
+        Bundle args = new Bundle();
+        if (getArguments() != null) {
+            args.putAll(getArguments());
+        }
+        if (savedInstanceState != null) {
+            args.putAll(savedInstanceState);
+        }
 
         mConfig = args.getParcelable(ARG_READER_CONFIG);
         if (mConfig == null) {
@@ -330,44 +339,6 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
         if (mViewSessionUuid == null) {
             mViewSessionUuid = Utils.createUUID();
         }
-
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-        mInflater = inflater;
-        mContainer = container;
-        setUpView(true);
-        return mFrame;
-    }
-
-    /**
-     * Called to setup the view, on create and resume events.
-     *
-     * @param removeParent Whether to remove the View from the parent view (on e.g. configuration changes)
-     */
-    private void setUpView(boolean removeParent) {
-
-        if (mFrame == null) {
-            mFrame = (FrameLayout) mInflater.inflate(R.layout.shopgun_sdk_layout_pageflip, mContainer, false);
-        } else {
-            // Remove self from parent view, to avoid attaching to two different vie
-            ViewGroup parent = (ViewGroup) mFrame.getParent();
-            if (parent != null && removeParent) {
-                parent.removeView(mFrame);
-            }
-        }
-
-        mLoader = (LoadingTextView) mFrame.findViewById(R.id.shopgun_sdk_layout_pageflip_loader);
-        mPager = (PageflipViewPager) mFrame.findViewById(R.id.shopgun_sdk_layout_pageflip_viewpager);
-        mPager.setScrollDurationFactor(PAGER_SCROLL_FACTOR);
-        mPager.addOnPageChangeListener(mOnPageChangeListener);
-        mPager.setOnPageBound(mPageBoundListener);
-
-        showContent(false);
-        setBranding(mBranding);
-        mLoader.start();
 
     }
 
@@ -408,6 +379,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
      * @return An array of pages being displayed
      */
     public int[] getPages() {
+        SgnLog.d(TAG, "getPages.isLandscape: " + mConfig.isLandscape());
         return mConfig.positionToPages(mCurrentPosition, mCatalog.getPageCount());
     }
 
@@ -418,6 +390,8 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
      * @param page The page to turn to
      */
     public void setPage(int page) {
+        SgnLog.d(TAG, "mConfig.landscape: " + mConfig.isLandscape());
+        SgnLog.d(TAG, "setPage: " + page);
         if (mConfig.isValidPage(mCatalog, page)) {
             setPosition(mConfig.pageToPosition(page));
         }
@@ -439,6 +413,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
      * @param position A position
      */
     public void setPosition(int position) {
+        SgnLog.d(TAG, "setPosition: " + position);
         mCurrentPosition = position;
         if (mPager != null) {
             mPager.setCurrentItem(mCurrentPosition);
@@ -514,39 +489,13 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        boolean land = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
-        if (land != mConfig.isLandscape()) {
-            internalPause();
-
-            // Get the old page
-            int[] pages = mConfig.positionToPages(mCurrentPosition, mCatalog.getPageCount());
-            // switch to landscape mode
-            mConfig.setConfiguration(newConfig);
-            // set new current position accordingly
-            mCurrentPosition = mConfig.pageToPosition(pages[0]);
-
-            mAdapter.clearState();
-            mPager.setAdapter(null);
-
-            setUpView(false);
-            internalResume();
-        }
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(ARG_PAGE, getPages()[0]);
+        int page = getPages()[0];
+        outState.putInt(ARG_PAGE, page);
         outState.putParcelable(ARG_CATALOG, mCatalog);
         outState.putString(ARG_CATALOG_ID, mCatalogId);
         outState.putString(ARG_VIEW_SESSION, mViewSessionUuid);
         outState.putParcelable(ARG_BRANDING, mBranding);
-        if (mAdapter != null) {
-            mAdapter.clearState();
-        }
-        mPager.setAdapter(null);
         super.onSaveInstanceState(outState);
     }
 
@@ -567,6 +516,9 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
             }
             mPageflipStarted = true;
         }
+        showContent(false);
+        setBranding(mBranding);
+        mLoader.start();
         ensureCatalog();
     }
 
@@ -596,7 +548,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
             }
         };
 
-        String url = Endpoint.catalogId(mCatalogId);
+        String url = Endpoints.catalogId(mCatalogId);
         JsonObjectRequest r = new JsonObjectRequest(url, l);
         r.setIgnoreCache(true);
         ShopGun.getInstance().add(r);
@@ -618,16 +570,13 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
         } else {
 
-            int heap = Utils.getMaxHeap(getActivity());
-            mAdapter = new CatalogPagerAdapter(getChildFragmentManager(), heap, mCatalogPageCallback, mConfig);
-            mPager.setAdapter(mAdapter);
+            applyAdapter();
             // force the first page change if needed
             if (mPager.getCurrentItem() != mCurrentPosition) {
                 mPager.setCurrentItem(mCurrentPosition);
             } else {
                 mWrapperListener.onPageChange(mConfig.positionToPages(mCurrentPosition, mCatalog.getPageCount()));
             }
-            showContent(true);
 
             mWrapperListener.onReady();
 
@@ -635,8 +584,14 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
     }
 
-    private void setBrandingAndFillCatalog() {
+    private void applyAdapter() {
+        int heap = Utils.getMaxHeap(getActivity());
+        mAdapter = new CatalogPagerAdapter(getChildFragmentManager(), heap, mCatalogPageCallback, mConfig);
+        mPager.setAdapter(mAdapter);
+        showContent(true);
+    }
 
+    private void setBrandingAndFillCatalog() {
         if (mCatalog != null) {
             setBranding(mCatalog.getBranding());
             mCatalogFillRequest = new CatalogFillerRequest(mCatalog, this);
@@ -644,7 +599,22 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
             mCatalogFillRequest.appendPages(true);
             ShopGun.getInstance().add(mCatalogFillRequest);
         }
+    }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        boolean land = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
+        if (land != mConfig.isLandscape()) {
+            // To correctly destroy the state of the CatalogPagerAdapter
+            // we will mimic the lifecycle of a fragment being destroyed
+            // and restored.
+            internalPause();
+            Bundle b = new Bundle();
+            onSaveInstanceState(b);
+            onRestoreState(b);
+            internalResume();
+        }
     }
 
     @Override
@@ -660,6 +630,15 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
         }
         mPagesReady = false;
         mPageflipStarted = false;
+        clearAdapter();
+    }
+
+    private void clearAdapter() {
+        if (mAdapter != null) {
+            mAdapter.clearState();
+        }
+        mPager.setAdapter(null);
+        showContent(false);
     }
 
     public Catalog getCatalog() {
@@ -707,13 +686,12 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     }
 
     /**
-     * A wrapper class for the users {@link PageflipListener}. Used to do some debugging.
+     * A wrapper for the {@link PageflipListener}, that allows us to intercept all calls.
+     * This also allows us to do some debugging.
      */
     protected class PageflipListenerWrapper implements PageflipListener {
 
-        private static final boolean LOG = false;
         protected PageflipListener mListener;
-        long s = -1;
 
         private boolean post() {
             return mListener != null;
