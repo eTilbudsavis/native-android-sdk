@@ -15,6 +15,10 @@
   limitations under the License.
   -->
 
-<resources>
-  <string name="com_shopgun_android_sdk_pageflip_page_error">Could not load\npage %1$s</string>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+  <string name="com_shopgun_android_sdk_name">ShopGun</string>
+  <string name="com_shopgun_android_sdk_pageflip_loading">Catalog\n&#8230;</string>
+  <string name="com_shopgun_android_sdk_pageflip_page_loading">2&#8211;3\n&#8230;</string>
 </resources>
