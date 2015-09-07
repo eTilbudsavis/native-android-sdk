@@ -50,7 +50,7 @@ public class ActivityCounter implements Runnable {
 
     public ActivityCounter(OnLifecycleEvent listener, int delay, Handler handler) {
         this.mListener = listener;
-        this.mDelay = delay;
+        this.mDelay = delay < 0 ? 0 : delay;
         this.mHandler = handler;
     }
 
@@ -75,7 +75,11 @@ public class ActivityCounter implements Runnable {
             mHandler.removeCallbacks(this);
             if (mCounter.decrementAndGet() == 0 ) {
                 mAwaitingTermination = true;
-                mHandler.postDelayed(this, mDelay);
+                if (mDelay <= 0) {
+                    run();
+                } else {
+                    mHandler.postDelayed(this, mDelay);
+                }
             }
         }
     }
