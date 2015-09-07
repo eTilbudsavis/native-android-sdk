@@ -19,7 +19,6 @@ package com.shopgun.android.sdk.test;
 import android.content.res.Configuration;
 
 import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.pageflip.DoublePageReaderConfig;
 import com.shopgun.android.sdk.pageflip.ReaderConfig;
 
@@ -39,31 +38,8 @@ public class DoublePageReaderConfigTest extends TestCase {
         DoublePageReaderConfig two = new DoublePageReaderConfig();
         two.setConfiguration(new Configuration());
         testIsLandscape(two);
-        testIsValidPage(two);
         testPositionToPage(two);
         testPageToPosition(two);
-
-    }
-
-    public static void testIsValidPage(ReaderConfig r) {
-
-        assertFalse(r.isValidPage(null, -1));
-        assertFalse(r.isValidPage(null, 0));
-        assertFalse(r.isValidPage(null, 1));
-
-        Catalog c = new Catalog();
-        c.setPageCount(30);
-
-        assertFalse(r.isValidPage(c, Integer.MIN_VALUE));
-        assertFalse(r.isValidPage(c, -1));
-        assertFalse(r.isValidPage(c, 0));
-        assertTrue(r.isValidPage(c, 1));
-        assertTrue(r.isValidPage(c, 30));
-        assertFalse(r.isValidPage(c, 31));
-        assertFalse(r.isValidPage(c, Integer.MAX_VALUE));
-
-        SdkTest.logTest(TAG, (new MethodNameHelper() {
-        }).getName());
 
     }
 

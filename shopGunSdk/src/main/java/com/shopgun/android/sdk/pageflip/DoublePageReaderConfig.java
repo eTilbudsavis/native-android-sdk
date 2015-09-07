@@ -18,8 +18,6 @@ package com.shopgun.android.sdk.pageflip;
 
 import android.os.Parcel;
 
-import com.shopgun.android.sdk.model.Catalog;
-
 public class DoublePageReaderConfig extends ReaderConfig {
 
     public DoublePageReaderConfig() {
@@ -63,11 +61,6 @@ public class DoublePageReaderConfig extends ReaderConfig {
             pages = new int[]{page, (page + 1)};
         }
         return pages;
-    }
-
-    @Override
-    public boolean isValidPage(Catalog c, int page) {
-        return 1 <= page && (c != null && page <= c.getPageCount());
     }
 
     @Override

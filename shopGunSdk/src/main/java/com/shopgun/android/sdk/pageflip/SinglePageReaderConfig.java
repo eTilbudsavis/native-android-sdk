@@ -18,8 +18,6 @@ package com.shopgun.android.sdk.pageflip;
 
 import android.os.Parcel;
 
-import com.shopgun.android.sdk.model.Catalog;
-
 public class SinglePageReaderConfig extends ReaderConfig {
 
     public SinglePageReaderConfig() {
@@ -38,11 +36,6 @@ public class SinglePageReaderConfig extends ReaderConfig {
     @Override
     public int[] positionToPages(int position, int pageCount) {
         return new int[]{position+1};
-    }
-
-    @Override
-    public boolean isValidPage(Catalog c, int page) {
-        return 1 <= page && (c != null && page <= c.getPageCount());
     }
 
     @Override

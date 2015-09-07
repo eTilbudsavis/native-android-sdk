@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,7 +33,6 @@ import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.filler.CatalogFillerRequest;
 import com.shopgun.android.sdk.filler.FillerRequest;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Branding;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Hotspot;
@@ -41,7 +41,6 @@ import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
-import com.shopgun.android.sdk.utils.LifecycleFragment;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONObject;
@@ -49,7 +48,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PageflipFragment extends LifecycleFragment implements FillerRequest.Listener<Catalog> {
+public class PageflipFragment extends Fragment implements FillerRequest.Listener<Catalog> {
 
     public static final String TAG = Constants.getTag(PageflipFragment.class);
     public static final String ARG_CATALOG = Constants.getArg(PageflipFragment.class, "catalog");
@@ -379,7 +378,6 @@ public class PageflipFragment extends LifecycleFragment implements FillerRequest
      * @return An array of pages being displayed
      */
     public int[] getPages() {
-        SgnLog.d(TAG, "getPages.isLandscape: " + mConfig.isLandscape());
         return mConfig.positionToPages(mCurrentPosition, mCatalog.getPageCount());
     }
 
@@ -390,11 +388,7 @@ public class PageflipFragment extends LifecycleFragment implements FillerRequest
      * @param page The page to turn to
      */
     public void setPage(int page) {
-        SgnLog.d(TAG, "mConfig.landscape: " + mConfig.isLandscape());
-        SgnLog.d(TAG, "setPage: " + page);
-        if (mConfig.isValidPage(mCatalog, page)) {
-            setPosition(mConfig.pageToPosition(page));
-        }
+        setPosition(mConfig.pageToPosition(page));
     }
 
     /**
@@ -413,7 +407,6 @@ public class PageflipFragment extends LifecycleFragment implements FillerRequest
      * @param position A position
      */
     public void setPosition(int position) {
-        SgnLog.d(TAG, "setPosition: " + position);
         mCurrentPosition = position;
         if (mPager != null) {
             mPager.setCurrentItem(mCurrentPosition);

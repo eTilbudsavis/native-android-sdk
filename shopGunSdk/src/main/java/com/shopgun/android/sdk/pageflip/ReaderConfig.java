@@ -55,15 +55,6 @@ public abstract class ReaderConfig implements Parcelable {
     public abstract int[] positionToPages(int position, int pageCount);
 
     /**
-     * Check if a page is within a valid range
-     *
-     * @param c    A catalog
-     * @param page the page number
-     * @return true if valid, else false
-     */
-    public abstract boolean isValidPage(Catalog c, int page);
-
-    /**
      * Method for getting the orientation
      *
      * @return true if in landscape mode, else false
