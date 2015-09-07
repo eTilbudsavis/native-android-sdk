@@ -84,7 +84,7 @@ import java.util.concurrent.Executors;
  * The ShopGun SDK Demo, demonstrates some of the setup methods, and features included in the SDK.
  *
  */
-public class ShopGun {
+public class ShopGun implements ActivityCounter.OnLifecycleEvent {
 
     public static final String TAG = Constants.getTag(ShopGun.class);
 
@@ -100,7 +100,7 @@ public class ShopGun {
     /** A static handler for usage in the SDK, this will help prevent leaks */
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     /** Counting the number of active activities, to determine when to stop any long running activities */
-    private final ActivityCounter mActivityCounter = new ActivityCounter();
+    private final ActivityCounter mActivityCounter;
     /** Application context for usage in the SDK */
     private Context mContext;
     /** The developers APIkey */
@@ -137,6 +137,7 @@ public class ShopGun {
     private ShopGun(Context context) {
         // Get application context, to avoid memory leaks (e.g. holding a reference to an Activity)
         mContext = context.getApplicationContext();
+        mActivityCounter = new ActivityCounter(this, 1000, mHandler);
         init();
     }
 
@@ -490,7 +491,7 @@ public class ShopGun {
      */
     public void destroy() {
         synchronized (ShopGun.class) {
-            mInternalStop.run();
+            onPerformStop();
             clear();
             mShopGun = null;
         }
@@ -515,44 +516,30 @@ public class ShopGun {
     }
 
     public void onStart() {
-        mHandler.removeCallbacks(mInternalStop);
-        mActivityCounter.increment();
-        if (mActivityCounter.shouldPerformStart()) {
-            internalStart();
-        }
-        mActivityCounter.setAwaitingTermination(false);
+        mActivityCounter.start();
     }
 
-    private void internalStart() {
+    public void onStop() {
+        mActivityCounter.stop();
+    }
+
+    @Override
+    public void onPerformStart() {
         ensureKeys(mContext);
         mSessionManager.onStart();
         mListManager.onStart();
         mSyncManager.onStart();
         mSettings.incrementUsageCount();
-        SgnLog.v(TAG, "SDK start performed");
+        SgnLog.v(TAG, "onPerformStart");
     }
 
-    public void onStop() {
-        mActivityCounter.decrement();
-        if (!mActivityCounter.isStarted()) {
-            // Delay shutdown 1 second, to prevent extra load on e.g. orientation changes
-            mHandler.postDelayed(mInternalStop, 1000);
-            mActivityCounter.setAwaitingTermination(true);
-        }
+    @Override
+    public void onPerformStop() {
+        mSettings.saveLocation(mLocation);
+        mListManager.onStop();
+        mSyncManager.onStop();
+        mSessionManager.onStop();
+        mSettings.setLastUsedTimeNow();
+        SgnLog.v(TAG, "onPerformStop");
     }
-
-    Runnable mInternalStop = new Runnable() {
-        @Override
-        public void run() {
-            mActivityCounter.setAwaitingTermination(false);
-            mSettings.saveLocation(mLocation);
-            mListManager.onStop();
-            mSyncManager.onStop();
-            mSessionManager.onStop();
-            mSettings.setLastUsedTimeNow();
-            mActivityCounter.reset();
-            SgnLog.v(TAG, "SDK shutdown performed");
-        }
-    };
-
 }

@@ -16,64 +16,92 @@
 
 package com.shopgun.android.sdk.utils;
 
+import android.os.Handler;
+import android.os.Looper;
+
+import com.shopgun.android.sdk.Constants;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class created for easily counting number of start/stop events from activities
  *
  */
-public class ActivityCounter {
+public class ActivityCounter implements Runnable {
 
+    public static final String TAG = Constants.getTag(ActivityCounter.class);
+
+    public static final int DELAY = 1000;
+
+    private final Handler mHandler;
+    private final int mDelay;
     private final AtomicInteger mCounter = new AtomicInteger(0);
+    private final OnLifecycleEvent mListener;
     private boolean mAwaitingTermination = false;
+    private final Object LOCK = new Object();
 
-    /**
-     * Reset the counter.
-     *
-     * @return Current count
-     */
-    public int reset() {
-        mCounter.set(0);
-        return 0;
+    public ActivityCounter(OnLifecycleEvent listener) {
+        this(listener, DELAY, new Handler(Looper.getMainLooper()));
+    }
+
+    public ActivityCounter(OnLifecycleEvent listener, int delay) {
+        this(listener, delay, new Handler(Looper.getMainLooper()));
+    }
+
+    public ActivityCounter(OnLifecycleEvent listener, int delay, Handler handler) {
+        this.mListener = listener;
+        this.mDelay = delay;
+        this.mHandler = handler;
     }
 
     /**
-     * Increments the counter by one. And returns <code>true</code> if this event was the start event of this counter.
-     *
-     * @return <code>true</code> if this was the start event, else <code>false</code>
+     * Increment counter
      */
-    public boolean increment() {
-        return mCounter.getAndIncrement() == 0;
+    public void start() {
+        synchronized (LOCK) {
+            if (mCounter.getAndIncrement() == 0 && !mAwaitingTermination) {
+                mListener.onPerformStart();
+            }
+            mHandler.removeCallbacks(this);
+            mAwaitingTermination = false;
+        }
     }
 
     /**
-     * Decrements the counter by one. And returns <code>true</code> if this event was the stop event of this counter.
-     *
-     * @return <code>true</code> if this was the stop event, else <code>false</code>
+     * Decrements counter
      */
-    public boolean decrement() {
-        return mCounter.decrementAndGet() == 0;
+    public void stop() {
+        synchronized (LOCK) {
+            mHandler.removeCallbacks(this);
+            if (mCounter.decrementAndGet() == 0 ) {
+                mAwaitingTermination = true;
+                mHandler.postDelayed(this, mDelay);
+            }
+        }
     }
 
     /**
-     * Test if the counter is started
-     *
-     * @return <code>true</code> if <code>counter > 0</code> else <code>false</code>
+     * Test if there is currently an active activity.
+     * @return <code>true</code> if SDK is started else <code>false</code>
      */
     public boolean isStarted() {
-        return mCounter.get() > 0;
+        synchronized (LOCK) {
+            return mCounter.get() > 0;
+        }
     }
 
-    public void setAwaitingTermination(boolean waiting) {
-        mAwaitingTermination = waiting;
+    public void run() {
+        synchronized (LOCK) {
+            mHandler.removeCallbacks(this);
+            mAwaitingTermination = false;
+            mCounter.set(0);
+            mListener.onPerformStop();
+        }
     }
 
-    public boolean isAwaitingTermination() {
-        return mAwaitingTermination;
-    }
-
-    public boolean shouldPerformStart() {
-        return isStarted() && !mAwaitingTermination;
+    public interface OnLifecycleEvent {
+        void onPerformStart();
+        void onPerformStop();
     }
 
 }
