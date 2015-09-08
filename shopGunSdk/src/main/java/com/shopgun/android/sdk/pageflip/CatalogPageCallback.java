@@ -27,15 +27,6 @@ import java.util.List;
 public interface CatalogPageCallback {
 
     /**
-     * Determining, if the {@link PageflipViewPager} if in the same position, as the position in the
-     * {@link PageflipFragment}. Is among other things used to determine, if the {@link PageflipFragment}
-     * and {@link PageflipViewPager} is ready to display the catalog pages.
-     *
-     * @return
-     */
-    boolean isPositionSet();
-
-    /**
      * Called by a {@link PageflipFragment} when it's ready to display catalog pages. This is used
      * to control events during configuration changes
      *

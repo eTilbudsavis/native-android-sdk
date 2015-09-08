@@ -158,12 +158,6 @@ public class CatalogPageFragment extends Fragment implements
         if (mPhotoView.isBitmapValid()) {
             return;
         }
-        if (mCallback == null) {
-            return;
-        }
-        if (!mCallback.isPositionSet()) {
-            return;
-        }
         if (ensureLoader()) {
             mPageLoader.into(mPhotoView, PageLoader.Quality.MEDIUM);
         }
@@ -173,12 +167,6 @@ public class CatalogPageFragment extends Fragment implements
      * When called, start loading zoom images into the {@link ZoomPhotoView}.
      */
     private void loadZoom() {
-        if (mCallback == null) {
-            return;
-        }
-        if (!mCallback.isPositionSet()) {
-            return;
-        }
         if (ensureLoader()) {
             mPageLoader.into(mPhotoView, PageLoader.Quality.HIGH);
         }

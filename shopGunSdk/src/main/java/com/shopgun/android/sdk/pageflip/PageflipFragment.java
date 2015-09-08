@@ -31,8 +31,6 @@ import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.api.Endpoints;
-import com.shopgun.android.sdk.filler.CatalogFillerRequest;
-import com.shopgun.android.sdk.filler.FillerRequest;
 import com.shopgun.android.sdk.model.Branding;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Hotspot;
@@ -41,6 +39,8 @@ import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
+import com.shopgun.android.sdk.requests.CatalogFillerRequest;
+import com.shopgun.android.sdk.requests.FillerRequest;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONObject;
@@ -85,11 +85,6 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     private CatalogFillerRequest mCatalogFillRequest;
 
     private CatalogPageCallback mCatalogPageCallback = new CatalogPageCallback() {
-
-        @Override
-        public boolean isPositionSet() {
-            return mPager.getCurrentItem() == mCurrentPosition;
-        }
 
         public void onReady(int position) {
             if (position == mCurrentPosition) {
@@ -549,6 +544,11 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     }
 
     @Override
+    public void onFillIntermediate(Catalog response, List<ShopGunError> errors) {
+        // empty
+    }
+
+    @Override
     public void onFillComplete(Catalog response, List<ShopGunError> errors) {
 
         if (!isAdded()) {
@@ -560,10 +560,10 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
             mLoader.error();
             // doesn't matter which error we choose, so we'll just take the first one
             mWrapperListener.onError(errors.get(0));
+            showContent(false);
 
         } else {
 
-            applyAdapter();
             // force the first page change if needed
             if (mPager.getCurrentItem() != mCurrentPosition) {
                 mPager.setCurrentItem(mCurrentPosition);
@@ -571,6 +571,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
                 mWrapperListener.onPageChange(mConfig.positionToPages(mCurrentPosition, mCatalog.getPageCount()));
             }
 
+            applyAdapter();
             mWrapperListener.onReady();
 
         }

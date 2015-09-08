@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.filler;
+package com.shopgun.android.sdk.requests;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -85,18 +85,24 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
 
     private void runFillerRequests() {
         synchronized (mRequests) {
-            mRequests.addAll(createRequests());
+            List<Request> tmp = createRequests();
+            mRequests.addAll(tmp);
             if (mRequests.isEmpty()) {
                 postResponseMain();
             } else {
                 for (Request r : mRequests) {
-                    addRequest(r);
+                    applyState(r);
+                    getRequestQueue().add(r);
                 }
             }
         }
     }
 
-    private void addRequest(Request r) {
+    /**
+     * Method for applying the current request state to the given request
+     * @param r A {@link Request} to apply state to.
+     */
+    private void applyState(Request r) {
         // mimic parent behaviour
         r.setDebugger(getDebugger());
         r.setDelivery(this);
@@ -104,7 +110,6 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
         r.setIgnoreCache(ignoreCache());
         r.setTimeOut(getTimeOut());
         r.setUseLocation(useLocation());
-        getRequestQueue().add(r);
     }
 
     @Override
@@ -134,6 +139,9 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
                 mRequests.remove(request);
                 if (mRequests.isEmpty()) {
                     postResponseMain();
+                } else {
+                    addEvent("intermediate-delivery");
+                    mListener.onFillIntermediate(mData, mErrors);
                 }
             }
 
@@ -147,8 +155,8 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                addEvent("request-on-new-thread");
-                internalDelivery();
+                    addEvent("request-on-new-thread");
+                    internalDelivery();
                 }
             });
         }
@@ -165,8 +173,20 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
 
     /** Callback interface for delivering parsed responses. */
     public interface Listener<T> {
-        /** Called when a response is received. */
+        /**
+         * Called when a response is received.
+         * @param response The response data.
+         * @param errors A list of {@link ShopGunError} that occurred during execution.
+         */
         void onFillComplete(T response, List<ShopGunError> errors);
+
+        /**
+         * Called every time a request finishes.
+         * <p>This is done on the network thread. Doing intensive work from this thread is discouraged</p>
+         * @param response The current state of the response data, this is not a complete set.
+         * @param errors A list of {@link ShopGunError} that occurred during execution.
+         */
+        void onFillIntermediate(T response, List<ShopGunError> errors);
     }
 
 }
