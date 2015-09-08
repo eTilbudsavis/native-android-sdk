@@ -192,6 +192,32 @@ public final class Utils {
     }
 
     /**
+     *
+     * Returns a string of parameters.
+     *
+     * <p>This method doesn't do encoding or sorting of parameters</p>
+     *
+     * @param parameters A map of parameters to convert
+     * @return A query string
+     */
+    public static String mapToQueryString(Map<String, String> parameters) {
+        if (parameters == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        LinkedList<String> keys = new LinkedList<String>(parameters.keySet());
+        for (String key : keys) {
+            String value = valueIsNull(parameters.get(key));
+            if (sb.length() > 0) {
+                sb.append("&");
+            }
+            sb.append(key).append("=").append(value);
+
+        }
+        return sb.toString();
+    }
+
+    /**
      * Returns a string of parameters, ordered alphabetically (for better cache performance)
      *
      * @param b A {@link Bundle} to convert into a {@link Map}
