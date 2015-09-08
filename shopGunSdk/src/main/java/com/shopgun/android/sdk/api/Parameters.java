@@ -266,6 +266,11 @@ public class Parameters {
     public static final String API_AV = "api_av";
 
     /**
+     * Parameter for sending the current locale of the device
+     */
+    public static final String API_LOCALE = "r_locale";
+
+    /**
      * Parameter not yet integrated in the API
      */
     public static final String ACCURACY = "accuracy";

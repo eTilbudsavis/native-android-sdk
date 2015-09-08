@@ -19,20 +19,20 @@ package com.shopgun.android.sdk.network;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.SgnLocation;
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.api.Endpoints;
+import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.log.EventLog;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.impl.HandlerDelivery;
-import com.shopgun.android.sdk.utils.Api.Endpoint;
-import com.shopgun.android.sdk.utils.Api.Param;
 import com.shopgun.android.sdk.utils.Utils;
 
-import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -64,7 +64,7 @@ public class RequestQueue {
 //    private final Map<String, LinkedList<Request>> mRequestParking = new HashMap<String, LinkedList<Request>>();
     /** Network interface for performing requests. */
     private final Network mNetwork;
-    /** Cache interface for retrieving and storing respones. */
+    /** Cache interface for retrieving and storing responses. */
     private final Cache mCache;
     /** Response delivery mechanism. */
     private final Delivery mDelivery;
@@ -98,7 +98,7 @@ public class RequestQueue {
     }
 
     /**
-     * Construct with default poolsize, and the ShopGun handler running on main thread
+     * Construct with default pool-size, and the ShopGun handler running on main thread
      * @param shopGun - the ShopGun SDK object to use for requests
      * @param cache - to use for this RequestQueue
      * @param network - the implementation you want to use for this RequestQueue
@@ -196,7 +196,7 @@ public class RequestQueue {
     }
 
     /**
-     * This method have been depricated, please refer to {@link SgnLog#getLogger()}
+     * This method have been deprecated, please refer to {@link SgnLog#getLogger()}
      * for a complete log of ShopGun sdk.<br><br>
      *
      * Get the log of all requests that have passed through this RequestQueue.
@@ -303,7 +303,7 @@ public class RequestQueue {
         try {
             log.put("method", r.getMethod().toString());
             log.put("url", Utils.requestToUrlAndQueryString(r));
-            log.put(HTTP.CONTENT_TYPE, r.getBodyContentType());
+            log.put("Content-Type", r.getBodyContentType());
             log.put("headers", new JSONObject(r.getHeaders()));
             log.put("time", Utils.dateToString(new Date()));
         } catch (JSONException e) {
@@ -319,7 +319,7 @@ public class RequestQueue {
      * {@link Object#equals(Object) equals} method</p>
      *
      * @param tag A tag to match
-     * @return
+     * @return The number of cancelled requests
      */
     public int cancelAll(Object tag) {
 
@@ -342,12 +342,12 @@ public class RequestQueue {
     }
 
     private boolean isSessionEndpoint(Request<?> r) {
-        return r.getUrl().contains(Endpoint.SESSIONS);
+        return r.getUrl().contains(Endpoints.SESSIONS);
     }
 
     /**
      * Method for adding required parameters for calling the ShopGun.<br>
-     * @param request
+     * @param request A request
      */
     private void prepareRequest(Request<?> request) {
 
@@ -358,8 +358,10 @@ public class RequestQueue {
 
         String version = mShopGun.getAppVersion();
         if (version != null) {
-            request.getParameters().put(Param.API_AV, version);
+            request.getParameters().put(Parameters.API_AV, version);
         }
+
+        request.getParameters().put(Parameters.API_LOCALE, Locale.getDefault().toString());
 
         if (request.useLocation()) {
             appendLocationParams(request.getParameters(), mShopGun.getLocation());
@@ -373,32 +375,32 @@ public class RequestQueue {
             return;
         }
 
-        if (!map.containsKey(Param.LATITUDE)) {
-            map.put(Param.LATITUDE, String.valueOf(l.getLatitude()));
+        if (!map.containsKey(Parameters.LATITUDE)) {
+            map.put(Parameters.LATITUDE, String.valueOf(l.getLatitude()));
         }
-        if (!map.containsKey(Param.LONGITUDE)) {
-            map.put(Param.LONGITUDE, String.valueOf(l.getLongitude()));
+        if (!map.containsKey(Parameters.LONGITUDE)) {
+            map.put(Parameters.LONGITUDE, String.valueOf(l.getLongitude()));
         }
-        if (!map.containsKey(Param.SENSOR)) {
-            map.put(Param.SENSOR, String.valueOf(l.isSensor()));
+        if (!map.containsKey(Parameters.SENSOR)) {
+            map.put(Parameters.SENSOR, String.valueOf(l.isSensor()));
         }
-        if (!map.containsKey(Param.RADIUS)) {
-            map.put(Param.RADIUS, String.valueOf(l.getRadius()));
+        if (!map.containsKey(Parameters.RADIUS)) {
+            map.put(Parameters.RADIUS, String.valueOf(l.getRadius()));
         }
 
         // Determine whether to include bounds.
         if (l.isBoundsSet()) {
-            if (!map.containsKey(Param.BOUND_EAST)) {
-                map.put(Param.BOUND_EAST, String.valueOf(l.getBoundEast()));
+            if (!map.containsKey(Parameters.BOUND_EAST)) {
+                map.put(Parameters.BOUND_EAST, String.valueOf(l.getBoundEast()));
             }
-            if (!map.containsKey(Param.BOUND_NORTH)) {
-                map.put(Param.BOUND_NORTH, String.valueOf(l.getBoundNorth()));
+            if (!map.containsKey(Parameters.BOUND_NORTH)) {
+                map.put(Parameters.BOUND_NORTH, String.valueOf(l.getBoundNorth()));
             }
-            if (!map.containsKey(Param.BOUND_SOUTH)) {
-                map.put(Param.BOUND_SOUTH, String.valueOf(l.getBoundSouth()));
+            if (!map.containsKey(Parameters.BOUND_SOUTH)) {
+                map.put(Parameters.BOUND_SOUTH, String.valueOf(l.getBoundSouth()));
             }
-            if (!map.containsKey(Param.BOUND_WEST)) {
-                map.put(Param.BOUND_WEST, String.valueOf(l.getBoundWest()));
+            if (!map.containsKey(Parameters.BOUND_WEST)) {
+                map.put(Parameters.BOUND_WEST, String.valueOf(l.getBoundWest()));
             }
         }
 
