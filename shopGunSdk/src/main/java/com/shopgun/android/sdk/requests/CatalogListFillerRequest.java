@@ -39,16 +39,10 @@ public class CatalogListFillerRequest extends FillerRequest<List<Catalog>> {
         List<Catalog> data = getData();
         ArrayList<Request> list = new ArrayList<Request>();
         if (mStore) {
-            Request r = RequestCreator.getStoresRequestOrNull(this, data);
-            if (r != null) {
-                list.add(r);
-            }
+            list.add(RequestCreator.getStoresRequestOrNull(this, data));
         }
         if (mDealer) {
-            Request r = RequestCreator.getDealersRequestOrNull(this, data);
-            if (r != null) {
-                list.add(r);
-            }
+            list.add(RequestCreator.getDealersRequestOrNull(this, data));
         }
         if (mPages) {
             list.addAll(RequestCreator.getPagesListRequestOrEmpty(this, data));

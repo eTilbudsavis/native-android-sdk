@@ -589,8 +589,8 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
         if (mCatalog != null) {
             setBranding(mCatalog.getBranding());
             mCatalogFillRequest = new CatalogFillerRequest(mCatalog, this);
-            mCatalogFillRequest.appendHotspots(true);
-            mCatalogFillRequest.appendPages(true);
+            mCatalogFillRequest.addHotspots(true);
+            mCatalogFillRequest.addPages(true);
             ShopGun.getInstance().add(mCatalogFillRequest);
         }
     }

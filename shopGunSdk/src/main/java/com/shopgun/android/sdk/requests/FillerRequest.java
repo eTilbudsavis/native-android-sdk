@@ -12,6 +12,7 @@ import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public abstract class FillerRequest<T> extends Request<T> implements Delivery {
@@ -86,6 +87,13 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
     private void runFillerRequests() {
         synchronized (mRequests) {
             List<Request> tmp = createRequests();
+            Iterator<Request> it = tmp.iterator();
+            while (it.hasNext()) {
+                Request r = it.next();
+                if (r==null) {
+                    it.remove();
+                }
+            }
             mRequests.addAll(tmp);
             if (mRequests.isEmpty()) {
                 postResponseMain();

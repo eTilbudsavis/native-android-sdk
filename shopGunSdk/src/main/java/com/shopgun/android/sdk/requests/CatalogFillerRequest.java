@@ -21,48 +21,51 @@ public class CatalogFillerRequest extends FillerRequest<Catalog> {
 
     @Override
     public List<Request> createRequests() {
-        Catalog c = getData();
         ArrayList<Request> list = new ArrayList<Request>();
         if (mStore) {
-            Request r = RequestCreator.getStoreRequestOrNull(this, c);
-            if (r != null) {
-                list.add(r);
-            }
+            list.add(RequestCreator.getStoreRequestOrNull(this, getData()));
         }
         if (mDealer) {
-            Request r = RequestCreator.getDealerRequestOrNull(this, c);
-            if (r != null) {
-                list.add(r);
-            }
+            list.add(RequestCreator.getDealerRequestOrNull(this, getData()));
         }
         if (mPages) {
-            Request r = RequestCreator.getPagesRequestOrNull(this, c);
-            if (r != null) {
-                list.add(r);
-            }
+            list.add(RequestCreator.getPagesRequestOrNull(this, getData()));
         }
         if (mHotspots) {
-            Request r = RequestCreator.getHotspotsRequestOrNull(this, c);
-            if (r != null) {
-                list.add(r);
-            }
+            list.add(RequestCreator.getHotspotsRequestOrNull(this, getData()));
         }
         return list;
     }
 
-    public void appendPages(boolean pages) {
+    public boolean addPages() {
+        return mPages;
+    }
+
+    public void addPages(boolean pages) {
         mPages = pages;
     }
 
-    public void appendDealer(boolean dealer) {
+    public boolean addDealer() {
+        return mDealer;
+    }
+
+    public void addDealer(boolean dealer) {
         mDealer = dealer;
     }
 
-    public void appendStore(boolean store) {
+    public boolean addStore() {
+        return mStore;
+    }
+
+    public void addStore(boolean store) {
         mStore = store;
     }
 
-    public void appendHotspots(boolean hotspots) {
+    public boolean addHotspots() {
+        return mHotspots;
+    }
+
+    public void addHotspots(boolean hotspots) {
         mHotspots = hotspots;
     }
 
