@@ -17,6 +17,7 @@
 package com.shopgun.android.sdk.test;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.log.SgnLog;
 
 public class ColorUtilsTest {
 
@@ -27,7 +28,7 @@ public class ColorUtilsTest {
     }
 
     public static void test() {
-
+        SgnLog.w(TAG, "ColorUtilsTest NOT being performed");
         SdkTest.start(TAG);
     }
 

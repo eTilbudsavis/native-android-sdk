@@ -68,7 +68,7 @@ public class Branding implements IJson<JSONObject>, Parcelable {
             o.put(JsonKeys.NAME, Json.nullCheck(getName()));
             o.put(JsonKeys.WEBSITE, Json.nullCheck(getWebsite()));
             o.put(JsonKeys.LOGO, Json.nullCheck(getLogo()));
-            o.put(JsonKeys.COLOR, Json.colorToString(getMaterialColor()));
+            o.put(JsonKeys.COLOR, Json.colorToSgnJson(getMaterialColor()));
             o.put(JsonKeys.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);

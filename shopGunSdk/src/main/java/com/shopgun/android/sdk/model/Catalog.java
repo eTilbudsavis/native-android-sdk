@@ -173,7 +173,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
             o.put(JsonKeys.ID, Json.nullCheck(getId()));
             o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
             o.put(JsonKeys.LABEL, Json.nullCheck(getLabel()));
-            o.put(JsonKeys.BACKGROUND, Json.colorToString(getBackgroundMaterialColor()));
+            o.put(JsonKeys.BACKGROUND, Json.colorToSgnJson(getBackgroundMaterialColor()));
             o.put(JsonKeys.RUN_FROM, Json.nullCheck(Utils.dateToString(getRunFrom())));
             o.put(JsonKeys.RUN_TILL, Json.nullCheck(Utils.dateToString(getRunTill())));
             o.put(JsonKeys.PAGE_COUNT, getPageCount());

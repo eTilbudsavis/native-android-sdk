@@ -60,7 +60,7 @@ public class Pageflip implements IJson<JSONObject>, Parcelable {
         JSONObject o = new JSONObject();
         try {
             o.put(JsonKeys.LOGO, Json.nullCheck(getLogo()));
-            o.put(JsonKeys.COLOR, Json.colorToString(getMaterialColor()));
+            o.put(JsonKeys.COLOR, Json.colorToSgnJson(getMaterialColor()));
         } catch (JSONException e) {
             SgnLog.e(TAG, e.getMessage(), e);
         }

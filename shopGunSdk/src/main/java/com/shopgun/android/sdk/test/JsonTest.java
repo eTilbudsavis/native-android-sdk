@@ -17,24 +17,28 @@
 package com.shopgun.android.sdk.test;
 
 import android.graphics.Color;
+import android.support.v4.graphics.ColorUtils;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Json;
 
 import junit.framework.Assert;
+import junit.framework.TestCase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class JsonTest {
+public class JsonTest extends TestCase {
 
     public static final String TAG = Constants.getTag(JsonTest.class);
 
     public static void test() {
 
         SdkTest.start(TAG);
-        testJsonUtils();
+        testJsonPrimitives();
+        testJsonColorMethods();
 
         try {
             testJsonEquals();
@@ -44,7 +48,58 @@ public class JsonTest {
 
     }
 
-    public static void testJsonUtils() {
+    public static void testJsonColorMethods() {
+
+        // Testing conversion of int values
+        Assert.assertEquals("000000", Json.colorToString(Color.BLACK));
+        Assert.assertEquals("000000", Json.colorToString(Color.TRANSPARENT));
+        Assert.assertEquals("0000FF", Json.colorToString(Color.BLUE));
+        Assert.assertEquals("0000FF", Json.colorToString(ColorUtils.setAlphaComponent(Color.BLUE, 0)));
+
+        // Testing object values
+        Assert.assertEquals(null, Json.colorToString(null));
+        Assert.assertEquals("000000", Json.colorToString(new SgnColor()));
+        Assert.assertEquals("00FF00", Json.colorToString(new SgnColor(Color.GREEN)));
+        Assert.assertEquals("000000", Json.colorToString(new SgnColor(Color.TRANSPARENT)));
+
+        // Testing object values
+        Assert.assertEquals(JSONObject.NULL, Json.colorToSgnJson(null));
+        Assert.assertEquals("000000", Json.colorToSgnJson(new SgnColor()));
+        Assert.assertEquals("00FF00", Json.colorToSgnJson(new SgnColor(Color.GREEN)));
+        Assert.assertEquals("000000", Json.colorToSgnJson(new SgnColor(Color.TRANSPARENT)));
+
+        JSONObject o = new JSONObject();
+        try {
+            o.put("#ARGB", "#FF00FF00");
+            o.put("#RGB", "#00FF00");
+            o.put("ARGB", "0100FF00");
+            o.put("RGB", "00FF00");
+            o.put("black", "000000");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // API doesn't support alpha, so we default to black
+        assertEquals(Color.BLACK, Json.colorValueOf(o, "noKey"));
+        // unless we specify it
+        assertEquals(Color.GREEN, Json.colorValueOf(o, "noKey", Color.GREEN));
+
+        // A valid #ARGB color
+        assertEquals(Color.GREEN, Json.colorValueOf(o, "#ARGB"));
+        // A valid #RGB color
+        assertEquals(Color.GREEN, Json.colorValueOf(o, "#RGB"));
+        // ARGB value contains 16 in alpha channel, lets test
+        int greenAlpha = ColorUtils.setAlphaComponent(Color.GREEN, 1);
+        assertEquals(greenAlpha, Json.colorValueOf(o, "ARGB"));
+        // An API green
+        assertEquals(Color.GREEN, Json.colorValueOf(o, "RGB"));
+        // An API Black
+        assertEquals(Color.BLACK, Json.colorValueOf(o, "black"));
+
+
+    }
+
+    public static void testJsonPrimitives() {
 
         Assert.assertNull(Json.getObject(new JSONObject(), null));
         Assert.assertNull(Json.getObject(null, "myString"));
@@ -73,14 +128,6 @@ public class JsonTest {
         String jsonObjectKey = "jsonobject";
         JSONObject jsonObjectValue = new JSONObject();
 
-        int colorIntValue = Color.BLACK;
-        String colorStringKey = "colorstring";
-        String colorStringValue = "000000";
-
-        int colorAlphaIntValue = 0x80FF00FF;
-        String colorAlphaStringKey = "coloralphastring";
-        String colorAlphaStringValue = "80FF00FF";
-
         JSONObject o = new JSONObject();
         try {
             o.put(stringKey, stringValue);
@@ -90,8 +137,6 @@ public class JsonTest {
             o.put(booleanKey, booleanValue);
             o.put(jsonArrayKey, jsonArrayValue);
             o.put(jsonObjectKey, jsonObjectValue);
-            o.put(colorStringKey, colorStringValue);
-            o.put(colorAlphaStringKey, colorAlphaStringValue);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -102,7 +147,6 @@ public class JsonTest {
         Assert.assertNull(Json.getArray(o, noKey, null));
         Assert.assertNull(Json.getObject(o, noKey));
         Assert.assertNull(Json.getObject(o, noKey, null));
-        Assert.assertEquals(Color.BLACK, Json.colorValueOf(o, noKey));
 
         Assert.assertEquals(stringValue, Json.valueOf(o, noKey, stringValue));
         Assert.assertEquals(stringValue, Json.valueOf(o, stringKey, stringValue));
@@ -133,10 +177,6 @@ public class JsonTest {
         Assert.assertNotNull(Json.getObject(o, jsonObjectKey, null));
         Assert.assertNotNull(Json.getObject(o, jsonObjectKey, jsonObjectValue));
 
-        Assert.assertEquals(colorIntValue, Json.colorValueOf(o, colorStringKey));
-
-        // We do not allow alpha channel, so this will be stripped in the process
-        Assert.assertEquals(colorAlphaIntValue, Json.colorValueOf(o, colorAlphaStringKey));
 
     }
 

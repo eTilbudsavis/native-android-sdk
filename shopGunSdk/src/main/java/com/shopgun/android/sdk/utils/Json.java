@@ -239,7 +239,7 @@ public class Json {
 
     /**
      * This method calls {@link Json#colorValueOf(JSONObject, String, int)},
-     * with the defValue set to Color.TRANSPARENT.
+     * with the defValue set to Color.BLACK.
      */
     public static int colorValueOf(JSONObject object, String key) {
         return colorValueOf(object, key, Color.BLACK);
@@ -267,13 +267,17 @@ public class Json {
         return defValue;
     }
 
+    public static Object colorToSgnJson(MaterialColor color) {
+        return nullCheck(colorToString(color));
+    }
+
     /**
      * Convert a color into a ShopGun valid formatted string.
      * @param color A color
      * @return A string representing the color in a ShopGun valid format. Or {@link JSONObject#NULL} if input color is null
      */
-    public static Object colorToString(MaterialColor color) {
-        return color == null ? JSONObject.NULL : colorToString(color.getValue());
+    public static String colorToString(MaterialColor color) {
+        return color == null ? null : colorToString(color.getValue());
     }
 
     /**

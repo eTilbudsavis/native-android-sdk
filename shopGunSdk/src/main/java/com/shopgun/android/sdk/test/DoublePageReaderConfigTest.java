@@ -18,7 +18,6 @@ package com.shopgun.android.sdk.test;
 
 import android.content.res.Configuration;
 
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.pageflip.DoublePageReaderConfig;
 import com.shopgun.android.sdk.pageflip.ReaderConfig;
 
@@ -76,7 +75,6 @@ public class DoublePageReaderConfigTest extends TestCase {
         c.orientation = Configuration.ORIENTATION_LANDSCAPE;
         r.setConfiguration(c);
 
-        SgnLog.i(TAG, "testPageToPosition is not running");
         testPageToPosition(r, 1, 0);
         testPageToPosition(r, 2, 1);
         testPageToPosition(r, 3, 1);
