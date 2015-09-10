@@ -16,13 +16,10 @@
 
 package com.shopgun.android.sdk.pageflip.utils;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Build;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.model.Catalog;
 
 public class PageflipUtils {
@@ -72,31 +69,6 @@ public class PageflipUtils {
      */
     public static boolean almost(float first, float second, float epsilon) {
         return Math.abs(first - second) < epsilon;
-    }
-
-    /**
-     * Get brightness of a specific color
-     */
-    public static Integer getBrightness(Integer color) {
-        return (int) Math.sqrt(
-                Color.red(color) * Color.red(color) * .241 +
-                        Color.green(color) * Color.green(color) * .691 +
-                        Color.blue(color) * Color.blue(color) * .068);
-    }
-
-    public static boolean isBright(int color) {
-        return getBrightness(color) > 160;
-    }
-
-    /**
-     * Get the text color based on the brightness of another color
-     *
-     * @param color The color to compare and evaluate
-     * @return A color for text (white, or dark grey)
-     */
-    public static Integer getTextColor(Integer color, Context c) {
-        int resId = isBright(color) ? R.color.shopgun_sdk_text_dark : R.color.shopgun_sdk_text_light;
-        return c.getResources().getColor(resId);
     }
 
     /**

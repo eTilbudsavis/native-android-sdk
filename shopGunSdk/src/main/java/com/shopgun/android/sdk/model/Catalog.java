@@ -21,14 +21,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.IStore;
+import com.shopgun.android.sdk.palette.MaterialColor;
+import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
-import com.shopgun.android.sdk.utils.ColorUtils;
 import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.Utils;
 
@@ -52,19 +53,11 @@ import java.util.List;
 public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalog>, IStore<Catalog>, Parcelable {
 
     public static final String TAG = Constants.getTag(Catalog.class);
-    public static Parcelable.Creator<Catalog> CREATOR = new Parcelable.Creator<Catalog>() {
-        public Catalog createFromParcel(Parcel source) {
-            return new Catalog(source);
-        }
 
-        public Catalog[] newArray(int size) {
-            return new Catalog[size];
-        }
-    };
     // From JSON blob
     private String mErn;
     private String mLabel;
-    private Integer mBackground;
+    private MaterialColor mBackground;
     private Date mRunFrom;
     private Date mRunTill;
     private int mPageCount = 0;
@@ -86,36 +79,6 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 
     public Catalog() {
 
-    }
-
-    private Catalog(Parcel in) {
-        this.mErn = in.readString();
-        this.mLabel = in.readString();
-        this.mBackground = (Integer) in.readValue(Integer.class.getClassLoader());
-        long tmpMRunFrom = in.readLong();
-        this.mRunFrom = tmpMRunFrom == -1 ? null : new Date(tmpMRunFrom);
-        long tmpMRunTill = in.readLong();
-        this.mRunTill = tmpMRunTill == -1 ? null : new Date(tmpMRunTill);
-        this.mPageCount = in.readInt();
-        this.mOfferCount = in.readInt();
-        this.mBranding = in.readParcelable(Branding.class.getClassLoader());
-        this.mDealerId = in.readString();
-        this.mDealerUrl = in.readString();
-        this.mStoreId = in.readString();
-        this.mStoreUrl = in.readString();
-        this.mDimension = in.readParcelable(Dimension.class.getClassLoader());
-        this.mImages = in.readParcelable(Images.class.getClassLoader());
-        int size = in.readInt();
-        mCatrgoryIds = new HashSet<String>();
-        for (int i = 0; i < size; i++) {
-            mCatrgoryIds.add(in.readString());
-        }
-        this.mPdfUrl = in.readString();
-        this.mPages = new ArrayList<Images>();
-        in.readTypedList(mPages, Images.CREATOR);
-        this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
-        this.mStore = in.readParcelable(Store.class.getClassLoader());
-        this.mHotspots = in.readParcelable(HotspotMap.class.getClassLoader());
     }
 
     /**
@@ -147,26 +110,26 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         }
 
         try {
-            catalog.setId(Json.valueOf(jCatalog, JsonKey.ID));
-            catalog.setErn(Json.valueOf(jCatalog, JsonKey.ERN));
-            catalog.setLabel(Json.valueOf(jCatalog, JsonKey.LABEL));
-            catalog.setBackground(Json.colorValueOf(jCatalog, JsonKey.BACKGROUND));
-            Date runFrom = Utils.stringToDate(Json.valueOf(jCatalog, JsonKey.RUN_FROM));
+            catalog.setId(Json.valueOf(jCatalog, JsonKeys.ID));
+            catalog.setErn(Json.valueOf(jCatalog, JsonKeys.ERN));
+            catalog.setLabel(Json.valueOf(jCatalog, JsonKeys.LABEL));
+            catalog.setBackground(Json.colorValueOf(jCatalog, JsonKeys.BACKGROUND));
+            Date runFrom = Utils.stringToDate(Json.valueOf(jCatalog, JsonKeys.RUN_FROM));
             catalog.setRunFrom(runFrom);
-            Date runTill = Utils.stringToDate(Json.valueOf(jCatalog, JsonKey.RUN_TILL));
+            Date runTill = Utils.stringToDate(Json.valueOf(jCatalog, JsonKeys.RUN_TILL));
             catalog.setRunTill(runTill);
-            catalog.setPageCount(Json.valueOf(jCatalog, JsonKey.PAGE_COUNT, 0));
-            catalog.setOfferCount(Json.valueOf(jCatalog, JsonKey.OFFER_COUNT, 0));
-            catalog.setBranding(Branding.fromJSON(jCatalog.getJSONObject(JsonKey.BRANDING)));
-            catalog.setDealerId(Json.valueOf(jCatalog, JsonKey.DEALER_ID));
-            catalog.setDealerUrl(Json.valueOf(jCatalog, JsonKey.DEALER_URL));
-            catalog.setStoreId(Json.valueOf(jCatalog, JsonKey.STORE_ID));
-            catalog.setStoreUrl(Json.valueOf(jCatalog, JsonKey.STORE_URL));
-            catalog.setDimension(Dimension.fromJSON(jCatalog.getJSONObject(JsonKey.DIMENSIONS)));
-            catalog.setImages(Images.fromJSON(jCatalog.getJSONObject(JsonKey.IMAGES)));
+            catalog.setPageCount(Json.valueOf(jCatalog, JsonKeys.PAGE_COUNT, 0));
+            catalog.setOfferCount(Json.valueOf(jCatalog, JsonKeys.OFFER_COUNT, 0));
+            catalog.setBranding(Branding.fromJSON(jCatalog.getJSONObject(JsonKeys.BRANDING)));
+            catalog.setDealerId(Json.valueOf(jCatalog, JsonKeys.DEALER_ID));
+            catalog.setDealerUrl(Json.valueOf(jCatalog, JsonKeys.DEALER_URL));
+            catalog.setStoreId(Json.valueOf(jCatalog, JsonKeys.STORE_ID));
+            catalog.setStoreUrl(Json.valueOf(jCatalog, JsonKeys.STORE_URL));
+            catalog.setDimension(Dimension.fromJSON(jCatalog.getJSONObject(JsonKeys.DIMENSIONS)));
+            catalog.setImages(Images.fromJSON(jCatalog.getJSONObject(JsonKeys.IMAGES)));
 
-            if (jCatalog.has(JsonKey.CATEGORY_IDS)) {
-                JSONArray jCats = jCatalog.getJSONArray(JsonKey.CATEGORY_IDS);
+            if (jCatalog.has(JsonKeys.CATEGORY_IDS)) {
+                JSONArray jCats = jCatalog.getJSONArray(JsonKeys.CATEGORY_IDS);
                 HashSet<String> cat = new HashSet<String>(jCats.length());
                 for (int i = 0; i < jCats.length(); i++) {
                     cat.add(jCats.getString(i));
@@ -174,20 +137,20 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
                 catalog.setCatrgoryIds(cat);
             }
 
-            catalog.setPdfUrl(Json.valueOf(jCatalog, JsonKey.PDF_URL));
+            catalog.setPdfUrl(Json.valueOf(jCatalog, JsonKeys.PDF_URL));
 
-            if (jCatalog.has(JsonKey.SDK_DEALER)) {
-                JSONObject jDealer = Json.getObject(jCatalog, JsonKey.SDK_DEALER, null);
+            if (jCatalog.has(JsonKeys.SDK_DEALER)) {
+                JSONObject jDealer = Json.getObject(jCatalog, JsonKeys.SDK_DEALER, null);
                 catalog.setDealer(Dealer.fromJSON(jDealer));
             }
 
-            if (jCatalog.has(JsonKey.SDK_STORE)) {
-                JSONObject jStore = Json.getObject(jCatalog, JsonKey.SDK_STORE, null);
+            if (jCatalog.has(JsonKeys.SDK_STORE)) {
+                JSONObject jStore = Json.getObject(jCatalog, JsonKeys.SDK_STORE, null);
                 catalog.setStore(Store.fromJSON(jStore));
             }
 
-            if (jCatalog.has(JsonKey.SDK_PAGES)) {
-                JSONArray jPages = Json.getArray(jCatalog, JsonKey.SDK_PAGES);
+            if (jCatalog.has(JsonKeys.SDK_PAGES)) {
+                JSONArray jPages = Json.getArray(jCatalog, JsonKeys.SDK_PAGES);
                 List<Images> pages = new ArrayList<Images>(jPages.length());
                 for (int i = 0; i < jPages.length(); i++) {
                     pages.add(Images.fromJSON(jPages.getJSONObject(i)));
@@ -207,30 +170,30 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.ID, Json.nullCheck(getId()));
-            o.put(JsonKey.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKey.LABEL, Json.nullCheck(getLabel()));
-            o.put(JsonKey.BACKGROUND, Json.nullCheck(ColorUtils.toString(getBackground())));
-            o.put(JsonKey.RUN_FROM, Json.nullCheck(Utils.dateToString(getRunFrom())));
-            o.put(JsonKey.RUN_TILL, Json.nullCheck(Utils.dateToString(getRunTill())));
-            o.put(JsonKey.PAGE_COUNT, getPageCount());
-            o.put(JsonKey.OFFER_COUNT, getOfferCount());
-            o.put(JsonKey.BRANDING, Json.nullCheck(getBranding().toJSON()));
-            o.put(JsonKey.DEALER_ID, Json.nullCheck(getDealerId()));
-            o.put(JsonKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
-            o.put(JsonKey.STORE_ID, Json.nullCheck(getStoreId()));
-            o.put(JsonKey.STORE_URL, Json.nullCheck(getStoreUrl()));
-            o.put(JsonKey.DIMENSIONS, Json.nullCheck(getDimension().toJSON()));
-            o.put(JsonKey.IMAGES, Json.nullCheck(getImages().toJSON()));
-            o.put(JsonKey.CATEGORY_IDS, new JSONArray(getCatrgoryIds()));
-            o.put(JsonKey.PDF_URL, Json.nullCheck(getPdfUrl()));
+            o.put(JsonKeys.ID, Json.nullCheck(getId()));
+            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
+            o.put(JsonKeys.LABEL, Json.nullCheck(getLabel()));
+            o.put(JsonKeys.BACKGROUND, Json.colorToString(getBackgroundMaterialColor()));
+            o.put(JsonKeys.RUN_FROM, Json.nullCheck(Utils.dateToString(getRunFrom())));
+            o.put(JsonKeys.RUN_TILL, Json.nullCheck(Utils.dateToString(getRunTill())));
+            o.put(JsonKeys.PAGE_COUNT, getPageCount());
+            o.put(JsonKeys.OFFER_COUNT, getOfferCount());
+            o.put(JsonKeys.BRANDING, Json.nullCheck(getBranding().toJSON()));
+            o.put(JsonKeys.DEALER_ID, Json.nullCheck(getDealerId()));
+            o.put(JsonKeys.DEALER_URL, Json.nullCheck(getDealerUrl()));
+            o.put(JsonKeys.STORE_ID, Json.nullCheck(getStoreId()));
+            o.put(JsonKeys.STORE_URL, Json.nullCheck(getStoreUrl()));
+            o.put(JsonKeys.DIMENSIONS, Json.nullCheck(getDimension().toJSON()));
+            o.put(JsonKeys.IMAGES, Json.nullCheck(getImages().toJSON()));
+            o.put(JsonKeys.CATEGORY_IDS, new JSONArray(getCatrgoryIds()));
+            o.put(JsonKeys.PDF_URL, Json.nullCheck(getPdfUrl()));
 
             if (mDealer != null) {
-                o.put(JsonKey.SDK_DEALER, Json.toJson(mDealer));
+                o.put(JsonKeys.SDK_DEALER, Json.toJson(mDealer));
             }
 
             if (mStore != null) {
-                o.put(JsonKey.SDK_STORE, Json.toJson(mStore));
+                o.put(JsonKeys.SDK_STORE, Json.toJson(mStore));
             }
 
             if (mPages != null) {
@@ -238,7 +201,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
                 for (Images i : mPages) {
                     jPages.put(i.toJSON());
                 }
-                o.put(JsonKey.SDK_PAGES, Json.nullCheck(jPages));
+                o.put(JsonKeys.SDK_PAGES, Json.nullCheck(jPages));
             }
 
             // TODO Fix HotspotsMap so it can be JSON'ed
@@ -291,12 +254,29 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * For displaying the catalog, in a reader fashion, please use the color found in {@link Pageflip}.
      * @return A color
      */
-    public Integer getBackground() {
+    public int getBackground() {
+        return getBackgroundMaterialColor().getValue();
+    }
+
+    /**
+     * Get the background color for this catalog.<br>
+     * For displaying the catalog, in a reader fashion, please use the color found in {@link Pageflip}.
+     * @return A color
+     */
+    public MaterialColor getBackgroundMaterialColor() {
+        if (mBackground == null) {
+            mBackground = new SgnColor();
+        }
         return mBackground;
     }
 
-    public Catalog setBackground(Integer background) {
-        mBackground = ColorUtils.stripAlpha(background);
+    public Catalog setBackground(int background) {
+        setBackground(new SgnColor(background));
+        return this;
+    }
+
+    public Catalog setBackground(MaterialColor background) {
+        mBackground = background;
         return this;
     }
 
@@ -634,178 +614,122 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Catalog catalog = (Catalog) o;
+
+        if (mPageCount != catalog.mPageCount) return false;
+        if (mOfferCount != catalog.mOfferCount) return false;
+        if (mErn != null ? !mErn.equals(catalog.mErn) : catalog.mErn != null) return false;
+        if (mLabel != null ? !mLabel.equals(catalog.mLabel) : catalog.mLabel != null) return false;
+        if (mBackground != null ? !mBackground.equals(catalog.mBackground) : catalog.mBackground != null) return false;
+        if (mRunFrom != null ? !mRunFrom.equals(catalog.mRunFrom) : catalog.mRunFrom != null) return false;
+        if (mRunTill != null ? !mRunTill.equals(catalog.mRunTill) : catalog.mRunTill != null) return false;
+        if (mBranding != null ? !mBranding.equals(catalog.mBranding) : catalog.mBranding != null) return false;
+        if (mDealerId != null ? !mDealerId.equals(catalog.mDealerId) : catalog.mDealerId != null) return false;
+        if (mDealerUrl != null ? !mDealerUrl.equals(catalog.mDealerUrl) : catalog.mDealerUrl != null) return false;
+        if (mStoreId != null ? !mStoreId.equals(catalog.mStoreId) : catalog.mStoreId != null) return false;
+        if (mStoreUrl != null ? !mStoreUrl.equals(catalog.mStoreUrl) : catalog.mStoreUrl != null) return false;
+        if (mDimension != null ? !mDimension.equals(catalog.mDimension) : catalog.mDimension != null) return false;
+        if (mImages != null ? !mImages.equals(catalog.mImages) : catalog.mImages != null) return false;
+        if (mCatrgoryIds != null ? !mCatrgoryIds.equals(catalog.mCatrgoryIds) : catalog.mCatrgoryIds != null)
+            return false;
+        if (mPdfUrl != null ? !mPdfUrl.equals(catalog.mPdfUrl) : catalog.mPdfUrl != null) return false;
+        if (mPages != null ? !mPages.equals(catalog.mPages) : catalog.mPages != null) return false;
+        if (mDealer != null ? !mDealer.equals(catalog.mDealer) : catalog.mDealer != null) return false;
+        if (mStore != null ? !mStore.equals(catalog.mStore) : catalog.mStore != null) return false;
+        return !(mHotspots != null ? !mHotspots.equals(catalog.mHotspots) : catalog.mHotspots != null);
+
+    }
+
+    @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((mBackground == null) ? 0 : mBackground.hashCode());
-        result = prime * result
-                + ((mBranding == null) ? 0 : mBranding.hashCode());
-        result = prime * result
-                + ((mCatrgoryIds == null) ? 0 : mCatrgoryIds.hashCode());
-        result = prime * result + ((mDealer == null) ? 0 : mDealer.hashCode());
-        result = prime * result
-                + ((mDealerId == null) ? 0 : mDealerId.hashCode());
-        result = prime * result
-                + ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
-        result = prime * result
-                + ((mDimension == null) ? 0 : mDimension.hashCode());
-        result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-        result = prime * result
-                + ((mHotspots == null) ? 0 : mHotspots.hashCode());
-        result = prime * result + ((mImages == null) ? 0 : mImages.hashCode());
-        result = prime * result + ((mLabel == null) ? 0 : mLabel.hashCode());
-        result = prime * result + mOfferCount;
-        result = prime * result + mPageCount;
-        result = prime * result + ((mPages == null) ? 0 : mPages.hashCode());
-        result = prime * result + ((mPdfUrl == null) ? 0 : mPdfUrl.hashCode());
-        result = prime * result
-                + ((mRunFrom == null) ? 0 : mRunFrom.hashCode());
-        result = prime * result
-                + ((mRunTill == null) ? 0 : mRunTill.hashCode());
-        result = prime * result + ((mStore == null) ? 0 : mStore.hashCode());
-        result = prime * result
-                + ((mStoreId == null) ? 0 : mStoreId.hashCode());
-        result = prime * result
-                + ((mStoreUrl == null) ? 0 : mStoreUrl.hashCode());
+        int result = mErn != null ? mErn.hashCode() : 0;
+        result = 31 * result + (mLabel != null ? mLabel.hashCode() : 0);
+        result = 31 * result + (mBackground != null ? mBackground.hashCode() : 0);
+        result = 31 * result + (mRunFrom != null ? mRunFrom.hashCode() : 0);
+        result = 31 * result + (mRunTill != null ? mRunTill.hashCode() : 0);
+        result = 31 * result + mPageCount;
+        result = 31 * result + mOfferCount;
+        result = 31 * result + (mBranding != null ? mBranding.hashCode() : 0);
+        result = 31 * result + (mDealerId != null ? mDealerId.hashCode() : 0);
+        result = 31 * result + (mDealerUrl != null ? mDealerUrl.hashCode() : 0);
+        result = 31 * result + (mStoreId != null ? mStoreId.hashCode() : 0);
+        result = 31 * result + (mStoreUrl != null ? mStoreUrl.hashCode() : 0);
+        result = 31 * result + (mDimension != null ? mDimension.hashCode() : 0);
+        result = 31 * result + (mImages != null ? mImages.hashCode() : 0);
+        result = 31 * result + (mCatrgoryIds != null ? mCatrgoryIds.hashCode() : 0);
+        result = 31 * result + (mPdfUrl != null ? mPdfUrl.hashCode() : 0);
+        result = 31 * result + (mPages != null ? mPages.hashCode() : 0);
+        result = 31 * result + (mDealer != null ? mDealer.hashCode() : 0);
+        result = 31 * result + (mStore != null ? mStore.hashCode() : 0);
+        result = 31 * result + (mHotspots != null ? mHotspots.hashCode() : 0);
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Catalog other = (Catalog) obj;
-        if (mBackground == null) {
-            if (other.mBackground != null) {
-                return false;
-            }
-        } else if (!mBackground.equals(other.mBackground))
-            return false;
-        if (mBranding == null) {
-            if (other.mBranding != null)
-                return false;
-        } else if (!mBranding.equals(other.mBranding))
-            return false;
-        if (mCatrgoryIds == null) {
-            if (other.mCatrgoryIds != null)
-                return false;
-        } else if (!mCatrgoryIds.equals(other.mCatrgoryIds))
-            return false;
-        if (mDealer == null) {
-            if (other.mDealer != null)
-                return false;
-        } else if (!mDealer.equals(other.mDealer))
-            return false;
-        if (mDealerId == null) {
-            if (other.mDealerId != null)
-                return false;
-        } else if (!mDealerId.equals(other.mDealerId))
-            return false;
-        if (mDealerUrl == null) {
-            if (other.mDealerUrl != null)
-                return false;
-        } else if (!mDealerUrl.equals(other.mDealerUrl))
-            return false;
-        if (mDimension == null) {
-            if (other.mDimension != null)
-                return false;
-        } else if (!mDimension.equals(other.mDimension))
-            return false;
-        if (mErn == null) {
-            if (other.mErn != null)
-                return false;
-        } else if (!mErn.equals(other.mErn))
-            return false;
-        if (mHotspots == null) {
-            if (other.mHotspots != null)
-                return false;
-        } else if (!mHotspots.equals(other.mHotspots))
-            return false;
-        if (mImages == null) {
-            if (other.mImages != null)
-                return false;
-        } else if (!mImages.equals(other.mImages))
-            return false;
-        if (mLabel == null) {
-            if (other.mLabel != null)
-                return false;
-        } else if (!mLabel.equals(other.mLabel))
-            return false;
-        if (mOfferCount != other.mOfferCount)
-            return false;
-        if (mPageCount != other.mPageCount)
-            return false;
-        if (mPages == null) {
-            if (other.mPages != null)
-                return false;
-        } else if (!mPages.equals(other.mPages))
-            return false;
-        if (mPdfUrl == null) {
-            if (other.mPdfUrl != null)
-                return false;
-        } else if (!mPdfUrl.equals(other.mPdfUrl))
-            return false;
-        if (mRunFrom == null) {
-            if (other.mRunFrom != null)
-                return false;
-        } else if (!mRunFrom.equals(other.mRunFrom))
-            return false;
-        if (mRunTill == null) {
-            if (other.mRunTill != null)
-                return false;
-        } else if (!mRunTill.equals(other.mRunTill))
-            return false;
-        if (mStore == null) {
-            if (other.mStore != null)
-                return false;
-        } else if (!mStore.equals(other.mStore))
-            return false;
-        if (mStoreId == null) {
-            if (other.mStoreId != null)
-                return false;
-        } else if (!mStoreId.equals(other.mStoreId))
-            return false;
-        if (mStoreUrl == null) {
-            if (other.mStoreUrl != null)
-                return false;
-        } else if (!mStoreUrl.equals(other.mStoreUrl))
-            return false;
-        return true;
-    }
-
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.mErn);
         dest.writeString(this.mLabel);
-        dest.writeValue(this.mBackground);
+        dest.writeParcelable(this.mBackground, 0);
         dest.writeLong(mRunFrom != null ? mRunFrom.getTime() : -1);
         dest.writeLong(mRunTill != null ? mRunTill.getTime() : -1);
         dest.writeInt(this.mPageCount);
         dest.writeInt(this.mOfferCount);
-        dest.writeParcelable(this.mBranding, flags);
+        dest.writeParcelable(this.mBranding, 0);
         dest.writeString(this.mDealerId);
         dest.writeString(this.mDealerUrl);
         dest.writeString(this.mStoreId);
         dest.writeString(this.mStoreUrl);
-        dest.writeParcelable(this.mDimension, flags);
-        dest.writeParcelable(this.mImages, flags);
-        dest.writeInt(mCatrgoryIds.size());
-        for (String s : mCatrgoryIds) {
-            dest.writeString(s);
-        }
+        dest.writeParcelable(this.mDimension, 0);
+        dest.writeParcelable(this.mImages, 0);
+        dest.writeSerializable(this.mCatrgoryIds);
         dest.writeString(this.mPdfUrl);
         dest.writeTypedList(mPages);
-        dest.writeParcelable(this.mDealer, flags);
-        dest.writeParcelable(this.mStore, flags);
-        dest.writeParcelable(this.mHotspots, flags);
+        dest.writeParcelable(this.mDealer, 0);
+        dest.writeParcelable(this.mStore, 0);
+        dest.writeParcelable(this.mHotspots, 0);
     }
 
+    protected Catalog(Parcel in) {
+        this.mErn = in.readString();
+        this.mLabel = in.readString();
+        this.mBackground = in.readParcelable(MaterialColor.class.getClassLoader());
+        long tmpMRunFrom = in.readLong();
+        this.mRunFrom = tmpMRunFrom == -1 ? null : new Date(tmpMRunFrom);
+        long tmpMRunTill = in.readLong();
+        this.mRunTill = tmpMRunTill == -1 ? null : new Date(tmpMRunTill);
+        this.mPageCount = in.readInt();
+        this.mOfferCount = in.readInt();
+        this.mBranding = in.readParcelable(Branding.class.getClassLoader());
+        this.mDealerId = in.readString();
+        this.mDealerUrl = in.readString();
+        this.mStoreId = in.readString();
+        this.mStoreUrl = in.readString();
+        this.mDimension = in.readParcelable(Dimension.class.getClassLoader());
+        this.mImages = in.readParcelable(Images.class.getClassLoader());
+        this.mCatrgoryIds = (HashSet<String>) in.readSerializable();
+        this.mPdfUrl = in.readString();
+        this.mPages = in.createTypedArrayList(Images.CREATOR);
+        this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
+        this.mStore = in.readParcelable(Store.class.getClassLoader());
+        this.mHotspots = in.readParcelable(HotspotMap.class.getClassLoader());
+    }
+
+    public static final Creator<Catalog> CREATOR = new Creator<Catalog>() {
+        public Catalog createFromParcel(Parcel source) {
+            return new Catalog(source);
+        }
+
+        public Catalog[] newArray(int size) {
+            return new Catalog[size];
+        }
+    };
 }

@@ -17,8 +17,4 @@
 
 <resources>
 
-    <!-- Text colors -->
-    <color name="shopgun_sdk_text_light">#a0ffffff</color>
-    <color name="shopgun_sdk_text_dark">#a0000000</color>
-
 </resources>

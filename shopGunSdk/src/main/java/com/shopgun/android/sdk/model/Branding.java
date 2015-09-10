@@ -20,10 +20,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
-import com.shopgun.android.sdk.utils.ColorUtils;
+import com.shopgun.android.sdk.palette.MaterialColor;
+import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONException;
@@ -32,31 +33,15 @@ import org.json.JSONObject;
 public class Branding implements IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Branding.class);
-    public static Parcelable.Creator<Branding> CREATOR = new Parcelable.Creator<Branding>() {
-        public Branding createFromParcel(Parcel source) {
-            return new Branding(source);
-        }
 
-        public Branding[] newArray(int size) {
-            return new Branding[size];
-        }
-    };
     private String mName;
     private String mWebsite;
     private String mLogo;
-    private Integer mColor;
+    private MaterialColor mColor;
     private Pageflip mPageflip;
 
     public Branding() {
 
-    }
-
-    private Branding(Parcel in) {
-        this.mName = in.readString();
-        this.mWebsite = in.readString();
-        this.mLogo = in.readString();
-        this.mColor = (Integer) in.readValue(Integer.class.getClassLoader());
-        this.mPageflip = in.readParcelable(Pageflip.class.getClassLoader());
     }
 
     public static Branding fromJSON(JSONObject branding) {
@@ -66,11 +51,11 @@ public class Branding implements IJson<JSONObject>, Parcelable {
         }
 
         try {
-            b.setName(Json.valueOf(branding, JsonKey.NAME));
-            b.setWebsite(Json.valueOf(branding, JsonKey.WEBSITE));
-            b.setLogo(Json.valueOf(branding, JsonKey.LOGO));
-            b.setColor(Json.colorValueOf(branding, JsonKey.COLOR));
-            b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(JsonKey.PAGEFLIP)));
+            b.setName(Json.valueOf(branding, JsonKeys.NAME));
+            b.setWebsite(Json.valueOf(branding, JsonKeys.WEBSITE));
+            b.setLogo(Json.valueOf(branding, JsonKeys.LOGO));
+            b.setColor(Json.colorValueOf(branding, JsonKeys.COLOR));
+            b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(JsonKeys.PAGEFLIP)));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }
@@ -80,11 +65,11 @@ public class Branding implements IJson<JSONObject>, Parcelable {
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.NAME, Json.nullCheck(getName()));
-            o.put(JsonKey.WEBSITE, Json.nullCheck(getWebsite()));
-            o.put(JsonKey.LOGO, Json.nullCheck(getLogo()));
-            o.put(JsonKey.COLOR, Json.nullCheck(ColorUtils.toString(getColor())));
-            o.put(JsonKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
+            o.put(JsonKeys.NAME, Json.nullCheck(getName()));
+            o.put(JsonKeys.WEBSITE, Json.nullCheck(getWebsite()));
+            o.put(JsonKeys.LOGO, Json.nullCheck(getLogo()));
+            o.put(JsonKeys.COLOR, Json.colorToString(getMaterialColor()));
+            o.put(JsonKeys.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }
@@ -118,12 +103,24 @@ public class Branding implements IJson<JSONObject>, Parcelable {
         return this;
     }
 
-    public Integer getColor() {
+    public int getColor() {
+        return getMaterialColor().getValue();
+    }
+
+    public MaterialColor getMaterialColor() {
+        if (mColor == null) {
+            mColor = new SgnColor();
+        }
         return mColor;
     }
 
-    public Branding setColor(Integer color) {
-        mColor = ColorUtils.stripAlpha(color);
+    public Branding setColor(int color) {
+        setColor(new SgnColor(color));
+        return this;
+    }
+
+    public Branding setColor(MaterialColor color) {
+        mColor = color;
         return this;
     }
 
@@ -137,66 +134,59 @@ public class Branding implements IJson<JSONObject>, Parcelable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Branding branding = (Branding) o;
+
+        if (mName != null ? !mName.equals(branding.mName) : branding.mName != null) return false;
+        if (mWebsite != null ? !mWebsite.equals(branding.mWebsite) : branding.mWebsite != null) return false;
+        if (mLogo != null ? !mLogo.equals(branding.mLogo) : branding.mLogo != null) return false;
+        if (mColor != null ? !mColor.equals(branding.mColor) : branding.mColor != null) return false;
+        return !(mPageflip != null ? !mPageflip.equals(branding.mPageflip) : branding.mPageflip != null);
+
+    }
+
+    @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((mColor == null) ? 0 : mColor.hashCode());
-        result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
-        result = prime * result + ((mName == null) ? 0 : mName.hashCode());
-        result = prime * result
-                + ((mPageflip == null) ? 0 : mPageflip.hashCode());
-        result = prime * result
-                + ((mWebsite == null) ? 0 : mWebsite.hashCode());
+        int result = mName != null ? mName.hashCode() : 0;
+        result = 31 * result + (mWebsite != null ? mWebsite.hashCode() : 0);
+        result = 31 * result + (mLogo != null ? mLogo.hashCode() : 0);
+        result = 31 * result + (mColor != null ? mColor.hashCode() : 0);
+        result = 31 * result + (mPageflip != null ? mPageflip.hashCode() : 0);
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Branding other = (Branding) obj;
-        if (mColor == null) {
-            if (other.mColor != null)
-                return false;
-        } else if (!mColor.equals(other.mColor))
-            return false;
-        if (mLogo == null) {
-            if (other.mLogo != null)
-                return false;
-        } else if (!mLogo.equals(other.mLogo))
-            return false;
-        if (mName == null) {
-            if (other.mName != null)
-                return false;
-        } else if (!mName.equals(other.mName))
-            return false;
-        if (mPageflip == null) {
-            if (other.mPageflip != null)
-                return false;
-        } else if (!mPageflip.equals(other.mPageflip))
-            return false;
-        if (mWebsite == null) {
-            if (other.mWebsite != null)
-                return false;
-        } else if (!mWebsite.equals(other.mWebsite))
-            return false;
-        return true;
-    }
-
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.mName);
         dest.writeString(this.mWebsite);
         dest.writeString(this.mLogo);
-        dest.writeValue(this.mColor);
-        dest.writeParcelable(this.mPageflip, flags);
+        dest.writeParcelable(this.mColor, 0);
+        dest.writeParcelable(this.mPageflip, 0);
     }
 
+    protected Branding(Parcel in) {
+        this.mName = in.readString();
+        this.mWebsite = in.readString();
+        this.mLogo = in.readString();
+        this.mColor = in.readParcelable(MaterialColor.class.getClassLoader());
+        this.mPageflip = in.readParcelable(Pageflip.class.getClassLoader());
+    }
+
+    public static final Creator<Branding> CREATOR = new Creator<Branding>() {
+        public Branding createFromParcel(Parcel source) {
+            return new Branding(source);
+        }
+
+        public Branding[] newArray(int size) {
+            return new Branding[size];
+        }
+    };
 }

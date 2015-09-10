@@ -20,10 +20,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
+import com.shopgun.android.sdk.palette.MaterialColor;
+import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.ColorUtils;
 import com.shopgun.android.sdk.utils.Json;
 
@@ -45,17 +47,6 @@ import java.util.Comparator;
 public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Dealer.class);
-    public static Parcelable.Creator<Dealer> CREATOR = new Parcelable.Creator<Dealer>() {
-        public Dealer createFromParcel(Parcel source) {
-            return new Dealer(source);
-        }
-
-        public Dealer[] newArray(int size) {
-            return new Dealer[size];
-        }
-    };
-    private String mErn;
-    private String mName;
     /**
      * Compare object, that uses {@link Dealer#getName() name} to compare two lists.
      */
@@ -79,22 +70,16 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
         }
 
     };
+
+    private String mErn;
+    private String mName;
     private String mWebsite;
     private String mLogo;
-    private Integer mColor;
+    private MaterialColor mColor;
     private Pageflip mPageflip;
 
     public Dealer() {
 
-    }
-
-    private Dealer(Parcel in) {
-        this.mErn = in.readString();
-        this.mName = in.readString();
-        this.mWebsite = in.readString();
-        this.mLogo = in.readString();
-        this.mColor = (Integer) in.readValue(Integer.class.getClassLoader());
-        this.mPageflip = in.readParcelable(Pageflip.class.getClassLoader());
     }
 
     public static ArrayList<Dealer> fromJSON(JSONArray dealers) {
@@ -117,13 +102,13 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
         }
 
         try {
-            d.setId(Json.valueOf(dealer, JsonKey.ID));
-            d.setErn(Json.valueOf(dealer, JsonKey.ERN));
-            d.setName(Json.valueOf(dealer, JsonKey.NAME));
-            d.setWebsite(Json.valueOf(dealer, JsonKey.WEBSITE));
-            d.setLogo(Json.valueOf(dealer, JsonKey.LOGO));
-            d.setColor(Json.colorValueOf(dealer, JsonKey.COLOR));
-            d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(JsonKey.PAGEFLIP)));
+            d.setId(Json.valueOf(dealer, JsonKeys.ID));
+            d.setErn(Json.valueOf(dealer, JsonKeys.ERN));
+            d.setName(Json.valueOf(dealer, JsonKeys.NAME));
+            d.setWebsite(Json.valueOf(dealer, JsonKeys.WEBSITE));
+            d.setLogo(Json.valueOf(dealer, JsonKeys.LOGO));
+            d.setColor(Json.colorValueOf(dealer, JsonKeys.COLOR));
+            d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(JsonKeys.PAGEFLIP)));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }
@@ -133,13 +118,13 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.ID, Json.nullCheck(getId()));
-            o.put(JsonKey.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKey.NAME, Json.nullCheck(getName()));
-            o.put(JsonKey.WEBSITE, Json.nullCheck(getWebsite()));
-            o.put(JsonKey.LOGO, Json.nullCheck(getLogo()));
-            o.put(JsonKey.COLOR, Json.nullCheck(ColorUtils.toString(getColor())));
-            o.put(JsonKey.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
+            o.put(JsonKeys.ID, Json.nullCheck(getId()));
+            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
+            o.put(JsonKeys.NAME, Json.nullCheck(getName()));
+            o.put(JsonKeys.WEBSITE, Json.nullCheck(getWebsite()));
+            o.put(JsonKeys.LOGO, Json.nullCheck(getLogo()));
+            o.put(JsonKeys.COLOR, Json.colorToString(getMaterialColor()));
+            o.put(JsonKeys.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }
@@ -201,12 +186,24 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
         return this;
     }
 
-    public Integer getColor() {
+    public int getColor() {
+        return getMaterialColor().getValue();
+    }
+
+    public MaterialColor getMaterialColor() {
+        if (mColor == null) {
+            mColor = new SgnColor();
+        }
         return mColor;
     }
 
-    public Dealer setColor(Integer color) {
-        mColor = ColorUtils.stripAlpha(color);
+    public Dealer setColor(int color) {
+        setColor(new SgnColor(color));
+        return this;
+    }
+
+    public Dealer setColor(SgnColor color) {
+        mColor = color;
         return this;
     }
 
@@ -220,73 +217,63 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Dealer dealer = (Dealer) o;
+
+        if (mErn != null ? !mErn.equals(dealer.mErn) : dealer.mErn != null) return false;
+        if (mName != null ? !mName.equals(dealer.mName) : dealer.mName != null) return false;
+        if (mWebsite != null ? !mWebsite.equals(dealer.mWebsite) : dealer.mWebsite != null) return false;
+        if (mLogo != null ? !mLogo.equals(dealer.mLogo) : dealer.mLogo != null) return false;
+        if (mColor != null ? !mColor.equals(dealer.mColor) : dealer.mColor != null) return false;
+        return !(mPageflip != null ? !mPageflip.equals(dealer.mPageflip) : dealer.mPageflip != null);
+
+    }
+
+    @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((mColor == null) ? 0 : mColor.hashCode());
-        result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-        result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
-        result = prime * result + ((mName == null) ? 0 : mName.hashCode());
-        result = prime * result
-                + ((mPageflip == null) ? 0 : mPageflip.hashCode());
-        result = prime * result
-                + ((mWebsite == null) ? 0 : mWebsite.hashCode());
+        int result = mErn != null ? mErn.hashCode() : 0;
+        result = 31 * result + (mName != null ? mName.hashCode() : 0);
+        result = 31 * result + (mWebsite != null ? mWebsite.hashCode() : 0);
+        result = 31 * result + (mLogo != null ? mLogo.hashCode() : 0);
+        result = 31 * result + (mColor != null ? mColor.hashCode() : 0);
+        result = 31 * result + (mPageflip != null ? mPageflip.hashCode() : 0);
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Dealer other = (Dealer) obj;
-        if (mColor == null) {
-            if (other.mColor != null)
-                return false;
-        } else if (!mColor.equals(other.mColor))
-            return false;
-        if (mErn == null) {
-            if (other.mErn != null)
-                return false;
-        } else if (!mErn.equals(other.mErn))
-            return false;
-        if (mLogo == null) {
-            if (other.mLogo != null)
-                return false;
-        } else if (!mLogo.equals(other.mLogo))
-            return false;
-        if (mName == null) {
-            if (other.mName != null)
-                return false;
-        } else if (!mName.equals(other.mName))
-            return false;
-        if (mPageflip == null) {
-            if (other.mPageflip != null)
-                return false;
-        } else if (!mPageflip.equals(other.mPageflip))
-            return false;
-        if (mWebsite == null) {
-            if (other.mWebsite != null)
-                return false;
-        } else if (!mWebsite.equals(other.mWebsite))
-            return false;
-        return true;
-    }
-
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.mErn);
         dest.writeString(this.mName);
         dest.writeString(this.mWebsite);
         dest.writeString(this.mLogo);
-        dest.writeValue(this.mColor);
-        dest.writeParcelable(this.mPageflip, flags);
+        dest.writeParcelable(this.mColor, 0);
+        dest.writeParcelable(this.mPageflip, 0);
     }
 
+    protected Dealer(Parcel in) {
+        this.mErn = in.readString();
+        this.mName = in.readString();
+        this.mWebsite = in.readString();
+        this.mLogo = in.readString();
+        this.mColor = in.readParcelable(MaterialColor.class.getClassLoader());
+        this.mPageflip = in.readParcelable(Pageflip.class.getClassLoader());
+    }
+
+    public static final Creator<Dealer> CREATOR = new Creator<Dealer>() {
+        public Dealer createFromParcel(Parcel source) {
+            return new Dealer(source);
+        }
+
+        public Dealer[] newArray(int size) {
+            return new Dealer[size];
+        }
+    };
 }

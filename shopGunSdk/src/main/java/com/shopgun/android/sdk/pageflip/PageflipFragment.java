@@ -439,8 +439,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
         mBranding = b;
         mLoader.setLoadingText(mBranding.getName());
-        int text = PageflipUtils.getTextColor(mBranding.getColor(), getActivity());
-        mLoader.setTextColor(text);
+        mLoader.setTextColor(b.getMaterialColor().getSecondaryText());
         mFrame.setBackgroundColor(mBranding.getColor());
         mContainer.setBackgroundColor(mBranding.getColor());
 

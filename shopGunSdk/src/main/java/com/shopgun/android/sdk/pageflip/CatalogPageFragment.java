@@ -112,9 +112,8 @@ public class CatalogPageFragment extends Fragment implements
 
     private void updateBranding() {
         if (isAdded() && mCallback != null && mCallback.getCatalog() != null) {
-            int brandingColor = mCallback.getCatalog().getBranding().getColor();
-            int complimentColor = PageflipUtils.getTextColor(brandingColor, getActivity());
-            mLoader.setTextColor(complimentColor);
+            int brandingColor = mCallback.getCatalog().getBranding().getMaterialColor().getSecondaryText();
+            mLoader.setTextColor(brandingColor);
         }
     }
 

@@ -45,6 +45,7 @@ import com.shopgun.android.sdk.model.Typeahead;
 import com.shopgun.android.sdk.model.Unit;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
+import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONException;
@@ -211,7 +212,7 @@ public class ModelCreator {
     public static Pageflip getPageflip(String logoUrl, int color) {
         Pageflip p = new Pageflip();
         p.setLogo(logoUrl);
-        p.setColor(color);
+        p.setColor(new SgnColor(color));
         return p;
     }
 

@@ -14,21 +14,41 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.test;
+package com.shopgun.android.sdk.palette;
 
-import com.shopgun.android.sdk.Constants;
+import android.os.Parcelable;
 
-public class ColorUtilsTest {
+public interface MaterialColor extends Parcelable {
 
-    public static final String TAG = Constants.getTag(ColorUtilsTest.class);
+    MaterialColor getColor(Shade s);
 
-    private ColorUtilsTest() {
-        // empty
-    }
+    int getValue();
 
-    public static void test() {
+    int getPrimaryText();
 
-        SdkTest.start(TAG);
-    }
+    int getSecondaryText();
+
+    int getDisabledText();
+
+    /**
+     * Returns the luminance of the color.
+     *
+     * Formula defined here: http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+     */
+    double getLuminance();
+
+    /**
+     * luminance value above 0.95
+     */
+    boolean isVeryBright();
+
+    /** luminance value above 0.87 */
+    boolean isBright();
+
+    /** luminance value above 0.64 */
+    boolean isLight();
+
+    /** luminance value below 0.025 */
+    boolean isVeryDark();
 
 }

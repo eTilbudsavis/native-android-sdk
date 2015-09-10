@@ -16,9 +16,12 @@
 
 package com.shopgun.android.sdk.utils;
 
+import android.graphics.Color;
+
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
+import com.shopgun.android.sdk.palette.MaterialColor;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -235,23 +238,11 @@ public class Json {
     }
 
     /**
-     * This method calls {@link Json#colorValueOf(JSONObject, String, String)},
+     * This method calls {@link Json#colorValueOf(JSONObject, String, int)},
      * with the defValue set to Color.TRANSPARENT.
-     * @see {@link Json#colorValueOf(JSONObject, String, String)}
      */
-    public static Integer colorValueOf(JSONObject object, String key) {
-        return colorValueOf(object, key, null);
-    }
-
-    /**
-     * Searches the JSONObject for the key and returns the matching value if it exists.
-     * @param object An object to get data from
-     * @param key A key to map to a value
-     * @param color A default value to return, if key doesn't exist or causes a JSONException
-     * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
-     */
-    public static Integer colorValueOf(JSONObject object, String key, int color) {
-        return colorValueOf(object, key, ColorUtils.toString(color, false, false));
+    public static int colorValueOf(JSONObject object, String key) {
+        return colorValueOf(object, key, Color.BLACK);
     }
 
     /**
@@ -261,9 +252,40 @@ public class Json {
      * @param defValue A default value to return, if key doesn't exist or causes a JSONException
      * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
      */
-    public static Integer colorValueOf(JSONObject object, String key, String defValue) {
-        String rawColor = Json.valueOf(object, key, defValue);
-        return ColorUtils.toColor(rawColor);
+    public static int colorValueOf(JSONObject object, String key, int defValue) {
+        String rawColor = Json.valueOf(object, key);
+        if (rawColor != null) {
+            try {
+                if (rawColor.charAt(0) != '#') {
+                    rawColor = '#' + rawColor;
+                }
+                return Color.parseColor(rawColor);
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        return defValue;
+    }
+
+    /**
+     * Convert a color into a ShopGun valid formatted string.
+     * @param color A color
+     * @return A string representing the color in a ShopGun valid format. Or {@link JSONObject#NULL} if input color is null
+     */
+    public static Object colorToString(MaterialColor color) {
+        return color == null ? JSONObject.NULL : colorToString(color.getValue());
+    }
+
+    /**
+     * Convert a color into a ShopGun valid formatted string.
+     * @param color A color
+     * @return A String, representing the color in a ShopGun valid format.
+     */
+    public static String colorToString(int color) {
+        if (Color.alpha(color) != 255) {
+            SgnLog.w(TAG, "ShopGun api doesn't support transparency. Transparency will be stripped.");
+        }
+        return String.format("%06X", 0xFFFFFF & color);
     }
 
     /**

@@ -14,21 +14,28 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.test;
+package com.shopgun.android.sdk.palette;
 
-import com.shopgun.android.sdk.Constants;
+public enum Shade {
 
-public class ColorUtilsTest {
+    Shade50(50),
+    Shade100(100),
+    Shade200(200),
+    Shade300(300),
+    Shade400(400),
+    Shade500(500),
+    Shade600(600),
+    Shade700(700),
+    Shade800(800),
+    Shade900(900);
 
-    public static final String TAG = Constants.getTag(ColorUtilsTest.class);
-
-    private ColorUtilsTest() {
-        // empty
+    int mValue = 500;
+    Shade(int value) {
+        mValue = value;
     }
 
-    public static void test() {
-
-        SdkTest.start(TAG);
+    public int getValue() {
+        return mValue;
     }
 
 }

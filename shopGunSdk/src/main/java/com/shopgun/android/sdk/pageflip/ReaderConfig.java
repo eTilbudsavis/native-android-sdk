@@ -68,7 +68,7 @@ public abstract class ReaderConfig implements Parcelable {
     }
 
     public void setConfiguration(Configuration config) {
-        setOrientation(config.orientation);
+        setOrientation(config == null ? Configuration.ORIENTATION_PORTRAIT : config.orientation);
     }
 
     public void setOrientation(int orientation) {

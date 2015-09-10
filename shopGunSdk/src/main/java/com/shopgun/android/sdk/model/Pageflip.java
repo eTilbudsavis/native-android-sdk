@@ -20,10 +20,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
-import com.shopgun.android.sdk.utils.ColorUtils;
+import com.shopgun.android.sdk.palette.MaterialColor;
+import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONException;
@@ -32,29 +33,15 @@ import org.json.JSONObject;
 public class Pageflip implements IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Pageflip.class);
-    public static Parcelable.Creator<Pageflip> CREATOR = new Parcelable.Creator<Pageflip>() {
-        public Pageflip createFromParcel(Parcel source) {
-            return new Pageflip(source);
-        }
-
-        public Pageflip[] newArray(int size) {
-            return new Pageflip[size];
-        }
-    };
     private String mLogo;
-    private Integer mColor = 0;
+    private MaterialColor mColor;
 
     public Pageflip() {
 
     }
 
     public Pageflip(int color) {
-        mColor = ColorUtils.stripAlpha(color);
-    }
-
-    private Pageflip(Parcel in) {
-        this.mLogo = in.readString();
-        this.mColor = (Integer) in.readValue(Integer.class.getClassLoader());
+        mColor = new SgnColor(color);
     }
 
     public static Pageflip fromJSON(JSONObject pageflip) {
@@ -63,8 +50,8 @@ public class Pageflip implements IJson<JSONObject>, Parcelable {
             return p;
         }
 
-        p.setLogo(Json.valueOf(pageflip, JsonKey.LOGO));
-        p.setColor(Json.colorValueOf(pageflip, JsonKey.COLOR));
+        p.setLogo(Json.valueOf(pageflip, JsonKeys.LOGO));
+        p.setColor(Json.colorValueOf(pageflip, JsonKeys.COLOR));
 
         return p;
     }
@@ -72,10 +59,10 @@ public class Pageflip implements IJson<JSONObject>, Parcelable {
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.LOGO, Json.nullCheck(getLogo()));
-            o.put(JsonKey.COLOR, Json.nullCheck(ColorUtils.toString(mColor)));
+            o.put(JsonKeys.LOGO, Json.nullCheck(getLogo()));
+            o.put(JsonKeys.COLOR, Json.colorToString(getMaterialColor()));
         } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return o;
     }
@@ -90,52 +77,69 @@ public class Pageflip implements IJson<JSONObject>, Parcelable {
     }
 
     public int getColor() {
+        return getMaterialColor().getValue();
+    }
+
+    public MaterialColor getMaterialColor() {
+        if (mColor == null) {
+            mColor = new SgnColor();
+        }
         return mColor;
     }
 
-    public Pageflip setColor(Integer color) {
-        mColor = ColorUtils.stripAlpha(color);
+    public Pageflip setColor(int color) {
+        setColor(new SgnColor(color));
+        return this;
+    }
+
+    public Pageflip setColor(MaterialColor color) {
+        mColor = color;
         return this;
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Pageflip pageflip = (Pageflip) o;
+
+        if (mLogo != null ? !mLogo.equals(pageflip.mLogo) : pageflip.mLogo != null) return false;
+
+        return !(mColor != null ? !mColor.equals(pageflip.mColor) : pageflip.mColor != null);
+
+    }
+
+    @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((mColor == null) ? 0 : mColor.hashCode());
-        result = prime * result + ((mLogo == null) ? 0 : mLogo.hashCode());
+        int result = mLogo != null ? mLogo.hashCode() : 0;
+        result = 31 * result + (mColor != null ? mColor.hashCode() : 0);
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Pageflip other = (Pageflip) obj;
-        if (mColor == null) {
-            if (other.mColor != null)
-                return false;
-        } else if (!mColor.equals(other.mColor))
-            return false;
-        if (mLogo == null) {
-            if (other.mLogo != null)
-                return false;
-        } else if (!mLogo.equals(other.mLogo))
-            return false;
-        return true;
-    }
-
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.mLogo);
-        dest.writeValue(this.mColor);
+        dest.writeParcelable(this.mColor, 0);
     }
 
+    protected Pageflip(Parcel in) {
+        this.mLogo = in.readString();
+        this.mColor = in.readParcelable(MaterialColor.class.getClassLoader());
+    }
+
+    public static final Creator<Pageflip> CREATOR = new Creator<Pageflip>() {
+        public Pageflip createFromParcel(Parcel source) {
+            return new Pageflip(source);
+        }
+
+        public Pageflip[] newArray(int size) {
+            return new Pageflip[size];
+        }
+    };
 }

@@ -102,8 +102,7 @@ public class JsonTest {
         Assert.assertNull(Json.getArray(o, noKey, null));
         Assert.assertNull(Json.getObject(o, noKey));
         Assert.assertNull(Json.getObject(o, noKey, null));
-        Assert.assertNull(Json.colorValueOf(o, noKey));
-        Assert.assertNull(Json.colorValueOf(o, noKey, null));
+        Assert.assertEquals(Color.BLACK, Json.colorValueOf(o, noKey));
 
         Assert.assertEquals(stringValue, Json.valueOf(o, noKey, stringValue));
         Assert.assertEquals(stringValue, Json.valueOf(o, stringKey, stringValue));
@@ -134,16 +133,10 @@ public class JsonTest {
         Assert.assertNotNull(Json.getObject(o, jsonObjectKey, null));
         Assert.assertNotNull(Json.getObject(o, jsonObjectKey, jsonObjectValue));
 
-        Assert.assertEquals(colorIntValue, (int) Json.colorValueOf(o, colorStringKey));
-        Assert.assertEquals(colorIntValue, (int) Json.colorValueOf(o, colorStringKey, colorStringValue));
-        Assert.assertEquals(colorIntValue, (int) Json.colorValueOf(o, colorStringKey, colorIntValue));
-        Assert.assertEquals(colorIntValue, (int) Json.colorValueOf(o, colorStringKey, "this-is-not-a-color"));
+        Assert.assertEquals(colorIntValue, Json.colorValueOf(o, colorStringKey));
 
         // We do not allow alpha channel, so this will be stripped in the process
-        Assert.assertEquals(colorAlphaIntValue, (int) Json.colorValueOf(o, colorAlphaStringKey));
-        Assert.assertEquals(colorAlphaIntValue, (int) Json.colorValueOf(o, colorAlphaStringKey, colorAlphaStringValue));
-        Assert.assertEquals(colorAlphaIntValue, (int) Json.colorValueOf(o, colorAlphaStringKey, colorAlphaIntValue));
-        Assert.assertEquals(colorAlphaIntValue, (int) Json.colorValueOf(o, colorAlphaStringKey, "this-is-not-a-color"));
+        Assert.assertEquals(colorAlphaIntValue, Json.colorValueOf(o, colorAlphaStringKey));
 
     }
 
