@@ -50,11 +50,11 @@ public class ColorUtils {
         return Color.argb(alpha, red, green, blue);
     }
 
-    public static String toString(MaterialColor color) {
-        return color == null ? null : toString(color.getValue());
+    public static String toHexString(MaterialColor color) {
+        return color == null ? null : toHexString(color.getValue());
     }
 
-    public static String toString(int color) {
+    public static String toHexString(int color) {
         return String.format("#%08X", color);
     }
 

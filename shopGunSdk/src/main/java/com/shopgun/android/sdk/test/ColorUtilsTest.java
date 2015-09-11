@@ -16,10 +16,16 @@
 
 package com.shopgun.android.sdk.test;
 
+import android.graphics.Color;
+
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.palette.SgnColor;
+import com.shopgun.android.sdk.utils.ColorUtils;
 
-public class ColorUtilsTest {
+import junit.framework.TestCase;
+
+public class ColorUtilsTest extends TestCase {
 
     public static final String TAG = Constants.getTag(ColorUtilsTest.class);
 
@@ -29,7 +35,35 @@ public class ColorUtilsTest {
 
     public static void test() {
         SgnLog.w(TAG, "ColorUtilsTest NOT being performed");
+        assertEquals("#00000000", ColorUtils.toHexString(Color.TRANSPARENT));
+        assertEquals("#FF000000", ColorUtils.toHexString(Color.BLACK));
+        assertEquals("#FF0000FF", ColorUtils.toHexString(Color.BLUE));
+        assertEquals("#FFFF0000", ColorUtils.toHexString(Color.RED));
+        assertEquals("#FF00FF00", ColorUtils.toHexString(Color.GREEN));
+
+        assertNull(ColorUtils.toHexString(null));
+        assertEquals("#FF000000", ColorUtils.toHexString(new SgnColor(Color.BLACK)));
+        assertEquals("#FF0000FF", ColorUtils.toHexString(new SgnColor(Color.BLUE)));
+        assertEquals("#FFFF0000", ColorUtils.toHexString(new SgnColor(Color.RED)));
+        assertEquals("#FF00FF00", ColorUtils.toHexString(new SgnColor(Color.GREEN)));
+
+        assertEquals(0xFFFFFFFF, ColorUtils.getCompliment(0xFF000000));
+        assertEquals(0xFF0000FF, ColorUtils.getCompliment(0xFFFFFF00));
+
+        assertEquals(new float[]{0.0f, 1.0f, 1.0f}, ColorUtils.toHSV(0xFFFF0000), 0.01f);
+        assertEquals(new float[]{240.0f, 1.0f, 1.0f}, ColorUtils.toHSV(0xFF0000FF), 0.01f);
+        assertEquals(new float[]{60.0f, 1.0f, 1.0f}, ColorUtils.toHSV(0xFFFFFF00), 0.01f);
+
         SdkTest.start(TAG);
+    }
+
+    public static void assertEquals(float[] expected, float[] actual, float delta) {
+
+        assertEquals(expected.length, actual.length);
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals(expected[i], actual[i], delta);
+        }
+
     }
 
 }

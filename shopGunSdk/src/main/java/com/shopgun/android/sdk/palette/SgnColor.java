@@ -20,8 +20,6 @@ import android.graphics.Color;
 import android.os.Parcel;
 import android.support.v4.graphics.ColorUtils;
 
-import com.shopgun.android.sdk.log.SgnLog;
-
 public class SgnColor extends Color implements  MaterialColor {
 
     public static final String TAG = SgnColor.class.getSimpleName();
@@ -126,12 +124,6 @@ public class SgnColor extends Color implements  MaterialColor {
         if (o == null || getClass() != o.getClass()) return false;
 
         SgnColor sgnColor = (SgnColor) o;
-
-        if (mColor != sgnColor.mColor) {
-            SgnLog.d(TAG, "mColor" + com.shopgun.android.sdk.utils.ColorUtils.toString(mColor));
-            SgnLog.d(TAG, "sgnColor.mColor" + com.shopgun.android.sdk.utils.ColorUtils.toString(sgnColor.mColor));
-        }
-
 
         return mColor == sgnColor.mColor;
 

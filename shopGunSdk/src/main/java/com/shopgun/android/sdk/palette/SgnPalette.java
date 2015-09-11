@@ -17,8 +17,6 @@
 package com.shopgun.android.sdk.palette;
 
 import android.graphics.Color;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.v4.graphics.ColorUtils;
 
 import com.shopgun.android.sdk.log.SgnLog;
@@ -42,7 +40,7 @@ public class SgnPalette {
 
     public static final double THRESHOLD_VERY_BRIGHT = 0.95d;
     public static final double THRESHOLD_BRIGHT = 0.87d;
-    public static final double THRESHOLD_LIGHT = 0.50d;
+    public static final double THRESHOLD_LIGHT = 0.54d;
     public static final double THRESHOLD_DARK = 0.13d;
     public static final double THRESHOLD_VERY_DARK = 0.025d;
 
