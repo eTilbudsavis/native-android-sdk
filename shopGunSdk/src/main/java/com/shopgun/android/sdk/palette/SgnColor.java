@@ -18,7 +18,8 @@ package com.shopgun.android.sdk.palette;
 
 import android.graphics.Color;
 import android.os.Parcel;
-import android.support.v4.graphics.ColorUtils;
+
+import com.shopgun.android.sdk.utils.ColorUtils;
 
 public class SgnColor extends Color implements  MaterialColor {
 

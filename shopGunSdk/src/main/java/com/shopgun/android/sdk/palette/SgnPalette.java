@@ -17,9 +17,9 @@
 package com.shopgun.android.sdk.palette;
 
 import android.graphics.Color;
-import android.support.v4.graphics.ColorUtils;
 
 import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.utils.ColorUtils;
 
 public class SgnPalette {
 

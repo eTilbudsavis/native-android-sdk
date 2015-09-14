@@ -17,6 +17,7 @@
 package com.shopgun.android.sdk.test;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.palette.MaterialColor;
 import com.shopgun.android.sdk.palette.Shade;
 import com.shopgun.android.sdk.utils.ColorUtils;
@@ -41,6 +42,8 @@ public class MaterialColorTest extends TestCase {
     }
 
     public static void test() {
+
+        SgnLog.v(TAG, "MaterialColorTest isn't working");
 
         Map<MaterialColor, MaterialColorTestCreator.MaterialTestColor> map = MaterialColorTestCreator.getTestMap();
 

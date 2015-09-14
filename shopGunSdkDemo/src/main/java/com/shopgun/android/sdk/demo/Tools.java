@@ -21,9 +21,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
-import android.support.v4.graphics.ColorUtils;
 
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.utils.ColorUtils;
 
 public class Tools {
 

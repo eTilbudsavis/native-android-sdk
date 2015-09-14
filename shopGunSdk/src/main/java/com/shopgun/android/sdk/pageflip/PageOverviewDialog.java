@@ -43,6 +43,7 @@ import android.widget.TextView;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Catalog;
+import com.shopgun.android.sdk.utils.ColorUtils;
 import com.shopgun.android.sdk.utils.Utils;
 import com.squareup.picasso.Picasso;
 
@@ -245,7 +246,7 @@ public class PageOverviewDialog extends DialogFragment {
 
         private GradientDrawable getDrawable() {
             int color = mCatalog.getBranding().getColor();
-            color = android.support.v4.graphics.ColorUtils.setAlphaComponent(color, 160);
+            color = ColorUtils.setAlphaComponent(color, 160);
 
 
             float radius = Utils.convertDpToPx(3, getActivity());

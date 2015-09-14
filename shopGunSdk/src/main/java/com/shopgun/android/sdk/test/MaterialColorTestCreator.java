@@ -40,6 +40,7 @@ public class MaterialColorTestCreator {
 
         CUSTOM.put("ShopGun", Color.parseColor("#ee1e79"));
         CUSTOM.put("eTilbudsavis", Color.parseColor("#7b9119"));
+        CUSTOM.put("eTilbudsavis-new", Color.parseColor("#01c545"));
         CUSTOM.put("Black", Color.parseColor("#000000"));
         CUSTOM.put("White", Color.parseColor("#FFFFFF"));
         CUSTOM.put("Red", Color.parseColor("#FF0000"));

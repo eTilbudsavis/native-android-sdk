@@ -17,10 +17,10 @@
 package com.shopgun.android.sdk.test;
 
 import android.graphics.Color;
-import android.support.v4.graphics.ColorUtils;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.palette.SgnColor;
+import com.shopgun.android.sdk.utils.ColorUtils;
 import com.shopgun.android.sdk.utils.Json;
 
 import junit.framework.Assert;

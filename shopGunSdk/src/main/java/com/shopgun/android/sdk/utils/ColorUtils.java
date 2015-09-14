@@ -78,160 +78,49 @@ public class ColorUtils {
     }
 
     /**
-     * Creates a new color with a decrease in value/brightness.
-     *
-     * @param color  The color to darken
-     * @param shades The number of shades to darken the color
-     * @param offset The offset in value/lumination
-     * @return a new color
+     * Set the alpha component of {@code color} to be {@code alpha}.
+     * <p>Wrapper for {@link android.support.v4.graphics.ColorUtils#setAlphaComponent(int, int)}</p>
      */
-    public static int decreaseBrightness(int color, int shades, float offset) {
-        return decreaseHSV(2, color, shades, offset);
+    public static int setAlphaComponent(int color, int alpha) {
+        return android.support.v4.graphics.ColorUtils.setAlphaComponent(color, alpha);
     }
 
     /**
-     * Creates a new color with a decrease in saturation.
+     * Returns the luminance of a color.
      *
-     * @param color  The color to saturate
-     * @param shades The number of shades to saturate the color
-     * @param offset The offset in saturation
-     * @return a new color
+     * Formula defined here: http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+     * <p>Wrapper for {@link android.support.v4.graphics.ColorUtils#calculateLuminance(int)}</p>
      */
-    public static int decreaseSaturation(int color, int shades, float offset) {
-        return decreaseHSV(1, color, shades, offset);
+    public static double calculateLuminance(int color) {
+        return android.support.v4.graphics.ColorUtils.calculateLuminance(color);
     }
 
     /**
-     * Creates a new color with a decrease in hue.
-     *
-     * @param color  The color to offset the hue on
-     * @param shades The number of steps to make in hue
-     * @param offset The offset in hue
-     * @return a new color
+     * Returns the contrast ratio between {@code foreground} and {@code background}.
+     * {@code background} must be opaque.
+     * <p>
+     * Formula defined
+     * <a href="http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef">here</a>.
+     * <p>Wrapper for {@link android.support.v4.graphics.ColorUtils#calculateContrast(int, int)}</p>
      */
-    public static int decreaseHue(int color, int shades, float offset) {
-        return decreaseHSV(0, color, shades, offset);
+    public static double calculateContrast(int foreground, int background) {
+        return android.support.v4.graphics.ColorUtils.calculateContrast(foreground, background);
     }
+
 
     /**
-     * Creates a new color with a increase in value/brightness.
+     * Calculates the minimum alpha value which can be applied to {@code foreground} so that would
+     * have a contrast value of at least {@code minContrastRatio} when compared to
+     * {@code background}.
      *
-     * @param color  The color to darken
-     * @param shades The number of shades to darken the color
-     * @param offset The
-     * @return a new color
+     * @param foreground       the foreground color.
+     * @param background       the background color. Should be opaque.
+     * @param minContrastRatio the minimum contrast ratio.
+     * @return the alpha value in the range 0-255, or -1 if no value could be calculated.
+     * <p>Wrapper for {@link android.support.v4.graphics.ColorUtils#calculateMinimumAlpha(int, int, float)}</p>
      */
-    public static int increaseBrightness(int color, int shades, float offset) {
-        return increaseHSV(2, color, shades, offset);
-    }
-
-    public static int increaseSaturation(int color, int shades, float offset) {
-        return increaseHSV(1, color, shades, offset);
-    }
-
-    public static int increaseHue(int color, int shades, float offset) {
-        return increaseHSV(0, color, shades, offset);
-    }
-
-    /**
-     * Creates a new color, with a decreased Hue, Saturation, or Value
-     *
-     * @param what   Either Hue (0), Saturation (1), or Value (2)
-     * @param color A color
-     * @param shades Number of shades to decrease
-     * @param offset The offset for each shade
-     * @return A new color
-     */
-    public static int decreaseHSV(int what, int color, int shades, float offset) {
-        if (whatOutOfBounds(what)) { return color; }
-        float[] hsv = new float[3];
-        Color.colorToHSV(color, hsv);
-        decrease(what, hsv, shades, offset);
-        return Color.HSVToColor(Color.alpha(color), hsv);
-    }
-
-    /**
-     * Method will return a new color, with a increase Hue, Saturation, or Value
-     *
-     * @param what   Either Hue (0), Saturation (1), or Value (2)
-     * @param color A color
-     * @param shades Number of shades to increase
-     * @param offset The offset for each shade
-     * @return A new color
-     */
-    public static int increaseHSV(int what, int color, int shades, float offset) {
-        if (whatOutOfBounds(what)) { return color; }
-        float[] hsv = new float[3];
-        Color.colorToHSV(color, hsv);
-        increase(what, hsv, shades, offset);
-        return Color.HSVToColor(Color.alpha(color), hsv);
-    }
-
-    /**
-     * Method will return a new color, with a increase Hue, Saturation, or Lightness
-     *
-     * @param what   Either Hue (0), Saturation (1), or Lightness (2)
-     * @param color A color
-     * @param shades Number of shades to increase
-     * @param offset The offset for each shade
-     * @return A new color
-     */
-    public static int increaseHSL(int what, int color, int shades, float offset) {
-        if (whatOutOfBounds(what)) { return color; }
-        float[] hsl = new float[3];
-        android.support.v4.graphics.ColorUtils.colorToHSL(color, hsl);
-        increase(what, hsl, shades, offset);
-        int tmp = android.support.v4.graphics.ColorUtils.HSLToColor(hsl);
-        return android.support.v4.graphics.ColorUtils.setAlphaComponent(tmp, Color.alpha(color));
-    }
-
-    /**
-     * Creates a new color, with a decreased Hue, Saturation, or Lightness
-     *
-     * @param what   Either Hue (0), Saturation (1), or Lightness (2)
-     * @param color A color
-     * @param shades Number of shades to decrease
-     * @param offset The offset for each shade
-     * @return A new color
-     */
-    public static int decreaseHSL(int what, int color, int shades, float offset) {
-        if (whatOutOfBounds(what)) { return color; }
-        float[] hsl = new float[3];
-        android.support.v4.graphics.ColorUtils.colorToHSL(color, hsl);
-        decrease(what, hsl, shades, offset);
-        int tmp = android.support.v4.graphics.ColorUtils.HSLToColor(hsl);
-        return android.support.v4.graphics.ColorUtils.setAlphaComponent(tmp, Color.alpha(color));
-    }
-
-    private static boolean whatOutOfBounds(int what) {
-        return what < 0 || 2 < what;
-    }
-
-    private static void decrease(int what, float[] hsl, int shades, float offset) {
-        while (shades > 0) {
-            shades--;
-            hsl[what] = hsl[what] * (1.0f - offset);
-        }
-    }
-
-    private static void increase(int what, float[] hsl, int shades, float offset) {
-        while (shades > 0) {
-            shades--;
-            hsl[what] += ((1.0f - hsl[what]) * offset);
-        }
-    }
-
-    /**
-     * Get brightness of a specific color
-     *
-     * @param color A color
-     * @return The brightness, in the range 0 - 255
-     */
-    public static int getBrightness(int color) {
-        return (int) Math.sqrt(
-                Color.red(color) * Color.red(color) * .241 +
-                        Color.green(color) * Color.green(color) * .691 +
-                        Color.blue(color) * Color.blue(color) * .068);
+    public static int calculateMinimumAlpha(int foreground, int background, float minContrastRatio) {
+        return android.support.v4.graphics.ColorUtils.calculateMinimumAlpha(foreground, background, minContrastRatio);
     }
 
 }
