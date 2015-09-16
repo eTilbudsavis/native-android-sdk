@@ -563,15 +563,14 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
         } else {
 
+            applyAdapter();
+            mWrapperListener.onReady();
             // force the first page change if needed
             if (mPager.getCurrentItem() != mCurrentPosition) {
                 mPager.setCurrentItem(mCurrentPosition);
             } else {
                 mWrapperListener.onPageChange(mConfig.positionToPages(mCurrentPosition, mCatalog.getPageCount()));
             }
-
-            applyAdapter();
-            mWrapperListener.onReady();
 
         }
 
