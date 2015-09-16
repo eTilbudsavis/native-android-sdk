@@ -122,7 +122,7 @@ public class MaterialColorTestCreator {
     }
 
     private static String toHex(int color) {
-        return ColorUtils.toHexString(color).replace("#", "0x");
+        return ColorUtils.toARGBString(color).replace("#", "0x");
     }
 
     private static void printShadesToMap(StringBuilder sb, String mapName, Shade s, MaterialColor color) {

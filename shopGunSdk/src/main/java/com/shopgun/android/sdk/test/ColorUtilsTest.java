@@ -35,17 +35,17 @@ public class ColorUtilsTest extends TestCase {
 
     public static void test() {
         SgnLog.w(TAG, "ColorUtilsTest NOT being performed");
-        assertEquals("#00000000", ColorUtils.toHexString(Color.TRANSPARENT));
-        assertEquals("#FF000000", ColorUtils.toHexString(Color.BLACK));
-        assertEquals("#FF0000FF", ColorUtils.toHexString(Color.BLUE));
-        assertEquals("#FFFF0000", ColorUtils.toHexString(Color.RED));
-        assertEquals("#FF00FF00", ColorUtils.toHexString(Color.GREEN));
+        assertEquals("#00000000", ColorUtils.toARGBString(Color.TRANSPARENT));
+        assertEquals("#FF000000", ColorUtils.toARGBString(Color.BLACK));
+        assertEquals("#FF0000FF", ColorUtils.toARGBString(Color.BLUE));
+        assertEquals("#FFFF0000", ColorUtils.toARGBString(Color.RED));
+        assertEquals("#FF00FF00", ColorUtils.toARGBString(Color.GREEN));
 
-        assertNull(ColorUtils.toHexString(null));
-        assertEquals("#FF000000", ColorUtils.toHexString(new SgnColor(Color.BLACK)));
-        assertEquals("#FF0000FF", ColorUtils.toHexString(new SgnColor(Color.BLUE)));
-        assertEquals("#FFFF0000", ColorUtils.toHexString(new SgnColor(Color.RED)));
-        assertEquals("#FF00FF00", ColorUtils.toHexString(new SgnColor(Color.GREEN)));
+        assertNull(ColorUtils.toARGBString(null));
+        assertEquals("#FF000000", ColorUtils.toARGBString(new SgnColor(Color.BLACK)));
+        assertEquals("#FF0000FF", ColorUtils.toARGBString(new SgnColor(Color.BLUE)));
+        assertEquals("#FFFF0000", ColorUtils.toARGBString(new SgnColor(Color.RED)));
+        assertEquals("#FF00FF00", ColorUtils.toARGBString(new SgnColor(Color.GREEN)));
 
         assertEquals(0xFFFFFFFF, ColorUtils.getCompliment(0xFF000000));
         assertEquals(0xFF0000FF, ColorUtils.getCompliment(0xFFFFFF00));
