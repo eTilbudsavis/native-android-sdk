@@ -392,7 +392,9 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
      * @param page The page to turn to
      */
     public void setPage(int page) {
-        setPosition(mConfig.pageToPosition(page));
+        if (page > 0) {
+            setPosition(mConfig.pageToPosition(page));
+        }
     }
 
     /**
@@ -411,9 +413,11 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
      * @param position A position
      */
     public void setPosition(int position) {
-        mCurrentPosition = position;
-        if (mPager != null) {
-            mPager.setCurrentItem(mCurrentPosition);
+        if (mCurrentPosition >= 0) {
+            mCurrentPosition = position;
+            if (mPager != null) {
+                mPager.setCurrentItem(mCurrentPosition);
+            }
         }
     }
 
@@ -577,10 +581,8 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
             // force the first page change if needed
             if (mPager.getCurrentItem() != mCurrentPosition) {
                 mPager.setCurrentItem(mCurrentPosition);
-            } else {
-                mWrapperListener.onPageChange(mConfig.positionToPages(mCurrentPosition, mCatalog.getPageCount()));
             }
-
+            mWrapperListener.onPageChange(getPages());
         }
 
     }

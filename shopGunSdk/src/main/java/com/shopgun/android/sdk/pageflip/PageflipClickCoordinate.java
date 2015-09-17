@@ -23,10 +23,10 @@ import java.util.List;
 
 public class PageflipClickCoordinate {
 
-    public final int mPage;
-    public final float mActualX;
-    public final float mActualY;
-    public final List<Hotspot> mHotspots;
+    private final int mPage;
+    private final float mActualX;
+    private final float mActualY;
+    private final List<Hotspot> mHotspots;
 
     public PageflipClickCoordinate(Catalog c, int[] pages, float x, float y) {
 
@@ -39,6 +39,22 @@ public class PageflipClickCoordinate {
         mActualY = y;
         mHotspots = c.getHotspots().getHotspots(mPage, mActualX, mActualY, pages);
 
+    }
+
+    public int getPage() {
+        return mPage;
+    }
+
+    public float getX() {
+        return mActualX;
+    }
+
+    public float getY() {
+        return mActualY;
+    }
+
+    public List<Hotspot> getHotspots() {
+        return mHotspots;
     }
 
     @Override

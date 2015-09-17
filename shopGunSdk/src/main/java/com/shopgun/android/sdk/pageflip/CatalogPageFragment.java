@@ -237,19 +237,19 @@ public class CatalogPageFragment extends Fragment implements
     @Override
     public void onPhotoTap(View view, float x, float y) {
         PageflipClickCoordinate c = new PageflipClickCoordinate(mCallback.getCatalog(), mPages, x, y);
-        mCallback.onSingleClick(mPhotoView, c.page, c.x, c.y, c.list);
+        mCallback.onSingleClick(mPhotoView, c.getPage(), c.getX(), c.getY(), c.getHotspots());
     }
 
     @Override
     public void onPhotoDoubleTap(View view, float x, float y) {
         PageflipClickCoordinate c = new PageflipClickCoordinate(mCallback.getCatalog(), mPages, x, y);
-        mCallback.onDoubleClick(mPhotoView, c.page, c.x, c.y, c.list);
+        mCallback.onDoubleClick(mPhotoView, c.getPage(), c.getX(), c.getY(), c.getHotspots());
     }
 
     @Override
     public void onPhotoLongTap(View view, float x, float y) {
         PageflipClickCoordinate c = new PageflipClickCoordinate(mCallback.getCatalog(), mPages, x, y);
-        mCallback.onLongClick(mPhotoView, c.page, c.x, c.y, c.list);
+        mCallback.onLongClick(mPhotoView, c.getPage(), c.getX(), c.getY(), c.getHotspots());
     }
 
     public void onZoomChange(boolean isZoomed) {
