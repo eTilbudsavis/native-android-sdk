@@ -28,30 +28,18 @@ import com.shopgun.android.sdk.utils.Json;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Currency;
+
 public class Pricing implements IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Pricing.class);
-    public static Parcelable.Creator<Pricing> CREATOR = new Parcelable.Creator<Pricing>() {
-        public Pricing createFromParcel(Parcel source) {
-            return new Pricing(source);
-        }
 
-        public Pricing[] newArray(int size) {
-            return new Pricing[size];
-        }
-    };
     private double mPrice = 1.0d;
     private Double mPrePrice;
-    private String mCurrency;
+    private Currency mCurrency;
 
     public Pricing() {
 
-    }
-
-    private Pricing(Parcel in) {
-        this.mPrice = in.readDouble();
-        this.mPrePrice = (Double) in.readValue(Double.class.getClassLoader());
-        this.mCurrency = in.readString();
     }
 
     public static Pricing fromJSON(JSONObject pricing) {
@@ -75,7 +63,7 @@ public class Pricing implements IJson<JSONObject>, Parcelable {
         try {
             o.put(JsonKey.PRICE, getPrice());
             o.put(JsonKey.PREPRICE, Json.nullCheck(getPrePrice()));
-            o.put(JsonKey.CURRENCY, Json.nullCheck(getCurrency()));
+            o.put(JsonKey.CURRENCY, Json.nullCheck(getCurrency().getCurrencyCode()));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }
@@ -100,63 +88,93 @@ public class Pricing implements IJson<JSONObject>, Parcelable {
         return this;
     }
 
-    public String getCurrency() {
+    /**
+     * Get the {@link Currency} for this {@link Pricing} object. If nothing else was set/specified
+     * we'll default to "DKK", due to a bug in API v1.
+     * @return A currency.
+     */
+    public Currency getCurrency() {
+        if (mCurrency == null) {
+            // API v1 had a null issue, we'll default to DKK
+            return Currency.getInstance("DKK");
+        }
         return mCurrency;
     }
 
-    public Pricing setCurrency(String currency) {
-        mCurrency = currency;
+    /**
+     * A currency corresponding to an <a href="http://en.wikipedia.org/wiki/ISO_4217">ISO 4217</a>
+     * currency code such as "EUR" or "USD". If <code>isoCurrencyCode</code> is <code>null</code>, we'll default to
+     * "DKK", due to a bug i API v1.
+     * @param isoCurrencyCode A currency string
+     * @return this object
+     */
+    public Pricing setCurrency(String isoCurrencyCode) {
+        mCurrency = Currency.getInstance(isoCurrencyCode==null ? "DKK" : isoCurrencyCode);
+        return this;
+    }
+
+    /**
+     * A currency corresponding to an <a href="http://en.wikipedia.org/wiki/ISO_4217">ISO 4217</a>
+     * currency code such as "EUR" or "USD". If <code>currency</code> is <code>null</code>, we'll default to
+     * "DKK", due to a bug i API v1.
+     * @param currency A currency string
+     * @return this object
+     */
+    public Pricing setCurrency(Currency currency) {
+        // API v1 had a null issue, we'll default to DKK
+        mCurrency = currency==null ? Currency.getInstance("DKK") : currency;
         return this;
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Pricing pricing = (Pricing) o;
+
+        if (Double.compare(pricing.mPrice, mPrice) != 0) return false;
+        if (mPrePrice != null ? !mPrePrice.equals(pricing.mPrePrice) : pricing.mPrePrice != null) return false;
+        return !(mCurrency != null ? !mCurrency.equals(pricing.mCurrency) : pricing.mCurrency != null);
+
+    }
+
+    @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((mCurrency == null) ? 0 : mCurrency.hashCode());
-        result = prime * result
-                + ((mPrePrice == null) ? 0 : mPrePrice.hashCode());
+        int result;
         long temp;
         temp = Double.doubleToLongBits(mPrice);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
+        result = (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (mPrePrice != null ? mPrePrice.hashCode() : 0);
+        result = 31 * result + (mCurrency != null ? mCurrency.hashCode() : 0);
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Pricing other = (Pricing) obj;
-        if (mCurrency == null) {
-            if (other.mCurrency != null)
-                return false;
-        } else if (!mCurrency.equals(other.mCurrency))
-            return false;
-        if (mPrePrice == null) {
-            if (other.mPrePrice != null)
-                return false;
-        } else if (!mPrePrice.equals(other.mPrePrice))
-            return false;
-        if (Double.doubleToLongBits(mPrice) != Double
-                .doubleToLongBits(other.mPrice))
-            return false;
-        return true;
-    }
-
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeDouble(this.mPrice);
         dest.writeValue(this.mPrePrice);
-        dest.writeString(this.mCurrency);
+        dest.writeSerializable(this.mCurrency);
     }
 
+    protected Pricing(Parcel in) {
+        this.mPrice = in.readDouble();
+        this.mPrePrice = (Double) in.readValue(Double.class.getClassLoader());
+        this.mCurrency = (Currency) in.readSerializable();
+    }
 
+    public static final Creator<Pricing> CREATOR = new Creator<Pricing>() {
+        public Pricing createFromParcel(Parcel source) {
+            return new Pricing(source);
+        }
+
+        public Pricing[] newArray(int size) {
+            return new Pricing[size];
+        }
+    };
 }

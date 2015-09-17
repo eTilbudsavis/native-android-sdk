@@ -64,7 +64,7 @@ public class OfferAdapter extends BaseAdapter {
         TextView price = (TextView) v.findViewById(R.id.price);
 
         heading.setText(o.getHeading());
-        price.setText(o.getPricing().getPrice() + o.getPricing().getCurrency());
+        price.setText(o.getPricing().getPrice() + o.getPricing().getCurrency().getSymbol());
 
         if (position%2==0) {
             v.setBackgroundColor(mDarkBackground);

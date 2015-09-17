@@ -271,6 +271,26 @@ public class Parameters {
     public static final String API_LOCALE = "r_locale";
 
     /**
+     * Feedback parameter
+     */
+    public static final String COMMENT = "comment";
+
+    /**
+     * Feedback parameter
+     */
+    public static final String SUBJECT = "subject";
+
+    /**
+     * Feedback parameter
+     */
+    public static final String TAGS = "tags";
+
+    /**
+     * Feedback parameter
+     */
+    public static final String FIELD_SCREEN = "field_screen";
+
+    /**
      * Parameter not yet integrated in the API
      */
     public static final String ACCURACY = "accuracy";
