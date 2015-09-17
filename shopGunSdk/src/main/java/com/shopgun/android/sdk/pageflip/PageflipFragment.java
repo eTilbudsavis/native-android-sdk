@@ -79,6 +79,9 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
     List<OnDrawPage> mDrawList = new ArrayList<OnDrawPage>();
 
+    // internal representation for when a full lifecycle isn't performed.
+    private Bundle mSavedInstanceState;
+
     // Callbacks and stats
     private PageflipListenerWrapper mWrapperListener = new PageflipListenerWrapper();
 
@@ -287,7 +290,13 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
             // Make sure, that ShopGun is running
             ShopGun.create(getActivity());
         }
-        onRestoreState(savedInstanceState);
+
+        if (mSavedInstanceState != null) {
+            onRestoreState(mSavedInstanceState);
+        } else {
+            onRestoreState(savedInstanceState);
+        }
+        mSavedInstanceState = null;
 
         mContainer = container;
         mFrame = (FrameLayout) inflater.inflate(R.layout.shopgun_sdk_layout_pageflip, mContainer, false);
@@ -483,6 +492,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
         outState.putString(ARG_CATALOG_ID, mCatalogId);
         outState.putString(ARG_VIEW_SESSION, mViewSessionUuid);
         outState.putParcelable(ARG_BRANDING, mBranding);
+        mSavedInstanceState = outState;
         super.onSaveInstanceState(outState);
     }
 
@@ -562,7 +572,6 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
             showContent(false);
 
         } else {
-
             applyAdapter();
             mWrapperListener.onReady();
             // force the first page change if needed
@@ -605,6 +614,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
             Bundle b = new Bundle();
             onSaveInstanceState(b);
             onRestoreState(b);
+            mSavedInstanceState = null;
             internalResume();
         }
     }
@@ -613,6 +623,14 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     public void onPause() {
         internalPause();
         super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        if (mSavedInstanceState == null) {
+            onSaveInstanceState(new Bundle());
+        }
+        super.onStop();
     }
 
     private void internalPause() {
