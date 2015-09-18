@@ -206,11 +206,4 @@ public class Endpoints {
         return String.format("/v2/push/payloads/%s", payloadId);
     }
 
-    /**
-     * https://etilbudsavis.dk/ern/{ern}/
-     */
-    public static String shareERN(String ern) {
-        return String.format("https://%s/ern/%s/", Environment.HOST_POSTFIX, ern);
-    }
-
 }
