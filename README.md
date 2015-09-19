@@ -1,4 +1,4 @@
-eTilbudsavis - Android SDK
+ShopGun Android SDK
 ===
 
 This guide is out of date
