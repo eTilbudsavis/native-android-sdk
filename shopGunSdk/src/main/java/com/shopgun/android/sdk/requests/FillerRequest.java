@@ -123,7 +123,10 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
     @Override
     public void cancel() {
         synchronized (FillerRequest.class) {
-            getRequestQueue().cancelAll(getTag());
+            if (!isCanceled()) {
+                super.cancel();
+                getRequestQueue().cancelAll(getTag());
+            }
         }
     }
 
