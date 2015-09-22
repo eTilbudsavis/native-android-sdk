@@ -60,15 +60,20 @@ public class Permission implements IJson<JSONObject>, Parcelable {
         }
     }
 
-    public static Permission fromJSON(JSONObject permission) {
-        Permission p = new Permission();
-        if (permission == null) {
-            return p;
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Links}
+     * @return A {@link Links}, or {@link null} if {@code object is null}
+     */
+    public static Permission fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
 
+        Permission p = new Permission();
         try {
 
-            JSONArray groups = permission.names();
+            JSONArray groups = object.names();
             if (groups == null) {
                 return p;
             }
@@ -76,7 +81,7 @@ public class Permission implements IJson<JSONObject>, Parcelable {
             for (int i = 0; i < groups.length(); i++) {
 
                 String group = groups.get(i).toString();
-                JSONArray jArray = permission.getJSONArray(group);
+                JSONArray jArray = object.getJSONArray(group);
                 ArrayList<String> permissions = new ArrayList<String>();
 
                 for (int j = 0; j < jArray.length(); j++) {

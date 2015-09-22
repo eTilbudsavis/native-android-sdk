@@ -20,9 +20,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONArray;
@@ -102,42 +102,51 @@ public class Subscription implements IJson<JSONObject>, Parcelable {
         this.mSubscribed = in.readByte() != 0;
     }
 
-    public static Subscription fromJSON(JSONObject subscription) {
-        Subscription s = new Subscription();
-        if (subscription == null) {
-            return s;
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Subscription}
+     * @return A {@link List} of POJO
+     */
+    public static List<Subscription> fromJSON(JSONArray array) {
+        List<Subscription> list = new ArrayList<Subscription>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Subscription.fromJSON(o));
+            }
+        }
+        return list;
+    }
+
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Subscription}
+     * @return A {@link Subscription}, or {@link null} if {@code object is null}
+     */
+    public static Subscription fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
 
-        s.setDealerId(Json.valueOf(subscription, JsonKey.DEALER_ID));
-        s.setSubscribed(Json.valueOf(subscription, JsonKey.SUBSCRIBED, false));
+        Subscription s = new Subscription();
+        s.setDealerId(Json.valueOf(object, JsonKeys.DEALER_ID));
+        s.setSubscribed(Json.valueOf(object, JsonKeys.SUBSCRIBED, false));
 
-        if (subscription.has(JsonKey.SDK_DEALER)) {
-            s.setDealer(Dealer.fromJSON(Json.getObject(subscription, JsonKey.SDK_DEALER)));
+        if (object.has(JsonKeys.SDK_DEALER)) {
+            s.setDealer(Dealer.fromJSON(Json.getObject(object, JsonKeys.SDK_DEALER)));
         }
 
         return s;
     }
 
-    public static List<Subscription> fromJSON(JSONArray subscription) {
-        List<Subscription> list = new ArrayList<Subscription>();
-        try {
-            for (int i = 0; i < subscription.length(); i++) {
-                list.add(Subscription.fromJSON((JSONObject) subscription.get(i)));
-            }
-        } catch (JSONException e) {
-            SgnLog.e(TAG, e.getMessage(), e);
-        }
-        return list;
-    }
-
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.DEALER_ID, Json.nullCheck(mDealerId));
-            o.put(JsonKey.SUBSCRIBED, mSubscribed);
+            o.put(JsonKeys.DEALER_ID, Json.nullCheck(mDealerId));
+            o.put(JsonKeys.SUBSCRIBED, mSubscribed);
 
             if (mDealer != null) {
-                o.put(JsonKey.SDK_DEALER, Json.toJson(mDealer));
+                o.put(JsonKeys.SDK_DEALER, Json.toJson(mDealer));
             }
 
         } catch (JSONException e) {
@@ -189,9 +198,7 @@ public class Subscription implements IJson<JSONObject>, Parcelable {
                 + ((mDealerId == null) ? 0 : mDealerId.hashCode());
         result = prime * result + (mSubscribed ? 1231 : 1237);
         return result;
-    }
-
-    ;
+    };
 
     @Override
     public boolean equals(Object obj) {
@@ -219,10 +226,10 @@ public class Subscription implements IJson<JSONObject>, Parcelable {
 
     public String toString() {
         JSONObject o = toJSON();
-        o.remove(JsonKey.SDK_DEALER);
+        o.remove(JsonKeys.SDK_DEALER);
         if (mDealer != null) {
             try {
-                o.put(JsonKey.SDK_DEALER, mDealer.getName());
+                o.put(JsonKeys.SDK_DEALER, mDealer.getName());
             } catch (JSONException e) {
                 // ignore
             }

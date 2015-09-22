@@ -21,13 +21,17 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Dimension implements IJson<JSONObject>, Parcelable {
 
@@ -62,12 +66,35 @@ public class Dimension implements IJson<JSONObject>, Parcelable {
         this.mHeight = in.readDouble();
     }
 
-    public static Dimension fromJSON(JSONObject dimension) {
-        Dimension d = new Dimension();
-        if (dimension == null) return d;
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Dimension}
+     * @return A {@link List} of POJO
+     */
+    public static List<Dimension> fromJSON(JSONArray array) {
+        List<Dimension> list = new ArrayList<Dimension>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Dimension.fromJSON(o));
+            }
+        }
+        return list;
+    }
 
-        d.setWidth(Json.valueOf(dimension, JsonKey.WIDTH, DEF_DIMENSION));
-        d.setHeight(Json.valueOf(dimension, JsonKey.HEIGHT, DEF_DIMENSION));
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Dimension}
+     * @return A {@link Dimension}, or {@link null} if {@code object is null}
+     */
+    public static Dimension fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
+        }
+
+        Dimension d = new Dimension();
+        d.setWidth(Json.valueOf(object, JsonKeys.WIDTH, DEF_DIMENSION));
+        d.setHeight(Json.valueOf(object, JsonKeys.HEIGHT, DEF_DIMENSION));
 
         return d;
     }
@@ -80,8 +107,8 @@ public class Dimension implements IJson<JSONObject>, Parcelable {
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.HEIGHT, Json.nullCheck(getHeight()));
-            o.put(JsonKey.WIDTH, Json.nullCheck(getWidth()));
+            o.put(JsonKeys.HEIGHT, Json.nullCheck(getHeight()));
+            o.put(JsonKeys.WIDTH, Json.nullCheck(getWidth()));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }

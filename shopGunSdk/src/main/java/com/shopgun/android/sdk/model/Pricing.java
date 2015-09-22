@@ -20,9 +20,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONException;
@@ -42,28 +42,33 @@ public class Pricing implements IJson<JSONObject>, Parcelable {
 
     }
 
-    public static Pricing fromJSON(JSONObject pricing) {
-        Pricing p = new Pricing();
-        if (pricing == null) {
-            return p;
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Pricing}
+     * @return A {@link Pricing}, or {@link null} if {@code object is null}
+     */
+    public static Pricing fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
 
+        Pricing p = new Pricing();
+        p.setPrice(Json.valueOf(object, JsonKeys.PRICE, 1.0d));
         try {
-            p.setPrice(Json.valueOf(pricing, JsonKey.PRICE, 1.0d));
-            p.setPrePrice(pricing.isNull(JsonKey.PREPRICE) ? null : pricing.getDouble(JsonKey.PREPRICE));
-            p.setCurrency(Json.valueOf(pricing, JsonKey.CURRENCY));
+            p.setPrePrice(object.isNull(JsonKeys.PREPRICE) ? null : object.getDouble(JsonKeys.PREPRICE));
         } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
+        p.setCurrency(Json.valueOf(object, JsonKeys.CURRENCY));
         return p;
     }
 
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.PRICE, getPrice());
-            o.put(JsonKey.PREPRICE, Json.nullCheck(getPrePrice()));
-            o.put(JsonKey.CURRENCY, Json.nullCheck(getCurrency().getCurrencyCode()));
+            o.put(JsonKeys.PRICE, getPrice());
+            o.put(JsonKeys.PREPRICE, Json.nullCheck(getPrePrice()));
+            o.put(JsonKeys.CURRENCY, Json.nullCheck(getCurrency().getCurrencyCode()));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }

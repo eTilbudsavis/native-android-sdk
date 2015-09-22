@@ -21,10 +21,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONArray;
@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObject>, Parcelable {
 
@@ -92,37 +93,42 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         this.mSyncState = in.readInt();
     }
 
-    public static ArrayList<Share> fromJSON(JSONArray shares) {
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Share}
+     * @return A {@link List} of POJO
+     */
+    public static List<Share> fromJSON(JSONArray array) {
         ArrayList<Share> list = new ArrayList<Share>();
-        for (int i = 0; i < shares.length(); i++) {
-            try {
-                list.add(Share.fromJSON(shares.getJSONObject(i)));
-            } catch (JSONException e) {
-                SgnLog.e(TAG, "", e);
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Share.fromJSON(o));
             }
         }
         return list;
     }
 
-    public static Share fromJSON(JSONObject share) {
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Share}
+     * @return A {@link Share}, or {@link null} if {@code object is null}
+     */
+    public static Share fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
+        }
+
         Share s = new Share();
-        if (share == null) {
-            return s;
+        JSONObject jUser = Json.getObject(object, JsonKeys.USER);
+        if (jUser != null) {
+            // TODO: Consider changing structure of Share to match API
+            s.setEmail(Json.valueOf(jUser, JsonKeys.EMAIL));
+            s.setName(Json.valueOf(jUser, JsonKeys.NAME));
         }
-
-        try {
-
-            JSONObject o = share.getJSONObject(JsonKey.USER);
-            s.setEmail(Json.valueOf(o, JsonKey.EMAIL));
-            s.setName(Json.valueOf(o, JsonKey.NAME));
-
-            s.setAccess(Json.valueOf(share, JsonKey.ACCESS));
-            s.setAccepted(Json.valueOf(share, JsonKey.ACCEPTED, false));
-            s.setAcceptUrl(Json.valueOf(share, JsonKey.ACCEPT_URL, null));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-
+        s.setAccess(Json.valueOf(object, JsonKeys.ACCESS));
+        s.setAccepted(Json.valueOf(object, JsonKeys.ACCEPTED, false));
+        s.setAcceptUrl(Json.valueOf(object, JsonKeys.ACCEPT_URL, null));
         return s;
     }
 
@@ -131,14 +137,14 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         JSONObject o = new JSONObject();
         try {
             JSONObject user = new JSONObject();
-            user.put(JsonKey.EMAIL, Json.nullCheck(getEmail()));
-            user.put(JsonKey.NAME, Json.nullCheck(getName()));
+            user.put(JsonKeys.EMAIL, Json.nullCheck(getEmail()));
+            user.put(JsonKeys.NAME, Json.nullCheck(getName()));
 
-            o.put(JsonKey.USER, Json.nullCheck(user));
-            o.put(JsonKey.ACCEPTED, Json.nullCheck(getAccepted()));
-            o.put(JsonKey.ACCESS, Json.nullCheck(getAccess()));
+            o.put(JsonKeys.USER, Json.nullCheck(user));
+            o.put(JsonKeys.ACCEPTED, Json.nullCheck(getAccepted()));
+            o.put(JsonKeys.ACCESS, Json.nullCheck(getAccess()));
             if (getAcceptUrl() != null) {
-                o.put(JsonKey.ACCEPT_URL, getAcceptUrl());
+                o.put(JsonKeys.ACCEPT_URL, getAcceptUrl());
             }
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);

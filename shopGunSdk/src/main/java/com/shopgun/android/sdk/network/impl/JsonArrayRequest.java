@@ -18,14 +18,13 @@ package com.shopgun.android.sdk.network.impl;
 
 import android.text.TextUtils;
 
+import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.utils.Api;
-import com.shopgun.android.sdk.utils.Api.Param;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
@@ -118,7 +117,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
      * @return this object
      */
     public Request<?> setOrderBy(String order) {
-        getParameters().put(Api.Param.ORDER_BY, order);
+        getParameters().put(Parameters.ORDER_BY, order);
         return this;
     }
 
@@ -130,7 +129,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
     public Request<?> setOrderBy(List<String> order) {
         if (!order.isEmpty()) {
             String tmp = TextUtils.join(",", order);
-            getParameters().put(Api.Param.ORDER_BY, tmp);
+            getParameters().put(Parameters.ORDER_BY, tmp);
         }
         return this;
     }
@@ -140,7 +139,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
      * @return the order as a String, or null if no order have been given.
      */
     public String getOrderBy() {
-        return getParameters().get(Api.Param.ORDER_BY);
+        return getParameters().get(Parameters.ORDER_BY);
     }
 
     /**
@@ -154,7 +153,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
         if (offset < 0) {
             throw new IllegalStateException(ERROR_OFFSET_NEGATIVE);
         }
-        getParameters().put(Param.OFFSET, String.valueOf(offset));
+        getParameters().put(Parameters.OFFSET, String.valueOf(offset));
         return this;
     }
 
@@ -163,7 +162,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
      * @return offset
      */
     public int getOffset() {
-        return Integer.valueOf(getParameters().get(Param.OFFSET));
+        return Integer.valueOf(getParameters().get(Parameters.OFFSET));
     }
 
     /**
@@ -177,7 +176,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
         if (limit < 0) {
             throw new IllegalStateException(ERROR_LIMIT_NEGATIVE);
         }
-        getParameters().put(Param.LIMIT, String.valueOf(limit));
+        getParameters().put(Parameters.LIMIT, String.valueOf(limit));
         return this;
     }
 
@@ -186,14 +185,14 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
      * @return max number of items API should return
      */
     public int getLimit() {
-        return Integer.valueOf(getParameters().get(Param.LIMIT));
+        return Integer.valueOf(getParameters().get(Parameters.LIMIT));
     }
 
     /**
      * Set a parameter for what specific id's to get from a given endpoint.<br><br>
      *
      *
-     * @param    type The id type, e.g. Api.Param.CATALOG_IDS
+     * @param    type The id type, e.g. Parameters.CATALOG_IDS
      * @param    ids The id's to get
      * @return this object
      */

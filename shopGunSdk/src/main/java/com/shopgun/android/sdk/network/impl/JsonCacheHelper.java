@@ -19,6 +19,7 @@ package com.shopgun.android.sdk.network.impl;
 import android.text.TextUtils;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.Cache.Item;
@@ -80,10 +81,10 @@ public class JsonCacheHelper {
         // Lets try to see if it's possible to create a response from
         // previously cached items
         Set<String> keys = r.getParameters().keySet();
-        boolean hasFilter = keys.contains(Api.Param.CATALOG_IDS) ||
-                keys.contains(Api.Param.DEALER_IDS) ||
-                keys.contains(Api.Param.OFFER_IDS) ||
-                keys.contains(Api.Param.STORE_IDS);
+        boolean hasFilter = keys.contains(Parameters.CATALOG_IDS) ||
+                keys.contains(Parameters.DEALER_IDS) ||
+                keys.contains(Parameters.OFFER_IDS) ||
+                keys.contains(Parameters.STORE_IDS);
 
         if (!hasFilter) {
             // Nothing to work with

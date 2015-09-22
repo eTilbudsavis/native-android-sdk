@@ -27,8 +27,12 @@ import com.shopgun.android.sdk.palette.MaterialColor;
 import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Json;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Branding implements IJson<JSONObject>, Parcelable {
 
@@ -44,21 +48,38 @@ public class Branding implements IJson<JSONObject>, Parcelable {
 
     }
 
-    public static Branding fromJSON(JSONObject branding) {
-        Branding b = new Branding();
-        if (branding == null) {
-            return b;
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a branding
+     * @return A {@link List} of POJO
+     */
+    public static List<Branding> fromJSON(JSONArray array) {
+        List<Branding> list = new ArrayList<Branding>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Branding.fromJSON(o));
+            }
         }
+        return list;
+    }
 
-        try {
-            b.setName(Json.valueOf(branding, JsonKeys.NAME));
-            b.setWebsite(Json.valueOf(branding, JsonKeys.WEBSITE));
-            b.setLogo(Json.valueOf(branding, JsonKeys.LOGO));
-            b.setColor(Json.colorValueOf(branding, JsonKeys.COLOR));
-            b.setPageflip(Pageflip.fromJSON(branding.getJSONObject(JsonKeys.PAGEFLIP)));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a branding
+     * @return A {@link Branding}, or {@link null} if {@code object is null}
+     */
+    public static Branding fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
+        Branding b = new Branding();
+        b.setName(Json.valueOf(object, JsonKeys.NAME));
+        b.setWebsite(Json.valueOf(object, JsonKeys.WEBSITE));
+        b.setLogo(Json.valueOf(object, JsonKeys.LOGO));
+        b.setColor(Json.colorValueOf(object, JsonKeys.COLOR));
+        JSONObject jPageflip = Json.getObject(object, JsonKeys.PAGEFLIP, null);
+        b.setPageflip(Pageflip.fromJSON(jPageflip));
         return b;
     }
 

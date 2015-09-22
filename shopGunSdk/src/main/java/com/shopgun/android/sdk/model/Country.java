@@ -21,10 +21,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONArray;
@@ -59,46 +59,41 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Parcelable {
     }
 
     /**
-     * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
-     * @param countries A {@link JSONArray} in the format of a valid API v2 country response
-     * @return A {@link List}&lt;T&gt;
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a country
+     * @return A {@link List} of POJO
      */
-    public static List<Country> fromJSON(JSONArray countries) {
+    public static List<Country> fromJSON(JSONArray array) {
         List<Country> list = new ArrayList<Country>();
-        try {
-            for (int i = 0; i < countries.length(); i++) {
-                list.add(Country.fromJSON(countries.getJSONObject(i)));
-            }
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject jCountry = Json.getObject(array, i);
+            list.add(Country.fromJSON(jCountry));
         }
         return list;
     }
 
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
-     * @param country A {@link JSONObject} in the format of a valid API v2 country response
-     * @return A Country object
+     * @param object A {@link JSONObject} with a valid API v2 structure for a country
+     * @return A {@link Country}, or {@link null} if {@code object is null}
      */
-    public static Country fromJSON(JSONObject jCountry) {
-        Country country = new Country();
-        if (jCountry == null) {
-            return country;
+    public static Country fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
-
-        country.setId(Json.valueOf(jCountry, JsonKey.ID));
-        country.setErn(Json.valueOf(jCountry, JsonKey.ERN));
-        country.setUnsubscribePrintUrl(Json.valueOf(jCountry, JsonKey.UNSUBSCRIBE_PRINT_URL));
-
+        Country country = new Country();
+        country.setId(Json.valueOf(object, JsonKeys.ID));
+        country.setErn(Json.valueOf(object, JsonKeys.ERN));
+        country.setUnsubscribePrintUrl(Json.valueOf(object, JsonKeys.UNSUBSCRIBE_PRINT_URL));
         return country;
     }
 
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.ID, Json.nullCheck(getId()));
-            o.put(JsonKey.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKey.UNSUBSCRIBE_PRINT_URL, Json.nullCheck(getUnsubscribePrintUrl()));
+            o.put(JsonKeys.ID, Json.nullCheck(getId()));
+            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
+            o.put(JsonKeys.UNSUBSCRIBE_PRINT_URL, Json.nullCheck(getUnsubscribePrintUrl()));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }

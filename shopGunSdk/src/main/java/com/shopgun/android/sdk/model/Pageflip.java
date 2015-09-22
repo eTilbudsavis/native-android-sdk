@@ -27,8 +27,12 @@ import com.shopgun.android.sdk.palette.MaterialColor;
 import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Json;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Pageflip implements IJson<JSONObject>, Parcelable {
 
@@ -44,14 +48,35 @@ public class Pageflip implements IJson<JSONObject>, Parcelable {
         mColor = new SgnColor(color);
     }
 
-    public static Pageflip fromJSON(JSONObject pageflip) {
-        Pageflip p = new Pageflip();
-        if (pageflip == null) {
-            return p;
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Pageflip}
+     * @return A {@link List} of POJO
+     */
+    public static List<Pageflip> fromJSON(JSONArray array) {
+        List<Pageflip> list = new ArrayList<Pageflip>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Pageflip.fromJSON(o));
+            }
+        }
+        return list;
+    }
+
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Pageflip}
+     * @return A {@link Pageflip}, or {@link null} if {@code object is null}
+     */
+    public static Pageflip fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
 
-        p.setLogo(Json.valueOf(pageflip, JsonKeys.LOGO));
-        p.setColor(Json.colorValueOf(pageflip, JsonKeys.COLOR));
+        Pageflip p = new Pageflip();
+        p.setLogo(Json.valueOf(object, JsonKeys.LOGO));
+        p.setColor(Json.colorValueOf(object, JsonKeys.COLOR));
 
         return p;
     }

@@ -17,13 +17,13 @@
 package com.shopgun.android.sdk.network.impl;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.utils.Api.Param;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
@@ -42,10 +42,10 @@ public class JsonStringRequest extends JsonRequest<String> {
     private static Map<String, String> mFilterTypes = new HashMap<String, String>();
 
     static {
-        mFilterTypes.put("catalogs", Param.CATALOG_IDS);
-        mFilterTypes.put("offers", Param.OFFER_IDS);
-        mFilterTypes.put("dealers", Param.DEALER_IDS);
-        mFilterTypes.put("stores", Param.STORE_IDS);
+        mFilterTypes.put("catalogs", Parameters.CATALOG_IDS);
+        mFilterTypes.put("offers", Parameters.OFFER_IDS);
+        mFilterTypes.put("dealers", Parameters.DEALER_IDS);
+        mFilterTypes.put("stores", Parameters.STORE_IDS);
     }
 
     public JsonStringRequest(String url, Listener<String> listener) {

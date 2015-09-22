@@ -20,9 +20,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONException;
@@ -52,12 +52,19 @@ public class Si implements IJson<JSONObject>, Parcelable {
         this.mFactor = in.readDouble();
     }
 
-    public static Si fromJSON(JSONObject si) {
-        Si s = new Si();
-        if (si == null) return s;
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Si}
+     * @return A {@link Links}, or {@link null} if {@code object is null}
+     */
+    public static Si fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
+        }
 
-        s.setSymbol(Json.valueOf(si, JsonKey.SYMBOL));
-        s.setFactor(Json.valueOf(si, JsonKey.FACTOR, 1.0d));
+        Si s = new Si();
+        s.setSymbol(Json.valueOf(object, JsonKeys.SYMBOL));
+        s.setFactor(Json.valueOf(object, JsonKeys.FACTOR, 1.0d));
 
         return s;
     }
@@ -65,8 +72,8 @@ public class Si implements IJson<JSONObject>, Parcelable {
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.SYMBOL, Json.nullCheck(getSymbol()));
-            o.put(JsonKey.FACTOR, Json.nullCheck(getFactor()));
+            o.put(JsonKeys.SYMBOL, Json.nullCheck(getSymbol()));
+            o.put(JsonKeys.FACTOR, Json.nullCheck(getFactor()));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }

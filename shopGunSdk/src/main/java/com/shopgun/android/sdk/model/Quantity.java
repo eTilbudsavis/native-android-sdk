@@ -20,13 +20,17 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Quantity implements IJson<JSONObject>, Parcelable {
 
@@ -54,28 +58,48 @@ public class Quantity implements IJson<JSONObject>, Parcelable {
         this.mPieces = in.readParcelable(Pieces.class.getClassLoader());
     }
 
-    public static Quantity fromJSON(JSONObject quantity) {
-        Quantity q = new Quantity();
-        if (quantity == null) {
-            return q;
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Quantity}
+     * @return A {@link List} of POJO
+     */
+    public static List<Quantity> fromJSON(JSONArray array) {
+        List<Quantity> list = new ArrayList<Quantity>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Quantity.fromJSON(o));
+            }
+        }
+        return list;
+    }
+
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Quantity}
+     * @return A {@link Quantity}, or {@link null} if {@code object is null}
+     */
+    public static Quantity fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
 
-        try {
-            q.setUnit(quantity.isNull(JsonKey.UNIT) ? null : Unit.fromJSON(quantity.getJSONObject(JsonKey.UNIT)));
-            q.setSize(quantity.isNull(JsonKey.SIZE) ? null : Size.fromJSON(quantity.getJSONObject(JsonKey.SIZE)));
-            q.setPieces(quantity.isNull(JsonKey.PIECES) ? null : Pieces.fromJSON(quantity.getJSONObject(JsonKey.PIECES)));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
+        Quantity q = new Quantity();
+        JSONObject jUnit = Json.getObject(object, JsonKeys.UNIT);
+        q.setUnit(Unit.fromJSON(jUnit));
+        JSONObject jSize = Json.getObject(object, JsonKeys.UNIT);
+        q.setSize(Size.fromJSON(jSize));
+        JSONObject jPieces = Json.getObject(object, JsonKeys.UNIT);
+        q.setPieces(Pieces.fromJSON(jPieces));
         return q;
     }
 
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.UNIT, Json.toJson(getUnit()));
-            o.put(JsonKey.SIZE, Json.toJson(getSize()));
-            o.put(JsonKey.PIECES, Json.toJson(getPieces()));
+            o.put(JsonKeys.UNIT, Json.toJson(getUnit()));
+            o.put(JsonKeys.SIZE, Json.toJson(getSize()));
+            o.put(JsonKeys.PIECES, Json.toJson(getPieces()));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }

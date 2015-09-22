@@ -20,9 +20,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONArray;
@@ -35,20 +35,6 @@ import java.util.List;
 public class Images implements IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Images.class);
-    public static Parcelable.Creator<Images> CREATOR = new Parcelable.Creator<Images>() {
-        public Images createFromParcel(Parcel source) {
-            return new Images(source);
-        }
-
-        public Images[] newArray(int size) {
-            return new Images[size];
-        }
-    };
-
-    public static final int THUMB = 0;
-    public static final int VIEW = 1;
-    public static final int ZOOM = 2;
-
     private String mView;
     private String mZoom;
     private String mThumb;
@@ -57,43 +43,44 @@ public class Images implements IJson<JSONObject>, Parcelable {
 
     }
 
-    private Images(Parcel in) {
-        this.mView = in.readString();
-        this.mZoom = in.readString();
-        this.mThumb = in.readString();
-    }
-
-    public static List<Images> fromJSON(JSONArray images) {
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for an images
+     * @return A {@link List} of POJO
+     */
+    public static List<Images> fromJSON(JSONArray array) {
         List<Images> list = new ArrayList<Images>();
-        for (int i = 0; i < images.length(); i++) {
-            try {
-                list.add(fromJSON(images.getJSONObject(i)));
-            } catch (JSONException e) {
-                SgnLog.e(TAG, e.getMessage(), e);
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(fromJSON(o));
             }
         }
         return list;
     }
 
-    public static Images fromJSON(JSONObject image) {
-        Images i = new Images();
-        if (image == null) {
-            return i;
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for an images
+     * @return A {@link Images}, or {@link null} if {@code object is null}
+     */
+    public static Images fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
-
-        i.setView(Json.valueOf(image, JsonKey.VIEW));
-        i.setZoom(Json.valueOf(image, JsonKey.ZOOM));
-        i.setThumb(Json.valueOf(image, JsonKey.THUMB));
-
+        Images i = new Images();
+        i.setView(Json.valueOf(object, JsonKeys.VIEW));
+        i.setZoom(Json.valueOf(object, JsonKeys.ZOOM));
+        i.setThumb(Json.valueOf(object, JsonKeys.THUMB));
         return i;
     }
 
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.VIEW, Json.nullCheck(getView()));
-            o.put(JsonKey.ZOOM, Json.nullCheck(getZoom()));
-            o.put(JsonKey.THUMB, Json.nullCheck(getThumb()));
+            o.put(JsonKeys.VIEW, Json.nullCheck(getView()));
+            o.put(JsonKeys.ZOOM, Json.nullCheck(getZoom()));
+            o.put(JsonKeys.THUMB, Json.nullCheck(getThumb()));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }
@@ -125,50 +112,51 @@ public class Images implements IJson<JSONObject>, Parcelable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Images images = (Images) o;
+
+        if (mView != null ? !mView.equals(images.mView) : images.mView != null) return false;
+        if (mZoom != null ? !mZoom.equals(images.mZoom) : images.mZoom != null) return false;
+        return !(mThumb != null ? !mThumb.equals(images.mThumb) : images.mThumb != null);
+
+    }
+
+    @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((mThumb == null) ? 0 : mThumb.hashCode());
-        result = prime * result + ((mView == null) ? 0 : mView.hashCode());
-        result = prime * result + ((mZoom == null) ? 0 : mZoom.hashCode());
+        int result = mView != null ? mView.hashCode() : 0;
+        result = 31 * result + (mZoom != null ? mZoom.hashCode() : 0);
+        result = 31 * result + (mThumb != null ? mThumb.hashCode() : 0);
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Images other = (Images) obj;
-        if (mThumb == null) {
-            if (other.mThumb != null)
-                return false;
-        } else if (!mThumb.equals(other.mThumb))
-            return false;
-        if (mView == null) {
-            if (other.mView != null)
-                return false;
-        } else if (!mView.equals(other.mView))
-            return false;
-        if (mZoom == null) {
-            if (other.mZoom != null)
-                return false;
-        } else if (!mZoom.equals(other.mZoom))
-            return false;
-        return true;
-    }
-
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.mView);
         dest.writeString(this.mZoom);
         dest.writeString(this.mThumb);
     }
 
+    protected Images(Parcel in) {
+        this.mView = in.readString();
+        this.mZoom = in.readString();
+        this.mThumb = in.readString();
+    }
+
+    public static final Creator<Images> CREATOR = new Creator<Images>() {
+        public Images createFromParcel(Parcel source) {
+            return new Images(source);
+        }
+
+        public Images[] newArray(int size) {
+            return new Images[size];
+        }
+    };
 }

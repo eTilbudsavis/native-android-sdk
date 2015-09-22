@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.demo.base.BaseActivity;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Offer;
@@ -32,7 +33,6 @@ import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
-import com.shopgun.android.sdk.utils.Api.Param;
 
 import org.json.JSONArray;
 
@@ -136,7 +136,7 @@ public class OfferSearchActivity extends BaseActivity implements View.OnClickLis
         };
 
         Map<String, String> args = new HashMap<String, String>();
-        args.put(Param.QUERY, query);
+        args.put(Parameters.QUERY, query);
 
         // Create the request
         JsonArrayRequest offerRequest = new JsonArrayRequest(Endpoint.OFFER_SEARCH, offerListener);

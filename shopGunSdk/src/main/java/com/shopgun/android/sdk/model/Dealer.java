@@ -34,6 +34,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * <p>This class is a representation of a dealer as the API v2 exposes it</p>
@@ -81,36 +82,41 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
 
     }
 
-    public static ArrayList<Dealer> fromJSON(JSONArray dealers) {
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a dealer
+     * @return A {@link List} of POJO
+     */
+    public static List<Dealer> fromJSON(JSONArray array) {
         ArrayList<Dealer> list = new ArrayList<Dealer>();
-        try {
-            for (int i = 0; i < dealers.length(); i++)
-                list.add(Dealer.fromJSON((JSONObject) dealers.get(i)));
-
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Dealer.fromJSON(o));
+            }
         }
-
         return list;
     }
 
-    public static Dealer fromJSON(JSONObject dealer) {
-        Dealer d = new Dealer();
-        if (dealer == null) {
-            return d;
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a dealer
+     * @return A {@link Dealer}, or {@link null} if {@code object is null}
+     */
+    public static Dealer fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
 
-        try {
-            d.setId(Json.valueOf(dealer, JsonKeys.ID));
-            d.setErn(Json.valueOf(dealer, JsonKeys.ERN));
-            d.setName(Json.valueOf(dealer, JsonKeys.NAME));
-            d.setWebsite(Json.valueOf(dealer, JsonKeys.WEBSITE));
-            d.setLogo(Json.valueOf(dealer, JsonKeys.LOGO));
-            d.setColor(Json.colorValueOf(dealer, JsonKeys.COLOR));
-            d.setPageflip(Pageflip.fromJSON(dealer.getJSONObject(JsonKeys.PAGEFLIP)));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
+        Dealer d = new Dealer();
+        d.setId(Json.valueOf(object, JsonKeys.ID));
+        d.setErn(Json.valueOf(object, JsonKeys.ERN));
+        d.setName(Json.valueOf(object, JsonKeys.NAME));
+        d.setWebsite(Json.valueOf(object, JsonKeys.WEBSITE));
+        d.setLogo(Json.valueOf(object, JsonKeys.LOGO));
+        d.setColor(Json.colorValueOf(object, JsonKeys.COLOR));
+        JSONObject jPageflip = Json.getObject(object, JsonKeys.PAGEFLIP);
+        d.setPageflip(Pageflip.fromJSON(jPageflip));
         return d;
     }
 

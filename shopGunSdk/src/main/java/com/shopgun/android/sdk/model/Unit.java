@@ -20,13 +20,17 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Unit implements IJson<JSONObject>, Parcelable {
 
@@ -52,29 +56,45 @@ public class Unit implements IJson<JSONObject>, Parcelable {
         this.mSi = in.readParcelable(Si.class.getClassLoader());
     }
 
-    public static Unit fromJSON(JSONObject unit) {
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Unit}
+     * @return A {@link List} of POJO
+     */
+    public static List<Unit> fromJSON(JSONArray array) {
+        List<Unit> list = new ArrayList<Unit>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Unit.fromJSON(o));
+            }
+        }
+        return list;
+    }
+
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Unit}
+     * @return A {@link Unit}, or {@link null} if {@code object is null}
+     */
+    public static Unit fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
+        }
         Unit u = new Unit();
-        if (unit == null) {
-            return u;
-        }
-
-        u.setSymbol(Json.valueOf(unit, JsonKey.SYMBOL));
-        try {
-            u.setSi(Si.fromJSON(unit.getJSONObject(JsonKey.SI)));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-
+        u.setSymbol(Json.valueOf(object, JsonKeys.SYMBOL));
+        JSONObject jSi = Json.getObject(object, JsonKeys.SI);
+        u.setSi(Si.fromJSON(jSi));
         return u;
     }
 
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.SYMBOL, Json.nullCheck(getSymbol()));
-            o.put(JsonKey.SI, Json.toJson(getSi()));
+            o.put(JsonKeys.SYMBOL, Json.nullCheck(getSymbol()));
+            o.put(JsonKeys.SI, Json.toJson(getSi()));
         } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return o;
     }

@@ -20,11 +20,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONArray;
@@ -32,6 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -86,11 +87,16 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
         this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
     }
 
-    public static ArrayList<Store> fromJSON(JSONArray stores) {
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a store
+     * @return A {@link List} of POJO
+     */
+    public static ArrayList<Store> fromJSON(JSONArray array) {
         ArrayList<Store> list = new ArrayList<Store>();
         try {
-            for (int i = 0; i < stores.length(); i++)
-                list.add(Store.fromJSON((JSONObject) stores.get(i)));
+            for (int i = 0; i < array.length(); i++)
+                list.add(Store.fromJSON((JSONObject) array.get(i)));
 
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
@@ -98,55 +104,58 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
         return list;
     }
 
-    public static Store fromJSON(JSONObject store) {
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a store
+     * @return A {@link Store}, or {@link null} if {@code object is null}
+     */
+    public static Store fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
+        }
+
         Store s = new Store();
-        if (store == null) {
-            return s;
+        s.setId(Json.valueOf(object, JsonKeys.ID));
+        s.setErn(Json.valueOf(object, JsonKeys.ERN));
+        s.setStreet(Json.valueOf(object, JsonKeys.STREET));
+        s.setCity(Json.valueOf(object, JsonKeys.CITY));
+        s.setZipcode(Json.valueOf(object, JsonKeys.ZIP_CODE));
+        JSONObject jCountry = Json.getObject(object, JsonKeys.COUNTRY, null);
+        s.setCountry(Country.fromJSON(jCountry));
+        s.setLatitude(Json.valueOf(object, JsonKeys.LATITUDE, 0.0d));
+        s.setLongitude(Json.valueOf(object, JsonKeys.LONGITUDE, 0.0d));
+        s.setDealerUrl(Json.valueOf(object, JsonKeys.DEALER_URL));
+        s.setDealerId(Json.valueOf(object, JsonKeys.DEALER_ID));
+        JSONObject jBranding = Json.getObject(object, JsonKeys.BRANDING, null);
+        s.setBranding(Branding.fromJSON(jBranding));
+        s.setContact(Json.valueOf(object, JsonKeys.CONTACT));
+
+        if (object.has(JsonKeys.SDK_DEALER)) {
+            JSONObject jDealer = Json.getObject(object, JsonKeys.SDK_DEALER, null);
+            s.setDealer(Dealer.fromJSON(jDealer));
         }
 
-        try {
-            s.setId(Json.valueOf(store, JsonKey.ID));
-            s.setErn(Json.valueOf(store, JsonKey.ERN));
-            s.setStreet(Json.valueOf(store, JsonKey.STREET));
-            s.setCity(Json.valueOf(store, JsonKey.CITY));
-            s.setZipcode(Json.valueOf(store, JsonKey.ZIP_CODE));
-            s.setCountry(Country.fromJSON(store.getJSONObject(JsonKey.COUNTRY)));
-            s.setLatitude(Json.valueOf(store, JsonKey.LATITUDE, 0.0d));
-            s.setLongitude(Json.valueOf(store, JsonKey.LONGITUDE, 0.0d));
-            s.setDealerUrl(Json.valueOf(store, JsonKey.DEALER_URL));
-            s.setDealerId(Json.valueOf(store, JsonKey.DEALER_ID));
-            s.setBranding(Branding.fromJSON(store.getJSONObject(JsonKey.BRANDING)));
-            s.setContact(Json.valueOf(store, JsonKey.CONTACT));
-
-            if (store.has(JsonKey.SDK_DEALER)) {
-                JSONObject jDealer = Json.getObject(store, JsonKey.SDK_DEALER, null);
-                s.setDealer(Dealer.fromJSON(jDealer));
-            }
-
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
         return s;
     }
 
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.ID, Json.nullCheck(getId()));
-            o.put(JsonKey.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKey.STREET, Json.nullCheck(getStreet()));
-            o.put(JsonKey.CITY, Json.nullCheck(getCity()));
-            o.put(JsonKey.ZIP_CODE, Json.nullCheck(getZipcode()));
-            o.put(JsonKey.COUNTRY, Json.nullCheck(getCountry().toJSON()));
-            o.put(JsonKey.LATITUDE, getLatitude());
-            o.put(JsonKey.LONGITUDE, getLongitude());
-            o.put(JsonKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
-            o.put(JsonKey.DEALER_ID, Json.nullCheck(getDealerId()));
-            o.put(JsonKey.BRANDING, Json.nullCheck(getBranding().toJSON()));
-            o.put(JsonKey.CONTACT, Json.nullCheck(getContact()));
+            o.put(JsonKeys.ID, Json.nullCheck(getId()));
+            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
+            o.put(JsonKeys.STREET, Json.nullCheck(getStreet()));
+            o.put(JsonKeys.CITY, Json.nullCheck(getCity()));
+            o.put(JsonKeys.ZIP_CODE, Json.nullCheck(getZipcode()));
+            o.put(JsonKeys.COUNTRY, Json.nullCheck(getCountry().toJSON()));
+            o.put(JsonKeys.LATITUDE, getLatitude());
+            o.put(JsonKeys.LONGITUDE, getLongitude());
+            o.put(JsonKeys.DEALER_URL, Json.nullCheck(getDealerUrl()));
+            o.put(JsonKeys.DEALER_ID, Json.nullCheck(getDealerId()));
+            o.put(JsonKeys.BRANDING, Json.nullCheck(getBranding().toJSON()));
+            o.put(JsonKeys.CONTACT, Json.nullCheck(getContact()));
 
             if (mDealer != null) {
-                o.put(JsonKey.SDK_DEALER, Json.toJson(mDealer));
+                o.put(JsonKeys.SDK_DEALER, Json.toJson(mDealer));
             }
 
         } catch (JSONException e) {

@@ -20,14 +20,18 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -76,38 +80,53 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
     }
 
     /**
-     * A factory method for converting {@link JSONObject} into a POJO.
-     * @param user A {@link JSONObject} in the format of a valid API v2 user response
-     * @return A User object
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code User}
+     * @return A {@link List} of POJO
      */
-    public static User fromJSON(JSONObject jUser) {
-        User user = new User();
-        if (jUser == null) return user;
-
-        try {
-            user.setUserId(Json.valueOf(jUser, JsonKey.ID, User.NO_USER));
-            user.setErn(Json.valueOf(jUser, JsonKey.ERN));
-            user.setGender(Json.valueOf(jUser, JsonKey.GENDER));
-            user.setBirthYear(Json.valueOf(jUser, JsonKey.BIRTH_YEAR, 0));
-            user.setName(Json.valueOf(jUser, JsonKey.NAME));
-            user.setEmail(Json.valueOf(jUser, JsonKey.EMAIL));
-            user.setPermissions(Permission.fromJSON(jUser.getJSONObject(JsonKey.PERMISSIONS)));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
+    public static List<User> fromJSON(JSONArray array) {
+        List<User> list = new ArrayList<User>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(User.fromJSON(o));
+            }
         }
+        return list;
+    }
+
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code User}
+     * @return A {@link User}, or {@link null} if {@code object is null}
+     */
+    public static User fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
+        }
+
+        User user = new User();
+        user.setUserId(Json.valueOf(object, JsonKeys.ID, User.NO_USER));
+        user.setErn(Json.valueOf(object, JsonKeys.ERN));
+        user.setGender(Json.valueOf(object, JsonKeys.GENDER));
+        user.setBirthYear(Json.valueOf(object, JsonKeys.BIRTH_YEAR, 0));
+        user.setName(Json.valueOf(object, JsonKeys.NAME));
+        user.setEmail(Json.valueOf(object, JsonKeys.EMAIL));
+        JSONObject jPermission = Json.getObject(object, JsonKeys.PERMISSIONS);
+        user.setPermissions(Permission.fromJSON(jPermission));
         return user;
     }
 
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.ID, getUserId());
-            o.put(JsonKey.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKey.GENDER, Json.nullCheck(getGender()));
-            o.put(JsonKey.BIRTH_YEAR, Json.nullCheck(getBirthYear()));
-            o.put(JsonKey.NAME, Json.nullCheck(getName()));
-            o.put(JsonKey.EMAIL, Json.nullCheck(getEmail()));
-            o.put(JsonKey.PERMISSIONS, Json.toJson(getPermissions()));
+            o.put(JsonKeys.ID, getUserId());
+            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
+            o.put(JsonKeys.GENDER, Json.nullCheck(getGender()));
+            o.put(JsonKeys.BIRTH_YEAR, Json.nullCheck(getBirthYear()));
+            o.put(JsonKeys.NAME, Json.nullCheck(getName()));
+            o.put(JsonKeys.EMAIL, Json.nullCheck(getEmail()));
+            o.put(JsonKeys.PERMISSIONS, Json.toJson(getPermissions()));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }

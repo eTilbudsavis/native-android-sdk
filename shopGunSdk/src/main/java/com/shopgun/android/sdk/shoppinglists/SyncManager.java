@@ -23,6 +23,7 @@ import android.os.Process;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
@@ -47,7 +48,6 @@ import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.utils.Api;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
-import com.shopgun.android.sdk.utils.Api.Param;
 import com.shopgun.android.sdk.utils.ListUtils;
 import com.shopgun.android.sdk.utils.PermissionUtils;
 import com.shopgun.android.sdk.utils.Utils;
@@ -456,8 +456,8 @@ public class SyncManager {
 
         JsonArrayRequest listRequest = new JsonArrayRequest(Method.GET, Endpoint.lists(user.getUserId()), listListener);
         // Offset and limit are set to default values, we want to ignore this.
-        listRequest.getParameters().remove(Param.OFFSET);
-        listRequest.getParameters().remove(Param.LIMIT);
+        listRequest.getParameters().remove(Parameters.OFFSET);
+        listRequest.getParameters().remove(Parameters.LIMIT);
         listRequest.setSaveNetworkLog(SAVE_NETWORK_LOG);
         addRequest(listRequest);
 
@@ -693,8 +693,8 @@ public class SyncManager {
 
         JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Endpoint.listitems(user.getUserId(), sl.getId()), itemListener);
         // Offset and limit are set to default values, we want to ignore this.
-        itemRequest.getParameters().remove(Param.OFFSET);
-        itemRequest.getParameters().remove(Param.LIMIT);
+        itemRequest.getParameters().remove(Parameters.OFFSET);
+        itemRequest.getParameters().remove(Parameters.LIMIT);
         itemRequest.setSaveNetworkLog(SAVE_NETWORK_LOG);
         addRequest(itemRequest);
 
@@ -929,7 +929,7 @@ public class SyncManager {
         String url = Endpoint.list(user.getUserId(), sl.getId());
 
         JsonObjectRequest listReq = new JsonObjectRequest(Method.DELETE, url, null, listListener);
-        listReq.getParameters().put(Param.MODIFIED, Utils.dateToString(sl.getModified()));
+        listReq.getParameters().put(Parameters.MODIFIED, Utils.dateToString(sl.getModified()));
         addRequest(listReq);
 
     }
@@ -1060,7 +1060,7 @@ public class SyncManager {
 
         String url = Endpoint.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
         JsonObjectRequest itemReq = new JsonObjectRequest(Method.DELETE, url, null, itemListener);
-        itemReq.getParameters().put(Param.MODIFIED, Utils.dateToString(sli.getModified()));
+        itemReq.getParameters().put(Parameters.MODIFIED, Utils.dateToString(sli.getModified()));
         addRequest(itemReq);
 
     }

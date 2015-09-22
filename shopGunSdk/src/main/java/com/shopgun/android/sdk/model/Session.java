@@ -21,9 +21,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.Utils;
 
@@ -67,25 +67,30 @@ public class Session implements IJson<JSONObject>, Parcelable {
         this.mReference = in.readString();
     }
 
-    public static Session fromJSON(JSONObject session) {
-        Session s = new Session();
-        if (session == null) {
-            return s;
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Session}
+     * @return A {@link Session}, or {@link null} if {@code object is null}
+     */
+    public static Session fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
 
-        s.setToken(Json.valueOf(session, JsonKey.TOKEN));
-        String exp = Json.valueOf(session, JsonKey.EXPIRES);
+        Session s = new Session();
+        s.setToken(Json.valueOf(object, JsonKeys.TOKEN));
+        String exp = Json.valueOf(object, JsonKeys.EXPIRES);
         s.setExpires(Utils.stringToDate(exp));
-        s.setClientId(Json.valueOf(session, JsonKey.CLIENT_ID));
-        s.setReference(Json.valueOf(session, JsonKey.REFERENCE));
+        s.setClientId(Json.valueOf(object, JsonKeys.CLIENT_ID));
+        s.setReference(Json.valueOf(object, JsonKeys.REFERENCE));
 
-        JSONObject user = Json.getObject(session, JsonKey.USER);
+        JSONObject user = Json.getObject(object, JsonKeys.USER);
         s.setUser(User.fromJSON(user));
 
-        JSONObject perm = Json.getObject(session, JsonKey.PERMISSIONS);
+        JSONObject perm = Json.getObject(object, JsonKeys.PERMISSIONS);
         s.setPermission(Permission.fromJSON(perm));
 
-        s.setProvider(Json.valueOf(session, JsonKey.PROVIDER));
+        s.setProvider(Json.valueOf(object, JsonKeys.PROVIDER));
 
         return s;
     }
@@ -93,13 +98,13 @@ public class Session implements IJson<JSONObject>, Parcelable {
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.TOKEN, Json.nullCheck(getToken()));
-            o.put(JsonKey.EXPIRES, Json.nullCheck(Utils.dateToString(getExpire())));
-            o.put(JsonKey.USER, getUser().getUserId() == User.NO_USER ? JSONObject.NULL : getUser().toJSON());
-            o.put(JsonKey.PERMISSIONS, Json.toJson(getPermission()));
-            o.put(JsonKey.PROVIDER, Json.nullCheck(getProvider()));
-            o.put(JsonKey.CLIENT_ID, Json.nullCheck(mClientId));
-            o.put(JsonKey.REFERENCE, Json.nullCheck(mReference));
+            o.put(JsonKeys.TOKEN, Json.nullCheck(getToken()));
+            o.put(JsonKeys.EXPIRES, Json.nullCheck(Utils.dateToString(getExpire())));
+            o.put(JsonKeys.USER, getUser().getUserId() == User.NO_USER ? JSONObject.NULL : getUser().toJSON());
+            o.put(JsonKeys.PERMISSIONS, Json.toJson(getPermission()));
+            o.put(JsonKeys.PROVIDER, Json.nullCheck(getProvider()));
+            o.put(JsonKeys.CLIENT_ID, Json.nullCheck(mClientId));
+            o.put(JsonKeys.REFERENCE, Json.nullCheck(mReference));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }

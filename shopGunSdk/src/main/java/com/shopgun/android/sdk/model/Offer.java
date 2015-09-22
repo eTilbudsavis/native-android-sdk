@@ -20,13 +20,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.model.interfaces.ICatalog;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.IStore;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.Utils;
 
@@ -108,113 +107,115 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
     }
 
     /**
-     * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
-     * @param offers A {@link JSONArray} in the format of a valid API v2 offer response
-     * @return A {@link List} of POJO;
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for an {@code Offer}
+     * @return A {@link List} of POJO
      */
-    public static List<Offer> fromJSON(JSONArray offers) {
+    public static List<Offer> fromJSON(JSONArray array) {
         List<Offer> list = new ArrayList<Offer>();
-        try {
-            for (int i = 0; i < offers.length(); i++) {
-                list.add(Offer.fromJSON((JSONObject) offers.get(i)));
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Offer.fromJSON(o));
             }
-        } catch (JSONException e) {
-            SgnLog.e(TAG, e.getMessage(), e);
         }
         return list;
     }
 
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
-     * @param jOffer A {@link JSONObject} in the format of a valid API v2 offer response
-     * @return An Offer object
+     * @param object A {@link JSONObject} with a valid API v2 structure for an {@code Offer}
+     * @return A {@link Offer}, or {@link null} if {@code object is null}
      */
-    public static Offer fromJSON(JSONObject jOffer) {
-        Offer offer = new Offer();
-        if (jOffer == null) {
-            return offer;
+    public static Offer fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
 
-        try {
+        Offer offer = new Offer();
 
-            // Stuff found in the Hotspots parsed first
-            offer.setId(Json.valueOf(jOffer, JsonKey.ID));
-            offer.setErn(Json.valueOf(jOffer, JsonKey.ERN));
-            offer.setHeading(Json.valueOf(jOffer, JsonKey.HEADING));
-            offer.setPricing(Pricing.fromJSON(jOffer.getJSONObject(JsonKey.PRICING)));
-            offer.setQuantity(Quantity.fromJSON(jOffer.getJSONObject(JsonKey.QUANTITY)));
-            Date runFrom = Utils.stringToDate(Json.valueOf(jOffer, JsonKey.RUN_FROM));
-            offer.setRunFrom(runFrom);
-            Date runTill = Utils.stringToDate(Json.valueOf(jOffer, JsonKey.RUN_TILL));
-            offer.setRunTill(runTill);
+        // Stuff found in the Hotspots parsed first
+        offer.setId(Json.valueOf(object, JsonKeys.ID));
+        offer.setErn(Json.valueOf(object, JsonKeys.ERN));
+        offer.setHeading(Json.valueOf(object, JsonKeys.HEADING));
+        JSONObject jPricing = Json.getObject(object, JsonKeys.PRICING);
+        offer.setPricing(Pricing.fromJSON(jPricing));
+        JSONObject jQuantity = Json.getObject(object, JsonKeys.QUANTITY);
+        offer.setQuantity(Quantity.fromJSON(jQuantity));
+        Date runFrom = Utils.stringToDate(Json.valueOf(object, JsonKeys.RUN_FROM));
+        offer.setRunFrom(runFrom);
+        Date runTill = Utils.stringToDate(Json.valueOf(object, JsonKeys.RUN_TILL));
+        offer.setRunTill(runTill);
 
-            // The rest isn't in the hotspots and is discarded
-            if (jOffer.has(JsonKey.DESCRIPTION) && jOffer.has(JsonKey.CATALOG_ID)) {
-                offer.setDescription(Json.valueOf(jOffer, JsonKey.DESCRIPTION));
-                offer.setCatalogPage(Json.valueOf(jOffer, JsonKey.CATALOG_PAGE, 0));
-                offer.setImages(Images.fromJSON(jOffer.getJSONObject(JsonKey.IMAGES)));
-                offer.setLinks(Links.fromJSON(jOffer.getJSONObject(JsonKey.LINKS)));
-                offer.setDealerUrl(Json.valueOf(jOffer, JsonKey.DEALER_URL));
-                offer.setDealerId(Json.valueOf(jOffer, JsonKey.DEALER_ID));
-                offer.setStoreUrl(Json.valueOf(jOffer, JsonKey.STORE_URL));
-                offer.setStoreId(Json.valueOf(jOffer, JsonKey.STORE_ID));
-                offer.setCatalogUrl(Json.valueOf(jOffer, JsonKey.CATALOG_URL));
-                offer.setCatalogId(Json.valueOf(jOffer, JsonKey.CATALOG_ID));
-            }
+        // The rest isn't in the hotspots and is discarded
+        if (isFullOffer(object)) {
+            offer.setDescription(Json.valueOf(object, JsonKeys.DESCRIPTION));
+            offer.setCatalogPage(Json.valueOf(object, JsonKeys.CATALOG_PAGE, 0));
+            JSONObject jImages = Json.getObject(object, JsonKeys.IMAGES);
+            offer.setImages(Images.fromJSON(jImages));
+            JSONObject jLinks = Json.getObject(object, JsonKeys.LINKS);
+            offer.setLinks(Links.fromJSON(jLinks));
+            offer.setDealerUrl(Json.valueOf(object, JsonKeys.DEALER_URL));
+            offer.setDealerId(Json.valueOf(object, JsonKeys.DEALER_ID));
+            offer.setStoreUrl(Json.valueOf(object, JsonKeys.STORE_URL));
+            offer.setStoreId(Json.valueOf(object, JsonKeys.STORE_ID));
+            offer.setCatalogUrl(Json.valueOf(object, JsonKeys.CATALOG_URL));
+            offer.setCatalogId(Json.valueOf(object, JsonKeys.CATALOG_ID));
+        }
 
-            if (jOffer.has(JsonKey.SDK_DEALER)) {
-                JSONObject jDealer = Json.getObject(jOffer, JsonKey.SDK_DEALER, null);
-                offer.setDealer(Dealer.fromJSON(jDealer));
-            }
+        if (object.has(JsonKeys.SDK_DEALER)) {
+            JSONObject jDealer = Json.getObject(object, JsonKeys.SDK_DEALER, null);
+            offer.setDealer(Dealer.fromJSON(jDealer));
+        }
 
-            if (jOffer.has(JsonKey.SDK_STORE)) {
-                JSONObject jStore = Json.getObject(jOffer, JsonKey.SDK_STORE, null);
-                offer.setStore(Store.fromJSON(jStore));
-            }
+        if (object.has(JsonKeys.SDK_STORE)) {
+            JSONObject jStore = Json.getObject(object, JsonKeys.SDK_STORE, null);
+            offer.setStore(Store.fromJSON(jStore));
+        }
 
-            if (jOffer.has(JsonKey.SDK_CATALOG)) {
-                JSONObject jCatalog = Json.getObject(jOffer, JsonKey.SDK_CATALOG, null);
-                offer.setCatalog(Catalog.fromJSON(jCatalog));
-            }
-
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
+        if (object.has(JsonKeys.SDK_CATALOG)) {
+            JSONObject jCatalog = Json.getObject(object, JsonKeys.SDK_CATALOG, null);
+            offer.setCatalog(Catalog.fromJSON(jCatalog));
         }
 
         return offer;
     }
 
+    private static boolean isFullOffer(JSONObject object) {
+        return object.has(JsonKeys.DESCRIPTION) && object.has(JsonKeys.CATALOG_ID);
+    }
+
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.ID, Json.nullCheck(getId()));
-            o.put(JsonKey.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKey.HEADING, Json.nullCheck(getHeading()));
-            o.put(JsonKey.DESCRIPTION, Json.nullCheck(getDescription()));
-            o.put(JsonKey.CATALOG_PAGE, getCatalogPage());
-            o.put(JsonKey.PRICING, Json.toJson(getPricing()));
-            o.put(JsonKey.QUANTITY, Json.toJson(getQuantity()));
-            o.put(JsonKey.IMAGES, Json.toJson(getImages()));
-            o.put(JsonKey.LINKS, Json.toJson(getLinks()));
-            o.put(JsonKey.RUN_FROM, Json.nullCheck(Utils.dateToString(getRunFrom())));
-            o.put(JsonKey.RUN_TILL, Json.nullCheck(Utils.dateToString(getRunTill())));
-            o.put(JsonKey.DEALER_URL, Json.nullCheck(getDealerUrl()));
-            o.put(JsonKey.DEALER_ID, Json.nullCheck(getDealerId()));
-            o.put(JsonKey.STORE_URL, Json.nullCheck(getStoreUrl()));
-            o.put(JsonKey.STORE_ID, Json.nullCheck(getStoreId()));
-            o.put(JsonKey.CATALOG_URL, Json.nullCheck(getCatalogUrl()));
-            o.put(JsonKey.CATALOG_ID, Json.nullCheck(getCatalogId()));
+            o.put(JsonKeys.ID, Json.nullCheck(getId()));
+            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
+            o.put(JsonKeys.HEADING, Json.nullCheck(getHeading()));
+            o.put(JsonKeys.DESCRIPTION, Json.nullCheck(getDescription()));
+            o.put(JsonKeys.CATALOG_PAGE, getCatalogPage());
+            o.put(JsonKeys.PRICING, Json.toJson(getPricing()));
+            o.put(JsonKeys.QUANTITY, Json.toJson(getQuantity()));
+            o.put(JsonKeys.IMAGES, Json.toJson(getImages()));
+            o.put(JsonKeys.LINKS, Json.toJson(getLinks()));
+            o.put(JsonKeys.RUN_FROM, Json.nullCheck(Utils.dateToString(getRunFrom())));
+            o.put(JsonKeys.RUN_TILL, Json.nullCheck(Utils.dateToString(getRunTill())));
+            o.put(JsonKeys.DEALER_URL, Json.nullCheck(getDealerUrl()));
+            o.put(JsonKeys.DEALER_ID, Json.nullCheck(getDealerId()));
+            o.put(JsonKeys.STORE_URL, Json.nullCheck(getStoreUrl()));
+            o.put(JsonKeys.STORE_ID, Json.nullCheck(getStoreId()));
+            o.put(JsonKeys.CATALOG_URL, Json.nullCheck(getCatalogUrl()));
+            o.put(JsonKeys.CATALOG_ID, Json.nullCheck(getCatalogId()));
 
             if (mCatalog != null) {
-                o.put(JsonKey.SDK_CATALOG, Json.toJson(mCatalog));
+                o.put(JsonKeys.SDK_CATALOG, Json.toJson(mCatalog));
             }
 
             if (mDealer != null) {
-                o.put(JsonKey.SDK_DEALER, Json.toJson(mDealer));
+                o.put(JsonKeys.SDK_DEALER, Json.toJson(mDealer));
             }
 
             if (mStore != null) {
-                o.put(JsonKey.SDK_STORE, Json.toJson(mStore));
+                o.put(JsonKeys.SDK_STORE, Json.toJson(mStore));
             }
 
         } catch (JSONException e) {

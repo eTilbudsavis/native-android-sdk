@@ -20,9 +20,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONException;
@@ -52,14 +52,19 @@ public class Size implements IJson<JSONObject>, Parcelable {
         this.mTo = in.readDouble();
     }
 
-    public static Size fromJSON(JSONObject size) {
-        Size s = new Size();
-        if (size == null) {
-            return s;
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Links}
+     * @return A {@link Links}, or {@link null} if {@code object is null}
+     */
+    public static Size fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
 
-        s.setFrom(Json.valueOf(size, JsonKey.FROM, 1.0d));
-        s.setTo(Json.valueOf(size, JsonKey.TO, 1.0d));
+        Size s = new Size();
+        s.setFrom(Json.valueOf(object, JsonKeys.FROM, 1.0d));
+        s.setTo(Json.valueOf(object, JsonKeys.TO, 1.0d));
 
         return s;
     }
@@ -67,8 +72,8 @@ public class Size implements IJson<JSONObject>, Parcelable {
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.FROM, getFrom());
-            o.put(JsonKey.TO, getTo());
+            o.put(JsonKeys.FROM, getFrom());
+            o.put(JsonKeys.TO, getTo());
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }

@@ -23,9 +23,9 @@ import android.text.Spanned;
 import android.widget.AutoCompleteTextView;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONArray;
@@ -82,38 +82,35 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
     }
 
     /**
-     * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
-     * @param typeaheads A {@link JSONArray} in the format of a valid API v2 typeahead response
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Typeahead}
      * @return A {@link List} of POJO
      */
-    public static List<Typeahead> fromJSON(JSONArray typeaheads) {
-        List<Typeahead> resp = new ArrayList<Typeahead>();
-        try {
-            for (int i = 0; i < typeaheads.length(); i++) {
-                resp.add(Typeahead.fromJSON((JSONObject) typeaheads.get(i)));
+    public static List<Links> fromJSON(JSONArray array) {
+        List<Links> list = new ArrayList<Links>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Links.fromJSON(o));
             }
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
         }
-        return resp;
+        return list;
     }
 
     /**
-     * A factory method for converting {@link JSONObject} into POJO.
-     * <p>This method exposes a way, of updating/setting an objects properties</p>
-     * @param typeahead An object to set/update
-     * @param jTypeahead A {@link JSONObject} in the format of a valid API v2 typeahead response
-     * @return A {@link List} of POJO
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Typeahead}
+     * @return A {@link Typeahead}, or {@link null} if {@code object is null}
      */
-    public static Typeahead fromJSON(JSONObject jTypeahead) {
-        Typeahead typeahead = new Typeahead();
-        if (jTypeahead == null) {
-            return typeahead;
+    public static Typeahead fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
 
-        typeahead.setSubject(Json.valueOf(jTypeahead, JsonKey.SUBJECT));
-        typeahead.setOffset(Json.valueOf(jTypeahead, JsonKey.OFFSET, 0));
-        typeahead.setLength(Json.valueOf(jTypeahead, JsonKey.LENGTH, 0));
+        Typeahead typeahead = new Typeahead();
+        typeahead.setSubject(Json.valueOf(object, JsonKeys.SUBJECT));
+        typeahead.setOffset(Json.valueOf(object, JsonKeys.OFFSET, 0));
+        typeahead.setLength(Json.valueOf(object, JsonKeys.LENGTH, 0));
 
         return typeahead;
     }
@@ -121,9 +118,9 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.SUBJECT, Json.nullCheck(getSubject()));
-            o.put(JsonKey.LENGTH, getLength());
-            o.put(JsonKey.OFFSET, getOffset());
+            o.put(JsonKeys.SUBJECT, Json.nullCheck(getSubject()));
+            o.put(JsonKeys.LENGTH, getLength());
+            o.put(JsonKeys.OFFSET, getOffset());
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }

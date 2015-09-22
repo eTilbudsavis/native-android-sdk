@@ -21,9 +21,9 @@ import android.location.LocationManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Store;
-import com.shopgun.android.sdk.utils.Api.Param;
 import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONException;
@@ -74,21 +74,21 @@ public class SgnLocation extends Location {
         if (o == null) {
             return l;
         }
-        l.setAccuracy(Json.valueOf(o, Param.ACCURACY, l.getAccuracy()));
-        l.setAddress(Json.valueOf(o, Param.ADDRESS, l.getAddress()));
-        l.setAltitude(Json.valueOf(o, Param.ALTITUDE, l.getAltitude()));
-        l.setBearing(Json.valueOf(o, Param.BEARING, l.getBearing()));
-        l.setLatitude(Json.valueOf(o, Param.LATITUDE, l.getLatitude()));
-        l.setLongitude(Json.valueOf(o, Param.LONGITUDE, l.getLongitude()));
-        l.setProvider(Json.valueOf(o, Param.PROVIDER, l.getProvider()));
-        l.setRadius(Json.valueOf(o, Param.RADIUS, DEFAULT_RADIUS));
-        l.setSpeed(Json.valueOf(o, Param.SPEED, l.getSpeed()));
-        l.setTime(Json.valueOf(o, Param.TIME, l.getTime()));
-        l.setSensor(Json.valueOf(o, Param.SENSOR, false));
-        double east = Json.valueOf(o, Param.BOUND_EAST, DEFAULT_COORDINATE);
-        double west = Json.valueOf(o, Param.BOUND_WEST, DEFAULT_COORDINATE);
-        double north = Json.valueOf(o, Param.BOUND_NORTH, DEFAULT_COORDINATE);
-        double south = Json.valueOf(o, Param.BOUND_SOUTH, DEFAULT_COORDINATE);
+        l.setAccuracy(Json.valueOf(o, Parameters.ACCURACY, l.getAccuracy()));
+        l.setAddress(Json.valueOf(o, Parameters.ADDRESS, l.getAddress()));
+        l.setAltitude(Json.valueOf(o, Parameters.ALTITUDE, l.getAltitude()));
+        l.setBearing(Json.valueOf(o, Parameters.BEARING, l.getBearing()));
+        l.setLatitude(Json.valueOf(o, Parameters.LATITUDE, l.getLatitude()));
+        l.setLongitude(Json.valueOf(o, Parameters.LONGITUDE, l.getLongitude()));
+        l.setProvider(Json.valueOf(o, Parameters.PROVIDER, l.getProvider()));
+        l.setRadius(Json.valueOf(o, Parameters.RADIUS, DEFAULT_RADIUS));
+        l.setSpeed(Json.valueOf(o, Parameters.SPEED, l.getSpeed()));
+        l.setTime(Json.valueOf(o, Parameters.TIME, l.getTime()));
+        l.setSensor(Json.valueOf(o, Parameters.SENSOR, false));
+        double east = Json.valueOf(o, Parameters.BOUND_EAST, DEFAULT_COORDINATE);
+        double west = Json.valueOf(o, Parameters.BOUND_WEST, DEFAULT_COORDINATE);
+        double north = Json.valueOf(o, Parameters.BOUND_NORTH, DEFAULT_COORDINATE);
+        double south = Json.valueOf(o, Parameters.BOUND_SOUTH, DEFAULT_COORDINATE);
         l.setBounds(north, east, south, west);
         return l;
     }
@@ -153,22 +153,22 @@ public class SgnLocation extends Location {
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(Param.ACCURACY, getAccuracy());
-            o.put(Param.ADDRESS, getAddress());
-            o.put(Param.ALTITUDE, getAltitude());
-            o.put(Param.BEARING, getBearing());
-            o.put(Param.LATITUDE, getLatitude());
-            o.put(Param.LONGITUDE, getLongitude());
-            o.put(Param.PROVIDER, getProvider());
-            o.put(Param.RADIUS, getRadius());
-            o.put(Param.SPEED, getSpeed());
-            o.put(Param.TIME, getTime());
-            o.put(Param.SENSOR, isSensor());
+            o.put(Parameters.ACCURACY, getAccuracy());
+            o.put(Parameters.ADDRESS, getAddress());
+            o.put(Parameters.ALTITUDE, getAltitude());
+            o.put(Parameters.BEARING, getBearing());
+            o.put(Parameters.LATITUDE, getLatitude());
+            o.put(Parameters.LONGITUDE, getLongitude());
+            o.put(Parameters.PROVIDER, getProvider());
+            o.put(Parameters.RADIUS, getRadius());
+            o.put(Parameters.SPEED, getSpeed());
+            o.put(Parameters.TIME, getTime());
+            o.put(Parameters.SENSOR, isSensor());
             if (isBoundsSet()) {
-                o.put(Param.BOUND_EAST, getBoundEast());
-                o.put(Param.BOUND_NORTH, getBoundNorth());
-                o.put(Param.BOUND_SOUTH, getBoundSouth());
-                o.put(Param.BOUND_WEST, getBoundWest());
+                o.put(Parameters.BOUND_EAST, getBoundEast());
+                o.put(Parameters.BOUND_NORTH, getBoundNorth());
+                o.put(Parameters.BOUND_SOUTH, getBoundSouth());
+                o.put(Parameters.BOUND_WEST, getBoundWest());
             }
         } catch (JSONException e) {
             SgnLog.e(TAG, null, e);

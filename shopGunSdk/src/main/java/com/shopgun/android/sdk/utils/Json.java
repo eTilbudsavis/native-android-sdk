@@ -81,10 +81,11 @@ public class Json {
     }
 
     /**
-     * Searches the JSONObject for the key and returns the matching value if it exists.
+     * Searches the {@code object} for the {@code key} and returns the matching value if it exists.
      * @param object An object to get data from
      * @param key A key to map to a value
-     * @return Returns the value mapped to the key if it exists, coercing it if necessary else null.
+     * @param defValue A default value to return, if {@code key} doesn't exist or causes a JSONException
+     * @return Returns the value mapped to the key if it exists, coercing it if necessary else {@code defValue}.
      */
     public static JSONObject getObject(JSONObject object, String key, JSONObject defValue) {
         if (object == null || key == null) {
@@ -92,6 +93,35 @@ public class Json {
         }
         try {
             return object.isNull(key) ? defValue : object.getJSONObject(key);
+        } catch (JSONException e) {
+            SgnLog.e(TAG, e.getMessage(), e);
+        }
+        return defValue;
+    }
+
+    /**
+     * Returns the value at {@code index} if it exists and is a {@code JSONObject}.
+     * @param array An JSONArray to get data from
+     * @param index The index to get
+     * @return Returns the value mapped to the {@code index} if it exists, coercing it if necessary else {@code null}.
+     */
+    public static JSONObject getObject(JSONArray array, int index) {
+        return getObject(array, index, null);
+    }
+
+    /**
+     * Returns the value at {@code index} if it exists and is a {@code JSONObject}.
+     * @param array An JSONArray to get data from
+     * @param index The index to get
+     * @param defValue A default value to return, if {@code index} doesn't exist or causes a JSONException
+     * @return Returns the value mapped to the {@code index} if it exists, coercing it if necessary else {@code defValue}.
+     */
+    public static JSONObject getObject(JSONArray array, int index, JSONObject defValue) {
+        if (array == null) {
+            return defValue;
+        }
+        try {
+            return array.isNull(index) ? defValue : array.getJSONObject(index);
         } catch (JSONException e) {
             SgnLog.e(TAG, e.getMessage(), e);
         }

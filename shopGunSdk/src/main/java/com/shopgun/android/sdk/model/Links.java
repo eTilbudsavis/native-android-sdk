@@ -20,13 +20,17 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Links implements IJson<JSONObject>, Parcelable {
 
@@ -50,13 +54,34 @@ public class Links implements IJson<JSONObject>, Parcelable {
         this.mWebshop = in.readString();
     }
 
-    public static Links fromJSON(JSONObject links) {
-        Links l = new Links();
-        if (links == null) {
-            return l;
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Links}
+     * @return A {@link List} of POJO
+     */
+    public static List<Links> fromJSON(JSONArray array) {
+        List<Links> list = new ArrayList<Links>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Links.fromJSON(o));
+            }
+        }
+        return list;
+    }
+
+    /**
+     * A factory method for converting {@link JSONObject} into a POJO.
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Links}
+     * @return A {@link Links}, or {@link null} if {@code object is null}
+     */
+    public static Links fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
 
-        l.setWebshop(Json.valueOf(links, JsonKey.WEBSHOP));
+        Links l = new Links();
+        l.setWebshop(Json.valueOf(object, JsonKeys.WEBSHOP));
 
         return l;
     }
@@ -64,7 +89,7 @@ public class Links implements IJson<JSONObject>, Parcelable {
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.WEBSHOP, Json.nullCheck(getWebshop()));
+            o.put(JsonKeys.WEBSHOP, Json.nullCheck(getWebshop()));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }

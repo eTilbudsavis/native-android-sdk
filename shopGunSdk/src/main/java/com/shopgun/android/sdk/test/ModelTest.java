@@ -113,6 +113,7 @@ public class ModelTest {
         testParcelable(obj, ShoppinglistItem.CREATOR);
 
         // JSON
+        Assert.assertNull(ShoppinglistItem.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         ShoppinglistItem jsonObj = ShoppinglistItem.fromJSON(jObj);
 
@@ -157,6 +158,7 @@ public class ModelTest {
         testParcelable(obj, Shoppinglist.CREATOR);
 
         // JSON
+        Assert.assertNull(Shoppinglist.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Shoppinglist jsonObj = Shoppinglist.fromJSON(jObj);
 
@@ -186,6 +188,7 @@ public class ModelTest {
         testParcelable(obj, Session.CREATOR);
 
         // JSON
+        Assert.assertNull(Session.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Session jsonObj = Session.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -193,6 +196,7 @@ public class ModelTest {
         try {
             jObj.put(JsonKey.TOKEN, "new-fake-token");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Session.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -219,6 +223,7 @@ public class ModelTest {
         testParcelable(obj, Dealer.CREATOR);
 
         // JSON
+        Assert.assertNull(Dealer.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Dealer jsonObj = Dealer.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -251,6 +256,7 @@ public class ModelTest {
         testParcelable(obj, Catalog.CREATOR);
 
         // JSON
+        Assert.assertNull(Catalog.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Catalog jsonObj = Catalog.fromJSON(jObj);
 
@@ -289,6 +295,7 @@ public class ModelTest {
         testParcelable(obj, Store.CREATOR);
 
         // JSON
+        Assert.assertNull(Store.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Store jsonObj = Store.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -319,6 +326,7 @@ public class ModelTest {
         testParcelable(obj, Country.CREATOR);
 
         // JSON
+        Assert.assertNull(Country.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Country jsonObj = Country.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -351,6 +359,7 @@ public class ModelTest {
         testParcelable(obj, Share.CREATOR);
 
         // JSON
+        Assert.assertNull(Share.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         try {
             jObj.put(JsonKey.EMAIL, "fake-wrong-email@nomail.org");
@@ -380,6 +389,7 @@ public class ModelTest {
         testParcelable(obj, User.CREATOR);
 
         // JSON
+        Assert.assertNull(User.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         User jsonObj = User.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -409,6 +419,7 @@ public class ModelTest {
         testParcelable(obj, Branding.CREATOR);
 
         // JSON
+        Assert.assertNull(Branding.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Branding jsonObj = Branding.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -435,6 +446,7 @@ public class ModelTest {
         testParcelable(obj, Dimension.CREATOR);
 
         // JSON
+        Assert.assertNull(Dimension.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Dimension jsonObj = Dimension.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -513,6 +525,7 @@ public class ModelTest {
         testParcelable(obj, Pageflip.CREATOR);
 
         // JSON
+        Assert.assertNull(Pageflip.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Pageflip jsonObj = Pageflip.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -540,6 +553,7 @@ public class ModelTest {
         testParcelable(obj, Permission.CREATOR);
 
         // JSON
+        Assert.assertNull(Permission.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Permission jsonObj = Permission.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -560,6 +574,7 @@ public class ModelTest {
         testParcelable(obj, Typeahead.CREATOR);
 
         // JSON
+        Assert.assertNull(Typeahead.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Typeahead jsonObj = Typeahead.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -587,6 +602,7 @@ public class ModelTest {
         testParcelable(obj, Subscription.CREATOR);
 
         // JSON
+        Assert.assertNull(Subscription.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Subscription jsonObj = Subscription.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -613,6 +629,7 @@ public class ModelTest {
         testParcelable(obj, Pricing.CREATOR);
 
         // JSON
+        Assert.assertNull(Pricing.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Pricing jsonObj = Pricing.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -640,6 +657,7 @@ public class ModelTest {
         testParcelable(obj, Links.CREATOR);
 
         // JSON
+        Assert.assertNull(Links.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Links jsonObj = Links.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -667,6 +685,7 @@ public class ModelTest {
         testParcelable(obj, Images.CREATOR);
 
         // JSON
+        Assert.assertNull(Images.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Images jsonObj = Images.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -693,6 +712,7 @@ public class ModelTest {
         testParcelable(obj, Si.CREATOR);
 
         // JSON
+        Assert.assertNull(Si.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Si jsonObj = Si.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -719,6 +739,7 @@ public class ModelTest {
         testParcelable(obj, Unit.CREATOR);
 
         // JSON
+        Assert.assertNull(Unit.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Unit jsonObj = Unit.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -745,6 +766,7 @@ public class ModelTest {
         testParcelable(obj, Pieces.CREATOR);
 
         // JSON
+        Assert.assertNull(Pieces.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Pieces jsonObj = Pieces.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -771,6 +793,7 @@ public class ModelTest {
         testParcelable(obj, Size.CREATOR);
 
         // JSON
+        Assert.assertNull(Size.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Size jsonObj = Size.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -797,6 +820,7 @@ public class ModelTest {
         testParcelable(obj, Quantity.CREATOR);
 
         // JSON
+        Assert.assertNull(Quantity.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         Quantity jsonObj = Quantity.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
@@ -832,6 +856,7 @@ public class ModelTest {
 //        Assert.assertEquals(offer.hashCode(), parceledOffer.hashCode());
 
         // JSON
+        Assert.assertNull(Offer.fromJSON((JSONObject)null));
         JSONObject jOffer = obj.toJSON();
         Offer jsonObj = Offer.fromJSON(jOffer);
         Assert.assertEquals(obj, jsonObj);

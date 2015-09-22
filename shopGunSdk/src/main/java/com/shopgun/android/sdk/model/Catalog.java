@@ -83,86 +83,89 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 
     /**
      * Convert a {@link JSONArray} into a {@link List};.
-     * @param catalogs A {@link JSONArray} in the format of a valid API v2 catalog response
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Catalog}
      * @return A {@link List} of POJO
      */
-    public static List<Catalog> fromJSON(JSONArray catalogs) {
+    public static List<Catalog> fromJSON(JSONArray array) {
         List<Catalog> list = new ArrayList<Catalog>();
-        try {
-            for (int i = 0; i < catalogs.length(); i++) {
-                list.add(Catalog.fromJSON((JSONObject) catalogs.get(i)));
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Catalog.fromJSON(o));
             }
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
         }
         return list;
     }
 
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
-     * @param jCatalog A {@link JSONObject} in the format of a valid API v2 catalog response
-     * @return A Catalog object
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Catalog}
+     * @return A {@link Catalog}, or {@link null} if {@code object is null}
      */
-    public static Catalog fromJSON(JSONObject jCatalog) {
+    public static Catalog fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
+        }
         Catalog catalog = new Catalog();
-        if (jCatalog == null) {
-            return catalog;
+        catalog.setId(Json.valueOf(object, JsonKeys.ID));
+        catalog.setErn(Json.valueOf(object, JsonKeys.ERN));
+        catalog.setLabel(Json.valueOf(object, JsonKeys.LABEL));
+        catalog.setBackground(Json.colorValueOf(object, JsonKeys.BACKGROUND));
+        Date runFrom = Utils.stringToDate(Json.valueOf(object, JsonKeys.RUN_FROM));
+        catalog.setRunFrom(runFrom);
+        Date runTill = Utils.stringToDate(Json.valueOf(object, JsonKeys.RUN_TILL));
+        catalog.setRunTill(runTill);
+        catalog.setPageCount(Json.valueOf(object, JsonKeys.PAGE_COUNT, 0));
+        catalog.setOfferCount(Json.valueOf(object, JsonKeys.OFFER_COUNT, 0));
+        JSONObject jBranding = Json.getObject(object, JsonKeys.BRANDING, null);
+        catalog.setBranding(Branding.fromJSON(jBranding));
+        catalog.setDealerId(Json.valueOf(object, JsonKeys.DEALER_ID));
+        catalog.setDealerUrl(Json.valueOf(object, JsonKeys.DEALER_URL));
+        catalog.setStoreId(Json.valueOf(object, JsonKeys.STORE_ID));
+        catalog.setStoreUrl(Json.valueOf(object, JsonKeys.STORE_URL));
+        JSONObject jDimen = Json.getObject(object, JsonKeys.DIMENSIONS, null);
+        catalog.setDimension(Dimension.fromJSON(jDimen));
+        JSONObject jImages = Json.getObject(object, JsonKeys.IMAGES, null);
+        catalog.setImages(Images.fromJSON(jImages));
+
+        if (object.has(JsonKeys.CATEGORY_IDS)) {
+            JSONArray jCats = Json.getArray(object, JsonKeys.CATEGORY_IDS, new JSONArray());
+            HashSet<String> cat = new HashSet<String>(jCats.length());
+            for (int i = 0; i < jCats.length(); i++) {
+                try {
+                    cat.add(jCats.getString(i));
+                } catch (JSONException e) {
+                    // ignore
+                }
+            }
+            catalog.setCatrgoryIds(cat);
         }
 
-        try {
-            catalog.setId(Json.valueOf(jCatalog, JsonKeys.ID));
-            catalog.setErn(Json.valueOf(jCatalog, JsonKeys.ERN));
-            catalog.setLabel(Json.valueOf(jCatalog, JsonKeys.LABEL));
-            catalog.setBackground(Json.colorValueOf(jCatalog, JsonKeys.BACKGROUND));
-            Date runFrom = Utils.stringToDate(Json.valueOf(jCatalog, JsonKeys.RUN_FROM));
-            catalog.setRunFrom(runFrom);
-            Date runTill = Utils.stringToDate(Json.valueOf(jCatalog, JsonKeys.RUN_TILL));
-            catalog.setRunTill(runTill);
-            catalog.setPageCount(Json.valueOf(jCatalog, JsonKeys.PAGE_COUNT, 0));
-            catalog.setOfferCount(Json.valueOf(jCatalog, JsonKeys.OFFER_COUNT, 0));
-            catalog.setBranding(Branding.fromJSON(jCatalog.getJSONObject(JsonKeys.BRANDING)));
-            catalog.setDealerId(Json.valueOf(jCatalog, JsonKeys.DEALER_ID));
-            catalog.setDealerUrl(Json.valueOf(jCatalog, JsonKeys.DEALER_URL));
-            catalog.setStoreId(Json.valueOf(jCatalog, JsonKeys.STORE_ID));
-            catalog.setStoreUrl(Json.valueOf(jCatalog, JsonKeys.STORE_URL));
-            catalog.setDimension(Dimension.fromJSON(jCatalog.getJSONObject(JsonKeys.DIMENSIONS)));
-            catalog.setImages(Images.fromJSON(jCatalog.getJSONObject(JsonKeys.IMAGES)));
+        catalog.setPdfUrl(Json.valueOf(object, JsonKeys.PDF_URL));
 
-            if (jCatalog.has(JsonKeys.CATEGORY_IDS)) {
-                JSONArray jCats = jCatalog.getJSONArray(JsonKeys.CATEGORY_IDS);
-                HashSet<String> cat = new HashSet<String>(jCats.length());
-                for (int i = 0; i < jCats.length(); i++) {
-                    cat.add(jCats.getString(i));
+        if (object.has(JsonKeys.SDK_DEALER)) {
+            JSONObject jDealer = Json.getObject(object, JsonKeys.SDK_DEALER, null);
+            catalog.setDealer(Dealer.fromJSON(jDealer));
+        }
+
+        if (object.has(JsonKeys.SDK_STORE)) {
+            JSONObject jStore = Json.getObject(object, JsonKeys.SDK_STORE, null);
+            catalog.setStore(Store.fromJSON(jStore));
+        }
+
+        if (object.has(JsonKeys.SDK_PAGES)) {
+            JSONArray jPages = Json.getArray(object, JsonKeys.SDK_PAGES);
+            List<Images> pages = new ArrayList<Images>(jPages.length());
+            for (int i = 0; i < jPages.length(); i++) {
+                JSONObject ji = Json.getObject(object, JsonKeys.IMAGES, null);
+                if (ji != null) {
+                    pages.add(Images.fromJSON(jImages));
                 }
-                catalog.setCatrgoryIds(cat);
             }
-
-            catalog.setPdfUrl(Json.valueOf(jCatalog, JsonKeys.PDF_URL));
-
-            if (jCatalog.has(JsonKeys.SDK_DEALER)) {
-                JSONObject jDealer = Json.getObject(jCatalog, JsonKeys.SDK_DEALER, null);
-                catalog.setDealer(Dealer.fromJSON(jDealer));
-            }
-
-            if (jCatalog.has(JsonKeys.SDK_STORE)) {
-                JSONObject jStore = Json.getObject(jCatalog, JsonKeys.SDK_STORE, null);
-                catalog.setStore(Store.fromJSON(jStore));
-            }
-
-            if (jCatalog.has(JsonKeys.SDK_PAGES)) {
-                JSONArray jPages = Json.getArray(jCatalog, JsonKeys.SDK_PAGES);
-                List<Images> pages = new ArrayList<Images>(jPages.length());
-                for (int i = 0; i < jPages.length(); i++) {
-                    pages.add(Images.fromJSON(jPages.getJSONObject(i)));
-                }
-                catalog.setPages(pages);
-            }
+            catalog.setPages(pages);
+        }
 
             // TODO Fix HotspotsMap so it can be JSON'ed
-
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
 
         return catalog;
     }
@@ -612,6 +615,11 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     public void setPdfUrl(String pdfUrl) {
         mPdfUrl = pdfUrl;
     }
+
+//    @Override
+//    public String toString() {
+//        return toJSON().toString();
+//    }
 
     @Override
     public boolean equals(Object o) {

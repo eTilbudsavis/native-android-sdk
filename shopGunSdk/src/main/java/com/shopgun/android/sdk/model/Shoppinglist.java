@@ -20,13 +20,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
+import com.shopgun.android.sdk.api.MetaKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
-import com.shopgun.android.sdk.utils.Api;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.Utils;
 
@@ -158,73 +158,62 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
     }
 
     /**
-     * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
-     * @param shoppinglists A {@link JSONArray} in the format of a valid API v2 shoppinglist response
-     * @return A {@link List} of POJO;
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Shoppinglist}
+     * @return A {@link List} of POJO
      */
-    public static ArrayList<Shoppinglist> fromJSON(JSONArray shoppinglists) {
+    public static ArrayList<Shoppinglist> fromJSON(JSONArray array) {
         ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
-
-        try {
-            for (int i = 0; i < shoppinglists.length(); i++) {
-                Shoppinglist s = Shoppinglist.fromJSON(shoppinglists.getJSONObject(i));
-                list.add(s);
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Shoppinglist.fromJSON(o));
             }
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
         }
         return list;
     }
 
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
-     * @param jShoppinglist A {@link JSONObject} in the format of a valid API v
-     *                       shoppinglist response
-     * @return An {@link Shoppinglist} object
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Shoppinglist}
+     * @return A {@link Shoppinglist}, or {@link null} if {@code object is null}
      */
-    public static Shoppinglist fromJSON(JSONObject jShoppinglist) {
+    public static Shoppinglist fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
+        }
+
         Shoppinglist shoppinglist = new Shoppinglist();
-        if (jShoppinglist == null) {
-            return shoppinglist;
-        }
-
-        try {
-            // We've don't use OWNER anymore, since we now get all share info.
-            shoppinglist.setId(Json.valueOf(jShoppinglist, JsonKey.ID));
-            shoppinglist.setErn(Json.valueOf(jShoppinglist, JsonKey.ERN));
-            shoppinglist.setName(Json.valueOf(jShoppinglist, JsonKey.NAME));
-            shoppinglist.setAccess(Json.valueOf(jShoppinglist, JsonKey.ACCESS));
-            String modified = Json.valueOf(jShoppinglist, JsonKey.MODIFIED, Utils.DATE_EPOC);
-            shoppinglist.setModified(Utils.stringToDate(modified));
-            shoppinglist.setPreviousId(Json.valueOf(jShoppinglist, JsonKey.PREVIOUS_ID));
-            shoppinglist.setType(Json.valueOf(jShoppinglist, JsonKey.TYPE));
-
-            shoppinglist.setMeta(Json.getObject(jShoppinglist, JsonKey.META, new JSONObject()));
-
-            shoppinglist.putShares(Share.fromJSON(jShoppinglist.getJSONArray(JsonKey.SHARES)));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-
+        shoppinglist.setId(Json.valueOf(object, JsonKeys.ID));
+        shoppinglist.setErn(Json.valueOf(object, JsonKeys.ERN));
+        shoppinglist.setName(Json.valueOf(object, JsonKeys.NAME));
+        shoppinglist.setAccess(Json.valueOf(object, JsonKeys.ACCESS));
+        String modified = Json.valueOf(object, JsonKeys.MODIFIED, Utils.DATE_EPOC);
+        shoppinglist.setModified(Utils.stringToDate(modified));
+        shoppinglist.setPreviousId(Json.valueOf(object, JsonKeys.PREVIOUS_ID));
+        shoppinglist.setType(Json.valueOf(object, JsonKeys.TYPE));
+        shoppinglist.setMeta(Json.getObject(object, JsonKeys.META, new JSONObject()));
+        JSONArray jShares = Json.getArray(object, JsonKeys.SHARES);
+        shoppinglist.putShares(Share.fromJSON(jShares));
         return shoppinglist;
     }
 
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.ID, Json.nullCheck(getId()));
-            o.put(JsonKey.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKey.NAME, Json.nullCheck(getName()));
-            o.put(JsonKey.ACCESS, Json.nullCheck(getAccess()));
-            o.put(JsonKey.MODIFIED, Json.nullCheck(Utils.dateToString(getModified())));
-            o.put(JsonKey.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
-            o.put(JsonKey.TYPE, Json.nullCheck(getType()));
-            o.put(JsonKey.META, Json.nullCheck(getMeta()));
+            o.put(JsonKeys.ID, Json.nullCheck(getId()));
+            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
+            o.put(JsonKeys.NAME, Json.nullCheck(getName()));
+            o.put(JsonKeys.ACCESS, Json.nullCheck(getAccess()));
+            o.put(JsonKeys.MODIFIED, Json.nullCheck(Utils.dateToString(getModified())));
+            o.put(JsonKeys.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
+            o.put(JsonKeys.TYPE, Json.nullCheck(getType()));
+            o.put(JsonKeys.META, Json.nullCheck(getMeta()));
             JSONArray shares = new JSONArray();
             for (Share share : getShares().values()) {
                 shares.put(share.toJSON());
             }
-            o.put(JsonKey.SHARES, shares);
+            o.put(JsonKeys.SHARES, shares);
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }
@@ -520,7 +509,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      * @return A theme id. If no id have been set it returns 'default'.
      */
     public String getTheme() {
-        return Json.valueOf(getMeta(), Api.MetaKey.THEME, "default");
+        return Json.valueOf(getMeta(), MetaKeys.THEME, "default");
     }
 
     /**
@@ -530,7 +519,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      */
     public Shoppinglist setTheme(String id) {
         try {
-            getMeta().put(Api.MetaKey.THEME, id);
+            getMeta().put(MetaKeys.THEME, id);
         } catch (JSONException e) {
             // ignore
         }

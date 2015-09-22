@@ -20,13 +20,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
+import com.shopgun.android.sdk.api.MetaKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
-import com.shopgun.android.sdk.utils.Api;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
-import com.shopgun.android.sdk.utils.Api.MetaKey;
 import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.Utils;
 
@@ -173,68 +172,62 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
     }
 
     /**
-     * Convert a {@link JSONArray} into a {@link List}&lt;T&gt;.
-     * @param shoppinglistItems A {@link JSONArray} in the format of a valid API v2 shoppinglistItem response
-     * @return A {@link List} of POJO;
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code ShoppinglistItem}
+     * @return A {@link List} of POJO
      */
-    public static List<ShoppinglistItem> fromJSON(JSONArray shoppinglistItems) {
+    public static List<ShoppinglistItem> fromJSON(JSONArray array) {
         List<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
-
-        try {
-            for (int i = 0; i < shoppinglistItems.length(); i++) {
-                ShoppinglistItem s = ShoppinglistItem.fromJSON((JSONObject) shoppinglistItems.get(i));
-                list.add(s);
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(ShoppinglistItem.fromJSON(o));
             }
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
         }
         return list;
     }
 
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
-     * @param jSli A {@link JSONObject} in the format of a valid API v2 shoppinglistItem response
-     * @return An ShoppinglistItem object
+     * @param object A {@link JSONObject} with a valid API v2 structure for a {@code ShoppinglistItem}
+     * @return A {@link ShoppinglistItem}, or {@link null} if {@code object is null}
      */
-    public static ShoppinglistItem fromJSON(JSONObject jSli) {
-
-        ShoppinglistItem sli = new ShoppinglistItem();
-        if (jSli == null) {
-            return sli;
+    public static ShoppinglistItem fromJSON(JSONObject object) {
+        if (object == null) {
+            return null;
         }
 
-        sli.setId(Json.valueOf(jSli, JsonKey.ID));
-        sli.setErn(Json.valueOf(jSli, JsonKey.ERN));
-        sli.setTick(Json.valueOf(jSli, JsonKey.TICK, false));
-        sli.setOfferId(Json.valueOf(jSli, JsonKey.OFFER_ID));
-        sli.setCount(Json.valueOf(jSli, JsonKey.COUNT, 1));
-        sli.setDescription(Json.valueOf(jSli, JsonKey.DESCRIPTION));
-        sli.setShoppinglistId(Json.valueOf(jSli, JsonKey.SHOPPINGLIST_ID));
-        sli.setErn(Json.valueOf(jSli, JsonKey.ERN));
-        sli.setCreator(Json.valueOf(jSli, JsonKey.CREATOR));
-        String date = Json.valueOf(jSli, JsonKey.MODIFIED, Utils.DATE_EPOC);
+        ShoppinglistItem sli = new ShoppinglistItem();
+        sli.setId(Json.valueOf(object, JsonKeys.ID));
+        sli.setErn(Json.valueOf(object, JsonKeys.ERN));
+        sli.setTick(Json.valueOf(object, JsonKeys.TICK, false));
+        sli.setOfferId(Json.valueOf(object, JsonKeys.OFFER_ID));
+        sli.setCount(Json.valueOf(object, JsonKeys.COUNT, 1));
+        sli.setDescription(Json.valueOf(object, JsonKeys.DESCRIPTION));
+        sli.setShoppinglistId(Json.valueOf(object, JsonKeys.SHOPPINGLIST_ID));
+        sli.setErn(Json.valueOf(object, JsonKeys.ERN));
+        sli.setCreator(Json.valueOf(object, JsonKeys.CREATOR));
+        String date = Json.valueOf(object, JsonKeys.MODIFIED, Utils.DATE_EPOC);
         sli.setModified(Utils.stringToDate(date));
-        sli.setPreviousId(Json.valueOf(jSli, JsonKey.PREVIOUS_ID, null));
-
-        sli.setMeta(Json.getObject(jSli, JsonKey.META, new JSONObject()));
-
+        sli.setPreviousId(Json.valueOf(object, JsonKeys.PREVIOUS_ID, null));
+        sli.setMeta(Json.getObject(object, JsonKeys.META, new JSONObject()));
         return sli;
     }
 
     public JSONObject toJSON() {
         JSONObject o = new JSONObject();
         try {
-            o.put(JsonKey.ID, Json.nullCheck(getId()));
-            o.put(JsonKey.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKey.TICK, Json.nullCheck(isTicked()));
-            o.put(JsonKey.OFFER_ID, Json.nullCheck(getOfferId()));
-            o.put(JsonKey.COUNT, getCount());
-            o.put(JsonKey.DESCRIPTION, Json.nullCheck(getDescription()));
-            o.put(JsonKey.SHOPPINGLIST_ID, Json.nullCheck(getShoppinglistId()));
-            o.put(JsonKey.CREATOR, Json.nullCheck(getCreator()));
-            o.put(JsonKey.MODIFIED, Json.nullCheck(Utils.dateToString(getModified())));
-            o.put(JsonKey.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
-            o.put(JsonKey.META, Json.nullCheck(getMeta()));
+            o.put(JsonKeys.ID, Json.nullCheck(getId()));
+            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
+            o.put(JsonKeys.TICK, Json.nullCheck(isTicked()));
+            o.put(JsonKeys.OFFER_ID, Json.nullCheck(getOfferId()));
+            o.put(JsonKeys.COUNT, getCount());
+            o.put(JsonKeys.DESCRIPTION, Json.nullCheck(getDescription()));
+            o.put(JsonKeys.SHOPPINGLIST_ID, Json.nullCheck(getShoppinglistId()));
+            o.put(JsonKeys.CREATOR, Json.nullCheck(getCreator()));
+            o.put(JsonKeys.MODIFIED, Json.nullCheck(Utils.dateToString(getModified())));
+            o.put(JsonKeys.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
+            o.put(JsonKeys.META, Json.nullCheck(getMeta()));
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }
@@ -525,12 +518,12 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
      * @return A comment, or {@code null}
      */
     public String getComment() {
-        return Json.valueOf(getMeta(), Api.MetaKey.COMMENT);
+        return Json.valueOf(getMeta(), MetaKeys.COMMENT);
     }
 
     /**
      * Set a comment on the shoppinglistitem. Setting comment to {@code null}
-     * will delete the {@link MetaKey#COMMENT comment}-key altogether.
+     * will delete the {@link MetaKeys#COMMENT comment}-key altogether.
      * <p>The comment is part of the {@link #getMeta() meta}-blob, and therefore
      * has very few restrictions</p>
      * @param comment The comment to set on the shoppinglistitem, {@code null} to delete
@@ -538,7 +531,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
      */
     public ShoppinglistItem setComment(String comment) {
         try {
-            getMeta().put(MetaKey.COMMENT, comment);
+            getMeta().put(MetaKeys.COMMENT, comment);
         } catch (JSONException e) {
             // ignore
         }
