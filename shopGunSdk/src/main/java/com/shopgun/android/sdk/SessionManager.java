@@ -19,6 +19,7 @@ package com.shopgun.android.sdk;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
+import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.log.SgnLog;
@@ -31,7 +32,6 @@ import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.utils.Api;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
-import com.shopgun.android.sdk.utils.Api.Param;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONObject;
@@ -73,6 +73,9 @@ public class SessionManager {
         mShopGun = shopGun;
         JSONObject session = mShopGun.getSettings().getSessionJson();
         mSession = Session.fromJSON(session);
+        if (mSession == null) {
+            mSession = new Session();
+        }
         ExternalClientIdStore.updateCid(mSession, mShopGun.getContext());
     }
 
@@ -220,6 +223,9 @@ public class SessionManager {
         synchronized (LOCK) {
 
             Session s = Session.fromJSON(session);
+            if (mSession == null) {
+                mSession = new Session();
+            }
 
             // Check that the JSON is actually session JSON
             if (s.getToken() == null) {
@@ -293,8 +299,8 @@ public class SessionManager {
 
         Map<String, Object> args = new HashMap<String, Object>();
 
-        args.put(Param.TOKEN_TTL, TTL);
-        args.put(Param.API_KEY, mShopGun.getApiKey());
+        args.put(Parameters.TOKEN_TTL, TTL);
+        args.put(Parameters.API_KEY, mShopGun.getApiKey());
 
         CookieSyncManager.createInstance(mShopGun.getContext());
         CookieManager cm = CookieManager.getInstance();
@@ -330,9 +336,9 @@ public class SessionManager {
 
             // If all three fields are set, then try to migrate
             if (authId != null && authHash != null && authTime != null) {
-                args.put(Param.V1_AUTH_ID, authId);
-                args.put(Param.V1_AUTH_HASH, authHash);
-                args.put(Param.V1_AUTH_TIME, authTime);
+                args.put(Parameters.V1_AUTH_ID, authId);
+                args.put(Parameters.V1_AUTH_HASH, authHash);
+                args.put(Parameters.V1_AUTH_TIME, authTime);
             }
 
             // Clear all cookie data, just to make sure
@@ -358,8 +364,8 @@ public class SessionManager {
      */
     public JsonObjectRequest login(String email, String password, Listener<JSONObject> l) {
         Map<String, Object> args = new HashMap<String, Object>();
-        args.put(Param.EMAIL, email);
-        args.put(Param.PASSWORD, password);
+        args.put(Parameters.EMAIL, email);
+        args.put(Parameters.PASSWORD, password);
         mShopGun.getSettings().setSessionUser(email);
         JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
         addRequest(req);
@@ -374,7 +380,7 @@ public class SessionManager {
      */
     public JsonObjectRequest loginFacebook(String facebookAccessToken, Listener<JSONObject> l) {
         Map<String, String> args = new HashMap<String, String>();
-        args.put(Param.FACEBOOK_TOKEN, facebookAccessToken);
+        args.put(Parameters.FACEBOOK_TOKEN, facebookAccessToken);
         mShopGun.getSettings().setSessionFacebook(facebookAccessToken);
         JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
         addRequest(req);
@@ -400,7 +406,7 @@ public class SessionManager {
         mShopGun.getSettings().setSessionFacebook(null);
         mShopGun.getListManager().clear(mSession.getUser().getUserId());
         Map<String, String> args = new HashMap<String, String>();
-        args.put(Param.EMAIL, "");
+        args.put(Parameters.EMAIL, "");
         JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
         addRequest(req);
         return req;
@@ -431,14 +437,14 @@ public class SessionManager {
     public JsonObjectRequest createUser(String email, String password, String name, int birthYear, String gender, String locale, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
 
         Map<String, String> args = new HashMap<String, String>();
-        args.put(Param.EMAIL, email.trim());
-        args.put(Param.PASSWORD, password);
-        args.put(Param.NAME, name.trim());
-        args.put(Param.BIRTH_YEAR, String.valueOf(birthYear));
-        args.put(Param.GENDER, gender.trim());
-        args.put(Param.SUCCESS_REDIRECT, successRedirect);
-        args.put(Param.ERROR_REDIRECT, errorRedirect);
-        args.put(Param.LOCALE, locale);
+        args.put(Parameters.EMAIL, email.trim());
+        args.put(Parameters.PASSWORD, password);
+        args.put(Parameters.NAME, name.trim());
+        args.put(Parameters.BIRTH_YEAR, String.valueOf(birthYear));
+        args.put(Parameters.GENDER, gender.trim());
+        args.put(Parameters.SUCCESS_REDIRECT, successRedirect);
+        args.put(Parameters.ERROR_REDIRECT, errorRedirect);
+        args.put(Parameters.LOCALE, locale);
         JsonObjectRequest req = new JsonObjectRequest(Method.POST, Endpoint.USER, new JSONObject(args), l);
         mShopGun.add(req);
         return req;
@@ -455,9 +461,9 @@ public class SessionManager {
     public JsonObjectRequest forgotPassword(String email, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
 
         Map<String, String> args = new HashMap<String, String>();
-        args.put(Param.EMAIL, email);
-        args.put(Param.SUCCESS_REDIRECT, successRedirect);
-        args.put(Param.ERROR_REDIRECT, errorRedirect);
+        args.put(Parameters.EMAIL, email);
+        args.put(Parameters.SUCCESS_REDIRECT, successRedirect);
+        args.put(Parameters.ERROR_REDIRECT, errorRedirect);
         JsonObjectRequest req = new JsonObjectRequest(Method.POST, Endpoint.USER_RESET, new JSONObject(args), l);
         mShopGun.add(req);
         return req;
