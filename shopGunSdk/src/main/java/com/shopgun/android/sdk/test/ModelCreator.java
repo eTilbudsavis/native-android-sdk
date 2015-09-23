@@ -465,7 +465,7 @@ public class ModelCreator {
         c.setDimension(getDimension());
         c.setId(id);
         c.setHotspots(getHotspotMap());
-        c.setImages(getImages(id));
+        c.setImages(getImages());
         c.setLabel("fake-label");
         c.setOfferCount(32);
         c.setPageCount(9);

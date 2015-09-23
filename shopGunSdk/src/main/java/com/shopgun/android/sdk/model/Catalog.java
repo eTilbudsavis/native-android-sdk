@@ -157,9 +157,9 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
             JSONArray jPages = Json.getArray(object, JsonKeys.SDK_PAGES);
             List<Images> pages = new ArrayList<Images>(jPages.length());
             for (int i = 0; i < jPages.length(); i++) {
-                JSONObject ji = Json.getObject(object, JsonKeys.IMAGES, null);
-                if (ji != null) {
-                    pages.add(Images.fromJSON(jImages));
+                JSONObject jImage = Json.getObject(jPages, i);
+                if (jImage != null) {
+                    pages.add(Images.fromJSON(jImage));
                 }
             }
             catalog.setPages(pages);
