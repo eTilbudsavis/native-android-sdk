@@ -952,7 +952,11 @@ public class ModelTest {
 
         // The type must always exist
         Assert.assertNotNull(obj.getErnType());
-        Assert.assertEquals(type, obj.getErnType());
+        if (type != null) {
+            Assert.assertEquals(type, obj.getErnType());
+        } else {
+            Assert.assertNotSame(type, obj.getErnType());
+        }
 
         if (fakeId == null) {
             obj.setId(null);
