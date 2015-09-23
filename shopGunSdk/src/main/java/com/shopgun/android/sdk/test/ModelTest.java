@@ -689,8 +689,9 @@ public class ModelTest {
 
     public static void testImages() {
         String id = "fake-id";
-        Images obj = ModelCreator.getImages(id);
-        Images tmp = ModelCreator.getImages(id);
+        int page = 0;
+        Images obj = ModelCreator.getImages(id, page);
+        Images tmp = ModelCreator.getImages(id, page);
         Assert.assertEquals(obj, tmp);
         Assert.assertEquals(obj.hashCode(), tmp.hashCode());
 

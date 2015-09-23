@@ -81,9 +81,9 @@ public class PageflipUtilsTest {
         Assert.assertFalse(PageflipUtils.isCatalogReady(c));
 
         // refill pages and add map
-        pages.add(ModelCreator.getImages(c.getId()));
-        pages.add(ModelCreator.getImages(c.getId()));
-        pages.add(ModelCreator.getImages(c.getId()));
+        pages.add(ModelCreator.getImages(c.getId(), 0));
+        pages.add(ModelCreator.getImages(c.getId(), 1));
+        pages.add(ModelCreator.getImages(c.getId(), 2));
         c.setHotspots(map);
         Assert.assertTrue(PageflipUtils.isHotspotsReady(c));
         Assert.assertTrue(PageflipUtils.isPagesReady(c));

@@ -78,9 +78,6 @@ public class ModelCreator {
 
     /**
      * Returns a date, that has been rounded to the nearest day (set to 16:00:00)
-     *
-     * @param dayOffset
-     * @return
      */
     public static Date getDate(int dayOffset) {
         Calendar c = GregorianCalendar.getInstance();
@@ -130,8 +127,7 @@ public class ModelCreator {
     }
 
     public static Share getShare(String email, String access, String acceptUrl) {
-        Share s = new Share(email, access, acceptUrl);
-        return s;
+        return new Share(email, access, acceptUrl);
     }
 
     public static User getUser() {
@@ -250,16 +246,19 @@ public class ModelCreator {
     }
 
     public static Images getImages() {
-        return getImages("fake-id");
+        return getImages("fake-id", 0);
     }
 
-    public static Images getImages(String id) {
+    public static Images getImages(String id, int page) {
         Images i = new Images();
-        i.setThumb(getUrl(id, "thumb"));
-        i.setView(getUrl(id, "view"));
-        i.setZoom(getUrl(id, "zoom"));
+        i.setThumb(getImageUrl(id, "thumb", page));
+        i.setView(getImageUrl(id, "view", page));
+        i.setZoom(getImageUrl(id, "zoom", page));
         return i;
+    }
 
+    private static String getImageUrl(String id, String path, int page) {
+        return String.format("https://eta.dk/%s/%s-%s.jpg", id, path, page);
     }
 
     public static Links getLinks() {
@@ -377,7 +376,7 @@ public class ModelCreator {
         try {
             o.put("metadata", "foobar");
         } catch (JSONException e) {
-
+            // ignore
         }
         s.setMeta(o);
         s.setModified(getDate(1));
@@ -403,7 +402,7 @@ public class ModelCreator {
         try {
             o.put("metadata", "foobar");
         } catch (JSONException e) {
-
+            // ignore
         }
         s.setMeta(o);
         s.setModified(getDate(1));
@@ -471,7 +470,7 @@ public class ModelCreator {
         c.setPageCount(9);
         List<Images> images = new ArrayList<Images>(10);
         for (int i = 0; i < 10; i++) {
-            images.add(getImages(id));
+            images.add(getImages(id, i));
         }
         c.setPages(images);
         c.setPdfUrl(getUrl("pdf"));
@@ -505,7 +504,7 @@ public class ModelCreator {
         o.setHeading(name);
         o.setDescription(description);
         o.setCatalogPage(32);
-        o.setImages(getImages(offerId));
+        o.setImages(getImages(offerId, 0));
         o.setLinks(getLinks(offerId));
         o.setPricing(getPricing());
         o.setQuantity(getQuantity());
