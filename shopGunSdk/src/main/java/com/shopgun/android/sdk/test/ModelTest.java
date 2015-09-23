@@ -19,6 +19,7 @@ package com.shopgun.android.sdk.test;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.model.Branding;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Country;
@@ -50,7 +51,6 @@ import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IStore;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Utils;
 
 import junit.framework.Assert;
@@ -121,8 +121,9 @@ public class ModelTest {
         Assert.assertTrue(obj.same(jsonObj));
 
         try {
-            jObj.put(JsonKey.DESCRIPTION, "not-pizza");
+            jObj.put(JsonKeys.DESCRIPTION, "not-pizza");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = ShoppinglistItem.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -166,8 +167,9 @@ public class ModelTest {
         Assert.assertTrue(obj.same(jsonObj));
 
         try {
-            jObj.put(JsonKey.NAME, "not bents list anymore");
+            jObj.put(JsonKeys.NAME, "not bents list anymore");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Shoppinglist.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -194,7 +196,7 @@ public class ModelTest {
         Assert.assertEquals(obj, jsonObj);
 
         try {
-            jObj.put(JsonKey.TOKEN, "new-fake-token");
+            jObj.put(JsonKeys.TOKEN, "new-fake-token");
         } catch (JSONException e) {
             // ignore
         }
@@ -228,8 +230,9 @@ public class ModelTest {
         Dealer jsonObj = Dealer.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.NAME, "bentes frisør salon");
+            jObj.put(JsonKeys.NAME, "bentes frisør salon");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Dealer.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -256,7 +259,7 @@ public class ModelTest {
         testParcelable(obj, Catalog.CREATOR);
 
         // JSON
-        Assert.assertNull(Catalog.fromJSON((JSONObject)null));
+        Assert.assertNull(Catalog.fromJSON((JSONObject) null));
         JSONObject jObj = obj.toJSON();
         Catalog jsonObj = Catalog.fromJSON(jObj);
 
@@ -266,9 +269,9 @@ public class ModelTest {
         Assert.assertEquals(obj, jsonObj);
 
         try {
-            jObj.put(JsonKey.OFFER_COUNT, 0);
+            jObj.put(JsonKeys.OFFER_COUNT, 0);
         } catch (JSONException e) {
-
+            // ignore
         }
         jsonObj = Catalog.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -300,8 +303,9 @@ public class ModelTest {
         Store jsonObj = Store.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.STREET, "fake-street-new");
+            jObj.put(JsonKeys.STREET, "fake-street-new");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Store.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -331,8 +335,9 @@ public class ModelTest {
         Country jsonObj = Country.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.ID, "US");
+            jObj.put(JsonKeys.ID, "US");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Country.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -362,8 +367,9 @@ public class ModelTest {
         Assert.assertNull(Share.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         try {
-            jObj.put(JsonKey.EMAIL, "fake-wrong-email@nomail.org");
+            jObj.put(JsonKeys.EMAIL, "fake-wrong-email@nomail.org");
         } catch (JSONException e) {
+            // ignore
         }
         Share jsonObj = Share.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -394,8 +400,9 @@ public class ModelTest {
         User jsonObj = User.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.GENDER, "male");
+            jObj.put(JsonKeys.GENDER, "male");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = User.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -424,8 +431,9 @@ public class ModelTest {
         Branding jsonObj = Branding.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.NAME, "fake-branding-name-new");
+            jObj.put(JsonKeys.NAME, "fake-branding-name-new");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Branding.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -451,8 +459,9 @@ public class ModelTest {
         Dimension jsonObj = Dimension.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.HEIGHT, 2.0d);
+            jObj.put(JsonKeys.HEIGHT, 2.0d);
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Dimension.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -479,7 +488,7 @@ public class ModelTest {
 //        Hotspot jsonObj = Hotspot.fromJSON(jObj);
 //        Assert.assertEquals(obj, jsonObj);
 //        try {
-//            jObj.put(JsonKey.LOGO, "fake-logo-url-new");
+//            jObj.put(JsonKeys.LOGO, "fake-logo-url-new");
 //        } catch (JSONException e) {
 //        }
 //        jsonObj = Hotspot.fromJSON(jObj);
@@ -530,8 +539,9 @@ public class ModelTest {
         Pageflip jsonObj = Pageflip.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.LOGO, "fake-logo-url-new");
+            jObj.put(JsonKeys.LOGO, "fake-logo-url-new");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Pageflip.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -579,9 +589,9 @@ public class ModelTest {
         Typeahead jsonObj = Typeahead.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.SUBJECT, "fake-subject-new");
+            jObj.put(JsonKeys.SUBJECT, "fake-subject-new");
         } catch (JSONException e) {
-
+            // ignore
         }
         jsonObj = Typeahead.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -607,8 +617,9 @@ public class ModelTest {
         Subscription jsonObj = Subscription.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.DEALER_ID, "fake-dealer-new");
+            jObj.put(JsonKeys.DEALER_ID, "fake-dealer-new");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Subscription.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -634,8 +645,9 @@ public class ModelTest {
         Pricing jsonObj = Pricing.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.PRICE, Double.MAX_VALUE);
+            jObj.put(JsonKeys.PRICE, Double.MAX_VALUE);
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Pricing.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -662,8 +674,9 @@ public class ModelTest {
         Links jsonObj = Links.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.WEBSHOP, "not fake-id");
+            jObj.put(JsonKeys.WEBSHOP, "not fake-id");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Links.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -690,8 +703,9 @@ public class ModelTest {
         Images jsonObj = Images.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.VIEW, "not fake-id");
+            jObj.put(JsonKeys.VIEW, "not fake-id");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Images.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -717,8 +731,9 @@ public class ModelTest {
         Si jsonObj = Si.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.SYMBOL, "not foobar");
+            jObj.put(JsonKeys.SYMBOL, "not foobar");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Si.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -744,8 +759,9 @@ public class ModelTest {
         Unit jsonObj = Unit.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.SYMBOL, "not foobar");
+            jObj.put(JsonKeys.SYMBOL, "not foobar");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Unit.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -771,8 +787,9 @@ public class ModelTest {
         Pieces jsonObj = Pieces.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.TO, "4.0");
+            jObj.put(JsonKeys.TO, "4.0");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Pieces.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -798,8 +815,9 @@ public class ModelTest {
         Size jsonObj = Size.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKey.TO, "4.0");
+            jObj.put(JsonKeys.TO, "4.0");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Size.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
@@ -861,8 +879,9 @@ public class ModelTest {
         Offer jsonObj = Offer.fromJSON(jOffer);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jOffer.put(JsonKey.HEADING, "Not an offer heading");
+            jOffer.put(JsonKeys.HEADING, "Not an offer heading");
         } catch (JSONException e) {
+            // ignore
         }
         jsonObj = Offer.fromJSON(jOffer);
         Assert.assertNotSame(obj, jsonObj);
