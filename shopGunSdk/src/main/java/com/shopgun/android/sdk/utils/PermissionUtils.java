@@ -30,7 +30,7 @@ public class PermissionUtils {
 
     public static final String TAG = Constants.getTag(PermissionUtils.class);
 
-    public static final String ERROR_MISSING_PERMISSION = "The user does not have permissions to edit this list";
+    public static final String ERROR_MISSING_PERMISSION = "User doesn't have edit permissions, reason: %s";
 
     private static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
 
@@ -56,7 +56,9 @@ public class PermissionUtils {
      */
     public static void allowEditOrThrow(Shoppinglist sl, String email) {
         if (!allowEdit(sl, email)) {
-            throw new IllegalArgumentException(ERROR_MISSING_PERMISSION);
+            String reason = getReasonForNotAllowEdit(sl, email);
+            String message = String.format(ERROR_MISSING_PERMISSION, reason);
+            throw new IllegalArgumentException(message);
         }
     }
 
@@ -68,7 +70,9 @@ public class PermissionUtils {
      */
     public static void allowEditOrThrow(Shoppinglist sl, Share share) {
         if (!allowEdit(sl, share)) {
-            throw new IllegalArgumentException(ERROR_MISSING_PERMISSION);
+            String reason = getReasonForNotAllowEdit(sl, share);
+            String message = String.format(ERROR_MISSING_PERMISSION, reason);
+            throw new IllegalArgumentException(message);
         }
     }
 
@@ -80,7 +84,23 @@ public class PermissionUtils {
      */
     public static void allowEditOrThrow(String shoppinglistId, Share share) {
         if (!allowEdit(shoppinglistId, share)) {
-            throw new IllegalArgumentException(ERROR_MISSING_PERMISSION);
+            String reason = getReasonForNotAllowEdit(shoppinglistId, share);
+            String message = String.format(ERROR_MISSING_PERMISSION, reason);
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    /**
+     * Method that determines if a {@link User} can edit a list of {@link Shoppinglist}
+     *
+     * @param list A {@link Shoppinglist} to check edit rights on
+     * @param user The {@link User} that wants to edit the {@link Shoppinglist}
+     */
+    public static void allowEditOrThrow(List<Shoppinglist> list, User user) {
+        if (!allowEdit(list, user)) {
+            String reason = getReasonForNotAllowEdit(list, user);
+            String message = String.format(ERROR_MISSING_PERMISSION, reason);
+            throw new IllegalArgumentException(message);
         }
     }
 
@@ -158,4 +178,55 @@ public class PermissionUtils {
         return owner || rw;
     }
 
+
+
+
+    public static String getReasonForNotAllowEdit(List<Shoppinglist> list, User user) {
+        if (list == null) {
+            return "list == null";
+        } else if (user == null) {
+            return "user == null";
+        } else {
+            for (Shoppinglist sl : list) {
+                if (!allowEdit(sl, user)) {
+                    return getReasonForNotAllowEdit(sl, user);
+                }
+            }
+        }
+        return "unknown exception";
+    }
+
+    public static String getReasonForNotAllowEdit(Shoppinglist sl, User user) {
+        return getReasonForNotAllowEdit(sl, user.getEmail());
+    }
+
+    public static String getReasonForNotAllowEdit(Shoppinglist sl, Share share) {
+        if (sl == null) {
+            return "Shoppinglist == null";
+        } else {
+            return getReasonForNotAllowEdit(sl.getId(), share);
+        }
+    }
+
+    public static String getReasonForNotAllowEdit(Shoppinglist sl, String email) {
+        if (sl == null) {
+            return "Shoppinglist == null";
+        } else if (sl.getShares() == null) {
+            return "Shoppinglist does not contain any shares (Shoppinglist.getShares() == null)";
+        } else {
+            return getReasonForNotAllowEdit(sl.getId(), sl.getShares().get(email));
+        }
+    }
+
+    public static String getReasonForNotAllowEdit(String shoppinglistId, Share share) {
+        if (share == null) {
+            return "Share == null";
+        } else if (shoppinglistId == null) {
+            return "Shoppinglist.id == null";
+        } else if (!shoppinglistId.equals(share.getShoppinglistId())) {
+            return "Shoppinglist.id != Share.getShoppinglistId()";
+        } else {
+            return "Access[ " + share.getAccess() + "] does not permit edits";
+        }
+    }
 }
