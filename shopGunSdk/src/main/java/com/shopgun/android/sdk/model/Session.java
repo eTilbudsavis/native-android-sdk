@@ -27,10 +27,13 @@ import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.Utils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Session implements IJson<JSONObject>, Parcelable {
 
@@ -65,6 +68,22 @@ public class Session implements IJson<JSONObject>, Parcelable {
         this.mProvider = in.readString();
         this.mClientId = in.readString();
         this.mReference = in.readString();
+    }
+
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Session}
+     * @return A {@link List} of POJO
+     */
+    public static List<Session> fromJSON(JSONArray array) {
+        List<Session> list = new ArrayList<Session>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Session.fromJSON(o));
+            }
+        }
+        return list;
     }
 
     /**

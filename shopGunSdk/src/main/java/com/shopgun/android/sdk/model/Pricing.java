@@ -25,10 +25,13 @@ import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Currency;
+import java.util.List;
 
 public class Pricing implements IJson<JSONObject>, Parcelable {
 
@@ -40,6 +43,22 @@ public class Pricing implements IJson<JSONObject>, Parcelable {
 
     public Pricing() {
 
+    }
+
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Pricing}
+     * @return A {@link List} of POJO
+     */
+    public static List<Pricing> fromJSON(JSONArray array) {
+        List<Pricing> list = new ArrayList<Pricing>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Pricing.fromJSON(o));
+            }
+        }
+        return list;
     }
 
     /**

@@ -86,12 +86,12 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
      * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Typeahead}
      * @return A {@link List} of POJO
      */
-    public static List<Links> fromJSON(JSONArray array) {
-        List<Links> list = new ArrayList<Links>();
+    public static List<Typeahead> fromJSON(JSONArray array) {
+        List<Typeahead> list = new ArrayList<Typeahead>();
         for (int i = 0; i < array.length(); i++) {
             JSONObject o = Json.getObject(array, i);
             if (o != null) {
-                list.add(Links.fromJSON(o));
+                list.add(Typeahead.fromJSON(o));
             }
         }
         return list;

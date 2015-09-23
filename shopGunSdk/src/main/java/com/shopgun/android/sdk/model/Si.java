@@ -25,8 +25,12 @@ import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Si implements IJson<JSONObject>, Parcelable {
 
@@ -50,6 +54,22 @@ public class Si implements IJson<JSONObject>, Parcelable {
     private Si(Parcel in) {
         this.mSymbol = in.readString();
         this.mFactor = in.readDouble();
+    }
+
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Si}
+     * @return A {@link List} of POJO
+     */
+    public static List<Si> fromJSON(JSONArray array) {
+        List<Si> list = new ArrayList<Si>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Si.fromJSON(o));
+            }
+        }
+        return list;
     }
 
     /**

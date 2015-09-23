@@ -22,6 +22,7 @@ import android.os.Parcelable;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
+import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +31,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class Permission implements IJson<JSONObject>, Parcelable {
@@ -58,6 +60,22 @@ public class Permission implements IJson<JSONObject>, Parcelable {
             in.readStringList(value);
             mPermissions.put(key, value);
         }
+    }
+
+    /**
+     * Convert a {@link JSONArray} into a {@link List};.
+     * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Permission}
+     * @return A {@link List} of POJO
+     */
+    public static List<Permission> fromJSON(JSONArray array) {
+        List<Permission> list = new ArrayList<Permission>();
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject o = Json.getObject(array, i);
+            if (o != null) {
+                list.add(Permission.fromJSON(o));
+            }
+        }
+        return list;
     }
 
     /**
