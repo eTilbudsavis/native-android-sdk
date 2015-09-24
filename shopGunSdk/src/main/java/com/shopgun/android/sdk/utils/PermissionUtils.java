@@ -173,14 +173,22 @@ public class PermissionUtils {
         if (!shoppinglistId.equals(share.getShoppinglistId())) {
             return false;
         }
+        return hasWritePermission(share);
+    }
+
+    private static boolean hasWritePermission(Share share) {
         boolean owner = Share.ACCESS_OWNER.equals(share.getAccess());
         boolean rw = Share.ACCESS_READWRITE.equals(share.getAccess());
         return owner || rw;
     }
 
-
-
-
+    /**
+     * Get a reason for why a given edit isn't allowed.
+     *
+     * @param list A {@link List} of {@link Shoppinglist} to check
+     * @param user A {@link User} to check if can edit the given {@link List} of {@link Shoppinglist}
+     * @return A reason for not allowing edit access.
+     */
     public static String getReasonForNotAllowEdit(List<Shoppinglist> list, User user) {
         if (list == null) {
             return "list == null";
@@ -193,31 +201,57 @@ public class PermissionUtils {
                 }
             }
         }
-        return "unknown exception";
+        return "Unknown reason";
     }
 
+    /**
+     * Get a reason for why a given edit isn't allowed.
+     *
+     * @param sl A {@link Shoppinglist} to check
+     * @param user A {@link User} to check if can edit the given {@link Shoppinglist}
+     * @return A reason for not allowing edit access.
+     */
     public static String getReasonForNotAllowEdit(Shoppinglist sl, User user) {
         return getReasonForNotAllowEdit(sl, user.getEmail());
     }
 
+    /**
+     * Get a reason for why a given edit isn't allowed.
+     *
+     * @param sl A {@link Shoppinglist} to check
+     * @param share A {@link Share} to check if can edit the given {@link Shoppinglist}
+     * @return A reason for not allowing edit access.
+     */
     public static String getReasonForNotAllowEdit(Shoppinglist sl, Share share) {
         if (sl == null) {
             return "Shoppinglist == null";
-        } else {
-            return getReasonForNotAllowEdit(sl.getId(), share);
         }
+        return getReasonForNotAllowEdit(sl.getId(), share);
     }
 
+    /**
+     * Get a reason for why a given edit isn't allowed.
+     *
+     * @param sl A {@link Shoppinglist} to check
+     * @param email An email to check if can edit the given {@link Shoppinglist}
+     * @return A reason for not allowing edit access.
+     */
     public static String getReasonForNotAllowEdit(Shoppinglist sl, String email) {
         if (sl == null) {
             return "Shoppinglist == null";
         } else if (sl.getShares() == null) {
             return "Shoppinglist does not contain any shares (Shoppinglist.getShares() == null)";
-        } else {
-            return getReasonForNotAllowEdit(sl.getId(), sl.getShares().get(email));
         }
+        return getReasonForNotAllowEdit(sl.getId(), sl.getShares().get(email));
     }
 
+    /**
+     * Get a reason for why a given edit isn't allowed.
+     *
+     * @param shoppinglistId A {@link Shoppinglist#getId() Shoppinglist.id} to check
+     * @param share A {@link Share} to check if can edit the given {@link Shoppinglist}
+     * @return A reason for not allowing edit access.
+     */
     public static String getReasonForNotAllowEdit(String shoppinglistId, Share share) {
         if (share == null) {
             return "Share == null";
@@ -225,8 +259,10 @@ public class PermissionUtils {
             return "Shoppinglist.id == null";
         } else if (!shoppinglistId.equals(share.getShoppinglistId())) {
             return "Shoppinglist.id != Share.getShoppinglistId()";
-        } else {
-            return "Access[ " + share.getAccess() + "] does not permit edits";
+        } else if (!hasWritePermission(share)) {
+            String f = "Share (%s) does not have write permissions (access == %s)";
+            return String.format(f, share.getEmail(), share.getAccess());
         }
+        return "Unknown reason";
     }
 }
