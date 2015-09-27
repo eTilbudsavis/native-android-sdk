@@ -87,9 +87,9 @@ public class Quantity implements IJson<JSONObject>, Parcelable {
         Quantity q = new Quantity();
         JSONObject jUnit = Json.getObject(object, JsonKeys.UNIT);
         q.setUnit(Unit.fromJSON(jUnit));
-        JSONObject jSize = Json.getObject(object, JsonKeys.UNIT);
+        JSONObject jSize = Json.getObject(object, JsonKeys.SIZE);
         q.setSize(Size.fromJSON(jSize));
-        JSONObject jPieces = Json.getObject(object, JsonKeys.UNIT);
+        JSONObject jPieces = Json.getObject(object, JsonKeys.PIECES);
         q.setPieces(Pieces.fromJSON(jPieces));
         return q;
     }
