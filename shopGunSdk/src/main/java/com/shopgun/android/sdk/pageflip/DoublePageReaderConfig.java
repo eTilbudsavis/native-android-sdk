@@ -20,6 +20,8 @@ import android.os.Parcel;
 
 public class DoublePageReaderConfig extends ReaderConfig {
 
+    public static final String TAG = DoublePageReaderConfig.class.getSimpleName();
+
     public DoublePageReaderConfig() {
 
     }
@@ -31,29 +33,43 @@ public class DoublePageReaderConfig extends ReaderConfig {
 
     @Override
     public int pageToPosition(int page) {
-        int pos = page - 1;
         if (isLandscape() && page > 1) {
-            if (page % 2 == 1) {
-                page--;
-            }
-            pos = page / 2;
+            // normalize so we'll get the first actual page from a position
+            page -= page % 2;
+            return hasIntro() ? (page/2)+1 : page/2;
         }
-        return pos;
+        return hasIntro() ? page : page-1;
     }
 
     @Override
     public int[] positionToPages(int position, int pageCount) {
+
+        boolean landscape = isLandscape();
+
+        if (hasIntro() && position > 0) {
+            // if the intro is present just offset everything by one,
+            // except if it's the intro position it self
+            position--;
+        }
+
+        if (hasOutro()) {
+            // Correct values if there is an outro page
+            int maxPagePos = landscape ? pageCount/2 : pageCount-1;
+            if (maxPagePos < position) {
+                position = maxPagePos;
+            }
+        }
+
         // default is offset by one
         int page;
-        boolean land = isLandscape();
-        if (land && position != 0) {
+        if (landscape && position > 0) {
             page = (position * 2);
         } else {
             page = position + 1;
         }
 
         int[] pages;
-        if (!land || page == 1 || page == pageCount) {
+        if (!landscape || page == 1 || page == pageCount) {
             // first, last, and everything in portrait is single-page
             pages = new int[]{page};
         } else {

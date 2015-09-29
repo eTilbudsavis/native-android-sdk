@@ -26,22 +26,27 @@ public class CatalogPagerAdapter extends FragmentStatelessPagerAdapter {
     public static final String TAG = CatalogPagerAdapter.class.getSimpleName();
 
     private CatalogPageCallback mCallback;
-    private int mViewCount = 0;
     private int mMaxHeap;
     private ReaderConfig mConfig;
+    private PageflipPageFragment mIntro;
+    private PageflipPageFragment mOutro;
 
     public CatalogPagerAdapter(FragmentManager fm, int maxHeap, CatalogPageCallback callback, ReaderConfig config) {
         super(fm);
         mMaxHeap = maxHeap;
         mCallback = callback;
         mConfig = config;
-        int pc = mCallback.getCatalog().getPageCount();
-        mViewCount = mConfig.isLandscape() ? (pc/2)+1 : pc;
 //        SgnLog.d(TAG, toString());
     }
 
     @Override
     public Fragment getItem(int position) {
+        if (position == 0 && mIntro != null) {
+            return mIntro;
+        }
+        if (position == getCount()-1 && mOutro != null) {
+            return mOutro;
+        }
         Catalog c = mCallback.getCatalog();
         int[] pages = mConfig.positionToPages(position, c.getPageCount());
         PageLoader.Config config = new PageLoader.Config(mMaxHeap, pages, c);
@@ -51,15 +56,46 @@ public class CatalogPagerAdapter extends FragmentStatelessPagerAdapter {
     }
 
     @Override
-    public String toString() {
-        int pc = mCallback.getCatalog().getPageCount();
-        String f = "%s[landscape:%s, pageCount:%s, viewCount:%s]";
-        return String.format(f, TAG, mConfig.isLandscape(), pc, mViewCount);
+    public float getPageWidth(int position) {
+        return ((PageflipPageFragment)getItem(position)).getPageWidth();
     }
 
     @Override
     public int getCount() {
-        return mViewCount;
+        int pc = mCallback.getCatalog().getPageCount();
+        int count = mConfig.isLandscape() ? (pc/2)+1 : pc;
+        if (mIntro != null) {
+            count++;
+        }
+        if (mOutro != null) {
+            count ++;
+        }
+        return count;
+    }
+
+    public void setIntroFragment(PageflipPageFragment intro) {
+        if (mIntro != intro) {
+            mIntro = intro;
+            mConfig.setHasIntro(mIntro != null);
+            notifyDataSetChanged();
+        }
+        mConfig.setHasIntro(mIntro != null);
+    }
+
+    public void setOutroFragment(PageflipPageFragment outro) {
+        if (mOutro != outro) {
+            mOutro = outro;
+            mConfig.setHasOutro(mOutro != null);
+            notifyDataSetChanged();
+        }
+        mConfig.setHasOutro(mOutro != null);
+    }
+
+    @Override
+    public String toString() {
+        int pc = mCallback.getCatalog().getPageCount();
+        String f = "%s[landscape:%s, pageCount:%s, viewCount:%s]";
+        return String.format(f, TAG, mConfig.isLandscape(), pc, getCount());
     }
 
 }

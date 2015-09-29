@@ -25,6 +25,8 @@ import com.shopgun.android.sdk.model.Catalog;
 public abstract class ReaderConfig implements Parcelable {
 
     boolean mLandscape = false;
+    boolean mHasIntro = false;
+    boolean mHasOutro = false;
 
     public ReaderConfig() {
     }
@@ -77,7 +79,7 @@ public abstract class ReaderConfig implements Parcelable {
 
     @Override
     public String toString() {
-        return "ReaderConfig[landscape:" + isLandscape() + "]";
+        return String.format("ReaderConfig[landscape:%s, hasIntro:%s, hasOutro:%s]", isLandscape(), hasIntro(), hasOutro());
     }
 
     @Override
@@ -94,4 +96,19 @@ public abstract class ReaderConfig implements Parcelable {
         this.mLandscape = in.readByte() != 0;
     }
 
+    public boolean hasIntro() {
+        return mHasIntro;
+    }
+
+    public void setHasIntro(boolean hasIntro) {
+        this.mHasIntro = hasIntro;
+    }
+
+    public boolean hasOutro() {
+        return mHasOutro;
+    }
+
+    public void setHasOutro(boolean hasOutro) {
+        this.mHasOutro = hasOutro;
+    }
 }

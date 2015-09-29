@@ -79,6 +79,10 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
     List<OnDrawPage> mDrawList = new ArrayList<OnDrawPage>();
 
+    // The meta fragments for intro/outro in Pageflip. Need to keep track of these until the Adapter is created
+    private PageflipPageFragment mIntroFragment;
+    private PageflipPageFragment mOutroFragment;
+
     // internal representation for when a full lifecycle isn't performed.
     private Bundle mSavedInstanceState;
 
@@ -91,8 +95,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
         public void onReady(int position) {
             if (position == mCurrentPosition) {
-                CatalogPageFragment old = getPage(position);
-                old.onVisible();
+                getPage(position).performVisible();
                 mPagesReady = true;
             }
         }
@@ -150,15 +153,13 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
         @Override
         public void onPageSelected(int position) {
-            int oldPos = mCurrentPosition;
+            int prev = mCurrentPosition;
             mCurrentPosition = position;
             if (mPagesReady) {
-                CatalogPageFragment old = getPage(oldPos);
-                old.onInvisible();
-                CatalogPageFragment current = getPage(mCurrentPosition);
-                current.onVisible();
+                getPage(prev).performInvisible();
+                getPage(mCurrentPosition).performVisible();
             }
-            mWrapperListener.onPageChange(mConfig.positionToPages(mCurrentPosition, mCatalog.getPageCount()));
+            mWrapperListener.onPageChange(getPages());
         }
 
         @Override
@@ -590,6 +591,8 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     private void applyAdapter() {
         int heap = Utils.getMaxHeap(getActivity());
         mAdapter = new CatalogPagerAdapter(getChildFragmentManager(), heap, mCatalogPageCallback, mConfig);
+        mAdapter.setIntroFragment(mIntroFragment);
+        mAdapter.setOutroFragment(mOutroFragment);
         mPager.setAdapter(mAdapter);
         showContent(true);
     }
@@ -657,8 +660,13 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
         return mCatalog;
     }
 
-    private CatalogPageFragment getPage(int position) {
-        return (CatalogPageFragment) mAdapter.instantiateItem(mContainer, position);
+    private Fragment getFragment(int position) {
+        return (Fragment) mAdapter.instantiateItem(mContainer, position);
+    }
+
+    private PageflipPageFragment getPage(int position) {
+        Fragment f = getFragment(position);
+        return (f instanceof PageflipPageFragment) ? (PageflipPageFragment) f : null;
     }
 
     /**
@@ -753,6 +761,24 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
         public void onZoom(View v, int[] pages, boolean zoonIn) {
             if (post()) mListener.onZoom(v, pages, zoonIn);
         }
+
+    }
+
+    public void setIntroFragment(PageflipPageFragment intro) {
+        mIntroFragment = intro;
+        if (mAdapter != null) {
+            mAdapter.setIntroFragment(mIntroFragment);
+        }
+    }
+
+    public void setOutroFragment(PageflipPageFragment outro) {
+        mOutroFragment = outro;
+        if (mAdapter != null) {
+            mAdapter.setOutroFragment(mOutroFragment);
+        }
+    }
+
+    private void saveState() {
 
     }
 
