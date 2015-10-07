@@ -200,14 +200,14 @@ public class DoublePageReaderConfigTest extends TestCase {
         r.setHasIntro(true);
         r.setHasOutro(false);
         landscape.clear();
-        landscape.add(new ConfigTestCase(0, PAGE_COUNT_LANDSCAPE, new int[]{1}));
+        landscape.add(new ConfigTestCase(0, PAGE_COUNT_LANDSCAPE, new int[]{}));
         landscape.add(new ConfigTestCase(1, PAGE_COUNT_LANDSCAPE, new int[]{1}));
         landscape.add(new ConfigTestCase(2, PAGE_COUNT_LANDSCAPE, new int[]{2, 3}));
         landscape.add(new ConfigTestCase(3, PAGE_COUNT_LANDSCAPE, new int[]{4, 5}));
         landscape.add(new ConfigTestCase(4, PAGE_COUNT_LANDSCAPE, new int[]{6, 7}));
         landscape.add(new ConfigTestCase(5, PAGE_COUNT_LANDSCAPE, new int[]{8}));
         portrait.clear();
-        portrait.add(new ConfigTestCase(0, PAGE_COUNT_PORTRAIT, new int[]{1}));
+        portrait.add(new ConfigTestCase(0, PAGE_COUNT_PORTRAIT, new int[]{}));
         portrait.add(new ConfigTestCase(1, PAGE_COUNT_PORTRAIT, new int[]{1}));
         portrait.add(new ConfigTestCase(2, PAGE_COUNT_PORTRAIT, new int[]{2}));
         portrait.add(new ConfigTestCase(3, PAGE_COUNT_PORTRAIT, new int[]{3}));
@@ -235,13 +235,13 @@ public class DoublePageReaderConfigTest extends TestCase {
         landscape.add(new ConfigTestCase(2, PAGE_COUNT_LANDSCAPE, new int[]{4, 5}));
         landscape.add(new ConfigTestCase(3, PAGE_COUNT_LANDSCAPE, new int[]{6, 7}));
         landscape.add(new ConfigTestCase(4, PAGE_COUNT_LANDSCAPE, new int[]{8}));
-        landscape.add(new ConfigTestCase(5, PAGE_COUNT_LANDSCAPE, new int[]{8}));
+        landscape.add(new ConfigTestCase(5, PAGE_COUNT_LANDSCAPE, new int[]{}));
         portrait.clear();
         portrait.add(new ConfigTestCase(0, PAGE_COUNT_PORTRAIT, new int[]{1}));
         portrait.add(new ConfigTestCase(1, PAGE_COUNT_PORTRAIT, new int[]{2}));
         portrait.add(new ConfigTestCase(2, PAGE_COUNT_PORTRAIT, new int[]{3}));
         portrait.add(new ConfigTestCase(3, PAGE_COUNT_PORTRAIT, new int[]{4}));
-        portrait.add(new ConfigTestCase(4, PAGE_COUNT_PORTRAIT, new int[]{4}));
+        portrait.add(new ConfigTestCase(4, PAGE_COUNT_PORTRAIT, new int[]{}));
 
         c.orientation = Configuration.ORIENTATION_LANDSCAPE;
         r.setConfiguration(c);
@@ -260,20 +260,20 @@ public class DoublePageReaderConfigTest extends TestCase {
         r.setHasIntro(true);
         r.setHasOutro(true);
         landscape.clear();
-        landscape.add(new ConfigTestCase(0, PAGE_COUNT_LANDSCAPE, new int[]{1}));
+        landscape.add(new ConfigTestCase(0, PAGE_COUNT_LANDSCAPE, new int[]{}));
         landscape.add(new ConfigTestCase(1, PAGE_COUNT_LANDSCAPE, new int[]{1}));
         landscape.add(new ConfigTestCase(2, PAGE_COUNT_LANDSCAPE, new int[]{2, 3}));
         landscape.add(new ConfigTestCase(3, PAGE_COUNT_LANDSCAPE, new int[]{4, 5}));
         landscape.add(new ConfigTestCase(4, PAGE_COUNT_LANDSCAPE, new int[]{6, 7}));
         landscape.add(new ConfigTestCase(5, PAGE_COUNT_LANDSCAPE, new int[]{8}));
-        landscape.add(new ConfigTestCase(6, PAGE_COUNT_LANDSCAPE, new int[]{8}));
+        landscape.add(new ConfigTestCase(6, PAGE_COUNT_LANDSCAPE, new int[]{}));
         portrait.clear();
-        portrait.add(new ConfigTestCase(0, PAGE_COUNT_PORTRAIT, new int[]{1}));
+        portrait.add(new ConfigTestCase(0, PAGE_COUNT_PORTRAIT, new int[]{}));
         portrait.add(new ConfigTestCase(1, PAGE_COUNT_PORTRAIT, new int[]{1}));
         portrait.add(new ConfigTestCase(2, PAGE_COUNT_PORTRAIT, new int[]{2}));
         portrait.add(new ConfigTestCase(3, PAGE_COUNT_PORTRAIT, new int[]{3}));
         portrait.add(new ConfigTestCase(4, PAGE_COUNT_PORTRAIT, new int[]{4}));
-        portrait.add(new ConfigTestCase(5, PAGE_COUNT_PORTRAIT, new int[]{4}));
+        portrait.add(new ConfigTestCase(5, PAGE_COUNT_PORTRAIT, new int[]{}));
 
         c.orientation = Configuration.ORIENTATION_LANDSCAPE;
         r.setConfiguration(c);

@@ -36,13 +36,19 @@ public class SinglePageReaderConfig extends ReaderConfig {
     @Override
     public int[] positionToPages(int position, int pageCount) {
 
-        if (hasIntro() && position > 0) {
-            // if the intro is present just offset everything by one, except it self
-            position--;
+        if (hasIntro()) {
+            if (position > 0) {
+                // if the intro is present just offset everything by one, except it self
+                position--;
+            } else {
+                // Intro doesn't have a pageNum, so we'll return empty
+                return new int[]{};
+            }
         }
+
         if (hasOutro() && position >= pageCount) {
-            // no matter what the max pos is pageCount-1, simple
-            position = pageCount-1;
+            // Outro doesn't have a pageNum, so we'll return empty
+            return new int[]{};
         }
 
         return new int[]{position+1};

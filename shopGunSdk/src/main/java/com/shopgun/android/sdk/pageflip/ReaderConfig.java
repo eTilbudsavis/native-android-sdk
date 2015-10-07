@@ -50,6 +50,8 @@ public abstract class ReaderConfig implements Parcelable {
     /**
      * Convert a position of a {@link PageflipViewPager} into it's corresponding human readable pages.
      *
+     * <p>Note that both, Intro and Outro fragments returns an empty array, as there is no human readable pages</p>
+     *
      * @param position  The {@link PageflipViewPager} position
      * @param pageCount The number of pages in the {@link Catalog} being displayed in the {@link PageflipViewPager}
      * @return An array of pages

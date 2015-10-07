@@ -46,17 +46,22 @@ public class DoublePageReaderConfig extends ReaderConfig {
 
         boolean landscape = isLandscape();
 
-        if (hasIntro() && position > 0) {
-            // if the intro is present just offset everything by one,
-            // except if it's the intro position it self
-            position--;
+        if (hasIntro()) {
+            if (position > 0) {
+                // if the intro is present just offset everything by one,
+                // except if it's the intro position it self
+                position--;
+            } else {
+                // Intro doesn't have a pageNum, so we'll return empty
+                return new int[]{};
+            }
         }
 
         if (hasOutro()) {
-            // Correct values if there is an outro page
             int maxPagePos = landscape ? pageCount/2 : pageCount-1;
             if (maxPagePos < position) {
-                position = maxPagePos;
+                // Outro doesn't have a pageNum, so we'll return empty
+                return new int[]{};
             }
         }
 
