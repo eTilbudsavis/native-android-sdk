@@ -50,7 +50,7 @@ public class PageflipListenerPrinter implements PageflipListener {
     }
 
     @Override
-    public void onPageChange(int[] pages) {
+    public void onPageChange(int position, int[] pages) {
         log("onPageChange: " + PageflipUtils.join(",", pages));
     }
 

@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.pageflip;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,12 +30,13 @@ import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView;
 import com.shopgun.android.sdk.photoview.PhotoView;
 
-public class CatalogPageFragment extends PageflipPageFragment implements
+public class CatalogPageFragment extends Fragment implements
         PhotoView.OnPhotoTapListener,
         PhotoView.OnPhotoDoubleClickListener,
         PhotoView.OnPhotoLongClickListener,
         ZoomPhotoView.OnZoomChangeListener,
-        PageLoader.PageLoaderListener{
+        PageLoader.PageLoaderListener,
+        PageflipPage {
 
     public static final String TAG = Constants.getTag(CatalogPageFragment.class);
 
@@ -47,6 +49,8 @@ public class CatalogPageFragment extends PageflipPageFragment implements
     private int[] mPages;
     private int mPosition = -1;
     private PageLoader.Config mConfig;
+
+    private boolean mPageVisible = false;
 
     private ZoomPhotoView mPhotoView;
     private LoadingTextView mLoader;
@@ -186,24 +190,25 @@ public class CatalogPageFragment extends PageflipPageFragment implements
         super.onResume();
     }
 
-    /**
-     * called once the {@link CatalogPageFragment} becomes visible in the {@link PageflipViewPager}
-     */
+    public float getPageWidth() {
+        return 1.0f;
+    }
+
     public void onVisible() {
         log("onVisible");
         updateBranding();
         loadView();
-        if (!isPageVisible() && mPhotoView != null && mPhotoView.getBitmap() != null) {
+        if (!mPageVisible && mPhotoView != null && mPhotoView.getBitmap() != null) {
             // first start if the page is visible, and has a bitmap
             getStat().startView();
         }
-        super.onVisible();
+        mPageVisible = true;
     }
 
     public void onInvisible() {
+        mPageVisible = false;
         log("onInvisible");
         getStat().collectView();
-        super.onInvisible();
     }
 
     @Override
@@ -252,7 +257,7 @@ public class CatalogPageFragment extends PageflipPageFragment implements
     @Override
     public void onComplete() {
         toggleContentVisibility(false);
-        if (isPageVisible()) {
+        if (mPageVisible) {
             getStat().startView();
         }
     }

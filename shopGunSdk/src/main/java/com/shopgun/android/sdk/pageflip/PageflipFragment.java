@@ -80,8 +80,8 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     List<OnDrawPage> mDrawList = new ArrayList<OnDrawPage>();
 
     // The meta fragments for intro/outro in Pageflip. Need to keep track of these until the Adapter is created
-    private PageflipPageFragment mIntroFragment;
-    private PageflipPageFragment mOutroFragment;
+    private Fragment mIntroFragment;
+    private Fragment mOutroFragment;
 
     // internal representation for when a full lifecycle isn't performed.
     private Bundle mSavedInstanceState;
@@ -95,7 +95,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
         public void onReady(int position) {
             if (position == mCurrentPosition) {
-                getPage(position).performVisible();
+                getPage(position).onVisible();
                 mPagesReady = true;
             }
         }
@@ -156,10 +156,10 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
             int prev = mCurrentPosition;
             mCurrentPosition = position;
             if (mPagesReady) {
-                getPage(prev).performInvisible();
-                getPage(mCurrentPosition).performVisible();
+                getPage(prev).onVisible();
+                getPage(mCurrentPosition).onInvisible();
             }
-            mWrapperListener.onPageChange(getPages());
+            mWrapperListener.onPageChange(position, getPages());
         }
 
         @Override
@@ -583,7 +583,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
             if (mPager.getCurrentItem() != mCurrentPosition) {
                 mPager.setCurrentItem(mCurrentPosition);
             }
-            mWrapperListener.onPageChange(getPages());
+            mWrapperListener.onPageChange(mCurrentPosition, getPages());
         }
 
     }
@@ -664,9 +664,8 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
         return (Fragment) mAdapter.instantiateItem(mContainer, position);
     }
 
-    private PageflipPageFragment getPage(int position) {
-        Fragment f = getFragment(position);
-        return (f instanceof PageflipPageFragment) ? (PageflipPageFragment) f : null;
+    private PageflipPage getPage(int position) {
+        return (PageflipPage) mAdapter.instantiateItem(mContainer, position);
     }
 
     /**
@@ -729,8 +728,8 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
             if (post()) mListener.onReady();
         }
 
-        public void onPageChange(int[] pages) {
-            if (post()) mListener.onPageChange(pages);
+        public void onPageChange(int position, int[] pages) {
+            if (post()) mListener.onPageChange(position, pages);
         }
 
         public void onOutOfBounds(boolean left) {
@@ -764,18 +763,34 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
     }
 
-    public void setIntroFragment(PageflipPageFragment intro) {
+    public void setIntroFragment(Fragment intro) {
+        if (intro != null && !(intro instanceof PageflipPage)) {
+            String msg = String.format("%s must implement %s", intro.getClass().getSimpleName(), PageflipPage.class.getCanonicalName());
+            throw new ClassCastException(msg);
+        }
         mIntroFragment = intro;
         if (mAdapter != null) {
             mAdapter.setIntroFragment(mIntroFragment);
         }
     }
 
-    public void setOutroFragment(PageflipPageFragment outro) {
+    public Fragment getIntroFragment() {
+        return mIntroFragment;
+    }
+
+    public void setOutroFragment(Fragment outro) {
+        if (outro != null && !(outro instanceof PageflipPage)) {
+            String msg = String.format("%s must implement %s", outro.getClass().getSimpleName(), PageflipPage.class.getCanonicalName());
+            throw new ClassCastException(msg);
+        }
         mOutroFragment = outro;
         if (mAdapter != null) {
             mAdapter.setOutroFragment(mOutroFragment);
         }
+    }
+
+    public Fragment getOutroFragment() {
+        return mOutroFragment;
     }
 
     private void saveState() {

@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.pageflip;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.view.ViewGroup;
 
 import com.shopgun.android.sdk.model.Catalog;
 
@@ -28,8 +29,8 @@ public class CatalogPagerAdapter extends FragmentStatelessPagerAdapter {
     private CatalogPageCallback mCallback;
     private int mMaxHeap;
     private ReaderConfig mConfig;
-    private PageflipPageFragment mIntro;
-    private PageflipPageFragment mOutro;
+    private Fragment mIntro;
+    private Fragment mOutro;
 
     public CatalogPagerAdapter(FragmentManager fm, int maxHeap, CatalogPageCallback callback, ReaderConfig config) {
         super(fm);
@@ -57,7 +58,7 @@ public class CatalogPagerAdapter extends FragmentStatelessPagerAdapter {
 
     @Override
     public float getPageWidth(int position) {
-        return ((PageflipPageFragment)getItem(position)).getPageWidth();
+        return ((PageflipPage)getItem(position)).getPageWidth();
     }
 
     @Override
@@ -73,7 +74,7 @@ public class CatalogPagerAdapter extends FragmentStatelessPagerAdapter {
         return count;
     }
 
-    public void setIntroFragment(PageflipPageFragment intro) {
+    public void setIntroFragment(Fragment intro) {
         if (mIntro != intro) {
             mIntro = intro;
             mConfig.setHasIntro(mIntro != null);
@@ -82,7 +83,7 @@ public class CatalogPagerAdapter extends FragmentStatelessPagerAdapter {
         mConfig.setHasIntro(mIntro != null);
     }
 
-    public void setOutroFragment(PageflipPageFragment outro) {
+    public void setOutroFragment(Fragment outro) {
         if (mOutro != outro) {
             mOutro = outro;
             mConfig.setHasOutro(mOutro != null);

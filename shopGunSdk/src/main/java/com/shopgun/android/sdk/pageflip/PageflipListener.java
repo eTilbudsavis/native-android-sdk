@@ -33,9 +33,10 @@ public interface PageflipListener {
     /**
      * Called on every page change event.
      *
+     * @param position The current position in the adapter - not to be confused with pages
      * @param pages The current set of pages being displayed
      */
-    public void onPageChange(int[] pages);
+    public void onPageChange(int position, int[] pages);
 
     /**
      * Called when the user swipes 'out' of the catalog, at either the most left or most right position.
