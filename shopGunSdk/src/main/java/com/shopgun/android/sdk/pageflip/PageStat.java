@@ -16,6 +16,8 @@
 
 package com.shopgun.android.sdk.pageflip;
 
+import android.os.SystemClock;
+
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
@@ -48,11 +50,15 @@ public class PageStat {
         mPages = pages;
     }
 
+    private long now() {
+        return SystemClock.elapsedRealtime();
+    }
+
     public void collectView() {
         if (mViewStart != 0) {
             log("viewCollect");
             collectZoom();
-            long now = System.currentTimeMillis();
+            long now = now();
             long duration = (now - mViewStart) - mZoomAccumulated;
             collect(true, duration);
         }
@@ -62,7 +68,7 @@ public class PageStat {
     public void startView() {
         if (mViewStart == 0) {
             log("viewStart");
-            mViewStart = System.currentTimeMillis();
+            mViewStart = now();
             mZoomAccumulated = 0;
         }
     }
@@ -70,14 +76,14 @@ public class PageStat {
     public void startZoom() {
         if (mZoomStart == 0) {
             log("zoomStart");
-            mZoomStart = System.currentTimeMillis();
+            mZoomStart = now();
         }
     }
 
     public void collectZoom() {
         if (mZoomStart != 0) {
             log("zoomCollect");
-            long duration = System.currentTimeMillis() - mZoomStart;
+            long duration = now() - mZoomStart;
             mZoomAccumulated += duration;
             collect(false, duration);
         }
