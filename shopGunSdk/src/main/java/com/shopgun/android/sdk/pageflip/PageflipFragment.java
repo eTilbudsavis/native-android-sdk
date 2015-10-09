@@ -387,6 +387,22 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     }
 
     /**
+     * Get the pages currently being displayed in the {@link PageflipFragment}.
+     * But with corrected values for the Intro, and Outro fragments, where they
+     * will be also be counted as being either the first or last page respectively.
+     * @return An array of pages being displayed
+     */
+    public int[] getPagesCorrected() {
+        int pos = mCurrentPosition;
+        if (mConfig.hasIntro() && mCurrentPosition == 0) {
+            pos = mCurrentPosition + 1;
+        } else if (mConfig.hasOutro() && (mAdapter.getCount()-1) == mCurrentPosition) {
+            pos = mCurrentPosition - 1;
+        }
+        return mConfig.positionToPages(pos, mCatalog.getPageCount());
+    }
+
+    /**
      * Set the {@link PageflipFragment} to show the given page number in the catalog.
      * Note that page number doesn't directly correlate to the position of the {@link PageflipViewPager}.
      *
@@ -491,7 +507,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        int page = getPages()[0];
+        int page = getPagesCorrected()[0];
         outState.putInt(ARG_PAGE, page);
         outState.putParcelable(ARG_CATALOG, mCatalog);
         outState.putString(ARG_CATALOG_ID, mCatalogId);
@@ -698,7 +714,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
      */
     public void showPageOverview() {
         if (isCatalogReady()) {
-            int page = getPages()[0];
+            int page = getPagesCorrected()[0];
             PageOverviewDialog f = PageOverviewDialog.newInstance(PageflipFragment.this, mCatalog, page);
             f.show(getChildFragmentManager(), PageOverviewDialog.TAG);
         }
