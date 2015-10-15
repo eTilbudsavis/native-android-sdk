@@ -48,6 +48,9 @@ public interface MaterialColor extends Parcelable {
     /** luminance value above 0.64 */
     boolean isLight();
 
+    /** luminance value below 0.13 */
+    boolean isDark();
+
     /** luminance value below 0.025 */
     boolean isVeryDark();
 

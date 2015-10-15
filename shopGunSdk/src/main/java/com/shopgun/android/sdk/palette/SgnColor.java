@@ -96,6 +96,11 @@ public class SgnColor extends Color implements  MaterialColor {
         return SgnPalette.isLight(mColor);
     }
 
+    @Override
+    public boolean isDark() {
+        return SgnPalette.isDark(mColor);
+    }
+
     /** luminance value below 0.025 */
     @Override
     public boolean isVeryDark() {
