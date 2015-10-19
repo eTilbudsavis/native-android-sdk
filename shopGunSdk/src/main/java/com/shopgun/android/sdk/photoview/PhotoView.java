@@ -25,7 +25,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.AttributeSet;
-import android.util.FloatMath;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewParent;
@@ -225,7 +224,7 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
      * @return float - current scale value
      */
     public float getScale() {
-        return FloatMath.sqrt((float) Math.pow(getValue(mSuppMatrix, Matrix.MSCALE_X), 2) + (float) Math.pow(getValue(mSuppMatrix, Matrix.MSKEW_Y), 2));
+        return (float) Math.sqrt(Math.pow(getValue(mSuppMatrix, Matrix.MSCALE_X), 2) + Math.pow(getValue(mSuppMatrix, Matrix.MSKEW_Y), 2));
     }
 
     /**
