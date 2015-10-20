@@ -31,8 +31,8 @@ public enum Environment {
 
     static {
         PRODUCTION.mEnvironment = "https://api." + HOST_POSTFIX;
-        EDGE.mEnvironment = "https://edge.api." + HOST_POSTFIX;
-        STAGING.mEnvironment = "https://staging.api." + HOST_POSTFIX;
+        EDGE.mEnvironment = "https://api-edge." + HOST_POSTFIX;
+        STAGING.mEnvironment = "https://api-staging." + HOST_POSTFIX;
         CUSTOM.mEnvironment = "https://api." + HOST_POSTFIX;
     }
 
