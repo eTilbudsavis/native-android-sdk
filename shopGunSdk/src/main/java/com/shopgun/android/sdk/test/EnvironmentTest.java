@@ -26,8 +26,8 @@ public class EnvironmentTest extends TestCase {
     public static final String TAG = Constants.getTag(EnvironmentTest.class);
 
     private static final String PROD = "https://api.etilbudsavis.dk";
-    private static final String EDGE = "https://edge.api.etilbudsavis.dk";
-    private static final String STAG = "https://staging.api.etilbudsavis.dk";
+    private static final String EDGE = "https://api-edge.etilbudsavis.dk";
+    private static final String STAG = "https://api-staging.etilbudsavis.dk";
 
     public static void test() {
 
