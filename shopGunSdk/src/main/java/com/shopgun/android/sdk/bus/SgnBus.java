@@ -109,8 +109,12 @@ public class SgnBus {
         }
 
         private static final String MSG_FORMAT = "An %s was caught in %s, and suppressed.";
-        private void log(Exception ex) {
-            SgnLog.e(TAG, String.format(MSG_FORMAT, ex.getClass().getSimpleName(), TAG), ex);
+        private void log(EventBusException ex) {
+            if (DEBUG) {
+                throw ex;
+            } else {
+                SgnLog.e(TAG, String.format(MSG_FORMAT, ex.getClass().getSimpleName(), TAG), ex);
+            }
         }
 
     }
