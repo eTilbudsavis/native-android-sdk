@@ -16,5 +16,8 @@
   -->
 
 <resources>
-
+  <color name="sgn_primaryDark">#01942D</color>
+  <color name="sgn_primary">#01C545</color>
+  <color name="sgn_primaryLight">#55D782</color>
+  <color name="sgn_accent">#03A9F4</color>
 </resources>
