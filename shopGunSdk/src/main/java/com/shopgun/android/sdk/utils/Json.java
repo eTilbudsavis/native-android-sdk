@@ -259,7 +259,7 @@ public class Json {
     /**
      * Method for safely converting a ShopGun model object to JSON.
      * @param object The ShopGun model object to convert
-     * @return A JSONObject, or JSONObject.NULL
+     * @return A {@link JSONObject}, or {@link JSONObject#NULL}
      */
     public static Object toJson(IJson<?> object) {
         return toJson(object, JSONObject.NULL);
@@ -272,7 +272,7 @@ public class Json {
      * mapped to the key is null.
      * @param object An object to check for null
      * @param <T> Any type
-     * @return The object, or JSONObject.NULL
+     * @return The object, or {@link JSONObject#NULL}
      */
     public static <T> Object nullCheck(T object) {
         return object == null ? JSONObject.NULL : object;
@@ -283,6 +283,7 @@ public class Json {
      * with the defValue set to Color.BLACK.
      * @param object An object to get data from
      * @param key A key to map to a value
+     * @return Returns the value mapped to the key if it exists, coercing it if necessary, else {@link Color#BLACK}.
      */
     public static int colorValueOf(JSONObject object, String key) {
         return colorValueOf(object, key, Color.BLACK);
@@ -293,7 +294,7 @@ public class Json {
      * @param object An object to get data from
      * @param key A key to map to a value
      * @param defValue A default value to return, if key doesn't exist or causes a JSONException
-     * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
+     * @return Returns the value mapped to the key if it exists, coercing it if necessary, else {@code defValue}.
      */
     public static int colorValueOf(JSONObject object, String key, int defValue) {
         String rawColor = Json.valueOf(object, key);

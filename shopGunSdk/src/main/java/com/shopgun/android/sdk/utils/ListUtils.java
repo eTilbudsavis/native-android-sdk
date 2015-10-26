@@ -37,12 +37,6 @@ public class ListUtils {
         SgnLog.d(tag, "Item " + s.getDescription() + " prevId( " + s.getPreviousId() + ") - modified( " + s.getModified().toGMTString() + " ) ");
     }
 
-    /**
-     * @param list
-     * @param prevPos
-     * @param movePos
-     * @return
-     */
     public static List<ShoppinglistItem> setPrevious(List<ShoppinglistItem> list, int prevPos, int movePos) {
 
         List<ShoppinglistItem> tmp = new ArrayList<ShoppinglistItem>();

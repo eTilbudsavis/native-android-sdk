@@ -59,8 +59,8 @@ public class PrettyPrint {
     /**
      * Get the essential parameters from a shoppinglistItem.
      * <p>Example: "item[cola      ] prev[00000000] id[36473829] modified[2014-03-11T14:39:25+0100]"</p>
-     * @param sli
-     * @return
+     * @param sli A {@link ShoppinglistItem}
+     * @return A string
      */
     public static String shoppinglistItemToString(ShoppinglistItem sli) {
         String id = sli.getId().substring(0, 8);
@@ -73,20 +73,6 @@ public class PrettyPrint {
         resp = String.format(resp, title, prev, id, Utils.dateToString(sli.getModified()));
         return resp;
     }
-
-    /**
-     *
-     * @param type
-     * @param isServer
-     * @param added
-     * @param deleted
-     * @param edited
-     */
-    public static void printListenerCallback(String type, boolean isServer, List<?> added, List<?> deleted, List<?> edited) {
-        String text = "type[%s], isServer[%s], added[%s], deleted[%s], edited[%s]";
-        SgnLog.d(TAG, String.format(text, type, isServer, added.size(), deleted.size(), edited.size()));
-    }
-
 
     public static void printResponse(String tag, String name, JSONObject response, ShopGunError error) {
 

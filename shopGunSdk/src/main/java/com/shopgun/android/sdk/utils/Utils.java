@@ -144,6 +144,7 @@ public final class Utils {
      * Returns a string of parameters, ordered alphabetically (for better cache performance)
      *
      * @param apiParams to convert into query parameters
+     * @param encoding encoding to use
      * @return a string of parameters
      * @deprecated Method is deprecated, refer to {@link Utils#mapToQueryString(Map, String)} instead.
      */
@@ -171,6 +172,7 @@ public final class Utils {
      * Returns a string of parameters, ordered alfabetically (for better cache performance)
      *
      * @param apiParams to convert into query parameters
+     * @param encoding encoding to use
      * @return a string of parameters
      */
     public static String mapToQueryString(Map<String, String> apiParams, String encoding) {
@@ -332,6 +334,7 @@ public final class Utils {
      * <code>1394021345625 -&gt; 1394021345000</code>
      *
      * @param date A date to round
+     * @return A date, floored to nearest second.
      */
     public static Date roundTime(Date date) {
         if (date != null) {
@@ -344,7 +347,7 @@ public final class Utils {
     /**
      * <p>Method for converting a size (in bytes) into a human readable format.</p>
      *
-     * <table style="text-align: right; border: #000000 solid 1px ">
+     * <table style="text-align: right; border: #000000 solid 1px " summary="">
      * <tr><th>input</th>	<th>SI</th>			<th>BINARY</th></tr>
      * <tr><td>0</td>		<td>0 B</td>		<td>0 B</td></tr>
      * <tr><td>27</td>		<td>27 B</td>		<td>27 B</td></tr>
@@ -382,6 +385,7 @@ public final class Utils {
     /**
      * Copy all elements from an iterator to a {@link List}
      * @param it An {@link Iterator}
+     * @param <T> Any type
      * @return A list containing all elements from the {@link Iterator}
      */
     public static <T> List<T> copyIterator(Iterator<T> it) {
@@ -437,6 +441,7 @@ public final class Utils {
      *
      * @param obj     An object to clone
      * @param creator The creator to clone from
+     * @param <T> Any type
      * @return A clone of the obj
      */
     public static <T extends Parcelable> T copyParcelable(T obj, Parcelable.Creator<T> creator) {
@@ -451,6 +456,7 @@ public final class Utils {
      *
      * @param list    A list to clone
      * @param creator The creator to clone from
+     * @param <T> Any type
      * @return A cloned list
      */
     public static <T extends Parcelable> List<T> copyParcelable(List<T> list, Parcelable.Creator<T> creator) {
