@@ -91,6 +91,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * URL, and error listener.  Note that the normal response listener is not provided here as
      * delivery of responses is provided by subclasses, who have a better idea of how to deliver
      * an already-parsed response.
+     * @param method A {@link com.shopgun.android.sdk.network.Request.Method}
+     * @param url An url
+     * @param listener A callback listener
      */
     public Request(Method method, String url, Listener<T> listener) {
         mMethod = method;

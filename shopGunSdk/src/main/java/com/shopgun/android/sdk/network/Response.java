@@ -35,7 +35,13 @@ public class Response<T> {
         this.cache = cache;
     }
 
-    /** Returns a successful response containing the parsed result. */
+    /**
+     * Returns a successful response containing the parsed result.
+     * @param result A successful result
+     * @param cache A cache item
+     * @param <T> Any response type
+     * @return A new {@link Response}
+     */
     public static <T> Response<T> fromSuccess(T result, Map<String, Cache.Item> cache) {
         return new Response<T>(result, cache, null);
     }
@@ -43,6 +49,9 @@ public class Response<T> {
     /**
      * Returns a failed response containing the given error code and an optional
      * localized message displayed to the user.
+     * @param error A {@link ShopGunError}
+     * @param <T> Any response type
+     * @return A new {@link Response}
      */
     public static <T> Response<T> fromError(ShopGunError error) {
         return new Response<T>(null, null, error);
@@ -58,8 +67,12 @@ public class Response<T> {
 
     /** Callback interface for delivering parsed responses. */
     public interface Listener<T> {
-        /** Called when a response is received. */
-        public void onComplete(T response, ShopGunError error);
+        /**
+         * Called when a response is received.
+         * @param response A parsed response, or {@code null}
+         * @param error A {@link ShopGunError}, or {@code null}
+         */
+        void onComplete(T response, ShopGunError error);
     }
 
 }
