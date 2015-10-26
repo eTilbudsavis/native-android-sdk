@@ -318,7 +318,7 @@ public class DataSource extends SQLDataSource {
 
     /**
      * Deletes all items, in a given state, from a {@link Shoppinglist}
-     * <p/>
+     *
      * <ul>
      * <li>{@code true} - delete ticked items</li>
      * <li>{@code false} - delete unticked items</li>
@@ -341,9 +341,9 @@ public class DataSource extends SQLDataSource {
 
     /**
      * ********************************************************************************************
-     * <p/>
+     *
      * SHARES
-     * <p/>
+     *
      * ********************************************************************************************
      */
 

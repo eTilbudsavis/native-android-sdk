@@ -309,7 +309,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
 
     /**
      * Set the API environment the API should use.
-     * <p/>
+     *
      * <p>The environment will only be used, if you do not prefix your url's with another domain name.
      * it's therefore advised to use the url's exposed in {@link com.shopgun.android.sdk.api.Endpoints}.</p>
      *

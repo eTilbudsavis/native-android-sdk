@@ -21,7 +21,7 @@ package com.shopgun.android.sdk.api;
  * It by default contains three predefined settings, which maps directly to it's counterparts in our API.
  * And furthermore there is an option to set a {@link Environment#CUSTOM} environment, this is for local
  * development and testing.
- * <p/>
+ *
  * By default, the {@link Environment} is set to {@link Environment#PRODUCTION}.
  */
 public enum Environment {
@@ -71,14 +71,13 @@ public enum Environment {
 
     /**
      * Apply the environment to a given path/url.
-     * <p/>
      * <p>
      * The {@link Environment} will only be applied, if the url given is only the path of an url.
      * In a {@link Environment#PRODUCTION PRODUCTION} environment we will translate as follows:
      * <ul>
-     * <li>"/v2/catalogs" -> "https://api.etilbudsavis.dk/v2/catalogs"
-     * <li><code>null</code> -> "https://api.etilbudsavis.dk/"
-     * <li>"" -> "https://api.etilbudsavis.dk/"
+     * <li>"/v2/catalogs" -&gt; "https://api.etilbudsavis.dk/v2/catalogs"
+     * <li><code>null</code> -&gt; "https://api.etilbudsavis.dk/"
+     * <li>"" -&gt; "https://api.etilbudsavis.dk/"
      * </ul>
      * </p>
      *

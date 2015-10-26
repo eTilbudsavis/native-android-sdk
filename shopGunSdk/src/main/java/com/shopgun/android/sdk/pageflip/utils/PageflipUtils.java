@@ -74,6 +74,7 @@ public class PageflipUtils {
     /**
      * Method for determining if the caralog is ready;
      *
+     * @param c A {@link Catalog}
      * @return true, if the catalog is fully loaded, including pages and hotspots
      */
     public static boolean isCatalogReady(Catalog c) {
@@ -102,6 +103,8 @@ public class PageflipUtils {
 
     /**
      * returns the bytesize of the give bitmap
+     * @param bitmap A bitmap to measure
+     * @return Size of bitmap, in byte
      */
     public static int sizeOf(Bitmap bitmap) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -115,6 +118,8 @@ public class PageflipUtils {
 
     /**
      * returns the kilobytesize of the give bitmap
+     * @param bitmap A bitmap to measure
+     * @return Size of bitmap, in kilo byte
      */
     public static int sizeOfKb(Bitmap bitmap) {
         return sizeOf(bitmap) / 1024;

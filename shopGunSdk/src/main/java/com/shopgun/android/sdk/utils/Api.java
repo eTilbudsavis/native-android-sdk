@@ -24,9 +24,10 @@ import com.shopgun.android.sdk.api.SortBy;
 
 /**
  * The {@link Api} class contains miscellaneous helper variables, and classes, which comes very handy when interacting with the API.
- * <p/>
+ *
  * <p>For a complete set of keys and their respective parameters, as well as detailed documentation,
- * in a given context, we will refer you to the <a href="http://docs.api.etilbudsavis.dk/">API documentation</a></p>
+ * in a given context, we will refer you to the <a href="http://docs.api.etilbudsavis.dk/">API documentation</a>
+ * </p>
  */
 public final class Api {
 

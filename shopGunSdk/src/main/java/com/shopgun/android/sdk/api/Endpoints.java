@@ -16,6 +16,13 @@
 
 package com.shopgun.android.sdk.api;
 
+import com.shopgun.android.sdk.model.Catalog;
+import com.shopgun.android.sdk.model.Dealer;
+import com.shopgun.android.sdk.model.Offer;
+import com.shopgun.android.sdk.model.Shoppinglist;
+import com.shopgun.android.sdk.model.ShoppinglistItem;
+import com.shopgun.android.sdk.model.Store;
+import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.utils.Utils;
 
 /**
@@ -67,6 +74,7 @@ public class Endpoints {
     public static final String SHOPPINGLIST_OFFERS = "/v2/shoppinglists/offers";
 
     /**
+     * @param offerId An {@link Offer#getId()}
      * @return /v2/offers/{offer_id}
      */
     public static String offerId(String offerId) {
@@ -74,6 +82,7 @@ public class Endpoints {
     }
 
     /**
+     * @param storeId A {@link Store#getId()}
      * @return /v2/stores/{store_id}
      */
     public static String storeId(String storeId) {
@@ -81,6 +90,7 @@ public class Endpoints {
     }
 
     /**
+     * @param dealerId A {@link Dealer#getId()}
      * @return /v2/dealers/{dealer_id}
      */
     public static String dealerId(String dealerId) {
@@ -88,6 +98,7 @@ public class Endpoints {
     }
 
     /**
+     * @param catalogId A {@link Catalog#getId()}
      * @return /v2/catalogs/{catalog_id}
      */
     public static String catalogId(String catalogId) {
@@ -95,6 +106,7 @@ public class Endpoints {
     }
 
     /**
+     * @param catalogId A {@link Catalog#getId()}
      * @return /v2/catalogs/{catalog_id}/pages
      */
     public static String catalogPages(String catalogId) {
@@ -102,6 +114,7 @@ public class Endpoints {
     }
 
     /**
+     * @param catalogId A {@link Catalog#getId()}
      * @return /v2/catalogs/{catalog_id}/hotspots
      */
     public static String catalogHotspots(String catalogId) {
@@ -109,6 +122,7 @@ public class Endpoints {
     }
 
     /**
+     * @param catalogId A {@link Catalog#getId()}
      * @return /v2/catalogs/{catalog_id}/collect
      */
     public static String catalogCollect(String catalogId) {
@@ -116,6 +130,7 @@ public class Endpoints {
     }
 
     /**
+     * @param offerId An {@link Offer#getId()}
      * @return /v2/offers/{offer_id}/collect
      */
     public static String offerCollect(String offerId) {
@@ -123,13 +138,15 @@ public class Endpoints {
     }
 
     /**
-     * @return /v2/stores/{offer_id}/collect
+     * @param storeId A {@link Store#getId()}
+     * @return /v2/stores/{store_id}/collect
      */
     public static String storeCollect(String storeId) {
         return String.format("/v2/stores/%s/collect", storeId);
     }
 
     /**
+     * @param userId A {@link User#getUserId()}
      * @return /v2/users/{user_id}/facebook
      */
     public static String facebook(int userId) {
@@ -137,6 +154,7 @@ public class Endpoints {
     }
 
     /**
+     * @param userId A {@link User#getUserId()}
      * @return /v2/users/{user_id}/shoppinglists
      */
     public static String lists(int userId) {
@@ -144,6 +162,8 @@ public class Endpoints {
     }
 
     /**
+     * @param userId A {@link User#getUserId()}
+     * @param listId A {@link Shoppinglist#getId()}
      * @return /v2/users/{user_id}/shoppinglists/{list_uuid}
      */
     public static String list(int userId, String listId) {
@@ -151,6 +171,8 @@ public class Endpoints {
     }
 
     /**
+     * @param userId A {@link User#getUserId()}
+     * @param listId A {@link Shoppinglist#getId()}
      * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/modified
      */
     public static String listModified(int userId, String listId) {
@@ -158,6 +180,8 @@ public class Endpoints {
     }
 
     /**
+     * @param userId A {@link User#getUserId()}
+     * @param listId A {@link Shoppinglist#getId()}
      * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/empty
      */
     public static String listEmpty(int userId, String listId) {
@@ -165,6 +189,8 @@ public class Endpoints {
     }
 
     /**
+     * @param userId A {@link User#getUserId()}
+     * @param listId A {@link Shoppinglist#getId()}
      * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/shares
      */
     public static String listShares(int userId, String listId) {
@@ -172,6 +198,9 @@ public class Endpoints {
     }
 
     /**
+     * @param userId A {@link User#getUserId()}
+     * @param listId A {@link Shoppinglist#getId()}
+     * @param email An emailaddress
      * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email}
      */
     public static String listShareEmail(int userId, String listId, String email) {
@@ -179,6 +208,8 @@ public class Endpoints {
     }
 
     /**
+     * @param userId A {@link User#getUserId()}
+     * @param listId A {@link Shoppinglist#getId()}
      * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/items
      */
     public static String listitems(int userId, String listId) {
@@ -186,6 +217,9 @@ public class Endpoints {
     }
 
     /**
+     * @param userId A {@link User#getUserId()}
+     * @param listId A {@link Shoppinglist#getId()}
+     * @param itemId A {@link ShoppinglistItem#getId()}
      * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}
      */
     public static String listitem(int userId, String listId, String itemId) {
@@ -193,6 +227,9 @@ public class Endpoints {
     }
 
     /**
+     * @param userId A {@link User#getUserId()}
+     * @param listId A {@link Shoppinglist#getId()}
+     * @param itemId A {@link ShoppinglistItem#getId()}
      * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified
      */
     public static String listitemModifiedById(int userId, String listId, String itemId) {
@@ -200,6 +237,7 @@ public class Endpoints {
     }
 
     /**
+     * @param payloadId A payload id
      * @return /v2/push/payloads/{payload_id}
      */
     public static String pushPayload(String payloadId) {

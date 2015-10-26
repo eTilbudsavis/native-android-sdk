@@ -43,7 +43,7 @@ public interface Cache {
 
         /**
          * Returns true if the Item is still valid.
-         * <p/>
+         *
          * this is based on the time to live factor
          *
          * @return

@@ -82,7 +82,7 @@ public class ListUtils {
      * the order of a list should look be. This method does <b>not</b> update
      * the objects (as in {@link ShoppinglistItem#getPreviousId() previous_id}
      * isn't updated automatically).
-     * <p/>
+     *
      * <p>There is no requirement to use this sorting method. This is only meant
      * as a nice to have.</p>
      *

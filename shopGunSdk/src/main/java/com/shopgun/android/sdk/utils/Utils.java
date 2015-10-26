@@ -327,9 +327,9 @@ public final class Utils {
     /**
      * <p>Method for rounding the time (date in milliseconds) down to the nearest second. This is necessary when
      * comparing timestamps between the server and client, as the server uses seconds, and timestamps will rarely match
-     * as expected otherwise.<p>
-     * <p/>
-     * 1394021345625 -> 1394021345000
+     * as expected otherwise.</p>
+     *
+     * <code>1394021345625 -&gt; 1394021345000</code>
      *
      * @param date A date to round
      */
@@ -343,7 +343,7 @@ public final class Utils {
 
     /**
      * <p>Method for converting a size (in bytes) into a human readable format.</p>
-     * <p/>
+     *
      * <table style="text-align: right; border: #000000 solid 1px ">
      * <tr><th>input</th>	<th>SI</th>			<th>BINARY</th></tr>
      * <tr><td>0</td>		<td>0 B</td>		<td>0 B</td></tr>
@@ -351,7 +351,7 @@ public final class Utils {
      * <tr><td>1023</td>	<td>1.0 kB</td>		<td>1023 B</td></tr>
      * <tr><td>1024</td>	<td>1.0 kB</td>		<td>1.0 KiB</td></tr>
      * </table>
-     * <p/>
+     *
      * <p>Same system as above for larger values.</p>
      *
      * @param bytes A number of bytes to convert
