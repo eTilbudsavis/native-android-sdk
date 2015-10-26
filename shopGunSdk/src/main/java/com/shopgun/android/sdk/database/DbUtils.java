@@ -187,8 +187,10 @@ public class DbUtils {
     }
 
     /**
-     * SDK default mapping between int and boolean.<br/><br/>
-     * returns <code>i == 1</code> so 1 is <code>true</code>, and all else is <code>false</code>
+     * SDK default mapping between int and boolean.
+     * <p>
+     *     returns <code>i == 1</code> so 1 is <code>true</code>, and all else is <code>false</code>
+     * </p>
      * @param i The integer to convert
      * @return A boolean value
      */
@@ -197,8 +199,10 @@ public class DbUtils {
     }
 
     /**
-     * SDK default mapping between int and boolean.<br/><br/>
-     * <code>true</code> returns 1, <code>false</code> returns 0;
+     * SDK default mapping between int and boolean.
+     * <p>
+     *     <code>true</code> returns 1, <code>false</code> returns 0;
+     * </p>
      *
      * @param b The boolean to convert
      * @return An integer
@@ -208,8 +212,8 @@ public class DbUtils {
     }
 
     /**
-     * SDK default mapping between string and boolean.<br/><br/>
-     * <code>true</code> returns 1, <code>null</code> and <code>false</code> returns 0;
+     * SDK default mapping between string and boolean.
+     * <p><code>true</code> returns 1, <code>null</code> and <code>false</code> returns 0;</p>
      *
      * @param b The Boolean to convert
      * @return A String

@@ -40,7 +40,7 @@ public interface SyncState<T> {
     /**
      * Set a new {@link SyncState} for this object.
      *
-     * @param state A {@link SyncState} (where state >= {@link SyncState#TO_SYNC} && state <= {@link SyncState#ERROR})
+     * @param state A {@link SyncState} (where state &gt;= {@link SyncState#TO_SYNC} &amp;&amp; state &lt;= {@link SyncState#ERROR})
      * @return
      */
     public T setState(int state);

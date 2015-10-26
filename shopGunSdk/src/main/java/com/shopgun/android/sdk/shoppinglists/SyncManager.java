@@ -72,7 +72,6 @@ import java.util.Stack;
  * <p>
  * Notifications about {@link Shoppinglist} and {@link ShoppinglistItem}
  * changes, are relayed through the subscriber system in the {@link ListManager}.
- * </p>
  *
  * <p>
  * There are four types of synchronization that will be performed:
@@ -109,12 +108,9 @@ import java.util.Stack;
  * </li>
  * </ul>
  *
- * </p>
- *
  * <p>
  * When {@link #onStop()} is triggered, all local pending changes are pushed to
  * the API if possible to ensure a correct state on the server (and other devices).
- * </p>
  */
 public class SyncManager {
 
@@ -296,7 +292,6 @@ public class SyncManager {
      * <ul>
      * 		<li>the {@link SyncManager} having performed the first sync cycle, and </li>
      * </ul>
-     * </p>
      * @return True if the first sync is complete, or there is no user to sync.
      */
     public boolean hasFirstSync() {
@@ -305,12 +300,14 @@ public class SyncManager {
 
     /**
      * Method for forcing a new synchronization iteration.
-     * <p>This method will trigger the synchronization loop, so it's essentially
-     * also the method for starting the {@link SyncManager} sync loop</p>
+     * <p>
+     *     This method will trigger the synchronization loop, so it's essentially
+     *     also the method for starting the {@link SyncManager} sync loop
      *
-     * <p>This method should only be used in special cases, as the
-     * synchronization is (within reasonably time intervals) being handled
-     * automatically by the {@link SyncManager}</p>
+     * <p>
+     *     This method should only be used in special cases, as the
+     *     synchronization is (within reasonably time intervals) being handled
+     *     automatically by the {@link SyncManager}
      */
     public void forceSync() {
         // First make sure, that we do not leak memory by posting the runnable multiple times
@@ -320,7 +317,7 @@ public class SyncManager {
 
     /**
      * Method to call on all onResume events.
-     * <p>This is implicitly handled by the {@link ShopGun} instance</p>
+     * <p>This is implicitly handled by the {@link ShopGun} instance
      */
     public void onStart() {
         mDatabase.open();
@@ -330,7 +327,7 @@ public class SyncManager {
 
     /**
      * Method to call on all onPause events.
-     * <p>This is implicitly handled by the {@link ShopGun} instance</p>
+     * <p>This is implicitly handled by the {@link ShopGun} instance
      */
     public void onStop() {
         mDatabase.close();
@@ -343,7 +340,7 @@ public class SyncManager {
     /**
      * Set synchronization interval for {@link Shoppinglist}, and {@link ShoppinglistItem}.
      *
-     * <p>Also time must be greater than or equal to 3000 (milliseconds)</p>
+     * <p>Also time must be greater than or equal to 3000 (milliseconds)
      * @param time A synchronization interval in milliseconds
      */
     public void setSyncSpeed(int time) {
@@ -359,10 +356,10 @@ public class SyncManager {
      *
      * <p>If true, the {@link SyncManager} ensures the merging of any
      * (non-empty) "offline" lists, into a new "online" user's
-     * {@link Shoppinglist shoppinglists}, on the first completed sync cycle.</p>
+     * {@link Shoppinglist shoppinglists}, on the first completed sync cycle.
      * <p>
      * (a user is considered a "new" if he/she haven't got any lists on the
-     * server already)</p>
+     * server already)
      *
      * @param migrate {@code true} if to do automatic migration of offline
      *                 {@link Shoppinglist shoppinglists}, else {@code false}

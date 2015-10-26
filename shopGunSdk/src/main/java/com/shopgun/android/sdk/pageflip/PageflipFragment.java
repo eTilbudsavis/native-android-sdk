@@ -209,6 +209,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
      * Creates a new instance of {@link PageflipFragment}, to replace or insert into a current layout.
      * @param c A {@link Catalog} to show
      * @param page The first page to display
+     * @param config A ReaderConfiguration
      * @return A Fragment
      */
     public static PageflipFragment newInstance(Catalog c, int page, ReaderConfig config) {

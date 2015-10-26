@@ -41,10 +41,11 @@ public class ShopGunEvent {
 
     /**
      * Get the type of event.
-     * <br/>
-     * <br/>
-     * This is equavelent to calling {@link Class#getSimpleName()}
-     * @return
+     *
+     * <p>
+     *     This is equavelent to calling {@link Class#getSimpleName()}
+     * </p>
+     * @return The type of event
      */
     public String getType() {
         return getClass().getSimpleName();

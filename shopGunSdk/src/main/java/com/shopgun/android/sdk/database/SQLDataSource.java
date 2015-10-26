@@ -80,12 +80,14 @@ public class SQLDataSource {
     /**
      * Get the instance of the {@link SQLiteDatabase}. The DB will be created if it haven't already
      * been instantiated. And the reference count will be incremented, ensuring that the SDK will not
-     * be able to close any connections until your reference is released again.<br/><br/>
+     * be able to close any connections until your reference is released again.
      *
+     * <p>
      * <b>IMPORTANT: </b> You must call {@link SQLDataSource#releaseDb()} once your DB transaction finishes.
      * So for every call to {@link SQLDataSource#acquireDb()} you must at some point call
      * {@link SQLDataSource#releaseDb()} (a one to one mapping)
      * , or we are going to start leaking memory.
+     * </p>
      * @return A {@link SQLiteDatabase}
      */
     protected synchronized SQLiteDatabase acquireDb() {

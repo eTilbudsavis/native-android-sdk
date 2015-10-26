@@ -150,6 +150,7 @@ public class PageflipViewPager extends ViewPager {
 
     /**
      * Set the factor by which the duration will change
+     * @param scrollFactor A scrollFactor
      */
     public void setScrollDurationFactor(double scrollFactor) {
         mScroller.setScrollDurationFactor(scrollFactor);
@@ -173,6 +174,7 @@ public class PageflipViewPager extends ViewPager {
 
         /**
          * Set the factor by which the duration will change
+         * @param scrollFactor A scrollFactor
          */
         public void setScrollDurationFactor(double scrollFactor) {
             mScrollFactor = scrollFactor;

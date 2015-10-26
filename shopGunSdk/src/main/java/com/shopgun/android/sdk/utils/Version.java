@@ -1,11 +1,11 @@
 package com.shopgun.android.sdk.utils;
 
 /**
- * Version class is used for easier migration of various features in the SDK.<br/><br/>
+ * <p>Version class is used for easier migration of various features in the SDK.</p>
  *
- * The general design of Version is based on Semantic Versioning (http://semver.org/).<br/><br/>
+ * <p>The general design of Version is based on Semantic Versioning (http://semver.org/).</p>
  *
- * The version is stored as follows: major*MASK_MAJOR + minor*MASK_MINOR + patch
+ * <p>The version is stored as follows: major*MASK_MAJOR + minor*MASK_MINOR + patch</p>
  *
  */
 public class Version {

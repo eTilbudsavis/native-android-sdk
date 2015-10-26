@@ -67,140 +67,140 @@ public class Endpoints {
     public static final String SHOPPINGLIST_OFFERS = "/v2/shoppinglists/offers";
 
     /**
-     * /v2/offers/{offer_id}
+     * @return /v2/offers/{offer_id}
      */
     public static String offerId(String offerId) {
         return String.format("/v2/offers/%s", offerId);
     }
 
     /**
-     * /v2/stores/{store_id}
+     * @return /v2/stores/{store_id}
      */
     public static String storeId(String storeId) {
         return String.format("/v2/stores/%s", storeId);
     }
 
     /**
-     * /v2/dealers/{dealer_id}
+     * @return /v2/dealers/{dealer_id}
      */
     public static String dealerId(String dealerId) {
         return String.format("/v2/dealers/%s", dealerId);
     }
 
     /**
-     * /v2/catalogs/{catalog_id}
+     * @return /v2/catalogs/{catalog_id}
      */
     public static String catalogId(String catalogId) {
         return String.format("/v2/catalogs/%s", catalogId);
     }
 
     /**
-     * /v2/catalogs/{catalog_id}/pages
+     * @return /v2/catalogs/{catalog_id}/pages
      */
     public static String catalogPages(String catalogId) {
         return String.format("/v2/catalogs/%s/pages", catalogId);
     }
 
     /**
-     * /v2/catalogs/{catalog_id}/hotspots
+     * @return /v2/catalogs/{catalog_id}/hotspots
      */
     public static String catalogHotspots(String catalogId) {
         return String.format("/v2/catalogs/%s/hotspots", catalogId);
     }
 
     /**
-     * /v2/catalogs/{catalog_id}/collect
+     * @return /v2/catalogs/{catalog_id}/collect
      */
     public static String catalogCollect(String catalogId) {
         return String.format("/v2/catalogs/%s/collect", catalogId);
     }
 
     /**
-     * /v2/offers/{offer_id}/collect
+     * @return /v2/offers/{offer_id}/collect
      */
     public static String offerCollect(String offerId) {
         return String.format("/v2/offers/%s/collect", offerId);
     }
 
     /**
-     * /v2/stores/{offer_id}/collect
+     * @return /v2/stores/{offer_id}/collect
      */
     public static String storeCollect(String storeId) {
         return String.format("/v2/stores/%s/collect", storeId);
     }
 
     /**
-     * /v2/users/{user_id}/facebook
+     * @return /v2/users/{user_id}/facebook
      */
     public static String facebook(int userId) {
         return String.format("/v2/users/%s/facebook", userId);
     }
 
     /**
-     * /v2/users/{user_id}/shoppinglists
+     * @return /v2/users/{user_id}/shoppinglists
      */
     public static String lists(int userId) {
         return String.format("/v2/users/%s/shoppinglists", userId);
     }
 
     /**
-     * /v2/users/{user_id}/shoppinglists/{list_uuid}
+     * @return /v2/users/{user_id}/shoppinglists/{list_uuid}
      */
     public static String list(int userId, String listId) {
         return String.format("/v2/users/%s/shoppinglists/%s", userId, listId);
     }
 
     /**
-     * /v2/users/{user_id}/shoppinglists/{list_uuid}/modified
+     * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/modified
      */
     public static String listModified(int userId, String listId) {
         return String.format("/v2/users/%s/shoppinglists/%s/modified", userId, listId);
     }
 
     /**
-     * /v2/users/{user_id}/shoppinglists/{list_uuid}/empty
+     * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/empty
      */
     public static String listEmpty(int userId, String listId) {
         return String.format("/v2/users/%s/shoppinglists/%s/empty", userId, listId);
     }
 
     /**
-     * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares
+     * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/shares
      */
     public static String listShares(int userId, String listId) {
         return String.format("/v2/users/%s/shoppinglists/%s/shares", userId, listId);
     }
 
     /**
-     * /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email}
+     * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email}
      */
     public static String listShareEmail(int userId, String listId, String email) {
         return String.format("/v2/users/%s/shoppinglists/%s/shares/%s", userId, listId, Utils.encode(email, "UTF-8"));
     }
 
     /**
-     * /v2/users/{user_id}/shoppinglists/{list_uuid}/items
+     * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/items
      */
     public static String listitems(int userId, String listId) {
         return String.format("/v2/users/%s/shoppinglists/%s/items", userId, listId);
     }
 
     /**
-     * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}
+     * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}
      */
     public static String listitem(int userId, String listId, String itemId) {
         return String.format("/v2/users/%s/shoppinglists/%s/items/%s", userId, listId, itemId);
     }
 
     /**
-     * /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified
+     * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/items/{item_uuid}/modified
      */
     public static String listitemModifiedById(int userId, String listId, String itemId) {
         return String.format("/v2/users/%s/shoppinglists/%s/items/%s/modified", userId, listId, itemId);
     }
 
     /**
-     * /v2/push/payloads/{payload_id}
+     * @return /v2/push/payloads/{payload_id}
      */
     public static String pushPayload(String payloadId) {
         return String.format("/v2/push/payloads/%s", payloadId);
