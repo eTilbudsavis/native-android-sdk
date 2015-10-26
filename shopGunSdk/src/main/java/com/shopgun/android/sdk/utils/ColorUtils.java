@@ -17,6 +17,8 @@
 package com.shopgun.android.sdk.utils;
 
 import android.graphics.Color;
+import android.support.annotation.ColorInt;
+import android.support.annotation.IntRange;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.palette.MaterialColor;
@@ -84,8 +86,13 @@ public class ColorUtils {
     /**
      * Set the alpha component of {@code color} to be {@code alpha}.
      * <p>Wrapper for {@link android.support.v4.graphics.ColorUtils#setAlphaComponent(int, int)}</p>
+     * @param color A color
+     * @param alpha The new alpha value for the color, in the range 0 - 255.
+     * @return A the given {@code color}, with the given {@code alpha}
      */
-    public static int setAlphaComponent(int color, int alpha) {
+    @ColorInt
+    public static int setAlphaComponent(@ColorInt int color,
+                                        @IntRange(from = 0x0, to = 0xFF) int alpha) {
         return android.support.v4.graphics.ColorUtils.setAlphaComponent(color, alpha);
     }
 
@@ -94,6 +101,8 @@ public class ColorUtils {
      *
      * Formula defined here: http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
      * <p>Wrapper for {@link android.support.v4.graphics.ColorUtils#calculateLuminance(int)}</p>
+     * @param color A color to test
+     * @return the luminance of a color
      */
     public static double calculateLuminance(int color) {
         return android.support.v4.graphics.ColorUtils.calculateLuminance(color);
@@ -106,6 +115,9 @@ public class ColorUtils {
      * Formula defined
      * <a href="http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef">here</a>.
      * <p>Wrapper for {@link android.support.v4.graphics.ColorUtils#calculateContrast(int, int)}</p>
+     * @param foreground A color
+     * @param background A color
+     * @return the contrast ratio between {@code foreground} and {@code background}.
      */
     public static double calculateContrast(int foreground, int background) {
         return android.support.v4.graphics.ColorUtils.calculateContrast(foreground, background);
@@ -117,11 +129,11 @@ public class ColorUtils {
      * have a contrast value of at least {@code minContrastRatio} when compared to
      * {@code background}.
      *
+     * <p>Wrapper for {@link android.support.v4.graphics.ColorUtils#calculateMinimumAlpha(int, int, float)}</p>
      * @param foreground       the foreground color.
      * @param background       the background color. Should be opaque.
      * @param minContrastRatio the minimum contrast ratio.
      * @return the alpha value in the range 0-255, or -1 if no value could be calculated.
-     * <p>Wrapper for {@link android.support.v4.graphics.ColorUtils#calculateMinimumAlpha(int, int, float)}</p>
      */
     public static int calculateMinimumAlpha(int foreground, int background, float minContrastRatio) {
         return android.support.v4.graphics.ColorUtils.calculateMinimumAlpha(foreground, background, minContrastRatio);

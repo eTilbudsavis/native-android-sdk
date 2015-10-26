@@ -71,15 +71,14 @@ public enum Environment {
 
     /**
      * Apply the environment to a given path/url.
-     * <p>
-     * The {@link Environment} will only be applied, if the url given is only the path of an url.
-     * In a {@link Environment#PRODUCTION PRODUCTION} environment we will translate as follows:
+     * <p> The {@link Environment} will only be applied, if the url given is only the path of an url.
+     * In a {@link Environment#PRODUCTION PRODUCTION} environment we will translate as follows:</p>
+     *
      * <ul>
      * <li>"/v2/catalogs" -&gt; "https://api.etilbudsavis.dk/v2/catalogs"
      * <li><code>null</code> -&gt; "https://api.etilbudsavis.dk/"
      * <li>"" -&gt; "https://api.etilbudsavis.dk/"
      * </ul>
-     * </p>
      *
      * @param path The path to apply the given Environment to
      * @return A url

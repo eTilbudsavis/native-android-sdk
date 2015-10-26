@@ -56,6 +56,8 @@ public class Json {
      * Searches the JSONObject for the key and returns the matching value if it exists.
      * @param object An object to get data from
      * @param key A key to map to a value
+     * @param defValue Value to return if key does not exist or if a null
+     *     value is associated with the given key.
      * @return Returns the value mapped to the key if it exists, coercing it if necessary else null.
      */
     public static JSONArray getArray(JSONObject object, String key, JSONArray defValue) {
@@ -84,7 +86,8 @@ public class Json {
      * Searches the {@code object} for the {@code key} and returns the matching value if it exists.
      * @param object An object to get data from
      * @param key A key to map to a value
-     * @param defValue A default value to return, if {@code key} doesn't exist or causes a JSONException
+     * @param defValue Value to return if key does not exist or if a null
+     *     value is associated with the given key.
      * @return Returns the value mapped to the key if it exists, coercing it if necessary else {@code defValue}.
      */
     public static JSONObject getObject(JSONObject object, String key, JSONObject defValue) {
@@ -113,7 +116,8 @@ public class Json {
      * Returns the value at {@code index} if it exists and is a {@code JSONObject}.
      * @param array An JSONArray to get data from
      * @param index The index to get
-     * @param defValue A default value to return, if {@code index} doesn't exist or causes a JSONException
+     * @param defValue Value to return if key does not exist or if a null
+     *     value is associated with the given key.
      * @return Returns the value mapped to the {@code index} if it exists, coercing it if necessary else {@code defValue}.
      */
     public static JSONObject getObject(JSONArray array, int index, JSONObject defValue) {
@@ -142,7 +146,8 @@ public class Json {
      * Searches the JSONObject for the key and returns the matching value if it exists.
      * @param object An object to get data from
      * @param key A key to map to a value
-     * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+     * @param defValue Value to return if key does not exist or if a null
+     *     value is associated with the given key.
      * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
      */
     public static String valueOf(JSONObject object, String key, String defValue) {
@@ -158,7 +163,8 @@ public class Json {
      * Searches the JSONObject for the key and returns the matching value if it exists.
      * @param object An object to get data from
      * @param key A key to map to a value
-     * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+     * @param defValue Value to return if key does not exist or if a null
+     *     value is associated with the given key.
      * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
      */
     public static int valueOf(JSONObject object, String key, int defValue) {
@@ -174,7 +180,8 @@ public class Json {
      * Searches the JSONObject for the key and returns the matching value if it exists.
      * @param object An object to get data from
      * @param key A key to map to a value
-     * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+     * @param defValue Value to return if key does not exist or if a null
+     *     value is associated with the given key.
      * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
      */
     public static double valueOf(JSONObject object, String key, double defValue) {
@@ -190,7 +197,8 @@ public class Json {
      * Searches the JSONObject for the key and returns the matching value if it exists.
      * @param object An object to get data from
      * @param key A key to map to a value
-     * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+     * @param defValue Value to return if key does not exist or if a null
+     *     value is associated with the given key.
      * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
      */
     public static float valueOf(JSONObject object, String key, float defValue) {
@@ -207,7 +215,8 @@ public class Json {
      * Searches the JSONObject for the key and returns the matching value if it exists.
      * @param object An object to get data from
      * @param key A key to map to a value
-     * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+     * @param defValue Value to return if key does not exist or if a null
+     *     value is associated with the given key.
      * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
      */
     public static long valueOf(JSONObject object, String key, long defValue) {
@@ -223,7 +232,8 @@ public class Json {
      * Searches the JSONObject for the key and returns the matching value if it exists.
      * @param object An object to get data from
      * @param key A key to map to a value
-     * @param defValue A default value to return, if key doesn't exist or causes a JSONException
+     * @param defValue Value to return if key does not exist or if a null
+     *     value is associated with the given key.
      * @return Returns the value mapped to the key if it exists, coercing it if necessary else defValue.
      */
     public static boolean valueOf(JSONObject object, String key, boolean defValue) {
@@ -261,6 +271,7 @@ public class Json {
      * by the API and they will be removed, when performing toString() on the object, if the value
      * mapped to the key is null.
      * @param object An object to check for null
+     * @param <T> Any type
      * @return The object, or JSONObject.NULL
      */
     public static <T> Object nullCheck(T object) {
@@ -270,6 +281,8 @@ public class Json {
     /**
      * This method calls {@link Json#colorValueOf(JSONObject, String, int)},
      * with the defValue set to Color.BLACK.
+     * @param object An object to get data from
+     * @param key A key to map to a value
      */
     public static int colorValueOf(JSONObject object, String key) {
         return colorValueOf(object, key, Color.BLACK);

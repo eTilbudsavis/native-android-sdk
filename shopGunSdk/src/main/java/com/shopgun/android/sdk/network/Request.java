@@ -107,7 +107,10 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         mCacheHit = false;
     }
 
-    /** Adds event to a request, for later debugging purposes */
+    /**
+     * Adds event to a request, for later debugging purposes
+     * @param event An event
+     */
     public void addEvent(String event) {
         mEventLog.add(event);
     }
@@ -125,7 +128,10 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         mCanceled = true;
     }
 
-    /** Returns true if this request has been canceled. */
+    /**
+     * Returns true if this request has been canceled.
+     * @return <code>true</code> if the request is canceled, else <code>false</code>
+     */
     public boolean isCanceled() {
         return mCanceled;
     }
@@ -141,6 +147,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Method for marking a request as finished
+     * @param reason A reason for finishing the request
      * @return this object
      */
     public Request finish(String reason) {
@@ -195,15 +202,18 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /**
      * Set the timeout value for this request.
      * <p>The timeout will be the same for connecting, and for reading data</p>
-     * @param timeout
-     * @return
+     * @param timeout A timeout in millis
+     * @return this object
      */
     public Request setTimeOut(int timeout) {
         mTimeout = timeout;
         return this;
     }
 
-    /** Returns a list of headers for this request. */
+    /**
+     * Returns a list of headers for this request.
+     * @return A map of headers
+     */
     public Map<String, String> getHeaders() {
         return mHeaders;
     }
@@ -218,6 +228,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Return the method for this request.  Can be one of the values in {@link Method}.
+     * @return A method
      */
     public Method getMethod() {
         return mMethod;
@@ -364,7 +375,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Enable or disable the usage of location data in this request.<br>
      * Please use with care, <b>most API v2 endpoints require location data</b>
      * @param useLocation true to include, and false exclude location data in request parameters
-     * @return
+     * @return this object
      */
     public Request setUseLocation(boolean useLocation) {
         mUseLocation = useLocation;
@@ -402,8 +413,8 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * as HTTP query parameters to the URL, when the SDK executes the request.
      * Therefore you should <b>not</b> do nested structures, only simple key-value-pairs.
      * This is <b>not the same as appending a body</b> to the request, when doing a PUT or POST request.
-     * @param query
-     * @return
+     * @param query A map of parameters to bundle along with this request
+     * @return this object
      */
     public Request putParameters(Map<String, String> query) {
         if (query != null) {
@@ -435,7 +446,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Set a sequence number for when the request was received by
      * {@link RequestQueue RequestQueue}
      * in order to partially determine the order of execution of requests.
-     * @param seq
+     * @param seq A sequence number
      */
     protected void setSequence(int seq) {
         mSequence = seq;
@@ -451,7 +462,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Get content type of the body. Useful for setting headers.
-     * @return
+     * @return A string
      */
     public String getBodyContentType() {
         return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
@@ -532,15 +543,15 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /**
      * Returns a complete printable representation of this Request, e.g:
      *
-     * <li>GET: https://api.etilbudsavis.dk/v2/catalogs/{catalog_id}?param1=value1&amp;param2=value2</li>
+     * <code>GET: https://api.etilbudsavis.dk/v2/catalogs/{catalog_id}?param1=value1&amp;param2=value2</code>
      *
      * <p>The SDK/API parameters are not added to the
      * {@link Request#getParameters()}  query parameters}, before the request
      * is handed to the {@link RequestQueue}. So if you want to have the SDK/API
      * parameters appended as well in the string do:</p>
-     * <li>ShopGun.getInstance().add(Request)</li>
+     * <code>ShopGun.getInstance().add(Request)</code>
      * <p>and then call: </p>
-     * <li>toString()</li>
+     * <code>toString()</code>
      */
     @Override
     public String toString() {
