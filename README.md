@@ -11,9 +11,11 @@ If you wish to try our demo app, just clone and run it. We've included an API ke
 
 Download
 --------
-Grab it with Gradle:
+Grab it with Gradle, by adding this to your module's `build.gradle`:
 ```groovy
-compile 'com.shopgun.android:sdk:3.1.0-beta'
+dependencies {
+	compile 'com.shopgun.android:sdk:3.1.0-beta'
+}
 ```
 or clone from github, and add this to your project's `settings.gradle`:
 ```groovy
