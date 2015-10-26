@@ -1,25 +1,29 @@
 ShopGun Android SDK
-===
+===================
 
-This guide is out of date
-===
-
-We are working on a new version, please stay tuned. Until then you can refer to the Demo App, or email us with questions :-) 
-
-<!-- 
 The simple solution to querying for ShopGun-data.
 
-[Before you begin](#before-you-begin)
+API key and secret
+-----------------
+You will need to get an *API key* and *API secret* from our [developer site] (look for "Manage Apps").
 
-[Getting Started](#getting-started)
+If you wish to try our demo app, just clone and run it. We've included an API key and secret, that will work straight out of the box. But the key only provides a limited amount of quereis pr day so don't use it in production.
 
-## <a name="before-you-begin"></a>Before you begin
-This is a short guide to guide you through our Android SDK. We will assume you are using [eclipse] and the [Android Development Tools] plugin. 
+Download
+--------
+Grab it with Gradle:
+```groovy
+compile 'com.shopgun.android:sdk:3.1.0-beta'
+```
+or clone from github, and add this to your project's `settings.gradle`:
+```groovy
+include ':shopGunSdk'
+project(':shopGunSdk').projectDir=new File('/path/to/shopgun-android-sdk/shopGunSdk')
+```
 
-To get started you'll need to:
 
-* Get an *API key* and *API secret* from our [developer site] (look for "Manage Apps").
-* Clone the [Native Android SDK] repository.
+
+<!-- 
 
 The SDK Demo app included in the repo demonstrates some basic features, some of which are also described in this README. If you want to get started quickly, just start a new Android Application Project and import the ETA SDK into Eclipse as a library. 
 
@@ -31,12 +35,10 @@ The SDK Demo app included in the repo demonstrates some basic features, some of 
 ## Need to know
 * [Requests](#first-request)
 * [Pageflip](#pageflip)
-* [ImageLoader](#imageloader)
 
 ## Managers
 * [SessionManager](#sessionmanager)
 * [ListManager](#listmanager)
-* [LocationManager](#locationmanager)
 
 ## Last but not least
 * [Models](#models)
