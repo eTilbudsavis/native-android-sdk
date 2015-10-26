@@ -34,7 +34,6 @@ public class NetworkResponse {
      * @param statusCode the HTTP status code
      * @param data Response body
      * @param headers Headers returned with this response, or null for none
-     * @param notModified True if the server returned a 304 and the data was already in cache
      */
     public NetworkResponse(int statusCode, byte[] data, Map<String, String> headers) {
         this.statusCode = statusCode;

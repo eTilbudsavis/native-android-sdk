@@ -31,31 +31,32 @@ public class Validator {
     //           \d+\.\d+\.\d+(\-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?
 
     /**
-     * Checks if a given integer is a valid birth year.<br>
+     * Checks if a given integer is a valid birth year.
      * Requirements: birth year is in the span 1900 - 2015.
      *
-     * @param birthyear
-     * @return
+     * @param birthyear An int to check
+     * @return {@code true} if {@code birthyear} is valid, else {@code false}
      */
     public static boolean isBirthyearValid(Integer birthyear) {
         return birthyear >= 1900 && (birthyear <= 2015);
     }
 
     /**
-     * A very naive implementation of email validation.<br>
-     * Requirement:
-     * <li>Email != null</li>
-     * <li>must contain a single '@' char</li>
-     * <li>At least one char before and after the '@'</li>
-     * <li>email.trim() must be equal to email</li>
-     * <br />
-     * But why not just use an email RegEx, like android.util.Patterns.EMAIL_ADDRESS?
-     * <br />
-     * Simple: it doesn't comply with RFC 2822. <br />
-     * Our {@link Validator} doesn't either. But it's better to let the API decide if it's valid.
+     * <p>A very naive implementation of email validation. Requirement:</p>
+     * <ul>
+     *      <li>Email != null</li>
+     *      <li>must contain a single '@' char</li>
+     *      <li>At least one char before and after the '@'</li>
+     *      <li>email.trim() must be equal to email</li>
+     * </ul>
      *
-     * @param email to check
-     * @return true if email is valid, else false
+     * <p>But why not just use an email RegEx, like android.util.Patterns.EMAIL_ADDRESS?</p>
+     *
+     * <p>Simple: it doesn't comply with RFC 2822. But neither does uur {@link Validator}.
+     * We do something better, we'll let the API decide if it's valid.</p>
+     *
+     * @param email A string to check
+     * @return {@code true} if email is valid, else {@code false}
      */
     public static boolean isEmailValid(String email) {
 
@@ -76,10 +77,10 @@ public class Validator {
 
     /**
      * Checks if a given string is a valid gender.<br>
-     * Requirements: String is either 'male' or 'female' (not case sensitive).
+     * Requirements: String is either {@code 'male'} or {@code 'female'} (not case sensitive).
      *
-     * @param birthyear
-     * @return
+     * @param gender A string of either {@code 'male'} or {@code 'female'}
+     * @return {@code true} if the given string is a valid gender, else {@code false}
      */
     public static boolean isGenderValid(String gender) {
         if (gender != null) {
