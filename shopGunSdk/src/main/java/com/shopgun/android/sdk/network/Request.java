@@ -516,7 +516,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     }
 
     /**
-     * Get the {@link RequestDebugger} assiciated with this request
+     * Get the {@link RequestDebugger} associated with this request
      * @return A {@link RequestDebugger}, or null
      */
     public RequestDebugger getDebugger() {
@@ -525,7 +525,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Set a debugger to perform debugging when {@link Request} finishes.
-     * @see {@link SgnLog SgnLog} for detalis about SDK Log.d output
+     *
      * @param debugger A {@link RequestDebugger} to print/debug the {@link Request}
      * @return this object
      */

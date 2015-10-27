@@ -52,7 +52,7 @@ public abstract class FragmentStatelessPagerAdapter extends FragmentStatePagerAd
     /**
      * Clear the current state of the {@link FragmentStatelessPagerAdapter}.
      *
-     * <p>Technically the state is temporarily stored in {@link FragmentStatePagerAdapter},
+     * <p>Technically the state is temporarily stored in FragmentStatePagerAdapter,
      * but the state will be cleared when {@link FragmentStatelessPagerAdapter#saveState()}
      * is called.</p>
      */

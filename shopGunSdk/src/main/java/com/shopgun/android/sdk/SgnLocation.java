@@ -305,7 +305,7 @@ public class SgnLocation extends Location {
      *
      * @param store to measure distance to
      * @return the approximate distance in meters
-     * @see {@link SgnLocation#distanceTo(Location)}
+     * @see SgnLocation#distanceTo(Location)
      */
     public int distanceTo(Store store) {
         Location tmp = new Location(SgnLocation.SHOPGUN_PROVIDER);
