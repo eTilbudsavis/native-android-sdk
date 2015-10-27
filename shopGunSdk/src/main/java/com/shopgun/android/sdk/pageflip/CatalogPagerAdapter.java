@@ -18,7 +18,6 @@ package com.shopgun.android.sdk.pageflip;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.view.ViewGroup;
 
 import com.shopgun.android.sdk.model.Catalog;
 
