@@ -266,9 +266,9 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
      * <p>App version should follow http://semver.org/ specifications (MAJOR.MINOR.PATCH), e.g.:</p>
      *
      * <ul>
-     *      <li> 1.0.0
-     *      <li> 1.0.0-beta
-     *      <li> 1.0.0-rc.1
+     *      <li> 1.0.0 </li>
+     *      <li> 1.0.0-beta </li>
+     *      <li> 1.0.0-rc.1 </li>
      * </ul>
      *
      * @return API key as String
@@ -282,9 +282,9 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
      * <p>App version should follow http://semver.org/ specifications (MAJOR.MINOR.PATCH), e.g.:</p>
      *
      * <ul>
-     *      <li> 1.0.0
-     *      <li> 1.0.0-beta
-     *      <li> 1.0.0-rc.1
+     *      <li> 1.0.0 </li>
+     *      <li> 1.0.0-beta </li>
+     *      <li> 1.0.0-rc.1 </li>
      * </ul>
      * @param appVersion A string
      */

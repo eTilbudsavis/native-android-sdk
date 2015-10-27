@@ -146,10 +146,10 @@ public class SgnLocation extends Location {
      * Returns a JSONObject, with mapped values for, what is needed for an API request:
      *
      * <ul>
-     *      <li>Latitude
-     *      <li>Longitude
-     *      <li>Sensor
-     *      <li>Radius
+     *      <li>Latitude</li>
+     *      <li>Longitude</li>
+     *      <li>Sensor</li>
+     *      <li>Radius</li>
      * </ul>
      * @return The mapped JSONObject
      */

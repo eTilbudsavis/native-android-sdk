@@ -75,9 +75,9 @@ public enum Environment {
      * In a {@link Environment#PRODUCTION PRODUCTION} environment we will translate as follows:</p>
      *
      * <ul>
-     * <li>"/v2/catalogs" -&gt; "https://api.etilbudsavis.dk/v2/catalogs"
-     * <li><code>null</code> -&gt; "https://api.etilbudsavis.dk/"
-     * <li>"" -&gt; "https://api.etilbudsavis.dk/"
+     *      <li>"/v2/catalogs" -&gt; "https://api.etilbudsavis.dk/v2/catalogs"</li>
+     *      <li>{@code null} -&gt; "https://api.etilbudsavis.dk/"</li>
+     *      <li>"" -&gt; "https://api.etilbudsavis.dk/"</li>
      * </ul>
      *
      * @param path The path to apply the given Environment to
