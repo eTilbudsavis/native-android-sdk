@@ -100,7 +100,7 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
      * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Typeahead}
-     * @return A {@link Typeahead}, or {@link null} if {@code object is null}
+     * @return A {@link Typeahead}, or {@code null} if {@code object} is {@code null}
      */
     public static Typeahead fromJSON(JSONObject object) {
         if (object == null) {
@@ -152,15 +152,15 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
     }
 
     /**
-     * Set the offset of this {@link Typeahead}.
-     * @param offset
+     * Set the offset into the {@link #getSubject() subject} before there is a match
+     * @param offset The offset to the match
      */
     public void setOffset(int offset) {
         mOffset = offset;
     }
 
     /**
-     * Get the subject for this Typeahead.
+     * Get the subject for this {@link Typeahead}.
      * @return A {@link String} is subject have been set, else null
      */
     public String getSubject() {
@@ -168,7 +168,8 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
     }
 
     /**
-     * Set the subject of this Typeahead. When subject is set, offset and length is automatically updated as well.
+     * Set the subject of this {@link Typeahead}.
+     * When subject is set, offset and length is automatically updated as well.
      *
      * @param subject A {@link String}
      */
@@ -189,13 +190,15 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
     }
 
     /**
+     *
      * This method inserts a set of custom tags to highlight the parts of the subject that
      * was matched by the API, to a given query. The {@link #getSubject() subject} is then returned
      * as a {@link Spanned} object. This type of object can directly be used in a TextView to create
      * the desired effect.
      *
-     * @return A {@link Spanned} containing the subject, or {@code null} if
-     *          subject id null
+     * @param startTag The definition of the start-tag
+     * @param endTag The definition of the end-tag
+     * @return A {@link Spanned} containing the subject, or {@code null} if subject id null
      */
     public Spanned getHtml(String startTag, String endTag) {
 

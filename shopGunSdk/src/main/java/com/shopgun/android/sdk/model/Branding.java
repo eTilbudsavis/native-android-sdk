@@ -67,7 +67,7 @@ public class Branding implements IJson<JSONObject>, Parcelable {
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
      * @param object A {@link JSONObject} with a valid API v2 structure for a branding
-     * @return A {@link Branding}, or {@link null} if {@code object is null}
+     * @return A {@link Branding}, or {@code null} if {@code object} is {@code null}
      */
     public static Branding fromJSON(JSONObject object) {
         if (object == null) {

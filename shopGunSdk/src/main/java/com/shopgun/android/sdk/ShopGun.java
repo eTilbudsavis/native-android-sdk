@@ -286,7 +286,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
      *      <li> 1.0.0-beta
      *      <li> 1.0.0-rc.1
      * </ul>
-     *
+     * @param appVersion A string
      */
     public void setAppVersion(String appVersion) {
         if (Validator.isAppVersionValid(appVersion)) {

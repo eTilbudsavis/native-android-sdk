@@ -75,7 +75,7 @@ public class Si implements IJson<JSONObject>, Parcelable {
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
      * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Si}
-     * @return A {@link Links}, or {@link null} if {@code object is null}
+     * @return A {@link Links}, or {@code null} if {@code object} is {@code null}
      */
     public static Si fromJSON(JSONObject object) {
         if (object == null) {

@@ -121,7 +121,7 @@ public class Subscription implements IJson<JSONObject>, Parcelable {
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
      * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Subscription}
-     * @return A {@link Subscription}, or {@link null} if {@code object is null}
+     * @return A {@link Subscription}, or {@code null} if {@code object} is {@code null}
      */
     public static Subscription fromJSON(JSONObject object) {
         if (object == null) {

@@ -107,7 +107,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
      * @param object A {@link JSONObject} with a valid API v2 structure for a store
-     * @return A {@link Store}, or {@link null} if {@code object is null}
+     * @return A {@link Store}, or {@code null} if {@code object} is {@code null}
      */
     public static Store fromJSON(JSONObject object) {
         if (object == null) {
@@ -274,7 +274,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
 
     /**
      * Set the latitude for this {@link Store}
-     * @param latitude
+     * @param latitude A latitude for this {@link Store}
      * @return this object
      */
     public Store setLatitude(Double latitude) {
@@ -292,7 +292,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
 
     /**
      * Set the longitude for this {@link Store}
-     * @param longitude
+     * @param longitude A longitude for this {@link Store}
      * @return this object
      */
     public Store setLongitude(Double longitude) {
@@ -365,7 +365,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
 
     /**
      * This is (for now) unused by the API. Please ignore.
-     * @return A string, or <code>null</code>
+     * @return A string, or {@code null}
      */
     public String getContact() {
         return mContact;
@@ -373,6 +373,8 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
 
     /**
      * This is (for now) unused by the API. Please ignore.
+     * @param contact A contact string
+     * @return This object
      */
     public Store setContact(String contact) {
         mContact = contact;
@@ -397,8 +399,8 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
      * @param dealer A {@link Dealer} (preferably related to this store)
      * @return This object
      */
-    public Store setDealer(Dealer d) {
-        mDealer = d;
+    public Store setDealer(Dealer dealer) {
+        mDealer = dealer;
         mDealerId = (mDealer == null ? null : mDealer.getId());
         return this;
     }

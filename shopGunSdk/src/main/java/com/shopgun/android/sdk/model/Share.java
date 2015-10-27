@@ -112,7 +112,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
      * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Share}
-     * @return A {@link Share}, or {@link null} if {@code object is null}
+     * @return A {@link Share}, or {@code null} if {@code object} is {@code null}
      */
     public static Share fromJSON(JSONObject object) {
         if (object == null) {
@@ -183,7 +183,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     /**
      * Set the name of this share
      * @param name A name, not {@code null}
-     * @return
+     * @return This object
      */
     public Share setName(String name) {
         if (name != null) {

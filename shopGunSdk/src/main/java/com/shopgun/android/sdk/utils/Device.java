@@ -45,8 +45,7 @@ public class Device {
     }
 
     /**
-     * Get the build version of the device.<br>
-     * @see {@link #Build.VERSION.RELEASE Build.VERSION.RELEASE}
+     * Get the build version of the device.
      * @return build version
      */
     public static String getBuildVersion() {
@@ -54,8 +53,7 @@ public class Device {
     }
 
     /**
-     * Get the kernel version of this device.<br>
-     * @see {@link #System.getProperty() System.getProperty("os.version")}
+     * Get the kernel version of this device.
      * @return kernel version
      */
     public static String getKernel() {
@@ -90,15 +88,12 @@ public class Device {
     }
 
     /**
-     * Get a concatenated version of:
-     * {@link #getModel() getModel()}, {@link #getBuildVersion() getBuildVersion()}, {@link #getRadio() getRadio()}, {@link #getKernel() getKernel()}
+     * Device[model:%s, android:%s, baseBand:%s, kernel:%s]
      * @return a readable string with device info
      */
     public static String getDeviceInfo() {
-        return "model[" + getModel() +
-                "], android[" + getBuildVersion() +
-                "], baseBand[" + getRadio() +
-                "], kernel[" + getKernel() + "]";
+        String format = "Device[model:%s, android:%s, baseBand:%s, kernel:%s]";
+        return String.format(format, getModel(), getBuildVersion(), getRadio(), getKernel());
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)

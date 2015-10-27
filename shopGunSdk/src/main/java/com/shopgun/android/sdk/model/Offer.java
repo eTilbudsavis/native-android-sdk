@@ -125,7 +125,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
      * @param object A {@link JSONObject} with a valid API v2 structure for an {@code Offer}
-     * @return A {@link Offer}, or {@link null} if {@code object is null}
+     * @return A {@link Offer}, or {@code null} if {@code object} is {@code null}
      */
     public static Offer fromJSON(JSONObject object) {
         if (object == null) {
@@ -374,7 +374,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
     /**
      * Set {@link Links} relevant for this offer
      * @param links {@link Links} relevant for this offer
-     * @return
+     * @return this object
      */
     public Offer setLinks(Links links) {
         mLinks = links;

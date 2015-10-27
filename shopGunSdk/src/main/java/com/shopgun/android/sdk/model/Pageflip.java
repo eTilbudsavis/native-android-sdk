@@ -67,7 +67,7 @@ public class Pageflip implements IJson<JSONObject>, Parcelable {
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
      * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Pageflip}
-     * @return A {@link Pageflip}, or {@link null} if {@code object is null}
+     * @return A {@link Pageflip}, or {@code null} if {@code object} is {@code null}
      */
     public static Pageflip fromJSON(JSONObject object) {
         if (object == null) {

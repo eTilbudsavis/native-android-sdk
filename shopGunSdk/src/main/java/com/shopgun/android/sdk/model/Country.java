@@ -75,7 +75,7 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Parcelable {
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
      * @param object A {@link JSONObject} with a valid API v2 structure for a country
-     * @return A {@link Country}, or {@link null} if {@code object is null}
+     * @return A {@link Country}, or {@code null} if {@code object} is {@code null}
      */
     public static Country fromJSON(JSONObject object) {
         if (object == null) {
@@ -157,7 +157,7 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Parcelable {
     /**
      * Set the URL to a website in which is it possible for the user to 'unsubscribe' them or their
      * household from receiving the physical catalogs.
-     * @param url
+     * @param url A string
      */
     public void setUnsubscribePrintUrl(String url) {
         mUnsubscribeUrl = url;

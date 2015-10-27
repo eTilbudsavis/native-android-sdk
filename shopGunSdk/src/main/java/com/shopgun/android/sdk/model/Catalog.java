@@ -100,7 +100,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
      * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Catalog}
-     * @return A {@link Catalog}, or {@link null} if {@code object is null}
+     * @return A {@link Catalog}, or {@code null} if {@code object} is {@code null}
      */
     public static Catalog fromJSON(JSONObject object) {
         if (object == null) {
@@ -578,6 +578,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     /**
      * Method for setting the {@link HotspotMap} associated with this catalog
      * @param hotspots A {@link HotspotMap} object
+     * @return this object
      */
     public Catalog setHotspots(HotspotMap hotspots) {
         mHotspots = hotspots;

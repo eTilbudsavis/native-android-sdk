@@ -98,7 +98,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
      * @param object A {@link JSONObject} with a valid API v2 structure for a {@code User}
-     * @return A {@link User}, or {@link null} if {@code object is null}
+     * @return A {@link User}, or {@code null} if {@code object} is {@code null}
      */
     public static User fromJSON(JSONObject object) {
         if (object == null) {
@@ -136,24 +136,30 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
     /**
      * Method for finding out if the user is logged in via the API. It is determined
      * on the basis that the {@link #getEmail() email} != null and the
-     * {@link #getUserId() user id} > {@link #NO_USER -1}.
+     * {@link User#getUserId()} &gt; {@link #NO_USER}.
      *
      * <p>It is not a requirement to be logged in, but it does offer some
      * advantages, such as online lists</p>
-     * @return
+     * @return {@code true} if the {@link User} is logged in with a ShopGun account, else {@code false}
      */
     public boolean isLoggedIn() {
         return mEmail != null && getUserId() > NO_USER;
     }
 
+    /**
+     * Get the id of this user
+     * @deprecated Use {@link User#getUserId()}} instead.
+     */
     @Deprecated
     public String getId() {
         return String.valueOf(getUserId());
     }
 
     /**
-     *    @Deprecated Use {@link User#setUserId(int)} instead.
+     * @param id A string
+     * @deprecated Use {@link User#setUserId(int)} instead.
      */
+    @Deprecated
     public User setId(String id) {
         setUserId((id == null) ? NO_USER : Integer.valueOf(id));
         return this;
@@ -201,20 +207,11 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
     /**
      * Get the gender of this user. Gender can be either:
      *
-     * <table border=1>
-     * <tr>
-     * <td>male</td>
-     * 		<td>{@link String} "male"</td>
-     * </tr>
-     * <tr>
-     * 		<td>female</td>
-     * 		<td>{@link String} "female"</td>
-     * </tr>
-     * <tr>
-     * 		<td>unknown</td>
-     * 		<td><code>null</code></td>
-     * </tr>
-     * </table>
+     * <ul>
+     *     <li>"male" for a male user</li>
+     *     <li>"female" for a female user</li>
+     *     <li>{@code null} if gender is unknown</li>
+     * </ul>
      *
      * @return The gender, or <code>null</code>
      */
@@ -224,20 +221,14 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 
     /**
      * Set the gender of the user. Gender can be set to:
-     * <table border=1>
-     * <tr>
-     * <td>male</td>
-     * 		<td>{@link String} "male"</td>
-     * </tr>
-     * <tr>
-     * 		<td>female</td>
-     * 		<td>{@link String} "female"</td>
-     * </tr>
-     * </table>
+     * <ul>
+     *     <li>"male" for a male user</li>
+     *     <li>"female" for a female user</li>
+     * </ul>
      *
-     * It is not allowed to 'reset' gender, to unknown by passing <code>null</code> as argument
+     * It is not allowed to 'reset' gender, to unknown by passing {@code null} as argument
      *
-     * @param gender of either male or female
+     * @param gender Either 'male' or 'female'
      * @return This object
      */
     public User setGender(String gender) {
@@ -252,7 +243,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 
     /**
      * Get the birth year of the user
-     * @return Birth year as an {@link Integer}
+     * @return The birth year of the user
      */
     public int getBirthYear() {
         return mBirthYear;

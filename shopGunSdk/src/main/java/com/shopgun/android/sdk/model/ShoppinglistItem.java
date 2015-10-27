@@ -190,7 +190,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
      * @param object A {@link JSONObject} with a valid API v2 structure for a {@code ShoppinglistItem}
-     * @return A {@link ShoppinglistItem}, or {@link null} if {@code object is null}
+     * @return A {@link ShoppinglistItem}, or {@code null} if {@code object is null}
      */
     public static ShoppinglistItem fromJSON(JSONObject object) {
         if (object == null) {
@@ -279,7 +279,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
      * Get the count.
      * <p>Count represents the physical amount or number of items to get of this
      * ShoppinglistItem, (such as 6 eggs or 500g of flour)</p>
-     * @return
+     * @return This object
      */
     public int getCount() {
         return mCount;
@@ -414,8 +414,8 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
      * The first item to onTransform will have the {@code previous_id}
      * {@link com.shopgun.android.sdk.utils.ListUtils#FIRST_ITEM FIRST_ITEM}, the next item should then
      * point at this items {@link #getId() id}, and so on</p>
-     * @param id An id
-     * @return
+     * @param id A {@link ShoppinglistItem#getId()}
+     * @return This object
      */
     public ShoppinglistItem setPreviousId(String id) {
         mPrevId = id;
@@ -432,6 +432,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 
     /**
      * Set the offer id associated with this item
+     * @param offerId A {@link Offer#getId()}
      * @return This object
      */
     public ShoppinglistItem setOfferId(String offerId) {
@@ -481,8 +482,8 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
      * <p>Meta can be used for any kind of information, that is needed to
      * describe any kind of information regarding this item. It's kind of a
      * 'anything goes' item.</p>
-     * @param meta
-     * @return
+     * @param meta A {@link JSONObject} containing the meta data
+     * @return This object
      */
     public ShoppinglistItem setMeta(JSONObject meta) {
         mMeta = meta == null ? new JSONObject() : meta;
@@ -552,10 +553,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
         return toJSON().toString();
     }
 
-    /**
-     * Compare method, that uses the {@link ShoppinglistItem#getTitle() title}
-     * to compare two items.
-     */
+    @Override
     public int compareTo(ShoppinglistItem another) {
         return TITLE_ASCENDING.compare(this, another);
     }

@@ -176,7 +176,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
     /**
      * A factory method for converting {@link JSONObject} into a POJO.
      * @param object A {@link JSONObject} with a valid API v2 structure for a {@code Shoppinglist}
-     * @return A {@link Shoppinglist}, or {@link null} if {@code object is null}
+     * @return A {@link Shoppinglist}, or {@code null} if {@code object} is {@code null}
      */
     public static Shoppinglist fromJSON(JSONObject object) {
         if (object == null) {
@@ -275,17 +275,15 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
     }
 
     /**
-     * Set the access level for this {@link Shoppinglist}.
-     * <p>
-     * Current valid options are:
+     * Set the access level for this {@link Shoppinglist}. Current valid options are:
      * <ul>
-     * <li> {@link #ACCESS_PRIVATE} </li>
-     * <li> {@link #ACCESS_SHARED} </li>
-     * <li> {@link #ACCESS_PUBLIC} </li>
+     *      <li> {@link #ACCESS_PRIVATE} </li>
+     *      <li> {@link #ACCESS_SHARED} </li>
+     *      <li> {@link #ACCESS_PUBLIC} </li>
      * </ul>
-     * </p>
-     * @param access
-     * @return
+     *
+     * @param access A access string
+     * @return This object
      */
     public Shoppinglist setAccess(String access) {
         mAccess = access;
@@ -373,12 +371,13 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
     /**
      * Set the type of {@link Shoppinglist}
      *
-     * Currently ShopGun are using the two types below, but you are free to
-     * do other types too.
+     * <p>Currently ShopGun are using the two types below, but you are free to
+     * do other types too.</p>
      * <ul>
-     * <li> {@link Shoppinglist#TYPE_SHOPPING_LIST} </li>
-     * <li> {@link Shoppinglist#TYPE_WISH_LIST} </li>
+     *      <li> {@link Shoppinglist#TYPE_SHOPPING_LIST} </li>
+     *      <li> {@link Shoppinglist#TYPE_WISH_LIST} </li>
      * </ul>
+     * @param type A type string
      * @return This object
      */
     public Shoppinglist setType(String type) {
@@ -406,7 +405,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      * <p>This method will <i>override</i> the current {@link Share shares} in
      * the list. To append/edit the current set of shares use {@link #putShares(List)}</p>
      * @param shares A new list of {@link Share shares}
-     * @return
+     * @return This object
      */
     public Shoppinglist setShares(List<Share> shares) {
         mShares.clear();
