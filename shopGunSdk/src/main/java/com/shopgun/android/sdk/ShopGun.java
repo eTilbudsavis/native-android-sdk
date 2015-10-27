@@ -147,6 +147,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
      * <p>Be sure to {@link ShopGun#create(Context)} create an
      * instance} before invoking this method, or bad things will happen.</p>
      *
+     * @return The {@link ShopGun} instance
      * @throws IllegalStateException If {@link ShopGun} no instance is available
      */
     public static ShopGun getInstance() {
@@ -165,6 +166,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
      * used throughout your app.</p>
      *
      * @param ctx A context
+     * @return The newly created {@link ShopGun} instance
      */
     public static ShopGun create(Context ctx) {
 
@@ -260,11 +262,14 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     }
 
     /**
-     * Set the version of your app, for better statistics collection on http://insight.etilbudsavis.dk/.<br><br>
-     * App version should follow http://semver.org/ specifications (MAJOR.MINOR.PATCH), e.g.:<br>
-     * <li> 1.0.0
-     * <li> 1.0.0-beta
-     * <li> 1.0.0-rc.1
+     * <p>Get the version of your app, for better statistics collection on http://insight.etilbudsavis.dk/.</p>
+     * <p>App version should follow http://semver.org/ specifications (MAJOR.MINOR.PATCH), e.g.:</p>
+     *
+     * <ul>
+     *      <li> 1.0.0
+     *      <li> 1.0.0-beta
+     *      <li> 1.0.0-rc.1
+     * </ul>
      *
      * @return API key as String
      */
@@ -273,11 +278,14 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     }
 
     /**
-     * Set the version of your app, for better statistics collection on http://insight.etilbudsavis.dk/.<br><br>
-     * App version should follow http://semver.org/ specifications (MAJOR.MINOR.PATCH), e.g.:<br>
-     * <li> 1.0.0
-     * <li> 1.0.0-beta
-     * <li> 1.0.0-rc.1
+     * <p>Set the version of your app, for better statistics collection on http://insight.etilbudsavis.dk/.</p>
+     * <p>App version should follow http://semver.org/ specifications (MAJOR.MINOR.PATCH), e.g.:</p>
+     *
+     * <ul>
+     *      <li> 1.0.0
+     *      <li> 1.0.0-beta
+     *      <li> 1.0.0-rc.1
+     * </ul>
      *
      */
     public void setAppVersion(String appVersion) {
@@ -330,6 +338,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
 
     /**
      * Set the {@link ThemeEnvironment} the SDK will be using.
+     * @param e A {@link ThemeEnvironment} to use
      */
     public void setThemeEnvironment(ThemeEnvironment e) {
         mThemeEnvironment = e;
@@ -371,6 +380,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
 
     /**
      * Get the settings, that ETA SDK is using.
+     * @return current settings
      */
     public Settings getSettings() {
         return mSettings;
@@ -379,7 +389,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     /**
      * A location object used by ETA, when making API requests.
      * This object should be edited when ever you want to change location.
-     * @return <li> A location object
+     * @return A location object
      */
     public SgnLocation getLocation() {
         return mLocation;

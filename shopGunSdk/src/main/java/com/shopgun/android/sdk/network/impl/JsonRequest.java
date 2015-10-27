@@ -19,7 +19,6 @@ package com.shopgun.android.sdk.network.impl;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Request;
-import com.shopgun.android.sdk.network.RequestQueue;
 import com.shopgun.android.sdk.network.Response.Listener;
 
 import java.io.UnsupportedEncodingException;
@@ -50,18 +49,6 @@ public abstract class JsonRequest<T> extends Request<T> {
         mRequestBody = requestBody;
     }
 
-    /**
-     * Append single query parameter to the given request.
-     * @param key - a API v2 parameter key
-     * @param value - The value matching the key
-     * @return this object, for easy chaining
-     */
-//    @Deprecated
-//    public Request<?> putQueryParam(String key, String value) {
-//        getQueryParameters().putString(key, value);
-//        return this;
-//    }
-
     @Override
     public String getBodyContentType() {
         return PROTOCOL_CONTENT_TYPE;
@@ -89,17 +76,13 @@ public abstract class JsonRequest<T> extends Request<T> {
     /**
      * Returns a complete printable representation of this Request, e.g:
      *
-     * <li>GET: https://api.etilbudsavis.dk/v2/catalogs/{catalog_id}?param1=value1&amp;param2=value2</li>
-     * <li>PUT: https://api.etilbudsavis.dk/v2/catalogs/{catalog_id}?param1=value1&amp;param2=value2&amp;body=[json_string]</li>
+     * <ul>
+     *      <li>GET: https://api.etilbudsavis.dk/v2/catalogs/{catalog_id}?param1=value1&amp;param2=value2</li>
+     *      <li>PUT: https://api.etilbudsavis.dk/v2/catalogs/{catalog_id}?param1=value1&amp;param2=value2&amp;body=[json_string]</li>
+     * </ul>
      *
      * <p>Body data is appended as the last query parameter for convenience, as
-     * seen in the examples above. The SDK/API parameters are not added to the
-     * {@link Request#getQueryParameters() query parameters}, before the request
-     * is handed to the {@link RequestQueue}. So if you want to have the SDK/API
-     * parameters appended as well in the string do:</p>
-     * <li>ShopGun.getInstance().add(Request)</li>
-     * <p>and then call: </p>
-     * <li>toString()</li>
+     * seen in the examples above.</p>
      */
     @Override
     public String toString() {

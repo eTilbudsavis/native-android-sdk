@@ -101,7 +101,9 @@ public class PhotoView extends ImageView implements View.OnTouchListener, OnGest
     }
 
     /**
-     * @return true if the ImageView exists, and it's Drawable existss
+     * Check if a given {@link ImageView} has a {@link Drawable}
+     * @param imageView An {@link ImageView} to check for a {@link Drawable}
+     * @return true if the {@link ImageView} exists, and it's {@link Drawable} exists
      */
     public static boolean hasDrawable(ImageView imageView) {
         return null != imageView && null != imageView.getDrawable();

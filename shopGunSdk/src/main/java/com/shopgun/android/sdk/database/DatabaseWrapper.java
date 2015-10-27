@@ -86,27 +86,39 @@ public class DatabaseWrapper {
     }
 
     /**
-     * Clears the whole DB. This cannot be undone.
+     * Clear all data in the database. This operation cannot be undone.
+     * @return number of changes
      */
     public int clear() {
         return mDataSource.clear();
     }
 
+    /**
+     * Clear all data from a given {@link User}. This operation cannot be undone.
+     * @param userId A {@link User#getId()}
+     * @return number of changes
+     */
     public int clear(int userId) {
         return mDataSource.clear(userId);
     }
 
     /**
-     * Insert new shopping list into DB
-     * @param sl to insert
-     * @return true, if operation succeeded, else false
+     * Insert a {@link Shoppinglist}, into the database
+     * @param sl A {@link Shoppinglist}
+     * @param user A {@link User}
+     * @return {@code true} if the operation was successful, else {@code false}
      */
     public boolean insertList(Shoppinglist sl, User user) {
-
         long id = mDataSource.insertList(sl, String.valueOf(user.getUserId()));
         return successId(id);
     }
 
+    /**
+     * Insert a list of {@link Shoppinglist}, into the database
+     * @param lists A list of {@link Shoppinglist}
+     * @param user A {@link User}
+     * @return {@code true} if the operation was successful, else {@code false}
+     */
     public boolean insertLists(List<Shoppinglist> lists, User user) {
         if (lists.isEmpty()) {
             return true;
@@ -116,9 +128,10 @@ public class DatabaseWrapper {
     }
 
     /**
-     * Get a shoppinglist by it's id
-     * @param id to get from db
-     * @return A shoppinglist or null if no march is found
+     * Get a {@link Shoppinglist} object by it's {@link Shoppinglist#getId()}
+     * @param id A {@link Shoppinglist#getId()}
+     * @param user A {@link User}
+     * @return A {@link Shoppinglist} if one exists, else {@code null}
      */
     public Shoppinglist getList(String id, User user) {
         Shoppinglist sl = mDataSource.getList(id, String.valueOf(user.getUserId()));
@@ -134,18 +147,19 @@ public class DatabaseWrapper {
     }
 
     /**
-     * Get all shoppinglists, deleted lists are not included
-     * @return A list of shoppinglists
+     * Get the {@link Shoppinglist}'s that belong to tha given {@link User}
+     * @param user A {@link User}
+     * @return A list of {@link Shoppinglist}
      */
     public List<Shoppinglist> getLists(User user) {
         return getLists(user, false);
     }
 
     /**
-     *
-     * @param user The user to fetch lists from
-     * @param includeDeleted Whether to include deleted items
-     * @return A list of Shoppinglist
+     * Get the {@link Shoppinglist}'s that belong to tha given {@link User}
+     * @param user A {@link User}
+     * @param includeDeleted {@code true} to include the items that have locally been marked as deleted, else {@code false}
+     * @return A list of {@link Shoppinglist}
      */
     public List<Shoppinglist> getLists(User user, boolean includeDeleted) {
         List<Shoppinglist> lists = mDataSource.getLists(String.valueOf(user.getUserId()), includeDeleted);
@@ -168,29 +182,30 @@ public class DatabaseWrapper {
     }
 
     /**
-     * Delete a (all) shoppinglist where both the Shoppinglist.id, and user.id matches
-     * @param sl A shoppinglist
-     * @param user A user
-     * @return true, if operation succeeded, else false
+     * Delete a given {@link Shoppinglist} from the {@link User}'s lists
+     * @param sl A {@link Shoppinglist}
+     * @param user A {@link User}
+     * @return {@code true} if the operation was successful, else {@code false}
      */
     public boolean deleteList(Shoppinglist sl, User user) {
         return deleteList(sl.getId(), user);
     }
 
     /**
-     * Delete a (all) shoppinglist where both the Shoppinglist.id, and user.id matches
-     * @param shoppinglistId A shoppinglist id
-     * @param user A user id
-     * @return true, if operation succeeded, else false
+     * Delete a given {@link Shoppinglist} from the {@link User}'s lists
+     * @param shoppinglistId A {@link Shoppinglist#getId()}
+     * @param user A {@link User}
+     * @return {@code true} if the operation was successful, else {@code false}
      */
     public boolean deleteList(String shoppinglistId, User user) {
         return deleteList(shoppinglistId, String.valueOf(user.getUserId()));
     }
 
     /**
-     * Delete a list, from the db
-     * @param shoppinglistId to delete
-     * @return true, if operation succeeded, else false
+     * Delete a given {@link Shoppinglist#getId()} from the {@link User}'s lists
+     * @param shoppinglistId A {@link Shoppinglist#getId()}
+     * @param userId A {@link User#getId()}
+     * @return {@code true} if the operation was successful, else {@code false}
      */
     public boolean deleteList(String shoppinglistId, String userId) {
         // TODO: Do we need to remove shares?
@@ -199,18 +214,21 @@ public class DatabaseWrapper {
     }
 
     /**
-     * Replaces a shoppinglist, that have been updated in some way
-     * @param sl that have been edited
-     * @return true, if operation succeeded, else false
+     * Replaces a {@link Shoppinglist}, that have been modified
+     * @param sl A {@link Shoppinglist} that have been modified
+     * @param user A {@link User}
+     * @return {@code true} if the operation was successful, else {@code false}
      */
     public boolean editList(Shoppinglist sl, User user) {
         return insertList(sl, user);
     }
 
     /**
-     * Adds item to db, IF it does not yet exist, else nothing
-     * @param sli to add to db
-     * @return true, if operation succeeded, else false
+     * Adds item to db, <b>if and only if</b> it does not yet exist, else nothing
+     *
+     * @param sli A {@link ShoppinglistItem} to add to the database
+     * @param user A {@link User}
+     * @return {@code true} if the operation was successful, else {@code false}
      */
     public boolean insertItem(ShoppinglistItem sli, User user) {
         long id = mDataSource.insertItem(sli, String.valueOf(user.getUserId()));
@@ -220,6 +238,7 @@ public class DatabaseWrapper {
     /**
      * Adds a list of items to db, IF they do not yet exist, else nothing
      * @param items to insert
+     * @param user A {@link User}
      * @return number of affected rows
      */
     public boolean insertItems(List<ShoppinglistItem> items, User user) {
@@ -228,27 +247,32 @@ public class DatabaseWrapper {
     }
 
     /**
-     * Get a shoppinglistitem from the db
+     * Get a {@link ShoppinglistItem} from the database
      * @param itemId to get from db
-     * @return A shoppinglistitem or null if no match is found
+     * @param user A {@link User}
+     * @return A {@link ShoppinglistItem} if one matches the criteria, else {@code null}
      */
     public ShoppinglistItem getItem(String itemId, User user) {
         return mDataSource.getItem(itemId, String.valueOf(user.getUserId()));
     }
 
     /**
-     * Get all Shoppinglistitems from a shoppinglist.
-     * @param sl from which to get items
-     * @return A list of shoppinglistitems
+     * Get all {@link ShoppinglistItem} from a {@link Shoppinglist}.
+     * This does not include i{@link ShoppinglistItem}'s that have locally been marked at deleted
+     * @param sl A {@link Shoppinglist}
+     * @param user A {@link User}
+     * @return A list of {@link ShoppinglistItem}
      */
     public List<ShoppinglistItem> getItems(Shoppinglist sl, User user) {
         return getItems(sl.getId(), user, false);
     }
 
     /**
-     * Get all Shoppinglistitems from a shoppinglist.
-     * @param sl from which to get items
-     * @return A list of shoppinglistitems
+     * Get all {@link ShoppinglistItem} from a {@link Shoppinglist}.
+     * @param sl A {@link Shoppinglist}
+     * @param user A {@link User}
+     * @param includeDeleted {@code true} to include the items that have locally been marked as deleted, else {@code false}
+     * @return A list of {@link ShoppinglistItem}
      */
     public List<ShoppinglistItem> getItems(Shoppinglist sl, User user, boolean includeDeleted) {
         return getItems(sl.getId(), user, includeDeleted);
@@ -256,25 +280,52 @@ public class DatabaseWrapper {
 
     /**
      * Get all {@link ShoppinglistItem} from a {@link Shoppinglist}.
-     * @param shoppinglistId from which to get items
-     * @return A list of shoppinglistitems
+     * @param shoppinglistId a {@link Shoppinglist#getId()}
+     * @param user A {@link User}
+     * @param includeDeleted {@code true} to include the items that have locally been marked as deleted, else {@code false}
+     * @return A list of {@link ShoppinglistItem}
      */
     public List<ShoppinglistItem> getItems(String shoppinglistId, User user, boolean includeDeleted) {
         return mDataSource.getItems(shoppinglistId, String.valueOf(user.getUserId()), includeDeleted);
     }
 
+    /**
+     * Get the {@link ShoppinglistItem} that is marked as the first ({@link ListUtils#FIRST_ITEM})
+     * in the given {@link Shoppinglist}.
+     * @param shoppinglistId a {@link Shoppinglist#getId()}
+     * @param user A {@link User}
+     * @return A {@link ShoppinglistItem} if one exists with the {@code previousId}, else {@code null}
+     */
     public ShoppinglistItem getFirstItem(String shoppinglistId, User user) {
         return getItemPrevious(shoppinglistId, ListUtils.FIRST_ITEM, user);
     }
 
+    /**
+     * Get the {@link ShoppinglistItem} that matches the given set of criteria.
+     * @param shoppinglistId A {@link Shoppinglist#getId()}
+     * @param previousId A {@link ShoppinglistItem#getPreviousId()}
+     * @param user A {@link User}
+     * @return A {@link ShoppinglistItem} if one exists with the {@code previousId}, else {@code null}
+     */
     public ShoppinglistItem getItemPrevious(String shoppinglistId, String previousId, User user) {
         return mDataSource.getItemPrevious(shoppinglistId, previousId, String.valueOf(user.getUserId()));
     }
 
+    /**
+     * Get the {@link Shoppinglist} that is marked as the first ({@link ListUtils#FIRST_ITEM}).
+     * @param user A {@link User}
+     * @return A {@link Shoppinglist} if one exists with the {@code previousId}, else {@code null}
+     */
     public Shoppinglist getFirstList(User user) {
         return getListPrevious(ListUtils.FIRST_ITEM, user);
     }
 
+    /**
+     * Get the {@link Shoppinglist} with the given {@code previousId}
+     * @param previousId An {@link Shoppinglist#getId()} or {@link com.shopgun.android.sdk.utils.ListUtils#FIRST_ITEM}
+     * @param user A {@link User}
+     * @return A {@link Shoppinglist} if one exists with the {@code previousId}, else {@code null}
+     */
     public Shoppinglist getListPrevious(String previousId, User user) {
         return mDataSource.getListPrevious(previousId, String.valueOf(user.getUserId()));
     }
@@ -282,7 +333,8 @@ public class DatabaseWrapper {
     /**
      * Deletes an {@link ShoppinglistItem} from db
      * @param sli An item to delete
-     * @return true, if operation succeeded, else false
+     * @param user A {@link User}
+     * @return {@code true} if the operation was successful, else {@code false}
      */
     public boolean deleteItem(ShoppinglistItem sli, User user) {
         int count = mDataSource.deleteItem(sli.getId(), String.valueOf(user.getUserId()));
@@ -300,6 +352,7 @@ public class DatabaseWrapper {
      *
      * @param shoppinglistId to remove items from
      * @param state that items must have to be removed
+     * @param user A {@link User}
      * @return number of affected rows
      */
     public int deleteItems(String shoppinglistId, Boolean state, User user) {
@@ -307,9 +360,10 @@ public class DatabaseWrapper {
     }
 
     /**
-     * replaces an item in db
-     * @param sli to insert
-     * @return true, if operation succeeded, else false
+     * Adds item to db, <b>if and only if</b> it does not yet exist, else nothing
+     * @param sli to add to db
+     * @param user A {@link User}
+     * @return {@code true} if the edit was successful, else {@code true}
      */
     public boolean editItems(ShoppinglistItem sli, User user) {
         long id = mDataSource.insertItem(sli, String.valueOf(user.getUserId()));
@@ -317,9 +371,10 @@ public class DatabaseWrapper {
     }
 
     /**
-     * replaces an item in db
-     * @param list to insert
-     * @return true if edit was successful, else false
+     * Insert a list of {@link ShoppinglistItem} into the database
+     * @param list A list of {@link ShoppinglistItem}
+     * @param user A {@link User}
+     * @return {@code true} if the edit was successful, else {@code true}
      */
     public boolean editItems(List<ShoppinglistItem> list, User user) {
         int count = mDataSource.insertItem(list, String.valueOf(user.getUserId()));
@@ -327,9 +382,13 @@ public class DatabaseWrapper {
     }
 
     /**
-     * replaces an item in db
-     * @param list to insert
-     * @return true if edit was successful, else false
+     * Method for updating a state for all ShoppinglistItem with a given User and Shoppinglist.id
+     *
+     * @param list A list of {@link ShoppinglistItem} to edit
+     * @param user A {@link User}
+     * @param modified The new Modified for the items
+     * @param syncState The new SyncState for the items
+     * @return {@code true} if the edit was successful, else {@code true}
      */
     public boolean editItemState(List<ShoppinglistItem> list, User user, Date modified, int syncState) {
         Map<String, List<ShoppinglistItem>> map = new HashMap<String, List<ShoppinglistItem>>();
@@ -348,7 +407,13 @@ public class DatabaseWrapper {
     }
 
     /**
-     * replaces an item in db
+     * Method for updating a state for all ShoppinglistItem with a given User and Shoppinglist.id
+     *
+     * @param sl A {@link Shoppinglist}
+     * @param user A {@link User}
+     * @param modified The new Modified for the items
+     * @param syncState The new SyncState for the items
+     * @return the number of rows affected
      */
     public int editItemState(Shoppinglist sl, User user, Date modified, int syncState) {
         modified = Utils.roundTime(modified);

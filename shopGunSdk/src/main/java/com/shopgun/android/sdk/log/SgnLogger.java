@@ -32,6 +32,7 @@ public interface SgnLogger {
      * @param tag Used to identify the source of a log message.  It usually identifies
      *            the class or activity where the log call occurs.
      * @param msg The message you would like logged.
+     * @return The number of bytes written
      */
     int v(String tag, String msg);
 
@@ -42,6 +43,7 @@ public interface SgnLogger {
      *            the class or activity where the log call occurs.
      * @param msg The message you would like logged.
      * @param tr  An exception to log
+     * @return The number of bytes written
      */
     int v(String tag, String msg, Throwable tr);
 
@@ -51,6 +53,7 @@ public interface SgnLogger {
      * @param tag Used to identify the source of a log message.  It usually identifies
      *            the class or activity where the log call occurs.
      * @param msg The message you would like logged.
+     * @return The number of bytes written
      */
     int d(String tag, String msg);
 
@@ -61,6 +64,7 @@ public interface SgnLogger {
      *            the class or activity where the log call occurs.
      * @param msg The message you would like logged.
      * @param tr  An exception to log
+     * @return The number of bytes written
      */
     int d(String tag, String msg, Throwable tr);
 
@@ -70,6 +74,7 @@ public interface SgnLogger {
      * @param tag Used to identify the source of a log message.  It usually identifies
      *            the class or activity where the log call occurs.
      * @param msg The message you would like logged.
+     * @return The number of bytes written
      */
     int i(String tag, String msg);
 
@@ -80,6 +85,7 @@ public interface SgnLogger {
      *            the class or activity where the log call occurs.
      * @param msg The message you would like logged.
      * @param tr  An exception to log
+     * @return The number of bytes written
      */
     int i(String tag, String msg, Throwable tr);
 
@@ -89,6 +95,7 @@ public interface SgnLogger {
      * @param tag Used to identify the source of a log message.  It usually identifies
      *            the class or activity where the log call occurs.
      * @param msg The message you would like logged.
+     * @return The number of bytes written
      */
     int w(String tag, String msg);
 
@@ -99,6 +106,7 @@ public interface SgnLogger {
      *            the class or activity where the log call occurs.
      * @param msg The message you would like logged.
      * @param tr  An exception to log
+     * @return The number of bytes written
      */
     int w(String tag, String msg, Throwable tr);
 
@@ -108,6 +116,7 @@ public interface SgnLogger {
      * @param tag Used to identify the source of a log message.  It usually identifies
      *            the class or activity where the log call occurs.
      * @param msg The message you would like logged.
+     * @return The number of bytes written
      */
     int e(String tag, String msg);
 
@@ -118,6 +127,7 @@ public interface SgnLogger {
      *            the class or activity where the log call occurs.
      * @param msg The message you would like logged.
      * @param tr  An exception to log
+     * @return The number of bytes written
      */
     int e(String tag, String msg, Throwable tr);
 }

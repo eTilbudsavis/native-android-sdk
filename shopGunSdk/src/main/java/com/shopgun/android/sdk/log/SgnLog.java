@@ -103,6 +103,7 @@ public class SgnLog {
 
     /**
      * Print a StackTrace from any given point of your source code.
+     * @param tag     Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
      */
     public static void printStackTrace(String tag) {
         for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
@@ -112,6 +113,7 @@ public class SgnLog {
 
     /**
      * Print a StackTrace from any given point of your source code.
+     * @param tag     Used to identify the source of a log message. It usually identifies the class or activity where the log call occurs.
      */
     public static void printParentMethod(String tag) {
         StackTraceElement[] trace = Thread.currentThread().getStackTrace();
@@ -119,9 +121,9 @@ public class SgnLog {
     }
 
     /**
-     * Adds the throwable to the {@link #mExceptionLog Exception Log}.
-     *
+     * Convert an {@link Throwable} to a {@link JSONObject}
      * @param t The throwable to add
+     * @return A {@link JSONObject} representation of the given {@link Throwable}
      */
     public static JSONObject exceptionToJson(Throwable t) {
 

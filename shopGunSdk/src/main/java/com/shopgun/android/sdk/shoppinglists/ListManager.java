@@ -63,6 +63,7 @@ public class ListManager {
     /**
      * Default constructor for ListManager.
      * @param shopGun The {@link ShopGun} instance to use
+     * @param db A database
      */
     public ListManager(ShopGun shopGun, DatabaseWrapper db) {
         mShopGun = shopGun;
@@ -105,6 +106,7 @@ public class ListManager {
      * <p>Changes are synchronized to the API when and if possible.<br>
      *
      * @param sl A shoppinglist to add to the database
+     * @return {@code true} if the action was performed, else {@code false}
      */
     public boolean addList(final Shoppinglist sl) {
 
@@ -150,6 +152,7 @@ public class ListManager {
      * {@link DatabaseWrapper database}, and changes will later be synchronized to the
      * API if possible.</p>
      * @param sl A shoppinglist that have been edited
+     * @return {@code true} if the action was performed, else {@code false}
      */
     public boolean editList(Shoppinglist sl) {
         return editList(sl, user());
@@ -376,6 +379,7 @@ public class ListManager {
      * <p>{@link ShoppinglistItem ShoppinglistItems} are inserted into the
      * database, and changes are synchronized to the server when and if possible.</p>
      * @param sli A {@link ShoppinglistItem} to add to a {@link Shoppinglist}
+     * @return {@code true} if the action was performed, else {@code false}
      */
     public boolean addItem(ShoppinglistItem sli) {
         return addItem(sli, true, user());
@@ -390,6 +394,7 @@ public class ListManager {
      * @param incrementCount Increment the count on the {@link ShoppinglistItem}
      * if an item like it exists, instead of adding new item.
      * @param user A user that owns the {@link ShoppinglistItem}
+     * @return {@code true} if the action was performed, else {@code false}
      */
     @SuppressLint("DefaultLocale")
     public boolean addItem(ShoppinglistItem sli, boolean incrementCount, User user) {
@@ -472,6 +477,7 @@ public class ListManager {
      * <p>The {@link ShoppinglistItem} is replaced in the database, and changes
      * is synchronized to the server when, and if possible.</p>
      * @param sli An edited {@link ShoppinglistItem}
+     * @return {@code true} if the action was performed, else {@code false}
      */
     public boolean editItem(ShoppinglistItem sli) {
         try {
@@ -691,6 +697,7 @@ public class ListManager {
      * <p>The {@link ShoppinglistItem} is removed from the database, and later
      * changes is synchronized to the server when and if possible</p>
      * @param sli A {@link ShoppinglistItem} to delete
+     * @return {@code true} if the action was performed, else {@code false}
      */
     public boolean deleteItem(ShoppinglistItem sli) {
         User u = user();
@@ -761,6 +768,7 @@ public class ListManager {
     /**
      * Deletes all rows in the {@link DatabaseWrapper database} associated with a
      * given{@link User}.
+     * @param userId A {@link User#getUserId()} to clear
      */
     public void clear(int userId) {
         mDatabase.clear(userId);

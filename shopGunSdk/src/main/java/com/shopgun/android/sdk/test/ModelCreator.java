@@ -78,6 +78,8 @@ public class ModelCreator {
 
     /**
      * Returns a date, that has been rounded to the nearest day (set to 16:00:00)
+     * @param dayOffset The number os days to off the given day
+     * @return A date
      */
     public static Date getDate(int dayOffset) {
         Calendar c = GregorianCalendar.getInstance();

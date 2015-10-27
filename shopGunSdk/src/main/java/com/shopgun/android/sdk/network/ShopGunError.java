@@ -72,8 +72,8 @@ public class ShopGunError extends Exception implements IJson<JSONObject>,Parcela
     /**
      * Method will return an ApiError if the provided JSONObject is an API error.<br>
      * Otherwise it will return a ParseError.
-     * @param apiError
-     * @return
+     * @param apiError A ShopGun API error response
+     * @return A java object representing the server error
      */
     public static ShopGunError fromJSON(JSONObject apiError) {
 
@@ -90,20 +90,34 @@ public class ShopGunError extends Exception implements IJson<JSONObject>,Parcela
      * Id is the unique reference to this specific error on the API.<br>
      * You can write to support, to get specific info about this error.<br>
      * NOTE: If id is null, this is a SDK error. Therefore there is no logging of the error.
-     * @return
+     * @return An error id
      */
     public String getId() {
         return mId;
     }
 
+    /**
+     * Get the error code for this specific error.
+     * The error code is a reference to the type of error.
+     * @return An error code
+     */
     public int getCode() {
         return mCode;
     }
 
+    /**
+     * Get details regarding this request. The details may give further insights as to why the error occurred.
+     *
+     * @return A string, or {@code null}
+     */
     public String getDetails() {
         return mDetails;
     }
 
+    /**
+     * If the error was caused by invalid user-input, the server can let you know what field failed.
+     * @return A string, or {@code null}
+     */
     public String getFailedOnField() {
         return mFailedOnField;
     }
@@ -122,11 +136,19 @@ public class ShopGunError extends Exception implements IJson<JSONObject>,Parcela
         return o;
     }
 
+    /**
+     * Helper for letting you know if the error code is in the range 10000 - 10999
+     * @return {@code true} if the error happened in the SDK, else {@code false}
+     */
     public boolean isSdk() {
         int code = getCode();
         return 10000 <= code && code < 11000;
     }
 
+    /**
+     * Helper for letting you know if the error code is in the range 1000 - 9999
+     * @return {@code true} if the error happened in the API, else {@code false}
+     */
     public boolean isApi() {
         int code = getCode();
         return 1000 <= code && code < 10000;

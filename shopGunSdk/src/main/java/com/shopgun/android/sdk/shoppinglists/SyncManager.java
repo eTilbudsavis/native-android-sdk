@@ -193,6 +193,7 @@ public class SyncManager {
     /**
      * Default constructor for the {@link SyncManager}
      * @param shopGun An ShopGun instance
+     * @param db A database
      */
     public SyncManager(ShopGun shopGun, DatabaseWrapper db) {
         mShopGun = shopGun;
@@ -206,7 +207,10 @@ public class SyncManager {
         mDelivery = new HandlerDelivery(mHandler);
     }
 
-    /** Listening for session changes, starting and stopping sync as needed */
+    /**
+     * Listening for session changes, starting and stopping sync as needed
+     * @param e The event we are listening for
+     */
     public void onEvent(SessionEvent e) {
         if (e.isNewUser()) {
             mHasFirstSync = false;

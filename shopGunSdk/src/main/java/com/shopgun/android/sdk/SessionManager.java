@@ -193,6 +193,7 @@ public class SessionManager {
 
     /**
      * Ask the SessionManager to refresh the session.
+     * @param e A {@link ShopGunError} to recover from.
      * @return true if SessionManager is trying, or will try to refresh the session.
      * False if no more tries will be attempted.
      */
@@ -251,12 +252,22 @@ public class SessionManager {
 
     }
 
+    /**
+     * Get the current session request in flight, for a {@link Session} update.
+     * If the {@link SessionManager} isn't performing a {@link Session} update then
+     * {@code null} will be returned.
+     * @return A {@link Request} if one is in flight, else {@code null}
+     */
     public Request<?> getRequestInFlight() {
         synchronized (LOCK) {
             return mReqInFlight;
         }
     }
 
+    /**
+     * Check if {@link SessionManager} is currently performing a {@link Session} update.
+     * @return {@code true} if {@link Session} is being updated, else {@code false}
+     */
     public boolean isRequestInFlight() {
         synchronized (LOCK) {
             return mReqInFlight != null;
@@ -361,6 +372,8 @@ public class SessionManager {
      * @param email - ShopGun user name (e-mail)
      * @param password for user
      * @param l for callback on complete
+     * @return The {@link Request} generated to perform the action.
+     *          The request have already been queued for processing in the {@link com.shopgun.android.sdk.network.RequestQueue}.
      */
     public JsonObjectRequest login(String email, String password, Listener<JSONObject> l) {
         Map<String, Object> args = new HashMap<String, Object>();
@@ -377,6 +390,8 @@ public class SessionManager {
      * This requires you to implement the Facebook SDK, and relay the Facebook token.
      * @param facebookAccessToken A facebook access token
      * @param l lister for callbacks
+     * @return The {@link Request} generated to perform the action.
+     *          The request have already been queued for processing in the {@link com.shopgun.android.sdk.network.RequestQueue}.
      */
     public JsonObjectRequest loginFacebook(String facebookAccessToken, Listener<JSONObject> l) {
         Map<String, String> args = new HashMap<String, String>();
@@ -398,6 +413,10 @@ public class SessionManager {
     /**
      * Signs a user out, and cleans all references to the user.<br><br>
      * A new {@link #login(String, String, com.shopgun.android.sdk.network.Response.Listener)} login} is needed to get access to user stuff again.
+     *
+     * @param l A request listener
+     * @return The {@link Request} generated to perform the action.
+     *          The request have already been queued for processing in the {@link com.shopgun.android.sdk.network.RequestQueue}.
      */
     public JsonObjectRequest signout(final Listener<JSONObject> l) {
 
@@ -430,9 +449,12 @@ public class SessionManager {
      * @param name A name
      * @param birthYear A birthyear
      * @param gender A gender
+     * @param locale A {@link java.util.Locale} string
      * @param successRedirect An URL to include in the validation email, given registration succeeded
      * @param errorRedirect An URL to include in the validation email, given registration failed
-     * @return true if all arguments are valid, false otherwise
+     * @param l A request listener
+     * @return The {@link Request} generated to perform the action.
+     *          The request have already been queued for processing in the {@link com.shopgun.android.sdk.network.RequestQueue}.
      */
     public JsonObjectRequest createUser(String email, String password, String name, int birthYear, String gender, String locale, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
 
@@ -457,6 +479,8 @@ public class SessionManager {
      * @param successRedirect An URL to include in the validation email, given registration succeeded
      * @param errorRedirect An URL to include in the validation email, given registration failed
      * @param l lister for callbacks
+     * @return The {@link Request} generated to perform the action.
+     *          The request have already been queued for processing in the {@link com.shopgun.android.sdk.network.RequestQueue}.
      */
     public JsonObjectRequest forgotPassword(String email, String successRedirect, String errorRedirect, Listener<JSONObject> l) {
 

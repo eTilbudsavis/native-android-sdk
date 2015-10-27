@@ -21,7 +21,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.util.Log;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Share;
@@ -45,6 +44,10 @@ public class DataSource extends SQLDataSource {
         super(new DatabaseHelper(c));
     }
 
+    /**
+     * Clear all data in the database
+     * @return number of changes
+     */
     public int clear() {
         String whereClause = "1";
         int count = delete(ItemSQLiteHelper.TABLE, whereClause, null);
@@ -53,6 +56,11 @@ public class DataSource extends SQLDataSource {
         return count;
     }
 
+    /**
+     * Clear all data from a given {@link User}
+     * @param userId A {@link User#getId()}
+     * @return number of changes
+     */
     public int clear(int userId) {
         String whereClause = DatabaseHelper.USER + "=?";
         String[] whereArgs = new String[]{String.valueOf(userId)};
@@ -80,10 +88,9 @@ public class DataSource extends SQLDataSource {
      **********************************************************************************************/
 
     /**
-     * Insert new shopping list into DB
-     *
-     * @param sl     A shoppinglist
-     * @param userId A user
+     * Insert a {@link Shoppinglist}, into the database
+     * @param sl A {@link Shoppinglist}
+     * @param userId A {@link User#getId()}
      * @return number of affected rows
      */
     public int insertList(Shoppinglist sl, String userId) {
@@ -93,10 +100,9 @@ public class DataSource extends SQLDataSource {
     }
 
     /**
-     * Insert new shopping list into DB
-     *
-     * @param list   A list of Shoppinglist
-     * @param userId A user
+     * Insert a list of {@link Shoppinglist}, into the database
+     * @param list A list of {@link Shoppinglist}
+     * @param userId A {@link User#getId()}
      * @return number of affected rows
      */
     public int insertList(List<Shoppinglist> list, String userId) {
@@ -128,10 +134,10 @@ public class DataSource extends SQLDataSource {
     }
 
     /**
-     * Get a Shoppinglist matching the given parameters
+     * Get a Shoppinglist from database, matching the given criteria.
      *
-     * @param id     A Shoppinglist id
-     * @param userId A user id
+     * @param id A {@link Shoppinglist#getId()}
+     * @param userId A {@link User#getId()}
      * @return A Shoppinglist if one exists in DB, else null;
      */
     public Shoppinglist getList(String id, String userId) {
@@ -192,6 +198,12 @@ public class DataSource extends SQLDataSource {
         return delete(ListSQLiteHelper.TABLE, whereClause, whereArgs);
     }
 
+    /**
+     * Get the {@link Shoppinglist} with the given {@code previousId}
+     * @param previousId An {@link Shoppinglist#getId()} or {@link com.shopgun.android.sdk.utils.ListUtils#FIRST_ITEM}
+     * @param userId A {@link User#getId()}
+     * @return A {@link Shoppinglist} if one exists with the {@code previousId}, else {@code null}
+     */
     public Shoppinglist getListPrevious(String previousId, String userId) {
         String selection = DatabaseHelper.PREVIOUS_ID + "=? AND " + DatabaseHelper.USER + "=?";
         String[] selectionArgs = new String[]{previousId, userId};
@@ -208,8 +220,8 @@ public class DataSource extends SQLDataSource {
     /**
      * Method for updating a state for all ShoppinglistItem with a given User and Shoppinglist.id
      *
-     * @param shoppinglistId A shoppinglist.id
-     * @param userId         A userid
+     * @param shoppinglistId A {@link Shoppinglist#getId()}
+     * @param userId A {@link User#getId()}
      * @param modified       The new Modified for the items
      * @param syncState      The new SyncState for the items
      * @return the number of rows affected
@@ -229,9 +241,10 @@ public class DataSource extends SQLDataSource {
     }
 
     /**
-     * Adds item to db, IF it does not yet exist, else nothing
+     * Adds item to db, <b>if and only if</b> it does not yet exist, else nothing
      *
-     * @param sli to add to db
+     * @param sli A {@link ShoppinglistItem} to add to the database
+     * @param userId A {@link User#getId()}
      * @return number of affected rows
      */
     public long insertItem(ShoppinglistItem sli, String userId) {
@@ -246,6 +259,12 @@ public class DataSource extends SQLDataSource {
         }
     }
 
+    /**
+     * Insert a list of {@link ShoppinglistItem} into the database
+     * @param list A list of {@link ShoppinglistItem}
+     * @param userId A {@link User#getId()}
+     * @return The number of inserted items
+     */
     public int insertItem(List<ShoppinglistItem> list, String userId) {
         if (list.isEmpty()) {
             return -1;
@@ -279,6 +298,13 @@ public class DataSource extends SQLDataSource {
         return list.isEmpty() ? null : list.get(0);
     }
 
+    /**
+     * Get all {@link ShoppinglistItem} from a {@link Shoppinglist}.
+     * @param shoppinglistId a {@link Shoppinglist#getId()}
+     * @param userId A {@link User#getId()}
+     * @param includeDeleted {@code true} to include the items that have locally been marked as deleted, else {@code false}
+     * @return A list of {@link ShoppinglistItem}
+     */
     public List<ShoppinglistItem> getItems(String shoppinglistId, String userId, boolean includeDeleted) {
         String selection = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=? AND " + DatabaseHelper.STATE + "!=?";
         String[] selectionArgs = new String[]{shoppinglistId, userId, String.valueOf(SyncState.DELETE)};
@@ -289,6 +315,13 @@ public class DataSource extends SQLDataSource {
         return getItems(selection, selectionArgs);
     }
 
+    /**
+     * Get the {@link ShoppinglistItem} that has the given set of criteria
+     * @param shoppinglistId A {@link Shoppinglist#getId()}
+     * @param previousId A {@link ShoppinglistItem#getPreviousId()}
+     * @param userId A {@link User#getId()}
+     * @return A {@link ShoppinglistItem} if one exists with the {@code previousId}, else {@code null}
+     */
     public ShoppinglistItem getItemPrevious(String shoppinglistId, String previousId, String userId) {
         String selection = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.PREVIOUS_ID + "=? AND " + DatabaseHelper.USER + "=?";
         String[] selectionArgs = new String[]{shoppinglistId, previousId, userId};
@@ -320,13 +353,14 @@ public class DataSource extends SQLDataSource {
      * Deletes all items, in a given state, from a {@link Shoppinglist}
      *
      * <ul>
-     * <li>{@code true} - delete ticked items</li>
-     * <li>{@code false} - delete unticked items</li>
-     * <li>{@code null} - delete all items</li>
+     *      <li>{@code true} - delete ticked items</li>
+     *      <li>{@code false} - delete unticked items</li>
+     *      <li>{@code null} - delete all items</li>
      * </ul>
      *
-     * @param shoppinglistId to remove items from
-     * @param state          that items must have to be removed
+     * @param shoppinglistId A {@link Shoppinglist#getId()} to remove items from
+     * @param state that items must have to be removed
+     * @param userId A {@link User#getId()}
      * @return number of affected rows
      */
     public int deleteItems(String shoppinglistId, Boolean state, String userId) {
@@ -347,13 +381,18 @@ public class DataSource extends SQLDataSource {
      * ********************************************************************************************
      */
 
+    /**
+     * Insert a share into the database,
+     * @param s A share
+     * @param userId A {@link User#getId()}
+     * @return the row ID of the newly inserted row OR -1 if any error
+     */
     public long insertShare(Share s, String userId) {
         try {
             ContentValues cv = ShareSQLiteHelper.objectToContentValues(s, userId);
             return acquireDb().insertWithOnConflict(ShareSQLiteHelper.TABLE, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
         } catch (IllegalStateException e) {
             log(TAG, e);
-            Log.d(TAG, s.toJSON().toString());
             return -1;
         } finally {
             releaseDb();

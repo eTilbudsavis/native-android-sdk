@@ -81,6 +81,7 @@ public class EventLog {
      * Create a JSONArray of the currents events
      *
      * @param events to torn into a JSONArray
+     * @param rawTime {@code true} to add timestamps as milliseconds singe 1970, {@code false} to use a human readable string.
      * @return a JSONArray
      */
     public static JSONArray toJSON(List<Event> events, boolean rawTime) {
@@ -116,9 +117,13 @@ public class EventLog {
     }
 
     /**
-     * @param name
-     * @param type
-     * @param data
+     * Add a new Event to the log. Adding a special type, is nice for saving generic error correcting data
+     * to a log. This can be {@link #TYPE_VIEW view}, {@link #TYPE_EXCEPTION exception}, or {@link #TYPE_REQUEST request} events.
+     * but essentially any string will do.
+     *
+     * @param name A name for the event
+     * @param type of event to add
+     * @param data data accompanying the event
      */
     private void add(String name, String type, JSONObject data) {
         String user = "null";
@@ -131,9 +136,15 @@ public class EventLog {
     }
 
     /**
-     * @param name
-     * @param type
-     * @param data
+     * Add a new Event to the log. Adding a special type, is nice for saving generic error correcting data
+     * to a log. This can be {@link #TYPE_VIEW view}, {@link #TYPE_EXCEPTION exception}, or {@link #TYPE_REQUEST request} events.
+     * but essentially any string will do.
+     *
+     * @param name A name for the event
+     * @param type of event to add
+     * @param data data accompanying the event
+     * @param user The ERN of the connected user
+     * @param token The session token
      */
     private void add(String name, String type, JSONObject data, String user, String token) {
         long time = System.currentTimeMillis();
@@ -154,7 +165,7 @@ public class EventLog {
     /**
      * Get the current list of events
      *
-     * @return
+     * @return A list of {@link com.shopgun.android.sdk.log.EventLog.Event}
      */
     public List<Event> getEvents() {
         return mEvents;
@@ -187,6 +198,7 @@ public class EventLog {
      * Prints the timing of events in this EventLog
      *
      * @param name to use as print prefix
+     * @return A human readable string representation of this log
      */
     public String getString(String name) {
 
@@ -248,6 +260,11 @@ public class EventLog {
             this.data = data;
         }
 
+        /**
+         * Convert this object into a JSONObject representation
+         * @param rawTime {@code true} to add timestamps as milliseconds singe 1970, {@code false} to use a human readable string.
+         * @return A JSONObject
+         */
         public JSONObject toJSON(boolean rawTime) {
             JSONObject o = new JSONObject();
             try {

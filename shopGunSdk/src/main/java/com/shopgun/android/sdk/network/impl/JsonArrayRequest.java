@@ -124,7 +124,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
     /**
      * Set a list of "order_by" parameters that the API should order the data by.
      * @param order parameters to order data by
-     * @return
+     * @return this object
      */
     public Request<?> setOrderBy(List<String> order) {
         if (!order.isEmpty()) {
@@ -169,8 +169,8 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
      * The API relies on pagination for retrieving data. Therefore you need to
      * define a limit for the data you want to retrieve. If no limit is set
      * this will default to {@link #DEFAULT_LIMIT DEFAULT_LIMIT} if no limit is set.
-     * @param limit
-     * @return
+     * @param limit A limit for the number of items returned
+     * @return this object
      */
     public Request<?> setLimit(int limit) {
         if (limit < 0) {

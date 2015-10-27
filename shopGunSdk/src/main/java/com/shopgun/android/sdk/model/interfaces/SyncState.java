@@ -17,6 +17,8 @@
 package com.shopgun.android.sdk.model.interfaces;
 
 
+import android.support.annotation.IntRange;
+
 /**
  * The state an object can be in, this is an indication of
  * whether the item needs synchronization with the API or not.
@@ -41,8 +43,8 @@ public interface SyncState<T> {
      * Set a new {@link SyncState} for this object.
      *
      * @param state A {@link SyncState} (where state &gt;= {@link SyncState#TO_SYNC} &amp;&amp; state &lt;= {@link SyncState#ERROR})
-     * @return
+     * @return this object
      */
-    public T setState(int state);
+    public T setState(@IntRange(from = TO_SYNC, to = ERROR)int state);
 
 }

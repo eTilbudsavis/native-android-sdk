@@ -20,6 +20,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.IntRange;
 
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.log.SgnLog;
@@ -49,7 +50,7 @@ public class SgnLocation extends Location {
         }
     };
     private static final String ERROR_RADIUS = "Radius must be within range %s to %s, provided radius: %s";
-    private static final String ETA_PROVIDER = "shopgun";
+    private static final String SHOPGUN_PROVIDER = "shopgun";
     private static final String GMAPS_PROVIDER = "fused";
     private static final String PASSIVE_PROVIDER = "passive";
     private int mRadius = DEFAULT_RADIUS;
@@ -61,7 +62,7 @@ public class SgnLocation extends Location {
     private double mBoundWest = DEFAULT_COORDINATE;
 
     public SgnLocation() {
-        super(ETA_PROVIDER);
+        super(SHOPGUN_PROVIDER);
     }
 
     public SgnLocation(SgnLocation l) {
@@ -94,7 +95,7 @@ public class SgnLocation extends Location {
     }
 
     protected SgnLocation(Parcel in) {
-        super(ETA_PROVIDER);
+        super(SHOPGUN_PROVIDER);
         set(Location.CREATOR.createFromParcel(in));
         mRadius = in.readInt();
         mSensor = in.readByte() != 0x00;
@@ -143,11 +144,13 @@ public class SgnLocation extends Location {
 
     /**
      * Returns a JSONObject, with mapped values for, what is needed for an API request:
-     * <li>Latitude
-     * <li>Longitude
-     * <li>Sensor
-     * <li>Radius
      *
+     * <ul>
+     *      <li>Latitude
+     *      <li>Longitude
+     *      <li>Sensor
+     *      <li>Radius
+     * </ul>
      * @return The mapped JSONObject
      */
     public JSONObject toJSON() {
@@ -208,34 +211,37 @@ public class SgnLocation extends Location {
     }
 
     /**
-     * Set the current search radius.
+     * Set radius for this location.
+     * <p>Minimum radius is 0, and maximum radius is 700000</p>
      *
-     * @param radius in meters <li> Min value = 0 <li> Max value = 700000
+     * @param radius A radius distance in meters
      * @throws IllegalArgumentException if radius is out of bounds
      */
-    public void setRadius(int radius) {
+    public void setRadius(@IntRange(from = 0, to = 700000)int radius) {
         if (radius < RADIUS_MIN || radius > RADIUS_MAX) {
             throw new IllegalArgumentException(String.format(ERROR_RADIUS, RADIUS_MIN, RADIUS_MAX, radius));
         }
         mRadius = radius;
-        super.setTime(System.currentTimeMillis());
+        setTimeNow();
     }
 
     @Override
     public void setLatitude(double latitude) {
         super.setLatitude(latitude);
-        super.setTime(System.currentTimeMillis());
+        setTimeNow();
     }
 
     @Override
     public void setLongitude(double longitude) {
         super.setLongitude(longitude);
-        super.setTime(System.currentTimeMillis());
+        setTimeNow();
     }
 
-    @Override
-    public void setTime(long time) {
-        super.setTime(time);
+    /**
+     * Update the time for this location to now.
+     */
+    private void setTimeNow() {
+        super.setTime(System.currentTimeMillis());
     }
 
     /**
@@ -256,7 +262,7 @@ public class SgnLocation extends Location {
      */
     public void setSensor(boolean sensor) {
         mSensor = sensor;
-        super.setTime(System.currentTimeMillis());
+        setTimeNow();
     }
 
     /**
@@ -275,7 +281,7 @@ public class SgnLocation extends Location {
      */
     public void setAddress(String address) {
         mAddress = address;
-        super.setTime(System.currentTimeMillis());
+        setTimeNow();
     }
 
     /**
@@ -297,12 +303,12 @@ public class SgnLocation extends Location {
     /**
      * Returns the approximate distance in meters between this location and the given location. Distance is defined using the WGS84 ellipsoid.
      *
-     * @param store to mesure distance to
+     * @param store to measure distance to
      * @return the approximate distance in meters
-     * @see {@link #distanceTo(Location)}
+     * @see {@link SgnLocation#distanceTo(Location)}
      */
     public int distanceTo(Store store) {
-        Location tmp = new Location(SgnLocation.ETA_PROVIDER);
+        Location tmp = new Location(SgnLocation.SHOPGUN_PROVIDER);
         tmp.setLatitude(store.getLatitude());
         tmp.setLongitude(store.getLongitude());
         float dist = distanceTo(tmp);
@@ -323,7 +329,7 @@ public class SgnLocation extends Location {
         mBoundNorth = boundNorth;
         mBoundSouth = boundSouth;
         mBoundWest = boundWest;
-        super.setTime(System.currentTimeMillis());
+        setTimeNow();
     }
 
     public double getBoundEast() {
@@ -352,9 +358,9 @@ public class SgnLocation extends Location {
         super.setExtras(null);
         super.setLatitude(DEFAULT_COORDINATE);
         super.setLongitude(DEFAULT_COORDINATE);
-        super.setProvider(ETA_PROVIDER);
+        super.setProvider(SHOPGUN_PROVIDER);
         super.setSpeed(0.0f);
-        super.setTime(System.currentTimeMillis());
+        setTimeNow();
         mAddress = null;
         mBoundEast = DEFAULT_COORDINATE;
         mBoundNorth = DEFAULT_COORDINATE;
@@ -392,7 +398,7 @@ public class SgnLocation extends Location {
     /**
      * Checks if two {@link SgnLocation} is at the same point in the eyes of the API.
      * So, latitude, longitude, radius and sensor will be checked. (and null)
-     * <p><b>It's not an equals method<b></p>
+     * <p><b>It's not an equals method</b></p>
      *
      * @param other A location to compare with
      * @return true if they are the same, otherwise false
