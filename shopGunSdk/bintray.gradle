@@ -12,6 +12,7 @@ task sourcesJar(type: Jar) {
 }
 
 task javadoc(type: Javadoc) {
+    failOnError true // Only disable for debugging
     source = android.sourceSets.main.java.srcDirs
     classpath += configurations.compile
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
@@ -31,14 +32,13 @@ javadoc {
         links "http://docs.oracle.com/javase/8/docs/api"
         title PROJ_ARTIFACTID
     }
-
 }
 
 if (JavaVersion.current().isJava8Compatible()) {
     tasks.withType(Javadoc) {
-        // disable the crazy super-strict doclint tool in Java 8
-        //noinspection SpellCheckingInspection
-        options.addStringOption('Xdoclint:none', '-quiet')
+        // Disable the crazy super-strict doclint tool in Java 8
+        // Only disable for debugging
+//        options.addStringOption('Xdoclint:none', '-quiet')
     }
 }
 
