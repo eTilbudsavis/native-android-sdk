@@ -19,11 +19,46 @@ package com.shopgun.android.sdk.palette;
 import android.graphics.Color;
 import android.os.Parcel;
 
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.ColorUtils;
 
 public class SgnColor extends Color implements  MaterialColor {
 
     public static final String TAG = SgnColor.class.getSimpleName();
+
+    /** Google definition: alpha = 0.30f */
+    public static final int TEXT_ALPHA_DISABLED_LIGHT = (int)(255*0.3f);
+    /** Google definition: alpha = 0.38f */
+    public static final int TEXT_ALPHA_DISABLED_DARK = (int)(255*0.38f);
+    /** Google definition: alpha = 0.70f */
+    public static final int TEXT_ALPHA_SECONDARY_LIGHT = (int)(255*0.70f);
+    /** Google definition: alpha = 0.54f */
+    public static final int TEXT_ALPHA_SECONDARY_DARK = (int)(255*0.54f);
+    /** Google definition: alpha = 1.0f */
+    public static final int TEXT_ALPHA_PRIMARY_LIGHT = (int)(255*1.0f);
+    /** Google definition: alpha = 0.87f */
+    public static final int TEXT_ALPHA_PRIMARY_DARK = (int)(255*0.87f);
+
+    public static final double THRESHOLD_VERY_BRIGHT = 0.95d;
+    public static final double THRESHOLD_BRIGHT = 0.87d;
+    public static final double THRESHOLD_LIGHT = 0.54d;
+    public static final double THRESHOLD_DARK = 0.13d;
+    public static final double THRESHOLD_VERY_DARK = 0.025d;
+
+    // We have modifier-percentages that map to shades.
+    // Use this list to find the matching percentage, or lerp if the shade is not on a x100 bounds
+    private static float[] mValuePercentConversion = new float[]{
+            1.06f,//50
+            0.70f,//100
+            0.50f,//200
+            0.30f,//300
+            0.15f,//400
+            0.00f,//500
+            -0.10f,//600
+            -0.25f,//700
+            -0.42f,//800
+            -0.59f,//900
+    };
 
     private final int mColor;
 
@@ -39,9 +74,108 @@ public class SgnColor extends Color implements  MaterialColor {
         this.mColor = color.mColor;
     }
 
+    public static float getModifiedHue(float hue, Shade shade) {
+        float s = (float)shade.getValue();
+        if (s > 500) {
+            // Laurie's calculations are based on hue being in the range [0.0-1.0]
+            // java has the range [0.0-360.0] so we'll do a little conversion
+            hue = hue/360.0f;
+            float hueAt900 = (1.003f*hue) - 0.016f;
+            hue = ((hueAt900 - hue)/((float)900-(float)500))*(s-(float)500) + hue;
+            return hue*360.0f;
+        } else {
+            return hue;
+        }
+    }
+
+    public static float getModifiedSaturation(float saturation, Shade shade) {
+        if (shade.getValue() == 500) {
+            return saturation;
+        }
+
+        if (shade.getValue() < 500) {
+            // get the saturation target @ 50:
+            // clamp to 0.0
+            float f = (0.136f * saturation) - 0.025f;
+            float satAt50 = Math.max(f, 0.0f);
+            // lerp shade 500->900
+            return ((saturation - satAt50)/(500-50))*(shade.getValue()-50) + satAt50;
+        } else {
+            // get the saturation target @ 900:
+            // quick inaccurate version:
+            // 110% of the base saturation (clamped to 1.0)
+            //            CGFloat satAt900 = MIN(baseSaturation * 1.10, 1.0);
+            // expensive(?) accurate version
+            float satAt900 = Math.min((-1.019f * saturation * saturation) + (2.283f * saturation) - 0.281f, 1.0f);
+            // lerp shade 500->900
+            return ((satAt900 - saturation)/(900-500))*(shade.getValue()-500) + saturation;
+        }
+    }
+
+
+    public static float getModifiedValue(float value, Shade shade) {
+
+        if (shade.getValue() == 500) {
+            return value;
+        }
+
+        float indexFloat = ((float)shade.getValue())/100.0f;
+
+        int indexFloor = (int)Math.floor(indexFloat);
+        int indexCeil = (int)Math.ceil(indexFloat);
+
+        int max = mValuePercentConversion.length-1;
+        int lowerIndex = Math.min( Math.max(indexFloor , 0 ), max );
+        int upperIndex = Math.min( Math.max(indexCeil, 0), max );
+
+        float lowerPercent = mValuePercentConversion[lowerIndex];
+        float valuePercent = 0.0f;
+        if (lowerIndex != upperIndex) {
+            float upperPercent = mValuePercentConversion[upperIndex];
+            float deltaPercent = upperPercent-lowerPercent;
+            float deltaIndex = upperIndex-lowerIndex;
+            valuePercent = lowerPercent + (deltaPercent / deltaIndex) * (indexFloat-(float)lowerIndex);
+        } else {
+            valuePercent = lowerPercent;
+        }
+
+        if (shade.getValue() < 500) {
+            return value + ((1.0f-value)*valuePercent);
+        } else {
+            return value + (value*valuePercent);
+        }
+    }
+
+    public static SgnColor getModifiedColor(int color, Shade shade) {
+        int modified = color;
+        if (shade != Shade.Shade500) {
+            float[] hsv = new float[3];
+            Color.colorToHSV(color, hsv);
+            hsv[0] = getModifiedHue(hsv[0], shade);
+            hsv[1] = getModifiedSaturation(hsv[1], shade);
+            hsv[2] = getModifiedValue(hsv[2], shade);
+            modified = Color.HSVToColor(Color.alpha(color), hsv);
+        }
+//        print(shade, color, modified);
+        return new SgnColor(modified);
+    }
+
+    private static String hsvToString(float[] hsv) {
+        return String.format("%.2f, %.2f, %.2f", hsv[0], hsv[1], hsv[2]);
+    }
+
+    private static void print(Shade shade, int orig, int modified) {
+        float[] origHsv = new float[3];
+        Color.colorToHSV(orig, origHsv);
+        float[] modHsv = new float[3];
+        Color.colorToHSV(modified, modHsv);
+        String format = "shade: %3s, orig.hsv[%s], mod.hsv[%s]";
+        SgnLog.d(TAG, String.format(format, shade.getValue(), hsvToString(origHsv), hsvToString(modHsv)));
+    }
+
     @Override
     public MaterialColor getColor(Shade s) {
-        return SgnPalette.getModifiedColor(mColor, s);
+        return SgnColor.getModifiedColor(mColor, s);
     }
 
     @Override
@@ -51,60 +185,77 @@ public class SgnColor extends Color implements  MaterialColor {
 
     @Override
     public int getPrimaryText() {
-        return SgnPalette.getPrimaryTextColor(mColor);
+        return getPrimaryTextColor(isLight());
+    }
+
+    /**
+     * @param brightBackground <code>true</code> if the background is bright, else <code>false</code>
+     * @return A foreground text color to fit the background
+     */
+    public static int getPrimaryTextColor(boolean brightBackground) {
+        int color = brightBackground ? Color.BLACK : Color.WHITE;
+        int alpha = brightBackground ? TEXT_ALPHA_PRIMARY_DARK : TEXT_ALPHA_PRIMARY_LIGHT;
+        return ColorUtils.setAlphaComponent(color, alpha);
     }
 
     @Override
     public int getSecondaryText() {
-        return SgnPalette.getSecondaryTextColor(mColor);
+        return getSecondaryTextColor(isLight());
+    }
+
+    /**
+     * @param brightBackground <code>true</code> if the background is bright, else <code>false</code>
+     * @return A foreground text color to fit the background
+     */
+    public static int getSecondaryTextColor(boolean brightBackground) {
+        int color = brightBackground ? Color.BLACK : Color.WHITE;
+        int alpha = brightBackground ? TEXT_ALPHA_SECONDARY_DARK : TEXT_ALPHA_SECONDARY_LIGHT;
+        return ColorUtils.setAlphaComponent(color, alpha);
     }
 
     @Override
     public int getDisabledText() {
-        return SgnPalette.getDisabledTextColor(mColor);
+        return getDisabledTextColor(isLight());
     }
 
     /**
-     * Returns the luminance of the color.
-     *
-     * Formula defined here: http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+     * @param brightBackground <code>true</code> if the background is bright, else <code>false</code>
+     * @return A foreground text color to fit the background
      */
+    public static int getDisabledTextColor(boolean brightBackground) {
+        int color = brightBackground ? Color.BLACK : Color.WHITE;
+        int alpha = brightBackground ? TEXT_ALPHA_DISABLED_DARK : TEXT_ALPHA_DISABLED_LIGHT;
+        return ColorUtils.setAlphaComponent(color, alpha);
+    }
+
     @Override
     public double getLuminance() {
         return ColorUtils.calculateLuminance(mColor);
     }
 
-    /**
-     * luminance value above 0.95
-     *
-     * @return
-     */
     @Override
     public boolean isVeryBright() {
-        return SgnPalette.isVeryBright(mColor);
+        return getLuminance() > THRESHOLD_VERY_BRIGHT;
     }
 
-    /** luminance value above 0.87 */
     @Override
     public boolean isBright() {
-        return SgnPalette.isBright(mColor);
+        return getLuminance() > THRESHOLD_BRIGHT;
     }
 
-    /** luminance value above 0.64 */
     @Override
     public boolean isLight() {
-        return SgnPalette.isLight(mColor);
+        return getLuminance() > THRESHOLD_LIGHT;
     }
 
     @Override
     public boolean isDark() {
-        return SgnPalette.isDark(mColor);
+        return getLuminance() < THRESHOLD_DARK;
     }
 
-    /** luminance value below 0.025 */
     @Override
     public boolean isVeryDark() {
-        return SgnPalette.isVeryDark(mColor);
+        return getLuminance() < THRESHOLD_VERY_DARK;
     }
 
     @Override
@@ -112,14 +263,28 @@ public class SgnColor extends Color implements  MaterialColor {
         return String.format("#%08X", mColor);
     }
 
+    /**
+     * Test is a color is darker than {@code this}
+     * @param other A color
+     * @return {@code true} if {@code other} is darker than {@code this}, else {@code false}
+     */
     public boolean isDarker(int other) {
         return getLuminance() < ColorUtils.calculateLuminance(other);
     }
 
+    /**
+     * Test is a color is lighter than {@code this}
+     * @param other A color
+     * @return {@code true} if {@code other} is lighter than {@code this}, else {@code false}
+     */
     public boolean isLighter(int other) {
         return getLuminance() > ColorUtils.calculateLuminance(other);
     }
 
+    /**
+     * Convert this color into a Hue, Saturation, Value human readable string
+     * @return A string
+     */
     public String toHSVString() {
         return com.shopgun.android.sdk.utils.ColorUtils.toHsvString(mColor);
     }

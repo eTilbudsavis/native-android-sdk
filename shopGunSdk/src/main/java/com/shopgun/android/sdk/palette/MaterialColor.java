@@ -17,41 +17,86 @@
 package com.shopgun.android.sdk.palette;
 
 import android.os.Parcelable;
+import android.support.annotation.ColorInt;
 
 public interface MaterialColor extends Parcelable {
 
+    /**
+     * Get a modified {@link MaterialColor} from a given {@link Shade}.
+     * <p>The returned {@link MaterialColor} should reflect the material design guidelines defined by Google</p>
+     * @param s A {@link Shade}
+     * @return A {@link MaterialColor}
+     */
     MaterialColor getColor(Shade s);
 
+    /**
+     * Get the color value of this {@link MaterialColor}
+     * @return A color
+     */
+    @ColorInt
     int getValue();
 
+    /**
+     * Get a nice primary-text-color for  text on top of this {@link MaterialColor}
+     * @return A color
+     */
+    @ColorInt
     int getPrimaryText();
 
+    /**
+     * Get a nice secondary-text-color for  text on top of this {@link MaterialColor}
+     * @return A color
+     */
+    @ColorInt
     int getSecondaryText();
 
+    /**
+     * Get a nice disabled-text-color for text on top of this {@link MaterialColor}
+     * @return A color
+     */
+    @ColorInt
     int getDisabledText();
 
     /**
-     * Returns the luminance of the color.
-     *
-     * Formula defined here: http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+     * Returns the luminance of the color.\
+     * <p>Formula defined here: http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef</p>
+     * @return The luminance value of this {@link MaterialColor}
      */
     double getLuminance();
 
     /**
-     * luminance value above 0.95
+     * Determine if this {@link MaterialColor} is very bright.
+     * <p>Implementations are suggested to use a luminance value above 0.95</p>
+     * @return {@code true} if this is very bright}, else {@code false}
      */
     boolean isVeryBright();
 
-    /** luminance value above 0.87 */
+    /**
+     * Determine if this {@link MaterialColor} is bright.
+     * <p>Implementations are suggested to use a luminance value above 0.87</p>
+     * @return {@code true} if this is bright}, else {@code false}
+     */
     boolean isBright();
 
-    /** luminance value above 0.64 */
+    /**
+     * Determine if this {@link MaterialColor} is light.
+     * <p>Implementations are suggested to use a luminance value above 0.64</p>
+     * @return {@code true} if this is light}, else {@code false}
+     */
     boolean isLight();
 
-    /** luminance value below 0.13 */
+    /**
+     * Determine if this {@link MaterialColor} is dark.
+     * <p>Implementations are suggested to use a luminance value below 0.13</p>
+     * @return {@code true} if this is dark}, else {@code false}
+     */
     boolean isDark();
 
-    /** luminance value below 0.025 */
+    /**
+     * Determine if this {@link MaterialColor} is very dark.
+     * <p>Implementations are suggested to use a luminance value below 0.025</p>
+     * @return {@code true} if this is very dark}, else {@code false}
+     */
     boolean isVeryDark();
 
 }
