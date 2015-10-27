@@ -63,15 +63,12 @@ import java.util.concurrent.Executors;
  *
  * You will have to add the API key and API secret as meta data in your AndroidManifest, in the following way:
  *
- * <pre>
- * &lt;meta-data android:name="com.shopgun.android.sdk.api_key" android:value="YOUR_API_KEY" /&gt;
- * &lt;meta-data android:name="com.shopgun.android.sdk.api_secret" android:value="YOUR_API_SECRET" /&gt;
- * </pre>
+ * {@code <meta-data android:name="com.shopgun.android.sdk.api_key" android:value="YOUR_API_KEY" />}
+ * {@code <meta-data android:name="com.shopgun.android.sdk.api_secret" android:value="YOUR_API_SECRET" />}
  *
- * <pre>
- * &lt;meta-data android:name="com.shopgun.android.sdk.develop.api_key" android:value="YOUR_DEVELOP_API_KEY" /&gt;
- * &lt;meta-data android:name="com.shopgun.android.sdk.develop.api_secret" android:value="YOUR_DEVELOP_API_SECRET" /&gt;
- * </pre>
+ *
+ * {@code <meta-data android:name="com.shopgun.android.sdk.develop.api_key" android:value="YOUR_DEVELOP_API_KEY" />}
+ * {@code <meta-data android:name="com.shopgun.android.sdk.develop.api_secret" android:value="YOUR_DEVELOP_API_SECRET" />}
  *
  * <h3>Usage</h3>
  *
@@ -439,7 +436,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     /**
      * Set the ETA SDK to use development options, such as development API key/secret.
      * This must be called prior to calling start.
-     * @param develop <code>true</code> to set development state.
+     * @param develop {@code true} to set development state.
      */
     public void setDevelop(boolean develop) {
         mDevelop = develop;

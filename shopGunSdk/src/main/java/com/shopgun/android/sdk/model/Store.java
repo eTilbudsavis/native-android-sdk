@@ -194,7 +194,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
 
     /**
      * Get the street for this {@link Store}
-     * @return A street, or <code>null</code>
+     * @return A street, or {@code null}
      */
     public String getStreet() {
         return mStreet;
@@ -212,7 +212,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
 
     /**
      * Get the city for this {@link Store}
-     * @return A city, or <code>null</code>
+     * @return A city, or {@code null}
      */
     public String getCity() {
         return mCity;
@@ -230,7 +230,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
 
     /**
      * Get the zip code for this {@link Store}
-     * @return A zipcode, or <code>null</code>
+     * @return A zipcode, or {@code null}
      */
     public String getZipcode() {
         return mZipcode;
@@ -248,7 +248,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
 
     /**
      * Get the country for this object
-     * @return A {@link Country}, or <code>null</code>
+     * @return A {@link Country}, or {@code null}
      */
     public Country getCountry() {
         return mCountry;
@@ -304,7 +304,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
      * Get the URL that points directly to the {@link Dealer} resource of this
      * {@link Store}, this is for convenience only.
      * <p>e.g.: "https://api.etilbudsavis.dk/v2/dealers/9bc61"</p>
-     * @return A {@link String}, or <code>null</code>
+     * @return A {@link String}, or {@code null}
      */
     public String getDealerUrl() {
         return mDealerUrl;
@@ -323,7 +323,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
 
     /**
      * Get the id for a {@link Dealer} resource related to this {@link Store}.
-     * @return An id, or <code>null</code>
+     * @return An id, or {@code null}
      */
     public String getDealerId() {
         return mDealerId;
@@ -347,7 +347,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
 
     /**
      * The {@link Branding} that is specific for this {@link Store}
-     * @return A {@link Branding}, or <code>null</code>
+     * @return A {@link Branding}, or {@code null}
      */
     public Branding getBranding() {
         return mBranding;

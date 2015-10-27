@@ -39,7 +39,7 @@ public interface PageCallback {
      * {@link PageflipFragment}. Is among other things used to determine, if the {@link PageflipFragment}
      * and {@link PageflipViewPager} is ready to display the catalog pages.
      *
-     * @return <code>true</code> if the current page have been set, else <code>false</code>
+     * @return {@code true} if the current page have been set, else {@code false}
      */
     public boolean isPositionSet();
 

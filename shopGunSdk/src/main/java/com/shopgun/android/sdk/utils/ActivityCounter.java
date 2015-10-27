@@ -86,7 +86,7 @@ public class ActivityCounter implements Runnable {
 
     /**
      * Test if there is currently an active activity.
-     * @return <code>true</code> if SDK is started else <code>false</code>
+     * @return {@code true} if SDK is started else {@code false}
      */
     public boolean isStarted() {
         synchronized (LOCK) {

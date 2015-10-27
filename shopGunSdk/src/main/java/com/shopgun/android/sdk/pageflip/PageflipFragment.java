@@ -355,7 +355,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     /**
      * Get the {@link PageflipListener}.
      *
-     * @return The listener, or <code>null</code>.
+     * @return The listener, or {@code null}.
      */
     public PageflipListener getListener() {
         return mWrapperListener.getListener();

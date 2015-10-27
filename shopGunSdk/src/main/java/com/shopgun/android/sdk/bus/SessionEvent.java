@@ -33,7 +33,7 @@ public class SessionEvent extends ShopGunEvent {
 
     /**
      * Check if the event is caused by a new user being logged in.
-     * @return <code>true</code> if it's a new user, else <code>false</code>
+     * @return {@code true} if it's a new user, else {@code false}
      */
     public boolean isNewUser() {
         return mOldUser != mNewUser;

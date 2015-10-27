@@ -189,7 +189,7 @@ public class SgnColor extends Color implements  MaterialColor {
     }
 
     /**
-     * @param brightBackground <code>true</code> if the background is bright, else <code>false</code>
+     * @param brightBackground {@code true} if the background is bright, else {@code false}
      * @return A foreground text color to fit the background
      */
     public static int getPrimaryTextColor(boolean brightBackground) {
@@ -204,7 +204,7 @@ public class SgnColor extends Color implements  MaterialColor {
     }
 
     /**
-     * @param brightBackground <code>true</code> if the background is bright, else <code>false</code>
+     * @param brightBackground {@code true} if the background is bright, else {@code false}
      * @return A foreground text color to fit the background
      */
     public static int getSecondaryTextColor(boolean brightBackground) {
@@ -219,7 +219,7 @@ public class SgnColor extends Color implements  MaterialColor {
     }
 
     /**
-     * @param brightBackground <code>true</code> if the background is bright, else <code>false</code>
+     * @param brightBackground {@code true} if the background is bright, else {@code false}
      * @return A foreground text color to fit the background
      */
     public static int getDisabledTextColor(boolean brightBackground) {

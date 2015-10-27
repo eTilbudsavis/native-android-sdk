@@ -178,7 +178,7 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
     }
 
     /**
-     * This method inserts a set of tags (&lt;b&gt;) to highlight the parts of the subject that
+     * This method inserts a set of tags ({@code <b>}, and {@code </b>}) to highlight the parts of the subject that
      * was matched by the API, to a given query. The {@link #getSubject() subject} is then returned
      * as a {@link Spanned} object. This type of object can directly be used in a TextView to create
      * the desired effect.

@@ -85,7 +85,7 @@ public class PageflipUtils {
      * Check if the given catalog has a list of valid Hotspots
      *
      * @param c A catalog
-     * @return <code>true</code> if the catalog has hotspots, else <code>false</code>
+     * @return {@code true} if the catalog has hotspots, else {@code false}
      */
     public static boolean isHotspotsReady(Catalog c) {
         return c != null && c.getHotspots() != null;
@@ -95,7 +95,7 @@ public class PageflipUtils {
      * Check if a given {@link Catalog} has a valid list of {@link com.shopgun.android.sdk.model.Images}
      *
      * @param c A catalog
-     * @return <code>true</code> if the catalog has pages, else <code>false</code>
+     * @return {@code true} if the catalog has pages, else {@code false}
      */
     public static boolean isPagesReady(Catalog c) {
         return c != null && c.getPages() != null && !c.getPages().isEmpty();

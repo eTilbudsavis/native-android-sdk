@@ -272,7 +272,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 
     /**
      * Get the description of this object. Description isn't required and may
-     * therefore be <code>null</code>.
+     * therefore be {@code null}.
      * @return A {@link String}, or null
      */
     public String getDescription() {
@@ -329,7 +329,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
     /**
      * Get the {@link Quantity} for this offer, where additional information
      * can be gathered, about weight, dimensions e.t.c.
-     * @return {@link Quantity} object, or <code>null</code>
+     * @return {@link Quantity} object, or {@code null}
      */
     public Quantity getQuantity() {
         return mQuantity;
@@ -365,7 +365,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 
     /**
      * Get {@link Links} that this offer has, including webshop links e.t.c.
-     * @return {@link Links} object, or <code>null</code>
+     * @return {@link Links} object, or {@code null}
      */
     public Links getLinks() {
         return mLinks;
@@ -383,7 +383,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 
     /**
      * Returns the {@link Date} this offer is be valid from.
-     * @return A {@link Date}, or <code>null</code>
+     * @return A {@link Date}, or {@code null}
      */
     public Date getRunFrom() {
         return mRunFrom;
@@ -407,7 +407,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 
     /**
      * Returns the {@link Date} this offer is be valid till.
-     * @return A {@link Date}, or <code>null</code>
+     * @return A {@link Date}, or {@code null}
      */
     public Date getRunTill() {
         return mRunTill;
@@ -433,7 +433,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
      * Get the URL that points directly to the {@link Dealer} resource of this
      * offer, this is for convenience only.
      * <p>e.g.: "https://api.etilbudsavis.dk/v2/dealers/9bc61"</p>
-     * @return A {@link String}, or <code>null</code>
+     * @return A {@link String}, or {@code null}
      */
     public String getDealerUrl() {
         return mDealerUrl;
@@ -452,7 +452,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 
     /**
      * Get the id for a {@link Dealer} resource related to this offer.
-     * @return An id, or <code>null</code>
+     * @return An id, or {@code null}
      */
     public String getDealerId() {
         return mDealerId;
@@ -478,7 +478,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
      * Get the URL that points directly to the {@link Store} resource of this
      * offer, this is for convenience only.
      * <p>e.g.: "https://api.etilbudsavis.dk/v2/stores/6d36wXI"</p>
-     * @return A {@link String}, or <code>null</code>
+     * @return A {@link String}, or {@code null}
      */
     public String getStoreUrl() {
         return mStoreUrl;
@@ -497,7 +497,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 
     /**
      * Get the id for a {@link Store} resource related to this offer.
-     * @return An id, or <code>null</code>
+     * @return An id, or {@code null}
      */
     public String getStoreId() {
         return mStoreId;
@@ -523,7 +523,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
      * Get the URL that points directly to the {@link Catalog} resource of this
      * offer, this is for convenience only.
      * <p>e.g.: "https://api.etilbudsavis.dk/v2/catalogs/56e37cL"</p>
-     * @return A {@link String}, or <code>null</code>
+     * @return A {@link String}, or {@code null}
      */
     public String getCatalogUrl() {
         return mCatalogUrl;
@@ -542,7 +542,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 
     /**
      * Get the id for a {@link Catalog} resource related to this offer.
-     * @return An id, or <code>null</code>
+     * @return An id, or {@code null}
      */
     public String getCatalogId() {
         return mCatalogId;

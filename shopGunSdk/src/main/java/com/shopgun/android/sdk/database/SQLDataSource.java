@@ -69,7 +69,7 @@ public class SQLDataSource {
 
     /**
      * Ask if the {@link SQLiteDatabase} is still open for business
-     * @return <code>true</code> if DB is open, else <code>false</code>
+     * @return {@code true} if DB is open, else {@code false}
      */
     public boolean isOpen() {
         synchronized (LOCK) {

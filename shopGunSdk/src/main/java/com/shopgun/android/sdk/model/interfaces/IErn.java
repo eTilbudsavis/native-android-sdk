@@ -29,7 +29,7 @@ public interface IErn<T> {
     /**
      * Get the id for this object.
      *
-     * @return A {@link String}, or <code>null</code>
+     * @return A {@link String}, or {@code null}
      */
     public String getId();
 

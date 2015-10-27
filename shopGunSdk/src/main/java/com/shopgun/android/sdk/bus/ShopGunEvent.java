@@ -24,16 +24,16 @@ public class ShopGunEvent {
     private Object mTag;
 
     /**
-     * The the <code>tag</code> associated with this event.
-     * @return An {@link Object}, or <code>null</code>
+     * The the {@code tag} associated with this event.
+     * @return An {@link Object}, or {@code null}
      */
     public Object getTag() {
         return mTag;
     }
 
     /**
-     * Set a <code>tag</code> to this event.
-     * @param tag An {@link Object}, or <code>null</code>
+     * Set a {@code tag} to this event.
+     * @param tag An {@link Object}, or {@code null}
      */
     public void setTag(Object tag) {
         this.mTag = tag;
@@ -41,10 +41,8 @@ public class ShopGunEvent {
 
     /**
      * Get the type of event.
+     * <p>This is equavelent to calling {@link Class#getSimpleName()}</p>
      *
-     * <p>
-     *     This is equavelent to calling {@link Class#getSimpleName()}
-     * </p>
      * @return The type of event
      */
     public String getType() {

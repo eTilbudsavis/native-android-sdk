@@ -127,7 +127,7 @@ public class Pricing implements IJson<JSONObject>, Parcelable {
 
     /**
      * A currency corresponding to an <a href="http://en.wikipedia.org/wiki/ISO_4217">ISO 4217</a>
-     * currency code such as "EUR" or "USD". If <code>isoCurrencyCode</code> is <code>null</code>, we'll default to
+     * currency code such as "EUR" or "USD". If <code>isoCurrencyCode</code> is {@code null}, we'll default to
      * "DKK", due to a bug i API v1.
      * @param isoCurrencyCode A currency string
      * @return this object
@@ -139,7 +139,7 @@ public class Pricing implements IJson<JSONObject>, Parcelable {
 
     /**
      * A currency corresponding to an <a href="http://en.wikipedia.org/wiki/ISO_4217">ISO 4217</a>
-     * currency code such as "EUR" or "USD". If <code>currency</code> is <code>null</code>, we'll default to
+     * currency code such as "EUR" or "USD". If <code>currency</code> is {@code null}, we'll default to
      * "DKK", due to a bug i API v1.
      * @param currency A currency string
      * @return this object

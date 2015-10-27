@@ -133,7 +133,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Returns true if this request has been canceled.
-     * @return <code>true</code> if the request is canceled, else <code>false</code>
+     * @return {@code true} if the request is canceled, else {@code false}
      */
     public boolean isCanceled() {
         return mCanceled;
@@ -247,7 +247,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Whether this request should be added to cache.
-     * @param cacheable <code>true</code> if the response is cacheable, else <code>false</code>
+     * @param cacheable {@code true} if the response is cacheable, else {@code false}
      */
     protected void setCacheable(boolean cacheable) {
         mIsCacheable = cacheable;

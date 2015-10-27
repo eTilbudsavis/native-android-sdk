@@ -285,7 +285,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 
     /**
      * Returns the {@link Date} this catalog is be valid from.
-     * @return A {@link Date}, or <code>null</code>
+     * @return A {@link Date}, or {@code null}
      */
     public Date getRunFrom() {
         return mRunFrom;
@@ -309,7 +309,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 
     /**
      * Returns the {@link Date} this catalog is be valid till.
-     * @return A {@link Date}, or <code>null</code>
+     * @return A {@link Date}, or {@code null}
      */
     public Date getRunTill() {
         return mRunTill;

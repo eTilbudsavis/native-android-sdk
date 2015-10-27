@@ -331,7 +331,7 @@ public final class Utils {
      * comparing timestamps between the server and client, as the server uses seconds, and timestamps will rarely match
      * as expected otherwise.</p>
      *
-     * <code>1394021345625 -&gt; 1394021345000</code>
+     * {@code 1394021345625 -> 1394021345000}
      *
      * @param date A date to round
      * @return A date, floored to nearest second.
@@ -424,7 +424,7 @@ public final class Utils {
      * Get the version name contained in the AndroidManifest
      *
      * @param c A {@link Context} to get the the info from
-     * @return A version name string, or <code>null</code>
+     * @return A version name string, or {@code null}
      */
     public static String getAppVersion(Context c) {
 
@@ -471,7 +471,7 @@ public final class Utils {
      * Method for getting the meta data from a {@link Context}
      *
      * @param c A context
-     * @return A {@link Bundle} or <code>null</code>
+     * @return A {@link Bundle} or {@code null}
      */
     public static Bundle getMetaData(Context c) {
         try {

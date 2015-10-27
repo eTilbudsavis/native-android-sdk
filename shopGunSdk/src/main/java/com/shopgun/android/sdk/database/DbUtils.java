@@ -144,8 +144,8 @@ public class DbUtils {
      *
      * @param manager A {@link ListManager}
      * @param db      A {@link DatabaseWrapper}
-     * @param delete  <code>true</code> if you want to have the offline {@link Shoppinglist} and
-     *                {@link ShoppinglistItem} deleted on a successful migration completion, else <code>false</code>.
+     * @param delete  {@code true} if you want to have the offline {@link Shoppinglist} and
+     *                {@link ShoppinglistItem} deleted on a successful migration completion, else {@code false}.
      * @return the number of migrated lists
      */
     public static int migrateOfflineLists(ListManager manager, DatabaseWrapper db, boolean delete) {
@@ -189,7 +189,7 @@ public class DbUtils {
     /**
      * SDK default mapping between int and boolean.
      * <p>
-     *     returns <code>i == 1</code> so 1 is <code>true</code>, and all else is <code>false</code>
+     *     returns <code>i == 1</code> so 1 is {@code true}, and all else is {@code false}
      * </p>
      * @param i The integer to convert
      * @return A boolean value
@@ -201,7 +201,7 @@ public class DbUtils {
     /**
      * SDK default mapping between int and boolean.
      * <p>
-     *     <code>true</code> returns 1, <code>false</code> returns 0;
+     *     {@code true} returns 1, {@code false} returns 0;
      * </p>
      *
      * @param b The boolean to convert
@@ -213,7 +213,7 @@ public class DbUtils {
 
     /**
      * SDK default mapping between string and boolean.
-     * <p><code>true</code> returns 1, <code>null</code> and <code>false</code> returns 0;</p>
+     * <p>{@code true} returns 1, {@code null} and {@code false} returns 0;</p>
      *
      * @param b The Boolean to convert
      * @return A String

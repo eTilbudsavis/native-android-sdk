@@ -94,7 +94,7 @@ public class SharedPreferencesUtils {
      * @param ctx A {@link Context}
      * @param fromPreferencesName Name of old SharedPreferences
      * @param toPreferencesName Name of new SharedPreferences
-     * @return <code>true</code> if success, else <code>false</code>
+     * @return {@code true} if success, else {@code false}
      */
     @SuppressLint("CommitPrefEdits")
     @SuppressWarnings({"unchecked", "ConstantConditions"})

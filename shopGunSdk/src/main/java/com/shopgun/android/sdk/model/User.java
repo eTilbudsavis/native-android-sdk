@@ -135,8 +135,8 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 
     /**
      * Method for finding out if the user is logged in via the API. It is determined
-     * on the basis that the {@link #getEmail() email} != null and the
-     * {@link User#getUserId()} &gt; {@link #NO_USER}.
+     * on the basis that the {@link #getEmail() email}  {@code !=} {@code null} and the
+     * {@link User#getUserId()} {@code >} {@link #NO_USER}.
      *
      * <p>It is not a requirement to be logged in, but it does offer some
      * advantages, such as online lists</p>
@@ -213,7 +213,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
      *     <li>{@code null} if gender is unknown</li>
      * </ul>
      *
-     * @return The gender, or <code>null</code>
+     * @return The gender, or {@code null}
      */
     public String getGender() {
         return mGender;
@@ -262,7 +262,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 
     /**
      * Get the name of the user.
-     * @return A name, or <code>null</code>
+     * @return A name, or {@code null}
      */
     public String getName() {
         return mName;
@@ -270,7 +270,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 
     /**
      * Set the name of a user.
-     * @param name A non-<code>null</code> {@link String}
+     * @param name A non-{@code null} {@link String}
      * @return This object
      */
     public User setName(String name) {
@@ -282,7 +282,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 
     /**
      * Get the e-mail address of the user.
-     * @return An email, or <code>null</code>
+     * @return An email, or {@code null}
      */
     public String getEmail() {
         return mEmail;
@@ -290,7 +290,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 
     /**
      * Set the email of the user.
-     * @param email A non-<code>null</code> {@link String}
+     * @param email A non-{@code null} {@link String}
      * @return This object
      */
     public User setEmail(String email) {
@@ -300,7 +300,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 
     /**
      * Get this users {@link Permission}. Permissions determine what access levelse the user has in the API.
-     * @return A set of permissions, or <code>null</code>
+     * @return A set of permissions, or {@code null}
      */
     public Permission getPermissions() {
         return mPermissions;
