@@ -24,13 +24,13 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.demo.base.BaseListActivity;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
-import com.shopgun.android.sdk.utils.Api;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
@@ -69,7 +69,7 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
         super.onResume();
         if (mCatalogs.isEmpty()) {
             showProgress("Fetching catalogs");
-            JsonArrayRequest catalogReq = new JsonArrayRequest(Api.Endpoint.CATALOG_LIST, mCatalogListener);
+            JsonArrayRequest catalogReq = new JsonArrayRequest(Endpoints.CATALOG_LIST, mCatalogListener);
             ShopGun.getInstance().add(catalogReq);
         }
     }
