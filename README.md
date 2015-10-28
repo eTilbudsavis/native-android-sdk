@@ -9,12 +9,17 @@ You will need to get an *API key* and *API secret* from our [developer site] (lo
 
 If you wish to try our demo app, just clone and run it. We've included an API key and secret, that will work straight out of the box. But the key only provides a limited amount of quereis pr day so don't use it in production.
 
+
+Getting Started
+---------------
+
+
 Download
 --------
 Grab it with Gradle, by adding this to your module's `build.gradle`:
 ```groovy
 dependencies {
-	compile 'com.shopgun.android:sdk:3.1.0-beta'
+	compile 'com.shopgun.android:sdk:3.1.+'
 }
 ```
 or clone from github, and add this to your project's `settings.gradle`:
@@ -24,6 +29,27 @@ project(':shopGunSdk').projectDir=new File('/path/to/shopgun-android-sdk/shopGun
 ```
 
 
+Features
+--------
+
+
+Feedback
+--------
+
+
+
+Contributing
+------------
+
+
+
+License
+-------
+We are licenced under [Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0).
+
+[ShopGun Developer site]:https://business.shopgun.com/developers/
+[ShopGun Android SDK]:https://github.com/shopgun/shopgun-android-sdk/
+[ShopGun API Documentation]:http://docs.api.etilbudsavis.dk/
 
 <!-- 
 
@@ -76,7 +102,7 @@ The rest of this documentation will offer detailed insights into:
 The SDK offers several convenient packages. Each package has a short description below, where the essential classes are described.
 
 Here we will give a short presentation of each class, it's purpose and functionality.
-For any information on API specifics please refer to our [API Documentation Page](http://docs.api.etilbudsavis.dk/)
+For any information on API specifics please refer to our [ShopGun API Documentation](http://docs.api.etilbudsavis.dk/)
 
 com.eTilbudsavis.etasdk
 
@@ -226,20 +252,4 @@ The objects are:
 
 The objects will in someway contain parts of all other objects, that have been included in this SDK.
 
-## Debugging
-
-
-# Utilities
-
-
-
-
-# Feedback
-If you have any feedback or comments feel free to contact danny@etilbudsavis.dk :-)
-
-[eclipse]:http://www.eclipse.org/
-[Android Development Tools]:http://developer.android.com/tools/sdk/eclipse-adt.html
-plugin. 
-[developer site]:https://etilbudsavis.dk/developers/
-[Native Android SDK]:https://github.com/eTilbudsavis/native-android-sdk.git
  -->
