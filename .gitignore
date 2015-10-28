@@ -39,7 +39,3 @@ infer-out/
 .idea/libraries
 .idea/datasources.xml
 .idea/dataSources.ids
-
-com.eTilbudsavis.SDKDemo/src/com/eTilbudsavis/sdkdemo/Keys.java
-com.eTilbudsavis.Testing/src/com/eTilbudsavis/testing/Keys.java
-com.eTilbudsavis.SDKDemo/res/values/strings_keys.xml
