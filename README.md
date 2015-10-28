@@ -3,25 +3,17 @@ ShopGun Android SDK
 
 The simple solution to querying for ShopGun-data.
 
-<a name="api-key-secret">API key and secret
------------------
-You will need to get an *API key* and *API secret* from our 
-[ShopGun Developer site] (look for "My Apps")
-
-If you wish to try our demo app, just clone and run it. We've included an API 
-key and secret, that will work straight out of the box. But the key only provides 
-a limited amount of quereis pr day so don't use it in production.
-
 Getting Started
 ---------------
 
-### Download with Gradle
+#### Download with Gradle
 If you haven't already added `jCenter` to your `build.gradle`, you'll need this:
 ```groovy
 repositories {
     jcenter() 
 }
 ```
+
 Now add these lines to your module's `build.gradle`:
 
 ```groovy
@@ -37,7 +29,15 @@ include ':shopGunSdk'
 project(':shopGunSdk').projectDir=new File('/path/to/shopgun-android-sdk/shopGunSdk')
 ```
 
-### Setup AndroidManifest.xml
+#### <a name="api-key-secret">API key and secret
+You will need to get an *API key* and *API secret* from our 
+[ShopGun Developer site] (look for "My Apps")
+
+If you wish to try our demo app, just clone and run it. We've included an API 
+key and secret, that will work straight out of the box. But the key only provides 
+a limited amount of quereis pr day so don't use it in production.
+
+#### Setup AndroidManifest.xml
 
 We need certain permissions, to make the whole thing run:
 ```xml
@@ -67,7 +67,7 @@ Now add the ApiKey and ApiSecret, you obtained in
 </application>
 ```
 
-### Initialize
+#### Initialize
 You'll need to inititlize the `ShopGun Android SDK` before you can use it. 
 You can do this from either `Application` or an `Activity`. 
 
@@ -75,7 +75,7 @@ You can do this from either `Application` or an `Activity`.
 // You'll need this import
 import com.shopgun.android.sdk.ShopGun;
 
-// And add this to your activity class
+// And add this to your Application/Activity class
 @Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -102,7 +102,7 @@ protected void onStop() {
 
 ```
 
-### Location
+#### Location
 We are very keen on delivering content close to the user, therefore we'll need
 to know their location. 
 
@@ -118,7 +118,7 @@ loc.setSensor(false);
 Typically you'll hook into LocationManager to get the device location, rather 
 than hardcode it ;-)
 
-### Performing yout first request
+#### Performing yout first request
 
 Let's try to get a list of catalogs.
 
@@ -139,7 +139,7 @@ JsonArrayRequest catalogReq = new JsonArrayRequest(Endpoints.CATALOG_LIST, liste
 // Add the request to the request queue
 ShopGun.getInstance().add(catalogReq);
 ```
-That was it, you've performed your first request to our ShopGun API :-)
+That's it, you've performed your first request to our ShopGun API :-)
 
 For more demonstartions on how you can do requests to the ShopGun API, 
 please have a look at the ShopGun SDK Demo. It's inclided in the [ShopGun Android SDK] project.
@@ -160,17 +160,35 @@ Features
 
 Feedback
 --------
-
+If you have any feedback, then please feel free to let us know. Issues can be 
+submitted via GitHub issues. Comments and suggestions can be emailed to
+me direcly via `danny@shopgun.com`, but i'd prefer if you'd use GitHub issues as well.
 
 
 Contributing
 ------------
+If you would like to contribute to the ShopGun Android SDK, feel free to do so.
+Just fork the repository on GitHub, and send us a pull request.
 
+Please try to follow existing code convention and style, when committing code.
 
 
 License
 -------
-We are licenced under [Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0).
+
+	Copyright 2015 ShopGun
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+	
+	  http://www.apache.org/licenses/LICENSE-2.0
+	
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
 
 
 [ShopGun Developer site]:https://business.shopgun.com/developers/
