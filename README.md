@@ -43,7 +43,7 @@ We need certain permissions, to make the whole thing run:
 ```xml
 <!-- Obviously we'll need internet -->
 <uses-permission android:name="android.permission.INTERNET"/>
-<!-- Check for connectivity, prior to performint shoppinglist synchronization -->
+<!-- Check for connectivity, prior to performing shoppinglist synchronization -->
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 <!-- Caching of images e.t.c. for Pageflip -->
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -141,8 +141,8 @@ ShopGun.getInstance().add(catalogReq);
 ```
 That's it, you've performed your first request to our ShopGun API :-)
 
-For more demonstartions on how you can do requests to the ShopGun API, 
-please have a look at the ShopGun SDK Demo. It's inclided in the [ShopGun Android SDK] project.
+For more exampels, please have a look at the ShopGun SDK Demo. There you can
+find some common usecases for the SDK. It's inclided in the [ShopGun Android SDK] project.
 
 
 Features
@@ -160,9 +160,9 @@ Features
 
 Feedback
 --------
-If you have any feedback, then please feel free to let us know. Issues can be 
-submitted via GitHub issues. Comments and suggestions can be emailed to
-me direcly via `danny@shopgun.com`, but i'd prefer if you'd use GitHub issues as well.
+If you have any feedback, then please feel free to let us know. Issues and 
+suggestions can be submitted via GitHub issues. Comments can be emailed to me at
+<danny@shopgun.com>
 
 
 Contributing
