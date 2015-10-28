@@ -115,7 +115,7 @@ bintray {
         websiteUrl = PROJ_WEBSITEURL
         issueTrackerUrl = PROJ_ISSUETRACKERURL
         vcsUrl = PROJ_VCSURL
-        licenses = ["Apache-2.0"]
+        licenses = LICENSE_ALL
         publicDownloadNumbers = true
     }
 }
