@@ -16,5 +16,5 @@
   limitations under the License.
   -->
 <resources>
-  <string name="com_shopgun_android_sdk_pageflip_page_error">Kunne ikke indlæse\nside %1$s</string>
+  <string name="com_shopgun_android_sdk_pageflip_page_error">Det gick inte att läsa in\nsidan %1$s</string>
 </resources>

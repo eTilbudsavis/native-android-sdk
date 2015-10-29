@@ -265,7 +265,8 @@ public class CatalogPageFragment extends Fragment implements
     @Override
     public void onError() {
         mLoader.stop();
-        mLoader.error("Couldn't load page: " + PageflipUtils.join("-", mPages));
+        String page = PageflipUtils.join("-", mPages);
+        mLoader.error(getString(R.string.com_shopgun_android_sdk_pageflip_page_error, page));
     }
 
     @Override
