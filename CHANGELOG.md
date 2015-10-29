@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-Version 3.1.0 *(2015-10)*
+Version 3.1.0 *(2015-10-29)*
 ----------------------------
 
  * New: Added ShopGun Android SDK to jCenter
@@ -51,6 +51,7 @@ Version 2.2.0 *(2015-01-12)*
  * New: Networking performance, with new loader classes
  * New: Started writing tests for models, and features in SDK
 
+
 Version 2.1.1
 ----------------------------
 
@@ -61,6 +62,7 @@ Version 2.1.1
  * Fix: Varius bug have been squished
  * Fix: ERN/id mismatch causing problems in `EtaErnObject`
  * Fix: Thread synchronization issues
+
 
 Version 2.1.0 *(2014-02-06)*
 ----------------------------
@@ -75,10 +77,12 @@ Version 2.1.0 *(2014-02-06)*
  * Deleted: `Api` class has been replaced. It wasn't easily extendable, the method for generics was faulty, and the type of request wasn't easy to work with.
  * fix: Major improvements to `SyncManager`, in keeping state between the local data, server data, and the changes performed in between start and end of a sync cycle
 
+
 Version 2.0.1 *(2014-02-06)*
 ----------------------------
 
  * Fix: Implemented more type safety when parsing JSON for primitive types
+
 
 Version 2.0.0 *(2014-02-06)*
 ----------------------------
@@ -95,6 +99,7 @@ Version 2.0.0 *(2014-02-06)*
  * Fix: Major speed improvements for Pageflip (see example)
  * Deleted: Basically a complete re-write, so all of v1.0
 
+
 Version 1.0.0 *(2013-04-18)*
 ----------------------------
 
@@ -102,5 +107,6 @@ Version 1.0.0 *(2013-04-18)*
  * Fix: SSL hack to use our wildcard certificate
  * Fix: Using threads instead of `AsyncTask`, as `AsyncTask` is slow
  * Fix: Fixed odd linebreaks in Pageflip HTML
+
 
 Initial release.
