@@ -123,6 +123,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         JSONObject jUser = Json.getObject(object, JsonKeys.USER);
         if (jUser != null) {
             // TODO: Consider changing structure of Share to match API
+            // But the 'user'-key indicates it's a User-object which it isn't
             s.setEmail(Json.valueOf(jUser, JsonKeys.EMAIL));
             s.setName(Json.valueOf(jUser, JsonKeys.NAME));
         }

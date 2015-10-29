@@ -25,7 +25,6 @@ import junit.framework.TestCase;
 public class ValidatorTest extends TestCase {
 
     public static final String TAG = Constants.getTag(ValidatorTest.class);
-    // TODO override all appropriate methods
 
 
     public static void test() {

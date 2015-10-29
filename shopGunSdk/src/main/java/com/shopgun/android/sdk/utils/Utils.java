@@ -32,10 +32,13 @@ import android.view.WindowManager;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Request;
+import com.squareup.picasso.Cache;
+import com.squareup.picasso.Picasso;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.URLEncoder;
 import java.nio.charset.IllegalCharsetNameException;
 import java.text.ParseException;
@@ -517,6 +520,32 @@ public final class Utils {
             p.x = display.getWidth();
         }
         return p;
+    }
+
+    private static void printFields(Object o) {
+        printFields(o.getClass());
+    }
+
+    private static void printFields(Class c) {
+        for (Field f : c.getDeclaredFields()) {
+            SgnLog.d(TAG, "Field: " + f.getName());
+        }
+    }
+
+    public static boolean clearPicassoCache(Picasso p) {
+
+        try {
+            Field f = p.getClass().getDeclaredField("cache");
+            f.setAccessible(true);
+            Cache c = (Cache) f.get(p);
+            c.clear();
+            return true;
+        } catch (Exception e) {
+            // ignore
+            SgnLog.e(TAG, e.getMessage(), e);
+        }
+
+        return false;
     }
 
 }

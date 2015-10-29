@@ -142,7 +142,7 @@ ShopGun.getInstance().add(catalogReq);
 That's it, you've performed your first request to our ShopGun API :-)
 
 For more exampels, please have a look at the ShopGun SDK Demo. There you can
-find some common usecases for the SDK. It's inclided in the [ShopGun Android SDK] project.
+find some common usecases for the SDK. It's bundled with the SDK. 
 
 
 Features
@@ -153,6 +153,7 @@ Features
 * [Pageflip](#pageflip)
 * [SessionManager](#sessionmanager)
 * [ListManager](#listmanager)
+* [MaterialColor](#MaterialColor)
 * [Debugging](#debugging)
 * [Models](#models)
 * [Utils](#utils)

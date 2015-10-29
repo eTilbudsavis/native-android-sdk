@@ -864,16 +864,6 @@ public class ModelTest {
         // Parcelable
         testParcelable(obj, Offer.CREATOR);
 
-        // TODO Can't run thing yet, uncomment when moved to junit project
-        // Parcelable - false
-//        parcel = Parcel.obtain();
-//        offer.writeToParcel(parcel, 0);
-//        parcel.setDataPosition(0);
-//        parcel.readString(); // This should make it impossible to recreate the offer
-//        parceledOffer = Offer.CREATOR.createFromParcel(parcel);
-//        Assert.assertNotSame(offer, parceledOffer);
-//        Assert.assertEquals(offer.hashCode(), parceledOffer.hashCode());
-
         // JSON
         Assert.assertNull(Offer.fromJSON((JSONObject)null));
         JSONObject jOffer = obj.toJSON();
