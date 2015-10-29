@@ -103,7 +103,7 @@ bintray {
     user = hasProperty("bintrayUser")?getProperty("bintrayUser"):getProperty("BINTRAY_USER")
     key = hasProperty("bintrayKey")?getProperty("bintrayKey"):getProperty("BINTRAY_KEY")
 
-    dryRun = true
+    dryRun = PROJ_DRYRUN
     publications = ['MavenJava']
     publish = true
 
