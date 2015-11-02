@@ -508,9 +508,12 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        int page = getPagesCorrected()[0];
-        outState.putInt(ARG_PAGE, page);
-        outState.putParcelable(ARG_CATALOG, mCatalog);
+        if (mConfig != null && mCatalog != null) {
+            // Only save state if Pageflip is running
+            int page = getPagesCorrected()[0];
+            outState.putInt(ARG_PAGE, page);
+            outState.putParcelable(ARG_CATALOG, mCatalog);
+        }
         outState.putString(ARG_CATALOG_ID, mCatalogId);
         outState.putString(ARG_VIEW_SESSION, mViewSessionUuid);
         outState.putParcelable(ARG_BRANDING, mBranding);
