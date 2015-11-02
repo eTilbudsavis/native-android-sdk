@@ -532,20 +532,4 @@ public final class Utils {
         }
     }
 
-    public static boolean clearPicassoCache(Picasso p) {
-
-        try {
-            Field f = p.getClass().getDeclaredField("cache");
-            f.setAccessible(true);
-            Cache c = (Cache) f.get(p);
-            c.clear();
-            return true;
-        } catch (Exception e) {
-            // ignore
-            SgnLog.e(TAG, e.getMessage(), e);
-        }
-
-        return false;
-    }
-
 }
