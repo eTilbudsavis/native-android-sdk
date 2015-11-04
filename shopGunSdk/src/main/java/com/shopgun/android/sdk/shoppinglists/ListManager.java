@@ -418,6 +418,7 @@ public class ListManager {
                 boolean equalId = sli.getOfferId() != null && sli.getOfferId().equals(s.getOfferId());
                 if (equalId || equalDes) {
                     s.setCount(s.getCount() + 1);
+                    s.setTick(false);
                     return editItem(s);
                 }
             }
