@@ -31,6 +31,7 @@ import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.api.Endpoints;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Branding;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Hotspot;
@@ -508,10 +509,15 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if (mConfig != null && mCatalog != null) {
-            // Only save state if Pageflip is running
+        try {
+            // A few things can go wrong here, but we can safely ignore them
+            // worst case, the reader will start at page 1
             int page = getPagesCorrected()[0];
             outState.putInt(ARG_PAGE, page);
+        } catch (Exception e) {
+            SgnLog.w(TAG, "Pageflip isn't ready, to save all state", e);
+        }
+        if (mCatalog != null) {
             outState.putParcelable(ARG_CATALOG, mCatalog);
         }
         outState.putString(ARG_CATALOG_ID, mCatalogId);
