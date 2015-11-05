@@ -17,6 +17,7 @@
 package com.shopgun.android.sdk.pageflip;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -43,6 +44,7 @@ import android.widget.TextView;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Catalog;
+import com.shopgun.android.sdk.utils.CatalogThumbTransformation;
 import com.shopgun.android.sdk.utils.ColorUtils;
 import com.shopgun.android.sdk.utils.Utils;
 import com.squareup.picasso.Picasso;
@@ -183,16 +185,16 @@ public class PageOverviewDialog extends DialogFragment {
     public class GalleryAdapter extends BaseAdapter implements SectionIndexer {
 
 
-        String[] sections;
-        Activity a;
+        String[] mSections;
+        Context mContext;
 
         public GalleryAdapter() {
 
-            a = getActivity();
+            mContext = getActivity();
 
-            sections = new String[getCount()];
+            mSections = new String[getCount()];
             for (int i = 0; i < getCount(); i++) {
-                sections[i] = String.valueOf(i + 1);
+                mSections[i] = String.valueOf(i + 1);
             }
 
         }
@@ -214,33 +216,36 @@ public class PageOverviewDialog extends DialogFragment {
             int fill = LayoutParams.FILL_PARENT;
 
             GridView.LayoutParams lp = new GridView.LayoutParams(fill, fill);
-            FrameLayout fl = new FrameLayout(a);
+            FrameLayout fl = new FrameLayout(mContext);
             fl.setLayoutParams(lp);
 
-            int ivSize = Utils.convertDpToPx(115, a);
+            int ivSize = Utils.convertDpToPx(115, mContext);
             FrameLayout.LayoutParams ivlp = new FrameLayout.LayoutParams(ivSize, ivSize, Gravity.CENTER_HORIZONTAL);
-            ImageView iv = new ImageView(a);
+            ImageView iv = new ImageView(mContext);
             iv.setLayoutParams(ivlp);
             fl.addView(iv);
 
             int g = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
             FrameLayout.LayoutParams tvlp = new FrameLayout.LayoutParams(wrap, wrap, g);
-            TextView tv = new TextView(a);
+            TextView tv = new TextView(mContext);
             tv.setText(String.valueOf(position + 1));
             tv.setTextColor(Color.WHITE);
             tv.setTextSize(20);
             tv.setTypeface(null, Typeface.BOLD);
             tv.setLayoutParams(tvlp);
 
-            int vpad = Utils.convertDpToPx(0, a);
-            int hpad = Utils.convertDpToPx(5, a);
+            int vpad = Utils.convertDpToPx(0, mContext);
+            int hpad = Utils.convertDpToPx(5, mContext);
             tv.setPadding(hpad, vpad, hpad, vpad);
 
             tv.setBackgroundDrawable(getDrawable());
             fl.addView(tv);
 
             String url = mCatalog.getPages().get(position).getThumb();
-            Picasso.with(a).load(url).into(iv);
+            Picasso.with(mContext)
+                    .load(url)
+                    .transform(new CatalogThumbTransformation(mCatalog))
+                    .into(iv);
             return fl;
         }
 
@@ -259,7 +264,7 @@ public class PageOverviewDialog extends DialogFragment {
         }
 
         public Object[] getSections() {
-            return sections;
+            return mSections;
         }
 
         public int getPositionForSection(int sectionIndex) {
