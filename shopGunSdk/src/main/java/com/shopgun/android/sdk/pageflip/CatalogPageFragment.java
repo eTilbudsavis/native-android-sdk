@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView;
@@ -39,6 +40,8 @@ public class CatalogPageFragment extends Fragment implements
         PageflipPage {
 
     public static final String TAG = Constants.getTag(CatalogPageFragment.class);
+
+    private static boolean LOG = false;
 
     protected static final float MAX_SCALE = 3.0f;
 
@@ -256,6 +259,7 @@ public class CatalogPageFragment extends Fragment implements
 
     @Override
     public void onComplete() {
+        log("onComplete");
         toggleContentVisibility(false);
         if (mPageVisible) {
             getStat().startView();
@@ -275,9 +279,11 @@ public class CatalogPageFragment extends Fragment implements
     }
 
     private void log(String msg) {
-//        String format = "pos[%s], pages[%s] %s";
-//        String text = String.format(format, mPosition, PageflipUtils.join(",", mPages), msg);
-//        SgnLog.d(TAG, text);
+        if (LOG) {
+            String format = "pos[%s], pages[%s] %s";
+            String text = String.format(format, mPosition, PageflipUtils.join(",", mPages), msg);
+            SgnLog.d(TAG, text);
+        }
     }
 
 }

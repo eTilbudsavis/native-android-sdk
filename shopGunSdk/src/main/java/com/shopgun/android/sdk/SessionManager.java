@@ -109,49 +109,50 @@ public class SessionManager {
         return (e != null && (1100 <= e.getCode() && e.getCode() < 1200));
     }
 
-    private Listener<JSONObject> getSessionListener(final Listener<JSONObject> l) {
+    private class SessionListenerWrapper implements Listener<JSONObject> {
 
-        Listener<JSONObject> sessionListener = new Listener<JSONObject>() {
+        Listener<JSONObject> mListener;
 
-            public void onComplete(JSONObject response, ShopGunError error) {
+        public SessionListenerWrapper(Listener<JSONObject> l) {
+            this.mListener = l;
+        }
 
-                synchronized (LOCK) {
+        @Override
+        public void onComplete(JSONObject response, ShopGunError error) {
+
+            synchronized (LOCK) {
 
 //                    SgnLog.d(TAG, "session: " + (response == null ? error.toString() : response.toString()));
 
-                    mReqInFlight = null;
+                mReqInFlight = null;
 
-                    if (response != null) {
+                if (response != null) {
 
-                        setSession(response);
-                        runQueue();
+                    setSession(response);
+                    runQueue();
 
-                    } else if (error.isSdk()) {
+                } else if (error.isSdk()) {
 
-                        // Only API responses should result in a session update.
-                        // We'll prevent the session from being destroyed, and 'ignore' the problem
-                        runQueue();
+                    // Only API responses should result in a session update.
+                    // We'll prevent the session from being destroyed, and 'ignore' the problem
+                    runQueue();
 
-                    } else if (mTryToRecover && recoverableError(error)) {
+                } else if (mTryToRecover && recoverableError(error)) {
 
-                        mTryToRecover = false;
-                        postSession(null);
+                    mTryToRecover = false;
+                    postSession(null);
 
-                    } else {
+                } else {
 
-                        runQueue();
+                    runQueue();
 
-                    }
-                }
-
-                if (l != null) {
-                    l.onComplete(response, error);
                 }
             }
-        };
 
-        return sessionListener;
-
+            if (mListener != null) {
+                mListener.onComplete(response, error);
+            }
+        }
     }
 
     private void addRequest(JsonObjectRequest r) {
@@ -357,13 +358,13 @@ public class SessionManager {
 
         }
 
-        JsonObjectRequest req = new JsonObjectRequest(Method.POST, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
+        JsonObjectRequest req = new JsonObjectRequest(Method.POST, Endpoint.SESSIONS, new JSONObject(args), new SessionListenerWrapper(l));
         addRequest(req);
 
     }
 
     private void putSession(final Listener<JSONObject> l) {
-        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, null, getSessionListener(l));
+        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, null, new SessionListenerWrapper(l));
         addRequest(req);
     }
 
@@ -380,7 +381,7 @@ public class SessionManager {
         args.put(Parameters.EMAIL, email);
         args.put(Parameters.PASSWORD, password);
         mShopGun.getSettings().setSessionUser(email);
-        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
+        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), new SessionListenerWrapper(l));
         addRequest(req);
         return req;
     }
@@ -397,7 +398,7 @@ public class SessionManager {
         Map<String, String> args = new HashMap<String, String>();
         args.put(Parameters.FACEBOOK_TOKEN, facebookAccessToken);
         mShopGun.getSettings().setSessionFacebook(facebookAccessToken);
-        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
+        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), new SessionListenerWrapper(l));
         addRequest(req);
         return req;
     }
@@ -426,7 +427,7 @@ public class SessionManager {
         mShopGun.getListManager().clear(mSession.getUser().getUserId());
         Map<String, String> args = new HashMap<String, String>();
         args.put(Parameters.EMAIL, "");
-        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), getSessionListener(l));
+        JsonObjectRequest req = new JsonObjectRequest(Method.PUT, Endpoint.SESSIONS, new JSONObject(args), new SessionListenerWrapper(l));
         addRequest(req);
         return req;
 //		} else {

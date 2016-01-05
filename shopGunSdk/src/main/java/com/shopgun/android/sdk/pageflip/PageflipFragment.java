@@ -157,8 +157,8 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
             int prev = mCurrentPosition;
             mCurrentPosition = position;
             if (mPagesReady) {
-                getPage(prev).onVisible();
-                getPage(mCurrentPosition).onInvisible();
+                getPage(prev).onInvisible();
+                getPage(mCurrentPosition).onVisible();
             }
             mWrapperListener.onPageChange(position, getPages());
         }
