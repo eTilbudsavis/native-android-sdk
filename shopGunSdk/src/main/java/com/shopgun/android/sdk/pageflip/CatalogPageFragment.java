@@ -29,16 +29,12 @@ import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.pageflip.stats.Clock;
 import com.shopgun.android.sdk.pageflip.stats.ClockFactory;
-import com.shopgun.android.sdk.pageflip.stats.NanoTimeClock;
 import com.shopgun.android.sdk.pageflip.stats.PageStatsCollector;
 import com.shopgun.android.sdk.pageflip.stats.PageStatsCollectorImpl;
-import com.shopgun.android.sdk.pageflip.stats.TimeSinceBootClock;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView;
 import com.shopgun.android.sdk.photoview.PhotoView;
-
-import java.util.Random;
 
 public class CatalogPageFragment extends Fragment implements
         PhotoView.OnPhotoTapListener,

@@ -76,6 +76,7 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     private ReaderConfig mConfig;
     private int mCurrentPosition = 0;
     private boolean mPagesReady = false;
+    /** Keeping track of internal resume/pause state */
     private boolean mPageflipStarted = false;
     private String mViewSessionUuid;
 
@@ -667,6 +668,13 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
     private void internalPause() {
 
+        synchronized (this) {
+            if (!mPageflipStarted) {
+                return;
+            }
+            mPageflipStarted = false;
+        }
+
         // The visibility usually happens via the OnPageChangeListener,
         // but when lifecycle events happens this isn't the case, so we'll fake it.
         getPage(mCurrentPosition).onInvisible();
@@ -676,7 +684,6 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
             mCatalogFillRequest.cancel();
         }
         mPagesReady = false;
-        mPageflipStarted = false;
         clearAdapter();
     }
 

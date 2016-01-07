@@ -121,7 +121,11 @@ public class PageStatsCollectorImpl implements PageStatsCollector {
         JsonObjectRequest r = new JsonObjectRequest(Request.Method.POST, url, body, new Response.Listener<JSONObject>() {
 
             public void onComplete(JSONObject response, ShopGunError error) {
-                logOut("Collected: " + body.toString() + ", " + (error==null? response.toString() : error.toString()));
+                if (response != null) {
+                    logOut("Collected: " + body.toString() );
+                } else {
+                    logOut("Failed to collect: " + body.toString() + ", error: " + error.toString() );
+                }
             }
         });
         mShopgun.add(r);
@@ -129,7 +133,7 @@ public class PageStatsCollectorImpl implements PageStatsCollector {
 
     private void verifyIntegrity() {
 
-        if (mView.getDurationAbsolute() < 0) {
+        if (mView.getDuration() < 0) {
 
             ShopGun sgn = ShopGun.getInstance();
             AppLogEntry entry = new AppLogEntry(sgn, "negative-duration", "android@shopgun.com");
