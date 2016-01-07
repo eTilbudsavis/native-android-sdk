@@ -27,6 +27,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 
 public class BaseFragment extends Fragment {
@@ -145,7 +146,8 @@ public class BaseFragment extends Fragment {
         if (print) {
             StackTraceElement ste = Thread.currentThread().getStackTrace()[3];
             String text = ste.getMethodName() + "(" + ste.getFileName() + ":" + ste.getLineNumber() + ")";
-            SgnLog.d(getClass().getSimpleName(), text);
+            String tag = Constants.getTag(getClass().getSimpleName());
+            SgnLog.d(tag, text);
         }
     }
 

@@ -18,7 +18,11 @@ package com.shopgun.android.sdk.pageflip;
 
 import android.os.Parcel;
 
+import com.shopgun.android.sdk.Constants;
+
 public class SinglePageReaderConfig extends ReaderConfig {
+
+    public static final String TAG = Constants.getTag(SinglePageReaderConfig.class);
 
     public SinglePageReaderConfig() {
     }

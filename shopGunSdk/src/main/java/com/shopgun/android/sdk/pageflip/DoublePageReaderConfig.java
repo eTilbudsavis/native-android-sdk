@@ -18,9 +18,11 @@ package com.shopgun.android.sdk.pageflip;
 
 import android.os.Parcel;
 
+import com.shopgun.android.sdk.Constants;
+
 public class DoublePageReaderConfig extends ReaderConfig {
 
-    public static final String TAG = DoublePageReaderConfig.class.getSimpleName();
+    public static final String TAG = Constants.getTag(DoublePageReaderConfig.class);
 
     public DoublePageReaderConfig() {
 

@@ -25,6 +25,7 @@ import android.os.Parcelable;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
+import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Images;
@@ -41,7 +42,7 @@ import java.util.Random;
 
 public class PageLoader implements ViewTreeObserver.OnPreDrawListener {
 
-    public static final String TAG = PageLoader.class.getSimpleName();
+    public static final String TAG = Constants.getTag(PageLoader.class);
 
     private Picasso mPicasso;
     private ImageView mImageView;

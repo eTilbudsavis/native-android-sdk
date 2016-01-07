@@ -19,11 +19,12 @@ package com.shopgun.android.sdk.pageflip;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 
+import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Catalog;
 
 public class CatalogPagerAdapter extends FragmentStatelessPagerAdapter {
 
-    public static final String TAG = CatalogPagerAdapter.class.getSimpleName();
+    public static final String TAG = Constants.getTag(CatalogPagerAdapter.class);
 
     private CatalogPageCallback mCallback;
     private int mMaxHeap;

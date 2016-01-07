@@ -21,6 +21,7 @@ public interface Clock {
     /**
      * Returns the current time time in milliseconds.
      * The time may be relative (as in not wall-clock time), as it's purpose is time measurements.
+     *
      * @return The clocks current time
      */
     long now();

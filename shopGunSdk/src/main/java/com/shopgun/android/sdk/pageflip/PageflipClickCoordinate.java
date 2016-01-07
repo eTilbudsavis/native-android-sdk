@@ -16,12 +16,15 @@
 
 package com.shopgun.android.sdk.pageflip;
 
+import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Hotspot;
 
 import java.util.List;
 
 public class PageflipClickCoordinate {
+
+    public static final String TAG = Constants.getTag(PageflipClickCoordinate.class);
 
     private final int mPage;
     private final float mActualX;

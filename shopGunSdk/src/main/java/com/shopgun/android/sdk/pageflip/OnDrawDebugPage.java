@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Hotspot;
 
@@ -27,7 +28,7 @@ import java.util.List;
 
 public class OnDrawDebugPage implements OnDrawPage {
 
-    public static final String TAG = OnDrawDebugPage.class.getSimpleName();
+    public static final String TAG = Constants.getTag(OnDrawDebugPage.class);
 
     @Override
     public Bitmap onDraw(Catalog catalog, int page, int[] pages, Bitmap b) {
