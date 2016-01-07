@@ -17,6 +17,7 @@
 package com.shopgun.android.sdk.network;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.log.Event;
 import com.shopgun.android.sdk.log.EventLog;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Response.Listener;
@@ -104,7 +105,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     }
 
     protected void resetstate() {
-        getLog().add("request-state-reset");
+        mEventLog.add("request-state-reset");
         mFinished = false;
         mCanceled = false;
         mCacheHit = false;
@@ -162,14 +163,14 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         addEvent(reason);
 
         try {
-            mNetworkLog.put("duration", getLog().getTotalDuration());
+            mNetworkLog.put("duration", mEventLog.getTotalDuration());
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
         }
 
         if (mSaveNetworkLog) {
             // Append the request summary to the debugging log
-            SgnLog.getLogger().getLog().add(EventLog.TYPE_REQUEST, mNetworkLog);
+            SgnLog.getLogger().getLog().add(Event.TYPE_REQUEST, mNetworkLog);
         }
 
         mFinished = true;

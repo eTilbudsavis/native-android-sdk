@@ -14,12 +14,18 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.pageflip;
+package com.shopgun.android.sdk.pageflip.stats;
 
-import android.util.AndroidRuntimeException;
-
-final class SuperNotCalledException extends AndroidRuntimeException {
-    public SuperNotCalledException(String msg) {
-        super(msg);
+public enum EventType {
+    VIEW {
+        @Override
+        public String toString() {
+            return "view";
+        }
+    }, ZOOM {
+        @Override
+        public String toString() {
+            return "zoom";
+        }
     }
 }

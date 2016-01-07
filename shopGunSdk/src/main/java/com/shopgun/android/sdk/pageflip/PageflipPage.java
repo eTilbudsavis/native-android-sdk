@@ -28,14 +28,15 @@ public interface PageflipPage {
 
     /**
      * Called when this {@link PageflipPage} becomes invisible/has focus in the {@link PageflipViewPager}.
-     * <p>Remember to </p>
-     * This can be used for statistics events.
+     * <p>This isn't necessarily in sync with the lifecycle of the e.g. fragments or activities</p>
+     * <p>This can be used for statistics events.</p>
      */
     void onInvisible();
 
     /**
      * Called when the {@link PageflipPage} is no longer visible/has focus in the {@link PageflipViewPager}.
-     * This can be used for statistics events.
+     * <p>This isn't necessarily in sync with the lifecycle of the e.g. fragments or activities</p>
+     * <p>This can be used for statistics events.</p>
      */
     void onVisible();
 

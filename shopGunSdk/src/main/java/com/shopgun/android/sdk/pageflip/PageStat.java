@@ -31,6 +31,7 @@ import com.shopgun.android.sdk.utils.Api;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@Deprecated
 public class PageStat {
 
     public static final String TAG = Constants.getTag(PageStat.class);

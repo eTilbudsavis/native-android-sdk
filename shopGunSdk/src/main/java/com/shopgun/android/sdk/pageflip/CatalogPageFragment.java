@@ -25,11 +25,20 @@ import android.view.ViewGroup;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
+import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.pageflip.stats.Clock;
+import com.shopgun.android.sdk.pageflip.stats.ClockFactory;
+import com.shopgun.android.sdk.pageflip.stats.NanoTimeClock;
+import com.shopgun.android.sdk.pageflip.stats.PageStatsCollector;
+import com.shopgun.android.sdk.pageflip.stats.PageStatsCollectorImpl;
+import com.shopgun.android.sdk.pageflip.stats.TimeSinceBootClock;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView;
 import com.shopgun.android.sdk.photoview.PhotoView;
+
+import java.util.Random;
 
 public class CatalogPageFragment extends Fragment implements
         PhotoView.OnPhotoTapListener,
@@ -57,7 +66,7 @@ public class CatalogPageFragment extends Fragment implements
 
     private ZoomPhotoView mPhotoView;
     private LoadingTextView mLoader;
-    private PageStat mStats;
+    private PageStatsCollector mStats;
 
     private PageLoader mPageLoader;
 
@@ -122,11 +131,11 @@ public class CatalogPageFragment extends Fragment implements
         }
     }
 
-    private PageStat getStat() {
+    private void ensurePageCollector() {
         if (mStats == null) {
-            mStats = new PageStat(mCallback.getCatalog().getId(), mCallback.getViewSession(), mPages);
+            Clock c = ClockFactory.getClock();
+            mStats = new PageStatsCollectorImpl(ShopGun.getInstance(), mCallback.getViewSession(), mCallback.getCatalog().getId(), mPages, c);
         }
-        return mStats;
     }
 
     public void setCatalogPageCallback(CatalogPageCallback callback) {
@@ -199,19 +208,21 @@ public class CatalogPageFragment extends Fragment implements
 
     public void onVisible() {
         log("onVisible");
+        ensurePageCollector();
         updateBranding();
         loadView();
         if (!mPageVisible && mPhotoView != null && mPhotoView.getBitmap() != null) {
             // first start if the page is visible, and has a bitmap
-            getStat().startView();
+            mStats.startView();
         }
         mPageVisible = true;
     }
 
     public void onInvisible() {
-        mPageVisible = false;
         log("onInvisible");
-        getStat().collectView();
+        mPageVisible = false;
+        mStats.collect();
+        mStats = null;
     }
 
     @Override
@@ -219,7 +230,6 @@ public class CatalogPageFragment extends Fragment implements
         log("onPause");
         mLoader.stop();
         mPhotoView.recycle();
-        onInvisible();
         if (mPageLoader != null) {
             mPageLoader.cancel();
         }
@@ -249,9 +259,9 @@ public class CatalogPageFragment extends Fragment implements
     public void onZoomChange(boolean isZoomed) {
         loadZoom();
         if (isZoomed) {
-            getStat().startZoom();
+            mStats.startZoom();
         } else {
-            getStat().collectZoom();
+            mStats.stopZoom();
         }
 
         mCallback.onZoom(mPhotoView, mPages, isZoomed);
@@ -262,7 +272,7 @@ public class CatalogPageFragment extends Fragment implements
         log("onComplete");
         toggleContentVisibility(false);
         if (mPageVisible) {
-            getStat().startView();
+            mStats.startView();
         }
     }
 

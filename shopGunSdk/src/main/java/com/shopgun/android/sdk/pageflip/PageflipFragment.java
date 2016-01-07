@@ -52,6 +52,7 @@ import java.util.List;
 public class PageflipFragment extends Fragment implements FillerRequest.Listener<Catalog> {
 
     public static final String TAG = Constants.getTag(PageflipFragment.class);
+
     public static final String ARG_CATALOG = Constants.getArg(PageflipFragment.class, "catalog");
     public static final String ARG_CATALOG_ID = Constants.getArg(PageflipFragment.class, "catalog-id");
     public static final String ARG_READER_CONFIG = Constants.getArg(PageflipFragment.class, "reader-config");
@@ -665,6 +666,11 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     }
 
     private void internalPause() {
+
+        // The visibility usually happens via the OnPageChangeListener,
+        // but when lifecycle events happens this isn't the case, so we'll fake it.
+        getPage(mCurrentPosition).onInvisible();
+
         mLoader.stop();
         if (mCatalogFillRequest != null) {
             mCatalogFillRequest.cancel();

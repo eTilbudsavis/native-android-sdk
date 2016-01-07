@@ -79,7 +79,7 @@ public class DefaultLogger implements SgnLogger {
         if (msg == null || msg.length() == 0) {
             msg = tr.getMessage();
         }
-        mLog.add(EventLog.TYPE_EXCEPTION, SgnLog.exceptionToJson(tr));
+        mLog.add(Event.TYPE_EXCEPTION, SgnLog.exceptionToJson(tr));
         return Log.e(tag, msg, tr);
     }
 

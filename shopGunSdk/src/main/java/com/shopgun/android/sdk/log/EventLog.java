@@ -18,17 +18,12 @@ package com.shopgun.android.sdk.log;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.FixedArrayList;
-import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -40,23 +35,6 @@ public class EventLog {
 
     public static final String TAG = Constants.getTag(EventLog.class);
 
-    public static final String TYPE_REQUEST = "request";
-    public static final String TYPE_EXCEPTION = "exception";
-    public static final String TYPE_VIEW = "view";
-    public static final String TYPE_LOG = "log";
-    public static Comparator<Event> timestamp = new Comparator<Event>() {
-
-        public int compare(Event e1, Event e2) {
-
-            if (e1 == null || e2 == null) {
-                return e1 == null ? (e2 == null ? 0 : 1) : -1;
-            } else {
-                return e1.time < e2.time ? -1 : 1;
-            }
-
-        }
-
-    };
     private List<Event> mEvents;
 
     /**
@@ -78,79 +56,25 @@ public class EventLog {
     }
 
     /**
-     * Create a JSONArray of the currents events
-     *
-     * @param events to torn into a JSONArray
-     * @param rawTime {@code true} to add timestamps as milliseconds singe 1970, {@code false} to use a human readable string.
-     * @return a JSONArray
-     */
-    public static JSONArray toJSON(List<Event> events, boolean rawTime) {
-        JSONArray jArray = new JSONArray();
-        if (events != null && !events.isEmpty()) {
-            for (Event e : events) {
-                jArray.put(e.toJSON(rawTime));
-            }
-        }
-        return jArray;
-    }
-
-    /**
      * Add a new Event to the log, based simply on a name. This is nice for tracing
      * when, where and in what order the events have occurred.
      *
      * @param name of the log entry
      */
     public void add(String name) {
-        add(name, null, null);
+        mEvents.add(new Event(name));
     }
 
     /**
      * Add a new Event to the log. Adding a special type, is nice for saving generic error correcting data
-     * to a log. This can be {@link #TYPE_VIEW view}, {@link #TYPE_EXCEPTION exception}, or {@link #TYPE_REQUEST request} events.
+     * to a log. This can be {@link Event#TYPE_VIEW view}, {@link Event#TYPE_EXCEPTION exception}, or {@link Event#TYPE_REQUEST request} events.
      * but essentially any string will do.
      *
      * @param type of event to add
      * @param data data accompanying the event
      */
     public void add(String type, JSONObject data) {
-        add(type, type, data);
-    }
-
-    /**
-     * Add a new Event to the log. Adding a special type, is nice for saving generic error correcting data
-     * to a log. This can be {@link #TYPE_VIEW view}, {@link #TYPE_EXCEPTION exception}, or {@link #TYPE_REQUEST request} events.
-     * but essentially any string will do.
-     *
-     * @param name A name for the event
-     * @param type of event to add
-     * @param data data accompanying the event
-     */
-    private void add(String name, String type, JSONObject data) {
-        String user = "null";
-        String token = "null";
-        if (ShopGun.isCreated()) {
-            user = ShopGun.getInstance().getUser().getErn();
-            token = ShopGun.getInstance().getSessionManager().getSession().getToken();
-        }
-        add(name, type, data, user, token);
-    }
-
-    /**
-     * Add a new Event to the log. Adding a special type, is nice for saving generic error correcting data
-     * to a log. This can be {@link #TYPE_VIEW view}, {@link #TYPE_EXCEPTION exception}, or {@link #TYPE_REQUEST request} events.
-     * but essentially any string will do.
-     *
-     * @param name A name for the event
-     * @param type of event to add
-     * @param data data accompanying the event
-     * @param user The ERN of the connected user
-     * @param token The session token
-     */
-    private void add(String name, String type, JSONObject data, String user, String token) {
-        long time = System.currentTimeMillis();
-        user = String.valueOf(user);
-        token = String.valueOf(token);
-        add(new Event(name, time, type, user, token, data));
+        mEvents.add(new Event(type, type).setData(data));
     }
 
     /**
@@ -165,7 +89,7 @@ public class EventLog {
     /**
      * Get the current list of events
      *
-     * @return A list of {@link com.shopgun.android.sdk.log.EventLog.Event}
+     * @return A list of {@link com.shopgun.android.sdk.log.Event}
      */
     public List<Event> getEvents() {
         return mEvents;
@@ -187,7 +111,7 @@ public class EventLog {
     public List<Event> getType(String type) {
         List<Event> tmp = new ArrayList<Event>();
         for (Event e : mEvents) {
-            if (e.type.equals(type)) {
+            if (e.getType().equals(type)) {
                 tmp.add(e);
             }
         }
@@ -207,12 +131,12 @@ public class EventLog {
         }
 
         StringBuilder sb = new StringBuilder();
-        long prevTime = mEvents.get(0).time;
+        long prevTime = mEvents.get(0).getTime();
         sb.append(String.format("     [%+6d ms] %s", getTotalDuration(), name)).append("\n");
         for (int i = 0; i < mEvents.size(); i++) {
             Event e = mEvents.get(i);
-            sb.append(String.format("[%2d] [%+6d ms] %s", i, (e.time - prevTime), e.name)).append("\n");
-            prevTime = e.time;
+            sb.append(String.format("[%2d] [%+6d ms] %s", i, (e.getTime() - prevTime), e.getName())).append("\n");
+            prevTime = e.getTime();
         }
 
         return sb.toString();
@@ -220,7 +144,7 @@ public class EventLog {
     }
 
     public JSONArray toJSON(boolean rawTime) {
-        return toJSON(mEvents, rawTime);
+        return Event.toJSON(mEvents, rawTime);
     }
 
     /**
@@ -233,52 +157,9 @@ public class EventLog {
             return 0;
         }
 
-        long first = mEvents.get(0).time;
-        long last = mEvents.get(mEvents.size() - 1).time;
+        long first = mEvents.get(0).getTime();
+        long last = mEvents.get(mEvents.size() - 1).getTime();
         return last - first;
-
-    }
-
-    /**
-     * Simple helper class, for usage in EventLog
-     */
-    public static class Event {
-
-        public final long time;
-        public final String type;
-        public final String token;
-        public final String user;
-        public final String name;
-        public final JSONObject data;
-
-        public Event(String name, long time, String type, String user, String token, JSONObject data) {
-            this.name = name == null ? (type == null ? "unknown" : type) : name;
-            this.time = time;
-            this.type = type;
-            this.user = user;
-            this.token = token;
-            this.data = data;
-        }
-
-        /**
-         * Convert this object into a JSONObject representation
-         * @param rawTime {@code true} to add timestamps as milliseconds singe 1970, {@code false} to use a human readable string.
-         * @return A JSONObject
-         */
-        public JSONObject toJSON(boolean rawTime) {
-            JSONObject o = new JSONObject();
-            try {
-                o.put("timestamp", (rawTime ? time : Utils.dateToString(new Date(time))));
-                o.put("type", type);
-                o.put("token", token);
-                o.put("userid", user);
-                o.put("name", name);
-                o.put("data", data);
-            } catch (JSONException e) {
-                SgnLog.e(TAG, null, e);
-            }
-            return o;
-        }
 
     }
 
