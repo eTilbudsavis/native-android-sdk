@@ -36,6 +36,8 @@ public class PageEvent {
     private final Orientation mOrientation;
     private final Clock mClock;
     private boolean mCollected = false;
+    private boolean mStarted = false;
+    private boolean mStopped = false;
     private long mStart = 0;
     private long mStop = 0;
     private ArrayList<PageEvent> mSubEvents = new ArrayList<PageEvent>();
@@ -64,6 +66,7 @@ public class PageEvent {
         if (!isStarted()) {
             mStart = mClock.now();
         }
+        mStarted = true;
     }
 
     /**
@@ -76,8 +79,8 @@ public class PageEvent {
             long now = mClock.now();
             mStart = now;
             mStop = now;
-            SgnLog.w(TAG, "Timer haven't been started, start and stop time set");
         }
+        mStopped = true;
     }
 
     /**
@@ -88,7 +91,7 @@ public class PageEvent {
      */
     public long getDuration() {
         long delta = 0;
-        for (PageEvent e : getSubEventsRecursive()) {
+        for (PageEvent e : getSubEvents()) {
             delta += e.getDuration();
         }
         return getDurationAbsolute() - delta;
@@ -108,24 +111,26 @@ public class PageEvent {
      * @return {@code true} if the event has been started, but not yet stopped, else {@code false}
      */
     public boolean isActive() {
-        return isStarted() && !isStopped();
+        return mStarted && !mStopped;
     }
 
     /**
      * @return {@code true} if the event has been started, else {@code false}
      */
     public boolean isStarted() {
-        return mStart > 0;
+        return mStarted;
     }
 
     /**
      * @return {@code true} if the event has been stopped, else {@code false}
      */
     public boolean isStopped() {
-        return mStop > 0;
+        return mStopped;
     }
 
     public void reset() {
+        mStarted = false;
+        mStopped = false;
         mStart = 0;
         mStop = 0;
         for (PageEvent e : mSubEvents) {
@@ -148,6 +153,10 @@ public class PageEvent {
 
     public long getStart() {
         return mStart;
+    }
+
+    public long getStop() {
+        return mStop;
     }
 
     public Clock getClock() {
@@ -187,17 +196,22 @@ public class PageEvent {
 
     @Override
     public String toString() {
+        return "";
+    }
+
+
+    public JSONObject toDebugJSON() {
         JSONObject o = toJSON();
         try {
             o.put("start", mStart);
             o.put("stop", mStop);
             o.put("clock", mClock.getClass().getSimpleName());
-            o.put("subevent.count", mSubEvents.size());
-            return o.toString();
+            o.put("sub-event-count", mSubEvents.size());
+            o.put("durationAbs", getDurationAbsolute());
         } catch (JSONException e) {
             SgnLog.d(TAG, e.getMessage(), e);
         }
-        return "";
+        return o;
     }
 
     public JSONObject toJSON() {

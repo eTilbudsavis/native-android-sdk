@@ -14,45 +14,45 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.pageflip.stats;
+package com.shopgun.android.sdk.pageflip.stats.impl;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.api.Endpoints;
-import com.shopgun.android.sdk.log.AppLogEntry;
-import com.shopgun.android.sdk.log.Event;
 import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.network.Request;
-import com.shopgun.android.sdk.network.Response;
-import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
+import com.shopgun.android.sdk.model.Catalog;
+import com.shopgun.android.sdk.pageflip.stats.Clock;
+import com.shopgun.android.sdk.pageflip.stats.PageEvent;
+import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
+import com.shopgun.android.sdk.pageflip.stats.StatDelivery;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PageStatsCollectorImpl implements PageStatsCollector {
+public class PageflipStatsCollectorImpl implements PageflipStatsCollector {
 
-    public static final String TAG = Constants.getTag(PageStatsCollectorImpl.class);
+    public static final String TAG = Constants.getTag(PageflipStatsCollectorImpl.class);
 
     private static final boolean LOG = false;
 
-    private ShopGun mShopgun;
-    private String mViewSession;
-    private String mCatalogId;
-    private int[] mPages;
-    private Clock mClock;
+    private final String mViewSession;
+    private final String mCatalogId;
+    private final int[] mPages;
+    private final Clock mClock;
+    private final StatDelivery mDelivery;
     private PageEvent mView;
     private PageEvent mZoom;
 
-    public PageStatsCollectorImpl(ShopGun sgn, String viewSession, String catalogId, int[] pages, Clock clock) {
-        mShopgun = sgn;
+    public PageflipStatsCollectorImpl(String viewSession, Catalog catalog, int[] pages, Clock clock, StatDelivery delivery) {
+        this(viewSession, catalog.getId(), pages, clock, delivery);
+    }
+
+    public PageflipStatsCollectorImpl(String viewSession, String catalogId, int[] pages, Clock clock, StatDelivery delivery) {
         mViewSession = viewSession;
         mCatalogId = catalogId;
         mPages = pages;
         mClock = clock;
+        mDelivery = delivery;
     }
 
     @Override
@@ -70,14 +70,19 @@ public class PageStatsCollectorImpl implements PageStatsCollector {
         if (mView == null) {
             mView = PageEvent.view(mViewSession, mPages, mClock);
         }
-        stopZoom();
+        if (mZoom != null) {
+            stopZoom();
+        }
         mView.stop();
     }
 
     @Override
     public void startZoom() {
         log("startZoom");
-        stopZoom();
+        startView();
+        if (mZoom != null) {
+            stopZoom();
+        }
         mZoom = PageEvent.zoom(mViewSession, mPages, mClock);
         mView.addSubEvent(mZoom);
         mZoom.start();
@@ -86,10 +91,13 @@ public class PageStatsCollectorImpl implements PageStatsCollector {
     @Override
     public void stopZoom() {
         log("stopZoom");
-        if (mZoom != null) {
-            mZoom.stop();
-            mZoom = null;
+        if (mZoom == null) {
+            startView();
+            mZoom = PageEvent.zoom(mViewSession, mPages, mClock);
+            mView.addSubEvent(mZoom);
         }
+        mZoom.stop();
+        mZoom = null;
     }
 
     @Override
@@ -98,52 +106,18 @@ public class PageStatsCollectorImpl implements PageStatsCollector {
         if (mView == null) {
             log("Nothing to collect, ignoring");
             return;
-        }
-        if (mView.isCollected()) {
+        } else if (mView.isCollected()) {
             log("Already collected, ignore");
             return;
         }
         stopView();
         for (PageEvent ve : getEvents()) {
-            postEvent(ve);
-        }
-        verifyIntegrity();
-    }
-
-    private void postEvent(PageEvent ve) {
-        if (ve.isCollected()) {
-            return;
-        }
-        ve.setCollected(true);
-
-        String url = Endpoints.catalogCollect(mCatalogId);
-        final JSONObject body = ve.toJSON();
-        JsonObjectRequest r = new JsonObjectRequest(Request.Method.POST, url, body, new Response.Listener<JSONObject>() {
-
-            public void onComplete(JSONObject response, ShopGunError error) {
-                if (response != null) {
-                    logOut("Collected: " + body.toString() );
-                } else {
-                    logOut("Failed to collect: " + body.toString() + ", error: " + error.toString() );
-                }
+            if (ve.isCollected()) {
+                return;
             }
-        });
-        mShopgun.add(r);
-    }
-
-    private void verifyIntegrity() {
-
-        if (mView.getDuration() < 0) {
-
-            ShopGun sgn = ShopGun.getInstance();
-            AppLogEntry entry = new AppLogEntry(sgn, "negative-duration", "android@shopgun.com");
-            for (PageEvent e : getEvents()) {
-                entry.addEvent(new Event(sgn, "view-event").setData(e.toJSON()));
-            }
-            entry.post();
-
+            ve.setCollected(true);
+            mDelivery.deliver(Endpoints.catalogCollect(mCatalogId), ve.toJSON());
         }
-
     }
 
     public PageEvent getCurrentEvent() {
@@ -151,21 +125,30 @@ public class PageStatsCollectorImpl implements PageStatsCollector {
     }
 
     @Override
+    public PageEvent getRootEvent() {
+        return mView;
+    }
+
+    @Override
     public List<PageEvent> getEvents() {
         ArrayList<PageEvent> list = new ArrayList<PageEvent>();
-        list.add(mView);
-        list.addAll(mView.getSubEventsRecursive());
+        if (mView != null) {
+            list.add(mView);
+            list.addAll(mView.getSubEventsRecursive());
+        }
         return list;
+    }
+
+    @Override
+    public void reset() {
+        mView = null;
+        mZoom = null;
     }
 
     private void log(String s) {
         if (LOG) {
-            logOut(s);
+            SgnLog.d(TAG, "page[" + PageflipUtils.join("-", mPages) + "] " + s);
         }
-    }
-
-    private void logOut(String s) {
-        SgnLog.d(TAG, "page[" + PageflipUtils.join("-", mPages) + "] " + s);
     }
 
 }

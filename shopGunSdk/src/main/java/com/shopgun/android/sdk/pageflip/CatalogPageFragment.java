@@ -18,25 +18,27 @@ package com.shopgun.android.sdk.pageflip;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
+import com.shopgun.android.sdk.SgnFragment;
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.log.AppLogEntry;
+import com.shopgun.android.sdk.log.Event;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.pageflip.stats.Clock;
-import com.shopgun.android.sdk.pageflip.stats.ClockFactory;
-import com.shopgun.android.sdk.pageflip.stats.PageStatsCollector;
-import com.shopgun.android.sdk.pageflip.stats.PageStatsCollectorImpl;
+import com.shopgun.android.sdk.pageflip.stats.PageEvent;
+import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
+import com.shopgun.android.sdk.pageflip.stats.StatDelivery;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView;
 import com.shopgun.android.sdk.photoview.PhotoView;
 
-public class CatalogPageFragment extends Fragment implements
+public class CatalogPageFragment extends SgnFragment implements
         PhotoView.OnPhotoTapListener,
         PhotoView.OnPhotoDoubleClickListener,
         PhotoView.OnPhotoLongClickListener,
@@ -62,10 +64,11 @@ public class CatalogPageFragment extends Fragment implements
 
     private ZoomPhotoView mPhotoView;
     private LoadingTextView mLoader;
-    private PageStatsCollector mStats;
+    private PageflipStatsCollector mStats;
 
     private PageLoader mPageLoader;
-
+    private StatDelivery mCollector;
+    private Clock mClock;
     private CatalogPageCallback mCallback;
 
     public static CatalogPageFragment newInstance(int position, int[] pages, PageLoader.Config config) {
@@ -124,13 +127,6 @@ public class CatalogPageFragment extends Fragment implements
         if (isAdded() && mCallback != null && mCallback.getCatalog() != null) {
             int brandingColor = mCallback.getCatalog().getBranding().getMaterialColor().getSecondaryText();
             mLoader.setTextColor(brandingColor);
-        }
-    }
-
-    private void ensurePageCollector() {
-        if (mStats == null) {
-            Clock c = ClockFactory.getClock();
-            mStats = new PageStatsCollectorImpl(ShopGun.getInstance(), mCallback.getViewSession(), mCallback.getCatalog().getId(), mPages, c);
         }
     }
 
@@ -204,7 +200,11 @@ public class CatalogPageFragment extends Fragment implements
 
     public void onVisible() {
         log("onVisible");
-        ensurePageCollector();
+        if (mStats == null) {
+            mStats = mCallback.getCollector(mPages);
+        } else {
+            SgnLog.d(TAG, "reusing a Collector, this shouldn't happen");
+        }
         updateBranding();
         loadView();
         if (!mPageVisible && mPhotoView != null && mPhotoView.getBitmap() != null) {
@@ -218,7 +218,23 @@ public class CatalogPageFragment extends Fragment implements
         log("onInvisible");
         mPageVisible = false;
         mStats.collect();
+        verifyIntegrity(mStats.getRootEvent());
         mStats = null;
+    }
+
+    private void verifyIntegrity(PageEvent rootEvent) {
+
+        if (rootEvent.getDuration() < 5) {
+
+            ShopGun sgn = ShopGun.getInstance();
+            AppLogEntry entry = new AppLogEntry(sgn, "negative-duration", "android@shopgun.com");
+            for (PageEvent subEvent : rootEvent.getSubEventsRecursive()) {
+                entry.addEvent(new Event(sgn, "view-event").setData(subEvent.toDebugJSON()));
+            }
+            entry.post();
+
+        }
+
     }
 
     @Override

@@ -21,6 +21,7 @@ import android.view.View;
 
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Hotspot;
+import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
 
 import java.util.List;
 
@@ -73,12 +74,6 @@ public interface CatalogPageCallback {
     Catalog getCatalog();
 
     /**
-     * Get the current view-session (for statistics purposes only)
-     * @return A view-session
-     */
-    String getViewSession();
-
-    /**
      * Called when a {@link CatalogPageFragment} has a page that is ready to be drawn.
      * Each page in a given array of pages will be called individually.
      * @param page Human readable page number to be drawn
@@ -87,5 +82,11 @@ public interface CatalogPageCallback {
      * @return A bitmap.
      */
     Bitmap onDrawPage(int page, int[] pages, Bitmap b);
+
+    /**
+     * Get the collector to be used for stats collection
+     * @return A collector
+     */
+    PageflipStatsCollector getCollector(int[] pages);
 
 }

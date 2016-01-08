@@ -157,6 +157,19 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     }
 
     /**
+     * Singleton access to a {@link ShopGun} object.
+     *
+     * @param ctx A context
+     * @return The {@link ShopGun} instance
+     */
+    public static ShopGun getInstance(Context ctx) {
+        if (!ShopGun.isCreated()) {
+            ShopGun.create(ctx);
+        }
+        return getInstance();
+    }
+
+    /**
      * Creates a new instance of {@link ShopGun}.
      *
      * <p>This method will instantiate a new instance of {@link ShopGun}, than can be
@@ -171,6 +184,9 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
             if (isCreated()) {
                 SgnLog.v(TAG, "ShopGun instance already created - ignoring");
             } else {
+                if (ctx == null) {
+                    throw new IllegalArgumentException("Context is null");
+                }
                 mShopGun = new ShopGun(ctx);
             }
             return mShopGun;

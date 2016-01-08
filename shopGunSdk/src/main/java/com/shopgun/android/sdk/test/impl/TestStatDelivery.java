@@ -14,13 +14,28 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.pageflip.stats;
+package com.shopgun.android.sdk.test.impl;
 
-import android.os.SystemClock;
+import com.shopgun.android.sdk.pageflip.stats.StatDelivery;
 
-public class TimeSinceBootClock implements Clock {
+import org.json.JSONObject;
+
+public class TestStatDelivery implements StatDelivery {
+
+    private boolean mReceivedDelivery = false;
+
     @Override
-    public long now() {
-        return SystemClock.elapsedRealtime();
+    public boolean deliver(String url, JSONObject data) {
+        mReceivedDelivery = true;
+        return true;
     }
+
+    public void reset() {
+        mReceivedDelivery = false;
+    }
+
+    public boolean recievedCollect() {
+        return mReceivedDelivery;
+    }
+
 }

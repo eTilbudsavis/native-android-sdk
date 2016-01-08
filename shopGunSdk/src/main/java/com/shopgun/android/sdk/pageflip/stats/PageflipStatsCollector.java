@@ -18,14 +18,28 @@ package com.shopgun.android.sdk.pageflip.stats;
 
 import java.util.List;
 
-public interface PageStatsCollector {
+public interface PageflipStatsCollector {
 
+    /**
+     * Start a view event. This method starts one view-event, subsequent invocations of this method will be no-op.
+     */
     void startView();
 
+    /**
+     * Stop the currently active view-event. All active sub-events in the view-event must also be terminated.
+     * If there is no active view-event, then just no-op
+     */
     void stopView();
 
+    /**
+     * Start a zoom-event. If there is no active view-event to append this zoom event to, then start must be invoked
+     */
     void startZoom();
 
+    /**
+     * Stop the currently active zoom-event.
+     * If there is no active zoom-event, then just no-op
+     */
     void stopZoom();
 
     /**
@@ -33,6 +47,21 @@ public interface PageStatsCollector {
      */
     void collect();
 
+    /**
+     * Get the root event of this collector
+     * @return An event
+     */
+    PageEvent getRootEvent();
+
+    /**
+     * Get a list of all events in this collector (recursive)
+     * @return A list of events
+     */
     List<PageEvent> getEvents();
+
+    /**
+     * Reset the current state for the events (and events only)
+     */
+    void reset();
 
 }

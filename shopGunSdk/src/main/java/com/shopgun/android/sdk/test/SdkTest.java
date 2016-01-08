@@ -44,6 +44,7 @@ public class SdkTest {
         VersionTest.test();
         ReaderConfigTest.test();
         MaterialColorTest.test();
+        PageflipTest.test();
 
         String ok = "*   All test passed (" + (System.currentTimeMillis() - start) + "ms)   *";
         StringBuilder sb = new StringBuilder();

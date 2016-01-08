@@ -14,15 +14,32 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.pageflip.stats;
+package com.shopgun.android.sdk.test.impl;
 
-import java.util.concurrent.TimeUnit;
+import com.shopgun.android.sdk.pageflip.stats.Clock;
 
-public class NanoTimeClock implements Clock {
+/**
+ * A clock that will increment by 10 for every invocation of {@link #now()}
+ */
+public class TestClock implements Clock {
+
+    private long mTime = 00;
 
     @Override
     public long now() {
-        return TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+        return mTime;
+    }
+
+    public long getCurrent() {
+        return mTime;
+    }
+
+    public void increment() {
+        mTime += 10;
+    }
+
+    public void reset() {
+        mTime = 0;
     }
 
 }

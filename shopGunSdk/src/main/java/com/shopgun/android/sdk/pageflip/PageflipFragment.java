@@ -30,6 +30,7 @@ import android.widget.FrameLayout;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.SgnFragment;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Branding;
@@ -38,6 +39,12 @@ import com.shopgun.android.sdk.model.Hotspot;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
+import com.shopgun.android.sdk.pageflip.stats.Clock;
+import com.shopgun.android.sdk.pageflip.stats.impl.ClockFactory;
+import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
+import com.shopgun.android.sdk.pageflip.stats.impl.PageflipStatsCollectorImpl;
+import com.shopgun.android.sdk.pageflip.stats.impl.StatDeliveryImpl;
+import com.shopgun.android.sdk.pageflip.stats.StatDelivery;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.requests.CatalogFillerRequest;
@@ -49,7 +56,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PageflipFragment extends Fragment implements FillerRequest.Listener<Catalog> {
+public class PageflipFragment extends SgnFragment implements FillerRequest.Listener<Catalog> {
 
     public static final String TAG = Constants.getTag(PageflipFragment.class);
 
@@ -94,6 +101,8 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
 
     private CatalogFillerRequest mCatalogFillRequest;
 
+    private Clock mClock = ClockFactory.getClock();
+    private StatDelivery mCollector;
     private CatalogPageCallback mCatalogPageCallback = new CatalogPageCallback() {
 
         public void onReady(int position) {
@@ -129,11 +138,6 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
         }
 
         @Override
-        public String getViewSession() {
-            return mViewSessionUuid;
-        }
-
-        @Override
         public Bitmap onDrawPage(int page, int[] pages, Bitmap b) {
             synchronized (this) {
                 mCatalog.getHotspots().normalize(b);
@@ -148,6 +152,11 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
                 b = tmp;
             }
             return b;
+        }
+
+        @Override
+        public PageflipStatsCollector getCollector(int[] pages) {
+            return new PageflipStatsCollectorImpl(mViewSessionUuid, mCatalog, pages, mClock, mCollector);
         }
 
     };
@@ -291,17 +300,14 @@ public class PageflipFragment extends Fragment implements FillerRequest.Listener
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
-        if (!ShopGun.isCreated()) {
-            // Make sure, that ShopGun is running
-            ShopGun.create(getActivity());
-        }
-
         if (mSavedInstanceState != null) {
             onRestoreState(mSavedInstanceState);
         } else {
             onRestoreState(savedInstanceState);
         }
         mSavedInstanceState = null;
+
+        mCollector = new StatDeliveryImpl(ShopGun.getInstance());
 
         mContainer = container;
         mFrame = (FrameLayout) inflater.inflate(R.layout.shopgun_sdk_layout_pageflip, mContainer, false);

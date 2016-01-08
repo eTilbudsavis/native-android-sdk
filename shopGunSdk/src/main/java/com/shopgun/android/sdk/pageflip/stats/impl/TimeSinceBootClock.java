@@ -14,12 +14,15 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.pageflip.stats;
+package com.shopgun.android.sdk.pageflip.stats.impl;
 
-public class WallClock implements Clock {
+import android.os.SystemClock;
 
+import com.shopgun.android.sdk.pageflip.stats.Clock;
+
+public class TimeSinceBootClock implements Clock {
     @Override
     public long now() {
-        return System.currentTimeMillis();
+        return SystemClock.elapsedRealtime();
     }
 }

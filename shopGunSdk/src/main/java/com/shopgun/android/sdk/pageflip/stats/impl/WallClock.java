@@ -14,26 +14,14 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.pageflip.stats;
+package com.shopgun.android.sdk.pageflip.stats.impl;
 
-import java.util.Random;
+import com.shopgun.android.sdk.pageflip.stats.Clock;
 
-public class ClockFactory {
+public class WallClock implements Clock {
 
-    static final Random mRandom = new Random();
-
-    public static Clock getClock() {
-
-        int i = mRandom.nextInt(2);
-
-        switch (i) {
-            case 0: return new NanoTimeClock();
-            case 1: return new TimeSinceBootClock();
-            case 2: return new WallClock();
-            default:
-                throw new IllegalStateException("What, can't you do math?");
-        }
-
+    @Override
+    public long now() {
+        return System.currentTimeMillis();
     }
-
 }
