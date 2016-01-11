@@ -90,6 +90,21 @@ public class PageflipTest extends TestCase {
         assertFalse(e.isStarted());
         assertFalse(e.isStopped());
 
+        clock.reset();
+        e.start();
+        clock.increment(); // time == 10
+        for (int i = 0; i < 10; i++) {
+            PageEvent subEvent = PageEvent.zoom(viewSession, pages, clock);
+            subEvent.start();
+            e.addSubEvent(subEvent);
+            clock.increment();
+            subEvent.stop();
+        }
+
+        assertEquals(10, e.getDuration());
+        assertEquals(110, e.getDurationAbsolute());
+        e.stop();
+
         SdkTest.logTest(TAG, "PageEvent");
     }
 
