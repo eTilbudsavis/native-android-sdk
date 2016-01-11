@@ -19,8 +19,6 @@ package com.shopgun.android.sdk;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 
-import com.shopgun.android.sdk.log.SgnLog;
-
 public class SgnFragment extends Fragment {
 
     public static final String TAG = Constants.getTag(SgnFragment.class);
@@ -35,7 +33,6 @@ public class SgnFragment extends Fragment {
 
     @Override
     public void onAttach(Context context) {
-        log("onAttach");
         super.onAttach(context);
         mShopgun = ShopGun.getInstance(context);
         // We'll just make sure we're running for the duration of this fragment
@@ -44,7 +41,6 @@ public class SgnFragment extends Fragment {
 
     @Override
     public void onDetach() {
-        log("onDetach");
         mShopgun.onStop();
         super.onDetach();
     }
@@ -55,10 +51,6 @@ public class SgnFragment extends Fragment {
                     "if ShopGun instance is instantiated prior to constructing " + getClass().getSimpleName());
         }
         return mShopgun;
-    }
-
-    private void log(String msg) {
-        SgnLog.d(getClass().getSimpleName(), msg);
     }
 
 }

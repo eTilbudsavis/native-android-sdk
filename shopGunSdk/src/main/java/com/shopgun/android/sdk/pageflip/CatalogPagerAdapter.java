@@ -95,8 +95,8 @@ public class CatalogPagerAdapter extends FragmentStatelessPagerAdapter {
     @Override
     public String toString() {
         int pc = mCallback.getCatalog().getPageCount();
-        String f = "%s[landscape:%s, pageCount:%s, viewCount:%s]";
-        return String.format(f, TAG, mConfig.isLandscape(), pc, getCount());
+        String f = "%s[orientation:%s, pageCount:%s, viewCount:%s]";
+        return String.format(f, TAG, mConfig.getOrientation().toString(), pc, getCount());
     }
 
 }
