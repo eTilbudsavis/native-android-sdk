@@ -39,6 +39,7 @@ import com.shopgun.android.sdk.model.Hotspot;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
+import com.shopgun.android.sdk.pageflip.impl.DoublePageReaderConfig;
 import com.shopgun.android.sdk.pageflip.stats.Clock;
 import com.shopgun.android.sdk.pageflip.stats.impl.ClockFactory;
 import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
@@ -102,7 +103,7 @@ public class PageflipFragment extends SgnFragment implements FillerRequest.Liste
     private CatalogFillerRequest mCatalogFillRequest;
 
     private Clock mClock = ClockFactory.getClock();
-    private StatDelivery mCollector;
+    private StatDelivery mStatsDelivery;
     private CatalogPageCallback mCatalogPageCallback = new CatalogPageCallback() {
 
         public void onReady(int position) {
@@ -156,7 +157,7 @@ public class PageflipFragment extends SgnFragment implements FillerRequest.Liste
 
         @Override
         public PageflipStatsCollector getCollector(int[] pages) {
-            return new PageflipStatsCollectorImpl(mViewSessionUuid, mCatalog, pages, mClock, mCollector);
+            return new PageflipStatsCollectorImpl(mViewSessionUuid, mCatalog, pages, mConfig, mClock, mStatsDelivery);
         }
 
     };
@@ -307,7 +308,7 @@ public class PageflipFragment extends SgnFragment implements FillerRequest.Liste
         }
         mSavedInstanceState = null;
 
-        mCollector = new StatDeliveryImpl(ShopGun.getInstance());
+        mStatsDelivery = new StatDeliveryImpl(ShopGun.getInstance(), true);
 
         mContainer = container;
         mFrame = (FrameLayout) inflater.inflate(R.layout.shopgun_sdk_layout_pageflip, mContainer, false);

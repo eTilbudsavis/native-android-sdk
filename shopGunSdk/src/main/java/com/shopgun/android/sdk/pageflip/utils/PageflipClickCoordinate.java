@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.pageflip;
+package com.shopgun.android.sdk.pageflip.utils;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Catalog;

@@ -24,7 +24,7 @@ import com.shopgun.android.sdk.model.Catalog;
 
 public abstract class ReaderConfig implements Parcelable {
 
-    boolean mLandscape = false;
+    Orientation mOrientation = Orientation.PORTRAIT;
     boolean mHasIntro = false;
     boolean mHasOutro = false;
 
@@ -62,40 +62,23 @@ public abstract class ReaderConfig implements Parcelable {
      * Method for getting the orientation
      *
      * @return true if in landscape mode, else false
+     * @deprecated see {@link #getOrientation()}
      */
+    @Deprecated
     public boolean isLandscape() {
-        return mLandscape;
+        return mOrientation.isLandscape();
     }
 
-    public void setLandscape(boolean landscape) {
-        mLandscape = landscape;
+    public Orientation getOrientation() {
+        return mOrientation;
+    }
+
+    public void setOrientation(Orientation orientation) {
+        mOrientation = orientation;
     }
 
     public void setConfiguration(Configuration config) {
-        setOrientation(config == null ? Configuration.ORIENTATION_PORTRAIT : config.orientation);
-    }
-
-    public void setOrientation(int orientation) {
-        setLandscape(orientation == Configuration.ORIENTATION_LANDSCAPE);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("ReaderConfig[landscape:%s, hasIntro:%s, hasOutro:%s]", isLandscape(), hasIntro(), hasOutro());
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByte(mLandscape ? (byte) 1 : (byte) 0);
-    }
-
-    protected ReaderConfig(Parcel in) {
-        this.mLandscape = in.readByte() != 0;
+        setOrientation(Orientation.fromConfiguration(config));
     }
 
     public boolean hasIntro() {
@@ -113,4 +96,24 @@ public abstract class ReaderConfig implements Parcelable {
     public void setHasOutro(boolean hasOutro) {
         this.mHasOutro = hasOutro;
     }
+
+    @Override
+    public String toString() {
+        return String.format("ReaderConfig[orientation:%s, hasIntro:%s, hasOutro:%s]", mOrientation.toString(), hasIntro(), hasOutro());
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        mOrientation.writeToParcel(dest, flags);
+    }
+
+    protected ReaderConfig(Parcel in) {
+        this.mOrientation = Orientation.CREATOR.createFromParcel(in);
+    }
+
 }

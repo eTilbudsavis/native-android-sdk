@@ -19,7 +19,7 @@ package com.shopgun.android.sdk.pageflip.stats;
 import java.util.List;
 
 public interface PageflipStatsCollector {
-
+    
     /**
      * Start a view event. This method starts one view-event, subsequent invocations of this method will be no-op.
      */

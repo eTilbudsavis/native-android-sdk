@@ -19,7 +19,7 @@ package com.shopgun.android.sdk.test;
 import android.content.res.Configuration;
 
 import com.shopgun.android.sdk.pageflip.ReaderConfig;
-import com.shopgun.android.sdk.pageflip.SinglePageReaderConfig;
+import com.shopgun.android.sdk.pageflip.impl.SinglePageReaderConfig;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;

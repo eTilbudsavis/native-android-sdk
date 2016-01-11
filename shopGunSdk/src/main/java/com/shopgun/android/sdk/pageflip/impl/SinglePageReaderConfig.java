@@ -14,11 +14,12 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.pageflip;
+package com.shopgun.android.sdk.pageflip.impl;
 
 import android.os.Parcel;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.pageflip.ReaderConfig;
 
 public class SinglePageReaderConfig extends ReaderConfig {
 

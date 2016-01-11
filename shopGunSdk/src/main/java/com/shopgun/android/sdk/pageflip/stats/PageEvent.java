@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.pageflip.stats;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.pageflip.Orientation;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 
 import org.json.JSONException;
@@ -42,12 +43,12 @@ public class PageEvent {
     private long mStop = 0;
     private ArrayList<PageEvent> mSubEvents = new ArrayList<PageEvent>();
 
-    public static PageEvent view(String viewSession, int[] pages, Clock c) {
-        return new PageEvent(EventType.VIEW, viewSession, Orientation.fromPages(pages), pages, c);
+    public static PageEvent view(String viewSession, int[] pages, Orientation orientation, Clock c) {
+        return new PageEvent(EventType.VIEW, viewSession, orientation, pages, c);
     }
 
-    public static PageEvent zoom(String viewSession, int[] pages, Clock c) {
-        return new PageEvent(EventType.ZOOM, viewSession, Orientation.fromPages(pages), pages, c);
+    public static PageEvent zoom(String viewSession, int[] pages, Orientation orientation, Clock c) {
+        return new PageEvent(EventType.ZOOM, viewSession, orientation, pages, c);
     }
 
     public PageEvent(EventType type, String viewSession, Orientation orientation, int[] pages, Clock c) {

@@ -18,7 +18,7 @@ package com.shopgun.android.sdk.test;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.pageflip.stats.EventType;
-import com.shopgun.android.sdk.pageflip.stats.Orientation;
+import com.shopgun.android.sdk.pageflip.Orientation;
 import com.shopgun.android.sdk.pageflip.stats.PageEvent;
 import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
 import com.shopgun.android.sdk.pageflip.stats.impl.PageflipStatsCollectorImpl;
@@ -94,7 +94,7 @@ public class PageflipTest extends TestCase {
         e.start();
         clock.increment(); // time == 10
         for (int i = 0; i < 10; i++) {
-            PageEvent subEvent = PageEvent.zoom(viewSession, pages, clock);
+            PageEvent subEvent = new PageEvent(EventType.ZOOM, viewSession, Orientation.LANDSCAPE, pages, clock);
             subEvent.start();
             e.addSubEvent(subEvent);
             clock.increment();
@@ -116,7 +116,7 @@ public class PageflipTest extends TestCase {
         TestClock clock = new TestClock();
         TestStatDelivery delivery = new TestStatDelivery();
 
-        PageflipStatsCollector collector = new PageflipStatsCollectorImpl(viewSession, catalogId, pages, clock, delivery);
+        PageflipStatsCollector collector = new PageflipStatsCollectorImpl(viewSession, catalogId, pages, Orientation.LANDSCAPE, clock, delivery);
 
         testPageflipStatsCollector(collector, clock, delivery);
 

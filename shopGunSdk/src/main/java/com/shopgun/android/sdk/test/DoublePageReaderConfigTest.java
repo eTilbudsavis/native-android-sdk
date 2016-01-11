@@ -19,7 +19,8 @@ package com.shopgun.android.sdk.test;
 import android.content.res.Configuration;
 
 import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.pageflip.DoublePageReaderConfig;
+import com.shopgun.android.sdk.pageflip.impl.DoublePageReaderConfig;
+import com.shopgun.android.sdk.pageflip.Orientation;
 import com.shopgun.android.sdk.pageflip.ReaderConfig;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 
@@ -48,7 +49,7 @@ public class DoublePageReaderConfigTest extends TestCase {
     public static void testIsLandscape(ReaderConfig r) {
 
         r.setConfiguration(null);
-        assertFalse(r.isLandscape());
+        assertEquals(Orientation.PORTRAIT, r.getOrientation());
 
         Configuration c = new Configuration();
         c.orientation = Configuration.ORIENTATION_LANDSCAPE;

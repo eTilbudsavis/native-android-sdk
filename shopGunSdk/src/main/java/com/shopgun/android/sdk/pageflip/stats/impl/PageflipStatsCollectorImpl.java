@@ -20,7 +20,9 @@ import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
+import com.shopgun.android.sdk.pageflip.ReaderConfig;
 import com.shopgun.android.sdk.pageflip.stats.Clock;
+import com.shopgun.android.sdk.pageflip.Orientation;
 import com.shopgun.android.sdk.pageflip.stats.PageEvent;
 import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
 import com.shopgun.android.sdk.pageflip.stats.StatDelivery;
@@ -38,19 +40,21 @@ public class PageflipStatsCollectorImpl implements PageflipStatsCollector {
     private final String mViewSession;
     private final String mCatalogId;
     private final int[] mPages;
+    private final Orientation mOrientation;
     private final Clock mClock;
     private final StatDelivery mDelivery;
     private PageEvent mView;
     private PageEvent mZoom;
 
-    public PageflipStatsCollectorImpl(String viewSession, Catalog catalog, int[] pages, Clock clock, StatDelivery delivery) {
-        this(viewSession, catalog.getId(), pages, clock, delivery);
+    public PageflipStatsCollectorImpl(String viewSession, Catalog catalog, int[] pages, ReaderConfig config, Clock clock, StatDelivery delivery) {
+        this(viewSession, catalog.getId(), pages, config.getOrientation(), clock, delivery);
     }
 
-    public PageflipStatsCollectorImpl(String viewSession, String catalogId, int[] pages, Clock clock, StatDelivery delivery) {
+    public PageflipStatsCollectorImpl(String viewSession, String catalogId, int[] pages, Orientation orientation, Clock clock, StatDelivery delivery) {
         mViewSession = viewSession;
         mCatalogId = catalogId;
         mPages = pages;
+        mOrientation = orientation;
         mClock = clock;
         mDelivery = delivery;
     }
@@ -59,7 +63,7 @@ public class PageflipStatsCollectorImpl implements PageflipStatsCollector {
     public void startView() {
         log("startView");
         if (mView == null) {
-            mView = PageEvent.view(mViewSession, mPages, mClock);
+            mView = PageEvent.view(mViewSession, mPages, mOrientation, mClock);
         }
         mView.start();
     }
@@ -68,7 +72,7 @@ public class PageflipStatsCollectorImpl implements PageflipStatsCollector {
     public void stopView() {
         log("stopView");
         if (mView == null) {
-            mView = PageEvent.view(mViewSession, mPages, mClock);
+            mView = PageEvent.view(mViewSession, mPages, mOrientation, mClock);
         }
         if (mZoom != null) {
             stopZoom();
@@ -83,7 +87,7 @@ public class PageflipStatsCollectorImpl implements PageflipStatsCollector {
         if (mZoom != null) {
             stopZoom();
         }
-        mZoom = PageEvent.zoom(mViewSession, mPages, mClock);
+        mZoom = PageEvent.zoom(mViewSession, mPages, mOrientation, mClock);
         mView.addSubEvent(mZoom);
         mZoom.start();
     }
@@ -93,7 +97,7 @@ public class PageflipStatsCollectorImpl implements PageflipStatsCollector {
         log("stopZoom");
         if (mZoom == null) {
             startView();
-            mZoom = PageEvent.zoom(mViewSession, mPages, mClock);
+            mZoom = PageEvent.zoom(mViewSession, mPages, mOrientation, mClock);
             mView.addSubEvent(mZoom);
         }
         mZoom.stop();

@@ -33,6 +33,7 @@ import com.shopgun.android.sdk.pageflip.stats.Clock;
 import com.shopgun.android.sdk.pageflip.stats.PageEvent;
 import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
 import com.shopgun.android.sdk.pageflip.stats.StatDelivery;
+import com.shopgun.android.sdk.pageflip.utils.PageflipClickCoordinate;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView;
@@ -223,6 +224,11 @@ public class CatalogPageFragment extends SgnFragment implements
     }
 
     private void verifyIntegrity(PageEvent rootEvent) {
+
+        if (rootEvent == null) {
+            // ignore, stats haven't been initialized yet
+            return;
+        }
 
         if (rootEvent.getDuration() < 5) {
 

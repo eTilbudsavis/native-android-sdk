@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.pageflip.utils;
+package com.shopgun.android.sdk.pageflip.impl;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
