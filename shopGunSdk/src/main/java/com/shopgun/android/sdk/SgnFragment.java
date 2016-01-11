@@ -19,27 +19,46 @@ package com.shopgun.android.sdk;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 
+import com.shopgun.android.sdk.log.SgnLog;
+
 public class SgnFragment extends Fragment {
 
-    private ShopGun mShopgun;
+    public static final String TAG = Constants.getTag(SgnFragment.class);
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mShopgun = ShopGun.getInstance(context);
+    protected ShopGun mShopgun;
+
+    public SgnFragment() {
+        if (ShopGun.isCreated()) {
+            this.mShopgun = ShopGun.getInstance();
+        }
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onAttach(Context context) {
+        log("onAttach");
+        super.onAttach(context);
+        mShopgun = ShopGun.getInstance(context);
         // We'll just make sure we're running for the duration of this fragment
         mShopgun.onStart();
     }
 
     @Override
-    public void onStop() {
+    public void onDetach() {
+        log("onDetach");
         mShopgun.onStop();
-        super.onStop();
+        super.onDetach();
+    }
+
+    protected ShopGun getShopgun() {
+        if (mShopgun == null) {
+            throw new IllegalStateException("Calling getShopgun() prior to onAttach only allowed, " +
+                    "if ShopGun instance is instantiated prior to constructing " + getClass().getSimpleName());
+        }
+        return mShopgun;
+    }
+
+    private void log(String msg) {
+        SgnLog.d(getClass().getSimpleName(), msg);
     }
 
 }

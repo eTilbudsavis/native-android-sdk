@@ -29,7 +29,6 @@ import android.widget.FrameLayout;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
-import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.SgnFragment;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.log.SgnLog;
@@ -41,11 +40,11 @@ import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.pageflip.impl.DoublePageReaderConfig;
 import com.shopgun.android.sdk.pageflip.stats.Clock;
-import com.shopgun.android.sdk.pageflip.stats.impl.ClockFactory;
 import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
+import com.shopgun.android.sdk.pageflip.stats.StatDelivery;
+import com.shopgun.android.sdk.pageflip.stats.impl.ClockFactory;
 import com.shopgun.android.sdk.pageflip.stats.impl.PageflipStatsCollectorImpl;
 import com.shopgun.android.sdk.pageflip.stats.impl.StatDeliveryImpl;
-import com.shopgun.android.sdk.pageflip.stats.StatDelivery;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.requests.CatalogFillerRequest;
@@ -308,7 +307,7 @@ public class PageflipFragment extends SgnFragment implements FillerRequest.Liste
         }
         mSavedInstanceState = null;
 
-        mStatsDelivery = new StatDeliveryImpl(ShopGun.getInstance(), true);
+        mStatsDelivery = new StatDeliveryImpl(getShopgun());
 
         mContainer = container;
         mFrame = (FrameLayout) inflater.inflate(R.layout.shopgun_sdk_layout_pageflip, mContainer, false);
@@ -588,7 +587,7 @@ public class PageflipFragment extends SgnFragment implements FillerRequest.Liste
         String url = Endpoints.catalogId(mCatalogId);
         JsonObjectRequest r = new JsonObjectRequest(url, l);
         r.setIgnoreCache(true);
-        ShopGun.getInstance().add(r);
+        getShopgun().add(r);
 
     }
 
@@ -638,7 +637,7 @@ public class PageflipFragment extends SgnFragment implements FillerRequest.Liste
             mCatalogFillRequest = new CatalogFillerRequest(mCatalog, this);
             mCatalogFillRequest.addHotspots(true);
             mCatalogFillRequest.addPages(true);
-            ShopGun.getInstance().add(mCatalogFillRequest);
+            getShopgun().add(mCatalogFillRequest);
         }
     }
 

@@ -25,7 +25,6 @@ import android.view.ViewGroup;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.SgnFragment;
-import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.AppLogEntry;
 import com.shopgun.android.sdk.log.Event;
 import com.shopgun.android.sdk.log.SgnLog;
@@ -232,10 +231,9 @@ public class CatalogPageFragment extends SgnFragment implements
 
         if (rootEvent.getDuration() < 5) {
 
-            ShopGun sgn = ShopGun.getInstance();
-            AppLogEntry entry = new AppLogEntry(sgn, "negative-duration", "android@shopgun.com");
+            AppLogEntry entry = new AppLogEntry(getShopgun(), "negative-duration", "android@shopgun.com");
             for (PageEvent subEvent : rootEvent.getSubEventsRecursive()) {
-                entry.addEvent(new Event(sgn, "view-event").setData(subEvent.toDebugJSON()));
+                entry.addEvent(new Event(getShopgun(), "view-event").setData(subEvent.toDebugJSON()));
             }
             entry.post();
 
