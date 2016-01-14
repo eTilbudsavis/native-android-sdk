@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+Version 3.1.1 *(2016-01)*
+----------------------------
+
+ * New: New statistics package, to replace `PageStats` for Pageflip
+ * Updates to the event log system, to better allow posting of the events
+ * New: A bunch of new request types, that'll allow for easy access to API data, 
+   including having depencencies automatically bundled into the request. See demo app for an example.
+
 Version 3.1.0 *(2015-10-29)*
 ----------------------------
 

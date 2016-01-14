@@ -32,8 +32,6 @@ import android.view.WindowManager;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Request;
-import com.squareup.picasso.Cache;
-import com.squareup.picasso.Picasso;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

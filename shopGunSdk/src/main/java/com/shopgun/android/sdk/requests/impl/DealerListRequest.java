@@ -14,25 +14,29 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.requests;
-
-import android.os.Parcelable;
+package com.shopgun.android.sdk.requests.impl;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.network.ShopGunError;
+import com.shopgun.android.sdk.api.Endpoints;
+import com.shopgun.android.sdk.model.Dealer;
+import com.shopgun.android.sdk.requests.LoaderRequest;
+import com.shopgun.android.sdk.requests.ModelListRequest;
 
-public class InternalOkError extends ShopGunError {
+import org.json.JSONArray;
 
-    public static final String TAG = Constants.getTag(InternalOkError.class);
+import java.util.List;
 
-    private static final int INTERNAL_ERROR_OK_SIGNAL = Integer.MAX_VALUE;
+public class DealerListRequest extends ModelListRequest<List<Dealer>> {
 
-    protected InternalOkError() {
-        super(INTERNAL_ERROR_OK_SIGNAL,
-                "Internal OK",
-                "An internal signal to run the remaining request queue");
+    public static final String TAG = Constants.getTag(DealerListRequest.class);
+
+    public DealerListRequest(LoaderRequest.Listener<List<Dealer>> listener) {
+        super(Endpoints.DEALER_LIST, null, listener);
     }
 
-    public static final Parcelable.Creator<ShopGunError> CREATOR = ShopGunError.CREATOR;
+    @Override
+    public List<Dealer> parse(JSONArray response) {
+        return Dealer.fromJSON(response);
+    }
 
 }
