@@ -16,9 +16,7 @@
 
 package com.shopgun.android.sdk.requests;
 
-import android.os.Handler;
-import android.os.Looper;
-
+import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.Delivery;
 import com.shopgun.android.sdk.network.NetworkResponse;
@@ -28,32 +26,44 @@ import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public abstract class FillerRequest<T> extends Request<T> implements Delivery {
+public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
 
-    public static final String TAG = FillerRequest.class.getSimpleName();
+    public static final String TAG = Constants.getTag(LoaderRequest.class);
 
-    private static final int INTERNAL_ERROR_OK_SIGNAL = Integer.MAX_VALUE;
-
+    private T mData;
     private final Listener<T> mListener;
-    private final ArrayList<Request> mRequests = new ArrayList<Request>();
-    private final T mData;
-    private final ArrayList<ShopGunError> mErrors = new ArrayList<ShopGunError>();
+    private final List<Request> mRequests = Collections.synchronizedList(new ArrayList<Request>());
+    private final List<ShopGunError> mErrors = Collections.synchronizedList(new ArrayList<ShopGunError>());
+    private final LoaderDelivery<T> mDelivery;
+    private final Object LOCK = new Object();
 
-    public FillerRequest(T data, Listener<T> l) {
+    public LoaderRequest(T data, Listener<T> l) {
         super(Method.PUT, null, null);
         mData = data;
         mListener = l;
+        mDelivery = new LoaderDelivery<T>(mListener);
     }
 
     public T getData() {
         return mData;
     }
 
-    public void addError(ShopGunError e) {
+    public Request setData(T data) {
+        mData = data;
+        return this;
+    }
+
+    public Request addError(ShopGunError e) {
         mErrors.add(e);
+        return this;
+    }
+
+    public List<ShopGunError> getErrors() {
+        return mErrors;
     }
 
     @Override
@@ -63,46 +73,34 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
             // This will be used at a cancellation signal
             setTag(new Object());
         }
-        setDelivery(this);
+        super.setDelivery(this);
         return super.setRequestQueue(requestQueue);
     }
 
     @Override
+    public Request setDelivery(Delivery d) {
+        throw new RuntimeException(new IllegalAccessException("Custom delivery not possible"));
+    }
+
+    @Override
     protected Response<T> parseNetworkResponse(NetworkResponse response) {
-        return getHackResponse();
+        return Response.fromError(new InternalOkError());
     }
 
     @Override
     protected Response<T> parseCache(Cache c) {
-        return getHackResponse();
-    }
-
-    private Response<T> getHackResponse() {
-        String message = String.format("%s internal OK", TAG);
-        String details = String.format("A %s internal signal to run the remaining %s request queue", TAG, TAG);
-        return Response.fromError(new ShopGunError(INTERNAL_ERROR_OK_SIGNAL, message, details));
+        return Response.fromError(new InternalOkError());
     }
 
     /**
      * Method for creating the needed requests for filling out a given object
      * @return A list of Request
      */
-    public abstract List<Request> createRequests();
-
-    @Override
-    public void deliverResponse(T response, ShopGunError error) {
-        if (error != null && error.getCode() == INTERNAL_ERROR_OK_SIGNAL) {
-            // Perform the rest of the request
-            runFillerRequests();
-        } else {
-            // Something bad, ignore and deliver
-            postResponseMain();
-        }
-    }
+    public abstract List<Request> createRequests(T data);
 
     private void runFillerRequests() {
-        synchronized (mRequests) {
-            List<Request> tmp = createRequests();
+        synchronized (LOCK) {
+            List<Request> tmp = createRequests(mData);
             Iterator<Request> it = tmp.iterator();
             while (it.hasNext()) {
                 Request r = it.next();
@@ -111,13 +109,9 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
                 }
             }
             mRequests.addAll(tmp);
-            if (mRequests.isEmpty()) {
-                postResponseMain();
-            } else {
-                for (Request r : mRequests) {
-                    applyState(r);
-                    getRequestQueue().add(r);
-                }
+            for (Request r : mRequests) {
+                applyState(r);
+                getRequestQueue().add(r);
             }
         }
     }
@@ -138,7 +132,7 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
 
     @Override
     public void cancel() {
-        synchronized (FillerRequest.class) {
+        synchronized (LOCK) {
             if (!isCanceled()) {
                 super.cancel();
                 getRequestQueue().cancelAll(getTag());
@@ -147,55 +141,43 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
     }
 
     @Override
+    public boolean isFinished() {
+        for (Request r : mRequests) {
+            if (!r.isFinished()) {
+                return false;
+            }
+        }
+        return super.isFinished();
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public void postResponse(Request<?> request, Response<?> response) {
-        request.addEvent("post-response");
 
-        if (this.equals(request)) {
+        synchronized (LOCK) {
 
-            // if it's this request
-            deliverResponse( (T)response.result, response.error);
+            request.addEvent("post-response");
 
-        } else {
+            if (this.equals(request)) {
 
-            // Update catalog (shouldn't be using network threads to deliver responses)
-            new DeliveryRunnable(request,response).run();
-
-            // Deliver catalog if needed
-            synchronized (mRequests) {
-                mRequests.remove(request);
-                if (mRequests.isEmpty()) {
-                    postResponseMain();
-                } else {
-                    addEvent("intermediate-delivery");
-                    mListener.onFillIntermediate(mData, mErrors);
+                if (response.error instanceof InternalOkError) {
+                    // Perform the rest of the request
+                    runFillerRequests();
                 }
+                boolean finished = mRequests.isEmpty();
+                mDelivery.deliver(this, response, mData, mErrors, !finished);
+
+            } else {
+
+                // Deliver catalog if needed
+                mRequests.remove(request);
+                boolean finished = mRequests.isEmpty();
+                mDelivery.deliver(request, response, mData, mErrors, !finished);
+
             }
 
         }
-    }
 
-    private void postResponseMain() {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            internalDelivery();
-        } else {
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    addEvent("request-on-new-thread");
-                    internalDelivery();
-                }
-            });
-        }
-    }
-
-    private void internalDelivery() {
-        if (isCanceled()) {
-            finish("cancelled-at-delivery");
-        } else {
-            finish("execution-finished-successfully");
-            mListener.onFillComplete(mData, mErrors);
-        }
     }
 
     /** Callback interface for delivering parsed responses. */
@@ -205,7 +187,7 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
          * @param response The response data.
          * @param errors A list of {@link ShopGunError} that occurred during execution.
          */
-        void onFillComplete(T response, List<ShopGunError> errors);
+        void onComplete(T response, List<ShopGunError> errors);
 
         /**
          * Called every time a request finishes.
@@ -213,7 +195,7 @@ public abstract class FillerRequest<T> extends Request<T> implements Delivery {
          * @param response The current state of the response data, this is not a complete set.
          * @param errors A list of {@link ShopGunError} that occurred during execution.
          */
-        void onFillIntermediate(T response, List<ShopGunError> errors);
+        void onIntermediate(T response, List<ShopGunError> errors);
     }
 
 }

@@ -157,7 +157,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     public Request finish(String reason) {
 
         if (mFinished) {
-            SgnLog.d(TAG, getClass().getSimpleName() + " - BAD is finished");
+            SgnLog.d(TAG, getClass().getSimpleName() + " - Request already finished, " + toString());
         }
 
         addEvent(reason);

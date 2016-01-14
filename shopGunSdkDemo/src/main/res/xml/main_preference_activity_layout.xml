@@ -29,6 +29,14 @@
         </Preference>
 
         <Preference
+            android:key="pref_main_catalog_list_loader"
+            android:title="Catalog list loader">
+            <intent
+                android:targetPackage="com.shopgun.android.sdk.demo"
+                android:targetClass="com.shopgun.android.sdk.demo.CatalogListLoaderActivity"/>
+        </Preference>
+
+        <Preference
             android:key="pref_main_offer_list"
             android:title="Offer list">
             <intent

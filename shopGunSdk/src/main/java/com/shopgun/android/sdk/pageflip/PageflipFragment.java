@@ -30,14 +30,13 @@ import android.widget.FrameLayout;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.SgnFragment;
-import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Branding;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Hotspot;
+import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.pageflip.impl.DoublePageReaderConfig;
 import com.shopgun.android.sdk.pageflip.stats.Clock;
 import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
@@ -47,8 +46,8 @@ import com.shopgun.android.sdk.pageflip.stats.impl.PageflipStatsCollectorImpl;
 import com.shopgun.android.sdk.pageflip.stats.impl.StatDeliveryImpl;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
-import com.shopgun.android.sdk.requests.CatalogFillerRequest;
-import com.shopgun.android.sdk.requests.FillerRequest;
+import com.shopgun.android.sdk.requests.LoaderRequest;
+import com.shopgun.android.sdk.requests.impl.CatalogRequest;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONObject;
@@ -56,7 +55,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PageflipFragment extends SgnFragment implements FillerRequest.Listener<Catalog> {
+public class PageflipFragment extends SgnFragment implements LoaderRequest.Listener<Catalog> {
 
     public static final String TAG = Constants.getTag(PageflipFragment.class);
 
@@ -99,7 +98,7 @@ public class PageflipFragment extends SgnFragment implements FillerRequest.Liste
     // Callbacks and stats
     private PageflipListenerWrapper mWrapperListener = new PageflipListenerWrapper();
 
-    private CatalogFillerRequest mCatalogFillRequest;
+    private CatalogRequest mCatalogRequest;
 
     private Clock mClock = ClockFactory.getClock();
     private StatDelivery mStatsDelivery;
@@ -558,68 +557,84 @@ public class PageflipFragment extends SgnFragment implements FillerRequest.Liste
         ensureCatalog();
     }
 
+    class CatalogRequestCacheIgnore extends CatalogRequest {
+
+        private boolean mIgnoreCache = true;
+
+        public CatalogRequestCacheIgnore(String catalogId, LoaderRequest.Listener<Catalog> listener) {
+            super(catalogId, listener);
+        }
+
+        public CatalogRequestCacheIgnore(Catalog catalog, LoaderRequest.Listener<Catalog> listener) {
+            super(catalog, listener);
+        }
+
+        @Override
+        protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+            // We'll ignore the cache until the first request have been on network
+            // we'll use this as stats
+            mIgnoreCache = false;
+            return super.parseNetworkResponse(response);
+        }
+
+        @Override
+        public boolean ignoreCache() {
+            return mIgnoreCache;
+        }
+
+    }
+
     private void ensureCatalog() {
-
         if (mCatalog != null) {
-            setBrandingAndFillCatalog();
-            return;
-        }
-
-        Response.Listener<JSONObject> l = new Response.Listener<JSONObject>() {
-
-            public void onComplete(JSONObject response, ShopGunError error) {
-
-                if (!isAdded()) {
-                    // Ignore callback
-                    return;
-                }
-
-                if (response != null) {
-                    setCatalog(Catalog.fromJSON(response));
-                    setBrandingAndFillCatalog();
-                } else {
-                    mLoader.error();
-                }
-
-            }
-        };
-
-        String url = Endpoints.catalogId(mCatalogId);
-        JsonObjectRequest r = new JsonObjectRequest(url, l);
-        r.setIgnoreCache(true);
-        getShopgun().add(r);
-
-    }
-
-    @Override
-    public void onFillIntermediate(Catalog response, List<ShopGunError> errors) {
-        // empty
-    }
-
-    @Override
-    public void onFillComplete(Catalog response, List<ShopGunError> errors) {
-
-        if (!isAdded()) {
-            return;
-        }
-
-        if (!errors.isEmpty()) {
-
-            mLoader.error();
-            // doesn't matter which error we choose, so we'll just take the first one
-            mWrapperListener.onError(errors.get(0));
-            showContent(false);
-
+            mCatalogRequest = new CatalogRequestCacheIgnore(mCatalog, this);
         } else {
-            applyAdapter();
-            mWrapperListener.onReady();
-            // force the first page change if needed
-            if (mPager.getCurrentItem() != mCurrentPosition) {
-                mPager.setCurrentItem(mCurrentPosition);
+            mCatalogRequest = new CatalogRequestCacheIgnore(mCatalogId, this);
+        }
+        mCatalogRequest.loadHotspots(true);
+        mCatalogRequest.loadPages(true);
+        getShopgun().add(mCatalogRequest);
+    }
+
+    @Override
+    public void onComplete(Catalog response, List<ShopGunError> errors) {
+
+        if (isAdded()) {
+
+            if (!errors.isEmpty()) {
+
+                mLoader.error();
+                // doesn't matter which error we choose, so we'll just take the first one
+                mWrapperListener.onError(errors.get(0));
+                showContent(false);
+
+            } else {
+
+                setCatalog(response);
+                setBranding(mCatalog.getBranding());
+
+                applyAdapter();
+                mWrapperListener.onReady();
+                // force the first page change if needed
+                if (mPager.getCurrentItem() != mCurrentPosition) {
+                    mPager.setCurrentItem(mCurrentPosition);
+                }
+                mWrapperListener.onPageChange(mCurrentPosition, getPages());
+
             }
-            mWrapperListener.onPageChange(mCurrentPosition, getPages());
+
         }
 
+    }
+
+    @Override
+    public void onIntermediate(Catalog response, List<ShopGunError> errors) {
+        mCatalogRequest.setIgnoreCache(false);
+        if (isAdded()) {
+            if (response != null) {
+                setCatalog(response);
+                setBranding(mCatalog.getBranding());
+            }
+        }
     }
 
     private void applyAdapter() {
@@ -629,16 +644,6 @@ public class PageflipFragment extends SgnFragment implements FillerRequest.Liste
         mAdapter.setOutroFragment(mOutroFragment);
         mPager.setAdapter(mAdapter);
         showContent(true);
-    }
-
-    private void setBrandingAndFillCatalog() {
-        if (mCatalog != null) {
-            setBranding(mCatalog.getBranding());
-            mCatalogFillRequest = new CatalogFillerRequest(mCatalog, this);
-            mCatalogFillRequest.addHotspots(true);
-            mCatalogFillRequest.addPages(true);
-            getShopgun().add(mCatalogFillRequest);
-        }
     }
 
     @Override
@@ -686,8 +691,8 @@ public class PageflipFragment extends SgnFragment implements FillerRequest.Liste
         getPage(mCurrentPosition).onInvisible();
 
         mLoader.stop();
-        if (mCatalogFillRequest != null) {
-            mCatalogFillRequest.cancel();
+        if (mCatalogRequest != null) {
+            mCatalogRequest.cancel();
         }
         mPagesReady = false;
         clearAdapter();
@@ -721,7 +726,7 @@ public class PageflipFragment extends SgnFragment implements FillerRequest.Liste
      * @param c A catalog to display
      */
     public void setCatalog(Catalog c) {
-        if (c != null) {
+        if (c != null && c != mCatalog) {
             mCatalog = c;
             mCatalogId = mCatalog.getId();
         }

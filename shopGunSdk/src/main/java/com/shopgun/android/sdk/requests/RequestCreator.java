@@ -16,6 +16,7 @@
 
 package com.shopgun.android.sdk.requests;
 
+import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.model.Catalog;
@@ -23,6 +24,7 @@ import com.shopgun.android.sdk.model.Dealer;
 import com.shopgun.android.sdk.model.HotspotMap;
 import com.shopgun.android.sdk.model.Images;
 import com.shopgun.android.sdk.model.Store;
+import com.shopgun.android.sdk.model.interfaces.ICatalog;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IStore;
 import com.shopgun.android.sdk.network.Request;
@@ -41,12 +43,18 @@ import java.util.Set;
 
 public class RequestCreator {
 
-    public static Request getStoreRequestOrNull(final FillerRequest request, final IStore<?> item) {
+    public static final String TAG = Constants.getTag(RequestCreator.class);
+
+    protected RequestCreator() {
+        // empty
+    }
+
+    public static Request getStoreRequestOrNull(final LoaderRequest request, final IStore<?> item) {
         boolean needStore = item.getStore() == null;
         return needStore ? getStoreRequest(request, item) : null;
     }
 
-    public static Request getStoreRequest(final FillerRequest request, final IStore<?> item) {
+    public static Request getStoreRequest(final LoaderRequest request, final IStore<?> item) {
         return new JsonObjectRequest(Endpoints.storeId(item.getStoreId()), new Response.Listener<JSONObject>() {
 
             public void onComplete(JSONObject response, ShopGunError error) {
@@ -59,12 +67,12 @@ public class RequestCreator {
         });
     }
 
-    public static Request getStoresRequestOrNull(final FillerRequest request, final List<? extends IStore<?>> list) {
+    public static Request getStoresRequestOrNull(final LoaderRequest request, final List<? extends IStore<?>> list) {
         Set<String> ids = getStoreIds(list);
         return ids.isEmpty() ? null : getStoreRequest(ids, request, list);
     }
 
-    public static Request getStoresRequest(final FillerRequest request, final List<? extends IStore<?>> list) {
+    public static Request getStoresRequest(final LoaderRequest request, final List<? extends IStore<?>> list) {
         Set<String> ids = getStoreIds(list);
         return getStoreRequest(ids, request, list);
     }
@@ -79,7 +87,7 @@ public class RequestCreator {
         return ids;
     }
 
-    private static Request getStoreRequest(final Set<String> ids, final FillerRequest request, final List<? extends IStore<?>> list) {
+    private static Request getStoreRequest(final Set<String> ids, final LoaderRequest request, final List<? extends IStore<?>> list) {
         JsonArrayRequest r = new JsonArrayRequest(Endpoints.STORE_LIST, new Response.Listener<JSONArray>() {
 
             @Override
@@ -104,12 +112,12 @@ public class RequestCreator {
         return r;
     }
 
-    public static Request getDealerRequestOrNull(final FillerRequest request, final IDealer<?> item) {
+    public static Request getDealerRequestOrNull(final LoaderRequest request, final IDealer<?> item) {
         boolean needDealer = item.getDealer() == null;
         return needDealer ? getDealerRequest(request, item) : null;
     }
 
-    public static Request getDealerRequest(final FillerRequest request, final IDealer<?> item) {
+    public static Request getDealerRequest(final LoaderRequest request, final IDealer<?> item) {
         return new JsonObjectRequest(Endpoints.dealerId(item.getDealerId()), new Response.Listener<JSONObject>() {
 
             public void onComplete(JSONObject response, ShopGunError error) {
@@ -122,12 +130,12 @@ public class RequestCreator {
         });
     }
 
-    public static Request getDealersRequestOrNull(final FillerRequest request, final List<? extends IDealer<?>> list) {
+    public static Request getDealersRequestOrNull(final LoaderRequest request, final List<? extends IDealer<?>> list) {
         Set<String> ids = getDealerIds(list);
         return ids.isEmpty() ? null : getDealersRequest(ids, request, list);
     }
 
-    public static Request getDealersRequest(final FillerRequest request, final List<? extends IDealer<?>> list) {
+    public static Request getDealersRequest(final LoaderRequest request, final List<? extends IDealer<?>> list) {
         Set<String> ids = getDealerIds(list);
         return getDealersRequest(ids, request, list);
     }
@@ -142,7 +150,7 @@ public class RequestCreator {
         return ids;
     }
 
-    private static Request getDealersRequest(final Set<String> ids, final FillerRequest request, final List<? extends IDealer<?>> list) {
+    private static Request getDealersRequest(final Set<String> ids, final LoaderRequest request, final List<? extends IDealer<?>> list) {
         JsonArrayRequest r = new JsonArrayRequest(Endpoints.DEALER_LIST, new Response.Listener<JSONArray>() {
 
             @Override
@@ -167,7 +175,7 @@ public class RequestCreator {
         return r;
     }
 
-    public static List<Request> getPagesListRequestOrEmpty(final FillerRequest request, final List<Catalog> catalogs) {
+    public static List<Request> getPagesListRequestOrEmpty(final LoaderRequest request, final List<Catalog> catalogs) {
         List<Request> list = new ArrayList<Request>();
         for (Catalog c : catalogs) {
             Request r = getPagesRequestOrNull(request, c);
@@ -178,7 +186,7 @@ public class RequestCreator {
         return list;
     }
 
-    public static List<Request> getPagesListRequest(final FillerRequest request, final List<Catalog> catalogs) {
+    public static List<Request> getPagesListRequest(final LoaderRequest request, final List<Catalog> catalogs) {
         List<Request> list = new ArrayList<Request>();
         for (Catalog c : catalogs) {
             list.add(getPagesRequestOrNull(request, c));
@@ -186,12 +194,12 @@ public class RequestCreator {
         return list;
     }
 
-    public static Request getPagesRequestOrNull(final FillerRequest request, final Catalog c) {
+    public static Request getPagesRequestOrNull(final LoaderRequest request, final Catalog c) {
         boolean needPages = c.getPages() == null || c.getPages().isEmpty();
         return needPages ? getPagesRequest(request, c) : null;
     }
 
-    public static Request getPagesRequest(final FillerRequest request, final Catalog c) {
+    public static Request getPagesRequest(final LoaderRequest request, final Catalog c) {
         return new JsonArrayRequest(Endpoints.catalogPages(c.getId()), new Response.Listener<JSONArray>() {
 
             public void onComplete(JSONArray response, ShopGunError error) {
@@ -204,7 +212,7 @@ public class RequestCreator {
         });
     }
 
-    public static List<Request> getHotspotsListRequestOrEmpty(final FillerRequest request, final List<Catalog> catalogs) {
+    public static List<Request> getHotspotsListRequestOrEmpty(LoaderRequest request, List<Catalog> catalogs) {
         List<Request> list = new ArrayList<Request>();
         for (Catalog c : catalogs) {
             Request r = getHotspotsRequestOrNull(request, c);
@@ -215,7 +223,7 @@ public class RequestCreator {
         return list;
     }
 
-    public static List<Request> getHotspotsListRequest(final FillerRequest request, final List<Catalog> catalogs) {
+    public static List<Request> getHotspotsListRequest(LoaderRequest request, List<Catalog> catalogs) {
         List<Request> list = new ArrayList<Request>();
         for (Catalog c : catalogs) {
             list.add(getHotspotsRequest(request, c));
@@ -223,12 +231,12 @@ public class RequestCreator {
         return list;
     }
 
-    public static Request getHotspotsRequestOrNull(final FillerRequest request, final Catalog c) {
+    public static Request getHotspotsRequestOrNull(LoaderRequest request, Catalog c) {
         boolean needHotspots = c.getHotspots() == null;
         return needHotspots ? getHotspotsRequest(request, c) : null;
     }
 
-    public static Request getHotspotsRequest(final FillerRequest request, final Catalog c) {
+    public static Request getHotspotsRequest(final LoaderRequest request, final Catalog c) {
 
         return new JsonArrayRequest(Endpoints.catalogHotspots(c.getId()), new Response.Listener<JSONArray>() {
 
@@ -241,6 +249,71 @@ public class RequestCreator {
             }
         });
 
+    }
+
+    public static Request createCatalogRequest(LoaderRequest request, ICatalog<?> item, boolean replace) {
+        return (replace || item.getCatalog() == null) ? createCatalogRequest(request, item) : null;
+    }
+
+    public static Request createCatalogRequest(final LoaderRequest request, final ICatalog<?> item) {
+        return new JsonObjectRequest(Endpoints.catalogId(item.getCatalogId()), new Response.Listener<JSONObject>() {
+
+            public void onComplete(JSONObject response, ShopGunError error) {
+                if (response != null) {
+                    item.setCatalog(Catalog.fromJSON(response));
+                } else {
+                    request.addError(error);
+                }
+            }
+        });
+    }
+
+    public static Request createCatalogRequest(LoaderRequest request, List<? extends ICatalog<?>> list) {
+        return createCatalogRequest(request, list, false);
+    }
+
+    public static Request createCatalogRequest(LoaderRequest request, List<? extends ICatalog<?>> list, boolean replace) {
+        Set<String> ids = getCatalogIds(list, replace);
+        return ids.isEmpty() ? null : createCatalogRequest(ids, request, list) ;
+    }
+
+    private static Set<String> getCatalogIds(List<? extends ICatalog<?>> list, boolean replace) {
+        Set<String> ids = new HashSet<String>(list.size());
+        for (ICatalog ic : list) {
+            if (ic.getCatalog() == null) {
+                // We need to get the catalog
+                ids.add(ic.getCatalogId());
+            } else if (replace) {
+                // We want to replace the catalog
+                ids.add(ic.getCatalogId());
+            }
+        }
+        return ids;
+    }
+
+    private static Request createCatalogRequest(final Set<String> ids, final LoaderRequest request, final List<? extends ICatalog<?>> list) {
+        JsonArrayRequest r = new JsonArrayRequest(Endpoints.CATALOG_LIST, new Response.Listener<JSONArray>() {
+
+            @Override
+            public void onComplete(JSONArray response, ShopGunError error) {
+
+                if (response != null) {
+                    List<Catalog> stores = Catalog.fromJSON(response);
+                    for (ICatalog is : list) {
+                        for (Catalog s : stores) {
+                            if (is.getCatalogId().equals(s.getId())) {
+                                is.setCatalog(s);
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    request.addError(error);
+                }
+            }
+        });
+        r.setIds(Parameters.CATALOG_IDS, ids);
+        return r;
     }
 
 }
