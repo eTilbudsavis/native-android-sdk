@@ -71,8 +71,14 @@ public class CatalogListLoaderActivity extends BaseListActivity implements Adapt
         if (mCatalogs.isEmpty()) {
             showProgress("Fetching catalogs");
             CatalogListRequest r = new CatalogListRequest(mCatalogListener);
+            // Just because it's possible doesn't mean you have to attach everything.
+            // The more you add, the worse performance you'll get...
             r.loadStore(true);
+            r.loadDealer(true);
+            // Limit is default to 24, it's good for cache performance on the API
             r.setLimit(10);
+            // Offset can be used for pagination, and if default to 0
+            r.setOffset(0);
             start = System.nanoTime();
             ShopGun.getInstance().add(r);
         }
