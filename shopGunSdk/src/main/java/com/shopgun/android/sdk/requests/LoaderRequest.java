@@ -40,6 +40,7 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
     private final List<ShopGunError> mErrors = Collections.synchronizedList(new ArrayList<ShopGunError>());
     private final LoaderDelivery<T> mDelivery;
     private final Object LOCK = new Object();
+    private boolean mCanceled = false;
 
     public LoaderRequest(T data, Listener<T> l) {
         super(Method.PUT, null, null);
@@ -74,7 +75,11 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
             setTag(new Object());
         }
         super.setDelivery(this);
-        return super.setRequestQueue(requestQueue);
+        super.setRequestQueue(requestQueue);
+        runFillerRequests();
+        mCanceled = true;
+        super.cancel();
+        return this;
     }
 
     @Override
@@ -131,9 +136,15 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
     }
 
     @Override
+    public boolean isCanceled() {
+        return mCanceled;
+    }
+
+    @Override
     public void cancel() {
         synchronized (LOCK) {
-            if (!isCanceled()) {
+            if (!mCanceled) {
+                mCanceled = true;
                 super.cancel();
                 getRequestQueue().cancelAll(getTag());
             }
@@ -158,23 +169,10 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
 
             request.addEvent("post-response");
 
-            if (this.equals(request)) {
-
-                if (response.error instanceof InternalOkError) {
-                    // Perform the rest of the request
-                    runFillerRequests();
-                }
-                boolean finished = mRequests.isEmpty();
-                mDelivery.deliver(this, response, mData, mErrors, !finished);
-
-            } else {
-
-                // Deliver catalog if needed
-                mRequests.remove(request);
-                boolean finished = mRequests.isEmpty();
-                mDelivery.deliver(request, response, mData, mErrors, !finished);
-
-            }
+            // Deliver catalog if needed
+            mRequests.remove(request);
+            boolean finished = mRequests.isEmpty();
+            mDelivery.deliver(request, response, mData, mErrors, !finished);
 
         }
 

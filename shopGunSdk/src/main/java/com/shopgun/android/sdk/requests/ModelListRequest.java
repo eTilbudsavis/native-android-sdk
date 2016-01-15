@@ -17,7 +17,6 @@
 package com.shopgun.android.sdk.requests;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.Delivery;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.RequestQueue;
@@ -37,6 +36,7 @@ public abstract class ModelListRequest<T> extends JsonArrayRequest implements De
     private final ModelListLoaderRequest<T> mLoaderRequest;
     private final LoaderRequest.Listener<T> mLoaderListener;
     private final LoaderDelivery<T> mDelivery;
+    private boolean mCancelled = false;
 
     public ModelListRequest(String url, LoaderRequest.Listener<T> listener) {
         this(url, null, listener);
@@ -62,21 +62,22 @@ public abstract class ModelListRequest<T> extends JsonArrayRequest implements De
             setTag(new Object());
         }
         super.setDelivery(this);
+
+        if (mLoaderRequest != null) {
+            // If the loader already has the initial data, there's no reason to perform a request
+            T data = mLoaderRequest.getData();
+            if (data != null && (data instanceof List) && !((List)data).isEmpty()) {
+                runLoader(data);
+                mCancelled = true;
+                super.cancel();
+            }
+        }
         return this;
     }
 
     @Override
     public Request setDelivery(Delivery d) {
         throw new RuntimeException(new IllegalAccessException("Custom delivery not possible"));
-    }
-
-    @Override
-    public Response<JSONArray> parseCache(Cache c) {
-        T data = mLoaderRequest.getData();
-        if (data != null && (data instanceof List) && !((List)data).isEmpty()) {
-            return Response.fromError(new InternalOkError());
-        }
-        return super.parseCache(c);
     }
 
     public abstract T parse(JSONArray response);
@@ -95,9 +96,15 @@ public abstract class ModelListRequest<T> extends JsonArrayRequest implements De
     }
 
     @Override
+    public boolean isCanceled() {
+        return mCancelled;
+    }
+
+    @Override
     public void cancel() {
         synchronized (this) {
-            if (!isCanceled()) {
+            if (!mCancelled) {
+                mCancelled = true;
                 super.cancel();
                 if (mLoaderRequest != null) {
                     mLoaderRequest.cancel();
@@ -106,32 +113,31 @@ public abstract class ModelListRequest<T> extends JsonArrayRequest implements De
         }
     }
 
+    private boolean runLoader(T data) {
+
+        if (mLoaderListener != null) {
+            if (mLoaderRequest.getData() == null) {
+                mLoaderRequest.setData(data);
+            }
+            // Load extra data into result
+            applyState(mLoaderRequest);
+            getRequestQueue().add(mLoaderRequest);
+            return true;
+        }
+        return false;
+
+    }
+
     @Override
     public void postResponse(Request<?> request, Response<?> response) {
         request.addEvent("post-response");
 
-        if (response.isSuccess() || response.error instanceof InternalOkError) {
-
-            boolean intermediate =  mLoaderListener != null;
-
-            T data = null;
-            if (intermediate) {
-                data = mLoaderRequest.getData();
-            }
-            if (data == null) {
-                data = parse((JSONArray) response.result);
-            }
-
-            if (intermediate) {
-                // Load extra data into result
-                mLoaderRequest.setData(data);
-                applyState(mLoaderRequest);
-                getRequestQueue().add(mLoaderRequest);
-            }
-
-            List<ShopGunError> errors = intermediate ? mLoaderRequest.getErrors() : new ArrayList<ShopGunError>();
-            mDelivery.deliver(this, response, data, errors, intermediate);
-
+        if (response.isSuccess()) {
+            request.addEvent("parsing-response-to-model-objects");
+            T data = parse((JSONArray) response.result);
+            List<ShopGunError> errors = new ArrayList<ShopGunError>();
+            boolean running = runLoader(data);
+            mDelivery.deliver(this, response, data, errors, running);
         } else {
 
             // Something bad, ignore and deliver

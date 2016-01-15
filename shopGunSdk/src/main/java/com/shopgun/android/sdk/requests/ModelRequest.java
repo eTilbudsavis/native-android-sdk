@@ -37,6 +37,7 @@ public abstract class ModelRequest<T> extends JsonObjectRequest implements Deliv
     private final ModelLoaderRequest<T> mLoaderRequest;
     private final LoaderRequest.Listener<T> mLoaderListener;
     private final LoaderDelivery<T> mDelivery;
+    private boolean mCancelled = false;
 
     public ModelRequest(String url, LoaderRequest.Listener<T> listener) {
         this(url, null, listener);
@@ -55,13 +56,24 @@ public abstract class ModelRequest<T> extends JsonObjectRequest implements Deliv
 
     @Override
     public Request setRequestQueue(RequestQueue requestQueue) {
+        super.setRequestQueue(requestQueue);
         if (getTag() == null) {
             // Attach a tag if one haven't been provided
             // This will be used at a cancellation signal
             setTag(new Object());
         }
         super.setDelivery(this);
-        return super.setRequestQueue(requestQueue);
+
+        if (mLoaderRequest != null) {
+            // If the loader already has the initial data, there's no reason to perform a request
+            T data = mLoaderRequest.getData();
+            if (data != null) {
+                runLoader(data);
+                mCancelled = true;
+                super.cancel();
+            }
+        }
+        return this;
     }
 
     @Override
@@ -93,9 +105,15 @@ public abstract class ModelRequest<T> extends JsonObjectRequest implements Deliv
     }
 
     @Override
+    public boolean isCanceled() {
+        return mCancelled;
+    }
+
+    @Override
     public void cancel() {
         synchronized (this) {
-            if (!isCanceled()) {
+            if (!mCancelled) {
+                mCancelled = true;
                 super.cancel();
                 if (mLoaderRequest != null) {
                     mLoaderRequest.cancel();
@@ -104,30 +122,31 @@ public abstract class ModelRequest<T> extends JsonObjectRequest implements Deliv
         }
     }
 
+    private boolean runLoader(T data) {
+
+        if (mLoaderListener != null) {
+            if (mLoaderRequest.getData() == null) {
+                mLoaderRequest.setData(data);
+            }
+            // Load extra data into result
+            applyState(mLoaderRequest);
+            getRequestQueue().add(mLoaderRequest);
+            return true;
+        }
+        return false;
+
+    }
+
     @Override
     public void postResponse(Request<?> request, Response<?> response) {
         request.addEvent("post-response");
-        if (response.isSuccess() || response.error instanceof InternalOkError) {
 
-            boolean intermediate =  mLoaderListener != null;
-
-            T data = null;
-            if (intermediate) {
-                data = mLoaderRequest.getData();
-            }
-            if (data == null) {
-                data = parse((JSONObject) response.result);
-            }
-
-            if (intermediate) {
-                // Load extra data into result
-                mLoaderRequest.setData(data);
-                applyState(mLoaderRequest);
-                getRequestQueue().add(mLoaderRequest);
-            }
-
-            List<ShopGunError> errors = intermediate ? mLoaderRequest.getErrors() : new ArrayList<ShopGunError>();
-            mDelivery.deliver(this, response, data, errors, intermediate);
+        if (response.isSuccess()) {
+            request.addEvent("parsing-response-to-model-object");
+            T data = parse((JSONObject) response.result);
+            List<ShopGunError> errors = new ArrayList<ShopGunError>();
+            boolean running = runLoader(data);
+            mDelivery.deliver(this, response, data, errors, running);
 
         } else {
 
