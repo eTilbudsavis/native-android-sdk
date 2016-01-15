@@ -17,7 +17,6 @@
 package com.shopgun.android.sdk.demo;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -28,6 +27,8 @@ import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.demo.base.BaseListActivity;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
+import com.shopgun.android.sdk.model.Dealer;
+import com.shopgun.android.sdk.model.Store;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogListRequest;
@@ -35,7 +36,6 @@ import com.shopgun.android.sdk.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class CatalogListLoaderActivity extends BaseListActivity implements AdapterView.OnItemClickListener {
 
@@ -44,8 +44,6 @@ public class CatalogListLoaderActivity extends BaseListActivity implements Adapt
     private static final String STATE_CATALOGS = "catalogs";
 
     private final List<Catalog> mCatalogs = new ArrayList<Catalog>();
-
-    long start = 0;
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -62,7 +60,6 @@ public class CatalogListLoaderActivity extends BaseListActivity implements Adapt
         }
         setListAdapter(new CatalogAdapter());
         getListView().setOnItemClickListener(this);
-
     }
 
     @Override
@@ -79,7 +76,6 @@ public class CatalogListLoaderActivity extends BaseListActivity implements Adapt
             r.setLimit(10);
             // Offset can be used for pagination, and if default to 0
             r.setOffset(0);
-            start = System.nanoTime();
             ShopGun.getInstance().add(r);
         }
     }
@@ -93,23 +89,20 @@ public class CatalogListLoaderActivity extends BaseListActivity implements Adapt
     private final LoaderRequest.Listener<List<Catalog>> mCatalogListener = new LoaderRequest.Listener<List<Catalog>>() {
         @Override
         public void onComplete(List<Catalog> response, List<ShopGunError> errors) {
-            Log.d(TAG, "onComplete");
-            SgnLog.d(TAG, "Time: " + (TimeUnit.NANOSECONDS.toMillis((System.nanoTime()-start))));
             update(response, errors);
         }
 
         @Override
         public void onIntermediate(List<Catalog> response, List<ShopGunError> errors) {
-            Log.d(TAG, "onIntermediate");
             update(response, errors);
         }
     };
 
     private void update(List<Catalog> response, List<ShopGunError> errors) {
 
-        hideProgress();
-
         if (response != null) {
+
+            hideProgress();
 
             if (response.size() == 0) {
 
@@ -136,6 +129,7 @@ public class CatalogListLoaderActivity extends BaseListActivity implements Adapt
             SgnLog.e(TAG, error.getMessage(), error);
 
         }
+
     }
 
     public class CatalogAdapter extends BaseAdapter {
@@ -162,11 +156,16 @@ public class CatalogListLoaderActivity extends BaseListActivity implements Adapt
             TextView tv = new TextView(CatalogListLoaderActivity.this);
             Catalog c = mCatalogs.get(position);
             String text = c.getBranding().getName();
-            if (c.getStore() != null) {
-                text = text + ", " + c.getStore().getCity();
+            Store store = c.getStore();
+            if (store != null) {
+                text = text + ", " + store.getCity();
+            }
+            Dealer dealer = c.getDealer();
+            if (dealer != null) {
+                text = text + ", " + dealer.getName();
             }
             tv.setText(text);
-            tv.setTextSize(30);
+            tv.setTextSize(24);
             tv.setPadding(mPadding, mPadding, mPadding, mPadding);
             int color = c.getBranding().getColor();
             tv.setBackgroundColor(color);
