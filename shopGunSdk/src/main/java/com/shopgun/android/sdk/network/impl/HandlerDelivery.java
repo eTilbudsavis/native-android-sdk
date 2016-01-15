@@ -53,12 +53,13 @@ public class HandlerDelivery implements Delivery {
      * @param response response response from the API fulfilling the Request
      */
     public void postResponse(Request<?> request, Response<?> response) {
-        request.addEvent("post-response");
 
         if (request.getDelivery() != null && !HandlerDelivery.this.equals(request.getDelivery())) {
             // If there isn't a check, you'll end up in an infinite loop
+            request.addEvent("post-to-custom-delivery");
             request.getDelivery().postResponse(request, response);
         } else {
+            request.addEvent("post-response");
             mHandler.post(new DeliveryRunnable(request, response));
         }
 

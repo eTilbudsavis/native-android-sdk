@@ -77,7 +77,7 @@ public class RequestCreator {
         return getStoreRequest(ids, request, list);
     }
 
-    private static Set<String> getStoreIds(List<? extends IStore<?>> list) {
+    public static Set<String> getStoreIds(List<? extends IStore<?>> list) {
         Set<String> ids = new HashSet<String>(list.size());
         for (IStore is : list) {
             if (is.getStore() == null) {
@@ -140,7 +140,7 @@ public class RequestCreator {
         return getDealersRequest(ids, request, list);
     }
 
-    private static Set<String> getDealerIds(List<? extends IDealer<?>> list) {
+    public static Set<String> getDealerIds(List<? extends IDealer<?>> list) {
         Set<String> ids = new HashSet<String>(list.size());
         for (IDealer is : list) {
             if (is.getDealer() == null) {
@@ -277,7 +277,7 @@ public class RequestCreator {
         return ids.isEmpty() ? null : createCatalogRequest(ids, request, list) ;
     }
 
-    private static Set<String> getCatalogIds(List<? extends ICatalog<?>> list, boolean replace) {
+    public static Set<String> getCatalogIds(List<? extends ICatalog<?>> list, boolean replace) {
         Set<String> ids = new HashSet<String>(list.size());
         for (ICatalog ic : list) {
             if (ic.getCatalog() == null) {
