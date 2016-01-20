@@ -686,9 +686,11 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
             mPageflipStarted = false;
         }
 
-        // The visibility usually happens via the OnPageChangeListener,
-        // but when lifecycle events happens this isn't the case, so we'll fake it.
-        getPage(mCurrentPosition).onInvisible();
+        if (mPagesReady) {
+            // The visibility usually happens via the OnPageChangeListener,
+            // but when lifecycle events happens this isn't the case, so we'll fake it.
+            getPage(mCurrentPosition).onInvisible();
+        }
 
         mLoader.stop();
         if (mCatalogRequest != null) {
