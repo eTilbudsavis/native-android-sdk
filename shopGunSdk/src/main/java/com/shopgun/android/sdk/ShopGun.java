@@ -38,7 +38,7 @@ import com.shopgun.android.sdk.network.RequestQueue;
 import com.shopgun.android.sdk.network.impl.DefaultHttpNetwork;
 import com.shopgun.android.sdk.network.impl.HttpURLNetwork;
 import com.shopgun.android.sdk.network.impl.MemoryCache;
-import com.shopgun.android.sdk.network.impl.NetworkImpl;
+import com.shopgun.android.sdk.network.mock.MockNetwork;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
 import com.shopgun.android.sdk.shoppinglists.SyncManager;
 import com.shopgun.android.sdk.utils.ActivityCounter;
@@ -219,7 +219,8 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
             stack = new DefaultHttpNetwork();
         }
 
-        mRequestQueue = new RequestQueue(ShopGun.this, new MemoryCache(), new NetworkImpl(stack));
+//        mRequestQueue = new RequestQueue(ShopGun.this, new MemoryCache(), new NetworkImpl(stack));
+        mRequestQueue = new RequestQueue(ShopGun.this, new MemoryCache(), new MockNetwork(mContext));
         mRequestQueue.start();
 
         mLocation = mSettings.getLocation();
