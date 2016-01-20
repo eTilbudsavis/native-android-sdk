@@ -25,6 +25,7 @@ import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.mock.MockUnsupportedResponse;
 import com.shopgun.android.sdk.network.mock.PathHelper;
+import com.shopgun.android.sdk.utils.Api;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,6 +38,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 public abstract class MockNetworkResponse {
 
@@ -191,6 +193,37 @@ public abstract class MockNetworkResponse {
         return byteBuffer.toByteArray();
     }
 
+    public static JSONArray trimToOffsetAndLimit(JSONArray array, Request<?> request) {
+
+        JSONArray a = new JSONArray();
+        int limit = 0;
+        int offset = 0;
+        try {
+            Map<String, String> map = request.getParameters();
+            limit = Integer.valueOf(map.get(Api.Param.LIMIT));
+            offset = Integer.valueOf(map.get(Api.Param.OFFSET));
+        } catch (NumberFormatException e) {
+            SgnLog.e(TAG, e.getMessage(), e);
+            return array;
+        }
+
+        SgnLog.d(TAG, String.format("offset:%s, limit:%s", offset, limit));
+
+        if (offset > array.length()) {
+            return a;
+        }
+
+        int max = Math.min(array.length(), offset+limit);
+        for (int i = offset; i < max; i++) {
+            try {
+                a.put(array.get(i));
+            } catch (JSONException e) {
+                SgnLog.e(TAG, e.getMessage(), e);
+            }
+        }
+        return a;
+    }
+    
     public static JSONArray filterByIds(JSONArray totalList, Request<?> request, String idParam) {
 
         String ids = request.getParameters().get(idParam);

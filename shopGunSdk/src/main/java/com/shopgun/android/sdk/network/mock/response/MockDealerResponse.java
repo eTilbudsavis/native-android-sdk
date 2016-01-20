@@ -23,8 +23,6 @@ import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class MockDealerResponse extends MockNetworkResponse {
 
@@ -42,13 +40,16 @@ public class MockDealerResponse extends MockNetworkResponse {
             // Just a list
             JSONArray idArray = filterByIds(array, mRequest, Parameters.DEALER_IDS);
             if (idArray != null) {
-                return new NetworkResponse(200, idArray.toString().getBytes(), null);
+                array = trimToOffsetAndLimit(idArray, mRequest);
+                return new NetworkResponse(200, array.toString().getBytes(), null);
             }
+            array = trimToOffsetAndLimit(array, mRequest);
             return new NetworkResponse(200, array.toString().getBytes(), null);
         }
 
         if ("search".equals(actionOrId)) {
             // 'query' is being ignored
+            array = trimToOffsetAndLimit(array, mRequest);
             return new NetworkResponse(200, array.toString().getBytes(), null);
         } else if ("suggested".equals(actionOrId)) {
             return getUnsupportedResponse();
@@ -57,21 +58,9 @@ public class MockDealerResponse extends MockNetworkResponse {
         }
 
         // The action must be an id
-        String id = actionOrId;
         String action = mPath.getItemAction();
         if (action == null) {
-            // there is no further actions, lets get the specified catalog
-            for (int i = 0; i < array.length(); i++) {
-                try {
-                    JSONObject item = array.getJSONObject(i);
-                    if (id.equals(item.getString("id"))) {
-                        return new NetworkResponse(200, item.toString().getBytes(), null);
-                    }
-                } catch (JSONException e) {
-                    // Ignore
-                }
-            }
-            return getUnsupportedResponse();
+            return getItem(array, actionOrId);
         }
 
         // dealers doesn't have any actions for an item

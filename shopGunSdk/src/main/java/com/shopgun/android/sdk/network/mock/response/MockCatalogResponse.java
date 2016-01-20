@@ -40,14 +40,17 @@ public class MockCatalogResponse extends MockNetworkResponse {
             // Just a catalog list
             JSONArray idArray = filterByIds(array, mRequest, Parameters.CATALOG_IDS);
             if (idArray != null) {
-                return new NetworkResponse(200, idArray.toString().getBytes(), null);
+                array = trimToOffsetAndLimit(idArray, mRequest);
+                return new NetworkResponse(200, array.toString().getBytes(), null);
             }
+            array = trimToOffsetAndLimit(array, mRequest);
             return new NetworkResponse(200, array.toString().getBytes(), null);
         }
 
 
         if ("search".equals(actionOrId)) {
             // 'query' is being ignored
+            array = trimToOffsetAndLimit(array, mRequest);
             return new NetworkResponse(200, array.toString().getBytes(), null);
         } else if ("suggest".equals(actionOrId)) {
             return new NetworkResponse(200, array.toString().getBytes(), null);
