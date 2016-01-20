@@ -25,12 +25,6 @@ public class SgnFragment extends Fragment {
 
     protected ShopGun mShopgun;
 
-    public SgnFragment() {
-        if (ShopGun.isCreated()) {
-            this.mShopgun = ShopGun.getInstance();
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -47,8 +41,7 @@ public class SgnFragment extends Fragment {
 
     protected ShopGun getShopgun() {
         if (mShopgun == null) {
-            throw new IllegalStateException("Calling getShopgun() prior to onAttach only allowed, " +
-                    "if ShopGun instance is instantiated prior to constructing " + getClass().getSimpleName());
+            throw new IllegalStateException("Calling getShopgun() prior to onAttach not allowed");
         }
         return mShopgun;
     }
