@@ -14,36 +14,25 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk;
+package com.shopgun.android.sdk.network.mock.response;
 
 import android.content.Context;
-import android.support.v4.app.Fragment;
 
-public class SgnFragment extends Fragment {
+import com.shopgun.android.sdk.network.NetworkResponse;
+import com.shopgun.android.sdk.network.Request;
 
-    public static final String TAG = Constants.getTag(SgnFragment.class);
+public class MockSimpleResponse extends MockNetworkResponse {
 
-    protected ShopGun mShopgun;
+    private String mName;
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mShopgun = ShopGun.getInstance(context);
-        // We'll just make sure we're running for the duration of this fragment
-        mShopgun.onStart();
+    public MockSimpleResponse(Context mContext, Request<?> request, String name) {
+        super(mContext, request);
+        mName = name;
     }
 
     @Override
-    public void onDetach() {
-        mShopgun.onStop();
-        super.onDetach();
-    }
-
-    protected ShopGun getShopgun() {
-        if (mShopgun == null) {
-            throw new IllegalStateException("Calling getShopgun() prior to onAttach not allowed");
-        }
-        return mShopgun;
+    public NetworkResponse getResponse() {
+        return new NetworkResponse(200, getAssetAsByteArray(mName), null);
     }
 
 }

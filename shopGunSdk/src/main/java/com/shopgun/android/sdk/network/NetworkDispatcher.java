@@ -216,11 +216,13 @@ public class NetworkDispatcher extends Thread {
      * @param headers to check for new token.
      */
     private void updateSessionInfo(Map<String, String> headers) {
-        String token = headers.get(HeaderUtils.X_TOKEN);
-        String expire = headers.get(HeaderUtils.X_TOKEN_EXPIRES);
+        if (headers != null) {
+            String token = headers.get(HeaderUtils.X_TOKEN);
+            String expire = headers.get(HeaderUtils.X_TOKEN_EXPIRES);
 
-        if (!(token == null || expire == null)) {
-            mShopGun.getSessionManager().updateTokens(token, expire);
+            if (!(token == null || expire == null)) {
+                mShopGun.getSessionManager().updateTokens(token, expire);
+            }
         }
 
     }

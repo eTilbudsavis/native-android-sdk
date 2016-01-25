@@ -23,6 +23,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.network.mock.MockNetwork;
 import com.shopgun.android.sdk.utils.ColorUtils;
 
 public class Tools {
@@ -45,15 +46,13 @@ public class Tools {
          * ApiKey and ApiSecret are not included in the demo/SDK, but you can
          * get your own at https://etilbudsavis.dk/developers/ :-)
          */
-        if (!ShopGun.isCreated()) {
+        if (!ShopGun.hasInstance()) {
 
-            // Create your instance of ShopGun
-            ShopGun.create(c);
+            new ShopGun.Builder(c)
+                    .setDevelop(BuildConfig.DEBUG)
+                    .setNetwork(new MockNetwork(c))
+                    .build();
 
-			/* You can optionally set a develop flag.
-			 * I'm using BuildConfig, but you can choose what ever scheme you want.
-			 */
-            ShopGun.getInstance().setDevelop(BuildConfig.DEBUG);
         }
 
     }
