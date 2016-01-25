@@ -596,7 +596,7 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
     }
 
     @Override
-    public void onComplete(Catalog response, List<ShopGunError> errors) {
+    public void onRequestComplete(Catalog response, List<ShopGunError> errors) {
 
         if (isAdded()) {
 
@@ -627,7 +627,7 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
     }
 
     @Override
-    public void onIntermediate(Catalog response, List<ShopGunError> errors) {
+    public void onRequestIntermediate(Catalog response, List<ShopGunError> errors) {
         mCatalogRequest.setIgnoreCache(false);
         if (isAdded()) {
             if (response != null) {

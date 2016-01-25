@@ -229,7 +229,7 @@ public class CatalogPageFragment extends SgnFragment implements
             return;
         }
 
-        if (rootEvent.getDuration() < 5) {
+        if (rootEvent.getDuration() < 10) {
 
             AppLogEntry entry = new AppLogEntry(getShopgun(), "negative-duration", "android@shopgun.com");
             for (PageEvent subEvent : rootEvent.getSubEventsRecursive()) {

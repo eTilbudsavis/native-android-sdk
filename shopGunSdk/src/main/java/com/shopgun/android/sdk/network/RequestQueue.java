@@ -17,7 +17,6 @@
 package com.shopgun.android.sdk.network;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.SgnLocation;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.api.Parameters;
@@ -33,7 +32,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -364,44 +362,7 @@ public class RequestQueue {
         request.getParameters().put(Parameters.API_LOCALE, Locale.getDefault().toString());
 
         if (request.useLocation()) {
-            appendLocationParams(request.getParameters(), mShopGun.getLocation());
-        }
-
-    }
-
-    public void appendLocationParams(Map<String, String> map, SgnLocation l) {
-
-        if (!l.isSet()) {
-            return;
-        }
-
-        if (!map.containsKey(Parameters.LATITUDE)) {
-            map.put(Parameters.LATITUDE, String.valueOf(l.getLatitude()));
-        }
-        if (!map.containsKey(Parameters.LONGITUDE)) {
-            map.put(Parameters.LONGITUDE, String.valueOf(l.getLongitude()));
-        }
-        if (!map.containsKey(Parameters.SENSOR)) {
-            map.put(Parameters.SENSOR, String.valueOf(l.isSensor()));
-        }
-        if (!map.containsKey(Parameters.RADIUS)) {
-            map.put(Parameters.RADIUS, String.valueOf(l.getRadius()));
-        }
-
-        // Determine whether to include bounds.
-        if (l.isBoundsSet()) {
-            if (!map.containsKey(Parameters.BOUND_EAST)) {
-                map.put(Parameters.BOUND_EAST, String.valueOf(l.getBoundEast()));
-            }
-            if (!map.containsKey(Parameters.BOUND_NORTH)) {
-                map.put(Parameters.BOUND_NORTH, String.valueOf(l.getBoundNorth()));
-            }
-            if (!map.containsKey(Parameters.BOUND_SOUTH)) {
-                map.put(Parameters.BOUND_SOUTH, String.valueOf(l.getBoundSouth()));
-            }
-            if (!map.containsKey(Parameters.BOUND_WEST)) {
-                map.put(Parameters.BOUND_WEST, String.valueOf(l.getBoundWest()));
-            }
+            NetworkUtils.appendLocationParams(request.getParameters(), mShopGun.getLocation());
         }
 
     }

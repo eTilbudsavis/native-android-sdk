@@ -185,7 +185,7 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
          * @param response The response data.
          * @param errors A list of {@link ShopGunError} that occurred during execution.
          */
-        void onComplete(T response, List<ShopGunError> errors);
+        void onRequestComplete(T response, List<ShopGunError> errors);
 
         /**
          * Called every time a request finishes.
@@ -193,7 +193,7 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
          * @param response The current state of the response data, this is not a complete set.
          * @param errors A list of {@link ShopGunError} that occurred during execution.
          */
-        void onIntermediate(T response, List<ShopGunError> errors);
+        void onRequestIntermediate(T response, List<ShopGunError> errors);
     }
 
 }

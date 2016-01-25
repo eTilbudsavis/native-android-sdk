@@ -67,9 +67,9 @@ public class LoaderDelivery<T> {
         public void run() {
             // Don't finish requests, as they have already been marked at finished
             if (mIntermediate) {
-                mListener.onIntermediate(mData, mErrors);
+                mListener.onRequestIntermediate(mData, mErrors);
             } else {
-                mListener.onComplete(mData, mErrors);
+                mListener.onRequestComplete(mData, mErrors);
             }
         }
     }

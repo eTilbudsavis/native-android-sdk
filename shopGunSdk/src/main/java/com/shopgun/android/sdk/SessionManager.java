@@ -435,7 +435,7 @@ public class SessionManager {
 //			ShopGun.getInstance().getHandler().post(new Runnable() {
 //				
 //				public void run() {
-//					l.onComplete(mSession.toJSON(), null);
+//					l.onRequestComplete(mSession.toJSON(), null);
 //				}
 //			});
 //		}

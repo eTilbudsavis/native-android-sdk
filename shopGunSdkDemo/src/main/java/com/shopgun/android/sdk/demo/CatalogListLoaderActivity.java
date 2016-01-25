@@ -88,12 +88,12 @@ public class CatalogListLoaderActivity extends BaseListActivity implements Adapt
 
     private final LoaderRequest.Listener<List<Catalog>> mCatalogListener = new LoaderRequest.Listener<List<Catalog>>() {
         @Override
-        public void onComplete(List<Catalog> response, List<ShopGunError> errors) {
+        public void onRequestComplete(List<Catalog> response, List<ShopGunError> errors) {
             update(response, errors);
         }
 
         @Override
-        public void onIntermediate(List<Catalog> response, List<ShopGunError> errors) {
+        public void onRequestIntermediate(List<Catalog> response, List<ShopGunError> errors) {
             update(response, errors);
         }
     };

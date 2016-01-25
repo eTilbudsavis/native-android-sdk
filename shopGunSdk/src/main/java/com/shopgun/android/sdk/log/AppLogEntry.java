@@ -35,6 +35,8 @@ public class AppLogEntry {
 
     public static final String TAG = Constants.getTag(AppLogEntry.class);
 
+    public static boolean DEBUG = false;
+
     private final ShopGun mShopgun;
     private String mEmail;
     private List<Event> mEvents = new ArrayList<Event>();
@@ -143,7 +145,11 @@ public class AppLogEntry {
         JSONObject appLogObject = toJSON(eventList);
 
         JsonObjectRequest r = new JsonObjectRequest(Request.Method.POST, Endpoints.APP_LOG_ENDPOINT, appLogObject, new IgnoreResponseListener<JSONObject>());
-        mShopgun.add(r);
+
+        if (DEBUG) {
+            mShopgun.add(r);
+        }
+
         return r;
     }
 

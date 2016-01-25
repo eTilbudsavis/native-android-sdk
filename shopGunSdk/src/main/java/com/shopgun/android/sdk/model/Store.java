@@ -46,15 +46,7 @@ import java.util.List;
 public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Parcelable {
 
     public static final String TAG = Constants.getTag(Store.class);
-    public static Parcelable.Creator<Store> CREATOR = new Parcelable.Creator<Store>() {
-        public Store createFromParcel(Parcel source) {
-            return new Store(source);
-        }
 
-        public Store[] newArray(int size) {
-            return new Store[size];
-        }
-    };
     private String mErn;
     private String mStreet;
     private String mCity;
@@ -69,22 +61,21 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
     private Dealer mDealer;
 
     public Store() {
-
     }
 
-    private Store(Parcel in) {
-        this.mErn = in.readString();
-        this.mStreet = in.readString();
-        this.mCity = in.readString();
-        this.mZipcode = in.readString();
-        this.mCountry = in.readParcelable(Country.class.getClassLoader());
-        this.mLatitude = in.readDouble();
-        this.mLongitude = in.readDouble();
-        this.mDealerUrl = in.readString();
-        this.mDealerId = in.readString();
-        this.mBranding = in.readParcelable(Branding.class.getClassLoader());
-        this.mContact = in.readString();
-        this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
+    public Store(Store store) {
+        this.mErn = store.mErn;
+        this.mStreet = store.mStreet;
+        this.mCity = store.mCity;
+        this.mZipcode = store.mZipcode;
+        this.mCountry = store.mCountry;
+        this.mLatitude = store.mLatitude;
+        this.mLongitude = store.mLongitude;
+        this.mDealerUrl = store.mDealerUrl;
+        this.mDealerId = store.mDealerId;
+        this.mBranding = store.mBranding;
+        this.mContact = store.mContact;
+        this.mDealer = store.mDealer;
     }
 
     /**
@@ -406,117 +397,92 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((mBranding == null) ? 0 : mBranding.hashCode());
-        result = prime * result + ((mCity == null) ? 0 : mCity.hashCode());
-        result = prime * result
-                + ((mContact == null) ? 0 : mContact.hashCode());
-        result = prime * result
-                + ((mCountry == null) ? 0 : mCountry.hashCode());
-        result = prime * result + ((mDealer == null) ? 0 : mDealer.hashCode());
-        result = prime * result
-                + ((mDealerId == null) ? 0 : mDealerId.hashCode());
-        result = prime * result
-                + ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
-        result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-        long temp;
-        temp = Double.doubleToLongBits(mLatitude);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(mLongitude);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        result = prime * result + ((mStreet == null) ? 0 : mStreet.hashCode());
-        result = prime * result
-                + ((mZipcode == null) ? 0 : mZipcode.hashCode());
-        return result;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Store store = (Store) o;
+
+        if (Double.compare(store.mLatitude, mLatitude) != 0) return false;
+        if (Double.compare(store.mLongitude, mLongitude) != 0) return false;
+        if (mErn != null ? !mErn.equals(store.mErn) : store.mErn != null) return false;
+        if (mStreet != null ? !mStreet.equals(store.mStreet) : store.mStreet != null) return false;
+        if (mCity != null ? !mCity.equals(store.mCity) : store.mCity != null) return false;
+        if (mZipcode != null ? !mZipcode.equals(store.mZipcode) : store.mZipcode != null) return false;
+        if (mCountry != null ? !mCountry.equals(store.mCountry) : store.mCountry != null) return false;
+        if (mDealerUrl != null ? !mDealerUrl.equals(store.mDealerUrl) : store.mDealerUrl != null) return false;
+        if (mDealerId != null ? !mDealerId.equals(store.mDealerId) : store.mDealerId != null) return false;
+        if (mBranding != null ? !mBranding.equals(store.mBranding) : store.mBranding != null) return false;
+        if (mContact != null ? !mContact.equals(store.mContact) : store.mContact != null) return false;
+        return mDealer != null ? mDealer.equals(store.mDealer) : store.mDealer == null;
+
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Store other = (Store) obj;
-        if (mBranding == null) {
-            if (other.mBranding != null)
-                return false;
-        } else if (!mBranding.equals(other.mBranding))
-            return false;
-        if (mCity == null) {
-            if (other.mCity != null)
-                return false;
-        } else if (!mCity.equals(other.mCity))
-            return false;
-        if (mContact == null) {
-            if (other.mContact != null)
-                return false;
-        } else if (!mContact.equals(other.mContact))
-            return false;
-        if (mCountry == null) {
-            if (other.mCountry != null)
-                return false;
-        } else if (!mCountry.equals(other.mCountry))
-            return false;
-        if (mDealer == null) {
-            if (other.mDealer != null)
-                return false;
-        } else if (!mDealer.equals(other.mDealer))
-            return false;
-        if (mDealerId == null) {
-            if (other.mDealerId != null)
-                return false;
-        } else if (!mDealerId.equals(other.mDealerId))
-            return false;
-        if (mDealerUrl == null) {
-            if (other.mDealerUrl != null)
-                return false;
-        } else if (!mDealerUrl.equals(other.mDealerUrl))
-            return false;
-        if (mErn == null) {
-            if (other.mErn != null)
-                return false;
-        } else if (!mErn.equals(other.mErn))
-            return false;
-        if (Double.doubleToLongBits(mLatitude) != Double
-                .doubleToLongBits(other.mLatitude))
-            return false;
-        if (Double.doubleToLongBits(mLongitude) != Double
-                .doubleToLongBits(other.mLongitude))
-            return false;
-        if (mStreet == null) {
-            if (other.mStreet != null)
-                return false;
-        } else if (!mStreet.equals(other.mStreet))
-            return false;
-        if (mZipcode == null) {
-            if (other.mZipcode != null)
-                return false;
-        } else if (!mZipcode.equals(other.mZipcode))
-            return false;
-        return true;
+    public int hashCode() {
+        int result;
+        long temp;
+        result = mErn != null ? mErn.hashCode() : 0;
+        result = 31 * result + (mStreet != null ? mStreet.hashCode() : 0);
+        result = 31 * result + (mCity != null ? mCity.hashCode() : 0);
+        result = 31 * result + (mZipcode != null ? mZipcode.hashCode() : 0);
+        result = 31 * result + (mCountry != null ? mCountry.hashCode() : 0);
+        temp = Double.doubleToLongBits(mLatitude);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(mLongitude);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (mDealerUrl != null ? mDealerUrl.hashCode() : 0);
+        result = 31 * result + (mDealerId != null ? mDealerId.hashCode() : 0);
+        result = 31 * result + (mBranding != null ? mBranding.hashCode() : 0);
+        result = 31 * result + (mContact != null ? mContact.hashCode() : 0);
+        result = 31 * result + (mDealer != null ? mDealer.hashCode() : 0);
+        return result;
     }
 
+
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.mErn);
         dest.writeString(this.mStreet);
         dest.writeString(this.mCity);
         dest.writeString(this.mZipcode);
-        dest.writeParcelable(this.mCountry, flags);
+        dest.writeParcelable(this.mCountry, 0);
         dest.writeDouble(this.mLatitude);
         dest.writeDouble(this.mLongitude);
         dest.writeString(this.mDealerUrl);
         dest.writeString(this.mDealerId);
-        dest.writeParcelable(this.mBranding, flags);
+        dest.writeParcelable(this.mBranding, 0);
         dest.writeString(this.mContact);
-        dest.writeParcelable(this.mDealer, flags);
+        dest.writeParcelable(this.mDealer, 0);
     }
+
+    protected Store(Parcel in) {
+        this.mErn = in.readString();
+        this.mStreet = in.readString();
+        this.mCity = in.readString();
+        this.mZipcode = in.readString();
+        this.mCountry = in.readParcelable(Country.class.getClassLoader());
+        this.mLatitude = in.readDouble();
+        this.mLongitude = in.readDouble();
+        this.mDealerUrl = in.readString();
+        this.mDealerId = in.readString();
+        this.mBranding = in.readParcelable(Branding.class.getClassLoader());
+        this.mContact = in.readString();
+        this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
+    }
+
+    public static final Creator<Store> CREATOR = new Creator<Store>() {
+        public Store createFromParcel(Parcel source) {
+            return new Store(source);
+        }
+
+        public Store[] newArray(int size) {
+            return new Store[size];
+        }
+    };
 }
