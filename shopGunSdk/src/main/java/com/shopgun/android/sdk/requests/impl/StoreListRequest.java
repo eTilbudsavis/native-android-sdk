@@ -17,7 +17,6 @@
 package com.shopgun.android.sdk.requests.impl;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.model.Store;
 import com.shopgun.android.sdk.requests.LoaderRequest;

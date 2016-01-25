@@ -19,9 +19,9 @@ package com.shopgun.android.sdk.test;
 import android.content.res.Configuration;
 
 import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.pageflip.impl.DoublePageReaderConfig;
 import com.shopgun.android.sdk.pageflip.Orientation;
 import com.shopgun.android.sdk.pageflip.ReaderConfig;
+import com.shopgun.android.sdk.pageflip.impl.DoublePageReaderConfig;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 
 import junit.framework.Assert;
