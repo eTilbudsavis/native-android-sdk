@@ -37,6 +37,7 @@ import com.shopgun.android.sdk.model.Hotspot;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
+import com.shopgun.android.sdk.network.impl.NetworkDebugger;
 import com.shopgun.android.sdk.pageflip.impl.DoublePageReaderConfig;
 import com.shopgun.android.sdk.pageflip.stats.Clock;
 import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
@@ -557,47 +558,29 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
         ensureCatalog();
     }
 
-    class CatalogRequestCacheIgnore extends CatalogRequest {
-
-        private boolean mIgnoreCache = true;
-
-        public CatalogRequestCacheIgnore(String catalogId, LoaderRequest.Listener<Catalog> listener) {
-            super(catalogId, listener);
-        }
-
-        public CatalogRequestCacheIgnore(Catalog catalog, LoaderRequest.Listener<Catalog> listener) {
-            super(catalog, listener);
-        }
-
-        @Override
-        protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
-            // We'll ignore the cache until the first request have been on network
-            // we'll use this as stats
-            mIgnoreCache = false;
-            return super.parseNetworkResponse(response);
-        }
-
-        @Override
-        public boolean ignoreCache() {
-            return mIgnoreCache;
-        }
-
-    }
-
     private void ensureCatalog() {
-        if (mCatalog != null) {
-            mCatalogRequest = new CatalogRequestCacheIgnore(mCatalog, this);
+
+        if (PageflipUtils.isCatalogReady(mCatalog)) {
+
+            onRequestComplete(mCatalog, new ArrayList<ShopGunError>(0));
+
         } else {
-            mCatalogRequest = new CatalogRequestCacheIgnore(mCatalogId, this);
+
+            if (mCatalog != null) {
+                mCatalogRequest = new CatalogRequestCacheIgnore(mCatalog, this);
+            } else {
+                mCatalogRequest = new CatalogRequestCacheIgnore(mCatalogId, this);
+            }
+            mCatalogRequest.loadHotspots(true);
+            mCatalogRequest.loadPages(true);
+            mCatalogRequest.setDebugger(new NetworkDebugger());
+            getShopgun().add(mCatalogRequest);
+
         }
-        mCatalogRequest.loadHotspots(true);
-        mCatalogRequest.loadPages(true);
-        getShopgun().add(mCatalogRequest);
     }
 
     @Override
     public void onRequestComplete(Catalog response, List<ShopGunError> errors) {
-
         if (isAdded()) {
 
             if (!errors.isEmpty()) {
@@ -845,7 +828,30 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
         return mOutroFragment;
     }
 
-    private void saveState() {
+    class CatalogRequestCacheIgnore extends CatalogRequest {
+
+        private boolean mIgnoreCache = true;
+
+        public CatalogRequestCacheIgnore(String catalogId, LoaderRequest.Listener<Catalog> listener) {
+            super(catalogId, listener);
+        }
+
+        public CatalogRequestCacheIgnore(Catalog catalog, LoaderRequest.Listener<Catalog> listener) {
+            super(catalog, listener);
+        }
+
+        @Override
+        protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+            // We'll ignore the cache until the first request have been on network
+            // we'll use this as stats
+            mIgnoreCache = false;
+            return super.parseNetworkResponse(response);
+        }
+
+        @Override
+        public boolean ignoreCache() {
+            return mIgnoreCache;
+        }
 
     }
 
