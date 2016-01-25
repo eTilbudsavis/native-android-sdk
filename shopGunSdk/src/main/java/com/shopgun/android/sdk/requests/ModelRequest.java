@@ -28,7 +28,6 @@ import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public abstract class ModelRequest<T> extends JsonObjectRequest implements Delivery {
 
@@ -37,7 +36,6 @@ public abstract class ModelRequest<T> extends JsonObjectRequest implements Deliv
     private final ModelLoaderRequest<T> mLoaderRequest;
     private final LoaderRequest.Listener<T> mLoaderListener;
     private final LoaderDelivery<T> mDelivery;
-    private boolean mCancelled = false;
 
     public ModelRequest(String url, LoaderRequest.Listener<T> listener) {
         this(url, null, listener);
@@ -63,78 +61,33 @@ public abstract class ModelRequest<T> extends JsonObjectRequest implements Deliv
             setTag(new Object());
         }
         super.setDelivery(this);
-
-        if (mLoaderRequest != null) {
-            // If the loader already has the initial data, there's no reason to perform a request
-            T data = mLoaderRequest.getData();
-            if (data != null) {
-                runLoader(data);
-                mCancelled = true;
-                super.cancel();
-            }
-        }
         return this;
     }
 
     @Override
-    public Request setDelivery(Delivery d) {
-        throw new RuntimeException(new IllegalAccessException("Custom delivery not possible"));
-    }
-
-    @Override
     public Response<JSONObject> parseCache(Cache c) {
-        if (mLoaderRequest.getData() != null) {
+        if (mLoaderRequest != null && mLoaderRequest.getData() != null) {
+            // ensure that the loader data is used, if it's present
             return Response.fromError(new InternalOkError());
         }
         return super.parseCache(c);
     }
 
-    public abstract T parse(JSONObject response);
-
-    /**
-     * Method for applying the current request state to the given request
-     * @param r A {@link Request} to apply state to.
-     */
-    private void applyState(Request r) {
-        // mimic parent behaviour
-        r.setDebugger(getDebugger());
-        r.setTag(getTag());
-        r.setIgnoreCache(ignoreCache());
-        r.setTimeOut(getTimeOut());
-        r.setUseLocation(useLocation());
-    }
-
     @Override
-    public boolean isCanceled() {
-        return mCancelled;
+    public Request setDelivery(Delivery d) {
+        throw new RuntimeException(new IllegalAccessException("Custom delivery for model requests is not allowed"));
     }
+
+    public abstract T parse(JSONObject response);
 
     @Override
     public void cancel() {
         synchronized (this) {
-            if (!mCancelled) {
-                mCancelled = true;
-                super.cancel();
-                if (mLoaderRequest != null) {
-                    mLoaderRequest.cancel();
-                }
+            super.cancel();
+            if (mLoaderRequest != null) {
+                mLoaderRequest.cancel();
             }
         }
-    }
-
-    private boolean runLoader(T data) {
-
-        if (mLoaderListener != null) {
-            if (mLoaderRequest.getData() == null) {
-                mLoaderRequest.setData(data);
-            }
-            // Load extra data into result
-            applyState(mLoaderRequest);
-            getRequestQueue().add(mLoaderRequest);
-            return true;
-        }
-        return false;
-
     }
 
     @Override
@@ -142,11 +95,19 @@ public abstract class ModelRequest<T> extends JsonObjectRequest implements Deliv
         request.addEvent("post-response");
 
         if (response.isSuccess()) {
+
+            // Standard request, we got the data, we'll parse and deliver
             request.addEvent("parsing-response-to-model-object");
             T data = parse((JSONObject) response.result);
-            List<ShopGunError> errors = new ArrayList<ShopGunError>();
-            boolean running = runLoader(data);
-            mDelivery.deliver(this, response, data, errors, running);
+            boolean intermediate = ModelRequestTools.runLoader(this, mLoaderRequest, data, getRequestQueue());
+            mDelivery.deliver(this, response, data, new ArrayList<ShopGunError>(0), intermediate);
+
+        } else if (response.error instanceof InternalOkError) {
+
+            request.addEvent("running-loader-request-with-original-data");
+            T data = mLoaderRequest.getData();
+            boolean intermediate = ModelRequestTools.runLoader(this, mLoaderRequest, data, getRequestQueue());
+            mDelivery.deliver(this, response, data, new ArrayList<ShopGunError>(0), intermediate);
 
         } else {
 

@@ -114,9 +114,13 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
                 }
             }
             mRequests.addAll(tmp);
-            for (Request r : mRequests) {
-                applyState(r);
-                getRequestQueue().add(r);
+            if (mRequests.isEmpty()) {
+                finish("no-filler-requests-needed");
+            } else {
+                for (Request r : mRequests) {
+                    applyState(r);
+                    getRequestQueue().add(r);
+                }
             }
         }
     }
