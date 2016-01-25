@@ -14,44 +14,45 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.network.mock;
+package com.shopgun.android.sdk.network.mock.api;
 
 import android.content.Context;
 
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
-import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.network.mock.response.MockNetworkResponse;
+import com.shopgun.android.sdk.utils.HeaderUtils;
+import com.shopgun.android.sdk.utils.Utils;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class MockUnsupportedResponse extends MockNetworkResponse {
+import java.util.Date;
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
-    public static final String TAG = MockUnsupportedResponse.class.getSimpleName();
+public class MockSessionResponse extends MockNetworkResponse {
 
-    public MockUnsupportedResponse(Context mContext, Request<?> request) {
-        super(mContext, request);
+    protected MockSessionResponse(Context context, Request<?> request) {
+        super(context, request);
+
     }
 
     @Override
     public NetworkResponse getResponse() {
 
-        ShopGunError error;
+        JSONObject session = getAssetJSONObject(FILE_SESSIONS);
+        // Add some time to the session to make the sessionmanager happy
+        long exp = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(24);
         try {
-            URL url = new URL(mRequest.getUrl());
-            error = new ShopGunError(Integer.MAX_VALUE, "Path not supported", url.getPath());
-        } catch (MalformedURLException e) {
+            session.put("expires", Utils.dateToString(new Date(exp)));
+        } catch (JSONException e) {
             SgnLog.e(TAG, e.getMessage(), e);
-            error = new ShopGunError(Integer.MAX_VALUE, "Malformed URL", e.getMessage() + ", " + mRequest.getUrl());
         }
-        return new NetworkResponse(404, error.toJSON().toString().getBytes(), null);
+        HashMap<String, String> headers = new HashMap<String, String>();
+        headers.put(HeaderUtils.X_TOKEN, "mock-token");
+        headers.put(HeaderUtils.X_SIGNATURE, "mock-signature");
+        return new NetworkResponse(200, session.toString().getBytes(), headers);
 
-    }
-
-    @Override
-    protected NetworkResponse getUnsupportedResponse() {
-        return getResponse();
     }
 }

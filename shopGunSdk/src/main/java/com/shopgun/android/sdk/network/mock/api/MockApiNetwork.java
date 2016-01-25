@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.network.mock;
+package com.shopgun.android.sdk.network.mock.api;
 
 import android.content.Context;
 
@@ -23,18 +23,18 @@ import com.shopgun.android.sdk.network.Network;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.network.mock.response.MockNetworkResponse;
+import com.shopgun.android.sdk.network.mock.PathHelper;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class MockNetwork implements Network {
+public class MockApiNetwork implements Network {
 
-    public static final String TAG = Constants.getTag(MockNetwork.class);
+    public static final String TAG = Constants.getTag(MockApiNetwork.class);
 
     Context mContext;
 
-    public MockNetwork(Context ctx) {
+    public MockApiNetwork(Context ctx) {
         this.mContext = ctx;
     }
 

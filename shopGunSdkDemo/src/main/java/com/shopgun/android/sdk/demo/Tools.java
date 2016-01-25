@@ -23,7 +23,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.network.mock.MockNetwork;
+import com.shopgun.android.sdk.network.mock.api.MockApiNetwork;
 import com.shopgun.android.sdk.utils.ColorUtils;
 
 public class Tools {
@@ -50,7 +50,7 @@ public class Tools {
 
             new ShopGun.Builder(c)
                     .setDevelop(BuildConfig.DEBUG)
-                    .setNetwork(new MockNetwork(c))
+                    .setNetwork(new MockApiNetwork(c))
                     .build();
 
         }

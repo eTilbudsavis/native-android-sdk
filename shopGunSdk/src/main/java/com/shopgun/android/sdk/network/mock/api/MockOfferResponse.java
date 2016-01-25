@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.network.mock.response;
+package com.shopgun.android.sdk.network.mock.api;
 
 import android.content.Context;
 
@@ -24,21 +24,40 @@ import com.shopgun.android.sdk.network.Request;
 
 import org.json.JSONArray;
 
-public class MockCatalogResponse extends MockNetworkResponse {
+import java.util.HashSet;
 
-    public MockCatalogResponse(Context mContext, Request<?> request) {
+public class MockOfferResponse extends MockNetworkResponse {
+
+    static {
+
+        HashSet<String> mOfferActions = new HashSet<String>();
+        mOfferActions.add("search");
+        mOfferActions.add("count");
+        mOfferActions.add("suggest");
+        mOfferActions.add("typeahead");
+        mActions.put("offers", mOfferActions);
+
+        HashSet<String> mOfferModelActions = new HashSet<String>();
+        mOfferModelActions.add("search");
+        mOfferModelActions.add("count");
+        mOfferModelActions.add("suggest");
+        mOfferModelActions.add("typeahead");
+        mModelActions.put("offers", mOfferModelActions);
+    }
+
+    protected MockOfferResponse(Context mContext, Request<?> request) {
         super(mContext, request);
     }
 
     @Override
     public NetworkResponse getResponse() {
 
-        JSONArray array = getAssetJSONArray(FILE_CATALOG_LIST);
+        JSONArray array = getAssetJSONArray(FILE_OFFER_LIST);
 
         String actionOrId = mPath.getActionOrId();
         if (actionOrId == null) {
-            // Just a catalog list
-            JSONArray idArray = filterByIds(array, mRequest, Parameters.CATALOG_IDS);
+            // Just a list
+            JSONArray idArray = filterByIds(array, mRequest, Parameters.OFFER_IDS);
             if (idArray != null) {
                 array = trimToOffsetAndLimit(idArray, mRequest);
                 return new NetworkResponse(200, array.toString().getBytes(), null);
@@ -47,12 +66,12 @@ public class MockCatalogResponse extends MockNetworkResponse {
             return new NetworkResponse(200, array.toString().getBytes(), null);
         }
 
-
         if ("search".equals(actionOrId)) {
             // 'query' is being ignored
             array = trimToOffsetAndLimit(array, mRequest);
             return new NetworkResponse(200, array.toString().getBytes(), null);
         } else if ("suggest".equals(actionOrId)) {
+            array = trimToOffsetAndLimit(array, mRequest);
             return new NetworkResponse(200, array.toString().getBytes(), null);
         } else if ("count".equals(actionOrId)) {
             return getUnsupportedResponse();
@@ -61,29 +80,18 @@ public class MockCatalogResponse extends MockNetworkResponse {
         }
 
         // The action must be an id
-        String id = actionOrId;
         String action = mPath.getItemAction();
         if (action == null) {
-            return getItem(array, id);
+            return getItem(array, actionOrId);
         }
 
-        if ("pages".equals(action)) {
-
-            String name = String.format("catalog-%s-pages.json", id);
-            JSONArray pages = getAssetJSONArray(name);
-            return new NetworkResponse(200, pages.toString().getBytes(), null);
-
-        } else if ("hotspots".equals(action)) {
-
-            String name = String.format("catalog-%s-hotspots.json", id);
-            JSONArray hotspots = getAssetJSONArray(name);
-            return new NetworkResponse(200, hotspots.toString().getBytes(), null);
-
-        } else if ("stores".equals(action)) {
-            return getUnsupportedResponse();
-        } else if ("collect".equals(action)) {
+        if ("collect".equals(action)) {
             return new NetworkResponse(201, "{}".getBytes(), null);
-        } else if ("download".equals(action)) {
+        } else if ("light".equals(action)) {
+            return getUnsupportedResponse();
+        } else if ("webshop".equals(action)) {
+            return getUnsupportedResponse();
+        } else if ("stores".equals(action)) {
             return getUnsupportedResponse();
         }
 

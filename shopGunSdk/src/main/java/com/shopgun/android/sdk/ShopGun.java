@@ -431,6 +431,16 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
         return mDevelop;
     }
 
+    /** @deprecated Use {@link #getInstance(Context)} */
+    @Deprecated
+    public void setDevelop(boolean develop) {
+        mDevelop = develop;
+        if (isStarted()) {
+            SgnLog.i(TAG, "Re-registering apiKey and apiSecret");
+            ensureKeys(mContext);
+        }
+    }
+
     private boolean isKeySecretOk() {
         if (mApiKey == null || mApiSecret == null) {
             // Reset both to keep sane state

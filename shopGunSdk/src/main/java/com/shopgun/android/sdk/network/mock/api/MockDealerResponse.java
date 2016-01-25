@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.network.mock.response;
+package com.shopgun.android.sdk.network.mock.api;
 
 import android.content.Context;
 
@@ -24,21 +24,21 @@ import com.shopgun.android.sdk.network.Request;
 
 import org.json.JSONArray;
 
-public class MockStoreResponse extends MockNetworkResponse {
+public class MockDealerResponse extends MockNetworkResponse {
 
-    public MockStoreResponse(Context mContext, Request<?> request) {
+    protected MockDealerResponse(Context mContext, Request<?> request) {
         super(mContext, request);
     }
 
     @Override
     public NetworkResponse getResponse() {
 
-        JSONArray array = getAssetJSONArray(FILE_STORE_LIST);
+        JSONArray array = getAssetJSONArray(FILE_DEALER_LIST);
 
         String actionOrId = mPath.getActionOrId();
         if (actionOrId == null) {
             // Just a list
-            JSONArray idArray = filterByIds(array, mRequest, Parameters.STORE_IDS);
+            JSONArray idArray = filterByIds(array, mRequest, Parameters.DEALER_IDS);
             if (idArray != null) {
                 array = trimToOffsetAndLimit(idArray, mRequest);
                 return new NetworkResponse(200, array.toString().getBytes(), null);
@@ -51,7 +51,9 @@ public class MockStoreResponse extends MockNetworkResponse {
             // 'query' is being ignored
             array = trimToOffsetAndLimit(array, mRequest);
             return new NetworkResponse(200, array.toString().getBytes(), null);
-        } else if ("quicksearch".equals(actionOrId)) {
+        } else if ("suggested".equals(actionOrId)) {
+            return getUnsupportedResponse();
+        } else if ("suggest".equals(actionOrId)) {
             return getUnsupportedResponse();
         }
 
@@ -61,15 +63,10 @@ public class MockStoreResponse extends MockNetworkResponse {
             return getItem(array, actionOrId);
         }
 
-        if ("collect".equals(action)) {
-            return new NetworkResponse(201, "{}".getBytes(), null);
-        } else if ("catalogs".equals(action)) {
-            return getUnsupportedResponse();
-        } else if ("offers".equals(action)) {
-            return getUnsupportedResponse();
-        }
+        // dealers doesn't have any actions for an item
 
         return getUnsupportedResponse();
+
 
     }
 }

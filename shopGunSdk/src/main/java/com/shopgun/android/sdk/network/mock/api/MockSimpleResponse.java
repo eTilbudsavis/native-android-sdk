@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.network.mock.response;
+package com.shopgun.android.sdk.network.mock.api;
 
 import android.content.Context;
 
@@ -25,7 +25,7 @@ public class MockSimpleResponse extends MockNetworkResponse {
 
     private String mName;
 
-    public MockSimpleResponse(Context mContext, Request<?> request, String name) {
+    protected MockSimpleResponse(Context mContext, Request<?> request, String name) {
         super(mContext, request);
         mName = name;
     }
