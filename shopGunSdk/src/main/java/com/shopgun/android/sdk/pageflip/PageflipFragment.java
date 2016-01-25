@@ -37,7 +37,6 @@ import com.shopgun.android.sdk.model.Hotspot;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.network.impl.NetworkDebugger;
 import com.shopgun.android.sdk.pageflip.impl.DoublePageReaderConfig;
 import com.shopgun.android.sdk.pageflip.stats.Clock;
 import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
@@ -300,6 +299,14 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
+        mContainer = container;
+        mFrame = (FrameLayout) inflater.inflate(R.layout.shopgun_sdk_layout_pageflip, mContainer, false);
+        mLoader = (LoadingTextView) mFrame.findViewById(R.id.shopgun_sdk_layout_pageflip_loader);
+        mPager = (PageflipViewPager) mFrame.findViewById(R.id.shopgun_sdk_layout_pageflip_viewpager);
+        mPager.setScrollDurationFactor(PAGER_SCROLL_FACTOR);
+        mPager.addOnPageChangeListener(mOnPageChangeListener);
+        mPager.setOnPageBound(mPageBoundListener);
+
         if (mSavedInstanceState != null) {
             onRestoreState(mSavedInstanceState);
         } else {
@@ -308,14 +315,6 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
         mSavedInstanceState = null;
 
         mStatsDelivery = new StatDeliveryImpl(getShopgun());
-
-        mContainer = container;
-        mFrame = (FrameLayout) inflater.inflate(R.layout.shopgun_sdk_layout_pageflip, mContainer, false);
-        mLoader = (LoadingTextView) mFrame.findViewById(R.id.shopgun_sdk_layout_pageflip_loader);
-        mPager = (PageflipViewPager) mFrame.findViewById(R.id.shopgun_sdk_layout_pageflip_viewpager);
-        mPager.setScrollDurationFactor(PAGER_SCROLL_FACTOR);
-        mPager.addOnPageChangeListener(mOnPageChangeListener);
-        mPager.setOnPageBound(mPageBoundListener);
 
         return mFrame;
     }
@@ -562,13 +561,16 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
 
         if (PageflipUtils.isCatalogReady(mCatalog)) {
 
+            SgnLog.d(TAG, "ensureCatalog.PageflipUtils.isCatalogReady");
             onRequestComplete(mCatalog, new ArrayList<ShopGunError>(0));
 
         } else {
 
             if (mCatalog != null) {
+                SgnLog.d(TAG, "ensureCatalog. catalog != null");
                 mCatalogRequest = new CatalogRequestCacheIgnore(mCatalog, this);
             } else {
+                SgnLog.d(TAG, "ensureCatalog. catalog == null");
                 mCatalogRequest = new CatalogRequestCacheIgnore(mCatalogId, this);
             }
             mCatalogRequest.loadHotspots(true);
