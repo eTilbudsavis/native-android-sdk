@@ -573,7 +573,6 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
             }
             mCatalogRequest.loadHotspots(true);
             mCatalogRequest.loadPages(true);
-            mCatalogRequest.setDebugger(new NetworkDebugger());
             getShopgun().add(mCatalogRequest);
 
         }
