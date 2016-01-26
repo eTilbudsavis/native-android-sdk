@@ -26,6 +26,7 @@ import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,18 +65,22 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
     }
 
     public Store(Store store) {
-        this.mErn = store.mErn;
-        this.mStreet = store.mStreet;
-        this.mCity = store.mCity;
-        this.mZipcode = store.mZipcode;
-        this.mCountry = store.mCountry;
-        this.mLatitude = store.mLatitude;
-        this.mLongitude = store.mLongitude;
-        this.mDealerUrl = store.mDealerUrl;
-        this.mDealerId = store.mDealerId;
-        this.mBranding = store.mBranding;
-        this.mContact = store.mContact;
-        this.mDealer = store.mDealer;
+
+        // Ensure we don't reference objects
+        Store tmp = Utils.copyParcelable(store, Store.CREATOR);
+
+        this.mErn = tmp.mErn;
+        this.mStreet = tmp.mStreet;
+        this.mCity = tmp.mCity;
+        this.mZipcode = tmp.mZipcode;
+        this.mCountry = tmp.mCountry;
+        this.mLatitude = tmp.mLatitude;
+        this.mLongitude = tmp.mLongitude;
+        this.mDealerUrl = tmp.mDealerUrl;
+        this.mDealerId = tmp.mDealerId;
+        this.mBranding = tmp.mBranding;
+        this.mContact = tmp.mContact;
+        this.mDealer = tmp.mDealer;
     }
 
     /**

@@ -82,6 +82,33 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
 
     }
 
+    public Offer(Offer offer) {
+
+        // Ensure we don't reference objects
+        Offer tmp = Utils.copyParcelable(offer, Offer.CREATOR);
+
+        this.mErn = tmp.mErn;
+        this.mHeading = tmp.mHeading;
+        this.mDescription = tmp.mDescription;
+        this.mCatalogPage = tmp.mCatalogPage;
+        this.mPricing = tmp.mPricing;
+        this.mQuantity = tmp.mQuantity;
+        this.mImages = tmp.mImages;
+        this.mLinks = tmp.mLinks;
+        this.mRunFrom = tmp.mRunFrom;
+        this.mRunTill = tmp.mRunTill;
+        this.mDealerUrl = tmp.mDealerUrl;
+        this.mDealerId = tmp.mDealerId;
+        this.mStoreUrl = tmp.mStoreUrl;
+        this.mStoreId = tmp.mStoreId;
+        this.mCatalogUrl = tmp.mCatalogUrl;
+        this.mCatalogId = tmp.mCatalogId;
+        this.mCatalog = tmp.mCatalog;
+        this.mDealer = tmp.mDealer;
+        this.mStore = tmp.mStore;
+
+    }
+
     private Offer(Parcel in) {
         this.mErn = in.readString();
         this.mHeading = in.readString();

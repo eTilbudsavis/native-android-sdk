@@ -81,6 +81,34 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 
     }
 
+    public Catalog(Catalog catalog) {
+
+        // Ensure we don't reference objects
+        Catalog tmp = Utils.copyParcelable(catalog, Catalog.CREATOR);
+
+        this.mErn = tmp.mErn;
+        this.mLabel = tmp.mLabel;
+        this.mBackground = tmp.mBackground;
+        this.mRunFrom = tmp.mRunFrom;
+        this.mRunTill = tmp.mRunTill;
+        this.mPageCount = tmp.mPageCount;
+        this.mOfferCount = tmp.mOfferCount;
+        this.mBranding = tmp.mBranding;
+        this.mDealerId = tmp.mDealerId;
+        this.mDealerUrl = tmp.mDealerUrl;
+        this.mStoreId = tmp.mStoreId;
+        this.mStoreUrl = tmp.mStoreUrl;
+        this.mDimension = tmp.mDimension;
+        this.mImages = tmp.mImages;
+        this.mCatrgoryIds = tmp.mCatrgoryIds;
+        this.mPdfUrl = tmp.mPdfUrl;
+
+        this.mPages = tmp.mPages;
+        this.mDealer = tmp.mDealer;
+        this.mStore = tmp.mStore;
+        this.mHotspots = tmp.mHotspots;
+    }
+
     /**
      * Convert a {@link JSONArray} into a {@link List};.
      * @param array A {@link JSONArray}  with a valid API v2 structure for a {@code Catalog}

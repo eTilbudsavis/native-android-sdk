@@ -27,6 +27,7 @@ import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.palette.MaterialColor;
 import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -80,6 +81,19 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
 
     public Dealer() {
 
+    }
+
+    public Dealer(Dealer dealer) {
+
+        // Ensure we don't reference objects
+        Dealer tmp = Utils.copyParcelable(dealer, Dealer.CREATOR);
+
+        this.mErn = tmp.mErn;
+        this.mName = tmp.mErn;
+        this.mWebsite = tmp.mWebsite;
+        this.mLogo = tmp.mLogo;
+        this.mColor = tmp.mColor;
+        this.mPageflip = tmp.mPageflip;
     }
 
     /**
