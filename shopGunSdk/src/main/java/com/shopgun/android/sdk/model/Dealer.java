@@ -89,7 +89,7 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
         Dealer tmp = Utils.copyParcelable(dealer, Dealer.CREATOR);
 
         this.mErn = tmp.mErn;
-        this.mName = tmp.mErn;
+        this.mName = tmp.mName;
         this.mWebsite = tmp.mWebsite;
         this.mLogo = tmp.mLogo;
         this.mColor = tmp.mColor;

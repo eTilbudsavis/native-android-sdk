@@ -239,6 +239,8 @@ public class ModelTest {
 
         // getters and setters
 
+        Assert.assertEquals(obj, new Dealer(obj));
+
         SdkTest.logTest(TAG, "Dealer");
 
     }
@@ -281,6 +283,8 @@ public class ModelTest {
         testIDealer(obj);
         testIStore(obj);
 
+        Assert.assertEquals(obj, new Catalog(obj));
+
         SdkTest.logTestWarning(TAG, "Catalog", "NO TEST OF HOTSPOTMAP, see HotspotMap test");
 
     }
@@ -312,6 +316,8 @@ public class ModelTest {
 
         // getters and setters
         testIDealer(obj);
+
+        Assert.assertEquals(obj, new Store(obj));
 
         SdkTest.logTest(TAG, "Store");
 
@@ -880,6 +886,8 @@ public class ModelTest {
         testIDealer(obj);
         testIStore(obj);
         testICatalog(obj);
+
+        Assert.assertEquals(obj, new Offer(obj));
 
         SdkTest.logTest(TAG, "Offer");
         // getters and setters
