@@ -104,7 +104,7 @@ public final class Utils {
     /**
      * Single instance of SimpleDateFormat to save time and memory
      */
-    private static SimpleDateFormat mSdf = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
+    private static SimpleDateFormat mSdf = new SimpleDateFormat(DATE_FORMAT, Locale.US);
 
     private static final Object DATE_LOCK = new Object();
 
