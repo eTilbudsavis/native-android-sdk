@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class SessionManager {
 
@@ -293,7 +294,7 @@ public class SessionManager {
 			 */
             Date now = new Date();
             long delta = now.getTime() - mShopGun.getSettings().getLastUsedTime();
-            boolean shouldPut = delta > (2 * Utils.HOUR_IN_MILLIS);
+            boolean shouldPut = delta > TimeUnit.HOURS.toMillis(2);
 //            boolean shouldPut = delta > (20 * Utils.SECOND_IN_MILLIS);
             if (shouldPut) {
                 putSession(null);

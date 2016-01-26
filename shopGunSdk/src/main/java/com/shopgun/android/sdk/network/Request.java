@@ -28,6 +28,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("rawtypes")
 public abstract class Request<T> implements Comparable<Request<T>> {
@@ -38,10 +39,10 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     protected static final String DEFAULT_PARAMS_ENCODING = "utf-8";
 
     /** Default cache time in milliseconds */
-    protected static final long DEFAULT_CACHE_TTL = 3 * Utils.MINUTE_IN_MILLIS;
+    protected static final long DEFAULT_CACHE_TTL = TimeUnit.MINUTES.toMillis(3);
 
     /** Default connection timeout, this is for both connection and socket */
-    private static final int CONNECTION_TIME_OUT = (int) (20 * Utils.SECOND_IN_MILLIS);
+    private static final int CONNECTION_TIME_OUT = (int) TimeUnit.SECONDS.toMillis(20);
 
     /** Listener interface, for responses */
     private final Listener<T> mListener;

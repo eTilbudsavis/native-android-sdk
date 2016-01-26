@@ -46,7 +46,6 @@ import com.shopgun.android.sdk.model.Unit;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.palette.SgnColor;
-import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,6 +58,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ModelCreator {
 
@@ -429,7 +429,7 @@ public class ModelCreator {
     public static Session getSession(long expires, String token) {
         Session s = new Session();
         s.setClientId("fake-cid");
-        long exp = expires + Utils.HOUR_IN_MILLIS;
+        long exp = expires + TimeUnit.HOURS.toMillis(1);
         s.setExpires(new Date(exp));
         s.setPermission(getPermission());
         s.setProvider("fake-provider");

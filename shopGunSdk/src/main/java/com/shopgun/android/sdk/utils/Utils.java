@@ -57,41 +57,6 @@ public final class Utils {
     public static final String TAG = Constants.getTag(Utils.class);
 
     /**
-     * A second in milliseconds
-     */
-    public static final long SECOND_IN_MILLIS = 1000;
-
-    /**
-     * A minute in milliseconds
-     */
-    public static final long MINUTE_IN_MILLIS = SECOND_IN_MILLIS * 60;
-
-    /**
-     * A hour in milliseconds
-     */
-    public static final long HOUR_IN_MILLIS = MINUTE_IN_MILLIS * 60;
-
-    /**
-     * A day in milliseconds
-     */
-    public static final long DAY_IN_MILLIS = HOUR_IN_MILLIS * 24;
-
-    /**
-     * A week in milliseconds
-     */
-    public static final long WEEK_IN_MILLIS = DAY_IN_MILLIS * 7;
-
-    /**
-     * A month in milliseconds
-     */
-    public static final long MONTH_IN_MILLIS = DAY_IN_MILLIS * 30;
-
-    /**
-     * A year in milliseconds
-     */
-    public static final long YEAR_IN_MILLIS = WEEK_IN_MILLIS * 52;
-
-    /**
      * The date format as returned from the server
      */
     public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZZZ";
@@ -108,11 +73,8 @@ public final class Utils {
 
     private static final Object DATE_LOCK = new Object();
 
-    static {
-
-    }
-
     private Utils() {
+        // private
     }
 
     /**

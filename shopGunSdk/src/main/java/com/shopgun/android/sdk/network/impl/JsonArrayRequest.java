@@ -33,6 +33,7 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class JsonArrayRequest extends JsonRequest<JSONArray> {
 
@@ -42,7 +43,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
     public static final int DEFAULT_LIMIT = 24;
     private static final String ERROR_OFFSET_NEGATIVE = "Offset may not be negative";
     private static final String ERROR_LIMIT_NEGATIVE = "Limit may not be negative";
-    private static final long CACHE_TTL = 3 * Utils.MINUTE_IN_MILLIS;
+    private static final long CACHE_TTL = TimeUnit.MINUTES.toMillis(3);
 
     public JsonArrayRequest(String url, Listener<JSONArray> listener) {
         super(Method.GET, url, null, listener);

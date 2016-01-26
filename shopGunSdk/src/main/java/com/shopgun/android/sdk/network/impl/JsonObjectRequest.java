@@ -28,12 +28,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.TimeUnit;
 
 public class JsonObjectRequest extends JsonRequest<JSONObject> {
 
     public static final String TAG = Constants.getTag(JsonObjectRequest.class);
 
-    private static final long CACHE_TTL = 3 * Utils.MINUTE_IN_MILLIS;
+    private static final long CACHE_TTL = TimeUnit.MINUTES.toMillis(3);
 
     public JsonObjectRequest(String url, Listener<JSONObject> listener) {
         super(url, listener);
