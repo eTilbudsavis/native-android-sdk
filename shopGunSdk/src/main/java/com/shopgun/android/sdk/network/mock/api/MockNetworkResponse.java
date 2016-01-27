@@ -115,7 +115,7 @@ public abstract class MockNetworkResponse {
                 if (id.equals(item.getString("id"))) {
                     return new NetworkResponse(200, item.toString().getBytes(), null);
                 }
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
@@ -125,7 +125,7 @@ public abstract class MockNetworkResponse {
     protected JSONArray getAssetJSONArray(String name) {
         try {
             return new JSONArray(getAssetAsString(name));
-        } catch (JSONException e) {
+        } catch (Exception e) {
             SgnLog.e(getClass().getSimpleName(), e.getMessage(), e);
         }
         return new JSONArray();
@@ -134,7 +134,7 @@ public abstract class MockNetworkResponse {
     protected JSONObject getAssetJSONObject(String name) {
         try {
             return new JSONObject(getAssetAsString(name));
-        } catch (JSONException e) {
+        } catch (Exception e) {
             SgnLog.e(getClass().getSimpleName(), e.getMessage(), e);
         }
         return new JSONObject();

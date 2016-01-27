@@ -24,10 +24,19 @@ import com.shopgun.android.sdk.network.RequestDebugger;
 public class NetworkDebugger implements RequestDebugger {
 
     public static final String TAG = Constants.getTag(NetworkDebugger.class);
+    private final String mTag;
+
+    public NetworkDebugger() {
+        this(TAG);
+    }
+
+    public NetworkDebugger(String tag) {
+        this.mTag = tag;
+    }
 
     public void onFinish(Request<?> req) {
-        SgnLog.d(TAG, req.getNetworkLog().toString());
-        SgnLog.d(TAG, req.getLog().getString(getClass().getSimpleName()));
+        SgnLog.d(mTag, req.getNetworkLog().toString());
+        SgnLog.d(mTag, req.getLog().getString(getClass().getSimpleName()));
     }
 
     public void onDelivery(Request<?> r) {

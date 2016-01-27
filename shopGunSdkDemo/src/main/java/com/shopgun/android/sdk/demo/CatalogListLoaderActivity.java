@@ -76,7 +76,7 @@ public class CatalogListLoaderActivity extends BaseListActivity implements Adapt
             r.setLimit(10);
             // Offset can be used for pagination, and if default to 0
             r.setOffset(0);
-            ShopGun.getInstance().add(r);
+            ShopGun.getInstance(this).add(r);
         }
     }
 
