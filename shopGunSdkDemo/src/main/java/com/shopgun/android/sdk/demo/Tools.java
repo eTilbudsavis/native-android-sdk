@@ -23,6 +23,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.network.mock.api.MockApiNetwork;
 import com.shopgun.android.sdk.utils.ColorUtils;
 
 public class Tools {
@@ -37,19 +38,21 @@ public class Tools {
     public static void shopGunCreate(Context c) {
 
         /*
-         * ShopGun.create(Context ctx) must be invoked once, to instantiate the SDK
-         * prior to calling ShopGun.getInstance().
+         * There is two options to get a ShopGun instance:
+         * 1) Just call ShopGun.getInstance(Context)
+         * 2) Take control, by building ShopGun with the ShopGun.Builder
          *
-         * Calling ShopGun.create(Context ctx) can also be called from Application.onCreate().
+         * You can instantiate ShopGun from your Application.onCreate().
          *
          * ApiKey and ApiSecret are not included in the demo/SDK, but you can
          * get your own at https://etilbudsavis.dk/developers/ :-)
          */
         if (!ShopGun.hasInstance()) {
 
+            // The builder will automatically attach the ShopGun singleton.
             new ShopGun.Builder(c)
                     .setDevelop(BuildConfig.DEBUG)
-//                    .setNetwork(new MockApiNetwork(c))
+                    .setNetwork(new MockApiNetwork(c))
                     .build();
 
         }
