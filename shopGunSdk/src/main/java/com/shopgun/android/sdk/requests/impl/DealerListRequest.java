@@ -31,7 +31,11 @@ public class DealerListRequest extends ModelListRequest<List<Dealer>> {
     public static final String TAG = Constants.getTag(DealerListRequest.class);
 
     public DealerListRequest(LoaderRequest.Listener<List<Dealer>> listener) {
-        super(Endpoints.DEALER_LIST, null, listener);
+        this(Endpoints.DEALER_LIST, listener);
+    }
+
+    public DealerListRequest(String url, LoaderRequest.Listener<List<Dealer>> listener) {
+        super(url, null, listener);
     }
 
     @Override

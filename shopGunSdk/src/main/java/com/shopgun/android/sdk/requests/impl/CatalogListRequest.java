@@ -19,6 +19,7 @@ package com.shopgun.android.sdk.requests.impl;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.model.Catalog;
+import com.shopgun.android.sdk.model.Store;
 import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.ModelListLoaderRequest;
 import com.shopgun.android.sdk.requests.ModelListRequest;
@@ -36,7 +37,15 @@ public class CatalogListRequest extends ModelListRequest<List<Catalog>> {
     }
 
     public CatalogListRequest(ModelListLoaderRequest<List<Catalog>> loaderRequest, LoaderRequest.Listener<List<Catalog>> listener) {
-        super(Endpoints.CATALOG_LIST, loaderRequest, listener);
+        this(Endpoints.CATALOG_LIST, loaderRequest, listener);
+    }
+
+    public CatalogListRequest(String url, LoaderRequest.Listener<List<Catalog>> listener) {
+        this(url, new CatalogListLoaderRequest(null, listener), listener);
+    }
+
+    public CatalogListRequest(String url, ModelListLoaderRequest<List<Catalog>> loaderRequest, LoaderRequest.Listener<List<Catalog>> listener) {
+        super(url, loaderRequest, listener);
     }
 
     @Override

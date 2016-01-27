@@ -36,7 +36,15 @@ public class OfferListRequest extends ModelListRequest<List<Offer>> {
     }
 
     public OfferListRequest(ModelListLoaderRequest<List<Offer>> loaderRequest, LoaderRequest.Listener<List<Offer>> listener) {
-        super(Endpoints.OFFER_LIST, loaderRequest, listener);
+        this(Endpoints.OFFER_LIST, loaderRequest, listener);
+    }
+
+    public OfferListRequest(String url, LoaderRequest.Listener<List<Offer>> listener) {
+        this(url, new OfferListLoaderRequest(null, listener), listener);
+    }
+
+    public OfferListRequest(String url, ModelListLoaderRequest<List<Offer>> loaderRequest, LoaderRequest.Listener<List<Offer>> listener) {
+        super(url, loaderRequest, listener);
     }
 
     @Override
