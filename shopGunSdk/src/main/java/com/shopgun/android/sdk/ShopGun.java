@@ -210,9 +210,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     /** @deprecated Use {@link #hasInstance()} */
     @Deprecated
     public static boolean isCreated() {
-        synchronized (ShopGun.class) {
-            return mShopGun != null;
-        }
+        return hasInstance();
     }
 
     /**
@@ -652,7 +650,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
             }
 
             ShopGun.mShopGun = new ShopGun(mContext, mExecutor, mCache, mNetwork, mDevelop);
-            return mShopGun;
+            return ShopGun.getInstance(mContext);
         }
 
     }
