@@ -14,36 +14,61 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.network.mock.empty;
+package com.shopgun.android.sdk.network.mock;
 
-import android.content.Context;
-
+import com.shopgun.android.sdk.network.Network;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
-import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
-import com.shopgun.android.sdk.network.mock.MockNetwork;
-import com.shopgun.android.sdk.network.mock.MockUnsupportedNetworkResponse;
 
-public class MockEmptyNetwork extends MockNetwork {
+import java.util.Random;
 
-    private Context mContext;
+public abstract class MockNetwork implements Network {
 
-    public MockEmptyNetwork(Context mContext) {
-        this.mContext = mContext;
-    }
+    long mDelayMin = 0;
+    long mDelayMax = 0;
 
     @Override
     public NetworkResponse performRequest(Request<?> request) throws ShopGunError {
-        super.performRequest(request);
 
-        if (request instanceof JsonObjectRequest) {
-            return new NetworkResponse(200, "{}".getBytes(), null);
-        } else if (request instanceof JsonArrayRequest) {
-            return new NetworkResponse(200, "[]".getBytes(), null);
+        if (mDelayMin > 0) {
+            try {
+                int offset = (int)(mDelayMax-mDelayMin);
+                int sleep = new Random().nextInt(offset+1) + (int)(mDelayMin);
+                Thread.sleep(sleep);
+            } catch (Exception e) {
+                // ignore
+            }
+
         }
 
         return new MockUnsupportedNetworkResponse(request);
     }
+
+    public long getDelayMin() {
+        return mDelayMin;
+    }
+
+    public void setDelayMin(long delayMin) {
+        if (delayMin >= 0) {
+            this.mDelayMin = delayMin;
+        }
+        if (mDelayMin > mDelayMax) {
+            mDelayMax = mDelayMin;
+        }
+    }
+
+    public long getDelayMax() {
+        return mDelayMax;
+    }
+
+    public void setDelayMax(long delayMax) {
+        if (delayMax >= 0) {
+            this.mDelayMax = delayMax;
+        }
+        if (mDelayMax < mDelayMin) {
+            mDelayMin = mDelayMax;
+        }
+    }
+
 }

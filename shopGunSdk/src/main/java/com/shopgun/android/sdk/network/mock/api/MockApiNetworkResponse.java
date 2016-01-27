@@ -23,6 +23,7 @@ import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
+import com.shopgun.android.sdk.network.mock.MockUnsupportedNetworkResponse;
 import com.shopgun.android.sdk.network.mock.PathHelper;
 import com.shopgun.android.sdk.utils.Api;
 
@@ -39,9 +40,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-public abstract class MockNetworkResponse {
+public abstract class MockApiNetworkResponse {
 
-    public static final String TAG = MockNetworkResponse.class.getSimpleName();
+    public static final String TAG = MockApiNetworkResponse.class.getSimpleName();
 
     protected static final String FILE_CATALOG_LIST = "list-catalog.json";
     protected static final String FILE_STORE_LIST = "list-store.json";
@@ -59,7 +60,7 @@ public abstract class MockNetworkResponse {
     protected Request<?> mRequest;
     protected PathHelper mPath;
 
-    protected MockNetworkResponse(Context mContext, Request<?> request) {
+    protected MockApiNetworkResponse(Context mContext, Request<?> request) {
         this.mContext = mContext;
         mRequest = request;
         mPath = new PathHelper(request);
@@ -67,22 +68,22 @@ public abstract class MockNetworkResponse {
 
     public abstract NetworkResponse getResponse();
 
-    public static MockNetworkResponse create(Context ctx, Request request, String type) throws ShopGunError {
+    public static MockApiNetworkResponse create(Context ctx, Request request, String type) throws ShopGunError {
 
         if ("sessions".equals(type)) {
-            return new MockSessionResponse(ctx, request);
+            return new MockApiSessionResponse(ctx, request);
         } if ("offers".equals(type)) {
-            return new MockOfferResponse(ctx, request);
+            return new MockApiOfferResponse(ctx, request);
         } else if ("catalogs".equals(type)) {
-            return new MockCatalogResponse(ctx, request);
+            return new MockApiCatalogResponse(ctx, request);
         } else if ("stores".equals(type)) {
-            return new MockStoreResponse(ctx, request);
+            return new MockApiStoreResponse(ctx, request);
         } else if ("dealers".equals(type)) {
-            return new MockDealerResponse(ctx, request);
+            return new MockApiDealerResponse(ctx, request);
         } else if ("currencies".equals(type)) {
-            return new MockSimpleResponse(ctx, request, FILE_CURRENCY);
+            return new MockApiSimpleResponse(ctx, request, FILE_CURRENCY);
         } else if ("countries".equals(type)) {
-            return new MockSimpleResponse(ctx, request, FILE_COUNTRIES);
+            return new MockApiSimpleResponse(ctx, request, FILE_COUNTRIES);
         }
 //        else if ("regions".equals(type)) {
 //
@@ -100,11 +101,11 @@ public abstract class MockNetworkResponse {
 //
 //        }
 
-        return new MockUnsupportedResponse(ctx, request);
+        return new MockApiUnsupportedResponse(ctx, request);
     }
 
     protected NetworkResponse getUnsupportedResponse() {
-        return new MockUnsupportedResponse(mContext, mRequest).getResponse();
+        return new MockUnsupportedNetworkResponse(mRequest);
     }
 
     protected NetworkResponse getItem(JSONArray array,  String id) {

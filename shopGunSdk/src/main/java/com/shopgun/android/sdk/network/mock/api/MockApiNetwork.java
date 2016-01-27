@@ -19,16 +19,17 @@ package com.shopgun.android.sdk.network.mock.api;
 import android.content.Context;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.network.Network;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
+import com.shopgun.android.sdk.network.mock.MockUnsupportedNetworkResponse;
+import com.shopgun.android.sdk.network.mock.MockNetwork;
 import com.shopgun.android.sdk.network.mock.PathHelper;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class MockApiNetwork implements Network {
+public class MockApiNetwork extends MockNetwork {
 
     public static final String TAG = Constants.getTag(MockApiNetwork.class);
 
@@ -40,7 +41,7 @@ public class MockApiNetwork implements Network {
 
     @Override
     public NetworkResponse performRequest(Request<?> request) throws ShopGunError {
-
+        super.performRequest(request);
         try {
 
             URL url = new URL(request.getUrl());
@@ -55,10 +56,10 @@ public class MockApiNetwork implements Network {
                 throw new ShopGunError(Integer.MAX_VALUE, "API version not supported", "Api version given: " + apiVersion);
             }
 
-            return MockNetworkResponse.create(mContext, request, pathHelper.getType()).getResponse();
+            return MockApiNetworkResponse.create(mContext, request, pathHelper.getType()).getResponse();
 
         } catch (MalformedURLException e) {
-            return new MockUnsupportedResponse(mContext, request).getResponse();
+            return new MockUnsupportedNetworkResponse(request);
         }
 
     }

@@ -24,9 +24,9 @@ import com.shopgun.android.sdk.network.Request;
 
 import org.json.JSONArray;
 
-public class MockDealerResponse extends MockNetworkResponse {
+public class MockApiDealerResponse extends MockApiNetworkResponse {
 
-    protected MockDealerResponse(Context mContext, Request<?> request) {
+    protected MockApiDealerResponse(Context mContext, Request<?> request) {
         super(mContext, request);
     }
 

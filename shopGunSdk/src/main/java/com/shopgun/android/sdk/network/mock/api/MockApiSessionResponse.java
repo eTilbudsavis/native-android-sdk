@@ -31,9 +31,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-public class MockSessionResponse extends MockNetworkResponse {
+public class MockApiSessionResponse extends MockApiNetworkResponse {
 
-    protected MockSessionResponse(Context context, Request<?> request) {
+    protected MockApiSessionResponse(Context context, Request<?> request) {
         super(context, request);
 
     }

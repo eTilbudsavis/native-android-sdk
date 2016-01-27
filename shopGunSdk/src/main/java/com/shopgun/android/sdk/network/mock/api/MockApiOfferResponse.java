@@ -24,21 +24,40 @@ import com.shopgun.android.sdk.network.Request;
 
 import org.json.JSONArray;
 
-public class MockStoreResponse extends MockNetworkResponse {
+import java.util.HashSet;
 
-    protected MockStoreResponse(Context mContext, Request<?> request) {
+public class MockApiOfferResponse extends MockApiNetworkResponse {
+
+    static {
+
+        HashSet<String> mOfferActions = new HashSet<String>();
+        mOfferActions.add("search");
+        mOfferActions.add("count");
+        mOfferActions.add("suggest");
+        mOfferActions.add("typeahead");
+        mActions.put("offers", mOfferActions);
+
+        HashSet<String> mOfferModelActions = new HashSet<String>();
+        mOfferModelActions.add("search");
+        mOfferModelActions.add("count");
+        mOfferModelActions.add("suggest");
+        mOfferModelActions.add("typeahead");
+        mModelActions.put("offers", mOfferModelActions);
+    }
+
+    protected MockApiOfferResponse(Context mContext, Request<?> request) {
         super(mContext, request);
     }
 
     @Override
     public NetworkResponse getResponse() {
 
-        JSONArray array = getAssetJSONArray(FILE_STORE_LIST);
+        JSONArray array = getAssetJSONArray(FILE_OFFER_LIST);
 
         String actionOrId = mPath.getActionOrId();
         if (actionOrId == null) {
             // Just a list
-            JSONArray idArray = filterByIds(array, mRequest, Parameters.STORE_IDS);
+            JSONArray idArray = filterByIds(array, mRequest, Parameters.OFFER_IDS);
             if (idArray != null) {
                 array = trimToOffsetAndLimit(idArray, mRequest);
                 return new NetworkResponse(200, array.toString().getBytes(), null);
@@ -51,8 +70,13 @@ public class MockStoreResponse extends MockNetworkResponse {
             // 'query' is being ignored
             array = trimToOffsetAndLimit(array, mRequest);
             return new NetworkResponse(200, array.toString().getBytes(), null);
-        } else if ("quicksearch".equals(actionOrId)) {
+        } else if ("suggest".equals(actionOrId)) {
+            array = trimToOffsetAndLimit(array, mRequest);
+            return new NetworkResponse(200, array.toString().getBytes(), null);
+        } else if ("count".equals(actionOrId)) {
             return getUnsupportedResponse();
+        } else if ("typeahead".equals(actionOrId)) {
+            return new NetworkResponse(200, getAssetAsString(FILE_TYPEAHEAD).getBytes(), null);
         }
 
         // The action must be an id
@@ -63,13 +87,16 @@ public class MockStoreResponse extends MockNetworkResponse {
 
         if ("collect".equals(action)) {
             return new NetworkResponse(201, "{}".getBytes(), null);
-        } else if ("catalogs".equals(action)) {
+        } else if ("light".equals(action)) {
             return getUnsupportedResponse();
-        } else if ("offers".equals(action)) {
+        } else if ("webshop".equals(action)) {
+            return getUnsupportedResponse();
+        } else if ("stores".equals(action)) {
             return getUnsupportedResponse();
         }
 
         return getUnsupportedResponse();
 
     }
+
 }

@@ -14,36 +14,23 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.network.mock.empty;
+package com.shopgun.android.sdk.network.mock.api;
 
 import android.content.Context;
 
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
-import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
-import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
-import com.shopgun.android.sdk.network.mock.MockNetwork;
 import com.shopgun.android.sdk.network.mock.MockUnsupportedNetworkResponse;
 
-public class MockEmptyNetwork extends MockNetwork {
+public class MockApiUnsupportedResponse extends MockApiNetworkResponse {
 
-    private Context mContext;
-
-    public MockEmptyNetwork(Context mContext) {
-        this.mContext = mContext;
+    protected MockApiUnsupportedResponse(Context mContext, Request<?> request) {
+        super(mContext, request);
     }
 
     @Override
-    public NetworkResponse performRequest(Request<?> request) throws ShopGunError {
-        super.performRequest(request);
-
-        if (request instanceof JsonObjectRequest) {
-            return new NetworkResponse(200, "{}".getBytes(), null);
-        } else if (request instanceof JsonArrayRequest) {
-            return new NetworkResponse(200, "[]".getBytes(), null);
-        }
-
-        return new MockUnsupportedNetworkResponse(request);
+    public NetworkResponse getResponse() {
+        return new MockUnsupportedNetworkResponse(mRequest);
     }
+
 }

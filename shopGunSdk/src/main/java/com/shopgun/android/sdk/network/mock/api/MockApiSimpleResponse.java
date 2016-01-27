@@ -21,11 +21,11 @@ import android.content.Context;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
 
-public class MockSimpleResponse extends MockNetworkResponse {
+public class MockApiSimpleResponse extends MockApiNetworkResponse {
 
     private String mName;
 
-    protected MockSimpleResponse(Context mContext, Request<?> request, String name) {
+    protected MockApiSimpleResponse(Context mContext, Request<?> request, String name) {
         super(mContext, request);
         mName = name;
     }

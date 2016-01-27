@@ -14,9 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.network.mock.api;
-
-import android.content.Context;
+package com.shopgun.android.sdk.network.mock;
 
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.NetworkResponse;
@@ -26,31 +24,25 @@ import com.shopgun.android.sdk.network.ShopGunError;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class MockUnsupportedResponse extends MockNetworkResponse {
+public class MockUnsupportedNetworkResponse extends NetworkResponse {
 
-    public static final String TAG = MockUnsupportedResponse.class.getSimpleName();
+    public static final String TAG = MockUnsupportedNetworkResponse.class.getSimpleName();
 
-    public MockUnsupportedResponse(Context mContext, Request<?> request) {
-        super(mContext, request);
+    public MockUnsupportedNetworkResponse(Request<?> request) {
+        super(404, getBody(request), null);
     }
 
-    @Override
-    public NetworkResponse getResponse() {
+    private static byte[] getBody(Request<?> request) {
 
         ShopGunError error;
         try {
-            URL url = new URL(mRequest.getUrl());
+            URL url = new URL(request.getUrl());
             error = new ShopGunError(Integer.MAX_VALUE, "Path not supported", url.getPath());
         } catch (MalformedURLException e) {
             SgnLog.e(TAG, e.getMessage(), e);
-            error = new ShopGunError(Integer.MAX_VALUE, "Malformed URL", e.getMessage() + ", " + mRequest.getUrl());
+            error = new ShopGunError(Integer.MAX_VALUE, "Malformed URL", e.getMessage() + ", " + request.getUrl());
         }
-        return new NetworkResponse(404, error.toJSON().toString().getBytes(), null);
-
+        return error.toJSON().toString().getBytes();
     }
 
-    @Override
-    protected NetworkResponse getUnsupportedResponse() {
-        return getResponse();
-    }
 }
