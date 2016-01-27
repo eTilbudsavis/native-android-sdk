@@ -40,7 +40,6 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
     private final List<ShopGunError> mErrors = Collections.synchronizedList(new ArrayList<ShopGunError>());
     private final LoaderDelivery<T> mDelivery;
     private final Object LOCK = new Object();
-    private boolean mCanceled = false;
 
     public LoaderRequest(T data, Listener<T> l) {
         super(Method.PUT, null, null);
@@ -77,7 +76,6 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
         super.setDelivery(this);
         super.setRequestQueue(requestQueue);
         runFillerRequests();
-        mCanceled = true;
         super.cancel();
         return this;
     }
@@ -140,16 +138,10 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
     }
 
     @Override
-    public boolean isCanceled() {
-        return mCanceled;
-    }
-
-    @Override
     public void cancel() {
         synchronized (LOCK) {
-            if (!mCanceled) {
-                mCanceled = true;
-                super.cancel();
+            super.cancel();
+            if (getRequestQueue() != null) {
                 getRequestQueue().cancelAll(getTag());
             }
         }
