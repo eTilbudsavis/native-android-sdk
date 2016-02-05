@@ -149,15 +149,16 @@ public class ModelCreator {
 
     public static Branding getBranding() {
         return getBranding(Color.GREEN, "fake-logo-url", "fake-branding-name",
-                getPageflip(), "fake-website-url");
+                getPageflip(), "fake-website-url", "fake-description");
     }
 
     public static Branding getBranding(int color, String logoUrl, String name,
-                                       Pageflip pageflip, String website) {
+                                       Pageflip pageflip, String website, String description) {
         Branding b = new Branding();
         b.setColor(color);
         b.setLogo(logoUrl);
         b.setName(name);
+        b.setDescription(description);
         b.setPageflip(pageflip);
         b.setWebsite(website);
         return b;

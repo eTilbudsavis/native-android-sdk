@@ -17,6 +17,7 @@
 package com.shopgun.android.sdk.requests;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.Delivery;
 import com.shopgun.android.sdk.network.NetworkResponse;
@@ -145,6 +146,15 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
                 getRequestQueue().cancelAll(getTag());
             }
         }
+    }
+
+    @Override
+    public Request finish(String reason) {
+        if (isFinished()) {
+            SgnLog.d(TAG, "I should fix this finish(String) thing");
+            return this;
+        }
+        return super.finish(reason);
     }
 
     @Override

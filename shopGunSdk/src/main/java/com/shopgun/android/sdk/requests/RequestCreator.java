@@ -32,6 +32,7 @@ import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
+import com.shopgun.android.sdk.utils.IUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -68,23 +69,13 @@ public class RequestCreator {
     }
 
     public static Request getStoresRequestOrNull(final LoaderRequest request, final List<? extends IStore<?>> list) {
-        Set<String> ids = getStoreIds(list);
+        Set<String> ids = IUtils.getStoreIds(list);
         return ids.isEmpty() ? null : getStoreRequest(ids, request, list);
     }
 
     public static Request getStoresRequest(final LoaderRequest request, final List<? extends IStore<?>> list) {
-        Set<String> ids = getStoreIds(list);
+        Set<String> ids = IUtils.getStoreIds(list);
         return getStoreRequest(ids, request, list);
-    }
-
-    public static Set<String> getStoreIds(List<? extends IStore<?>> list) {
-        Set<String> ids = new HashSet<String>(list.size());
-        for (IStore is : list) {
-            if (is.getStore() == null) {
-                ids.add(is.getStoreId());
-            }
-        }
-        return ids;
     }
 
     private static Request getStoreRequest(final Set<String> ids, final LoaderRequest request, final List<? extends IStore<?>> list) {
@@ -131,23 +122,13 @@ public class RequestCreator {
     }
 
     public static Request getDealersRequestOrNull(final LoaderRequest request, final List<? extends IDealer<?>> list) {
-        Set<String> ids = getDealerIds(list);
+        Set<String> ids = IUtils.getDealerIds(list);
         return ids.isEmpty() ? null : getDealersRequest(ids, request, list);
     }
 
     public static Request getDealersRequest(final LoaderRequest request, final List<? extends IDealer<?>> list) {
-        Set<String> ids = getDealerIds(list);
+        Set<String> ids = IUtils.getDealerIds(list);
         return getDealersRequest(ids, request, list);
-    }
-
-    public static Set<String> getDealerIds(List<? extends IDealer<?>> list) {
-        Set<String> ids = new HashSet<String>(list.size());
-        for (IDealer is : list) {
-            if (is.getDealer() == null) {
-                ids.add(is.getDealerId());
-            }
-        }
-        return ids;
     }
 
     private static Request getDealersRequest(final Set<String> ids, final LoaderRequest request, final List<? extends IDealer<?>> list) {
@@ -273,22 +254,8 @@ public class RequestCreator {
     }
 
     public static Request createCatalogRequest(LoaderRequest request, List<? extends ICatalog<?>> list, boolean replace) {
-        Set<String> ids = getCatalogIds(list, replace);
+        Set<String> ids = IUtils.getCatalogIds(list, replace);
         return ids.isEmpty() ? null : createCatalogRequest(ids, request, list) ;
-    }
-
-    public static Set<String> getCatalogIds(List<? extends ICatalog<?>> list, boolean replace) {
-        Set<String> ids = new HashSet<String>(list.size());
-        for (ICatalog ic : list) {
-            if (ic.getCatalog() == null) {
-                // We need to get the catalog
-                ids.add(ic.getCatalogId());
-            } else if (replace) {
-                // We want to replace the catalog
-                ids.add(ic.getCatalogId());
-            }
-        }
-        return ids;
     }
 
     private static Request createCatalogRequest(final Set<String> ids, final LoaderRequest request, final List<? extends ICatalog<?>> list) {

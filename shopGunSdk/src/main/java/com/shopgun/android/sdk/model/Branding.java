@@ -40,6 +40,7 @@ public class Branding implements IJson<JSONObject>, Parcelable {
 
     private String mName;
     private String mWebsite;
+    private String mDescription;
     private String mLogo;
     private MaterialColor mColor;
     private Pageflip mPageflip;
@@ -75,6 +76,7 @@ public class Branding implements IJson<JSONObject>, Parcelable {
         }
         Branding b = new Branding();
         b.setName(Json.valueOf(object, JsonKeys.NAME));
+        b.setDescription(Json.valueOf(object, JsonKeys.DESCRIPTION));
         b.setWebsite(Json.valueOf(object, JsonKeys.WEBSITE));
         b.setLogo(Json.valueOf(object, JsonKeys.LOGO));
         b.setColor(Json.colorValueOf(object, JsonKeys.COLOR));
@@ -88,6 +90,7 @@ public class Branding implements IJson<JSONObject>, Parcelable {
         try {
             o.put(JsonKeys.NAME, Json.nullCheck(getName()));
             o.put(JsonKeys.WEBSITE, Json.nullCheck(getWebsite()));
+            o.put(JsonKeys.DESCRIPTION, Json.nullCheck(getDescription()));
             o.put(JsonKeys.LOGO, Json.nullCheck(getLogo()));
             o.put(JsonKeys.COLOR, Json.colorToSgnJson(getMaterialColor()));
             o.put(JsonKeys.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
@@ -103,6 +106,15 @@ public class Branding implements IJson<JSONObject>, Parcelable {
 
     public Branding setName(String name) {
         mName = name;
+        return this;
+    }
+
+    public String getDescription() {
+        return mDescription;
+    }
+
+    public Branding setDescription(String description) {
+        mDescription = description;
         return this;
     }
 
@@ -163,9 +175,11 @@ public class Branding implements IJson<JSONObject>, Parcelable {
 
         if (mName != null ? !mName.equals(branding.mName) : branding.mName != null) return false;
         if (mWebsite != null ? !mWebsite.equals(branding.mWebsite) : branding.mWebsite != null) return false;
+        if (mDescription != null ? !mDescription.equals(branding.mDescription) : branding.mDescription != null)
+            return false;
         if (mLogo != null ? !mLogo.equals(branding.mLogo) : branding.mLogo != null) return false;
         if (mColor != null ? !mColor.equals(branding.mColor) : branding.mColor != null) return false;
-        return !(mPageflip != null ? !mPageflip.equals(branding.mPageflip) : branding.mPageflip != null);
+        return mPageflip != null ? mPageflip.equals(branding.mPageflip) : branding.mPageflip == null;
 
     }
 
@@ -173,11 +187,13 @@ public class Branding implements IJson<JSONObject>, Parcelable {
     public int hashCode() {
         int result = mName != null ? mName.hashCode() : 0;
         result = 31 * result + (mWebsite != null ? mWebsite.hashCode() : 0);
+        result = 31 * result + (mDescription != null ? mDescription.hashCode() : 0);
         result = 31 * result + (mLogo != null ? mLogo.hashCode() : 0);
         result = 31 * result + (mColor != null ? mColor.hashCode() : 0);
         result = 31 * result + (mPageflip != null ? mPageflip.hashCode() : 0);
         return result;
     }
+
 
     @Override
     public int describeContents() {
@@ -188,6 +204,7 @@ public class Branding implements IJson<JSONObject>, Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.mName);
         dest.writeString(this.mWebsite);
+        dest.writeString(this.mDescription);
         dest.writeString(this.mLogo);
         dest.writeParcelable(this.mColor, 0);
         dest.writeParcelable(this.mPageflip, 0);
@@ -196,6 +213,7 @@ public class Branding implements IJson<JSONObject>, Parcelable {
     protected Branding(Parcel in) {
         this.mName = in.readString();
         this.mWebsite = in.readString();
+        this.mDescription = in.readString();
         this.mLogo = in.readString();
         this.mColor = in.readParcelable(MaterialColor.class.getClassLoader());
         this.mPageflip = in.readParcelable(Pageflip.class.getClassLoader());
