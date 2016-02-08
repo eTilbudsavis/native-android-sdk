@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>This class is a representation of a catalog as the API v2 exposes it</p>
@@ -69,7 +70,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     private String mStoreUrl;
     private Dimension mDimension;
     private Images mImages;
-    private HashSet<String> mCatrgoryIds;
+    private Set<String> mCategoryIds;
     private String mPdfUrl;
     // From separate queries
     private List<Images> mPages;
@@ -100,7 +101,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         this.mStoreUrl = tmp.mStoreUrl;
         this.mDimension = tmp.mDimension;
         this.mImages = tmp.mImages;
-        this.mCatrgoryIds = tmp.mCatrgoryIds;
+        this.mCategoryIds = tmp.mCategoryIds;
         this.mPdfUrl = tmp.mPdfUrl;
 
         this.mPages = tmp.mPages;
@@ -372,7 +373,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * @param pageCount Number of pages in this catalog
      * @return This object
      */
-    public Catalog setPageCount(Integer pageCount) {
+    public Catalog setPageCount(int pageCount) {
         mPageCount = pageCount;
         return this;
     }
@@ -390,7 +391,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * @param offerCount The number of offers
      * @return This object
      */
-    public Catalog setOfferCount(Integer offerCount) {
+    public Catalog setOfferCount(int offerCount) {
         this.mOfferCount = offerCount;
         return this;
     }
@@ -546,8 +547,9 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * Method for setting the {@link Page} associated with this catalog
      * @param pages A pages object
      */
-    public void setPages(List<Images> pages) {
+    public Catalog setPages(List<Images> pages) {
         mPages = pages;
+        return this;
     }
 
     /**
@@ -617,16 +619,29 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * Get the category id's for this catalog
      * @return A list of categories, or null
      */
-    public HashSet<String> getCatrgoryIds() {
-        return mCatrgoryIds;
+    public Set<String> getCategoryIds() {
+        return mCategoryIds;
     }
 
     /**
      * Set the list of categories for this catalog.
-     * @param catrgoryIds A list of categories
+     * @param categoryIds A list of categories
      */
-    public void setCatrgoryIds(HashSet<String> catrgoryIds) {
-        mCatrgoryIds = catrgoryIds;
+    public Catalog setCategoryIds(Set<String> categoryIds) {
+        mCategoryIds = categoryIds;
+        return this;
+    }
+
+    /** @deprecated typo in method name */
+    @Deprecated
+    public Set<String> getCatrgoryIds() {
+        return getCategoryIds();
+    }
+
+    /** @deprecated typo in method name */
+    @Deprecated
+    public Catalog setCatrgoryIds(Set<String> categoryIds) {
+        return setCategoryIds(categoryIds);
     }
 
     /**
@@ -641,14 +656,10 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * Set the URL where the PDF can be downloaded.
      * @param pdfUrl A url
      */
-    public void setPdfUrl(String pdfUrl) {
+    public Catalog setPdfUrl(String pdfUrl) {
         mPdfUrl = pdfUrl;
+        return this;
     }
-
-//    @Override
-//    public String toString() {
-//        return toJSON().toString();
-//    }
 
     @Override
     public boolean equals(Object o) {
@@ -671,7 +682,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         if (mStoreUrl != null ? !mStoreUrl.equals(catalog.mStoreUrl) : catalog.mStoreUrl != null) return false;
         if (mDimension != null ? !mDimension.equals(catalog.mDimension) : catalog.mDimension != null) return false;
         if (mImages != null ? !mImages.equals(catalog.mImages) : catalog.mImages != null) return false;
-        if (mCatrgoryIds != null ? !mCatrgoryIds.equals(catalog.mCatrgoryIds) : catalog.mCatrgoryIds != null)
+        if (mCategoryIds != null ? !mCategoryIds.equals(catalog.mCategoryIds) : catalog.mCategoryIds != null)
             return false;
         if (mPdfUrl != null ? !mPdfUrl.equals(catalog.mPdfUrl) : catalog.mPdfUrl != null) return false;
         if (mPages != null ? !mPages.equals(catalog.mPages) : catalog.mPages != null) return false;
@@ -697,7 +708,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         result = 31 * result + (mStoreUrl != null ? mStoreUrl.hashCode() : 0);
         result = 31 * result + (mDimension != null ? mDimension.hashCode() : 0);
         result = 31 * result + (mImages != null ? mImages.hashCode() : 0);
-        result = 31 * result + (mCatrgoryIds != null ? mCatrgoryIds.hashCode() : 0);
+        result = 31 * result + (mCategoryIds != null ? mCategoryIds.hashCode() : 0);
         result = 31 * result + (mPdfUrl != null ? mPdfUrl.hashCode() : 0);
         result = 31 * result + (mPages != null ? mPages.hashCode() : 0);
         result = 31 * result + (mDealer != null ? mDealer.hashCode() : 0);
@@ -727,7 +738,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         dest.writeString(this.mStoreUrl);
         dest.writeParcelable(this.mDimension, 0);
         dest.writeParcelable(this.mImages, 0);
-        dest.writeSerializable(this.mCatrgoryIds);
+        dest.writeStringList(new ArrayList<String>(mCategoryIds));
         dest.writeString(this.mPdfUrl);
         dest.writeTypedList(mPages);
         dest.writeParcelable(this.mDealer, 0);
@@ -752,7 +763,9 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         this.mStoreUrl = in.readString();
         this.mDimension = in.readParcelable(Dimension.class.getClassLoader());
         this.mImages = in.readParcelable(Images.class.getClassLoader());
-        this.mCatrgoryIds = (HashSet<String>) in.readSerializable();
+        ArrayList<String> catIds = new ArrayList<String>();
+        in.readStringList(catIds);
+        this.mCategoryIds = new HashSet<String>(catIds);
         this.mPdfUrl = in.readString();
         this.mPages = in.createTypedArrayList(Images.CREATOR);
         this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
