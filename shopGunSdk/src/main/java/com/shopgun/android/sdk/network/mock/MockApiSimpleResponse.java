@@ -14,23 +14,25 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.network.mock.api;
+package com.shopgun.android.sdk.network.mock;
 
 import android.content.Context;
 
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
-import com.shopgun.android.sdk.network.mock.MockUnsupportedNetworkResponse;
 
-public class MockApiUnsupportedResponse extends MockApiNetworkResponse {
+public class MockApiSimpleResponse extends MockApiNetworkResponse {
 
-    protected MockApiUnsupportedResponse(Context mContext, Request<?> request) {
+    private String mName;
+
+    protected MockApiSimpleResponse(Context mContext, Request<?> request, String name) {
         super(mContext, request);
+        mName = name;
     }
 
     @Override
     public NetworkResponse getResponse() {
-        return new MockUnsupportedNetworkResponse(mRequest);
+        return new NetworkResponse(200, getAssetAsByteArray(mName), null);
     }
 
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.network.mock.empty;
+package com.shopgun.android.sdk.network.mock;
 
 import android.content.Context;
 
@@ -25,6 +25,8 @@ import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.network.mock.MockNetwork;
 import com.shopgun.android.sdk.network.mock.MockUnsupportedNetworkResponse;
+import com.shopgun.android.sdk.network.mock.PathHelper;
+import com.shopgun.android.sdk.network.mock.MockApiSessionResponse;
 
 public class MockEmptyNetwork extends MockNetwork {
 
@@ -38,7 +40,11 @@ public class MockEmptyNetwork extends MockNetwork {
     public NetworkResponse performRequest(Request<?> request) throws ShopGunError {
         super.performRequest(request);
 
-        if (request instanceof JsonObjectRequest) {
+        PathHelper pathHelper = new PathHelper(request);
+        if ("sessions".equals(pathHelper.getType())) {
+            // if we do not create a session, nothing will work
+            return new MockApiSessionResponse(mContext, request).getResponse();
+        } else if (request instanceof JsonObjectRequest) {
             return new NetworkResponse(200, "{}".getBytes(), null);
         } else if (request instanceof JsonArrayRequest) {
             return new NetworkResponse(200, "[]".getBytes(), null);
@@ -46,4 +52,5 @@ public class MockEmptyNetwork extends MockNetwork {
 
         return new MockUnsupportedNetworkResponse(request);
     }
+
 }

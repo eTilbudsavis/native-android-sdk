@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.network.mock.api;
+package com.shopgun.android.sdk.network.mock;
 
 import android.content.Context;
 
@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MockApiSessionResponse extends MockApiNetworkResponse {
 
-    protected MockApiSessionResponse(Context context, Request<?> request) {
+    public MockApiSessionResponse(Context context, Request<?> request) {
         super(context, request);
 
     }

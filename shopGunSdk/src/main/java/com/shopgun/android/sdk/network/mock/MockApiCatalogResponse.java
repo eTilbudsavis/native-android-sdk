@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.network.mock.api;
+package com.shopgun.android.sdk.network.mock;
 
 import android.content.Context;
 
@@ -24,21 +24,21 @@ import com.shopgun.android.sdk.network.Request;
 
 import org.json.JSONArray;
 
-public class MockApiStoreResponse extends MockApiNetworkResponse {
+public class MockApiCatalogResponse extends MockApiNetworkResponse {
 
-    protected MockApiStoreResponse(Context mContext, Request<?> request) {
+    protected MockApiCatalogResponse(Context mContext, Request<?> request) {
         super(mContext, request);
     }
 
     @Override
     public NetworkResponse getResponse() {
 
-        JSONArray array = getAssetJSONArray(FILE_STORE_LIST);
+        JSONArray array = getAssetJSONArray(FILE_CATALOG_LIST);
 
         String actionOrId = mPath.getActionOrId();
         if (actionOrId == null) {
-            // Just a list
-            JSONArray idArray = filterByIds(array, mRequest, Parameters.STORE_IDS);
+            // Just a catalog list
+            JSONArray idArray = filterByIds(array, mRequest, Parameters.CATALOG_IDS);
             if (idArray != null) {
                 array = trimToOffsetAndLimit(idArray, mRequest);
                 return new NetworkResponse(200, array.toString().getBytes(), null);
@@ -47,29 +47,48 @@ public class MockApiStoreResponse extends MockApiNetworkResponse {
             return new NetworkResponse(200, array.toString().getBytes(), null);
         }
 
+
         if ("search".equals(actionOrId)) {
             // 'query' is being ignored
             array = trimToOffsetAndLimit(array, mRequest);
             return new NetworkResponse(200, array.toString().getBytes(), null);
-        } else if ("quicksearch".equals(actionOrId)) {
+        } else if ("suggest".equals(actionOrId)) {
+            return new NetworkResponse(200, array.toString().getBytes(), null);
+        } else if ("count".equals(actionOrId)) {
             return getUnsupportedResponse();
+        } else if ("typeahead".equals(actionOrId)) {
+            return new NetworkResponse(200, getAssetAsString(FILE_TYPEAHEAD).getBytes(), null);
         }
 
         // The action must be an id
+        String id = actionOrId;
         String action = mPath.getItemAction();
         if (action == null) {
-            return getItem(array, actionOrId);
+            return getItem(array, id);
         }
 
-        if ("collect".equals(action)) {
-            return new NetworkResponse(201, "{}".getBytes(), null);
-        } else if ("catalogs".equals(action)) {
+        if ("pages".equals(action)) {
+
+            String name = String.format("catalog-%s-pages.json", id);
+            JSONArray pages = getAssetJSONArray(name);
+            return new NetworkResponse(200, pages.toString().getBytes(), null);
+
+        } else if ("hotspots".equals(action)) {
+
+            String name = String.format("catalog-%s-hotspots.json", id);
+            JSONArray hotspots = getAssetJSONArray(name);
+            return new NetworkResponse(200, hotspots.toString().getBytes(), null);
+
+        } else if ("stores".equals(action)) {
             return getUnsupportedResponse();
-        } else if ("offers".equals(action)) {
+        } else if ("collect".equals(action)) {
+            return new NetworkResponse(201, "{}".getBytes(), null);
+        } else if ("download".equals(action)) {
             return getUnsupportedResponse();
         }
 
         return getUnsupportedResponse();
 
     }
+
 }

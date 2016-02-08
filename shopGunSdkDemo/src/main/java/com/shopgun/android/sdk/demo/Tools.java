@@ -23,7 +23,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.network.mock.api.MockApiNetwork;
+import com.shopgun.android.sdk.network.mock.MockApiNetwork;
 import com.shopgun.android.sdk.utils.ColorUtils;
 
 public class Tools {
