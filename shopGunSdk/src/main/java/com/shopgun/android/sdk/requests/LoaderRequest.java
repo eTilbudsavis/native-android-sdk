@@ -151,7 +151,7 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
     @Override
     public Request finish(String reason) {
         if (isFinished()) {
-            SgnLog.d(TAG, "I should fix this finish(String) thing");
+            SgnLog.d(TAG, "I should fix this finish(String) thing. It seems to happen when using an \'empty\' loader request");
             return this;
         }
         return super.finish(reason);
