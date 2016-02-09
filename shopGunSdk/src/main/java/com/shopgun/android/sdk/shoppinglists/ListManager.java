@@ -385,6 +385,10 @@ public class ListManager {
         return addItem(sli, true, user());
     }
 
+    private boolean isStringEqual(String first, String last) {
+        return first == null ? last == null : first.equalsIgnoreCase(last);
+    }
+
     /**
      * Add a {@link ShoppinglistItem} to a {@link Shoppinglist}
      *
@@ -412,11 +416,9 @@ public class ListManager {
 
             List<ShoppinglistItem> items = mDatabase.getItems(sli.getShoppinglistId(), user, false);
             for (ShoppinglistItem s : items) {
-                String des = s.getDescription();
-                String desOld = sli.getDescription();
-                boolean equalDes = des != null && des.equalsIgnoreCase(desOld);
-                boolean equalId = sli.getOfferId() != null && sli.getOfferId().equals(s.getOfferId());
-                if (equalId || equalDes) {
+                boolean descriptionEqual = isStringEqual(s.getDescription(), sli.getDescription());
+                boolean idEqual = isStringEqual(sli.getOfferId(), s.getOfferId());
+                if (idEqual && descriptionEqual) {
                     s.setCount(s.getCount() + 1);
                     s.setTick(false);
                     return editItem(s);
