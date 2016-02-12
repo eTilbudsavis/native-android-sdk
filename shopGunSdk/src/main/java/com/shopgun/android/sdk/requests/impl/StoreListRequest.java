@@ -58,8 +58,9 @@ public class StoreListRequest extends ModelListRequest<List<Store>> {
     }
 
     @Override
-    public void loadDealer(boolean dealer) {
+    public StoreListRequest loadDealer(boolean dealer) {
         super.loadDealer(dealer);
+        return this;
     }
 
     @Override
@@ -68,8 +69,9 @@ public class StoreListRequest extends ModelListRequest<List<Store>> {
     }
 
     @Override
-    public void loadStore(boolean store) {
+    public StoreListRequest loadStore(boolean store) {
         super.loadStore(store);
+        return this;
     }
 
     @Override
@@ -78,8 +80,9 @@ public class StoreListRequest extends ModelListRequest<List<Store>> {
     }
 
     @Override
-    public void loadCatalog(boolean catalog) {
+    public StoreListRequest loadCatalog(boolean catalog) {
         super.loadCatalog(catalog);
+        return this;
     }
 
 }

@@ -121,40 +121,45 @@ public abstract class ModelListRequest<T> extends JsonArrayRequest implements De
         return mLoaderRequest.loadDealer();
     }
 
-    protected void loadDealer(boolean dealer) {
+    protected ModelListRequest<T> loadDealer(boolean dealer) {
         mLoaderRequest.loadDealer(dealer);
+        return this;
     }
 
     protected boolean loadHotspots() {
         return mLoaderRequest.loadHotspots();
     }
 
-    protected void loadHotspots(boolean hotspots) {
+    protected ModelListRequest<T> loadHotspots(boolean hotspots) {
         mLoaderRequest.loadHotspots(hotspots);
+        return this;
     }
 
     protected boolean loadPages() {
         return mLoaderRequest.loadPages();
     }
 
-    protected void loadPages(boolean pages) {
+    protected ModelListRequest<T> loadPages(boolean pages) {
         mLoaderRequest.loadPages(pages);
+        return this;
     }
 
     protected boolean loadStore() {
         return mLoaderRequest.loadStore();
     }
 
-    protected void loadStore(boolean store) {
+    protected ModelListRequest<T> loadStore(boolean store) {
         mLoaderRequest.loadStore(store);
+        return this;
     }
 
     protected boolean loadCatalog() {
         return mLoaderRequest.loadCatalog();
     }
 
-    protected void loadCatalog(boolean catalog) {
+    protected ModelListRequest<T> loadCatalog(boolean catalog) {
         mLoaderRequest.loadCatalog(catalog);
+        return this;
     }
 
 }

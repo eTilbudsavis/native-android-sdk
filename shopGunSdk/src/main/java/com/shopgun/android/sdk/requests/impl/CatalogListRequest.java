@@ -59,8 +59,9 @@ public class CatalogListRequest extends ModelListRequest<List<Catalog>> {
     }
 
     @Override
-    public void loadDealer(boolean dealer) {
+    public CatalogListRequest loadDealer(boolean dealer) {
         super.loadDealer(dealer);
+        return this;
     }
 
     @Override
@@ -69,8 +70,9 @@ public class CatalogListRequest extends ModelListRequest<List<Catalog>> {
     }
 
     @Override
-    public void loadHotspots(boolean hotspots) {
+    public CatalogListRequest loadHotspots(boolean hotspots) {
         super.loadHotspots(hotspots);
+        return this;
     }
 
     @Override
@@ -79,8 +81,9 @@ public class CatalogListRequest extends ModelListRequest<List<Catalog>> {
     }
 
     @Override
-    public void loadPages(boolean pages) {
+    public CatalogListRequest loadPages(boolean pages) {
         super.loadPages(pages);
+        return this;
     }
 
     @Override
@@ -89,8 +92,9 @@ public class CatalogListRequest extends ModelListRequest<List<Catalog>> {
     }
 
     @Override
-    public void loadStore(boolean store) {
+    public CatalogListRequest loadStore(boolean store) {
         super.loadStore(store);
+        return this;
     }
 
 }
