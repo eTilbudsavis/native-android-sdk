@@ -20,12 +20,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
@@ -34,6 +33,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -60,6 +60,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
     private Branding mBranding;
     private String mContact;
     private Dealer mDealer;
+    private Set<String> mCategoryIds;
 
     public Store() {
     }
@@ -81,6 +82,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
         this.mBranding = tmp.mBranding;
         this.mContact = tmp.mContact;
         this.mDealer = tmp.mDealer;
+        this.mCategoryIds = tmp.mCategoryIds;
     }
 
     /**
@@ -110,54 +112,50 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
             return null;
         }
 
-        Store s = new Store();
-        s.setId(Json.valueOf(object, JsonKeys.ID));
-        s.setErn(Json.valueOf(object, JsonKeys.ERN));
-        s.setStreet(Json.valueOf(object, JsonKeys.STREET));
-        s.setCity(Json.valueOf(object, JsonKeys.CITY));
-        s.setZipcode(Json.valueOf(object, JsonKeys.ZIP_CODE));
-        JSONObject jCountry = Json.getObject(object, JsonKeys.COUNTRY, null);
-        s.setCountry(Country.fromJSON(jCountry));
-        s.setLatitude(Json.valueOf(object, JsonKeys.LATITUDE, 0.0d));
-        s.setLongitude(Json.valueOf(object, JsonKeys.LONGITUDE, 0.0d));
-        s.setDealerUrl(Json.valueOf(object, JsonKeys.DEALER_URL));
-        s.setDealerId(Json.valueOf(object, JsonKeys.DEALER_ID));
-        JSONObject jBranding = Json.getObject(object, JsonKeys.BRANDING, null);
-        s.setBranding(Branding.fromJSON(jBranding));
-        s.setContact(Json.valueOf(object, JsonKeys.CONTACT));
+        SgnJson o = new SgnJson(object);
+        o.isErnTypeOrThrow(IErn.TYPE_STORE, Store.class);
+        Store s = new Store()
+                .setId(o.getId())
+                .setErn(o.getErn())
+                .setStreet(o.getStreet())
+                .setCity(o.getCity())
+                .setZipcode(o.getZipCode())
+                .setCountry(o.getCountry())
+                .setLatitude(o.getLatitude())
+                .setLongitude(o.getLongitude())
+                .setDealerUrl(o.getDealerUrl())
+                .setDealerId(o.getDealerId())
+                .setBranding(o.getBranding())
+                .setContact(o.getContact())
+                .setCategoryIds(o.getCategoryIds());
 
-        if (object.has(JsonKeys.SDK_DEALER)) {
-            JSONObject jDealer = Json.getObject(object, JsonKeys.SDK_DEALER, null);
-            s.setDealer(Dealer.fromJSON(jDealer));
-        }
+        s.mDealer = o.getDealer();
+
+        o.logStatus(TAG, null, new String[]{ SgnJson.DEALER });
 
         return s;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.ID, Json.nullCheck(getId()));
-            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKeys.STREET, Json.nullCheck(getStreet()));
-            o.put(JsonKeys.CITY, Json.nullCheck(getCity()));
-            o.put(JsonKeys.ZIP_CODE, Json.nullCheck(getZipcode()));
-            o.put(JsonKeys.COUNTRY, Json.nullCheck(getCountry().toJSON()));
-            o.put(JsonKeys.LATITUDE, getLatitude());
-            o.put(JsonKeys.LONGITUDE, getLongitude());
-            o.put(JsonKeys.DEALER_URL, Json.nullCheck(getDealerUrl()));
-            o.put(JsonKeys.DEALER_ID, Json.nullCheck(getDealerId()));
-            o.put(JsonKeys.BRANDING, Json.nullCheck(getBranding().toJSON()));
-            o.put(JsonKeys.CONTACT, Json.nullCheck(getContact()));
 
-            if (mDealer != null) {
-                o.put(JsonKeys.SDK_DEALER, Json.toJson(mDealer));
-            }
+        return new SgnJson()
+                .setId(getId())
+                .setErn(getErn())
+                .setStreet(getStreet())
+                .setCity(getCity())
+                .setZipCode(getZipcode())
+                .setCountry(getCountry())
+                .setLatitude(getLatitude())
+                .setLongitude(getLongitude())
+                .setDealerUrl(getDealerUrl())
+                .setDealerId(getDealerId())
+                .setBranding(getBranding())
+                .setContact(getContact())
+                .setCategoryIds(getCategoryIds())
+                // Internal SDK variables
+                .putDealer(getDealer())
+                .toJSON();
 
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
     }
 
     public String getId() {
@@ -398,6 +396,23 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
     public Store setDealer(Dealer dealer) {
         mDealer = dealer;
         mDealerId = (mDealer == null ? null : mDealer.getId());
+        return this;
+    }
+
+    /**
+     * Get the category id's for this object
+     * @return A list of categories, or null
+     */
+    public Set<String> getCategoryIds() {
+        return mCategoryIds;
+    }
+
+    /**
+     * Set the list of categories for this object.
+     * @param categoryIds A list of categories
+     */
+    public Store setCategoryIds(Set<String> categoryIds) {
+        mCategoryIds = categoryIds;
         return this;
     }
 

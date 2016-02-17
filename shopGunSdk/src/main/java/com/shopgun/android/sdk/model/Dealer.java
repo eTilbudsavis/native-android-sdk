@@ -20,22 +20,21 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.palette.MaterialColor;
 import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>This class is a representation of a dealer as the API v2 exposes it</p>
@@ -78,6 +77,9 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
     private String mLogo;
     private MaterialColor mColor;
     private Pageflip mPageflip;
+    private Set<String> mCategoryIds;
+    private Country mCountry;
+    private String mDescription;
 
     public Dealer() {
 
@@ -94,6 +96,10 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
         this.mLogo = tmp.mLogo;
         this.mColor = tmp.mColor;
         this.mPageflip = tmp.mPageflip;
+        this.mCategoryIds = tmp.mCategoryIds;
+        this.mCountry = tmp.mCountry;
+        this.mDescription = tmp.mDescription;
+
     }
 
     /**
@@ -122,32 +128,37 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
             return null;
         }
 
-        Dealer d = new Dealer();
-        d.setId(Json.valueOf(object, JsonKeys.ID));
-        d.setErn(Json.valueOf(object, JsonKeys.ERN));
-        d.setName(Json.valueOf(object, JsonKeys.NAME));
-        d.setWebsite(Json.valueOf(object, JsonKeys.WEBSITE));
-        d.setLogo(Json.valueOf(object, JsonKeys.LOGO));
-        d.setColor(Json.colorValueOf(object, JsonKeys.COLOR));
-        JSONObject jPageflip = Json.getObject(object, JsonKeys.PAGEFLIP);
-        d.setPageflip(Pageflip.fromJSON(jPageflip));
+        SgnJson o = new SgnJson(object);
+        Dealer d = new Dealer()
+                .setId(o.getId())
+                .setErn(o.getErn())
+                .setName(o.getName())
+                .setWebsite(o.getWebsite())
+                .setLogo(o.getLogo())
+                .setColor(o.getColor())
+                .setPageflip(o.getPageflip())
+                .setCategoryIds(o.getCategoryIds())
+                .setCountry(o.getCountry())
+                .setDescription(o.getDescription());
+
+        o.logStatus(TAG);
+
         return d;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.ID, Json.nullCheck(getId()));
-            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKeys.NAME, Json.nullCheck(getName()));
-            o.put(JsonKeys.WEBSITE, Json.nullCheck(getWebsite()));
-            o.put(JsonKeys.LOGO, Json.nullCheck(getLogo()));
-            o.put(JsonKeys.COLOR, Json.colorToSgnJson(getMaterialColor()));
-            o.put(JsonKeys.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setId(getId())
+                .setErn(getErn())
+                .setName(getName())
+                .setWebsite(getWebsite())
+                .setLogo(getLogo())
+                .setColor(getColor())
+                .setPageflip(getPageflip())
+                .setCategoryIds(getCategoryIds())
+                .setCountry(getCountry())
+                .setDescription(getDescription())
+                .toJSON();
     }
 
     public String getId() {
@@ -232,6 +243,60 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
 
     public Dealer setPageflip(Pageflip pageflip) {
         mPageflip = pageflip;
+        return this;
+    }
+
+    /**
+     * Get the category id's for this catalog
+     * @return A list of categories, or null
+     */
+    public Set<String> getCategoryIds() {
+        return mCategoryIds;
+    }
+
+    /**
+     * Set the list of categories for this catalog.
+     * @param categoryIds A list of categories
+     */
+    public Dealer setCategoryIds(Set<String> categoryIds) {
+        mCategoryIds = categoryIds;
+        return this;
+    }
+
+    /**
+     * Get the country for this object
+     * @return A {@link Country}, or {@code null}
+     */
+    public Country getCountry() {
+        return mCountry;
+    }
+
+    /**
+     * Set the {@link Country} object for this {@link Store}
+     * @param country A {@link Country}
+     * @return this object
+     */
+    public Dealer setCountry(Country country) {
+        mCountry = country;
+        return this;
+    }
+
+    /**
+     * Get the description of this object. Description isn't required and may
+     * therefore be {@code null}.
+     * @return A {@link String}, or null
+     */
+    public String getDescription() {
+        return mDescription;
+    }
+
+    /**
+     * Set the description of this offer.
+     * @param description A string describing the offer
+     * @return This object
+     */
+    public Dealer setDescription(String description) {
+        mDescription = description;
         return this;
     }
 

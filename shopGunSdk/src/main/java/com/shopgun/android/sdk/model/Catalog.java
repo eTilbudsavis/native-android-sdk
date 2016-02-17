@@ -21,8 +21,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
@@ -31,10 +29,10 @@ import com.shopgun.android.sdk.palette.MaterialColor;
 import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -132,116 +130,66 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * @return A {@link Catalog}, or {@code null} if {@code object} is {@code null}
      */
     public static Catalog fromJSON(JSONObject object) {
+        // TODO Fix HotspotsMap so it can be JSON'ed
         if (object == null) {
             return null;
         }
-        Catalog catalog = new Catalog();
-        catalog.setId(Json.valueOf(object, JsonKeys.ID));
-        catalog.setErn(Json.valueOf(object, JsonKeys.ERN));
-        catalog.setLabel(Json.valueOf(object, JsonKeys.LABEL));
-        catalog.setBackground(Json.colorValueOf(object, JsonKeys.BACKGROUND));
-        Date runFrom = Utils.stringToDate(Json.valueOf(object, JsonKeys.RUN_FROM));
-        catalog.setRunFrom(runFrom);
-        Date runTill = Utils.stringToDate(Json.valueOf(object, JsonKeys.RUN_TILL));
-        catalog.setRunTill(runTill);
-        catalog.setPageCount(Json.valueOf(object, JsonKeys.PAGE_COUNT, 0));
-        catalog.setOfferCount(Json.valueOf(object, JsonKeys.OFFER_COUNT, 0));
-        JSONObject jBranding = Json.getObject(object, JsonKeys.BRANDING, null);
-        catalog.setBranding(Branding.fromJSON(jBranding));
-        catalog.setDealerId(Json.valueOf(object, JsonKeys.DEALER_ID));
-        catalog.setDealerUrl(Json.valueOf(object, JsonKeys.DEALER_URL));
-        catalog.setStoreId(Json.valueOf(object, JsonKeys.STORE_ID));
-        catalog.setStoreUrl(Json.valueOf(object, JsonKeys.STORE_URL));
-        JSONObject jDimen = Json.getObject(object, JsonKeys.DIMENSIONS, null);
-        catalog.setDimension(Dimension.fromJSON(jDimen));
-        JSONObject jImages = Json.getObject(object, JsonKeys.IMAGES, null);
-        catalog.setImages(Images.fromJSON(jImages));
+        SgnJson o = new SgnJson(object);
+        o.isErnTypeOrThrow(IErn.TYPE_CATALOG, Catalog.class);
+        Catalog c = new Catalog()
+                .setId(o.getId())
+                .setErn(o.getErn())
+                .setLabel(o.getLabel())
+                .setBackground(o.getBackground())
+                .setRunFrom(o.getRunFrom())
+                .setRunTill(o.getRunTill())
+                .setPageCount(o.getPageCount())
+                .setOfferCount(o.getOfferCount())
+                .setBranding(o.getBranding())
+                .setDealerId(o.getDealerId())
+                .setDealerUrl(o.getDealerUrl())
+                .setStoreId(o.getStoreId())
+                .setStoreUrl(o.getStoreUrl())
+                .setDimension(o.getDimensions())
+                .setImages(o.getImages())
+                .setCategoryIds(o.getCategoryIds())
+                .setPdfUrl(o.getPdfUrl())
+                .setPages(o.getPages());
 
-        if (object.has(JsonKeys.CATEGORY_IDS)) {
-            JSONArray jCats = Json.getArray(object, JsonKeys.CATEGORY_IDS, new JSONArray());
-            HashSet<String> cat = new HashSet<String>(jCats.length());
-            for (int i = 0; i < jCats.length(); i++) {
-                try {
-                    cat.add(jCats.getString(i));
-                } catch (JSONException e) {
-                    // ignore
-                }
-            }
-            catalog.setCatrgoryIds(cat);
-        }
+        // Internal SDK variables, avoid getter and setter to circumvent safety features... o_O
+        c.mDealer = o.getDealer();
+        c.mStore = o.getStore();
 
-        catalog.setPdfUrl(Json.valueOf(object, JsonKeys.PDF_URL));
+        o.logStatus(TAG, null, new String[]{ SgnJson.DEALER, SgnJson.STORE});
 
-        if (object.has(JsonKeys.SDK_DEALER)) {
-            JSONObject jDealer = Json.getObject(object, JsonKeys.SDK_DEALER, null);
-            catalog.setDealer(Dealer.fromJSON(jDealer));
-        }
-
-        if (object.has(JsonKeys.SDK_STORE)) {
-            JSONObject jStore = Json.getObject(object, JsonKeys.SDK_STORE, null);
-            catalog.setStore(Store.fromJSON(jStore));
-        }
-
-        if (object.has(JsonKeys.SDK_PAGES)) {
-            JSONArray jPages = Json.getArray(object, JsonKeys.SDK_PAGES);
-            List<Images> pages = new ArrayList<Images>(jPages.length());
-            for (int i = 0; i < jPages.length(); i++) {
-                JSONObject jImage = Json.getObject(jPages, i);
-                if (jImage != null) {
-                    pages.add(Images.fromJSON(jImage));
-                }
-            }
-            catalog.setPages(pages);
-        }
-
-            // TODO Fix HotspotsMap so it can be JSON'ed
-
-        return catalog;
+        return c;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.ID, Json.nullCheck(getId()));
-            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKeys.LABEL, Json.nullCheck(getLabel()));
-            o.put(JsonKeys.BACKGROUND, Json.colorToSgnJson(getBackgroundMaterialColor()));
-            o.put(JsonKeys.RUN_FROM, Json.nullCheck(Utils.dateToString(getRunFrom())));
-            o.put(JsonKeys.RUN_TILL, Json.nullCheck(Utils.dateToString(getRunTill())));
-            o.put(JsonKeys.PAGE_COUNT, getPageCount());
-            o.put(JsonKeys.OFFER_COUNT, getOfferCount());
-            o.put(JsonKeys.BRANDING, Json.nullCheck(getBranding().toJSON()));
-            o.put(JsonKeys.DEALER_ID, Json.nullCheck(getDealerId()));
-            o.put(JsonKeys.DEALER_URL, Json.nullCheck(getDealerUrl()));
-            o.put(JsonKeys.STORE_ID, Json.nullCheck(getStoreId()));
-            o.put(JsonKeys.STORE_URL, Json.nullCheck(getStoreUrl()));
-            o.put(JsonKeys.DIMENSIONS, Json.nullCheck(getDimension().toJSON()));
-            o.put(JsonKeys.IMAGES, Json.nullCheck(getImages().toJSON()));
-            o.put(JsonKeys.CATEGORY_IDS, new JSONArray(getCatrgoryIds()));
-            o.put(JsonKeys.PDF_URL, Json.nullCheck(getPdfUrl()));
-
-            if (mDealer != null) {
-                o.put(JsonKeys.SDK_DEALER, Json.toJson(mDealer));
-            }
-
-            if (mStore != null) {
-                o.put(JsonKeys.SDK_STORE, Json.toJson(mStore));
-            }
-
-            if (mPages != null) {
-                JSONArray jPages = new JSONArray();
-                for (Images i : mPages) {
-                    jPages.put(i.toJSON());
-                }
-                o.put(JsonKeys.SDK_PAGES, Json.nullCheck(jPages));
-            }
-
-            // TODO Fix HotspotsMap so it can be JSON'ed
-
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        // TODO Fix HotspotsMap so it can be JSON'ed
+        return new SgnJson()
+                .setId(getId())
+                .setErn(getErn())
+                .setLabel(getLabel())
+                .setBackground(getBackgroundMaterialColor())
+                .setRunFrom(getRunFrom())
+                .setRunTill(getRunTill())
+                .setPagecount(getPageCount())
+                .setOfferCount(getOfferCount())
+                .setBranding(getBranding())
+                .setDealerId(getDealerId())
+                .setDealerUrl(getDealerUrl())
+                .setStoreId(getStoreId())
+                .setStoreUrl(getStoreUrl())
+                .setDimensions(getDimension())
+                .setImages(getImages())
+                .setCategoryIds(getCategoryIds())
+                .setPdfUrl(getPdfUrl())
+                // Internal SDK variables
+                .putDealer(getDealer())
+                .putStore(getStore())
+                .putPages(getPages())
+                .toJSON();
     }
 
     public String getId() {
@@ -688,7 +636,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         if (mPages != null ? !mPages.equals(catalog.mPages) : catalog.mPages != null) return false;
         if (mDealer != null ? !mDealer.equals(catalog.mDealer) : catalog.mDealer != null) return false;
         if (mStore != null ? !mStore.equals(catalog.mStore) : catalog.mStore != null) return false;
-        return !(mHotspots != null ? !mHotspots.equals(catalog.mHotspots) : catalog.mHotspots != null);
+        return mHotspots != null ? mHotspots.equals(catalog.mHotspots) : catalog.mHotspots == null;
 
     }
 

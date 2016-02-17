@@ -27,15 +27,17 @@ import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.IStore;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>This class is a representation of an offer as the API v2 exposes it</p>
@@ -45,18 +47,10 @@ import java.util.List;
  * documentation, on the engineering blog.
  * </p>
  */
-public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>, Parcelable {
+public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>,Parcelable {
 
     public static final String TAG = Constants.getTag(Offer.class);
-    public static Parcelable.Creator<Offer> CREATOR = new Parcelable.Creator<Offer>() {
-        public Offer createFromParcel(Parcel source) {
-            return new Offer(source);
-        }
 
-        public Offer[] newArray(int size) {
-            return new Offer[size];
-        }
-    };
     private String mErn;
     private String mHeading;
     private String mDescription;
@@ -73,6 +67,8 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
     private String mStoreId;
     private String mCatalogUrl;
     private String mCatalogId;
+    private Set<String> mCategoryIds = new HashSet<String>();
+    private Branding mBranding;
     // Other stuff
     private Catalog mCatalog;
     private Dealer mDealer;
@@ -103,34 +99,12 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         this.mStoreId = tmp.mStoreId;
         this.mCatalogUrl = tmp.mCatalogUrl;
         this.mCatalogId = tmp.mCatalogId;
+        this.mCategoryIds = tmp.mCategoryIds;
         this.mCatalog = tmp.mCatalog;
         this.mDealer = tmp.mDealer;
         this.mStore = tmp.mStore;
+        this.mBranding = tmp.mBranding;
 
-    }
-
-    private Offer(Parcel in) {
-        this.mErn = in.readString();
-        this.mHeading = in.readString();
-        this.mDescription = in.readString();
-        this.mCatalogPage = in.readInt();
-        this.mPricing = in.readParcelable(Pricing.class.getClassLoader());
-        this.mQuantity = in.readParcelable(Quantity.class.getClassLoader());
-        this.mImages = in.readParcelable(Images.class.getClassLoader());
-        this.mLinks = in.readParcelable(Links.class.getClassLoader());
-        long tmpMRunFrom = in.readLong();
-        this.mRunFrom = tmpMRunFrom == -1 ? null : new Date(tmpMRunFrom);
-        long tmpMRunTill = in.readLong();
-        this.mRunTill = tmpMRunTill == -1 ? null : new Date(tmpMRunTill);
-        this.mDealerUrl = in.readString();
-        this.mDealerId = in.readString();
-        this.mStoreUrl = in.readString();
-        this.mStoreId = in.readString();
-        this.mCatalogUrl = in.readString();
-        this.mCatalogId = in.readString();
-        this.mCatalog = in.readParcelable(Catalog.class.getClassLoader());
-        this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
-        this.mStore = in.readParcelable(Store.class.getClassLoader());
     }
 
     /**
@@ -159,51 +133,38 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
             return null;
         }
 
-        Offer offer = new Offer();
+        SgnJson o = new SgnJson(object);
+        o.isErnTypeOrThrow(IErn.TYPE_OFFER, Offer.class);
 
-        // Stuff found in the Hotspots parsed first
-        offer.setId(Json.valueOf(object, JsonKeys.ID));
-        offer.setErn(Json.valueOf(object, JsonKeys.ERN));
-        offer.setHeading(Json.valueOf(object, JsonKeys.HEADING));
-        JSONObject jPricing = Json.getObject(object, JsonKeys.PRICING);
-        offer.setPricing(Pricing.fromJSON(jPricing));
-        JSONObject jQuantity = Json.getObject(object, JsonKeys.QUANTITY);
-        offer.setQuantity(Quantity.fromJSON(jQuantity));
-        Date runFrom = Utils.stringToDate(Json.valueOf(object, JsonKeys.RUN_FROM));
-        offer.setRunFrom(runFrom);
-        Date runTill = Utils.stringToDate(Json.valueOf(object, JsonKeys.RUN_TILL));
-        offer.setRunTill(runTill);
+        // A 'lite' offer - Stuff found in a hotspot
+        Offer offer = new Offer()
+                .setId(o.getId())
+                .setErn(o.getErn())
+                .setHeading(o.getHeading())
+                .setPricing(o.getPricing())
+                .setQuantity(o.getQuantity())
+                .setRunFrom(o.getRunFrom())
+                .setRunTill(o.getRunTill());
 
-        // The rest isn't in the hotspots and is discarded
-        if (isFullOffer(object)) {
-            offer.setDescription(Json.valueOf(object, JsonKeys.DESCRIPTION));
-            offer.setCatalogPage(Json.valueOf(object, JsonKeys.CATALOG_PAGE, 0));
-            JSONObject jImages = Json.getObject(object, JsonKeys.IMAGES);
-            offer.setImages(Images.fromJSON(jImages));
-            JSONObject jLinks = Json.getObject(object, JsonKeys.LINKS);
-            offer.setLinks(Links.fromJSON(jLinks));
-            offer.setDealerUrl(Json.valueOf(object, JsonKeys.DEALER_URL));
-            offer.setDealerId(Json.valueOf(object, JsonKeys.DEALER_ID));
-            offer.setStoreUrl(Json.valueOf(object, JsonKeys.STORE_URL));
-            offer.setStoreId(Json.valueOf(object, JsonKeys.STORE_ID));
-            offer.setCatalogUrl(Json.valueOf(object, JsonKeys.CATALOG_URL));
-            offer.setCatalogId(Json.valueOf(object, JsonKeys.CATALOG_ID));
-        }
+        // A full offer also contains these
+        offer.setDescription(o.getDescription())
+                .setCatalogPage(o.getCatalogPage())
+                .setImages(o.getImages())
+                .setLinks(o.getLinks())
+                .setDealerUrl(o.getDealerUrl())
+                .setDealerId(o.getDealerId())
+                .setStoreUrl(o.getStoreUrl())
+                .setStoreId(o.getStoreId())
+                .setCatalogUrl(o.getCatalogUrl())
+                .setCatalogId(o.getCatalogId())
+                .setCategoryIds(o.getCategoryIds())
+                .setBranding(o.getBranding());
 
-        if (object.has(JsonKeys.SDK_DEALER)) {
-            JSONObject jDealer = Json.getObject(object, JsonKeys.SDK_DEALER, null);
-            offer.setDealer(Dealer.fromJSON(jDealer));
-        }
+        offer.mDealer = o.getDealer();
+        offer.mStore = o.getStore();
+        offer.mCatalog = o.getCatalog();
 
-        if (object.has(JsonKeys.SDK_STORE)) {
-            JSONObject jStore = Json.getObject(object, JsonKeys.SDK_STORE, null);
-            offer.setStore(Store.fromJSON(jStore));
-        }
-
-        if (object.has(JsonKeys.SDK_CATALOG)) {
-            JSONObject jCatalog = Json.getObject(object, JsonKeys.SDK_CATALOG, null);
-            offer.setCatalog(Catalog.fromJSON(jCatalog));
-        }
+        o.logStatus(TAG, null, new String[]{ SgnJson.DEALER, SgnJson.STORE, SgnJson.CATALOG});
 
         return offer;
     }
@@ -213,42 +174,32 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.ID, Json.nullCheck(getId()));
-            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKeys.HEADING, Json.nullCheck(getHeading()));
-            o.put(JsonKeys.DESCRIPTION, Json.nullCheck(getDescription()));
-            o.put(JsonKeys.CATALOG_PAGE, getCatalogPage());
-            o.put(JsonKeys.PRICING, Json.toJson(getPricing()));
-            o.put(JsonKeys.QUANTITY, Json.toJson(getQuantity()));
-            o.put(JsonKeys.IMAGES, Json.toJson(getImages()));
-            o.put(JsonKeys.LINKS, Json.toJson(getLinks()));
-            o.put(JsonKeys.RUN_FROM, Json.nullCheck(Utils.dateToString(getRunFrom())));
-            o.put(JsonKeys.RUN_TILL, Json.nullCheck(Utils.dateToString(getRunTill())));
-            o.put(JsonKeys.DEALER_URL, Json.nullCheck(getDealerUrl()));
-            o.put(JsonKeys.DEALER_ID, Json.nullCheck(getDealerId()));
-            o.put(JsonKeys.STORE_URL, Json.nullCheck(getStoreUrl()));
-            o.put(JsonKeys.STORE_ID, Json.nullCheck(getStoreId()));
-            o.put(JsonKeys.CATALOG_URL, Json.nullCheck(getCatalogUrl()));
-            o.put(JsonKeys.CATALOG_ID, Json.nullCheck(getCatalogId()));
 
-            if (mCatalog != null) {
-                o.put(JsonKeys.SDK_CATALOG, Json.toJson(mCatalog));
-            }
+        return new SgnJson()
+                .setId(getId())
+                .setErn(getErn())
+                .setHeading(getHeading())
+                .setDescription(getDescription())
+                .setCatalogPage(getCatalogPage())
+                .setPricing(getPricing())
+                .setQuantity(getQuantity())
+                .setImages(getImages())
+                .setLinks(getLinks())
+                .setRunFrom(getRunFrom())
+                .setRunTill(getRunTill())
+                .setDealerUrl(getDealerUrl())
+                .setDealerId(getDealerId())
+                .setStoreUrl(getStoreUrl())
+                .setStoreId(getStoreId())
+                .setCatalogUrl(getCatalogUrl())
+                .setCatalogId(getCatalogId())
+                .putDealer(getDealer())
+                .putStore(getStore())
+                .putCatalog(getCatalog())
+                .setBranding(getBranding())
+                .setCategoryIds(getCategoryIds())
+                .toJSON();
 
-            if (mDealer != null) {
-                o.put(JsonKeys.SDK_DEALER, Json.toJson(mDealer));
-            }
-
-            if (mStore != null) {
-                o.put(JsonKeys.SDK_STORE, Json.toJson(mStore));
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return o;
     }
 
     public String getId() {
@@ -664,162 +615,113 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         return this;
     }
 
+    /**
+     * Get the category id's for this object
+     * @return A list of categories, or null
+     */
+    public Set<String> getCategoryIds() {
+        return mCategoryIds;
+    }
+
+    /**
+     * Set the list of categories for this object.
+     * @param categoryIds A list of categories
+     */
+    public Offer setCategoryIds(Set<String> categoryIds) {
+        mCategoryIds = categoryIds;
+        return this;
+    }
+
+    /**
+     * Get the branding, that is applied to this catalog.
+     * @return A {@link Branding} object, or {@code null}
+     */
+    public Branding getBranding() {
+        return mBranding;
+    }
+
+    /**
+     * Set the {@link Branding} to apply to this offer.
+     * @param branding A branding object
+     * @return This object
+     */
+    public Offer setBranding(Branding branding) {
+        this.mBranding = branding;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Offer offer = (Offer) o;
+
+        if (mCatalogPage != offer.mCatalogPage) return false;
+        if (mErn != null ? !mErn.equals(offer.mErn) : offer.mErn != null) return false;
+        if (mHeading != null ? !mHeading.equals(offer.mHeading) : offer.mHeading != null) return false;
+        if (mDescription != null ? !mDescription.equals(offer.mDescription) : offer.mDescription != null) return false;
+        if (mPricing != null ? !mPricing.equals(offer.mPricing) : offer.mPricing != null) return false;
+        if (mQuantity != null ? !mQuantity.equals(offer.mQuantity) : offer.mQuantity != null) return false;
+        if (mImages != null ? !mImages.equals(offer.mImages) : offer.mImages != null) return false;
+        if (mLinks != null ? !mLinks.equals(offer.mLinks) : offer.mLinks != null) return false;
+        if (mRunFrom != null ? !mRunFrom.equals(offer.mRunFrom) : offer.mRunFrom != null) return false;
+        if (mRunTill != null ? !mRunTill.equals(offer.mRunTill) : offer.mRunTill != null) return false;
+        if (mDealerUrl != null ? !mDealerUrl.equals(offer.mDealerUrl) : offer.mDealerUrl != null) return false;
+        if (mDealerId != null ? !mDealerId.equals(offer.mDealerId) : offer.mDealerId != null) return false;
+        if (mStoreUrl != null ? !mStoreUrl.equals(offer.mStoreUrl) : offer.mStoreUrl != null) return false;
+        if (mStoreId != null ? !mStoreId.equals(offer.mStoreId) : offer.mStoreId != null) return false;
+        if (mCatalogUrl != null ? !mCatalogUrl.equals(offer.mCatalogUrl) : offer.mCatalogUrl != null) return false;
+        if (mCatalogId != null ? !mCatalogId.equals(offer.mCatalogId) : offer.mCatalogId != null) return false;
+        if (mCategoryIds != null ? !mCategoryIds.equals(offer.mCategoryIds) : offer.mCategoryIds != null) return false;
+        if (mBranding != null ? !mBranding.equals(offer.mBranding) : offer.mBranding != null) return false;
+        if (mCatalog != null ? !mCatalog.equals(offer.mCatalog) : offer.mCatalog != null) return false;
+        if (mDealer != null ? !mDealer.equals(offer.mDealer) : offer.mDealer != null) return false;
+        return mStore != null ? mStore.equals(offer.mStore) : offer.mStore == null;
+
+    }
+
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((mCatalog == null) ? 0 : mCatalog.hashCode());
-        result = prime * result
-                + ((mCatalogId == null) ? 0 : mCatalogId.hashCode());
-        result = prime * result + mCatalogPage;
-        result = prime * result
-                + ((mCatalogUrl == null) ? 0 : mCatalogUrl.hashCode());
-        result = prime * result + ((mDealer == null) ? 0 : mDealer.hashCode());
-        result = prime * result
-                + ((mDealerId == null) ? 0 : mDealerId.hashCode());
-        result = prime * result
-                + ((mDealerUrl == null) ? 0 : mDealerUrl.hashCode());
-        result = prime * result
-                + ((mDescription == null) ? 0 : mDescription.hashCode());
-        result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-        result = prime * result
-                + ((mHeading == null) ? 0 : mHeading.hashCode());
-        result = prime * result + ((mImages == null) ? 0 : mImages.hashCode());
-        result = prime * result + ((mLinks == null) ? 0 : mLinks.hashCode());
-        result = prime * result
-                + ((mPricing == null) ? 0 : mPricing.hashCode());
-        result = prime * result
-                + ((mQuantity == null) ? 0 : mQuantity.hashCode());
-        result = prime * result
-                + ((mRunFrom == null) ? 0 : mRunFrom.hashCode());
-        result = prime * result
-                + ((mRunTill == null) ? 0 : mRunTill.hashCode());
-        result = prime * result + ((mStore == null) ? 0 : mStore.hashCode());
-        result = prime * result
-                + ((mStoreId == null) ? 0 : mStoreId.hashCode());
-        result = prime * result
-                + ((mStoreUrl == null) ? 0 : mStoreUrl.hashCode());
+        int result = mErn != null ? mErn.hashCode() : 0;
+        result = 31 * result + (mHeading != null ? mHeading.hashCode() : 0);
+        result = 31 * result + (mDescription != null ? mDescription.hashCode() : 0);
+        result = 31 * result + mCatalogPage;
+        result = 31 * result + (mPricing != null ? mPricing.hashCode() : 0);
+        result = 31 * result + (mQuantity != null ? mQuantity.hashCode() : 0);
+        result = 31 * result + (mImages != null ? mImages.hashCode() : 0);
+        result = 31 * result + (mLinks != null ? mLinks.hashCode() : 0);
+        result = 31 * result + (mRunFrom != null ? mRunFrom.hashCode() : 0);
+        result = 31 * result + (mRunTill != null ? mRunTill.hashCode() : 0);
+        result = 31 * result + (mDealerUrl != null ? mDealerUrl.hashCode() : 0);
+        result = 31 * result + (mDealerId != null ? mDealerId.hashCode() : 0);
+        result = 31 * result + (mStoreUrl != null ? mStoreUrl.hashCode() : 0);
+        result = 31 * result + (mStoreId != null ? mStoreId.hashCode() : 0);
+        result = 31 * result + (mCatalogUrl != null ? mCatalogUrl.hashCode() : 0);
+        result = 31 * result + (mCatalogId != null ? mCatalogId.hashCode() : 0);
+        result = 31 * result + (mCategoryIds != null ? mCategoryIds.hashCode() : 0);
+        result = 31 * result + (mBranding != null ? mBranding.hashCode() : 0);
+        result = 31 * result + (mCatalog != null ? mCatalog.hashCode() : 0);
+        result = 31 * result + (mDealer != null ? mDealer.hashCode() : 0);
+        result = 31 * result + (mStore != null ? mStore.hashCode() : 0);
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Offer other = (Offer) obj;
-        if (mCatalog == null) {
-            if (other.mCatalog != null)
-                return false;
-        } else if (!mCatalog.equals(other.mCatalog))
-            return false;
-        if (mCatalogId == null) {
-            if (other.mCatalogId != null)
-                return false;
-        } else if (!mCatalogId.equals(other.mCatalogId))
-            return false;
-        if (mCatalogPage != other.mCatalogPage)
-            return false;
-        if (mCatalogUrl == null) {
-            if (other.mCatalogUrl != null)
-                return false;
-        } else if (!mCatalogUrl.equals(other.mCatalogUrl))
-            return false;
-        if (mDealer == null) {
-            if (other.mDealer != null)
-                return false;
-        } else if (!mDealer.equals(other.mDealer))
-            return false;
-        if (mDealerId == null) {
-            if (other.mDealerId != null)
-                return false;
-        } else if (!mDealerId.equals(other.mDealerId))
-            return false;
-        if (mDealerUrl == null) {
-            if (other.mDealerUrl != null)
-                return false;
-        } else if (!mDealerUrl.equals(other.mDealerUrl))
-            return false;
-        if (mDescription == null) {
-            if (other.mDescription != null)
-                return false;
-        } else if (!mDescription.equals(other.mDescription))
-            return false;
-        if (mErn == null) {
-            if (other.mErn != null)
-                return false;
-        } else if (!mErn.equals(other.mErn))
-            return false;
-        if (mHeading == null) {
-            if (other.mHeading != null)
-                return false;
-        } else if (!mHeading.equals(other.mHeading))
-            return false;
-        if (mImages == null) {
-            if (other.mImages != null)
-                return false;
-        } else if (!mImages.equals(other.mImages))
-            return false;
-        if (mLinks == null) {
-            if (other.mLinks != null)
-                return false;
-        } else if (!mLinks.equals(other.mLinks))
-            return false;
-        if (mPricing == null) {
-            if (other.mPricing != null)
-                return false;
-        } else if (!mPricing.equals(other.mPricing))
-            return false;
-        if (mQuantity == null) {
-            if (other.mQuantity != null)
-                return false;
-        } else if (!mQuantity.equals(other.mQuantity))
-            return false;
-        if (mRunFrom == null) {
-            if (other.mRunFrom != null)
-                return false;
-        } else if (!mRunFrom.equals(other.mRunFrom))
-            return false;
-        if (mRunTill == null) {
-            if (other.mRunTill != null)
-                return false;
-        } else if (!mRunTill.equals(other.mRunTill))
-            return false;
-        if (mStore == null) {
-            if (other.mStore != null)
-                return false;
-        } else if (!mStore.equals(other.mStore))
-            return false;
-        if (mStoreId == null) {
-            if (other.mStoreId != null)
-                return false;
-        } else if (!mStoreId.equals(other.mStoreId))
-            return false;
-        if (mStoreUrl == null) {
-            if (other.mStoreUrl != null)
-                return false;
-        } else if (!mStoreUrl.equals(other.mStoreUrl))
-            return false;
-        return true;
-    }
-
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.mErn);
         dest.writeString(this.mHeading);
         dest.writeString(this.mDescription);
         dest.writeInt(this.mCatalogPage);
-        dest.writeParcelable(this.mPricing, flags);
-        dest.writeParcelable(this.mQuantity, flags);
-        dest.writeParcelable(this.mImages, flags);
-        dest.writeParcelable(this.mLinks, flags);
+        dest.writeParcelable(this.mPricing, 0);
+        dest.writeParcelable(this.mQuantity, 0);
+        dest.writeParcelable(this.mImages, 0);
+        dest.writeParcelable(this.mLinks, 0);
         dest.writeLong(mRunFrom != null ? mRunFrom.getTime() : -1);
         dest.writeLong(mRunTill != null ? mRunTill.getTime() : -1);
         dest.writeString(this.mDealerUrl);
@@ -828,9 +730,48 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         dest.writeString(this.mStoreId);
         dest.writeString(this.mCatalogUrl);
         dest.writeString(this.mCatalogId);
-        dest.writeParcelable(this.mCatalog, flags);
-        dest.writeParcelable(this.mDealer, flags);
-        dest.writeParcelable(this.mStore, flags);
+        dest.writeStringList(new ArrayList<String>(mCategoryIds));
+        dest.writeParcelable(this.mBranding, 0);
+        dest.writeParcelable(this.mCatalog, 0);
+        dest.writeParcelable(this.mDealer, 0);
+        dest.writeParcelable(this.mStore, 0);
     }
 
+    protected Offer(Parcel in) {
+        this.mErn = in.readString();
+        this.mHeading = in.readString();
+        this.mDescription = in.readString();
+        this.mCatalogPage = in.readInt();
+        this.mPricing = in.readParcelable(Pricing.class.getClassLoader());
+        this.mQuantity = in.readParcelable(Quantity.class.getClassLoader());
+        this.mImages = in.readParcelable(Images.class.getClassLoader());
+        this.mLinks = in.readParcelable(Links.class.getClassLoader());
+        long tmpMRunFrom = in.readLong();
+        this.mRunFrom = tmpMRunFrom == -1 ? null : new Date(tmpMRunFrom);
+        long tmpMRunTill = in.readLong();
+        this.mRunTill = tmpMRunTill == -1 ? null : new Date(tmpMRunTill);
+        this.mDealerUrl = in.readString();
+        this.mDealerId = in.readString();
+        this.mStoreUrl = in.readString();
+        this.mStoreId = in.readString();
+        this.mCatalogUrl = in.readString();
+        this.mCatalogId = in.readString();
+        ArrayList<String> catIds = new ArrayList<String>();
+        in.readStringList(catIds);
+        this.mCategoryIds = new HashSet<String>(catIds);
+        this.mBranding = in.readParcelable(Branding.class.getClassLoader());
+        this.mCatalog = in.readParcelable(Catalog.class.getClassLoader());
+        this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
+        this.mStore = in.readParcelable(Store.class.getClassLoader());
+    }
+
+    public static final Parcelable.Creator<Offer> CREATOR = new Parcelable.Creator<Offer>() {
+        public Offer createFromParcel(Parcel source) {
+            return new Offer(source);
+        }
+
+        public Offer[] newArray(int size) {
+            return new Offer[size];
+        }
+    };
 }

@@ -20,13 +20,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -68,47 +66,50 @@ public class Images implements IJson<JSONObject>, Parcelable {
         if (object == null) {
             return null;
         }
-        Images i = new Images();
-        i.setView(Json.valueOf(object, JsonKeys.VIEW));
-        i.setZoom(Json.valueOf(object, JsonKeys.ZOOM));
-        i.setThumb(Json.valueOf(object, JsonKeys.THUMB));
+        SgnJson o = new SgnJson(object);
+        Images i = new Images()
+                .setView(o.getView())
+                .setZoom(o.getZoom())
+                .setThumb(o.getThumb());
+
+        o.logStatus(TAG, new String[]{ "@note.1" }, null);
+
         return i;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.VIEW, Json.nullCheck(getView()));
-            o.put(JsonKeys.ZOOM, Json.nullCheck(getZoom()));
-            o.put(JsonKeys.THUMB, Json.nullCheck(getThumb()));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setView(getView())
+                .setZoom(getZoom())
+                .setThumb(getThumb())
+                .toJSON();
     }
 
     public String getView() {
         return mView;
     }
 
-    public void setView(String viewUrl) {
+    public Images setView(String viewUrl) {
         this.mView = viewUrl;
+        return this;
     }
 
     public String getZoom() {
         return mZoom;
     }
 
-    public void setZoom(String zoomUrl) {
+    public Images setZoom(String zoomUrl) {
         this.mZoom = zoomUrl;
+        return this;
     }
 
     public String getThumb() {
         return mThumb;
     }
 
-    public void setThumb(String thumbUrl) {
+    public Images setThumb(String thumbUrl) {
         this.mThumb = thumbUrl;
+        return this;
     }
 
     @Override

@@ -121,6 +121,7 @@ public class ModelCreator {
         s.setLongitude(9.5d);
         s.setStreet("fake-street");
         s.setZipcode("fake-zipcode");
+        s.setCategoryIds(getCategoryIds());
         return s;
     }
 
@@ -452,6 +453,9 @@ public class ModelCreator {
         d.setName(name);
         d.setPageflip(getPageflip());
         d.setWebsite(getUrl(id, "website"));
+        d.setCategoryIds(getCategoryIds());
+        d.setCountry(getCountry());
+        d.setDescription("fake-description");
         return d;
     }
 
@@ -527,11 +531,10 @@ public class ModelCreator {
         o.setStoreId(storeId);
         o.setStoreUrl(getUrl(storeId));
 
-        o.setCategoryIds(new HashSet<String>());
-        int color = Color.BLUE;
-        String url = "fake-logo-url";
-        Pageflip pf = getPageflip(url, color);
-        o.setBranding(getBranding(color, url, "fake-name", pf, "fake-website", "fake-description"));
+        o.setCategoryIds(getCategoryIds());
+
+        Pageflip pf = getPageflip("fake-logo-url", Color.BLUE);
+        o.setBranding(getBranding(Color.BLUE, "fake-logo-url", "fake-name", pf, "fake-website", "fake-description"));
 
         return o;
     }

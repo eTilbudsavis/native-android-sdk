@@ -20,15 +20,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.palette.MaterialColor;
 import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -74,30 +72,29 @@ public class Branding implements IJson<JSONObject>, Parcelable {
         if (object == null) {
             return null;
         }
-        Branding b = new Branding();
-        b.setName(Json.valueOf(object, JsonKeys.NAME));
-        b.setDescription(Json.valueOf(object, JsonKeys.DESCRIPTION));
-        b.setWebsite(Json.valueOf(object, JsonKeys.WEBSITE));
-        b.setLogo(Json.valueOf(object, JsonKeys.LOGO));
-        b.setColor(Json.colorValueOf(object, JsonKeys.COLOR));
-        JSONObject jPageflip = Json.getObject(object, JsonKeys.PAGEFLIP, null);
-        b.setPageflip(Pageflip.fromJSON(jPageflip));
-        return b;
+        SgnJson o = new SgnJson(object);
+        Branding branding = new Branding();
+        branding.setName(o.getName())
+                .setDescription(o.getDescription())
+                .setWebsite(o.getWebsite())
+                .setLogo(o.getLogo())
+                .setColor(o.getMaterialColor())
+                .setPageflip(o.getPageflip());
+
+        o.logStatus(TAG);
+
+        return branding;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.NAME, Json.nullCheck(getName()));
-            o.put(JsonKeys.WEBSITE, Json.nullCheck(getWebsite()));
-            o.put(JsonKeys.DESCRIPTION, Json.nullCheck(getDescription()));
-            o.put(JsonKeys.LOGO, Json.nullCheck(getLogo()));
-            o.put(JsonKeys.COLOR, Json.colorToSgnJson(getMaterialColor()));
-            o.put(JsonKeys.PAGEFLIP, Json.nullCheck(getPageflip().toJSON()));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setName(getName())
+                .setWebsite(getWebsite())
+                .setDescription(getDescription())
+                .setLogo(getLogo())
+                .setColor(getColor())
+                .setPageflip(getPageflip())
+                .toJSON();
     }
 
     public String getName() {

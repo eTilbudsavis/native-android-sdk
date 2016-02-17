@@ -26,6 +26,7 @@ import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.palette.MaterialColor;
 import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -73,23 +74,22 @@ public class Pageflip implements IJson<JSONObject>, Parcelable {
         if (object == null) {
             return null;
         }
+        SgnJson o = new SgnJson(object);
 
-        Pageflip p = new Pageflip();
-        p.setLogo(Json.valueOf(object, JsonKeys.LOGO));
-        p.setColor(Json.colorValueOf(object, JsonKeys.COLOR));
+        Pageflip p = new Pageflip()
+                .setLogo(o.getLogo())
+                .setColor(o.getColor());
+
+        o.logStatus(TAG);
 
         return p;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.LOGO, Json.nullCheck(getLogo()));
-            o.put(JsonKeys.COLOR, Json.colorToSgnJson(getMaterialColor()));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, e.getMessage(), e);
-        }
-        return o;
+        return new SgnJson()
+                .setLogo(getLogo())
+                .setColor(getColor())
+                .toJSON();
     }
 
     public String getLogo() {

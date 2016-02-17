@@ -21,13 +21,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -37,7 +35,6 @@ public class Dimension implements IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Dimension.class);
 
-    public static final double DEF_DIMENSION = 0d;
     public static Parcelable.Creator<Dimension> CREATOR = new Parcelable.Creator<Dimension>() {
         public Dimension createFromParcel(Parcel source) {
             return new Dimension(source);
@@ -47,8 +44,8 @@ public class Dimension implements IJson<JSONObject>, Parcelable {
             return new Dimension[size];
         }
     };
-    private double mWidth = DEF_DIMENSION;
-    private double mHeight = DEF_DIMENSION;
+    private double mWidth = Double.NaN;
+    private double mHeight = Double.NaN;
 
     public static Dimension fromBitmap(Bitmap b) {
         Dimension d = new Dimension();
@@ -92,9 +89,12 @@ public class Dimension implements IJson<JSONObject>, Parcelable {
             return null;
         }
 
-        Dimension d = new Dimension();
-        d.setWidth(Json.valueOf(object, JsonKeys.WIDTH, DEF_DIMENSION));
-        d.setHeight(Json.valueOf(object, JsonKeys.HEIGHT, DEF_DIMENSION));
+        SgnJson o = new SgnJson(object);
+        Dimension d = new Dimension()
+                .setWidth(o.getWidth())
+                .setHeight(o.getHeight());
+
+        o.logStatus(TAG);
 
         return d;
     }
@@ -105,14 +105,10 @@ public class Dimension implements IJson<JSONObject>, Parcelable {
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.HEIGHT, Json.nullCheck(getHeight()));
-            o.put(JsonKeys.WIDTH, Json.nullCheck(getWidth()));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setWidth(getWidth())
+                .setHeight(getHeight())
+                .toJSON();
     }
 
     public Double getWidth() {
@@ -134,7 +130,7 @@ public class Dimension implements IJson<JSONObject>, Parcelable {
     }
 
     public boolean isSet() {
-        return mWidth > DEF_DIMENSION && mHeight > DEF_DIMENSION;
+        return mWidth != Double.NaN && mHeight != Double.NaN;
     }
 
     @Override
