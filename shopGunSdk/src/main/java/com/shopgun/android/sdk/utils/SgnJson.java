@@ -62,22 +62,26 @@ public class SgnJson {
     /** Single instance of SimpleDateFormat to save time and memory */
     private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat(API_DATE_FORMAT, Locale.US);
 
-    JSONObject mObject;
+    private JSONObject mObject;
+    private boolean mKeysValidate = false;
+    private Set<String> mKeysAccepted;
+    private Set<String> mKeysRejected;
 
     public SgnJson() {
-        mObject = new JSONObject();
-        init();
+        this(new JSONObject(), false);
     }
 
     public SgnJson(JSONObject object) {
-        mObject = object;
-        init();
+        this(object, false);
     }
 
-    private void init() {
-        if (mTestKeys) {
-            mGoodKeys = new HashSet<String>(mObject.length());
-            mBadKeys = new HashSet<String>(mObject.length());
+    public SgnJson(JSONObject object, boolean validateKeys) {
+        mObject = object == null ? new JSONObject() : object;
+        mKeysValidate = validateKeys;
+        if (mKeysValidate) {
+            int size = mObject.length();
+            mKeysAccepted = new HashSet<String>(size);
+            mKeysRejected = new HashSet<String>(size);
         }
     }
 
@@ -89,57 +93,95 @@ public class SgnJson {
         return mObject.has(key);
     }
 
-    private Set<String> mGoodKeys;
-    private Set<String> mBadKeys;
-    private boolean mTestKeys = true;
-
-    private void testKey(String key) {
-        if (!mTestKeys || mObject == null) {
-            return;
-        }
-
-        if (mObject.has(key)) {
-            mGoodKeys.add(key);
-        } else {
-            mBadKeys.add(key);
+    private void logKey(String key) {
+        if (mKeysValidate) {
+            if (mObject.has(key)) {
+                mKeysAccepted.add(key);
+            } else {
+                mKeysRejected.add(key);
+            }
         }
     }
 
     public Set<String> getForgottenKeys() {
+        return  getForgottenKeys(new String[]{});
+    }
+
+    public Set<String> getForgottenKeys(String[] ignoreKeys) {
         Set<String> missing = new HashSet<String>();
-        if (!mTestKeys || mObject == null) {
-            return missing;
-        }
-        List<String> keys = Utils.copyIterator(mObject.keys());
-        for (String key : keys) {
-            if (!mGoodKeys.contains(key)) {
-                missing.add(key);
+        if (mKeysValidate) {
+            List<String> keys = Utils.copyIterator(mObject.keys());
+            for (String key : keys) {
+                if (!mKeysAccepted.contains(key)) {
+                    missing.add(key);
+                }
+            }
+            if (ignoreKeys != null) {
+                for (String s : ignoreKeys) {
+                    missing.remove(s);
+                }
             }
         }
         return missing;
     }
 
-    public Set<String> getSwingAndAMiss() {
-        if (!mTestKeys || mObject == null) {
-            return new HashSet<String>();
-        } else {
-            return new HashSet<String>(mBadKeys);
+    public Set<String> getRejectedKeys() {
+        return getRejectedKeys(new String[]{});
+    }
+
+    public Set<String> getRejectedKeys(String[] ignoreKeys) {
+        HashSet<String> rejected = new HashSet<String>();
+        if (mKeysValidate) {
+            rejected.addAll(mKeysRejected);
+            if (ignoreKeys != null) {
+                for (String s : ignoreKeys) {
+                    rejected.remove(s);
+                }
+            }
+        }
+        return rejected;
+    }
+
+    public void logStatus(String tag) {
+        logStatus(tag, null, null);
+    }
+
+    public void logStatus(String tag, String[] ignoreForgottenKeys, String[] ignoreRejectedKeys) {
+        if (mKeysValidate) {
+            logForgottenKeys(tag, ignoreForgottenKeys);
+            logRejectedKeys(tag, ignoreRejectedKeys);
         }
     }
 
-    public void printParsingStatus(String tag) {
-        if (!mTestKeys) {
-            return;
-        }
-        Set<String> forgottenKeys = getForgottenKeys();
-        if (!forgottenKeys.isEmpty()) {
-            SgnLog.d(tag, "ForgottenKeys: " + TextUtils.join(", ", forgottenKeys) );
-        }
-        Set<String> swingAndAMiss = getSwingAndAMiss();
-        if (!swingAndAMiss.isEmpty()) {
-            SgnLog.d(tag, "swingAndAMiss: " + TextUtils.join(",", swingAndAMiss));
-        }
+    public void logForgottenKeys(String tag) {
+        logForgottenKeys(tag, null);
+    }
 
+    public void logForgottenKeys(String tag, String[] ignore) {
+        if (mKeysValidate) {
+            Set<String> forgotten = getForgottenKeys(ignore);
+            if (!forgotten.isEmpty()) {
+                log(tag, "ForgottenKeys[ " + TextUtils.join(", ", forgotten) + " ]");
+            }
+        }
+    }
+
+    public void logRejectedKeys(String tag) {
+        logRejectedKeys(tag, null);
+    }
+
+    public void logRejectedKeys(String tag, String[] ignore) {
+        if (mKeysValidate) {
+            Set<String> rejected = getRejectedKeys(ignore);
+            if (!rejected.isEmpty()) {
+                log(tag, "RejectedKeys[ " + TextUtils.join(", ", rejected) + " ]");
+            }
+        }
+    }
+
+    private void log(String tag, String msg) {
+        String ern = getErn();
+        SgnLog.d(tag, (ern == null ? "" : (ern + " ")) + msg);
     }
 
     public static class ErnTypeException extends RuntimeException {
@@ -211,7 +253,7 @@ public class SgnJson {
      */
     public Object get(String key, Object defValue) {
         try {
-            testKey(key);
+            logKey(key);
             return mObject.isNull(key) ? defValue : mObject.get(key);
         } catch (Exception e) {
             SgnLog.e(TAG, null, e);
@@ -230,7 +272,7 @@ public class SgnJson {
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
      */
     public boolean getBoolean(String key, boolean defValue) {
-        testKey(key);
+        logKey(key);
         return mObject.optBoolean(key, defValue);
     }
 
@@ -245,7 +287,7 @@ public class SgnJson {
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
      */
     public double getDouble(String key, double defValue) {
-        testKey(key);
+        logKey(key);
         return mObject.optDouble(key, defValue);
     }
 
@@ -261,7 +303,7 @@ public class SgnJson {
      */
     public int getInt(String key, int defValue) {
         try {
-            testKey(key);
+            logKey(key);
             return mObject.isNull(key) ? defValue : mObject.getInt(key);
         } catch (Exception e) {
             SgnLog.e(TAG, null, e);
@@ -281,7 +323,7 @@ public class SgnJson {
      */
     public JSONArray getJSONArray(String key, JSONArray defValue) {
         try {
-            testKey(key);
+            logKey(key);
             return mObject.isNull(key) ? defValue : mObject.getJSONArray(key);
         } catch (Exception e) {
             SgnLog.e(TAG, null, e);
@@ -301,7 +343,7 @@ public class SgnJson {
      */
     public JSONObject getJSONObject(String key, JSONObject defValue) {
         try {
-            testKey(key);
+            logKey(key);
             return mObject.isNull(key) ? defValue : mObject.getJSONObject(key);
         } catch (Exception e) {
             SgnLog.e(TAG, null, e);
@@ -320,7 +362,7 @@ public class SgnJson {
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
      */
     public long getLong(String key, long defValue) {
-        testKey(key);
+        logKey(key);
         return mObject.optLong(key, defValue);
     }
 
@@ -335,7 +377,7 @@ public class SgnJson {
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
      */
     public String getString(String key, String defValue) {
-        testKey(key);
+        logKey(key);
         return mObject.optString(key, defValue);
     }
 
