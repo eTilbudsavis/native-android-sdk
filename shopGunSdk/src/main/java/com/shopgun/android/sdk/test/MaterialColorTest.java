@@ -59,7 +59,7 @@ public class MaterialColorTest extends TestCase {
     public static void testMaterialColor(MaterialColor c, MaterialColorTestCreator.MaterialTestColor v) {
 
         assertEquals(c.getValue(), v.value);
-        assertEquals(c.getLuminance(), v.luminance);
+        assertEquals(c.getLuminance(), v.luminance, 0.00001);
         assertEquals(c.getPrimaryText(), v.primaryText);
         assertEquals(c.getSecondaryText(), v.secondaryText);
         assertEquals(c.getDisabledText(), v.disabledText);
