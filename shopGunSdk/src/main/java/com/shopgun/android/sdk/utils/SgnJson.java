@@ -783,14 +783,23 @@ public class SgnJson {
         return this;
     }
 
-    public static final String PAGEFLIP = "pageflip";
-
-    public JSONObject getPageflip() {
-        return getJSONObject(PAGEFLIP);
+    public MaterialColor getMaterialColor() {
+        return getMaterialColor(COLOR);
     }
 
-    public SgnJson getPageflip(JSONObject value) {
-        put(PAGEFLIP, value);
+    public SgnJson setMaterialColor(MaterialColor value) {
+        putMaterialColor(COLOR, value);
+        return this;
+    }
+
+    public static final String PAGEFLIP = "pageflip";
+
+    public Pageflip getPageflip() {
+        return Pageflip.fromJSON(getJSONObject(PAGEFLIP));
+    }
+
+    public SgnJson setPageflip(Pageflip value) {
+        put(PAGEFLIP, putCheck(value));
         return this;
     }
 
@@ -981,21 +990,133 @@ public class SgnJson {
     }
 
     public static final String STREET = "street";
+
+    public String getStreet() {
+        return getString(STREET);
+    }
+
+    public SgnJson setStreet(String value) {
+        put(STREET, value);
+        return this;
+    }
+
     public static final String CITY = "city";
+
+    public String getCity() {
+        return getString(CITY);
+    }
+
+    public SgnJson setCity(String value) {
+        put(CITY, value);
+        return this;
+    }
+
     public static final String ZIP_CODE = "zip_code";
+
+    public String getZipCode() {
+        return getString(ZIP_CODE);
+    }
+
+    public SgnJson setZipCode(String value) {
+        put(ZIP_CODE, value);
+        return this;
+    }
+
     public static final String LATITUDE = "latitude";
+
+    public double getLatitude() {
+        return getDouble(LATITUDE);
+    }
+
+    public SgnJson setLatitude(double value) {
+        put(LATITUDE, value);
+        return this;
+    }
+
     public static final String LONGITUDE = "longitude";
+
+    public double getLongitude() {
+        return getDouble(LONGITUDE);
+    }
+
+    public SgnJson setLongitude(double value) {
+        put(LONGITUDE, value);
+        return this;
+    }
+
     public static final String CONTACT = "contact";
+
+    public String getContact() {
+        return getString(CONTACT);
+    }
+
+    public SgnJson setContact(String value) {
+        put(CONTACT, value);
+        return this;
+    }
+
     public static final String WEBSHOP = "webshop";
+
     public static final String WIDTH = "width";
+
+    public double getWidth() {
+        return getDouble(WIDTH);
+    }
+
+    public SgnJson setWidth(double value) {
+        put(WIDTH, value);
+        return this;
+    }
+
     public static final String HEIGHT = "height";
+
+    public double getHeight() {
+        return getDouble(HEIGHT);
+    }
+
+    public SgnJson setHeight(double value) {
+        put(HEIGHT, value);
+        return this;
+    }
+
     public static final String CODE = "code";
     public static final String MESSAGE = "message";
     public static final String DETAILS = "details";
     public static final String FAILED_ON_FIELD = "failed_on_field";
+
     public static final String VIEW = "view";
+
+    public String getView() {
+        return getString(VIEW);
+    }
+
+    public SgnJson setView(String value) {
+        put(VIEW, value);
+        return this;
+    }
+
     public static final String ZOOM = "zoom";
+
+    public String getZoom() {
+        return getString(ZOOM);
+    }
+
+    public SgnJson setZoom(String value) {
+        put(ZOOM, value);
+        return this;
+    }
+
     public static final String THUMB = "thumb";
+
+    public String getThumb() {
+        return getString(THUMB);
+    }
+
+    public SgnJson setThumb(String value) {
+        put(THUMB, value);
+        return this;
+    }
+
     public static final String FROM = "from";
     public static final String TO = "to";
     public static final String UNIT = "unit";
