@@ -463,7 +463,7 @@ public class ModelCreator {
         Catalog c = new Catalog();
         c.setBackground(Color.BLACK);
         c.setBranding(getBranding());
-        c.setCatrgoryIds(getCategoryIds());
+        c.setCategoryIds(getCategoryIds());
         c.setDimension(getDimension());
         c.setId(id);
         c.setHotspots(getHotspotMap());
@@ -526,6 +526,12 @@ public class ModelCreator {
         String storeId = getID("store", id);
         o.setStoreId(storeId);
         o.setStoreUrl(getUrl(storeId));
+
+        o.setCategoryIds(new HashSet<String>());
+        int color = Color.BLUE;
+        String url = "fake-logo-url";
+        Pageflip pf = getPageflip(url, color);
+        o.setBranding(getBranding(color, url, "fake-name", pf, "fake-website", "fake-description"));
 
         return o;
     }
