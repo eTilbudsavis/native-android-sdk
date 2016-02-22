@@ -16,107 +16,39 @@
 
 package com.shopgun.android.sdk.bus;
 
+import com.shopgun.android.sdk.BuildConfig;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 
 import java.lang.reflect.Field;
 
 import de.greenrobot.event.EventBus;
+import de.greenrobot.event.EventBusBuilder;
 import de.greenrobot.event.EventBusException;
 
 public class SgnBus {
 
     public static final String TAG = Constants.getTag(SgnBus.class);
 
-    private static final WeakEventBus BUS = new WeakEventBus();
+    private static EventBus BUS;
+
+    private static boolean DEBUG = BuildConfig.DEBUG;
 
     private SgnBus() {
         // empty
     }
 
     public static EventBus getInstance() {
+        if (BUS == null) {
+            EventBusBuilder b = EventBus.builder();
+            b.throwSubscriberException(DEBUG);
+            b.logSubscriberExceptions(DEBUG);
+            b.logNoSubscriberMessages(DEBUG);
+            b.sendSubscriberExceptionEvent(DEBUG);
+            b.sendNoSubscriberEvent(DEBUG);
+            BUS = b.build();
+        }
         return BUS;
-    }
-
-    public static class WeakEventBus extends EventBus {
-
-        private static final boolean DEBUG = false;
-
-        private WeakEventBus() {
-            enableLogging(false);
-        }
-
-        public void enableLogging(boolean enable) {
-            setBooleanField("logSubscriberExceptions", enable);
-            setBooleanField("logNoSubscriberMessages", enable);
-            setBooleanField("sendSubscriberExceptionEvent", enable);
-            setBooleanField("sendNoSubscriberEvent", enable);
-        }
-
-        private void setBooleanField(String field, boolean value) {
-            try {
-                Field f = getClass().getSuperclass().getDeclaredField(field);
-                f.setAccessible(true);
-                f.set(this, value);
-            } catch (Exception ex) {
-                SgnLog.d(TAG, ex.getMessage(), ex);
-            }
-        }
-
-        @Override
-        public void register(Object subscriber) {
-            try {
-                super.register(subscriber);
-            } catch (EventBusException e) {
-                log(e);
-            }
-        }
-
-        @Override
-        public void registerSticky(Object subscriber) {
-            try {
-                super.registerSticky(subscriber);
-            } catch (EventBusException e) {
-                log(e);
-            }
-        }
-
-        @Override
-        public void register(Object subscriber, int priority) {
-            try {
-                super.register(subscriber, priority);
-            } catch (EventBusException e) {
-                log(e);
-            }
-        }
-
-        @Override
-        public void registerSticky(Object subscriber, int priority) {
-            try {
-                super.registerSticky(subscriber, priority);
-            } catch (EventBusException e) {
-                log(e);
-            }
-        }
-
-        @Override
-        public synchronized void unregister(Object subscriber) {
-            try {
-                super.unregister(subscriber);
-            } catch (EventBusException e) {
-                log(e);
-            }
-        }
-
-        private static final String MSG_FORMAT = "An %s was caught in %s, and suppressed.";
-        private void log(EventBusException ex) {
-            if (DEBUG) {
-                throw ex;
-            } else {
-                SgnLog.e(TAG, String.format(MSG_FORMAT, ex.getClass().getSimpleName(), TAG), ex);
-            }
-        }
-
     }
 
 }
