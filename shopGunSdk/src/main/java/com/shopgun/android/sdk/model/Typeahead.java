@@ -23,13 +23,12 @@ import android.text.Spanned;
 import android.widget.AutoCompleteTextView;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -107,24 +106,23 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
             return null;
         }
 
-        Typeahead typeahead = new Typeahead();
-        typeahead.setSubject(Json.valueOf(object, JsonKeys.SUBJECT));
-        typeahead.setOffset(Json.valueOf(object, JsonKeys.OFFSET, 0));
-        typeahead.setLength(Json.valueOf(object, JsonKeys.LENGTH, 0));
+        SgnJson o = new SgnJson(object);
+        Typeahead typeahead = new Typeahead()
+                .setSubject(o.getSubject())
+                .setOffset(o.getOffset())
+                .setLength(o.getLength());
+
+        o.getStats().log(TAG);
 
         return typeahead;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.SUBJECT, Json.nullCheck(getSubject()));
-            o.put(JsonKeys.LENGTH, getLength());
-            o.put(JsonKeys.OFFSET, getOffset());
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setSubject(getSubject())
+                .setOffset(getOffset())
+                .setLength(getLength())
+                .toJSON();
     }
 
     /**
@@ -139,8 +137,9 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
      * Set the length of the match the typeahead has, given a query
      * @param length The length of the match. This may not be longer that the length of the subject
      */
-    public void setLength(int length) {
+    public Typeahead setLength(int length) {
         mLength = length;
+        return this;
     }
 
     /**
@@ -155,8 +154,9 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
      * Set the offset into the {@link #getSubject() subject} before there is a match
      * @param offset The offset to the match
      */
-    public void setOffset(int offset) {
+    public Typeahead setOffset(int offset) {
         mOffset = offset;
+        return this;
     }
 
     /**
@@ -173,8 +173,9 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
      *
      * @param subject A {@link String}
      */
-    public void setSubject(String subject) {
+    public Typeahead setSubject(String subject) {
         mSubject = subject;
+        return this;
     }
 
     /**

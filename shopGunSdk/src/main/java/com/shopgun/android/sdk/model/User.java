@@ -20,14 +20,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -105,32 +103,31 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
             return null;
         }
 
-        User user = new User();
-        user.setUserId(Json.valueOf(object, JsonKeys.ID, User.NO_USER));
-        user.setErn(Json.valueOf(object, JsonKeys.ERN));
-        user.setGender(Json.valueOf(object, JsonKeys.GENDER));
-        user.setBirthYear(Json.valueOf(object, JsonKeys.BIRTH_YEAR, 0));
-        user.setName(Json.valueOf(object, JsonKeys.NAME));
-        user.setEmail(Json.valueOf(object, JsonKeys.EMAIL));
-        JSONObject jPermission = Json.getObject(object, JsonKeys.PERMISSIONS);
-        user.setPermissions(Permission.fromJSON(jPermission));
+        SgnJson o = new SgnJson(object);
+        User user = new User()
+                .setId(o.getId())
+                .setErn(o.getErn())
+                .setGender(o.getGender())
+                .setBirthYear(o.getBirthYear())
+                .setName(o.getName())
+                .setEmail(o.getEmail())
+                .setPermissions(o.getPermissions());
+
+        o.getStats().log(TAG);
+
         return user;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.ID, getUserId());
-            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKeys.GENDER, Json.nullCheck(getGender()));
-            o.put(JsonKeys.BIRTH_YEAR, Json.nullCheck(getBirthYear()));
-            o.put(JsonKeys.NAME, Json.nullCheck(getName()));
-            o.put(JsonKeys.EMAIL, Json.nullCheck(getEmail()));
-            o.put(JsonKeys.PERMISSIONS, Json.toJson(getPermissions()));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setId(getId())
+                .setErn(getErn())
+                .setGender(getGender())
+                .setBirthYear(getBirthYear())
+                .setName(getName())
+                .setEmail(getEmail())
+                .setPermissions(getPermissions())
+                .toJSON();
     }
 
     /**

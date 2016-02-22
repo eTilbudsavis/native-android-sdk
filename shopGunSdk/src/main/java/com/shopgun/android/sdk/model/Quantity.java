@@ -20,13 +20,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -84,26 +82,21 @@ public class Quantity implements IJson<JSONObject>, Parcelable {
             return null;
         }
 
-        Quantity q = new Quantity();
-        JSONObject jUnit = Json.getObject(object, JsonKeys.UNIT);
-        q.setUnit(Unit.fromJSON(jUnit));
-        JSONObject jSize = Json.getObject(object, JsonKeys.SIZE);
-        q.setSize(Size.fromJSON(jSize));
-        JSONObject jPieces = Json.getObject(object, JsonKeys.PIECES);
-        q.setPieces(Pieces.fromJSON(jPieces));
+        SgnJson o = new SgnJson(object);
+        Quantity q = new Quantity()
+                .setUnit(o.getUnit())
+                .setSize(o.getSize())
+                .setPieces(o.getPieces());
+        o.getStats().log(TAG);
         return q;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.UNIT, Json.toJson(getUnit()));
-            o.put(JsonKeys.SIZE, Json.toJson(getSize()));
-            o.put(JsonKeys.PIECES, Json.toJson(getPieces()));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setUnit(getUnit())
+                .setSize(getSize())
+                .setPieces(getPieces())
+                .toJSON();
     }
 
     public Unit getUnit() {

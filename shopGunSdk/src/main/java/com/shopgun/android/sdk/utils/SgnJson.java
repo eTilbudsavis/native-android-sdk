@@ -30,9 +30,16 @@ import com.shopgun.android.sdk.model.Images;
 import com.shopgun.android.sdk.model.Links;
 import com.shopgun.android.sdk.model.Offer;
 import com.shopgun.android.sdk.model.Pageflip;
+import com.shopgun.android.sdk.model.Permission;
+import com.shopgun.android.sdk.model.Pieces;
 import com.shopgun.android.sdk.model.Pricing;
 import com.shopgun.android.sdk.model.Quantity;
+import com.shopgun.android.sdk.model.Share;
+import com.shopgun.android.sdk.model.Si;
+import com.shopgun.android.sdk.model.Size;
 import com.shopgun.android.sdk.model.Store;
+import com.shopgun.android.sdk.model.Unit;
+import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.palette.MaterialColor;
 import com.shopgun.android.sdk.palette.SgnColor;
@@ -44,6 +51,7 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -424,20 +432,34 @@ public class SgnJson {
         return this;
     }
 
-    private SgnJson putIfNotNull(String key, IJson<JSONObject> object) {
+    private SgnJson putIJsonIfNotNull(String key, IJson<JSONObject> object) {
         if (object != null) {
             put(key, object.toJSON());
         }
         return this;
     }
 
-    private SgnJson putIfNotNull(String key, List<? extends IJson<JSONObject>> list) {
+    private SgnJson putIJsonIfNotNull(String key, Collection<? extends IJson<JSONObject>> list) {
         if (list != null) {
             JSONArray a = new JSONArray();
             for (IJson<JSONObject> o: list) {
                 a.put(o.toJSON());
             }
             put(key, putCheck(a));
+        }
+        return this;
+    }
+
+    private SgnJson putIJson(String key, IJson<JSONObject> object) {
+        put(key, putCheck(object));
+        return this;
+    }
+
+    private SgnJson putIJson(String key, Collection<? extends IJson<JSONObject>> list) {
+        if (list == null) {
+            put(key, putCheck(null));
+        } else {
+            putIJsonIfNotNull(key, list);
         }
         return this;
     }
@@ -455,7 +477,7 @@ public class SgnJson {
     public static final String STORE = "store";
 
     public SgnJson putStore(Store store) {
-        putIfNotNull(STORE, store);
+        putIJsonIfNotNull(STORE, store);
         return this;
     }
 
@@ -466,7 +488,7 @@ public class SgnJson {
     public static final String CATALOG = "catalog";
 
     public SgnJson putCatalog(Catalog catalog) {
-        putIfNotNull(CATALOG, catalog);
+        putIJsonIfNotNull(CATALOG, catalog);
         return this;
     }
 
@@ -475,7 +497,7 @@ public class SgnJson {
     }
 
     public SgnJson putCatalogList(List<Catalog> catalogs) {
-        putIfNotNull(CATALOGS, catalogs);
+        putIJsonIfNotNull(CATALOGS, catalogs);
         return this;
     }
 
@@ -487,14 +509,14 @@ public class SgnJson {
     public static final String OFFERS = "offers";
 
     public SgnJson putOfferList(List<Offer> offers) {
-        putIfNotNull(OFFERS, offers);
+        putIJsonIfNotNull(OFFERS, offers);
         return this;
     }
 
     public static final String DEALER = "dealer";
 
     public SgnJson putDealer(Dealer dealer) {
-        putIfNotNull(DEALER, dealer);
+        putIJsonIfNotNull(DEALER, dealer);
         return this;
     }
 
@@ -631,7 +653,7 @@ public class SgnJson {
     public static final String MODIFIED = "modified";
 
     public Date getModified() {
-        return getDate(MODIFIED);
+        return getDate(MODIFIED, new Date(0));
     }
 
     public SgnJson setModified(Date value) {
@@ -788,7 +810,7 @@ public class SgnJson {
     public static final String PAGES = "pages";
 
     public SgnJson putPages(List<Images> pages) {
-        putIfNotNull(PAGES, pages);
+        putIJsonIfNotNull(PAGES, pages);
         return this;
     }
 
@@ -807,10 +829,59 @@ public class SgnJson {
     public static final String PAGE = "page";
     public static final String OWNER = "owner";
     public static final String TICK = "tick";
+
+    public boolean getTick() {
+        return getBoolean(TICK);
+    }
+
+    public SgnJson setTick(boolean value) {
+        put(TICK, value);
+        return this;
+    }
+
     public static final String OFFER_ID = "offer_id";
+
+    public String getOfferId() {
+        return getString(OFFER_ID);
+    }
+
+    public SgnJson setOfferId(String value) {
+        put(OFFER_ID, value);
+        return this;
+    }
+
     public static final String COUNT = "count";
+
+    public int getCount() {
+        return getInt(COUNT);
+    }
+
+    public SgnJson setCount(int value) {
+        put(COUNT, value);
+        return this;
+    }
+
     public static final String SHOPPINGLIST_ID = "shopping_list_id";
+
+    public String getShoppingListId() {
+        return getString(SHOPPINGLIST_ID);
+    }
+
+    public SgnJson setShoppingListId(String value) {
+        put(SHOPPINGLIST_ID, value);
+        return this;
+    }
+
     public static final String CREATOR = "creator";
+
+    public String getCreator() {
+        return getString(CREATOR);
+    }
+
+    public SgnJson setCreator(String value) {
+        put(CREATOR, value);
+        return this;
+    }
 
     public static final String HEADING = "heading";
 
@@ -957,6 +1028,15 @@ public class SgnJson {
 
     public static final String WEBSHOP = "webshop";
 
+    public String getWebshop() {
+        return getString(WEBSHOP);
+    }
+
+    public SgnJson setWebshop(String value) {
+        put(WEBSHOP, value);
+        return this;
+    }
+
     public static final String WIDTH = "width";
 
     public double getWidth() {
@@ -1018,44 +1098,319 @@ public class SgnJson {
     }
 
     public static final String FROM = "from";
+
+    public double getFrom() {
+        return getDouble(FROM, 1.0d);
+    }
+
+    public SgnJson setFrom(double value) {
+        put(FROM, value);
+        return this;
+    }
+
     public static final String TO = "to";
+
+    public double getTo() {
+        return getDouble(TO, 1.0d);
+    }
+
+    public SgnJson setTo(double value) {
+        put(TO, value);
+        return this;
+    }
+
     public static final String UNIT = "unit";
+
+    public Unit getUnit() {
+        return Unit.fromJSON(getJSONObject(UNIT));
+    }
+
+    public SgnJson setUnit(Unit value) {
+        put(UNIT, putCheck(value));
+        return this;
+    }
+
     public static final String SIZE = "size";
+
+    public Size getSize() {
+        return Size.fromJSON(getJSONObject(SIZE));
+    }
+
+    public SgnJson setSize(Size value) {
+        put(SIZE, putCheck(value));
+        return this;
+    }
+
     public static final String PIECES = "pieces";
+
+    public Pieces getPieces() {
+        return Pieces.fromJSON(getJSONObject(PIECES));
+    }
+
+    public SgnJson setPieces(Pieces value) {
+        put(PIECES, putCheck(value));
+        return this;
+    }
+
     public static final String USER = "user";
+
+    public User getUser() {
+        return User.fromJSON(getJSONObject(USER));
+    }
+
+    public SgnJson setUser(User value) {
+        // The API doesn't recognize our 'non-user' setup, so we'll null it for now
+        put(USER, putCheck( (value == null || value.getUserId() == User.NO_USER) ? null : value));
+        return this;
+    }
+
     public static final String ACCEPTED = "accepted";
     public static final String SYMBOL = "symbol";
+
+    public String getSymbol() {
+        return getString(SYMBOL);
+    }
+
+    public SgnJson setSymbol(String value) {
+        put(SYMBOL, value);
+        return this;
+    }
+
     public static final String GENDER = "gender";
+
+    public String getGender() {
+        return getString(GENDER);
+    }
+
+    public SgnJson setGender(String value) {
+        put(GENDER, value);
+        return this;
+    }
+
     public static final String BIRTH_YEAR = "birth_year";
+
+    public int getBirthYear() {
+        return getInt(BIRTH_YEAR);
+    }
+
+    public SgnJson setBirthYear(int value) {
+        put(BIRTH_YEAR, value);
+        return this;
+    }
+
     public static final String EMAIL = "email";
+
+    public String getEmail() {
+        return getString(EMAIL);
+    }
+
+    public SgnJson setEmail(String value) {
+        put(EMAIL, value);
+        return this;
+    }
+
     public static final String PERMISSIONS = "permissions";
+
+    public Permission getPermissions() {
+        return Permission.fromJSON(getJSONObject(PERMISSIONS));
+    }
+
+    public SgnJson setPermissions(Permission value) {
+        put(PERMISSIONS, putCheck(value));
+        return this;
+    }
+
     public static final String PREVIOUS_ID = "previous_id";
+
+    public String getPreviousId() {
+        return getString(PREVIOUS_ID);
+    }
+
+    public SgnJson setPreviousId(String value) {
+        put(PREVIOUS_ID, value);
+        return this;
+    }
+
     public static final String SI = "si";
+
+    public Si getSi() {
+        return Si.fromJSON(getJSONObject(SI));
+    }
+
+    public SgnJson setSi(Si value) {
+        put(SI, putCheck(value));
+        return this;
+    }
+
     public static final String FACTOR = "factor";
+
+    public double getFactor() {
+        return getDouble(FACTOR, 1.0d);
+    }
+
+    public SgnJson setFactor(double value) {
+        put(FACTOR, value);
+        return this;
+    }
+
     public static final String UNSUBSCRIBE_PRINT_URL = "unsubscribe_print_url";
+
+    public String getUnsubscribePrintUrl() {
+        return getString(UNSUBSCRIBE_PRINT_URL);
+    }
+
+    public SgnJson setUnsubscribePrintUrl(String value) {
+        put(UNSUBSCRIBE_PRINT_URL, value);
+        return this;
+    }
+
     public static final String TYPE = "type";
+
+    public String getType() {
+        return getString(TYPE);
+    }
+
+    public SgnJson setType(String value) {
+        put(TYPE, value);
+        return this;
+    }
+
     public static final String META = "meta";
+
+    public JSONObject getMeta() {
+        return getJSONObject(META, new JSONObject());
+    }
+
+    public SgnJson setMeta(JSONObject value) {
+        put(META, value);
+        return this;
+    }
+
     public static final String SHARES = "shares";
+
+    public Collection<Share> getShares() {
+        return Share.fromJSON(getJSONArray(SHARES));
+    }
+
+    public SgnJson setShares(Collection<Share> value) {
+        putIJson(SHARES, value);
+        return this;
+    }
+
     public static final String TOKEN = "token";
+
+    public String getToken() {
+        return getString(TOKEN);
+    }
+
+    public SgnJson setToken(String value) {
+        put(TOKEN, value);
+        return this;
+    }
+
     public static final String EXPIRES = "expires";
 
     public Date getExpires() {
         return getDate(EXPIRES);
     }
 
-    public SgnJson setExpires(Date expires) {
-        putDate(EXPIRES, expires);
+    public SgnJson setExpires(Date value) {
+        putDate(EXPIRES, value);
         return this;
     }
 
     public static final String PROVIDER = "provider";
+
+    public String getProvider() {
+        return getString(PROVIDER);
+    }
+
+    public SgnJson setProvider(String value) {
+        put(PROVIDER, value);
+        return this;
+    }
+
     public static final String PRICE = "price";
+
+    public double getPrice() {
+        return getDouble(PRICE, 1.0d);
+    }
+
+    public SgnJson setPrice(double value) {
+        put(PRICE, value);
+        return this;
+    }
+
     public static final String PREPRICE = "pre_price";
+
+    public Double getPrePrice() {
+        try {
+            return Double.valueOf(getString(PREPRICE));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public SgnJson setPrePrice(Double value) {
+        put(PREPRICE, putCheck(value));
+        return this;
+    }
+
     public static final String CURRENCY = "currency";
+
+    public String getCurrency() {
+        return getString(CURRENCY);
+    }
+
+    public SgnJson setCurrency(String value) {
+        put(CURRENCY, value);
+        return this;
+    }
+
     public static final String LENGTH = "length";
+
+    public int getLength() {
+        return getInt(LENGTH);
+    }
+
+    public SgnJson setLength(int value) {
+        put(LENGTH, value);
+        return this;
+    }
+
     public static final String OFFSET = "offset";
+
+    public int getOffset() {
+        return getInt(OFFSET);
+    }
+
+    public SgnJson setOffset(int value) {
+        put(OFFSET, value);
+        return this;
+    }
+
     public static final String SUBJECT = "subject";
+
+    public String getSubject() {
+        return getString(SUBJECT);
+    }
+
+    public SgnJson setSubject(String value) {
+        put(SUBJECT, value);
+        return this;
+    }
+
     public static final String ACCEPT_URL = "accept_url";
+
+    public String getAcceptUrl() {
+        return getString(ACCEPT_URL);
+    }
+
+    public SgnJson setAcceptUrl(String value) {
+        put(ACCEPT_URL, value);
+        return this;
+    }
+
     public static final String PDF_URL = "pdf_url";
 
     public String getPdfUrl() {
@@ -1090,8 +1445,38 @@ public class SgnJson {
     public static final String OFFER = "offer";
     public static final String LOCATIONS = "locations";
     public static final String CLIENT_ID = "client_id";
+
+    public String getClientId() {
+        return getString(CLIENT_ID);
+    }
+
+    public SgnJson setClientId(String value) {
+        put(CLIENT_ID, value);
+        return this;
+    }
+
     public static final String REFERENCE = "reference";
+
+    public String getReference() {
+        return getString(REFERENCE);
+    }
+
+    public SgnJson setReference(String value) {
+        put(REFERENCE, value);
+        return this;
+    }
+
     public static final String SUBSCRIBED = "subscribed";
+
+    public boolean getSubscribed() {
+        return getBoolean(SUBSCRIBED);
+    }
+
+    public SgnJson setSubscribed(boolean value) {
+        put(SUBSCRIBED, value);
+        return this;
+    }
+
     public static final String PAYLOAD = "payload";
 
     public static final String CATALOGS = "catalogs";

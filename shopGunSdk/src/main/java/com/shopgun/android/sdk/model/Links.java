@@ -20,13 +20,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -80,28 +78,28 @@ public class Links implements IJson<JSONObject>, Parcelable {
             return null;
         }
 
-        Links l = new Links();
-        l.setWebshop(Json.valueOf(object, JsonKeys.WEBSHOP));
+        SgnJson o = new SgnJson(object);
+        Links l = new Links()
+                .setWebshop(o.getWebshop());
+
+        o.getStats().log(TAG);
 
         return l;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.WEBSHOP, Json.nullCheck(getWebshop()));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setWebshop(getWebshop())
+                .toJSON();
     }
 
     public String getWebshop() {
         return mWebshop;
     }
 
-    public void setWebshop(String url) {
+    public Links setWebshop(String url) {
         mWebshop = url;
+        return this;
     }
 
     @Override

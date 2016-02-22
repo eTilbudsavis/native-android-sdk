@@ -21,9 +21,9 @@ import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -128,61 +128,56 @@ public class Subscription implements IJson<JSONObject>, Parcelable {
             return null;
         }
 
-        Subscription s = new Subscription();
-        s.setDealerId(Json.valueOf(object, JsonKeys.DEALER_ID));
-        s.setSubscribed(Json.valueOf(object, JsonKeys.SUBSCRIBED, false));
+        SgnJson o = new SgnJson(object);
+        Subscription s = new Subscription()
+                .setDealerId(o.getDealerId())
+                .setSubscribed(o.getSubscribed())
+                .setDealer(o.getDealer());
 
-        if (object.has(JsonKeys.SDK_DEALER)) {
-            s.setDealer(Dealer.fromJSON(Json.getObject(object, JsonKeys.SDK_DEALER)));
-        }
+        o.getStats().ignoreRejectedKeys(SgnJson.DEALER).log(TAG);
 
         return s;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.DEALER_ID, Json.nullCheck(mDealerId));
-            o.put(JsonKeys.SUBSCRIBED, mSubscribed);
-
-            if (mDealer != null) {
-                o.put(JsonKeys.SDK_DEALER, Json.toJson(mDealer));
-            }
-
-        } catch (JSONException e) {
-            SgnLog.e(TAG, e.getMessage(), e);
-        }
-        return o;
+        return new SgnJson()
+                .setDealerId(getDealerId())
+                .setSubscribed(isSubscribed())
+                .putDealer(getDealer())
+                .toJSON();
     }
 
     public Dealer getDealer() {
         return mDealer;
     }
 
-    public void setDealer(Dealer d) {
+    public Subscription setDealer(Dealer d) {
         mDealer = d;
         if (mDealer != null) {
             setDealerId(mDealer.getId());
         }
+        return this;
     }
 
     public String getDealerId() {
         return mDealerId;
     }
 
-    public void setDealerId(String dealerId) {
+    public Subscription setDealerId(String dealerId) {
         mDealerId = dealerId;
         if (mDealer != null && !mDealer.getId().equals(mDealerId)) {
             setDealer(null);
         }
+        return this;
     }
 
     public boolean isSubscribed() {
         return mSubscribed;
     }
 
-    public void setSubscribed(boolean subscribed) {
+    public Subscription setSubscribed(boolean subscribed) {
         mSubscribed = subscribed;
+        return this;
     }
 
     public void toggle() {

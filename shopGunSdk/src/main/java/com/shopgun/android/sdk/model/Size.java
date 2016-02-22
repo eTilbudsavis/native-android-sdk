@@ -20,13 +20,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -82,22 +80,19 @@ public class Size implements IJson<JSONObject>, Parcelable {
             return null;
         }
 
-        Size s = new Size();
-        s.setFrom(Json.valueOf(object, JsonKeys.FROM, 1.0d));
-        s.setTo(Json.valueOf(object, JsonKeys.TO, 1.0d));
-
+        SgnJson o = new SgnJson(object);
+        Size s = new Size()
+                .setFrom(o.getFrom())
+                .setTo(o.getTo());
+        o.getStats().log(TAG);
         return s;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.FROM, getFrom());
-            o.put(JsonKeys.TO, getTo());
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setFrom(getFrom())
+                .setTo(getTo())
+                .toJSON();
     }
 
     public double getFrom() {

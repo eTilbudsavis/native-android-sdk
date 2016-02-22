@@ -20,13 +20,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -81,22 +79,20 @@ public class Unit implements IJson<JSONObject>, Parcelable {
         if (object == null) {
             return null;
         }
-        Unit u = new Unit();
-        u.setSymbol(Json.valueOf(object, JsonKeys.SYMBOL));
-        JSONObject jSi = Json.getObject(object, JsonKeys.SI);
-        u.setSi(Si.fromJSON(jSi));
+        SgnJson o = new SgnJson(object);
+        Unit u = new Unit()
+                .setSymbol(o.getSymbol())
+                .setSi(o.getSi());
+
+        o.getStats().log(TAG);
         return u;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.SYMBOL, Json.nullCheck(getSymbol()));
-            o.put(JsonKeys.SI, Json.toJson(getSi()));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, e.getMessage(), e);
-        }
-        return o;
+        return new SgnJson()
+                .setSymbol(getSymbol())
+                .setSi(getSi())
+                .toJSON();
     }
 
     public String getSymbol() {

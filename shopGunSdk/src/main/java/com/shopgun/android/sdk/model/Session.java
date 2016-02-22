@@ -21,14 +21,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -96,38 +94,31 @@ public class Session implements IJson<JSONObject>, Parcelable {
             return null;
         }
 
-        Session s = new Session();
-        s.setToken(Json.valueOf(object, JsonKeys.TOKEN));
-        String exp = Json.valueOf(object, JsonKeys.EXPIRES);
-        s.setExpires(Utils.stringToDate(exp));
-        s.setClientId(Json.valueOf(object, JsonKeys.CLIENT_ID));
-        s.setReference(Json.valueOf(object, JsonKeys.REFERENCE));
+        SgnJson o = new SgnJson(object);
+        Session s = new Session()
+                .setToken(o.getToken())
+                .setExpires(o.getExpires())
+                .setClientId(o.getClientId())
+                .setReference(o.getReference())
+                .setUser(o.getUser())
+                .setPermission(o.getPermissions())
+                .setProvider(o.getProvider());
 
-        JSONObject user = Json.getObject(object, JsonKeys.USER);
-        s.setUser(User.fromJSON(user));
-
-        JSONObject perm = Json.getObject(object, JsonKeys.PERMISSIONS);
-        s.setPermission(Permission.fromJSON(perm));
-
-        s.setProvider(Json.valueOf(object, JsonKeys.PROVIDER));
+        o.getStats().log(TAG);
 
         return s;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.TOKEN, Json.nullCheck(getToken()));
-            o.put(JsonKeys.EXPIRES, Json.nullCheck(Utils.dateToString(getExpire())));
-            o.put(JsonKeys.USER, getUser().getUserId() == User.NO_USER ? JSONObject.NULL : getUser().toJSON());
-            o.put(JsonKeys.PERMISSIONS, Json.toJson(getPermission()));
-            o.put(JsonKeys.PROVIDER, Json.nullCheck(getProvider()));
-            o.put(JsonKeys.CLIENT_ID, Json.nullCheck(mClientId));
-            o.put(JsonKeys.REFERENCE, Json.nullCheck(mReference));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setToken(getToken())
+                .setExpires(getExpire())
+                .setClientId(getClientId())
+                .setReference(getReference())
+                .setUser(getUser())
+                .setPermissions(getPermission())
+                .setProvider(getProvider())
+                .toJSON();
     }
 
     /**
@@ -147,16 +138,18 @@ public class Session implements IJson<JSONObject>, Parcelable {
         return mClientId;
     }
 
-    public void setClientId(String clientId) {
+    public Session setClientId(String clientId) {
         mClientId = clientId;
+        return this;
     }
 
     public String getReference() {
         return mReference;
     }
 
-    public void setReference(String reference) {
+    public Session setReference(String reference) {
         mReference = reference;
+        return this;
     }
 
     public User getUser() {
@@ -196,69 +189,46 @@ public class Session implements IJson<JSONObject>, Parcelable {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((mClientId == null) ? 0 : mClientId.hashCode());
-        result = prime * result
-                + ((mExpires == null) ? 0 : mExpires.hashCode());
-        result = prime * result
-                + ((mPermission == null) ? 0 : mPermission.hashCode());
-        result = prime * result
-                + ((mProvider == null) ? 0 : mProvider.hashCode());
-        result = prime * result
-                + ((mReference == null) ? 0 : mReference.hashCode());
-        result = prime * result + ((mToken == null) ? 0 : mToken.hashCode());
-        result = prime * result + ((mUser == null) ? 0 : mUser.hashCode());
-        return result;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Session session = (Session) o;
+
+        SgnLog.d(TAG, "1");
+
+        if (mToken != null ? !mToken.equals(session.mToken) : session.mToken != null) return false;
+        SgnLog.d(TAG, "2");
+
+        if (mExpires != null ? !mExpires.equals(session.mExpires) : session.mExpires != null) return false;
+        SgnLog.d(TAG, "3");
+
+        if (mUser != null ? !mUser.equals(session.mUser) : session.mUser != null) return false;
+        SgnLog.d(TAG, "4");
+
+        if (mPermission != null ? !mPermission.equals(session.mPermission) : session.mPermission != null) return false;
+        SgnLog.d(TAG, "5");
+
+        if (mProvider != null ? !mProvider.equals(session.mProvider) : session.mProvider != null) return false;
+        SgnLog.d(TAG, "6");
+
+        if (mClientId != null ? !mClientId.equals(session.mClientId) : session.mClientId != null) return false;
+        SgnLog.d(TAG, "7");
+
+        return mReference != null ? mReference.equals(session.mReference) : session.mReference == null;
+
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Session other = (Session) obj;
-        if (mClientId == null) {
-            if (other.mClientId != null)
-                return false;
-        } else if (!mClientId.equals(other.mClientId))
-            return false;
-        if (mExpires == null) {
-            if (other.mExpires != null)
-                return false;
-        } else if (!mExpires.equals(other.mExpires))
-            return false;
-        if (mPermission == null) {
-            if (other.mPermission != null)
-                return false;
-        } else if (!mPermission.equals(other.mPermission))
-            return false;
-        if (mProvider == null) {
-            if (other.mProvider != null)
-                return false;
-        } else if (!mProvider.equals(other.mProvider))
-            return false;
-        if (mReference == null) {
-            if (other.mReference != null)
-                return false;
-        } else if (!mReference.equals(other.mReference))
-            return false;
-        if (mToken == null) {
-            if (other.mToken != null)
-                return false;
-        } else if (!mToken.equals(other.mToken))
-            return false;
-        if (mUser == null) {
-            if (other.mUser != null)
-                return false;
-        } else if (!mUser.equals(other.mUser))
-            return false;
-        return true;
+    public int hashCode() {
+        int result = mToken != null ? mToken.hashCode() : 0;
+        result = 31 * result + (mExpires != null ? mExpires.hashCode() : 0);
+        result = 31 * result + (mUser != null ? mUser.hashCode() : 0);
+        result = 31 * result + (mPermission != null ? mPermission.hashCode() : 0);
+        result = 31 * result + (mProvider != null ? mProvider.hashCode() : 0);
+        result = 31 * result + (mClientId != null ? mClientId.hashCode() : 0);
+        result = 31 * result + (mReference != null ? mReference.hashCode() : 0);
+        return result;
     }
 
     public int describeContents() {

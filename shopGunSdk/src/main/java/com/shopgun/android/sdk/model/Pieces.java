@@ -20,13 +20,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -82,22 +80,21 @@ public class Pieces implements IJson<JSONObject>, Parcelable {
             return null;
         }
 
-        Pieces p = new Pieces();
-        p.setFrom(Json.valueOf(object, JsonKeys.FROM, 1));
-        p.setTo(Json.valueOf(object, JsonKeys.TO, 1));
+        SgnJson o = new SgnJson(object);
+        Pieces p = new Pieces()
+                .setFrom((int)o.getFrom())
+                .setTo((int)o.getTo());
+
+        o.getStats().log(TAG);
 
         return p;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.FROM, Json.nullCheck(getFrom()));
-            o.put(JsonKeys.TO, Json.nullCheck(getTo()));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setFrom(getFrom())
+                .setTo(getTo())
+                .toJSON();
     }
 
     public int getFrom() {

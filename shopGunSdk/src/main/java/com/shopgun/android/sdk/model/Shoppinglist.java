@@ -20,14 +20,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.api.MetaKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
@@ -35,6 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -183,41 +183,37 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
             return null;
         }
 
-        Shoppinglist shoppinglist = new Shoppinglist();
-        shoppinglist.setId(Json.valueOf(object, JsonKeys.ID));
-        shoppinglist.setErn(Json.valueOf(object, JsonKeys.ERN));
-        shoppinglist.setName(Json.valueOf(object, JsonKeys.NAME));
-        shoppinglist.setAccess(Json.valueOf(object, JsonKeys.ACCESS));
-        String modified = Json.valueOf(object, JsonKeys.MODIFIED, Utils.DATE_EPOC);
-        shoppinglist.setModified(Utils.stringToDate(modified));
-        shoppinglist.setPreviousId(Json.valueOf(object, JsonKeys.PREVIOUS_ID));
-        shoppinglist.setType(Json.valueOf(object, JsonKeys.TYPE));
-        shoppinglist.setMeta(Json.getObject(object, JsonKeys.META, new JSONObject()));
-        JSONArray jShares = Json.getArray(object, JsonKeys.SHARES);
-        shoppinglist.putShares(Share.fromJSON(jShares));
+        SgnJson o = new SgnJson(object);
+        Shoppinglist shoppinglist = new Shoppinglist()
+                .setId(o.getId())
+                .setErn(o.getErn())
+                .setName(o.getName())
+                .setAccess(o.getAccess())
+                .setModified(o.getModified())
+                .setPreviousId(o.getPreviousId())
+                .setType(o.getType())
+                .setMeta(o.getMeta())
+                .putShares(o.getShares());
+
+        // Owner is part of the shares, we'll ignore it
+        // previous_id haven't been implemented for shoppinglists on the API yet
+        o.getStats().ignoreForgottenKeys(SgnJson.OWNER).ignoreRejectedKeys(SgnJson.PREVIOUS_ID).log(TAG);
+
         return shoppinglist;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.ID, Json.nullCheck(getId()));
-            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKeys.NAME, Json.nullCheck(getName()));
-            o.put(JsonKeys.ACCESS, Json.nullCheck(getAccess()));
-            o.put(JsonKeys.MODIFIED, Json.nullCheck(Utils.dateToString(getModified())));
-            o.put(JsonKeys.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
-            o.put(JsonKeys.TYPE, Json.nullCheck(getType()));
-            o.put(JsonKeys.META, Json.nullCheck(getMeta()));
-            JSONArray shares = new JSONArray();
-            for (Share share : getShares().values()) {
-                shares.put(share.toJSON());
-            }
-            o.put(JsonKeys.SHARES, shares);
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setId(getId())
+                .setErn(getErn())
+                .setName(getName())
+                .setAccess(getAccess())
+                .setModified(getModified())
+                .setPreviousId(getPreviousId())
+                .setType(getType())
+                .setMeta(getMeta())
+                .setShares(getShares().values())
+                .toJSON();
     }
 
     public String getId() {
@@ -403,7 +399,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      * Update the set of {@link Share shares} that may read/edit this {@link Shoppinglist}
      *
      * <p>This method will <i>override</i> the current {@link Share shares} in
-     * the list. To append/edit the current set of shares use {@link #putShares(List)}</p>
+     * the list. To append/edit the current set of shares use {@link #putShares(Collection)}</p>
      * @param shares A new list of {@link Share shares}
      * @return This object
      */
@@ -422,7 +418,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      * @param shares A list of {@link Share shares} to append/edit
      * @return This object
      */
-    public Shoppinglist putShares(List<Share> shares) {
+    public Shoppinglist putShares(Collection<Share> shares) {
         if (shares == null) return this;
 
         for (Share s : shares) {

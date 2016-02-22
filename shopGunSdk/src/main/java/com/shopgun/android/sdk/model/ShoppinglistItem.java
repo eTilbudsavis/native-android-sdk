@@ -20,13 +20,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.api.MetaKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
@@ -197,41 +196,39 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
             return null;
         }
 
-        ShoppinglistItem sli = new ShoppinglistItem();
-        sli.setId(Json.valueOf(object, JsonKeys.ID));
-        sli.setErn(Json.valueOf(object, JsonKeys.ERN));
-        sli.setTick(Json.valueOf(object, JsonKeys.TICK, false));
-        sli.setOfferId(Json.valueOf(object, JsonKeys.OFFER_ID));
-        sli.setCount(Json.valueOf(object, JsonKeys.COUNT, 1));
-        sli.setDescription(Json.valueOf(object, JsonKeys.DESCRIPTION));
-        sli.setShoppinglistId(Json.valueOf(object, JsonKeys.SHOPPINGLIST_ID));
-        sli.setErn(Json.valueOf(object, JsonKeys.ERN));
-        sli.setCreator(Json.valueOf(object, JsonKeys.CREATOR));
-        String date = Json.valueOf(object, JsonKeys.MODIFIED, Utils.DATE_EPOC);
-        sli.setModified(Utils.stringToDate(date));
-        sli.setPreviousId(Json.valueOf(object, JsonKeys.PREVIOUS_ID, null));
-        sli.setMeta(Json.getObject(object, JsonKeys.META, new JSONObject()));
+        SgnJson o = new SgnJson(object);
+        ShoppinglistItem sli = new ShoppinglistItem()
+                .setId(o.getId())
+                .setErn(o.getErn())
+                .setTick(o.getTick())
+                .setOfferId(o.getOfferId())
+                .setCount(o.getCount())
+                .setDescription(o.getDescription())
+                .setShoppinglistId(o.getShoppingListId())
+                .setCreator(o.getCreator())
+                .setModified(o.getModified())
+                .setPreviousId(o.getPreviousId())
+                .setMeta(o.getMeta());
+
+        o.getStats().log(TAG);
+
         return sli;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.ID, Json.nullCheck(getId()));
-            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKeys.TICK, Json.nullCheck(isTicked()));
-            o.put(JsonKeys.OFFER_ID, Json.nullCheck(getOfferId()));
-            o.put(JsonKeys.COUNT, getCount());
-            o.put(JsonKeys.DESCRIPTION, Json.nullCheck(getDescription()));
-            o.put(JsonKeys.SHOPPINGLIST_ID, Json.nullCheck(getShoppinglistId()));
-            o.put(JsonKeys.CREATOR, Json.nullCheck(getCreator()));
-            o.put(JsonKeys.MODIFIED, Json.nullCheck(Utils.dateToString(getModified())));
-            o.put(JsonKeys.PREVIOUS_ID, Json.nullCheck(getPreviousId()));
-            o.put(JsonKeys.META, Json.nullCheck(getMeta()));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setId(getId())
+                .setErn(getErn())
+                .setTick(isTicked())
+                .setOfferId(getOfferId())
+                .setCount(getCount())
+                .setDescription(getDescription())
+                .setShoppingListId(getShoppinglistId())
+                .setCreator(getCreator())
+                .setModified(getModified())
+                .setPreviousId(getPreviousId())
+                .setMeta(getMeta())
+                .toJSON();
     }
 
     public String getId() {
