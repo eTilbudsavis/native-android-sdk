@@ -164,7 +164,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         offer.mStore = o.getStore();
         offer.mCatalog = o.getCatalog();
 
-        o.logStatus(TAG, null, new String[]{ SgnJson.DEALER, SgnJson.STORE, SgnJson.CATALOG});
+        o.getStats().ignoreRejectedKeys(SgnJson.DEALER, SgnJson.STORE, SgnJson.CATALOG).log(TAG);
 
         return offer;
     }

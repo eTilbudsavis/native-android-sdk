@@ -20,8 +20,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.palette.MaterialColor;
 import com.shopgun.android.sdk.palette.SgnColor;
@@ -29,7 +27,6 @@ import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -80,7 +77,7 @@ public class Pageflip implements IJson<JSONObject>, Parcelable {
                 .setLogo(o.getLogo())
                 .setColor(o.getColor());
 
-        o.logStatus(TAG);
+        o.getStats().log(TAG);
 
         return p;
     }

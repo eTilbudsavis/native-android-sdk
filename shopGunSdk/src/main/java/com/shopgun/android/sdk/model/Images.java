@@ -72,7 +72,7 @@ public class Images implements IJson<JSONObject>, Parcelable {
                 .setZoom(o.getZoom())
                 .setThumb(o.getThumb());
 
-        o.logStatus(TAG, new String[]{ "@note.1" }, null);
+        o.getStats().ignoreForgottenKeys("@note.1").log(TAG);
 
         return i;
     }

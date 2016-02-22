@@ -160,7 +160,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         c.mDealer = o.getDealer();
         c.mStore = o.getStore();
 
-        o.logStatus(TAG, null, new String[]{ SgnJson.DEALER, SgnJson.STORE});
+        o.getStats().ignoreRejectedKeys(SgnJson.DEALER, SgnJson.STORE).log(TAG);
 
         return c;
     }

@@ -131,7 +131,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
 
         s.mDealer = o.getDealer();
 
-        o.logStatus(TAG, null, new String[]{ SgnJson.DEALER });
+        o.getStats().ignoreRejectedKeys(SgnJson.DEALER).log(TAG);
 
         return s;
     }

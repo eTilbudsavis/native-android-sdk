@@ -94,7 +94,7 @@ public class Dimension implements IJson<JSONObject>, Parcelable {
                 .setWidth(o.getWidth())
                 .setHeight(o.getHeight());
 
-        o.logStatus(TAG);
+        o.getStats().log(TAG);
 
         return d;
     }

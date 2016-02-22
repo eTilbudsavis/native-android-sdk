@@ -141,7 +141,7 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
                 .setCountry(o.getCountry())
                 .setDescription(o.getDescription());
 
-        o.logStatus(TAG);
+        o.getStats().log(TAG);
 
         return d;
     }
