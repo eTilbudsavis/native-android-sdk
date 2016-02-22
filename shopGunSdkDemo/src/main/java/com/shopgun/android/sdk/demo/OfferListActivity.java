@@ -29,12 +29,9 @@ import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.demo.base.BaseListActivity;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Offer;
-import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
-import com.shopgun.android.sdk.utils.Api;
-
-import org.json.JSONArray;
+import com.shopgun.android.sdk.requests.LoaderRequest;
+import com.shopgun.android.sdk.requests.impl.OfferListRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,8 +67,8 @@ public class OfferListActivity extends BaseListActivity implements AdapterView.O
         super.onResume();
         if (mOffers.isEmpty()) {
             showProgress("Fetching catalogs");
-            JsonArrayRequest offerReq = new JsonArrayRequest(Api.Endpoint.OFFER_LIST, mOfferListener);
-            ShopGun.getInstance().add(offerReq);
+            OfferListRequest req = new OfferListRequest(mListener);
+            ShopGun.getInstance(this).add(req);
         }
     }
 
@@ -81,16 +78,15 @@ public class OfferListActivity extends BaseListActivity implements AdapterView.O
         outState.putParcelableArrayList(STATE_OFFERS, new ArrayList<Offer>(mOffers));
     }
 
-    Response.Listener<JSONArray> mOfferListener = new Response.Listener<JSONArray>() {
-
+    LoaderRequest.Listener<List<Offer>> mListener = new LoaderRequest.Listener<List<Offer>>() {
         @Override
-        public void onComplete(JSONArray response, ShopGunError error) {
+        public void onRequestComplete(List<Offer> response, List<ShopGunError> errors) {
 
             hideProgress();
 
             if (response != null) {
 
-                if (response.length() == 0) {
+                if (response.isEmpty()) {
 
                     // This is usually the case when either location or radius could use some adjustment.
                     Tools.showDialog(OfferListActivity.this, "No offers available", "Try changing the SDK location, or increase the radius.");
@@ -98,8 +94,7 @@ public class OfferListActivity extends BaseListActivity implements AdapterView.O
                 } else {
 
                     // The request was a success, take the first catalog and display it
-                    List<Offer> offers = Offer.fromJSON(response);
-                    mOffers.addAll(offers);
+                    mOffers.addAll(response);
                     ((OfferAdapter)getListAdapter()).notifyDataSetChanged();
 
                 }
@@ -108,11 +103,17 @@ public class OfferListActivity extends BaseListActivity implements AdapterView.O
 
                 // There could be a bunch of things wrong here.
                 // Please check the error code, and details for further information
+                ShopGunError error = errors.get(0);
                 String title = error.isApi() ? "API Error" : "SDK Error";
                 Tools.showDialog(OfferListActivity.this, title, error.toString());
                 SgnLog.e(TAG, error.getMessage(), error);
 
             }
+        }
+
+        @Override
+        public void onRequestIntermediate(List<Offer> response, List<ShopGunError> errors) {
+
         }
     };
 
