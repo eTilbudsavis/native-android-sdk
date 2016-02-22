@@ -17,7 +17,6 @@
 package com.shopgun.android.sdk.requests;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.Delivery;
 import com.shopgun.android.sdk.network.NetworkResponse;
@@ -78,6 +77,7 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
         super.setRequestQueue(requestQueue);
         runFillerRequests();
         super.cancel();
+        addEvent("cancelled-to-finish-on-cache-dispatcher");
         return this;
     }
 
@@ -113,9 +113,7 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
                 }
             }
             mRequests.addAll(tmp);
-            if (mRequests.isEmpty()) {
-                finish("no-filler-requests-needed");
-            } else {
+            if (!mRequests.isEmpty()) {
                 for (Request r : mRequests) {
                     applyState(r);
                     getRequestQueue().add(r);
@@ -146,15 +144,6 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
                 getRequestQueue().cancelAll(getTag());
             }
         }
-    }
-
-    @Override
-    public Request finish(String reason) {
-        if (isFinished()) {
-            SgnLog.d(TAG, "I should fix this finish(String) thing. It seems to happen when using an \'empty\' loader request");
-            return this;
-        }
-        return super.finish(reason);
     }
 
     @Override
