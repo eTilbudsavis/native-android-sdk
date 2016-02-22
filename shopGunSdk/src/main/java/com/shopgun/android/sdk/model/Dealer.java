@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -80,6 +81,7 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
     private Set<String> mCategoryIds;
     private Country mCountry;
     private String mDescription;
+    private int mFavoriteCount = 0;
 
     public Dealer() {
 
@@ -139,7 +141,8 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
                 .setPageflip(o.getPageflip())
                 .setCategoryIds(o.getCategoryIds())
                 .setCountry(o.getCountry())
-                .setDescription(o.getDescription());
+                .setDescription(o.getDescription())
+                .setFavoriteCount(o.getFavoriteCount());
 
         o.getStats().log(TAG);
 
@@ -158,6 +161,7 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
                 .setCategoryIds(getCategoryIds())
                 .setCountry(getCountry())
                 .setDescription(getDescription())
+                .setFavoriteCount(getFavoriteCount())
                 .toJSON();
     }
 
@@ -300,6 +304,26 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
         return this;
     }
 
+    /**
+     * Get the number of users who have subscribed this dealer
+     * @return Number of users who have subscribed this dealer or 0.
+     */
+    public int getFavoriteCount() {
+        return mFavoriteCount;
+    }
+
+    /**
+     * Set the number of users who have subscribed this dealer
+     * @param favCount Number of users who have subscribed this dealer, must be {@code >= 0}
+     * @return This object
+     */
+    public Dealer setFavoriteCount(int favCount) {
+        if (favCount >= 0) {
+            mFavoriteCount = favCount;
+        }
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -307,12 +331,17 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
 
         Dealer dealer = (Dealer) o;
 
+        if (mFavoriteCount != dealer.mFavoriteCount) return false;
         if (mErn != null ? !mErn.equals(dealer.mErn) : dealer.mErn != null) return false;
         if (mName != null ? !mName.equals(dealer.mName) : dealer.mName != null) return false;
         if (mWebsite != null ? !mWebsite.equals(dealer.mWebsite) : dealer.mWebsite != null) return false;
         if (mLogo != null ? !mLogo.equals(dealer.mLogo) : dealer.mLogo != null) return false;
         if (mColor != null ? !mColor.equals(dealer.mColor) : dealer.mColor != null) return false;
-        return !(mPageflip != null ? !mPageflip.equals(dealer.mPageflip) : dealer.mPageflip != null);
+        if (mPageflip != null ? !mPageflip.equals(dealer.mPageflip) : dealer.mPageflip != null) return false;
+        if (mCategoryIds != null ? !mCategoryIds.equals(dealer.mCategoryIds) : dealer.mCategoryIds != null)
+            return false;
+        if (mCountry != null ? !mCountry.equals(dealer.mCountry) : dealer.mCountry != null) return false;
+        return mDescription != null ? mDescription.equals(dealer.mDescription) : dealer.mDescription == null;
 
     }
 
@@ -324,8 +353,13 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
         result = 31 * result + (mLogo != null ? mLogo.hashCode() : 0);
         result = 31 * result + (mColor != null ? mColor.hashCode() : 0);
         result = 31 * result + (mPageflip != null ? mPageflip.hashCode() : 0);
+        result = 31 * result + (mCategoryIds != null ? mCategoryIds.hashCode() : 0);
+        result = 31 * result + (mCountry != null ? mCountry.hashCode() : 0);
+        result = 31 * result + (mDescription != null ? mDescription.hashCode() : 0);
+        result = 31 * result + mFavoriteCount;
         return result;
     }
+
 
     @Override
     public int describeContents() {
@@ -340,6 +374,10 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
         dest.writeString(this.mLogo);
         dest.writeParcelable(this.mColor, 0);
         dest.writeParcelable(this.mPageflip, 0);
+        dest.writeStringList(new ArrayList<String>(mCategoryIds));
+        dest.writeParcelable(this.mCountry, 0);
+        dest.writeString(this.mDescription);
+        dest.writeInt(this.mFavoriteCount);
     }
 
     protected Dealer(Parcel in) {
@@ -349,6 +387,12 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
         this.mLogo = in.readString();
         this.mColor = in.readParcelable(MaterialColor.class.getClassLoader());
         this.mPageflip = in.readParcelable(Pageflip.class.getClassLoader());
+        ArrayList<String> catIds = new ArrayList<String>();
+        in.readStringList(catIds);
+        this.mCategoryIds = new HashSet<String>(catIds);
+        this.mCountry = in.readParcelable(Country.class.getClassLoader());
+        this.mDescription = in.readString();
+        this.mFavoriteCount = in.readInt();
     }
 
     public static final Creator<Dealer> CREATOR = new Creator<Dealer>() {

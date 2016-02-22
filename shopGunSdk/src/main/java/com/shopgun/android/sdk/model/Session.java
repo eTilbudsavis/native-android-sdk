@@ -21,7 +21,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.SgnJson;
@@ -195,26 +194,12 @@ public class Session implements IJson<JSONObject>, Parcelable {
 
         Session session = (Session) o;
 
-        SgnLog.d(TAG, "1");
-
         if (mToken != null ? !mToken.equals(session.mToken) : session.mToken != null) return false;
-        SgnLog.d(TAG, "2");
-
         if (mExpires != null ? !mExpires.equals(session.mExpires) : session.mExpires != null) return false;
-        SgnLog.d(TAG, "3");
-
         if (mUser != null ? !mUser.equals(session.mUser) : session.mUser != null) return false;
-        SgnLog.d(TAG, "4");
-
         if (mPermission != null ? !mPermission.equals(session.mPermission) : session.mPermission != null) return false;
-        SgnLog.d(TAG, "5");
-
         if (mProvider != null ? !mProvider.equals(session.mProvider) : session.mProvider != null) return false;
-        SgnLog.d(TAG, "6");
-
         if (mClientId != null ? !mClientId.equals(session.mClientId) : session.mClientId != null) return false;
-        SgnLog.d(TAG, "7");
-
         return mReference != null ? mReference.equals(session.mReference) : session.mReference == null;
 
     }

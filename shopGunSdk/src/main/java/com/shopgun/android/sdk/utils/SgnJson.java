@@ -785,6 +785,17 @@ public class SgnJson {
         return this;
     }
 
+    public static final String FAVORITE_COUNT = "favorite_count";
+
+    public int getFavoriteCount() {
+        return getInt(FAVORITE_COUNT);
+    }
+
+    public SgnJson setFavoriteCount(int value) {
+        put(FAVORITE_COUNT, value);
+        return this;
+    }
+
     public static final String OFFER_COUNT = "offer_count";
 
     public int getOfferCount() {
