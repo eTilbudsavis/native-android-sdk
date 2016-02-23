@@ -144,7 +144,9 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
                 .setDescription(o.getDescription())
                 .setFavoriteCount(o.getFavoriteCount());
 
-        o.getStats().log(TAG);
+        o.getStats()
+                .ignoreForgottenKeys("youtube_user_id", "twitter_handle", "facebook_page_id")
+                .log(TAG);
 
         return d;
     }

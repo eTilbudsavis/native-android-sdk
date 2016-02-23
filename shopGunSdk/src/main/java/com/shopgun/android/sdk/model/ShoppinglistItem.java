@@ -516,7 +516,8 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
      * @return A comment, or {@code null}
      */
     public String getComment() {
-        return Json.valueOf(getMeta(), MetaKeys.COMMENT);
+        String comment = mMeta.optString(MetaKeys.COMMENT);
+        return comment.length() == 0 ? null : comment;
     }
 
     /**

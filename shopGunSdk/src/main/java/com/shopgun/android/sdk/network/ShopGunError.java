@@ -26,6 +26,7 @@ import com.shopgun.android.sdk.network.impl.ApiError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.utils.Api.JsonKey;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -77,11 +78,12 @@ public class ShopGunError extends Exception implements IJson<JSONObject>,Parcela
      */
     public static ShopGunError fromJSON(JSONObject apiError) {
 
-        String id = Json.valueOf(apiError, JsonKey.ID);
-        int code = Json.valueOf(apiError, JsonKey.CODE, Code.UNKNOWN);
-        String message = Json.valueOf(apiError, JsonKey.MESSAGE, DEF_MESSAGE);
-        String details = Json.valueOf(apiError, JsonKey.DETAILS, DEF_DETAILS);
-        String failedOnField = Json.valueOf(apiError, JsonKey.FAILED_ON_FIELD);
+        SgnJson o = new SgnJson(apiError);
+        String id = o.getId();
+        int code = o.getInt(SgnJson.CODE, Code.UNKNOWN);
+        String message = o.getString(SgnJson.MESSAGE, DEF_MESSAGE);
+        String details = o.getString(SgnJson.DETAILS, DEF_DETAILS);
+        String failedOnField = o.getString(SgnJson.FAILED_ON_FIELD);
         return new ApiError(code, message, id, details, failedOnField);
 
     }
@@ -123,17 +125,13 @@ public class ShopGunError extends Exception implements IJson<JSONObject>,Parcela
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKey.ID, Json.nullCheck(mId));
-            o.put(JsonKey.CODE, Json.nullCheck(mCode));
-            o.put(JsonKey.MESSAGE, Json.nullCheck(getMessage()));
-            o.put(JsonKey.DETAILS, Json.nullCheck(mDetails));
-            o.put(JsonKey.FAILED_ON_FIELD, Json.nullCheck(mFailedOnField));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, e.getMessage(), e);
-        }
-        return o;
+        return new SgnJson()
+                .put(SgnJson.ID, getId())
+                .put(SgnJson.CODE, getCode())
+                .put(SgnJson.MESSAGE, getMessage())
+                .put(SgnJson.DETAILS, getDetails())
+                .put(SgnJson.FAILED_ON_FIELD, getFailedOnField())
+                .toJSON();
     }
 
     /**

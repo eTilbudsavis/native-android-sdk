@@ -501,6 +501,10 @@ public class SgnJson {
         return this;
     }
 
+    /**
+     * Querying for 'catalogs'
+     * @return A list of catalog
+     */
     public List<Catalog> getCatalogList() {
         JSONArray a = getJSONArray(CATALOGS);
         return a == null ? null : Catalog.fromJSON(a);
@@ -1490,8 +1494,27 @@ public class SgnJson {
 
     public static final String PAYLOAD = "payload";
 
+    public JSONObject getPayload() {
+        return getJSONObject(PAYLOAD);
+    }
+
+    public SgnJson setPayload(JSONObject value) {
+        put(PAYLOAD, putCheck(value));
+        return this;
+    }
+
     public static final String CATALOGS = "catalogs";
     public static final String PAYLOAD_TYPE = "payload_type";
+
+    public String getPayloadType() {
+        return getString(PAYLOAD_TYPE);
+    }
+
+    public SgnJson setPayloadType(String value) {
+        put(PAYLOAD_TYPE, value);
+        return this;
+    }
+
 
     private class Ern {
 

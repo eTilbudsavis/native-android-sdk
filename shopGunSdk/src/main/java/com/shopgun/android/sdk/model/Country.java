@@ -21,14 +21,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -81,23 +80,23 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Parcelable {
         if (object == null) {
             return null;
         }
-        Country country = new Country();
-        country.setId(Json.valueOf(object, JsonKeys.ID));
-        country.setErn(Json.valueOf(object, JsonKeys.ERN));
-        country.setUnsubscribePrintUrl(Json.valueOf(object, JsonKeys.UNSUBSCRIBE_PRINT_URL));
+        SgnJson o = new SgnJson(object);
+        Country country = new Country()
+                .setId(o.getId())
+                .setErn(o.getErn())
+                .setUnsubscribePrintUrl(o.getUnsubscribePrintUrl());
+
+        o.getStats().ignoreRejectedKeys(SgnJson.ERN).log(TAG);
+
         return country;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.ID, Json.nullCheck(getId()));
-            o.put(JsonKeys.ERN, Json.nullCheck(getErn()));
-            o.put(JsonKeys.UNSUBSCRIBE_PRINT_URL, Json.nullCheck(getUnsubscribePrintUrl()));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setId(getId())
+                .setErn(getErn())
+                .setUnsubscribePrintUrl(getUnsubscribePrintUrl())
+                .toJSON();
     }
 
     /**
@@ -159,8 +158,9 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Parcelable {
      * household from receiving the physical catalogs.
      * @param url A string
      */
-    public void setUnsubscribePrintUrl(String url) {
+    public Country setUnsubscribePrintUrl(String url) {
         mUnsubscribeUrl = url;
+        return this;
     }
 
     @Override
