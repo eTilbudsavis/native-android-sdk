@@ -21,14 +21,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
-import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -101,7 +98,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     public static List<Share> fromJSON(JSONArray array) {
         ArrayList<Share> list = new ArrayList<Share>();
         for (int i = 0; i < array.length(); i++) {
-            JSONObject o = Json.getObject(array, i);
+            JSONObject o = array.optJSONObject(i);
             if (o != null) {
                 list.add(Share.fromJSON(o));
             }
@@ -119,38 +116,41 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
             return null;
         }
 
+        SgnJson o = new SgnJson(object);
         Share s = new Share();
-        JSONObject jUser = Json.getObject(object, JsonKeys.USER);
-        if (jUser != null) {
-            // TODO: Consider changing structure of Share to match API
-            // But the 'user'-key indicates it's a User-object which it isn't
-            s.setEmail(Json.valueOf(jUser, JsonKeys.EMAIL));
-            s.setName(Json.valueOf(jUser, JsonKeys.NAME));
+
+        // Consider changing structure of Share to match API
+        // But the 'user'-key indicates it's a User-object which it isn't
+        SgnJson u = new SgnJson(o.getJSONObject(SgnJson.USER));
+        s.setEmail(u.getEmail());
+        s.setName(u.getName());
+
+        s.setAccess(o.getAccess());
+        s.setAccepted(o.getAccepted());
+        if (o.has(SgnJson.ACCEPT_URL)) {
+            s.setAcceptUrl(o.getAcceptUrl());
         }
-        s.setAccess(Json.valueOf(object, JsonKeys.ACCESS));
-        s.setAccepted(Json.valueOf(object, JsonKeys.ACCEPTED, false));
-        s.setAcceptUrl(Json.valueOf(object, JsonKeys.ACCEPT_URL, null));
+
+        o.getStats().log(TAG);
+
         return s;
     }
 
     public JSONObject toJSON() {
+        SgnJson u = new SgnJson()
+                .setEmail(getEmail())
+                .setName(getName());
 
-        JSONObject o = new JSONObject();
-        try {
-            JSONObject user = new JSONObject();
-            user.put(JsonKeys.EMAIL, Json.nullCheck(getEmail()));
-            user.put(JsonKeys.NAME, Json.nullCheck(getName()));
+        SgnJson o = new SgnJson()
+                .put(SgnJson.USER, u.toJSON())
+                .setAccepted(getAccepted())
+                .setAccess(getAccess());
 
-            o.put(JsonKeys.USER, Json.nullCheck(user));
-            o.put(JsonKeys.ACCEPTED, Json.nullCheck(getAccepted()));
-            o.put(JsonKeys.ACCESS, Json.nullCheck(getAccess()));
-            if (getAcceptUrl() != null) {
-                o.put(JsonKeys.ACCEPT_URL, getAcceptUrl());
-            }
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
+        if (getAcceptUrl() != null) {
+            o.setAcceptUrl(getAcceptUrl());
         }
-        return o;
+
+        return o.toJSON();
     }
 
     /**

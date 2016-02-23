@@ -24,7 +24,6 @@ import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
@@ -65,8 +64,8 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Parcelable {
     public static List<Country> fromJSON(JSONArray array) {
         List<Country> list = new ArrayList<Country>();
         for (int i = 0; i < array.length(); i++) {
-            JSONObject jCountry = Json.getObject(array, i);
-            list.add(Country.fromJSON(jCountry));
+            JSONObject o = array.optJSONObject(i);
+            list.add(Country.fromJSON(o));
         }
         return list;
     }

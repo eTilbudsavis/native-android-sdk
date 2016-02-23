@@ -46,10 +46,10 @@ import com.shopgun.android.sdk.network.ShopGunError.Code;
 import com.shopgun.android.sdk.network.impl.HandlerDelivery;
 import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
-import com.shopgun.android.sdk.utils.Api;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
 import com.shopgun.android.sdk.utils.ListUtils;
 import com.shopgun.android.sdk.utils.PermissionUtils;
+import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
@@ -591,7 +591,7 @@ public class SyncManager {
 
                     sl.setState(SyncState.SYNCED);
                     try {
-                        String modified = response.getString(Api.JsonKey.MODIFIED);
+                        String modified = response.getString(SgnJson.MODIFIED);
                         // If local list has been modified before the server list, then sync items
                         if (sl.getModified().before(Utils.stringToDate(modified))) {
                             // If there are changes, update items (this will update list-state in DB)

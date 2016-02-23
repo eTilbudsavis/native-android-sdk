@@ -24,7 +24,6 @@ import com.shopgun.android.sdk.api.MetaKeys;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
-import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
@@ -178,7 +177,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
     public static List<ShoppinglistItem> fromJSON(JSONArray array) {
         List<ShoppinglistItem> list = new ArrayList<ShoppinglistItem>();
         for (int i = 0; i < array.length(); i++) {
-            JSONObject o = Json.getObject(array, i);
+            JSONObject o = array.optJSONObject(i);
             if (o != null) {
                 list.add(ShoppinglistItem.fromJSON(o));
             }
@@ -589,7 +588,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
         if (mMeta == null) {
             if (other.mMeta != null)
                 return false;
-        } else if (!Json.jsonObjectEquals(mMeta, other.mMeta))
+        } else if (!SgnJson.jsonObjectEquals(mMeta, other.mMeta))
             return false;
 
 
@@ -661,7 +660,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
                 + ((mDescription == null) ? 0 : mDescription.hashCode());
         result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
         result = prime * result + ((mId == null) ? 0 : mId.hashCode());
-        result = prime * result + Json.jsonObjectHashCode(mMeta);
+        result = prime * result + SgnJson.jsonObjectHashCode(mMeta);
         result = prime * result
                 + ((mModified == null) ? 0 : mModified.hashCode());
         result = prime * result + ((mOffer == null) ? 0 : mOffer.hashCode());

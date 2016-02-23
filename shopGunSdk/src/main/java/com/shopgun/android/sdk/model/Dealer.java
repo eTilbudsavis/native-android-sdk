@@ -24,7 +24,6 @@ import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.palette.MaterialColor;
 import com.shopgun.android.sdk.palette.SgnColor;
-import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
@@ -112,7 +111,7 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
     public static List<Dealer> fromJSON(JSONArray array) {
         ArrayList<Dealer> list = new ArrayList<Dealer>();
         for (int i = 0; i < array.length(); i++) {
-            JSONObject o = Json.getObject(array, i);
+            JSONObject o = array.optJSONObject(i);
             if (o != null) {
                 list.add(Dealer.fromJSON(o));
             }

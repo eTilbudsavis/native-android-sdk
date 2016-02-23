@@ -25,7 +25,7 @@ import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.Cache.Item;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;
-import com.shopgun.android.sdk.utils.Api;
+import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
@@ -185,8 +185,8 @@ public class JsonCacheHelper {
 
         try {
 
-            if (o.has(Api.JsonKey.ERN)) {
-                String ern = o.getString(Api.JsonKey.ERN);
+            if (o.has(SgnJson.ERN)) {
+                String ern = o.getString(SgnJson.ERN);
                 Cache.Item i = new Item(o, r.getCacheTTL());
                 r.getCache().put(ern, i);
                 return ern;

@@ -23,10 +23,6 @@ import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
-import com.shopgun.android.sdk.network.mock.MockNetwork;
-import com.shopgun.android.sdk.network.mock.MockUnsupportedNetworkResponse;
-import com.shopgun.android.sdk.network.mock.PathHelper;
-import com.shopgun.android.sdk.network.mock.MockApiSessionResponse;
 
 public class MockEmptyNetwork extends MockNetwork {
 

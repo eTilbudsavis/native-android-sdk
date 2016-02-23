@@ -22,7 +22,6 @@ import android.os.Parcelable;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Json;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -70,7 +69,7 @@ public class Permission implements IJson<JSONObject>, Parcelable {
     public static List<Permission> fromJSON(JSONArray array) {
         List<Permission> list = new ArrayList<Permission>();
         for (int i = 0; i < array.length(); i++) {
-            JSONObject o = Json.getObject(array, i);
+            JSONObject o = array.optJSONObject(i);
             if (o != null) {
                 list.add(Permission.fromJSON(o));
             }

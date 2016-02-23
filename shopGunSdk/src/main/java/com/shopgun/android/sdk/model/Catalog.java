@@ -28,7 +28,6 @@ import com.shopgun.android.sdk.model.interfaces.IStore;
 import com.shopgun.android.sdk.palette.MaterialColor;
 import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
-import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
@@ -116,7 +115,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     public static List<Catalog> fromJSON(JSONArray array) {
         List<Catalog> list = new ArrayList<Catalog>();
         for (int i = 0; i < array.length(); i++) {
-            JSONObject o = Json.getObject(array, i);
+            JSONObject o = array.optJSONObject(i);
             if (o != null) {
                 list.add(Catalog.fromJSON(o));
             }

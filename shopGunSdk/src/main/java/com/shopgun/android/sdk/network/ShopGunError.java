@@ -20,15 +20,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.network.impl.ApiError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
-import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.SgnJson;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ShopGunError extends Exception implements IJson<JSONObject>,Parcelable {

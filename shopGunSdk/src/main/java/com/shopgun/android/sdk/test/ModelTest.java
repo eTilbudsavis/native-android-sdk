@@ -19,7 +19,6 @@ package com.shopgun.android.sdk.test;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.model.Branding;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Country;
@@ -51,6 +50,7 @@ import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IStore;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
+import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
 import junit.framework.Assert;
@@ -121,7 +121,7 @@ public class ModelTest {
         Assert.assertTrue(obj.same(jsonObj));
 
         try {
-            jObj.put(JsonKeys.DESCRIPTION, "not-pizza");
+            jObj.put(SgnJson.DESCRIPTION, "not-pizza");
         } catch (JSONException e) {
             // ignore
         }
@@ -167,7 +167,7 @@ public class ModelTest {
         Assert.assertTrue(obj.same(jsonObj));
 
         try {
-            jObj.put(JsonKeys.NAME, "not bents list anymore");
+            jObj.put(SgnJson.NAME, "not bents list anymore");
         } catch (JSONException e) {
             // ignore
         }
@@ -196,7 +196,7 @@ public class ModelTest {
         Assert.assertEquals(obj, jsonObj);
 
         try {
-            jObj.put(JsonKeys.TOKEN, "new-fake-token");
+            jObj.put(SgnJson.TOKEN, "new-fake-token");
         } catch (JSONException e) {
             // ignore
         }
@@ -230,7 +230,7 @@ public class ModelTest {
         Dealer jsonObj = Dealer.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.NAME, "bentes frisør salon");
+            jObj.put(SgnJson.NAME, "bentes frisør salon");
         } catch (JSONException e) {
             // ignore
         }
@@ -271,7 +271,7 @@ public class ModelTest {
         Assert.assertEquals(obj, jsonObj);
 
         try {
-            jObj.put(JsonKeys.OFFER_COUNT, 0);
+            jObj.put(SgnJson.OFFER_COUNT, 0);
         } catch (JSONException e) {
             // ignore
         }
@@ -307,7 +307,7 @@ public class ModelTest {
         Store jsonObj = Store.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.STREET, "fake-street-new");
+            jObj.put(SgnJson.STREET, "fake-street-new");
         } catch (JSONException e) {
             // ignore
         }
@@ -341,7 +341,7 @@ public class ModelTest {
         Country jsonObj = Country.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.ID, "US");
+            jObj.put(SgnJson.ID, "US");
         } catch (JSONException e) {
             // ignore
         }
@@ -373,7 +373,7 @@ public class ModelTest {
         Assert.assertNull(Share.fromJSON((JSONObject)null));
         JSONObject jObj = obj.toJSON();
         try {
-            jObj.put(JsonKeys.EMAIL, "fake-wrong-email@nomail.org");
+            jObj.put(SgnJson.EMAIL, "fake-wrong-email@nomail.org");
         } catch (JSONException e) {
             // ignore
         }
@@ -406,7 +406,7 @@ public class ModelTest {
         User jsonObj = User.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.GENDER, "male");
+            jObj.put(SgnJson.GENDER, "male");
         } catch (JSONException e) {
             // ignore
         }
@@ -437,7 +437,7 @@ public class ModelTest {
         Branding jsonObj = Branding.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.NAME, "fake-branding-name-new");
+            jObj.put(SgnJson.NAME, "fake-branding-name-new");
         } catch (JSONException e) {
             // ignore
         }
@@ -465,7 +465,7 @@ public class ModelTest {
         Dimension jsonObj = Dimension.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.HEIGHT, 2.0d);
+            jObj.put(SgnJson.HEIGHT, 2.0d);
         } catch (JSONException e) {
             // ignore
         }
@@ -494,7 +494,7 @@ public class ModelTest {
 //        Hotspot jsonObj = Hotspot.fromJSON(jObj);
 //        Assert.assertEquals(obj, jsonObj);
 //        try {
-//            jObj.put(JsonKeys.LOGO, "fake-logo-url-new");
+//            jObj.put(SgnJson.LOGO, "fake-logo-url-new");
 //        } catch (JSONException e) {
 //        }
 //        jsonObj = Hotspot.fromJSON(jObj);
@@ -545,7 +545,7 @@ public class ModelTest {
         Pageflip jsonObj = Pageflip.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.LOGO, "fake-logo-url-new");
+            jObj.put(SgnJson.LOGO, "fake-logo-url-new");
         } catch (JSONException e) {
             // ignore
         }
@@ -595,7 +595,7 @@ public class ModelTest {
         Typeahead jsonObj = Typeahead.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.SUBJECT, "fake-subject-new");
+            jObj.put(SgnJson.SUBJECT, "fake-subject-new");
         } catch (JSONException e) {
             // ignore
         }
@@ -623,7 +623,7 @@ public class ModelTest {
         Subscription jsonObj = Subscription.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.DEALER_ID, "fake-dealer-new");
+            jObj.put(SgnJson.DEALER_ID, "fake-dealer-new");
         } catch (JSONException e) {
             // ignore
         }
@@ -651,7 +651,7 @@ public class ModelTest {
         Pricing jsonObj = Pricing.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.PRICE, Double.MAX_VALUE);
+            jObj.put(SgnJson.PRICE, Double.MAX_VALUE);
         } catch (JSONException e) {
             // ignore
         }
@@ -680,7 +680,7 @@ public class ModelTest {
         Links jsonObj = Links.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.WEBSHOP, "not fake-id");
+            jObj.put(SgnJson.WEBSHOP, "not fake-id");
         } catch (JSONException e) {
             // ignore
         }
@@ -710,7 +710,7 @@ public class ModelTest {
         Images jsonObj = Images.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.VIEW, "not fake-id");
+            jObj.put(SgnJson.VIEW, "not fake-id");
         } catch (JSONException e) {
             // ignore
         }
@@ -738,7 +738,7 @@ public class ModelTest {
         Si jsonObj = Si.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.SYMBOL, "not foobar");
+            jObj.put(SgnJson.SYMBOL, "not foobar");
         } catch (JSONException e) {
             // ignore
         }
@@ -766,7 +766,7 @@ public class ModelTest {
         Unit jsonObj = Unit.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.SYMBOL, "not foobar");
+            jObj.put(SgnJson.SYMBOL, "not foobar");
         } catch (JSONException e) {
             // ignore
         }
@@ -794,7 +794,7 @@ public class ModelTest {
         Pieces jsonObj = Pieces.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.TO, "4.0");
+            jObj.put(SgnJson.TO, "4.0");
         } catch (JSONException e) {
             // ignore
         }
@@ -822,7 +822,7 @@ public class ModelTest {
         Size jsonObj = Size.fromJSON(jObj);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jObj.put(JsonKeys.TO, "4.0");
+            jObj.put(SgnJson.TO, "4.0");
         } catch (JSONException e) {
             // ignore
         }
@@ -876,7 +876,7 @@ public class ModelTest {
         Offer jsonObj = Offer.fromJSON(jOffer);
         Assert.assertEquals(obj, jsonObj);
         try {
-            jOffer.put(JsonKeys.HEADING, "Not an offer heading");
+            jOffer.put(SgnJson.HEADING, "Not an offer heading");
         } catch (JSONException e) {
             // ignore
         }

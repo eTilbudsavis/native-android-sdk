@@ -18,11 +18,9 @@ package com.shopgun.android.sdk.log;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.utils.Json;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.Date;
@@ -135,18 +133,18 @@ public class Event {
      * @return A JSONObject
      */
     public JSONObject toJSON(boolean rawTime) {
-        JSONObject o = new JSONObject();
-        try {
-            o.put("timestamp", (rawTime ? mTime : Utils.dateToString(new Date(mTime))));
-            o.put("type", Json.nullCheck(mType));
-            o.put("token", Json.nullCheck(mSessionToken));
-            o.put("userid", Json.nullCheck(mUserErn));
-            o.put("name", Json.nullCheck(mName));
-            o.put("data", Json.nullCheck(mData));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, null, e);
+        SgnJson o = new SgnJson();
+        if (rawTime) {
+            o.put("timestamp", mTime);
+        } else {
+            o.putDate("timestamp", new Date(mTime));
         }
-        return o;
+        o.put("type", mType);
+        o.put("token", mSessionToken);
+        o.put("userid", mUserErn);
+        o.put("name", mName);
+        o.put("data", mData);
+        return o.toJSON();
     }
 
     /**

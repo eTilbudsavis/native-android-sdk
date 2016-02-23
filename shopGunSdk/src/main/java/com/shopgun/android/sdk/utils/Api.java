@@ -17,7 +17,6 @@
 package com.shopgun.android.sdk.utils;
 
 import com.shopgun.android.sdk.api.Endpoints;
-import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.api.MetaKeys;
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.api.SortBy;
@@ -39,13 +38,6 @@ public final class Api {
      * @deprecated Use {@link com.shopgun.android.sdk.api.Endpoints}
      */
     public static class Endpoint extends Endpoints {
-
-    }
-
-    /**
-     * @deprecated Use {@link com.shopgun.android.sdk.api.JsonKeys}
-     */
-    public class JsonKey extends JsonKeys {
 
     }
 

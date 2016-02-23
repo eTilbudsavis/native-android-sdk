@@ -20,9 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
@@ -110,7 +108,7 @@ public class Subscription implements IJson<JSONObject>, Parcelable {
     public static List<Subscription> fromJSON(JSONArray array) {
         List<Subscription> list = new ArrayList<Subscription>();
         for (int i = 0; i < array.length(); i++) {
-            JSONObject o = Json.getObject(array, i);
+            JSONObject o = array.optJSONObject(i);
             if (o != null) {
                 list.add(Subscription.fromJSON(o));
             }
@@ -221,10 +219,10 @@ public class Subscription implements IJson<JSONObject>, Parcelable {
 
     public String toString() {
         JSONObject o = toJSON();
-        o.remove(JsonKeys.SDK_DEALER);
         if (mDealer != null) {
             try {
-                o.put(JsonKeys.SDK_DEALER, mDealer.getName());
+                o.remove(SgnJson.DEALER);
+                o.put(SgnJson.DEALER, mDealer.getName());
             } catch (JSONException e) {
                 // ignore
             }

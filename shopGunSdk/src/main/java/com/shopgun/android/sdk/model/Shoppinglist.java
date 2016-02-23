@@ -25,7 +25,6 @@ import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
-import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
@@ -131,8 +130,8 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
         this.mModified = tmpMModified == -1 ? null : new Date(tmpMModified);
         this.mPrevId = in.readString();
         this.mType = in.readString();
-        String json = in.readString();
         try {
+            String json = in.readString();
             this.mMeta = new JSONObject(json);
         } catch (JSONException e) {
             this.mMeta = new JSONObject();
@@ -165,7 +164,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
     public static ArrayList<Shoppinglist> fromJSON(JSONArray array) {
         ArrayList<Shoppinglist> list = new ArrayList<Shoppinglist>();
         for (int i = 0; i < array.length(); i++) {
-            JSONObject o = Json.getObject(array, i);
+            JSONObject o = array.optJSONObject(i);
             if (o != null) {
                 list.add(Shoppinglist.fromJSON(o));
             }
@@ -504,7 +503,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      * @return A theme id. If no id have been set it returns 'default'.
      */
     public String getTheme() {
-        return Json.valueOf(getMeta(), MetaKeys.THEME, "default");
+        return getMeta().optString(MetaKeys.THEME, "default");
     }
 
     /**
@@ -608,7 +607,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
         if (mMeta == null) {
             if (other.mMeta != null)
                 return false;
-        } else if (!Json.jsonObjectEquals(mMeta, other.mMeta))
+        } else if (!SgnJson.jsonObjectEquals(mMeta, other.mMeta))
             return false;
 
         if (modified) {
@@ -662,7 +661,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
         int result = 1;
         result = prime * result + ((mAccess == null) ? 0 : mAccess.hashCode());
         result = prime * result + ((mErn == null) ? 0 : mErn.hashCode());
-        result = prime * result + Json.jsonObjectHashCode(mMeta);
+        result = prime * result + SgnJson.jsonObjectHashCode(mMeta);
         result = prime * result
                 + ((mModified == null) ? 0 : mModified.hashCode());
         result = prime * result + ((mName == null) ? 0 : mName.hashCode());

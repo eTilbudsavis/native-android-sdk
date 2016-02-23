@@ -50,10 +50,13 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -185,10 +188,10 @@ public class SgnJson {
     }
 
     /**
-     * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@link Double#NaN}.
+     * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code 0.0d}.
      */
     public double getDouble(String key) {
-        return getDouble(key, Double.NaN);
+        return getDouble(key, 0.0d);
     }
 
     /**
@@ -197,6 +200,20 @@ public class SgnJson {
     public double getDouble(String key, double defValue) {
         mStats.logKey(key);
         return mObject.optDouble(key, defValue);
+    }
+
+    /**
+     * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code 0.0d}.
+     */
+    public float getFloat(String key) {
+        return getFloat(key, 0.0f);
+    }
+
+    /**
+     * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
+     */
+    public float getFloat(String key, float defValue) {
+        return (float) mObject.optDouble(key, defValue);
     }
 
     /**
@@ -1180,6 +1197,16 @@ public class SgnJson {
     }
 
     public static final String ACCEPTED = "accepted";
+
+    public boolean getAccepted() {
+        return getBoolean(ACCEPTED);
+    }
+
+    public SgnJson setAccepted(boolean value) {
+        put(ACCEPTED, value);
+        return this;
+    }
+
     public static final String SYMBOL = "symbol";
 
     public String getSymbol() {
@@ -1636,6 +1663,214 @@ public class SgnJson {
                 SgnLog.d(tag, text.trim());
             }
         }
+
+    }
+
+    /**
+     * Method for generating a consistent HashCode for a given JSONArray
+     * @param a A JSONArray
+     * @return A hashCode
+     */
+    public static int jsonArrayHashCode(JSONArray a) {
+        try {
+            return jsonArrayHashCodeInternal(a);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return a.hashCode();
+        }
+    }
+
+    private static int jsonArrayHashCodeInternal(JSONArray a) throws JSONException {
+        if (a == null) {
+            return 0;
+        }
+        final int prime = 31;
+        int result = 1;
+        for (int i = 0; i < a.length(); i++) {
+            Object o = a.get(i);
+            int hash = 0;
+            if (o instanceof JSONObject) {
+                hash = jsonObjectHashCode((JSONObject) o);
+            } else if (o instanceof JSONArray) {
+                hash = jsonArrayHashCode((JSONArray) o);
+            } else {
+                hash = (o == null) ? 0 : o.hashCode();
+            }
+            result = prime * result + hash;
+        }
+        return result;
+    }
+
+    /**
+     * Method for determining equality in two JSONArray's
+     * @param one A JSONArray
+     * @param two A JSONArray
+     * @return true if they are equal, else false
+     */
+    public static boolean jsonArrayEquals(JSONArray one, JSONArray two) {
+        try {
+            return jsonEqualsInternal(one, two);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private static boolean jsonEqualsInternal(JSONArray one, JSONArray two) throws JSONException {
+
+        if (one == null || two == null) {
+            return one == two;
+        }
+        if (one.length() != two.length()) {
+            return false;
+        }
+
+        // Set of elements that have been comparedand found equal
+        // and therefore cannot be used again
+        Set<Integer> used = new HashSet<Integer>(two.length());
+
+        // bubble sort check for equals isn't very efficient
+        outerloop:
+        for (int i = 0; i < one.length(); i++) {
+
+            Object objOne = one.isNull(i) ? null : one.get(i);
+
+            for (int j = 0; j < two.length(); j++) {
+
+                if (used.contains(i)) {
+                    continue;
+                }
+
+                Object objTwo = two.isNull(j) ? null : two.get(j);
+
+                if (objOne == null || objTwo == null) {
+                    if (objOne == objTwo) {
+                        // both null, just continue
+                        used.add(j);
+                        continue outerloop;
+                    } else {
+                        return false;
+                    }
+                }
+
+                if (isEqualJson(objOne, objTwo)) {
+                    used.add(j);
+                    continue outerloop;
+                }
+
+            }
+            // we'll only reach this if there wasn't a match/mismatch in the above loop
+            return false;
+
+        }
+        return true;
+    }
+
+    /**
+     * Method for generating a consistent HashCode for a given JSONObject
+     * @param o A JSONObject
+     * @return A hashCode
+     */
+    public static int jsonObjectHashCode(JSONObject o) {
+        try {
+            return jsonObjectHashCodeInternal(o);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return o.hashCode();
+        }
+    }
+
+    private static int jsonObjectHashCodeInternal(JSONObject o) throws JSONException {
+        if (o == null) {
+            return 0;
+        }
+        List<String> keys = new ArrayList<String>();
+        Iterator<String> it = o.keys();
+        while (it.hasNext()) {
+            keys.add(it.next());
+        }
+        Collections.sort(keys);
+        StringBuilder sb = new StringBuilder();
+
+        final int prime = 31;
+        int result = 1;
+
+        for (String key : keys) {
+            Object tmp = o.get(key);
+            if (tmp instanceof JSONObject) {
+                result = prime * result + jsonObjectHashCode((JSONObject) tmp);
+            } else if (tmp instanceof JSONArray) {
+                result = prime * result + jsonArrayHashCode((JSONArray) tmp);
+            } else {
+                sb.append(key).append(tmp);
+            }
+        }
+        result = prime * result + sb.toString().hashCode();
+        return result;
+    }
+
+    /**
+     * Method for determining equality in two JSONObject's
+     * @param one A JSONObject
+     * @param two A JSONObject
+     * @return true if they are equal, else false
+     */
+    public static boolean jsonObjectEquals(JSONObject one, JSONObject two) {
+        try {
+            return jsonEqualsInternal(one, two);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private static boolean jsonEqualsInternal(JSONObject one, JSONObject two) throws JSONException {
+        if (one == null || two == null) {
+            return one == two;
+        }
+        if (one.length() != two.length()) {
+            return false;
+        }
+
+        Iterator<String> it = one.keys();
+        while (it.hasNext()) {
+            String key = it.next();
+            if (!two.has(key)) {
+                return false;
+            }
+
+            Object objOne = one.isNull(key) ? null : one.get(key);
+            Object objTwo = two.isNull(key) ? null : two.get(key);
+
+            if (objOne == null || objTwo == null) {
+                if (objOne == objTwo) {
+                    // both null, just continue
+                    continue;
+                } else {
+                    return false;
+                }
+            }
+
+            if (!isEqualJson(objOne, objTwo)) {
+                return false;
+            }
+
+        }
+
+        return true;
+    }
+
+    private static boolean isEqualJson(Object one, Object two) {
+
+        if (one instanceof JSONObject) {
+            return (two instanceof JSONObject) && jsonObjectEquals((JSONObject) one, (JSONObject) two);
+        }
+
+        if (one instanceof JSONArray) {
+            return (two instanceof JSONArray) && jsonArrayEquals((JSONArray) one, (JSONArray) two);
+        }
+
+        return one.equals(two);
 
     }
 

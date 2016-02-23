@@ -30,8 +30,8 @@ import com.shopgun.android.sdk.network.Request.Priority;
 import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
-import com.shopgun.android.sdk.utils.Api;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
+import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONObject;
@@ -161,7 +161,7 @@ public class SessionManager {
         synchronized (LOCK) {
             r.setPriority(Priority.HIGH);
             if (mSession.getClientId() != null) {
-                r.getParameters().put(Api.JsonKey.CLIENT_ID, mSession.getClientId());
+                r.getParameters().put(SgnJson.CLIENT_ID, mSession.getClientId());
             }
 //			r.setDebugger(new NetworkDebugger());
             mSessionQueue.add(r);

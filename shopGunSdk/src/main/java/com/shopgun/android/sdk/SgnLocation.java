@@ -23,11 +23,9 @@ import android.os.Parcelable;
 import android.support.annotation.IntRange;
 
 import com.shopgun.android.sdk.api.Parameters;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Store;
-import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class SgnLocation extends Location {
@@ -36,7 +34,7 @@ public class SgnLocation extends Location {
     public static final int RADIUS_MIN = 0;
     public static final int RADIUS_MAX = 700000;
     public static final int DEFAULT_RADIUS = 100000;
-    public static final double DEFAULT_COORDINATE = 0.0d;
+
     @SuppressWarnings("unused")
     public static final Parcelable.Creator<SgnLocation> CREATOR = new Parcelable.Creator<SgnLocation>() {
         @Override
@@ -56,10 +54,10 @@ public class SgnLocation extends Location {
     private int mRadius = DEFAULT_RADIUS;
     private boolean mSensor = false;
     private String mAddress = null;
-    private double mBoundNorth = DEFAULT_COORDINATE;
-    private double mBoundEast = DEFAULT_COORDINATE;
-    private double mBoundSouth = DEFAULT_COORDINATE;
-    private double mBoundWest = DEFAULT_COORDINATE;
+    private double mBoundNorth = 0.0d;
+    private double mBoundEast = 0.0d;
+    private double mBoundSouth = 0.0d;
+    private double mBoundWest = 0.0d;
 
     public SgnLocation() {
         super(SHOPGUN_PROVIDER);
@@ -70,26 +68,27 @@ public class SgnLocation extends Location {
         set(l);
     }
 
-    public static SgnLocation fromJSON(JSONObject o) {
+    public static SgnLocation fromJSON(JSONObject object) {
         SgnLocation l = new SgnLocation();
-        if (o == null) {
+        if (object == null) {
             return l;
         }
-        l.setAccuracy(Json.valueOf(o, Parameters.ACCURACY, l.getAccuracy()));
-        l.setAddress(Json.valueOf(o, Parameters.ADDRESS, l.getAddress()));
-        l.setAltitude(Json.valueOf(o, Parameters.ALTITUDE, l.getAltitude()));
-        l.setBearing(Json.valueOf(o, Parameters.BEARING, l.getBearing()));
-        l.setLatitude(Json.valueOf(o, Parameters.LATITUDE, l.getLatitude()));
-        l.setLongitude(Json.valueOf(o, Parameters.LONGITUDE, l.getLongitude()));
-        l.setProvider(Json.valueOf(o, Parameters.PROVIDER, l.getProvider()));
-        l.setRadius(Json.valueOf(o, Parameters.RADIUS, DEFAULT_RADIUS));
-        l.setSpeed(Json.valueOf(o, Parameters.SPEED, l.getSpeed()));
-        l.setTime(Json.valueOf(o, Parameters.TIME, l.getTime()));
-        l.setSensor(Json.valueOf(o, Parameters.SENSOR, false));
-        double east = Json.valueOf(o, Parameters.BOUND_EAST, DEFAULT_COORDINATE);
-        double west = Json.valueOf(o, Parameters.BOUND_WEST, DEFAULT_COORDINATE);
-        double north = Json.valueOf(o, Parameters.BOUND_NORTH, DEFAULT_COORDINATE);
-        double south = Json.valueOf(o, Parameters.BOUND_SOUTH, DEFAULT_COORDINATE);
+        SgnJson o = new SgnJson(object);
+        l.setAccuracy(o.getFloat(Parameters.ACCURACY));
+        l.setAddress(o.getString(Parameters.ADDRESS));
+        l.setAltitude(o.getDouble(Parameters.ALTITUDE));
+        l.setBearing(o.getFloat(Parameters.BEARING));
+        l.setLatitude(o.getDouble(Parameters.LATITUDE));
+        l.setLongitude(o.getDouble(Parameters.LONGITUDE));
+        l.setProvider(o.getString(Parameters.PROVIDER, SHOPGUN_PROVIDER));
+        l.setRadius(o.getInt(Parameters.RADIUS, DEFAULT_RADIUS));
+        l.setSpeed(o.getFloat(Parameters.SPEED));
+        l.setTime(o.getLong(Parameters.TIME));
+        l.setSensor(o.getBoolean(Parameters.SENSOR));
+        double east = o.getDouble(Parameters.BOUND_EAST);
+        double west = o.getDouble(Parameters.BOUND_WEST);
+        double north = o.getDouble(Parameters.BOUND_NORTH);
+        double south = o.getDouble(Parameters.BOUND_SOUTH);
         l.setBounds(north, east, south, west);
         return l;
     }
@@ -154,29 +153,25 @@ public class SgnLocation extends Location {
      * @return The mapped JSONObject
      */
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(Parameters.ACCURACY, getAccuracy());
-            o.put(Parameters.ADDRESS, getAddress());
-            o.put(Parameters.ALTITUDE, getAltitude());
-            o.put(Parameters.BEARING, getBearing());
-            o.put(Parameters.LATITUDE, getLatitude());
-            o.put(Parameters.LONGITUDE, getLongitude());
-            o.put(Parameters.PROVIDER, getProvider());
-            o.put(Parameters.RADIUS, getRadius());
-            o.put(Parameters.SPEED, getSpeed());
-            o.put(Parameters.TIME, getTime());
-            o.put(Parameters.SENSOR, isSensor());
-            if (isBoundsSet()) {
-                o.put(Parameters.BOUND_EAST, getBoundEast());
-                o.put(Parameters.BOUND_NORTH, getBoundNorth());
-                o.put(Parameters.BOUND_SOUTH, getBoundSouth());
-                o.put(Parameters.BOUND_WEST, getBoundWest());
-            }
-        } catch (JSONException e) {
-            SgnLog.e(TAG, null, e);
+        SgnJson o = new SgnJson();
+        o.put(Parameters.ACCURACY, getAccuracy());
+        o.put(Parameters.ADDRESS, getAddress());
+        o.put(Parameters.ALTITUDE, getAltitude());
+        o.put(Parameters.BEARING, getBearing());
+        o.put(Parameters.LATITUDE, getLatitude());
+        o.put(Parameters.LONGITUDE, getLongitude());
+        o.put(Parameters.PROVIDER, getProvider());
+        o.put(Parameters.RADIUS, getRadius());
+        o.put(Parameters.SPEED, getSpeed());
+        o.put(Parameters.TIME, getTime());
+        o.put(Parameters.SENSOR, isSensor());
+        if (isBoundsSet()) {
+            o.put(Parameters.BOUND_EAST, getBoundEast());
+            o.put(Parameters.BOUND_NORTH, getBoundNorth());
+            o.put(Parameters.BOUND_SOUTH, getBoundSouth());
+            o.put(Parameters.BOUND_WEST, getBoundWest());
         }
-        return o;
+        return o.toJSON();
     }
 
     /**
@@ -294,10 +289,10 @@ public class SgnLocation extends Location {
     }
 
     public boolean isBoundsSet() {
-        return (mBoundNorth != DEFAULT_COORDINATE &&
-                mBoundSouth != DEFAULT_COORDINATE &&
-                mBoundEast != DEFAULT_COORDINATE &&
-                mBoundWest != DEFAULT_COORDINATE);
+        return (mBoundNorth != 0.0d &&
+                mBoundSouth != 0.0d &&
+                mBoundEast != 0.0d &&
+                mBoundWest != 0.0d);
     }
 
     /**
@@ -356,16 +351,16 @@ public class SgnLocation extends Location {
         super.setAltitude(0.0d);
         super.setBearing(0.0f);
         super.setExtras(null);
-        super.setLatitude(DEFAULT_COORDINATE);
-        super.setLongitude(DEFAULT_COORDINATE);
+        super.setLatitude(0.0d);
+        super.setLongitude(0.0d);
         super.setProvider(SHOPGUN_PROVIDER);
         super.setSpeed(0.0f);
         setTimeNow();
         mAddress = null;
-        mBoundEast = DEFAULT_COORDINATE;
-        mBoundNorth = DEFAULT_COORDINATE;
-        mBoundSouth = DEFAULT_COORDINATE;
-        mBoundWest = DEFAULT_COORDINATE;
+        mBoundEast = 0.0d;
+        mBoundNorth = 0.0d;
+        mBoundSouth = 0.0d;
+        mBoundWest = 0.0d;
         mRadius = DEFAULT_RADIUS;
         mSensor = false;
     }

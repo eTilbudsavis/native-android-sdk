@@ -20,13 +20,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -53,7 +50,7 @@ public class Pricing implements IJson<JSONObject>, Parcelable {
     public static List<Pricing> fromJSON(JSONArray array) {
         List<Pricing> list = new ArrayList<Pricing>();
         for (int i = 0; i < array.length(); i++) {
-            JSONObject o = Json.getObject(array, i);
+            JSONObject o = array.optJSONObject(i);
             if (o != null) {
                 list.add(Pricing.fromJSON(o));
             }
@@ -71,27 +68,23 @@ public class Pricing implements IJson<JSONObject>, Parcelable {
             return null;
         }
 
-        Pricing p = new Pricing();
-        p.setPrice(Json.valueOf(object, JsonKeys.PRICE, 1.0d));
-        try {
-            p.setPrePrice(object.isNull(JsonKeys.PREPRICE) ? null : object.getDouble(JsonKeys.PREPRICE));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, e.getMessage(), e);
-        }
-        p.setCurrency(Json.valueOf(object, JsonKeys.CURRENCY));
+        SgnJson o = new SgnJson(object);
+        Pricing p = new Pricing()
+                .setPrice(o.getPrice())
+                .setPrePrice(o.getPrePrice())
+                .setCurrency(o.getCurrency());
+
+        o.getStats().log(TAG);
+
         return p;
     }
 
     public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put(JsonKeys.PRICE, getPrice());
-            o.put(JsonKeys.PREPRICE, Json.nullCheck(getPrePrice()));
-            o.put(JsonKeys.CURRENCY, Json.nullCheck(getCurrency().getCurrencyCode()));
-        } catch (JSONException e) {
-            SgnLog.e(TAG, "", e);
-        }
-        return o;
+        return new SgnJson()
+                .setPrice(getPrice())
+                .setPrePrice(getPrePrice())
+                .setCurrency(getCurrency().getCurrencyCode())
+                .toJSON();
     }
 
     public double getPrice() {
@@ -148,6 +141,10 @@ public class Pricing implements IJson<JSONObject>, Parcelable {
         // API v1 had a null issue, we'll default to DKK
         mCurrency = currency==null ? Currency.getInstance("DKK") : currency;
         return this;
+    }
+
+    public boolean hasPrePrice() {
+        return mPrePrice != null;
     }
 
     @Override

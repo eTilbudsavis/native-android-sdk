@@ -21,7 +21,6 @@ import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
@@ -62,7 +61,7 @@ public class Pieces implements IJson<JSONObject>, Parcelable {
     public static List<Pieces> fromJSON(JSONArray array) {
         List<Pieces> list = new ArrayList<Pieces>();
         for (int i = 0; i < array.length(); i++) {
-            JSONObject o = Json.getObject(array, i);
+            JSONObject o = array.optJSONObject(i);
             if (o != null) {
                 list.add(Pieces.fromJSON(o));
             }

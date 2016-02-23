@@ -25,9 +25,7 @@ import android.os.Parcelable;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.utils.Api;
-import com.shopgun.android.sdk.utils.Api.JsonKey;
-import com.shopgun.android.sdk.utils.Json;
+import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
@@ -61,29 +59,26 @@ public class HotspotMap implements IJson<JSONArray>,Parcelable {
         return mMap.get(page);
     }
 
-    public static HotspotMap fromJSON(Dimension d, JSONArray jHotspots) {
+    public static HotspotMap fromJSON(Dimension d, JSONArray hotspots) {
 
         HotspotMap map = new HotspotMap();
-        if (jHotspots == null) {
+        if (hotspots == null) {
             return map;
         }
 
-        for (int i = 0; i < jHotspots.length(); i++) {
+        for (int i = 0; i < hotspots.length(); i++) {
+            JSONObject hotspot = hotspots.optJSONObject(i);
+            String type = hotspot.optString(SgnJson.TYPE, null);
+            // We all know that someone is going to introduce a new type at some point, so might as well check now
+            if (TYPE_OFFER.equals(type)) {
 
-            try {
-
-                JSONObject jHotspot = jHotspots.getJSONObject(i);
-
-                String type = Json.valueOf(jHotspot, JsonKey.TYPE, null);
-                // We all know that someone is going to introduce a new type at some point, so might as well check now
-                if (TYPE_OFFER.equals(type)) {
-
-                    JSONObject offer = jHotspot.getJSONObject(Api.JsonKey.OFFER);
+                try {
+                    JSONObject offer = hotspot.getJSONObject(SgnJson.OFFER);
                     Offer o = Offer.fromJSON(offer);
 
                     int color = mRectColors[i % mRectColors.length];
 
-                    JSONObject rectangleList = jHotspot.getJSONObject(Api.JsonKey.LOCATIONS);
+                    JSONObject rectangleList = hotspot.getJSONObject(SgnJson.LOCATIONS);
 
                     List<String> keys = Utils.copyIterator(rectangleList.keys());
 
@@ -106,11 +101,12 @@ public class HotspotMap implements IJson<JSONArray>,Parcelable {
                         map.get(page).add(h);
 
                     }
+                } catch (JSONException e) {
+                    SgnLog.e(TAG, e.getMessage(), e);
                 }
 
-            } catch (JSONException e) {
-                SgnLog.e(TAG, e.getMessage(), e);
             }
+
         }
 
         map.normalize(d);

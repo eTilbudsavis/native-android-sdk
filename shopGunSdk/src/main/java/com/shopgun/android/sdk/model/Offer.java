@@ -20,13 +20,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.api.JsonKeys;
 import com.shopgun.android.sdk.model.interfaces.ICatalog;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.IStore;
-import com.shopgun.android.sdk.utils.Json;
 import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.Utils;
 
@@ -115,7 +113,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
     public static List<Offer> fromJSON(JSONArray array) {
         List<Offer> list = new ArrayList<Offer>();
         for (int i = 0; i < array.length(); i++) {
-            JSONObject o = Json.getObject(array, i);
+            JSONObject o = array.optJSONObject(i);
             if (o != null) {
                 list.add(Offer.fromJSON(o));
             }
@@ -164,13 +162,29 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         offer.mStore = o.getStore();
         offer.mCatalog = o.getCatalog();
 
-        o.getStats().ignoreRejectedKeys(SgnJson.DEALER, SgnJson.STORE, SgnJson.CATALOG).log(TAG);
+        if (!isFullOffer(object)) {
+            o.getStats().ignoreRejectedKeys(
+                    "catalog_page",
+                    "description",
+                    "images",
+                    "links",
+                    "dealer_url",
+                    "dealer_id",
+                    "store_url",
+                    "store_id",
+                    "catalog_url",
+                    "catalog_id",
+                    "category_ids",
+                    "branding");
+        }
+
+        o.getStats().ignoreForgottenKeys("publish").ignoreRejectedKeys(SgnJson.DEALER, SgnJson.STORE, SgnJson.CATALOG).log(TAG);
 
         return offer;
     }
 
     private static boolean isFullOffer(JSONObject object) {
-        return object.has(JsonKeys.DESCRIPTION) && object.has(JsonKeys.CATALOG_ID);
+        return object.has(SgnJson.DESCRIPTION) && object.has(SgnJson.CATALOG_ID);
     }
 
     public JSONObject toJSON() {
