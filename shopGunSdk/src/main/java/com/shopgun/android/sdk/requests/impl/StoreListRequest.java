@@ -32,7 +32,7 @@ public class StoreListRequest extends ModelListRequest<List<Store>> {
     public static final String TAG = Constants.getTag(StoreListRequest.class);
 
     public StoreListRequest(LoaderRequest.Listener<List<Store>> listener) {
-        this(new StoreListLoaderRequest(null, listener), listener);
+        this(new StoreListLoaderRequest(listener), listener);
     }
 
     public StoreListRequest(ModelListLoaderRequest<List<Store>> loaderRequest, LoaderRequest.Listener<List<Store>> listener) {
@@ -40,7 +40,7 @@ public class StoreListRequest extends ModelListRequest<List<Store>> {
     }
 
     public StoreListRequest(String url, LoaderRequest.Listener<List<Store>> listener) {
-        this(url, new StoreListLoaderRequest(null, listener), listener);
+        this(url, new StoreListLoaderRequest(listener), listener);
     }
 
     public StoreListRequest(String url, ModelListLoaderRequest<List<Store>> loaderRequest, LoaderRequest.Listener<List<Store>> listener) {

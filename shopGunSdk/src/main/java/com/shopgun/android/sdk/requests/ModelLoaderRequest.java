@@ -36,6 +36,10 @@ public class ModelLoaderRequest<T> extends LoaderRequest<T> {
     private boolean mHotspots = false;
     private boolean mCatalog = false;
 
+    public ModelLoaderRequest(Listener<T> l) {
+        super(l);
+    }
+
     public ModelLoaderRequest(T data, Listener<T> l) {
         super(data, l);
     }

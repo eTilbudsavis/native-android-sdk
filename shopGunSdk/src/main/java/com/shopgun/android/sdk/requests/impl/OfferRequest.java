@@ -29,7 +29,7 @@ public class OfferRequest extends ModelRequest<Offer> {
     public static final String TAG = Constants.getTag(OfferRequest.class);
 
     public OfferRequest(String offerId, LoaderRequest.Listener<Offer> listener) {
-        this(offerId, new OfferLoaderRequest(null, listener), listener);
+        this(offerId, new OfferLoaderRequest(listener), listener);
     }
 
     public OfferRequest(Offer offer, LoaderRequest.Listener<Offer> listener) {

@@ -24,6 +24,10 @@ public class StoreLoaderRequest extends ModelLoaderRequest<Store> {
 
     public static final String TAG = Constants.getTag(StoreLoaderRequest.class);
 
+    public StoreLoaderRequest(Listener<Store> listener) {
+        super(listener);
+    }
+
     public StoreLoaderRequest(Store s, Listener<Store> listener) {
         super(s, listener);
     }

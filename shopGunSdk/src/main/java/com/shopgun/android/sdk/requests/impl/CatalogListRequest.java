@@ -32,7 +32,7 @@ public class CatalogListRequest extends ModelListRequest<List<Catalog>> {
     public static final String TAG = Constants.getTag(CatalogListRequest.class);
 
     public CatalogListRequest(LoaderRequest.Listener<List<Catalog>> listener) {
-        this(new CatalogListLoaderRequest(null, listener), listener);
+        this(new CatalogListLoaderRequest(listener), listener);
     }
 
     public CatalogListRequest(ModelListLoaderRequest<List<Catalog>> loaderRequest, LoaderRequest.Listener<List<Catalog>> listener) {
@@ -40,7 +40,7 @@ public class CatalogListRequest extends ModelListRequest<List<Catalog>> {
     }
 
     public CatalogListRequest(String url, LoaderRequest.Listener<List<Catalog>> listener) {
-        this(url, new CatalogListLoaderRequest(null, listener), listener);
+        this(url, new CatalogListLoaderRequest(listener), listener);
     }
 
     public CatalogListRequest(String url, ModelListLoaderRequest<List<Catalog>> loaderRequest, LoaderRequest.Listener<List<Catalog>> listener) {

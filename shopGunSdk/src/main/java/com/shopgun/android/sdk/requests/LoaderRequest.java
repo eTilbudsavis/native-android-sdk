@@ -41,6 +41,10 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
     private final LoaderDelivery<T> mDelivery;
     private final Object LOCK = new Object();
 
+    public LoaderRequest(Listener<T> l) {
+        this(null, l);
+    }
+
     public LoaderRequest(T data, Listener<T> l) {
         super(Method.PUT, null, null);
         mData = data;

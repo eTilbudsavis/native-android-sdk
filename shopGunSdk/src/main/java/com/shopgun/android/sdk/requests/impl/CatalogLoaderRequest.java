@@ -24,6 +24,10 @@ public class CatalogLoaderRequest extends ModelLoaderRequest<Catalog> {
 
     public static final String TAG = Constants.getTag(CatalogLoaderRequest.class);
 
+    public CatalogLoaderRequest(Listener<Catalog> listener) {
+        super(listener);
+    }
+
     public CatalogLoaderRequest(Catalog c, Listener<Catalog> listener) {
         super(c, listener);
     }

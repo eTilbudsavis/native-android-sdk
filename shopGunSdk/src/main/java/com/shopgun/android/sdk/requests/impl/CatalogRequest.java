@@ -29,7 +29,7 @@ public class CatalogRequest extends ModelRequest<Catalog> {
     public static final String TAG = Constants.getTag(CatalogRequest.class);
 
     public CatalogRequest(String catalogId, LoaderRequest.Listener<Catalog> listener) {
-        this(catalogId, new CatalogLoaderRequest(null, listener), listener);
+        this(catalogId, new CatalogLoaderRequest(listener), listener);
     }
 
     public CatalogRequest(Catalog catalog, LoaderRequest.Listener<Catalog> listener) {

@@ -24,6 +24,10 @@ public class OfferLoaderRequest extends ModelLoaderRequest<Offer> {
 
     public static final String TAG = Constants.getTag(OfferLoaderRequest.class);
 
+    public OfferLoaderRequest(Listener<Offer> listener) {
+        super(listener);
+    }
+
     public OfferLoaderRequest(Offer o, Listener<Offer> listener) {
         super(o, listener);
     }

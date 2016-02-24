@@ -29,7 +29,7 @@ public class StoreRequest extends ModelRequest<Store> {
     public static final String TAG = Constants.getTag(StoreRequest.class);
 
     public StoreRequest(String storeId, LoaderRequest.Listener<Store> listener) {
-        this(storeId, new StoreLoaderRequest(null, listener), listener);
+        this(storeId, new StoreLoaderRequest(listener), listener);
     }
 
     public StoreRequest(Store store, LoaderRequest.Listener<Store> listener) {
