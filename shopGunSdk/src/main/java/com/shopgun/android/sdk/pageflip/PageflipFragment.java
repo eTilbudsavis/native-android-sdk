@@ -561,16 +561,13 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
 
         if (PageflipUtils.isCatalogReady(mCatalog)) {
 
-            SgnLog.d(TAG, "ensureCatalog.PageflipUtils.isCatalogReady");
             onRequestComplete(mCatalog, new ArrayList<ShopGunError>(0));
 
         } else {
 
             if (mCatalog != null) {
-                SgnLog.d(TAG, "ensureCatalog. catalog != null");
                 mCatalogRequest = new CatalogRequestCacheIgnore(mCatalog, this);
             } else {
-                SgnLog.d(TAG, "ensureCatalog. catalog == null");
                 mCatalogRequest = new CatalogRequestCacheIgnore(mCatalogId, this);
             }
             mCatalogRequest.loadHotspots(true);
