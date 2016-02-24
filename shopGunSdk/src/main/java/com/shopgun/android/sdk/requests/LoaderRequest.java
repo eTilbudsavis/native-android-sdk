@@ -79,15 +79,32 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
         }
         super.setDelivery(this);
         super.setRequestQueue(requestQueue);
-        runFillerRequests();
+
+        synchronized (LOCK) {
+            mRequests.addAll(createRequests(mData));
+
+            // RequestCreator-class unfortunately returns null, so we'll have to clean the list
+            for (Iterator<Request> it = mRequests.iterator(); it.hasNext();) {
+                if (it.next() == null) it.remove();
+            }
+
+            if (mRequests.isEmpty()) {
+                finish("loaderRequest-has-no-subRequests-to-perform");
+            } else {
+                for (Request r : mRequests) {
+                    applyState(r);
+                    getRequestQueue().add(r);
+                }
+            }
+        }
+
         super.cancel();
-        addEvent("cancelled-to-finish-on-cache-dispatcher");
         return this;
     }
 
     @Override
     public Request setDelivery(Delivery d) {
-        throw new RuntimeException(new IllegalAccessException("Custom delivery not possible"));
+        throw new IllegalStateException("Custom delivery not allowed for LoaderRequests");
     }
 
     @Override
@@ -105,26 +122,6 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
      * @return A list of Request
      */
     public abstract List<Request> createRequests(T data);
-
-    private void runFillerRequests() {
-        synchronized (LOCK) {
-            List<Request> tmp = createRequests(mData);
-            Iterator<Request> it = tmp.iterator();
-            while (it.hasNext()) {
-                Request r = it.next();
-                if (r==null) {
-                    it.remove();
-                }
-            }
-            mRequests.addAll(tmp);
-            if (!mRequests.isEmpty()) {
-                for (Request r : mRequests) {
-                    applyState(r);
-                    getRequestQueue().add(r);
-                }
-            }
-        }
-    }
 
     /**
      * Method for applying the current request state to the given request
@@ -148,6 +145,17 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
                 getRequestQueue().cancelAll(getTag());
             }
         }
+    }
+
+    @Override
+    public Request finish(String reason) {
+        if (super.isFinished()) {
+            // If no sub-requests was generated in setRequestQueue(RequestQueue),
+            // this LoaderRequest have already finished it self. But the CacheDispatcher
+            // will also call finish(String), so we'll just silence it.
+            return this;
+        }
+        return super.finish(reason);
     }
 
     @Override
