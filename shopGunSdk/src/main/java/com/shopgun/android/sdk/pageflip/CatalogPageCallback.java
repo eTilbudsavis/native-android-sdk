@@ -28,14 +28,6 @@ import java.util.List;
 public interface CatalogPageCallback {
 
     /**
-     * Called by a {@link PageflipFragment} when it's ready to display catalog pages. This is used
-     * to control events during configuration changes
-     *
-     * @param position The position of the
-     */
-    void onReady(int position);
-
-    /**
      * Called on a catalog page single-click
      * @param v The view clicked
      * @param page The page clicked. If displaying a two page layout, only the page clicked will be returned.

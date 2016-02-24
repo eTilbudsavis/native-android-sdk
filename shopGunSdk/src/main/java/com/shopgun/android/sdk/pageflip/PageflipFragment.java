@@ -25,6 +25,7 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
 import com.shopgun.android.sdk.Constants;
@@ -103,13 +104,6 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
     private Clock mClock = ClockFactory.getClock();
     private StatDelivery mStatsDelivery;
     private CatalogPageCallback mCatalogPageCallback = new CatalogPageCallback() {
-
-        public void onReady(int position) {
-            if (position == mCurrentPosition) {
-                getPage(position).onVisible();
-                mPagesReady = true;
-            }
-        }
 
         @Override
         public void onSingleClick(View v, int page, float x, float y, List<Hotspot> hotspots) {
@@ -306,6 +300,19 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
         mPager.setScrollDurationFactor(PAGER_SCROLL_FACTOR);
         mPager.addOnPageChangeListener(mOnPageChangeListener);
         mPager.setOnPageBound(mPageBoundListener);
+        mPager.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (mAdapter != null) {
+                    Fragment f = mAdapter.getItem(mCurrentPosition);
+                    if (f.isResumed()) {
+                        mPager.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                        ((PageflipPage)f).onVisible();
+                        mPagesReady = true;
+                    }
+                }
+            }
+        });
 
         if (mSavedInstanceState != null) {
             onRestoreState(mSavedInstanceState);
@@ -439,7 +446,7 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
      * @param position A position
      */
     public void setPosition(int position) {
-        if (mCurrentPosition >= 0) {
+        if (position >= 0) {
             mCurrentPosition = position;
             if (mPager != null) {
                 mPager.setCurrentItem(mCurrentPosition);
@@ -593,12 +600,15 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
                 setCatalog(response);
                 setBranding(mCatalog.getBranding());
 
-                applyAdapter();
+                int heap = Utils.getMaxHeap(getActivity());
+                mAdapter = new CatalogPagerAdapter(getChildFragmentManager(), heap, mCatalogPageCallback, mConfig);
+                mAdapter.setIntroFragment(mIntroFragment);
+                mAdapter.setOutroFragment(mOutroFragment);
+                mPager.setAdapter(mAdapter);
+                mPager.setCurrentItem(mCurrentPosition);
+                showContent(true);
+
                 mWrapperListener.onReady();
-                // force the first page change if needed
-                if (mPager.getCurrentItem() != mCurrentPosition) {
-                    mPager.setCurrentItem(mCurrentPosition);
-                }
                 mWrapperListener.onPageChange(mCurrentPosition, getPages());
 
             }
@@ -616,15 +626,6 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
                 setBranding(mCatalog.getBranding());
             }
         }
-    }
-
-    private void applyAdapter() {
-        int heap = Utils.getMaxHeap(getActivity());
-        mAdapter = new CatalogPagerAdapter(getChildFragmentManager(), heap, mCatalogPageCallback, mConfig);
-        mAdapter.setIntroFragment(mIntroFragment);
-        mAdapter.setOutroFragment(mOutroFragment);
-        mPager.setAdapter(mAdapter);
-        showContent(true);
     }
 
     @Override
@@ -694,11 +695,11 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
     }
 
     private Fragment getFragment(int position) {
-        return (Fragment) mAdapter.instantiateItem(mContainer, position);
+        return mAdapter.getItem(position);
     }
 
     private PageflipPage getPage(int position) {
-        return (PageflipPage) mAdapter.instantiateItem(mContainer, position);
+        return (PageflipPage) getFragment(position);
     }
 
     /**

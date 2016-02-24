@@ -37,11 +37,10 @@ public class CatalogPagerAdapter extends FragmentStatelessPagerAdapter {
         mMaxHeap = maxHeap;
         mCallback = callback;
         mConfig = config;
-//        SgnLog.d(TAG, toString());
     }
 
     @Override
-    public Fragment getItem(int position) {
+    public Fragment createItem(int position) {
         if (position == 0 && mIntro != null) {
             return mIntro;
         }

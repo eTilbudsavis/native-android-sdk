@@ -36,6 +36,12 @@ import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView;
 import com.shopgun.android.sdk.photoview.PhotoView;
 
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class CatalogPageFragment extends SgnFragment implements
         PhotoView.OnPhotoTapListener,
         PhotoView.OnPhotoDoubleClickListener,
@@ -89,17 +95,12 @@ public class CatalogPageFragment extends SgnFragment implements
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.shopgun_sdk_layout_page, container, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        View view = inflater.inflate(R.layout.shopgun_sdk_layout_page, container, false);
         mPhotoView = (ZoomPhotoView) view.findViewById(R.id.shopgun_sdk_layout_page_photoview);
         mLoader = (LoadingTextView) view.findViewById(R.id.shopgun_sdk_layout_page_pagenum);
         mPhotoView.setMaximumScale(MAX_SCALE);
-        mPhotoView.setOnZoomListener(this);
         toggleContentVisibility(true);
+        return view;
     }
 
     private void toggleContentVisibility(boolean isLoading) {
@@ -109,18 +110,14 @@ public class CatalogPageFragment extends SgnFragment implements
         mPhotoView.setVisibility(isLoading ? View.INVISIBLE : View.VISIBLE);
         mLoader.setVisibility(isLoading ? View.VISIBLE : View.INVISIBLE);
         if (isLoading) {
-            runLoader();
+            updateBranding();
+            mLoader.setLoadingText(PageflipUtils.join("-", mPages));
+            mLoader.start();
         }
     }
 
-    private void runLoader() {
-        updateBranding();
-        mLoader.setLoadingText(PageflipUtils.join("-", mPages));
-        mLoader.start();
-    }
-
     private void updateBranding() {
-        if (isAdded() && mCallback != null && mCallback.getCatalog() != null) {
+        if (isAdded() && mCallback.getCatalog() != null) {
             int brandingColor = mCallback.getCatalog().getBranding().getMaterialColor().getSecondaryText();
             mLoader.setTextColor(brandingColor);
         }
@@ -135,7 +132,7 @@ public class CatalogPageFragment extends SgnFragment implements
     }
 
     private boolean ensureLoader() {
-        if (mCallback != null && isAdded()) {
+        if (isAdded()) {
             if (mPageLoader == null) {
                 if (mConfig == null) {
                     mConfig = new PageLoader.Config(getActivity(), mPages, mCallback.getCatalog());
@@ -177,15 +174,9 @@ public class CatalogPageFragment extends SgnFragment implements
     public void onResume() {
         log("onResume");
         updateBranding();
-
         mPhotoView.setOnPhotoDoubleClickListener(this);
         mPhotoView.setOnPhotoLongClickListener(this);
         mPhotoView.setOnPhotoTapListener(this);
-
-        if (mCallback != null) {
-            mCallback.onReady(mPosition);
-        }
-
         loadView();
         super.onResume();
     }
@@ -198,12 +189,11 @@ public class CatalogPageFragment extends SgnFragment implements
         log("onVisible");
         if (mStats == null) {
             mStats = mCallback.getCollector(mPages);
-        } else {
-            SgnLog.d(TAG, "reusing a Collector, this shouldn't happen");
         }
         updateBranding();
         loadView();
         if (!mPageVisible && mPhotoView != null && mPhotoView.getBitmap() != null) {
+            mPhotoView.setOnZoomListener(this);
             // first start if the page is visible, and has a bitmap
             mStats.startView();
         }
@@ -212,26 +202,45 @@ public class CatalogPageFragment extends SgnFragment implements
 
     public void onInvisible() {
         log("onInvisible");
+        if (mPageVisible) {
+            // only collect stats if the page is visible, but why wouldn't it be?
+            mStats.collect();
+            verifyIntegrity();
+        }
         mPageVisible = false;
-        mStats.collect();
-        verifyIntegrity(mStats.getRootEvent());
         mStats = null;
     }
 
-    private void verifyIntegrity(PageEvent rootEvent) {
+    private void verifyIntegrity() {
 
-        if (rootEvent == null) {
-            // ignore, stats haven't been initialized yet
-            return;
-        }
+        AppLogEntry appLogEntry = new AppLogEntry(getShopgun(), "negative-duration", "android@shopgun.com");
 
-        if (rootEvent.getDuration() < 10) {
+        if (mStats.getRootEvent() == null) {
 
-            AppLogEntry entry = new AppLogEntry(getShopgun(), "negative-duration", "android@shopgun.com");
-            for (PageEvent subEvent : rootEvent.getSubEventsRecursive()) {
-                entry.addEvent(new Event(getShopgun(), "view-event").setData(subEvent.toDebugJSON()));
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("PageflipStatsCollector", mStats.toString());
+            map.put("debug", "Collector does not have eny events. " +
+                    "PageflipStatsCollector.startView(), have not been called");
+            Event event = new Event(getShopgun(), "page-stats-collector-event");
+            event.setData(new JSONObject(map));
+            appLogEntry.addEvent(event);
+            appLogEntry.post();
+
+        } else if (mStats.getRootEvent().getDuration() < 5) {
+
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("PageflipStatsCollector", mStats.toString());
+            Event event = new Event(getShopgun(), "page-stats-collector-event");
+            event.setData(new JSONObject(map));
+            appLogEntry.addEvent(event);
+
+            List<PageEvent> events = mStats.getEvents();
+            for (PageEvent subEvent : events) {
+                Event e = new Event(getShopgun(), "view-event");
+                e.setData(subEvent.toDebugJSON());
+                appLogEntry.addEvent(e);
             }
-            entry.post();
+            appLogEntry.post();
 
         }
 
@@ -268,6 +277,7 @@ public class CatalogPageFragment extends SgnFragment implements
         mCallback.onLongClick(mPhotoView, c.getPage(), c.getX(), c.getY(), c.getHotspots());
     }
 
+    @Override
     public void onZoomChange(boolean isZoomed) {
         loadZoom();
         if (isZoomed) {

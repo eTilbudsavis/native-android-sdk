@@ -35,9 +35,26 @@ public abstract class FragmentStatelessPagerAdapter extends FragmentStatePagerAd
     }
 
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
-        Object o = super.instantiateItem(container, position);
+    public Fragment getItem(int position) {
         ensureFragmentArray();
+        if (mFragments.length > position) {
+            Fragment f = mFragments[position];
+            if (f != null) {
+                return f;
+            }
+        }
+        return createItem(position);
+    }
+
+    /**
+     * Return the Fragment associated with a specified position.
+     */
+    public abstract Fragment createItem(int position);
+
+    @Override
+    public Object instantiateItem(ViewGroup container, int position) {
+        ensureFragmentArray();
+        Object o = super.instantiateItem(container, position);
         mFragments[position] = (Fragment)o;
         return o;
     }
