@@ -155,4 +155,9 @@ public class PageflipStatsCollectorImpl implements PageflipStatsCollector {
         }
     }
 
+    @Override
+    public String toString() {
+        String format = "%s[ viewSession:%s, catalogId:%s, pages:%s, orientation:%s, clock:%s, delivery:%s ]";
+        return String.format(format, getClass().getSimpleName(), mViewSession, mCatalogId, PageflipUtils.join("-", mPages), mOrientation.toString(), mClock.getClass().getSimpleName(), mDelivery.getClass().getSimpleName());
+    }
 }
