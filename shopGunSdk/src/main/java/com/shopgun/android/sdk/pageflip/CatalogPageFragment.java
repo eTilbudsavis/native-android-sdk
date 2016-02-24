@@ -28,10 +28,8 @@ import com.shopgun.android.sdk.SgnFragment;
 import com.shopgun.android.sdk.log.AppLogEntry;
 import com.shopgun.android.sdk.log.Event;
 import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.pageflip.stats.Clock;
 import com.shopgun.android.sdk.pageflip.stats.PageEvent;
 import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
-import com.shopgun.android.sdk.pageflip.stats.StatDelivery;
 import com.shopgun.android.sdk.pageflip.utils.PageflipClickCoordinate;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
@@ -67,8 +65,6 @@ public class CatalogPageFragment extends SgnFragment implements
     private PageflipStatsCollector mStats;
 
     private PageLoader mPageLoader;
-    private StatDelivery mCollector;
-    private Clock mClock;
     private CatalogPageCallback mCallback;
 
     public static CatalogPageFragment newInstance(int position, int[] pages, PageLoader.Config config) {
