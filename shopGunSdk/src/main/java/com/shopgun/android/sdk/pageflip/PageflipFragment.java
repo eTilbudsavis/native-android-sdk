@@ -82,7 +82,6 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
     // State
     private ReaderConfig mConfig;
     private int mCurrentPosition = 0;
-    private boolean mPagesReady = false;
     private boolean mInternalResumed = false;
     private String mViewSessionUuid;
     private List<OnDrawPage> mDrawList = new ArrayList<OnDrawPage>();
@@ -158,7 +157,7 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
         public void onPageSelected(int position) {
             int prev = mCurrentPosition;
             mCurrentPosition = position;
-            if (mPagesReady) {
+            if (isPagesReady()) {
                 getPage(prev).onInvisible();
                 getPage(mCurrentPosition).onVisible();
             }
@@ -289,6 +288,10 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
         return f;
     }
 
+    private boolean isPagesReady() {
+        return mAdapter != null && mAdapter.getItem(mCurrentPosition).isResumed();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -303,13 +306,9 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
         mPager.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                if (mAdapter != null) {
-                    Fragment f = mAdapter.getItem(mCurrentPosition);
-                    if (f.isResumed()) {
-                        mPager.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                        ((PageflipPage)f).onVisible();
-                        mPagesReady = true;
-                    }
+                if (isPagesReady()) {
+                    mPager.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    ((PageflipPage)mAdapter.getItem(mCurrentPosition)).onVisible();
                 }
             }
         });
@@ -566,7 +565,7 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
 
     private void ensureCatalog() {
 
-        if (PageflipUtils.isCatalogReady(mCatalog)) {
+        if (isCatalogReady()) {
 
             onRequestComplete(mCatalog, new ArrayList<ShopGunError>(0));
 
@@ -678,7 +677,6 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
         if (mCatalogRequest != null) {
             mCatalogRequest.cancel();
         }
-        mPagesReady = false;
         clearAdapter();
     }
 
