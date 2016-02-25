@@ -83,8 +83,7 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
     private ReaderConfig mConfig;
     private int mCurrentPosition = 0;
     private boolean mPagesReady = false;
-    /** Keeping track of internal resume/pause state */
-    private boolean mPageflipStarted = false;
+    private boolean mInternalResumed = false;
     private String mViewSessionUuid;
 
     List<OnDrawPage> mDrawList = new ArrayList<OnDrawPage>();
@@ -553,10 +552,10 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
      */
     private void internalResume() {
         synchronized (this) {
-            if (mPageflipStarted) {
+            if (mInternalResumed) {
                 return;
             }
-            mPageflipStarted = true;
+            mInternalResumed = true;
         }
         showContent(false);
         setBranding(mBranding);
@@ -662,13 +661,13 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
     private void internalPause() {
 
         synchronized (this) {
-            if (!mPageflipStarted) {
+            if (!mInternalResumed) {
                 return;
             }
-            mPageflipStarted = false;
+            mInternalResumed = false;
         }
 
-        if (mPagesReady) {
+        if (isPagesReady()) {
             // The visibility usually happens via the OnPageChangeListener,
             // but when lifecycle events happens this isn't the case, so we'll fake it.
             getPage(mCurrentPosition).onInvisible();
