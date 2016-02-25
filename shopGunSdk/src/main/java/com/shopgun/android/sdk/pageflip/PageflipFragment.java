@@ -277,6 +277,8 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
             b.putString(ARG_CATALOG_ID, catalog.getId());
         } else if (catalogId != null) {
             b.putString(ARG_CATALOG_ID, catalogId);
+        } else {
+            throw new IllegalStateException("Pageflip must have either a catalog or a catalog.id set");
         }
         b.putParcelable(ARG_READER_CONFIG, config);
         b.putInt(ARG_PAGE, page);
