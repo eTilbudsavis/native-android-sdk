@@ -85,8 +85,7 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
     private boolean mPagesReady = false;
     private boolean mInternalResumed = false;
     private String mViewSessionUuid;
-
-    List<OnDrawPage> mDrawList = new ArrayList<OnDrawPage>();
+    private List<OnDrawPage> mDrawList = new ArrayList<OnDrawPage>();
 
     // The meta fragments for intro/outro in Pageflip. Need to keep track of these until the Adapter is created
     private Fragment mIntroFragment;
