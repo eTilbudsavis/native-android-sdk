@@ -302,8 +302,14 @@ public class SgnJson {
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
      */
     public String getString(String key, String defValue) {
-        mStats.logKey(key);
-        return mObject.optString(key, defValue);
+        try {
+            mStats.logKey(key);
+            // So if it's an actual JSON-null value, then we'll get the string 'null' rather than an actual null. Fuck
+            return mObject.isNull(key) ? defValue : mObject.getString(key);
+        } catch (JSONException e) {
+            SgnLog.e(TAG, e.getMessage(), e);
+        }
+        return defValue;
     }
 
     /**
