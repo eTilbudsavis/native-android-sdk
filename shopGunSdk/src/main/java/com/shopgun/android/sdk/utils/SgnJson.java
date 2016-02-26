@@ -861,7 +861,8 @@ public class SgnJson {
                 return null;
             }
         }
-        return Images.fromJSON(getJSONArray(PAGES, new JSONArray()));
+        JSONArray array = getJSONArray(PAGES, null);
+        return (array != null) ? Images.fromJSON(array) : null;
     }
 
     public static final String PAGE = "page";
