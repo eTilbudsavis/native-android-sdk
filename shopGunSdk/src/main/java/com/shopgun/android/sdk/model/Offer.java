@@ -162,7 +162,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         offer.mStore = o.getStore();
         offer.mCatalog = o.getCatalog();
 
-        if (!isFullOffer(object)) {
+        if (!object.has(SgnJson.BRANDING) && !object.has(SgnJson.IMAGES) && !object.has(SgnJson.LINKS)) {
             o.getStats().ignoreRejectedKeys(
                     "catalog_page",
                     "description",
@@ -183,8 +183,15 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         return offer;
     }
 
-    private static boolean isFullOffer(JSONObject object) {
-        return object.has(SgnJson.DESCRIPTION) && object.has(SgnJson.CATALOG_ID);
+    /**
+     * Check if this offer is from a {@link Hotspot} in a catalog.
+     *
+     * <p>This isn't perfect, basically just checks if images, and links is set.
+     * So if a user sets those, this method will obviously not be correct.</p>
+     * @return {@code true} if the offer is from a {@link Hotspot} else {@code false}
+     */
+    public boolean isHotspot() {
+        return mImages == null || mLinks == null;
     }
 
     public JSONObject toJSON() {

@@ -91,13 +91,16 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
             if (mRequests.isEmpty()) {
                 finish("loaderRequest-has-no-subRequests-to-perform");
             } else {
+                addEvent("sub-requests-added-to-request-queue");
                 for (Request r : mRequests) {
+                    r.addEvent("added-from-loader-request");
                     applyState(r);
                     getRequestQueue().add(r);
                 }
             }
         }
 
+        addEvent("cancelled-to-force-cache-dispatcher-to-drop-loader-request");
         super.cancel();
         return this;
     }
