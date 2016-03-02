@@ -853,16 +853,18 @@ public class SgnJson {
     }
 
     public List<Images> getPages() {
-        if (mObject.opt(PAGES) instanceof JSONObject) {
+        Object o = mObject.opt(PAGES);
+        if (o instanceof JSONObject) {
             JSONObject pages = getJSONObject(PAGES);
             if (pages.has(THUMB) && pages.has(VIEW) && pages.has(ZOOM)) {
                 // The API catalog model, contains a JSONObject, with "thumb", "view", "zoom".
                 // This is just dummy data, and should be ignored
                 return null;
             }
+        } else if (o == null || o == JSONObject.NULL) {
+            return null;
         }
-        JSONArray array = getJSONArray(PAGES, null);
-        return (array != null) ? Images.fromJSON(array) : null;
+        return Images.fromJSON(getJSONArray(PAGES, null));
     }
 
     public static final String PAGE = "page";
