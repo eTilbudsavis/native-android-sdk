@@ -216,17 +216,8 @@ public class CatalogPageFragment extends SgnFragment implements
         AppLogEntry appLogEntry = new AppLogEntry(getShopgun(), "negative-duration", "android@shopgun.com");
 
         if (mStats.getRootEvent() == null) {
-
-            Map<String, String> map = new HashMap<String, String>();
-            map.put("PageflipStatsCollector", mStats.toString());
-            map.put("debug", "Collector does not have eny events. " +
-                    "PageflipStatsCollector.startView(), have not been called");
-            Event event = new Event(getShopgun(), "page-stats-collector-event");
-            event.setData(new JSONObject(map));
-            appLogEntry.addEvent(event);
-            appLogEntry.post();
-
-        } else if (mStats.getRootEvent().getDuration() < 5) {
+            // Page isn't visible to the user yet, startView() haven't been called yet
+        } else if (mStats.getRootEvent().getDuration() <= 0) {
 
             Map<String, String> map = new HashMap<String, String>();
             map.put("PageflipStatsCollector", mStats.toString());
