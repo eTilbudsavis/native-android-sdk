@@ -585,45 +585,38 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
 
     @Override
     public void onRequestComplete(Catalog response, List<ShopGunError> errors) {
-        if (isAdded()) {
+        if (!errors.isEmpty()) {
 
-            if (!errors.isEmpty()) {
+            mLoader.error();
+            // doesn't matter which error we choose, so we'll just take the first one
+            mWrapperListener.onError(errors.get(0));
+            showContent(false);
 
-                mLoader.error();
-                // doesn't matter which error we choose, so we'll just take the first one
-                mWrapperListener.onError(errors.get(0));
-                showContent(false);
+        } else {
 
-            } else {
+            setCatalog(response);
+            setBranding(mCatalog.getBranding());
 
-                setCatalog(response);
-                setBranding(mCatalog.getBranding());
+            int heap = Utils.getMaxHeap(getActivity());
+            mAdapter = new CatalogPagerAdapter(getChildFragmentManager(), heap, mCatalogPageCallback, mConfig);
+            mAdapter.setIntroFragment(mIntroFragment);
+            mAdapter.setOutroFragment(mOutroFragment);
+            mPager.setAdapter(mAdapter);
+            mPager.setCurrentItem(mCurrentPosition);
+            showContent(true);
 
-                int heap = Utils.getMaxHeap(getActivity());
-                mAdapter = new CatalogPagerAdapter(getChildFragmentManager(), heap, mCatalogPageCallback, mConfig);
-                mAdapter.setIntroFragment(mIntroFragment);
-                mAdapter.setOutroFragment(mOutroFragment);
-                mPager.setAdapter(mAdapter);
-                mPager.setCurrentItem(mCurrentPosition);
-                showContent(true);
-
-                mWrapperListener.onReady();
-                mWrapperListener.onPageChange(mCurrentPosition, getPages());
-
-            }
+            mWrapperListener.onReady();
+            mWrapperListener.onPageChange(mCurrentPosition, getPages());
 
         }
-
     }
 
     @Override
     public void onRequestIntermediate(Catalog response, List<ShopGunError> errors) {
         mCatalogRequest.setIgnoreCache(false);
-        if (isAdded()) {
-            if (response != null) {
-                setCatalog(response);
-                setBranding(mCatalog.getBranding());
-            }
+        if (errors.isEmpty()) {
+            setCatalog(response);
+            setBranding(mCatalog.getBranding());
         }
     }
 
@@ -654,6 +647,9 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
     public void onStop() {
         if (mSavedInstanceState == null) {
             onSaveInstanceState(new Bundle());
+        }
+        if (mCatalogRequest != null) {
+            mCatalogRequest.cancel();
         }
         super.onStop();
     }
