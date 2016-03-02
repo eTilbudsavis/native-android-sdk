@@ -498,6 +498,7 @@ public class SgnJson {
     }
 
     public static final String STORE = "store";
+    private static final String SDK_STORE = "sdk_store";
 
     public SgnJson putStore(Store store) {
         putIJsonIfNotNull(STORE, store);
@@ -505,10 +506,15 @@ public class SgnJson {
     }
 
     public Store getStore() {
+        if (mObject.has(SDK_STORE)) {
+            // recover from the legacy key
+            return Store.fromJSON(getJSONObject(SDK_STORE));
+        }
         return Store.fromJSON(getJSONObject(STORE));
     }
 
     public static final String CATALOG = "catalog";
+    public static final String SDK_CATALOG = "sdk_catalog";
 
     public SgnJson putCatalog(Catalog catalog) {
         putIJsonIfNotNull(CATALOG, catalog);
@@ -516,6 +522,10 @@ public class SgnJson {
     }
 
     public Catalog getCatalog() {
+        if (mObject.has(SDK_CATALOG)) {
+            // recover from the legacy key
+            return Catalog.fromJSON(getJSONObject(SDK_CATALOG));
+        }
         return Catalog.fromJSON(getJSONObject(CATALOG));
     }
 
@@ -541,6 +551,7 @@ public class SgnJson {
     }
 
     public static final String DEALER = "dealer";
+    private static final String SDK_DEALER = "sdk_dealer";
 
     public SgnJson putDealer(Dealer dealer) {
         putIJsonIfNotNull(DEALER, dealer);
@@ -548,6 +559,10 @@ public class SgnJson {
     }
 
     public Dealer getDealer() {
+        if (mObject.has(SDK_DEALER)) {
+            // recover from the legacy key
+            return Dealer.fromJSON(getJSONObject(SDK_DEALER));
+        }
         return Dealer.fromJSON(getJSONObject(DEALER));
     }
 
@@ -846,6 +861,7 @@ public class SgnJson {
     }
 
     public static final String PAGES = "pages";
+    private static final String SDK_PAGES = "sdk_pages";
 
     public SgnJson putPages(List<Images> pages) {
         putIJsonIfNotNull(PAGES, pages);
@@ -853,6 +869,10 @@ public class SgnJson {
     }
 
     public List<Images> getPages() {
+        if (mObject.has(SDK_PAGES)) {
+            // recover from the legacy key
+            Images.fromJSON(getJSONArray(SDK_PAGES));
+        }
         Object o = mObject.opt(PAGES);
         if (o instanceof JSONObject) {
             JSONObject pages = getJSONObject(PAGES);
@@ -864,7 +884,7 @@ public class SgnJson {
         } else if (o == null || o == JSONObject.NULL) {
             return null;
         }
-        return Images.fromJSON(getJSONArray(PAGES, null));
+        return Images.fromJSON(getJSONArray(PAGES));
     }
 
     public static final String PAGE = "page";
