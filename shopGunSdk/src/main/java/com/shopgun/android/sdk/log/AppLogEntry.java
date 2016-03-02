@@ -72,6 +72,11 @@ public class AppLogEntry {
         return this;
     }
 
+    public AppLogEntry addEvent(String name, JSONObject data) {
+        addEvent(new Event(mShopgun, name).setData(data));
+        return this;
+    }
+
     public AppLogEntry addEvent(Event event) {
         mEvents.add(event);
         return this;
