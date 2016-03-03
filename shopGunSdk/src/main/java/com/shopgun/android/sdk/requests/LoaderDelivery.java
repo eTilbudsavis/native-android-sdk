@@ -46,18 +46,20 @@ public class LoaderDelivery<T> {
         deliverFinishRequestAndPostBack(request, response, data, errors, intermediate);
     }
 
-    private void deliverFinishRequestAndPostBack(Request<?> r, Response response, T data, List<ShopGunError> errors, boolean intermediate) {
-        new Delivery.DeliveryRunnable(r, response).run();
-        mHandler.post(new LoaderRequestPostBackRunnable(data, errors, intermediate));
+    private void deliverFinishRequestAndPostBack(Request<?> request, Response response, T data, List<ShopGunError> errors, boolean intermediate) {
+        new Delivery.DeliveryRunnable(request, response).run();
+        mHandler.post(new LoaderRequestPostBackRunnable(request, data, errors, intermediate));
     }
 
     private class LoaderRequestPostBackRunnable implements Runnable {
 
+        private final Request<?> mRequest;
         private final T mData;
         private final List<ShopGunError> mErrors;
         private final boolean mIntermediate;
 
-        public LoaderRequestPostBackRunnable(T mData, List<ShopGunError> mErrors, boolean intermediate) {
+        public LoaderRequestPostBackRunnable(Request<?> request, T mData, List<ShopGunError> mErrors, boolean intermediate) {
+            this.mRequest = request;
             this.mData = mData;
             this.mErrors = mErrors;
             this.mIntermediate = intermediate;
@@ -65,12 +67,18 @@ public class LoaderDelivery<T> {
 
         @Override
         public void run() {
-            // Don't finish requests, as they have already been marked at finished
-            if (mIntermediate) {
-                mListener.onRequestIntermediate(mData, mErrors);
+
+            if (mRequest.isCanceled()) {
+                mRequest.finish("cancelled-at-delivery");
             } else {
-                mListener.onRequestComplete(mData, mErrors);
+                // Don't finish requests, as they have already been marked at finished
+                if (mIntermediate) {
+                    mListener.onRequestIntermediate(mData, mErrors);
+                } else {
+                    mListener.onRequestComplete(mData, mErrors);
+                }
             }
+
         }
     }
 
