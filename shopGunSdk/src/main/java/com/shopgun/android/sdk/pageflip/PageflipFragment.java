@@ -648,9 +648,6 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
         if (mSavedInstanceState == null) {
             onSaveInstanceState(new Bundle());
         }
-        if (mCatalogRequest != null) {
-            mCatalogRequest.cancel();
-        }
         super.onStop();
     }
 

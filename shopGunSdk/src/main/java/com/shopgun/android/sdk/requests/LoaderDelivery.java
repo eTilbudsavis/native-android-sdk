@@ -69,14 +69,12 @@ public class LoaderDelivery<T> {
         public void run() {
 
             if (mRequest.isCanceled()) {
+                // This should finish all sub-requests in a nice manor
                 mRequest.finish("cancelled-at-delivery");
+            } else if (mIntermediate) {
+                mListener.onRequestIntermediate(mData, mErrors);
             } else {
-                // Don't finish requests, as they have already been marked at finished
-                if (mIntermediate) {
-                    mListener.onRequestIntermediate(mData, mErrors);
-                } else {
-                    mListener.onRequestComplete(mData, mErrors);
-                }
+                mListener.onRequestComplete(mData, mErrors);
             }
 
         }
