@@ -1,6 +1,19 @@
 Change Log
 ==========
 
+Version 3.2.0 *(2016-03-04)*
+----------------------------
+
+* New: ModelRequests, each model should idealy have their own request subclass, that'll make life alot easier for developers
+  * Callbacks with modelobjects, rather than JSON, givins type safety
+  * Parsing performed on a non-ui-thread, giving a smoother user experience
+  * Easy loading of sidecar objects
+* New: Network implementations allowing mocking of some API requests
+* Improved JSON to modelobject mechanisms, allowing some basic error checking.
+* Fix: Some minor issues in PageflipFragment have been sorted out
+* Removed: The WeakEventBus-class that previously wrapped EventBus have been removed. Better buckle up.
+* Verious other minor bugfixes
+
 Version 3.1.1 *(2016-01)*
 ----------------------------
 
