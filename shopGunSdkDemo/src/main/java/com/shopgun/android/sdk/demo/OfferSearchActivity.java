@@ -25,20 +25,16 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.demo.base.BaseActivity;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Offer;
-import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
-import com.shopgun.android.sdk.utils.Api.Endpoint;
-
-import org.json.JSONArray;
+import com.shopgun.android.sdk.requests.LoaderRequest;
+import com.shopgun.android.sdk.requests.impl.OfferListRequest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class OfferSearchActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
 
@@ -90,60 +86,28 @@ public class OfferSearchActivity extends BaseActivity implements View.OnClickLis
      */
     private void performSearch(String query) {
 
-		/*
-		 * Create a new Listener.
-		 * 
-		 * This is a JSONArray listener, and it's therefore important
-		 * to request an API endpoint that returns valid JSONArray data,
-		 * or you will get a ParseError.
-		 */
-        Listener<JSONArray> offerListener = new Listener<JSONArray>() {
+        LoaderRequest.Listener<List<Offer>> mSearchListener = new LoaderRequest.Listener<List<Offer>>() {
+            @Override
+            public void onRequestComplete(List<Offer> response, List<ShopGunError> errors) {
+                if (errors.isEmpty()) {
+                    mOffers.addAll(response);
+                    mAdapter.notifyDataSetChanged();
+                } else {
+                    // Do error checking and handle situation appropriately
+                }
+            }
 
             @Override
-            public void onComplete(JSONArray response, ShopGunError error) {
-
-                if (mPd != null) {
-                    mPd.dismiss();
-                }
-				
-				/* 
-				 * Determining the state of the request response is simple.
-				 * 
-				 * If it's a successful request, the response will be populated
-				 * and the error object will be null. And if the request failed
-				 * the error object will be populated, and the request will be
-				 * null.
-				 * 
-				 */
-                if (response != null) {
-					
-					/*
-					 * Generate object from the JSONArray, with the factory method
-					 * in the Offer object.
-					 */
-                    mOffers.addAll(Offer.fromJSON(response));
-                    mAdapter.notifyDataSetChanged();
-
-                } else {
-					
-					/*
-					 * If the request failed, you can print the error message
-					 */
-                    SgnLog.d(TAG, "", error);
-                }
-
+            public void onRequestIntermediate(List<Offer> response, List<ShopGunError> errors) {
+                // Perform UI updates if necessary
             }
         };
 
-        Map<String, String> args = new HashMap<String, String>();
-        args.put(Parameters.QUERY, query);
-
-        // Create the request
-        JsonArrayRequest offerRequest = new JsonArrayRequest(Endpoint.OFFER_SEARCH, offerListener);
-        offerRequest.putParameters(args);
+        OfferListRequest request = new OfferListRequest(Endpoints.OFFER_SEARCH, mSearchListener);
+        request.getParameters().put(Parameters.QUERY, query);
 
         // Send the request to the SDK for execution
-        ShopGun.getInstance().add(offerRequest);
+        ShopGun.getInstance().add(request);
 
     }
 

@@ -84,7 +84,7 @@ public class OfferListActivity extends BaseListActivity implements AdapterView.O
 
             hideProgress();
 
-            if (response != null) {
+            if (errors.isEmpty()) {
 
                 if (response.isEmpty()) {
 

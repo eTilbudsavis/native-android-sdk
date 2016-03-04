@@ -49,7 +49,6 @@
         </activity>
 
         <activity android:name=".CatalogListActivity"/>
-        <activity android:name=".CatalogListLoaderActivity"/>
         <activity android:name=".CatalogViewerActivity"/>
 
         <activity android:name=".OfferListActivity"/>
