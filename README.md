@@ -124,20 +124,31 @@ Let's try to get a list of catalogs.
 
 ```java
 // The callback interface
-Response.Listener<JSONArray> listener = new Response.Listener<JSONArray>() {
-    @Override
-    public void onComplete(JSONArray response, ShopGunError error) {
-        if (response != null) {
+LoaderRequest.Listener<List<Catalog>> catalogListener = new LoaderRequest.Listener<List<Catalog>>() {
+@Override
+public void onRequestComplete(List<Catalog> response, List<ShopGunError> errors) {
+    if (errors.isEmpty()) {
+        // Hurray it's a successful request!
+    } else {
+        // Whh something went wrong
+    }
+}
+
+@Override
+public void onRequestIntermediate(List<Catalog> response, List<ShopGunError> errors) {
+        // Do intermediate update of UI, or other actions needed.
+        if (errors.isEmpty()) {
             // Hurray it's a successful request!
         } else {
             // Whh something went wrong
         }
     }
 };
+
 // The request
-JsonArrayRequest catalogReq = new JsonArrayRequest(Endpoints.CATALOG_LIST, listener);
+CatalogListRequest request = new CatalogListRequest(catalogListener);
 // Add the request to the request queue
-ShopGun.getInstance().add(catalogReq);
+ShopGun.getInstance().add(request);
 ```
 That's it, you've performed your first request to our ShopGun API :-)
 
