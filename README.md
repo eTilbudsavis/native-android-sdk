@@ -125,17 +125,18 @@ Let's try to get a list of catalogs.
 ```java
 // The callback interface
 LoaderRequest.Listener<List<Catalog>> catalogListener = new LoaderRequest.Listener<List<Catalog>>() {
-@Override
-public void onRequestComplete(List<Catalog> response, List<ShopGunError> errors) {
-    if (errors.isEmpty()) {
-        // Hurray it's a successful request!
-    } else {
-        // Whh something went wrong
-    }
-}
 
-@Override
-public void onRequestIntermediate(List<Catalog> response, List<ShopGunError> errors) {
+    @Override
+    public void onRequestComplete(List<Catalog> response, List<ShopGunError> errors) {
+        if (errors.isEmpty()) {
+            // Hurray it's a successful request!
+        } else {
+            // Whh something went wrong
+        }
+    }
+
+    @Override
+    public void onRequestIntermediate(List<Catalog> response, List<ShopGunError> errors) {
         // Do intermediate update of UI, or other actions needed.
         if (errors.isEmpty()) {
             // Hurray it's a successful request!
@@ -143,6 +144,7 @@ public void onRequestIntermediate(List<Catalog> response, List<ShopGunError> err
             // Whh something went wrong
         }
     }
+    
 };
 
 // The request
