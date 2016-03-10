@@ -329,7 +329,7 @@ public class RequestQueue {
 
         synchronized (mCurrentRequests) {
             for (Request<?> r : mCurrentRequests) {
-                if (r.getTag() == tag) {
+                if (r.getTag() == tag && !r.isCanceled()) {
                     count++;
                     r.cancel();
                 }
