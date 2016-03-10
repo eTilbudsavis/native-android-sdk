@@ -129,7 +129,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     }
 
     /** Mark this request as canceled.  No callback will be delivered. */
-    public void cancel() {
+    public synchronized void cancel() {
         mCanceled = true;
     }
 
@@ -137,7 +137,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Returns true if this request has been canceled.
      * @return {@code true} if the request is canceled, else {@code false}
      */
-    public boolean isCanceled() {
+    public synchronized boolean isCanceled() {
         return mCanceled;
     }
 
@@ -146,7 +146,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Whether the request was successful or not, it <b>NOT</b> reflected here.
      * @return true if the SDK, has finished this request
      */
-    public boolean isFinished() {
+    public synchronized boolean isFinished() {
         return mFinished;
     }
 
@@ -155,7 +155,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * @param reason A reason for finishing the request
      * @return this object
      */
-    public Request finish(String reason) {
+    public synchronized Request finish(String reason) {
 
         if (mFinished) {
             SgnLog.d(TAG, getClass().getSimpleName() + " - Request already finished, " + toString());
@@ -283,7 +283,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * @param requestQueue The RequestQueue that is performing this Request
      * @return This object
      */
-    public Request setRequestQueue(RequestQueue requestQueue) {
+    public synchronized Request setRequestQueue(RequestQueue requestQueue) {
         mRequestQueue = requestQueue;
         return this;
     }

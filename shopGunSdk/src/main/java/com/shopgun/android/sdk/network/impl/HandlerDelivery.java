@@ -54,7 +54,9 @@ public class HandlerDelivery implements Delivery {
      */
     public void postResponse(Request<?> request, Response<?> response) {
 
-        if (request.getDelivery() != null && !HandlerDelivery.this.equals(request.getDelivery())) {
+        if (request.isCanceled()) {
+            request.finish("cancelled-at-delivery");
+        } else if (request.getDelivery() != null && !HandlerDelivery.this.equals(request.getDelivery())) {
             // If there isn't a check, you'll end up in an infinite loop
             request.addEvent("post-to-custom-delivery");
             request.getDelivery().postResponse(request, response);

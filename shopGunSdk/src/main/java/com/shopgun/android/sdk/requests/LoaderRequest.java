@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
 
@@ -39,7 +40,7 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
     private final List<Request> mRequests = Collections.synchronizedList(new ArrayList<Request>());
     private final List<ShopGunError> mErrors = Collections.synchronizedList(new ArrayList<ShopGunError>());
     private final LoaderDelivery<T> mDelivery;
-    private final Object LOCK = new Object();
+    private AtomicInteger mAtomicCounter = new AtomicInteger();
 
     public LoaderRequest(Listener<T> l) {
         this(null, l);
@@ -52,11 +53,11 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
         mDelivery = new LoaderDelivery<T>(mListener);
     }
 
-    public T getData() {
+    public synchronized T getData() {
         return mData;
     }
 
-    public Request setData(T data) {
+    public synchronized Request setData(T data) {
         mData = data;
         return this;
     }
@@ -71,7 +72,7 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
     }
 
     @Override
-    public Request setRequestQueue(RequestQueue requestQueue) {
+    public synchronized Request setRequestQueue(RequestQueue requestQueue) {
         if (getTag() == null) {
             // Attach a tag if one haven't been provided
             // This will be used at a cancellation signal
@@ -80,23 +81,23 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
         super.setDelivery(this);
         super.setRequestQueue(requestQueue);
 
-        synchronized (LOCK) {
-            mRequests.addAll(createRequests(mData));
+        mRequests.addAll(createRequests(mData));
 
-            // RequestCreator-class unfortunately returns null, so we'll have to clean the list
-            for (Iterator<Request> it = mRequests.iterator(); it.hasNext();) {
-                if (it.next() == null) it.remove();
-            }
+        // RequestCreator-class unfortunately returns null, so we'll have to clean the list
+        for (Iterator<Request> it = mRequests.iterator(); it.hasNext();) {
+            if (it.next() == null) it.remove();
+        }
 
-            if (mRequests.isEmpty()) {
-                finish("loaderRequest-has-no-subRequests-to-perform");
-            } else {
-                addEvent("sub-requests-added-to-request-queue");
-                for (Request r : mRequests) {
-                    r.addEvent("added-from-loader-request");
-                    applyState(r);
-                    getRequestQueue().add(r);
-                }
+        mAtomicCounter.set(mRequests.size());
+
+        if (mAtomicCounter.get() == 0) {
+            finish("loaderRequest-has-no-subRequests-to-perform");
+        } else {
+            addEvent("sub-requests-added-to-request-queue");
+            for (Request r : mRequests) {
+                r.addEvent("added-from-loader-request");
+                applyState(r);
+                getRequestQueue().add(r);
             }
         }
 
@@ -141,17 +142,21 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
     }
 
     @Override
-    public void cancel() {
-        synchronized (LOCK) {
-            super.cancel();
-            if (getRequestQueue() != null) {
-                getRequestQueue().cancelAll(getTag());
+    public synchronized void cancel() {
+        super.cancel();
+        /* We cannot use RequestQueue.cancelAll(Object), as the RequestQueue removes Requests on Request.finish(String).
+        Therefore if the cancel() is called in the time from a Request is finished, until it reaches UI thread,
+        the cancellation signal will be lost, and we'll trigger the Request listener. That's a no-go.
+        So we'll use cancel on out own queue instead. */
+        for (Request<?> request : mRequests) {
+            if (!request.isCanceled()) {
+                request.cancel();
             }
         }
     }
 
     @Override
-    public Request finish(String reason) {
+    public synchronized Request finish(String reason) {
         if (super.isFinished()) {
             // If no sub-requests was generated in setRequestQueue(RequestQueue),
             // this LoaderRequest have already finished it self. But the CacheDispatcher
@@ -162,7 +167,7 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
     }
 
     @Override
-    public boolean isFinished() {
+    public synchronized boolean isFinished() {
         for (Request r : mRequests) {
             if (!r.isFinished()) {
                 return false;
@@ -173,19 +178,11 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void postResponse(Request<?> request, Response<?> response) {
-
-        synchronized (LOCK) {
-
-            request.addEvent("post-response");
-
-            // Deliver catalog if needed
-            mRequests.remove(request);
-            boolean finished = mRequests.isEmpty();
-            mDelivery.deliver(request, response, mData, mErrors, !finished);
-
-        }
-
+    public synchronized void postResponse(Request<?> request, Response<?> response) {
+        request.addEvent("post-response");
+        // Deliver catalog
+        boolean intermediate = mAtomicCounter.incrementAndGet() > 0;
+        mDelivery.deliver(request, response, mData, mErrors, intermediate);
     }
 
     /** Callback interface for delivering parsed responses. */

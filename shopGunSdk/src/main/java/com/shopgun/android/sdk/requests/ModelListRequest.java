@@ -53,7 +53,7 @@ public abstract class ModelListRequest<T> extends JsonArrayRequest implements De
     }
 
     @Override
-    public Request setRequestQueue(RequestQueue requestQueue) {
+    public synchronized Request setRequestQueue(RequestQueue requestQueue) {
         super.setRequestQueue(requestQueue);
         if (getTag() == null) {
             // Attach a tag if one haven't been provided
@@ -81,20 +81,23 @@ public abstract class ModelListRequest<T> extends JsonArrayRequest implements De
     public abstract T parse(JSONArray response);
 
     @Override
-    public void cancel() {
-        synchronized (this) {
-            super.cancel();
-            if (mLoaderRequest != null) {
-                mLoaderRequest.cancel();
-            }
+    public synchronized void cancel() {
+        super.cancel();
+        if (mLoaderRequest != null) {
+            mLoaderRequest.cancel();
         }
     }
 
     @Override
-    public void postResponse(Request<?> request, Response<?> response) {
+    public synchronized void postResponse(Request<?> request, Response<?> response) {
         request.addEvent("post-response");
 
-        if (response.isSuccess()) {
+        if (isCanceled()) {
+
+            // ignore callback
+            request.addEvent("loaderRequest-have-been-canceled");
+
+        } else if (response.isSuccess()) {
 
             request.addEvent("parsing-response-to-model-objects");
             T data = parse((JSONArray) response.result);

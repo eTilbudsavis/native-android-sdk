@@ -19,6 +19,7 @@ package com.shopgun.android.sdk.requests;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.network.Delivery;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;
@@ -28,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LoaderDelivery<T> {
+
+    public static final String TAG = Constants.getTag(LoaderDelivery.class);
 
     Handler mHandler = new Handler(Looper.getMainLooper());
     LoaderRequest.Listener<T> mListener;
