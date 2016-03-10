@@ -181,7 +181,7 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
     public synchronized void postResponse(Request<?> request, Response<?> response) {
         request.addEvent("post-response");
         // Deliver catalog
-        boolean intermediate = mAtomicCounter.incrementAndGet() > 0;
+        boolean intermediate = mAtomicCounter.decrementAndGet() > 0;
         mDelivery.deliver(request, response, mData, mErrors, intermediate);
     }
 
