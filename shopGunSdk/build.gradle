@@ -35,7 +35,7 @@ ext {
     PROJ_REPO='maven'
     PROJ_GROUP='com.shopgun.android'
     PROJ_ARTIFACTID='sdk'
-    PROJ_VERSION='3.2.0-beta'
+    PROJ_VERSION='3.2.0'
     PROJ_NAME='sdk'
     PROJ_ORG='shopgun'
     PROJ_WEBSITEURL='https://shopgun.com'
