@@ -84,8 +84,10 @@ android {
 dependencies {
     compile 'com.android.support:support-v4:23.1.0'
     compile 'de.greenrobot:eventbus:2.4.0'
+    compile 'com.squareup.okhttp:okhttp:2.7.5'
     compile 'com.squareup.picasso:picasso:2.5.2'
 }
 
 // Apply the Bintray plugin. Do release with "gradlew bintrayUpload"
+// Setup BINTRAY_USER and BINTRAY_KEY in your global gradle.properties to upload
 apply from: 'bintray.gradle'
