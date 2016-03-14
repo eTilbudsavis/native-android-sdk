@@ -207,6 +207,7 @@ public class CatalogPageFragment extends SgnFragment implements
             mStats.collect();
             verifyIntegrity();
         }
+        mPhotoView.setOnZoomListener(null);
         mPageVisible = false;
         mStats = null;
     }
