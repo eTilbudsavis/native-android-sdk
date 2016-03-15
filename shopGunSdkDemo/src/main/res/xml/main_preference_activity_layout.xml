@@ -58,6 +58,14 @@
         android:title="SDK Tests">
 
         <Preference
+            android:key="pref_main_picasso"
+            android:title="Picasso test">
+            <intent
+                android:targetPackage="com.shopgun.android.sdk.demo"
+                android:targetClass="com.shopgun.android.sdk.demo.PicassoActivity"/>
+        </Preference>
+
+        <Preference
             android:key="pref_main_sdk_unit_test"
             android:title="SDK Unit Test"/>
 
