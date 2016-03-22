@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.shopgun.android.sdk.api.Environment;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
@@ -547,6 +548,9 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     }
 
 
+    /**
+     * API for creating ShopGun instance.
+     */
     public static class Builder {
 
         Context mContext;
@@ -558,6 +562,10 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
         Environment mEnvironment;
         ThemeEnvironment mThemeEnvironment;
 
+        /**
+         * Start building your {@link ShopGun} instance.
+         * @param ctx A context
+         */
         public Builder(Context ctx) {
             if (ctx == null) {
                 throw new IllegalArgumentException("Context must not be null.");
@@ -565,6 +573,11 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
             this.mContext = ctx.getApplicationContext();
         }
 
+        /**
+         * Specify the memory cache for the shopgun-requests.
+         * @param cache A {@link Cache}
+         * @return This object
+         */
         public Builder setCache(Cache cache) {
             if (cache == null) {
                 throw new IllegalArgumentException("Cache must not be null.");
@@ -576,6 +589,11 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
             return this;
         }
 
+        /**
+         * Specify the {@link Network} to use for requests performed.
+         * @param network A network
+         * @return This object
+         */
         public Builder setNetwork(Network network) {
             if (network == null) {
                 throw new IllegalArgumentException("Network must not be null.");
@@ -587,6 +605,11 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
             return this;
         }
 
+        /**
+         * Specify the {@link ExecutorService} for background tasks
+         * @param executorService A ExecutorService
+         * @return This object
+         */
         public Builder setExecutorService(ExecutorService executorService) {
             if (executorService == null) {
                 throw new IllegalArgumentException("ExecutorService must not be null.");
@@ -598,6 +621,11 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
             return this;
         }
 
+        /**
+         * Specify the {@link SgnLogger} to use for logging SDK events.
+         * @param logger A logger
+         * @return This object
+         */
         public Builder setLogger(SgnLogger logger) {
             if (logger == null) {
                 throw new IllegalArgumentException("SgnLogger must not be null.");
@@ -609,6 +637,11 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
             return this;
         }
 
+        /**
+         * Enable development keys, for the ShopGun API, among other features.
+         * @param develop {@code true} for development mode, else {@code false}
+         * @return This object
+         */
         public Builder setDevelop(boolean develop) {
             if (mDevelop != null) {
                 throw new IllegalStateException("SgnLogger already set.");
@@ -617,6 +650,13 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
             return this;
         }
 
+        /**
+         * Specify the {@link Environment} to use for requesting content from ShopGun API.
+         * <p><b>Please be careful</b> when specifying environments, you don't want to end up with a
+         * production app querying the wrong environment, that might break everything for you!</p>
+         * @param environment An environment
+         * @return This object
+         */
         public Builder setEnvironment(Environment environment) {
             if (environment == null) {
                 throw new IllegalArgumentException("Environment must not be null.");
@@ -624,10 +664,20 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
             if (mEnvironment != null) {
                 throw new IllegalStateException("Environment already set.");
             }
+            if (BuildConfig.DEBUG && environment != Environment.PRODUCTION) {
+                Log.w(TAG, "A production build not using Environment.PRODUCTION might cause trouble!");
+            }
             mEnvironment = environment;
             return this;
         }
 
+        /**
+         * Specify the {@link ThemeEnvironment} to use for requesting themes from ShopGun API.
+         * <p><b>Please be careful</b> when specifying environments, you don't want to end up with a
+         * production app querying the wrong environment, that might break everything for you!</p>
+         * @param themeEnvironment An environment
+         * @return This object
+         */
         public Builder setThemeEnvironment(ThemeEnvironment themeEnvironment) {
             if (themeEnvironment == null) {
                 throw new IllegalArgumentException("ThemeEnvironment must not be null.");
@@ -635,18 +685,21 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
             if (mThemeEnvironment != null) {
                 throw new IllegalStateException("ThemeEnvironment already set.");
             }
+            if (BuildConfig.DEBUG && themeEnvironment != ThemeEnvironment.PRODUCTION) {
+                Log.w(TAG, "A production build not using ThemeEnvironment.PRODUCTION might cause trouble!");
+            }
             mThemeEnvironment = themeEnvironment;
             return this;
         }
 
         /**
-         * Builds and set the ShopGun instance.
+         * Builds and set the ShopGun instance, and sets it to be the global singleton.
          * @return The ShopGun instance
          */
         public ShopGun build() {
 
             if (ShopGun.mShopGun != null) {
-                SgnLog.d(TAG, "ShopGun instance already build.");
+                SgnLog.d(TAG, "ShopGun instance already build and set.");
                 return mShopGun;
             }
 
