@@ -93,7 +93,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     /**
      * Current version of the ShopGun SDK.
      */
-    public static final int VERSION = 300000;
+    public static final int VERSION = 302001;
 
     private static final int DEFAULT_THREAD_COUNT = 3;
 
@@ -104,7 +104,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     /** Counting the number of active activities, to determine when to stop any long running activities */
     private final ActivityCounter mActivityCounter;
     /** Application context for usage in the SDK */
-    private Context mContext;
+    private final Context mContext;
     /** The developers APIkey */
     private String mApiKey;
     /** The developers APIsecret */
@@ -112,19 +112,19 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     /** The developers app version, this isn't strictly necessary */
     private String mAppVersion;
     /** The SDK settings */
-    private Settings mSettings;
+    private final Settings mSettings;
     /** A session manager, for handling all session requests, user information e.t.c. */
-    private SessionManager mSessionManager;
+    private final SessionManager mSessionManager;
     /** The current location that the SDK is aware of */
-    private SgnLocation mLocation;
+    private final SgnLocation mLocation;
     /** Manager for handling all {@link Shoppinglist}, and {@link ShoppinglistItem} */
-    private ListManager mListManager;
+    private final ListManager mListManager;
     /** Manager for doing asynchronous sync */
-    private SyncManager mSyncManager;
+    private final SyncManager mSyncManager;
     /** A {@link RequestQueue} implementation to handle all API requests */
-    private RequestQueue mRequestQueue;
+    private final RequestQueue mRequestQueue;
     /** My go to executor service */
-    private ExecutorService mExecutor;
+    private final ExecutorService mExecutor;
     /** The development flag, indicating the app is in development */
     private boolean mDevelop = false;
     /** The current API environment in use */
