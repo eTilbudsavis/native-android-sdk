@@ -251,10 +251,8 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
      * Returns the API key found at http://etilbudsavis.dk/api/.
      * @return API key as String
      */
-    public String getApiKey() {
-        if (!isKeySecretOk()) {
-            ensureKeys(mContext);
-        }
+    public synchronized String getApiKey() {
+        ensureKeys(mContext);
         return mApiKey;
     }
 
@@ -296,10 +294,8 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
      * Returns the API secret found at http://etilbudsavis.dk/api/.
      * @return API secret as String
      */
-    public String getApiSecret() {
-        if (!isKeySecretOk()) {
-            ensureKeys(mContext);
-        }
+    public synchronized String getApiSecret() {
+        ensureKeys(mContext);
         return mApiSecret;
     }
 
@@ -435,15 +431,16 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
 
     /** @deprecated Use {@link #getInstance(Context)} */
     @Deprecated
-    public void setDevelop(boolean develop) {
-        mDevelop = develop;
-        if (isStarted()) {
-            SgnLog.i(TAG, "Re-registering apiKey and apiSecret");
+    public synchronized void setDevelop(boolean develop) {
+        if (mDevelop != develop) {
+            mDevelop = develop;
+            mApiKey = null;
+            mApiSecret = null;
             ensureKeys(mContext);
         }
     }
 
-    private boolean isKeySecretOk() {
+    private synchronized boolean isKeySecretOk() {
         if (mApiKey == null || mApiSecret == null) {
             // Reset both to keep sane state
             mApiKey = null;
@@ -452,7 +449,11 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
         return mApiKey != null && mApiSecret != null;
     }
 
-    private void ensureKeys(Context c) {
+    private synchronized void ensureKeys(Context c) {
+
+        if (isKeySecretOk()) {
+            return;
+        }
 
         Bundle b = Utils.getMetaData(c);
         if (b == null) {
@@ -529,7 +530,6 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
 
     @Override
     public void onPerformStart() {
-        ensureKeys(mContext);
         mSessionManager.onStart();
         mListManager.onStart();
         mSyncManager.onStart();
