@@ -127,19 +127,22 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     /** The development flag, indicating the app is in development */
     private boolean mDevelop = false;
     /** The current API environment in use */
-    private Environment mEnvironment = Environment.PRODUCTION;
+    private Environment mEnvironment;
     /** The current API environment in use for themes (used for e.g. shoppinglists */
-    private ThemeEnvironment mThemeEnvironment = ThemeEnvironment.PRODUCTION;
+    private ThemeEnvironment mThemeEnvironment;
 
     /**
      * Default constructor, this is private to allow us to create a singleton instance
      * @param context A context
      */
-    private ShopGun(Context context, ExecutorService executorService, Cache cache, Network network, boolean develop) {
+    private ShopGun(Context context, ExecutorService executorService, Cache cache, Network network, Environment environment, ThemeEnvironment themeEnvironment, boolean develop) {
         // Get application context, to avoid memory leaks (e.g. holding a reference to an Activity)
         mContext = context;
         mActivityCounter = new ActivityCounter(this, 1000, mHandler);
         mDevelop = develop;
+
+        mEnvironment = environment;
+        mThemeEnvironment = themeEnvironment;
 
         ensureKeys(mContext);
         setAppVersion(Utils.getAppVersion(mContext));
@@ -552,6 +555,8 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
         Network mNetwork;
         SgnLogger mLog;
         Boolean mDevelop;
+        Environment mEnvironment;
+        ThemeEnvironment mThemeEnvironment;
 
         public Builder(Context ctx) {
             if (ctx == null) {
@@ -612,6 +617,28 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
             return this;
         }
 
+        public Builder setEnvironment(Environment environment) {
+            if (environment == null) {
+                throw new IllegalArgumentException("Environment must not be null.");
+            }
+            if (mEnvironment != null) {
+                throw new IllegalStateException("Environment already set.");
+            }
+            mEnvironment = environment;
+            return this;
+        }
+
+        public Builder setThemeEnvironment(ThemeEnvironment themeEnvironment) {
+            if (themeEnvironment == null) {
+                throw new IllegalArgumentException("ThemeEnvironment must not be null.");
+            }
+            if (mThemeEnvironment != null) {
+                throw new IllegalStateException("ThemeEnvironment already set.");
+            }
+            mThemeEnvironment = themeEnvironment;
+            return this;
+        }
+
         /**
          * Builds and set the ShopGun instance.
          * @return The ShopGun instance
@@ -649,7 +676,16 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
                 mDevelop = false;
             }
 
-            ShopGun.mShopGun = new ShopGun(mContext, mExecutor, mCache, mNetwork, mDevelop);
+            if (mEnvironment == null) {
+                mEnvironment = Environment.PRODUCTION;
+            }
+
+            if (mThemeEnvironment == null) {
+                mThemeEnvironment = ThemeEnvironment.PRODUCTION;
+            }
+
+            SgnLog.setLogger(mLog);
+            ShopGun.mShopGun = new ShopGun(mContext, mExecutor, mCache, mNetwork, mEnvironment, mThemeEnvironment, mDevelop);
             return ShopGun.getInstance(mContext);
         }
 
