@@ -1509,7 +1509,7 @@ public class SgnJson {
     }
 
     public SgnJson setCategoryIds(Set<String> value) {
-        put(CATEGORY_IDS, new JSONArray(value));
+        put(CATEGORY_IDS, value == null ? new JSONArray() : new JSONArray(value));
         return this;
     }
 
