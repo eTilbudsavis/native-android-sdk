@@ -1,10 +1,9 @@
-ShopGun Android SDK
-===================
+## ShopGun Android SDK
+
 
 The simple solution to querying for ShopGun-data.
 
-Getting Started
----------------
+### Getting Started
 
 #### Download with Gradle
 If you haven't already added `jCenter` to your `build.gradle`, you'll need this:
@@ -18,7 +17,7 @@ Now add these lines to your module's `build.gradle`:
 
 ```groovy
 dependencies {
-	compile 'com.shopgun.android:sdk:3.2.0'
+    compile 'com.shopgun.android:sdk:3.2.0'
 }
 ```
 
@@ -158,8 +157,7 @@ For more exampels, please have a look at the ShopGun SDK Demo. There you can
 find some common usecases for the SDK. It's bundled with the SDK. 
 
 
-Features
---------
+### Features
 
 
 * [Requests](#first-request)
@@ -172,37 +170,36 @@ Features
 * [Utils](#utils)
 * [Test](#test)
 
-Feedback
---------
+### Feedback
+
 If you have any feedback, then please feel free to let us know. Issues and 
 suggestions can be submitted via GitHub issues. Comments can be emailed to me at
 <danny@shopgun.com>
 
 
-Contributing
-------------
+### Contributing
+
 If you would like to contribute to the ShopGun Android SDK, feel free to do so.
 Just fork the repository on GitHub, and send us a pull request.
 
 Please try to follow existing code convention and style, when committing code.
 
 
-License
--------
+### License
 
-	Copyright 2015 ShopGun
-	
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
-	
-	  http://www.apache.org/licenses/LICENSE-2.0
-	
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
+    Copyright 2015 ShopGun
+    
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+      http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 
 [ShopGun Developer site]:https://business.shopgun.com/developers/
