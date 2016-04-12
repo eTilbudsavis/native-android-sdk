@@ -16,8 +16,10 @@
 
 package com.shopgun.android.sdk.utils;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.support.v4.content.ContextCompat;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Share;
@@ -32,10 +34,9 @@ public class PermissionUtils {
 
     public static final String ERROR_MISSING_PERMISSION = "User doesn't have edit permissions, reason: %s";
 
-    private static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
-
     public static boolean hasWriteExternalStorage(Context c) {
-        return c.checkCallingOrSelfPermission(WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(c, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
