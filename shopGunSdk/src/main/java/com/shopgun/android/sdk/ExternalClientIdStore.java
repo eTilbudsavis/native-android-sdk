@@ -47,7 +47,7 @@ public class ExternalClientIdStore {
         sgn.getSettings().setClientId(s.getClientId());
     }
 
-    private static String getCid(ShopGun sgn) {
+    public static String getCid(ShopGun sgn) {
 
         // First try SharedPrefs
         String cid = sgn.getSettings().getClientId();
@@ -83,13 +83,18 @@ public class ExternalClientIdStore {
             }
 
             // Cleanup the cid file, we won't need it any more
-            deleteCid(sgn.getContext());
+            deleteCidFile(sgn.getContext());
         }
 
         return null;
     }
 
-    private static boolean deleteCid(Context c) {
+    public static void clear(ShopGun sgn) {
+        deleteCidFile(sgn.getContext());
+        sgn.getSettings().setClientId(null);
+    }
+
+    private static boolean deleteCidFile(Context c) {
         File f = getCidFile(c);
         return f != null && f.exists() && f.delete();
     }

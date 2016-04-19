@@ -16,6 +16,8 @@
 
 package com.shopgun.android.sdk.test;
 
+import android.content.Context;
+
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 
@@ -26,7 +28,7 @@ public class SdkTest {
     private static String mCurrentTitle;
     private static long mStartScoped = 0;
 
-    public static void test() {
+    public static void test(Context context) {
 
         long start = System.currentTimeMillis();
 
@@ -45,6 +47,7 @@ public class SdkTest {
         ReaderConfigTest.test();
         MaterialColorTest.test();
         PageflipTest.test();
+        ExternalClientIdStoreTest.test(context);
 
         String ok = "*   All test passed (" + (System.currentTimeMillis() - start) + "ms)   *";
         StringBuilder sb = new StringBuilder();
