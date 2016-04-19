@@ -30,7 +30,7 @@ buildscript {
 
 ext {
 
-    PROJ_DRYRUN=false
+    PROJ_DRYRUN=true
 
     PROJ_REPO='maven'
     PROJ_GROUP='com.shopgun.android'
