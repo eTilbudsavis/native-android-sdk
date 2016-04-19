@@ -40,13 +40,22 @@ public class Settings {
     private static final String SESSION_USER = "session_user";
     private static final String SESSION_FACEBOOK = "session_facebook";
     private static final String LOCATION = "location_json";
+    private static final String CLIENT_ID = "client_id";
 
     private SharedPreferences mSharedPrefs;
+    private static boolean mMovedSharedPrefs = false;
 
     public Settings(Context context) {
-        SharedPreferencesUtils.moveSharedPreferences(context, "eta_sdk", PREFS_NAME);
-        mSharedPrefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mSharedPrefs = getPrefs(context);
         performMigration();
+    }
+
+    public static SharedPreferences getPrefs(Context context) {
+        if (!mMovedSharedPrefs) {
+            mMovedSharedPrefs = true;
+            SharedPreferencesUtils.moveSharedPreferences(context, "eta_sdk", PREFS_NAME);
+        }
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
 
     public boolean clear() {
@@ -118,6 +127,14 @@ public class Settings {
             SgnLog.e(TAG, "Not able to parse location json from SharedPreferences", e);
         }
         return new SgnLocation();
+    }
+
+    public String getClientId() {
+        return mSharedPrefs.getString(CLIENT_ID, null);
+    }
+
+    public void setClientId(String clientId) {
+        mSharedPrefs.edit().putString(CLIENT_ID, clientId).apply();
     }
 
     private void performMigration() {

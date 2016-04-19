@@ -25,8 +25,6 @@ import com.shopgun.android.sdk.utils.PermissionUtils;
 import com.shopgun.android.sdk.utils.Utils;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import static android.os.Environment.MEDIA_MOUNTED;
@@ -40,51 +38,27 @@ public class ExternalClientIdStore {
     public static void updateCid(Session s, Context c) {
 
         String extCid = getCid(c);
-        String cid = s.getClientId();
 
-        // Previously used this hardcoded cid in beta, recover it
-        if (CID_RANDOMJUNK.equals(cid) || CID_RANDOMJUNK.equals(extCid)) {
+        if (CID_RANDOMJUNK.equals(s.getClientId()) || CID_RANDOMJUNK.equals(extCid)) {
+            // Previously used this hardcoded cid in beta, recover it
             s.setClientId(Utils.createUUID());
-            saveCid(s.getClientId(), c);
-        } else if (cid == null) {
+        } else if (s.getClientId() == null) {
             // No ClientID is set, try to get from disk
             s.setClientId(extCid);
-        } else if (!cid.equals(extCid)) {
-            // ClientID have changed, write changes to disk
-            saveCid(cid, c);
         }
-
-    }
-
-    private static void saveCid(String cid, Context c) {
-
-        File f = getCidFile(c);
-        if (f == null) {
-            return;
-        }
-
-        FileOutputStream fos = null;
-        if (f.exists()) {
-            f.delete();
-        }
-        try {
-            fos = new FileOutputStream(f);
-            fos.write(cid.getBytes());
-            fos.flush();
-        } catch (IOException e) {
-            // Ignoring
-        } finally {
-            try {
-                fos.close();
-            } catch (Throwable t) {
-                // ignore
-            }
-        }
+        ShopGun.getInstance(c).getSettings().setClientId(s.getClientId());
 
     }
 
     private static String getCid(Context c) {
 
+        // First try SharedPrefs
+        String cid = ShopGun.getInstance(c).getSettings().getClientId();
+        if (cid != null) {
+            return cid;
+        }
+
+        // Then try external storage
         File cidFile = getCidFile(c);
         if (cidFile == null) {
             return null;
@@ -110,6 +84,8 @@ public class ExternalClientIdStore {
             } catch (Exception e) {
                 // Ignore
             }
+            // Cleanup the cid file, we won't need it any more
+            deleteCid(c);
         }
 
         return null;
@@ -122,17 +98,21 @@ public class ExternalClientIdStore {
 
     private static File getCidFile(Context context) {
 
-        if (MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) &&
-                PermissionUtils.hasWriteExternalStorage(context)) {
+        try {
+            if (MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) &&
+                    PermissionUtils.hasWriteExternalStorage(context)) {
 
-            File cacheDir = new File(Environment.getExternalStorageDirectory(), "cache");
-            if (!cacheDir.exists() && !cacheDir.mkdirs()) {
-                SgnLog.w(TAG, "External directory couldn't be created");
-                return null;
+                File cacheDir = new File(Environment.getExternalStorageDirectory(), "cache");
+                if (!cacheDir.exists() && !cacheDir.mkdirs()) {
+                    SgnLog.w(TAG, "External directory couldn't be created");
+                    return null;
+                }
+
+                String fileName = context.getPackageName() + ".txt";
+                return new File(cacheDir, fileName);
             }
-
-            String fileName = context.getPackageName() + ".txt";
-            return new File(cacheDir, fileName);
+        } catch (Exception e) {
+            // If we are not allowed to access external storage
         }
 
         return null;
