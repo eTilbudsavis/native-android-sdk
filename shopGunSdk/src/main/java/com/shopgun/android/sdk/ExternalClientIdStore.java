@@ -36,9 +36,7 @@ public class ExternalClientIdStore {
     private static final String CID_RANDOMJUNK = "randomjunkid";
 
     public static void updateCid(Session s, Context c) {
-
         String extCid = getCid(c);
-
         if (CID_RANDOMJUNK.equals(s.getClientId()) || CID_RANDOMJUNK.equals(extCid)) {
             // Previously used this hardcoded cid in beta, recover it
             s.setClientId(Utils.createUUID());
@@ -47,20 +45,28 @@ public class ExternalClientIdStore {
             s.setClientId(extCid);
         }
         ShopGun.getInstance(c).getSettings().setClientId(s.getClientId());
-
     }
 
     private static String getCid(Context c) {
 
+        SgnLog.printStackTrace(TAG);
         // First try SharedPrefs
-        String cid = ShopGun.getInstance(c).getSettings().getClientId();
+        ShopGun sgn = ShopGun.getInstance(c);
+        SgnLog.d(TAG, "getCid.2");
+        Settings settings = sgn.getSettings();
+        SgnLog.d(TAG, "getCid.3");
+        String cid = settings.getClientId();
+        SgnLog.d(TAG, "getCid.4");
+
         if (cid != null) {
+            SgnLog.d(TAG, "getCid.sharedPreferences");
             return cid;
         }
 
         // Then try external storage
         File cidFile = getCidFile(c);
         if (cidFile == null) {
+            SgnLog.d(TAG, "getCid.cidFile == null");
             return null;
         }
 
@@ -84,6 +90,7 @@ public class ExternalClientIdStore {
             } catch (Exception e) {
                 // Ignore
             }
+
             // Cleanup the cid file, we won't need it any more
             deleteCid(c);
         }
@@ -92,11 +99,14 @@ public class ExternalClientIdStore {
     }
 
     private static boolean deleteCid(Context c) {
+        SgnLog.d(TAG, "deleteCid");
         File f = getCidFile(c);
         return f != null && f.exists() && f.delete();
     }
 
     private static File getCidFile(Context context) {
+
+        SgnLog.d(TAG, "getCidFile");
 
         try {
             if (MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) &&
