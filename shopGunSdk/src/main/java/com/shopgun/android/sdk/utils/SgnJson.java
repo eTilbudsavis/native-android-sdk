@@ -48,7 +48,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -124,7 +123,7 @@ public class SgnJson {
         synchronized (DATE_FORMATTER) {
             try {
                 return DATE_FORMATTER.parse(date);
-            } catch (ParseException e) {
+            } catch (Exception e) {
                 return null;
             }
         }
@@ -1509,7 +1508,7 @@ public class SgnJson {
     }
 
     public SgnJson setCategoryIds(Set<String> value) {
-        put(CATEGORY_IDS, new JSONArray(value));
+        put(CATEGORY_IDS, value == null ? new JSONArray() : new JSONArray(value));
         return this;
     }
 

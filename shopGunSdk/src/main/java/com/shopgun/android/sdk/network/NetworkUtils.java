@@ -64,4 +64,40 @@ public class NetworkUtils {
 
     }
 
+
+    public static SgnLocation getLocationParams(Request<?> request) {
+
+        SgnLocation l = new SgnLocation();
+
+        Map<String, String> map = request.getParameters();
+
+        if (map.containsKey(Parameters.LATITUDE)) {
+            l.setLatitude(Double.valueOf(map.get(Parameters.LATITUDE)));
+        }
+        if (map.containsKey(Parameters.LONGITUDE)) {
+            l.setLongitude(Double.valueOf(map.get(Parameters.LONGITUDE)));
+        }
+
+        if (map.containsKey(Parameters.SENSOR)) {
+            l.setSensor(Boolean.valueOf(map.get(Parameters.SENSOR)));
+        }
+
+        if (map.containsKey(Parameters.RADIUS)) {
+            l.setRadius(Integer.valueOf(map.get(Parameters.RADIUS)));
+        }
+
+        // Determine whether to include bounds.
+        if (map.containsKey(Parameters.BOUND_EAST) &&
+                map.containsKey(Parameters.BOUND_NORTH) &&
+                map.containsKey(Parameters.BOUND_SOUTH) &&
+                map.containsKey(Parameters.BOUND_WEST)) {
+            l.setBounds(Double.valueOf(map.get(Parameters.BOUND_NORTH)),
+                    Double.valueOf(map.get(Parameters.BOUND_EAST)),
+                    Double.valueOf(map.get(Parameters.BOUND_SOUTH)),
+                    Double.valueOf(map.get(Parameters.BOUND_WEST)));
+        }
+        return l;
+    }
+
+
 }

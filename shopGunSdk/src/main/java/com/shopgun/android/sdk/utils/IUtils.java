@@ -39,6 +39,14 @@ public class IUtils {
         return ids;
     }
 
+    public static Set<String> toErnSet(List<? extends IErn<?>> list) {
+        Set<String> set = new HashSet<String>();
+        for (IErn<?> ern : list) {
+            set.add(ern.getErn());
+        }
+        return set;
+    }
+
     public static Set<String> getStoreIds(List<? extends IStore<?>> list) {
         Set<String> ids = new HashSet<String>(list.size());
         for (IStore is : list) {

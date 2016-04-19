@@ -22,7 +22,7 @@ def versionPatch = 0
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         versionCode versionMajor * 100000 + versionMinor * 1000 + versionPatch
