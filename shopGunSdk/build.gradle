@@ -35,7 +35,7 @@ ext {
     PROJ_REPO='maven'
     PROJ_GROUP='com.shopgun.android'
     PROJ_ARTIFACTID='sdk'
-    PROJ_VERSION='3.2.0'
+    PROJ_VERSION='3.2.1'
     PROJ_NAME='sdk'
     PROJ_ORG='shopgun'
     PROJ_WEBSITEURL='https://shopgun.com'
@@ -62,7 +62,7 @@ android {
 
     defaultConfig {
         minSdkVersion 10
-        targetSdkVersion 22
+        targetSdkVersion 23
     }
 
     compileOptions {
@@ -90,4 +90,4 @@ dependencies {
 
 // Apply the Bintray plugin. Do release with "gradlew bintrayUpload"
 // Setup BINTRAY_USER and BINTRAY_KEY in your global gradle.properties to upload
-//apply from: 'bintray.gradle'
+apply from: 'bintray.gradle'

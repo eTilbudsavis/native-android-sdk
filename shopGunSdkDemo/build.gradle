@@ -17,8 +17,8 @@
 apply plugin: 'com.android.application'
 
 def versionMajor = 3
-def versionMinor = 1
-def versionPatch = 0
+def versionMinor = 2
+def versionPatch = 1
 
 android {
     compileSdkVersion 23
@@ -47,6 +47,6 @@ android {
 
 dependencies {
     compile project(':shopGunSdk')
-    compile 'com.android.support:support-v4:23.1.1'
+    compile 'com.android.support:support-v4:23.3.0'
     compile 'com.jakewharton:butterknife:7.0.1'
 }
