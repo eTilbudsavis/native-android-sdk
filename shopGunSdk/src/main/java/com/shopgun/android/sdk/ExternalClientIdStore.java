@@ -18,8 +18,8 @@ package com.shopgun.android.sdk;
 
 import android.content.Context;
 import android.os.Environment;
+import android.util.Log;
 
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Session;
 import com.shopgun.android.sdk.utils.PermissionUtils;
 import com.shopgun.android.sdk.utils.Utils;
@@ -52,14 +52,14 @@ public class ExternalClientIdStore {
         // First try SharedPrefs
         String cid = sgn.getSettings().getClientId();
         if (cid != null) {
-            SgnLog.d(TAG, "getCid.sharedPreferences");
+            Log.d(TAG, "getCid.sharedPreferences");
             return cid;
         }
 
         // Then try external storage
         File cidFile = getCidFile(sgn.getContext());
         if (cidFile == null) {
-            SgnLog.d(TAG, "getCid.cidFile == null");
+            Log.d(TAG, "getCid.cidFile == null");
             return null;
         }
 
@@ -74,7 +74,7 @@ public class ExternalClientIdStore {
             // Read file and return data
             byte[] data = new byte[length];
             f.readFully(data);
-            SgnLog.d(TAG, "getCid.fromFile");
+            Log.d(TAG, "getCid.fromFile");
             return new String(data);
         } catch (Exception e) {
             // Ignore
@@ -93,14 +93,14 @@ public class ExternalClientIdStore {
     }
 
     private static boolean deleteCid(Context c) {
-        SgnLog.d(TAG, "deleteCid");
+        Log.d(TAG, "deleteCid");
         File f = getCidFile(c);
         return f != null && f.exists() && f.delete();
     }
 
     private static File getCidFile(Context context) {
 
-        SgnLog.d(TAG, "getCidFile");
+        Log.d(TAG, "getCidFile");
 
         try {
             if (MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) &&
@@ -108,7 +108,7 @@ public class ExternalClientIdStore {
 
                 File cacheDir = new File(Environment.getExternalStorageDirectory(), "cache");
                 if (!cacheDir.exists() && !cacheDir.mkdirs()) {
-                    SgnLog.w(TAG, "External directory couldn't be created");
+                    Log.w(TAG, "External directory couldn't be created");
                     return null;
                 }
 
