@@ -35,8 +35,8 @@ public class ExternalClientIdStore {
 
     private static final String CID_RANDOMJUNK = "randomjunkid";
 
-    public static void updateCid(Session s, Context c) {
-        String extCid = getCid(c);
+    public static void updateCid(Session s, ShopGun sgn) {
+        String extCid = getCid(sgn);
         if (CID_RANDOMJUNK.equals(s.getClientId()) || CID_RANDOMJUNK.equals(extCid)) {
             // Previously used this hardcoded cid in beta, recover it
             s.setClientId(Utils.createUUID());
@@ -44,27 +44,20 @@ public class ExternalClientIdStore {
             // No ClientID is set, try to get from disk
             s.setClientId(extCid);
         }
-        ShopGun.getInstance(c).getSettings().setClientId(s.getClientId());
+        sgn.getSettings().setClientId(s.getClientId());
     }
 
-    private static String getCid(Context c) {
+    private static String getCid(ShopGun sgn) {
 
-        SgnLog.printStackTrace(TAG);
         // First try SharedPrefs
-        ShopGun sgn = ShopGun.getInstance(c);
-        SgnLog.d(TAG, "getCid.2");
-        Settings settings = sgn.getSettings();
-        SgnLog.d(TAG, "getCid.3");
-        String cid = settings.getClientId();
-        SgnLog.d(TAG, "getCid.4");
-
+        String cid = sgn.getSettings().getClientId();
         if (cid != null) {
             SgnLog.d(TAG, "getCid.sharedPreferences");
             return cid;
         }
 
         // Then try external storage
-        File cidFile = getCidFile(c);
+        File cidFile = getCidFile(sgn.getContext());
         if (cidFile == null) {
             SgnLog.d(TAG, "getCid.cidFile == null");
             return null;
@@ -81,6 +74,7 @@ public class ExternalClientIdStore {
             // Read file and return data
             byte[] data = new byte[length];
             f.readFully(data);
+            SgnLog.d(TAG, "getCid.fromFile");
             return new String(data);
         } catch (Exception e) {
             // Ignore
@@ -92,7 +86,7 @@ public class ExternalClientIdStore {
             }
 
             // Cleanup the cid file, we won't need it any more
-            deleteCid(c);
+            deleteCid(sgn.getContext());
         }
 
         return null;
@@ -126,50 +120,6 @@ public class ExternalClientIdStore {
         }
 
         return null;
-    }
-
-    public static void test(Context c) {
-
-        long start = System.currentTimeMillis();
-
-        // Just clearing the prefs file
-        deleteCid(c);
-
-        boolean didFail = false;
-
-        String extCid = null;
-
-        // no CID has been obtained yet
-        Session s = new Session();
-        updateCid(s, c);
-        if (s.getClientId() != null || extCid != null) {
-            SgnLog.d(TAG, "ERROR: ClientId has been set: Session:" + s.getClientId() + ", mCid:" + extCid);
-            didFail = true;
-        }
-
-        String first = "fake_client_id";
-        s.setClientId(first);
-        updateCid(s, c);
-        if (!first.equals(s.getClientId())) {
-            SgnLog.d(TAG, "ERROR: ClientId changed: Session:" + s.getClientId() + ", mCid:" + extCid);
-            didFail = true;
-        }
-        if (!s.getClientId().equals(extCid)) {
-            SgnLog.d(TAG, "ERROR: ClientId mismstch: Session:" + s.getClientId() + ", mCid:" + extCid);
-            didFail = true;
-        }
-
-        String second = "new_fake_client_id";
-        s.setClientId(second);
-        updateCid(s, c);
-        if (!second.equals(s.getClientId()) || !s.getClientId().equals(extCid)) {
-            SgnLog.d(TAG, "ERROR: ClientId mismstch: Session:" + s.getClientId() + ", mCid:" + extCid);
-            didFail = true;
-        }
-
-        deleteCid(c);
-        SgnLog.d(TAG, "Test: " + (didFail ? "failed" : "succeded") + ", in " + (System.currentTimeMillis() - start));
-
     }
 
 }
