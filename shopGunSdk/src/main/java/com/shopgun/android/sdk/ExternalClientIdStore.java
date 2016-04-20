@@ -16,12 +16,14 @@
 
 package com.shopgun.android.sdk;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Session;
-import com.shopgun.android.sdk.utils.PermissionUtils;
 import com.shopgun.android.sdk.utils.Utils;
 
 import java.io.File;
@@ -101,21 +103,21 @@ public class ExternalClientIdStore {
 
     private static File getCidFile(Context context) {
 
-        try {
-            if (MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) &&
-                    PermissionUtils.hasWriteExternalStorage(context)) {
+        if (MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED) {
 
+            try {
                 File cacheDir = new File(Environment.getExternalStorageDirectory(), "cache");
                 if (!cacheDir.exists() && !cacheDir.mkdirs()) {
                     SgnLog.w(TAG, "External directory couldn't be created");
                     return null;
                 }
-
                 String fileName = context.getPackageName() + ".txt";
                 return new File(cacheDir, fileName);
+            } catch (Exception e) {
+                // If we are not allowed to access external storage
             }
-        } catch (Exception e) {
-            // If we are not allowed to access external storage
         }
 
         return null;
