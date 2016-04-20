@@ -1,16 +1,15 @@
 ShopGun Android SDK
 ===================
 
-The simple solution to querying for ShopGun-data.
+The simple solution to querying for ShopGun data.
 
-Getting Started
----------------
+## Getting Started
 
-#### Download with Gradle
+### Download with Gradle
 If you haven't already added `jCenter` to your `build.gradle`, you'll need this:
 ```groovy
 repositories {
-    jcenter() 
+    jcenter()
 }
 ```
 
@@ -18,7 +17,7 @@ Now add these lines to your module's `build.gradle`:
 
 ```groovy
 dependencies {
-	compile 'com.shopgun.android:sdk:3.2.0'
+    compile 'com.shopgun.android:sdk:3.2.1'
 }
 ```
 
@@ -29,7 +28,7 @@ include ':shopGunSdk'
 project(':shopGunSdk').projectDir=new File('/path/to/shopgun-android-sdk/shopGunSdk')
 ```
 
-#### <a name="api-key-secret">API key and secret
+### API key and secret
 You will need to get an *API key* and *API secret* from our 
 [ShopGun Developer site] (look for "My Apps")
 
@@ -37,7 +36,7 @@ If you wish to try our demo app, just clone and run it. We've included an API
 key and secret, that will work straight out of the box. But the key only provides 
 a limited amount of quereis pr day so don't use it in production.
 
-#### Setup AndroidManifest.xml
+### Setup AndroidManifest.xml
 
 We need certain permissions, to make the whole thing run:
 ```xml
@@ -45,8 +44,6 @@ We need certain permissions, to make the whole thing run:
 <uses-permission android:name="android.permission.INTERNET"/>
 <!-- Check for connectivity, prior to performing shoppinglist synchronization -->
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-<!-- Caching of images e.t.c. for Pageflip -->
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 ```
 
 Now add the ApiKey and ApiSecret, you obtained in 
@@ -67,19 +64,19 @@ Now add the ApiKey and ApiSecret, you obtained in
 </application>
 ```
 
-#### Initialize
-You'll need to inititlize the `ShopGun Android SDK` before you can use it. 
-You can do this from either `Application` or an `Activity`. 
+### Building the ShopGun instance
+By default you can call `ShopGun.getInstance(Context)` and we will set everything up for you, no worries. But if you want to custimize your experience, you can use the `ShopGun.Builder` to do so. Before you call `ShopGun.getInstance(Context)` for the very first time, just create a new `Builder` setit up, and call `Builder.build()`. See the example below.
 
 ```java
-// You'll need this import
-import com.shopgun.android.sdk.ShopGun;
-
-// And add this to your Application/Activity class
 @Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    ShopGun.create(this);
+    if (!ShopGun.hasInstance()) {
+        // The builder will automatically attach the ShopGun singleton.
+        new ShopGun.Builder(Activity.this)
+                .setDevelop(BuildConfig.DEBUG)
+                .build();
+    }
 }
 ```
 
@@ -90,19 +87,19 @@ further more, we'll need to know when your `Activity` performs `onStart()` and
 ```java
 @Override
 protected void onStart() {
-    ShopGun.getInstance().onStart();
+    ShopGun.getInstance(Activity.this).onStart();
     super.onStart();
 }
 
 @Override
 protected void onStop() {
     super.onStop();
-    ShopGun.getInstance().onStop();
+    ShopGun.getInstance(Activity.this).onStop();
 }
 
 ```
 
-#### Location
+### Location
 We are very keen on delivering content close to the user, therefore we'll need
 to know their location. 
 
@@ -118,7 +115,7 @@ loc.setSensor(false);
 Typically you'll hook into LocationManager to get the device location, rather 
 than hardcode it ;-)
 
-#### Performing yout first request
+### Performing yout first request
 
 Let's try to get a list of catalogs.
 
@@ -161,7 +158,6 @@ find some common usecases for the SDK. It's bundled with the SDK.
 Features
 --------
 
-
 * [Requests](#first-request)
 * [Pageflip](#pageflip)
 * [SessionManager](#sessionmanager)
@@ -190,19 +186,19 @@ Please try to follow existing code convention and style, when committing code.
 License
 -------
 
-	Copyright 2015 ShopGun
-	
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
-	
-	  http://www.apache.org/licenses/LICENSE-2.0
-	
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
+    Copyright 2015 ShopGun
+    
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+      http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 
 [ShopGun Developer site]:https://business.shopgun.com/developers/
