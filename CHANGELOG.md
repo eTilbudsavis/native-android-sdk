@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+Version 3.2.1 *(2016-04-20)*
+----------------------------
+* Prepared for Android Marshmallow
+* Added functionality to `ShopGun.Builder`
+* Bugfix in key handling
+* Removed file caching on external storage
+
 Version 3.2.0 *(2016-03-04)*
 ----------------------------
 

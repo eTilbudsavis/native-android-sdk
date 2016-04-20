@@ -413,6 +413,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
     /**
      * Set the list of categories for this object.
      * @param categoryIds A list of categories
+     * @return This object
      */
     public Store setCategoryIds(Set<String> categoryIds) {
         mCategoryIds = categoryIds;

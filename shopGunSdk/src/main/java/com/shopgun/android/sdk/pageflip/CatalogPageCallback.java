@@ -77,6 +77,7 @@ public interface CatalogPageCallback {
 
     /**
      * Get the collector to be used for stats collection
+     * @param pages The pages to create a collector for
      * @return A collector
      */
     PageflipStatsCollector getCollector(int[] pages);

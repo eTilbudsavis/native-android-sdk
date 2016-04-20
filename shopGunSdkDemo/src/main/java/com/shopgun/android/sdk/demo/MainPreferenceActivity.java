@@ -37,7 +37,7 @@ public class MainPreferenceActivity extends BasePreferenceActivity implements Pr
         @Override
         public void run() {
             Toast.makeText(MainPreferenceActivity.this, "Running SDK Unit Test", Toast.LENGTH_SHORT).show();
-            SdkTest.test();
+            SdkTest.test(getApplicationContext());
             Toast.makeText(MainPreferenceActivity.this, "SDK Unit Test: Success", Toast.LENGTH_SHORT).show();
         }
     };

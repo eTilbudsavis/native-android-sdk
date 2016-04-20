@@ -77,7 +77,7 @@ public class SessionManager {
         if (mSession == null) {
             mSession = new Session();
         }
-        ExternalClientIdStore.updateCid(mSession, mShopGun.getContext());
+        ExternalClientIdStore.updateCid(mSession, mShopGun);
     }
 
     /**
@@ -239,7 +239,7 @@ public class SessionManager {
             int newId = s.getUser().getUserId();
 
             mSession = s;
-            ExternalClientIdStore.updateCid(mSession, mShopGun.getContext());
+            ExternalClientIdStore.updateCid(mSession, mShopGun);
             mShopGun.getSettings().setSessionJson(session);
 
             // Reset session retry boolean
@@ -301,7 +301,7 @@ public class SessionManager {
             }
         }
 
-        ExternalClientIdStore.updateCid(mSession, mShopGun.getContext());
+        ExternalClientIdStore.updateCid(mSession, mShopGun);
     }
 
     public void onStop() {
@@ -531,7 +531,7 @@ public class SessionManager {
         synchronized (LOCK) {
             int oldUserId = mSession.getUser().getUserId();
             mSession = new Session();
-            ExternalClientIdStore.updateCid(mSession, mShopGun.getContext());
+            ExternalClientIdStore.updateCid(mSession, mShopGun);
             mShopGun.getSettings().setSessionJson(mSession.toJSON());
             mShopGun.getSettings().setSessionFacebook(null);
             clearUser();

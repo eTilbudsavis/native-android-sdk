@@ -123,6 +123,7 @@ public abstract class LoaderRequest<T> extends Request<T> implements Delivery {
 
     /**
      * Method for creating the needed requests for filling out a given object
+     * @param data The data to use in this request
      * @return A list of Request
      */
     public abstract List<Request> createRequests(T data);

@@ -40,14 +40,31 @@ public class ActivityCounter implements Runnable {
     private boolean mAwaitingTermination = false;
     private final Object LOCK = new Object();
 
+    /**
+     * Instantiate an instance of ActivityCounter.
+     * @param listener A listener for callbacks
+     */
     public ActivityCounter(OnLifecycleEvent listener) {
         this(listener, DELAY, new Handler(Looper.getMainLooper()));
     }
 
+    /**
+     * Instantiate an instance of ActivityCounter.
+     * @param listener A listener for callbacks
+     * @param delay The delay (in ms) from this ActivityCounter receives the last {@link #stop()}
+     *              until it will trigger the {@link OnLifecycleEvent#onPerformStop()}
+     */
     public ActivityCounter(OnLifecycleEvent listener, int delay) {
         this(listener, delay, new Handler(Looper.getMainLooper()));
     }
 
+    /**
+     * Instantiate an instance of ActivityCounter.
+     * @param listener A listener for callbacks
+     * @param delay The delay (in ms) from this ActivityCounter receives the last {@link #stop()}
+     *              until it will trigger the {@link OnLifecycleEvent#onPerformStop()}
+     * @param handler A handler
+     */
     public ActivityCounter(OnLifecycleEvent listener, int delay, Handler handler) {
         this.mListener = listener;
         this.mDelay = delay < 0 ? 0 : delay;
@@ -103,8 +120,13 @@ public class ActivityCounter implements Runnable {
         }
     }
 
+    /**
+     * Interface for receiving callbacks when the {@link android.app.Application} is supposedly about to stopped.
+     */
     public interface OnLifecycleEvent {
+        /** Signal sent when the first activity have been started */
         void onPerformStart();
+        /** Signal sent when the last activity have been stopped */
         void onPerformStop();
     }
 

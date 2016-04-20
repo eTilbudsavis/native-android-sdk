@@ -48,7 +48,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -124,7 +123,7 @@ public class SgnJson {
         synchronized (DATE_FORMATTER) {
             try {
                 return DATE_FORMATTER.parse(date);
-            } catch (ParseException e) {
+            } catch (Exception e) {
                 return null;
             }
         }
@@ -154,6 +153,8 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code null}.
+     * @param key the key to lookup
+     * @return the mapped value or {@code null}
      */
     public Object get(String key) {
         return mObject.opt(key);
@@ -161,6 +162,9 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
+     * @param key the key to lookup
+     * @param defValue the default value to return
+     * @return the mapped value or {@code defValue}
      */
     public Object get(String key, Object defValue) {
         try {
@@ -174,6 +178,8 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code false}.
+     * @param key the key to lookup
+     * @return the mapped value or {@code false}
      */
     public boolean getBoolean(String key) {
         return getBoolean(key, false);
@@ -181,6 +187,9 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
+     * @param key the key to lookup
+     * @param defValue the default value to return
+     * @return the mapped value or {@code defValue}
      */
     public boolean getBoolean(String key, boolean defValue) {
         mStats.logKey(key);
@@ -189,6 +198,8 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code 0.0d}.
+     * @param key the key to lookup
+     * @return the mapped value or {@code 0.0d}
      */
     public double getDouble(String key) {
         return getDouble(key, 0.0d);
@@ -196,6 +207,9 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
+     * @param key the key to lookup
+     * @param defValue the default value to return
+     * @return the mapped value or {@code defValue}
      */
     public double getDouble(String key, double defValue) {
         mStats.logKey(key);
@@ -204,6 +218,8 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code 0.0d}.
+     * @param key the key to lookup
+     * @return the mapped value or {@code 0.0f}
      */
     public float getFloat(String key) {
         return getFloat(key, 0.0f);
@@ -211,6 +227,9 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
+     * @param key the key to lookup
+     * @param defValue the default value to return
+     * @return the mapped value or {@code defValue}
      */
     public float getFloat(String key, float defValue) {
         return (float) mObject.optDouble(key, defValue);
@@ -218,6 +237,8 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else 0.
+     * @param key the key to lookup
+     * @return the mapped value or {@code 0}
      */
     public int getInt(String key) {
         return getInt(key, 0);
@@ -225,6 +246,9 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
+     * @param key the key to lookup
+     * @param defValue the default value to return
+     * @return the mapped value or {@code defValue}
      */
     public int getInt(String key, int defValue) {
         try {
@@ -238,6 +262,8 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code null}.
+     * @param key the key to lookup
+     * @return the mapped value or {@code null}
      */
     public JSONArray getJSONArray(String key) {
         return getJSONArray(key, null);
@@ -245,6 +271,9 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
+     * @param key the key to lookup
+     * @param defValue the default value to return
+     * @return the mapped value or {@code defValue}
      */
     public JSONArray getJSONArray(String key, JSONArray defValue) {
         try {
@@ -258,6 +287,8 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code null}.
+     * @param key the key to lookup
+     * @return the mapped value or {@code null}
      */
     public JSONObject getJSONObject(String key) {
         return getJSONObject(key, null);
@@ -265,6 +296,9 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
+     * @param key the key to lookup
+     * @param defValue the default value to return
+     * @return the mapped value or {@code defValue}
      */
     public JSONObject getJSONObject(String key, JSONObject defValue) {
         try {
@@ -278,6 +312,8 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code 0}.
+     * @param key the key to lookup
+     * @return the mapped value or {@code 0L}
      */
     public long getLong(String key) {
         return getLong(key, 0L);
@@ -285,6 +321,9 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
+     * @param key the key to lookup
+     * @param defValue the default value to return
+     * @return the mapped value or {@code defValue}
      */
     public long getLong(String key, long defValue) {
         mStats.logKey(key);
@@ -293,6 +332,8 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code null}.
+     * @param key the key to lookup
+     * @return the mapped value or {@code null}
      */
     public String getString(String key) {
         return getString(key, null);
@@ -300,6 +341,9 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
+     * @param key the key to lookup
+     * @param defValue the default value to return
+     * @return the mapped value or {@code defValue}
      */
     public String getString(String key, String defValue) {
         try {
@@ -314,6 +358,8 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code new Date(0)}.
+     * @param key the key to lookup
+     * @return the mapped value or {@code new Date(0)}
      */
     public Date getDate(String key) {
         return getDate(key, null);
@@ -321,6 +367,9 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
+     * @param key the key to lookup
+     * @param defValue the default value to return
+     * @return the mapped value or {@code defValue}
      */
     public Date getDate(String key, Date defValue) {
         Date date = toDate(getString(key));
@@ -329,6 +378,8 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@link Color#BLACK}.
+     * @param key the key to lookup
+     * @return the mapped value or {@link Color#BLACK}
      */
     public int getColor(String key) {
         return getColor(key, Color.BLACK);
@@ -336,6 +387,9 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
+     * @param key the key to lookup
+     * @param defValue the default value to return
+     * @return the mapped value or {@code defValue}
      */
     public int getColor(String key, int defValue) {
         String rawColor = getString(key);
@@ -355,6 +409,8 @@ public class SgnJson {
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else a {@link MaterialColor}
      * set to {@link Color#BLACK}.
+     * @param key the key to lookup
+     * @return the mapped value or a {@link MaterialColor} set to {@link Color#BLACK}
      */
     public MaterialColor getMaterialColor(String key) {
         return getMaterialColor(key, new SgnColor(Color.BLACK));
@@ -362,6 +418,9 @@ public class SgnJson {
 
     /**
      * Returns the value mapped by {@code key} if it exists, coercing it if necessary else {@code defValue}.
+     * @param key the key to lookup
+     * @param defValue the default value to return
+     * @return the mapped value or {@code defValue}
      */
     public MaterialColor getMaterialColor(String key, MaterialColor defValue) {
         int color = getColor(key, Color.BLACK);
@@ -1509,7 +1568,7 @@ public class SgnJson {
     }
 
     public SgnJson setCategoryIds(Set<String> value) {
-        put(CATEGORY_IDS, new JSONArray(value));
+        put(CATEGORY_IDS, value == null ? new JSONArray() : new JSONArray(value));
         return this;
     }
 

@@ -156,6 +156,7 @@ public class Country implements IErn<Country>, IJson<JSONObject>, Parcelable {
      * Set the URL to a website in which is it possible for the user to 'unsubscribe' them or their
      * household from receiving the physical catalogs.
      * @param url A string
+     * @return This object
      */
     public Country setUnsubscribePrintUrl(String url) {
         mUnsubscribeUrl = url;

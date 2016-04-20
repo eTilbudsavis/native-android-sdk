@@ -37,7 +37,7 @@ public class BaseListActivity extends PreferenceActivity {
 
     @Override
     protected void onStart() {
-        ShopGun.getInstance().onStart();
+        ShopGun.getInstance(this).onStart();
         super.onStart();
     }
 
@@ -45,7 +45,7 @@ public class BaseListActivity extends PreferenceActivity {
     protected void onStop() {
         super.onStop();
         hideProgress();
-        ShopGun.getInstance().onStop();
+        ShopGun.getInstance(this).onStop();
     }
 
     protected void showProgress(String message) {

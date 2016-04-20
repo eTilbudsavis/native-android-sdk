@@ -16,9 +16,6 @@
 
 package com.shopgun.android.sdk.utils;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
-
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
@@ -31,12 +28,6 @@ public class PermissionUtils {
     public static final String TAG = Constants.getTag(PermissionUtils.class);
 
     public static final String ERROR_MISSING_PERMISSION = "User doesn't have edit permissions, reason: %s";
-
-    private static final String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
-
-    public static boolean hasWriteExternalStorage(Context c) {
-        return c.checkCallingOrSelfPermission(WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-    }
 
     /**
      * Method that determines if a {@link User} can edit a list of {@link Shoppinglist}

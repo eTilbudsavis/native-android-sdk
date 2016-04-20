@@ -493,6 +493,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     /**
      * Method for setting the {@link Page} associated with this catalog
      * @param pages A pages object
+     * @return This object
      */
     public Catalog setPages(List<Images> pages) {
         mPages = pages;
@@ -573,6 +574,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     /**
      * Set the list of categories for this catalog.
      * @param categoryIds A list of categories
+     * @return This object
      */
     public Catalog setCategoryIds(Set<String> categoryIds) {
         mCategoryIds = categoryIds;
@@ -602,6 +604,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     /**
      * Set the URL where the PDF can be downloaded.
      * @param pdfUrl A url
+     * @return This object
      */
     public Catalog setPdfUrl(String pdfUrl) {
         mPdfUrl = pdfUrl;
