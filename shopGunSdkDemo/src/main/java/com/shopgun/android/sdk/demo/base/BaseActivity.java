@@ -37,14 +37,14 @@ public class BaseActivity extends FragmentActivity {
 
     @Override
     protected void onStart() {
-        ShopGun.getInstance().onStart();
+        ShopGun.getInstance(this).onStart();
         super.onStart();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        ShopGun.getInstance().onStop();
+        ShopGun.getInstance(this).onStop();
     }
 
     protected void showProgress(String title, String message) {
