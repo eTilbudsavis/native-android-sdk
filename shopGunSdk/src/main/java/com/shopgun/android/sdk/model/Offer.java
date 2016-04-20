@@ -647,6 +647,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
     /**
      * Set the list of categories for this object.
      * @param categoryIds A list of categories
+     * @return This object
      */
     public Offer setCategoryIds(Set<String> categoryIds) {
         mCategoryIds = categoryIds;

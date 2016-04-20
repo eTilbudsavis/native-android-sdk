@@ -135,6 +135,7 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
     /**
      * Set the length of the match the typeahead has, given a query
      * @param length The length of the match. This may not be longer that the length of the subject
+     * @return This object
      */
     public Typeahead setLength(int length) {
         mLength = length;
@@ -152,6 +153,7 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
     /**
      * Set the offset into the {@link #getSubject() subject} before there is a match
      * @param offset The offset to the match
+     * @return This object
      */
     public Typeahead setOffset(int offset) {
         mOffset = offset;
@@ -171,6 +173,7 @@ public class Typeahead implements IJson<JSONObject>, Parcelable {
      * When subject is set, offset and length is automatically updated as well.
      *
      * @param subject A {@link String}
+     * @return This object
      */
     public Typeahead setSubject(String subject) {
         mSubject = subject;

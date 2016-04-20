@@ -429,7 +429,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
         return mDevelop;
     }
 
-    /** @deprecated Use {@link #getInstance(Context)} */
+    /** @deprecated Use {@link Builder} to set this value */
     @Deprecated
     public synchronized void setDevelop(boolean develop) {
         if (mDevelop != develop) {

@@ -262,6 +262,7 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
     /**
      * Set the list of categories for this catalog.
      * @param categoryIds A list of categories
+     * @return This object
      */
     public Dealer setCategoryIds(Set<String> categoryIds) {
         mCategoryIds = categoryIds;
