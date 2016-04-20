@@ -95,6 +95,7 @@ public class OfferSearchActivity extends BaseActivity implements View.OnClickLis
                 } else {
                     // Do error checking and handle situation appropriately
                 }
+                mPd.dismiss();
             }
 
             @Override
