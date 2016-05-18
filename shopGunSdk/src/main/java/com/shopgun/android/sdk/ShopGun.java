@@ -20,7 +20,6 @@ import android.app.Application;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,11 +35,10 @@ import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.network.Cache;
-import com.shopgun.android.sdk.network.HttpStack;
 import com.shopgun.android.sdk.network.Network;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.RequestQueue;
-import com.shopgun.android.sdk.network.impl.DefaultHttpNetwork;
+import com.shopgun.android.sdk.network.impl.DefaultRedirectProtocol;
 import com.shopgun.android.sdk.network.impl.HttpURLNetwork;
 import com.shopgun.android.sdk.network.impl.MemoryCache;
 import com.shopgun.android.sdk.network.impl.NetworkImpl;
@@ -712,13 +710,7 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
             }
 
             if (mNetwork == null) {
-                HttpStack stack;
-                if (Build.VERSION.SDK_INT > 8) {
-                    stack = new HttpURLNetwork();
-                } else {
-                    stack = new DefaultHttpNetwork();
-                }
-                mNetwork = new NetworkImpl(stack);
+                mNetwork = new NetworkImpl(new HttpURLNetwork(new DefaultRedirectProtocol()));
             }
 
             if (mLog == null) {
