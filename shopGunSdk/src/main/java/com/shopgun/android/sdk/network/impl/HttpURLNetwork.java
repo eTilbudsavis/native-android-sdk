@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 
 public class HttpURLNetwork implements HttpStack {
 
-    public static final String TAG = Constants.getTag(HttpURLNetworkRedirect.class);
+    public static final String TAG = Constants.getTag(HttpURLNetwork.class);
 
     Pattern mHostPatternPrefix = Pattern.compile("^(shopgun\\.com|etilbudsavis\\.dk|api\\.etilbudsavis\\.dk|api-edge\\.etilbudsavis\\.dk|api-staging\\.etilbudsavis\\.dk).*$");
     Pattern mHostPatternPostfix = Pattern.compile(".*?(shopgun\\.com|etilbudsavis\\.dk)");
