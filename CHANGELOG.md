@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 3.2.2
+----------------------------
+* New: `RedirectProtocol` to handle redirects when performing http requests.
+* Removed: Legacy network `DefaultHttpNetwork`, dur to problems with redirect, and SSL certificates.
+
 Version 3.2.1 *(2016-04-20)*
 ----------------------------
 * Prepared for Android Marshmallow
