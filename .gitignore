@@ -29,7 +29,6 @@ proguard/
 # Windows clutter
 Thumbs.db
 
-
 # Facebook Infer
 infer-out/
 
@@ -39,3 +38,9 @@ infer-out/
 .idea/libraries
 .idea/datasources.xml
 .idea/dataSources.ids
+
+# Intellij IDEA custom
+.idea/misc.xml
+*.iml
+*.iws
+*.ipr
