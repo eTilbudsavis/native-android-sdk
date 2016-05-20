@@ -26,7 +26,7 @@ import java.io.UnsupportedEncodingException;
 
 public class ByteRequest extends Request<byte[]> {
 
-    private String mRequestBody;
+    private byte[] mRequestBody;
     private String mProtocolContentType;
     private Priority mPriority = Priority.MEDIUM;
 
@@ -49,11 +49,7 @@ public class ByteRequest extends Request<byte[]> {
 
     @Override
     public byte[] getBody() {
-        try {
-            return mRequestBody == null ? null : mRequestBody.getBytes(DEFAULT_PARAMS_ENCODING);
-        } catch (UnsupportedEncodingException uee) {
-            return null;
-        }
+        return mRequestBody;
     }
 
     @Override
