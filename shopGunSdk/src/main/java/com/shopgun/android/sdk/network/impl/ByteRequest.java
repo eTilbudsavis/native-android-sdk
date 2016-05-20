@@ -22,8 +22,6 @@ import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.utils.Utils;
 
-import java.io.UnsupportedEncodingException;
-
 public class ByteRequest extends Request<byte[]> {
 
     private byte[] mRequestBody;
@@ -50,6 +48,11 @@ public class ByteRequest extends Request<byte[]> {
     @Override
     public byte[] getBody() {
         return mRequestBody;
+    }
+
+    public ByteRequest setBody(byte[] body) {
+        mRequestBody = body;
+        return this;
     }
 
     @Override
