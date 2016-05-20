@@ -492,4 +492,56 @@ public final class Utils {
         }
     }
 
+    /**
+     *
+     * @param o
+     * @return
+     */
+    public static Map<String, String> getDeclaredFields(Object o) {
+        HashMap<String, String> map = new HashMap<String, String>();
+
+        //determine fields declared in this class only (no fields of superclass)
+        Field[] fields = o.getClass().getDeclaredFields();
+
+        //print field names paired with their values
+        for ( Field field : fields  ) {
+            try {
+                field.setAccessible(true);
+                map.put(field.getName(), String.valueOf(field.get(o)));
+            } catch ( IllegalAccessException ex ) {
+                System.out.println(ex);
+            }
+        }
+        return map;
+    }
+
+    /**
+     * Get a
+     * @param o
+     * @return
+     */
+    public static String getDeclaredFieldsPrintable(Object o) {
+        Map<String, String> map = getDeclaredFields(o);
+
+        StringBuilder result = new StringBuilder();
+        String newLine = System.getProperty("line.separator");
+
+        result.append( o.getClass().getName() );
+        result.append( " Object {" );
+        result.append(newLine);
+
+        //print field names paired with their values
+        for ( Map.Entry<String, String> e : map.entrySet()  ) {
+            result.append("  ");
+            result.append( e.getKey() );
+            result.append(": ");
+            //requires access to private field:
+            result.append(e.getValue());
+            result.append(newLine);
+        }
+        result.append("}");
+
+        return result.toString();
+    }
+
 }
