@@ -192,6 +192,12 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
         }
     }
 
+    public static boolean isRunning() {
+        synchronized (ShopGun.class) {
+            return ShopGun.hasInstance() && mShopGun.isStarted();
+        }
+    }
+
     /** @deprecated Use {@link #getInstance(Context)} */
     @Deprecated
     public static ShopGun getInstance() {
