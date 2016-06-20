@@ -94,9 +94,7 @@ public class NetworkImpl implements Network {
                 responseHeaders.put(h.getName(), h.getValue());
             }
 
-            NetworkResponse r = new NetworkResponse(resp.getStatusLine().getStatusCode(), content, responseHeaders);
-
-            return r;
+            return new NetworkResponse(resp.getStatusLine().getStatusCode(), content, responseHeaders);
 
         } catch (Exception e) {
             SgnLog.e(TAG, e.getMessage(), e);

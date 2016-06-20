@@ -315,11 +315,11 @@ public class SessionManager {
         args.put(Parameters.TOKEN_TTL, TTL);
         args.put(Parameters.API_KEY, mShopGun.getApiKey());
 
-        CookieSyncManager.createInstance(mShopGun.getContext());
-        CookieManager cm = CookieManager.getInstance();
-        String cookieString = cm.getCookie(ETA_COOKIE_DOMAIN);
+        try {
 
-        if (cookieString != null) {
+            CookieSyncManager.createInstance(mShopGun.getContext());
+            CookieManager cm = CookieManager.getInstance();
+            String cookieString = cm.getCookie(ETA_COOKIE_DOMAIN);
 
             // No session yet, check cookies for old token
             String authId = null;
@@ -357,6 +357,10 @@ public class SessionManager {
             // Clear all cookie data, just to make sure
             cm.removeAllCookie();
 
+        } catch (Exception e) {
+            // An unfortunate situation, where the system is updating the WebView app
+            // at the exact time where we're trying to grab the CookieManager.
+            // https://bugs.chromium.org/p/chromium/issues/detail?id=506369
         }
 
         JsonObjectRequest req = new JsonObjectRequest(Method.POST, Endpoint.SESSIONS, new JSONObject(args), new SessionListenerWrapper(l));

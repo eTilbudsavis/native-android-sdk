@@ -1,24 +1,3 @@
 <component name="CopyrightManager">
-  <settings default="ShopGun SDK">
-    <module2copyright>
-      <element module="All" copyright="ShopGun SDK" />
-    </module2copyright>
-    <LanguageOptions name="Groovy">
-      <option name="separateBefore" value="true" />
-      <option name="separateAfter" value="true" />
-    </LanguageOptions>
-    <LanguageOptions name="JAVA">
-      <option name="separateBefore" value="true" />
-      <option name="separateAfter" value="true" />
-    </LanguageOptions>
-    <LanguageOptions name="XML">
-      <option name="fileTypeOverride" value="3" />
-      <option name="prefixLines" value="false" />
-      <option name="filler" value="-" />
-    </LanguageOptions>
-    <LanguageOptions name="__TEMPLATE__">
-      <option name="separateBefore" value="true" />
-      <option name="separateAfter" value="true" />
-    </LanguageOptions>
-  </settings>
+  <settings default="" />
 </component>

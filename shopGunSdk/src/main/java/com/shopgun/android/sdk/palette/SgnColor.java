@@ -19,10 +19,9 @@ package com.shopgun.android.sdk.palette;
 import android.graphics.Color;
 import android.os.Parcel;
 
-import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.utils.ColorUtils;
+import com.shopgun.android.utils.ColorUtils;
 
-public class SgnColor extends Color implements  MaterialColor {
+public class SgnColor implements MaterialColor {
 
     public static final String TAG = SgnColor.class.getSimpleName();
 
@@ -70,14 +69,14 @@ public class SgnColor extends Color implements  MaterialColor {
         this.mColor = color;
     }
 
-    public SgnColor(SgnColor color) {
-        this.mColor = color.mColor;
+    public SgnColor(MaterialColor color) {
+        this.mColor = color.getValue();
     }
 
     public static float getModifiedHue(float hue, Shade shade) {
         float s = (float)shade.getValue();
         if (s > 500) {
-            // Laurie's calculations are based on hue being in the range [0.0-1.0]
+            // Initial calculations are based on hue being in the range [0.0-1.0]
             // java has the range [0.0-360.0] so we'll do a little conversion
             hue = hue/360.0f;
             float hueAt900 = (1.003f*hue) - 0.016f;
@@ -129,7 +128,7 @@ public class SgnColor extends Color implements  MaterialColor {
         int upperIndex = Math.min( Math.max(indexCeil, 0), max );
 
         float lowerPercent = mValuePercentConversion[lowerIndex];
-        float valuePercent = 0.0f;
+        float valuePercent;
         if (lowerIndex != upperIndex) {
             float upperPercent = mValuePercentConversion[upperIndex];
             float deltaPercent = upperPercent-lowerPercent;
@@ -146,7 +145,7 @@ public class SgnColor extends Color implements  MaterialColor {
         }
     }
 
-    public static SgnColor getModifiedColor(int color, Shade shade) {
+    public static MaterialColor getModifiedColor(int color, Shade shade) {
         int modified = color;
         if (shade != Shade.Shade500) {
             float[] hsv = new float[3];
@@ -156,21 +155,7 @@ public class SgnColor extends Color implements  MaterialColor {
             hsv[2] = getModifiedValue(hsv[2], shade);
             modified = Color.HSVToColor(Color.alpha(color), hsv);
         }
-//        print(shade, color, modified);
         return new SgnColor(modified);
-    }
-
-    private static String hsvToString(float[] hsv) {
-        return String.format("%.2f, %.2f, %.2f", hsv[0], hsv[1], hsv[2]);
-    }
-
-    private static void print(Shade shade, int orig, int modified) {
-        float[] origHsv = new float[3];
-        Color.colorToHSV(orig, origHsv);
-        float[] modHsv = new float[3];
-        Color.colorToHSV(modified, modHsv);
-        String format = "shade: %3s, orig.hsv[%s], mod.hsv[%s]";
-        SgnLog.d(TAG, String.format(format, shade.getValue(), hsvToString(origHsv), hsvToString(modHsv)));
     }
 
     @Override
@@ -260,7 +245,7 @@ public class SgnColor extends Color implements  MaterialColor {
 
     @Override
     public String toString() {
-        return String.format("#%08X", mColor);
+        return ColorUtils.toARGBString(mColor);
     }
 
     /**
@@ -286,7 +271,7 @@ public class SgnColor extends Color implements  MaterialColor {
      * @return A string
      */
     public String toHSVString() {
-        return com.shopgun.android.sdk.utils.ColorUtils.toHsvString(mColor);
+        return ColorUtils.toHsvString(mColor);
     }
 
     @Override
@@ -359,4 +344,5 @@ public class SgnColor extends Color implements  MaterialColor {
             return new SgnColor[size];
         }
     };
+
 }

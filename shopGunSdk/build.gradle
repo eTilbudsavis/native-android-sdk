@@ -22,7 +22,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:3.1.1"
     }
@@ -35,7 +35,7 @@ ext {
     PROJ_REPO='maven'
     PROJ_GROUP='com.shopgun.android'
     PROJ_ARTIFACTID='sdk'
-    PROJ_VERSION='3.2.1'
+    PROJ_VERSION='3.2.2'
     PROJ_NAME='sdk'
     PROJ_ORG='shopgun'
     PROJ_WEBSITEURL='https://shopgun.com'
@@ -82,10 +82,13 @@ android {
 }
 
 dependencies {
+    compile project(':markhor')
     compile 'com.android.support:support-v4:23.3.0'
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.squareup.okhttp:okhttp:2.7.5'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:1.10.19'
 }
 
 // Apply the Bintray plugin. Do release with "gradlew bintrayUpload"

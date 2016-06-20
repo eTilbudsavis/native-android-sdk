@@ -17,11 +17,8 @@
 package com.shopgun.android.sdk.utils;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.SgnLog;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
+@Deprecated
 public class HashUtils {
 
     public static final String TAG = Constants.getTag(HashUtils.class);
@@ -33,48 +30,11 @@ public class HashUtils {
      * @return A SHA256 string
      */
     public static String sha256(String string) {
-
-        MessageDigest digest = null;
-        String hash = "";
-        try {
-            digest = MessageDigest.getInstance("SHA-256");
-            digest.update(string.getBytes());
-            byte[] bytes = digest.digest();
-
-            StringBuffer sb = new StringBuffer();
-            for (byte b : bytes) {
-                String hex = Integer.toHexString(0xFF & b);
-                if (hex.length() == 1) {
-                    sb.append('0');
-                }
-                sb.append(hex);
-            }
-            hash = sb.toString();
-
-        } catch (NoSuchAlgorithmException e1) {
-            e1.printStackTrace();
-        }
-        return hash;
+        return com.shopgun.android.utils.HashUtils.sha256(string);
     }
 
     public static String md5(String s) {
-        try {
-            // Create MD5 Hash
-            MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
-            digest.update(s.getBytes());
-            byte messageDigest[] = digest.digest();
-
-            // Create Hex String
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : messageDigest) {
-                hexString.append(Integer.toHexString(0xFF & b));
-            }
-            return hexString.toString();
-
-        } catch (NoSuchAlgorithmException e) {
-            SgnLog.e(TAG, e.getMessage(), e);
-        }
-        return "";
+        return com.shopgun.android.utils.HashUtils.md5(s);
     }
 
 }

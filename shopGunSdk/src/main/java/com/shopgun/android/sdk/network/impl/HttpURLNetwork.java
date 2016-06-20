@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.network.impl;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.network.HttpStack;
+import com.shopgun.android.sdk.network.RedirectProtocol;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.utils.HeaderUtils;
 import com.shopgun.android.sdk.utils.Utils;
@@ -35,15 +36,83 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 public class HttpURLNetwork implements HttpStack {
 
     public static final String TAG = Constants.getTag(HttpURLNetwork.class);
 
-    static void setRequestMethod(HttpURLConnection connection, Request<?> request) throws IOException {
+    Pattern mHostPatternPrefix = Pattern.compile("^(shopgun\\.com|etilbudsavis\\.dk|api\\.etilbudsavis\\.dk|api-edge\\.etilbudsavis\\.dk|api-staging\\.etilbudsavis\\.dk).*$");
+    Pattern mHostPatternPostfix = Pattern.compile(".*?(shopgun\\.com|etilbudsavis\\.dk)");
+
+    final RedirectProtocol mRedirectProtocol;
+
+    public HttpURLNetwork(RedirectProtocol redirectProtocol) {
+        mRedirectProtocol = redirectProtocol;
+    }
+
+    public HttpResponse performNetworking(Request<?> request) throws IOException {
+        String tmpUrl = Utils.requestToUrlAndQueryString(request);
+        ArrayList<URL> urls = new ArrayList<URL>();
+        urls.add(new URL(tmpUrl));
+        return performNetworking(request, urls);
+    }
+
+    private HttpResponse performNetworking(Request<?> request, ArrayList<URL> urls) throws IOException {
+
+        URL url = urls.get(urls.size()-1);
+        HttpURLConnection connection = openConnection(request, url);
+        HttpResponse response = getHttpResponse(connection);
+
+        if (response.getStatusLine().getStatusCode() == -1) {
+            throw new IOException("Connection returned invalid response code.");
+        }
+
+        if (mRedirectProtocol.isRedirectRequested(request, response, urls)) {
+            URL redirectUrl = mRedirectProtocol.getRedirectLocation(request, response, urls);
+            if (redirectUrl != null) {
+                urls.add(redirectUrl);
+                return performNetworking(request, urls);
+            }
+        }
+
+        HttpEntity entity = getEntity(connection);
+        response.setEntity(entity);
+
+        if (urls.size() > 1) {
+            mRedirectProtocol.onRedirectComplete(request, urls);
+        }
+
+        return response;
+    }
+
+    private HttpURLConnection openConnection(Request<?> request, URL url) throws IOException {
+
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        connection.setConnectTimeout(request.getTimeOut());
+        connection.setReadTimeout(request.getTimeOut());
+        connection.setUseCaches(false);
+        connection.setDoInput(true);
+        connection.setInstanceFollowRedirects(false);
+
+        setHeaders(request, connection);
+        setRequestMethod(connection, request);
+        return connection;
+    }
+
+    private void setHeaders(Request<?> request, HttpURLConnection connection) {
+        HashMap<String, String> headers = new HashMap<String, String>(request.getHeaders().size());
+        headers.putAll(request.getHeaders());
+        for (String key : headers.keySet())
+            connection.setRequestProperty(key, headers.get(key));
+    }
+
+    private void setRequestMethod(HttpURLConnection connection, Request<?> request) throws IOException {
 
         String method = request.getMethod().toString();
         connection.setRequestMethod(method);
@@ -59,15 +128,20 @@ public class HttpURLNetwork implements HttpStack {
         }
     }
 
-    private static void addBodyIfExists(HttpURLConnection connection, Request<?> request) throws IOException {
-        byte[] body = request.getBody();
-        if (body != null) {
-            connection.setDoOutput(true);
-            connection.addRequestProperty(HeaderUtils.CONTENT_TYPE, request.getBodyContentType());
-            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-            out.write(body);
-            out.close();
+    private HttpResponse getHttpResponse(HttpURLConnection connection) throws IOException {
+
+        ProtocolVersion pv = new ProtocolVersion("HTTP", 1, 1);
+        String rm = connection.getResponseMessage();
+        HttpResponse response = new BasicHttpResponse(pv, connection.getResponseCode(), rm);
+
+        for (Entry<String, List<String>> header : connection.getHeaderFields().entrySet()) {
+            if (header.getKey() != null) {
+                Header h = new BasicHeader(header.getKey(), header.getValue().get(0));
+                response.addHeader(h);
+            }
         }
+
+        return response;
     }
 
     private static HttpEntity getEntity(HttpURLConnection connection) {
@@ -85,57 +159,15 @@ public class HttpURLNetwork implements HttpStack {
         return entity;
     }
 
-    public HttpResponse performNetworking(Request<?> request) throws IOException {
-
-        URL url = new URL(Utils.requestToUrlAndQueryString(request));
-        HttpURLConnection connection = openConnection(url, request);
-        setHeaders(request, connection);
-        setRequestMethod(connection, request);
-
-        int sc = connection.getResponseCode();
-        if (sc == -1) {
-            throw new IOException("Connection returned invalid response code.");
+    private static void addBodyIfExists(HttpURLConnection connection, Request<?> request) throws IOException {
+        byte[] body = request.getBody();
+        if (body != null) {
+            connection.setDoOutput(true);
+            connection.addRequestProperty(HeaderUtils.CONTENT_TYPE, request.getBodyContentType());
+            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+            out.write(body);
+            out.close();
         }
-
-        ProtocolVersion pv = new ProtocolVersion("HTTP", 1, 1);
-        String rm = connection.getResponseMessage();
-        BasicHttpResponse response = new BasicHttpResponse(pv, sc, rm);
-
-        HttpEntity entity = getEntity(connection);
-        response.setEntity(entity);
-
-        for (Entry<String, List<String>> header : connection.getHeaderFields().entrySet()) {
-            if (header.getKey() != null) {
-                Header h = new BasicHeader(header.getKey(), header.getValue().get(0));
-                response.addHeader(h);
-            }
-        }
-
-        return response;
-    }
-
-    private HttpURLConnection openConnection(URL url, Request<?> request) throws IOException {
-
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-        connection.setConnectTimeout(request.getTimeOut());
-        connection.setReadTimeout(request.getTimeOut());
-        connection.setUseCaches(false);
-        connection.setDoInput(true);
-
-        // use caller-provided custom SslSocketFactory, if any, for HTTPS
-//        if ("https".equals(url.getProtocol()) && mSslSocketFactory != null) {
-//            ((HttpsURLConnection)connection).setSSLSocketFactory(mSslSocketFactory);
-//        }
-
-        return connection;
-    }
-
-    private void setHeaders(Request<?> request, HttpURLConnection connection) {
-        HashMap<String, String> headers = new HashMap<String, String>(request.getHeaders().size());
-        headers.putAll(request.getHeaders());
-        for (String key : headers.keySet())
-            connection.setRequestProperty(key, headers.get(key));
     }
 
 }

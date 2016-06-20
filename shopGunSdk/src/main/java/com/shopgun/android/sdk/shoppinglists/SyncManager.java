@@ -30,7 +30,6 @@ import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
 import com.shopgun.android.sdk.database.DbUtils;
 import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.log.SyncLog;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -117,8 +116,7 @@ public class SyncManager {
     public static final String TAG = Constants.getTag(SyncManager.class);
 
     private static final boolean SAVE_NETWORK_LOG = false;
-    private static final boolean LOG_SYNC = false;
-    private static final boolean LOG = false;
+
     final Object RESUME_LOCK = new Object();
     private final Stack<Request<?>> mCurrentRequests = new Stack<Request<?>>();
     /** Thread running the options */
@@ -198,8 +196,6 @@ public class SyncManager {
     public SyncManager(ShopGun shopGun, DatabaseWrapper db) {
         mShopGun = shopGun;
         mDatabase = db;
-        SyncLog.setLog(LOG);
-        SyncLog.setLogSync(LOG_SYNC);
         // Create a new thread for a handler, so that i can later post content to that thread.
         mThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
         mThread.start();
@@ -1356,6 +1352,21 @@ public class SyncManager {
         int SLOW = 10000;
         int MEDIUM = 6000;
         int FAST = 3000;
+    }
+
+    static class SyncLog {
+
+        private static final boolean LOG_SYNC = false;
+        private static final boolean LOG = false;
+
+        public static int sync(String tag, String msg) {
+            return (LOG_SYNC ? SgnLog.v(tag, msg) : 0);
+        }
+
+        public static int log(String tag, String msg) {
+            return (LOG ? SgnLog.v(tag, msg) : 0);
+        }
+
     }
 
 }

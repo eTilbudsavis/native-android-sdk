@@ -16,15 +16,7 @@
 
 package com.shopgun.android.sdk.log;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
-import android.view.View;
-
-import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.utils.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -72,53 +64,6 @@ public class SgnLogHelper {
         String e = error == null ? "null" : error.toJSON().toString();
         String s = response == null ? "null" : response;
         SgnLog.d(tag, name + ": Response[" + s + "], Error[" + e + "]");
-    }
-
-    public static void logInvalidSignature(String tag, Request<?> request, ShopGunError e) {
-
-        if (e.getCode() == 1104) {
-
-            SgnLog.d(tag, request.getNetworkLog().toString() + "\n" +
-                    request.getLog().getString("Invalid Signature") + "\n" +
-                    e.toJSON().toString());
-        }
-
-    }
-
-    public static void printViewDimen(String tag, String viewName, View v) {
-        SgnLog.d(tag, viewName + ", getWidth: " + v.getWidth() + ", getHeight: " + v.getHeight());
-        SgnLog.d(tag, viewName + ", getMeasuredWidth: " + v.getMeasuredWidth() + ", getMeasuredHeight: " + v.getMeasuredHeight());
-    }
-
-    public static void printBitmapInfo(String tag, Bitmap b) {
-        printBitmapInfo(tag, null, b);
-    }
-
-    public static void printBitmapInfo(String tag, String infp, Bitmap b) {
-        int w = b.getWidth();
-        int h = b.getHeight();
-        float size = ((float) (w * h * 4) / (float) (1024 * 1024));
-        String text;
-        if (infp == null) {
-            String format = "Bitmap[w:%s, h:%s, %.2fmb]";
-            text = String.format(format, w, h, size);
-        } else {
-            String format = "Bitmap[info:%s, w:%s, h:%s, %.2fmb]";
-            text = String.format(format, infp, w, h, size);
-        }
-        SgnLog.d(tag, text);
-    }
-
-    public static void printScreen(String tag, Context c) {
-        Point p = Utils.getDisplayDimen(c);
-        String out = String.format("ScreenSize[w:%s, h:%s]", p.x, p.y);
-        SgnLog.d(tag, out);
-    }
-
-    public static void printOptions(String tag, BitmapFactory.Options o) {
-        String format = "Image[MimeType:%s, w:%s, h:%s]";
-        String out = String.format(format, o.outMimeType, o.outWidth, o.outHeight);
-        SgnLog.d(tag, out);
     }
 
 }

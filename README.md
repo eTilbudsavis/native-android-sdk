@@ -17,7 +17,7 @@ Now add these lines to your module's `build.gradle`:
 
 ```groovy
 dependencies {
-    compile 'com.shopgun.android:sdk:3.2.1'
+    compile 'com.shopgun.android:sdk:3.2.2'
 }
 ```
 

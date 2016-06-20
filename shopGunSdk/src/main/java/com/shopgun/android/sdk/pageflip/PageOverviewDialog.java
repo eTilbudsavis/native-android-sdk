@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build.VERSION_CODES;
@@ -47,6 +46,7 @@ import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.utils.CatalogThumbTransformation;
 import com.shopgun.android.sdk.utils.ColorUtils;
 import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.utils.DisplayUtils;
 import com.squareup.picasso.Picasso;
 
 @SuppressWarnings("deprecation")
@@ -130,8 +130,7 @@ public class PageOverviewDialog extends DialogFragment {
         mGrid.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
         mGrid.setBackgroundColor(mCatalog.getBranding().getColor());
 
-        Point screen = Utils.getDisplayDimen(getActivity());
-        int columns = (int) Math.floor(screen.x / MAX_WIDTH);
+        int columns = (int) Math.floor(DisplayUtils.getScreenWidth(getContext()) / MAX_WIDTH);
         mGrid.setNumColumns(Math.min(columns, MAX_COLUMNS));
 
         mGrid.setOnItemClickListener(new OnItemClickListener() {

@@ -14,33 +14,24 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.log;
+package com.shopgun.android.sdk;
 
-import com.shopgun.android.sdk.Constants;
+import android.content.Context;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-public class SyncLog {
+@RunWith(MockitoJUnitRunner.class)
+public class ShopGunUnitTest {
 
-    public static final String TAG = Constants.getTag(SyncLog.class);
+    @Mock
+    Context mMockContext;
 
-    private static boolean mLogSyncCycle = false;
-    private static boolean mSyncCycle = false;
+    @Test
+    public void test() throws Exception {
 
-    public static void setLogSync(boolean logSyncCycle) {
-        mLogSyncCycle = logSyncCycle;
-
-    }
-
-    public static void setLog(boolean log) {
-        mSyncCycle = log;
-    }
-
-    public static int sync(String tag, String msg) {
-        return (mLogSyncCycle ? SgnLog.v(tag, msg) : 0);
-    }
-
-    public static int log(String tag, String msg) {
-        return (mSyncCycle ? SgnLog.v(tag, msg) : 0);
     }
 
 }
