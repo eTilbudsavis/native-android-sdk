@@ -14,5 +14,6 @@
  * limitations under the License.
  ******************************************************************************/
 
-include ':shopGunSdk', ':shopGunSdkDemo', ':markhor'
-project(':markhor').projectDir=new File('../markhor/library')
+include ':shopGunSdk', ':shopGunSdkDemo'
+//include ':markhor'
+//project(':markhor').projectDir=new File('../markhor/library')
