@@ -17,10 +17,12 @@
 package com.shopgun.android.sdk.pageflip.utils;
 
 import android.graphics.Bitmap;
-import android.os.Build;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Catalog;
+import com.shopgun.android.utils.BitmapUtils;
+import com.shopgun.android.utils.NumberUtils;
+import com.shopgun.android.utils.TextUtils;
 
 public class PageflipUtils {
 
@@ -30,45 +32,22 @@ public class PageflipUtils {
         // Empty constructor
     }
 
-    /**
-     * Method for joining an array of int
-     *
-     * @param delimiter A string to join the int's by
-     * @param tokens    the values
-     * @return A formatted string
-     */
+    /** @deprecated see {@link TextUtils#join(CharSequence, int[])}*/
+    @Deprecated
     public static String join(CharSequence delimiter, int[] tokens) {
-        StringBuilder sb = new StringBuilder();
-        for (Object token : tokens) {
-            if (sb.length() != 0) {
-                sb.append(delimiter);
-            }
-            sb.append(token);
-        }
-        return sb.toString();
+        return TextUtils.join(delimiter,tokens);
     }
 
-    /**
-     * Method for detecting if two floats are almost equal (precision within 0.1)
-     *
-     * @param first  a float
-     * @param second another float
-     * @return true if equal, else false
-     */
+    /** @deprecated see {@link NumberUtils#isEqual(float, float, float)}*/
+    @Deprecated
     public static boolean almost(float first, float second) {
-        return almost(first, second, 0.1f);
+        return NumberUtils.isEqual(first, second, 0.1f);
     }
 
-    /**
-     * Method for detecting if two floats are almost equal
-     *
-     * @param first   a float
-     * @param second  another float
-     * @param epsilon The precision of the measurement
-     * @return true if equal, else false
-     */
+    /** @deprecated see {@link NumberUtils#isEqual(float, float, float)}*/
+    @Deprecated
     public static boolean almost(float first, float second, float epsilon) {
-        return Math.abs(first - second) < epsilon;
+        return NumberUtils.isEqual(first, second, epsilon);
     }
 
     /**
@@ -101,28 +80,16 @@ public class PageflipUtils {
         return c != null && c.getPages() != null && !c.getPages().isEmpty();
     }
 
-    /**
-     * returns the bytesize of the give bitmap
-     * @param bitmap A bitmap to measure
-     * @return Size of bitmap, in byte
-     */
+    /** @deprecated see {@link BitmapUtils#sizeOf(Bitmap)}*/
+    @Deprecated
     public static int sizeOf(Bitmap bitmap) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            return bitmap.getAllocationByteCount();
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
-            return bitmap.getByteCount();
-        } else {
-            return bitmap.getRowBytes() * bitmap.getHeight();
-        }
+        return BitmapUtils.sizeOf(bitmap);
     }
 
-    /**
-     * returns the kilobytesize of the give bitmap
-     * @param bitmap A bitmap to measure
-     * @return Size of bitmap, in kilo byte
-     */
+    /** @deprecated see {@link BitmapUtils#sizeOfKb(Bitmap)}*/
+    @Deprecated
     public static int sizeOfKb(Bitmap bitmap) {
-        return sizeOf(bitmap) / 1024;
+        return BitmapUtils.sizeOfKb(bitmap);
     }
 
 }

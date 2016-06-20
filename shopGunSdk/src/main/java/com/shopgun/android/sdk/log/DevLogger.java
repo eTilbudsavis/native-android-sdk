@@ -19,6 +19,7 @@ package com.shopgun.android.sdk.log;
 import android.util.Log;
 
 import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.utils.ExceptionUtils;
 
 public class DevLogger implements SgnLogger {
 
@@ -79,7 +80,7 @@ public class DevLogger implements SgnLogger {
         if (msg == null || msg.length() == 0) {
             msg = tr.getMessage();
         }
-        mLog.add(Event.TYPE_EXCEPTION, SgnLog.exceptionToJson(tr));
+        mLog.add(Event.TYPE_EXCEPTION, ExceptionUtils.exceptionToJson(tr));
         return Log.e(tag, msg, tr);
     }
 

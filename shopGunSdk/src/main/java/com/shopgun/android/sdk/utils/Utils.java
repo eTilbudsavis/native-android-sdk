@@ -18,25 +18,19 @@ package com.shopgun.android.sdk.utils;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.Display;
-import android.view.WindowManager;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Request;
+import com.shopgun.android.utils.DateUtils;
+import com.shopgun.android.utils.ExceptionUtils;
+import com.shopgun.android.utils.PackageUtils;
+import com.shopgun.android.utils.UnitUtils;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
 import java.net.URLEncoder;
 import java.nio.charset.IllegalCharsetNameException;
 import java.text.ParseException;
@@ -44,7 +38,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -104,34 +97,6 @@ public final class Utils {
     }
 
     /**
-     * Returns a string of parameters, ordered alphabetically (for better cache performance)
-     *
-     * @param apiParams to convert into query parameters
-     * @param encoding encoding to use
-     * @return a string of parameters
-     * @deprecated Method is deprecated, refer to {@link Utils#mapToQueryString(Map, String)} instead.
-     */
-    public static String buildQueryString(Bundle apiParams, String encoding) {
-        StringBuilder sb = new StringBuilder();
-        List<String> keys = new ArrayList<String>();
-        keys.addAll(apiParams.keySet());
-        Collections.sort(keys);
-        for (String key : keys) {
-            Object o = apiParams.get(key);
-            if (isAllowed(o)) {
-                if (sb.length() > 0) sb.append("&");
-                String value = valueIsNull(o);
-                sb.append(encode(key, encoding)).append("=").append(encode(value, encoding));
-            } else {
-
-                SgnLog.w(TAG, String.format("Key: %s with value-type: %s is not allowed",
-                        key, o.getClass().getSimpleName()));
-            }
-        }
-        return sb.toString();
-    }
-
-    /**
      * Returns a string of parameters, ordered alfabetically (for better cache performance)
      *
      * @param apiParams to convert into query parameters
@@ -180,38 +145,6 @@ public final class Utils {
 
         }
         return sb.toString();
-    }
-
-    /**
-     * Returns a string of parameters, ordered alphabetically (for better cache performance)
-     *
-     * @param b A {@link Bundle} to convert into a {@link Map}
-     * @return a string of parameters
-     */
-    public static Map<String, String> bundleToMap(Bundle b) {
-        Map<String, String> map = new HashMap<String, String>();
-        for (String key : b.keySet()) {
-            Object o = b.get(key);
-            if (o instanceof Bundle) {
-                throw new IllegalArgumentException("Type Bundle not allowed");
-            } else {
-                map.put(key, String.valueOf(o));
-            }
-        }
-
-        return map;
-    }
-
-    /**
-     * Checks the type of an object, to see if it fits the requirement of a query bundle
-     *
-     * @param o Object to check
-     * @return true if type is allowed
-     */
-    private static boolean isAllowed(Object o) {
-        return o == null || o instanceof Integer || o instanceof Long
-                || o instanceof Double || o instanceof String || o instanceof Boolean
-                || o instanceof Float || o instanceof Short || o instanceof Character;
     }
 
     /**
@@ -289,60 +222,22 @@ public final class Utils {
         return 200 <= statusCode && statusCode < 300 || statusCode == 304;
     }
 
-    /**
-     * <p>Method for rounding the time (date in milliseconds) down to the nearest second. This is necessary when
-     * comparing timestamps between the server and client, as the server uses seconds, and timestamps will rarely match
-     * as expected otherwise.</p>
-     *
-     * {@code 1394021345625 -> 1394021345000}
-     *
-     * @param date A date to round
-     * @return A date, floored to nearest second.
-     */
+    /** @deprecated see {@link DateUtils#roundTime(Date)} */
+    @Deprecated
     public static Date roundTime(Date date) {
-        if (date != null) {
-            long t = date.getTime() / 1000;
-            date.setTime(1000 * t);
-        }
-        return date;
+        return DateUtils.roundTime(date);
     }
 
-    /**
-     * <p>Method for converting a size (in bytes) into a human readable format.</p>
-     *
-     * <table style="text-align: right; border: #000000 solid 1px " summary="">
-     * <tr><th>input</th>	<th>SI</th>			<th>BINARY</th></tr>
-     * <tr><td>0</td>		<td>0 B</td>		<td>0 B</td></tr>
-     * <tr><td>27</td>		<td>27 B</td>		<td>27 B</td></tr>
-     * <tr><td>1023</td>	<td>1.0 kB</td>		<td>1023 B</td></tr>
-     * <tr><td>1024</td>	<td>1.0 kB</td>		<td>1.0 KiB</td></tr>
-     * </table>
-     *
-     * <p>Same system as above for larger values.</p>
-     *
-     * @param bytes A number of bytes to convert
-     * @param si    Use SI units, or binary form
-     * @return A human readable string of the byte-size
-     */
+    /** @deprecated see {@link UnitUtils#humanReadableByteCount(long, boolean)} */
+    @Deprecated
     public static String humanReadableByteCount(long bytes, boolean si) {
-        int unit = si ? 1000 : 1024;
-        if (bytes < unit) return bytes + " B";
-        int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+        return UnitUtils.humanReadableByteCount(bytes, si);
     }
 
-    /**
-     * Takes an exception and returns it as a String.
-     *
-     * @param t An exception
-     * @return The string representation of the exception
-     */
+    /** @deprecated see {@link ExceptionUtils#exceptionToString(Throwable)} */
+    @Deprecated
     public static String exceptionToString(Throwable t) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        t.printStackTrace(pw);
-        return sw.toString();
+        return ExceptionUtils.exceptionToString(t);
     }
 
     /**
@@ -359,44 +254,22 @@ public final class Utils {
         return copy;
     }
 
-    /**
-     * This method converts device independent pixels (dp) to the equivalent pixels (px) .
-     *
-     * @param dp A value in device independent pixels, to convert.
-     * @param c  Context to get device specifications from.
-     * @return The value in px representing the equivalent value given in dp
-     */
+    /** @deprecated see {@link UnitUtils#dpToPx(int, Context)} */
+    @Deprecated
     public static int convertDpToPx(int dp, Context c) {
-        float px = (float) dp * c.getResources().getDisplayMetrics().density;
-        return (int) px;
+        return UnitUtils.dpToPx(dp, c);
     }
 
-    /**
-     * This method converts pixels (px) to the equivalent device independent pixels (dp).
-     *
-     * @param px A value in pixels, to convert.
-     * @param c  Context to get device specifications from.
-     * @return The value in dp representing the equivalent value given in px
-     */
+    /** @deprecated see {@link UnitUtils#pxToDp(int, Context)} */
+    @Deprecated
     public static int convertPxToDp(int px, Context c) {
-        float dp = (float) px / c.getResources().getDisplayMetrics().density;
-        return (int) dp;
+        return UnitUtils.pxToDp(px, c);
     }
 
-    /**
-     * Get the version name contained in the AndroidManifest
-     *
-     * @param c A {@link Context} to get the the info from
-     * @return A version name string, or {@code null}
-     */
+    /** @deprecated see {@link PackageUtils#getVersionName(Context)} */
+    @Deprecated
     public static String getAppVersion(Context c) {
-
-        try {
-            return c.getPackageManager().getPackageInfo(c.getPackageName(), 0).versionName;
-        } catch (NameNotFoundException e) {
-            SgnLog.e(TAG, null, e);
-        }
-        return null;
+        return PackageUtils.getVersionName(c);
     }
 
     /**
@@ -430,21 +303,10 @@ public final class Utils {
         return tmp;
     }
 
-    /**
-     * Method for getting the meta data from a {@link Context}
-     *
-     * @param c A context
-     * @return A {@link Bundle} or {@code null}
-     */
+    /** @deprecated see {@link PackageUtils#getMetaData(Context)} */
+    @Deprecated
     public static Bundle getMetaData(Context c) {
-        try {
-            PackageManager pm = c.getPackageManager();
-            ApplicationInfo ai = pm.getApplicationInfo(c.getPackageName(), PackageManager.GET_META_DATA);
-            return ai.metaData;
-        } catch (Exception e) {
-            // ignore
-        }
-        return null;
+        return PackageUtils.getMetaData(c);
     }
 
     /**
@@ -460,88 +322,6 @@ public final class Utils {
         } else {
             return am.getMemoryClass();
         }
-    }
-
-    /**
-     * Get the display dimensions from a given {@link Context}.
-     *
-     * @param c Context of the application/activity
-     * @return A point containing the screen dimens
-     */
-    @SuppressWarnings("deprecation")
-    public static Point getDisplayDimen(Context c) {
-        Point p = new Point();
-        WindowManager wm = (WindowManager) c.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            display.getSize(p);
-        } else {
-            p.y = display.getHeight();
-            p.x = display.getWidth();
-        }
-        return p;
-    }
-
-    private static void printFields(Object o) {
-        printFields(o.getClass());
-    }
-
-    private static void printFields(Class c) {
-        for (Field f : c.getDeclaredFields()) {
-            SgnLog.d(TAG, "Field: " + f.getName());
-        }
-    }
-
-    /**
-     *
-     * @param o
-     * @return
-     */
-    public static Map<String, String> getDeclaredFields(Object o) {
-        HashMap<String, String> map = new HashMap<String, String>();
-
-        //determine fields declared in this class only (no fields of superclass)
-        Field[] fields = o.getClass().getDeclaredFields();
-
-        //print field names paired with their values
-        for ( Field field : fields  ) {
-            try {
-                field.setAccessible(true);
-                map.put(field.getName(), String.valueOf(field.get(o)));
-            } catch ( IllegalAccessException ex ) {
-                System.out.println(ex);
-            }
-        }
-        return map;
-    }
-
-    /**
-     * Get a
-     * @param o
-     * @return
-     */
-    public static String getDeclaredFieldsPrintable(Object o) {
-        Map<String, String> map = getDeclaredFields(o);
-
-        StringBuilder result = new StringBuilder();
-        String newLine = System.getProperty("line.separator");
-
-        result.append( o.getClass().getName() );
-        result.append( " Object {" );
-        result.append(newLine);
-
-        //print field names paired with their values
-        for ( Map.Entry<String, String> e : map.entrySet()  ) {
-            result.append("  ");
-            result.append( e.getKey() );
-            result.append(": ");
-            //requires access to private field:
-            result.append(e.getValue());
-            result.append(newLine);
-        }
-        result.append("}");
-
-        return result.toString();
     }
 
 }

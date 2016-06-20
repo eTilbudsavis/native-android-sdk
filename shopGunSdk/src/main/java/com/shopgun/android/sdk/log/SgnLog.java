@@ -17,9 +17,8 @@
 package com.shopgun.android.sdk.log;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.utils.ExceptionUtils;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -126,17 +125,7 @@ public class SgnLog {
      * @return A {@link JSONObject} representation of the given {@link Throwable}
      */
     public static JSONObject exceptionToJson(Throwable t) {
-
-        JSONObject log = new JSONObject();
-        try {
-            log.put("exception", t.getClass().getName());
-            log.put("stacktrace", Utils.exceptionToString(t));
-            return log;
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return new JSONObject();
+        return ExceptionUtils.exceptionToJson(t);
     }
-
 
 }
