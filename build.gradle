@@ -17,6 +17,9 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url  "http://dl.bintray.com/shopgun/maven"
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.1.2'
@@ -26,5 +29,8 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        maven {
+            url  "http://dl.bintray.com/shopgun/maven"
+        }
     }
 }
