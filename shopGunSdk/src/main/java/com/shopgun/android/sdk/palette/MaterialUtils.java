@@ -11,12 +11,24 @@ public class MaterialUtils {
         // private
     }
 
+    /**
+     * convert a {@link MaterialColor} to an ARGB string.
+     * <p>i.e. {@link android.graphics.Color#BLUE Color.BLUE} returns the string {@code #FF0000FF}.</p>
+     * @param color a {@link MaterialColor}
+     * @return the {@link MaterialColor} as string, or null if {@code color} is {@code null}.
+     */
     public static String toARGBString(MaterialColor color) {
         return color == null ? null : ColorUtils.toARGBString(color.getValue());
     }
 
+    /**
+     * convert a {@link MaterialColor} to an HSV string.
+     * <p>i.e. {@link android.graphics.Color#BLUE Color.BLUE} returns the string {@code hsv[240, 1, 1]}.</p>
+     * @param color a {@link MaterialColor}
+     * @return the {@link MaterialColor} as string, or null if {@code color} is {@code null}.
+     */
     public static String toHsvString(MaterialColor color) {
-        return ColorUtils.toHsvString(ColorUtils.toHSV(color.getValue()));
+        return color == null ? null : ColorUtils.toHsvString(ColorUtils.toHSV(color.getValue()));
     }
 
     /**
