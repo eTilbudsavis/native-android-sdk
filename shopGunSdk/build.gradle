@@ -83,7 +83,7 @@ android {
 
 dependencies {
 //    compile project(':markhor')
-    compile 'com.shopgun.android:utils:1.0.0'
+    compile 'com.shopgun.android:utils:1.0.1'
     compile 'com.android.support:support-v4:23.3.0'
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.squareup.okhttp:okhttp:2.7.5'
