@@ -16,10 +16,11 @@
 
 package com.shopgun.android.sdk;
 
+import android.app.Activity;
 import android.app.Application;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -27,13 +28,12 @@ import android.util.Log;
 
 import com.shopgun.android.sdk.api.Environment;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
+import com.shopgun.android.sdk.corekit.LifecycleManager;
+import com.shopgun.android.sdk.corekit.UserAgentInterceptor;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
-import com.shopgun.android.sdk.log.DefaultLogger;
 import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.log.SgnLogger;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
-import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.Network;
 import com.shopgun.android.sdk.network.Request;
@@ -44,12 +44,18 @@ import com.shopgun.android.sdk.network.impl.MemoryCache;
 import com.shopgun.android.sdk.network.impl.NetworkImpl;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
 import com.shopgun.android.sdk.shoppinglists.SyncManager;
-import com.shopgun.android.sdk.utils.ActivityCounter;
-import com.shopgun.android.sdk.utils.Utils;
-import com.shopgun.android.sdk.utils.Validator;
+import com.shopgun.android.sdk.utils.SgnThreadFactory;
+import com.shopgun.android.sdk.utils.SgnUserAgent;
+import com.shopgun.android.sdk.utils.Version;
+import com.shopgun.android.utils.PackageUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
 
 /**
  *
@@ -75,40 +81,43 @@ import java.util.concurrent.Executors;
  *
  * <h3>Usage</h3>
  *
- * First instantiate the instance with {@link ShopGun#create(Context) ShopGun.create() create()}.
- * Once {@link ShopGun#create(Context)} have been called, ShopGun have been setup and you can now
- * refer to the singleton by calling {@link ShopGun#getInstance() ShopGun.getInstance()}.
+ * First instantiate the instance with {@link Builder(Context) new ShopGun.Builder(Application).build()}.
+ * Once the SDk is instantiated, ShopGun have been setup and you can now
+ * refer to the singleton by calling {@link ShopGun#getInstance()}.
  *
  * <h3>Demo</h3>
  * For further instructions on the usage of ShopGun, please refer to the ShopGun SDK Demo included in the SDK.
  * The ShopGun SDK Demo, demonstrates some of the setup methods, and features included in the SDK.
  *
  */
-public class ShopGun implements ActivityCounter.OnLifecycleEvent {
+public class ShopGun {
 
     public static final String TAG = Constants.getTag(ShopGun.class);
 
-    /**
-     * Current version of the ShopGun SDK.
-     */
-    public static final int VERSION = 302001;
-
-    private static final int DEFAULT_THREAD_COUNT = 3;
+    public static final Version VERSION = new Version(4,0,0,"dev");
 
     /** The ShopGun singleton */
-    private static ShopGun mShopGun;
+    private static ShopGun mSingleton;
+
+    /** Application context for usage in the SDK */
+    private Context mContext;
+    private LifecycleManager mLifecycleManager;
     /** A static handler for usage in the SDK, this will help prevent leaks */
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-    /** Counting the number of active activities, to determine when to stop any long running activities */
-    private final ActivityCounter mActivityCounter;
-    /** Application context for usage in the SDK */
-    private final Context mContext;
-    /** The developers APIkey */
-    private String mApiKey;
-    /** The developers APIsecret */
-    private String mApiSecret;
-    /** The developers app version, this isn't strictly necessary */
-    private String mAppVersion;
+    /** My go to executor service */
+    private final ExecutorService mExecutor;
+    /** The development flag, indicating the app is in development */
+    private boolean mDevelop = false;
+    /** The current API environment in use */
+    private Environment mEnvironment;
+    /** The current API environment in use for themes (used for e.g. shoppinglists */
+    private ThemeEnvironment mThemeEnvironment;
+
+    private OkHttpClient mClient;
+    private String mSessionId;
+
+    // Things we'd like to get rid of
+
     /** The SDK settings */
     private final Settings mSettings;
     /** A session manager, for handling all session requests, user information e.t.c. */
@@ -121,31 +130,50 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     private final SyncManager mSyncManager;
     /** A {@link RequestQueue} implementation to handle all API requests */
     private final RequestQueue mRequestQueue;
-    /** My go to executor service */
-    private final ExecutorService mExecutor;
-    /** The development flag, indicating the app is in development */
-    private boolean mDevelop = false;
-    /** The current API environment in use */
-    private Environment mEnvironment;
-    /** The current API environment in use for themes (used for e.g. shoppinglists */
-    private ThemeEnvironment mThemeEnvironment;
 
-    /**
-     * Default constructor, this is private to allow us to create a singleton instance
-     * @param context A context
-     */
-    private ShopGun(Context context, ExecutorService executorService, Cache cache, Network network, Environment environment, ThemeEnvironment themeEnvironment, boolean develop) {
+    private ShopGun(Application application, ExecutorService executorService, Environment environment, ThemeEnvironment themeEnvironment, boolean develop, OkHttpClient client, Cache cache, Network network) {
         // Get application context, to avoid memory leaks (e.g. holding a reference to an Activity)
-        mContext = context;
-        mActivityCounter = new ActivityCounter(this, 1000, mHandler);
+        mContext = application.getApplicationContext();
         mDevelop = develop;
-
         mEnvironment = environment;
         mThemeEnvironment = themeEnvironment;
-
-        ensureKeys(mContext);
-        setAppVersion(Utils.getAppVersion(mContext));
         mExecutor = executorService;
+        mClient = client;
+
+        mLifecycleManager = new LifecycleManager(application);
+        mLifecycleManager.getApplication().registerComponentCallbacks(new ComponentCallbacks2() {
+            @Override
+            public void onTrimMemory(int level) {
+                // TODO trim memory
+            }
+
+            @Override
+            public void onConfigurationChanged(Configuration newConfig) {
+                // TODO handle configuration changes if needed
+            }
+
+            @Override
+            public void onLowMemory() {
+                onTrimMemory(TRIM_MEMORY_COMPLETE);
+            }
+        });
+        mLifecycleManager.registerCallback(new LifecycleManager.Callback() {
+            @Override
+            public void onStart() {
+
+            }
+
+            @Override
+            public void onStop() {
+
+            }
+
+            @Override
+            public void onDestroy() {
+
+            }
+        });
+
         mSettings = new Settings(mContext);
 
         mRequestQueue = new RequestQueue(ShopGun.this, cache, network);
@@ -164,61 +192,36 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
 
     /**
      * Singleton access to a {@link ShopGun} object.
-     *
-     * To customize your instance of {@link ShopGun}, please refer to {@link ShopGun.Builder}.
-     *
-     * @param ctx A context
+     * <p>To build and customize an instance of {@link ShopGun}, please refer to {@link ShopGun.Builder}.</p>
      * @return The {@link ShopGun} instance
      */
-    public static ShopGun getInstance(Context ctx) {
-        if (mShopGun == null) {
-            synchronized (ShopGun.class) {
-                if (mShopGun == null) {
-                    mShopGun = new Builder(ctx).build();
-                }
-            }
+    public static ShopGun getInstance() {
+        if(mSingleton == null) {
+            throw new IllegalStateException("No ShopGun instance found");
+        } else {
+            return mSingleton;
         }
-        return mShopGun;
     }
 
     /**
      * Check if the instance have been instantiated.
-     * <p>To instantiate an instance use {@link ShopGun#getInstance(Context)}</p>
+     * <p>To build and customize an instance of {@link ShopGun}, please refer to {@link ShopGun.Builder}.</p>
      * @return {@code true} if ShopGun is instantiated, else {@code false}
      */
-    public static boolean hasInstance() {
-        synchronized (ShopGun.class) {
-            return mShopGun != null;
-        }
+    public static boolean isInstantiated() {
+        return mSingleton != null;
     }
 
-    public static boolean isRunning() {
-        synchronized (ShopGun.class) {
-            return ShopGun.hasInstance() && mShopGun.isStarted();
-        }
+    public OkHttpClient getClient() {
+        return mClient;
     }
 
-    /** @deprecated Use {@link #getInstance(Context)} */
-    @Deprecated
-    public static ShopGun getInstance() {
-        synchronized (ShopGun.class) {
-            if (mShopGun == null) {
-                throw new IllegalStateException("ShopGun instance not created. See ShopGun.getInstance(Context)");
-            }
-            return mShopGun;
-        }
+    public Activity getActivity() {
+        return mLifecycleManager.getCurrentActivity();
     }
 
-    /** @deprecated Use {@link #getInstance(Context)} */
-    @Deprecated
-    public static ShopGun create(Context ctx) {
-        return getInstance(ctx);
-    }
-
-    /** @deprecated Use {@link #hasInstance()} */
-    @Deprecated
-    public static boolean isCreated() {
-        return hasInstance();
+    public LifecycleManager getLifecycleManager() {
+        return mLifecycleManager;
     }
 
     /**
@@ -227,16 +230,6 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
      */
     public ExecutorService getExecutor() {
         return mExecutor;
-    }
-
-    /**
-     * Method for determining the current network state
-     * @return true if network connectivity exists, false otherwise.
-     */
-    public boolean isOnline() {
-        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnected();
     }
 
     /**
@@ -256,42 +249,12 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
      * @return API key as String
      */
     public synchronized String getApiKey() {
-        ensureKeys(mContext);
-        return mApiKey;
-    }
-
-    /**
-     * <p>Get the version of your app, for better statistics collection on http://insight.etilbudsavis.dk/.</p>
-     * <p>App version should follow http://semver.org/ specifications (MAJOR.MINOR.PATCH), e.g.:</p>
-     *
-     * <ul>
-     *      <li> 1.0.0 </li>
-     *      <li> 1.0.0-beta </li>
-     *      <li> 1.0.0-rc.1 </li>
-     * </ul>
-     *
-     * @return API key as String
-     */
-    public String getAppVersion() {
-        return mAppVersion;
-    }
-
-    /**
-     * <p>Set the version of your app, for better statistics collection on http://insight.etilbudsavis.dk/.</p>
-     * <p>App version should follow http://semver.org/ specifications (MAJOR.MINOR.PATCH), e.g.:</p>
-     *
-     * <ul>
-     *      <li> 1.0.0 </li>
-     *      <li> 1.0.0-beta </li>
-     *      <li> 1.0.0-rc.1 </li>
-     * </ul>
-     * @param appVersion A string
-     */
-    public void setAppVersion(String appVersion) {
-        if (Validator.isAppVersionValid(appVersion)) {
-            mAppVersion = appVersion;
+        Bundle b = PackageUtils.getMetaData(mContext);
+        if (isDevelop()) {
+            return b.getString(Constants.META_DEVELOP_API_KEY);
+        } else {
+            return b.getString(Constants.META_API_KEY);
         }
-        SgnLog.v(TAG, "AppVersion: " + String.valueOf(mAppVersion));
     }
 
     /**
@@ -299,8 +262,12 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
      * @return API secret as String
      */
     public synchronized String getApiSecret() {
-        ensureKeys(mContext);
-        return mApiSecret;
+        Bundle b = PackageUtils.getMetaData(mContext);
+        if (isDevelop()) {
+            return b.getString(Constants.META_DEVELOP_API_SECRET);
+        } else {
+            return b.getString(Constants.META_API_SECRET);
+        }
     }
 
     /**
@@ -368,14 +335,6 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     }
 
     /**
-     * Get the current user
-     * @return a user
-     */
-    public User getUser() {
-        return mSessionManager.getSession().getUser();
-    }
-
-    /**
      * Get the settings, that ETA SDK is using.
      * @return current settings
      */
@@ -418,92 +377,11 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
     }
 
     /**
-     * Get the current state of the ShopGun instance
-     * @return {@code true} if in resumed state, else {@code false}
-     */
-    public boolean isStarted() {
-        return mActivityCounter.isStarted();
-    }
-
-    /**
      * Indicates whether the SDK is in develop state, and is using development keys.
      * @return true is in develop state, else false
      */
     public boolean isDevelop() {
         return mDevelop;
-    }
-
-    /** @deprecated Use {@link Builder} to set this value */
-    @Deprecated
-    public synchronized void setDevelop(boolean develop) {
-        if (mDevelop != develop) {
-            mDevelop = develop;
-            mApiKey = null;
-            mApiSecret = null;
-            ensureKeys(mContext);
-        }
-    }
-
-    private synchronized boolean isKeySecretOk() {
-        if (mApiKey == null || mApiSecret == null) {
-            // Reset both to keep sane state
-            mApiKey = null;
-            mApiSecret = null;
-        }
-        return mApiKey != null && mApiSecret != null;
-    }
-
-    private synchronized void ensureKeys(Context c) {
-
-        if (isKeySecretOk()) {
-            return;
-        }
-
-        Bundle b = Utils.getMetaData(c);
-        if (b == null) {
-            throw new IllegalStateException("Package meta data not available.");
-        }
-
-        // If the develop flag has been set, then try to get the matching keys
-        if (isDevelop()) {
-
-            mApiKey = b.getString(Constants.META_DEVELOP_API_KEY);
-            mApiSecret = b.getString(Constants.META_DEVELOP_API_SECRET);
-
-            if (isKeySecretOk()) {
-                SgnLog.i(TAG, "Using development key/secret");
-            } else {
-                SgnLog.w(TAG, "Debug flag set, but no develop keys found in AndroidManifest.");
-            }
-
-        }
-
-        // If no develop keys were found, then get the production keys
-        if (!isKeySecretOk()) {
-            mApiKey = b.getString(Constants.META_API_KEY);
-            mApiSecret = b.getString(Constants.META_API_SECRET);
-        }
-
-        // If no keys were found at all, then die
-        if (!isKeySecretOk()) {
-            throw new IllegalStateException("API key/secret missing from AndroidManifest.xml");
-        }
-
-    }
-
-    /**
-     * First clears all preferences with {@link #clear()}, and then {@code null}'s
-     * this instance of ShopGun
-     *
-     * <p>Further use of {@link ShopGun} after this, you must invoke
-     * {@link #create(Context)} it again.</p>
-     */
-    public void destroy() {
-        synchronized (ShopGun.class) {
-            onPerformStop();
-            clear();
-            mShopGun = null;
-        }
     }
 
     /**
@@ -514,25 +392,16 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
      * cache, e.t.c.</p>
      */
     public void clear() {
-        if (!isStarted()) {
-            mSessionManager.invalidate();
-            mSettings.clear();
-            mLocation.clear();
-            mRequestQueue.clear();
-            mListManager.clear();
-            SgnLog.getLogger().getLog().clear();
-        }
+//        if (!isStarted()) {
+//            mSessionManager.invalidate();
+//            mSettings.clear();
+//            mLocation.clear();
+//            mRequestQueue.clear();
+//            mListManager.clear();
+//            SgnLog.getLogger().getLog().clear();
+//        }
     }
 
-    public void onStart() {
-        mActivityCounter.start();
-    }
-
-    public void onStop() {
-        mActivityCounter.stop();
-    }
-
-    @Override
     public void onPerformStart() {
         mSessionManager.onStart();
         mListManager.onStart();
@@ -541,7 +410,6 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
         SgnLog.v(TAG, "onPerformStart");
     }
 
-    @Override
     public void onPerformStop() {
         mSettings.saveLocation(mLocation);
         mListManager.onStop();
@@ -557,24 +425,37 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
      */
     public static class Builder {
 
-        Context mContext;
+        final Application mApplication;
+
         ExecutorService mExecutor;
         Cache mCache;
         Network mNetwork;
-        SgnLogger mLog;
         Boolean mDevelop;
         Environment mEnvironment;
         ThemeEnvironment mThemeEnvironment;
 
+        List<Interceptor> mInterceptors = new ArrayList<>();
+        List<Interceptor> mNetworkInterceptors = new ArrayList<>();
+
         /**
          * Start building your {@link ShopGun} instance.
-         * @param ctx A context
+         * @param application The application
          */
-        public Builder(Context ctx) {
-            if (ctx == null) {
+        public Builder(Application application) {
+            if (application == null) {
                 throw new IllegalArgumentException("Context must not be null.");
             }
-            this.mContext = ctx.getApplicationContext();
+            this.mApplication = application;
+        }
+
+        public Builder addInterceptor(Interceptor interceptor) {
+            mInterceptors.add(interceptor);
+            return this;
+        }
+
+        public Builder addNetworkInterceptor(Interceptor interceptor) {
+            mNetworkInterceptors.add(interceptor);
+            return this;
         }
 
         /**
@@ -626,29 +507,13 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
         }
 
         /**
-         * Specify the {@link SgnLogger} to use for logging SDK events.
-         * @param logger A logger
-         * @return This object
-         */
-        public Builder setLogger(SgnLogger logger) {
-            if (logger == null) {
-                throw new IllegalArgumentException("SgnLogger must not be null.");
-            }
-            if (mLog != null) {
-                throw new IllegalStateException("SgnLogger already set.");
-            }
-            mLog = logger;
-            return this;
-        }
-
-        /**
          * Enable development keys, for the ShopGun API, among other features.
          * @param develop {@code true} for development mode, else {@code false}
          * @return This object
          */
         public Builder setDevelop(boolean develop) {
             if (mDevelop != null) {
-                throw new IllegalStateException("SgnLogger already set.");
+                throw new IllegalStateException("Develop already set.");
             }
             mDevelop = develop;
             return this;
@@ -700,15 +565,15 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
          * Builds and set the ShopGun instance, and sets it to be the global singleton.
          * @return The ShopGun instance
          */
-        public ShopGun build() {
+        public ShopGun setInstance() {
 
-            if (ShopGun.mShopGun != null) {
+            if (ShopGun.mSingleton != null) {
                 SgnLog.d(TAG, "ShopGun instance already build and set.");
-                return mShopGun;
+                return ShopGun.mSingleton;
             }
 
             if (mExecutor == null) {
-                mExecutor = Executors.newFixedThreadPool(DEFAULT_THREAD_COUNT, new SgnThreadFactory());
+                mExecutor = Executors.newFixedThreadPool(3, new SgnThreadFactory());
             }
 
             if (mCache == null) {
@@ -717,10 +582,6 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
 
             if (mNetwork == null) {
                 mNetwork = new NetworkImpl(new HttpURLNetwork(new DefaultRedirectProtocol()));
-            }
-
-            if (mLog == null) {
-                mLog = new DefaultLogger();
             }
 
             if (mDevelop == null) {
@@ -735,9 +596,19 @@ public class ShopGun implements ActivityCounter.OnLifecycleEvent {
                 mThemeEnvironment = ThemeEnvironment.PRODUCTION;
             }
 
-            SgnLog.setLogger(mLog);
-            ShopGun.mShopGun = new ShopGun(mContext, mExecutor, mCache, mNetwork, mEnvironment, mThemeEnvironment, mDevelop);
-            return ShopGun.getInstance(mContext);
+            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            for (Interceptor i : mInterceptors) {
+                builder.addInterceptor(i);
+            }
+            for (Interceptor i : mNetworkInterceptors) {
+                builder.addNetworkInterceptor(i);
+            }
+            builder.addInterceptor(new UserAgentInterceptor(SgnUserAgent.getUserAgent(mApplication)));
+            OkHttpClient okHttpClient = builder.build();
+
+            ShopGun.mSingleton = new ShopGun(mApplication, mExecutor, mEnvironment, mThemeEnvironment, mDevelop, okHttpClient, mCache, mNetwork);
+            return ShopGun.getInstance();
+
         }
 
     }

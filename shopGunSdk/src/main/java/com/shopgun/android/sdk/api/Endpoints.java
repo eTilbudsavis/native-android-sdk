@@ -23,7 +23,7 @@ import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.model.Store;
 import com.shopgun.android.sdk.model.User;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 /**
  * This class contains a sub-set of paths needed to request data from the ShopGun API,
@@ -204,7 +204,7 @@ public class Endpoints {
      * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email}
      */
     public static String listShareEmail(int userId, String listId, String email) {
-        return String.format("/v2/users/%s/shoppinglists/%s/shares/%s", userId, listId, Utils.encode(email, "UTF-8"));
+        return String.format("/v2/users/%s/shoppinglists/%s/shares/%s", userId, listId, SgnUtils.encode(email, "UTF-8"));
     }
 
     /**

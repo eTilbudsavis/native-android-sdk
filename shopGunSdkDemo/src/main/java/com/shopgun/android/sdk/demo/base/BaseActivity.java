@@ -18,34 +18,12 @@ package com.shopgun.android.sdk.demo.base;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
-import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-
-import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.demo.Tools;
+import android.support.v7.app.AppCompatActivity;
 
 @SuppressLint("Registered")
-public class BaseActivity extends FragmentActivity {
+public class BaseActivity extends AppCompatActivity {
 
     private ProgressDialog mProgressDialog;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        Tools.shopGunCreate(this);
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    protected void onStart() {
-        ShopGun.getInstance(this).onStart();
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        ShopGun.getInstance(this).onStop();
-    }
 
     protected void showProgress(String title, String message) {
         if (mProgressDialog == null) {

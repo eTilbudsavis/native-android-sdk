@@ -24,8 +24,7 @@ import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Request.Method;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
-import com.shopgun.android.sdk.utils.HashUtils;
-import com.shopgun.android.sdk.utils.HeaderUtils;
+import com.shopgun.android.utils.HashUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -181,9 +180,9 @@ public class NetworkDispatcher extends Thread {
 
             Map<String, String> headers = new HashMap<String, String>();
             String token = mShopGun.getSessionManager().getSession().getToken();
-            headers.put(HeaderUtils.X_TOKEN, token);
+            headers.put("X-Token", token);
             String sha256 = HashUtils.sha256(mShopGun.getApiSecret() + token);
-            headers.put(HeaderUtils.X_SIGNATURE, sha256);
+            headers.put("X-Signature", sha256);
             request.setHeaders(headers);
 
         }
@@ -217,8 +216,8 @@ public class NetworkDispatcher extends Thread {
      */
     private void updateSessionInfo(Map<String, String> headers) {
         if (headers != null) {
-            String token = headers.get(HeaderUtils.X_TOKEN);
-            String expire = headers.get(HeaderUtils.X_TOKEN_EXPIRES);
+            String token = headers.get("X-Token");
+            String expire = headers.get("X-Token-Expires");
 
             if (!(token == null || expire == null)) {
                 mShopGun.getSessionManager().updateTokens(token, expire);

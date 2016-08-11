@@ -68,7 +68,7 @@ public class OfferListActivity extends BaseListActivity implements AdapterView.O
         if (mOffers.isEmpty()) {
             showProgress("Fetching catalogs");
             OfferListRequest req = new OfferListRequest(mListener);
-            ShopGun.getInstance(this).add(req);
+            ShopGun.getInstance().add(req);
         }
     }
 

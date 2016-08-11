@@ -27,7 +27,7 @@ import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -172,7 +172,7 @@ public class DbUtils {
 
             for (ShoppinglistItem sli : noUserItems) {
                 sli.setShoppinglistId(tmpSl.getId());
-                sli.setId(Utils.createUUID());
+                sli.setId(SgnUtils.createUUID());
                 manager.addItem(sli);
             }
 
@@ -252,6 +252,21 @@ public class DbUtils {
         } finally {
             closeCursor(c);
         }
+    }
+
+    public static <T> List<T> cursorToList(Cursor c, ContentValuesConverter<T> converter) {
+        ArrayList<T> list = new ArrayList<T>();
+        for (ContentValues cv : cursorToContentValues(c)) {
+            T item = converter.convert(cv);
+            if (item != null) {
+                list.add(item);
+            }
+        }
+        return list;
+    }
+
+    public interface ContentValuesConverter<T> {
+        T convert(ContentValues cv);
     }
 
 }

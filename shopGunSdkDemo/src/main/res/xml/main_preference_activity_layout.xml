@@ -18,6 +18,27 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
+        android:title="Kits Features">
+
+        <Preference
+            android:key="pref_main_graphkit_demo"
+            android:title="GraphKitActivity">
+            <intent
+                android:targetPackage="com.shopgun.android.sdk.demo"
+                android:targetClass="com.shopgun.android.sdk.demo.GraphKitActivity"/>
+        </Preference>
+
+        <Preference
+            android:key="pref_main_eventskit_demo"
+            android:title="EventsKitActivity">
+            <intent
+                android:targetPackage="com.shopgun.android.sdk.demo"
+                android:targetClass="com.shopgun.android.sdk.demo.EventsKitActivity"/>
+        </Preference>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="SDK Features">
 
         <Preference
@@ -50,32 +71,6 @@
             <intent
                 android:targetPackage="com.shopgun.android.sdk.demo"
                 android:targetClass="com.shopgun.android.sdk.demo.SessionActivity"/>
-        </Preference>
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="SDK Tests">
-
-        <Preference
-            android:key="pref_main_picasso"
-            android:title="Picasso test">
-            <intent
-                android:targetPackage="com.shopgun.android.sdk.demo"
-                android:targetClass="com.shopgun.android.sdk.demo.PicassoActivity"/>
-        </Preference>
-
-        <Preference
-            android:key="pref_main_sdk_unit_test"
-            android:title="SDK Unit Test"/>
-
-        <Preference
-            android:key="pref_main_sdk_db_speed"
-            android:title="SDK DB Speed"
-            android:summary="Test the DB speed">
-            <intent
-                android:targetPackage="com.shopgun.android.sdk.demo"
-                android:targetClass="com.shopgun.android.sdk.demo.DBSpeedTestActivity"/>
         </Preference>
 
     </PreferenceCategory>

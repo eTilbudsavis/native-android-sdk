@@ -758,7 +758,7 @@ public class ListManager {
      * @return A {@link User}
      */
     private User user() {
-        return mShopGun.getUser();
+        return mShopGun.getSessionManager().getSession().getUser();
     }
 
     /**

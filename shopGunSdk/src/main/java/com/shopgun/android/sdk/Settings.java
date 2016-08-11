@@ -20,7 +20,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.utils.SharedPreferencesUtils;
+import com.shopgun.android.utils.SharedPreferencesUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -139,7 +139,7 @@ public class Settings {
 
     private void performMigration() {
         int version = mSharedPrefs.getInt(LAST_USED_VERSION, 0);
-        if (version == ShopGun.VERSION) {
+        if (version == ShopGun.VERSION.getCode()) {
             // no migration needed
             return;
         }
@@ -152,7 +152,7 @@ public class Settings {
             e.putLong(LAST_USED_TIME, mSharedPrefs.getLong("last_usage", 0));
             e.remove("last_usage");
         }
-        e.putInt(LAST_USED_VERSION, ShopGun.VERSION);
+        e.putInt(LAST_USED_VERSION, ShopGun.VERSION.getCode());
         e.apply();
     }
 

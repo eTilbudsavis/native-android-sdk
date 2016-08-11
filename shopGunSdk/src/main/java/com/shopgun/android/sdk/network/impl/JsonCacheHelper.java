@@ -26,7 +26,7 @@ import com.shopgun.android.sdk.network.Cache.Item;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,7 +58,7 @@ public class JsonCacheHelper {
 
         JSONArray jArray = new JSONArray();
         // Check if we've previously done this exact call
-        Cache.Item cacheList = c.get(Utils.requestToUrlAndQueryString(r));
+        Cache.Item cacheList = c.get(SgnUtils.requestToUrlAndQueryString(r));
         if (cacheList != null && cacheList.object instanceof LinkedList<?>) {
 
             LinkedList<?> cacheListLinkedList = (LinkedList<?>) cacheList.object;
@@ -177,7 +177,7 @@ public class JsonCacheHelper {
             return;
         }
 
-        r.getCache().put(Utils.requestToUrlAndQueryString(r), new Cache.Item(ernlist, r.getCacheTTL()));
+        r.getCache().put(SgnUtils.requestToUrlAndQueryString(r), new Cache.Item(ernlist, r.getCacheTTL()));
 
     }
 

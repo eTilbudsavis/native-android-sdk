@@ -17,11 +17,11 @@
 package com.shopgun.android.sdk.network;
 
 import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.Event;
+
 import com.shopgun.android.sdk.log.EventLog;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Response.Listener;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -171,7 +171,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
         if (mSaveNetworkLog) {
             // Append the request summary to the debugging log
-            SgnLog.getLogger().getLog().add(Event.TYPE_REQUEST, mNetworkLog);
+//            SgnLog.getLogger().getLog().add(Event.TYPE_REQUEST, mNetworkLog);
         }
 
         mFinished = true;
@@ -560,7 +560,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      */
     @Override
     public String toString() {
-        return mMethod.toString() + ": " + Utils.requestToUrlAndQueryString(this);
+        return mMethod.toString() + ": " + SgnUtils.requestToUrlAndQueryString(this);
     }
 
     public enum Priority {

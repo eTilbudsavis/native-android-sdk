@@ -17,36 +17,18 @@
 package com.shopgun.android.sdk.demo;
 
 import android.os.Bundle;
-import android.preference.Preference;
-import android.widget.Toast;
 
 import com.shopgun.android.sdk.SgnLocation;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.demo.base.BasePreferenceActivity;
-import com.shopgun.android.sdk.log.DevLogger;
-import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.test.SdkTest;
 
-public class MainPreferenceActivity extends BasePreferenceActivity implements Preference.OnPreferenceClickListener {
+public class MainPreferenceActivity extends BasePreferenceActivity {
 
     public static final String TAG = MainPreferenceActivity.class.getSimpleName();
-
-    public static final String KEY_SDK_UNIT_TEST = "pref_main_sdk_unit_test";
-
-    Runnable mSDKUnitTest = new Runnable() {
-        @Override
-        public void run() {
-            Toast.makeText(MainPreferenceActivity.this, "Running SDK Unit Test", Toast.LENGTH_SHORT).show();
-            SdkTest.test(getApplicationContext());
-            Toast.makeText(MainPreferenceActivity.this, "SDK Unit Test: Success", Toast.LENGTH_SHORT).show();
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        SgnLog.setLogger(new DevLogger());
 
         /*
          * ShopGun is a singleton you interact with via this method
@@ -69,16 +51,7 @@ public class MainPreferenceActivity extends BasePreferenceActivity implements Pr
          * You are now done setting up the SDK, the rest is just Android stuff
          */
         addPreferencesFromResource(R.xml.main_preference_activity_layout);
-        findPreference(KEY_SDK_UNIT_TEST).setOnPreferenceClickListener(this);
 
     }
 
-    @Override
-    public boolean onPreferenceClick(Preference preference) {
-        if (KEY_SDK_UNIT_TEST.equals(preference.getKey())) {
-            new Thread(mSDKUnitTest).run();
-            return true;
-        }
-        return false;
-    }
 }

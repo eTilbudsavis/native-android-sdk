@@ -25,7 +25,7 @@ import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -82,7 +82,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
             }
 
             Response<JSONArray> r = null;
-            if (Utils.isSuccess(response.statusCode)) {
+            if (SgnUtils.isSuccess(response.statusCode)) {
                 // Parse into array if it's successful
                 JSONArray jArray = new JSONArray(jsonString);
                 r = Response.fromSuccess(jArray, getCache());

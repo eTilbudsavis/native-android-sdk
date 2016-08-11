@@ -21,9 +21,9 @@ import android.os.Parcelable;
 
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.palette.MaterialColor;
-import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.SgnJson;
+import com.shopgun.android.utils.palette.MaterialColor;
+import com.shopgun.android.utils.palette.SgnColor;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

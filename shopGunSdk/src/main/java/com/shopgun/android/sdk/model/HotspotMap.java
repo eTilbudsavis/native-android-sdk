@@ -26,7 +26,7 @@ import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -80,7 +80,7 @@ public class HotspotMap implements IJson<JSONArray>,Parcelable {
 
                     JSONObject rectangleList = hotspot.getJSONObject(SgnJson.LOCATIONS);
 
-                    List<String> keys = Utils.copyIterator(rectangleList.keys());
+                    List<String> keys = SgnUtils.copyIterator(rectangleList.keys());
 
                     for (String key : keys) {
 

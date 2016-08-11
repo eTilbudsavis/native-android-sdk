@@ -21,8 +21,7 @@ import android.content.Context;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
-import com.shopgun.android.sdk.utils.HeaderUtils;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,13 +44,13 @@ public class MockApiSessionResponse extends MockApiNetworkResponse {
         // Add some time to the session to make the sessionmanager happy
         long exp = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(24);
         try {
-            session.put("expires", Utils.dateToString(new Date(exp)));
+            session.put("expires", SgnUtils.dateToString(new Date(exp)));
         } catch (JSONException e) {
             SgnLog.e(TAG, e.getMessage(), e);
         }
         HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put(HeaderUtils.X_TOKEN, "mock-token");
-        headers.put(HeaderUtils.X_SIGNATURE, "mock-signature");
+        headers.put("X-Token", "mock-token");
+        headers.put("X-Signature", "mock-signature");
         return new NetworkResponse(200, session.toString().getBytes(), headers);
 
     }

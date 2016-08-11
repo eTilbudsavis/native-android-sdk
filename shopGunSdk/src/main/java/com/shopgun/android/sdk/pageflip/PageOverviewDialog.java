@@ -44,9 +44,9 @@ import android.widget.TextView;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.utils.CatalogThumbTransformation;
-import com.shopgun.android.sdk.utils.ColorUtils;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.utils.ColorUtils;
 import com.shopgun.android.utils.DisplayUtils;
+import com.shopgun.android.utils.UnitUtils;
 import com.squareup.picasso.Picasso;
 
 @SuppressWarnings("deprecation")
@@ -111,7 +111,7 @@ public class PageOverviewDialog extends DialogFragment {
             getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         }
 
-        int spacePx = Utils.convertDpToPx(6, getActivity());
+        int spacePx = UnitUtils.dpToPx(6, getActivity());
 
         LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
         mGrid = new GridView(getActivity());
@@ -218,7 +218,7 @@ public class PageOverviewDialog extends DialogFragment {
             FrameLayout fl = new FrameLayout(mContext);
             fl.setLayoutParams(lp);
 
-            int ivSize = Utils.convertDpToPx(115, mContext);
+            int ivSize = UnitUtils.dpToPx(115, mContext);
             FrameLayout.LayoutParams ivlp = new FrameLayout.LayoutParams(ivSize, ivSize, Gravity.CENTER_HORIZONTAL);
             ImageView iv = new ImageView(mContext);
             iv.setLayoutParams(ivlp);
@@ -233,8 +233,8 @@ public class PageOverviewDialog extends DialogFragment {
             tv.setTypeface(null, Typeface.BOLD);
             tv.setLayoutParams(tvlp);
 
-            int vpad = Utils.convertDpToPx(0, mContext);
-            int hpad = Utils.convertDpToPx(5, mContext);
+            int vpad = UnitUtils.dpToPx(0, mContext);
+            int hpad = UnitUtils.dpToPx(5, mContext);
             tv.setPadding(hpad, vpad, hpad, vpad);
 
             tv.setBackgroundDrawable(getDrawable());
@@ -253,7 +253,7 @@ public class PageOverviewDialog extends DialogFragment {
             color = ColorUtils.setAlphaComponent(color, 160);
 
 
-            float radius = Utils.convertDpToPx(3, getActivity());
+            float radius = UnitUtils.dpToPx(3, getActivity());
 
             GradientDrawable gd = new GradientDrawable();
             gd.setColor(color);

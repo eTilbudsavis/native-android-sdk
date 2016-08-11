@@ -23,6 +23,7 @@ import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.impl.IgnoreResponseListener;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.utils.Device;
+import com.shopgun.android.utils.PackageUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,7 +56,7 @@ public class AppLogEntry {
         mEmail = email;
         mEntryName = entryName;
         if (mEmail == null) {
-            mEmail = mShopgun.getUser().getEmail();
+            mEmail = mShopgun.getSessionManager().getSession().getUser().getEmail();
         }
     }
 
@@ -95,7 +96,7 @@ public class AppLogEntry {
             device.put("useragent", Device.getDeviceInfo());
 
             JSONObject app = new JSONObject();
-            String appVersion = mShopgun.getAppVersion();
+            String appVersion = PackageUtils.getVersionName(mShopgun.getContext());
             app.put("version", (appVersion == null ? "null" : appVersion));
 
             JSONObject eventLog = new JSONObject();

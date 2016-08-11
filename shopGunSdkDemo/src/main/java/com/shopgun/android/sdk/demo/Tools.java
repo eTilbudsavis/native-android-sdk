@@ -18,12 +18,10 @@ package com.shopgun.android.sdk.demo;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 
-import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.utils.ColorUtils;
+import com.shopgun.android.utils.ColorUtils;
 
 public class Tools {
 
@@ -31,30 +29,6 @@ public class Tools {
     private static int mTextColorDark = ColorUtils.setAlphaComponent(Color.BLACK, 0xe0);
 
     private Tools() {
-
-    }
-
-    public static void shopGunCreate(Context c) {
-
-        /*
-         * There is two options to get a ShopGun instance:
-         * 1) Just call ShopGun.getInstance(Context)
-         * 2) Take control, by building ShopGun with the ShopGun.Builder
-         *
-         * You can instantiate ShopGun from your Application.onCreate().
-         *
-         * ApiKey and ApiSecret are not included in the demo/SDK, but you can
-         * get your own at https://etilbudsavis.dk/developers/ :-)
-         */
-        if (!ShopGun.hasInstance()) {
-
-            // The builder will automatically attach the ShopGun singleton.
-            new ShopGun.Builder(c)
-                    .setDevelop(BuildConfig.DEBUG)
-//                    .setNetwork(new MockApiNetwork(c))
-                    .build();
-
-        }
 
     }
 

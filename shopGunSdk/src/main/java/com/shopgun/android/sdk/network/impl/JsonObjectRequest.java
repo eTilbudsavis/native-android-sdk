@@ -22,7 +22,7 @@ import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,7 +59,7 @@ public class JsonObjectRequest extends JsonRequest<JSONObject> {
 
             JSONObject item = new JSONObject(jsonString);
             Response<JSONObject> r = null;
-            if (Utils.isSuccess(response.statusCode)) {
+            if (SgnUtils.isSuccess(response.statusCode)) {
                 JsonCacheHelper.cacheJSONObject(this, item);
                 r = Response.fromSuccess(item, getCache());
             } else {

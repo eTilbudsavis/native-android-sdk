@@ -49,7 +49,8 @@ import com.shopgun.android.sdk.utils.Api.Endpoint;
 import com.shopgun.android.sdk.utils.ListUtils;
 import com.shopgun.android.sdk.utils.PermissionUtils;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.ConnectivityUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -151,7 +152,7 @@ public class SyncManager {
 
         public void run() {
 
-            User u = mShopGun.getUser();
+            User u = mShopGun.getSessionManager().getSession().getUser();
             // If it's an offline user, then just quit it
             if (!u.isLoggedIn()) {
                 SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (NotLoggedIn)");
@@ -163,7 +164,7 @@ public class SyncManager {
 			 * By not doing a return statement we allow for a final sync, and
 			 * sending local changes to server
 			 */
-            if (mShopGun.isStarted()) {
+            if (mShopGun.getLifecycleManager().isActive()) {
                 mHandler.postDelayed(mSyncLoop, mSyncSpeed);
             }
 
@@ -172,7 +173,7 @@ public class SyncManager {
                 SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (ReqInFlight)");
                 return;
             }
-            if (!mShopGun.isOnline()) {
+            if (!ConnectivityUtils.isOnline(ShopGun.getInstance().getContext())) {
                 SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (Offline)");
                 return;
             }
@@ -589,7 +590,7 @@ public class SyncManager {
                     try {
                         String modified = response.getString(SgnJson.MODIFIED);
                         // If local list has been modified before the server list, then sync items
-                        if (sl.getModified().before(Utils.stringToDate(modified))) {
+                        if (sl.getModified().before(SgnUtils.stringToDate(modified))) {
                             // If there are changes, update items (this will update list-state in DB)
                             syncItems(sl, user);
                         } else {
@@ -926,7 +927,7 @@ public class SyncManager {
         String url = Endpoint.list(user.getUserId(), sl.getId());
 
         JsonObjectRequest listReq = new JsonObjectRequest(Method.DELETE, url, null, listListener);
-        listReq.getParameters().put(Parameters.MODIFIED, Utils.dateToString(sl.getModified()));
+        listReq.getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(sl.getModified()));
         addRequest(listReq);
 
     }
@@ -1057,7 +1058,7 @@ public class SyncManager {
 
         String url = Endpoint.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
         JsonObjectRequest itemReq = new JsonObjectRequest(Method.DELETE, url, null, itemListener);
-        itemReq.getParameters().put(Parameters.MODIFIED, Utils.dateToString(sli.getModified()));
+        itemReq.getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(sli.getModified()));
         addRequest(itemReq);
 
     }

@@ -1,0 +1,168 @@
+package com.shopgun.android.sdk.corekit;
+
+import android.app.Activity;
+import android.app.Application;
+import android.os.Build;
+import android.os.Bundle;
+
+import com.shopgun.android.sdk.ShopGun;
+
+import java.util.Collection;
+import java.util.HashSet;
+
+public class LifecycleManager {
+
+    public static final String TAG = LifecycleManager.class.getSimpleName();
+
+    private final Collection<Callback> mCallbacks = new HashSet<>();
+    private Application mApplication;
+    private Activity mCurrentActivity;
+
+    public LifecycleManager(Application application) {
+        mApplication = application;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+//            mApplication.registerActivityLifecycleCallbacks(new LifecycleLogger(TAG));
+            mApplication.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+                @Override
+                public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+                    mCurrentActivity = activity;
+                }
+
+                @Override
+                public void onActivityStarted(Activity activity) {
+                    mCurrentActivity = activity;
+                    dispatchStart(activity);
+                }
+
+                @Override
+                public void onActivityResumed(Activity activity) {
+                    mCurrentActivity = activity;
+                }
+
+                @Override
+                public void onActivityPaused(Activity activity) {
+                    throwIfNoActivity();
+                }
+
+                @Override
+                public void onActivityStopped(Activity activity) {
+                    throwIfNoActivity();
+                    if (activity == mCurrentActivity) {
+                        dispatchStop(activity);
+                    }
+                }
+
+                @Override
+                public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
+
+                @Override
+                public void onActivityDestroyed(Activity activity) {
+                    throwIfNoActivity();
+                    if (activity == mCurrentActivity) {
+                        dispatchDestroy(activity);
+                        mCurrentActivity = null;
+                        mApplication.unregisterActivityLifecycleCallbacks(this);
+                        unregisterAllCallbacks();
+                    }
+                }
+
+                private void throwIfNoActivity() {
+                    if (mCurrentActivity == null) {
+                        throw new IllegalStateException("No activity set in " + TAG +
+                                ". Make sure to instantiate ShopGun in Application.onCreate()");
+                    }
+                }
+
+            });
+        }
+    }
+
+    public boolean isActive() {
+        return mCurrentActivity != null;
+    }
+
+    public Activity getCurrentActivity() {
+        return mCurrentActivity;
+    }
+
+    public Application getApplication() {
+        return mApplication;
+    }
+
+    public boolean registerCallback(Callback callback) {
+        synchronized (mCallbacks) {
+            return mCallbacks.add(callback);
+        }
+    }
+
+    public void unregisterCallback(Callback callback) {
+        synchronized (mCallbacks) {
+            mCallbacks.remove(callback);
+        }
+    }
+
+    public void unregisterAllCallbacks() {
+        synchronized (mCallbacks) {
+            mCallbacks.clear();
+        }
+    }
+
+    private void dispatchStart(Activity activity) {
+        Callback[] callbacks = collectCallbacks();
+        if (callbacks != null) {
+            for (Callback callback : callbacks) {
+                callback.onStart();
+            }
+        }
+    }
+
+    private void dispatchStop(Activity activity) {
+        Callback[] callbacks = collectCallbacks();
+        if (callbacks != null) {
+            for (Callback callback : callbacks) {
+                callback.onStop();
+            }
+        }
+    }
+
+    private void dispatchDestroy(Activity activity) {
+        Callback[] callbacks = collectCallbacks();
+        if (callbacks != null) {
+            for (Callback callback : callbacks) {
+                callback.onDestroy();
+            }
+        }
+    }
+
+    private Callback[] collectCallbacks() {
+        Callback[] callbacks = null;
+        synchronized (mCallbacks) {
+            if (mCallbacks.size() > 0) {
+                callbacks = mCallbacks.toArray(new Callback[mCallbacks.size()]);
+            }
+        }
+        return callbacks;
+    }
+
+    /**
+     *
+     */
+    public interface Callback {
+
+        /**
+         * Called when the first activity starts
+         */
+        void onStart();
+
+        /**
+         * Called when the last activity stops
+         */
+        void onStop();
+
+        /**
+         * After this, {@link ShopGun} will be inactive and throw exceptions
+         */
+        void onDestroy();
+    }
+
+}

@@ -22,10 +22,10 @@ import android.os.Parcelable;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.palette.MaterialColor;
-import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.palette.MaterialColor;
+import com.shopgun.android.utils.palette.SgnColor;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -89,7 +89,7 @@ public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
     public Dealer(Dealer dealer) {
 
         // Ensure we don't reference objects
-        Dealer tmp = Utils.copyParcelable(dealer, Dealer.CREATOR);
+        Dealer tmp = SgnUtils.copyParcelable(dealer, Dealer.CREATOR);
 
         this.mErn = tmp.mErn;
         this.mName = tmp.mName;

@@ -108,7 +108,7 @@ public class OfferSearchActivity extends BaseActivity implements View.OnClickLis
         request.getParameters().put(Parameters.QUERY, query);
 
         // Send the request to the SDK for execution
-        ShopGun.getInstance(this).add(request);
+        ShopGun.getInstance().add(request);
 
     }
 

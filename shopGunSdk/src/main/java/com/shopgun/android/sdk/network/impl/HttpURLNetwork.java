@@ -20,8 +20,7 @@ import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.network.HttpStack;
 import com.shopgun.android.sdk.network.RedirectProtocol;
 import com.shopgun.android.sdk.network.Request;
-import com.shopgun.android.sdk.utils.HeaderUtils;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -56,7 +55,7 @@ public class HttpURLNetwork implements HttpStack {
     }
 
     public HttpResponse performNetworking(Request<?> request) throws IOException {
-        String tmpUrl = Utils.requestToUrlAndQueryString(request);
+        String tmpUrl = SgnUtils.requestToUrlAndQueryString(request);
         ArrayList<URL> urls = new ArrayList<URL>();
         urls.add(new URL(tmpUrl));
         return performNetworking(request, urls);
@@ -163,7 +162,7 @@ public class HttpURLNetwork implements HttpStack {
         byte[] body = request.getBody();
         if (body != null) {
             connection.setDoOutput(true);
-            connection.addRequestProperty(HeaderUtils.CONTENT_TYPE, request.getBodyContentType());
+            connection.addRequestProperty("Content-Type", request.getBodyContentType());
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
             out.write(body);
             out.close();

@@ -17,7 +17,9 @@
 package com.shopgun.android.sdk;
 
 public class Constants {
-    
+
+    public static final String PACKAGE = "com.shopgun.android.sdk";
+
     public static final String META_API_KEY = "com.shopgun.android.sdk.api_key";
     public static final String META_API_SECRET = "com.shopgun.android.sdk.api_secret";
 

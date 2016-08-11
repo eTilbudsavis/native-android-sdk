@@ -20,7 +20,7 @@ import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 public class ByteRequest extends Request<byte[]> {
 
@@ -67,7 +67,7 @@ public class ByteRequest extends Request<byte[]> {
 
     @Override
     protected Response<byte[]> parseNetworkResponse(NetworkResponse response) {
-        String url = Utils.requestToUrlAndQueryString(this);
+        String url = SgnUtils.requestToUrlAndQueryString(this);
         Cache.Item c = new Cache.Item(response.data, getCacheTTL());
         getCache().put(url, c);
         return Response.fromSuccess(response.data, getCache());
@@ -75,7 +75,7 @@ public class ByteRequest extends Request<byte[]> {
 
     @Override
     protected Response<byte[]> parseCache(Cache c) {
-        String url = Utils.requestToUrlAndQueryString(this);
+        String url = SgnUtils.requestToUrlAndQueryString(this);
         Cache.Item ci = c.get(url);
         if (ci != null && ci.object instanceof byte[]) {
             return Response.fromSuccess((byte[]) ci.object, null);

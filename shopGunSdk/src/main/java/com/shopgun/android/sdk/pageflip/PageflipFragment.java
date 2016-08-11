@@ -31,6 +31,7 @@ import android.widget.FrameLayout;
 import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.SgnFragment;
+import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Branding;
 import com.shopgun.android.sdk.model.Catalog;
@@ -49,7 +50,7 @@ import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogRequest;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONObject;
 
@@ -282,7 +283,7 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
         b.putParcelable(ARG_READER_CONFIG, config);
         b.putInt(ARG_PAGE, page);
         b.putParcelable(ARG_BRANDING, branding);
-        b.putString(ARG_VIEW_SESSION, Utils.createUUID());
+        b.putString(ARG_VIEW_SESSION, SgnUtils.createUUID());
         PageflipFragment f = new PageflipFragment();
         f.setArguments(b);
         return f;
@@ -320,7 +321,7 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
         }
         mSavedInstanceState = null;
 
-        mStatsDelivery = new StatDeliveryImpl(getShopgun());
+        mStatsDelivery = new StatDeliveryImpl(ShopGun.getInstance());
 
         return mFrame;
     }
@@ -356,7 +357,7 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
         mViewSessionUuid = args.getString(ARG_VIEW_SESSION);
 
         if (mViewSessionUuid == null) {
-            mViewSessionUuid = Utils.createUUID();
+            mViewSessionUuid = SgnUtils.createUUID();
         }
 
     }
@@ -597,7 +598,7 @@ public class PageflipFragment extends SgnFragment implements LoaderRequest.Liste
             setCatalog(response);
             setBranding(mCatalog.getBranding());
 
-            int heap = Utils.getMaxHeap(getActivity());
+            int heap = SgnUtils.getMaxHeap(getActivity());
             mAdapter = new CatalogPagerAdapter(getChildFragmentManager(), heap, mCatalogPageCallback, mConfig);
             mAdapter.setIntroFragment(mIntroFragment);
             mAdapter.setOutroFragment(mOutroFragment);

@@ -20,10 +20,10 @@ import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.api.Parameters;
-import com.shopgun.android.sdk.log.EventLog;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.impl.HandlerDelivery;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.PackageUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -194,20 +194,6 @@ public class RequestQueue {
     }
 
     /**
-     * This method have been deprecated, please refer to {@link SgnLog#getLogger()}
-     * for a complete log of ShopGun sdk.<br><br>
-     *
-     * Get the log of all requests that have passed through this RequestQueue.
-     * The log contains a summary of the request it self, and the response given by the API.
-     * This can be very useful for debugging.
-     * @return the EventLog from this RequestQueue
-     * @deprecated
-     */
-    public EventLog getLog() {
-        return SgnLog.getLogger().getLog();
-    }
-
-    /**
      * Get the {@link Network} associated with this {@link RequestQueue}
      * @return A {@link Network}
      */
@@ -300,10 +286,10 @@ public class RequestQueue {
 
         try {
             log.put("method", r.getMethod().toString());
-            log.put("url", Utils.requestToUrlAndQueryString(r));
+            log.put("url", SgnUtils.requestToUrlAndQueryString(r));
             log.put("Content-Type", r.getBodyContentType());
             log.put("headers", new JSONObject(r.getHeaders()));
-            log.put("time", Utils.dateToString(new Date()));
+            log.put("time", SgnUtils.dateToString(new Date()));
         } catch (JSONException e) {
             SgnLog.e(TAG, e.getMessage(), e);
         }
@@ -354,7 +340,7 @@ public class RequestQueue {
         // Apply ShopGun environment, if needed
         request.setUrl(mShopGun.getEnvironment().apply(request.getUrl()));
 
-        String version = mShopGun.getAppVersion();
+        String version = PackageUtils.getVersionName(mShopGun.getContext());
         if (version != null) {
             request.getParameters().put(Parameters.API_AV, version);
         }

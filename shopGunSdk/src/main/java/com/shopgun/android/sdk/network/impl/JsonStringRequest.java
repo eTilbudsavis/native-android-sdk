@@ -23,7 +23,7 @@ import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -65,7 +65,7 @@ public class JsonStringRequest extends JsonRequest<String> {
             jsonString = new String(response.data).trim();
         }
 
-        if (Utils.isSuccess(response.statusCode)) {
+        if (SgnUtils.isSuccess(response.statusCode)) {
 
             if (jsonString.startsWith("{") && jsonString.endsWith("}")) {
 

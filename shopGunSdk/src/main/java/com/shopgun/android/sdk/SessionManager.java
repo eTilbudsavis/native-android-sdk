@@ -31,8 +31,9 @@ import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
+import com.shopgun.android.sdk.utils.ExternalClientIdStore;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONObject;
 
@@ -295,7 +296,7 @@ public class SessionManager {
             Date now = new Date();
             long delta = now.getTime() - mShopGun.getSettings().getLastUsedTime();
             boolean shouldPut = delta > TimeUnit.HOURS.toMillis(2);
-//            boolean shouldPut = delta > (20 * Utils.SECOND_IN_MILLIS);
+//            boolean shouldPut = delta > (20 * SgnUtils.SECOND_IN_MILLIS);
             if (shouldPut) {
                 putSession(null);
             }
@@ -519,7 +520,7 @@ public class SessionManager {
 
             if (mSession.getToken() == null || !mSession.getToken().equals(headerToken)) {
                 mSession.setToken(headerToken);
-                Date exp = Utils.stringToDate(headerExpires);
+                Date exp = SgnUtils.stringToDate(headerExpires);
                 mSession.setExpires(exp);
                 mShopGun.getSettings().setSessionJson(mSession.toJSON());
             }

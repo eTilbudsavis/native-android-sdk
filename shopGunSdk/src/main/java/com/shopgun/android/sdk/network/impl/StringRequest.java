@@ -23,7 +23,7 @@ import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.Response.Listener;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import java.io.UnsupportedEncodingException;
 
@@ -85,7 +85,7 @@ public class StringRequest extends Request<String> {
             string = new String(response.data);
         }
 
-        String url = Utils.requestToUrlAndQueryString(this);
+        String url = SgnUtils.requestToUrlAndQueryString(this);
         Cache.Item c = new Cache.Item(string, getCacheTTL());
         getCache().put(url, c);
 
@@ -96,7 +96,7 @@ public class StringRequest extends Request<String> {
 
     @Override
     protected Response<String> parseCache(Cache c) {
-        String url = Utils.requestToUrlAndQueryString(this);
+        String url = SgnUtils.requestToUrlAndQueryString(this);
         Cache.Item ci = c.get(url);
         if (ci != null && ci.object instanceof String) {
             return Response.fromSuccess((String) ci.object, null);

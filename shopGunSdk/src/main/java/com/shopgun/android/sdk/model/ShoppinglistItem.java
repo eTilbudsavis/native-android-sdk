@@ -25,7 +25,8 @@ import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.DateUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -118,8 +119,8 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
      * update modified to the creation time of this object (now).
      */
     public ShoppinglistItem() {
-        setId(Utils.createUUID());
-        mModified = Utils.roundTime(new Date());
+        setId(SgnUtils.createUUID());
+        mModified = DateUtils.roundTime(new Date());
     }
 
     /**
@@ -452,7 +453,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
      * @return This object
      */
     public ShoppinglistItem setModified(Date time) {
-        mModified = Utils.roundTime(time);
+        mModified = DateUtils.roundTime(time);
         return this;
     }
 

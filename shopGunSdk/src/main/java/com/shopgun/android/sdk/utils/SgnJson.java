@@ -41,8 +41,8 @@ import com.shopgun.android.sdk.model.Store;
 import com.shopgun.android.sdk.model.Unit;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.palette.MaterialColor;
-import com.shopgun.android.sdk.palette.SgnColor;
+import com.shopgun.android.utils.palette.MaterialColor;
+import com.shopgun.android.utils.palette.SgnColor;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -1703,7 +1703,7 @@ public class SgnJson {
         }
 
         public Set<String> getForgottenKeys() {
-            List<String> keys = Utils.copyIterator(mObject.keys());
+            List<String> keys = SgnUtils.copyIterator(mObject.keys());
             Set<String> missing = new HashSet<String>(keys);
             missing.removeAll(mAccepted);
             missing.removeAll(mIgnoreForgotten);

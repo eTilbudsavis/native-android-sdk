@@ -27,7 +27,7 @@ import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.utils.ListUtils;
 import com.shopgun.android.sdk.utils.PermissionUtils;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.utils.DateUtils;
 
 import org.json.JSONArray;
 
@@ -416,7 +416,7 @@ public class DatabaseWrapper {
      * @return the number of rows affected
      */
     public int editItemState(Shoppinglist sl, User user, Date modified, int syncState) {
-        modified = Utils.roundTime(modified);
+        modified = DateUtils.roundTime(modified);
         return mDataSource.editItemState(sl.getId(), user.getId(), modified, syncState);
     }
 
