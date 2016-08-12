@@ -16,8 +16,6 @@
 
 package com.shopgun.android.sdk.utils;
 
-import com.shopgun.android.sdk.Constants;
-
 public final class Utils {
 
     public static final String TAG = Constants.getTag(SgnUtils.class);

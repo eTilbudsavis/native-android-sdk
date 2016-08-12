@@ -24,6 +24,7 @@ import android.support.annotation.IntRange;
 
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.model.Store;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONObject;

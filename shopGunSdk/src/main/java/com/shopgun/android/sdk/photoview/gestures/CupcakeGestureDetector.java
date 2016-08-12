@@ -21,7 +21,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 
 public class CupcakeGestureDetector implements GestureDetector {

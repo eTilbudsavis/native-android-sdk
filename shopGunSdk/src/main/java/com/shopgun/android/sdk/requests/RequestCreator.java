@@ -16,7 +16,7 @@
 
 package com.shopgun.android.sdk.requests;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.model.Catalog;

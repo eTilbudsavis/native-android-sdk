@@ -50,7 +50,7 @@ import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IStore;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.SgnUtils;
 

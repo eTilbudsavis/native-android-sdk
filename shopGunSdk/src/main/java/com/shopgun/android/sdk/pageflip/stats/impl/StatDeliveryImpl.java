@@ -16,7 +16,7 @@
 
 package com.shopgun.android.sdk.pageflip.stats.impl;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Request;

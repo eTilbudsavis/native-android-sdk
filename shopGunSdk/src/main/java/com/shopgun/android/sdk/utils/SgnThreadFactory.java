@@ -16,7 +16,6 @@
 
 package com.shopgun.android.sdk.utils;
 
-import com.shopgun.android.sdk.Constants;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;

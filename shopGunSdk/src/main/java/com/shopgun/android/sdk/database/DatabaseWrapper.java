@@ -18,7 +18,7 @@ package com.shopgun.android.sdk.database;
 
 import android.content.Context;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Share;

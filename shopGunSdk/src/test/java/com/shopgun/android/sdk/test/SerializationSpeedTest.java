@@ -23,7 +23,7 @@ import android.os.Parcelable;
 import android.os.Parcelable.Creator;
 
 import com.shopgun.android.sdk.model.Shoppinglist;
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 
 import junit.framework.Assert;
 

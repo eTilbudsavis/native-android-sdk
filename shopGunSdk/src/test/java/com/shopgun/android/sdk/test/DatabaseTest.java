@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.test;
 
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 
 public class DatabaseTest {
 

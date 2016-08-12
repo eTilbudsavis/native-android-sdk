@@ -20,7 +20,7 @@ package com.shopgun.android.sdk.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.SgnJson;
 

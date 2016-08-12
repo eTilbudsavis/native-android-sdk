@@ -19,7 +19,6 @@ package com.shopgun.android.sdk.utils;
 import android.graphics.Color;
 import android.text.TextUtils;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Branding;
 import com.shopgun.android.sdk.model.Catalog;

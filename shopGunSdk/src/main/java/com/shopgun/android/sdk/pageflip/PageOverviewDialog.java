@@ -41,7 +41,7 @@ import android.widget.ImageView;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.utils.CatalogThumbTransformation;
 import com.shopgun.android.utils.ColorUtils;

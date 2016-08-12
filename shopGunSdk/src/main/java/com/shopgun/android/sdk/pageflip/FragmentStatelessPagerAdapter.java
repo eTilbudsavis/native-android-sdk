@@ -22,7 +22,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.view.ViewGroup;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 
 public abstract class FragmentStatelessPagerAdapter extends FragmentStatePagerAdapter {
 

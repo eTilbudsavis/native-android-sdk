@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk;
+package com.shopgun.android.sdk.utils;
 
 public class Constants {
 

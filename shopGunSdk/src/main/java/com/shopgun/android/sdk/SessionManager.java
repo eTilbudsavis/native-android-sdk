@@ -31,6 +31,7 @@ import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.ExternalClientIdStore;
 import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.SgnUtils;

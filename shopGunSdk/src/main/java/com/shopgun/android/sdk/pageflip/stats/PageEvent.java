@@ -16,7 +16,7 @@
 
 package com.shopgun.android.sdk.pageflip.stats;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.pageflip.Orientation;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;

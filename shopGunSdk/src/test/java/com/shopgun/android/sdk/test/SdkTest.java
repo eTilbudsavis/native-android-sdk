@@ -21,7 +21,7 @@ package com.shopgun.android.sdk.test;
 import android.content.Context;
 
 import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 
 public class SdkTest {
 

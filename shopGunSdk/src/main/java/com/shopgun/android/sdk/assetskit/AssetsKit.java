@@ -3,7 +3,7 @@ package com.shopgun.android.sdk.assetskit;
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 
 import java.io.File;
 

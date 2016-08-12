@@ -23,8 +23,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
 
-import com.shopgun.android.sdk.Constants;
-
 public class Device {
 
     public static final String TAG = Constants.getTag(Device.class);

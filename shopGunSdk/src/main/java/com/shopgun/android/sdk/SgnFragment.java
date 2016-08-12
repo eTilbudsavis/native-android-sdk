@@ -18,6 +18,8 @@ package com.shopgun.android.sdk;
 
 import android.support.v4.app.Fragment;
 
+import com.shopgun.android.sdk.utils.Constants;
+
 public class SgnFragment extends Fragment {
 
     public static final String TAG = Constants.getTag(SgnFragment.class);

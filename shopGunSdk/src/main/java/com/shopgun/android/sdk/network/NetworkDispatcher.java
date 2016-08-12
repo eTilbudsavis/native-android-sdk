@@ -18,7 +18,7 @@ package com.shopgun.android.sdk.network;
 
 import android.os.Process;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.SessionManager;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.utils.SharedPreferencesUtils;
 
 import org.json.JSONException;

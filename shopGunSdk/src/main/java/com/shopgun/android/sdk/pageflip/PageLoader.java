@@ -25,7 +25,7 @@ import android.os.Parcelable;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Images;

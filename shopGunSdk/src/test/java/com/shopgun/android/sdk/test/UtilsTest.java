@@ -21,7 +21,7 @@ import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Si;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnUtils;
 
 import junit.framework.Assert;

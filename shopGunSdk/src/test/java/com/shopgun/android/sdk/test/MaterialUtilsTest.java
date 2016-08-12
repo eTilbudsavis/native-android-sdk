@@ -19,7 +19,7 @@ package com.shopgun.android.sdk.test;
 
 import android.graphics.Color;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.utils.palette.MaterialUtils;
 import com.shopgun.android.utils.palette.SgnColor;
 

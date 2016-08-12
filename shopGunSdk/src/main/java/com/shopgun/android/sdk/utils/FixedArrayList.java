@@ -16,8 +16,6 @@
 
 package com.shopgun.android.sdk.utils;
 
-import com.shopgun.android.sdk.Constants;
-
 import java.util.ArrayList;
 import java.util.Collection;
 

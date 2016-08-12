@@ -44,6 +44,7 @@ import com.shopgun.android.sdk.network.impl.MemoryCache;
 import com.shopgun.android.sdk.network.impl.NetworkImpl;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
 import com.shopgun.android.sdk.shoppinglists.SyncManager;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnThreadFactory;
 import com.shopgun.android.sdk.utils.SgnUserAgent;
 import com.shopgun.android.sdk.utils.Version;

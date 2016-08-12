@@ -19,7 +19,7 @@ package com.shopgun.android.sdk.requests;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.network.Delivery;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;

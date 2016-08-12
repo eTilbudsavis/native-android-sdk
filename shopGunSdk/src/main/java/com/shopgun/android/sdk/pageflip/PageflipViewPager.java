@@ -24,7 +24,7 @@ import android.view.MotionEvent;
 import android.view.animation.Interpolator;
 import android.widget.Scroller;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 
 import java.lang.reflect.Field;
 

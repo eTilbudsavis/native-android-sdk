@@ -20,7 +20,7 @@ import android.content.Context;
 
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.model.Session;
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.ExternalClientIdStore;
 import com.shopgun.android.sdk.utils.SgnUtils;
 

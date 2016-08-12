@@ -18,7 +18,7 @@ package com.shopgun.android.sdk.requests;
 
 import android.os.Parcelable;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.network.ShopGunError;
 
 public class InternalOkError extends ShopGunError {

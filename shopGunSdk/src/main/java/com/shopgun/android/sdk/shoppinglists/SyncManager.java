@@ -21,7 +21,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.bus.SessionEvent;
@@ -46,6 +45,7 @@ import com.shopgun.android.sdk.network.impl.HandlerDelivery;
 import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.ListUtils;
 import com.shopgun.android.sdk.utils.PermissionUtils;
 import com.shopgun.android.sdk.utils.SgnJson;
