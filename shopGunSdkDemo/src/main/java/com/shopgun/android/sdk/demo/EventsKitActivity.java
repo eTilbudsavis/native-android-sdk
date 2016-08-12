@@ -53,10 +53,10 @@ public class EventsKitActivity extends AppCompatActivity {
         map.put("offerId", "kkqS23412");
         tracker.track("x-custom-event", map.toJson());
 
-        map.put("offerId", "kkqS23412");
+        map.put("offerId", "54gtr445h");
         tracker.track("x-custom-event", map.toJson());
 
-        map.put("offerId", "kkqS23412");
+        map.put("offerId", "e5gtretre");
         tracker.track("x-custom-event", map.toJson());
 
         tracker.flush();

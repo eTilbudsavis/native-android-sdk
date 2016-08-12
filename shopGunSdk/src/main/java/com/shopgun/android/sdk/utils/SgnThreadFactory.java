@@ -16,6 +16,8 @@
 
 package com.shopgun.android.sdk.utils;
 
+import com.shopgun.android.sdk.BuildConfig;
+import com.shopgun.android.sdk.log.SgnLog;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,13 +30,6 @@ public class SgnThreadFactory implements ThreadFactory {
     private static final int DEFAULT_THREAD_PRIORITY = Thread.NORM_PRIORITY - 1;
 
     private static final AtomicInteger poolNumber = new AtomicInteger(1);
-
-//	private static UncaughtExceptionHandler mExceptionHandler = new UncaughtExceptionHandler() {
-//		
-//		public void uncaughtException(Thread thread, Throwable ex) {
-//			SgnLog.e(TAG, thread.getName() + " crashed", ex);
-//		}
-//	};
 
     private final ThreadGroup group;
     private final AtomicInteger threadNumber = new AtomicInteger(1);
@@ -60,8 +55,28 @@ public class SgnThreadFactory implements ThreadFactory {
         Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
         if (t.isDaemon()) t.setDaemon(false);
         t.setPriority(threadPriority);
-//		t.setUncaughtExceptionHandler(mExceptionHandler);
+        if (BuildConfig.DEBUG) {
+            t.setUncaughtExceptionHandler(new LogUncaughtExceptionHandler(t.getUncaughtExceptionHandler()));
+        }
         return t;
+    }
+
+    private static class LogUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+        Thread.UncaughtExceptionHandler mUncaughtExceptionHandler;
+
+        public LogUncaughtExceptionHandler(Thread.UncaughtExceptionHandler uncaughtExceptionHandler) {
+            mUncaughtExceptionHandler = uncaughtExceptionHandler;
+        }
+
+        @Override
+        public void uncaughtException(Thread thread, Throwable ex) {
+            SgnLog.e(TAG, thread.getName() + " crashed", ex);
+            if (mUncaughtExceptionHandler != null) {
+                // rethrow
+                mUncaughtExceptionHandler.uncaughtException(thread, ex);
+            }
+        }
     }
 
 }
