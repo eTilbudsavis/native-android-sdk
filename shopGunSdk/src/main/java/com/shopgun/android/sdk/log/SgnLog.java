@@ -1,14 +1,17 @@
 package com.shopgun.android.sdk.log;
 
+import com.shopgun.android.utils.log.LogCatLogger;
 import com.shopgun.android.utils.log.Logger;
-import com.shopgun.android.utils.log.QuietLogger;
 
+/**
+ * Static class for easy access to logging with {@link Logger}
+ */
 public class SgnLog {
 
-    private static volatile Logger mLogger = new QuietLogger();
+    private static volatile Logger mLogger = new LogCatLogger(0);
 
     public static void setLogger(Logger logger) {
-        mLogger = logger == null ? new QuietLogger() : logger;
+        mLogger = (logger == null ? new LogCatLogger(0) : logger);
     }
 
     public static int v(String tag, String msg) {
