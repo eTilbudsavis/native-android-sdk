@@ -18,6 +18,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
+
 public class EventsKitActivity extends AppCompatActivity {
 
     public static final String TAG = EventsKitActivity.class.getSimpleName();
@@ -31,8 +35,9 @@ public class EventsKitActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        localDBTest();
-        fullStackTest();
+        sqliteTest();
+        realmTest();
+//        fullStackTest();
     }
 
     private void fullStackTest() {
@@ -72,7 +77,7 @@ public class EventsKitActivity extends AppCompatActivity {
         }
     }
 
-    private void localDBTest() {
+    private void sqliteTest() {
 
         Logg l = new Logg();
 
@@ -80,7 +85,7 @@ public class EventsKitActivity extends AppCompatActivity {
 //        L.d(TAG, "### Clear database");
         EventDb db = EventDb.getInstance();
         db.clear();
-        l.intermediateStop("db cleared");
+        l.intermediateStop("sqlite cleared");
 
 //        L.d(TAG, "### Generate events");
         JsonMap testMap = new JsonMap();
@@ -93,7 +98,7 @@ public class EventsKitActivity extends AppCompatActivity {
         l.intermediateStart();
         db.insert(first);
         db.insert(second);
-        l.intermediateStop("db insert");
+        l.intermediateStop("sqlite insert");
 
 //        L.d(TAG, "### Update sentAt");
         List<Event> events = db.getEvents();
@@ -103,7 +108,7 @@ public class EventsKitActivity extends AppCompatActivity {
         }
         l.intermediateStart();
         db.update(events);
-        l.intermediateStop("db update");
+        l.intermediateStop("sqlite update");
 
 //        L.d(TAG, "### UpdateRetryCount");
         l.intermediateStart();
@@ -113,7 +118,7 @@ public class EventsKitActivity extends AppCompatActivity {
         db.updateRetryCount(toIds(events), 3);
         // Should delete
         db.updateRetryCount(toIds(events), 3);
-        l.intermediateStop("db retry count");
+        l.intermediateStop("sqlite retry count");
 
 
 //        L.d(TAG, "### Re-Insert events");
@@ -123,13 +128,80 @@ public class EventsKitActivity extends AppCompatActivity {
 //        L.d(TAG, "### Delete events");
         l.intermediateStart();
         db.delete(toIds(events));
-        l.intermediateStop("db deleted");
+        l.intermediateStop("sqlite deleted");
 
 //        L.d(TAG, "db.event.count: " + db.getEventCount());
 
         db.clear();
 
         l.stop("done");
+
+    }
+
+    private void realmTest() {
+
+        Logg l = new Logg();
+
+        l.intermediateStart();
+//        L.d(TAG, "### Clear database");
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).build();
+        Realm.setDefaultConfiguration(realmConfiguration);
+        Realm realm = Realm.getDefaultInstance();
+
+        realm.beginTransaction();
+        realm.deleteAll();
+        l.intermediateStop("realm cleared");
+
+//        L.d(TAG, "### Generate events");
+        JsonMap testMap = new JsonMap();
+        testMap.put("offerId", "firstEvent");
+        Event first = new Event("x-custom-event", testMap.toJson());
+        testMap.put("offerId", "secondEvent");
+        Event second = new Event("x-custom-event", testMap.toJson());
+
+//        L.d(TAG, "### Insert events");
+        l.intermediateStart();
+        realm.insert(first);
+        realm.insert(second);
+        l.intermediateStop("realm insert");
+
+//        L.d(TAG, "### Update sentAt");
+//        List<Event> events = db.getEvents();
+//        Date now = new Date();
+//        for (Event event : events) {
+//            event.setSentAt(now);
+//        }
+//        l.intermediateStart();
+//        db.update(events);
+        l.intermediateStop("realm update");
+
+//        L.d(TAG, "### UpdateRetryCount");
+        l.intermediateStart();
+
+        RealmResults<Event> nack = realm.where(Event.class).findAll();
+        updareRealm(realm, nack, 3);
+        updareRealm(realm, nack, 3);
+//        updareRealm(realm, nack, 3);
+        // Should delete
+//        updareRealm(realm, nack, 3);
+        l.intermediateStop("realm retry count");
+
+//        realm.deleteAll();
+        realm.commitTransaction();
+        l.stop("realm done");
+
+        realm.beginTransaction();
+        L.d(TAG, realm.where(Event.class).findAll().toString());
+        realm.commitTransaction();
+
+    }
+
+    private void updareRealm(Realm realm, RealmResults<Event> nack, int maxRetryCount) {
+        for (Event e : nack) {
+            e.incrementRetryCount();
+        }
+        realm.insertOrUpdate(nack);
+        realm.where(Event.class).greaterThan("mRetryCount", maxRetryCount).findAll().deleteAllFromRealm();
 
     }
 
@@ -160,14 +232,14 @@ public class EventsKitActivity extends AppCompatActivity {
         return  ids;
     }
 
-    private void dumpTable(EventDb db) {
-        L.d(TAG, "### Table dump");
-        try {
-            L.d(TAG, db.dump().toString(4));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-    }
+//    private void dumpTable(EventDb db) {
+//        L.d(TAG, "### Table dump");
+//        try {
+//            L.d(TAG, db.dump().toString(4));
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//
+//    }
 
 }

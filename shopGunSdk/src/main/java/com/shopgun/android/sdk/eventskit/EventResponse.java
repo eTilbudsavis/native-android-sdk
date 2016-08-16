@@ -4,7 +4,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class EventResponse {
 
@@ -82,20 +84,20 @@ public class EventResponse {
         return list;
     }
 
-    public List<String> getAckIds() {
+    public Set<String> getAckIds() {
         return getIds(Status.ACK);
     }
 
-    public List<String> getNackIds() {
+    public Set<String> getNackIds() {
         return getIds(Status.NACK);
     }
 
-    public List<String> getErrorIds() {
+    public Set<String> getErrorIds() {
         return getIds(Status.ERROR);
     }
 
-    public List<String> getIds(Status status) {
-        List<String> ids = new ArrayList<>();
+    public Set<String> getIds(Status status) {
+        Set<String> ids = new HashSet<>();
         for (Item item : mItems) {
             if (status == item.status) {
                 ids.add(item.id);

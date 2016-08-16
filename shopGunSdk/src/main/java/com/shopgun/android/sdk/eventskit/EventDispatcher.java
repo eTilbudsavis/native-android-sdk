@@ -2,7 +2,6 @@ package com.shopgun.android.sdk.eventskit;
 
 import android.os.Process;
 
-import com.shopgun.android.sdk.eventskit.database.EventDb;
 import com.shopgun.android.sdk.log.SgnLog;
 
 import org.json.JSONException;
@@ -10,9 +9,12 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
+import io.realm.Realm;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
@@ -20,6 +22,8 @@ import okhttp3.Response;
 public class EventDispatcher extends Thread {
 
     public static final String TAG = EventDispatcher.class.getSimpleName();
+
+    private static final String DISPATCH_EVENT = "dispatch_event-queue";
 
     /** The queue of requests to service. */
     private final BlockingQueue<Event> mQueue;
@@ -29,7 +33,7 @@ public class EventDispatcher extends Thread {
     private volatile boolean mQuit = false;
     private final int mMaxQueueSize;
     private final int mMaxRetryCount;
-    private int mEventCounter;
+    private Realm mRealm;
 
     public EventDispatcher(BlockingQueue<Event> queue, OkHttpClient client) {
         this(queue, client, 20, 5);
@@ -55,6 +59,8 @@ public class EventDispatcher extends Thread {
         // low priority on posting events to atta
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
+        mRealm = Realm.getDefaultInstance();
+
         dispatchEventQueue(true);
 
         Event event;
@@ -71,33 +77,45 @@ public class EventDispatcher extends Thread {
                 continue;
             }
 
-            if (event instanceof FlushEvent) {
+            if (DISPATCH_EVENT.equals(event.getId())) {
                 dispatchEventQueue(true);
             } else {
-                EventDb.getInstance().insert(event);
-                mEventCounter++;
+                mRealm.insert(event);
                 dispatchEventQueue(false);
             }
 
         }
     }
 
+    private RealmResults<Event> getIds(Set<String> ids) {
+        RealmQuery<Event> query = mRealm.where(Event.class);
+        boolean first = true;
+        for (String id : ids) {
+            if (!first) {
+                query.or();
+            }
+            first = false;
+            query = query.equalTo("mId", id);
+        }
+        return query.findAll();
+    }
+
     private void dispatchEventQueue(boolean force) {
 
-        if (!force && mEventCounter < mMaxQueueSize) {
+        if (!force && mRealm.where(Event.class).count() < mMaxQueueSize) {
             return;
         }
 
-        EventDb db = EventDb.getInstance();
-        List<Event> events = db.getEvents();
-
         try {
 
+            RealmResults<Event> events = mRealm.where(Event.class).findAll();
+            mRealm.beginTransaction();
             Date now = new Date();
             for (Event ew : events) {
                 ew.setSentAt(now);
             }
-            db.update(events);
+            mRealm.insertOrUpdate(events);
+            mRealm.commitTransaction();
 
             Call call = EventRequest.post(mClient, events);
             Response response = call.execute();
@@ -108,10 +126,16 @@ public class EventDispatcher extends Thread {
                 JSONObject jResponseBody = new JSONObject(responseBody);
                 EventResponse jResponse = EventResponse.fromJson(jResponseBody);
 
-                List<String> delete = jResponse.getAckIds();
+                Set<String> delete = jResponse.getAckIds();
                 delete.addAll(jResponse.getErrorIds());
-                db.delete(delete);
-                db.updateRetryCount(jResponse.getNackIds(), mMaxRetryCount);
+                getIds(delete).deleteAllFromRealm();
+
+                RealmResults<Event> nack = getIds(jResponse.getNackIds());
+                for (Event e : nack) {
+                    e.incrementRetryCount();
+                }
+                mRealm.insertOrUpdate(nack);
+                mRealm.where(Event.class).greaterThan("mRetryCount", mMaxRetryCount).findAll().deleteAllFromRealm();
 
             }
 
@@ -124,11 +148,9 @@ public class EventDispatcher extends Thread {
     }
 
     public void flush() {
-        mQueue.add(new FlushEvent());
-    }
-
-    private static class FlushEvent extends Event {
-
+        Event event = new Event();
+        event.setId(DISPATCH_EVENT);
+        mQueue.add(event);
     }
 
 }

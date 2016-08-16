@@ -1,12 +1,20 @@
 package com.shopgun.android.sdk.eventskit;
 
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.SgnUtils;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
 
-public class Event {
+import io.realm.RealmModel;
+import io.realm.annotations.Ignore;
+import io.realm.annotations.PrimaryKey;
+import io.realm.annotations.RealmClass;
+
+@RealmClass
+public class Event implements RealmModel {
 
     public static final String TAG = Event.class.getSimpleName();
     public static final String VERSION = "1.0.0";
@@ -29,6 +37,7 @@ public class Event {
     /* The event version scheme to use */
     private String mVersion = VERSION;
     /* A uuid that uniquely identifies the event */
+    @PrimaryKey
     private String mId;
     /* This determines what will be valid in "properties" key */
     private String mType;
@@ -39,11 +48,20 @@ public class Event {
     /* time the event arrived at the server according to the server */
     private Date mReceivedAt;
     /* information about the client sending the event. */
+    @Ignore
     private JSONObject mClient;
     /* Contextual event information about sender, viewport, etc. */
+    @Ignore
     private JSONObject mContext;
     /* What ever properties goes with the event type */
+    @Ignore
     private JSONObject mProperties;
+    /* number of retries performed */
+    private int mRetryCount;
+
+    private String mJsonClient;
+    private String mJsonContext;
+    private String mJsonProperties;
 
     public Event() {
         mRecordedAt = new Date();
@@ -105,27 +123,69 @@ public class Event {
     }
 
     public JSONObject getClient() {
+        if (mClient == null) {
+            try {
+                mClient = new JSONObject(mJsonClient);
+            } catch (JSONException e) {
+                SgnLog.e(TAG, "Client wasn't set as a JSON string.", e);
+            }
+        }
         return mClient;
     }
 
     public void setClient(JSONObject client) {
         mClient = client;
+        if (mClient != null) {
+            mJsonClient = client.toString();
+        }
     }
 
     public JSONObject getContext() {
+        if (mContext == null) {
+            try {
+                mContext = new JSONObject(mJsonContext);
+            } catch (JSONException e) {
+                SgnLog.e(TAG, "Context wasn't set as a JSON string.", e);
+            }
+        }
         return mContext;
     }
 
     public void setContext(JSONObject context) {
         mContext = context;
+        if (mContext!= null) {
+            mJsonContext = context.toString();
+        }
     }
 
     public JSONObject getProperties() {
+        if (mProperties == null) {
+            try {
+                mProperties = new JSONObject(mJsonProperties);
+            } catch (JSONException e) {
+                SgnLog.e(TAG, "Properties wasn't set as a JSON string.", e);
+            }
+        }
         return mProperties;
     }
 
     public void setProperties(JSONObject eventProperty) {
         mProperties = eventProperty;
+        if (mProperties != null) {
+            mJsonProperties = eventProperty.toString();
+        }
+    }
+
+    public void setRetryCount(int retryCount) {
+        mRetryCount = retryCount;
+    }
+
+    public void incrementRetryCount() {
+        mRetryCount++;
+    }
+
+    public int getRetryCount() {
+        return mRetryCount;
     }
 
     public JSONObject toJson() {

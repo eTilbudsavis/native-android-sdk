@@ -55,6 +55,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
@@ -597,6 +599,7 @@ public class ShopGun {
                 mThemeEnvironment = ThemeEnvironment.PRODUCTION;
             }
 
+            // Setup the default OkHttpClient
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             for (Interceptor i : mInterceptors) {
                 builder.addInterceptor(i);
@@ -606,6 +609,10 @@ public class ShopGun {
             }
             builder.addInterceptor(new UserAgentInterceptor(SgnUserAgent.getUserAgent(mApplication)));
             OkHttpClient okHttpClient = builder.build();
+
+            // Set the default RealmConfiguration.
+            RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(mApplication).build();
+            Realm.setDefaultConfiguration(realmConfiguration);
 
             ShopGun.mSingleton = new ShopGun(mApplication, mExecutor, mEnvironment, mThemeEnvironment, mDevelop, okHttpClient, mCache, mNetwork);
             return ShopGun.getInstance();
