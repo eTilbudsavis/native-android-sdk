@@ -29,6 +29,7 @@ import android.util.Log;
 import com.shopgun.android.sdk.api.Environment;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
+import com.shopgun.android.sdk.corekit.SgnRealmModule;
 import com.shopgun.android.sdk.corekit.UserAgentInterceptor;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
 import com.shopgun.android.sdk.log.SgnLog;
@@ -133,17 +134,20 @@ public class ShopGun {
     private final SyncManager mSyncManager;
     /** A {@link RequestQueue} implementation to handle all API requests */
     private final RequestQueue mRequestQueue;
+    /** A RealmConfiguration specifically for the SDK */
+    private final RealmConfiguration mRealmConfiguration;
 
-    private ShopGun(Application application, ExecutorService executorService, Environment environment, ThemeEnvironment themeEnvironment, boolean develop, OkHttpClient client, Cache cache, Network network) {
+    private ShopGun(Builder builder) {
         // Get application context, to avoid memory leaks (e.g. holding a reference to an Activity)
-        mContext = application.getApplicationContext();
-        mDevelop = develop;
-        mEnvironment = environment;
-        mThemeEnvironment = themeEnvironment;
-        mExecutor = executorService;
-        mClient = client;
+        mContext = builder.application.getApplicationContext();
+        mDevelop = builder.develop;
+        mEnvironment = builder.environment;
+        mThemeEnvironment = builder.themeEnvironment;
+        mExecutor = builder.executorService;
+        mClient = builder.client;
+        mRealmConfiguration = builder.realmConfiguration;
 
-        mLifecycleManager = new LifecycleManager(application);
+        mLifecycleManager = new LifecycleManager(builder.application);
         mLifecycleManager.getApplication().registerComponentCallbacks(new ComponentCallbacks2() {
             @Override
             public void onTrimMemory(int level) {
@@ -179,7 +183,7 @@ public class ShopGun {
 
         mSettings = new Settings(mContext);
 
-        mRequestQueue = new RequestQueue(ShopGun.this, cache, network);
+        mRequestQueue = new RequestQueue(ShopGun.this, builder.cache, builder.network);
         mRequestQueue.start();
 
         mLocation = mSettings.getLocation();
@@ -200,10 +204,21 @@ public class ShopGun {
      */
     public static ShopGun getInstance() {
         if(mSingleton == null) {
-            throw new IllegalStateException("No ShopGun instance found");
+            throw new IllegalStateException("No ShopGun instance found, see ShopGun.Builder.");
         } else {
             return mSingleton;
         }
+    }
+
+    private static ShopGun createInstance(Builder builder) {
+        if (mSingleton == null) {
+            synchronized (ShopGun.class) {
+                if (mSingleton == null) {
+                    mSingleton = new ShopGun(builder);
+                }
+            }
+        }
+        return mSingleton;
     }
 
     /**
@@ -271,44 +286,6 @@ public class ShopGun {
         } else {
             return b.getString(Constants.META_API_SECRET);
         }
-    }
-
-    /**
-     * Returns the current {@link Environment} in use.
-     *
-     * @return The current {@link Environment}
-     */
-    public Environment getEnvironment() {
-        return mEnvironment;
-    }
-
-    /**
-     * Set the API environment the API should use.
-     *
-     * <p>The environment will only be used, if you do not prefix your url's with another domain name.
-     * it's therefore advised to use the url's exposed in {@link com.shopgun.android.sdk.api.Endpoints}.</p>
-     *
-     * @param e An {@link Environment}
-     */
-    public void setEnvironment(Environment e) {
-        mEnvironment = e;
-    }
-
-    /**
-     * Returns the current {@link ThemeEnvironment} in use.
-     *
-     * @return The current {@link Environment}
-     */
-    public ThemeEnvironment getThemeEnvironment() {
-        return mThemeEnvironment;
-    }
-
-    /**
-     * Set the {@link ThemeEnvironment} the SDK will be using.
-     * @param e A {@link ThemeEnvironment} to use
-     */
-    public void setThemeEnvironment(ThemeEnvironment e) {
-        mThemeEnvironment = e;
     }
 
     /**
@@ -422,23 +399,28 @@ public class ShopGun {
         SgnLog.v(TAG, "onPerformStop");
     }
 
+    public Realm getRealmInstance() {
+        return Realm.getInstance(mRealmConfiguration);
+    }
 
     /**
      * API for creating ShopGun instance.
      */
+    @SuppressWarnings("unused")
     public static class Builder {
 
-        final Application mApplication;
+        final Application application;
 
-        ExecutorService mExecutor;
-        Cache mCache;
-        Network mNetwork;
-        Boolean mDevelop;
-        Environment mEnvironment;
-        ThemeEnvironment mThemeEnvironment;
-
-        List<Interceptor> mInterceptors = new ArrayList<>();
-        List<Interceptor> mNetworkInterceptors = new ArrayList<>();
+        ExecutorService executor;
+        Cache cache;
+        Network network;
+        Boolean develop;
+        Environment environment;
+        ThemeEnvironment themeEnvironment;
+        RealmConfiguration realmConfiguration;
+        OkHttpClient okHttpClient;
+        List<Interceptor> interceptors = new ArrayList<>();
+        List<Interceptor> networkInterceptors = new ArrayList<>();
 
         /**
          * Start building your {@link ShopGun} instance.
@@ -448,16 +430,16 @@ public class ShopGun {
             if (application == null) {
                 throw new IllegalArgumentException("Context must not be null.");
             }
-            this.mApplication = application;
+            this.application = application;
         }
 
         public Builder addInterceptor(Interceptor interceptor) {
-            mInterceptors.add(interceptor);
+            interceptors.add(interceptor);
             return this;
         }
 
         public Builder addNetworkInterceptor(Interceptor interceptor) {
-            mNetworkInterceptors.add(interceptor);
+            networkInterceptors.add(interceptor);
             return this;
         }
 
@@ -470,10 +452,10 @@ public class ShopGun {
             if (cache == null) {
                 throw new IllegalArgumentException("Cache must not be null.");
             }
-            if (mCache != null) {
+            if (this.cache != null) {
                 throw new IllegalStateException("Cache already set.");
             }
-            mCache = cache;
+            this.cache = cache;
             return this;
         }
 
@@ -486,10 +468,10 @@ public class ShopGun {
             if (network == null) {
                 throw new IllegalArgumentException("Network must not be null.");
             }
-            if (mNetwork != null) {
+            if (this.network != null) {
                 throw new IllegalStateException("Network already set.");
             }
-            mNetwork = network;
+            this.network = network;
             return this;
         }
 
@@ -502,10 +484,10 @@ public class ShopGun {
             if (executorService == null) {
                 throw new IllegalArgumentException("ExecutorService must not be null.");
             }
-            if (mExecutor != null) {
+            if (this.executor != null) {
                 throw new IllegalStateException("ExecutorService already set.");
             }
-            mExecutor = executorService;
+            this.executor = executorService;
             return this;
         }
 
@@ -515,10 +497,10 @@ public class ShopGun {
          * @return This object
          */
         public Builder setDevelop(boolean develop) {
-            if (mDevelop != null) {
+            if (this.develop != null) {
                 throw new IllegalStateException("Develop already set.");
             }
-            mDevelop = develop;
+            this.develop = develop;
             return this;
         }
 
@@ -533,13 +515,13 @@ public class ShopGun {
             if (environment == null) {
                 throw new IllegalArgumentException("Environment must not be null.");
             }
-            if (mEnvironment != null) {
+            if (this.environment != null) {
                 throw new IllegalStateException("Environment already set.");
             }
             if (BuildConfig.DEBUG && environment != Environment.PRODUCTION) {
                 Log.w(TAG, "A production build not using Environment.PRODUCTION might cause trouble!");
             }
-            mEnvironment = environment;
+            this.environment = environment;
             return this;
         }
 
@@ -554,13 +536,13 @@ public class ShopGun {
             if (themeEnvironment == null) {
                 throw new IllegalArgumentException("ThemeEnvironment must not be null.");
             }
-            if (mThemeEnvironment != null) {
+            if (this.themeEnvironment != null) {
                 throw new IllegalStateException("ThemeEnvironment already set.");
             }
             if (BuildConfig.DEBUG && themeEnvironment != ThemeEnvironment.PRODUCTION) {
                 Log.w(TAG, "A production build not using ThemeEnvironment.PRODUCTION might cause trouble!");
             }
-            mThemeEnvironment = themeEnvironment;
+            this.themeEnvironment = themeEnvironment;
             return this;
         }
 
@@ -575,47 +557,50 @@ public class ShopGun {
                 return ShopGun.mSingleton;
             }
 
-            if (mExecutor == null) {
-                mExecutor = Executors.newFixedThreadPool(3, new SgnThreadFactory());
+            if (executor == null) {
+                executor = Executors.newFixedThreadPool(3, new SgnThreadFactory());
             }
 
-            if (mCache == null) {
-                mCache = new MemoryCache();
+            if (cache == null) {
+                cache = new MemoryCache();
             }
 
-            if (mNetwork == null) {
-                mNetwork = new NetworkImpl(new HttpURLNetwork(new DefaultRedirectProtocol()));
+            if (network == null) {
+                network = new NetworkImpl(new HttpURLNetwork(new DefaultRedirectProtocol()));
             }
 
-            if (mDevelop == null) {
-                mDevelop = false;
+            if (develop == null) {
+                develop = false;
             }
 
-            if (mEnvironment == null) {
-                mEnvironment = Environment.PRODUCTION;
+            if (environment == null) {
+                environment = Environment.PRODUCTION;
             }
 
-            if (mThemeEnvironment == null) {
-                mThemeEnvironment = ThemeEnvironment.PRODUCTION;
+            if (themeEnvironment == null) {
+                themeEnvironment = ThemeEnvironment.PRODUCTION;
             }
 
             // Setup the default OkHttpClient
-            OkHttpClient.Builder builder = new OkHttpClient.Builder();
-            for (Interceptor i : mInterceptors) {
-                builder.addInterceptor(i);
+            OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
+            for (Interceptor i : interceptors) {
+                okHttpClientBuilder.addInterceptor(i);
             }
-            for (Interceptor i : mNetworkInterceptors) {
-                builder.addNetworkInterceptor(i);
+            for (Interceptor i : networkInterceptors) {
+                okHttpClientBuilder.addNetworkInterceptor(i);
             }
-            builder.addInterceptor(new UserAgentInterceptor(SgnUserAgent.getUserAgent(mApplication)));
-            OkHttpClient okHttpClient = builder.build();
+            // Add sdk interceptors last to override user options if necessary
+            okHttpClientBuilder.addInterceptor(new UserAgentInterceptor(SgnUserAgent.getUserAgent(application)));
+            okHttpClient = okHttpClientBuilder.build();
 
             // Set the default RealmConfiguration.
-            RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(mApplication).build();
-            Realm.setDefaultConfiguration(realmConfiguration);
+            realmConfiguration = new RealmConfiguration.Builder(application)
+                    .name(Constants.PACKAGE + ".realm")
+                    .modules(new SgnRealmModule())
+                    .schemaVersion(1)
+                    .build();
 
-            ShopGun.mSingleton = new ShopGun(mApplication, mExecutor, mEnvironment, mThemeEnvironment, mDevelop, okHttpClient, mCache, mNetwork);
-            return ShopGun.getInstance();
+            return ShopGun.createInstance(Builder.this);
 
         }
 
