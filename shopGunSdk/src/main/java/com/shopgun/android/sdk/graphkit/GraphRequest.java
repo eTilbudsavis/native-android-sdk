@@ -1,5 +1,8 @@
 package com.shopgun.android.sdk.graphkit;
 
+import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.utils.TextUtils;
+
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -23,6 +26,10 @@ public class GraphRequest {
             .add("Accept", "application/json")
             .build();
 
+    public static Call newCall(String query) {
+        return newCall(ShopGun.getInstance().getClient(), query);
+    }
+
     public static Call newCall(OkHttpClient client, String query) {
         return newCall(client, query, null, null);
     }
@@ -32,7 +39,7 @@ public class GraphRequest {
         Map<String, String> map = new HashMap<>();
         map.put("query", query);
         map.put("operationName", operationName); // TODO What is this?
-        map.put("variables", android.text.TextUtils.join(",", variables)); // TODO What is this?
+        map.put("variables", TextUtils.join(",", variables)); // TODO What is this?
 
         RequestBody requestBody = RequestBody.create(MEDIA_TYPE_JSON, new JSONObject(map).toString());
 

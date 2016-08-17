@@ -16,8 +16,6 @@
 
 package com.shopgun.android.sdk.network.impl;
 
-import android.text.TextUtils;
-
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.log.SgnLog;
@@ -27,6 +25,7 @@ import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.TextUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
