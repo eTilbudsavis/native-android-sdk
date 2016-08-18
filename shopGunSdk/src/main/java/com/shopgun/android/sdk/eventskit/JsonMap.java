@@ -1,5 +1,6 @@
 package com.shopgun.android.sdk.eventskit;
 
+import com.google.gson.internal.bind.util.ISO8601Utils;
 import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONObject;
@@ -13,22 +14,24 @@ public class JsonMap extends HashMap<String, Object> {
     public static final String TAG = JsonMap.class.getSimpleName();
 
     final boolean mOmit;
+    final boolean mISO8601;
 
     public JsonMap() {
         this(true);
     }
 
     public JsonMap(int capacity) {
-        this(capacity, true);
+        this(capacity, true, true);
     }
 
     public JsonMap(boolean ommit) {
-        mOmit = ommit;
+        this(16, ommit, true);
     }
 
-    public JsonMap(int capacity, boolean ommit) {
+    public JsonMap(int capacity, boolean ommit, boolean ISO8601) {
         super(capacity);
         mOmit = ommit;
+        mISO8601 = ISO8601;
     }
 
     @Override
@@ -37,7 +40,7 @@ public class JsonMap extends HashMap<String, Object> {
             return remove(key);
         } else if (value instanceof Date) {
             Date tmp = (Date) value;
-            value = SgnUtils.dateToString(tmp);
+            value = mISO8601 ? ISO8601Utils.format(tmp) : SgnUtils.dateToString(tmp);
         }
         return super.put(key, value);
     }
