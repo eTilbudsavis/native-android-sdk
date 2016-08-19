@@ -21,8 +21,8 @@ import android.os.Handler;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.R;
+import com.shopgun.android.sdk.utils.Constants;
 
 public class LoadingTextView extends TextView {
 

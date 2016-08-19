@@ -17,13 +17,11 @@
 package com.shopgun.android.sdk.test;
 
 
-import com.shopgun.android.sdk.utils.Constants;
-
-
 import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
+import com.shopgun.android.sdk.utils.Constants;
 
 import junit.framework.Assert;
 

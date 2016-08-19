@@ -16,12 +16,12 @@
 
 package com.shopgun.android.sdk.log;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.impl.IgnoreResponseListener;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.Device;
 import com.shopgun.android.utils.PackageUtils;
 

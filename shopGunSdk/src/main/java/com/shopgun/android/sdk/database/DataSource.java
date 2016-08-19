@@ -22,12 +22,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
+import com.shopgun.android.sdk.utils.Constants;
 
 import org.json.JSONArray;
 

@@ -16,9 +16,9 @@
 
 package com.shopgun.android.sdk.bus;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
+import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.Collections;

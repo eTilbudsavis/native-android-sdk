@@ -16,7 +16,6 @@
 
 package com.shopgun.android.sdk.pageflip.stats.impl;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Request;
@@ -24,6 +23,7 @@ import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.pageflip.stats.StatDelivery;
+import com.shopgun.android.sdk.utils.Constants;
 
 import org.json.JSONObject;
 

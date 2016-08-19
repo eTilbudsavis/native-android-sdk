@@ -20,8 +20,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.utils.Constants;
 
 /**
  * The DatabaseHelper is a class for doing easy/clean database instantiation, and migration.

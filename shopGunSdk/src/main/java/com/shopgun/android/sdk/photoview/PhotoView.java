@@ -33,12 +33,12 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.photoview.gestures.GestureDetector;
 import com.shopgun.android.sdk.photoview.gestures.OnGestureListener;
 import com.shopgun.android.sdk.photoview.gestures.VersionedGestureDetector;
 import com.shopgun.android.sdk.photoview.scrollerproxy.ScrollerProxy;
+import com.shopgun.android.sdk.utils.Constants;
 
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;

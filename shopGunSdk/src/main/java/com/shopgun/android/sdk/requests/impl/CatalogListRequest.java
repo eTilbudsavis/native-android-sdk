@@ -16,12 +16,12 @@
 
 package com.shopgun.android.sdk.requests.impl;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.ModelListLoaderRequest;
 import com.shopgun.android.sdk.requests.ModelListRequest;
+import com.shopgun.android.sdk.utils.Constants;
 
 import org.json.JSONArray;
 

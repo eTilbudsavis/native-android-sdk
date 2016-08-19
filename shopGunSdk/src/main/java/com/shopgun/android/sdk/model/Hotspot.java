@@ -23,9 +23,9 @@ import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
+import com.shopgun.android.sdk.utils.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONException;

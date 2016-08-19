@@ -16,13 +16,13 @@
 
 package com.shopgun.android.sdk.network.impl;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.Response.Listener;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnUtils;
 
 import java.io.UnsupportedEncodingException;

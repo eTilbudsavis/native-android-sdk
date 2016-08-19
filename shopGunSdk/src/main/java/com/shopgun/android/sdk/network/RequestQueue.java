@@ -16,12 +16,12 @@
 
 package com.shopgun.android.sdk.network;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.impl.HandlerDelivery;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.PackageUtils;
 

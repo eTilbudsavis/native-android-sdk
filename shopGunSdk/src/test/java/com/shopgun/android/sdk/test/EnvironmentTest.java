@@ -16,8 +16,8 @@
 
 package com.shopgun.android.sdk.test;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.api.Environment;
+import com.shopgun.android.sdk.utils.Constants;
 
 import junit.framework.TestCase;
 

@@ -22,9 +22,9 @@ import android.text.Html;
 import android.text.Spanned;
 import android.widget.AutoCompleteTextView;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;

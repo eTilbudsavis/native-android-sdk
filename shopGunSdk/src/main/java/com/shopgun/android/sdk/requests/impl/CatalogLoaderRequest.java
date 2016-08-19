@@ -16,9 +16,9 @@
 
 package com.shopgun.android.sdk.requests.impl;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.requests.ModelLoaderRequest;
+import com.shopgun.android.sdk.utils.Constants;
 
 public class CatalogLoaderRequest extends ModelLoaderRequest<Catalog> {
 

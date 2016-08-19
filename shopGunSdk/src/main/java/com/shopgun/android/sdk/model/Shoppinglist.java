@@ -19,12 +19,12 @@ package com.shopgun.android.sdk.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.api.MetaKeys;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.DateUtils;

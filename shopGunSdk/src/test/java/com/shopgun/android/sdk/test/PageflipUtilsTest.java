@@ -17,13 +17,11 @@
 package com.shopgun.android.sdk.test;
 
 
-
-import com.shopgun.android.sdk.utils.Constants;
-
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.HotspotMap;
 import com.shopgun.android.sdk.model.Images;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
+import com.shopgun.android.sdk.utils.Constants;
 
 import junit.framework.Assert;
 

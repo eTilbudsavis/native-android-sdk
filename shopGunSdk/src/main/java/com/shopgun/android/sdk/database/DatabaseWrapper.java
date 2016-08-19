@@ -18,13 +18,13 @@ package com.shopgun.android.sdk.database;
 
 import android.content.Context;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.model.User;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.ListUtils;
 import com.shopgun.android.sdk.utils.PermissionUtils;
 import com.shopgun.android.utils.DateUtils;

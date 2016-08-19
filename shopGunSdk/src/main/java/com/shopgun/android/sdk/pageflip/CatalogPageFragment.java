@@ -22,7 +22,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.SgnFragment;
 import com.shopgun.android.sdk.log.AppLogEntry;
@@ -35,6 +34,7 @@ import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView;
 import com.shopgun.android.sdk.photoview.PhotoView;
+import com.shopgun.android.sdk.utils.Constants;
 
 import org.json.JSONObject;
 

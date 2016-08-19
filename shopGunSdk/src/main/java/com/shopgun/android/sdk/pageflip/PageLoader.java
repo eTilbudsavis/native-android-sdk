@@ -25,11 +25,11 @@ import android.os.Parcelable;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Images;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;

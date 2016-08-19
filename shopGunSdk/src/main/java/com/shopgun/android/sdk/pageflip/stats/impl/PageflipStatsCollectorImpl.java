@@ -16,7 +16,6 @@
 
 package com.shopgun.android.sdk.pageflip.stats.impl;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
@@ -27,6 +26,7 @@ import com.shopgun.android.sdk.pageflip.stats.PageEvent;
 import com.shopgun.android.sdk.pageflip.stats.PageflipStatsCollector;
 import com.shopgun.android.sdk.pageflip.stats.StatDelivery;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
+import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;

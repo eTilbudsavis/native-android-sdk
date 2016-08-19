@@ -18,7 +18,6 @@ package com.shopgun.android.sdk.shoppinglists;
 
 import android.annotation.SuppressLint;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
@@ -29,6 +28,7 @@ import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.ListUtils;
 
 import org.json.JSONArray;

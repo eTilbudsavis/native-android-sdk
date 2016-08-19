@@ -18,8 +18,8 @@ package com.shopgun.android.sdk.pageflip.impl;
 
 import android.os.Parcel;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.pageflip.ReaderConfig;
+import com.shopgun.android.sdk.utils.Constants;
 
 public class DoublePageReaderConfig extends ReaderConfig {
 

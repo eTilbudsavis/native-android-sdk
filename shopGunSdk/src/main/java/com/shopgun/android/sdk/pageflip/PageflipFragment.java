@@ -28,7 +28,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.SgnFragment;
 import com.shopgun.android.sdk.ShopGun;
@@ -50,6 +49,7 @@ import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
 import com.shopgun.android.sdk.pageflip.widget.LoadingTextView;
 import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogRequest;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONObject;

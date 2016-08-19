@@ -16,12 +16,12 @@
 
 package com.shopgun.android.sdk.requests;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.interfaces.ICatalog;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IStore;
 import com.shopgun.android.sdk.network.Request;
+import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;

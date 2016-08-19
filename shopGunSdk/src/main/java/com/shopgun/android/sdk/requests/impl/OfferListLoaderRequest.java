@@ -16,9 +16,9 @@
 
 package com.shopgun.android.sdk.requests.impl;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.model.Offer;
 import com.shopgun.android.sdk.requests.ModelListLoaderRequest;
+import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.List;
 

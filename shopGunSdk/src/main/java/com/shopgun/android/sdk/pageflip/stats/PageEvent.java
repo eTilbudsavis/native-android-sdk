@@ -16,10 +16,10 @@
 
 package com.shopgun.android.sdk.pageflip.stats;
 
-import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.pageflip.Orientation;
 import com.shopgun.android.sdk.pageflip.utils.PageflipUtils;
+import com.shopgun.android.sdk.utils.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;

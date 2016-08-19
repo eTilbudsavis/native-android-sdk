@@ -16,11 +16,10 @@
 
 package com.shopgun.android.sdk.network;
 
-import com.shopgun.android.sdk.utils.Constants;
-
 import com.shopgun.android.sdk.log.EventLog;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Response.Listener;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONException;
