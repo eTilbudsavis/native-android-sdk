@@ -20,26 +20,26 @@ package com.shopgun.android.sdk.test;
 import android.graphics.Color;
 
 import com.shopgun.android.sdk.utils.Constants;
-import com.shopgun.android.utils.palette.MaterialUtils;
+import com.shopgun.android.utils.palette.MaterialColorUtils;
 import com.shopgun.android.utils.palette.SgnColor;
 
 import junit.framework.TestCase;
 
-public class MaterialUtilsTest extends TestCase {
+public class MaterialColorUtilsTest extends TestCase {
 
-    public static final String TAG = Constants.getTag(MaterialUtilsTest.class);
+    public static final String TAG = Constants.getTag(MaterialColorUtilsTest.class);
 
-    private MaterialUtilsTest() {
+    private MaterialColorUtilsTest() {
         // empty
     }
 
     public static void test() {
 
-        assertNull(MaterialUtils.toARGBString(null));
-        assertEquals("#FF000000", MaterialUtils.toARGBString(new SgnColor(Color.BLACK)));
-        assertEquals("#FF0000FF", MaterialUtils.toARGBString(new SgnColor(Color.BLUE)));
-        assertEquals("#FFFF0000", MaterialUtils.toARGBString(new SgnColor(Color.RED)));
-        assertEquals("#FF00FF00", MaterialUtils.toARGBString(new SgnColor(Color.GREEN)));
+        assertNull(MaterialColorUtils.toARGBString(null));
+        assertEquals("#FF000000", MaterialColorUtils.toARGBString(new SgnColor(Color.BLACK)));
+        assertEquals("#FF0000FF", MaterialColorUtils.toARGBString(new SgnColor(Color.BLUE)));
+        assertEquals("#FFFF0000", MaterialColorUtils.toARGBString(new SgnColor(Color.RED)));
+        assertEquals("#FF00FF00", MaterialColorUtils.toARGBString(new SgnColor(Color.GREEN)));
 
         SdkTest.start(TAG);
     }

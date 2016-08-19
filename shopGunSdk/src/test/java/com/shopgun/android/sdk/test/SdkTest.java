@@ -37,7 +37,7 @@ public class SdkTest {
         ValidatorTest.test();
         UtilsTest.test();
         JsonTest.test();
-        MaterialUtilsTest.test();
+        MaterialColorUtilsTest.test();
         ModelTest.test();
         SerializationSpeedTest.test();
         EnvironmentTest.test();
