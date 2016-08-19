@@ -16,7 +16,6 @@
 
 package com.shopgun.android.sdk;
 
-import android.app.Activity;
 import android.app.Application;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -29,8 +28,8 @@ import android.util.Log;
 import com.shopgun.android.sdk.api.Environment;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
-import com.shopgun.android.sdk.corekit.SgnRealmModule;
 import com.shopgun.android.sdk.corekit.UserAgentInterceptor;
+import com.shopgun.android.sdk.corekit.realm.SgnRealmModule;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
@@ -56,8 +55,10 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import io.realm.DynamicRealm;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmMigration;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
@@ -144,8 +145,11 @@ public class ShopGun {
         mEnvironment = builder.environment;
         mThemeEnvironment = builder.themeEnvironment;
         mExecutor = builder.executorService;
-        mClient = builder.client;
+        mClient = builder.okHttpClient;
         mRealmConfiguration = builder.realmConfiguration;
+
+        // TODO how do we pass around the RealmConfig without exposing it publicly and without having any knowledge of the kits
+//        EventManager.getInstacnce();
 
         mLifecycleManager = new LifecycleManager(builder.application);
         mLifecycleManager.getApplication().registerComponentCallbacks(new ComponentCallbacks2() {
@@ -164,22 +168,7 @@ public class ShopGun {
                 onTrimMemory(TRIM_MEMORY_COMPLETE);
             }
         });
-        mLifecycleManager.registerCallback(new LifecycleManager.Callback() {
-            @Override
-            public void onStart() {
-
-            }
-
-            @Override
-            public void onStop() {
-
-            }
-
-            @Override
-            public void onDestroy() {
-
-            }
-        });
+        mLifecycleManager.registerCallback(new LifecycleManager.CallbackLogger(TAG));
 
         mSettings = new Settings(mContext);
 
@@ -210,17 +199,6 @@ public class ShopGun {
         }
     }
 
-    private static ShopGun createInstance(Builder builder) {
-        if (mSingleton == null) {
-            synchronized (ShopGun.class) {
-                if (mSingleton == null) {
-                    mSingleton = new ShopGun(builder);
-                }
-            }
-        }
-        return mSingleton;
-    }
-
     /**
      * Check if the instance have been instantiated.
      * <p>To build and customize an instance of {@link ShopGun}, please refer to {@link ShopGun.Builder}.</p>
@@ -232,10 +210,6 @@ public class ShopGun {
 
     public OkHttpClient getClient() {
         return mClient;
-    }
-
-    public Activity getActivity() {
-        return mLifecycleManager.getCurrentActivity();
     }
 
     public LifecycleManager getLifecycleManager() {
@@ -286,6 +260,23 @@ public class ShopGun {
         } else {
             return b.getString(Constants.META_API_SECRET);
         }
+    }
+
+    /**     * Returns the current {@link Environment} in use.
+     *
+     * @return The current {@link Environment}
+     */
+    public Environment getEnvironment() {
+        return mEnvironment;
+    }
+
+    /**
+     * Returns the current {@link ThemeEnvironment} in use.
+     *
+     * @return The current {@link Environment}
+     */
+    public ThemeEnvironment getThemeEnvironment() {
+        return mThemeEnvironment;
     }
 
     /**
@@ -411,7 +402,7 @@ public class ShopGun {
 
         final Application application;
 
-        ExecutorService executor;
+        ExecutorService executorService;
         Cache cache;
         Network network;
         Boolean develop;
@@ -484,10 +475,10 @@ public class ShopGun {
             if (executorService == null) {
                 throw new IllegalArgumentException("ExecutorService must not be null.");
             }
-            if (this.executor != null) {
+            if (this.executorService != null) {
                 throw new IllegalStateException("ExecutorService already set.");
             }
-            this.executor = executorService;
+            this.executorService = executorService;
             return this;
         }
 
@@ -550,15 +541,15 @@ public class ShopGun {
          * Builds and set the ShopGun instance, and sets it to be the global singleton.
          * @return The ShopGun instance
          */
-        public ShopGun setInstance() {
+        public synchronized ShopGun setInstance() {
 
             if (ShopGun.mSingleton != null) {
                 SgnLog.d(TAG, "ShopGun instance already build and set.");
                 return ShopGun.mSingleton;
             }
 
-            if (executor == null) {
-                executor = Executors.newFixedThreadPool(3, new SgnThreadFactory());
+            if (executorService == null) {
+                executorService = Executors.newFixedThreadPool(3, new SgnThreadFactory());
             }
 
             if (cache == null) {
@@ -600,7 +591,7 @@ public class ShopGun {
                     .schemaVersion(1)
                     .build();
 
-            return ShopGun.createInstance(Builder.this);
+            return ShopGun.mSingleton = new ShopGun(Builder.this);
 
         }
 

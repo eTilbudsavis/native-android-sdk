@@ -1,12 +1,15 @@
 package com.shopgun.android.sdk.eventskit;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.shopgun.android.sdk.corekit.gson.JsonNullExclusionStrategy;
+import com.shopgun.android.sdk.corekit.gson.RealmObjectExclusionStrategy;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import io.realm.EventRealmProxy;
 import okhttp3.Call;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -27,10 +30,15 @@ public class EventRequest {
             .add("Accept", "application/json")
             .build();
 
+    public static Call postEvents(OkHttpClient client, List<Event> events) {
+        JsonElement eventArray = gson().toJsonTree(events);
+        JsonObject eventWrapper = new JsonObject();
+        eventWrapper.add("events", eventArray);
+        return postEvents(client, eventWrapper);
+    }
 
-    public static Call post(OkHttpClient client, List<Event> events) {
-        String jsonBody = json(events).toString();
-        RequestBody body = RequestBody.create(MEDIA_TYPE_JSON, jsonBody);
+    public static Call postEvents(OkHttpClient client, JsonElement json) {
+        RequestBody body = RequestBody.create(MEDIA_TYPE_JSON, json.toString());
         Request request = new Request.Builder()
                 .url(URL_PARSED)
                 .post(body)
@@ -39,14 +47,13 @@ public class EventRequest {
         return client.newCall(request);
     }
 
-    private static JSONObject json(List<Event> events) {
-        JSONArray jEvents = new JSONArray();
-        for (Event event : events) {
-            jEvents.put(event.toJson());
-        }
-        Map<String, JSONArray> map = new HashMap<>();
-        map.put("events", jEvents);
-        return new JSONObject(map);
+    private static Gson gson() {
+        return new GsonBuilder()
+                .setExclusionStrategies(
+                        new RealmObjectExclusionStrategy(),
+                        new JsonNullExclusionStrategy())
+                .registerTypeAdapter(EventRealmProxy.class, new EventSerializer())
+                .create();
     }
 
 }

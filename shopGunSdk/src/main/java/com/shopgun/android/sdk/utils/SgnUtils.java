@@ -150,6 +150,18 @@ public class SgnUtils {
     }
 
     /**
+     * Convert an API date of the format "2013-03-03T13:37:00+0000" into a Date object.
+     *
+     * @param date to convert
+     * @return a Date object
+     */
+    public static Date stringToDateThrows(String date) throws ParseException {
+        synchronized (DATE_LOCK) {
+            return SIMPLE_DATE_FORMAT.parse(date);
+        }
+    }
+
+    /**
      * Convert a Date object into a date string, that will be accepted by the API.
      * <p>The format for an API date is {@link #DATE_FORMAT}</p>
      *

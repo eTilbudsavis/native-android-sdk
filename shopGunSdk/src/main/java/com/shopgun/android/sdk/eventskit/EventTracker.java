@@ -1,13 +1,8 @@
 package com.shopgun.android.sdk.eventskit;
 
-import com.shopgun.android.sdk.log.SgnLog;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.utils.SgnUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class EventTracker {
 
@@ -16,7 +11,7 @@ public class EventTracker {
     private static EventTracker mGlobalInstance;
 
     private String mTrackerId;
-    private JSONObject mView;
+    private JsonObject mView;
 
     public static EventTracker globalTracker() {
         if (mGlobalInstance == null) {
@@ -49,17 +44,26 @@ public class EventTracker {
     }
 
     public void setView(String[] path, String[] previousPath, String uri) {
-        JsonMap map = new JsonMap();
-        List<String> tmp = Arrays.asList(path);
-        map.put("path", tmp);
+        JsonObject map = new JsonObject();
+        map.add("path", toJson(path));
         if (previousPath != null) {
-            tmp = Arrays.asList(previousPath);
-            map.put("previousPath", tmp);
+            map.add("previousPath", toJson(previousPath));
         }
         if (uri != null) {
-            map.put("uri", uri);
+            map.addProperty("uri", uri);
         }
-        setView(new JSONObject(map));
+        setView(map);
+    }
+
+    private JsonArray toJson(String[] array) {
+        JsonArray jsonArray = null;
+        if (array != null) {
+            jsonArray = new JsonArray();
+            for (String s : array) {
+                jsonArray.add(s);
+            }
+        }
+        return jsonArray;
     }
 
     /**
@@ -69,26 +73,22 @@ public class EventTracker {
      * "previousPath": ["the", "previous", "path"], // optional
      * "uri": "sgn://offers/sg32rmfsd", // optional
      */
-    public void setView(JSONObject view) {
+    public void setView(JsonObject view) {
         mView = view;
     }
 
-    public void setCampaign(JSONObject campaign) {
+    public void setCampaign(JsonObject campaign) {
         EventManager.getInstacnce().setCampaign(campaign);
     }
 
-    public void track(String type, JSONObject properties) {
+    public void track(String type, JsonObject properties) {
         track(new Event(type, properties));
     }
 
     public void track(Event event) {
         EventManager manager = EventManager.getInstacnce();
-        JSONObject context = manager.getContext(true);
-        try {
-            context.put("view", mView);
-        } catch (JSONException e) {
-            SgnLog.e(TAG, e.getMessage(), e);
-        }
+        JsonObject context = manager.getContext(true);
+        context.add("view", mView);
         event.setContext(context);
         manager.addEvent(event);
     }

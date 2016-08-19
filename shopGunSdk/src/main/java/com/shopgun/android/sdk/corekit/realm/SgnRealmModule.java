@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.corekit;
+package com.shopgun.android.sdk.corekit.realm;
 
 import io.realm.annotations.RealmModule;
 

@@ -1,14 +1,17 @@
 package com.shopgun.android.sdk.eventskit;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.corekit.SgnPreferences;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.SgnUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -16,42 +19,62 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class EventManager {
 
     public static final String TAG = EventManager.class.getSimpleName();
-    
+
+    private static final int DISPATCH_MSG = 5738629;
+    private static final long DISPATCH_INTERVAL = TimeUnit.SECONDS.toMillis(30);
+
     private static EventManager mInstacnce;
+    private static final Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case DISPATCH_MSG:
+                    mInstacnce.flush();
+                    break;
+            }
+        }
+    };
 
     private Collection<WeakReference<EventTracker>> mTrackers = new HashSet<WeakReference<EventTracker>>();
-    private static BlockingQueue<Event> mEventQueue = new LinkedBlockingQueue<>(128);
-    private JSONObject mContext;
-    private JSONObject mClient;
+    private static BlockingQueue<Event> mEventQueue = new LinkedBlockingQueue<>(1024);
+    private JsonObject mJsonContext;
+    private JsonObject mJsonClient;
     private EventDispatcher mEventDispatcher;
+    private Gson mGson;
 
     public static EventManager getInstacnce() {
         if (mInstacnce == null) {
             synchronized (EventManager.class) {
                 if (mInstacnce == null) {
-                    mInstacnce = new EventManager();
+                    mInstacnce = new EventManager(ShopGun.getInstance());
                 }
             }
         }
         return mInstacnce;
     }
 
-    private EventManager() {
-        mEventDispatcher = new EventDispatcher(mEventQueue, ShopGun.getInstance().getClient());
+    private EventManager(ShopGun shopGun) {
+
+        mEventDispatcher = new EventDispatcher(mEventQueue, shopGun.getClient());
+        mJsonContext = EventUtils.getContext(shopGun.getContext());
+        mJsonClient = getClient();
+
+
+        mHandler.sendEmptyMessageDelayed(DISPATCH_MSG, DISPATCH_INTERVAL);
         mEventDispatcher.start();
-        mContext = EventUtils.getContext(ShopGun.getInstance().getContext());
-        mClient = getClient();
+
     }
 
-    public static JSONObject getClient() {
-        JsonMap map = new JsonMap();
-        map.put("id", SgnPreferences.getInstance().getInstallationId());
-        map.put("trackId", SgnUtils.createUUID());
-        return map.toJson();
+    public static JsonObject getClient() {
+        JsonObject map = new JsonObject();
+        map.addProperty("id", SgnPreferences.getInstance().getInstallationId());
+        map.addProperty("trackId", SgnUtils.createUUID());
+        return map;
     }
 
     public void registerTracker(EventTracker tracker) {
@@ -78,30 +101,26 @@ public class EventManager {
         }
     }
 
-    public void setCampaign(JSONObject campaign) {
-        try {
-            mContext.put("campaing", campaign);
-        } catch (JSONException e) {
-            SgnLog.e(TAG, e.getMessage(), e);
-        }
+    public void setCampaign(JsonObject campaign) {
+        mJsonContext.add("campaing", campaign);
     }
 
-    public JSONObject getContext(boolean updateLocation) {
+    public JsonObject getContext(boolean updateLocation) {
         if (updateLocation) {
-            try {
-                Context ctx = ShopGun.getInstance().getContext();
-                JSONObject loc = EventUtils.location(ctx);
-                mContext.put("location", loc);
-            } catch (JSONException e) {
-                SgnLog.e(TAG, e.getMessage(), e);
-            }
+            Context ctx = ShopGun.getInstance().getContext();
+            JsonObject loc = EventUtils.location(ctx);
+            mJsonContext.add("location", loc);
         }
-        return mContext;
+        return mJsonContext;
     }
 
     public void addEvent(Event event) {
-        event.setClient(mClient);
-        mEventQueue.add(event);
+        event.setClient(mJsonClient);
+        try {
+            mEventQueue.add(event);
+        } catch (IllegalStateException e) {
+            SgnLog.d(TAG, "Queue is full", e);
+        }
     }
 
     public void flush() {

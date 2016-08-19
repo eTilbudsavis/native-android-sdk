@@ -5,14 +5,13 @@ import android.content.pm.ApplicationInfo;
 import android.location.Location;
 import android.os.Build;
 
+import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.utils.SgnUserAgent;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.DeviceUtils;
 import com.shopgun.android.utils.DisplayUtils;
 import com.shopgun.android.utils.LocationUtils;
 import com.shopgun.android.utils.PackageUtils;
-
-import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.Locale;
@@ -23,94 +22,94 @@ public class EventUtils {
     public static final String TAG = EventUtils.class.getSimpleName();
     
     private EventUtils() {
+
     }
 
-    public static JSONObject getContext(Context context) {
-        JsonMap map = new JsonMap();
-        map.put("application", application(context));
-        map.put("device", device(context));
-        map.put("locale", Locale.getDefault().toString());
-        map.put("location", location(context));
-        map.put("network", network(context));
-        map.put("os", os(context));
-        map.put("session", session(context));
-        map.put("timezone", timezone(context));
-        map.put("userAgent", SgnUserAgent.getUserAgent(context));
-        return map.toJson();
+    public static JsonObject getContext(Context context) {
+        JsonObject object = new JsonObject();
+        object.add("application", application(context));
+        object.add("device", device(context));
+        object.addProperty("locale", Locale.getDefault().toString());
+        object.add("location", location(context));
+        object.add("network", network(context));
+        object.add("os", os(context));
+        object.add("session", session(context));
+        object.add("timezone", timezone(context));
+        object.addProperty("userAgent", SgnUserAgent.getUserAgent(context));
+        return object;
     }
 
-    public static JSONObject network(Context context) {
-        JsonMap map = new JsonMap();
-        map.put("bluetooth", null);
-        map.put("carrier", null);
-        map.put("cellular", null);
-        map.put("ip", null);
-        map.put("wifi", null);
-        map.put("bluetooth", null);
-        return map.toJson();
+    public static JsonObject network(Context context) {
+        JsonObject object = new JsonObject();
+        object.add("bluetooth", null);
+        object.add("carrier", null);
+        object.add("cellular", null);
+        object.add("ip", null);
+        object.add("wifi", null);
+        object.add("bluetooth", null);
+        return object;
     }
 
-    public static JSONObject os(Context context) {
-        JsonMap map = new JsonMap();
-        map.put("name", "Android");
-        map.put("version", Build.VERSION.RELEASE);
-        return map.toJson();
+    public static JsonObject os(Context context) {
+        JsonObject object = new JsonObject();
+        object.addProperty("name", "Android");
+        object.addProperty("version", Build.VERSION.RELEASE);
+        return object;
     }
 
-    public static JSONObject timezone(Context context) {
-        JsonMap map = new JsonMap();
+    public static JsonObject timezone(Context context) {
+        JsonObject object = new JsonObject();
         int seconds = TimeZone.getDefault().getRawOffset()/1000;
-        map.put("utcOffsetSeconds", seconds);
-        return map.toJson();
+        object.addProperty("utcOffsetSeconds", seconds);
+        return object;
     }
 
-    public static JSONObject session(Context context) {
-        JsonMap map = new JsonMap();
-        map.put("id", null);
-        map.put("referrer", null);
-        return map.toJson();
+    public static JsonObject session(Context context) {
+        JsonObject object = new JsonObject();
+        object.add("id", null);
+        object.add("referrer", null);
+        return object;
     }
 
-    public static JSONObject device(Context context) {
+    public static JsonObject device(Context context) {
+        JsonObject screen = new JsonObject();
+        screen.addProperty("width", DisplayUtils.getScreenWidth(context));
+        screen.addProperty("height", DisplayUtils.getScreenHeight(context));
 
-        JsonMap screen = new JsonMap();
-        screen.put("width", DisplayUtils.getScreenWidth(context));
-        screen.put("height", DisplayUtils.getScreenHeight(context));
-
-        JsonMap map = new JsonMap();
-        map.put("manufacturer", DeviceUtils.getManufacturer());
-        map.put("model", DeviceUtils.getModel());
-        map.put("screen", screen);
-        return map.toJson();
+        JsonObject object = new JsonObject();
+        object.addProperty("manufacturer", DeviceUtils.getManufacturer());
+        object.addProperty("model", DeviceUtils.getModel());
+        object.add("screen", screen);
+        return object;
     }
 
-    public static JSONObject application(Context context) {
-        JsonMap map = new JsonMap();
+    public static JsonObject application(Context context) {
+        JsonObject object = new JsonObject();
         ApplicationInfo ai = PackageUtils.getApplicationInfo(context);
-        map.put("name", context.getPackageManager().getApplicationLabel(ai));
-        map.put("version", PackageUtils.getVersionName(context));
-        map.put("build", String.valueOf(PackageUtils.getVersionCode(context)));
-        map.put("id", context.getPackageName());
-        return map.toJson();
+        object.addProperty("name", (String) context.getPackageManager().getApplicationLabel(ai));
+        object.addProperty("version", PackageUtils.getVersionName(context));
+        object.addProperty("build", String.valueOf(PackageUtils.getVersionCode(context)));
+        object.addProperty("id", context.getPackageName());
+        return object;
     }
 
-    public static JSONObject location(Context mContext) {
+    public static JsonObject location(Context mContext) {
         Location mLocation = LocationUtils.getLastKnownLocation(mContext);
         if (mLocation != null) {
-            JsonMap map = new JsonMap();
-            map.put("determinedAt", SgnUtils.dateToString(new Date(mLocation.getTime())));
-            map.put("latitude", mLocation.getLatitude());
-            map.put("longitude", mLocation.getLongitude());
-            map.put("altitude", mLocation.hasAltitude() ? mLocation.getAltitude() : null);
-            map.put("speed", mLocation.hasSpeed() ? mLocation.getSpeed() : null);
+            JsonObject object = new JsonObject();
+            object.addProperty("determinedAt", SgnUtils.dateToString(new Date(mLocation.getTime())));
+            object.addProperty("latitude", mLocation.getLatitude());
+            object.addProperty("longitude", mLocation.getLongitude());
+            object.addProperty("altitude", mLocation.hasAltitude() ? mLocation.getAltitude() : null);
+            object.addProperty("speed", mLocation.hasSpeed() ? mLocation.getSpeed() : null);
             if (mLocation.hasAccuracy()) {
-                JsonMap accuracy = new JsonMap();
-                accuracy.put("horizontal", mLocation.getAccuracy());
-                accuracy.put("vertical", mLocation.getAccuracy());
-                map.put("accuracy", accuracy);
+                JsonObject accuracy = new JsonObject();
+                accuracy.addProperty("horizontal", mLocation.getAccuracy());
+                accuracy.addProperty("vertical", mLocation.getAccuracy());
+                object.add("accuracy", accuracy);
             }
-            map.put("floor", null);
-            return map.toJson();
+            object.add("floor", null);
+            return object;
         }
         return null;
     }

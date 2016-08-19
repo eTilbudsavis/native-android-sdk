@@ -1,10 +1,9 @@
 package com.shopgun.android.sdk.eventskit;
 
-import com.shopgun.android.sdk.log.SgnLog;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.shopgun.android.sdk.utils.SgnUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Date;
 
@@ -19,21 +18,6 @@ public class Event implements RealmModel {
     public static final String TAG = Event.class.getSimpleName();
     public static final String VERSION = "1.0.0";
 
-    public static Event fromJson(JSONObject object) {
-        Event e = new Event();
-        e.setVersion(object.optString("version"));
-        e.setId(object.optString("id"));
-        e.setType(object.optString("type"));
-        // TODO Fix the dates
-        e.setRecordedAt(SgnUtils.stringToDate(object.optString("recordedAt")));
-        e.setSentAt(SgnUtils.stringToDate(object.optString("sentAt")));
-        e.setReceivedAt(SgnUtils.stringToDate(object.optString("receivedAt")));
-        e.setClient(object.optJSONObject("client"));
-        e.setContext(object.optJSONObject("context"));
-        e.setProperties(object.optJSONObject("properties"));
-        return e;
-    }
-
     /* The event version scheme to use */
     private String mVersion = VERSION;
     /* A uuid that uniquely identifies the event */
@@ -47,31 +31,27 @@ public class Event implements RealmModel {
     private Date mSentAt;
     /* time the event arrived at the server according to the server */
     private Date mReceivedAt;
-    /* information about the client sending the event. */
-    @Ignore
-    private JSONObject mClient;
-    /* Contextual event information about sender, viewport, etc. */
-    @Ignore
-    private JSONObject mContext;
-    /* What ever properties goes with the event type */
-    @Ignore
-    private JSONObject mProperties;
     /* number of retries performed */
     private int mRetryCount;
-
-    private String mJsonClient;
-    private String mJsonContext;
-    private String mJsonProperties;
+    /* information about the client sending the event. */
+    @Ignore private JsonObject mJsonClient;
+    private String mStringClient;
+    /* Contextual event information about sender, viewport, etc. */
+    @Ignore private JsonObject mJsonContext;
+    private String mStringContext;
+    /* What ever properties goes with the event type */
+    @Ignore private JsonObject mJsonProperties;
+    private String mStringProperties;
 
     public Event() {
         mRecordedAt = new Date();
         mId = SgnUtils.createUUID();
     }
 
-    public Event(String type, JSONObject properties) {
+    public Event(String type, JsonObject properties) {
         this();
-        mType = type;
-        mProperties = properties;
+        setType(type);
+        setProperties(properties);
     }
 
     public String getVersion() {
@@ -122,57 +102,45 @@ public class Event implements RealmModel {
         mReceivedAt = receivedAt;
     }
 
-    public JSONObject getClient() {
-        if (mClient == null) {
-            try {
-                mClient = new JSONObject(mJsonClient);
-            } catch (JSONException e) {
-                SgnLog.e(TAG, "Client wasn't set as a JSON string.", e);
-            }
+    public JsonObject getClient() {
+        if (mJsonClient == null) {
+            mJsonClient = parse(mStringClient);
         }
-        return mClient;
+        return mJsonClient;
     }
 
-    public void setClient(JSONObject client) {
-        mClient = client;
-        if (mClient != null) {
-            mJsonClient = client.toString();
+    public void setClient(JsonObject client) {
+        mJsonClient = client;
+        if (mJsonClient != null) {
+            this.mStringClient = client.toString();
         }
     }
 
-    public JSONObject getContext() {
-        if (mContext == null) {
-            try {
-                mContext = new JSONObject(mJsonContext);
-            } catch (JSONException e) {
-                SgnLog.e(TAG, "Context wasn't set as a JSON string.", e);
-            }
+    public JsonObject getContext() {
+        if (mJsonContext == null) {
+            mJsonContext = parse(mStringContext);
         }
-        return mContext;
+        return mJsonContext;
     }
 
-    public void setContext(JSONObject context) {
-        mContext = context;
-        if (mContext!= null) {
-            mJsonContext = context.toString();
+    public void setContext(JsonObject context) {
+        mJsonContext = context;
+        if (mJsonContext!= null) {
+            mStringContext = context.toString();
         }
     }
 
-    public JSONObject getProperties() {
-        if (mProperties == null) {
-            try {
-                mProperties = new JSONObject(mJsonProperties);
-            } catch (JSONException e) {
-                SgnLog.e(TAG, "Properties wasn't set as a JSON string.", e);
-            }
+    public JsonObject getProperties() {
+        if (mJsonProperties == null) {
+            mJsonProperties = parse(mStringProperties);
         }
-        return mProperties;
+        return mJsonProperties;
     }
 
-    public void setProperties(JSONObject eventProperty) {
-        mProperties = eventProperty;
-        if (mProperties != null) {
-            mJsonProperties = eventProperty.toString();
+    public void setProperties(JsonObject eventProperty) {
+        mJsonProperties = eventProperty;
+        if (mJsonProperties != null) {
+            mStringProperties = eventProperty.toString();
         }
     }
 
@@ -188,22 +156,12 @@ public class Event implements RealmModel {
         return mRetryCount;
     }
 
-    public JSONObject toJson() {
-        JsonMap map = new JsonMap();
-        map.put("version", mVersion);
-        map.put("id", mId);
-        map.put("type", mType);
-        map.put("recordedAt", mRecordedAt);
-        map.put("sentAt", mSentAt);
-        map.put("receivedAt", mReceivedAt);
-        map.put("client", mClient);
-        map.put("context", mContext);
-        map.put("properties", mProperties);
-        return new JSONObject(map);
+    private JsonObject parse(String json) {
+        try {
+            return (JsonObject) new JsonParser().parse(json);
+        } catch (JsonParseException e) {
+            return null;
+        }
     }
 
-    @Override
-    public String toString() {
-        return toJson().toString();
-    }
 }

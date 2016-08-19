@@ -2,13 +2,15 @@ package com.shopgun.android.sdk.eventskit;
 
 import android.os.Process;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.utils.Constants;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
@@ -21,9 +23,11 @@ import okhttp3.Response;
 
 public class EventDispatcher extends Thread {
 
-    public static final String TAG = EventDispatcher.class.getSimpleName();
+    public static final String TAG = Constants.getTag(EventDispatcher.class);
 
     private static final String DISPATCH_EVENT = "dispatch_event-queue";
+    public static final int DEF_MAX_QUEUE_SIZE = 20;
+    public static final int DEF_MAX_RETRY_COUNT = 5;
 
     /** The queue of requests to service. */
     private final BlockingQueue<Event> mQueue;
@@ -36,7 +40,7 @@ public class EventDispatcher extends Thread {
     private Realm mRealm;
 
     public EventDispatcher(BlockingQueue<Event> queue, OkHttpClient client) {
-        this(queue, client, 20, 5);
+        this(queue, client, DEF_MAX_QUEUE_SIZE, DEF_MAX_RETRY_COUNT);
     }
 
     public EventDispatcher(BlockingQueue<Event> queue, OkHttpClient client, int maxQueueSize, int maxRetryCount) {
@@ -56,10 +60,10 @@ public class EventDispatcher extends Thread {
     @Override
     public void run() {
 
-        // low priority on posting events to atta
+        // low priority on posting mEvents to atta
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-        mRealm = Realm.getDefaultInstance();
+        mRealm = ShopGun.getInstance().getRealmInstance();
 
         dispatchEventQueue(true);
 
@@ -72,22 +76,95 @@ public class EventDispatcher extends Thread {
             } catch (InterruptedException e) {
                 // We may have been interrupted because it was time to quit.
                 if (mQuit) {
-                    return;
+                    // break the loop so we'll close the connection to Realm
+                    break;
                 }
                 continue;
             }
 
-            if (DISPATCH_EVENT.equals(event.getId())) {
+            boolean isFlush = DISPATCH_EVENT.equals(event.getId());
+            if (isFlush) {
                 dispatchEventQueue(true);
             } else {
-                mRealm.insert(event);
+                mRealm.executeTransaction(new InsertTransaction(event));
                 dispatchEventQueue(false);
             }
 
         }
+        mRealm.close();
+
     }
 
-    private RealmResults<Event> getIds(Set<String> ids) {
+    private void dispatchEventQueue(boolean force) {
+
+        if (!force && !ShopGun.getInstance().getLifecycleManager().isActive()) {
+            // Ship network is we aren't active
+            return;
+        }
+
+        int count = (int) mRealm.where(Event.class).count();
+        if (count == 0) {
+            // Nothing to dispatch
+            return;
+        }
+
+        if (!force && count < mMaxQueueSize) {
+            // Wait until we have a decent amount of mEvents
+            return;
+        }
+
+        try {
+
+            mRealm.beginTransaction();
+            List<Event> events = getEvents(100);
+            Date now = new Date();
+            for (Event event : events) {
+                event.setSentAt(now);
+            }
+            mRealm.commitTransaction();
+
+            Call call = EventRequest.postEvents(mClient, events);
+            Response response = call.execute();
+
+            if (response.isSuccessful()) {
+
+                String responseBody = response.body().string();
+                Gson gson = new GsonBuilder().create();
+                EventResponse resp = gson.fromJson(responseBody, EventResponse.class);
+
+                mRealm.beginTransaction();
+
+                Set<String> removeIds = resp.getRemovableItems();
+                getEvents(removeIds).deleteAllFromRealm();
+
+                Set<String> nackIds = resp.getNackItems();
+                RealmResults<Event> nack = getEvents(nackIds);
+                for (Event e : nack) {
+                    e.incrementRetryCount();
+                }
+                mRealm.where(Event.class).greaterThan("mRetryCount", mMaxRetryCount).findAll().deleteAllFromRealm();
+                mRealm.commitTransaction();
+            }
+
+        } catch (Exception e) {
+            SgnLog.e(TAG, "Networking failed", e);
+            if (mRealm.isInTransaction()) {
+                mRealm.cancelTransaction();
+            }
+        }
+
+    }
+
+    private List<Event> getEvents(int limit) {
+        RealmResults<Event> events = mRealm.where(Event.class).findAll();
+        List<Event> dispatchEvents = new ArrayList<>(100);
+        for (int i = 0; i < Math.min(limit, events.size()); i++) {
+            dispatchEvents.add(events.get(i));
+        }
+        return dispatchEvents;
+    }
+
+    private RealmResults<Event> getEvents(Set<String> ids) {
         RealmQuery<Event> query = mRealm.where(Event.class);
         boolean first = true;
         for (String id : ids) {
@@ -100,57 +177,24 @@ public class EventDispatcher extends Thread {
         return query.findAll();
     }
 
-    private void dispatchEventQueue(boolean force) {
-
-        if (!force && mRealm.where(Event.class).count() < mMaxQueueSize) {
-            return;
-        }
-
-        try {
-
-            RealmResults<Event> events = mRealm.where(Event.class).findAll();
-            mRealm.beginTransaction();
-            Date now = new Date();
-            for (Event ew : events) {
-                ew.setSentAt(now);
-            }
-            mRealm.insertOrUpdate(events);
-            mRealm.commitTransaction();
-
-            Call call = EventRequest.post(mClient, events);
-            Response response = call.execute();
-
-            if (response.isSuccessful()) {
-
-                String responseBody = response.body().string();
-                JSONObject jResponseBody = new JSONObject(responseBody);
-                EventResponse jResponse = EventResponse.fromJson(jResponseBody);
-
-                Set<String> delete = jResponse.getAckIds();
-                delete.addAll(jResponse.getErrorIds());
-                getIds(delete).deleteAllFromRealm();
-
-                RealmResults<Event> nack = getIds(jResponse.getNackIds());
-                for (Event e : nack) {
-                    e.incrementRetryCount();
-                }
-                mRealm.insertOrUpdate(nack);
-                mRealm.where(Event.class).greaterThan("mRetryCount", mMaxRetryCount).findAll().deleteAllFromRealm();
-
-            }
-
-        } catch (IOException e) {
-            SgnLog.e(TAG, e.getMessage(), e);
-        } catch (JSONException e) {
-            SgnLog.e(TAG, e.getMessage(), e);
-        }
-
-    }
-
     public void flush() {
         Event event = new Event();
         event.setId(DISPATCH_EVENT);
         mQueue.add(event);
+    }
+
+    private static class InsertTransaction implements Realm.Transaction {
+
+        Event mEvent;
+
+        InsertTransaction(Event event) {
+            mEvent = event;
+        }
+
+        @Override
+        public void execute(Realm realm) {
+            realm.insert(mEvent);
+        }
     }
 
 }
