@@ -6,13 +6,15 @@ import android.os.Build;
 import android.os.Bundle;
 
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.Collection;
 import java.util.HashSet;
 
 public class LifecycleManager {
 
-    public static final String TAG = LifecycleManager.class.getSimpleName();
+    public static final String TAG = Constants.getTag(LifecycleManager.class);
 
     private final Collection<Callback> mCallbacks = new HashSet<>();
     private Application mApplication;
@@ -25,7 +27,10 @@ public class LifecycleManager {
             mApplication.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
                 @Override
                 public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-                    mCurrentActivity = activity;
+                    if (mCurrentActivity == null) {
+                        mCurrentActivity = activity;
+                        dispatchCreate(mCurrentActivity);
+                    }
                 }
 
                 @Override
@@ -46,10 +51,7 @@ public class LifecycleManager {
 
                 @Override
                 public void onActivityStopped(Activity activity) {
-                    throwIfNoActivity();
-                    if (activity == mCurrentActivity) {
-                        dispatchStop(activity);
-                    }
+                    dispatchStop(activity);
                 }
 
                 @Override
@@ -57,11 +59,9 @@ public class LifecycleManager {
 
                 @Override
                 public void onActivityDestroyed(Activity activity) {
-                    throwIfNoActivity();
                     if (activity == mCurrentActivity) {
                         dispatchDestroy(activity);
                         mCurrentActivity = null;
-                        mApplication.unregisterActivityLifecycleCallbacks(this);
                         unregisterAllCallbacks();
                     }
                 }
@@ -107,6 +107,15 @@ public class LifecycleManager {
         }
     }
 
+    private void dispatchCreate(Activity activity) {
+        Callback[] callbacks = collectCallbacks();
+        if (callbacks != null) {
+            for (Callback callback : callbacks) {
+                callback.onCreate();
+            }
+        }
+    }
+
     private void dispatchStart(Activity activity) {
         Callback[] callbacks = collectCallbacks();
         if (callbacks != null) {
@@ -145,13 +154,18 @@ public class LifecycleManager {
     }
 
     /**
-     *
+     * Lifecycle for making ShopGun SDK lifecycle aware.
      */
     public interface Callback {
 
         /**
-         * Called when the first activity starts
+         * Called when the first activity is created.
          */
+        void onCreate();
+
+        /**
+        * Called when the first activity starts
+        */
         void onStart();
 
         /**
@@ -160,9 +174,43 @@ public class LifecycleManager {
         void onStop();
 
         /**
+         * Called when the last activity is destroyed.
          * After this, {@link ShopGun} will be inactive and throw exceptions
          */
         void onDestroy();
     }
 
+    public static class CallbackLogger implements Callback {
+
+        final String mTag;
+
+        public CallbackLogger(String tag) {
+            mTag = tag;
+        }
+
+        @Override
+        public void onCreate() {
+            log("onCreate");
+        }
+
+        @Override
+        public void onStart() {
+            log("onStart");
+        }
+
+        @Override
+        public void onStop() {
+            log("onStop");
+        }
+
+        @Override
+        public void onDestroy() {
+            log("onDestroy");
+        }
+
+        private void log(String event) {
+            SgnLog.d(mTag, event + ": " + ShopGun.getInstance().getLifecycleManager().getCurrentActivity().getClass().getSimpleName());
+        }
+
+    }
 }

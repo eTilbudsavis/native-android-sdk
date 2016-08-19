@@ -64,6 +64,34 @@ public class EventManager {
         mJsonContext = EventUtils.getContext(shopGun.getContext());
         mJsonClient = getClient();
 
+        LifecycleManager.Callback callback = new LifecycleManager.Callback() {
+
+            @Override
+            public void onCreate() {
+                SgnLog.d(TAG, "onCreate");
+                mHandler.sendEmptyMessageDelayed(DISPATCH_MSG, DISPATCH_INTERVAL);
+                mEventDispatcher.start();
+            }
+
+            @Override
+            public void onStart() {
+            }
+
+            @Override
+            public void onStop() {
+            }
+
+            @Override
+            public void onDestroy() {
+                SgnLog.d(TAG, "onDestroys");
+                mHandler.removeMessages(DISPATCH_MSG);
+                flush();
+                mEventDispatcher.quit();
+            }
+        };
+
+//        shopGun.getLifecycleManager().registerCallback(callback);
+
 
         mHandler.sendEmptyMessageDelayed(DISPATCH_MSG, DISPATCH_INTERVAL);
         mEventDispatcher.start();
