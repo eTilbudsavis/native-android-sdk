@@ -592,4 +592,30 @@ public class ShopGun {
 
     }
 
+    private static List<OnInstanceCreationListener> mOnInstanceCreationListeners = new ArrayList<>();
+
+    public interface OnInstanceCreationListener {
+        void onInstanceCreated();
+    }
+
+    public static void registerOnInstanceCreationListener(OnInstanceCreationListener listener) {
+        if (ShopGun.isInstantiated()) {
+            throw new IllegalStateException("ShopGun instance already created");
+        }
+        mOnInstanceCreationListeners.add(listener);
+    }
+
+    private static void dispatchInstanceCreated() {
+        OnInstanceCreationListener[] listeners = null;
+        int size = mOnInstanceCreationListeners.size();
+        if (size > 0) {
+            listeners = mOnInstanceCreationListeners.toArray(new OnInstanceCreationListener[size]);
+        }
+        if (listeners != null) {
+            for (OnInstanceCreationListener listener : listeners) {
+                listener.onInstanceCreated();
+            }
+        }
+    }
+
 }
