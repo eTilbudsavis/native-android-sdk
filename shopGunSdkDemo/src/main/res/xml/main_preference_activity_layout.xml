@@ -36,6 +36,14 @@
                 android:targetClass="com.shopgun.android.sdk.demo.EventsKitActivity"/>
         </Preference>
 
+        <Preference
+            android:key="pref_main_fragmentlifecycle_test"
+            android:title="FragmentLifecycleActivity">
+            <intent
+                android:targetPackage="com.shopgun.android.sdk.demo"
+                android:targetClass="com.shopgun.android.sdk.demo.FragmentLifecycleActivity"/>
+        </Preference>
+
     </PreferenceCategory>
 
     <PreferenceCategory
