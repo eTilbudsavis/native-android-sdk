@@ -1,16 +1,17 @@
 package com.shopgun.android.sdk.eventskit;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.corekit.SgnPreferences;
 import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnUtils;
 
 import java.lang.ref.WeakReference;
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 public class EventManager {
 
-    public static final String TAG = EventManager.class.getSimpleName();
+    public static final String TAG = Constants.getTag(EventManager.class);
 
     private static final int DISPATCH_MSG = 5738629;
     private static final long DISPATCH_INTERVAL = TimeUnit.SECONDS.toMillis(30);
@@ -45,7 +46,7 @@ public class EventManager {
     private JsonObject mJsonContext;
     private JsonObject mJsonClient;
     private EventDispatcher mEventDispatcher;
-    private Gson mGson;
+    private long mDispatchInterval = DISPATCH_INTERVAL;
 
     public static EventManager getInstacnce() {
         if (mInstacnce == null) {
@@ -64,37 +65,22 @@ public class EventManager {
         mJsonContext = EventUtils.getContext(shopGun.getContext());
         mJsonClient = getClient();
 
-        LifecycleManager.Callback callback = new LifecycleManager.Callback() {
+        LifecycleManager.Callback callback = new LifecycleManager.SimpleCallback() {
 
             @Override
-            public void onCreate() {
-                SgnLog.d(TAG, "onCreate");
-                mHandler.sendEmptyMessageDelayed(DISPATCH_MSG, DISPATCH_INTERVAL);
+            public void onCreate(Activity activity) {
                 mEventDispatcher.start();
-            }
-
-            @Override
-            public void onStart() {
-            }
-
-            @Override
-            public void onStop() {
-            }
-
-            @Override
-            public void onDestroy() {
-                SgnLog.d(TAG, "onDestroys");
-                mHandler.removeMessages(DISPATCH_MSG);
                 flush();
-                mEventDispatcher.quit();
+            }
+
+            @Override
+            public void onDestroy(Activity activity) {
+                mHandler.removeMessages(DISPATCH_MSG);
+                mEventDispatcher.flush();
             }
         };
 
-//        shopGun.getLifecycleManager().registerCallback(callback);
-
-
-        mHandler.sendEmptyMessageDelayed(DISPATCH_MSG, DISPATCH_INTERVAL);
-        mEventDispatcher.start();
+        shopGun.getLifecycleManager().registerCallback(callback);
 
     }
 
@@ -151,7 +137,13 @@ public class EventManager {
         }
     }
 
+    private void resetTimer() {
+        mHandler.removeMessages(DISPATCH_MSG);
+        mHandler.sendEmptyMessageDelayed(DISPATCH_MSG, mDispatchInterval);
+    }
+
     public void flush() {
+        resetTimer();
         mEventDispatcher.flush();
     }
 

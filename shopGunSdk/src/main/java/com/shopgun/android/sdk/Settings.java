@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
+import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.SharedPreferencesUtils;
 
 import org.json.JSONException;
@@ -42,6 +43,7 @@ public class Settings {
     private static final String SESSION_FACEBOOK = "session_facebook";
     private static final String LOCATION = "location_json";
     private static final String CLIENT_ID = "client_id";
+    private static final String SESSION_ID = "session_id";
 
     private SharedPreferences mSharedPrefs;
     private static boolean mMovedSharedPrefs = false;
@@ -136,6 +138,14 @@ public class Settings {
 
     public void setClientId(String clientId) {
         mSharedPrefs.edit().putString(CLIENT_ID, clientId).apply();
+    }
+
+    public String getSessionId() {
+        return mSharedPrefs.getString(SESSION_ID, SgnUtils.createUUID());
+    }
+
+    public void setSessionId(String sessionId) {
+        mSharedPrefs.edit().putString(SESSION_ID, sessionId).apply();
     }
 
     private void performMigration() {

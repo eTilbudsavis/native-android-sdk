@@ -2,11 +2,12 @@ package com.shopgun.android.sdk.corekit;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.ComponentCallbacks2;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.Collection;
@@ -19,6 +20,17 @@ public class LifecycleManager {
     private final Collection<Callback> mCallbacks = new HashSet<>();
     private Application mApplication;
     private Activity mCurrentActivity;
+    private Runnable mDestroyRunnable = new Runnable() {
+        @Override
+        public void run() {
+            // Remove current Activity, to indicate that we are no longer active
+            Activity tmp = mCurrentActivity;
+            mCurrentActivity = null;
+            dispatchDestroy(tmp);
+            // TODO to remove callbacks or not to remove callbacks, that is the question.
+            unregisterAllCallbacks();
+        }
+    };
 
     public LifecycleManager(Application application) {
         mApplication = application;
@@ -27,6 +39,7 @@ public class LifecycleManager {
             mApplication.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
                 @Override
                 public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+//                    ShopGun.getInstance().getHandler().removeCallbacks(mDestroyRunnable);
                     if (mCurrentActivity == null) {
                         mCurrentActivity = activity;
                         dispatchCreate(mCurrentActivity);
@@ -60,9 +73,7 @@ public class LifecycleManager {
                 @Override
                 public void onActivityDestroyed(Activity activity) {
                     if (activity == mCurrentActivity) {
-                        dispatchDestroy(activity);
-                        mCurrentActivity = null;
-                        unregisterAllCallbacks();
+                        ShopGun.getInstance().getHandler().post(mDestroyRunnable);
                     }
                 }
 
@@ -74,6 +85,22 @@ public class LifecycleManager {
                 }
 
             });
+            mApplication.registerComponentCallbacks(new ComponentCallbacks2() {
+                @Override
+                public void onTrimMemory(int level) {
+                    dispatchTrimMemory(level);
+                }
+
+                @Override
+                public void onConfigurationChanged(Configuration newConfig) {
+                    dispatchConfigurationChanged(newConfig);
+                }
+
+                @Override
+                public void onLowMemory() {
+                    onTrimMemory(TRIM_MEMORY_COMPLETE);
+                }
+            });
         }
     }
 
@@ -81,11 +108,11 @@ public class LifecycleManager {
         return mCurrentActivity != null;
     }
 
-    public Activity getCurrentActivity() {
+    private Activity getActivity() {
         return mCurrentActivity;
     }
 
-    public Application getApplication() {
+    private Application getApplication() {
         return mApplication;
     }
 
@@ -111,7 +138,7 @@ public class LifecycleManager {
         Callback[] callbacks = collectCallbacks();
         if (callbacks != null) {
             for (Callback callback : callbacks) {
-                callback.onCreate();
+                callback.onCreate(activity);
             }
         }
     }
@@ -120,7 +147,7 @@ public class LifecycleManager {
         Callback[] callbacks = collectCallbacks();
         if (callbacks != null) {
             for (Callback callback : callbacks) {
-                callback.onStart();
+                callback.onStart(activity);
             }
         }
     }
@@ -129,7 +156,7 @@ public class LifecycleManager {
         Callback[] callbacks = collectCallbacks();
         if (callbacks != null) {
             for (Callback callback : callbacks) {
-                callback.onStop();
+                callback.onStop(activity);
             }
         }
     }
@@ -138,7 +165,25 @@ public class LifecycleManager {
         Callback[] callbacks = collectCallbacks();
         if (callbacks != null) {
             for (Callback callback : callbacks) {
-                callback.onDestroy();
+                callback.onDestroy(activity);
+            }
+        }
+    }
+
+    private void dispatchTrimMemory(int level) {
+        Callback[] callbacks = collectCallbacks();
+        if (callbacks != null) {
+            for (Callback callback : callbacks) {
+                callback.onTrimMemory(level);
+            }
+        }
+    }
+
+    private void dispatchConfigurationChanged(Configuration newConfig) {
+        Callback[] callbacks = collectCallbacks();
+        if (callbacks != null) {
+            for (Callback callback : callbacks) {
+                callback.onConfigurationChanged(newConfig);
             }
         }
     }
@@ -161,56 +206,43 @@ public class LifecycleManager {
         /**
          * Called when the first activity is created.
          */
-        void onCreate();
+        void onCreate(Activity activity);
 
         /**
         * Called when the first activity starts
         */
-        void onStart();
+        void onStart(Activity activity);
 
         /**
          * Called when the last activity stops
          */
-        void onStop();
+        void onStop(Activity activity);
 
         /**
          * Called when the last activity is destroyed.
          * After this, {@link ShopGun} will be inactive and throw exceptions
          */
-        void onDestroy();
-    }
+        void onDestroy(Activity activity);
 
-    public static class CallbackLogger implements Callback {
+        /**
+         * @see android.content.ComponentCallbacks2#onTrimMemory(int)
+         */
+        void onTrimMemory(int level);
 
-        final String mTag;
-
-        public CallbackLogger(String tag) {
-            mTag = tag;
-        }
-
-        @Override
-        public void onCreate() {
-            log("onCreate");
-        }
-
-        @Override
-        public void onStart() {
-            log("onStart");
-        }
-
-        @Override
-        public void onStop() {
-            log("onStop");
-        }
-
-        @Override
-        public void onDestroy() {
-            log("onDestroy");
-        }
-
-        private void log(String event) {
-            SgnLog.d(mTag, event + ": " + ShopGun.getInstance().getLifecycleManager().getCurrentActivity().getClass().getSimpleName());
-        }
+        /**
+         * @see android.content.ComponentCallbacks2#onConfigurationChanged(Configuration)
+         */
+        void onConfigurationChanged(Configuration newConfig);
 
     }
+
+    public static class SimpleCallback implements Callback {
+        @Override public void onCreate(Activity activity) {}
+        @Override public void onStart(Activity activity) {}
+        @Override public void onStop(Activity activity) {}
+        @Override public void onDestroy(Activity activity) {}
+        @Override public void onTrimMemory(int level) {}
+        @Override public void onConfigurationChanged(Configuration newConfig) {}
+    }
+
 }

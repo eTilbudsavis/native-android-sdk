@@ -16,10 +16,9 @@
 
 package com.shopgun.android.sdk;
 
+import android.app.Activity;
 import android.app.Application;
-import android.content.ComponentCallbacks2;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -47,6 +46,7 @@ import com.shopgun.android.sdk.shoppinglists.SyncManager;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnThreadFactory;
 import com.shopgun.android.sdk.utils.SgnUserAgent;
+import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.sdk.utils.Version;
 import com.shopgun.android.utils.PackageUtils;
 
@@ -115,9 +115,12 @@ public class ShopGun {
     private Environment mEnvironment;
     /** The current API environment in use for themes (used for e.g. shoppinglists */
     private ThemeEnvironment mThemeEnvironment;
-
+    /** The http client of choice for SDK traffic */
     private OkHttpClient mClient;
+    /** The session id for this specific session */
     private String mSessionId;
+    /** The device id, this will if possible be persisted across installations */
+    private String mDeviceId;
 
     // Things we'd like to get rid of
 
@@ -136,6 +139,29 @@ public class ShopGun {
     /** A RealmConfiguration specifically for the SDK */
     private final RealmConfiguration mRealmConfiguration;
 
+    private LifecycleManager.Callback mLifecycleCallback = new LifecycleManager.SimpleCallback() {
+        @Override
+        public void onCreate(Activity activity) {
+            mSessionId = SgnUtils.createUUID();
+            mSessionManager.onStart();
+            mListManager.onStart();
+            mSyncManager.onStart();
+            mSettings.incrementUsageCount();
+            SgnLog.v(TAG, "onCreate");
+        }
+
+        @Override
+        public void onDestroy(Activity activity) {
+            mSettings.saveLocation(mLocation);
+            mListManager.onStop();
+            mSyncManager.onStop();
+            mSessionManager.onStop();
+            mSettings.setLastUsedTimeNow();
+            mSettings.setSessionId(mSessionId);
+            SgnLog.v(TAG, "onDestroy");
+        }
+    };
+
     private ShopGun(Builder builder) {
         // Get application context, to avoid memory leaks (e.g. holding a reference to an Activity)
         mContext = builder.application.getApplicationContext();
@@ -147,28 +173,16 @@ public class ShopGun {
         mRealmConfiguration = builder.realmConfiguration;
 
         // TODO how do we pass around the RealmConfig without exposing it publicly and without having any knowledge of the kits
-//        EventManager.getInstacnce();
 
         mLifecycleManager = new LifecycleManager(builder.application);
-        mLifecycleManager.getApplication().registerComponentCallbacks(new ComponentCallbacks2() {
-            @Override
-            public void onTrimMemory(int level) {
-                // TODO trim memory
-            }
-
-            @Override
-            public void onConfigurationChanged(Configuration newConfig) {
-                // TODO handle configuration changes if needed
-            }
-
-            @Override
-            public void onLowMemory() {
-                onTrimMemory(TRIM_MEMORY_COMPLETE);
-            }
-        });
-        mLifecycleManager.registerCallback(new LifecycleManager.CallbackLogger(TAG));
+        mLifecycleManager.registerCallback(mLifecycleCallback);
+//        mLifecycleManager.registerCallback(new LifecycleManager.CallbackLogger(TAG));
+//        mLifecycleManager.registerCallback(new LifecycleEventLogger());
 
         mSettings = new Settings(mContext);
+
+        mDeviceId = mSettings.getClientId();
+        mSessionId = mSettings.getSessionId();
 
         mRequestQueue = new RequestQueue(ShopGun.this, builder.cache, builder.network);
         mRequestQueue.start();
@@ -240,7 +254,7 @@ public class ShopGun {
      */
     public synchronized String getApiKey() {
         Bundle b = PackageUtils.getMetaData(mContext);
-        if (isDevelop()) {
+        if (isDevelop() && b.containsKey(Constants.META_DEVELOP_API_KEY)) {
             return b.getString(Constants.META_DEVELOP_API_KEY);
         } else {
             return b.getString(Constants.META_API_KEY);
@@ -253,7 +267,7 @@ public class ShopGun {
      */
     public synchronized String getApiSecret() {
         Bundle b = PackageUtils.getMetaData(mContext);
-        if (isDevelop()) {
+        if (isDevelop() && b.containsKey(Constants.META_DEVELOP_API_SECRET)) {
             return b.getString(Constants.META_DEVELOP_API_SECRET);
         } else {
             return b.getString(Constants.META_API_SECRET);
@@ -361,31 +375,13 @@ public class ShopGun {
      * cache, e.t.c.</p>
      */
     public void clear() {
-//        if (!isStarted()) {
-//            mSessionManager.invalidate();
-//            mSettings.clear();
-//            mLocation.clear();
-//            mRequestQueue.clear();
-//            mListManager.clear();
-//            SgnLog.getLogger().getLog().clear();
-//        }
-    }
-
-    public void onPerformStart() {
-        mSessionManager.onStart();
-        mListManager.onStart();
-        mSyncManager.onStart();
-        mSettings.incrementUsageCount();
-        SgnLog.v(TAG, "onPerformStart");
-    }
-
-    public void onPerformStop() {
-        mSettings.saveLocation(mLocation);
-        mListManager.onStop();
-        mSyncManager.onStop();
-        mSessionManager.onStop();
-        mSettings.setLastUsedTimeNow();
-        SgnLog.v(TAG, "onPerformStop");
+        if (!mLifecycleManager.isActive()) {
+            mSessionManager.invalidate();
+            mSettings.clear();
+            mLocation.clear();
+            mRequestQueue.clear();
+            mListManager.clear();
+        }
     }
 
     public Realm getRealmInstance() {
@@ -589,7 +585,8 @@ public class ShopGun {
                     .schemaVersion(1)
                     .build();
 
-            return ShopGun.mSingleton = new ShopGun(Builder.this);
+            ShopGun.mSingleton = new ShopGun(Builder.this);
+            return ShopGun.getInstance();
 
         }
 

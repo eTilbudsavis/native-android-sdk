@@ -59,14 +59,9 @@ public class EventDispatcher extends Thread {
 
     @Override
     public void run() {
-
         // low priority on posting mEvents to atta
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
         mRealm = ShopGun.getInstance().getRealmInstance();
-
-        dispatchEventQueue(true);
-
         Event event;
         while (true) {
             try {
@@ -82,8 +77,7 @@ public class EventDispatcher extends Thread {
                 continue;
             }
 
-            boolean isFlush = DISPATCH_EVENT.equals(event.getId());
-            if (isFlush) {
+            if (DISPATCH_EVENT.equals(event.getId())) {
                 dispatchEventQueue(true);
             } else {
                 mRealm.executeTransaction(new InsertTransaction(event));
