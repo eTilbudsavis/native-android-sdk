@@ -20,6 +20,7 @@ import android.graphics.pdf.PdfDocument.Page;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
@@ -29,8 +30,7 @@ import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.DateUtils;
-import com.shopgun.android.utils.palette.MaterialColor;
-import com.shopgun.android.utils.palette.SgnColor;
+import com.shopgun.android.materialcolorcreator.MaterialColor;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -245,13 +245,13 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      */
     public MaterialColor getBackgroundMaterialColor() {
         if (mBackground == null) {
-            mBackground = new SgnColor();
+            mBackground = new MaterialColorImpl();
         }
         return mBackground;
     }
 
     public Catalog setBackground(int background) {
-        setBackground(new SgnColor(background));
+        setBackground(new MaterialColorImpl(background));
         return this;
     }
 

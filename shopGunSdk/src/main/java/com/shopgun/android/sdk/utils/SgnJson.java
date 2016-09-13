@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.utils;
 
 import android.graphics.Color;
 
+import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Branding;
 import com.shopgun.android.sdk.model.Catalog;
@@ -40,8 +41,7 @@ import com.shopgun.android.sdk.model.Unit;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.utils.TextUtils;
-import com.shopgun.android.utils.palette.MaterialColor;
-import com.shopgun.android.utils.palette.SgnColor;
+import com.shopgun.android.materialcolorcreator.MaterialColor;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -412,7 +412,7 @@ public class SgnJson {
      * @return the mapped value or a {@link MaterialColor} set to {@link Color#BLACK}
      */
     public MaterialColor getMaterialColor(String key) {
-        return getMaterialColor(key, new SgnColor(Color.BLACK));
+        return getMaterialColor(key, new MaterialColorImpl(Color.BLACK));
     }
 
     /**
@@ -423,7 +423,7 @@ public class SgnJson {
      */
     public MaterialColor getMaterialColor(String key, MaterialColor defValue) {
         int color = getColor(key, Color.BLACK);
-        return (color == Color.BLACK ? defValue : new SgnColor(color));
+        return (color == Color.BLACK ? defValue : new MaterialColorImpl(color));
     }
 
 

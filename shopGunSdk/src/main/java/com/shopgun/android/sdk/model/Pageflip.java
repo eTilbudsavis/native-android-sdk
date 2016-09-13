@@ -19,11 +19,11 @@ package com.shopgun.android.sdk.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.utils.palette.MaterialColor;
-import com.shopgun.android.utils.palette.SgnColor;
+import com.shopgun.android.materialcolorcreator.MaterialColor;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -42,7 +42,7 @@ public class Pageflip implements IJson<JSONObject>, Parcelable {
     }
 
     public Pageflip(int color) {
-        mColor = new SgnColor(color);
+        mColor = new MaterialColorImpl(color);
     }
 
     /**
@@ -103,13 +103,13 @@ public class Pageflip implements IJson<JSONObject>, Parcelable {
 
     public MaterialColor getMaterialColor() {
         if (mColor == null) {
-            mColor = new SgnColor();
+            mColor = new MaterialColorImpl();
         }
         return mColor;
     }
 
     public Pageflip setColor(int color) {
-        setColor(new SgnColor(color));
+        setColor(new MaterialColorImpl(color));
         return this;
     }
 

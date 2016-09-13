@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.test;
 
 import android.graphics.Color;
 
+import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
 import com.shopgun.android.sdk.model.Branding;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Country;
@@ -45,7 +46,6 @@ import com.shopgun.android.sdk.model.Typeahead;
 import com.shopgun.android.sdk.model.Unit;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
-import com.shopgun.android.utils.palette.SgnColor;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -212,7 +212,7 @@ public class ModelCreator {
     public static Pageflip getPageflip(String logoUrl, int color) {
         Pageflip p = new Pageflip();
         p.setLogo(logoUrl);
-        p.setColor(new SgnColor(color));
+        p.setColor(new MaterialColorImpl(color));
         return p;
     }
 
