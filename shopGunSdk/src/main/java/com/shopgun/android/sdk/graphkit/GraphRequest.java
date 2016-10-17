@@ -18,7 +18,7 @@ import okhttp3.RequestBody;
 
 public class GraphRequest {
 
-    private static final String URL = "https://graph.shopgun.com";
+    private static final String URL = "https://graph-staging.shopgun.com";
     private static final HttpUrl URL_PARSED = HttpUrl.parse(URL);
     private static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
     private static final Headers HEADERS = new Headers.Builder()
@@ -39,7 +39,7 @@ public class GraphRequest {
         Map<String, String> map = new HashMap<>();
         map.put("query", query);
         map.put("operationName", operationName); // TODO What is this?
-        map.put("variables", TextUtils.join(",", variables)); // TODO What is this?
+        map.put("variables", variables == null ? null : TextUtils.join(",", variables)); // TODO What is this?
 
         RequestBody requestBody = RequestBody.create(MEDIA_TYPE_JSON, new JSONObject(map).toString());
 

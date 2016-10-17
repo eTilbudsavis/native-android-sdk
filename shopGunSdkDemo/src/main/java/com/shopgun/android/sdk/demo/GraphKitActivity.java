@@ -2,6 +2,7 @@ package com.shopgun.android.sdk.demo;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import com.shopgun.android.sdk.graphkit.GraphRequest;
 import com.shopgun.android.utils.log.L;
@@ -16,22 +17,34 @@ public class GraphKitActivity extends Activity {
 
     public static final String TAG = GraphKitActivity.class.getSimpleName();
 
+    TextView mInfo;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graphkit);
+        mInfo = (TextView) findViewById(R.id.info);
 
         Call call = GraphRequest.newCall("query: {}");
-        
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                L.d(TAG, "onFailure: " + call.toString());
+                main("onFailure: " + call.toString());
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                L.d(TAG, "onResponse: " + response.toString());
+                main("onResponse: " + response.toString());
+            }
+
+            private void main(final String text) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mInfo.setText(text);
+                        L.d(TAG, text);
+                    }
+                });
             }
         });
 

@@ -15,5 +15,5 @@
  ******************************************************************************/
 
 include ':shopGunSdk', ':shopGunSdkDemo'
-include ':markhor'
-project(':markhor').projectDir=new File('../markhor/library')
+//include ':markhor'
+//project(':markhor').projectDir=new File('../markhor/library')

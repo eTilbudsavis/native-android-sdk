@@ -37,18 +37,13 @@ public class SdkTest {
         ValidatorTest.test();
         UtilsTest.test();
         JsonTest.test();
-        MaterialColorUtilsTest.test();
         ModelTest.test();
         SerializationSpeedTest.test();
         EnvironmentTest.test();
         EventTest.test();
         SgnLocationTest.test();
-        PageflipUtilsTest.test();
         ListUtilsTest.test();
         VersionTest.test();
-        ReaderConfigTest.test();
-        MaterialColorTest.test();
-        PageflipTest.test();
         ExternalClientIdStoreTest.test(context);
 
         String ok = "*   All test passed (" + (System.currentTimeMillis() - start) + "ms)   *";
