@@ -29,7 +29,7 @@ public class GraphKitActivity extends Activity {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                main("onFailure: " + call.toString());
+                main("onFailure");
             }
 
             @Override
