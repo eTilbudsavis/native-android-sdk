@@ -52,7 +52,7 @@ import com.shopgun.android.sdk.model.interfaces.IStore;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.ParcelableUtils;
 
 import junit.framework.Assert;
 
@@ -973,7 +973,7 @@ public class ModelTest {
     }
 
     public static <T extends Parcelable> void testParcelable(T obj, Parcelable.Creator<T> creator) {
-        T copy = SgnUtils.copyParcelable(obj, creator);
+        T copy = ParcelableUtils.copyParcelable(obj, creator);
         // May not refer to the same object
         Assert.assertNotSame(obj, copy);
         // Must be equal

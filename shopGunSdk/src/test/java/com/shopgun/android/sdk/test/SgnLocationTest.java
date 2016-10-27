@@ -19,7 +19,7 @@ package com.shopgun.android.sdk.test;
 
 import com.shopgun.android.sdk.SgnLocation;
 import com.shopgun.android.sdk.utils.Constants;
-import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.ParcelableUtils;
 
 import junit.framework.Assert;
 
@@ -51,7 +51,7 @@ public class SgnLocationTest {
         l.setRadius(radius);
         l.setAddress(address);
 
-        SgnLocation pl = SgnUtils.copyParcelable(l, SgnLocation.CREATOR);
+        SgnLocation pl = ParcelableUtils.copyParcelable(l, SgnLocation.CREATOR);
 
         // android.location.Location doesn't implement equals
         Assert.assertEquals(l.getLatitude(), pl.getLatitude());

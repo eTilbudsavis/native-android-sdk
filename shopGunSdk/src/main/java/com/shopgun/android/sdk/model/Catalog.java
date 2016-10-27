@@ -20,6 +20,7 @@ import android.graphics.pdf.PdfDocument.Page;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.shopgun.android.materialcolorcreator.MaterialColor;
 import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
@@ -28,9 +29,8 @@ import com.shopgun.android.sdk.model.interfaces.IStore;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.DateUtils;
-import com.shopgun.android.materialcolorcreator.MaterialColor;
+import com.shopgun.android.utils.ParcelableUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -83,7 +83,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     public Catalog(Catalog catalog) {
 
         // Ensure we don't reference objects
-        Catalog tmp = SgnUtils.copyParcelable(catalog, Catalog.CREATOR);
+        Catalog tmp = ParcelableUtils.copyParcelable(catalog, Catalog.CREATOR);
 
         this.mErn = tmp.mErn;
         this.mLabel = tmp.mLabel;

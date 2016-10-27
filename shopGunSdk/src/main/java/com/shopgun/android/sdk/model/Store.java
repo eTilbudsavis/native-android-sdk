@@ -25,7 +25,7 @@ import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.ParcelableUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,7 +68,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
     public Store(Store store) {
 
         // Ensure we don't reference objects
-        Store tmp = SgnUtils.copyParcelable(store, Store.CREATOR);
+        Store tmp = ParcelableUtils.copyParcelable(store, Store.CREATOR);
 
         this.mErn = tmp.mErn;
         this.mStreet = tmp.mStreet;

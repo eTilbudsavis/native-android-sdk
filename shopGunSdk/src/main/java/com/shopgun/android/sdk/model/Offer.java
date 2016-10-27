@@ -26,8 +26,8 @@ import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.IStore;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.DateUtils;
+import com.shopgun.android.utils.ParcelableUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -80,7 +80,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
     public Offer(Offer offer) {
 
         // Ensure we don't reference objects
-        Offer tmp = SgnUtils.copyParcelable(offer, Offer.CREATOR);
+        Offer tmp = ParcelableUtils.copyParcelable(offer, Offer.CREATOR);
 
         this.mErn = tmp.mErn;
         this.mHeading = tmp.mHeading;

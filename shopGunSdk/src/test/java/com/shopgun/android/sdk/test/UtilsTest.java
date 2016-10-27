@@ -23,6 +23,7 @@ import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.ParcelableUtils;
 
 import junit.framework.Assert;
 
@@ -277,12 +278,12 @@ public class UtilsTest {
 		 * Si will be unit testet later, so don't worry
 		 */
         Si obj = new Si();
-        Si copy = SgnUtils.copyParcelable(obj, Si.CREATOR);
+        Si copy = ParcelableUtils.copyParcelable(obj, Si.CREATOR);
         Assert.assertNotSame(obj, null);
         Assert.assertNotSame(obj, copy);
         Assert.assertEquals(obj, copy);
 
-        copy = SgnUtils.copyParcelable(obj, Si.CREATOR);
+        copy = ParcelableUtils.copyParcelable(obj, Si.CREATOR);
         // They must not refer to the same object (as it's been deep copied)
         Assert.assertNotSame(obj, copy);
         // But they must be equal
@@ -291,7 +292,7 @@ public class UtilsTest {
         Assert.assertNotSame(obj, copy);
         Assert.assertFalse(obj.equals(copy));
 
-        copy = SgnUtils.copyParcelable(obj, Si.CREATOR);
+        copy = ParcelableUtils.copyParcelable(obj, Si.CREATOR);
         // They must not refer to the same object (as it's been deep copied)
         Assert.assertNotSame(obj, copy);
         // But they must be equal
@@ -302,7 +303,7 @@ public class UtilsTest {
         list.add(new Si());
         list.add(new Si());
 
-        List<Si> listCopy = SgnUtils.copyParcelable(list, Si.CREATOR);
+        List<Si> listCopy = ParcelableUtils.copyParcelable(list, Si.CREATOR);
 
         SdkTest.logTest(TAG, "Copy");
 
