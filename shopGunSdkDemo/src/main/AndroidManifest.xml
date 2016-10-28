@@ -50,7 +50,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".CatalogListActivity" />
-        <activity android:name=".CatalogViewerActivity" />
+        <activity android:name=".PagedPublicationActivity" />
         <activity android:name=".OfferListActivity" />
         <activity android:name=".OfferSearchActivity" />
         <activity android:name=".OfferViewActivity" />

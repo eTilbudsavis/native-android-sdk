@@ -48,7 +48,7 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Catalog c = mCatalogs.get(position);
-//        CatalogViewerActivity.launch(this, c);
+        PagedPublicationActivity.start(this, c);
     }
 
     @Override

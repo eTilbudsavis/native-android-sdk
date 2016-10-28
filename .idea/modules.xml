@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/shopGunSdk/shopGunSdk.iml" filepath="$PROJECT_DIR$/shopGunSdk/shopGunSdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/shopGunSdkDemo/shopGunSdkDemo.iml" filepath="$PROJECT_DIR$/shopGunSdkDemo/shopGunSdkDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/shopgun-android-sdk.iml" filepath="$PROJECT_DIR$/shopgun-android-sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../verso-android/library/verso.iml" filepath="$PROJECT_DIR$/../verso-android/library/verso.iml" />
     </modules>
   </component>
 </project>
