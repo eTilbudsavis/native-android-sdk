@@ -11,12 +11,14 @@ public class CatalogPage implements PagedPublicationPage {
     String mZoomUrl;
     int mPageIndex;
     Bitmap.Config mBitmapConfig;
+    float mAspectRatio;
 
-    public CatalogPage(int pageIndex, String viewUrl, String zoomUrl, Bitmap.Config bitmapConfig) {
+    public CatalogPage(int pageIndex, String viewUrl, String zoomUrl, float aspectRatio, Bitmap.Config bitmapConfig) {
         mPageIndex = pageIndex;
         mViewUrl = viewUrl;
         mZoomUrl = zoomUrl;
         mBitmapConfig = bitmapConfig;
+        mAspectRatio = aspectRatio;
     }
 
     @NonNull
@@ -48,4 +50,8 @@ public class CatalogPage implements PagedPublicationPage {
         return size == Size.VIEW;
     }
 
+    @Override
+    public float getAspectRatio() {
+        return mAspectRatio;
+    }
 }

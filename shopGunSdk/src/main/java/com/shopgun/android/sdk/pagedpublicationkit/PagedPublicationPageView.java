@@ -2,7 +2,9 @@ package com.shopgun.android.sdk.pagedpublicationkit;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
@@ -19,7 +21,7 @@ public class PagedPublicationPageView extends ImageView implements VersoPageView
     public static final String TAG = PagedPublicationPageView.class.getSimpleName();
 
     PagedPublicationPage mPagedPublicationPage;
-    PagedPublicationPage.Size mQuality = PagedPublicationPage.Size.VIEW;
+    PagedPublicationPage.Size mSize;
     Target mTarget;
 
     public PagedPublicationPageView(Context context, PagedPublicationPage page) {
@@ -30,15 +32,30 @@ public class PagedPublicationPageView extends ImageView implements VersoPageView
 
     private void init() {
         int wh = ViewGroup.LayoutParams.MATCH_PARENT;
-        setLayoutParams(new ViewGroup.LayoutParams(wh, wh));
+        ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(wh, wh);
+        setLayoutParams(lp);
+        setScaleType(ScaleType.FIT_CENTER);
+        setLayerType(View.LAYER_TYPE_HARDWARE, null);
         load(PagedPublicationPage.Size.VIEW);
     }
 
-//    @Override
-//    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-//        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-//        L.d(TAG, String.format(Locale.US, "onMeasure[ w:%s, h:%s ]", getMeasuredWidth(), getMeasuredHeight()));
-//    }
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        float width = MeasureSpec.getSize(widthMeasureSpec);
+        float height = MeasureSpec.getSize(heightMeasureSpec);
+        float viewRatio = width/height;
+        float ratio = mPagedPublicationPage.getAspectRatio();
+        L.d(TAG, String.format(Locale.US, "[%s] viewRatio:%.2f, ratio:%.2f", mPagedPublicationPage.getPageIndex(), viewRatio, ratio));
+        if (viewRatio < ratio) {
+            int h = (int)(width/ratio);
+            setMeasuredDimension(widthMeasureSpec, h);
+        } else {
+            int w = (int)(height/ratio);
+            setMeasuredDimension(w, heightMeasureSpec);
+        }
+        L.d(TAG, String.format(Locale.US, "[%s] Measured[ w:%s, h:%s ], MeasureSpec[ w:%s, h:%s ], ratio:%.2f", mPagedPublicationPage.getPageIndex(), getMeasuredWidth(), getMeasuredHeight(), width, height, ratio));
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
 
     @Override
     public boolean onZoom(float scale) {
@@ -66,7 +83,7 @@ public class PagedPublicationPageView extends ImageView implements VersoPageView
     }
 
     private boolean isZoomed() {
-        return mQuality == PagedPublicationPage.Size.ZOOM;
+        return mSize == PagedPublicationPage.Size.ZOOM;
     }
 
     @Override
@@ -76,12 +93,15 @@ public class PagedPublicationPageView extends ImageView implements VersoPageView
         }
     }
 
-    private void load(PagedPublicationPage.Size q) {
-//        L.d(TAG, String.format(Locale.US, "[%s] load ", q.name()));
+    private void load(PagedPublicationPage.Size size) {
+        if (mSize == size) {
+            return;
+        }
+        mSize = size;
         Picasso p = Picasso.with(getContext());
-        RequestCreator rc = p.load(mPagedPublicationPage.getUrl(q));
-        rc.config(mPagedPublicationPage.getBitmapConfig(q));
-        if (mPagedPublicationPage.allowResize(q)) {
+        RequestCreator rc = p.load(mPagedPublicationPage.getUrl(size));
+        rc.config(mPagedPublicationPage.getBitmapConfig(size));
+        if (mPagedPublicationPage.allowResize(size)) {
 //            rc.fit();
 //            rc.centerInside();
         }

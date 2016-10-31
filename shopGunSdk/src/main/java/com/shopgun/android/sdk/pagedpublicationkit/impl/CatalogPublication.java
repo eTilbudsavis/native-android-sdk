@@ -38,8 +38,14 @@ public class CatalogPublication implements PagedPublication {
     @Override
     public float getAspectRatio() {
         Dimension d = mCatalog.getDimension();
-        float width = (d == null || d.getWidth() == null) ? 0 : d.getWidth().floatValue();
-        return width / 1f;
+        if (d != null) {
+            float width = d.getWidth() == null ? 1f : d.getWidth().floatValue();
+            float height = d.getHeight() == null ? 1f : d.getHeight().floatValue();
+            return width / height;
+        }
+        return 1f;
+    }
+
     }
 
     @Override

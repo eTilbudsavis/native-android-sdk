@@ -26,6 +26,7 @@ public class CatalogLoader implements PagedPublicationLoader {
     Catalog mCatalog;
     String mCatalogId;
     Request mCatalogRequest;
+    CatalogPublication mCatalogPublication;
     boolean mCatalogLoaded = false;
     boolean mHotspotsLoaded = false;
     boolean mPagesLoaded = false;
@@ -57,11 +58,12 @@ public class CatalogLoader implements PagedPublicationLoader {
             public void onRequestIntermediate(Catalog response, List<ShopGunError> errors) {
                 if (!mCatalogLoaded) {
                     mCatalogLoaded = true;
-                    mCallback.onPublicationLoaded(new CatalogPublication(response));
+                    mCatalogPublication = new CatalogPublication(response);
+                    mCallback.onPublicationLoaded(mCatalogPublication);
                 }
                 if (!mPagesLoaded && response.getPages() != null) {
                     mPagesLoaded = true;
-                    List<PagedPublicationPage> pages = convertImagesToPages(mContext, response.getPages());
+                    List<PagedPublicationPage> pages = convertImagesToPages(mContext, response.getPages(), mCatalogPublication.getAspectRatio());
                     mCallback.onPagesLoaded(pages);
                 }
                 if (!mHotspotsLoaded && response.getHotspots() != null) {
@@ -85,8 +87,18 @@ public class CatalogLoader implements PagedPublicationLoader {
             r.loadHotspots(true);
             mCatalogRequest = r;
         }
-//        mCatalogRequest.setDebugger(new NetworkDebugger());
         ShopGun.getInstance().add(mCatalogRequest);
+    }
+
+    @Override
+    public boolean isLoading() {
+        return mCatalogRequest != null && (!mCatalogRequest.isFinished() || !mCatalogRequest.isCanceled());
+    }
+
+    @Override
+    public void cancel() {
+        mCatalogRequest.cancel();
+        mCatalogRequest = null;
     }
 
     /**
@@ -109,7 +121,7 @@ public class CatalogLoader implements PagedPublicationLoader {
      * | zoom (1500x2000)px |          6000kb |           12000kb |
      * ------------------------------------------------------------
      */
-    private List<PagedPublicationPage> convertImagesToPages(Context ctx, List<Images> images) {
+    private List<PagedPublicationPage> convertImagesToPages(Context ctx, List<Images> images, float aspectRatio) {
         int maxMem = MemoryUtils.getMaxHeap(ctx);
         ArrayList<PagedPublicationPage> pages = new ArrayList<>(images.size());
         for (int j = 0; j < images.size(); j++) {
@@ -117,29 +129,18 @@ public class CatalogLoader implements PagedPublicationLoader {
             CatalogPage page;
             if (maxMem >= 96) {
                 // worst case: (2*12000)*3 = 72mb
-                page = new CatalogPage(j, i.getView(), i.getZoom(), Bitmap.Config.ARGB_8888);
+                page = new CatalogPage(j, i.getView(), i.getZoom(), aspectRatio, Bitmap.Config.ARGB_8888);
             } else if (maxMem >= 48) {
                 // worst case: (2*6000)*3 = 36mb
-                page = new CatalogPage(j, i.getView(), i.getZoom(), Bitmap.Config.RGB_565);
+                page = new CatalogPage(j, i.getView(), i.getZoom(), aspectRatio, Bitmap.Config.RGB_565);
             } else {
                 // worst case: (2*1600)*3 = 10mb
                 // essentially we just hope for the best
-                page = new CatalogPage(j, i.getView(), i.getView(), Bitmap.Config.RGB_565);
+                page = new CatalogPage(j, i.getView(), i.getView(), aspectRatio, Bitmap.Config.RGB_565);
             }
             pages.add(page);
         }
         return pages;
-    }
-
-    @Override
-    public boolean isLoading() {
-        return mCatalogRequest != null && (!mCatalogRequest.isFinished() || !mCatalogRequest.isCanceled());
-    }
-
-    @Override
-    public void cancel() {
-        mCatalogRequest.cancel();
-        mCatalogRequest = null;
     }
 
 }

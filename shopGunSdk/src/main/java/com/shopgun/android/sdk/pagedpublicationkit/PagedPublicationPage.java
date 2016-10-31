@@ -13,5 +13,6 @@ public interface PagedPublicationPage {
     int getPageIndex();
     @NonNull Bitmap.Config getBitmapConfig(Size q);
     boolean allowResize(Size q);
+    float getAspectRatio();
 
 }
