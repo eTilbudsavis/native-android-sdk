@@ -2,19 +2,14 @@ package com.shopgun.android.sdk.pagedpublicationkit;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.shopgun.android.utils.log.L;
 import com.shopgun.android.verso.VersoPageView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.Target;
-
-import java.util.Locale;
 
 public class PagedPublicationPageView extends ImageView implements VersoPageView {
 
@@ -32,29 +27,34 @@ public class PagedPublicationPageView extends ImageView implements VersoPageView
 
     private void init() {
         int wh = ViewGroup.LayoutParams.MATCH_PARENT;
-        ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(wh, wh);
-        setLayoutParams(lp);
-        setScaleType(ScaleType.FIT_CENTER);
-        setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        setLayoutParams(new ViewGroup.LayoutParams(wh, wh));
         load(PagedPublicationPage.Size.VIEW);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        float width = MeasureSpec.getSize(widthMeasureSpec);
-        float height = MeasureSpec.getSize(heightMeasureSpec);
-        float viewRatio = width/height;
-        float ratio = mPagedPublicationPage.getAspectRatio();
-        L.d(TAG, String.format(Locale.US, "[%s] viewRatio:%.2f, ratio:%.2f", mPagedPublicationPage.getPageIndex(), viewRatio, ratio));
-        if (viewRatio < ratio) {
-            int h = (int)(width/ratio);
-            setMeasuredDimension(widthMeasureSpec, h);
+
+//        L.d(TAG, String.format("################################   onMeasure [%s]   ####", mPagedPublicationPage.getPageIndex()));
+
+        float containerWidth = MeasureSpec.getSize(widthMeasureSpec);
+        float containerHeight = MeasureSpec.getSize(heightMeasureSpec);
+        float containerAspectRatio = containerWidth/containerHeight;
+
+        float aspectRatio = mPagedPublicationPage.getAspectRatio();
+
+//        L.d(TAG, String.format(Locale.US, "MeasureSpec[ w:%s, h:%s, containerAspectRatio:%.2f ], Publication.AspectRatio:%.2f",
+//                containerWidth, containerHeight, containerAspectRatio, aspectRatio));
+
+        if (aspectRatio < containerAspectRatio) {
+            int w = (int)(containerHeight*aspectRatio);
+            setMeasuredDimension(w, (int) containerHeight);
+        } else if (aspectRatio > containerAspectRatio) {
+            int h = (int)(containerWidth/aspectRatio);
+            setMeasuredDimension((int) containerWidth, h);
         } else {
-            int w = (int)(height/ratio);
-            setMeasuredDimension(w, heightMeasureSpec);
+            setMeasuredDimension((int) containerWidth, (int) containerHeight);
         }
-        L.d(TAG, String.format(Locale.US, "[%s] Measured[ w:%s, h:%s ], MeasureSpec[ w:%s, h:%s ], ratio:%.2f", mPagedPublicationPage.getPageIndex(), getMeasuredWidth(), getMeasuredHeight(), width, height, ratio));
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+//        L.d(TAG, String.format(Locale.US, "Measured[ w:%s, h:%s ]", getMeasuredWidth(), getMeasuredHeight()));
     }
 
     @Override

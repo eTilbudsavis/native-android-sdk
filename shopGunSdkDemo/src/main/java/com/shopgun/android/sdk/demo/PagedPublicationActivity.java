@@ -7,11 +7,8 @@ import android.support.annotation.Nullable;
 
 import com.shopgun.android.sdk.demo.base.BaseActivity;
 import com.shopgun.android.sdk.model.Catalog;
-import com.shopgun.android.sdk.pagedpublicationkit.PagedPublication;
-import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationConfiguration;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationFragment;
 import com.shopgun.android.sdk.pagedpublicationkit.impl.CatalogLoader;
-import com.shopgun.android.sdk.pagedpublicationkit.impl.CatalogPublication;
 import com.shopgun.android.utils.TextUtils;
 import com.shopgun.android.utils.log.L;
 import com.shopgun.android.verso.VersoFragment;
