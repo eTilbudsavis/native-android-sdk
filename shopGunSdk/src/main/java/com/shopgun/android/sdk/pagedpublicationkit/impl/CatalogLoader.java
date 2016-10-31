@@ -91,6 +91,11 @@ public class CatalogLoader implements PagedPublicationLoader {
     }
 
     @Override
+    public String getSource() {
+        return "legacy";
+    }
+
+    @Override
     public boolean isLoading() {
         return mCatalogRequest != null && (!mCatalogRequest.isFinished() || !mCatalogRequest.isCanceled());
     }

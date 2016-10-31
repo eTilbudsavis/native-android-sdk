@@ -46,6 +46,9 @@ public class CatalogPublication implements PagedPublication {
         return 1f;
     }
 
+    @Override
+    public String getOwnerId() {
+        return mCatalog.getDealerId();
     }
 
     @Override
