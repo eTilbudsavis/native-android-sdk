@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.shopgun.android.utils.log.L;
 import com.shopgun.android.verso.VersoFragment;
 import com.shopgun.android.verso.VersoViewPager;
 
@@ -48,7 +47,6 @@ public class PagedPublicationFragment extends VersoFragment implements PagedPubl
     }
 
     public void setPublicationLoader(PagedPublicationLoader publicationLoader) {
-        L.d(TAG, "setPublicationLoader");
         mPublicationLoader = publicationLoader;
         if (mFrame != null) {
             loadPagedPublication();
@@ -57,40 +55,24 @@ public class PagedPublicationFragment extends VersoFragment implements PagedPubl
 
     @Override
     public void onStart() {
-        L.d(TAG, "onStart");
         super.onStart();
     }
 
     @Override
     public void onResume() {
-        L.d(TAG, "onResume");
         super.onResume();
         loadPagedPublication();
     }
 
     @Override
     public void onPause() {
-        L.d(TAG, "onPause");
         super.onPause();
         if (mPublicationLoader != null) {
             mPublicationLoader.cancel();
         }
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        L.d(TAG, "onSaveInstanceState");
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onStop() {
-        L.d(TAG, "onStop");
-        super.onStop();
-    }
-
     private void loadPagedPublication() {
-        L.d(TAG, "loadPagedPublication");
         if (mPublicationLoader != null && !mPublicationLoader.isLoading()) {
             mPublicationLoader.load(this);
             // TODO: 27/10/16 Show loader view

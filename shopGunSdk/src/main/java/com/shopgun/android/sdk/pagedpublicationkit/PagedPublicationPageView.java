@@ -17,7 +17,7 @@ public class PagedPublicationPageView extends ImageView implements VersoPageView
 
     PagedPublicationPage mPagedPublicationPage;
     PagedPublicationPage.Size mSize;
-    Target mTarget;
+    PageTarget mPageTarget;
 
     public PagedPublicationPageView(Context context, PagedPublicationPage page) {
         super(context);
@@ -34,27 +34,24 @@ public class PagedPublicationPageView extends ImageView implements VersoPageView
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-//        L.d(TAG, String.format("################################   onMeasure [%s]   ####", mPagedPublicationPage.getPageIndex()));
-
         float containerWidth = MeasureSpec.getSize(widthMeasureSpec);
         float containerHeight = MeasureSpec.getSize(heightMeasureSpec);
         float containerAspectRatio = containerWidth/containerHeight;
+        float pageAspectRatio = mPagedPublicationPage.getAspectRatio();
 
-        float aspectRatio = mPagedPublicationPage.getAspectRatio();
+//        L.d(TAG, String.format(Locale.US, "MeasureSpec[ w:%.0f, h:%.0f, containerAspectRatio:%.2f ], pageAspectRatio:%.2f",
+//                containerWidth, containerHeight, containerAspectRatio, pageAspectRatio));
 
-//        L.d(TAG, String.format(Locale.US, "MeasureSpec[ w:%s, h:%s, containerAspectRatio:%.2f ], Publication.AspectRatio:%.2f",
-//                containerWidth, containerHeight, containerAspectRatio, aspectRatio));
-
-        if (aspectRatio < containerAspectRatio) {
-            int w = (int)(containerHeight*aspectRatio);
-            setMeasuredDimension(w, (int) containerHeight);
-        } else if (aspectRatio > containerAspectRatio) {
-            int h = (int)(containerWidth/aspectRatio);
-            setMeasuredDimension((int) containerWidth, h);
-        } else {
-            setMeasuredDimension((int) containerWidth, (int) containerHeight);
+        if (pageAspectRatio < containerAspectRatio) {
+            containerWidth = containerHeight * pageAspectRatio;
+        } else if (pageAspectRatio > containerAspectRatio) {
+            containerHeight = containerWidth / pageAspectRatio;
         }
-//        L.d(TAG, String.format(Locale.US, "Measured[ w:%s, h:%s ]", getMeasuredWidth(), getMeasuredHeight()));
+
+        setMeasuredDimension((int) containerWidth, (int) containerHeight);
+
+//        L.d(TAG, String.format(Locale.US, "[%s] Measured[ w:%s, h:%s ]", mPagedPublicationPage.getPageIndex(), getMeasuredWidth(), getMeasuredHeight()));
+
     }
 
     @Override
@@ -101,28 +98,26 @@ public class PagedPublicationPageView extends ImageView implements VersoPageView
         Picasso p = Picasso.with(getContext());
         RequestCreator rc = p.load(mPagedPublicationPage.getUrl(size));
         rc.config(mPagedPublicationPage.getBitmapConfig(size));
-        if (mPagedPublicationPage.allowResize(size)) {
-//            rc.fit();
-//            rc.centerInside();
+        mPageTarget = new PageTarget();
+        rc.into(mPageTarget);
+    }
+
+    class PageTarget implements Target {
+
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            setImageBitmap(bitmap);
         }
-        mTarget = new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-//                L.d(TAG, String.format(Locale.US, "[%s] onBitmapLoaded", mPagedPublicationPage.getPageIndex()));
-                setImageBitmap(bitmap);
-            }
 
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-//                L.d(TAG, String.format(Locale.US, "[%s] onBitmapFailed", mPagedPublicationPage.getPageIndex()));
-            }
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
 
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-//                L.d(TAG, String.format(Locale.US, "[%s] onPrepareLoad", mPagedPublicationPage.getPageIndex()));
-            }
-        };
-        rc.into(mTarget);
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+        }
     }
 
 }
