@@ -17,6 +17,8 @@ public class LifecycleManager {
 
     public static final String TAG = Constants.getTag(LifecycleManager.class);
 
+    private static final int DEF_DESTROY_DELAY = 3000;
+
     private final Collection<Callback> mCallbacks = new HashSet<>();
     private Application mApplication;
     private Activity mCurrentActivity;
@@ -39,7 +41,7 @@ public class LifecycleManager {
             mApplication.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
                 @Override
                 public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-//                    ShopGun.getInstance().getHandler().removeCallbacks(mDestroyRunnable);
+                    ShopGun.getInstance().getHandler().removeCallbacks(mDestroyRunnable);
                     if (mCurrentActivity == null) {
                         mCurrentActivity = activity;
                         dispatchCreate(mCurrentActivity);
@@ -73,7 +75,7 @@ public class LifecycleManager {
                 @Override
                 public void onActivityDestroyed(Activity activity) {
                     if (activity == mCurrentActivity) {
-                        ShopGun.getInstance().getHandler().post(mDestroyRunnable);
+                        ShopGun.getInstance().getHandler().postDelayed(mDestroyRunnable, DEF_DESTROY_DELAY);
                     }
                 }
 
