@@ -1,5 +1,6 @@
 package com.shopgun.android.sdk.pagedpublicationkit;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -8,54 +9,107 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.shopgun.android.utils.log.L;
+import com.shopgun.android.utils.log.LogUtil;
 import com.shopgun.android.verso.VersoFragment;
 import com.shopgun.android.verso.VersoViewPager;
 
 import java.util.List;
 
-public class PagedPublicationFragment extends VersoFragment implements PagedPublicationLoader.OnLoadComplete {
+public class PagedPublicationFragment extends VersoFragment {
 
     public static final String TAG = PagedPublicationFragment.class.getSimpleName();
 
-    private static final String VERSO_FRAGMENT_TAG = "verso_fragment";
+    public static final String STATE_CONFIGURATION = "state_paged_publication_configuration";
 
     FrameLayout mFrame;
-    VersoViewPager mVersoView;
-    PagedPublication mPagedPublication;
-    List<PagedPublicationPage> mPublicationPages;
-    PagedPublicationHotspots mPublicationHotspots;
-    PagedPublicationLoader mPublicationLoader;
+    PagedPublicationConfiguration mConfig;
+    PagedPublicationConfiguration.OnLoadComplete mOnLoadComplete = new PagedPublicationConfiguration.OnLoadComplete() {
+        @Override
+        public void onPublicationLoaded(PagedPublication publication) {
+            L.d(TAG, "onPublicationLoaded");
+            if (publication != null) {
+                notifyVersoConfigurationChanged();
+            } else {
+                // TODO: 27/10/16 Show error view
+            }
+
+        }
+
+        @Override
+        public void onPagesLoaded(List<? extends PagedPublicationPage> pages) {
+            L.d(TAG, "onPagesLoaded");
+            if (pages != null) {
+                notifyVersoConfigurationChanged();
+            } else {
+                // TODO: 27/10/16 Show error view
+            }
+        }
+
+        @Override
+        public void onHotspotsLoaded(PagedPublicationHotspots hotspots) {
+            L.d(TAG, "onHotspotsLoaded");
+            if (hotspots != null) {
+                notifyVersoConfigurationChanged();
+            }
+        }
+
+    };
+
+    @Override
+    public void notifyVersoConfigurationChanged() {
+        if (mConfig.hasData()) {
+            super.notifyVersoConfigurationChanged();
+        }
+    }
 
     public static PagedPublicationFragment newInstance() {
         return new PagedPublicationFragment();
     }
 
+    public static PagedPublicationFragment newInstance(PagedPublicationConfiguration config) {
+        Bundle args = new Bundle();
+        args.putParcelable(STATE_CONFIGURATION, config);
+        PagedPublicationFragment f = newInstance();
+        f.setArguments(args);
+        return f;
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mVersoView = (VersoViewPager) super.onCreateView(inflater, container, savedInstanceState);
+        VersoViewPager versoViewPager = (VersoViewPager) super.onCreateView(inflater, container, savedInstanceState);
         mFrame = new FrameLayout(container.getContext());
         int wh = ViewGroup.LayoutParams.MATCH_PARENT;
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(wh, wh);
         mFrame.setLayoutParams(lp);
-        mFrame.addView(mVersoView);
+        mFrame.addView(versoViewPager);
         return mFrame;
     }
 
-    public PagedPublicationLoader getPublicationLoader() {
-        return mPublicationLoader;
-    }
-
-    public void setPublicationLoader(PagedPublicationLoader publicationLoader) {
-        mPublicationLoader = publicationLoader;
-        if (mFrame != null) {
-            loadPagedPublication();
-        }
-    }
-
     @Override
-    public void onStart() {
-        super.onStart();
+    protected void onRestoreState(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            mConfig = savedInstanceState.getParcelable(STATE_CONFIGURATION);
+            setPublicationConfiguration(mConfig);
+        } else if (getArguments() != null) {
+            mConfig = getArguments().getParcelable(STATE_CONFIGURATION);
+            setPublicationConfiguration(mConfig);
+        }
+        super.onRestoreState(savedInstanceState);
+    }
+
+    public PagedPublicationConfiguration getPublicationConfiguration() {
+        return mConfig;
+    }
+
+    public void setPublicationConfiguration(PagedPublicationConfiguration configuration) {
+        mConfig = configuration;
+        if (getContext() != null) {
+            mConfig.onConfigurationChanged(getResources().getConfiguration());
+        }
+        setVersoSpreadConfiguration(mConfig);
+        loadPagedPublication();
     }
 
     @Override
@@ -65,16 +119,27 @@ public class PagedPublicationFragment extends VersoFragment implements PagedPubl
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        if (mPublicationLoader != null) {
-            mPublicationLoader.cancel();
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mConfig != null) {
+            mConfig.cancel();
         }
+        outState.putParcelable(STATE_CONFIGURATION, mConfig);
     }
 
     private void loadPagedPublication() {
-        if (mPublicationLoader != null && !mPublicationLoader.isLoading()) {
-            mPublicationLoader.load(this);
+        if (mConfig != null) {
+            if (mConfig.isLoading()) {
+                // loader is already working on it,
+                return;
+            }
+            if (mConfig.getPublication() != null &&
+                            mConfig.hasPages() &&
+                            mConfig.hasHotspots()) {
+                // Already have the needed data
+                return;
+            }
+            mConfig.load(mOnLoadComplete);
             // TODO: 27/10/16 Show loader view
         }
     }
@@ -89,41 +154,6 @@ public class PagedPublicationFragment extends VersoFragment implements PagedPubl
         TextView tv = new TextView(mFrame.getContext());
         tv.setText("Loading...");
         return tv;
-    }
-
-    @Override
-    public void onPublicationLoaded(PagedPublication publication) {
-        if (publication != null) {
-            mPagedPublication = publication;
-            updateVerso();
-        } else {
-            // TODO: 27/10/16 Show error view
-        }
-    }
-
-    @Override
-    public void onPagesLoaded(List<PagedPublicationPage> pages) {
-        if (pages != null) {
-            mPublicationPages = pages;
-            updateVerso();
-        } else {
-            // TODO: 27/10/16 Show error view
-        }
-    }
-
-    @Override
-    public void onHotspotsLoaded(PagedPublicationHotspots hotspots) {
-        if (hotspots != null) {
-            mPublicationHotspots = hotspots;
-            updateVerso();
-        }
-    }
-
-    private void updateVerso() {
-        if (mPagedPublication != null && mPublicationPages != null) {
-            PagedPublicationConfiguration config = new PagedPublicationConfiguration(getContext(), mPagedPublication, mPublicationPages);
-            setVersoSpreadConfiguration(config);
-        }
     }
 
 }

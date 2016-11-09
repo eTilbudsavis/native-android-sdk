@@ -81,8 +81,6 @@ android {
 dependencies {
     compile 'com.shopgun.android:utils:1.0.4'
 //    compile project(':markhor')
-//    compile 'com.shopgun.android:verso:0.8.0'
-// Need to include ZoomLayout lib to debug Verso
     compile project(':zoomlayout')
     compile project(':verso')
     compile 'com.shopgun.android:materialcolorcreator:1.0.0'

@@ -1,43 +1,54 @@
-package com.shopgun.android.sdk.pagedpublicationkit.impl;
+package com.shopgun.android.sdk.pagedpublicationkit.apiv2;
 
 import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Dimension;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublication;
-import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationPage;
 
-public class CatalogPublication implements PagedPublication {
+public class CatalogPublication implements PagedPublication, Parcelable {
 
-    Catalog mCatalog;
+    String mId;
+    int mBackgroundColor;
+    int mPageCount;
+    float mAspectRatio;
+    String mOwnerId;
 
     public CatalogPublication(String catalogId) {
-        mCatalog = new Catalog();
-        mCatalog.setId(catalogId);
+        mId = catalogId;
     }
 
     public CatalogPublication(Catalog catalog) {
-        mCatalog = catalog;
+        mId = catalog.getId();
+        mBackgroundColor = catalog.getBackground();
+        mPageCount = catalog.getPageCount();
+        mAspectRatio = getAspectRatio(catalog);
+        mOwnerId = catalog.getDealerId();
     }
 
     @Override
     public String getId() {
-        return mCatalog.getId();
+        return mId;
     }
 
     @Override
     public int getBackgroundColor() {
-        return mCatalog.getBackground();
+        return mBackgroundColor;
     }
 
     @Override
     public int getPageCount() {
-        return mCatalog.getPageCount();
+        return mPageCount;
     }
 
     @Override
     public float getAspectRatio() {
-        Dimension d = mCatalog.getDimension();
+        return mAspectRatio;
+    }
+
+    private float getAspectRatio(Catalog catalog) {
+        Dimension d = catalog.getDimension();
         if (d != null) {
             float width = d.getWidth() == null ? 1f : d.getWidth().floatValue();
             float height = d.getHeight() == null ? 1f : d.getHeight().floatValue();
@@ -48,8 +59,9 @@ public class CatalogPublication implements PagedPublication {
 
     @Override
     public String getOwnerId() {
-        return mCatalog.getDealerId();
+        return mOwnerId;
     }
+
 
     @Override
     public int describeContents() {
@@ -58,11 +70,19 @@ public class CatalogPublication implements PagedPublication {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(this.mCatalog, flags);
+        dest.writeString(this.mId);
+        dest.writeInt(this.mBackgroundColor);
+        dest.writeInt(this.mPageCount);
+        dest.writeFloat(this.mAspectRatio);
+        dest.writeString(this.mOwnerId);
     }
 
     protected CatalogPublication(Parcel in) {
-        this.mCatalog = in.readParcelable(Catalog.class.getClassLoader());
+        this.mId = in.readString();
+        this.mBackgroundColor = in.readInt();
+        this.mPageCount = in.readInt();
+        this.mAspectRatio = in.readFloat();
+        this.mOwnerId = in.readString();
     }
 
     public static final Creator<CatalogPublication> CREATOR = new Creator<CatalogPublication>() {
@@ -76,4 +96,5 @@ public class CatalogPublication implements PagedPublication {
             return new CatalogPublication[size];
         }
     };
+
 }
