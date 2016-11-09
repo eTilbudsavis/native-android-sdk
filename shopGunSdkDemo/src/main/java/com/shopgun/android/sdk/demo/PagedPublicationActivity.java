@@ -53,11 +53,7 @@ public class PagedPublicationActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         if (mConfig == null) {
-            PagedPublicationConfiguration config =
-                    mPagedPublicationFragment.getPublicationConfiguration();
-            if (config instanceof CatalogConfiguration) {
-                mConfig = (CatalogConfiguration) config;
-            }
+            mConfig = (CatalogConfiguration) mPagedPublicationFragment.getPublicationConfiguration();
         }
     }
 
