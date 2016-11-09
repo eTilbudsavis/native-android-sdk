@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
 import android.view.View;
@@ -152,6 +153,33 @@ public class PagedPublicationActivity extends BaseActivity {
             tv.setTextSize(30f);
             return tv;
         }
+
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+        }
+
+        protected CatConfig(Parcel in) {
+            super(in);
+        }
+
+        public static final Creator<CatConfig> CREATOR = new Creator<CatConfig>() {
+            @Override
+            public CatConfig createFromParcel(Parcel source) {
+                return new CatConfig(source);
+            }
+
+            @Override
+            public CatConfig[] newArray(int size) {
+                return new CatConfig[size];
+            }
+        };
 
     }
 
