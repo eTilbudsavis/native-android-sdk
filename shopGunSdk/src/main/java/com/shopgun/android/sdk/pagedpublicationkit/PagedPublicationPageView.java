@@ -22,36 +22,24 @@ public class PagedPublicationPageView extends ImageView implements VersoPageView
     public PagedPublicationPageView(Context context, PagedPublicationPage page) {
         super(context);
         mPagedPublicationPage = page;
-        init();
-    }
-
-    private void init() {
-        int wh = ViewGroup.LayoutParams.MATCH_PARENT;
-        setLayoutParams(new ViewGroup.LayoutParams(wh, wh));
         load(PagedPublicationPage.Size.VIEW);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-
         float containerWidth = MeasureSpec.getSize(widthMeasureSpec);
         float containerHeight = MeasureSpec.getSize(heightMeasureSpec);
         float containerAspectRatio = containerWidth/containerHeight;
         float pageAspectRatio = mPagedPublicationPage.getAspectRatio();
-
 //        L.d(TAG, String.format(Locale.US, "MeasureSpec[ w:%.0f, h:%.0f, containerAspectRatio:%.2f ], pageAspectRatio:%.2f",
 //                containerWidth, containerHeight, containerAspectRatio, pageAspectRatio));
-
         if (pageAspectRatio < containerAspectRatio) {
             containerWidth = containerHeight * pageAspectRatio;
         } else if (pageAspectRatio > containerAspectRatio) {
             containerHeight = containerWidth / pageAspectRatio;
         }
-
         setMeasuredDimension((int) containerWidth, (int) containerHeight);
-
 //        L.d(TAG, String.format(Locale.US, "[%s] Measured[ w:%s, h:%s ]", mPagedPublicationPage.getPageIndex(), getMeasuredWidth(), getMeasuredHeight()));
-
     }
 
     @Override

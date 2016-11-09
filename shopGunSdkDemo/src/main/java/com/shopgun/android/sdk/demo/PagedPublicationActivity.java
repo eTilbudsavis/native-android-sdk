@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.demo.base.BaseActivity;
+import com.shopgun.android.sdk.demo.pagedpubkit.IntroOutroCatalogConfiguration;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationConfiguration;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationFragment;
@@ -61,7 +62,7 @@ public class PagedPublicationActivity extends BaseActivity {
         mPagedPublicationFragment = (PagedPublicationFragment)
                 getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG);
         if (mPagedPublicationFragment == null) {
-            mConfig = new CatConfig(catalog);
+            mConfig = new IntroOutroCatalogConfiguration(catalog, true, false);
             mPagedPublicationFragment = PagedPublicationFragment.newInstance(mConfig);
             getSupportFragmentManager()
                     .beginTransaction()
@@ -78,7 +79,6 @@ public class PagedPublicationActivity extends BaseActivity {
             public void onPagesScrolled(int currentPosition, int[] currentPages, int previousPosition, int[] previousPages) {
                 L.d(TAG, String.format(Locale.US, "onPagesChanged[ currentPosition:%s, currentPages:%s, previousPosition:%s, previousPages:%s ]"
                         , currentPosition, TextUtils.join(",", currentPages), previousPosition, TextUtils.join(",", previousPages)));
-
                 String spread = String.format("spread[ %s / %s ]", currentPosition+1, mConfig.getSpreadCount());
                 if (mConfig.hasIntro() && currentPosition == 0) {
                     setTitle("Intro " + spread);
@@ -90,11 +90,8 @@ public class PagedPublicationActivity extends BaseActivity {
                             currentPages[i] = currentPages[i] + 1;
                         }
                     }
-                    String pages = String.format("page[ %s / %s ]",
-                            TextUtils.join("-", currentPages),
-                            mConfig.getPublicationPageCount());
-                    setTitle(String.format("%s %s %s",
-                            mConfig.getCatalog().getBranding().getName(), spread, pages));
+                    String pages = String.format("page[ %s / %s ]", TextUtils.join("-", currentPages), mConfig.getPublicationPageCount());
+                    setTitle(String.format("%s %s %s", mConfig.getCatalog().getBranding().getName(), spread, pages));
 
                 }
             }
@@ -108,112 +105,6 @@ public class PagedPublicationActivity extends BaseActivity {
 
             }
         });
-
-    }
-
-    static class CatConfig extends CatalogConfiguration {
-
-        public CatConfig(Catalog catalog) {
-            super(catalog);
-        }
-
-        @Override
-        public boolean hasIntro() {
-            return true;
-        }
-
-        @Override
-        public View getIntro(ViewGroup container, int page) {
-            TextView tv = getTextView(container);
-            tv.setText("IntroView for:\n" + getCatalog().getBranding().getName());
-            return tv;
-        }
-
-        @Override
-        public boolean hasOutro() {
-            return true;
-        }
-
-        @Override
-        public View getOutro(ViewGroup container, int page) {
-            TextView tv = getTextView(container);
-            tv.setText("Outro for:\n" + getCatalog().getBranding().getName());
-            return tv;
-        }
-
-        private TextView getTextView(ViewGroup container) {
-            TextView tv = new MyTextView(container.getContext());
-            tv.setBackgroundColor(Color.YELLOW);
-            tv.setTextColor(Color.BLACK);
-            tv.setGravity(Gravity.CENTER);
-            tv.setTextSize(30f);
-            return tv;
-        }
-
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            super.writeToParcel(dest, flags);
-        }
-
-        protected CatConfig(Parcel in) {
-            super(in);
-        }
-
-        public static final Creator<CatConfig> CREATOR = new Creator<CatConfig>() {
-            @Override
-            public CatConfig createFromParcel(Parcel source) {
-                return new CatConfig(source);
-            }
-
-            @Override
-            public CatConfig[] newArray(int size) {
-                return new CatConfig[size];
-            }
-        };
-
-    }
-
-    static class MyTextView extends TextView implements VersoPageView {
-
-        public MyTextView(Context context) {
-            super(context);
-        }
-
-        @Override
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
-        }
-
-        @Override
-        public boolean onZoom(float scale) {
-            return false;
-        }
-
-        @Override
-        public void setOnCompletionListener() {
-
-        }
-
-        @Override
-        public OnLoadCompletionListener getOnLoadCompleteListener() {
-            return null;
-        }
-
-        @Override
-        public void onVisible() {
-
-        }
-
-        @Override
-        public void onInvisible() {
-
-        }
 
     }
 
