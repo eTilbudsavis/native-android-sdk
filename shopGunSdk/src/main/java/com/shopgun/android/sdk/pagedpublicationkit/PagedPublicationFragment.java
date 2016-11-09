@@ -1,6 +1,5 @@
 package com.shopgun.android.sdk.pagedpublicationkit;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -10,7 +9,6 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.shopgun.android.utils.log.L;
-import com.shopgun.android.utils.log.LogUtil;
 import com.shopgun.android.verso.VersoFragment;
 import com.shopgun.android.verso.VersoViewPager;
 

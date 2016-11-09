@@ -137,16 +137,24 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
 
         int spreadCount = getSpreadCount();
 
-        boolean isOutro = hasOutro() && position == spreadCount-1;
-        if (hasIntro() && isOutro) {
-            page = ((position - 1) * 2) - 1;
-        } else if (hasIntro()) {
-            page = (position - 1) * 2;
+        boolean isOutro = hasOutro() && position == spreadCount - 1;
+        boolean lastCatalogPage = position == spreadCount - (hasOutro() ? 2 : 1);
+
+        if (hasIntro()) {
+            if (isOutro) {
+                page = ((position - 1) * 2) - 1;
+            } else {
+                page = (position - 1) * 2;
+            }
         } else {
-            page = (position * 2) - 1;
+            if (hasOutro()) {
+                page = (position - 1) * 2;
+            } else {
+                page = (position * 2) - 1;
+            }
         }
 
-        if (isOutro || (hasOutro() && position == spreadCount-2)) {
+        if (isOutro || lastCatalogPage) {
             return new int[]{ page };
         }
 
@@ -157,12 +165,20 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
 
     @Override
     public int getSpreadPositionFromPage(int page) {
-        if (mOrientation.isLandscape() && page > 1) {
-            // normalize so we'll get the first actual page from a position
-            page -= page % 2;
-            return hasIntro() ? (page/2)+1 : page/2;
+        if (mOrientation.isPortrait()) {
+            return page;
         }
-        return hasIntro() ? page : page-1;
+        if (page == 0 || (hasIntro() && page == 1)) {
+            return page;
+        }
+
+        if (hasOutro() && page == getPageCount()-1) {
+            return getSpreadCount()-1;
+        } else if (hasIntro()) {
+            return ((page - (page % 2))/2)+1;
+        } else {
+            return ((page-1)/2)+1;
+        }
     }
 
     @Override
