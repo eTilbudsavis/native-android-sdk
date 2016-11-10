@@ -82,8 +82,10 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
     @Override
     public int getPageCount() {
         int count = getPublicationPageCount();
-        if (hasIntro()) count++;
-        if (hasOutro()) count++;
+        if (count > 0) {
+            if (hasIntro()) count++;
+            if (hasOutro()) count++;
+        }
         return count;
     }
 
@@ -98,10 +100,13 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
     @Override
     public int getSpreadCount() {
         int pageCount = getPublicationPageCount();
-        int count = mOrientation.isLandscape() && pageCount > 0 ? (pageCount/2)+1 : pageCount;
-        if (hasIntro()) count++;
-        if (hasOutro()) count++;
-        return count;
+        if (pageCount > 0) {
+            int count = mOrientation.isLandscape() && pageCount > 0 ? (pageCount/2)+1 : pageCount;
+            if (hasIntro()) count++;
+            if (hasOutro()) count++;
+            return count;
+        }
+        return 0;
     }
 
     @Override
@@ -248,6 +253,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
             @Override
             public void onRequestIntermediate(Catalog response, List<ShopGunError> errors) {
                 if (mPublication == null) {
+                    mCatalog = response;
                     mPublication = new CatalogPublication(response);
                     mCallback.onPublicationLoaded(mPublication);
                 } else if (mPages == null && response.getPages() != null) {

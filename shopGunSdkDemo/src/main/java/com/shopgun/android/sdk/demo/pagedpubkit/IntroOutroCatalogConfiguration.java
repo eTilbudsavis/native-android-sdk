@@ -18,7 +18,7 @@ public class IntroOutroCatalogConfiguration extends CatalogConfiguration {
     boolean mOutro = false;
 
     public IntroOutroCatalogConfiguration(Catalog catalog, boolean intro, boolean outro) {
-        super(catalog);
+        super(catalog.getId());
         mIntro = intro;
         mOutro = outro;
     }
