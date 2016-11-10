@@ -71,21 +71,18 @@ public class PagedPublicationActivity extends BaseActivity {
             public void onPagesScrolled(int currentPosition, int[] currentPages, int previousPosition, int[] previousPages) {
                 L.d(TAG, String.format(Locale.US, "onPagesChanged[ currentPosition:%s, currentPages:%s, previousPosition:%s, previousPages:%s ]"
                         , currentPosition, TextUtils.join(",", currentPages), previousPosition, TextUtils.join(",", previousPages)));
-                String spread = String.format("spread[ %s / %s ]", currentPosition+1, mConfig.getSpreadCount());
-                if (mConfig.hasIntro() && currentPosition == 0) {
-                    setTitle("Intro " + spread);
-                } else if (mConfig.hasOutro() && currentPosition == mConfig.getSpreadCount()-1) {
-                    setTitle("Outro " + spread);
-                } else {
-                    if (!mConfig.hasIntro()) {
-                        for (int i = 0; i < currentPages.length; i++) {
-                            currentPages[i] = currentPages[i] + 1;
-                        }
-                    }
-                    String pages = String.format("page[ %s / %s ]", TextUtils.join("-", currentPages), mConfig.getPublicationPageCount());
-                    setTitle(String.format("%s %s %s", mConfig.getCatalog().getBranding().getName(), spread, pages));
+                String name = mConfig.getCatalog().getBranding().getName();
+                String spread = String.format(" spread[ %s / %s ]", currentPosition+1, mConfig.getSpreadCount());
 
+                if (!mConfig.hasIntro()) {
+                    for (int i = 0; i < currentPages.length; i++) {
+                        currentPages[i] = currentPages[i] + 1;
+                    }
                 }
+                boolean isIntroOutro = (mConfig.hasIntro() && currentPosition == 0) ||
+                        (mConfig.hasOutro() && currentPosition == mConfig.getSpreadCount()-1);
+                String pages = isIntroOutro ? "" : String.format(" page[ %s / %s ]", TextUtils.join("-", currentPages), mConfig.getPublicationPageCount());
+                setTitle(name + spread + pages);
             }
 
             @Override
