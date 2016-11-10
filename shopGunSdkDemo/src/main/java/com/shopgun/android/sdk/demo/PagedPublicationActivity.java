@@ -2,25 +2,17 @@ package com.shopgun.android.sdk.demo;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.support.annotation.Nullable;
-import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.shopgun.android.sdk.demo.base.BaseActivity;
 import com.shopgun.android.sdk.demo.pagedpubkit.IntroOutroCatalogConfiguration;
 import com.shopgun.android.sdk.model.Catalog;
-import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationConfiguration;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationFragment;
 import com.shopgun.android.sdk.pagedpublicationkit.apiv2.CatalogConfiguration;
 import com.shopgun.android.utils.TextUtils;
 import com.shopgun.android.utils.log.L;
 import com.shopgun.android.verso.VersoFragment;
-import com.shopgun.android.verso.VersoPageView;
 
 import java.util.Locale;
 

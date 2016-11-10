@@ -1,6 +1,7 @@
 package com.shopgun.android.sdk.pagedpublicationkit;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.shopgun.android.utils.log.L;
+import com.shopgun.android.sdk.R;
 import com.shopgun.android.verso.VersoFragment;
 import com.shopgun.android.verso.VersoViewPager;
 
@@ -21,42 +22,39 @@ public class PagedPublicationFragment extends VersoFragment {
     public static final String STATE_CONFIGURATION = "state_paged_publication_configuration";
 
     FrameLayout mFrame;
+    FrameLayout mFrameVerso;
+    FrameLayout mFrameLoader;
+    FrameLayout mFrameError;
+    VersoViewPager mVersoViewPager;
     PagedPublicationConfiguration mConfig;
     PagedPublicationConfiguration.OnLoadComplete mOnLoadComplete = new PagedPublicationConfiguration.OnLoadComplete() {
         @Override
         public void onPublicationLoaded(PagedPublication publication) {
-            L.d(TAG, "onPublicationLoaded");
-            if (publication != null) {
-                notifyVersoConfigurationChanged();
-            } else {
-                // TODO: 27/10/16 Show error view
-            }
-
+            notifyVersoConfigurationChanged();
         }
 
         @Override
         public void onPagesLoaded(List<? extends PagedPublicationPage> pages) {
-            L.d(TAG, "onPagesLoaded");
-            if (pages != null) {
-                notifyVersoConfigurationChanged();
-            } else {
-                // TODO: 27/10/16 Show error view
-            }
+            notifyVersoConfigurationChanged();
         }
 
         @Override
         public void onHotspotsLoaded(PagedPublicationHotspots hotspots) {
-            L.d(TAG, "onHotspotsLoaded");
-            if (hotspots != null) {
-                notifyVersoConfigurationChanged();
-            }
+            notifyVersoConfigurationChanged();
         }
 
+        @Override
+        public void onError(List<PublicationException> ex) {
+            if (!mConfig.hasData()) {
+                showErrorView(ex.get(0));
+            }
+        }
     };
 
     @Override
     public void notifyVersoConfigurationChanged() {
         if (mConfig.hasData()) {
+            showVersoView();
             super.notifyVersoConfigurationChanged();
         }
     }
@@ -76,12 +74,12 @@ public class PagedPublicationFragment extends VersoFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        VersoViewPager versoViewPager = (VersoViewPager) super.onCreateView(inflater, container, savedInstanceState);
-        mFrame = new FrameLayout(container.getContext());
-        int wh = ViewGroup.LayoutParams.MATCH_PARENT;
-        ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(wh, wh);
-        mFrame.setLayoutParams(lp);
-        mFrame.addView(versoViewPager);
+        mVersoViewPager = (VersoViewPager) super.onCreateView(inflater, container, savedInstanceState);
+        mFrame = (FrameLayout) inflater.inflate(R.layout.shopgun_sdk_pagedpublication, container, false);
+        mFrameVerso = (FrameLayout) mFrame.findViewById(R.id.verso);
+        mFrameError = (FrameLayout) mFrame.findViewById(R.id.error);
+        mFrameLoader = (FrameLayout) mFrame.findViewById(R.id.loader);
+        setVisible(false, false, false);
         return mFrame;
     }
 
@@ -137,21 +135,77 @@ public class PagedPublicationFragment extends VersoFragment {
                 // Already have the needed data
                 return;
             }
-            mConfig.load(mOnLoadComplete);
-            // TODO: 27/10/16 Show loader view
+            showLoaderView();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mConfig.load(mOnLoadComplete);
+                }
+            }, 2000);
         }
     }
 
-    View getErrorView() {
-        TextView tv = new TextView(mFrame.getContext());
-        tv.setText("Error!");
-        return tv;
+    private void ensurePublicationBranding() {
+        PagedPublication pub = mConfig == null ? null : mConfig.getPublication();
+        if (pub != null && mFrame != null) {
+            int bgColor = pub.getBackgroundColor();
+            mFrame.setBackgroundColor(bgColor);
+        }
     }
 
-    View getLoaderView() {
-        TextView tv = new TextView(mFrame.getContext());
-        tv.setText("Loading...");
-        return tv;
+    private void showVersoView() {
+        if (mFrame != null &&
+                mFrameVerso.getVisibility() != View.VISIBLE) {
+            ensurePublicationBranding();
+            mFrameVerso.removeAllViews();
+            mFrameVerso.addView(mVersoViewPager);
+            setVisible(true, false, false);
+        }
+    }
+
+    private void showLoaderView() {
+        if (mFrame != null &&
+                mFrameLoader.getVisibility() != View.VISIBLE) {
+            ensurePublicationBranding();
+            mFrameLoader.removeAllViews();
+//            View loaderView = getErrorView(mFrame, new PublicationException("Testing error message while loading..."));
+            View loaderView = getLoaderView(mFrameLoader);
+            mFrameLoader.addView(loaderView);
+            setVisible(false, true, false);
+        }
+    }
+
+    private void showErrorView(PublicationException ex) {
+        if (mFrame != null &&
+                mFrameError.getVisibility() != View.VISIBLE) {
+            ensurePublicationBranding();
+            mFrameError.removeAllViews();
+            View errorView = getErrorView(mFrame, ex);
+            mFrameError.addView(errorView);
+            setVisible(false, false, true);
+        }
+    }
+
+    private void setVisible(boolean verso, boolean loader, boolean error) {
+        if (mFrame != null) {
+            // TODO: 10/11/16 Add animation between the views
+            mFrameVerso.setVisibility(verso ? View.VISIBLE : View.GONE);
+            mFrameLoader.setVisibility(loader ? View.VISIBLE : View.GONE);
+            mFrameError.setVisibility(error ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    View getErrorView(ViewGroup container, PublicationException ex) {
+        LayoutInflater i = LayoutInflater.from(container.getContext());
+        View v = i.inflate(R.layout.shopgun_sdk_pagedpublication_error, container, false);
+        TextView msg = (TextView) v.findViewById(R.id.message);
+        msg.setText(ex.getMessage());
+        return v;
+    }
+
+    View getLoaderView(ViewGroup container) {
+        LayoutInflater i = LayoutInflater.from(container.getContext());
+        return i.inflate(R.layout.shopgun_sdk_pagedpublication_loader, container, false);
     }
 
 }

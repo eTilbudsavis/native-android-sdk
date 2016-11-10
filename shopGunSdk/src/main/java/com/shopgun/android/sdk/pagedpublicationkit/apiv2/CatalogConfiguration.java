@@ -5,11 +5,9 @@ import android.os.Parcel;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.model.Catalog;
-import com.shopgun.android.sdk.model.Images;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublication;
@@ -18,18 +16,15 @@ import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspots;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationPage;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationPageView;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationSpreadProperty;
+import com.shopgun.android.sdk.pagedpublicationkit.PublicationException;
 import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogLoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogRequest;
-import com.shopgun.android.utils.TextUtils;
 import com.shopgun.android.utils.enums.Orientation;
-import com.shopgun.android.utils.log.L;
-import com.shopgun.android.utils.log.LogUtil;
 import com.shopgun.android.verso.VersoSpreadProperty;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class CatalogConfiguration implements PagedPublicationConfiguration {
 
@@ -52,6 +47,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
 
     public CatalogConfiguration(Catalog catalog) {
         mCatalog = catalog;
+        ensureData();
     }
 
     @NonNull
@@ -254,14 +250,18 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
                 if (mPublication == null) {
                     mPublication = new CatalogPublication(response);
                     mCallback.onPublicationLoaded(mPublication);
-                }
-                if (mPages == null && response.getPages() != null) {
+                } else if (mPages == null && response.getPages() != null) {
                     mPages = CatalogPage.from(ShopGun.getInstance().getContext(), response.getPages(), mPublication.getAspectRatio());
                     mCallback.onPagesLoaded(mPages);
-                }
-                if (mHotspots == null && response.getHotspots() != null) {
+                } else if (mHotspots == null && response.getHotspots() != null) {
                     mHotspots = CatalogHotspots.from(response.getHotspots());
                     mCallback.onHotspotsLoaded(mHotspots);
+                } else {
+                    List<PublicationException> tmp = new ArrayList<>(errors.size());
+                    for (ShopGunError e : errors) {
+                        tmp.add(new PublicationException(e));
+                    }
+                    mCallback.onError(tmp);
                 }
             }
 
@@ -273,7 +273,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
             r.loadPages(true);
             r.loadHotspots(true);
             mCatalogRequest = r;
-            listener.onRequestIntermediate(mCatalog, new ArrayList<ShopGunError>());
+            mCallback.onPublicationLoaded(mPublication);
         } else {
             CatalogRequest r = new CatalogRequest(mCatalogId, listener);
             r.loadPages(true);
@@ -303,6 +303,19 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
         return "legacy";
     }
 
+    private void ensureData() {
+        if (mCatalog != null) {
+            mCatalogId = mCatalog.getId();
+            mPublication = new CatalogPublication(mCatalog);
+            if (mCatalog.getPages() != null) {
+                mPages = CatalogPage.from(ShopGun.getInstance().getContext(), mCatalog.getPages(), mPublication.getAspectRatio());
+            }
+            if (mCatalog.getHotspots() != null) {
+                mHotspots = CatalogHotspots.from(mCatalog.getHotspots());
+            }
+        }
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -322,13 +335,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
         this.mCatalogId = in.readString();
         int tmpMOrientation = in.readInt();
         this.mOrientation = tmpMOrientation == -1 ? null : Orientation.values()[tmpMOrientation];
-        if (mCatalog != null) {
-            mPublication = new CatalogPublication(mCatalog);
-            if (mCatalog.getPages() != null) {
-                mPages = CatalogPage.from(ShopGun.getInstance().getContext(), mCatalog.getPages(), mPublication.getAspectRatio());
-            }
-        }
-
+        ensureData();
     }
 
     public static final Creator<CatalogConfiguration> CREATOR = new Creator<CatalogConfiguration>() {

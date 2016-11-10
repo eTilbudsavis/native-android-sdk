@@ -15,14 +15,9 @@
   limitations under the License.
   -->
 
-<FrameLayout android:id="@+id/shopgun_sdk_layout_pageflip_container"
-             xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
-
-    <FrameLayout
-        android:id="@+id/verso"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-</FrameLayout>
+<ProgressBar xmlns:android="http://schemas.android.com/apk/res/android"
+    style="?android:attr/progressBarStyleLarge"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:id="@+id/progressBar"/>

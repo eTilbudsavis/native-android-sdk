@@ -21,7 +21,7 @@ public class CatalogPublication implements PagedPublication, Parcelable {
 
     public CatalogPublication(Catalog catalog) {
         mId = catalog.getId();
-        mBackgroundColor = catalog.getBackground();
+        mBackgroundColor = catalog.getBranding().getColor();
         mPageCount = catalog.getPageCount();
         mAspectRatio = getAspectRatio(catalog);
         mOwnerId = catalog.getDealerId();

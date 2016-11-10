@@ -19,18 +19,19 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent">
 
-    <com.shopgun.android.sdk.pageflip.widget.ZoomPhotoView
-        android:id="@+id/shopgun_sdk_layout_page_photoview"
+    <FrameLayout
+        android:id="@+id/verso"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <com.shopgun.android.sdk.pageflip.widget.LoadingTextView
-        android:id="@+id/shopgun_sdk_layout_page_pagenum"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center_horizontal"
-        android:text="@string/com_shopgun_android_sdk_pageflip_page_loading"
-        android:textSize="30sp"/>
+    <FrameLayout
+        android:id="@+id/loader"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <FrameLayout
+        android:id="@+id/error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </FrameLayout>

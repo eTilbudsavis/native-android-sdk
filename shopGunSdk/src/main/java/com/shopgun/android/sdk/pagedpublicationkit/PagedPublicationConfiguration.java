@@ -34,6 +34,7 @@ public interface PagedPublicationConfiguration extends VersoSpreadConfiguration,
         void onPublicationLoaded(PagedPublication publication);
         void onPagesLoaded(List<? extends PagedPublicationPage> pages);
         void onHotspotsLoaded(PagedPublicationHotspots hotspots);
+        void onError(List<PublicationException> ex);
     }
 
 }
