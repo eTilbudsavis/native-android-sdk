@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.network.Request;
@@ -14,8 +15,6 @@ import com.shopgun.android.sdk.pagedpublicationkit.PagedPublication;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationConfiguration;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspots;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationPage;
-import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationPageView;
-import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationSpreadProperty;
 import com.shopgun.android.sdk.pagedpublicationkit.PublicationException;
 import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogLoaderRequest;
@@ -32,6 +31,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
 
     private Catalog mCatalog;
     private String mCatalogId;
+    private int mLoadingTextColor;
 
     private CatalogPublication mPublication;
     private List<CatalogPage> mPages;
@@ -62,7 +62,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
         // we'll need to offset all the pages to get the right images here
         int tmpPage = hasIntro() ? page - 1 : page;
         CatalogPage catalogPage = mPages.get(tmpPage);
-        return new PagedPublicationPageView(container.getContext(), catalogPage);
+        return new CatalogPageView(container.getContext(), catalogPage, mLoadingTextColor);
     }
 
     @Override
@@ -118,9 +118,9 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
     public VersoSpreadProperty getSpreadProperty(int spreadPosition) {
         int[] pages = positionToPages(spreadPosition);
         if ((hasIntro() && spreadPosition == 0) || (hasOutro() && spreadPosition == getSpreadCount()-1 ) ) {
-            return new PagedPublicationSpreadProperty(pages, 0.6f, 1f, 1f);
+            return new CatalogSpreadProperty(pages, 0.6f, 1f, 1f);
         }
-        return new PagedPublicationSpreadProperty(pages, 1f, 1f, 4f);
+        return new CatalogSpreadProperty(pages, 1f, 1f, 4f);
     }
 
     private int[] positionToPages(int position) {
@@ -254,7 +254,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
             public void onRequestIntermediate(Catalog response, List<ShopGunError> errors) {
                 if (mPublication == null) {
                     mCatalog = response;
-                    mPublication = new CatalogPublication(response);
+                    ensureData();
                     mCallback.onPublicationLoaded(mPublication);
                 } else if (mPages == null && response.getPages() != null) {
                     mPages = CatalogPage.from(ShopGun.getInstance().getContext(), response.getPages(), mPublication.getAspectRatio());
@@ -312,6 +312,8 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
     private void ensureData() {
         if (mCatalog != null) {
             mCatalogId = mCatalog.getId();
+            int color = mCatalog.getBranding().getColor();
+            mLoadingTextColor = new MaterialColorImpl(color).getPrimaryText();
             mPublication = new CatalogPublication(mCatalog);
             if (mCatalog.getPages() != null) {
                 mPages = CatalogPage.from(ShopGun.getInstance().getContext(), mCatalog.getPages(), mPublication.getAspectRatio());

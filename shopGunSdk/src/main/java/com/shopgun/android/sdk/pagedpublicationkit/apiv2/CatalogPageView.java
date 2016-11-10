@@ -1,45 +1,54 @@
-package com.shopgun.android.sdk.pagedpublicationkit;
+package com.shopgun.android.sdk.pagedpublicationkit.apiv2;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationPage;
+import com.shopgun.android.utils.ColorUtils;
+import com.shopgun.android.utils.UnitUtils;
 import com.shopgun.android.verso.VersoPageView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.Target;
 
-public class PagedPublicationPageView extends ImageView implements VersoPageView {
+public class CatalogPageView extends RatioFrameLayout implements VersoPageView {
 
-    public static final String TAG = PagedPublicationPageView.class.getSimpleName();
+    public static final String TAG = CatalogPageView.class.getSimpleName();
 
     PagedPublicationPage mPagedPublicationPage;
     PagedPublicationPage.Size mSize;
+    ImageView mImageView;
+    PulsatingTextView mTextView;
     PageTarget mPageTarget;
 
-    public PagedPublicationPageView(Context context, PagedPublicationPage page) {
+    public CatalogPageView(Context context, PagedPublicationPage page, int textColor) {
         super(context);
         mPagedPublicationPage = page;
-        load(PagedPublicationPage.Size.VIEW);
-    }
+        setAspectRatio(mPagedPublicationPage.getAspectRatio());
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        float containerWidth = MeasureSpec.getSize(widthMeasureSpec);
-        float containerHeight = MeasureSpec.getSize(heightMeasureSpec);
-        float containerAspectRatio = containerWidth/containerHeight;
-        float pageAspectRatio = mPagedPublicationPage.getAspectRatio();
-//        L.d(TAG, String.format(Locale.US, "MeasureSpec[ w:%.0f, h:%.0f, containerAspectRatio:%.2f ], pageAspectRatio:%.2f",
-//                containerWidth, containerHeight, containerAspectRatio, pageAspectRatio));
-        if (pageAspectRatio < containerAspectRatio) {
-            containerWidth = containerHeight * pageAspectRatio;
-        } else if (pageAspectRatio > containerAspectRatio) {
-            containerHeight = containerWidth / pageAspectRatio;
-        }
-        setMeasuredDimension((int) containerWidth, (int) containerHeight);
-//        L.d(TAG, String.format(Locale.US, "[%s] Measured[ w:%s, h:%s ]", mPagedPublicationPage.getPageIndex(), getMeasuredWidth(), getMeasuredHeight()));
+        // Add the ImageView
+        mImageView = new CatalogImageView(context);
+        addView(mImageView);
+
+        // Add the pulsing page number
+        mTextView = new PulsatingTextView(context);
+        FrameLayout.LayoutParams lp = new LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.gravity = Gravity.CENTER;
+        mTextView.setLayoutParams(lp);
+        mTextView.setPulseColors(textColor, ColorUtils.setAlphaComponent(textColor, 64));
+        mTextView.setText(String.valueOf(mPagedPublicationPage.getPageIndex()));
+        mTextView.setTextSize(UnitUtils.spToPx(26, getContext()));
+        addView(mTextView);
+
+        // load image
+        load(PagedPublicationPage.Size.VIEW);
     }
 
     @Override
@@ -94,7 +103,8 @@ public class PagedPublicationPageView extends ImageView implements VersoPageView
 
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-            setImageBitmap(bitmap);
+            mTextView.setVisibility(View.GONE);
+            mImageView.setImageBitmap(bitmap);
         }
 
         @Override
