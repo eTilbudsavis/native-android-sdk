@@ -176,35 +176,6 @@ public class ModelCreator {
         return d;
     }
 
-    public static Hotspot getHotspot() {
-        return getHotspot(0, 100, 100, 0);
-    }
-
-    public static Hotspot getHotspot(int top, int right, int bottom, int left) {
-        Hotspot h = new Hotspot();
-        h.mAbsBottom = bottom;
-        h.mAbsTop = top;
-        h.mAbsLeft = left;
-        h.mAbsRight = right;
-        // A test failed on serialization due to Offer not being Seriliazable
-        h.setOffer(getOffer());
-        return h;
-    }
-
-    public static HotspotMap getHotspotMap() {
-        return getHotspotMap("fake-logo-url", Color.GREEN);
-    }
-
-    public static HotspotMap getHotspotMap(String logoUrl, int color) {
-        HotspotMap h = new HotspotMap();
-        List<Hotspot> list = new ArrayList<Hotspot>();
-        for (int i = 0; i < 10; i++) {
-            list.add(getHotspot(i, 100 + i, 100 + i, i));
-        }
-        h.put(1, list);
-        return h;
-    }
-
     public static Pageflip getPageflip() {
         return getPageflip(getUrl("fake-id"), Color.GREEN);
     }
@@ -470,7 +441,7 @@ public class ModelCreator {
         c.setCategoryIds(getCategoryIds());
         c.setDimension(getDimension());
         c.setId(id);
-        c.setHotspots(getHotspotMap());
+//        c.setHotspots(getHotspotMap());
         c.setImages(getImages());
         c.setLabel("fake-label");
         c.setOfferCount(32);

@@ -4,16 +4,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.widget.Toast;
 
 import com.shopgun.android.sdk.demo.base.BaseActivity;
 import com.shopgun.android.sdk.demo.pagedpubkit.IntroOutroCatalogConfiguration;
 import com.shopgun.android.sdk.model.Catalog;
+import com.shopgun.android.sdk.model.Hotspot;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationFragment;
+import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;
 import com.shopgun.android.sdk.pagedpublicationkit.apiv2.CatalogConfiguration;
 import com.shopgun.android.utils.TextUtils;
 import com.shopgun.android.utils.log.L;
 import com.shopgun.android.verso.VersoFragment;
 
+import java.util.List;
 import java.util.Locale;
 
 public class PagedPublicationActivity extends BaseActivity {
@@ -92,6 +96,24 @@ public class PagedPublicationActivity extends BaseActivity {
             @Override
             public void onVisiblePageIndexesChanged(int[] pages, int[] added, int[] removed) {
 
+            }
+        });
+
+        mPagedPublicationFragment.setOnHotspotTapListener(new PagedPublicationFragment.OnHotspotTapListener() {
+            @Override
+            public void onHotspotsTap(List<PagedPublicationHotspot> hotspots) {
+                if (!hotspots.isEmpty()) {
+                    StringBuilder sb = new StringBuilder();
+                    for (PagedPublicationHotspot h : hotspots) {
+                        if (sb.length() > 0) {
+                            sb.append(", ");
+                        }
+                        sb.append(h.getOffer().getHeading());
+                        L.d(TAG, h.toString());
+                    }
+                    L.d(TAG, sb.toString());
+                    Toast.makeText(PagedPublicationActivity.this, sb.toString(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
 

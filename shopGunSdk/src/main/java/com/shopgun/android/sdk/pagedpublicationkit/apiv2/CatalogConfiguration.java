@@ -9,11 +9,12 @@ import android.view.ViewGroup;
 import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.model.Catalog;
+import com.shopgun.android.sdk.model.HotspotMap;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublication;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationConfiguration;
-import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspots;
+import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspotCollection;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationPage;
 import com.shopgun.android.sdk.pagedpublicationkit.PublicationException;
 import com.shopgun.android.sdk.requests.LoaderRequest;
@@ -35,7 +36,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
 
     private CatalogPublication mPublication;
     private List<CatalogPage> mPages;
-    private CatalogHotspots mHotspots;
+    private CatalogHotspotCollection mHotspots;
     private Orientation mOrientation = Orientation.PORTRAIT;
 
     private OnLoadComplete mCallback;
@@ -208,12 +209,12 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
     }
 
     @Override
-    public PagedPublicationHotspots getHotspots() {
+    public PagedPublicationHotspotCollection getHotspotCollection() {
         return mHotspots;
     }
 
     @Override
-    public boolean hasHotspots() {
+    public boolean hasHotspotCollection() {
         return mHotspots != null;
     }
 
@@ -260,7 +261,8 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
                     mPages = CatalogPage.from(ShopGun.getInstance().getContext(), response.getPages(), mPublication.getAspectRatio());
                     mCallback.onPagesLoaded(mPages);
                 } else if (mHotspots == null && response.getHotspots() != null) {
-                    mHotspots = CatalogHotspots.from(response.getHotspots());
+                    HotspotMap hotspotMap = response.getHotspots();
+                    mHotspots = new CatalogHotspotCollection(hotspotMap);
                     mCallback.onHotspotsLoaded(mHotspots);
                 } else {
                     List<PublicationException> tmp = new ArrayList<>(errors.size());
@@ -319,7 +321,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
                 mPages = CatalogPage.from(ShopGun.getInstance().getContext(), mCatalog.getPages(), mPublication.getAspectRatio());
             }
             if (mCatalog.getHotspots() != null) {
-                mHotspots = CatalogHotspots.from(mCatalog.getHotspots());
+                mHotspots = new CatalogHotspotCollection(mCatalog.getHotspots());
             }
         }
     }

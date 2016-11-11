@@ -480,16 +480,16 @@ public class ModelTest {
     }
 
     public static void testHotspot() {
-        Hotspot obj = ModelCreator.getHotspot();
-        Hotspot tmp = ModelCreator.getHotspot();
-        Assert.assertEquals(obj, tmp);
-        Assert.assertEquals(obj.hashCode(), tmp.hashCode());
-
-        // Parcelable
-        testParcelable(obj, Hotspot.CREATOR);
-
-        // TODO This contains json array JSON
-        SdkTest.logTestWarning(TAG, "Hotspot", "NO JSON TESTING DONE - Json will fail");
+//        Hotspot obj = ModelCreator.getHotspot();
+//        Hotspot tmp = ModelCreator.getHotspot();
+//        Assert.assertEquals(obj, tmp);
+//        Assert.assertEquals(obj.hashCode(), tmp.hashCode());
+//
+//        // Parcelable
+//        testParcelable(obj, Hotspot.CREATOR);
+//
+//        // TODO This contains json array JSON
+//        SdkTest.logTestWarning(TAG, "Hotspot", "NO JSON TESTING DONE - Json will fail");
 
 //        JSONObject jObj = obj.toJSON();
 //        Hotspot jsonObj = Hotspot.fromJSON(jObj);
@@ -507,13 +507,13 @@ public class ModelTest {
     }
 
     public static void testHotspotMap() {
-        HotspotMap obj = ModelCreator.getHotspotMap();
-        HotspotMap tmp = ModelCreator.getHotspotMap();
-        Assert.assertEquals(obj, tmp);
-        Assert.assertEquals(obj.hashCode(), tmp.hashCode());
-
-        // Parcelable
-        testParcelable(obj, HotspotMap.CREATOR);
+//        HotspotMap obj = ModelCreator.getHotspotMap();
+//        HotspotMap tmp = ModelCreator.getHotspotMap();
+//        Assert.assertEquals(obj, tmp);
+//        Assert.assertEquals(obj.hashCode(), tmp.hashCode());
+//
+//        // Parcelable
+//        testParcelable(obj, HotspotMap.CREATOR);
 
         // TODO This contains json array JSON
         SdkTest.logTestWarning(TAG, "HotspotMap", "NO JSON TESTING DONE - Json will fail");

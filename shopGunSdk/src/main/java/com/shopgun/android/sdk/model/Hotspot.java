@@ -16,216 +16,126 @@
 
 package com.shopgun.android.sdk.model;
 
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.SparseArray;
 
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
+import com.shopgun.android.utils.PolygonF;
 import com.shopgun.android.sdk.utils.Constants;
+import com.shopgun.android.sdk.utils.SgnJson;
+import com.shopgun.android.utils.TextUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+
 public class Hotspot implements IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Hotspot.class);
-    /**
-     * The default significant area
-     */
+
     public static final double SIGNIFICANT_AREA = 0.02d;
-    public static final double SIGNIFICANT_WH = 0.7d;
 
-    public static Parcelable.Creator<Hotspot> CREATOR = new Parcelable.Creator<Hotspot>() {
-        public Hotspot createFromParcel(Parcel source) {
-            return new Hotspot(source);
-        }
+    public static final String TYPE = "offer";
 
-        public Hotspot[] newArray(int size) {
-            return new Hotspot[size];
-        }
-    };
-    /**
-     * The top most part of the hotspot, relative to the catalog.dimensions
-     */
-    public double mTop = Double.MIN_VALUE;
-    /**
-     * The bottom most part of the hotspot, relative to the catalog.dimensions
-     */
-    public double mBottom = Double.MIN_VALUE;
-    /**
-     * The left most part of the hotspot, relative to the catalog.dimensions
-     */
-    public double mLeft = Double.MIN_VALUE;
-    /**
-     * The top most part of the hotspot, relative to the catalog.dimensions
-     */
-    public double mRight = Double.MIN_VALUE;
-    /**
-     * The top most part of the hotspot. This is the absolute value
-     */
-    public double mAbsTop = Double.MIN_VALUE;
-    /**
-     * The bottom most part of the hotspot. This is the absolute value
-     */
-    public double mAbsBottom = Double.MIN_VALUE;
-    /**
-     * The left most part of the hotspot. This is the absolute value
-     */
-    public double mAbsLeft = Double.MIN_VALUE;
-    /**
-     * The top most part of the hotspot. This is the absolute value
-     */
-    public double mAbsRight = Double.MIN_VALUE;
+    SparseArray<PolygonF> mLocations = new SparseArray<>();
     private String mType;
-    private int mPage = 0;
     private Offer mOffer;
-    private boolean mIsSpanningTwoPages = false;
-    private int mColor = Color.TRANSPARENT;
 
-    public Hotspot() {
-
-    }
-
-    private Hotspot(Parcel in) {
-        this.mPage = in.readInt();
-        this.mOffer = in.readParcelable(Offer.class.getClassLoader());
-        this.mIsSpanningTwoPages = in.readByte() != 0;
-        this.mTop = in.readDouble();
-        this.mBottom = in.readDouble();
-        this.mLeft = in.readDouble();
-        this.mRight = in.readDouble();
-        this.mAbsTop = in.readDouble();
-        this.mAbsBottom = in.readDouble();
-        this.mAbsLeft = in.readDouble();
-        this.mAbsRight = in.readDouble();
-        this.mColor = in.readInt();
-    }
-
-    public static Hotspot fromJSON(JSONArray jHotspot) {
+    public static Hotspot fromJSON(JSONObject hotspot) {
         Hotspot h = new Hotspot();
-        if (jHotspot == null) {
+        if (hotspot == null) {
             return h;
         }
 
-        // We expect the first JSONArray to have an additional 4 JSONArray's
-        if (jHotspot.length() != 4) {
-            SgnLog.w(TAG, "Expected jHotspot.length == 4, actual length: " + jHotspot.length());
-            return h;
-        }
+        try {
 
-        for (int i = 0; i < jHotspot.length(); i++) {
+            String type = hotspot.optString(SgnJson.TYPE, null);
+            h.setType(type);
 
-            try {
+            JSONObject offer = hotspot.getJSONObject(SgnJson.OFFER);
+            Offer o = Offer.fromJSON(offer);
+            h.setOffer(o);
 
-                JSONArray point = jHotspot.getJSONArray(i);
-                if (point.length() != 2) {
-                    SgnLog.w(TAG, "Expected hotspot.point.length == 2, actual length: " + point.length());
-                    continue;
+            JSONObject locations = hotspot.getJSONObject(SgnJson.LOCATIONS);
+            Iterator<String> it = locations.keys();
+            while (it.hasNext()) {
+                String page = it.next();
+                int intPage = Integer.valueOf(page)-1;
+                JSONArray location = locations.getJSONArray(page);
+                PolygonF poly = new PolygonF(location.length());
+                for (int i = 0; i < location.length(); i++) {
+                    JSONArray point = location.getJSONArray(i);
+                    float x = Float.valueOf(point.getString(0));
+                    float y = Float.valueOf(point.getString(1));
+                    poly.addPoint(x, y);
                 }
-
-                double x = Double.valueOf(point.getString(0));
-                double y = Double.valueOf(point.getString(1));
-
-                if (h.mAbsLeft == Double.MIN_VALUE) {
-                    // Nothing set yet
-                    h.mAbsLeft = x;
-                } else if (h.mAbsLeft > x) {
-                    // switch values
-                    h.mAbsRight = h.mAbsLeft;
-                    h.mAbsLeft = x;
-                } else {
-                    // no other options left
-                    h.mAbsRight = x;
-                }
-
-                if (h.mAbsTop == Double.MIN_VALUE) {
-                    // Nothing set yet
-                    h.mAbsTop = y;
-                } else if (h.mAbsTop > y) {
-                    // switch values
-                    h.mAbsBottom = h.mAbsTop;
-                    h.mAbsTop = y;
-                } else {
-                    // no other options left
-                    h.mAbsBottom = y;
-                }
-
-            } catch (JSONException e) {
-                SgnLog.e(TAG, e.getMessage(), e);
+                h.mLocations.append(intPage, poly);
             }
+
+        } catch (JSONException e) {
+            SgnLog.e(TAG, e.getMessage(), e);
         }
 
         return h;
     }
 
-    public void normalize(Dimension d) {
-        mTop = mAbsTop / d.getHeight();
-        mRight = mAbsRight / d.getWidth();
-        mBottom = mAbsBottom / d.getHeight();
-        mLeft = mAbsLeft / d.getWidth();
+    public Hotspot() {
     }
 
-    public boolean inBounds(double x, double y, double minArea, int[] pages) {
-        return inBounds(x, y) && isAreaSignificant(pages);
-    }
-
-    public boolean inBounds(double x, double y) {
-        return mTop < y && y < mBottom && mLeft < x && x < mRight;
-    }
-
-    public boolean isAreaSignificant(int[] pages) {
-        return isAreaSignificant(SIGNIFICANT_AREA, SIGNIFICANT_WH, pages);
-    }
-
-    public boolean isAreaSignificant(double minArea, double minWH, int[] pages) {
-        return !(pages.length == 1 && mIsSpanningTwoPages) || getArea() > minArea;
-    }
-
-//    public boolean isAreaSignificant(double minArea, double minWH, int[] pages) {
-//        if (!(pages.length == 1 && mIsSpanningTwoPages)) {
-//            return true;
-//        }
-//        return ((mAbsRight-mAbsLeft)>minWH) && ((mAbsBottom-mAbsTop)>minWH) && (getArea() > minArea);
-//    }
-
-    public double getArea() {
-        return Math.abs(mTop - mBottom) * Math.abs(mLeft - mRight);
-    }
-
-    public JSONObject toJSON() {
-        JSONObject o = new JSONObject();
-        try {
-            o.put("left", mLeft);
-            o.put("top", mTop);
-            o.put("right", mRight);
-            o.put("bottom", mBottom);
-            String offer = (mOffer == null ? "null" : mOffer.getHeading());
-            o.put("offer", offer);
-        } catch (JSONException e) {
-            SgnLog.e(TAG, e.getMessage(), e);
+    public void normalize(double width, double height) {
+        for (PolygonF p : getLocations()) {
+            for (int i = 0; i < p.npoints; i++) {
+                p.ypoints[i] = p.ypoints[i] / (float) height;
+                p.xpoints[i] = p.xpoints[i] / (float) width;
+            }
         }
-        return o;
     }
 
-    public boolean isDualPage() {
-        return mIsSpanningTwoPages;
+    public int[] getPages() {
+        int[] pages = new int[mLocations.size()];
+        for(int i = 0; i < mLocations.size(); i++) {
+            pages[i] = mLocations.keyAt(i);
+        }
+        return pages;
     }
 
-    public void setDualPage(boolean isDualPage) {
-        mIsSpanningTwoPages = isDualPage;
+    public List<PolygonF> getLocations() {
+        return getLocationsForPages(getPages());
     }
 
-    public int getPage() {
-        return mPage;
+    public List<PolygonF> getLocationsForPages(int[] pages) {
+        List<PolygonF> locs = new ArrayList<>(mLocations.size());
+        for (int p : pages) {
+            PolygonF poly = mLocations.get(p);
+            locs.add(poly);
+        }
+        return locs;
     }
 
-    public void setPage(int page) {
-        this.mPage = page;
+    public boolean hasLocationAt(int[] visiblePages, int clickedPage, float x, float y) {
+        PolygonF p = mLocations.get(clickedPage);
+        return p != null && p.contains(x, y) && isAreaSignificant(visiblePages, clickedPage);
+    }
+
+    private boolean isAreaSignificant(int[] visiblePages, int clickedPage) {
+        return isAreaSignificant(visiblePages, clickedPage, SIGNIFICANT_AREA);
+    }
+
+    private boolean isAreaSignificant(int[] visiblePages, int clickedPage, double minArea) {
+        return !(visiblePages.length == 1 && mLocations.size() > 1) || getArea(clickedPage) > minArea;
+    }
+
+    private double getArea(int page) {
+        PolygonF p = mLocations.get(page);
+        return p == null ? 0 : Math.abs(p.getBounds().height()) * Math.abs(p.getBounds().width());
     }
 
     public Offer getOffer() {
@@ -244,125 +154,51 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
         mType = type;
     }
 
-    public int getColor() {
-        return mColor;
-    }
-
-    public void setColor(int color) {
-        mColor = color;
-    }
-
-    public Rect getRect(Bitmap b) {
-        int left = (int) (mLeft * b.getWidth());
-        int top = (int) (mTop * b.getHeight());
-        int right = (int) (mRight * b.getWidth());
-        int bottom = (int) (mBottom * b.getHeight());
-        return new Rect(left, top, right, bottom);
-    }
-
-    public RectF getRectF(Bitmap b) {
-        return new RectF(getRect(b));
+    @Override
+    public JSONObject toJSON() {
+        return null;
     }
 
     @Override
     public String toString() {
-        String offer = (mOffer == null ? "null" : mOffer.getHeading());
-        String text = "hotspot[offer:%s, t:%.2f, r:%.2f, b:%.2f, l:%.2f, absT:%.2f, absR:%.2f, absB:%.2f, absL:%.2f]";
-        return String.format(text, offer, mTop, mRight, mBottom, mLeft, mAbsTop, mAbsRight, mAbsBottom, mAbsLeft);
+        StringBuilder sb = new StringBuilder();
+        for (PolygonF poly : getLocations()) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(poly.toString());
+        }
+        String offer = (mOffer == null ? "null" : (mOffer.getHeading()));
+        return "Hotspot[ type:" + mType + ", pages:" + TextUtils.join(",", getPages()) + ", locations:" + sb.toString() + ", offer:" + offer + " ]";
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        long temp;
-        temp = Double.doubleToLongBits(mAbsBottom);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(mAbsLeft);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(mAbsRight);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(mAbsTop);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(mBottom);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        result = prime * result + mColor;
-        result = prime * result + (mIsSpanningTwoPages ? 1231 : 1237);
-        temp = Double.doubleToLongBits(mLeft);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        result = prime * result + ((mOffer == null) ? 0 : mOffer.hashCode());
-        result = prime * result + mPage;
-        temp = Double.doubleToLongBits(mRight);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(mTop);
-        result = prime * result + (int) (temp ^ (temp >>> 32));
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Hotspot other = (Hotspot) obj;
-        if (Double.doubleToLongBits(mAbsBottom) != Double
-                .doubleToLongBits(other.mAbsBottom))
-            return false;
-        if (Double.doubleToLongBits(mAbsLeft) != Double
-                .doubleToLongBits(other.mAbsLeft))
-            return false;
-        if (Double.doubleToLongBits(mAbsRight) != Double
-                .doubleToLongBits(other.mAbsRight))
-            return false;
-        if (Double.doubleToLongBits(mAbsTop) != Double
-                .doubleToLongBits(other.mAbsTop))
-            return false;
-        if (Double.doubleToLongBits(mBottom) != Double
-                .doubleToLongBits(other.mBottom))
-            return false;
-        if (mColor != other.mColor)
-            return false;
-        if (mIsSpanningTwoPages != other.mIsSpanningTwoPages)
-            return false;
-        if (Double.doubleToLongBits(mLeft) != Double
-                .doubleToLongBits(other.mLeft))
-            return false;
-        if (mOffer == null) {
-            if (other.mOffer != null)
-                return false;
-        } else if (!mOffer.equals(other.mOffer))
-            return false;
-        if (mPage != other.mPage)
-            return false;
-        if (Double.doubleToLongBits(mRight) != Double
-                .doubleToLongBits(other.mRight))
-            return false;
-        if (Double.doubleToLongBits(mTop) != Double
-                .doubleToLongBits(other.mTop))
-            return false;
-        return true;
-    }
-
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.mPage);
+        dest.writeSparseArray((SparseArray) this.mLocations);
+        dest.writeString(this.mType);
         dest.writeParcelable(this.mOffer, flags);
-        dest.writeByte(mIsSpanningTwoPages ? (byte) 1 : (byte) 0);
-        dest.writeDouble(this.mTop);
-        dest.writeDouble(this.mBottom);
-        dest.writeDouble(this.mLeft);
-        dest.writeDouble(this.mRight);
-        dest.writeDouble(this.mAbsTop);
-        dest.writeDouble(this.mAbsBottom);
-        dest.writeDouble(this.mAbsLeft);
-        dest.writeDouble(this.mAbsRight);
-        dest.writeInt(this.mColor);
     }
 
+    protected Hotspot(Parcel in) {
+        this.mLocations = in.readSparseArray(PolygonF.class.getClassLoader());
+        this.mType = in.readString();
+        this.mOffer = in.readParcelable(Offer.class.getClassLoader());
+    }
+
+    public static final Creator<Hotspot> CREATOR = new Creator<Hotspot>() {
+        @Override
+        public Hotspot createFromParcel(Parcel source) {
+            return new Hotspot(source);
+        }
+
+        @Override
+        public Hotspot[] newArray(int size) {
+            return new Hotspot[size];
+        }
+    };
 }

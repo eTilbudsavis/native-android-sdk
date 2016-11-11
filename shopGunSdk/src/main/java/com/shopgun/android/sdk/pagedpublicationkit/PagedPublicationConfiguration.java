@@ -16,8 +16,8 @@ public interface PagedPublicationConfiguration extends VersoSpreadConfiguration,
     List<? extends PagedPublicationPage> getPages();
     boolean hasPages();
 
-    PagedPublicationHotspots getHotspots();
-    boolean hasHotspots();
+    PagedPublicationHotspotCollection getHotspotCollection();
+    boolean hasHotspotCollection();
 
     boolean hasIntro();
     View getIntro(ViewGroup container, int page);
@@ -33,7 +33,7 @@ public interface PagedPublicationConfiguration extends VersoSpreadConfiguration,
     interface OnLoadComplete {
         void onPublicationLoaded(PagedPublication publication);
         void onPagesLoaded(List<? extends PagedPublicationPage> pages);
-        void onHotspotsLoaded(PagedPublicationHotspots hotspots);
+        void onHotspotsLoaded(PagedPublicationHotspotCollection hotspots);
         void onError(List<PublicationException> ex);
     }
 

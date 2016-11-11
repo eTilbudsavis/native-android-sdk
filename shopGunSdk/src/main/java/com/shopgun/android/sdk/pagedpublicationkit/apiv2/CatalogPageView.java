@@ -17,7 +17,7 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.Target;
 
-public class CatalogPageView extends RatioFrameLayout implements VersoPageView {
+public class CatalogPageView extends AspectRatioFrameLayout implements VersoPageView {
 
     public static final String TAG = CatalogPageView.class.getSimpleName();
 
