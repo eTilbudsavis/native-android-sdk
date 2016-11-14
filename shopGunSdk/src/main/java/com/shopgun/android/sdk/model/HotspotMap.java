@@ -62,9 +62,7 @@ public class HotspotMap implements IJson<JSONArray>, Parcelable {
             }
         }
 
-        L.d(TAG, "Hotspot.preNormalise : " + tmp.toString());
         list.normalize(dimension);
-        L.d(TAG, "Hotspot.postNormalise: " + tmp.toString());
 
         return list;
     }

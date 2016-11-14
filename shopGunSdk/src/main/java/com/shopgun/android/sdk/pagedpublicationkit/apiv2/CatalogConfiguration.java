@@ -12,6 +12,7 @@ import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.HotspotMap;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
+import com.shopgun.android.sdk.network.impl.NetworkDebugger;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublication;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationConfiguration;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspotCollection;
@@ -21,6 +22,7 @@ import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogLoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogRequest;
 import com.shopgun.android.utils.enums.Orientation;
+import com.shopgun.android.utils.log.L;
 import com.shopgun.android.verso.VersoSpreadProperty;
 
 import java.util.ArrayList;
@@ -248,23 +250,39 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
         LoaderRequest.Listener<Catalog> listener = new LoaderRequest.Listener<Catalog>() {
             @Override
             public void onRequestComplete(Catalog response, List<ShopGunError> errors) {
-                onRequestIntermediate(response, errors);
+                populate(response, errors);
             }
 
             @Override
             public void onRequestIntermediate(Catalog response, List<ShopGunError> errors) {
-                if (mPublication == null) {
+                populate(response, errors);
+            }
+
+            private void populate(Catalog response, List<ShopGunError> errors) {
+
+                boolean publication = mPublication == null;
+                if (publication) {
                     mCatalog = response;
                     ensureData();
                     mCallback.onPublicationLoaded(mPublication);
-                } else if (mPages == null && response.getPages() != null) {
+                }
+
+                boolean pages = mPages == null && response.getPages() != null;
+                if (pages) {
                     mPages = CatalogPage.from(ShopGun.getInstance().getContext(), response.getPages(), mPublication.getAspectRatio());
+                    response.setPages(null);
                     mCallback.onPagesLoaded(mPages);
-                } else if (mHotspots == null && response.getHotspots() != null) {
+                }
+
+                boolean hotspots = mHotspots == null && response.getHotspots() != null;
+                if (hotspots) {
                     HotspotMap hotspotMap = response.getHotspots();
+                    response.setHotspots(null);
                     mHotspots = new CatalogHotspotCollection(hotspotMap);
                     mCallback.onHotspotsLoaded(mHotspots);
-                } else {
+                }
+
+                if (!(publication || pages || hotspots)) {
                     List<PublicationException> tmp = new ArrayList<>(errors.size());
                     for (ShopGunError e : errors) {
                         tmp.add(new PublicationException(e));
@@ -278,16 +296,17 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
         mCallback = callback;
         if (mCatalog != null) {
             CatalogLoaderRequest r = new CatalogLoaderRequest(mCatalog, listener);
-            r.loadPages(true);
-            r.loadHotspots(true);
+            r.loadPages(mPages == null);
+            r.loadHotspots(mHotspots == null);
             mCatalogRequest = r;
             mCallback.onPublicationLoaded(mPublication);
         } else {
             CatalogRequest r = new CatalogRequest(mCatalogId, listener);
-            r.loadPages(true);
-            r.loadHotspots(true);
+            r.loadPages(mPages == null);
+            r.loadHotspots(mHotspots == null);
             mCatalogRequest = r;
         }
+//        mCatalogRequest.setDebugger(new NetworkDebugger());
         ShopGun.getInstance().add(mCatalogRequest);
     }
 
@@ -333,8 +352,6 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        // Hotspots are simply too large to fit within the parcel limit
-        mCatalog.setHotspots(null);
         dest.writeParcelable(this.mCatalog, flags);
         dest.writeString(this.mCatalogId);
         dest.writeInt(this.mOrientation == null ? -1 : this.mOrientation.ordinal());
@@ -345,7 +362,6 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
         this.mCatalogId = in.readString();
         int tmpMOrientation = in.readInt();
         this.mOrientation = tmpMOrientation == -1 ? null : Orientation.values()[tmpMOrientation];
-        ensureData();
     }
 
     public static final Creator<CatalogConfiguration> CREATOR = new Creator<CatalogConfiguration>() {
@@ -359,4 +375,5 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
             return new CatalogConfiguration[size];
         }
     };
+
 }

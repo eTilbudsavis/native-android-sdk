@@ -9,7 +9,6 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.R;
-import com.shopgun.android.utils.TextUtils;
 import com.shopgun.android.utils.log.L;
 import com.shopgun.android.verso.VersoFragment;
 import com.shopgun.android.verso.VersoTapInfo;
@@ -17,7 +16,6 @@ import com.shopgun.android.verso.VersoViewPager;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 public class PagedPublicationFragment extends VersoFragment {
 
@@ -30,20 +28,27 @@ public class PagedPublicationFragment extends VersoFragment {
     FrameLayout mFrameLoader;
     FrameLayout mFrameError;
     VersoViewPager mVersoViewPager;
+
+    HotspotTapWrapper mHotspotTapWrapper;
+    HotspotLongTapWrapper mHotspotLongTapWrapper;
+
     PagedPublicationConfiguration mConfig;
     PagedPublicationConfiguration.OnLoadComplete mOnLoadComplete = new PagedPublicationConfiguration.OnLoadComplete() {
         @Override
         public void onPublicationLoaded(PagedPublication publication) {
+            L.d(TAG, "onPublicationLoaded");
             notifyVersoConfigurationChanged();
         }
 
         @Override
         public void onPagesLoaded(List<? extends PagedPublicationPage> pages) {
+            L.d(TAG, "onPagesLoaded");
             notifyVersoConfigurationChanged();
         }
 
         @Override
         public void onHotspotsLoaded(PagedPublicationHotspotCollection hotspots) {
+            L.d(TAG, "onHotspotsLoaded");
             notifyVersoConfigurationChanged();
         }
 
@@ -55,7 +60,6 @@ public class PagedPublicationFragment extends VersoFragment {
             }
         }
     };
-    OnHotspotTapListener mHotspotTapListener;
 
     @Override
     public void notifyVersoConfigurationChanged() {
@@ -77,6 +81,16 @@ public class PagedPublicationFragment extends VersoFragment {
         return f;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null && savedInstanceState.containsKey(STATE_CONFIGURATION)) {
+            mConfig = savedInstanceState.getParcelable(STATE_CONFIGURATION);
+        } else if (getArguments() != null) {
+            mConfig = getArguments().getParcelable(STATE_CONFIGURATION);
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -86,19 +100,12 @@ public class PagedPublicationFragment extends VersoFragment {
         mFrameError = (FrameLayout) mFrame.findViewById(R.id.error);
         mFrameLoader = (FrameLayout) mFrame.findViewById(R.id.loader);
         setVisible(false, false, false);
-        return mFrame;
-    }
 
-    @Override
-    protected void onRestoreState(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            mConfig = savedInstanceState.getParcelable(STATE_CONFIGURATION);
-            setPublicationConfiguration(mConfig);
-        } else if (getArguments() != null) {
-            mConfig = getArguments().getParcelable(STATE_CONFIGURATION);
+        if (getVersoSpreadConfiguration() == null) {
             setPublicationConfiguration(mConfig);
         }
-        super.onRestoreState(savedInstanceState);
+
+        return mFrame;
     }
 
     public PagedPublicationConfiguration getPublicationConfiguration() {
@@ -106,12 +113,11 @@ public class PagedPublicationFragment extends VersoFragment {
     }
 
     public void setPublicationConfiguration(PagedPublicationConfiguration configuration) {
-        mConfig = configuration;
-        if (getContext() != null) {
-            mConfig.onConfigurationChanged(getResources().getConfiguration());
+        if (configuration != null) {
+            mConfig = configuration;
+            setVersoSpreadConfiguration(mConfig);
+            loadPagedPublication();
         }
-        setVersoSpreadConfiguration(mConfig);
-        loadPagedPublication();
     }
 
     @Override
@@ -122,11 +128,11 @@ public class PagedPublicationFragment extends VersoFragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         if (mConfig != null) {
             mConfig.cancel();
         }
         outState.putParcelable(STATE_CONFIGURATION, mConfig);
+        super.onSaveInstanceState(outState);
     }
 
     private void loadPagedPublication() {
@@ -139,6 +145,8 @@ public class PagedPublicationFragment extends VersoFragment {
                             mConfig.hasPages() &&
                             mConfig.hasHotspotCollection()) {
                 // Already have the needed data
+                showVersoView();
+                notifyVersoConfigurationChanged();
                 return;
             }
             showLoaderView();
@@ -208,9 +216,6 @@ public class PagedPublicationFragment extends VersoFragment {
         return i.inflate(R.layout.shopgun_sdk_pagedpublication_loader, container, false);
     }
 
-    HotspotTapWrapper mHotspotTapWrapper;
-    HotspotLongTapWrapper mHotspotLongTapWrapper;
-
     @Override
     public void setOnTapListener(OnTapListener tapListener) {
         if (mHotspotTapWrapper == null) {
@@ -252,7 +257,6 @@ public class PagedPublicationFragment extends VersoFragment {
 
         @Override
         public boolean onTap(VersoTapInfo info) {
-            L.d(TAG, "onContentTap: " + info.toString());
             if (mTapListener != null) {
                 mTapListener.onTap(info);
             }

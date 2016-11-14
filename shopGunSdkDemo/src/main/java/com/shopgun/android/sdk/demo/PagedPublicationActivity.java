@@ -9,7 +9,8 @@ import android.widget.Toast;
 import com.shopgun.android.sdk.demo.base.BaseActivity;
 import com.shopgun.android.sdk.demo.pagedpubkit.IntroOutroCatalogConfiguration;
 import com.shopgun.android.sdk.model.Catalog;
-import com.shopgun.android.sdk.model.Hotspot;
+import com.shopgun.android.sdk.pagedpublicationkit.PagedPublication;
+import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationConfiguration;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationFragment;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;
 import com.shopgun.android.sdk.pagedpublicationkit.apiv2.CatalogConfiguration;
@@ -29,7 +30,6 @@ public class PagedPublicationActivity extends BaseActivity {
     private static final String KEY_CATALOG = "CATALOG";
 
     private PagedPublicationFragment mPagedPublicationFragment;
-    private CatalogConfiguration mConfig;
 
     public static void start(Context context, Catalog catalog) {
         Intent i = new Intent(context, PagedPublicationActivity.class);
@@ -41,31 +41,30 @@ public class PagedPublicationActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pagedpublicationkit);
-        Catalog catalog = getIntent().getExtras().getParcelable(KEY_CATALOG);
-        ensurePagedPublicationFragment(catalog);
-        addPagedPublicationListeners();
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (mConfig == null) {
-            mConfig = (CatalogConfiguration) mPagedPublicationFragment.getPublicationConfiguration();
-        }
-    }
-
-    private void ensurePagedPublicationFragment(Catalog catalog) {
         mPagedPublicationFragment = (PagedPublicationFragment)
                 getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG);
         if (mPagedPublicationFragment == null) {
-            mConfig = new IntroOutroCatalogConfiguration(catalog, true, false);
-            mPagedPublicationFragment = PagedPublicationFragment.newInstance(mConfig);
+            Catalog catalog = getIntent().getExtras().getParcelable(KEY_CATALOG);
+            PagedPublicationConfiguration config = new IntroOutroCatalogConfiguration(catalog, true, false);
+            mPagedPublicationFragment = PagedPublicationFragment.newInstance(config);
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.pagedPublication, mPagedPublicationFragment, FRAGMENT_TAG)
                     .commit();
         }
 
+        addPagedPublicationListeners();
+    }
+
+    private CatalogConfiguration getConfig() {
+        return (CatalogConfiguration) mPagedPublicationFragment.getPublicationConfiguration();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        mPagedPublicationFragment.clearAdapter();
+        super.onSaveInstanceState(outState);
     }
 
     private void addPagedPublicationListeners() {
@@ -75,17 +74,17 @@ public class PagedPublicationActivity extends BaseActivity {
             public void onPagesScrolled(int currentPosition, int[] currentPages, int previousPosition, int[] previousPages) {
                 L.d(TAG, String.format(Locale.US, "onPagesChanged[ currentPosition:%s, currentPages:%s, previousPosition:%s, previousPages:%s ]"
                         , currentPosition, TextUtils.join(",", currentPages), previousPosition, TextUtils.join(",", previousPages)));
-                String name = mConfig.getCatalog().getBranding().getName();
-                String spread = String.format(" spread[ %s / %s ]", currentPosition+1, mConfig.getSpreadCount());
+                String name = getConfig().getCatalog().getBranding().getName();
+                String spread = String.format(" spread[ %s / %s ]", currentPosition+1, getConfig().getSpreadCount());
 
-                if (!mConfig.hasIntro()) {
+                if (!getConfig().hasIntro()) {
                     for (int i = 0; i < currentPages.length; i++) {
                         currentPages[i] = currentPages[i] + 1;
                     }
                 }
-                boolean isIntroOutro = (mConfig.hasIntro() && currentPosition == 0) ||
-                        (mConfig.hasOutro() && currentPosition == mConfig.getSpreadCount()-1);
-                String pages = isIntroOutro ? "" : String.format(" page[ %s / %s ]", TextUtils.join("-", currentPages), mConfig.getPublicationPageCount());
+                boolean isIntroOutro = (getConfig().hasIntro() && currentPosition == 0) ||
+                        (getConfig().hasOutro() && currentPosition == getConfig().getSpreadCount()-1);
+                String pages = isIntroOutro ? "" : String.format(" page[ %s / %s ]", TextUtils.join("-", currentPages), getConfig().getPublicationPageCount());
                 setTitle(name + spread + pages);
             }
 
