@@ -24,8 +24,6 @@ import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Country;
 import com.shopgun.android.sdk.model.Dealer;
 import com.shopgun.android.sdk.model.Dimension;
-import com.shopgun.android.sdk.model.Hotspot;
-import com.shopgun.android.sdk.model.HotspotMap;
 import com.shopgun.android.sdk.model.Images;
 import com.shopgun.android.sdk.model.Links;
 import com.shopgun.android.sdk.model.Offer;

@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.utils;
 
 import android.graphics.Color;
 
+import com.shopgun.android.materialcolorcreator.MaterialColor;
 import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Branding;
@@ -41,7 +42,6 @@ import com.shopgun.android.sdk.model.Unit;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.utils.TextUtils;
-import com.shopgun.android.materialcolorcreator.MaterialColor;
 
 import org.json.JSONArray;
 import org.json.JSONException;

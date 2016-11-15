@@ -1,11 +1,5 @@
 package com.shopgun.android.sdk.utils;
 
-import android.app.ActivityManager;
-import android.content.Context;
-import android.os.Build;
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.shopgun.android.sdk.network.Request;
 
 import java.io.UnsupportedEncodingException;

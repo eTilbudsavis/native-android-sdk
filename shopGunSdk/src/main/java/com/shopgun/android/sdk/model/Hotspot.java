@@ -16,16 +16,15 @@
 
 package com.shopgun.android.sdk.model;
 
-import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
 
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.utils.PolygonF;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
+import com.shopgun.android.utils.PolygonF;
 import com.shopgun.android.utils.TextUtils;
 
 import org.json.JSONArray;
@@ -35,7 +34,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 public class Hotspot implements IJson<JSONObject>, Parcelable {
 

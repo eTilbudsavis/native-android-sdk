@@ -22,12 +22,8 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.shopgun.android.sdk.model.interfaces.IJson;
-import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;
-import com.shopgun.android.sdk.pagedpublicationkit.apiv2.CatalogHotspot;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.utils.TextUtils;
-import com.shopgun.android.utils.log.L;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

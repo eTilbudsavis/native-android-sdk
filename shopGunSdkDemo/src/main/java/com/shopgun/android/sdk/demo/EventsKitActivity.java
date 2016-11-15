@@ -7,8 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.eventskit.EventTracker;
 import com.shopgun.android.sdk.eventskit.Event;
+import com.shopgun.android.sdk.eventskit.EventTracker;
 import com.shopgun.android.utils.log.L;
 import com.shopgun.android.utils.log.LogUtil;
 
@@ -35,7 +35,7 @@ public class EventsKitActivity extends AppCompatActivity {
     }
 
     private void fullStackTest() {
-        LogUtil.printCallingMethod(L.getLogger());
+        LogUtil.printMethod();
 
         EventTracker tracker = EventTracker.globalTracker();
 
@@ -77,7 +77,7 @@ public class EventsKitActivity extends AppCompatActivity {
     }
 
     private void realmUpdateTest(int events) {
-        LogUtil.printCallingMethod(L.getLogger());
+        LogUtil.printMethod();
         clearEventsFromRealm();
 
         EventTracker tracker = EventTracker.globalTracker();

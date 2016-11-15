@@ -19,11 +19,11 @@ package com.shopgun.android.sdk.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.shopgun.android.materialcolorcreator.MaterialColor;
 import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.materialcolorcreator.MaterialColor;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

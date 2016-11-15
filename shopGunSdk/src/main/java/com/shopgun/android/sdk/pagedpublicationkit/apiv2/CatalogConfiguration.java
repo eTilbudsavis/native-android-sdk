@@ -12,7 +12,6 @@ import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.HotspotMap;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.network.impl.NetworkDebugger;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublication;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationConfiguration;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspotCollection;
@@ -22,7 +21,6 @@ import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogLoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogRequest;
 import com.shopgun.android.utils.enums.Orientation;
-import com.shopgun.android.utils.log.L;
 import com.shopgun.android.verso.VersoSpreadProperty;
 
 import java.util.ArrayList;

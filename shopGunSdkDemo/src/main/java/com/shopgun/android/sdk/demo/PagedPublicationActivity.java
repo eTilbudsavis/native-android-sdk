@@ -9,7 +9,6 @@ import android.widget.Toast;
 import com.shopgun.android.sdk.demo.base.BaseActivity;
 import com.shopgun.android.sdk.demo.pagedpubkit.IntroOutroCatalogConfiguration;
 import com.shopgun.android.sdk.model.Catalog;
-import com.shopgun.android.sdk.pagedpublicationkit.PagedPublication;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationConfiguration;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationFragment;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;
