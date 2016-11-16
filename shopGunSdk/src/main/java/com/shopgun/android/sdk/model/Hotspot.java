@@ -16,6 +16,7 @@
 
 package com.shopgun.android.sdk.model;
 
+import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -89,7 +90,11 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
     }
 
     public void normalize(double width, double height) {
-        for (PolygonF p : getLocations()) {
+        List<PolygonF> polygons = new ArrayList<>();
+        for (int p : getPages()) {
+            polygons.add(mLocations.get(p));
+        }
+        for (PolygonF p : polygons) {
             for (int i = 0; i < p.npoints; i++) {
                 p.ypoints[i] = p.ypoints[i] / (float) height;
                 p.xpoints[i] = p.xpoints[i] / (float) width;
@@ -113,9 +118,33 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
         List<PolygonF> locs = new ArrayList<>(mLocations.size());
         for (int p : pages) {
             PolygonF poly = mLocations.get(p);
-            locs.add(poly);
+            if (poly != null) {
+                locs.add(poly);
+            }
         }
         return locs;
+    }
+
+    public RectF getBoundsForPages(int[] pages) {
+        RectF rect = null;
+        float pagesLength = (float) pages.length;
+        float pageOffset = 1f/pagesLength;
+        for (int i = 0; i < pages.length; i++) {
+            int page = pages[i];
+            PolygonF p = mLocations.get(page);
+            if (p != null) {
+                RectF r = new RectF(p.getBounds());
+                r.right = r.right/pagesLength;
+                r.left = r.left/pagesLength;
+                r.offset( (pageOffset * (float)i) , 0f);
+                if (rect == null) {
+                    rect = r;
+                } else {
+                    rect.union(r);
+                }
+            }
+        }
+        return rect;
     }
 
     public boolean hasLocationAt(int[] visiblePages, int clickedPage, float x, float y) {
@@ -167,7 +196,7 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
             sb.append(poly.toString());
         }
         String offer = (mOffer == null ? "null" : (mOffer.getHeading()));
-        return "Hotspot[ type:" + mType + ", pages:" + TextUtils.join(",", getPages()) + ", locations:" + sb.toString() + ", offer:" + offer + " ]";
+        return "Hotspot[ offer:" + offer + ", type:" + mType + ", pages:" + TextUtils.join(",", getPages()) + ", locations:" + sb.toString() + " ]";
     }
 
     @Override

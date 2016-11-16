@@ -107,9 +107,7 @@ public class PagedPublicationActivity extends BaseActivity {
                             sb.append(", ");
                         }
                         sb.append(h.getOffer().getHeading());
-                        L.d(TAG, h.toString());
                     }
-                    L.d(TAG, sb.toString());
                     Toast.makeText(PagedPublicationActivity.this, sb.toString(), Toast.LENGTH_SHORT).show();
                 }
             }

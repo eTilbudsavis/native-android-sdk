@@ -52,9 +52,6 @@ public class HotspotMap implements IJson<JSONArray>, Parcelable {
             if (Hotspot.TYPE.equals(type)) {
                 Hotspot h = Hotspot.fromJSON(hotspot);
                 list.mHotspots.add(h);
-                if (i == 0) {
-                    tmp = h;
-                }
             }
         }
 

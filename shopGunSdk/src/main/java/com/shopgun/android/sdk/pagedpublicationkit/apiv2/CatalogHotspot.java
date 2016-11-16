@@ -1,8 +1,13 @@
 package com.shopgun.android.sdk.pagedpublicationkit.apiv2;
 
+import android.graphics.RectF;
+
 import com.shopgun.android.sdk.model.Hotspot;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationOffer;
+import com.shopgun.android.utils.PolygonF;
+
+import java.util.List;
 
 public class CatalogHotspot implements PagedPublicationHotspot {
 
@@ -17,7 +22,7 @@ public class CatalogHotspot implements PagedPublicationHotspot {
     }
 
     @Override
-    public boolean hasLocationAt(int[] visiblePages, int clickedPage, float x, float y) {
+    public boolean hasPolygonAt(int[] visiblePages, int clickedPage, float x, float y) {
         return mHotspot.hasLocationAt(visiblePages, clickedPage, x, y);
     }
 
@@ -34,6 +39,21 @@ public class CatalogHotspot implements PagedPublicationHotspot {
     @Override
     public PagedPublicationOffer getOffer() {
         return mOffer;
+    }
+
+    @Override
+    public List<PolygonF> getPolygons() {
+        return mHotspot.getLocations();
+    }
+
+    @Override
+    public List<PolygonF> getPolygons(int[] pages) {
+        return mHotspot.getLocationsForPages(pages);
+    }
+
+    @Override
+    public RectF getBoundsForPages(int[] pages) {
+        return mHotspot.getBoundsForPages(pages);
     }
 
     @Override

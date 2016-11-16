@@ -24,6 +24,7 @@ import com.shopgun.android.utils.enums.Orientation;
 import com.shopgun.android.verso.VersoSpreadProperty;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CatalogConfiguration implements PagedPublicationConfiguration {
@@ -68,7 +69,8 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
 
     @Override
     public View getSpreadOverlay(ViewGroup container, int[] pages) {
-        return null;
+        int[] tmp = fixPages(pages);
+        return new CatalogSpreadLayout(container.getContext(), tmp);
     }
 
     @Override
@@ -373,5 +375,15 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
             return new CatalogConfiguration[size];
         }
     };
+
+    public int[] fixPages(int[] pages) {
+        int[] tmp = Arrays.copyOf(pages, pages.length);
+        if (hasIntro()) {
+            for (int i = 0; i < tmp.length; i++) {
+                tmp[i] -= 1;
+            }
+        }
+        return tmp;
+    }
 
 }

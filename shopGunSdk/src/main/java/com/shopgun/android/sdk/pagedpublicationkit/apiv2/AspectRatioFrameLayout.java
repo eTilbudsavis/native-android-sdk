@@ -11,6 +11,8 @@ import com.shopgun.android.utils.NumberUtils;
 
 public class AspectRatioFrameLayout extends FrameLayout {
 
+    public static final String TAG = AspectRatioFrameLayout.class.getSimpleName();
+
     float mAspectRatio;
 
     public AspectRatioFrameLayout(Context context) {

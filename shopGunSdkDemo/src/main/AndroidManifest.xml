@@ -50,8 +50,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".CatalogListActivity" />
-        <!--<activity android:name=".PagedPublicationActivity" />-->
-        <activity android:name=".PagedPublicationActivity" android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation" />
+        <activity android:name=".PagedPublicationActivity" />
+        <!--<activity android:name=".PagedPublicationActivity" android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation" />-->
         <activity android:name=".OfferListActivity" />
         <activity android:name=".OfferSearchActivity" />
         <activity android:name=".OfferViewActivity" />
