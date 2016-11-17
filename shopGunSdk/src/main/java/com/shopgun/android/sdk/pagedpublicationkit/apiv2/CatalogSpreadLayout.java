@@ -30,4 +30,13 @@ public class CatalogSpreadLayout extends FrameLayout implements PagedPublication
         }
     }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+        int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST);
+        int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST);
+        measureChildren(childWidthMeasureSpec, childHeightMeasureSpec);
+        setMeasuredDimension(width, height);
+    }
 }
