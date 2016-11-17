@@ -22,6 +22,7 @@ public class PagedPublicationFragment extends VersoFragment {
     public static final String TAG = PagedPublicationFragment.class.getSimpleName();
 
     public static final String STATE_CONFIGURATION = "paged_publication_configuration";
+    public static final String STATE_PAGE = "page";
 
     FrameLayout mFrame;
     FrameLayout mFrameVerso;
@@ -75,8 +76,13 @@ public class PagedPublicationFragment extends VersoFragment {
     }
 
     public static PagedPublicationFragment newInstance(PagedPublicationConfiguration config) {
+        return newInstance(config, 0);
+    }
+
+    public static PagedPublicationFragment newInstance(PagedPublicationConfiguration config, int page) {
         Bundle args = new Bundle();
         args.putParcelable(STATE_CONFIGURATION, config);
+        args.putInt(STATE_PAGE, page);
         PagedPublicationFragment f = newInstance();
         f.setArguments(args);
         return f;
@@ -96,6 +102,10 @@ public class PagedPublicationFragment extends VersoFragment {
             mConfig = savedInstanceState.getParcelable(STATE_CONFIGURATION);
         } else if (getArguments() != null) {
             mConfig = getArguments().getParcelable(STATE_CONFIGURATION);
+            if (getArguments().containsKey(STATE_PAGE)) {
+                int page = getArguments().getInt(STATE_PAGE);
+                setPage(page);
+            }
         }
     }
 
