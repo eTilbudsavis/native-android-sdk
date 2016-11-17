@@ -26,40 +26,16 @@ public class CatalogHotspotView extends View {
     RectF mBounds;
     Handler mHandler;
     Animation mAnimation;
+    HotspotHandlerCallback mCallback;
 
     public CatalogHotspotView(Context context, PagedPublicationHotspot hotspot, int[] pages) {
         super(context);
         mHotspot = hotspot;
         mPages = pages;
-        mHandler = new Handler(Looper.getMainLooper(), new CB());
+        mCallback = new HotspotHandlerCallback();
+        mHandler = new Handler(Looper.getMainLooper(), mCallback);
         mBounds = mHotspot.getBoundsForPages(mPages);
         setBackgroundResource(R.drawable.sgn_pagedpubkit_hotspot_bg);
-    }
-
-    class CB implements Handler.Callback {
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            switch (msg.what) {
-
-                case MSG_WHAT_ANIMATE_OUT:
-                    if (mAnimation != null && mAnimation.hasStarted()) {
-                        mAnimation.cancel();
-                    }
-                    mAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_out);
-                    mAnimation.setAnimationListener(new HotspotAnimationListener());
-                    startAnimation(mAnimation);
-                    return true;
-
-                case MSG_WHAT_REMOVE_VIEW:
-                    // delay the removal of the view, to avoid crashes when parent wants to redraw.
-                    // this happens when multiple hotspot views are removed at the same time
-                    ((ViewGroup) getParent()).removeView(CatalogHotspotView.this);
-                    return true;
-
-            }
-            return false;
-        }
     }
 
     @Override
@@ -67,18 +43,26 @@ public class CatalogHotspotView extends View {
         super.onAttachedToWindow();
         Message msg = mHandler.obtainMessage(MSG_WHAT_ANIMATE_OUT);
         mHandler.sendMessageDelayed(msg, 2500);
+        cancelAnimation();
         mAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_in);
         startAnimation(mAnimation);
+    }
+
+    private void cancelAnimation() {
+        if (mAnimation != null) {
+            mAnimation.cancel();
+        }
+        mAnimation = null;
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mAnimation != null) {
-            mAnimation.cancel();
-        }
+        cancelAnimation();
         mHandler.removeMessages(MSG_WHAT_ANIMATE_OUT);
         mHandler.removeMessages(MSG_WHAT_REMOVE_VIEW);
+        mCallback = null;
+        mHandler = null;
     }
 
     @Override
@@ -100,6 +84,30 @@ public class CatalogHotspotView extends View {
         r.right = Math.round(rect.right * (float) width);
         r.bottom = Math.round(rect.bottom * (float) height);
         return r;
+    }
+
+    class HotspotHandlerCallback implements Handler.Callback {
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+
+                case MSG_WHAT_ANIMATE_OUT:
+                    cancelAnimation();
+                    mAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_out);
+                    mAnimation.setAnimationListener(new HotspotAnimationListener());
+                    startAnimation(mAnimation);
+                    return true;
+
+                case MSG_WHAT_REMOVE_VIEW:
+                    // delay the removal of the view, to avoid crashes when parent wants to redraw.
+                    // this happens when multiple hotspot views are removed at the same time
+                    ((ViewGroup) getParent()).removeView(CatalogHotspotView.this);
+                    return true;
+
+            }
+            return false;
+        }
     }
 
     class HotspotAnimationListener implements Animation.AnimationListener {
