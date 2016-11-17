@@ -100,16 +100,14 @@ public class PagedPublicationActivity extends BaseActivity {
         mPagedPublicationFragment.setOnHotspotTapListener(new PagedPublicationFragment.OnHotspotTapListener() {
             @Override
             public void onHotspotsTap(List<PagedPublicationHotspot> hotspots) {
-                if (!hotspots.isEmpty()) {
-                    StringBuilder sb = new StringBuilder();
-                    for (PagedPublicationHotspot h : hotspots) {
-                        if (sb.length() > 0) {
-                            sb.append(", ");
-                        }
-                        sb.append(h.getOffer().getHeading());
+                StringBuilder sb = new StringBuilder();
+                for (PagedPublicationHotspot h : hotspots) {
+                    if (sb.length() > 0) {
+                        sb.append(", ");
                     }
-                    Toast.makeText(PagedPublicationActivity.this, sb.toString(), Toast.LENGTH_SHORT).show();
+                    sb.append(h.getOffer().getHeading());
                 }
+                Toast.makeText(PagedPublicationActivity.this, sb.toString(), Toast.LENGTH_SHORT).show();
             }
         });
 

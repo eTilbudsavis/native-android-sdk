@@ -123,7 +123,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
         if ((hasIntro() && spreadPosition == 0) || (hasOutro() && spreadPosition == getSpreadCount()-1 ) ) {
             return new CatalogSpreadProperty(pages, 0.6f, 1f, 1f);
         }
-        return new CatalogSpreadProperty(pages, 1f, 1f, 4f);
+        return new CatalogSpreadProperty(pages, 1f, 1f, 3f);
     }
 
     private int[] positionToPages(int position) {
