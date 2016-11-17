@@ -260,8 +260,9 @@ public class PagedPublicationFragment extends VersoFragment {
             if (mTapListener != null) {
                 mTapListener.onTap(info);
             }
-            if (mHotspotTapListener != null
-                    || mShowOnHotspotTouch) {
+            if (info.isContentClicked() &&
+                    (mHotspotTapListener != null
+                    || mShowOnHotspotTouch)) {
                 List<PagedPublicationHotspot> hotspots = findHotspots(info);
                 if (!hotspots.isEmpty()) {
                     if (mShowOnHotspotTouch) {
@@ -290,8 +291,9 @@ public class PagedPublicationFragment extends VersoFragment {
             if (mLongTapListener != null) {
                 mLongTapListener.onLongTap(info);
             }
-            if (mHotspotLongTapListener != null
-                    || mShowOnHotspotTouch) {
+            if (info.isContentClicked() &&
+                    (mHotspotLongTapListener != null
+                            || mShowOnHotspotTouch)) {
                 List<PagedPublicationHotspot> hotspots = findHotspots(info);
 
                 if (!hotspots.isEmpty()) {
