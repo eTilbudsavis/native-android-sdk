@@ -221,7 +221,7 @@ public class PagedPublicationFragment extends VersoFragment {
         }
     }
 
-    View getErrorView(ViewGroup container, PublicationException ex) {
+    public View getErrorView(ViewGroup container, PublicationException ex) {
         LayoutInflater i = LayoutInflater.from(container.getContext());
         View v = i.inflate(R.layout.shopgun_sdk_pagedpublication_error, container, false);
         TextView msg = (TextView) v.findViewById(R.id.message);
@@ -229,7 +229,7 @@ public class PagedPublicationFragment extends VersoFragment {
         return v;
     }
 
-    View getLoaderView(ViewGroup container) {
+    public View getLoaderView(ViewGroup container) {
         LayoutInflater i = LayoutInflater.from(container.getContext());
         return i.inflate(R.layout.shopgun_sdk_pagedpublication_loader, container, false);
     }
