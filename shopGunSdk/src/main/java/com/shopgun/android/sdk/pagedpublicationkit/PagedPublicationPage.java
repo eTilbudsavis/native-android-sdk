@@ -5,8 +5,8 @@ import android.support.annotation.NonNull;
 
 public interface PagedPublicationPage {
 
-    public enum Size {
-        VIEW, ZOOM
+    enum Size {
+        THUMB, VIEW, ZOOM
     }
 
     @NonNull String getUrl(Size q);

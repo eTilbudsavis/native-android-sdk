@@ -12,15 +12,16 @@ import com.shopgun.android.utils.MemoryUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CatalogPage implements PagedPublicationPage, Parcelable {
 
+    private String mThumbUrl;
     private String mViewUrl;
     private String mZoomUrl;
     private int mPageIndex;
     private Bitmap.Config mBitmapConfig;
     private float mAspectRatio;
-
 
     /**
      * Calculating worst case scenario is landscape mode
@@ -50,22 +51,23 @@ public class CatalogPage implements PagedPublicationPage, Parcelable {
             CatalogPage page;
             if (maxMem >= 96) {
                 // worst case: (2*12000)*3 = 72mb
-                page = new CatalogPage(j, i.getView(), i.getZoom(), aspectRatio, Bitmap.Config.ARGB_8888);
+                page = new CatalogPage(j, i.getThumb(), i.getView(), i.getZoom(), aspectRatio, Bitmap.Config.ARGB_8888);
             } else if (maxMem >= 48) {
                 // worst case: (2*6000)*3 = 36mb
-                page = new CatalogPage(j, i.getView(), i.getZoom(), aspectRatio, Bitmap.Config.RGB_565);
+                page = new CatalogPage(j, i.getThumb(), i.getView(), i.getZoom(), aspectRatio, Bitmap.Config.RGB_565);
             } else {
                 // worst case: (2*1600)*3 = 10mb
                 // essentially we just hope for the best
-                page = new CatalogPage(j, i.getView(), i.getView(), aspectRatio, Bitmap.Config.RGB_565);
+                page = new CatalogPage(j, i.getThumb(), i.getView(), i.getView(), aspectRatio, Bitmap.Config.RGB_565);
             }
             pages.add(page);
         }
         return pages;
     }
 
-    public CatalogPage(int pageIndex, String viewUrl, String zoomUrl, float aspectRatio, Bitmap.Config bitmapConfig) {
+    public CatalogPage(int pageIndex, String thumbUrl, String viewUrl, String zoomUrl, float aspectRatio, Bitmap.Config bitmapConfig) {
         mPageIndex = pageIndex;
+        mThumbUrl = thumbUrl;
         mViewUrl = viewUrl;
         mZoomUrl = zoomUrl;
         mBitmapConfig = bitmapConfig;
@@ -76,6 +78,8 @@ public class CatalogPage implements PagedPublicationPage, Parcelable {
     @Override
     public String getUrl(Size size) {
         switch (size) {
+            case THUMB:
+                return mThumbUrl;
             case VIEW:
                 return mViewUrl;
             case ZOOM:
@@ -106,6 +110,11 @@ public class CatalogPage implements PagedPublicationPage, Parcelable {
         return mAspectRatio;
     }
 
+    @Override
+    public String toString() {
+        String format = "CatalogPage[ page:%s, viewUrl:%s, bitmapConfig:%s, aspectRatio:%.2f";
+        return String.format(Locale.US, format, mPageIndex, mViewUrl, mBitmapConfig, mAspectRatio);
+    }
 
     @Override
     public int describeContents() {
