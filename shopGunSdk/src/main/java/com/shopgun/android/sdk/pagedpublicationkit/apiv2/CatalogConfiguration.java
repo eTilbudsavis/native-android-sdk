@@ -126,7 +126,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
         return new CatalogSpreadProperty(pages, 1f, 1f, 3f);
     }
 
-    private int[] positionToPages(int position) {
+    public int[] positionToPages(int position) {
 
         int page = position;
 
