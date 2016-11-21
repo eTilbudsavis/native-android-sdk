@@ -282,7 +282,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
                     mCallback.onHotspotsLoaded(mHotspots);
                 }
 
-                if (!(publication || pages || hotspots)) {
+                if (!(publication || pages)) {
                     List<PublicationException> tmp = new ArrayList<>(errors.size());
                     for (ShopGunError e : errors) {
                         tmp.add(new PublicationException(e));
