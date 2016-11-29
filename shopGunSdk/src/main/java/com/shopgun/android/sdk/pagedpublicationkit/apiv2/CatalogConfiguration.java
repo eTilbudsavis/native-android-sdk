@@ -119,51 +119,38 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
 
     @Override
     public VersoSpreadProperty getSpreadProperty(int spreadPosition) {
-        int[] pages = positionToPages(spreadPosition);
+        int[] pages = getPagesFromSpreadPosition(spreadPosition);
         if ((hasIntro() && spreadPosition == 0) || (hasOutro() && spreadPosition == getSpreadCount()-1 ) ) {
             return new CatalogSpreadProperty(pages, 0.6f, 1f, 1f);
         }
         return new CatalogSpreadProperty(pages, 1f, 1f, 3f);
     }
 
-    public int[] positionToPages(int position) {
-
-        int page = position;
+    @Override
+    public int[] getPagesFromSpreadPosition(int position) {
 
         if (mOrientation.isPortrait()) {
-            return new int[]{ page };
+            return new int[]{ position };
         }
 
         if (position == 0 || (hasIntro() && position == 1)) {
             // either intro or first page of catalog
-            return new int[]{ page };
+            return new int[]{ position };
         }
 
-        int spreadCount = getSpreadCount();
-
-        boolean isOutro = hasOutro() && position == spreadCount - 1;
-        boolean lastCatalogPage = position == spreadCount - (hasOutro() ? 2 : 1);
-
+        int page;
         if (hasIntro()) {
-            if (isOutro) {
-                page = ((position - 1) * 2) - 1;
-            } else {
-                page = (position - 1) * 2;
-            }
+            page = (position - 1) * 2;
         } else {
-            if (hasOutro()) {
-                page = (position - 1) * 2;
-            } else {
-                page = (position * 2) - 1;
+            page = (position * 2) - 1;
+            if (hasOutro() && position == getSpreadCount()-1) {
+                page--;
             }
         }
 
-        if (isOutro || lastCatalogPage) {
-            return new int[]{ page };
-        }
-
-        // Anything else is double page
-        return new int[]{ page, page+1 };
+        int lastDoublePage = getSpreadCount() - (hasOutro() ? 3 : 2);
+        boolean isSinglePage = position > lastDoublePage;
+        return isSinglePage ? new int[]{ page } : new int[]{ page, page+1 };
 
     }
 
@@ -175,7 +162,6 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
         if (page == 0 || (hasIntro() && page == 1)) {
             return page;
         }
-
         if (hasOutro() && page == getPageCount()-1) {
             return getSpreadCount()-1;
         } else if (hasIntro()) {
@@ -289,6 +275,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
                     }
                     mCallback.onError(tmp);
                 }
+
             }
 
         };
