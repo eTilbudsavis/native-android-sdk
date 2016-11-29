@@ -23,6 +23,7 @@ import android.util.SparseArray;
 
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
+import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.utils.PolygonF;
@@ -36,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class Hotspot implements IJson<JSONObject>, Parcelable {
+public class Hotspot implements IJson<JSONObject>, PagedPublicationHotspot, Parcelable {
 
     public static final String TAG = Constants.getTag(Hotspot.class);
 
@@ -100,6 +101,21 @@ public class Hotspot implements IJson<JSONObject>, Parcelable {
                 p.xpoints[i] = p.xpoints[i] / (float) width;
             }
         }
+    }
+
+    @Override
+    public boolean hasPolygonAt(int[] visiblePages, int clickedPage, float x, float y) {
+        return hasLocationAt(visiblePages, clickedPage, x, y);
+    }
+
+    @Override
+    public List<PolygonF> getPolygons() {
+        return getLocations();
+    }
+
+    @Override
+    public List<PolygonF> getPolygons(int[] pages) {
+        return getLocationsForPages(pages);
     }
 
     public int[] getPages() {

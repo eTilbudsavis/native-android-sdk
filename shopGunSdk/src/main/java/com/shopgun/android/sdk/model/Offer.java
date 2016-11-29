@@ -24,6 +24,7 @@ import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.IStore;
+import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationOffer;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.utils.DateUtils;
@@ -46,7 +47,7 @@ import java.util.Set;
  * documentation, on the engineering blog.
  * </p>
  */
-public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>,Parcelable {
+public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>, PagedPublicationOffer, Parcelable {
 
     public static final String TAG = Constants.getTag(Offer.class);
 

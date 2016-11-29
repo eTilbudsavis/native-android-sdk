@@ -22,6 +22,8 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.shopgun.android.sdk.model.interfaces.IJson;
+import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;
+import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspotCollection;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
 
@@ -31,7 +33,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HotspotMap implements IJson<JSONArray>, Parcelable {
+public class HotspotMap implements IJson<JSONArray>, PagedPublicationHotspotCollection, Parcelable {
 
     public static final String TAG = Constants.getTag(HotspotMap.class);
 
@@ -85,6 +87,28 @@ public class HotspotMap implements IJson<JSONArray>, Parcelable {
     @Override
     public JSONArray toJSON() {
         return null;
+    }
+
+    @NonNull
+    @Override
+    public List<PagedPublicationHotspot> getPagedPublicationHotspots(int[] visiblePages, int clickedPage, float x, float y) {
+        List<Hotspot> tmp = getHotspots(visiblePages, clickedPage, x, y);
+        List<PagedPublicationHotspot> hotspots = new ArrayList<>(tmp.size());
+        for (Hotspot h : tmp) {
+            hotspots.add(h);
+        }
+        return hotspots;
+    }
+
+    @NonNull
+    @Override
+    public List<PagedPublicationHotspot> getPagedPublicationHotspots(int[] visiblePages) {
+        List<Hotspot> tmp = getHotspots(visiblePages);
+        List<PagedPublicationHotspot> hotspots = new ArrayList<>(tmp.size());
+        for (Hotspot h : tmp) {
+            hotspots.add(h);
+        }
+        return hotspots;
     }
 
     @NonNull

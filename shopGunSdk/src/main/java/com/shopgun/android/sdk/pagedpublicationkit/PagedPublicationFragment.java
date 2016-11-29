@@ -330,7 +330,7 @@ public class PagedPublicationFragment extends VersoFragment {
             pages[i] = pages[i] + introOffset;
         }
         int pageTapped = info.getPageTapped() + introOffset;
-        return mConfig.getHotspotCollection().getHotspots(pages, pageTapped, info.getPercentX(), info.getPercentY());
+        return mConfig.getHotspotCollection().getPagedPublicationHotspots(pages, pageTapped, info.getPercentX(), info.getPercentY());
     }
 
     public interface OnHotspotTapListener {

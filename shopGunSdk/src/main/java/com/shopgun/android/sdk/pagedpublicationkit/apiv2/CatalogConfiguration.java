@@ -37,7 +37,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
 
     private CatalogPublication mPublication;
     private List<CatalogPage> mPages;
-    private CatalogHotspotCollection mHotspots;
+    private HotspotMap mHotspots;
     private Orientation mOrientation = Orientation.PORTRAIT;
 
     private OnLoadComplete mCallback;
@@ -278,7 +278,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
                 if (hotspots) {
                     HotspotMap hotspotMap = response.getHotspots();
                     response.setHotspots(null);
-                    mHotspots = new CatalogHotspotCollection(hotspotMap);
+                    mHotspots = hotspotMap;
                     mCallback.onHotspotsLoaded(mHotspots);
                 }
 
@@ -340,7 +340,7 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
                 mPages = CatalogPage.from(ShopGun.getInstance().getContext(), mCatalog.getPages(), mPublication.getAspectRatio());
             }
             if (mCatalog.getHotspots() != null) {
-                mHotspots = new CatalogHotspotCollection(mCatalog.getHotspots());
+                mHotspots = mCatalog.getHotspots();
             }
         }
     }
