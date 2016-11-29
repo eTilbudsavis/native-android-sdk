@@ -51,33 +51,7 @@ public class CatalogSpreadLayout extends FrameLayout implements PagedPublication
     @Override
     public void hideHotspots() {
         cancelAnimation();
-        Animation a = AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_out);
-        a.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                for (int i = 0; i < getChildCount(); i++) {
-                    View v = getChildAt(i);
-                    if (v.getAnimation() == animation) {
-                        removeView(v);
-                    }
-                }
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-        for (int i = 0; i < getChildCount(); i++) {
-            View v = getChildAt(i);
-            v.setAnimation(a);
-        }
-        a.startNow();
+        removeAllViews();
     }
 
     @Override
