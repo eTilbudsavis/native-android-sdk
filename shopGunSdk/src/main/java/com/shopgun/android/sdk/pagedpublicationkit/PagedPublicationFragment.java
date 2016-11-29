@@ -1,6 +1,7 @@
 package com.shopgun.android.sdk.pagedpublicationkit;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -11,11 +12,13 @@ import android.widget.TextView;
 
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.utils.log.L;
+import com.shopgun.android.verso.VersoAdapter;
 import com.shopgun.android.verso.VersoFragment;
 import com.shopgun.android.verso.VersoPageViewFragment;
 import com.shopgun.android.verso.VersoTapInfo;
 import com.shopgun.android.verso.VersoViewPager;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -130,8 +133,8 @@ public class PagedPublicationFragment extends VersoFragment {
             @Override
             public void onPagesScrolled(int currentPosition, int[] currentPages, int previousPosition, int[] previousPages) {
                 if (mShowOnHotspotTouch) {
-                    VersoPageViewFragment f = mVersoViewPager.getVersoAdapter().getVersoFragment(null, previousPosition);
-                    hideHotspots(f);
+                    VersoPageViewFragment prevPage = mVersoViewPager.getVersoAdapter().getVersoFragment(null, previousPosition);
+                    hideHotspots(prevPage);
                 }
             }
 
@@ -332,7 +335,7 @@ public class PagedPublicationFragment extends VersoFragment {
             if (mTapListener != null) {
                 mTapListener.onTap(info);
             }
-            if (mHotspotTapListener != null && info.isContentClicked()) {
+            if (mHotspotTapListener != null) {
                 List<PagedPublicationHotspot> hotspots = findHotspots(info);
                 if (!hotspots.isEmpty()) {
                     mHotspotTapListener.onHotspotsTap(hotspots);
@@ -352,15 +355,10 @@ public class PagedPublicationFragment extends VersoFragment {
             if (mLongTapListener != null) {
                 mLongTapListener.onLongTap(info);
             }
-            if (info.isContentClicked() &&
-                    (mHotspotLongTapListener != null
-                            || mShowOnHotspotTouch)) {
+            if (mHotspotLongTapListener != null) {
                 List<PagedPublicationHotspot> hotspots = findHotspots(info);
-
                 if (!hotspots.isEmpty()) {
-                        if (mHotspotLongTapListener != null) {
-                            mHotspotLongTapListener.onHotspotsLongTap(hotspots);
-                        }
+                    mHotspotLongTapListener.onHotspotsLongTap(hotspots);
                 }
             }
         }
@@ -368,13 +366,17 @@ public class PagedPublicationFragment extends VersoFragment {
     }
 
     private List<PagedPublicationHotspot> findHotspots(VersoTapInfo info) {
-        int[] pages = Arrays.copyOf(info.getPages(), info.getPages().length);
-        int introOffset = mConfig.hasIntro() ? -1 : 0;
-        for (int i = 0; i < pages.length; i++) {
-            pages[i] = pages[i] + introOffset;
+        PagedPublicationHotspotCollection collection = mConfig.getHotspotCollection();
+        if (collection != null && info.isContentClicked()) {
+            int[] pages = Arrays.copyOf(info.getPages(), info.getPages().length);
+            int introOffset = mConfig.hasIntro() ? -1 : 0;
+            for (int i = 0; i < pages.length; i++) {
+                pages[i] = pages[i] + introOffset;
+            }
+            int pageTapped = info.getPageTapped() + introOffset;
+            return collection.getPagedPublicationHotspots(pages, pageTapped, info.getPercentX(), info.getPercentY());
         }
-        int pageTapped = info.getPageTapped() + introOffset;
-        return mConfig.getHotspotCollection().getPagedPublicationHotspots(pages, pageTapped, info.getPercentX(), info.getPercentY());
+        return new ArrayList<>();
     }
 
     public interface OnHotspotTapListener {
