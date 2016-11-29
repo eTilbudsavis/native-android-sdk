@@ -3,13 +3,8 @@ package com.shopgun.android.sdk.pagedpublicationkit.apiv2;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;
@@ -18,51 +13,16 @@ public class CatalogHotspotView extends View {
 
     public static final String TAG = CatalogHotspotView.class.getSimpleName();
 
-    private static final int MSG_WHAT_ANIMATE_OUT = 1;
-    private static final int MSG_WHAT_REMOVE_VIEW = 2;
-
     PagedPublicationHotspot mHotspot;
     int[] mPages;
     RectF mBounds;
-    Handler mHandler;
-    Animation mAnimation;
-    HotspotHandlerCallback mCallback;
 
     public CatalogHotspotView(Context context, PagedPublicationHotspot hotspot, int[] pages) {
         super(context);
         mHotspot = hotspot;
         mPages = pages;
-        mCallback = new HotspotHandlerCallback();
-        mHandler = new Handler(Looper.getMainLooper(), mCallback);
         mBounds = mHotspot.getBoundsForPages(mPages);
         setBackgroundResource(R.drawable.sgn_pagedpubkit_hotspot_bg);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        Message msg = mHandler.obtainMessage(MSG_WHAT_ANIMATE_OUT);
-        mHandler.sendMessageDelayed(msg, 2500);
-        cancelAnimation();
-        mAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_in);
-        startAnimation(mAnimation);
-    }
-
-    private void cancelAnimation() {
-        if (mAnimation != null) {
-            mAnimation.cancel();
-        }
-        mAnimation = null;
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        cancelAnimation();
-        mHandler.removeMessages(MSG_WHAT_ANIMATE_OUT);
-        mHandler.removeMessages(MSG_WHAT_REMOVE_VIEW);
-        mCallback = null;
-        mHandler = null;
     }
 
     @Override
@@ -86,44 +46,4 @@ public class CatalogHotspotView extends View {
         return r;
     }
 
-    class HotspotHandlerCallback implements Handler.Callback {
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            switch (msg.what) {
-
-                case MSG_WHAT_ANIMATE_OUT:
-                    cancelAnimation();
-                    mAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_out);
-                    mAnimation.setAnimationListener(new HotspotAnimationListener());
-                    startAnimation(mAnimation);
-                    return true;
-
-                case MSG_WHAT_REMOVE_VIEW:
-                    // delay the removal of the view, to avoid crashes when parent wants to redraw.
-                    // this happens when multiple hotspot views are removed at the same time
-                    ((ViewGroup) getParent()).removeView(CatalogHotspotView.this);
-                    return true;
-
-            }
-            return false;
-        }
-    }
-
-    class HotspotAnimationListener implements Animation.AnimationListener {
-
-        @Override
-        public void onAnimationStart(Animation animation) {}
-
-        @Override
-        public void onAnimationEnd(Animation animation) {
-            setVisibility(View.GONE);
-            Message msg = mHandler.obtainMessage(MSG_WHAT_REMOVE_VIEW);
-            mHandler.sendMessage(msg);
-        }
-
-        @Override
-        public void onAnimationRepeat(Animation animation) {}
-
-    }
 }

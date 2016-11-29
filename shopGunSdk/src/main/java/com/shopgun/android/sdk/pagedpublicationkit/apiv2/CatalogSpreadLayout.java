@@ -1,8 +1,12 @@
 package com.shopgun.android.sdk.pagedpublicationkit.apiv2;
 
 import android.content.Context;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 
+import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationOverlay;
 
@@ -11,8 +15,7 @@ import java.util.List;
 public class CatalogSpreadLayout extends FrameLayout implements PagedPublicationOverlay {
 
     public static final String TAG = CatalogSpreadLayout.class.getSimpleName();
-    
-    List<PagedPublicationHotspot> mHotspots;
+
     int[] mPages;
 
     public CatalogSpreadLayout(Context context, int[] pages) {
@@ -22,12 +25,59 @@ public class CatalogSpreadLayout extends FrameLayout implements PagedPublication
 
     @Override
     public void showHotspots(List<PagedPublicationHotspot> hotspots) {
-        mHotspots = hotspots;
+        cancelAnimation();
         removeAllViews();
-        for (PagedPublicationHotspot h : mHotspots) {
+        if (hotspots == null || hotspots.isEmpty()) {
+            return;
+        }
+        Animation a = AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_in);
+        for (PagedPublicationHotspot h : hotspots) {
             CatalogHotspotView view = new CatalogHotspotView(getContext(), h, mPages);
+            view.setAnimation(a);
             addView(view);
         }
+        a.startNow();
+    }
+
+    private void cancelAnimation() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View v = getChildAt(i);
+            if (v.getAnimation() != null) {
+                v.getAnimation().cancel();
+            }
+        }
+    }
+
+    @Override
+    public void hideHotspots() {
+        cancelAnimation();
+        Animation a = AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_out);
+        a.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                for (int i = 0; i < getChildCount(); i++) {
+                    View v = getChildAt(i);
+                    if (v.getAnimation() == animation) {
+                        removeView(v);
+                    }
+                }
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        for (int i = 0; i < getChildCount(); i++) {
+            View v = getChildAt(i);
+            v.setAnimation(a);
+        }
+        a.startNow();
     }
 
     @Override
@@ -39,4 +89,5 @@ public class CatalogSpreadLayout extends FrameLayout implements PagedPublication
         measureChildren(childWidthMeasureSpec, childHeightMeasureSpec);
         setMeasuredDimension(width, height);
     }
+
 }
