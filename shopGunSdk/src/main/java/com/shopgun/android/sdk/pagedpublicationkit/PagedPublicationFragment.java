@@ -2,7 +2,11 @@ package com.shopgun.android.sdk.pagedpublicationkit;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.CenteredViewPager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -11,8 +15,6 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.R;
-import com.shopgun.android.utils.log.L;
-import com.shopgun.android.verso.VersoAdapter;
 import com.shopgun.android.verso.VersoFragment;
 import com.shopgun.android.verso.VersoPageViewFragment;
 import com.shopgun.android.verso.VersoTapInfo;
@@ -29,52 +31,24 @@ public class PagedPublicationFragment extends VersoFragment {
     public static final String STATE_CONFIGURATION = "paged_publication_configuration";
     public static final String STATE_PAGE = "page";
 
+    private static final int HOTSPOT_DELAY_SHOW = 100;
+    private static final int HOTSPOT_DELAY_HIDE = 1500;
+    private static final int HOTSPOT_WHAT_SHOW = 1;
+    private static final int HOTSPOT_WHAT_HIDE = 0;
+
+    PagedPublicationConfiguration mConfig;
+
     FrameLayout mFrame;
     FrameLayout mFrameVerso;
     FrameLayout mFrameLoader;
     FrameLayout mFrameError;
     VersoViewPager mVersoViewPager;
 
+    Handler mHandler;
     boolean mShowOnHotspotTouch = true;
     OnTapListenerWrapper mHotspotTapWrapper;
     OnLongTapListenerWrapper mHotspotLongTapWrapper;
-
-    PagedPublicationConfiguration mConfig;
-    PagedPublicationConfiguration.OnLoadComplete mOnLoadComplete = new PagedPublicationConfiguration.OnLoadComplete() {
-        @Override
-        public void onPublicationLoaded(PagedPublication publication) {
-            L.d(TAG, "onPublicationLoaded");
-            notifyVersoConfigurationChanged();
-        }
-
-        @Override
-        public void onPagesLoaded(List<? extends PagedPublicationPage> pages) {
-            L.d(TAG, "onPagesLoaded");
-            notifyVersoConfigurationChanged();
-        }
-
-        @Override
-        public void onHotspotsLoaded(PagedPublicationHotspotCollection hotspots) {
-            L.d(TAG, "onHotspotsLoaded");
-            notifyVersoConfigurationChanged();
-        }
-
-        @Override
-        public void onError(List<PublicationException> ex) {
-            if (!mConfig.hasData()) {
-                showErrorView(ex != null && !ex.isEmpty() ?
-                        ex.get(0) : new PublicationException("Unknown error occurred"));
-            }
-        }
-    };
-
-    @Override
-    public void notifyVersoConfigurationChanged() {
-        if (mConfig.hasData()) {
-            showVersoView();
-            super.notifyVersoConfigurationChanged();
-        }
-    }
+    OnTouchListenerWrapper mOnTouchListenerWrapper;
 
     public static PagedPublicationFragment newInstance() {
         return new PagedPublicationFragment();
@@ -94,11 +68,10 @@ public class PagedPublicationFragment extends VersoFragment {
     }
 
     public PagedPublicationFragment() {
-        mHotspotLongTapWrapper = new OnLongTapListenerWrapper();
-        super.setOnLongTapListener(mHotspotLongTapWrapper);
-        mHotspotTapWrapper = new OnTapListenerWrapper();
-        super.setOnTapListener(mHotspotTapWrapper);
-        super.setOnTouchListener(new OnTouchListenerWrapper());
+        mHandler = new Handler(Looper.getMainLooper(), new HotSpotHandlerCallback());
+        super.setOnLongTapListener(mHotspotLongTapWrapper = new OnLongTapListenerWrapper());
+        super.setOnTapListener(mHotspotTapWrapper = new OnTapListenerWrapper());
+        super.setOnTouchListener(mOnTouchListenerWrapper = new OnTouchListenerWrapper());
     }
 
     @Override
@@ -129,20 +102,15 @@ public class PagedPublicationFragment extends VersoFragment {
             setPublicationConfiguration(mConfig);
         }
 
-        addOnPageChangeListener(new OnPageChangeListener() {
+        mVersoViewPager.addOnPageChangeListener(new CenteredViewPager.SimpleOnPageChangeListener(){
             @Override
-            public void onPagesScrolled(int currentPosition, int[] currentPages, int previousPosition, int[] previousPages) {
-                if (mShowOnHotspotTouch) {
-                    VersoPageViewFragment prevPage = mVersoViewPager.getVersoAdapter().getVersoFragment(null, previousPosition);
-                    hideHotspots(prevPage);
+            public void onPageScrollStateChanged(int state) {
+                if (state == CenteredViewPager.SCROLL_STATE_DRAGGING) {
+                    mHandler.removeMessages(HOTSPOT_WHAT_HIDE);
+                    mHandler.removeMessages(HOTSPOT_WHAT_SHOW);
+                    hideHotspots(getCurrentFragment());
                 }
             }
-
-            @Override
-            public void onPagesChanged(int currentPosition, int[] currentPages, int previousPosition, int[] previousPages) { }
-
-            @Override
-            public void onVisiblePageIndexesChanged(int[] pages, int[] added, int[] removed) { }
         });
 
         return mFrame;
@@ -190,7 +158,7 @@ public class PagedPublicationFragment extends VersoFragment {
                 return;
             }
             showLoaderView();
-            mConfig.load(mOnLoadComplete);
+            mConfig.load(new PagedPublicationOnLoadComplete());
         }
     }
 
@@ -256,12 +224,110 @@ public class PagedPublicationFragment extends VersoFragment {
         return i.inflate(R.layout.shopgun_sdk_pagedpublication_loader, container, false);
     }
 
+    private class PagedPublicationOnLoadComplete implements PagedPublicationConfiguration.OnLoadComplete {
+        @Override
+        public void onPublicationLoaded(PagedPublication publication) {
+            notifyVersoConfigurationChanged();
+        }
+
+        @Override
+        public void onPagesLoaded(List<? extends PagedPublicationPage> pages) {
+            notifyVersoConfigurationChanged();
+        }
+
+        @Override
+        public void onHotspotsLoaded(PagedPublicationHotspotCollection hotspots) {
+            notifyVersoConfigurationChanged();
+        }
+
+        @Override
+        public void onError(List<PublicationException> ex) {
+            if (!mConfig.hasData()) {
+                showErrorView(ex != null && !ex.isEmpty() ?
+                        ex.get(0) : new PublicationException("Unknown error occurred"));
+            }
+        }
+    }
+
+    @Override
+    public void notifyVersoConfigurationChanged() {
+        if (mConfig.hasData()) {
+            showVersoView();
+            super.notifyVersoConfigurationChanged();
+        }
+    }
+
     public boolean showOnHotspotTouch() {
         return mShowOnHotspotTouch;
     }
 
     public void showOnHotspotTouch(boolean showHotspotTouches) {
         mShowOnHotspotTouch = showHotspotTouches;
+    }
+
+    private void showHotspots(VersoPageViewFragment f, List<PagedPublicationHotspot> hotspots) {
+        if (f != null) {
+            View v = f.getSpreadOverlay();
+            if (v instanceof PagedPublicationOverlay) {
+                PagedPublicationOverlay overlay = (PagedPublicationOverlay) v;
+                overlay.showHotspots(hotspots);
+            }
+        }
+    }
+
+    private void hideHotspots(VersoPageViewFragment f) {
+        if (f != null) {
+            View v = f.getSpreadOverlay();
+            if (v instanceof PagedPublicationOverlay) {
+                PagedPublicationOverlay overlay = (PagedPublicationOverlay) v;
+                overlay.hideHotspots();
+            }
+        }
+    }
+
+    private VersoPageViewFragment getCurrentFragment() {
+        if (mVersoViewPager.getVersoAdapter() != null) {
+            for (Fragment fragment : mVersoViewPager.getVersoAdapter().getFragments()) {
+                VersoPageViewFragment f = (VersoPageViewFragment) fragment;
+                if (f != null && f.getSpreadPosition() == getPosition()) {
+                    return f;
+                }
+            }
+        }
+        return null;
+    }
+
+    private List<PagedPublicationHotspot> findHotspots(VersoTapInfo info) {
+        PagedPublicationHotspotCollection collection = mConfig.getHotspotCollection();
+        if (collection != null && info.isContentClicked()) {
+            int[] pages = Arrays.copyOf(info.getPages(), info.getPages().length);
+            int introOffset = mConfig.hasIntro() ? -1 : 0;
+            for (int i = 0; i < pages.length; i++) {
+                pages[i] = pages[i] + introOffset;
+            }
+            int pageTapped = info.getPageTapped() + introOffset;
+            return collection.getPagedPublicationHotspots(pages, pageTapped, info.getPercentX(), info.getPercentY());
+        }
+        return new ArrayList<>();
+    }
+
+    private class HotSpotHandlerCallback implements Handler.Callback {
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            VersoTapInfo info = (VersoTapInfo) msg.obj;
+            switch (msg.what) {
+                case HOTSPOT_WHAT_HIDE:
+                    hideHotspots(info.getFragment());
+                    break;
+                case HOTSPOT_WHAT_SHOW:
+                    if (mShowOnHotspotTouch) {
+                        showHotspots(info.getFragment(), findHotspots(info));
+                    }
+                    break;
+            }
+            return false;
+        }
     }
 
     @Override
@@ -284,44 +350,34 @@ public class PagedPublicationFragment extends VersoFragment {
 
     @Override
     public void setOnTouchListener(VersoPageViewFragment.OnTouchListener touchListener) {
-        super.setOnTouchListener(touchListener);
+        mOnTouchListenerWrapper.mOnTouchListener = touchListener;
+    }
+
+    public interface OnHotspotTapListener {
+        void onHotspotsTap(List<PagedPublicationHotspot> hotspots);
+    }
+
+    public interface OnHotspotLongTapListener {
+        void onHotspotsLongTap(List<PagedPublicationHotspot> hotspots);
     }
 
     private class OnTouchListenerWrapper implements VersoPageViewFragment.OnTouchListener {
 
+        VersoPageViewFragment.OnTouchListener mOnTouchListener;
+
         @Override
         public boolean onTouch(int action, VersoTapInfo info) {
-
-            switch (action) {
-                case MotionEvent.ACTION_DOWN:
-                    if (mShowOnHotspotTouch) {
-                        showHotspots(info.getFragment(), findHotspots(info));
-                    }
-                    break;
-
-                case MotionEvent.ACTION_UP:
-                    if (mShowOnHotspotTouch) {
-                        hideHotspots(info.getFragment());
-                    }
-                    break;
+            if (action == MotionEvent.ACTION_DOWN) {
+                Message msg = mHandler.obtainMessage(HOTSPOT_WHAT_SHOW, info);
+                mHandler.sendMessageDelayed(msg, HOTSPOT_DELAY_SHOW);
+            } else if (action == MotionEvent.ACTION_UP) {
+                Message msg = mHandler.obtainMessage(HOTSPOT_WHAT_HIDE, info);
+                mHandler.sendMessageDelayed(msg, HOTSPOT_DELAY_HIDE);
+            }
+            if (mOnTouchListener != null) {
+                mOnTouchListener.onTouch(action, info);
             }
             return false;
-        }
-    }
-
-    private void showHotspots(VersoPageViewFragment f, List<PagedPublicationHotspot> hotspots) {
-        View v = f.getSpreadOverlay();
-        if (v instanceof PagedPublicationOverlay) {
-            PagedPublicationOverlay overlay = (PagedPublicationOverlay) v;
-            overlay.showHotspots(hotspots);
-        }
-    }
-
-    private void hideHotspots(VersoPageViewFragment f) {
-        View v = f.getSpreadOverlay();
-        if (v instanceof PagedPublicationOverlay) {
-            PagedPublicationOverlay overlay = (PagedPublicationOverlay) v;
-            overlay.hideHotspots();
         }
     }
 
@@ -363,28 +419,6 @@ public class PagedPublicationFragment extends VersoFragment {
             }
         }
 
-    }
-
-    private List<PagedPublicationHotspot> findHotspots(VersoTapInfo info) {
-        PagedPublicationHotspotCollection collection = mConfig.getHotspotCollection();
-        if (collection != null && info.isContentClicked()) {
-            int[] pages = Arrays.copyOf(info.getPages(), info.getPages().length);
-            int introOffset = mConfig.hasIntro() ? -1 : 0;
-            for (int i = 0; i < pages.length; i++) {
-                pages[i] = pages[i] + introOffset;
-            }
-            int pageTapped = info.getPageTapped() + introOffset;
-            return collection.getPagedPublicationHotspots(pages, pageTapped, info.getPercentX(), info.getPercentY());
-        }
-        return new ArrayList<>();
-    }
-
-    public interface OnHotspotTapListener {
-        void onHotspotsTap(List<PagedPublicationHotspot> hotspots);
-    }
-
-    public interface OnHotspotLongTapListener {
-        void onHotspotsLongTap(List<PagedPublicationHotspot> hotspots);
     }
 
 }
