@@ -4,11 +4,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.CenteredViewPager;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -28,12 +29,11 @@ public class PagedPublicationFragment extends VersoFragment {
 
     public static final String TAG = PagedPublicationFragment.class.getSimpleName();
 
-    public static final String STATE_CONFIGURATION = "paged_publication_configuration";
-    public static final String STATE_PAGE = "page";
+    public static final String ARG_CONFIGURATION = "arg_config";
+    public static final String ARG_PAGE = "arg_page";
+    public static final String SAVED_STATE = "saved_state";
 
-    private static final int HOTSPOT_DELAY_SHOW = 100;
-    private static final int HOTSPOT_DELAY_HIDE = 1500;
-    private static final int HOTSPOT_WHAT_SHOW = 1;
+    private static final int HOTSPOT_DISPLAY_DURATION = 1500;
     private static final int HOTSPOT_WHAT_HIDE = 0;
 
     PagedPublicationConfiguration mConfig;
@@ -45,10 +45,10 @@ public class PagedPublicationFragment extends VersoFragment {
     VersoViewPager mVersoViewPager;
 
     Handler mHandler;
-    boolean mShowOnHotspotTouch = true;
+    boolean mDisplayHotspotsOnTouch = true;
+    private int mHotspotDisplayDuration = HOTSPOT_DISPLAY_DURATION;
     OnTapListenerWrapper mHotspotTapWrapper;
     OnLongTapListenerWrapper mHotspotLongTapWrapper;
-    OnTouchListenerWrapper mOnTouchListenerWrapper;
 
     public static PagedPublicationFragment newInstance() {
         return new PagedPublicationFragment();
@@ -60,8 +60,8 @@ public class PagedPublicationFragment extends VersoFragment {
 
     public static PagedPublicationFragment newInstance(PagedPublicationConfiguration config, int page) {
         Bundle args = new Bundle();
-        args.putParcelable(STATE_CONFIGURATION, config);
-        args.putInt(STATE_PAGE, page);
+        args.putParcelable(ARG_CONFIGURATION, config);
+        args.putInt(ARG_PAGE, page);
         PagedPublicationFragment f = newInstance();
         f.setArguments(args);
         return f;
@@ -71,18 +71,22 @@ public class PagedPublicationFragment extends VersoFragment {
         mHandler = new Handler(Looper.getMainLooper(), new HotSpotHandlerCallback());
         super.setOnLongTapListener(mHotspotLongTapWrapper = new OnLongTapListenerWrapper());
         super.setOnTapListener(mHotspotTapWrapper = new OnTapListenerWrapper());
-        super.setOnTouchListener(mOnTouchListenerWrapper = new OnTouchListenerWrapper());
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState != null && savedInstanceState.containsKey(STATE_CONFIGURATION)) {
-            mConfig = savedInstanceState.getParcelable(STATE_CONFIGURATION);
+        if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_STATE)) {
+            SavedState state = savedInstanceState.getParcelable(SAVED_STATE);
+            if (state != null) {
+                mConfig = state.config;
+                mDisplayHotspotsOnTouch = state.displayHotspotOnTouch;
+                mHotspotDisplayDuration = state.hotspotDisplayDuration;
+            }
         } else if (getArguments() != null) {
-            mConfig = getArguments().getParcelable(STATE_CONFIGURATION);
-            if (getArguments().containsKey(STATE_PAGE)) {
-                int page = getArguments().getInt(STATE_PAGE);
+            mConfig = getArguments().getParcelable(ARG_CONFIGURATION);
+            if (getArguments().containsKey(ARG_PAGE)) {
+                int page = getArguments().getInt(ARG_PAGE);
                 setPage(page);
             }
         }
@@ -106,8 +110,6 @@ public class PagedPublicationFragment extends VersoFragment {
             @Override
             public void onPageScrollStateChanged(int state) {
                 if (state == CenteredViewPager.SCROLL_STATE_DRAGGING) {
-                    mHandler.removeMessages(HOTSPOT_WHAT_HIDE);
-                    mHandler.removeMessages(HOTSPOT_WHAT_SHOW);
                     hideHotspots(getCurrentFragment());
                 }
             }
@@ -139,7 +141,7 @@ public class PagedPublicationFragment extends VersoFragment {
         if (mConfig != null) {
             mConfig.cancel();
         }
-        outState.putParcelable(STATE_CONFIGURATION, mConfig);
+        outState.putParcelable(SAVED_STATE, new SavedState(this));
         super.onSaveInstanceState(outState);
     }
 
@@ -257,12 +259,20 @@ public class PagedPublicationFragment extends VersoFragment {
         }
     }
 
-    public boolean showOnHotspotTouch() {
-        return mShowOnHotspotTouch;
+    public boolean isDisplayHotspotsOnTouch() {
+        return mDisplayHotspotsOnTouch;
     }
 
-    public void showOnHotspotTouch(boolean showHotspotTouches) {
-        mShowOnHotspotTouch = showHotspotTouches;
+    public void setDisplayHotspotsOnTouch(boolean displayHotspotsOnTouch) {
+        mDisplayHotspotsOnTouch = displayHotspotsOnTouch;
+    }
+
+    public int getHotspotDisplayDuration() {
+        return mHotspotDisplayDuration;
+    }
+
+    public void setHotspotDisplayDuration(int hotspotDisplayDuration) {
+        mHotspotDisplayDuration = hotspotDisplayDuration < 0 ? HOTSPOT_DISPLAY_DURATION : hotspotDisplayDuration;
     }
 
     private void showHotspots(VersoPageViewFragment f, List<PagedPublicationHotspot> hotspots) {
@@ -276,6 +286,7 @@ public class PagedPublicationFragment extends VersoFragment {
     }
 
     private void hideHotspots(VersoPageViewFragment f) {
+        mHandler.removeMessages(HOTSPOT_WHAT_HIDE);
         if (f != null) {
             View v = f.getSpreadOverlay();
             if (v instanceof PagedPublicationOverlay) {
@@ -320,11 +331,6 @@ public class PagedPublicationFragment extends VersoFragment {
                 case HOTSPOT_WHAT_HIDE:
                     hideHotspots(info.getFragment());
                     break;
-                case HOTSPOT_WHAT_SHOW:
-                    if (mShowOnHotspotTouch) {
-                        showHotspots(info.getFragment(), findHotspots(info));
-                    }
-                    break;
             }
             return false;
         }
@@ -348,37 +354,12 @@ public class PagedPublicationFragment extends VersoFragment {
         mHotspotLongTapWrapper.mHotspotLongTapListener = longTapListener;
     }
 
-    @Override
-    public void setOnTouchListener(VersoPageViewFragment.OnTouchListener touchListener) {
-        mOnTouchListenerWrapper.mOnTouchListener = touchListener;
-    }
-
     public interface OnHotspotTapListener {
         void onHotspotsTap(List<PagedPublicationHotspot> hotspots);
     }
 
     public interface OnHotspotLongTapListener {
         void onHotspotsLongTap(List<PagedPublicationHotspot> hotspots);
-    }
-
-    private class OnTouchListenerWrapper implements VersoPageViewFragment.OnTouchListener {
-
-        VersoPageViewFragment.OnTouchListener mOnTouchListener;
-
-        @Override
-        public boolean onTouch(int action, VersoTapInfo info) {
-            if (action == MotionEvent.ACTION_DOWN) {
-                Message msg = mHandler.obtainMessage(HOTSPOT_WHAT_SHOW, info);
-                mHandler.sendMessageDelayed(msg, HOTSPOT_DELAY_SHOW);
-            } else if (action == MotionEvent.ACTION_UP) {
-                Message msg = mHandler.obtainMessage(HOTSPOT_WHAT_HIDE, info);
-                mHandler.sendMessageDelayed(msg, HOTSPOT_DELAY_HIDE);
-            }
-            if (mOnTouchListener != null) {
-                mOnTouchListener.onTouch(action, info);
-            }
-            return false;
-        }
     }
 
     private class OnTapListenerWrapper implements VersoPageViewFragment.OnTapListener {
@@ -391,9 +372,10 @@ public class PagedPublicationFragment extends VersoFragment {
             if (mTapListener != null) {
                 mTapListener.onTap(info);
             }
-            if (mHotspotTapListener != null) {
-                List<PagedPublicationHotspot> hotspots = findHotspots(info);
-                if (!hotspots.isEmpty()) {
+            List<PagedPublicationHotspot> hotspots = findHotspots(info);
+            if (!hotspots.isEmpty()) {
+                displayHotspots(info, hotspots);
+                if (mHotspotTapListener != null) {
                     mHotspotTapListener.onHotspotsTap(hotspots);
                 }
             }
@@ -411,14 +393,66 @@ public class PagedPublicationFragment extends VersoFragment {
             if (mLongTapListener != null) {
                 mLongTapListener.onLongTap(info);
             }
-            if (mHotspotLongTapListener != null) {
-                List<PagedPublicationHotspot> hotspots = findHotspots(info);
-                if (!hotspots.isEmpty()) {
+            List<PagedPublicationHotspot> hotspots = findHotspots(info);
+            if (!hotspots.isEmpty()) {
+                displayHotspots(info, hotspots);
+                if (mHotspotLongTapListener != null) {
                     mHotspotLongTapListener.onHotspotsLongTap(hotspots);
                 }
             }
         }
 
+    }
+
+    private void displayHotspots(VersoTapInfo info, List<PagedPublicationHotspot> hotspots) {
+        if (mDisplayHotspotsOnTouch) {
+            showHotspots(info.getFragment(), hotspots);
+            Message msg = mHandler.obtainMessage(HOTSPOT_WHAT_HIDE, info);
+            mHandler.sendMessageDelayed(msg, HOTSPOT_DISPLAY_DURATION);
+        }
+    }
+
+    private static class SavedState implements Parcelable {
+
+        PagedPublicationConfiguration config;
+        int hotspotDisplayDuration;
+        boolean displayHotspotOnTouch;
+
+        private SavedState(PagedPublicationFragment f) {
+            config = f.mConfig;
+            hotspotDisplayDuration = f.mHotspotDisplayDuration;
+            displayHotspotOnTouch = f.mDisplayHotspotsOnTouch;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeParcelable(this.config, flags);
+            dest.writeInt(this.hotspotDisplayDuration);
+            dest.writeByte(this.displayHotspotOnTouch ? (byte) 1 : (byte) 0);
+        }
+
+        protected SavedState(Parcel in) {
+            this.config = in.readParcelable(PagedPublicationConfiguration.class.getClassLoader());
+            this.hotspotDisplayDuration = in.readInt();
+            this.displayHotspotOnTouch = in.readByte() != 0;
+        }
+
+        public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel source) {
+                return new SavedState(source);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
     }
 
 }
