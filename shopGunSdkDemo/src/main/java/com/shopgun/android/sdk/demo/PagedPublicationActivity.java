@@ -68,7 +68,7 @@ public class PagedPublicationActivity extends BaseActivity {
 
     private void addPagedPublicationListeners() {
 
-        mPagedPublicationFragment.setOnPageChangeListener(new VersoFragment.OnPageChangeListener() {
+        mPagedPublicationFragment.addOnPageChangeListener(new VersoFragment.OnPageChangeListener() {
             @Override
             public void onPagesScrolled(int currentPosition, int[] currentPages, int previousPosition, int[] previousPages) {
                 L.d(TAG, String.format(Locale.US, "onPagesChanged[ currentPosition:%s, currentPages:%s, previousPosition:%s, previousPages:%s ]"

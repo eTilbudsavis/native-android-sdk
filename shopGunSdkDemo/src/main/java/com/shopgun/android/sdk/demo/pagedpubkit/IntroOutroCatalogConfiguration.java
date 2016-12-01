@@ -29,7 +29,7 @@ public class IntroOutroCatalogConfiguration extends CatalogConfiguration {
     }
 
     @Override
-    public View getIntro(ViewGroup container, int page) {
+    public View getIntroPageView(ViewGroup container, int page) {
         TextView tv = getTextView(container);
         tv.setText("IntroView for:\n" + getCatalog().getBranding().getName());
         return tv;
@@ -41,7 +41,7 @@ public class IntroOutroCatalogConfiguration extends CatalogConfiguration {
     }
 
     @Override
-    public View getOutro(ViewGroup container, int page) {
+    public View getOutroPageView(ViewGroup container, int page) {
         TextView tv = getTextView(container);
         tv.setText("Outro for:\n" + getCatalog().getBranding().getName());
         return tv;

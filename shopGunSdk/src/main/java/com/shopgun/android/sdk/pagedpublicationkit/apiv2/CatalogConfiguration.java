@@ -2,7 +2,6 @@ package com.shopgun.android.sdk.pagedpublicationkit.apiv2;
 
 import android.content.res.Configuration;
 import android.os.Parcel;
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -13,10 +12,10 @@ import com.shopgun.android.sdk.model.HotspotMap;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublication;
-import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationConfiguration;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspotCollection;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationPage;
 import com.shopgun.android.sdk.pagedpublicationkit.PublicationException;
+import com.shopgun.android.sdk.pagedpublicationkit.impl.IntroOutroConfiguration;
 import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogLoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogRequest;
@@ -24,10 +23,9 @@ import com.shopgun.android.utils.enums.Orientation;
 import com.shopgun.android.verso.VersoSpreadProperty;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class CatalogConfiguration implements PagedPublicationConfiguration {
+public class CatalogConfiguration extends IntroOutroConfiguration {
 
     public static final String TAG = CatalogConfiguration.class.getSimpleName();
 
@@ -52,44 +50,13 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
         ensureData();
     }
 
-    @NonNull
-    @Override
-    public View getPageView(ViewGroup container, int page) {
-        if (hasIntro() && page == 0) {
-            return getIntro(container, page);
-        }
-        if (hasOutro() && page == getPageCount() - 1 ) {
-            return getOutro(container, page);
-        }
-        // we'll need to offset all the pages to get the right images here
-        int tmpPage = hasIntro() ? page - 1 : page;
-        CatalogPage catalogPage = mPages.get(tmpPage);
-        return new CatalogPageView(container.getContext(), catalogPage, mLoadingTextColor);
-    }
-
-    @Override
-    public View getSpreadOverlay(ViewGroup container, int[] pages) {
-        int[] tmp = fixPages(pages);
-        return new CatalogSpreadLayout(container.getContext(), tmp);
-    }
-
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        setOrientation(Orientation.fromConfiguration(newConfig));
+        mOrientation = Orientation.fromConfiguration(newConfig);
     }
 
-    public void setOrientation(Orientation orientation) {
-        mOrientation = orientation;
-    }
-
-    @Override
-    public int getPageCount() {
-        int count = getPublicationPageCount();
-        if (count > 0) {
-            if (hasIntro()) count++;
-            if (hasOutro()) count++;
-        }
-        return count;
+    public Orientation getOrientation() {
+        return mOrientation;
     }
 
     public int getPublicationPageCount() {
@@ -101,74 +68,24 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
     }
 
     @Override
-    public int getSpreadCount() {
-        int pageCount = getPublicationPageCount();
-        if (pageCount > 0) {
-            int count = mOrientation.isLandscape() && pageCount > 0 ? (pageCount/2)+1 : pageCount;
-            if (hasIntro()) count++;
-            if (hasOutro()) count++;
-            return count;
-        }
-        return 0;
-    }
-
-    @Override
     public int getSpreadMargin() {
         return 0;
     }
 
     @Override
-    public VersoSpreadProperty getSpreadProperty(int spreadPosition) {
-        int[] pages = getPagesFromSpreadPosition(spreadPosition);
-        if ((hasIntro() && spreadPosition == 0) || (hasOutro() && spreadPosition == getSpreadCount()-1 ) ) {
-            return new CatalogSpreadProperty(pages, 0.6f, 1f, 1f);
-        }
+    public VersoSpreadProperty getPublicationSpreadProperty(int spreadPosition, int[] pages) {
         return new CatalogSpreadProperty(pages, 1f, 1f, 3f);
     }
 
     @Override
-    public int[] getPagesFromSpreadPosition(int position) {
-
-        if (mOrientation.isPortrait()) {
-            return new int[]{ position };
-        }
-
-        if (position == 0 || (hasIntro() && position == 1)) {
-            // either intro or first page of catalog
-            return new int[]{ position };
-        }
-
-        int page;
-        if (hasIntro()) {
-            page = (position - 1) * 2;
-        } else {
-            page = (position * 2) - 1;
-            if (hasOutro() && position == getSpreadCount()-1) {
-                page--;
-            }
-        }
-
-        int lastDoublePage = getSpreadCount() - (hasOutro() ? 3 : 2);
-        boolean isSinglePage = position > lastDoublePage;
-        return isSinglePage ? new int[]{ page } : new int[]{ page, page+1 };
-
+    public View getPublicationPageView(ViewGroup container, int publicationPage) {
+        CatalogPage catalogPage = mPages.get(publicationPage);
+        return new CatalogPageView(container.getContext(), catalogPage, mLoadingTextColor);
     }
 
     @Override
-    public int getSpreadPositionFromPage(int page) {
-        if (mOrientation.isPortrait()) {
-            return page;
-        }
-        if (page == 0 || (hasIntro() && page == 1)) {
-            return page;
-        }
-        if (hasOutro() && page == getPageCount()-1) {
-            return getSpreadCount()-1;
-        } else if (hasIntro()) {
-            return ((page - (page % 2))/2)+1;
-        } else {
-            return ((page-1)/2)+1;
-        }
+    public View getPublicationSpreadOverlay(ViewGroup container, int[] publicationPages) {
+        return new CatalogSpreadLayout(container.getContext(), publicationPages);
     }
 
     @Override
@@ -207,88 +124,21 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
     }
 
     @Override
-    public boolean hasIntro() {
-        return false;
-    }
-
-    @Override
-    public View getIntro(ViewGroup container, int page) {
-        return null;
-    }
-
-    @Override
-    public boolean hasOutro() {
-        return false;
-    }
-
-    @Override
-    public View getOutro(ViewGroup container, int page) {
-        return null;
-    }
-
-    @Override
     public void load(OnLoadComplete callback) {
 
         if (isLoading()) {
             cancel();
         }
 
-        LoaderRequest.Listener<Catalog> listener = new LoaderRequest.Listener<Catalog>() {
-            @Override
-            public void onRequestComplete(Catalog response, List<ShopGunError> errors) {
-                populate(response, errors);
-            }
-
-            @Override
-            public void onRequestIntermediate(Catalog response, List<ShopGunError> errors) {
-                populate(response, errors);
-            }
-
-            private void populate(Catalog response, List<ShopGunError> errors) {
-
-                boolean publication = mPublication == null;
-                if (publication) {
-                    mCatalog = response;
-                    ensureData();
-                    mCallback.onPublicationLoaded(mPublication);
-                }
-
-                boolean pages = mPages == null && response.getPages() != null;
-                if (pages) {
-                    mPages = CatalogPage.from(ShopGun.getInstance().getContext(), response.getPages(), mPublication.getAspectRatio());
-                    response.setPages(null);
-                    mCallback.onPagesLoaded(mPages);
-                }
-
-                boolean hotspots = mHotspots == null && response.getHotspots() != null;
-                if (hotspots) {
-                    HotspotMap hotspotMap = response.getHotspots();
-                    response.setHotspots(null);
-                    mHotspots = hotspotMap;
-                    mCallback.onHotspotsLoaded(mHotspots);
-                }
-
-                if (!(publication || pages)) {
-                    List<PublicationException> tmp = new ArrayList<>(errors.size());
-                    for (ShopGunError e : errors) {
-                        tmp.add(new PublicationException(e));
-                    }
-                    mCallback.onError(tmp);
-                }
-
-            }
-
-        };
-
         mCallback = callback;
         if (mCatalog != null) {
-            CatalogLoaderRequest r = new CatalogLoaderRequest(mCatalog, listener);
+            CatalogLoaderRequest r = new CatalogLoaderRequest(mCatalog, new CatalogListener());
             r.loadPages(mPages == null);
             r.loadHotspots(mHotspots == null);
             mCatalogRequest = r;
             mCallback.onPublicationLoaded(mPublication);
         } else {
-            CatalogRequest r = new CatalogRequest(mCatalogId, listener);
+            CatalogRequest r = new CatalogRequest(mCatalogId, new CatalogListener());
             r.loadPages(mPages == null);
             r.loadHotspots(mHotspots == null);
             mCatalogRequest = r;
@@ -332,6 +182,54 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
         }
     }
 
+    private class CatalogListener implements LoaderRequest.Listener<Catalog> {
+
+        @Override
+        public void onRequestComplete(Catalog response, List<ShopGunError> errors) {
+            ensurePublicationData(response, errors);
+        }
+
+        @Override
+        public void onRequestIntermediate(Catalog response, List<ShopGunError> errors) {
+            ensurePublicationData(response, errors);
+        }
+
+        private void ensurePublicationData(Catalog catalog, List<ShopGunError> errors) {
+
+            boolean publication = mPublication == null;
+            if (publication) {
+                mCatalog = catalog;
+                ensureData();
+                mCallback.onPublicationLoaded(mPublication);
+            }
+
+            boolean pages = mPages == null && catalog.getPages() != null;
+            if (pages) {
+                mPages = CatalogPage.from(ShopGun.getInstance().getContext(), catalog.getPages(), mPublication.getAspectRatio());
+                catalog.setPages(null);
+                mCallback.onPagesLoaded(mPages);
+            }
+
+            boolean hotspots = mHotspots == null && catalog.getHotspots() != null;
+            if (hotspots) {
+                HotspotMap hotspotMap = catalog.getHotspots();
+                catalog.setHotspots(null);
+                mHotspots = hotspotMap;
+                mCallback.onHotspotsLoaded(mHotspots);
+            }
+
+            if (!(publication || pages)) {
+                List<PublicationException> tmp = new ArrayList<>(errors.size());
+                for (ShopGunError e : errors) {
+                    tmp.add(new PublicationException(e));
+                }
+                mCallback.onError(tmp);
+            }
+
+        }
+
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -362,15 +260,5 @@ public class CatalogConfiguration implements PagedPublicationConfiguration {
             return new CatalogConfiguration[size];
         }
     };
-
-    public int[] fixPages(int[] pages) {
-        int[] tmp = Arrays.copyOf(pages, pages.length);
-        if (hasIntro()) {
-            for (int i = 0; i < tmp.length; i++) {
-                tmp[i] -= 1;
-            }
-        }
-        return tmp;
-    }
 
 }

@@ -20,10 +20,10 @@ public interface PagedPublicationConfiguration extends VersoSpreadConfiguration,
     boolean hasHotspotCollection();
 
     boolean hasIntro();
-    View getIntro(ViewGroup container, int page);
+    View getIntroPageView(ViewGroup container, int page);
 
     boolean hasOutro();
-    View getOutro(ViewGroup container, int page);
+    View getOutroPageView(ViewGroup container, int page);
 
     void load(OnLoadComplete callback);
     boolean isLoading();
