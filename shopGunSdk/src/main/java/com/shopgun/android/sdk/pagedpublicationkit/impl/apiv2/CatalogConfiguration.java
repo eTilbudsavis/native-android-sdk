@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.pagedpublicationkit.apiv2;
+package com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2;
 
 import android.content.res.Configuration;
 import android.os.Parcel;
@@ -16,6 +16,7 @@ import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspotCollec
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationPage;
 import com.shopgun.android.sdk.pagedpublicationkit.PublicationException;
 import com.shopgun.android.sdk.pagedpublicationkit.impl.IntroOutroConfiguration;
+import com.shopgun.android.sdk.pagedpublicationkit.impl.SpreadPropertyImpl;
 import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogLoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogRequest;
@@ -74,7 +75,7 @@ public class CatalogConfiguration extends IntroOutroConfiguration {
 
     @Override
     public VersoSpreadProperty getPublicationSpreadProperty(int spreadPosition, int[] pages) {
-        return new CatalogSpreadProperty(pages, 1f, 1f, 3f);
+        return SpreadPropertyImpl.getCatalogSpread(pages);
     }
 
     @Override

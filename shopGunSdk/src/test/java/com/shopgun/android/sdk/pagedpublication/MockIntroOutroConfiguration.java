@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.demo.pagedpubkit;
+package com.shopgun.android.sdk.pagedpublication;
 
 import android.content.res.Configuration;
 import android.os.Parcel;
@@ -12,18 +12,16 @@ import com.shopgun.android.sdk.pagedpublicationkit.impl.IntroOutroConfiguration;
 import com.shopgun.android.utils.enums.Orientation;
 import com.shopgun.android.verso.VersoSpreadProperty;
 
-import junit.framework.Assert;
-
 import java.util.List;
 
-public class TestIntroOutroConfiguration extends IntroOutroConfiguration {
+public class MockIntroOutroConfiguration extends IntroOutroConfiguration {
 
     int mPublicationPageCount;
     Orientation mOrientation;
     boolean mIntro;
     boolean mOutro;
 
-    public TestIntroOutroConfiguration(int publicationPageCount, Orientation orientation, boolean intro, boolean outro) {
+    public MockIntroOutroConfiguration(int publicationPageCount, Orientation orientation, boolean intro, boolean outro) {
         mPublicationPageCount = publicationPageCount;
         mOrientation = orientation;
         mIntro = intro;
@@ -62,37 +60,31 @@ public class TestIntroOutroConfiguration extends IntroOutroConfiguration {
 
     @Override
     public View getIntroPageView(ViewGroup container, int page) {
-        Assert.assertTrue(hasIntro());
         return super.getIntroPageView(container, page);
     }
 
     @Override
     public VersoSpreadProperty getIntroSpreadProperty(int spreadPosition, int[] pages) {
-        Assert.assertTrue(hasIntro());
         return super.getIntroSpreadProperty(spreadPosition, pages);
     }
 
     @Override
     public View getIntroSpreadOverlay(ViewGroup container, int[] pages) {
-        Assert.assertTrue(hasIntro());
         return super.getIntroSpreadOverlay(container, pages);
     }
 
     @Override
     public VersoSpreadProperty getOutroSpreadProperty(int spreadPosition, int[] pages) {
-        Assert.assertTrue(hasOutro());
         return super.getOutroSpreadProperty(spreadPosition, pages);
     }
 
     @Override
     public View getOutroPageView(ViewGroup container, int page) {
-        Assert.assertTrue(hasOutro());
         return super.getOutroPageView(container, page);
     }
 
     @Override
     public View getOutroSpreadOverlay(ViewGroup container, int[] pages) {
-        Assert.assertTrue(hasOutro());
         return super.getOutroSpreadOverlay(container, pages);
     }
 
@@ -173,24 +165,24 @@ public class TestIntroOutroConfiguration extends IntroOutroConfiguration {
         dest.writeInt(this.mOrientation == null ? -1 : this.mOrientation.ordinal());
     }
 
-    public TestIntroOutroConfiguration() {
+    public MockIntroOutroConfiguration() {
     }
 
-    protected TestIntroOutroConfiguration(Parcel in) {
+    protected MockIntroOutroConfiguration(Parcel in) {
         this.mPublicationPageCount = in.readInt();
         int tmpMOrientation = in.readInt();
         this.mOrientation = tmpMOrientation == -1 ? null : Orientation.values()[tmpMOrientation];
     }
 
-    public static final Creator<TestIntroOutroConfiguration> CREATOR = new Creator<TestIntroOutroConfiguration>() {
+    public static final Creator<MockIntroOutroConfiguration> CREATOR = new Creator<MockIntroOutroConfiguration>() {
         @Override
-        public TestIntroOutroConfiguration createFromParcel(Parcel source) {
-            return new TestIntroOutroConfiguration(source);
+        public MockIntroOutroConfiguration createFromParcel(Parcel source) {
+            return new MockIntroOutroConfiguration(source);
         }
 
         @Override
-        public TestIntroOutroConfiguration[] newArray(int size) {
-            return new TestIntroOutroConfiguration[size];
+        public MockIntroOutroConfiguration[] newArray(int size) {
+            return new MockIntroOutroConfiguration[size];
         }
     };
 }

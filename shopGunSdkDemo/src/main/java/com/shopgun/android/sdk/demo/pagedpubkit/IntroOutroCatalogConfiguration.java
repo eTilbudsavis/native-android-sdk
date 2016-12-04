@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.model.Catalog;
-import com.shopgun.android.sdk.pagedpublicationkit.apiv2.CatalogConfiguration;
+import com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2.CatalogConfiguration;
 import com.shopgun.android.verso.VersoPageView;
 
 public class IntroOutroCatalogConfiguration extends CatalogConfiguration {

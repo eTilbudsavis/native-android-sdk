@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.pagedpublicationkit.apiv2;
+package com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,8 +10,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationPage;
+import com.shopgun.android.sdk.pagedpublicationkit.impl.AspectRatioFrameLayout;
+import com.shopgun.android.sdk.pagedpublicationkit.impl.PulsatingTextView;
 import com.shopgun.android.utils.ColorUtils;
 import com.shopgun.android.utils.UnitUtils;
+import com.shopgun.android.utils.log.L;
+import com.shopgun.android.utils.log.LogUtil;
 import com.shopgun.android.verso.VersoPageView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
@@ -26,6 +30,7 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
     ImageView mImageView;
     PulsatingTextView mTextView;
     PageTarget mPageTarget;
+    boolean mVisible;
 
     public CatalogPageView(Context context, PagedPublicationPage page, int textColor) {
         super(context);
@@ -47,8 +52,6 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
         mTextView.setTextSize(UnitUtils.spToPx(26, getContext()));
         addView(mTextView);
 
-        // load image
-        load(PagedPublicationPage.Size.VIEW);
     }
 
     @Override
@@ -72,8 +75,19 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
     }
 
     @Override
-    public void onVisible() {
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        load(PagedPublicationPage.Size.VIEW);
+    }
 
+    @Override
+    public void onVisible() {
+        mVisible = true;
+    }
+
+    @Override
+    public void onInvisible() {
+        mVisible = false;
     }
 
     private boolean isZoomed() {
@@ -81,10 +95,9 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
     }
 
     @Override
-    public void onInvisible() {
-        if (isZoomed()) {
-            load(PagedPublicationPage.Size.ZOOM);
-        }
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Picasso.with(getContext()).cancelRequest(mPageTarget);
     }
 
     private void load(PagedPublicationPage.Size size) {

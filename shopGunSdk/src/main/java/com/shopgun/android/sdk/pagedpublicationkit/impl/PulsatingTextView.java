@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.pagedpublicationkit.apiv2;
+package com.shopgun.android.sdk.pagedpublicationkit.impl;
 
 import android.animation.Animator;
 import android.animation.ArgbEvaluator;

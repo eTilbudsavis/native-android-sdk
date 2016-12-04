@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.pagedpublicationkit.apiv2;
+package com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2;
 
 import android.content.Context;
 import android.view.View;

@@ -12,7 +12,7 @@ import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationConfiguration;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationFragment;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;
-import com.shopgun.android.sdk.pagedpublicationkit.apiv2.CatalogConfiguration;
+import com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2.CatalogConfiguration;
 import com.shopgun.android.utils.TextUtils;
 import com.shopgun.android.utils.log.L;
 import com.shopgun.android.verso.VersoFragment;
