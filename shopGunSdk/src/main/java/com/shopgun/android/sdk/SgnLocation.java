@@ -29,6 +29,9 @@ import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONObject;
 
+import java.util.Date;
+import java.util.Locale;
+
 public class SgnLocation extends Location {
 
     public static final String TAG = Constants.getTag(SgnLocation.class);
@@ -380,6 +383,12 @@ public class SgnLocation extends Location {
                 ", east=" + getBoundEast() +
                 ", south=" + getBoundSouth() + "]" +
                 "]";
+    }
+
+    public String toShortString() {
+        return String.format(Locale.US,
+                "%s, radius=%s, sensor=%s, lat=%.3f, lng=%.3f, time=%s",
+                mAddress, mRadius, mSensor, getLatitude(), getLongitude(), new Date(getTime()).toGMTString());
     }
 
     /**
