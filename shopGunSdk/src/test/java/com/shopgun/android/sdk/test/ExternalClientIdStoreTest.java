@@ -26,13 +26,19 @@ import com.shopgun.android.sdk.utils.SgnUtils;
 
 import junit.framework.TestCase;
 
+import org.junit.Ignore;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest=Config.NONE)
+@Ignore("ExternalClientIdStoreTest test not ready")
 public class ExternalClientIdStoreTest extends TestCase {
 
     public static final String TAG = Constants.getTag(ExternalClientIdStoreTest.class);
 
     public static void test(Context ctx) {
-
-        SdkTest.start(TAG);
 
         ShopGun sgn = ShopGun.getInstance();
         String current = sgn.getSettings().getClientId();

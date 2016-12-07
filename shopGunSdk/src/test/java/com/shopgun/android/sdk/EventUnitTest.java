@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.test;
+package com.shopgun.android.sdk;
 
 
 import com.shopgun.android.sdk.bus.SessionEvent;
@@ -25,25 +25,19 @@ import com.shopgun.android.sdk.utils.Constants;
 
 import junit.framework.Assert;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
 import java.util.List;
 
-public class EventTest {
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest=Config.NONE)
+public class EventUnitTest {
 
-    public static final String TAG = Constants.getTag(EventTest.class);
-
-    private EventTest() {
-        // empty
-    }
-
-    public static void test() {
-
-        SdkTest.start(TAG);
-        testShoppinglistEvent();
-        testSessionEvent();
-
-    }
-
-    public static void testShoppinglistEvent() {
+    @Test
+    public void testShoppinglistEvent() throws Exception {
 
         ShoppinglistEvent.Builder b = new ShoppinglistEvent.Builder(true);
         // check the constructor
@@ -108,11 +102,10 @@ public class EventTest {
         // We added one item from a special list - this should be returned
         Assert.assertEquals(1, e.getAddedItems(id).size());
 
-        SdkTest.logTest(TAG, (new MethodNameHelper() {
-        }).getName());
     }
 
-    public static void testSessionEvent() {
+    @Test
+    public void testSessionEvent() throws Exception {
 
         int oldUser = 0;
         int newUser = 100;
@@ -128,8 +121,6 @@ public class EventTest {
         Assert.assertEquals(newUser, e.getNewUser());
         Assert.assertFalse(e.isNewUser());
 
-        SdkTest.logTest(TAG, (new MethodNameHelper() {
-        }).getName());
     }
 
 }

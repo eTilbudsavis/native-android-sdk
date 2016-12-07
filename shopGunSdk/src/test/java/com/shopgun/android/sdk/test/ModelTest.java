@@ -56,14 +56,19 @@ import junit.framework.Assert;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Ignore;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest=Config.NONE)
+@Ignore("Database test not ready")
 public class ModelTest {
 
     public static final String TAG = Constants.getTag(ModelTest.class);
 
     public static void test() {
-
-        SdkTest.start(TAG);
 
         // The first set of objects, have no dependencies to other objects
         testSi();
@@ -129,8 +134,6 @@ public class ModelTest {
 
         // getters and setters
 
-        SdkTest.logTest(TAG, "ShoppinglistItem");
-
     }
 
     public static void testShoppinglist() {
@@ -175,8 +178,6 @@ public class ModelTest {
 
         // getters and setters
 
-        SdkTest.logTest(TAG, "Shoppinglist");
-
     }
 
     public static void testSession() {
@@ -203,8 +204,6 @@ public class ModelTest {
         Assert.assertNotSame(obj, jsonObj);
 
         // getters and setters
-
-        SdkTest.logTest(TAG, "Session");
 
     }
 
@@ -239,8 +238,6 @@ public class ModelTest {
         // getters and setters
 
         Assert.assertEquals(obj, new Dealer(obj));
-
-        SdkTest.logTest(TAG, "Dealer");
 
     }
 
@@ -284,8 +281,6 @@ public class ModelTest {
 
         Assert.assertEquals(obj, new Catalog(obj));
 
-        SdkTest.logTestWarning(TAG, "Catalog", "NO TEST OF HOTSPOTMAP, see HotspotMap test");
-
     }
 
     public static void testStore() {
@@ -318,8 +313,6 @@ public class ModelTest {
 
         Assert.assertEquals(obj, new Store(obj));
 
-        SdkTest.logTest(TAG, "Store");
-
     }
 
     public static void testCountry() {
@@ -348,8 +341,6 @@ public class ModelTest {
         Assert.assertNotSame(obj, jsonObj);
 
         // getters and setters
-
-        SdkTest.logTest(TAG, "Country");
 
     }
 
@@ -380,8 +371,6 @@ public class ModelTest {
         Assert.assertNotSame(obj, jsonObj);
 
         // getters and setters
-
-        SdkTest.logTest(TAG, "Share");
 
     }
 
@@ -414,8 +403,6 @@ public class ModelTest {
 
         // getters and setters
 
-        SdkTest.logTest(TAG, "User");
-
     }
 
     public static void testBranding() {
@@ -445,8 +432,6 @@ public class ModelTest {
 
         // getters and setters
 
-        SdkTest.logTest(TAG, "Branding");
-
     }
 
     public static void testDimension() {
@@ -472,8 +457,6 @@ public class ModelTest {
         Assert.assertNotSame(obj, jsonObj);
 
         // getters and setters
-
-        SdkTest.logTest(TAG, "Dimension");
 
     }
 
@@ -501,7 +484,6 @@ public class ModelTest {
 
         // getters and setters
 
-        SdkTest.logTest(TAG, "Hotspot");
     }
 
     public static void testHotspotMap() {
@@ -514,15 +496,13 @@ public class ModelTest {
 //        testParcelable(obj, HotspotMap.CREATOR);
 
         // TODO This contains json array JSON
-        SdkTest.logTestWarning(TAG, "HotspotMap", "NO JSON TESTING DONE - Json will fail");
+
 //        JSONArray jObj = obj.toJSON();
 //        Dimension d = ObjectCreator.getDimension();
 //        HotspotMap jsonObj = HotspotMap.fromJSON(d, jObj);
 //        Assert.assertEquals(obj, jsonObj);
 
         // getters and setters
-
-        SdkTest.logTest(TAG, "HotspotMap");
 
     }
 
@@ -553,8 +533,6 @@ public class ModelTest {
 
         // getters and setters
 
-        SdkTest.logTest(TAG, "Pageflip");
-
     }
 
     public static void testPermission() {
@@ -574,8 +552,6 @@ public class ModelTest {
         Assert.assertEquals(obj, jsonObj);
 
         // getters and setters
-
-        SdkTest.logTest(TAG, "Permission");
 
     }
 
@@ -603,8 +579,6 @@ public class ModelTest {
 
         // getters and setters
 
-        SdkTest.logTest(TAG, "Typeahead");
-
     }
 
     public static void testSubscription() {
@@ -630,8 +604,6 @@ public class ModelTest {
         Assert.assertNotSame(obj, jsonObj);
 
         // getters and setters
-
-        SdkTest.logTest(TAG, "Subscription");
 
     }
 
@@ -659,8 +631,6 @@ public class ModelTest {
 
         // getters and setters
 
-        SdkTest.logTest(TAG, "Pricing");
-
     }
 
     public static void testLinks() {
@@ -687,8 +657,6 @@ public class ModelTest {
         Assert.assertNotSame(obj, jsonObj);
 
         // getters and setters
-
-        SdkTest.logTest(TAG, "Links");
 
     }
 
@@ -718,8 +686,6 @@ public class ModelTest {
 
         // getters and setters
 
-        SdkTest.logTest(TAG, "Images");
-
     }
 
     public static void testSi() {
@@ -745,8 +711,6 @@ public class ModelTest {
         Assert.assertNotSame(obj, jsonObj);
 
         // getters and setters
-
-        SdkTest.logTest(TAG, "Si");
 
     }
 
@@ -774,8 +738,6 @@ public class ModelTest {
 
         // getters and setters
 
-        SdkTest.logTest(TAG, "Unit");
-
     }
 
     public static void testPieces() {
@@ -801,8 +763,6 @@ public class ModelTest {
         Assert.assertNotSame(obj, jsonObj);
 
         // getters and setters
-
-        SdkTest.logTest(TAG, "Pieces");
 
     }
 
@@ -830,8 +790,6 @@ public class ModelTest {
 
         // getters and setters
 
-        SdkTest.logTest(TAG, "Size");
-
     }
 
     public static void testQuantity() {
@@ -850,8 +808,6 @@ public class ModelTest {
         Assert.assertEquals(obj, jsonObj);
 
         // getters and setters
-
-        SdkTest.logTest(TAG, "Quantity");
 
     }
 
@@ -888,7 +844,6 @@ public class ModelTest {
 
         Assert.assertEquals(obj, new Offer(obj));
 
-        SdkTest.logTest(TAG, "Offer");
         // getters and setters
 
     }

@@ -14,46 +14,42 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.test;
+package com.shopgun.android.sdk;
 
 
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.Validator;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 
-public class ValidatorTest extends TestCase {
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
-    public static final String TAG = Constants.getTag(ValidatorTest.class);
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest=Config.NONE)
+public class ValidatorUnitTest {
 
+    public static final String TAG = Constants.getTag(ValidatorUnitTest.class);
 
-    public static void test() {
-
-        SdkTest.start(TAG);
-        testIsEmailVaild();
-        testIsBirthYearValid();
-        testIsGenderValid();
-        testValidVersion();
-
-    }
-
-    public static void testIsEmailVaild() {
+    @Test
+    public void testIsEmailVaild() throws Exception {
 
         String[] inValid = new String[]{null, "", "@", "@@", "d@@h", "d@k@h", "@hvam", " @ ", "null", "danny@", " d@h.dk ", "d@h.dk ", " d@h.dk"};
         for (String s : inValid) {
-            assertFalse(Validator.isEmailValid(s));
+            Assert.assertFalse(Validator.isEmailValid(s));
         }
 
         String[] valid = new String[]{"danny@hvam.dk", "d@h", "d @ h", "d@h.dk", "4321@fdsafd", "[]{}()@[]{}()", "∂∑˙∆´∫∑@˙¨ˆ∂∑∆"};
         for (String s : valid) {
-            assertTrue(Validator.isEmailValid(s));
+            Assert.assertTrue(Validator.isEmailValid(s));
         }
 
-        SdkTest.logTest(TAG, "IsEmailValid");
     }
 
-    public static void testIsBirthYearValid() {
+    @Test
+    public void testIsBirthYearValid() throws Exception {
         Assert.assertFalse(Validator.isBirthyearValid(Integer.MIN_VALUE));
         for (int i = -1000; i < 1900; i++) {
             Assert.assertFalse(Validator.isBirthyearValid(i));
@@ -66,25 +62,25 @@ public class ValidatorTest extends TestCase {
         }
         Assert.assertFalse(Validator.isBirthyearValid(Integer.MAX_VALUE));
 
-        SdkTest.logTest(TAG, "IsBirthYesrValid");
     }
 
-    public static void testIsGenderValid() {
+    @Test
+    public void testIsGenderValid() throws Exception {
 
         String[] inValid = new String[]{null, "", "danny", "fe male", "  ma le  ", "males", "females"};
         for (String s : inValid) {
-            assertFalse(Validator.isGenderValid(s));
+            Assert.assertFalse(Validator.isGenderValid(s));
         }
 
         String[] valid = new String[]{"  male  ", "  female  ", "female", "male"};
         for (String s : valid) {
-            assertTrue(Validator.isGenderValid(s));
+            Assert.assertTrue(Validator.isGenderValid(s));
         }
 
-        SdkTest.logTest(TAG, "IsGenderValid");
     }
 
-    public static void testValidVersion() {
+    @Test
+    public void testValidVersion() throws Exception {
 
         String[] valid = {"2.0.0", "2.0.0-rc.2", "2.0.0-rc.1", "1.0.0", "1.0.0-beta",
                 "1.0.0-b", "1.0.0-beta", "1.0.0-chocolate", "1.0.0-15948", "1.0.0-rc-1"};
@@ -102,8 +98,6 @@ public class ValidatorTest extends TestCase {
             Assert.assertFalse(Validator.isAppVersionValid(s));
         }
 
-        SdkTest.logTest(TAG, "ValidVersion");
     }
-
 
 }

@@ -14,35 +14,34 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.test;
+package com.shopgun.android.sdk;
 
 
-import com.shopgun.android.sdk.log.SgnLog;
+import android.graphics.Color;
+
 import com.shopgun.android.sdk.utils.Constants;
+import com.shopgun.android.sdk.utils.SgnJson;
+import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.ColorUtils;
 
-import junit.framework.TestCase;
+import org.json.JSONObject;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
-public class JsonTest extends TestCase {
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest=Config.NONE)
+@Ignore("SgnJson tests missing")
+public class SgnJsonUnitTest {
 
-    public static final String TAG = Constants.getTag(JsonTest.class);
+    public static final String TAG = Constants.getTag(SgnJsonUnitTest.class);
 
-    public static void test() {
+    @Test
+    public void testJsonColorMethods() throws Exception {
 
-        SdkTest.start(TAG);
-        SgnLog.d(TAG, "JSON isn't being tested, needs a re-write");
-//        testJsonPrimitives();
-//        testJsonColorMethods();
-//
-//        try {
-//            testJsonEquals();
-//        } catch (JSONException e) {
-//            throw new AssertionError(e);
-//        }
-
-    }
-
-//    public static void testJsonColorMethods() {
-//
 //        // Testing conversion of int values
 //        Assert.assertEquals("000000", Json.colorToString(Color.BLACK));
 //        Assert.assertEquals("000000", Json.colorToString(Color.TRANSPARENT));
@@ -88,12 +87,13 @@ public class JsonTest extends TestCase {
 //        assertEquals(Color.GREEN, Json.colorValueOf(o, "RGB"));
 //        // An API Black
 //        assertEquals(Color.BLACK, Json.colorValueOf(o, "black"));
-//
-//
-//    }
 
-//    public static void testJsonPrimitives() {
-//
+
+    }
+
+    @Test
+    public void testJsonPrimitives() throws Exception {
+
 //        Assert.assertNull(Json.getObject(new JSONObject(), null));
 //        Assert.assertNull(Json.getObject(null, "myString"));
 //        Assert.assertNull(Json.getObject(null, null));
@@ -169,12 +169,13 @@ public class JsonTest extends TestCase {
 //        Assert.assertNotNull(Json.getObject(o, noKey, jsonObjectValue));
 //        Assert.assertNotNull(Json.getObject(o, jsonObjectKey, null));
 //        Assert.assertNotNull(Json.getObject(o, jsonObjectKey, jsonObjectValue));
-//
-//
-//    }
 
-//    public static void testJsonEquals() throws JSONException {
-//
+
+    }
+
+    @Test
+    public void testJsonEquals() throws Exception {
+
 //        JSONObject one = null;
 //        JSONObject two = null;
 //        Assert.assertTrue(Json.jsonObjectEquals(one, two));
@@ -249,9 +250,7 @@ public class JsonTest extends TestCase {
 //        Assert.assertTrue(Json.jsonObjectEquals(one, two));
 //        Assert.assertTrue(Json.jsonArrayHashCode(aOne) == Json.jsonArrayHashCode(aTwo));
 //        Assert.assertTrue(Json.jsonObjectHashCode(one) == Json.jsonObjectHashCode(two));
-//
-//        SdkTest.logTest(TAG, "JsonEquals");
-//
-//    }
+
+    }
 
 }

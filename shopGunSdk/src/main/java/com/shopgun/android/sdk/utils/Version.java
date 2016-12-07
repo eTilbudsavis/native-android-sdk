@@ -18,6 +18,10 @@ public class Version {
      * 1020304 == 1.02.03.04 = v1.2.3
      * @param version
      */
+    public Version(int version) {
+        this(version, null);
+    }
+
     public Version(int version, String build) {
         mVersion = version;
         mBuild = build;

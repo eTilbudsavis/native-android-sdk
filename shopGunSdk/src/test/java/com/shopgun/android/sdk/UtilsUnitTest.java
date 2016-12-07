@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.test;
+package com.shopgun.android.sdk;
 
 
 import com.shopgun.android.sdk.log.SgnLog;
@@ -27,6 +27,12 @@ import com.shopgun.android.utils.ParcelableUtils;
 
 import junit.framework.Assert;
 
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -35,26 +41,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UtilsTest {
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest=Config.NONE)
+public class UtilsUnitTest {
 
-    public static final String TAG = Constants.getTag(UtilsTest.class);
+    public static final String TAG = Constants.getTag(UtilsUnitTest.class);
 
     public static final String REGEX_UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 
-    public static void test() {
-
-        SdkTest.start(TAG);
-        testCreateUUID();
-        testMapToQueryString();
-        testRequestToUrlAndQueryString();
-        testIsSuccess();
-//		testStringToDate();
-//		testDateToString();
-        testCopyParcelable();
-
-    }
-
-    public static void testCreateUUID() {
+    @Test
+    public void testCreateUUID() throws Exception {
 
         String notUuid = "this should not match the REGEX_UUID";
         Assert.assertFalse(notUuid.matches(REGEX_UUID));
@@ -75,11 +71,10 @@ public class UtilsTest {
         String uuidFake = "83g24023-3225-4392-9362-332619620638";
         Assert.assertFalse(uuidFake.matches(REGEX_UUID));
 
-        SdkTest.logTest(TAG, "CreateUUID");
-
     }
 
-    public static void testMapToQueryString() {
+    @Test
+    public void testMapToQueryString() throws Exception {
 
         String UTF8 = "utf-8";
         String expected = "";
@@ -128,11 +123,10 @@ public class UtilsTest {
         expected = "a=red&b=blue&d=green";
         Assert.assertEquals(expected, actual);
 
-        SdkTest.logTest(TAG, "MapToQueryString");
-
     }
 
-    public static void testRequestToUrlAndQueryString() {
+    @Test
+    public void testRequestToUrlAndQueryString() throws Exception {
 
         // null test - no request
         String actual = SgnUtils.requestToUrlAndQueryString(null);
@@ -159,10 +153,10 @@ public class UtilsTest {
         actual = SgnUtils.requestToUrlAndQueryString(r);
         Assert.assertEquals(expected, actual);
 
-        SdkTest.logTest(TAG, "RequestToUrlAndQueryString");
     }
 
-    public static void testIsSuccess() {
+    @Test
+    public void testIsSuccess() throws Exception {
         // 200 <= statusCode && statusCode < 300 || statusCode == 304
 
 
@@ -183,10 +177,11 @@ public class UtilsTest {
         }
         Assert.assertFalse(SgnUtils.isSuccess(Integer.MAX_VALUE));
 
-        SdkTest.logTest(TAG, "IsGenderValid");
     }
 
-    public static void testStringToDate() {
+    @Ignore("UtilsUnitTest.StringToDate test not ready yet")
+    @Test
+    public void testStringToDate() throws Exception {
 
         // TODO How do we handle date tests
 
@@ -237,10 +232,11 @@ public class UtilsTest {
             Assert.assertEquals(epoch, actual);
         }
 
-        SdkTest.logTest(TAG, "StringToDate");
     }
 
-    public static void testDateToString() {
+    @Ignore("UtilsUnitTest.DateToString test not ready yet")
+    @Test
+    public void testDateToString() throws Exception {
 
         // TODO How do we handle date tests
 
@@ -268,10 +264,10 @@ public class UtilsTest {
         actual = SgnUtils.dateToString(c.getTime());
         Assert.assertNotSame("2100-12-12T23:59:59+0000", actual);
 
-        SdkTest.logTest(TAG, "DateToString");
     }
 
-    public static void testCopyParcelable() {
+    @Test
+    public void testCopyParcelable() throws Exception {
 
 		/*
 		 * We are assuming (at this point) that Si class is okay.
@@ -304,8 +300,6 @@ public class UtilsTest {
         list.add(new Si());
 
         List<Si> listCopy = ParcelableUtils.copyParcelable(list, Si.CREATOR);
-
-        SdkTest.logTest(TAG, "Copy");
 
     }
 

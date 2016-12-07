@@ -39,18 +39,6 @@ public class SgnLocation extends Location {
     public static final int RADIUS_MAX = 700000;
     public static final int DEFAULT_RADIUS = 100000;
 
-    @SuppressWarnings("unused")
-    public static final Parcelable.Creator<SgnLocation> CREATOR = new Parcelable.Creator<SgnLocation>() {
-        @Override
-        public SgnLocation createFromParcel(Parcel in) {
-            return new SgnLocation(in);
-        }
-
-        @Override
-        public SgnLocation[] newArray(int size) {
-            return new SgnLocation[size];
-        }
-    };
     private static final String ERROR_RADIUS = "Radius must be within range %s to %s, provided radius: %s";
     private static final String SHOPGUN_PROVIDER = "shopgun";
     private static final String GMAPS_PROVIDER = "fused";
@@ -95,18 +83,6 @@ public class SgnLocation extends Location {
         double south = o.getDouble(Parameters.BOUND_SOUTH);
         l.setBounds(north, east, south, west);
         return l;
-    }
-
-    protected SgnLocation(Parcel in) {
-        super(SHOPGUN_PROVIDER);
-        set(Location.CREATOR.createFromParcel(in));
-        mRadius = in.readInt();
-        mSensor = in.readByte() != 0x00;
-        mAddress = in.readString();
-        mBoundNorth = in.readDouble();
-        mBoundEast = in.readDouble();
-        mBoundSouth = in.readDouble();
-        mBoundWest = in.readDouble();
     }
 
     public static boolean isFromSensor(Location l) {
@@ -426,6 +402,36 @@ public class SgnLocation extends Location {
             return false;
 
         return true;
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<SgnLocation> CREATOR = new Parcelable.Creator<SgnLocation>() {
+        @Override
+        public SgnLocation createFromParcel(Parcel in) {
+            Location location = Location.CREATOR.createFromParcel(in);
+            return new SgnLocation(in, location);
+        }
+
+        @Override
+        public SgnLocation[] newArray(int size) {
+            return new SgnLocation[size];
+        }
+    };
+
+    protected SgnLocation(Parcel in, Location location) {
+        super(location);
+        mRadius = in.readInt();
+        mSensor = in.readByte() != 0x00;
+        mAddress = in.readString();
+        mBoundNorth = in.readDouble();
+        mBoundEast = in.readDouble();
+        mBoundSouth = in.readDouble();
+        mBoundWest = in.readDouble();
+    }
+
+    @Override
+    public int describeContents() {
+        return super.describeContents();
     }
 
     @Override

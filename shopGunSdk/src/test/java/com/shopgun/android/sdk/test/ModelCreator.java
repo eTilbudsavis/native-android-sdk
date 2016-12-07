@@ -47,6 +47,10 @@ import com.shopgun.android.sdk.model.interfaces.SyncState;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Ignore;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,6 +62,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest=Config.NONE)
+@Ignore("ModelCreator test not ready")
 public class ModelCreator {
 
     public static final String UUID_V4_FAKE = "de305d54-75b4-431b-adb2-eb6b9e546013";

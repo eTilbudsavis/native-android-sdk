@@ -14,31 +14,33 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.shopgun.android.sdk.test;
+package com.shopgun.android.sdk;
 
 import com.shopgun.android.sdk.api.Environment;
 import com.shopgun.android.sdk.utils.Constants;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
-public class EnvironmentTest extends TestCase {
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNotSame;
+import static junit.framework.Assert.assertTrue;
 
-    public static final String TAG = Constants.getTag(EnvironmentTest.class);
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest=Config.NONE)
+public class EnvironmentUnitTest {
+
+    public static final String TAG = Constants.getTag(EnvironmentUnitTest.class);
 
     private static final String PROD = "https://api.etilbudsavis.dk";
     private static final String EDGE = "https://api-edge.etilbudsavis.dk";
     private static final String STAG = "https://api-staging.etilbudsavis.dk";
 
-    public static void test() {
-
-        SdkTest.start(TAG);
-        testEnvironment();
-        testApply();
-        testFromString();
-
-    }
-
-    public static void testEnvironment() {
+    @Test
+    public void testEnvironment() throws Exception {
 
         assertEquals(Environment.PRODUCTION.toString(), PROD);
         assertEquals(Environment.EDGE.toString(), EDGE);
@@ -46,11 +48,10 @@ public class EnvironmentTest extends TestCase {
         // CUSTOM, can be anything, but null
         assertNotNull(Environment.CUSTOM.toString());
 
-        SdkTest.logTest(TAG, "Environment");
-
     }
 
-    public static void testApply() {
+    @Test
+    public void testApply() throws Exception {
 
         Environment e = Environment.PRODUCTION;
 
@@ -88,11 +89,10 @@ public class EnvironmentTest extends TestCase {
         String https = e.apply(httpsUrl);
         assertEquals(httpsUrl, https);
 
-        SdkTest.logTest(TAG, "Apply");
-
     }
 
-    public static void testFromString() {
+    @Test
+    public void testFromString() throws Exception {
 
         String customOriginal = Environment.CUSTOM.toString();
 
@@ -153,8 +153,6 @@ public class EnvironmentTest extends TestCase {
 
         // Set CUSTOM to it's original value
         Environment.setCustom(customOriginal);
-
-        SdkTest.logTest(TAG, "FromString");
 
     }
 

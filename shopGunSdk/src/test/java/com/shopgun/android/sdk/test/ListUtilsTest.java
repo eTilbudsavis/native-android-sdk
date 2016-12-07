@@ -24,17 +24,24 @@ import com.shopgun.android.sdk.utils.ListUtils;
 
 import junit.framework.Assert;
 
+import org.junit.Ignore;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest=Config.NONE)
+@Ignore("ListUtilsTest test not ready")
 public class ListUtilsTest {
 
     public static final String TAG = Constants.getTag(ListUtilsTest.class);
 
     public static void test() {
 
-        SdkTest.start(TAG);
         testGetShoppinglistIdsFromItems();
         testGetShoppinglistIdsFromLists();
 
@@ -66,8 +73,6 @@ public class ListUtilsTest {
         listIds = ListUtils.getShoppinglistIdsFromItems(items);
         Assert.assertEquals(modulo, listIds.size());
 
-        SdkTest.logTest(TAG, "GetShoppinglistIdsFromItems");
-
     }
 
     public static void testGetShoppinglistIdsFromLists() {
@@ -81,8 +86,6 @@ public class ListUtilsTest {
         }
         Set<String> listIds = ListUtils.getShoppinglistIdsFromLists(lists);
         Assert.assertEquals(lists.size(), listIds.size());
-
-        SdkTest.logTest(TAG, "GetShoppinglistIdsFromLists");
 
     }
 
