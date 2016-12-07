@@ -15,8 +15,8 @@
  ******************************************************************************/
 
 include ':shopGunSdk', ':shopGunSdkDemo'
-include ':markhor'
-project(':markhor').projectDir=new File('../markhor/library')
+//include ':markhor'
+//project(':markhor').projectDir=new File('../markhor/library')
 // Need to include ZoomLayout lib to debug Verso
 include ':zoomlayout'
 project(':zoomlayout').projectDir=new File('../zoomlayout/library')
