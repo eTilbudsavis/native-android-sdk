@@ -137,6 +137,14 @@ public class PagedPublicationFragment extends VersoFragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        if (mConfig != null) {
+            mConfig.cancel();
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         if (mConfig != null) {
             mConfig.cancel();
