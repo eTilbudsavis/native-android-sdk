@@ -1,5 +1,6 @@
 package com.shopgun.android.sdk.pagedpublicationkit.impl;
 
+import com.shopgun.android.utils.enums.Orientation;
 import com.shopgun.android.verso.VersoSpreadProperty;
 
 public class SpreadPropertyImpl implements VersoSpreadProperty {
@@ -8,8 +9,8 @@ public class SpreadPropertyImpl implements VersoSpreadProperty {
         return new SpreadPropertyImpl(pages, 1f, 1f, 3f);
     }
 
-    public static VersoSpreadProperty getOutroSpread(int[] pages) {
-        return new SpreadPropertyImpl(pages, 0.6f, 1f, 1f);
+    public static VersoSpreadProperty getOutroSpread(Orientation orientation, int[] pages) {
+        return new SpreadPropertyImpl(pages, (orientation.isLandscape() ? 0.55f : 0.8f), 1f, 1f);
     }
 
     public static VersoSpreadProperty getIntroSpread(int[] pages) {
