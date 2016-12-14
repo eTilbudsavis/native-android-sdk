@@ -39,7 +39,6 @@ public class CatalogConfiguration extends IntroOutroConfiguration {
     private HotspotMap mHotspots;
     private Orientation mOrientation = Orientation.PORTRAIT;
 
-    private OnLoadComplete mCallback;
     private Request mCatalogRequest;
 
     public CatalogConfiguration(String catalogId) {
@@ -131,15 +130,15 @@ public class CatalogConfiguration extends IntroOutroConfiguration {
             cancel();
         }
 
-        mCallback = callback;
+        CatalogListener listener = new CatalogListener(callback);
         if (mCatalog != null) {
-            CatalogLoaderRequest r = new CatalogLoaderRequest(mCatalog, new CatalogListener());
+            CatalogLoaderRequest r = new CatalogLoaderRequest(mCatalog, listener);
             r.loadPages(mPages == null);
             r.loadHotspots(mHotspots == null);
             mCatalogRequest = r;
-            mCallback.onPublicationLoaded(mPublication);
+            listener.onRequestIntermediate(mCatalog, new ArrayList<ShopGunError>());
         } else {
-            CatalogRequest r = new CatalogRequest(mCatalogId, new CatalogListener());
+            CatalogRequest r = new CatalogRequest(mCatalogId, listener);
             r.loadPages(mPages == null);
             r.loadHotspots(mHotspots == null);
             mCatalogRequest = r;
@@ -159,7 +158,6 @@ public class CatalogConfiguration extends IntroOutroConfiguration {
         if (mCatalogRequest != null) {
             mCatalogRequest.cancel();
         }
-        mCallback = null;
         mCatalogRequest = null;
     }
 
@@ -185,41 +183,44 @@ public class CatalogConfiguration extends IntroOutroConfiguration {
 
     private class CatalogListener implements LoaderRequest.Listener<Catalog> {
 
+        private OnLoadComplete mCallback;
+
+        public CatalogListener(OnLoadComplete callback) {
+            mCallback = callback;
+        }
+
         @Override
         public void onRequestComplete(Catalog response, List<ShopGunError> errors) {
-            ensurePublicationData(response, errors);
+            ensurePublicationData(response, errors, true);
         }
 
         @Override
         public void onRequestIntermediate(Catalog response, List<ShopGunError> errors) {
-            ensurePublicationData(response, errors);
+            ensurePublicationData(response, errors, false);
         }
 
-        private void ensurePublicationData(Catalog catalog, List<ShopGunError> errors) {
+        private void ensurePublicationData(Catalog catalog, List<ShopGunError> errors, boolean complete) {
 
-            boolean publication = mPublication == null;
-            if (publication) {
+            if (mPublication == null) {
                 mCatalog = catalog;
                 ensureData();
                 mCallback.onPublicationLoaded(mPublication);
             }
 
-            boolean pages = mPages == null && catalog.getPages() != null;
-            if (pages) {
+            if (mPages == null && catalog.getPages() != null) {
                 mPages = CatalogPage.from(ShopGun.getInstance().getContext(), catalog.getPages(), mPublication.getAspectRatio());
                 catalog.setPages(null);
                 mCallback.onPagesLoaded(mPages);
             }
 
-            boolean hotspots = mHotspots == null && catalog.getHotspots() != null;
-            if (hotspots) {
+            if (mHotspots == null && catalog.getHotspots() != null) {
                 HotspotMap hotspotMap = catalog.getHotspots();
                 catalog.setHotspots(null);
                 mHotspots = hotspotMap;
                 mCallback.onHotspotsLoaded(mHotspots);
             }
 
-            if (!(publication || pages)) {
+            if (complete && (mPublication == null || mPages == null)) {
                 List<PublicationException> tmp = new ArrayList<>(errors.size());
                 for (ShopGunError e : errors) {
                     tmp.add(new PublicationException(e));
