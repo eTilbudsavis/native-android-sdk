@@ -22,8 +22,8 @@ def versionPatch = 1
 
 android {
 
-    compileSdkVersion 24
-    buildToolsVersion "23.0.3"
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
 
     defaultConfig {
         versionCode versionMajor * 100000 + versionMinor * 1000 + versionPatch
@@ -48,8 +48,11 @@ android {
 
 dependencies {
     compile project(':shopGunSdk')
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.android.support:support-v4:24.2.1'
-    compile 'com.jakewharton:butterknife:7.0.1'
-    compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
+
+    def libs = rootProject.libDependencies
+    compile libs.butterknife
+    compile libs.appcompat
+    compile libs.supportv4
+    compile libs.okhttpLoggingInterceptor
+
 }
