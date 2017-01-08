@@ -14,23 +14,20 @@ import com.shopgun.android.sdk.pagedpublicationkit.impl.AspectRatioFrameLayout;
 import com.shopgun.android.sdk.pagedpublicationkit.impl.PulsatingTextView;
 import com.shopgun.android.utils.ColorUtils;
 import com.shopgun.android.utils.UnitUtils;
-import com.shopgun.android.utils.log.L;
-import com.shopgun.android.utils.log.LogUtil;
 import com.shopgun.android.verso.VersoPageView;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.Target;
 
 public class CatalogPageView extends AspectRatioFrameLayout implements VersoPageView {
 
     public static final String TAG = CatalogPageView.class.getSimpleName();
 
-    PagedPublicationPage mPagedPublicationPage;
-    PagedPublicationPage.Size mSize;
-    ImageView mImageView;
-    PulsatingTextView mTextView;
-    PageTarget mPageTarget;
-    boolean mVisible;
+    private PagedPublicationPage mPagedPublicationPage;
+    private PagedPublicationPage.Size mSize;
+    private ImageView mImageView;
+    private PulsatingTextView mTextView;
+    private PageTarget mPageTarget = new PageTarget();
+    private boolean mVisible;
 
     public CatalogPageView(Context context, PagedPublicationPage page, int textColor) {
         super(context);
@@ -106,10 +103,10 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
         }
         mSize = size;
         Picasso p = Picasso.with(getContext());
-        RequestCreator rc = p.load(mPagedPublicationPage.getUrl(size));
-        rc.config(mPagedPublicationPage.getBitmapConfig(size));
-        mPageTarget = new PageTarget();
-        rc.into(mPageTarget);
+        p.cancelRequest(mPageTarget);
+        p.load(mPagedPublicationPage.getUrl(size))
+                .config(mPagedPublicationPage.getBitmapConfig(size))
+                .into(mPageTarget);
     }
 
     class PageTarget implements Target {
