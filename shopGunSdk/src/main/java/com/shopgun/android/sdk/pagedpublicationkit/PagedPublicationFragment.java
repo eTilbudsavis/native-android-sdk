@@ -42,8 +42,7 @@ public class PagedPublicationFragment extends VersoFragment {
     VersoViewPager mVersoViewPager;
 
     boolean mDisplayHotspotsOnTouch = true;
-    OnTapListenerWrapper mHotspotTapWrapper;
-    OnLongTapListenerWrapper mHotspotLongTapWrapper;
+    OnTouchWrapper mOnTouchWrapper;
 
     public static PagedPublicationFragment newInstance() {
         return new PagedPublicationFragment();
@@ -63,9 +62,10 @@ public class PagedPublicationFragment extends VersoFragment {
     }
 
     public PagedPublicationFragment() {
-        super.setOnTouchListener(new OnHotspotTouchListener());
-        super.setOnLongTapListener(mHotspotLongTapWrapper = new OnLongTapListenerWrapper());
-        super.setOnTapListener(mHotspotTapWrapper = new OnTapListenerWrapper());
+        mOnTouchWrapper = new OnTouchWrapper();
+        super.setOnTouchListener(mOnTouchWrapper);
+        super.setOnLongTapListener(mOnTouchWrapper);
+        super.setOnTapListener(mOnTouchWrapper);
     }
 
     @Override
@@ -274,20 +274,20 @@ public class PagedPublicationFragment extends VersoFragment {
 
     @Override
     public void setOnTapListener(VersoPageViewFragment.OnTapListener tapListener) {
-        mHotspotTapWrapper.mTapListener = tapListener;
+        mOnTouchWrapper.mTapListener = tapListener;
     }
 
     public void setOnHotspotTapListener(OnHotspotTapListener tapListener) {
-        mHotspotTapWrapper.mHotspotTapListener = tapListener;
+        mOnTouchWrapper.mHotspotTapListener = tapListener;
     }
 
     @Override
     public void setOnLongTapListener(VersoPageViewFragment.OnLongTapListener longTapListener) {
-        mHotspotLongTapWrapper.mLongTapListener = longTapListener;
+        mOnTouchWrapper.mLongTapListener = longTapListener;
     }
 
     public void setOnHotspotLongTapListener(OnHotspotLongTapListener longTapListener) {
-        mHotspotLongTapWrapper.mHotspotLongTapListener = longTapListener;
+        mOnTouchWrapper.mHotspotLongTapListener = longTapListener;
     }
 
     public interface OnHotspotTapListener {
@@ -298,10 +298,21 @@ public class PagedPublicationFragment extends VersoFragment {
         void onHotspotsLongTap(List<PagedPublicationHotspot> hotspots);
     }
 
-    private class OnTapListenerWrapper implements VersoPageViewFragment.OnTapListener {
+    private class OnTouchWrapper implements
+            VersoPageViewFragment.OnTapListener,
+            VersoPageViewFragment.OnLongTapListener,
+            VersoPageViewFragment.OnTouchListener,
+            Handler.Callback {
+
+        private static final int DELAY = 100;
+        private static final int WHAT_TAP = 1;
+        private static final int WHAT_LONG_TAP = 2;
 
         OnHotspotTapListener mHotspotTapListener;
         VersoPageViewFragment.OnTapListener mTapListener;
+        OnHotspotLongTapListener mHotspotLongTapListener;
+        VersoPageViewFragment.OnLongTapListener mLongTapListener;
+        Handler mHandler = new Handler(Looper.getMainLooper(), this);
 
         @Override
         public boolean onTap(VersoTapInfo info) {
@@ -310,18 +321,11 @@ public class PagedPublicationFragment extends VersoFragment {
             }
             PublicationTapInfo pti = new PublicationTapInfo(info);
             if (pti.hasHotspots()) {
-                if (mHotspotTapListener != null) {
-                    mHotspotTapListener.onHotspotsTap(pti.getHotspots());
-                }
+                post(WHAT_TAP, pti);
+                showHotspots(pti);
             }
             return true;
         }
-    }
-
-    private class OnLongTapListenerWrapper implements VersoPageViewFragment.OnLongTapListener {
-
-        OnHotspotLongTapListener mHotspotLongTapListener;
-        VersoPageViewFragment.OnLongTapListener mLongTapListener;
 
         @Override
         public void onLongTap(VersoTapInfo info) {
@@ -330,79 +334,42 @@ public class PagedPublicationFragment extends VersoFragment {
             }
             PublicationTapInfo pti = new PublicationTapInfo(info);
             if (pti.hasHotspots()) {
-                if (mHotspotLongTapListener != null) {
-                    mHotspotLongTapListener.onHotspotsLongTap(pti.getHotspots());
-                }
+                post(WHAT_LONG_TAP, pti);
+                showHotspots(pti);
             }
-        }
-
-    }
-
-    public class OnHotspotTouchListener implements VersoPageViewFragment.OnTouchListener, Handler.Callback {
-
-        private static final int HOTSPOT_DISPLAY_DELAY = 180;
-        private static final int WHAT = 1;
-
-        Handler mHandler;
-        PublicationTapInfo mTapInfo;
-
-        public OnHotspotTouchListener() {
-            mHandler =  new Handler(Looper.getMainLooper(), this);
-        }
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            if (msg.what == WHAT) {
-                showHotspots();
-            }
-            return false;
         }
 
         @Override
         public boolean onTouch(int action, VersoTapInfo info) {
-//            L.d(TAG, "onTouch.action: " + ToStringUtils.motionEventAction(action));
-            if (!mDisplayHotspotsOnTouch) {
-                return false;
-            }
             switch (action) {
-                case MotionEvent.ACTION_DOWN:
-                    mTapInfo = new PublicationTapInfo(info);
-                    if (mTapInfo.hasHotspots()) {
-                        mHandler.sendEmptyMessageDelayed(WHAT, HOTSPOT_DISPLAY_DELAY);
-                    } else {
-                        mTapInfo = null;
-                    }
-                    break;
                 case MotionEvent.ACTION_UP:
-                    if (mHandler.hasMessages(WHAT)) {
-                        showHotspots();
-                    }
                 case MotionEvent.ACTION_CANCEL:
-                    mHandler.removeMessages(WHAT);
-                    dismissHotspots();
+                    dismissHotspots(new PublicationTapInfo(info));
                     break;
             }
             return false;
         }
 
-        private void showHotspots() {
-            PagedPublicationOverlay o = getSpreadOverlay();
+        private void showHotspots(PublicationTapInfo info) {
+            if (!mDisplayHotspotsOnTouch) {
+                return;
+            }
+            PagedPublicationOverlay o = getSpreadOverlay(info);
             if (o != null) {
-                o.showHotspots(mTapInfo);
+                o.showHotspots(info);
             }
         }
 
-        private void dismissHotspots() {
-            PagedPublicationOverlay o = getSpreadOverlay();
+        private void dismissHotspots(PublicationTapInfo info) {
+            PagedPublicationOverlay o = getSpreadOverlay(info);
             if (o != null) {
-                o.hideHotspots(mTapInfo);
+                o.hideHotspots(info);
             }
-            mTapInfo = null;
         }
 
-        private PagedPublicationOverlay getSpreadOverlay() {
-            if (mTapInfo != null && mTapInfo.getFragment() != null) {
-                View v = mTapInfo.getFragment().getSpreadOverlay();
+        private PagedPublicationOverlay getSpreadOverlay(PublicationTapInfo info) {
+            if (info != null && info.getFragment() != null) {
+                View v = info.getFragment().getSpreadOverlay();
                 if (v instanceof PagedPublicationOverlay) {
                     return (PagedPublicationOverlay) v;
                 }
@@ -410,6 +377,29 @@ public class PagedPublicationFragment extends VersoFragment {
             return null;
         }
 
+        private void post(int what, PublicationTapInfo info) {
+            Message msg = Message.obtain(mHandler, what, info);
+            mHandler.sendMessageDelayed(msg, DELAY);
+        }
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case WHAT_TAP:
+                    if (mHotspotTapListener != null) {
+                        PublicationTapInfo info = (PublicationTapInfo) msg.obj;
+                        mHotspotTapListener.onHotspotsTap(info.getHotspots());
+                    }
+                    break;
+                case WHAT_LONG_TAP:
+                    if (mHotspotLongTapListener != null) {
+                        PublicationTapInfo info = (PublicationTapInfo) msg.obj;
+                        mHotspotLongTapListener.onHotspotsLongTap(info.getHotspots());
+                    }
+                    break;
+            }
+            return false;
+        }
     }
 
     public class PublicationTapInfo extends VersoTapInfo {

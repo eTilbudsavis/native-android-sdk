@@ -12,14 +12,13 @@ import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationOverlay;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class CatalogSpreadLayout extends FrameLayout implements PagedPublicationOverlay {
 
     public static final String TAG = CatalogSpreadLayout.class.getSimpleName();
 
-    HashMap<PagedPublicationFragment.PublicationTapInfo, HotspotUIController> mMap = new HashMap<>();
+    List<HotspotUIController> mHotspots = new ArrayList<>();
     int[] mPages;
 
     public CatalogSpreadLayout(Context context, int[] pages) {
@@ -30,16 +29,16 @@ public class CatalogSpreadLayout extends FrameLayout implements PagedPublication
     @Override
     public void showHotspots(PagedPublicationFragment.PublicationTapInfo info) {
         if (info != null && info.hasHotspots()) {
-            mMap.put(info, new HotspotUIController(info));
-            mMap.get(info).display();
+            HotspotUIController huc = new HotspotUIController(info);
+            mHotspots.add(huc);
+            huc.display();
         }
     }
 
     @Override
     public void hideHotspots(PagedPublicationFragment.PublicationTapInfo info) {
-        if (mMap.containsKey(info)) {
-            mMap.get(info).hide();
-            mMap.remove(info);
+        for (HotspotUIController huc : mHotspots) {
+            huc.hide();
         }
     }
 
