@@ -29,59 +29,43 @@ public class EventManager {
     private static final int DISPATCH_MSG = 5738629;
     private static final long DISPATCH_INTERVAL = TimeUnit.SECONDS.toMillis(30);
 
-    private static EventManager mInstacnce;
+    private static EventManager mInstance;
     private static final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case DISPATCH_MSG:
-                    mInstacnce.flush();
+                    mInstance.flush();
                     break;
             }
         }
     };
 
-    private Collection<WeakReference<EventTracker>> mTrackers = new HashSet<WeakReference<EventTracker>>();
-    private static BlockingQueue<Event> mEventQueue = new LinkedBlockingQueue<>(1024);
+    private Collection<WeakReference<EventTracker>> mTrackers;
+    private static BlockingQueue<Event> mEventQueue;
     private JsonObject mJsonContext;
     private JsonObject mJsonClient;
     private EventDispatcher mEventDispatcher;
     private long mDispatchInterval = DISPATCH_INTERVAL;
 
-    public static EventManager getInstacnce() {
-        if (mInstacnce == null) {
+    public static EventManager getInstance() {
+        if (mInstance == null) {
             synchronized (EventManager.class) {
-                if (mInstacnce == null) {
-                    mInstacnce = new EventManager(ShopGun.getInstance());
+                if (mInstance == null) {
+                    mInstance = new EventManager(ShopGun.getInstance());
                 }
             }
         }
-        return mInstacnce;
+        return mInstance;
     }
 
     private EventManager(ShopGun shopGun) {
-
+        mTrackers = new HashSet<>();
+        mEventQueue = new LinkedBlockingQueue<>(1024);
         mEventDispatcher = new EventDispatcher(mEventQueue, shopGun.getClient());
         mJsonContext = EventUtils.getContext(shopGun.getContext());
         mJsonClient = getClient();
-
-        LifecycleManager.Callback callback = new LifecycleManager.SimpleCallback() {
-
-            @Override
-            public void onCreate(Activity activity) {
-                mEventDispatcher.start();
-                flush();
-            }
-
-            @Override
-            public void onDestroy(Activity activity) {
-                mHandler.removeMessages(DISPATCH_MSG);
-                mEventDispatcher.flush();
-            }
-        };
-
-        shopGun.getLifecycleManager().registerCallback(callback);
-
+        shopGun.getLifecycleManager().registerCallback(new EventLifecycle());
     }
 
     public static JsonObject getClient() {
@@ -147,4 +131,19 @@ public class EventManager {
         mEventDispatcher.flush();
     }
 
+    private class EventLifecycle extends LifecycleManager.SimpleCallback {
+
+        @Override
+        public void onCreate(Activity activity) {
+            mEventDispatcher.start();
+            flush();
+        }
+
+        @Override
+        public void onDestroy(Activity activity) {
+            mHandler.removeMessages(DISPATCH_MSG);
+            mEventDispatcher.flush();
+        }
+
+    }
 }

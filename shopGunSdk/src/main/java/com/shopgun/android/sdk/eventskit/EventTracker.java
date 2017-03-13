@@ -30,7 +30,7 @@ public class EventTracker {
 
     public static EventTracker newTracker(String trackerId) {
         EventTracker tracker = new EventTracker(trackerId);
-        EventManager.getInstacnce().registerTracker(tracker);
+        EventManager.getInstance().registerTracker(tracker);
         return tracker;
     }
 
@@ -78,7 +78,7 @@ public class EventTracker {
     }
 
     public void setCampaign(JsonObject campaign) {
-        EventManager.getInstacnce().setCampaign(campaign);
+        EventManager.getInstance().setCampaign(campaign);
     }
 
     public void track(String type, JsonObject properties) {
@@ -86,7 +86,7 @@ public class EventTracker {
     }
 
     public void track(Event event) {
-        EventManager manager = EventManager.getInstacnce();
+        EventManager manager = EventManager.getInstance();
         JsonObject context = manager.getContext(true);
         context.add("view", mView);
         event.setContext(context);
@@ -94,7 +94,7 @@ public class EventTracker {
     }
 
     public void flush() {
-        EventManager.getInstacnce().flush();
+        EventManager.getInstance().flush();
     }
 
 }
