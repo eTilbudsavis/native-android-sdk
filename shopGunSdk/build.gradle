@@ -30,31 +30,6 @@ buildscript {
     }
 }
 
-ext {
-
-    PROJ_DRYRUN=true
-
-    PROJ_REPO='maven'
-    PROJ_GROUP='com.shopgun.android'
-    PROJ_ARTIFACTID='sdk'
-    PROJ_VERSION='4.0.0'
-    PROJ_NAME='sdk'
-    PROJ_ORG='shopgun'
-    PROJ_WEBSITEURL='https://shopgun.com'
-    PROJ_ISSUETRACKERURL='https://github.com/shopgun/shopgun-android-sdk/issues'
-    PROJ_VCSURL='https://github.com/shopgun/shopgun-android-sdk.git'
-    PROJ_DESCRIPTION='Get easy access to the ShopGun API, with this nifty SDK.'
-    PROJ_LABELS=['shopgun', 'android', 'sdk', 'api', 'etilbudsavis']
-
-    DEVELOPER_ID='shopgun'
-    DEVELOPER_NAME='ShopGun'
-    DEVELOPER_EMAIL='danny@shopgun.com'
-
-    LICENSE_ALL=["Apache-2.0"]
-    LICENSE_NAME='The Apache Software License, Version 2.0'
-    LICENSE_URL='http://www.apache.org/licenses/LICENSE-2.0.txt'
-}
-
 android {
 
     compileSdkVersion rootProject.compileSdkVersion
@@ -97,6 +72,4 @@ dependencies {
     testCompile libs.okhttpMockwebserver
 }
 
-// Apply the Bintray plugin. Do release with "gradlew bintrayUpload"
-// Setup BINTRAY_USER and BINTRAY_KEY in your global gradle.properties to upload
 apply from: 'bintray.gradle'
