@@ -7,6 +7,8 @@ import com.google.gson.GsonBuilder;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
+import com.shopgun.android.utils.TextUtils;
+import com.shopgun.android.utils.log.L;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,7 +27,7 @@ public class EventDispatcher extends Thread {
 
     public static final String TAG = Constants.getTag(EventDispatcher.class);
 
-    private static final String DISPATCH_EVENT = "dispatch_event-queue";
+    private static final String DISPATCH_EVENT = "dispatch-event-queue-id";
     public static final int DEF_MAX_QUEUE_SIZE = 20;
     public static final int DEF_MAX_RETRY_COUNT = 5;
 
@@ -123,6 +125,7 @@ public class EventDispatcher extends Thread {
             if (response.isSuccessful()) {
 
                 String responseBody = response.body().string();
+
                 Gson gson = new GsonBuilder().create();
                 EventResponse resp = gson.fromJson(responseBody, EventResponse.class);
 
@@ -132,12 +135,15 @@ public class EventDispatcher extends Thread {
                 getEvents(removeIds).deleteAllFromRealm();
 
                 Set<String> nackIds = resp.getNackItems();
+
                 RealmResults<Event> nack = getEvents(nackIds);
                 for (Event e : nack) {
                     e.incrementRetryCount();
                 }
                 mRealm.where(Event.class).greaterThan("mRetryCount", mMaxRetryCount).findAll().deleteAllFromRealm();
                 mRealm.commitTransaction();
+
+                SgnLog.i(TAG, removeIds.size() + " events successfully shipped, " + nackIds.size() + " failed.");
             }
 
         } catch (Exception e) {

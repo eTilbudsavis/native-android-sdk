@@ -1,9 +1,9 @@
 package com.shopgun.android.sdk.eventskit;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.DateUtils;
 
 import java.util.Date;
 
@@ -159,9 +159,40 @@ public class Event implements RealmModel {
     private JsonObject parse(String json) {
         try {
             return (JsonObject) new JsonParser().parse(json);
-        } catch (JsonParseException e) {
+        } catch (Exception e) {
             return null;
         }
+    }
+
+    @Override
+    public String toString() {
+        return toString(true, true, true);
+    }
+
+    public String toString(boolean id, boolean client, boolean context) {
+        StringBuilder sb = new StringBuilder();
+        if (id) {
+            sb.append("id: ").append(mId).append(", ");
+        }
+        sb.append("type: ").append(mType);
+        sb.append(", recordedAt: ").append(DateUtils.format(mRecordedAt, true));
+        if (mSentAt != null) {
+            sb.append(", sentAt: ").append(DateUtils.format(mSentAt, true));
+        }
+        if (mReceivedAt != null) {
+            sb.append(", receivedAt: ").append(DateUtils.format(mReceivedAt, true));
+        }
+        sb.append(", properties: ").append(getProperties());
+        if (mRetryCount > 0) {
+            sb.append(", mRetryCount: ").append(mRetryCount);
+        }
+        if (client) {
+            sb.append(", client: ").append(getClient());
+        }
+        if (context) {
+            sb.append(", context: ").append(getContext());
+        }
+        return sb.toString();
     }
 
 }

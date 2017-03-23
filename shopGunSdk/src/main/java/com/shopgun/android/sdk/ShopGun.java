@@ -579,7 +579,8 @@ public class ShopGun {
             okHttpClient = okHttpClientBuilder.build();
 
             // Set the default RealmConfiguration.
-            realmConfiguration = new RealmConfiguration.Builder(application)
+            Realm.init(application);
+            realmConfiguration = new RealmConfiguration.Builder()
                     .name(Constants.PACKAGE + ".realm")
                     .modules(new SgnRealmModule())
                     .schemaVersion(1)

@@ -6,10 +6,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.corekit.gson.JsonNullExclusionStrategy;
 import com.shopgun.android.sdk.corekit.gson.RealmObjectExclusionStrategy;
+import com.shopgun.android.utils.log.L;
 
 import java.util.List;
 
-import io.realm.EventRealmProxy;
 import okhttp3.Call;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -21,14 +21,15 @@ import okhttp3.RequestBody;
 public class EventRequest {
     
     public static final String TAG = EventRequest.class.getSimpleName();
-    
-    public static final String URL = "https://events-staging.shopgun.com/track";
+
+    public static final String URL = "https://events.service-staging.shopgun.com/track/";
     private static final HttpUrl URL_PARSED = HttpUrl.parse(URL);
     private static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json");
     private static final Headers HEADERS = new Headers.Builder()
             .add("Content-Type", "application/json")
             .add("Accept", "application/json")
             .build();
+    private static Gson mGson;
 
     public static Call postEvents(OkHttpClient client, List<Event> events) {
         JsonElement eventArray = gson().toJsonTree(events);
@@ -48,12 +49,24 @@ public class EventRequest {
     }
 
     private static Gson gson() {
-        return new GsonBuilder()
-                .setExclusionStrategies(
-                        new RealmObjectExclusionStrategy(),
-                        new JsonNullExclusionStrategy())
-                .registerTypeAdapter(EventRealmProxy.class, new EventSerializer())
-                .create();
+        if (mGson == null) {
+            synchronized (EventRequest.class) {
+                if (mGson == null) {
+                    try {
+                        Class clazz = Class.forName("io.realm.EventRealmProxy");
+                        mGson = new GsonBuilder()
+                                .setExclusionStrategies(
+                                        new RealmObjectExclusionStrategy(),
+                                        new JsonNullExclusionStrategy())
+                                .registerTypeAdapter(clazz, new EventSerializer())
+                                .create();
+                    } catch (ClassNotFoundException e) {
+                        L.w(TAG, "Gson not instantiated due to missing RealmProxy class", e);
+                    }
+                }
+            }
+        }
+        return mGson;
     }
 
 }

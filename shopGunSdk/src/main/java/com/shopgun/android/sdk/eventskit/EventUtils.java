@@ -7,7 +7,7 @@ import android.os.Build;
 
 import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.utils.SgnUserAgent;
-import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.DateUtils;
 import com.shopgun.android.utils.DeviceUtils;
 import com.shopgun.android.utils.DisplayUtils;
 import com.shopgun.android.utils.LocationUtils;
@@ -34,7 +34,7 @@ public class EventUtils {
         object.add("network", network(context));
         object.add("os", os(context));
         object.add("session", session(context));
-        object.add("timezone", timezone(context));
+        object.add("timeZone", timezone(context));
         object.addProperty("userAgent", SgnUserAgent.getUserAgent(context));
         return object;
     }
@@ -97,7 +97,7 @@ public class EventUtils {
         Location mLocation = LocationUtils.getLastKnownLocation(mContext);
         if (mLocation != null) {
             JsonObject object = new JsonObject();
-            object.addProperty("determinedAt", SgnUtils.dateToString(new Date(mLocation.getTime())));
+            object.addProperty("determinedAt", DateUtils.format(new Date(mLocation.getTime())));
             object.addProperty("latitude", mLocation.getLatitude());
             object.addProperty("longitude", mLocation.getLongitude());
             object.addProperty("altitude", mLocation.hasAltitude() ? mLocation.getAltitude() : null);

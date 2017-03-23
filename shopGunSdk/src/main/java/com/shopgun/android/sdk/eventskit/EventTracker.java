@@ -1,70 +1,72 @@
 package com.shopgun.android.sdk.eventskit;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.shopgun.android.sdk.utils.SgnUtils;
+import android.content.Context;
+import android.net.Uri;
+import android.os.Bundle;
 
-public class EventTracker {
+import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.corekit.SgnPreferences;
+import com.shopgun.android.sdk.log.SgnLog;
+import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.PackageUtils;
+import com.shopgun.android.utils.TextUtils;
+
+public abstract class EventTracker {
 
     public static final String TAG = EventTracker.class.getSimpleName();
 
+    public static final String META_GLOBAL_TRACKER = "com.shopgun.android.sdk.eventskit.global_tracker_id";
+
     private static EventTracker mGlobalInstance;
 
-    private String mTrackerId;
+    private JsonObject mClient;
     private JsonObject mView;
 
     public static EventTracker globalTracker() {
         if (mGlobalInstance == null) {
             synchronized (EventTracker.class) {
                 if (mGlobalInstance == null) {
-                    mGlobalInstance = new EventTracker(SgnUtils.createUUID());
+                    Context c = ShopGun.getInstance().getContext();
+                    Bundle b = PackageUtils.getMetaData(c);
+                    String trackerId = b.getString(META_GLOBAL_TRACKER);
+                    if (TextUtils.isEmpty(trackerId)) {
+                        SgnLog.w(TAG, "No tracker id found for global tracker instance.");
+                        mGlobalInstance = new EventTrackerNoOp();
+                    } else {
+                        mGlobalInstance = new EventTrackerImpl(trackerId);
+                    }
                 }
             }
         }
         return mGlobalInstance;
     }
 
-    public static EventTracker newTracker() {
-        return newTracker(SgnUtils.createUUID());
+    public static void setGlobalTracker(EventTracker tracker) {
+        synchronized (EventTracker.class) {
+            mGlobalInstance = tracker;
+        }
+    }
+
+    protected EventTracker(String trackId) {
+        mClient = new JsonObject();
+        mClient.addProperty("id", SgnPreferences.getInstance().getInstallationId());
+        mClient.addProperty("trackId", trackId);
     }
 
     public static EventTracker newTracker(String trackerId) {
-        EventTracker tracker = new EventTracker(trackerId);
+        EventTracker tracker = new EventTrackerImpl(trackerId);
         EventManager.getInstance().registerTracker(tracker);
         return tracker;
     }
 
-    private EventTracker(String trackerId) {
-        SgnUtils.isValidUuidOrThrow(trackerId);
-        mTrackerId = trackerId;
-    }
+    public abstract void setView(String[] path);
 
-    public void setView(String[] path) {
-        setView(path, null, null);
-    }
+    public abstract void setView(String[] path, String[] previousPath, Uri uri);
 
-    public void setView(String[] path, String[] previousPath, String uri) {
-        JsonObject map = new JsonObject();
-        map.add("path", toJson(path));
-        if (previousPath != null) {
-            map.add("previousPath", toJson(previousPath));
-        }
-        if (uri != null) {
-            map.addProperty("uri", uri);
-        }
-        setView(map);
-    }
-
-    private JsonArray toJson(String[] array) {
-        JsonArray jsonArray = null;
-        if (array != null) {
-            jsonArray = new JsonArray();
-            for (String s : array) {
-                jsonArray.add(s);
-            }
-        }
-        return jsonArray;
-    }
+    public abstract void track(Event event);
 
     /**
      * Meta-data about "where" the event was triggered visually in the app.
@@ -77,20 +79,16 @@ public class EventTracker {
         mView = view;
     }
 
-    public void setCampaign(JsonObject campaign) {
-        EventManager.getInstance().setCampaign(campaign);
+    public JsonObject getView() {
+        return mView;
     }
 
     public void track(String type, JsonObject properties) {
         track(new Event(type, properties));
     }
 
-    public void track(Event event) {
-        EventManager manager = EventManager.getInstance();
-        JsonObject context = manager.getContext(true);
-        context.add("view", mView);
-        event.setContext(context);
-        manager.addEvent(event);
+    public JsonObject getClient() {
+        return mClient;
     }
 
     public void flush() {

@@ -6,13 +6,17 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.corekit.SgnPreferences;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.log.L;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -44,7 +48,6 @@ public class EventManager {
     private Collection<WeakReference<EventTracker>> mTrackers;
     private static BlockingQueue<Event> mEventQueue;
     private JsonObject mJsonContext;
-    private JsonObject mJsonClient;
     private EventDispatcher mEventDispatcher;
     private long mDispatchInterval = DISPATCH_INTERVAL;
 
@@ -64,15 +67,11 @@ public class EventManager {
         mEventQueue = new LinkedBlockingQueue<>(1024);
         mEventDispatcher = new EventDispatcher(mEventQueue, shopGun.getClient());
         mJsonContext = EventUtils.getContext(shopGun.getContext());
-        mJsonClient = getClient();
-        shopGun.getLifecycleManager().registerCallback(new EventLifecycle());
-    }
-
-    public static JsonObject getClient() {
-        JsonObject map = new JsonObject();
-        map.addProperty("id", SgnPreferences.getInstance().getInstallationId());
-        map.addProperty("trackId", SgnUtils.createUUID());
-        return map;
+        EventLifecycle lifecycleCallback = new EventLifecycle();
+        shopGun.getLifecycleManager().registerCallback(lifecycleCallback);
+        if (shopGun.getLifecycleManager().isActive()) {
+            lifecycleCallback.onCreate(shopGun.getLifecycleManager().getActivity());
+        }
     }
 
     public void registerTracker(EventTracker tracker) {
@@ -113,7 +112,6 @@ public class EventManager {
     }
 
     public void addEvent(Event event) {
-        event.setClient(mJsonClient);
         try {
             mEventQueue.add(event);
         } catch (IllegalStateException e) {
