@@ -1,5 +1,6 @@
 package com.shopgun.android.sdk.pagedpublicationkit;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -8,6 +9,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.CenteredViewPager;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,14 +19,22 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.R;
+import com.shopgun.android.utils.TextUtils;
+import com.shopgun.android.utils.ToStringUtils;
+import com.shopgun.android.utils.log.L;
+import com.shopgun.android.utils.log.LogUtil;
 import com.shopgun.android.verso.VersoFragment;
+import com.shopgun.android.verso.VersoPageView;
 import com.shopgun.android.verso.VersoPageViewFragment;
 import com.shopgun.android.verso.VersoTapInfo;
 import com.shopgun.android.verso.VersoViewPager;
+import com.shopgun.android.verso.VersoZoomPanInfo;
+import com.shopgun.android.verso.utils.OnPageChangeListenerLogger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class PagedPublicationFragment extends VersoFragment {
 
@@ -43,6 +54,8 @@ public class PagedPublicationFragment extends VersoFragment {
 
     boolean mDisplayHotspotsOnTouch = true;
     OnTouchWrapper mOnTouchWrapper;
+
+    PagedPublicationLifecycle mLifecycle;
 
     public static PagedPublicationFragment newInstance() {
         return new PagedPublicationFragment();
@@ -64,18 +77,24 @@ public class PagedPublicationFragment extends VersoFragment {
     public PagedPublicationFragment() {
         mOnTouchWrapper = new OnTouchWrapper();
         super.setOnTouchListener(mOnTouchWrapper);
-        super.setOnLongTapListener(mOnTouchWrapper);
         super.setOnTapListener(mOnTouchWrapper);
+        super.setOnDoubleTapListener(mOnTouchWrapper);
+        super.setOnLongTapListener(mOnTouchWrapper);
+        super.setOnZoomListener(mOnTouchWrapper);
+        super.addOnPageChangeListener(new PageChangeLisetner());
+        super.setOnLoadCompleteListener(mOnTouchWrapper);
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mLifecycle = new PagedPublicationLifecycle();
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_STATE)) {
-            SavedState state = savedInstanceState.getParcelable(SAVED_STATE);
-            if (state != null) {
-                mConfig = state.config;
-                mDisplayHotspotsOnTouch = state.displayHotspotOnTouch;
+            SavedState savedState = savedInstanceState.getParcelable(SAVED_STATE);
+            if (savedState != null) {
+                mConfig = savedState.config;
+                mDisplayHotspotsOnTouch = savedState.displayHotspotOnTouch;
+                mLifecycle.setConfig(mConfig);
             }
         } else if (getArguments() != null) {
             mConfig = getArguments().getParcelable(ARG_CONFIGURATION);
@@ -110,13 +129,27 @@ public class PagedPublicationFragment extends VersoFragment {
     public void setPublicationConfiguration(PagedPublicationConfiguration configuration) {
         if (configuration != null) {
             mConfig = configuration;
+            mLifecycle.setConfig(mConfig);
             setVersoSpreadConfiguration(mConfig);
             loadPagedPublication();
         }
     }
 
     @Override
+    protected void onInternalPause() {
+        mLifecycle.spreadDisappeared(getPosition(), getCurrentPages());
+        mLifecycle.reset();
+        super.onInternalPause();
+    }
+
+    @Override
+    protected void onInternalResume(Configuration config) {
+        super.onInternalResume(config);
+    }
+
+    @Override
     public void onResume() {
+        mLifecycle.resumed();
         super.onResume();
         loadPagedPublication();
     }
@@ -124,6 +157,7 @@ public class PagedPublicationFragment extends VersoFragment {
     @Override
     public void onPause() {
         super.onPause();
+        mLifecycle.paused();
         if (mConfig != null) {
             mConfig.cancel();
         }
@@ -171,8 +205,10 @@ public class PagedPublicationFragment extends VersoFragment {
             ensurePublicationBranding();
             mFrameVerso.removeAllViews();
             mFrameVerso.addView(mVersoViewPager);
+            mVersoViewPager.addOnPageChangeListener(new PageScrolledListener());
             setVisible(true, false, false);
         }
+        mLifecycle.appeared();
     }
 
     private void showLoaderView() {
@@ -247,6 +283,7 @@ public class PagedPublicationFragment extends VersoFragment {
     @Override
     public void notifyVersoConfigurationChanged() {
         if (mConfig.hasData()) {
+            mLifecycle.opened();
             showVersoView();
             super.notifyVersoConfigurationChanged();
         }
@@ -277,6 +314,11 @@ public class PagedPublicationFragment extends VersoFragment {
         mOnTouchWrapper.mTapListener = tapListener;
     }
 
+    @Override
+    public void setOnDoubleTapListener(VersoPageViewFragment.OnDoubleTapListener doubleTapListener) {
+        mOnTouchWrapper.mDoubleTapListener = doubleTapListener;
+    }
+
     public void setOnHotspotTapListener(OnHotspotTapListener tapListener) {
         mOnTouchWrapper.mHotspotTapListener = tapListener;
     }
@@ -290,6 +332,11 @@ public class PagedPublicationFragment extends VersoFragment {
         mOnTouchWrapper.mHotspotLongTapListener = longTapListener;
     }
 
+    @Override
+    public void setOnZoomListener(VersoPageViewFragment.OnZoomListener zoomListener) {
+        mOnTouchWrapper.mZoomListener = zoomListener;
+    }
+
     public interface OnHotspotTapListener {
         void onHotspotsTap(List<PagedPublicationHotspot> hotspots);
     }
@@ -298,10 +345,12 @@ public class PagedPublicationFragment extends VersoFragment {
         void onHotspotsLongTap(List<PagedPublicationHotspot> hotspots);
     }
 
-    private class OnTouchWrapper implements
-            VersoPageViewFragment.OnTapListener,
+    private class OnTouchWrapper implements VersoPageViewFragment.OnTapListener,
             VersoPageViewFragment.OnLongTapListener,
             VersoPageViewFragment.OnTouchListener,
+            VersoPageViewFragment.OnDoubleTapListener,
+            VersoPageViewFragment.OnZoomListener,
+            VersoPageViewFragment.OnLoadCompleteListener,
             Handler.Callback {
 
         private static final int DELAY = 100;
@@ -310,8 +359,12 @@ public class PagedPublicationFragment extends VersoFragment {
 
         OnHotspotTapListener mHotspotTapListener;
         VersoPageViewFragment.OnTapListener mTapListener;
+        VersoPageViewFragment.OnDoubleTapListener mDoubleTapListener;
         OnHotspotLongTapListener mHotspotLongTapListener;
         VersoPageViewFragment.OnLongTapListener mLongTapListener;
+        VersoPageViewFragment.OnZoomListener mZoomListener;
+        VersoPageViewFragment.OnLoadCompleteListener mLoadCompleteListener;
+
         Handler mHandler = new Handler(Looper.getMainLooper(), this);
 
         @Override
@@ -319,12 +372,20 @@ public class PagedPublicationFragment extends VersoFragment {
             if (mTapListener != null) {
                 mTapListener.onTap(info);
             }
+            PagedPublicationEvent.pageClicked(mConfig, info).track();
             PublicationTapInfo pti = new PublicationTapInfo(info);
             if (pti.hasHotspots()) {
                 post(WHAT_TAP, pti);
                 showHotspots(pti);
+                PagedPublicationEvent.pageHotspotClicked(mConfig, info).track();
             }
             return true;
+        }
+
+        @Override
+        public boolean onDoubleTap(VersoTapInfo info) {
+            PagedPublicationEvent.pageDoubleClicked(mConfig, info).track();
+            return mDoubleTapListener != null && mDoubleTapListener.onDoubleTap(info);
         }
 
         @Override
@@ -332,10 +393,51 @@ public class PagedPublicationFragment extends VersoFragment {
             if (mLongTapListener != null) {
                 mLongTapListener.onLongTap(info);
             }
+            PagedPublicationEvent.pageLongClicked(mConfig, info).track();
             PublicationTapInfo pti = new PublicationTapInfo(info);
             if (pti.hasHotspots()) {
                 post(WHAT_LONG_TAP, pti);
                 showHotspots(pti);
+                PagedPublicationEvent.pageHotspotClicked(mConfig, info).track();
+            }
+        }
+
+        boolean zoomBegin = false;
+        @Override
+        public void onZoom(VersoZoomPanInfo info) {
+            if (mZoomListener != null) {
+                mZoomListener.onZoom(info);
+            }
+            if (zoomBegin && info.getScale() > 1.0f) {
+                zoomBegin = false;
+                mLifecycle.spreadZoomedIn(info);
+            }
+        }
+
+        @Override
+        public void onZoomBegin(VersoZoomPanInfo info) {
+            if (mZoomListener != null) {
+                mZoomListener.onZoomBegin(info);
+            }
+            zoomBegin = true;
+        }
+
+        @Override
+        public void onZoomEnd(VersoZoomPanInfo info) {
+            if (mZoomListener != null) {
+                mZoomListener.onZoomEnd(info);
+            }
+            zoomBegin = false;
+            mLifecycle.spreadZoomedOut(info);
+        }
+
+        @Override
+        public void onPageLoadComplete(boolean success, VersoPageView versoPageView) {
+            if (mLoadCompleteListener != null) {
+                mLoadCompleteListener.onPageLoadComplete(success, versoPageView);
+            }
+            if (success) {
+                mLifecycle.pageLoaded(versoPageView.getPage());
             }
         }
 
@@ -400,6 +502,7 @@ public class PagedPublicationFragment extends VersoFragment {
             }
             return false;
         }
+
     }
 
     public class PublicationTapInfo extends VersoTapInfo {
@@ -438,6 +541,69 @@ public class PagedPublicationFragment extends VersoFragment {
             return new ArrayList<>();
         }
 
+    }
+
+    public void onPublicationDisappeared() {
+        mLifecycle.saveLoadedState();
+        mLifecycle.disappeared();
+    }
+
+    public void onPublicationAppeared() {
+        int spread = getPosition();
+        int[] pages = mConfig.getPagesFromSpreadPosition(spread);
+        mLifecycle.applyLoadedState(pages);
+        mLifecycle.appeared();
+        mLifecycle.spreadAppeared(spread, pages, true);
+    }
+
+    private class PageScrolledListener implements CenteredViewPager.OnPageChangeListener {
+
+        int mDragFromSpread;
+        int[] mDragFromPages;
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+            switch (state) {
+                case ViewPager.SCROLL_STATE_DRAGGING:
+                    mDragFromSpread = getPosition();
+                    mDragFromPages = mConfig.getPagesFromSpreadPosition(mDragFromSpread);
+                    mLifecycle.saveLoadedState();
+                    mLifecycle.spreadDisappeared(mDragFromSpread, mDragFromPages);
+                    break;
+                case ViewPager.SCROLL_STATE_IDLE:
+                    if (mDragFromSpread == getPosition()) {
+                        // User starts dragging, but doesn't swipe to the next spread - re-appear
+                        mLifecycle.applyLoadedState(mDragFromPages);
+                        mLifecycle.spreadAppeared(mDragFromSpread, mDragFromPages, true);
+                    }
+                    break;
+            }
+        }
+
+    }
+
+    private class PageChangeLisetner implements OnPageChangeListener {
+
+        @Override
+        public void onPagesScrolled(int currentPosition, int[] currentPages, int previousPosition, int[] previousPages) {
+        }
+
+        @Override
+        public void onPagesChanged(int currentPosition, int[] currentPages, int previousPosition, int[] previousPages) {
+            mLifecycle.spreadAppeared(currentPosition, currentPages, true);
+        }
+
+        @Override
+        public void onVisiblePageIndexesChanged(int[] pages, int[] added, int[] removed) {
+        }
     }
 
     private static class SavedState implements Parcelable {

@@ -110,7 +110,7 @@ public class LifecycleManager {
         return mCurrentActivity != null;
     }
 
-    private Activity getActivity() {
+    public Activity getActivity() {
         return mCurrentActivity;
     }
 

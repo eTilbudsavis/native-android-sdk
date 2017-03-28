@@ -15,6 +15,7 @@ import com.shopgun.android.sdk.pagedpublicationkit.impl.PulsatingTextView;
 import com.shopgun.android.utils.ColorUtils;
 import com.shopgun.android.utils.UnitUtils;
 import com.shopgun.android.verso.VersoPageView;
+import com.shopgun.android.verso.VersoPageViewFragment;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -28,6 +29,7 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
     private PulsatingTextView mTextView;
     private PageTarget mPageTarget = new PageTarget();
     private boolean mVisible;
+    private VersoPageViewFragment.OnLoadCompleteListener mLoadCompletionListener;
 
     public CatalogPageView(Context context, PagedPublicationPage page, int textColor) {
         super(context);
@@ -62,13 +64,8 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
     }
 
     @Override
-    public void setOnCompletionListener() {
-
-    }
-
-    @Override
-    public OnLoadCompletionListener getOnLoadCompleteListener() {
-        return null;
+    public void setOnLoadCompleteListener(VersoPageViewFragment.OnLoadCompleteListener listener) {
+        mLoadCompletionListener = listener;
     }
 
     @Override
@@ -85,6 +82,11 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
     @Override
     public void onInvisible() {
         mVisible = false;
+    }
+
+    @Override
+    public int getPage() {
+        return mPagedPublicationPage.getPageIndex();
     }
 
     private boolean isZoomed() {
@@ -111,15 +113,23 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
 
     class PageTarget implements Target {
 
+        public boolean mCallback = true;
+
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
             mTextView.setVisibility(View.GONE);
             mImageView.setImageBitmap(bitmap);
+            if (mLoadCompletionListener != null && mCallback) {
+                mCallback = false;
+                mLoadCompletionListener.onPageLoadComplete(true, CatalogPageView.this);
+            }
         }
 
         @Override
         public void onBitmapFailed(Drawable errorDrawable) {
-
+            if (mLoadCompletionListener != null) {
+                mLoadCompletionListener.onPageLoadComplete(false, CatalogPageView.this);
+            }
         }
 
         @Override
