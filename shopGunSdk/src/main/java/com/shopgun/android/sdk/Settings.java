@@ -76,7 +76,7 @@ public class Settings {
     }
 
     public void incrementUsageCount() {
-        mSharedPrefs.edit().putInt(USAGE_COUNT, mSharedPrefs.getInt(USAGE_COUNT, 0)).apply();
+        mSharedPrefs.edit().putInt(USAGE_COUNT, mSharedPrefs.getInt(USAGE_COUNT, -1)+1).apply();
     }
 
     public int getUsageCount() {

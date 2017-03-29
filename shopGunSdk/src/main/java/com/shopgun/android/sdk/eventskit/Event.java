@@ -42,6 +42,8 @@ public class Event implements RealmModel {
     /* What ever properties goes with the event type */
     @Ignore private JsonObject mJsonProperties;
     private String mStringProperties;
+    /* Tag for random properties */
+    @Ignore private Object mTag;
 
     public Event() {
         mRecordedAt = new Date();
@@ -162,6 +164,14 @@ public class Event implements RealmModel {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public void setTag(Object tag) {
+        mTag = true;
+    }
+
+    public Object getTag() {
+        return mTag;
     }
 
     @Override

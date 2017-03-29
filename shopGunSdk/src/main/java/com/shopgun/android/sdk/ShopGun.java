@@ -30,6 +30,7 @@ import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.corekit.UserAgentInterceptor;
 import com.shopgun.android.sdk.corekit.realm.SgnRealmModule;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
+import com.shopgun.android.sdk.eventskit.EzEvent;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -148,6 +149,14 @@ public class ShopGun {
             mSyncManager.onStart();
             mSettings.incrementUsageCount();
             SgnLog.v(TAG, "onCreate");
+        }
+
+        @Override
+        public void onStart(Activity activity) {
+            if (mSettings.getUsageCount() == 0) {
+                EzEvent.firstClientSessionOpened().track();
+            }
+            EzEvent.clientSessionOpened().track();
         }
 
         @Override

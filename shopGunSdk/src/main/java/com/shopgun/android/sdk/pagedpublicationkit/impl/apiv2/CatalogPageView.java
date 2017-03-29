@@ -111,9 +111,9 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
                 .into(mPageTarget);
     }
 
-    class PageTarget implements Target {
+    private class PageTarget implements Target {
 
-        public boolean mCallback = true;
+        private boolean mCallback = true;
 
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {

@@ -143,6 +143,9 @@ class PagedPublicationLifecycle implements Parcelable {
                     pageAppeared(page);
                 }
             }
+            if (mConfig.hasOutro() && mConfig.getSpreadCount()-1 == spread) {
+                PagedPublicationEvent.outroAppeared(mConfig).track();
+            }
         }
     }
 
