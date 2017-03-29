@@ -21,27 +21,9 @@ public class EzEvent {
     public void track() {
         // avoid duplicates
         if (mEvent != null) {
-//            log();
             EventTracker.globalTracker().track(mEvent);
         }
         mEvent = null;
-    }
-
-    private void log() {
-        StringBuilder sb = new StringBuilder();
-        String type = mEvent.getType().substring(18);
-        JsonObject p = mEvent.getProperties();
-        if (p.has("pagedPublicationPage")) {
-            JsonObject ppp = p.getAsJsonObject("pagedPublicationPage");
-            sb.append("[").append(ppp.get("pageNumber").getAsString()).append("]");
-        } else if (p.has("pagedPublicationPageSpread")) {
-            JsonArray ppps = p.getAsJsonArray("pagedPublicationPageSpread");
-            sb.append(ppps.toString());
-        } else {
-            sb.append(p.getAsJsonObject("pagedPublication").get("id").getAsString());
-        }
-        sb.append(" ").append(type);
-        L.d(TAG, sb.toString());
     }
 
     public static EzEvent clientSessionOpened() {

@@ -160,6 +160,11 @@ public class ShopGun {
         }
 
         @Override
+        public void onStop(Activity activity) {
+            EzEvent.clientSessionClosed().track();
+        }
+
+        @Override
         public void onDestroy(Activity activity) {
             mSettings.saveLocation(mLocation);
             mListManager.onStop();
