@@ -1,6 +1,7 @@
 package com.shopgun.android.sdk.pagedpublicationkit;
 
 import android.content.res.Configuration;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,8 +17,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.shopgun.android.materialcolorcreator.MaterialColor;
+import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.verso.VersoFragment;
 import com.shopgun.android.verso.VersoPageView;
@@ -177,7 +181,6 @@ public class PagedPublicationFragment extends VersoFragment {
                             mConfig.hasPages() &&
                             mConfig.hasHotspotCollection()) {
                 // Already have the needed data
-                showVersoView();
                 notifyVersoConfigurationChanged();
                 return;
             }
@@ -191,6 +194,12 @@ public class PagedPublicationFragment extends VersoFragment {
         if (pub != null && mFrame != null) {
             int bgColor = pub.getBackgroundColor();
             mFrame.setBackgroundColor(bgColor);
+            ProgressBar bar = (ProgressBar) mFrameLoader.findViewById(R.id.circulareProgressBar);
+            if (bar != null && bar.getIndeterminateDrawable() != null) {
+                bar.setIndeterminate(true);
+                MaterialColor c = new MaterialColorImpl(bgColor);
+                bar.getIndeterminateDrawable().setColorFilter(c.getSecondaryText(), PorterDuff.Mode.MULTIPLY);
+            }
         }
     }
 
@@ -210,9 +219,6 @@ public class PagedPublicationFragment extends VersoFragment {
         if (mFrameLoader != null &&
                 mFrameLoader.getVisibility() != View.VISIBLE) {
             ensurePublicationBranding();
-            mFrameLoader.removeAllViews();
-            View loaderView = getLoaderView(mFrameLoader);
-            mFrameLoader.addView(loaderView);
             setVisible(false, true, false);
         }
     }
@@ -243,11 +249,6 @@ public class PagedPublicationFragment extends VersoFragment {
         TextView msg = (TextView) v.findViewById(R.id.message);
         msg.setText(ex.getMessage());
         return v;
-    }
-
-    public View getLoaderView(ViewGroup container) {
-        LayoutInflater i = LayoutInflater.from(container.getContext());
-        return i.inflate(R.layout.shopgun_sdk_pagedpublication_loader, container, false);
     }
 
     private class PagedPublicationOnLoadComplete implements PagedPublicationConfiguration.OnLoadComplete {

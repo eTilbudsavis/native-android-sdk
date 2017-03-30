@@ -27,7 +27,11 @@
     <FrameLayout
         android:id="@+id/loader"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+
+        <include layout="@layout/shopgun_sdk_pagedpublication_loader" />
+
+        </FrameLayout>
 
     <FrameLayout
         android:id="@+id/error"
