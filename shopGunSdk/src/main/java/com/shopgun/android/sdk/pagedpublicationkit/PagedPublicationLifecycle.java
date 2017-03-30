@@ -71,11 +71,13 @@ class PagedPublicationLifecycle implements Parcelable {
         mSpreadZoomedInTmp = new boolean[spreadCount];
     }
 
-    public void reset() {
+    public void resetSpreadsPagesLoadedAndZoom() {
         mPageAppeared = null;
         mPageLoaded = null;
+        mPageLoadedTmp = null;
         mSpreadAppeared = null;
         mSpreadZoomedIn = null;
+        mSpreadZoomedInTmp = null;
     }
 
     void resumed() {

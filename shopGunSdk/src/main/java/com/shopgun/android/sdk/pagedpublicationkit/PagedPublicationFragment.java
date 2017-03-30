@@ -19,10 +19,6 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.R;
-import com.shopgun.android.utils.TextUtils;
-import com.shopgun.android.utils.ToStringUtils;
-import com.shopgun.android.utils.log.L;
-import com.shopgun.android.utils.log.LogUtil;
 import com.shopgun.android.verso.VersoFragment;
 import com.shopgun.android.verso.VersoPageView;
 import com.shopgun.android.verso.VersoPageViewFragment;
@@ -52,6 +48,7 @@ public class PagedPublicationFragment extends VersoFragment {
 
     boolean mDisplayHotspotsOnTouch = true;
     OnTouchWrapper mOnTouchWrapper;
+    PageChangeListener mPageChangeLisetner = new PageChangeListener();
 
     PagedPublicationLifecycle mLifecycle;
 
@@ -79,7 +76,7 @@ public class PagedPublicationFragment extends VersoFragment {
         super.setOnDoubleTapListener(mOnTouchWrapper);
         super.setOnLongTapListener(mOnTouchWrapper);
         super.setOnZoomListener(mOnTouchWrapper);
-        super.addOnPageChangeListener(new PageChangeLisetner());
+        super.addOnPageChangeListener(mPageChangeLisetner);
         super.setOnLoadCompleteListener(mOnTouchWrapper);
     }
 
@@ -135,11 +132,8 @@ public class PagedPublicationFragment extends VersoFragment {
 
     @Override
     protected void onInternalPause() {
-        LogUtil.printMethod();
-        L.d(TAG, "position: " + getPosition());
-        L.d(TAG, "pages: " + TextUtils.join(getCurrentPages()));
         mLifecycle.spreadDisappeared(getPosition(), getCurrentPages());
-        mLifecycle.reset();
+        mLifecycle.resetSpreadsPagesLoadedAndZoom();
         super.onInternalPause();
     }
 
@@ -559,6 +553,7 @@ public class PagedPublicationFragment extends VersoFragment {
 
     private class PageScrolledListener implements CenteredViewPager.OnPageChangeListener {
 
+        int mLastState = ViewPager.SCROLL_STATE_IDLE;
         int mDragFromSpread;
         int[] mDragFromPages;
 
@@ -572,7 +567,7 @@ public class PagedPublicationFragment extends VersoFragment {
 
         @Override
         public void onPageScrollStateChanged(int state) {
-            L.d(TAG, "onPageScrollStateChanged: " + ToStringUtils.pageScrollState(state));
+//            L.d(TAG, "onPageScrollStateChanged: " + ToStringUtils.pageScrollState(state));
             switch (state) {
                 case ViewPager.SCROLL_STATE_DRAGGING:
                     mDragFromSpread = getPosition();
@@ -588,26 +583,38 @@ public class PagedPublicationFragment extends VersoFragment {
                     }
                     break;
                 case ViewPager.SCROLL_STATE_SETTLING:
+                    if (mLastState != ViewPager.SCROLL_STATE_DRAGGING) {
+                        mPageChangeLisetner.mDisappearPreviousSpread = true;
+                    }
 
             }
+            mLastState = state;
         }
 
     }
 
-    private class PageChangeLisetner implements OnPageChangeListener {
+    private class PageChangeListener implements VersoFragment.OnPageChangeListener {
+
+        boolean mDisappearPreviousSpread = false;
 
         @Override
         public void onPagesScrolled(int currentPosition, int[] currentPages, int previousPosition, int[] previousPages) {
+
         }
 
         @Override
         public void onPagesChanged(int currentPosition, int[] currentPages, int previousPosition, int[] previousPages) {
+            if (mDisappearPreviousSpread) {
+                mLifecycle.spreadDisappeared(previousPosition, previousPages);
+            }
+            mDisappearPreviousSpread = false;
             mLifecycle.spreadAppeared(currentPosition, currentPages, true);
         }
 
         @Override
         public void onVisiblePageIndexesChanged(int[] pages, int[] added, int[] removed) {
         }
+
     }
 
     private static class SavedState implements Parcelable {
