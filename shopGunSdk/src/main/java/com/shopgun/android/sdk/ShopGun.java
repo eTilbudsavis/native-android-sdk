@@ -154,14 +154,14 @@ public class ShopGun {
         @Override
         public void onStart(Activity activity) {
             if (mSettings.getUsageCount() == 0) {
-                EzEvent.firstClientSessionOpened().track();
+                EzEvent.create(EzEvent.FIRST_CLIENT_SESSION_OPENED).track();
             }
-            EzEvent.clientSessionOpened().track();
+            EzEvent.create(EzEvent.CLIENT_SESSION_OPENED).track();
         }
 
         @Override
         public void onStop(Activity activity) {
-            EzEvent.clientSessionClosed().track();
+            EzEvent.create(EzEvent.CLIENT_SESSION_CLOSED).track();
         }
 
         @Override
