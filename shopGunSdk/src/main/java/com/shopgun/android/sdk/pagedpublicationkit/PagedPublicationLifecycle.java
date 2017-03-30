@@ -24,6 +24,7 @@ class PagedPublicationLifecycle implements Parcelable {
     private boolean[] mPageLoadedTmp;
     private boolean[] mSpreadAppeared;
     private boolean[] mSpreadZoomedIn;
+    private boolean[] mSpreadZoomedInTmp;
 
     PagedPublicationLifecycle() {
     }
@@ -67,6 +68,7 @@ class PagedPublicationLifecycle implements Parcelable {
         mPageLoadedTmp = new boolean[pageCount];
         mSpreadAppeared = new boolean[spreadCount];
         mSpreadZoomedIn = new boolean[spreadCount];
+        mSpreadZoomedInTmp = new boolean[spreadCount];
     }
 
     public void reset() {
@@ -143,6 +145,10 @@ class PagedPublicationLifecycle implements Parcelable {
                     pageAppeared(page);
                 }
             }
+            if (mSpreadZoomedInTmp[spread]) {
+                internalSpreadZoomedIn(spread, pageNumbers);
+                mSpreadZoomedInTmp[spread] = false;
+            }
             if (mConfig.hasOutro() && mConfig.getSpreadCount()-1 == spread) {
                 PagedPublicationEvent.outroAppeared(mConfig).track();
             }
@@ -166,6 +172,12 @@ class PagedPublicationLifecycle implements Parcelable {
 
     void spreadZoomedIn(int spread, int[] pages, float scale) {
         if (isReadyAndResumed() && !mSpreadZoomedIn[spread] && scale > 1.0f) {
+            internalSpreadZoomedIn(spread, pages);
+        }
+    }
+
+    private void internalSpreadZoomedIn(int spread, int[] pages) {
+        if (isReadyAndResumed()) {
             mSpreadZoomedIn[spread] = true;
             PagedPublicationEvent.pageSpreadZoomedIn(mConfig, pages).track();
         }
@@ -182,14 +194,16 @@ class PagedPublicationLifecycle implements Parcelable {
         }
     }
 
-    void saveLoadedState() {
+    void saveState() {
         System.arraycopy(mPageLoaded, 0, mPageLoadedTmp, 0, mPageLoadedTmp.length);
+        System.arraycopy(mSpreadZoomedIn, 0, mSpreadZoomedInTmp, 0, mSpreadZoomedInTmp.length);
     }
 
-    void applyLoadedState(int[] pages) {
+    void applyState(int spread, int[] pages) {
         for (int page : pages) {
             mPageLoaded[page] = mPageLoaded[page] | mPageLoadedTmp[page];
         }
+        mSpreadZoomedIn[spread] = mSpreadZoomedIn[spread] | mSpreadZoomedInTmp[spread];
     }
 
     void pageLoaded(int page) {
@@ -217,6 +231,7 @@ class PagedPublicationLifecycle implements Parcelable {
         dest.writeBooleanArray(this.mPageLoadedTmp);
         dest.writeBooleanArray(this.mSpreadAppeared);
         dest.writeBooleanArray(this.mSpreadZoomedIn);
+        dest.writeBooleanArray(this.mSpreadZoomedInTmp);
     }
 
     protected PagedPublicationLifecycle(Parcel in) {
@@ -228,6 +243,7 @@ class PagedPublicationLifecycle implements Parcelable {
         this.mPageLoadedTmp = in.createBooleanArray();
         this.mSpreadAppeared = in.createBooleanArray();
         this.mSpreadZoomedIn = in.createBooleanArray();
+        this.mSpreadZoomedInTmp = in.createBooleanArray();
     }
 
     public static final Creator<PagedPublicationLifecycle> CREATOR = new Creator<PagedPublicationLifecycle>() {

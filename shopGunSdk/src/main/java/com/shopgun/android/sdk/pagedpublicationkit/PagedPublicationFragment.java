@@ -29,12 +29,10 @@ import com.shopgun.android.verso.VersoPageViewFragment;
 import com.shopgun.android.verso.VersoTapInfo;
 import com.shopgun.android.verso.VersoViewPager;
 import com.shopgun.android.verso.VersoZoomPanInfo;
-import com.shopgun.android.verso.utils.OnPageChangeListenerLogger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 public class PagedPublicationFragment extends VersoFragment {
 
@@ -137,6 +135,9 @@ public class PagedPublicationFragment extends VersoFragment {
 
     @Override
     protected void onInternalPause() {
+        LogUtil.printMethod();
+        L.d(TAG, "position: " + getPosition());
+        L.d(TAG, "pages: " + TextUtils.join(getCurrentPages()));
         mLifecycle.spreadDisappeared(getPosition(), getCurrentPages());
         mLifecycle.reset();
         super.onInternalPause();
@@ -544,14 +545,14 @@ public class PagedPublicationFragment extends VersoFragment {
     }
 
     public void onPublicationDisappeared() {
-        mLifecycle.saveLoadedState();
+        mLifecycle.saveState();
         mLifecycle.disappeared();
     }
 
     public void onPublicationAppeared() {
         int spread = getPosition();
         int[] pages = mConfig.getPagesFromSpreadPosition(spread);
-        mLifecycle.applyLoadedState(pages);
+        mLifecycle.applyState(spread, pages);
         mLifecycle.appeared();
         mLifecycle.spreadAppeared(spread, pages, true);
     }
@@ -571,20 +572,23 @@ public class PagedPublicationFragment extends VersoFragment {
 
         @Override
         public void onPageScrollStateChanged(int state) {
+            L.d(TAG, "onPageScrollStateChanged: " + ToStringUtils.pageScrollState(state));
             switch (state) {
                 case ViewPager.SCROLL_STATE_DRAGGING:
                     mDragFromSpread = getPosition();
                     mDragFromPages = mConfig.getPagesFromSpreadPosition(mDragFromSpread);
-                    mLifecycle.saveLoadedState();
+                    mLifecycle.saveState();
                     mLifecycle.spreadDisappeared(mDragFromSpread, mDragFromPages);
                     break;
                 case ViewPager.SCROLL_STATE_IDLE:
                     if (mDragFromSpread == getPosition()) {
                         // User starts dragging, but doesn't swipe to the next spread - re-appear
-                        mLifecycle.applyLoadedState(mDragFromPages);
+                        mLifecycle.applyState(mDragFromSpread, mDragFromPages);
                         mLifecycle.spreadAppeared(mDragFromSpread, mDragFromPages, true);
                     }
                     break;
+                case ViewPager.SCROLL_STATE_SETTLING:
+
             }
         }
 
