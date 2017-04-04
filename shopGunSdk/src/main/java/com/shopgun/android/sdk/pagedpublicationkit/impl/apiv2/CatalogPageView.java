@@ -46,7 +46,7 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.gravity = Gravity.CENTER;
         mTextView.setLayoutParams(lp);
-        mTextView.setPulseColors(textColor, ColorUtils.setAlphaComponent(textColor, 64));
+        mTextView.setPulseColors(textColor, 20, 80);
         mTextView.setText(String.valueOf(mPagedPublicationPage.getPageIndex()+1));
         mTextView.setTextSize(UnitUtils.spToPx(26, getContext()));
         addView(mTextView);

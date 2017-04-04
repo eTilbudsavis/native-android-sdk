@@ -6,9 +6,12 @@ import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
+
+import com.shopgun.android.utils.ColorUtils;
 
 public class PulsatingTextView extends TextView {
 
@@ -39,6 +42,11 @@ public class PulsatingTextView extends TextView {
     public void setPulseColors(int colorFrom, int colorTo) {
         mColorFrom = colorFrom;
         mColorTo = colorTo;
+        setTextColor(mColorFrom);
+    }
+
+    public void setPulseColors(@ColorInt int color, int fromAlpha, int toAlpha) {
+        setPulseColors(ColorUtils.setAlphaComponent(color, fromAlpha), ColorUtils.setAlphaComponent(color, toAlpha));
     }
 
     public void startPulse() {
@@ -80,7 +88,7 @@ public class PulsatingTextView extends TextView {
         cancelPulse(false);
     }
 
-    class CancelAnimationListener implements Animator.AnimatorListener, ValueAnimator.AnimatorUpdateListener {
+    private class CancelAnimationListener implements Animator.AnimatorListener, ValueAnimator.AnimatorUpdateListener {
 
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
