@@ -7,6 +7,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.ColorInt;
+import android.support.annotation.IntRange;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
@@ -45,8 +46,14 @@ public class PulsatingTextView extends TextView {
         setTextColor(mColorFrom);
     }
 
-    public void setPulseColors(@ColorInt int color, int fromAlpha, int toAlpha) {
-        setPulseColors(ColorUtils.setAlphaComponent(color, fromAlpha), ColorUtils.setAlphaComponent(color, toAlpha));
+    public void setPulseColors(@ColorInt int color,
+                               @IntRange(from = 0x0, to = 0xFF) int fromAlpha,
+                               @IntRange(from = 0x0, to = 0xFF) int toAlpha) {
+        if ((0 <= fromAlpha || fromAlpha <= 255)
+                && (0 <= toAlpha || toAlpha <= 255)) {
+            setPulseColors(ColorUtils.setAlphaComponent(color, fromAlpha),
+                    ColorUtils.setAlphaComponent(color, toAlpha));
+        }
     }
 
     public void startPulse() {
