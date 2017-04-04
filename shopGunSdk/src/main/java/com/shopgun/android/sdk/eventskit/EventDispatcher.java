@@ -28,8 +28,8 @@ public class EventDispatcher extends Thread {
     public static final String TAG = Constants.getTag(EventDispatcher.class);
 
     private static final String DISPATCH_EVENT = "dispatch-event-queue-id";
-    public static final int DEF_MAX_QUEUE_SIZE = 20;
-    public static final int DEF_MAX_RETRY_COUNT = 5;
+    private static final int DEF_MAX_QUEUE_SIZE = 100;
+    private static final int DEF_MAX_RETRY_COUNT = 5;
 
     /** The queue of requests to service. */
     private final BlockingQueue<Event> mQueue;
