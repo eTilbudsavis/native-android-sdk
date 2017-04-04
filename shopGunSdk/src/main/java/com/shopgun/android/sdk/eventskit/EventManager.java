@@ -132,7 +132,11 @@ public class EventManager {
 
         @Override
         public void onCreate(Activity activity) {
-            mEventDispatcher.start();
+            try {
+                mEventDispatcher.start();
+            } catch (IllegalThreadStateException e) {
+                // ignore - we're running it's fine
+            }
             flush();
         }
 
