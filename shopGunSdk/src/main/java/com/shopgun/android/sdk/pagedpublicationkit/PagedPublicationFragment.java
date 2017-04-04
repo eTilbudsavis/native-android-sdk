@@ -592,7 +592,7 @@ public class PagedPublicationFragment extends VersoFragment {
                     mLifecycle.spreadDisappeared(mDragFromSpread, mDragFromPages);
                     break;
                 case ViewPager.SCROLL_STATE_IDLE:
-                    if (mDragFromSpread == getPosition()) {
+                    if (mDragFromSpread == getPosition() && mDragFromPages != null) {
                         // User starts dragging, but doesn't swipe to the next spread - re-appear
                         mLifecycle.applyState(mDragFromSpread, mDragFromPages);
                         mLifecycle.spreadAppeared(mDragFromSpread, mDragFromPages, true);
