@@ -293,6 +293,21 @@ public class PagedPublicationFragment extends VersoFragment {
         mDisplayHotspotsOnTouch = displayHotspotsOnTouch;
     }
 
+    /**
+     * @return {@code true} is the current spread is at a scaled state, else {@code false}
+     */
+    public boolean isCurrentSpreadScaled() {
+        VersoPageViewFragment f = getCurrentFragment();
+        return f != null && f.isScaled();
+    }
+
+    public void resetCurrentSpreadScale() {
+        VersoPageViewFragment f = getCurrentFragment();
+        if (f != null && f.getZoomLayout() != null) {
+            f.getZoomLayout().setScale(1.0f, true);
+        }
+    }
+
     private VersoPageViewFragment getCurrentFragment() {
         if (mVersoViewPager.getVersoAdapter() != null) {
             for (Fragment fragment : mVersoViewPager.getVersoAdapter().getFragments()) {
