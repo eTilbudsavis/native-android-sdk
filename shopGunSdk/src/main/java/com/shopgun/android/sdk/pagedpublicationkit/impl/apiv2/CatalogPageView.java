@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationPage;
 import com.shopgun.android.sdk.pagedpublicationkit.impl.AspectRatioFrameLayout;
 import com.shopgun.android.sdk.pagedpublicationkit.impl.PulsatingTextView;
-import com.shopgun.android.utils.ColorUtils;
 import com.shopgun.android.utils.UnitUtils;
 import com.shopgun.android.verso.VersoPageView;
 import com.shopgun.android.verso.VersoPageViewFragment;

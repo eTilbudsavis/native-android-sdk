@@ -5,12 +5,9 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.google.gson.JsonObject;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.corekit.SgnPreferences;
 import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.PackageUtils;
 import com.shopgun.android.utils.TextUtils;
 

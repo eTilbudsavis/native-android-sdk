@@ -17,15 +17,8 @@
 package com.shopgun.android.sdk;
 
 
-import android.graphics.Color;
-
 import com.shopgun.android.sdk.utils.Constants;
-import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.SgnUtils;
-import com.shopgun.android.utils.ColorUtils;
 
-import org.json.JSONObject;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

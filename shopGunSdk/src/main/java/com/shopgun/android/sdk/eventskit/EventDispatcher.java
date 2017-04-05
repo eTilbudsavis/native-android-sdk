@@ -7,8 +7,6 @@ import com.google.gson.GsonBuilder;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
-import com.shopgun.android.utils.TextUtils;
-import com.shopgun.android.utils.log.L;
 
 import java.util.ArrayList;
 import java.util.Date;

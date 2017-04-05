@@ -4,8 +4,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.DateUtils;
-import com.shopgun.android.utils.log.L;
-import com.shopgun.android.utils.log.LogUtil;
 
 import java.util.Date;
 

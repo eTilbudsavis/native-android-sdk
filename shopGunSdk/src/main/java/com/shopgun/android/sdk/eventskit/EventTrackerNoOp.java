@@ -2,8 +2,6 @@ package com.shopgun.android.sdk.eventskit;
 
 import android.net.Uri;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.log.L;
 

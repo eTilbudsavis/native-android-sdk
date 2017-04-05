@@ -4,12 +4,10 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.ComponentCallbacks2;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.utils.Constants;
-import com.shopgun.android.sdk.utils.LifecycleLogger;
 
 import java.util.Collection;
 import java.util.HashSet;
