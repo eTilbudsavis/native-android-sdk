@@ -27,7 +27,7 @@ public class EventManager {
     public static final String TAG = Constants.getTag(EventManager.class);
 
     private static final int DISPATCH_MSG = 5738629;
-    private static final long DISPATCH_INTERVAL = TimeUnit.SECONDS.toMillis(30);
+    private static final long DISPATCH_INTERVAL = TimeUnit.SECONDS.toMillis(120);
 
     private static EventManager mInstance;
     private static final Handler mHandler = new Handler(Looper.getMainLooper()) {
