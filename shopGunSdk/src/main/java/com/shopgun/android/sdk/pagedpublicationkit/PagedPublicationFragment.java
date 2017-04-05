@@ -9,7 +9,6 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.CenteredViewPager;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -291,33 +290,6 @@ public class PagedPublicationFragment extends VersoFragment {
 
     public void setDisplayHotspotsOnTouch(boolean displayHotspotsOnTouch) {
         mDisplayHotspotsOnTouch = displayHotspotsOnTouch;
-    }
-
-    /**
-     * @return {@code true} is the current spread is at a scaled state, else {@code false}
-     */
-    public boolean isCurrentSpreadScaled() {
-        VersoPageViewFragment f = getCurrentFragment();
-        return f != null && f.isScaled();
-    }
-
-    public void resetCurrentSpreadScale() {
-        VersoPageViewFragment f = getCurrentFragment();
-        if (f != null && f.getZoomLayout() != null) {
-            f.getZoomLayout().setScale(1.0f, true);
-        }
-    }
-
-    private VersoPageViewFragment getCurrentFragment() {
-        if (mVersoViewPager.getVersoAdapter() != null) {
-            for (Fragment fragment : mVersoViewPager.getVersoAdapter().getFragments()) {
-                VersoPageViewFragment f = (VersoPageViewFragment) fragment;
-                if (f != null && f.getSpreadPosition() == getPosition()) {
-                    return f;
-                }
-            }
-        }
-        return null;
     }
 
     @Override
