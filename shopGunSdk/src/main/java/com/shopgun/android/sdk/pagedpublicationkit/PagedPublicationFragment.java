@@ -399,6 +399,7 @@ public class PagedPublicationFragment extends VersoFragment {
 
         @Override
         public void onZoomBegin(VersoZoomPanInfo info) {
+            mVersoViewPager.enablePaging(false);
             if (mZoomListener != null) {
                 mZoomListener.onZoomBegin(info);
             }
@@ -407,6 +408,7 @@ public class PagedPublicationFragment extends VersoFragment {
 
         @Override
         public void onZoomEnd(VersoZoomPanInfo info) {
+            mVersoViewPager.enablePaging(!isCurrentSpreadScaled());
             if (mZoomListener != null) {
                 mZoomListener.onZoomEnd(info);
             }
