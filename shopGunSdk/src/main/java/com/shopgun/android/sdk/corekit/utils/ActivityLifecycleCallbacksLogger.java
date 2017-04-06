@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.utils;
+package com.shopgun.android.sdk.corekit.utils;
 
 import android.app.Activity;
 import android.app.Application;
@@ -6,11 +6,11 @@ import android.os.Bundle;
 
 import com.shopgun.android.sdk.log.SgnLog;
 
-public class LifecycleLogger implements Application.ActivityLifecycleCallbacks {
+public class ActivityLifecycleCallbacksLogger implements Application.ActivityLifecycleCallbacks {
 
     private String mTag;
 
-    public LifecycleLogger(String tag) {
+    public ActivityLifecycleCallbacksLogger(String tag) {
         mTag = tag;
     }
 

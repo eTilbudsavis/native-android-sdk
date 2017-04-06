@@ -7,6 +7,8 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.corekit.utils.ActivityLifecycleCallbacksLogger;
+import com.shopgun.android.sdk.corekit.utils.LifecycleManagerCallbackLogger;
 import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.Collection;
@@ -19,98 +21,102 @@ public class LifecycleManager {
     private static final int DEF_DESTROY_DELAY = 3000;
 
     private final Collection<Callback> mCallbacks = new HashSet<>();
-    private Application mApplication;
-    private Activity mCurrentActivity;
-    private Runnable mDestroyRunnable = new Runnable() {
+    private ApplicationCallbacks mApplicationCallbacks;
+
+    public LifecycleManager(Application application) {
+        mApplicationCallbacks = new ApplicationCallbacks();
+        application.registerActivityLifecycleCallbacks(mApplicationCallbacks);
+        application.registerComponentCallbacks(mApplicationCallbacks);
+//        addLoggers(application);
+    }
+
+    private void addLoggers(Application application) {
+        application.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacksLogger(TAG));
+        registerCallback(new LifecycleManagerCallbackLogger(TAG));
+    }
+
+    private class ApplicationCallbacks implements Application.ActivityLifecycleCallbacks, ComponentCallbacks2, Runnable {
+
+        Activity mCurrentActivity;
+
+        @Override
+        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+            ShopGun.getInstance().getHandler().removeCallbacks(this);
+            if (mCurrentActivity == null) {
+                mCurrentActivity = activity;
+                dispatchCreate(mCurrentActivity);
+            }
+        }
+
+        @Override
+        public void onActivityStarted(Activity activity) {
+            mCurrentActivity = activity;
+            dispatchStart(activity);
+        }
+
+        @Override
+        public void onActivityResumed(Activity activity) {
+            mCurrentActivity = activity;
+        }
+
+        @Override
+        public void onActivityPaused(Activity activity) {
+            throwIfNoActivity();
+        }
+
+        @Override
+        public void onActivityStopped(Activity activity) {
+            if (activity == mCurrentActivity) {
+                dispatchStop(activity);
+            }
+        }
+
+        @Override
+        public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
+
+        @Override
+        public void onActivityDestroyed(Activity activity) {
+            if (activity == mCurrentActivity) {
+                ShopGun.getInstance().getHandler().postDelayed(this, DEF_DESTROY_DELAY);
+            }
+        }
+
         @Override
         public void run() {
-            // Remove current Activity, to indicate that we are no longer active
             Activity tmp = mCurrentActivity;
             mCurrentActivity = null;
             dispatchDestroy(tmp);
         }
-    };
 
-    public LifecycleManager(Application application) {
-        mApplication = application;
-//        mApplication.registerActivityLifecycleCallbacks(new LifecycleLogger(TAG));
-        mApplication.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
-            @Override
-            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-                ShopGun.getInstance().getHandler().removeCallbacks(mDestroyRunnable);
-                if (mCurrentActivity == null) {
-                    mCurrentActivity = activity;
-                    dispatchCreate(mCurrentActivity);
-                }
+        private void throwIfNoActivity() {
+            if (mCurrentActivity == null) {
+                throw new IllegalStateException("No activity set in " + TAG +
+                        ". Make sure to instantiate ShopGun in Application.onCreate()");
             }
+        }
 
-            @Override
-            public void onActivityStarted(Activity activity) {
-                mCurrentActivity = activity;
-                dispatchStart(activity);
-            }
+        @Override
+        public void onTrimMemory(int level) {
+            dispatchTrimMemory(level);
+        }
 
-            @Override
-            public void onActivityResumed(Activity activity) {
-                mCurrentActivity = activity;
-            }
+        @Override
+        public void onConfigurationChanged(Configuration newConfig) {
+            dispatchConfigurationChanged(newConfig);
+        }
 
-            @Override
-            public void onActivityPaused(Activity activity) {
-                throwIfNoActivity();
-            }
-
-            @Override
-            public void onActivityStopped(Activity activity) {
-                dispatchStop(activity);
-            }
-
-            @Override
-            public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
-
-            @Override
-            public void onActivityDestroyed(Activity activity) {
-                if (activity == mCurrentActivity) {
-                    ShopGun.getInstance().getHandler().postDelayed(mDestroyRunnable, DEF_DESTROY_DELAY);
-                }
-            }
-
-            private void throwIfNoActivity() {
-                if (mCurrentActivity == null) {
-                    throw new IllegalStateException("No activity set in " + TAG +
-                            ". Make sure to instantiate ShopGun in Application.onCreate()");
-                }
-            }
-
-        });
-        mApplication.registerComponentCallbacks(new ComponentCallbacks2() {
-            @Override
-            public void onTrimMemory(int level) {
-                dispatchTrimMemory(level);
-            }
-
-            @Override
-            public void onConfigurationChanged(Configuration newConfig) {
-                dispatchConfigurationChanged(newConfig);
-            }
-
-            @Override
-            public void onLowMemory() {
-                onTrimMemory(TRIM_MEMORY_COMPLETE);
-            }
-        });
+        @Override
+        public void onLowMemory() {
+            onTrimMemory(TRIM_MEMORY_COMPLETE);
+        }
     }
 
     public boolean isActive() {
-        return mCurrentActivity != null;
+        return mApplicationCallbacks.mCurrentActivity != null;
     }
 
     public Activity getActivity() {
-        return mCurrentActivity;
-    }
-
-    private Application getApplication() {
-        return mApplication;
+        return mApplicationCallbacks.mCurrentActivity;
     }
 
     public boolean registerCallback(Callback callback) {
@@ -206,12 +212,12 @@ public class LifecycleManager {
         void onCreate(Activity activity);
 
         /**
-        * Called when the first activity starts
+        * Called when an activity starts
         */
         void onStart(Activity activity);
 
         /**
-         * Called when the last activity stops
+         * Called when an activity stops
          */
         void onStop(Activity activity);
 

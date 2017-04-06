@@ -19,6 +19,7 @@ package com.shopgun.android.sdk;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -139,42 +140,8 @@ public class ShopGun {
     private final RequestQueue mRequestQueue;
     /** A RealmConfiguration specifically for the SDK */
     private final RealmConfiguration mRealmConfiguration;
-
-    private LifecycleManager.Callback mLifecycleCallback = new LifecycleManager.SimpleCallback() {
-        @Override
-        public void onCreate(Activity activity) {
-            mSessionId = SgnUtils.createUUID();
-            mSessionManager.onStart();
-            mListManager.onStart();
-            mSyncManager.onStart();
-            mSettings.incrementUsageCount();
-            SgnLog.v(TAG, "onCreate");
-        }
-
-        @Override
-        public void onStart(Activity activity) {
-            if (mSettings.getUsageCount() == 0) {
-                EzEvent.create(EzEvent.FIRST_CLIENT_SESSION_OPENED).track();
-            }
-            EzEvent.create(EzEvent.CLIENT_SESSION_OPENED).track();
-        }
-
-        @Override
-        public void onStop(Activity activity) {
-            EzEvent.create(EzEvent.CLIENT_SESSION_CLOSED).track();
-        }
-
-        @Override
-        public void onDestroy(Activity activity) {
-            mSettings.saveLocation(mLocation);
-            mListManager.onStop();
-            mSyncManager.onStop();
-            mSessionManager.onStop();
-            mSettings.setLastUsedTimeNow();
-            mSettings.setSessionId(mSessionId);
-            SgnLog.v(TAG, "onDestroy");
-        }
-    };
+    /**  **/
+    private SgnLifecycleCallback mLifecycleCallback;
 
     private ShopGun(Builder builder) {
         // Get application context, to avoid memory leaks (e.g. holding a reference to an Activity)
@@ -185,13 +152,11 @@ public class ShopGun {
         mExecutor = builder.executorService;
         mClient = builder.okHttpClient;
         mRealmConfiguration = builder.realmConfiguration;
-
         // TODO how do we pass around the RealmConfig without exposing it publicly and without having any knowledge of the kits
 
         mLifecycleManager = new LifecycleManager(builder.application);
+        mLifecycleCallback = new SgnLifecycleCallback();
         mLifecycleManager.registerCallback(mLifecycleCallback);
-//        mLifecycleManager.registerCallback(new LifecycleManager.CallbackLogger(TAG));
-//        mLifecycleManager.registerCallback(new LifecycleEventLogger());
 
         mSettings = new Settings(mContext);
 
@@ -400,6 +365,56 @@ public class ShopGun {
 
     public Realm getRealmInstance() {
         return Realm.getInstance(mRealmConfiguration);
+    }
+
+    private class SgnLifecycleCallback implements LifecycleManager.Callback {
+
+        @Override
+        public void onCreate(Activity activity) {
+            mSessionId = SgnUtils.createUUID();
+            mSessionManager.onStart();
+            mListManager.onStart();
+            mSyncManager.onStart();
+            mSettings.incrementUsageCount();
+            SgnLog.v(TAG, "onCreate");
+        }
+
+        @Override
+        public void onStart(Activity activity) {
+            if (mSettings.getUsageCount() == 0) {
+                EzEvent.create(EzEvent.FIRST_CLIENT_SESSION_OPENED).track();
+            }
+            EzEvent.create(EzEvent.CLIENT_SESSION_OPENED).track();
+        }
+
+        @Override
+        public void onStop(Activity activity) {
+            EzEvent.create(EzEvent.CLIENT_SESSION_CLOSED).track();
+        }
+
+        @Override
+        public void onDestroy(Activity activity) {
+            mSettings.saveLocation(mLocation);
+            mListManager.onStop();
+            mSyncManager.onStop();
+            mSessionManager.onStop();
+            mSettings.setLastUsedTimeNow();
+            mSettings.setSessionId(mSessionId);
+            SgnLog.v(TAG, "onDestroy");
+
+//            mSingleton = null; // TODO: 06/04/2017 Synchronize this
+        }
+
+        @Override
+        public void onTrimMemory(int level) {
+
+        }
+
+        @Override
+        public void onConfigurationChanged(Configuration newConfig) {
+
+        }
+
     }
 
     /**
