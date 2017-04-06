@@ -16,10 +16,6 @@
 
 package com.shopgun.android.sdk.network;
 
-
-/**
- * TODO: Write documentation on how this interface should be implemented
- */
 public interface Network {
 
     /**

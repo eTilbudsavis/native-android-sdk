@@ -28,8 +28,6 @@ public class LifecycleManager {
             Activity tmp = mCurrentActivity;
             mCurrentActivity = null;
             dispatchDestroy(tmp);
-            // TODO to remove callbacks or not to remove callbacks, that is the question.
-//            unregisterAllCallbacks();
         }
     };
 

@@ -81,10 +81,6 @@ public class NetworkImpl implements Network {
                 content = entityToBytes(resp.getEntity());
             }
 
-			/*
-			 * TODO report back content and body length, to collect stats on
-			 * transferred data, to compare with MsgPack later.
-			 */
             int respLength = content.length;
             int bodyLength = (request.getBody() == null ? 0 : request.getBody().length);
 

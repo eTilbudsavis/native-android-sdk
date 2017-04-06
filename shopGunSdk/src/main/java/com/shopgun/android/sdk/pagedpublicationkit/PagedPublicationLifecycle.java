@@ -31,7 +31,6 @@ class PagedPublicationLifecycle implements Parcelable {
 
     public void setConfig(PagedPublicationConfiguration config) {
         mConfig = config;
-        // TODO: 22/03/2017 Consider adding an option to set a tracker to the configuration
     }
 
     private boolean isReady() {

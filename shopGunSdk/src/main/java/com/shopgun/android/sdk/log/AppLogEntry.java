@@ -44,6 +44,8 @@ public class AppLogEntry {
     private boolean mSingleEntry = true;
     private String mEntryName;
 
+    // TODO: 06/04/2017 Post debugging events to Atta
+
     public AppLogEntry(ShopGun sgn, String entryName) {
         this(sgn, entryName, null);
     }
