@@ -12,7 +12,6 @@ import com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2.quatzel.impl.Clock
 import com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2.quatzel.impl.PageflipStatsCollectorImpl;
 import com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2.quatzel.impl.StatDeliveryImpl;
 import com.shopgun.android.utils.enums.Orientation;
-import com.shopgun.android.utils.log.L;
 
 import java.util.ArrayList;
 import java.util.Arrays;
