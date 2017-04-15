@@ -155,6 +155,9 @@ public class PagedPublicationFragment extends VersoFragment {
     protected void onInternalPause() {
         mLifecycle.spreadDisappeared(getPosition(), getCurrentPages());
         mLifecycle.resetSpreadsPagesLoadedAndZoom();
+        if (isCurrentSpreadScaled()) {
+            resetCurrentSpreadScale(false);
+        }
         super.onInternalPause();
     }
 
@@ -417,7 +420,7 @@ public class PagedPublicationFragment extends VersoFragment {
 
         @Override
         public void onZoomBegin(VersoZoomPanInfo info) {
-            mVersoViewPager.enablePaging(false);
+            mVersoViewPager.setPagingEnabled(false);
             if (mZoomListener != null) {
                 mZoomListener.onZoomBegin(info);
             }
@@ -426,7 +429,7 @@ public class PagedPublicationFragment extends VersoFragment {
 
         @Override
         public void onZoomEnd(VersoZoomPanInfo info) {
-            mVersoViewPager.enablePaging(!isCurrentSpreadScaled());
+            mVersoViewPager.setPagingEnabled(!isCurrentSpreadScaled());
             if (mZoomListener != null) {
                 mZoomListener.onZoomEnd(info);
             }
