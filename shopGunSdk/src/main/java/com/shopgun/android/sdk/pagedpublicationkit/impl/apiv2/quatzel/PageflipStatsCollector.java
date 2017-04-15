@@ -47,8 +47,6 @@ public interface PageflipStatsCollector {
      */
     void collect();
 
-    boolean isCollected();
-
     /**
      * Get the root event of this collector
      * @return An event

@@ -22,6 +22,9 @@ import android.widget.TextView;
 import com.shopgun.android.materialcolorcreator.MaterialColor;
 import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
 import com.shopgun.android.sdk.R;
+import com.shopgun.android.sdk.eventskit.EventManager;
+import com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2.quatzel.QuatzelConverterPublicationListener;
+import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.verso.VersoFragment;
 import com.shopgun.android.verso.VersoPageView;
 import com.shopgun.android.verso.VersoPageViewFragment;
@@ -54,6 +57,8 @@ public class PagedPublicationFragment extends VersoFragment {
     PageChangeListener mPageChangeLisetner = new PageChangeListener();
 
     PagedPublicationLifecycle mLifecycle;
+    QuatzelConverterPublicationListener mQuatzelConverterPublicationListener;
+    String mViewSessionUuid;
 
     public static PagedPublicationFragment newInstance() {
         return new PagedPublicationFragment();
@@ -87,12 +92,16 @@ public class PagedPublicationFragment extends VersoFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mLifecycle = new PagedPublicationLifecycle();
+        mQuatzelConverterPublicationListener = new QuatzelConverterPublicationListener();
+        mViewSessionUuid = SgnUtils.createUUID();
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_STATE)) {
             SavedState savedState = savedInstanceState.getParcelable(SAVED_STATE);
             if (savedState != null) {
                 mConfig = savedState.config;
                 mDisplayHotspotsOnTouch = savedState.displayHotspotOnTouch;
+                mViewSessionUuid = savedState.viewSessionUuid;
                 mLifecycle.setConfig(mConfig);
+                mQuatzelConverterPublicationListener.setConfig(mConfig, mViewSessionUuid);
             }
         } else if (getArguments() != null) {
             mConfig = getArguments().getParcelable(ARG_CONFIGURATION);
@@ -113,11 +122,19 @@ public class PagedPublicationFragment extends VersoFragment {
         mFrameLoader = (FrameLayout) mFrame.findViewById(R.id.loader);
         setVisible(false, false, false);
 
+        EventManager.getInstance().addEventListener(mQuatzelConverterPublicationListener);
         if (getVersoSpreadConfiguration() == null) {
             setPublicationConfiguration(mConfig);
         }
 
         return mFrame;
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        // Resume lifecycle now, so callbacks for pagechanges is registered correctly when state is restored
+        mLifecycle.resumed();
+        super.onViewStateRestored(savedInstanceState);
     }
 
     public PagedPublicationConfiguration getPublicationConfiguration() {
@@ -128,6 +145,7 @@ public class PagedPublicationFragment extends VersoFragment {
         if (configuration != null) {
             mConfig = configuration;
             mLifecycle.setConfig(mConfig);
+            mQuatzelConverterPublicationListener.setConfig(mConfig, mViewSessionUuid);
             setVersoSpreadConfiguration(mConfig);
             loadPagedPublication();
         }
@@ -541,6 +559,12 @@ public class PagedPublicationFragment extends VersoFragment {
         mLifecycle.spreadAppeared(spread, pages, true);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        EventManager.getInstance().removeEventListener(mQuatzelConverterPublicationListener);
+    }
+
     private class PageScrolledListener implements CenteredViewPager.OnPageChangeListener {
 
         int mLastState = ViewPager.SCROLL_STATE_IDLE;
@@ -611,10 +635,12 @@ public class PagedPublicationFragment extends VersoFragment {
 
         PagedPublicationConfiguration config;
         boolean displayHotspotOnTouch;
+        String viewSessionUuid;
 
         private SavedState(PagedPublicationFragment f) {
             config = f.mConfig;
             displayHotspotOnTouch = f.mDisplayHotspotsOnTouch;
+            viewSessionUuid = f.mViewSessionUuid;
         }
 
         @Override
@@ -626,11 +652,13 @@ public class PagedPublicationFragment extends VersoFragment {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeParcelable(this.config, flags);
             dest.writeByte(this.displayHotspotOnTouch ? (byte) 1 : (byte) 0);
+            dest.writeString(this.viewSessionUuid);
         }
 
         protected SavedState(Parcel in) {
             this.config = in.readParcelable(PagedPublicationConfiguration.class.getClassLoader());
             this.displayHotspotOnTouch = in.readByte() != 0;
+            this.viewSessionUuid = in.readString();
         }
 
         public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {

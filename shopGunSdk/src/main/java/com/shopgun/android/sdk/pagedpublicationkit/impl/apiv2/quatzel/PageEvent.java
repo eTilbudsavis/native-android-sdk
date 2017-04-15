@@ -220,7 +220,7 @@ public class PageEvent {
             JSONObject o = new JSONObject();
             o.put("type", mEventType.toString());
             o.put("ms", getDuration());
-            o.put("orientation", mOrientation.toString());
+            o.put("orientation", mOrientation.toString().toLowerCase());
             o.put("pages", TextUtils.join(",", mPages));
             o.put("view_session", mViewSession);
             return o;

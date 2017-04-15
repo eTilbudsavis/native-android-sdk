@@ -60,7 +60,7 @@ public class CatalogConfiguration extends IntroOutroConfiguration {
     }
 
     public int getPublicationPageCount() {
-        return mPages == null ? 0 : mPages.size();
+        return mCatalog == null ? 0 : mCatalog.getPageCount();
     }
 
     public Catalog getCatalog() {
