@@ -37,18 +37,24 @@ public class QuatzelConverterPublicationListener implements EventListener {
             return;
         }
         mConfig = (CatalogConfiguration) config;
-        int pageCount = mConfig.getPublicationPageCount();
-        mConfig.getPageCount();
-        mCatalogId = mConfig.getPublication().getId();
-        mOrientation = mConfig.getOrientation();
-        mCollectors = new ArrayList<>(pageCount);
-        for (int i = 0; i < pageCount; i++) {
-            mCollectors.add(null);
-        }
-        mPagesLoaded = new boolean[pageCount];
         mViewSession = viewSession;
         mClock = ClockFactory.getClock();
         mStatDelivery = new StatDeliveryImpl(ShopGun.getInstance(), true);
+        isConfigReady();
+    }
+
+    private boolean isConfigReady() {
+        if (mCatalogId == null && mConfig.hasData()) {
+            int pageCount = mConfig.getPublicationPageCount();
+            mCatalogId = mConfig.getPublication().getId();
+            mOrientation = mConfig.getOrientation();
+            mCollectors = new ArrayList<>(pageCount);
+            for (int i = 0; i < pageCount; i++) {
+                mCollectors.add(null);
+            }
+            mPagesLoaded = new boolean[pageCount];
+        }
+        return mConfig != null;
     }
 
     private boolean isPagesLoadedAndAppeared(PropInfo info) {
@@ -95,6 +101,10 @@ public class QuatzelConverterPublicationListener implements EventListener {
 
     @Override
     public void onEvent(Event event) {
+
+        if (!isConfigReady()) {
+            return;
+        }
 
         PropInfo info = new PropInfo(event);
 //        L.d(TAG, event.getType() + ", " + info.toString());
