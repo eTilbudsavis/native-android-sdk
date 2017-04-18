@@ -14,10 +14,21 @@ public class PagedPublicationEvent extends EzEvent {
         super(type, properties);
     }
 
+    private static JsonArray idField(String id) {
+        return idField(true, id);
+    }
+
+    private static JsonArray idField(boolean legacy, String id) {
+        JsonArray array = new JsonArray();
+        array.add(legacy ? "legacy" : "graph");
+        array.add(id);
+        return array;
+    }
+
     private static JsonObject publication(String publicationId, String ownedBy) {
         JsonObject pagedPublication = new JsonObject();
-        pagedPublication.addProperty("id", publicationId);
-        pagedPublication.addProperty("ownedBy", ownedBy);
+        pagedPublication.add("id", idField(publicationId));
+        pagedPublication.add("ownedBy", idField(ownedBy));
         JsonObject properties = new JsonObject();
         properties.add("pagedPublication", pagedPublication);
         return properties;
@@ -53,12 +64,14 @@ public class PagedPublicationEvent extends EzEvent {
         return new PagedPublicationEvent(type, getPageClickProperties(publicationId, ownedBy, pageNumber, x, y));
     }
 
-    private static JsonObject getPageSpreadProperties(String publicationId, String ownedBy, int[] pageNumbers) {
+    private static JsonObject getPageSpreadProperties(String publicationId, String ownedBy, int[] pages) {
         JsonObject props = publication(publicationId, ownedBy);
-        JsonArray pagedPublicationPageSpread = new JsonArray();
-        for (int page : pageNumbers) {
-            pagedPublicationPageSpread.add(page+1);
+        JsonObject pagedPublicationPageSpread = new JsonObject();
+        JsonArray pageNumbers = new JsonArray();
+        for (int page : pages) {
+            pageNumbers.add(page+1);
         }
+        pagedPublicationPageSpread.add("pageNumbers", pageNumbers);
         props.add("pagedPublicationPageSpread", pagedPublicationPageSpread);
         return props;
     }

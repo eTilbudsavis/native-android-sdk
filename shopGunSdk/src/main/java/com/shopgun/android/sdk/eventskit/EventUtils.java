@@ -6,6 +6,7 @@ import android.location.Location;
 import android.os.Build;
 
 import com.google.gson.JsonObject;
+import com.shopgun.android.sdk.SgnLocation;
 import com.shopgun.android.sdk.utils.SgnUserAgent;
 import com.shopgun.android.utils.DateUtils;
 import com.shopgun.android.utils.DeviceUtils;
@@ -94,24 +95,28 @@ public class EventUtils {
     }
 
     public static JsonObject location(Context mContext) {
-        Location mLocation = LocationUtils.getLastKnownLocation(mContext);
-        if (mLocation != null) {
-            JsonObject object = new JsonObject();
-            object.addProperty("determinedAt", DateUtils.format(new Date(mLocation.getTime())));
-            object.addProperty("latitude", mLocation.getLatitude());
-            object.addProperty("longitude", mLocation.getLongitude());
-            object.addProperty("altitude", mLocation.hasAltitude() ? mLocation.getAltitude() : null);
-            object.addProperty("speed", mLocation.hasSpeed() ? mLocation.getSpeed() : null);
-            if (mLocation.hasAccuracy()) {
-                JsonObject accuracy = new JsonObject();
-                accuracy.addProperty("horizontal", mLocation.getAccuracy());
-                accuracy.addProperty("vertical", mLocation.getAccuracy());
-                object.add("accuracy", accuracy);
-            }
-            object.add("floor", null);
-            return object;
+        Location loc = LocationUtils.getLastKnownLocation(mContext);
+        return location(loc);
+    }
+
+    public static JsonObject location(Location loc) {
+        if (loc == null) {
+            return null;
         }
-        return null;
+        JsonObject object = new JsonObject();
+        object.addProperty("determinedAt", DateUtils.format(new Date(loc.getTime())));
+        object.addProperty("latitude", loc.getLatitude());
+        object.addProperty("longitude", loc.getLongitude());
+        object.addProperty("altitude", loc.hasAltitude() ? loc.getAltitude() : null);
+        object.addProperty("speed", loc.hasSpeed() ? loc.getSpeed() : null);
+        if (loc.hasAccuracy()) {
+            JsonObject accuracy = new JsonObject();
+            accuracy.addProperty("horizontal", loc.getAccuracy());
+            accuracy.addProperty("vertical", loc.getAccuracy());
+            object.add("accuracy", accuracy);
+        }
+        object.add("floor", null);
+        return object;
     }
 
 }

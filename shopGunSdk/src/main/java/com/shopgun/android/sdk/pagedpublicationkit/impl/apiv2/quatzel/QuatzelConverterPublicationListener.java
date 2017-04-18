@@ -156,7 +156,8 @@ public class QuatzelConverterPublicationListener implements EventListener {
         PropInfo(JsonObject properties) {
 
             if (properties.has("pagedPublicationPageSpread")) {
-                JsonArray pageNumbers = properties.getAsJsonArray("pagedPublicationPageSpread");
+                JsonObject pagedPublicationPageSpread = properties.getAsJsonObject("pagedPublicationPageSpread");
+                JsonArray pageNumbers = pagedPublicationPageSpread.getAsJsonArray("pageNumbers");
                 rawPages = new int[pageNumbers.size()];
                 for (int i = 0; i < pageNumbers.size(); i++) {
                     rawPages[i] = pageNumbers.get(i).getAsInt();
