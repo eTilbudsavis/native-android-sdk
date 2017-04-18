@@ -41,6 +41,9 @@ public class EzEvent {
     }
 
     protected EzEvent(String type, JsonObject properties) {
+        if (properties == null) {
+            properties = new JsonObject();
+        }
         mEvent = new Event(type, properties);
     }
 

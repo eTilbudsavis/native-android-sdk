@@ -141,9 +141,7 @@ public class QuatzelConverterPublicationListener implements EventListener {
 
     }
 
-    private static final int[] EMPTY_PAGES = new int[]{};
-
-    class PropInfo {
+    private class PropInfo {
 
         int[] rawPages;
         int rawPage;
