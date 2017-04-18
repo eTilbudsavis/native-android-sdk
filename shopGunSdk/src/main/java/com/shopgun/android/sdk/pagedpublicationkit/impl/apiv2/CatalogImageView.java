@@ -1,12 +1,10 @@
 package com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
-import android.widget.ImageView;
 
-public class CatalogImageView extends ImageView {
+public class CatalogImageView extends AppCompatImageView {
     public CatalogImageView(Context context) {
         super(context);
     }
@@ -17,11 +15,6 @@ public class CatalogImageView extends ImageView {
 
     public CatalogImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public CatalogImageView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Override

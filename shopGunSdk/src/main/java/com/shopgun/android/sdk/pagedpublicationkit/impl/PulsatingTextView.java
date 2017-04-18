@@ -8,13 +8,14 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.IntRange;
+import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
 import com.shopgun.android.utils.ColorUtils;
 
-public class PulsatingTextView extends TextView {
+public class PulsatingTextView extends AppCompatTextView {
 
     public static final String TAG = PulsatingTextView.class.getSimpleName();
 
@@ -33,11 +34,6 @@ public class PulsatingTextView extends TextView {
 
     public PulsatingTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public PulsatingTextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     public void setPulseColors(int colorFrom, int colorTo) {
