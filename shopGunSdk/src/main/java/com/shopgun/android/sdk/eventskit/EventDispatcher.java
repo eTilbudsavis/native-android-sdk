@@ -62,7 +62,9 @@ public class EventDispatcher extends Thread {
     public synchronized void start() {
         if (mQuit) {
             mQuit = false;
-            super.start();
+            if (!isAlive()) {
+                super.start();
+            }
             flush();
         }
     }
