@@ -50,6 +50,7 @@ public class LifecycleManager {
 
         @Override
         public void onActivityStarted(Activity activity) {
+            onActivityCreated(activity, null);
             mCurrentActivity = activity;
             dispatchStart(activity);
         }
