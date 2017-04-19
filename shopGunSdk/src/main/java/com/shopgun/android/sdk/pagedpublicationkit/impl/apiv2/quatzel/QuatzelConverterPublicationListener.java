@@ -39,7 +39,7 @@ public class QuatzelConverterPublicationListener implements EventListener {
         mConfig = (CatalogConfiguration) config;
         mViewSession = viewSession;
         mClock = ClockFactory.getClock();
-        mStatDelivery = new StatDeliveryImpl(ShopGun.getInstance(), true);
+        mStatDelivery = new StatDeliveryImpl(ShopGun.getInstance(), false);
         isConfigReady();
     }
 
