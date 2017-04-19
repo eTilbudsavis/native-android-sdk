@@ -68,6 +68,8 @@ public class LifecycleManager {
         public void onActivityStopped(Activity activity) {
             if (activity == mCurrentActivity) {
                 dispatchStop(activity);
+                // activities aren't guaranteed to be destroyed, so we'll initiate destroy here
+                ShopGun.getInstance().getHandler().postDelayed(this, DEF_DESTROY_DELAY);
             }
         }
 
@@ -75,11 +77,7 @@ public class LifecycleManager {
         public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
 
         @Override
-        public void onActivityDestroyed(Activity activity) {
-            if (activity == mCurrentActivity) {
-                ShopGun.getInstance().getHandler().postDelayed(this, DEF_DESTROY_DELAY);
-            }
-        }
+        public void onActivityDestroyed(Activity activity) { }
 
         @Override
         public void run() {
