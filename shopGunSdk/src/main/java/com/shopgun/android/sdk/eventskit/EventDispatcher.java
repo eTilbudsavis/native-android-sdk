@@ -97,15 +97,13 @@ public class EventDispatcher extends Thread {
         }
 
         int count = (int) mRealm.where(Event.class).count();
-        if (count == 0) {
-            // Nothing to dispatch
-            return;
-        }
 
         if (!force && count < mEventBatchSize) {
             // Wait until we have a decent amount of mEvents
             return;
         }
+
+        Response response = null;
 
         try {
 
@@ -118,7 +116,7 @@ public class EventDispatcher extends Thread {
             mRealm.commitTransaction();
 
             Call call = EventRequest.postEvents(mClient, events);
-            Response response = call.execute();
+            response = call.execute();
 
             if (response.isSuccessful()) {
 
@@ -148,6 +146,10 @@ public class EventDispatcher extends Thread {
             SgnLog.e(TAG, "Networking failed", e);
             if (mRealm.isInTransaction()) {
                 mRealm.cancelTransaction();
+            }
+        } finally {
+            if (response != null) {
+                response.body().close();
             }
         }
 
