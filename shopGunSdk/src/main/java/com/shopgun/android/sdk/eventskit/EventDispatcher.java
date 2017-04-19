@@ -25,7 +25,6 @@ public class EventDispatcher extends Thread {
 
     public static final String TAG = Constants.getTag(EventDispatcher.class);
 
-    private static final String DISPATCH_EVENT = "dispatch-event-queue-id";
     private static final int DEF_EVENT_BATCH_SIZE = 100;
     private static final int DEF_MAX_RETRY_COUNT = 5;
 
@@ -37,6 +36,7 @@ public class EventDispatcher extends Thread {
     private volatile boolean mQuit = false;
     private final int mEventBatchSize;
     private final int mMaxRetryCount;
+    private final Event mFlushEvent;
     private Realm mRealm;
 
     public EventDispatcher(BlockingQueue<Event> queue, OkHttpClient client) {
@@ -48,6 +48,7 @@ public class EventDispatcher extends Thread {
         mClient = client;
         mEventBatchSize = eventBatchSize;
         mMaxRetryCount = maxRetryCount;
+        mFlushEvent = new Event("dispatch-event-queue", new JsonObject());
     }
 
     /**
@@ -76,8 +77,7 @@ public class EventDispatcher extends Thread {
                 }
                 continue;
             }
-
-            if (DISPATCH_EVENT.equals(event.getId())) {
+            if (event == mFlushEvent) {
                 dispatchEventQueue(true);
             } else {
                 mRealm.executeTransaction(new InsertTransaction(event));
@@ -178,9 +178,10 @@ public class EventDispatcher extends Thread {
     }
 
     public void flush() {
-        Event event = new Event();
-        event.setId(DISPATCH_EVENT);
-        mQueue.add(event);
+        // we can't flush if we've exceeded the capacity
+        if (mQueue.remainingCapacity() > 0) {
+            mQueue.add(mFlushEvent);
+        }
     }
 
     private static class InsertTransaction implements Realm.Transaction {
