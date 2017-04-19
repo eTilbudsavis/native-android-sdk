@@ -26,7 +26,7 @@ public class EventDispatcher extends Thread {
     public static final String TAG = Constants.getTag(EventDispatcher.class);
 
     private static final String DISPATCH_EVENT = "dispatch-event-queue-id";
-    private static final int DEF_MAX_QUEUE_SIZE = 100;
+    private static final int DEF_EVENT_BATCH_SIZE = 100;
     private static final int DEF_MAX_RETRY_COUNT = 5;
 
     /** The queue of requests to service. */
@@ -35,18 +35,18 @@ public class EventDispatcher extends Thread {
     private final OkHttpClient mClient;
     /** Used for telling us to die. */
     private volatile boolean mQuit = false;
-    private final int mMaxQueueSize;
+    private final int mEventBatchSize;
     private final int mMaxRetryCount;
     private Realm mRealm;
 
     public EventDispatcher(BlockingQueue<Event> queue, OkHttpClient client) {
-        this(queue, client, DEF_MAX_QUEUE_SIZE, DEF_MAX_RETRY_COUNT);
+        this(queue, client, DEF_EVENT_BATCH_SIZE, DEF_MAX_RETRY_COUNT);
     }
 
-    public EventDispatcher(BlockingQueue<Event> queue, OkHttpClient client, int maxQueueSize, int maxRetryCount) {
+    public EventDispatcher(BlockingQueue<Event> queue, OkHttpClient client, int eventBatchSize, int maxRetryCount) {
         mQueue = queue;
         mClient = client;
-        mMaxQueueSize = maxQueueSize;
+        mEventBatchSize = eventBatchSize;
         mMaxRetryCount = maxRetryCount;
     }
 
@@ -102,7 +102,7 @@ public class EventDispatcher extends Thread {
             return;
         }
 
-        if (!force && count < mMaxQueueSize) {
+        if (!force && count < mEventBatchSize) {
             // Wait until we have a decent amount of mEvents
             return;
         }
@@ -110,7 +110,7 @@ public class EventDispatcher extends Thread {
         try {
 
             mRealm.beginTransaction();
-            List<Event> events = getEvents(100);
+            List<Event> events = getEvents(mEventBatchSize);
             Date now = new Date();
             for (Event event : events) {
                 event.setSentAt(now);
