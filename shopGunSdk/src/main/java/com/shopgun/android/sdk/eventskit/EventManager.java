@@ -8,10 +8,8 @@ import android.os.Looper;
 import android.os.Message;
 
 import com.google.gson.JsonObject;
-import com.shopgun.android.sdk.SgnLocation;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.utils.LocationUtils;
 
@@ -120,11 +118,9 @@ public class EventManager {
     }
 
     public void addEvent(Event event) {
-        try {
+        if (mEventQueue.remainingCapacity() > 0) {
             dispatchOnEvent(event);
             mEventQueue.add(event);
-        } catch (IllegalStateException e) {
-            SgnLog.d(TAG, "Queue is full", e);
         }
     }
 
