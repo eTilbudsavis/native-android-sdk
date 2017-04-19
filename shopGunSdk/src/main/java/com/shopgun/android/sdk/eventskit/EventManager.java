@@ -31,6 +31,7 @@ public class EventManager {
 
     private static final int DISPATCH_MSG = 5738629;
     private static final long DISPATCH_INTERVAL = TimeUnit.SECONDS.toMillis(120);
+    public static final int MAX_QUEUE_SIZE = 1024;
 
     private static EventManager mInstance;
     private static final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -67,7 +68,7 @@ public class EventManager {
     private EventManager(ShopGun shopGun) {
         mTrackers = new HashSet<>();
         mEventListeners = new ArrayList<>();
-        mEventQueue = new LinkedBlockingQueue<>(1024);
+        mEventQueue = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
         mEventDispatcher = new EventDispatcher(mEventQueue, shopGun.getClient());
         mJsonContext = EventUtils.getContext(shopGun.getContext());
         EventLifecycle lifecycleCallback = new EventLifecycle();
