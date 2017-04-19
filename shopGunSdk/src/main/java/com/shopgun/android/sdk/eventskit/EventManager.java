@@ -2,15 +2,18 @@ package com.shopgun.android.sdk.eventskit;
 
 import android.app.Activity;
 import android.content.Context;
+import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
 import com.google.gson.JsonObject;
+import com.shopgun.android.sdk.SgnLocation;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
+import com.shopgun.android.utils.LocationUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -44,6 +47,8 @@ public class EventManager {
     private Collection<WeakReference<EventTracker>> mTrackers;
     private static BlockingQueue<Event> mEventQueue;
     private JsonObject mJsonContext;
+    private Location mLastKnownLocation;
+    private JsonObject mJsonLocation;
     private EventDispatcher mEventDispatcher;
     private long mDispatchInterval = DISPATCH_INTERVAL;
     private final List<EventListener> mEventListeners;
@@ -101,10 +106,14 @@ public class EventManager {
     }
 
     public JsonObject getContext(boolean updateLocation) {
-        if (updateLocation) {
+        if (updateLocation || mLastKnownLocation == null) {
             Context ctx = ShopGun.getInstance().getContext();
-            JsonObject loc = EventUtils.location(ctx);
-            mJsonContext.add("location", loc);
+            Location currentLoc = LocationUtils.getLastKnownLocation(ctx);
+            if (!LocationUtils.isBetterLocation(currentLoc, mLastKnownLocation)) {
+                mLastKnownLocation = currentLoc;
+                mJsonLocation = EventUtils.location(mLastKnownLocation);
+            }
+            mJsonContext.add("location", mJsonLocation);
         }
         return mJsonContext;
     }
