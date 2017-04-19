@@ -97,7 +97,7 @@ public class EventManager {
     }
 
     public void setCampaign(JsonObject campaign) {
-        mJsonContext.add("campaing", campaign);
+        mJsonContext.add("campaign", campaign);
     }
 
     public JsonObject getContext(boolean updateLocation) {
