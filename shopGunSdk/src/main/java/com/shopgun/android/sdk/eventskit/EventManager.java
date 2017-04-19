@@ -10,6 +10,7 @@ import android.os.Message;
 import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.utils.LocationUtils;
 
@@ -118,6 +119,9 @@ public class EventManager {
     }
 
     public void addEvent(Event event) {
+        if (!ShopGun.getInstance().getLifecycleManager().isActive()) {
+            SgnLog.i(TAG, "ShopGun is inactive, and is not accepting events");
+        }
         if (mEventQueue.remainingCapacity() > 0) {
             dispatchOnEvent(event);
             mEventQueue.add(event);
@@ -134,28 +138,24 @@ public class EventManager {
         mEventDispatcher.flush();
     }
 
+    private void startDispatcher() {
+        if (mEventDispatcher == null || mEventDispatcher.getState() == Thread.State.TERMINATED) {
+            mEventDispatcher = new EventDispatcher(mEventQueue, ShopGun.getInstance().getClient());
+        }
+        mEventDispatcher.start();
+    }
+
     private class EventLifecycle extends LifecycleManager.SimpleCallback {
 
         @Override
         public void onCreate(Activity activity) {
-            try {
-                mEventDispatcher.start();
-            } catch (IllegalThreadStateException e) {
-                // ignore - we're running it's fine
-            }
-            flush();
-        }
-
-        @Override
-        public void onStop(Activity activity) {
-            mHandler.removeMessages(DISPATCH_MSG);
-            mEventDispatcher.flush();
+            startDispatcher();
         }
 
         @Override
         public void onDestroy(Activity activity) {
+            mHandler.removeMessages(DISPATCH_MSG);
             mEventDispatcher.quit();
-            mEventDispatcher.interrupt();
         }
 
     }

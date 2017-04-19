@@ -35,7 +35,7 @@ public class EventDispatcher extends Thread {
     /** The http client of choice. */
     private final OkHttpClient mClient;
     /** Used for telling us to die. */
-    private volatile boolean mQuit = false;
+    private volatile boolean mQuit = true;
     private final int mEventBatchSize;
     private final int mMaxRetryCount;
     private final Event mFlushEvent;
@@ -53,11 +53,18 @@ public class EventDispatcher extends Thread {
         mFlushEvent = new Event("dispatch-event-queue", new JsonObject());
     }
 
-    /**
-     * Terminate this NetworkDispatcher. Once terminated, no further requests will be processed.
-     */
     public void quit() {
+        flush();
         mQuit = true;
+    }
+
+    @Override
+    public synchronized void start() {
+        if (mQuit) {
+            mQuit = false;
+            super.start();
+            flush();
+        }
     }
 
     @Override
@@ -66,17 +73,12 @@ public class EventDispatcher extends Thread {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         mRealm = ShopGun.getInstance().getRealmInstance();
         Event event;
-        while (true) {
+        while (!mQuit || !mQueue.isEmpty()) {
             try {
                 // Take an event from the queue.
                 event = mQueue.take();
-
             } catch (InterruptedException e) {
-                // We may have been interrupted because it was time to quit.
-                if (mQuit) {
-                    // break the loop so we'll close the connection to Realm
-                    break;
-                }
+                // We were interrupted, likely because we want to quit
                 continue;
             }
             if (event == mFlushEvent) {
@@ -85,10 +87,9 @@ public class EventDispatcher extends Thread {
                 mRealm.executeTransaction(new InsertTransaction(event));
                 dispatchEventQueue(false);
             }
-
         }
         mRealm.close();
-
+        interrupt();
     }
 
     private void dispatchEventQueue(boolean force) {
