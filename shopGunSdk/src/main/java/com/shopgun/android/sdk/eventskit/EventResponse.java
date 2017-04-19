@@ -11,6 +11,8 @@ import java.util.Set;
 
 public class EventResponse {
 
+    public static final String TAG = EventResponse.class.getSimpleName();
+    
     @SerializedName("events")
     List<Item> mEvents = new ArrayList<>();
 
@@ -64,8 +66,11 @@ public class EventResponse {
 
     }
 
+    /**
+     * @return Items that have been either of {@code ack}'ed or reported to have some sort of unrecoverable error.
+     */
     public Set<String> getRemovableItems() {
-        Set<String> ids = new HashSet<>();
+        Set<String> ids = new HashSet<>(mEvents.size());
         for (Item item : mEvents) {
             if (item.isAck() || !item.isNack()) {
                 ids.add(item.mId);
@@ -75,10 +80,30 @@ public class EventResponse {
     }
 
     public Set<String> getNackItems() {
-        Set<String> ids = new HashSet<>();
+        Set<String> ids = new HashSet<>(mEvents.size());
         for (Item item : mEvents) {
             if (item.isNack()) {
                 ids.add(item.mId);
+            }
+        }
+        return ids;
+    }
+
+    public Set<String> getAckItems() {
+        Set<String> ids = new HashSet<>(mEvents.size());
+        for (Item item : mEvents) {
+            if (item.isAck()) {
+                ids.add(item.mId);
+            }
+        }
+        return ids;
+    }
+
+    public List<Item> getErrors() {
+        List<Item> ids = new ArrayList<>(mEvents.size());
+        for (Item item : mEvents) {
+            if (item.isError()) {
+                ids.add(item);
             }
         }
         return ids;

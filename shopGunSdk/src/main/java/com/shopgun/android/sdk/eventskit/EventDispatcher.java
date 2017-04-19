@@ -4,9 +4,11 @@ import android.os.Process;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
+import com.shopgun.android.utils.log.L;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -139,7 +141,15 @@ public class EventDispatcher extends Thread {
                 mRealm.where(Event.class).greaterThan("mRetryCount", mMaxRetryCount).findAll().deleteAllFromRealm();
                 mRealm.commitTransaction();
 
-                SgnLog.i(TAG, removeIds.size() + " events successfully shipped, " + nackIds.size() + " failed.");
+                List<EventResponse.Item> errors = resp.getErrors();
+                SgnLog.v(TAG, events.size() + " events successfully shipped. " + resp.getAckItems().size() + " ack, " + nackIds.size() + " nack, " + errors.size() + " error.");
+
+                if (!errors.isEmpty()) {
+                    for (EventResponse.Item i : resp.getErrors()) {
+                        L.d(TAG, " - " + i.getErrors().toString());
+                    }
+                }
+
             }
 
         } catch (Exception e) {
