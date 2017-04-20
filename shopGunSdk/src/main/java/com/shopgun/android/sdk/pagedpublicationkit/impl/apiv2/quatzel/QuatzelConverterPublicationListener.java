@@ -44,6 +44,9 @@ public class QuatzelConverterPublicationListener implements EventListener {
     }
 
     private boolean isConfigReady() {
+        if (mConfig == null) {
+            return false;
+        }
         if (mCatalogId == null && mConfig.hasData()) {
             int pageCount = mConfig.getPublicationPageCount();
             mCatalogId = mConfig.getPublication().getId();
@@ -54,7 +57,7 @@ public class QuatzelConverterPublicationListener implements EventListener {
             }
             mPagesLoaded = new boolean[pageCount];
         }
-        return mConfig != null;
+        return mConfig.hasData();
     }
 
     private boolean isPagesLoadedAndAppeared(PropInfo info) {
