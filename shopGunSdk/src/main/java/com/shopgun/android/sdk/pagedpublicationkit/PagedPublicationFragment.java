@@ -153,11 +153,11 @@ public class PagedPublicationFragment extends VersoFragment {
 
     @Override
     protected void onInternalPause() {
-        mLifecycle.spreadDisappeared(getPosition(), getCurrentPages());
-        mLifecycle.resetSpreadsPagesLoadedAndZoom();
         if (isCurrentSpreadScaled()) {
             resetCurrentSpreadScale(false);
         }
+        mLifecycle.spreadDisappeared(getPosition(), getCurrentPages());
+        mLifecycle.resetSpreadsPagesLoadedAndZoom();
         super.onInternalPause();
     }
 
