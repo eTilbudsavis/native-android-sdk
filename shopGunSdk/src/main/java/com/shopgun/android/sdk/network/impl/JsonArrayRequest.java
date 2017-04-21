@@ -126,6 +126,19 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
      * @param order parameters to order data by
      * @return this object
      */
+    public Request<?> setOrderBy(String[] order) {
+        if (order != null && order.length != 0) {
+            String tmp = TextUtils.join(",", order);
+            getParameters().put(Parameters.ORDER_BY, tmp);
+        }
+        return this;
+    }
+
+    /**
+     * Set a list of "order_by" parameters that the API should order the data by.
+     * @param order parameters to order data by
+     * @return this object
+     */
     public Request<?> setOrderBy(List<String> order) {
         if (!order.isEmpty()) {
             String tmp = TextUtils.join(",", order);
