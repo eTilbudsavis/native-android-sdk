@@ -19,10 +19,10 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 
 public class EventRequest {
-    
+
     public static final String TAG = EventRequest.class.getSimpleName();
 
-    public static final String URL = "https://events.service-staging.shopgun.com/track/";
+    public static final String URL = "https://events.service.shopgun.com/track";
     private static final HttpUrl URL_PARSED = HttpUrl.parse(URL);
     private static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json");
     private static final Headers HEADERS = new Headers.Builder()
