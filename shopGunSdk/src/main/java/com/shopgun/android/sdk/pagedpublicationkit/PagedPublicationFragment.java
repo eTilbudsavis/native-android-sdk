@@ -100,8 +100,7 @@ public class PagedPublicationFragment extends VersoFragment {
                 mConfig = savedState.config;
                 mDisplayHotspotsOnTouch = savedState.displayHotspotOnTouch;
                 mViewSessionUuid = savedState.viewSessionUuid;
-                mLifecycle.setConfig(mConfig);
-                mQuatzelConverterPublicationListener.setConfig(mConfig, mViewSessionUuid);
+                setupConfigAndTrackers();
             }
         } else if (getArguments() != null) {
             mConfig = getArguments().getParcelable(ARG_CONFIGURATION);
@@ -133,8 +132,16 @@ public class PagedPublicationFragment extends VersoFragment {
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         // Resume lifecycle now, so callbacks for pagechanges is registered correctly when state is restored
-        mLifecycle.resumed();
+        setupConfigAndTrackers();
         super.onViewStateRestored(savedInstanceState);
+    }
+
+    private void setupConfigAndTrackers() {
+        Configuration config = getResources().getConfiguration();
+        mConfig.onConfigurationChanged(config);
+        mLifecycle.setConfig(mConfig);
+        mLifecycle.resetSpreadsPagesLoadedAndZoom();
+        mQuatzelConverterPublicationListener.setConfig(mConfig, mViewSessionUuid);
     }
 
     public PagedPublicationConfiguration getPublicationConfiguration() {
@@ -163,12 +170,12 @@ public class PagedPublicationFragment extends VersoFragment {
 
     @Override
     protected void onInternalResume(Configuration config) {
+        mLifecycle.resumed();
         super.onInternalResume(config);
     }
 
     @Override
     public void onResume() {
-        mLifecycle.resumed();
         super.onResume();
         loadPagedPublication();
     }
