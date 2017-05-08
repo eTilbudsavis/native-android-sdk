@@ -93,7 +93,6 @@ public class NetworkImpl implements Network {
             return new NetworkResponse(resp.getStatusLine().getStatusCode(), content, responseHeaders);
 
         } catch (Exception e) {
-            SgnLog.e(TAG, e.getMessage(), e);
             throw new NetworkError(e);
         }
 
