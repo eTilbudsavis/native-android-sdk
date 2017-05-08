@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class PageEvent {
 
@@ -220,7 +221,7 @@ public class PageEvent {
             JSONObject o = new JSONObject();
             o.put("type", mEventType.toString());
             o.put("ms", getDuration());
-            o.put("orientation", mOrientation.toString().toLowerCase());
+            o.put("orientation", mOrientation.toString().toLowerCase(Locale.US));
             o.put("pages", TextUtils.join(",", mPages));
             o.put("view_session", mViewSession);
             return o;
