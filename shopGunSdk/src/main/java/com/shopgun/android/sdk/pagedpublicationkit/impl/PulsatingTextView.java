@@ -3,19 +3,16 @@ package com.shopgun.android.sdk.pagedpublicationkit.impl;
 import android.animation.Animator;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.IntRange;
-import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
 import com.shopgun.android.utils.ColorUtils;
 
-public class PulsatingTextView extends AppCompatTextView {
+public class PulsatingTextView extends TextView {
 
     public static final String TAG = PulsatingTextView.class.getSimpleName();
 
