@@ -57,13 +57,24 @@ public class LifecycleManager {
 
         @Override
         public void onActivityResumed(Activity activity) {
+            if (activity == null) {
+                throw new IllegalStateException("Activity passed in " +
+                        "Application.ActivityLifecycleCallbacks.onActivityResumed is null");
+            }
             mCurrentActivity = activity;
         }
 
         @Override
         public void onActivityPaused(Activity activity) {
-            throwIfNoActivity();
+            if (mCurrentActivity == null) {
+                String msg = "No activity set in " + TAG +
+                        ". Make sure to instantiate ShopGun in Application.onCreate()";
+                throw new IllegalStateException(msg);
+            }
         }
+
+        @Override
+        public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
 
         @Override
         public void onActivityStopped(Activity activity) {
@@ -75,9 +86,6 @@ public class LifecycleManager {
         }
 
         @Override
-        public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
-
-        @Override
         public void onActivityDestroyed(Activity activity) { }
 
         @Override
@@ -85,13 +93,6 @@ public class LifecycleManager {
             Activity tmp = mCurrentActivity;
             mCurrentActivity = null;
             dispatchDestroy(tmp);
-        }
-
-        private void throwIfNoActivity() {
-            if (mCurrentActivity == null) {
-                throw new IllegalStateException("No activity set in " + TAG +
-                        ". Make sure to instantiate ShopGun in Application.onCreate()");
-            }
         }
 
         @Override
