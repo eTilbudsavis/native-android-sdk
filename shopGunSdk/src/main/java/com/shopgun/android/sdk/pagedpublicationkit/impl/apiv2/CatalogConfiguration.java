@@ -201,6 +201,11 @@ public class CatalogConfiguration extends IntroOutroConfiguration {
 
         private void ensurePublicationData(Catalog catalog, List<ShopGunError> errors, boolean complete) {
 
+            if (catalog == null) {
+                callCatalogError(errors);
+                return;
+            }
+
             if (mPublication == null) {
                 mCatalog = catalog;
                 ensureData();
@@ -221,13 +226,17 @@ public class CatalogConfiguration extends IntroOutroConfiguration {
             }
 
             if (complete && (mPublication == null || mPages == null)) {
-                List<PublicationException> tmp = new ArrayList<>(errors.size());
-                for (ShopGunError e : errors) {
-                    tmp.add(new PublicationException(e));
-                }
-                mCallback.onError(tmp);
+                callCatalogError(errors);
             }
 
+        }
+
+        private void callCatalogError(List<ShopGunError> errors) {
+            List<PublicationException> tmp = new ArrayList<>(errors.size());
+            for (ShopGunError e : errors) {
+                tmp.add(new PublicationException(e));
+            }
+            mCallback.onError(tmp);
         }
 
     }
