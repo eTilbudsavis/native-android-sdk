@@ -4,11 +4,13 @@ import android.os.Process;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.corekit.gson.JsonNullExclusionStrategy;
+import com.shopgun.android.sdk.corekit.gson.RealmObjectExclusionStrategy;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
-import com.shopgun.android.utils.log.L;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,7 +22,12 @@ import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import okhttp3.Call;
+import okhttp3.Headers;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class EventDispatcher extends Thread {
@@ -41,16 +48,44 @@ public class EventDispatcher extends Thread {
     private final Event mFlushEvent;
     private Realm mRealm;
 
-    public EventDispatcher(BlockingQueue<Event> queue, OkHttpClient client) {
-        this(queue, client, DEF_EVENT_BATCH_SIZE, DEF_MAX_RETRY_COUNT);
+    private final HttpUrl mUrl;
+    private final MediaType mMediatype;
+    private final Headers mHeaders;
+    private final Gson mGson;
+
+    public EventDispatcher(BlockingQueue<Event> queue, OkHttpClient client, String url) {
+        this(queue, client, url, DEF_EVENT_BATCH_SIZE, DEF_MAX_RETRY_COUNT);
     }
 
-    public EventDispatcher(BlockingQueue<Event> queue, OkHttpClient client, int eventBatchSize, int maxRetryCount) {
+    public EventDispatcher(BlockingQueue<Event> queue, OkHttpClient client, String url, int eventBatchSize, int maxRetryCount) {
         mQueue = queue;
         mClient = client;
         mEventBatchSize = eventBatchSize;
         mMaxRetryCount = maxRetryCount;
         mFlushEvent = new Event("dispatch-event-queue", new JsonObject());
+        mUrl = HttpUrl.parse(url);
+        mMediatype = MediaType.parse("application/json");
+        mHeaders = new Headers.Builder()
+                .add("Content-Type", "application/json")
+                .add("Accept", "application/json")
+                .build();
+        mGson = getGson();
+    }
+
+    private Gson getGson() {
+
+        try {
+            Class clazz = Class.forName("io.realm.EventRealmProxy");
+            return new GsonBuilder()
+                    .setExclusionStrategies(
+                            new RealmObjectExclusionStrategy(),
+                            new JsonNullExclusionStrategy())
+                    .registerTypeAdapter(clazz, new EventSerializer())
+                    .create();
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException("Gson not instantiated due to missing RealmProxy class", e);
+        }
+
     }
 
     public void quit() {
@@ -120,7 +155,7 @@ public class EventDispatcher extends Thread {
             }
             mRealm.commitTransaction();
 
-            Call call = EventRequest.postEvents(mClient, events);
+            Call call = buildCallFromEvents(events);
             response = call.execute();
 
             if (response.isSuccessful()) {
@@ -149,18 +184,20 @@ public class EventDispatcher extends Thread {
 
                 if (!errors.isEmpty()) {
                     for (EventResponse.Item i : resp.getErrors()) {
-                        L.d(TAG, " - " + i.getErrors().toString());
+                        SgnLog.d(TAG, " - " + i.getErrors().toString());
                     }
                 }
 
+            } else {
+                SgnLog.d(TAG, response.toString());
             }
 
         } catch (Exception e) {
             SgnLog.e(TAG, "Networking failed", e);
+        } finally {
             if (mRealm.isInTransaction()) {
                 mRealm.cancelTransaction();
             }
-        } finally {
             if (response != null) {
                 response.body().close();
             }
@@ -209,6 +246,19 @@ public class EventDispatcher extends Thread {
         public void execute(Realm realm) {
             realm.insert(mEvent);
         }
+    }
+
+    private Call buildCallFromEvents(List<Event> events) {
+        JsonElement eventArray = mGson.toJsonTree(events);
+        JsonObject eventWrapper = new JsonObject();
+        eventWrapper.add("events", eventArray);
+        RequestBody body = RequestBody.create(mMediatype, eventWrapper.toString());
+        Request request = new Request.Builder()
+                .url(mUrl)
+                .post(body)
+                .headers(mHeaders)
+                .build();
+        return mClient.newCall(request);
     }
 
 }

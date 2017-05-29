@@ -68,7 +68,7 @@ public class EventManager {
         mTrackers = new HashSet<>();
         mEventListeners = new ArrayList<>();
         mEventQueue = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
-        mEventDispatcher = new EventDispatcher(mEventQueue, shopGun.getClient());
+        mEventDispatcher = new EventDispatcher(mEventQueue, shopGun.getClient(), shopGun.getEventEnvironment());
         mJsonContext = EventUtils.getContext(shopGun.getContext());
         EventLifecycle lifecycleCallback = new EventLifecycle();
         shopGun.getLifecycleManager().registerCallback(lifecycleCallback);
@@ -140,7 +140,8 @@ public class EventManager {
 
     private void startDispatcher() {
         if (mEventDispatcher == null || mEventDispatcher.getState() == Thread.State.TERMINATED) {
-            mEventDispatcher = new EventDispatcher(mEventQueue, ShopGun.getInstance().getClient());
+            ShopGun sgn = ShopGun.getInstance();
+            mEventDispatcher = new EventDispatcher(mEventQueue, sgn.getClient(), sgn.getEventEnvironment());
         }
         mEventDispatcher.start();
     }

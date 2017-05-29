@@ -117,6 +117,7 @@ public class ShopGun {
     private Environment mEnvironment;
     /** The current API environment in use for themes (used for e.g. shoppinglists */
     private ThemeEnvironment mThemeEnvironment;
+    private String mEventEnvironment;
     /** The http client of choice for SDK traffic */
     private OkHttpClient mClient;
     /** The session id for this specific session */
@@ -149,6 +150,7 @@ public class ShopGun {
         mDevelop = builder.develop;
         mEnvironment = builder.environment;
         mThemeEnvironment = builder.themeEnvironment;
+        mEventEnvironment = builder.eventEnvironment;
         mExecutor = builder.executorService;
         mClient = builder.okHttpClient;
         mRealmConfiguration = builder.realmConfiguration;
@@ -268,6 +270,10 @@ public class ShopGun {
      */
     public ThemeEnvironment getThemeEnvironment() {
         return mThemeEnvironment;
+    }
+
+    public String getEventEnvironment() {
+        return mEventEnvironment;
     }
 
     /**
@@ -431,6 +437,7 @@ public class ShopGun {
         Boolean develop;
         Environment environment;
         ThemeEnvironment themeEnvironment;
+        String eventEnvironment;
         RealmConfiguration realmConfiguration;
         OkHttpClient okHttpClient;
         List<Interceptor> interceptors = new ArrayList<>();
@@ -532,9 +539,6 @@ public class ShopGun {
             if (this.environment != null) {
                 throw new IllegalStateException("Environment already set.");
             }
-            if (BuildConfig.DEBUG && environment != Environment.PRODUCTION) {
-                Log.w(TAG, "A production build not using Environment.PRODUCTION might cause trouble!");
-            }
             this.environment = environment;
             return this;
         }
@@ -553,10 +557,18 @@ public class ShopGun {
             if (this.themeEnvironment != null) {
                 throw new IllegalStateException("ThemeEnvironment already set.");
             }
-            if (BuildConfig.DEBUG && themeEnvironment != ThemeEnvironment.PRODUCTION) {
-                Log.w(TAG, "A production build not using ThemeEnvironment.PRODUCTION might cause trouble!");
-            }
             this.themeEnvironment = themeEnvironment;
+            return this;
+        }
+
+        public Builder setEventEnvironment(String eventEnvironment) {
+            if (eventEnvironment == null) {
+                throw new IllegalArgumentException("EventEndpoint must not be null.");
+            }
+            if (this.eventEnvironment != null) {
+                throw new IllegalStateException("EventEndpoint already set.");
+            }
+            this.eventEnvironment = eventEnvironment;
             return this;
         }
 
@@ -595,6 +607,10 @@ public class ShopGun {
 
             if (themeEnvironment == null) {
                 themeEnvironment = ThemeEnvironment.PRODUCTION;
+            }
+
+            if (eventEnvironment == null) {
+                eventEnvironment = "https://events.service.shopgun.com/track";
             }
 
             // Setup the default OkHttpClient
