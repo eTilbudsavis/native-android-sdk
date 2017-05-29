@@ -1,6 +1,7 @@
 package com.shopgun.android.sdk.eventskit;
 
 import com.google.gson.JsonObject;
+import com.shopgun.android.sdk.log.SgnLog;
 
 public class EzEvent {
 
@@ -27,6 +28,7 @@ public class EzEvent {
     public static final String FIRST_CLIENT_SESSION_OPENED = "first-client-session-opened";
 
     protected Event mEvent;
+    private boolean mDebug;
 
     public static EzEvent create(String type, JsonObject properties) {
         return new EzEvent(type, properties);
@@ -47,9 +49,17 @@ public class EzEvent {
         mEvent = new Event(type, properties);
     }
 
+    public EzEvent setDebug(boolean debug) {
+        mDebug = debug;
+        return this;
+    }
+
     public void track() {
         // avoid duplicates
         if (mEvent != null) {
+            if (mDebug) {
+                SgnLog.d(TAG, mEvent.toString());
+            }
             EventTracker.globalTracker().track(mEvent);
         }
         mEvent = null;

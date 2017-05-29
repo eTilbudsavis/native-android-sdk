@@ -26,10 +26,6 @@ public class NetworkDebugger implements RequestDebugger {
     public static final String TAG = Constants.getTag(NetworkDebugger.class);
     private final String mTag;
 
-    public NetworkDebugger() {
-        this(TAG);
-    }
-
     public NetworkDebugger(String tag) {
         this.mTag = tag;
     }
