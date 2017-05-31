@@ -5,13 +5,13 @@ import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.RequestDebugger;
 import com.shopgun.android.sdk.utils.SgnUtils;
 
-public class OnDeliveryDebugger implements RequestDebugger {
+public class DeliveryDebugger implements RequestDebugger {
 
-    public static final String TAG = OnDeliveryDebugger.class.getSimpleName();
+    public static final String TAG = DeliveryDebugger.class.getSimpleName();
 
     private final String mTag;
 
-    public OnDeliveryDebugger(String tag) {
+    public DeliveryDebugger(String tag) {
         mTag = tag;
     }
 
@@ -24,4 +24,5 @@ public class OnDeliveryDebugger implements RequestDebugger {
     public void onDelivery(Request<?> r) {
         SgnLog.d(mTag, r.getMethod() + " " + SgnUtils.requestToUrlAndQueryString(r));
     }
+
 }
