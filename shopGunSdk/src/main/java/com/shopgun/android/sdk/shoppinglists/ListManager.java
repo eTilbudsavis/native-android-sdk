@@ -17,10 +17,13 @@
 package com.shopgun.android.sdk.shoppinglists;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
+import com.shopgun.android.sdk.corekit.LifecycleManager;
+import com.shopgun.android.sdk.corekit.utils.LifecycleManagerCallbackLogger;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Share;
@@ -68,6 +71,18 @@ public class ListManager {
     public ListManager(ShopGun shopGun, DatabaseWrapper db) {
         mShopGun = shopGun;
         mDatabase = db;
+        mShopGun.getLifecycleManager().registerCallback(new LifecycleManager.SimpleCallback() {
+
+            @Override
+            public void onCreate(Activity activity) {
+                mDatabase.open();
+            }
+
+            @Override
+            public void onDestroy(Activity activity) {
+                mDatabase.close();
+            }
+        });
     }
 
     /**
@@ -775,22 +790,6 @@ public class ListManager {
      */
     public void clear(int userId) {
         mDatabase.clear(userId);
-    }
-
-    /**
-     * Method to call on all onResume events.
-     * <p>This is implicitly handled by the {@link ShopGun} instance</p>
-     */
-    public void onStart() {
-        mDatabase.open();
-    }
-
-    /**
-     * Method to call on all onPause events.
-     * <p>This is implicitly handled by the {@link ShopGun} instance</p>
-     */
-    public void onStop() {
-        mDatabase.close();
     }
 
     private void postShoppinglistEvent() {
