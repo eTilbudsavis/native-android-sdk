@@ -1119,6 +1119,17 @@ public class SyncManager {
 
     }
 
+    private static String stateToString(int state) {
+        switch (state) {
+            case SyncState.TO_SYNC: return "TO_SYNC";
+            case SyncState.SYNCING: return "SYNCING";
+            case SyncState.SYNCED: return "SYNCED";
+            case SyncState.DELETE: return "DELETE";
+            case SyncState.ERROR: return "ERROR";
+            default: return "UNKNOWN";
+        }
+    }
+
     private boolean syncLocalShareChanges(Shoppinglist sl, User user) {
 
         List<Share> shares = mDatabase.getShares(sl, user, true);
@@ -1355,7 +1366,7 @@ public class SyncManager {
         int FAST = 3000;
     }
 
-    static class SyncLog {
+    private static class SyncLog {
 
         private static final boolean LOG_SYNC = false;
         private static final boolean LOG = false;
