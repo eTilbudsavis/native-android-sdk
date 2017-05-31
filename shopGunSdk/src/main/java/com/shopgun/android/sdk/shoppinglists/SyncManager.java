@@ -22,6 +22,7 @@ import android.os.Looper;
 import android.os.Process;
 
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.SgnBus;
@@ -44,7 +45,6 @@ import com.shopgun.android.sdk.network.ShopGunError.Code;
 import com.shopgun.android.sdk.network.impl.HandlerDelivery;
 import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
-import com.shopgun.android.sdk.utils.Api.Endpoint;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.ListUtils;
 import com.shopgun.android.sdk.utils.PermissionUtils;
@@ -118,11 +118,11 @@ public class SyncManager {
 
     private static final boolean SAVE_NETWORK_LOG = false;
 
-    final Object RESUME_LOCK = new Object();
-    private final Stack<Request<?>> mCurrentRequests = new Stack<Request<?>>();
+    private final Object RESUME_LOCK = new Object();
+    private final Stack<Request<?>> mCurrentRequests = new Stack<>();
     /** Thread running the options */
-    HandlerThread mThread;
-    boolean isPaused = false;
+    private HandlerThread mThread;
+    private boolean isPaused = false;
     /** The current sync speed */
     private int mSyncSpeed = SyncSpeed.SLOW;
     /** Sync iteration counter */
@@ -397,9 +397,8 @@ public class SyncManager {
 
     }
 
-    private boolean isPullReq(Request<?> r) {
-        String u = r.getUrl();
-        return u.contains("modified") || u.endsWith("shoppinglists") || u.endsWith("items");
+    private static boolean isPullReq(Request<?> r) {
+        return r.getUrl().contains("modified") || r.getUrl().endsWith("shoppinglists") || r.getUrl().endsWith("items");
     }
 
     private void popRequest() {
@@ -452,7 +451,7 @@ public class SyncManager {
             }
         };
 
-        JsonArrayRequest listRequest = new JsonArrayRequest(Method.GET, Endpoint.lists(user.getUserId()), listListener);
+        JsonArrayRequest listRequest = new JsonArrayRequest(Method.GET, Endpoints.lists(user.getUserId()), listListener);
         // Offset and limit are set to default values, we want to ignore this.
         listRequest.getParameters().remove(Parameters.OFFSET);
         listRequest.getParameters().remove(Parameters.LIMIT);
@@ -481,9 +480,9 @@ public class SyncManager {
             return;
         }
 
-        HashMap<String, Shoppinglist> localMap = new HashMap<String, Shoppinglist>();
-        HashMap<String, Shoppinglist> serverMap = new HashMap<String, Shoppinglist>();
-        HashSet<String> union = new HashSet<String>();
+        HashMap<String, Shoppinglist> localMap = new HashMap<>();
+        HashMap<String, Shoppinglist> serverMap = new HashMap<>();
+        HashSet<String> union = new HashSet<>();
 
         for (Shoppinglist sl : localList) {
             localMap.put(sl.getId(), sl);
@@ -511,9 +510,8 @@ public class SyncManager {
                         mBuilder.edit(serverSl);
                         mDatabase.editList(serverSl, user);
                         mDatabase.cleanShares(serverSl, user);
-                    } else {
-                        // Don't do anything, next iteration will put local changes to API
                     }
+                    // else: Don't do anything, next iteration will put local changes to API
 
                 } else {
                     mBuilder.del(localSl);
@@ -615,7 +613,7 @@ public class SyncManager {
             }
         };
 
-        JsonObjectRequest modifiedRequest = new JsonObjectRequest(Endpoint.listModified(user.getUserId(), sl.getId()), modifiedListener);
+        JsonObjectRequest modifiedRequest = new JsonObjectRequest(Endpoints.listModified(user.getUserId(), sl.getId()), modifiedListener);
         modifiedRequest.setSaveNetworkLog(SAVE_NETWORK_LOG);
         addRequest(modifiedRequest);
 
@@ -689,7 +687,7 @@ public class SyncManager {
             }
         };
 
-        JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Endpoint.listitems(user.getUserId(), sl.getId()), itemListener);
+        JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Endpoints.listitems(user.getUserId(), sl.getId()), itemListener);
         // Offset and limit are set to default values, we want to ignore this.
         itemRequest.getParameters().remove(Parameters.OFFSET);
         itemRequest.getParameters().remove(Parameters.LIMIT);
@@ -704,9 +702,9 @@ public class SyncManager {
             return;
         }
 
-        HashMap<String, ShoppinglistItem> localMap = new HashMap<String, ShoppinglistItem>();
-        HashMap<String, ShoppinglistItem> serverMap = new HashMap<String, ShoppinglistItem>();
-        HashSet<String> union = new HashSet<String>();
+        HashMap<String, ShoppinglistItem> localMap = new HashMap<>();
+        HashMap<String, ShoppinglistItem> serverMap = new HashMap<>();
+        HashSet<String> union = new HashSet<>();
 
         for (ShoppinglistItem sli : localItems) {
             localMap.put(sli.getId(), sli);
@@ -743,13 +741,9 @@ public class SyncManager {
 
                 } else {
                     ShoppinglistItem delSli = localMap.get(key);
-                    if (delSli.getState() == SyncState.TO_SYNC) {
-						/*
-						 * Item have been added while request was in flight
-						 * ignore it for now
-						 */
-                    } else {
-						/* Else delete the item */
+                    if (delSli.getState() != SyncState.TO_SYNC) {
+                        // If the item have been added while request was in flight it will
+                        // have the state TO_SYNC, and will just ignore it for now
                         mBuilder.del(delSli);
                         mDatabase.deleteItem(delSli, user);
                     }
@@ -866,9 +860,8 @@ public class SyncManager {
                 } else {
 
                     popRequest();
-                    if (error.getCode() == Code.NETWORK_ERROR) {
-						/* Ignore missing network, wait for next iteration */
-                    } else {
+                    // Ignore missing network, wait for next iteration
+                    if (error.getCode() != Code.NETWORK_ERROR) {
                         revertList(sl, user);
                     }
 
@@ -878,7 +871,7 @@ public class SyncManager {
             }
         };
 
-        String url = Endpoint.list(user.getUserId(), sl.getId());
+        String url = Endpoints.list(user.getUserId(), sl.getId());
         JsonObjectRequest listReq = new JsonObjectRequest(Method.PUT, url, sl.toJSON(), listListener);
         addRequest(listReq);
 
@@ -924,7 +917,7 @@ public class SyncManager {
             }
         };
 
-        String url = Endpoint.list(user.getUserId(), sl.getId());
+        String url = Endpoints.list(user.getUserId(), sl.getId());
 
         JsonObjectRequest listReq = new JsonObjectRequest(Method.DELETE, url, null, listListener);
         listReq.getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(sl.getModified()));
@@ -958,7 +951,7 @@ public class SyncManager {
             }
         };
 
-        String url = Endpoint.list(user.getUserId(), sl.getId());
+        String url = Endpoints.list(user.getUserId(), sl.getId());
         JsonObjectRequest listReq = new JsonObjectRequest(url, listListener);
         addRequest(listReq);
 
@@ -1014,7 +1007,7 @@ public class SyncManager {
             }
         };
 
-        String url = Endpoint.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
+        String url = Endpoints.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
         JsonObjectRequest itemReq = new JsonObjectRequest(Method.PUT, url, sli.toJSON(), itemListener);
 //		SgnLog.d(TAG, sli.toJSON().toString());
         addRequest(itemReq);
@@ -1056,7 +1049,7 @@ public class SyncManager {
             }
         };
 
-        String url = Endpoint.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
+        String url = Endpoints.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
         JsonObjectRequest itemReq = new JsonObjectRequest(Method.DELETE, url, null, itemListener);
         itemReq.getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(sli.getModified()));
         addRequest(itemReq);
@@ -1113,21 +1106,10 @@ public class SyncManager {
             }
         };
 
-        String url = Endpoint.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
+        String url = Endpoints.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
         JsonObjectRequest itemReq = new JsonObjectRequest(url, itemListener);
         addRequest(itemReq);
 
-    }
-
-    private static String stateToString(int state) {
-        switch (state) {
-            case SyncState.TO_SYNC: return "TO_SYNC";
-            case SyncState.SYNCING: return "SYNCING";
-            case SyncState.SYNCED: return "SYNCED";
-            case SyncState.DELETE: return "DELETE";
-            case SyncState.ERROR: return "ERROR";
-            default: return "UNKNOWN";
-        }
     }
 
     private boolean syncLocalShareChanges(Shoppinglist sl, User user) {
@@ -1225,7 +1207,7 @@ public class SyncManager {
             }
         };
 
-        String url = Endpoint.listShareEmail(user.getUserId(), s.getShoppinglistId(), s.getEmail());
+        String url = Endpoints.listShareEmail(user.getUserId(), s.getShoppinglistId(), s.getEmail());
         JsonObjectRequest shareReq = new JsonObjectRequest(Method.PUT, url, s.toJSON(), shareListener);
         addRequest(shareReq);
 
@@ -1284,7 +1266,7 @@ public class SyncManager {
             }
         };
 
-        String url = Endpoint.listShareEmail(user.getUserId(), s.getShoppinglistId(), s.getEmail());
+        String url = Endpoints.listShareEmail(user.getUserId(), s.getShoppinglistId(), s.getEmail());
         JsonObjectRequest shareReq = new JsonObjectRequest(Method.DELETE, url, null, shareListener);
         addRequest(shareReq);
 
@@ -1333,7 +1315,7 @@ public class SyncManager {
             }
         };
 
-        String url = Endpoint.listShareEmail(user.getUserId(), s.getShoppinglistId(), s.getEmail());
+        String url = Endpoints.listShareEmail(user.getUserId(), s.getShoppinglistId(), s.getEmail());
         JsonObjectRequest shareReq = new JsonObjectRequest(url, shareListener);
         addRequest(shareReq);
 
@@ -1379,6 +1361,17 @@ public class SyncManager {
             return (LOG ? SgnLog.v(tag, msg) : 0);
         }
 
+    }
+
+    private static String syncStateToString(int state) {
+        switch (state) {
+            case SyncState.TO_SYNC: return "TO_SYNC";
+            case SyncState.SYNCING: return "SYNCING";
+            case SyncState.SYNCED: return "SYNCED";
+            case SyncState.DELETE: return "DELETE";
+            case SyncState.ERROR: return "ERROR";
+            default: return "UNKNOWN";
+        }
     }
 
 }
