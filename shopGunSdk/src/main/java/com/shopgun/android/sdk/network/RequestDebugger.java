@@ -20,6 +20,6 @@ public interface RequestDebugger {
 
     public void onFinish(Request<?> r);
 
-    public void onDelivery(Request<?> r);
+    public void onDelivery(Request<?> r, Object response, ShopGunError error);
 
 }

@@ -22,6 +22,10 @@ public class SgnLog {
         mLogger = (logger == null ? new LogCatLogger(0) : logger);
     }
 
+    public static Logger getLogger() {
+        return mLogger;
+    }
+
     public static int v(String tag, String msg) {
         return mLogger.v(tag, msg);
     }
