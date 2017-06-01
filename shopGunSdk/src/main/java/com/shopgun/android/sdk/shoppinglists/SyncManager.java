@@ -16,6 +16,7 @@
 
 package com.shopgun.android.sdk.shoppinglists;
 
+import android.app.Activity;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -27,8 +28,8 @@ import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
+import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
-import com.shopgun.android.sdk.database.DbUtils;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
@@ -37,7 +38,7 @@ import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.network.Delivery;
 import com.shopgun.android.sdk.network.Request;
-import com.shopgun.android.sdk.network.Request.Method;
+import com.shopgun.android.sdk.network.RequestDebugger;
 import com.shopgun.android.sdk.network.RequestQueue;
 import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
@@ -109,7 +110,7 @@ import java.util.Stack;
  * </ul>
  *
  * <p>
- * When {@link #onStop()} is triggered, all local pending changes are pushed to
+ * When {@link LifecycleManager} calls destroy, all local pending changes are pushed to
  * the API if possible to ensure a correct state on the server (and other devices).
  */
 public class SyncManager {
@@ -120,74 +121,19 @@ public class SyncManager {
 
     private final Object RESUME_LOCK = new Object();
     private final Stack<Request<?>> mCurrentRequests = new Stack<>();
-    /** Thread running the options */
-    private HandlerThread mThread;
-    private boolean isPaused = false;
-    /** The current sync speed */
-    private int mSyncSpeed = SyncSpeed.SLOW;
-    /** Sync iteration counter */
-    private int mSyncCount = 0;
-    /** Has sync got the first sync */
-    private boolean mHasFirstSync = false;
-    /** Reference to the {@link ShopGun} object */
+    private int mSyncInterval = Integer.MIN_VALUE; // we'll cheat a bit here
+    private SyncLooper mSyncLooper;
     private ShopGun mShopGun;
     private DatabaseWrapper mDatabase;
-    /** The Handler instantiated on the sync Thread */
+    /** The handler used to send messages to the sync thread */
     private Handler mHandler;
-    /**
-     * Variable to determine if offline lists should automatically be
-     * synchronized if certain criteria are met.
-     */
+    /** Variable to determine if offline lists should automatically be synchronized if certain criteria are met. */
     private boolean mMigrateOfflineLists = false;
-    /**
-     * A tag for identifying all requests originating from this {@link SyncManager}
-     * in the {@link RequestQueue}
-     */
+    /** A tag for identifying all requests originating from this {@link SyncManager} in the {@link RequestQueue} */
     private Object mRequestTag = new Object();
     /** The notification object, used to combine and collect notifications */
     private ShoppinglistEvent.Builder mBuilder = new ShoppinglistEvent.Builder(true);
     private Delivery mDelivery;
-    /** The actual sync loop running every x seconds*/
-    private Runnable mSyncLoop = new Runnable() {
-
-        public void run() {
-
-            User u = mShopGun.getSessionManager().getSession().getUser();
-            // If it's an offline user, then just quit it
-            if (!u.isLoggedIn()) {
-                SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (NotLoggedIn)");
-                return;
-            }
-
-			/*
-			 * Prepare for next iteration if app is still resumed.
-			 * By not doing a return statement we allow for a final sync, and
-			 * sending local changes to server
-			 */
-            if (mShopGun.getLifecycleManager().isActive()) {
-                mHandler.postDelayed(mSyncLoop, mSyncSpeed);
-            }
-
-            // Only do an update, if there are no pending transactions, and we are online
-            if (!mCurrentRequests.isEmpty()) {
-                SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (ReqInFlight)");
-                return;
-            }
-            if (!ConnectivityUtils.isOnline(ShopGun.getInstance().getContext())) {
-                SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (Offline)");
-                return;
-            }
-            if (isPaused()) {
-                SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - skip-loop-cycle (Paused)");
-                return;
-            }
-
-            // Perform the actual sync cycle
-            performSyncCycle(u);
-
-        }
-
-    };
 
     /**
      * Default constructor for the {@link SyncManager}
@@ -196,12 +142,34 @@ public class SyncManager {
      */
     public SyncManager(ShopGun shopGun, DatabaseWrapper db) {
         mShopGun = shopGun;
+        mShopGun.getLifecycleManager().registerCallback(new LifecycleCallback());
         mDatabase = db;
+        mSyncLooper = new SyncLooper();
         // Create a new thread for a handler, so that i can later post content to that thread.
-        mThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
-        mThread.start();
-        mHandler = new Handler(mThread.getLooper());
+        HandlerThread thread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
+        thread.start();
+        mHandler = new Handler(thread.getLooper());
         mDelivery = new HandlerDelivery(mHandler);
+    }
+
+    private class LifecycleCallback extends LifecycleManager.SimpleCallback {
+
+        @Override
+        public void onCreate(Activity activity) {
+            mDatabase.open();
+            SgnBus.getInstance().register(SyncManager.this);
+            // Set a SyncInterval if user haven't set one yet, else just force a sync cycle
+            int interval = mSyncInterval == Integer.MIN_VALUE ? SyncInterval.SLOW : mSyncInterval;
+            setSyncInterval(interval);
+        }
+
+        @Override
+        public void onDestroy(Activity activity) {
+            mSyncLooper.forceSync();
+            SgnBus.getInstance().unregister(SyncManager.this);
+            mDatabase.close();
+        }
+
     }
 
     /**
@@ -210,93 +178,22 @@ public class SyncManager {
      */
     public void onEvent(SessionEvent e) {
         if (e.isNewUser()) {
-            mHasFirstSync = false;
-            mSyncCount = 0;
-            forceSync();
+            mSyncLooper.restart();
         }
-    }
-
-    private void performSyncCycle(User user) {
-
-        // If there are local changes to a list, then syncLocalListChanges will handle it: return
-        List<Shoppinglist> lists = mDatabase.getLists(user, true);
-        if (syncLocalListChanges(lists, user)) {
-            SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - syncLocalListChanges");
-            return;
-        }
-
-        // If there are changes to any items, then syncLocalItemChanges will handle it: return
-        boolean hasLocalChanges = false;
-        for (Shoppinglist sl : lists) {
-            hasLocalChanges = syncLocalItemChanges(sl, user) || hasLocalChanges;
-            hasLocalChanges = syncLocalShareChanges(sl, user) || hasLocalChanges;
-        }
-
-        // Skip further sync if we just posted our own changes
-        if (hasLocalChanges) {
-            SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - hasLocalChanges");
-            return;
-        }
-
-        // Finally ready to get server changes
-        if (mSyncCount % 3 == 0) {
-
-            // Get a new set of lists
-            SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - syncAllLists");
-            syncLists(user);
-
-        } else if (mSyncCount % 10 == 0) {
-
-            SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - syncAllItems");
-        	/* Because we update modified on lists, on all changes, we might
-        	 * have a situation where two devices have set the same modified
-        	 * on a list, and therefore won't try to get a new list of items
-        	 * So we force the SDK to get a new set once in a while */
-            List<Shoppinglist> localLists = mDatabase.getLists(user);
-            for (Shoppinglist sl : localLists) {
-                syncItems(sl, user);
-            }
-
-        } else {
-
-            SyncLog.sync(TAG, "SyncManager(" + mSyncCount + ") - checkModified");
-            // Base case, just check if there is changes
-            syncListsModified(user);
-
-        }
-        mSyncCount++;
-
     }
 
     public boolean isPaused() {
         synchronized (RESUME_LOCK) {
-            return isPaused;
-        }
-    }
-
-    public void pauseSync() {
-        synchronized (RESUME_LOCK) {
-            isPaused = true;
-        }
-    }
-
-    public void resumeSync() {
-        synchronized (RESUME_LOCK) {
-            isPaused = false;
+            return getSyncInterval() == SyncInterval.PAUSED;
         }
     }
 
     /**
-     * Method for determining if the first sync cycle is done.
-     *
-     * <p>This is dependent on, both:
-     * <ul>
-     * 		<li>the {@link SyncManager} having performed the first sync cycle, and </li>
-     * </ul>
+     * Method for determining if the first sync cycle to the API is done.
      * @return True if the first sync is complete, or there is no user to sync.
      */
     public boolean hasFirstSync() {
-        return mHasFirstSync;
+        return mSyncLooper.mHasFirstSync;
     }
 
     /**
@@ -311,45 +208,29 @@ public class SyncManager {
      *     automatically by the {@link SyncManager}
      */
     public void forceSync() {
-        // First make sure, that we do not leak memory by posting the runnable multiple times
-        mHandler.removeCallbacks(mSyncLoop);
-        mHandler.post(mSyncLoop);
-    }
-
-    /**
-     * Method to call on all onResume events.
-     * <p>This is implicitly handled by the {@link ShopGun} instance
-     */
-    public void onStart() {
-        mDatabase.open();
-        SgnBus.getInstance().register(this);
-        forceSync();
-    }
-
-    /**
-     * Method to call on all onPause events.
-     * <p>This is implicitly handled by the {@link ShopGun} instance
-     */
-    public void onStop() {
-        mDatabase.close();
-        forceSync();
-        SgnBus.getInstance().unregister(this);
-        mHasFirstSync = false;
-        mSyncCount = -1;
+        mSyncLooper.forceSync();
     }
 
     /**
      * Set synchronization interval for {@link Shoppinglist}, and {@link ShoppinglistItem}.
-     *
-     * <p>Also time must be greater than or equal to 3000 (milliseconds)
+     * The speed must be a value defined in {@link SyncInterval}.
      * @param time A synchronization interval in milliseconds
      */
-    public void setSyncSpeed(int time) {
-        if (time == SyncSpeed.SLOW || time == SyncSpeed.MEDIUM || time == SyncSpeed.FAST) {
-            mSyncSpeed = time;
-        } else {
-            mSyncSpeed = SyncSpeed.SLOW;
+    public void setSyncInterval(int time) {
+        if (time != SyncInterval.SLOW && time != SyncInterval.MEDIUM &&
+                time != SyncInterval.FAST && time != SyncInterval.PAUSED) {
+            throw new IllegalArgumentException("The sync time must be one of SyncManager.SyncInterval");
         }
+        mSyncInterval = time;
+        mSyncLooper.forceSync();
+    }
+
+    /**
+     * Get the current sync interval
+     * @return The sync interval in milliseconds
+     */
+    public int getSyncInterval() {
+        return mSyncInterval == Integer.MIN_VALUE ? SyncInterval.PAUSED : mSyncInterval;
     }
 
     /**
@@ -378,6 +259,9 @@ public class SyncManager {
         return mMigrateOfflineLists;
     }
 
+    RequestDebugger mDebugger = new SyncDebugger(SyncDebugger.TAG)
+            .setSkipMethods(Request.Method.GET);
+
     private void addRequest(Request<?> r) {
         // No request from here should return a result from cache
         r.setIgnoreCache(true);
@@ -389,6 +273,7 @@ public class SyncManager {
         r.setDelivery(mDelivery);
 
         r.setTag(mRequestTag);
+        r.setDebugger(mDebugger);
         mShopGun.add(r);
 
 //		if (!isPullReq(r) && r.getMethod() != Request.Method.GET) {
@@ -397,11 +282,16 @@ public class SyncManager {
 
     }
 
-    private static boolean isPullReq(Request<?> r) {
-        return r.getUrl().contains("modified") || r.getUrl().endsWith("shoppinglists") || r.getUrl().endsWith("items");
+    private void popRequest() {
+        popRequestAndPostShoppinglistEvent();
     }
 
-    private void popRequest() {
+    /**
+     * Pops one request off the request-stack, and sends out a notification if
+     * the stack is empty (all requests are done, and all notifications are ready)
+     */
+    private void popRequestAndPostShoppinglistEvent() {
+
         synchronized (mCurrentRequests) {
             try {
                 mCurrentRequests.pop();
@@ -409,72 +299,258 @@ public class SyncManager {
                 SgnLog.e(TAG, e.getMessage(), e);
             }
         }
-    }
 
-    private void syncLists(final User user) {
-
-        Listener<JSONArray> listListener = new Listener<JSONArray>() {
-
-            public void onComplete(JSONArray response, ShopGunError error) {
-
-                if (response != null) {
-
-                    // Get ALL lists including deleted, to avoid adding them again
-                    List<Shoppinglist> localLists = mDatabase.getLists(user, true);
-                    List<Shoppinglist> serverLists = Shoppinglist.fromJSON(response);
-
-                    // Server usually returns items in the order oldest to newest (not guaranteed)
-                    // We want them to be reversed
-                    Collections.reverse(serverLists);
-
-                    prepareServerList(serverLists);
-
-                    mergeListsToDb(serverLists, localLists, user);
-
-                    // On first iteration, check and merge lists plus notify subscribers of first sync event
-                    if (mSyncCount == 1) {
-
-                        if (mMigrateOfflineLists && serverLists.isEmpty() && localLists.isEmpty()) {
-                            DbUtils.migrateOfflineLists(mShopGun.getListManager(), mDatabase, false);
-                        }
-
-                        mHasFirstSync = true;
-                        mBuilder.firstSync = true;
-
-                    }
-
-                    popRequestAndPostShoppinglistEvent();
-
-                } else {
-                    popRequest();
+        if (mCurrentRequests.isEmpty() && !isPaused() && mBuilder.hasChanges()) {
+            final ShoppinglistEvent e = mBuilder.build();
+            mBuilder = new ShoppinglistEvent.Builder(true);
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    SgnBus.getInstance().post(e);
                 }
-            }
-        };
-
-        JsonArrayRequest listRequest = new JsonArrayRequest(Method.GET, Endpoints.lists(user.getUserId()), listListener);
-        // Offset and limit are set to default values, we want to ignore this.
-        listRequest.getParameters().remove(Parameters.OFFSET);
-        listRequest.getParameters().remove(Parameters.LIMIT);
-        listRequest.setSaveNetworkLog(SAVE_NETWORK_LOG);
-        addRequest(listRequest);
-
-    }
-
-    private void prepareServerList(List<Shoppinglist> serverList) {
-
-        for (Shoppinglist sl : serverList) {
-			/* Set the state of all shares in the serverList to SYNCED,
-			 * before inserting into the DB, as this is actually correct
-			 */
-            for (Share share : sl.getShares().values()) {
-                share.setState(SyncState.SYNCED);
-            }
-
+            });
         }
 
     }
 
-    private void mergeListsToDb(List<Shoppinglist> serverList, List<Shoppinglist> localList, User user) {
+    private class SyncLooper implements Runnable {
+
+        private int mSyncCount = 0;
+        private boolean mHasFirstSync;
+
+        private void restart() {
+            mSyncCount = 0;
+            mHasFirstSync = false;
+            forceSync();
+        }
+
+        private void forceSync() {
+            mHandler.removeCallbacks(this);
+            mHandler.post(this);
+        }
+
+        @Override
+        public void run() {
+
+            int interval = getSyncInterval();
+            if (interval == SyncInterval.PAUSED) {
+                // Sync paused, quit the loop
+                SyncLog.syncLooper(TAG, mSyncCount, "skip-loop-cycle (Paused)");
+                return;
+            }
+
+            User user = mShopGun.getSessionManager().getSession().getUser();
+            // If it's an offline user, then stop syncloop
+            // we'll keep listening for session changes and restert if needed
+            if (!user.isLoggedIn()) {
+                SyncLog.syncLooper(TAG, mSyncCount, "quit-loop-cycle (NotLoggedIn)");
+                return;
+            }
+
+            // Prepare for next iteration if app is still resumed.
+            // By not doing a return statement we allow for a final sync,
+            // and sending local changes to server
+            if (mShopGun.getLifecycleManager().isActive()) {
+                mHandler.postDelayed(this, interval);
+            }
+
+            // Only do an update, if there are no pending transactions, and we are online
+            if (!mCurrentRequests.isEmpty()) {
+                SyncLog.syncLooper(TAG, mSyncCount, "skip-loop-cycle (ReqInFlight)");
+                return;
+            }
+            if (!ConnectivityUtils.isOnline(ShopGun.getInstance().getContext())) {
+                SyncLog.syncLooper(TAG, mSyncCount, "skip-loop-cycle (Offline)");
+                return;
+            }
+
+            DatabaseWrapper database = mDatabase;
+            // If there are local changes to a list, then syncLocalListChanges will handle it: return
+            List<Shoppinglist> lists = database.getLists(user, true);
+            if (syncLocalListChanges(database, lists, user)) {
+                SyncLog.syncLooper(TAG, mSyncCount, "syncLocalListChanges");
+                return;
+            }
+
+            // If there are changes to any items, then syncLocalItemChanges will handle it: return
+            boolean hasLocalChanges = false;
+            for (Shoppinglist sl : lists) {
+                boolean itemChanges = syncLocalItemChanges(database, sl, user);
+                boolean shareChanges = syncLocalShareChanges(database, sl, user);
+//                if (itemChanges || shareChanges) {
+//                    L.d(TAG, sl.getName() + "[ itemChanges: " + itemChanges + ", shareChanges: " + shareChanges + " ]");
+//                }
+                hasLocalChanges = itemChanges || shareChanges || hasLocalChanges;
+            }
+
+            // Skip further sync if we just posted our own changes
+            if (hasLocalChanges) {
+                SyncLog.syncLooper(TAG, mSyncCount, "hasLocalChanges");
+                return;
+            }
+
+            // Finally ready to get server changes
+            if (mSyncCount % 3 == 0) {
+
+                // Get a new set of lists
+                SyncLog.syncLooper(TAG, mSyncCount, "syncAllLists");
+                addRequest(new ListSyncRequest(database, user, Integer.MAX_VALUE));
+
+            } else if (mSyncCount % 10 == 0) {
+
+                SyncLog.syncLooper(TAG, mSyncCount, "syncAllItems");
+                // Because we update modified on lists, on all changes, we might
+                // have a situation where two devices have set the same modified
+                // on a list, and therefore won't try to get a new list of items
+                // So we force the SDK to get a new set once in a while
+                List<Shoppinglist> localLists = database.getLists(user);
+                for (Shoppinglist sl : localLists) {
+                    addRequest(new ItemSyncRequest(database, sl, user));
+                }
+
+            } else {
+
+                SyncLog.syncLooper(TAG, mSyncCount, "checkModified");
+                // Base case, just check if there is changes
+                syncListsModifiedTimestamp(database, user);
+
+            }
+
+            mSyncCount++;
+
+        }
+    }
+
+    private class ListSyncRequest extends JsonArrayRequest {
+
+        private ListSyncRequest(DatabaseWrapper database, User user, int syncCount) {
+            super(Endpoints.lists(user.getUserId()), new ListSyncListener(database, user, syncCount));
+            // Offset and limit are set to default values, we want to ignore this.
+            getParameters().remove(Parameters.OFFSET);
+            getParameters().remove(Parameters.LIMIT);
+            setSaveNetworkLog(SAVE_NETWORK_LOG);
+        }
+    }
+
+    private void syncListsModifiedTimestamp(DatabaseWrapper database, User user) {
+        List<Shoppinglist> lists = database.getLists(user);
+        for (Iterator<Shoppinglist> it = lists.iterator(); it.hasNext();) {
+            Shoppinglist sl = it.next();
+            // If they are in the state of processing, then skip
+            if (sl.getState() == SyncState.SYNCING) {
+                it.remove();
+            }
+            // If state has changed locally, then sync then items
+            if (sl.getState() == SyncState.TO_SYNC) {
+                addRequest(new ItemSyncRequest(database, sl, user));
+                it.remove();
+            }
+            // Run the check
+            sl.setState(SyncState.SYNCING);
+        }
+        database.insertLists(lists, user);
+        for (Shoppinglist sl : lists) {
+            addRequest(new ListModifiedRequest(database, user, sl));
+        }
+    }
+
+    private boolean syncLocalListChanges(DatabaseWrapper database, List<Shoppinglist> lists, User user) {
+        int count = lists.size();
+        for (Shoppinglist sl : lists) {
+            switch (sl.getState()) {
+                case SyncState.TO_SYNC: addRequest(new ListPutRequest(database, user, sl)); break;
+                case SyncState.DELETE: addRequest(new ListDelRequest(database, user, sl)); break;
+                case SyncState.ERROR: addRequest(new ListRevertRequest(database, user, sl)); break;
+                default: count--; break;
+            }
+        }
+        return count != 0;
+    }
+
+    private boolean syncLocalItemChanges(DatabaseWrapper database, Shoppinglist sl, User user) {
+        List<ShoppinglistItem> items = database.getItems(sl, user, true);
+        int count = items.size();
+        for (ShoppinglistItem item : items) {
+            switch (item.getState()) {
+                case SyncState.TO_SYNC: addRequest(new ItemPutRequest(database, user, item)); break;
+                case SyncState.DELETE: addRequest(new ItemDelRequest(database, user, item)); break;
+                case SyncState.ERROR: addRequest(new ItemRevertRequest(database, user, item)); break;
+                default: count--; break;
+            }
+        }
+        return count != 0;
+    }
+
+    private boolean syncLocalShareChanges(DatabaseWrapper database, Shoppinglist sl, User user) {
+        List<Share> shares = database.getShares(sl, user, true);
+        int count = shares.size();
+        for (Share s : shares) {
+            if (s.isAccessOwner()) {
+                // The API doesn't allow the owner-share to be edited/deleted as it's technically
+                // not a share in the API-share-table. So we will not be sending any request from
+                // the owner to the API. But rather do a herd coding of the object.
+                if (s.getState() == SyncState.DELETE) {
+                    database.deleteShare(s, user);
+                    SgnLog.v(TAG, "API doesn't allow owner to be 'deleted'. Deleting from own DB and ignoring.");
+                } else if (s.getState() != SyncState.SYNCED) {
+                    s.setState(SyncState.SYNCED);
+                    s.setShoppinglistId(sl.getId());
+                    database.editShare(s, user);
+                    SgnLog.v(TAG, "Owner cannot be edited. Resetting share.state and ignoring.");
+                }
+                count--;
+                continue;
+            }
+
+            switch (s.getState()) {
+                case SyncState.TO_SYNC: addRequest(new SharePutRequest(database, user, s)); break;
+                case SyncState.DELETE: addRequest(new ShareDelRequest(database, user, s)); break;
+                case SyncState.ERROR: addRequest(new ShareRevertRequest(database, user, s)); break;
+                default: count--; break;
+            }
+        }
+        return count != 0;
+    }
+
+    private class ListSyncListener extends ListArrayListener {
+
+        private ListSyncListener(DatabaseWrapper database, User user, int syncCount) {
+            super(database, user, null);
+        }
+
+        @Override
+        public void onSuccess(List<Shoppinglist> serverLists) {
+
+            // Get ALL lists including deleted, to avoid adding them again
+            List<Shoppinglist> localLists = mDatabase.getLists(mUser, true);
+
+            // Server usually returns items in the order oldest to newest (not guaranteed)
+            // We want them to be reversed
+            Collections.reverse(serverLists);
+
+            // Set the state of all shares in the serverList to SYNCED,
+            // before inserting into the DB, as this is actually correct
+            for (Shoppinglist sl : serverLists) {
+                for (Share share : sl.getShares().values()) {
+                    share.setState(SyncState.SYNCED);
+                }
+            }
+
+            mergeListsToDbAndFetchItems(mDatabase, serverLists, localLists, mUser);
+
+            popRequestAndPostShoppinglistEvent();
+//            mSyncController.decrementAndPost();
+
+        }
+
+        @Override
+        public void onError(ShopGunError error) {
+            popRequest();
+        }
+
+    }
+
+    private void mergeListsToDbAndFetchItems(DatabaseWrapper database, List<Shoppinglist> serverList, List<Shoppinglist> localList, User user) {
 
         if (serverList.isEmpty() && localList.isEmpty()) {
             return;
@@ -508,18 +584,18 @@ public class SyncManager {
                     if (localSl.getModified().before(serverSl.getModified())) {
                         serverSl.setState(SyncState.SYNCED);
                         mBuilder.edit(serverSl);
-                        mDatabase.editList(serverSl, user);
-                        mDatabase.cleanShares(serverSl, user);
+                        database.editList(serverSl, user);
+                        database.cleanShares(serverSl, user);
                     }
                     // else: Don't do anything, next iteration will put local changes to API
 
                 } else {
                     mBuilder.del(localSl);
-                    for (ShoppinglistItem sli : mDatabase.getItems(localSl, user)) {
+                    for (ShoppinglistItem sli : database.getItems(localSl, user)) {
                         mBuilder.del(sli);
                     }
-                    mDatabase.deleteItems(localSl.getId(), null, user);
-                    mDatabase.deleteList(localSl, user);
+                    database.deleteItems(localSl.getId(), null, user);
+                    database.deleteList(localSl, user);
                 }
 
             } else {
@@ -527,176 +603,164 @@ public class SyncManager {
                 Shoppinglist add = serverMap.get(key);
                 add.setState(SyncState.TO_SYNC);
                 mBuilder.add(add);
-                mDatabase.insertList(add, user);
+                database.insertList(add, user);
 
             }
 
         }
 
         for (Shoppinglist sl : mBuilder.getAddedLists()) {
-            syncItems(sl, user);
+            addRequest(new ItemSyncRequest(database, sl, user));
         }
 
         for (Shoppinglist sl : mBuilder.getEditedLists()) {
-            syncItems(sl, user);
+            addRequest(new ItemSyncRequest(database, sl, user));
         }
 
     }
 
-    private void syncListsModified(final User user) {
+    private class ListModifiedRequest extends JsonObjectRequest {
+        private ListModifiedRequest(DatabaseWrapper database, User user, Shoppinglist shoppinglist) {
+            super(Endpoints.listModified(user.getUserId(), shoppinglist.getId()),
+                    new ListModifiedListener(database, user, shoppinglist));
+            setSaveNetworkLog(SAVE_NETWORK_LOG);
+        }
+    }
 
-        List<Shoppinglist> lists = mDatabase.getLists(user);
-        Iterator<Shoppinglist> it = lists.iterator();
+    private class ListModifiedListener extends JSONObjectListener<JSONObject> {
 
-        while (it.hasNext()) {
-            Shoppinglist sl = it.next();
+        Shoppinglist mShoppinglist;
 
-            // If they are in the state of processing, then skip
-            if (sl.getState() == SyncState.SYNCING) {
-                it.remove();
-            }
-
-            // If it obviously needs to sync, then just do it
-            if (sl.getState() == SyncState.TO_SYNC) {
-                // New shopping lists must always sync
-                syncItems(sl, user);
-                it.remove();
-            }
-
-            // Run the check
-            sl.setState(SyncState.SYNCING);
-
+        private ListModifiedListener(DatabaseWrapper database, User user, Shoppinglist shoppinglist) {
+            super(database, user, null);
+            mShoppinglist = shoppinglist;
         }
 
-        mDatabase.insertLists(lists, user);
+        @Override
+        public void onSuccess(JSONObject response) {
+            mShoppinglist.setState(SyncState.SYNCED);
+            try {
+                String modifiedString = response.getString(SgnJson.MODIFIED);
+                Date modified = SgnUtils.stringToDate(modifiedString);
+                // If local list has been modified before the server list, then sync items
+                if (mShoppinglist.getModified().before(modified)) {
+                    // If there are changes, update items (this will update list-state in DB)
+                    addRequest(new ItemSyncRequest(mDatabase, mShoppinglist, mUser));
+                } else {
+                    // if no changes, just write new state to DB
+                    mDatabase.editList(mShoppinglist, mUser);
+                }
+            } catch (JSONException e) {
+                SgnLog.e(TAG, e.getMessage(), e);
+                // error? just write new state to DB, next iteration will fix it
+                mDatabase.editList(mShoppinglist, mUser);
+            }
+            popRequestAndPostShoppinglistEvent();
+        }
 
-        for (Shoppinglist sl : lists) {
-            requestListsModified(sl, user);
+        @Override
+        public void onError(ShopGunError error) {
+            popRequest();
+            addRequest(new ListPutRequest(mDatabase, mUser, mShoppinglist));
+        }
+
+        @Override
+        public void onComplete(JSONObject response, ShopGunError error) {
+            if (response != null) {
+                onSuccess(response);
+            } else {
+                onError(error);
+            }
         }
 
     }
 
-    private void requestListsModified(final Shoppinglist sl, final User user) {
+    private class ItemSyncRequest extends JsonArrayRequest {
 
-        Listener<JSONObject> modifiedListener = new Listener<JSONObject>() {
+        private ItemSyncRequest(DatabaseWrapper database, Shoppinglist shoppinglist, User user) {
+            super(Endpoints.listitems(user.getUserId(), shoppinglist.getId()), new ItemSyncListener(database, shoppinglist, user));
+            // Offset and limit are set to default values, we want to ignore this.
+            getParameters().remove(Parameters.OFFSET);
+            getParameters().remove(Parameters.LIMIT);
+            setSaveNetworkLog(SAVE_NETWORK_LOG);
+            // update database state for the list
+            shoppinglist.setState(SyncState.SYNCING);
+            database.editList(shoppinglist, user);
+        }
 
-            public void onComplete(JSONObject response, ShopGunError error) {
+    }
 
-                if (response != null) {
+    private class ItemSyncListener implements Listener<JSONArray> {
 
-                    sl.setState(SyncState.SYNCED);
-                    try {
-                        String modified = response.getString(SgnJson.MODIFIED);
-                        // If local list has been modified before the server list, then sync items
-                        if (sl.getModified().before(SgnUtils.stringToDate(modified))) {
-                            // If there are changes, update items (this will update list-state in DB)
-                            syncItems(sl, user);
+        private DatabaseWrapper mDatabase;
+        private User mUser;
+        private Shoppinglist mShoppinglist;
+
+        private ItemSyncListener(DatabaseWrapper database, Shoppinglist shoppinglist, User user) {
+            mDatabase = database;
+            mShoppinglist = shoppinglist;
+            mUser = user;
+        }
+
+        public void onComplete(JSONArray response, ShopGunError error) {
+
+            if (response == null) {
+                popRequest();
+                addRequest(new ListPutRequest(mDatabase, mUser, mShoppinglist));
+                return;
+            }
+
+            mShoppinglist.setState(SyncState.SYNCED);
+            mDatabase.editList(mShoppinglist, mUser);
+
+            // Get ALL items including deleted, to avoid adding them again
+            List<ShoppinglistItem> localItems = mDatabase.getItems(mShoppinglist, mUser, true);
+            List<ShoppinglistItem> serverItems = ShoppinglistItem.fromJSON(response);
+
+            // So far, we get items in reverse order, well just keep reversing it for now.
+            Collections.reverse(serverItems);
+
+            for (ShoppinglistItem sli : serverItems) {
+                sli.setState(SyncState.SYNCED);
+            }
+
+            mergeItemsToDb(mDatabase, serverItems, localItems, mUser);
+
+            // fetch updated items from DB, as the state might be a bit whack after the merging of items
+            localItems = mDatabase.getItems(mShoppinglist, mUser);
+            ListUtils.sortItems(localItems);
+
+            if (PermissionUtils.allowEdit(mShoppinglist, mUser)) {
+
+                // Update previous_id's, modified and state if needed
+                String tmp = ListUtils.FIRST_ITEM;
+                for (ShoppinglistItem sli : localItems) {
+
+                    if (!tmp.equals(sli.getPreviousId())) {
+                        sli.setPreviousId(tmp);
+                        sli.setModified(new Date());
+                        sli.setState(SyncState.TO_SYNC);
+
+                        // If it's a new item, it's already in the added list, then we'll override it
+                        // else add it to the edited as a new item to the edited list
+                        if (mBuilder.items.containsKey(sli.getId())) {
+                            mBuilder.add(sli);
                         } else {
-                            // if no changes, just write new state to DB
-                            mDatabase.editList(sl, user);
+                            mBuilder.edit(sli);
                         }
-                    } catch (JSONException e) {
-                        SgnLog.e(TAG, e.getMessage(), e);
-                        // error? just write new state to DB, next iteration will fix it
-                        mDatabase.editList(sl, user);
+
+                        mDatabase.editItems(sli, mUser);
                     }
-                    popRequestAndPostShoppinglistEvent();
-
-                } else {
-
-                    popRequest();
-                    revertList(sl, user);
-
+                    tmp = sli.getId();
                 }
-
-
             }
-        };
 
-        JsonObjectRequest modifiedRequest = new JsonObjectRequest(Endpoints.listModified(user.getUserId(), sl.getId()), modifiedListener);
-        modifiedRequest.setSaveNetworkLog(SAVE_NETWORK_LOG);
-        addRequest(modifiedRequest);
+            popRequestAndPostShoppinglistEvent();
 
+        }
     }
 
-    private void syncItems(final Shoppinglist sl, final User user) {
-
-        sl.setState(SyncState.SYNCING);
-        mDatabase.editList(sl, user);
-
-        Listener<JSONArray> itemListener = new Listener<JSONArray>() {
-
-            public void onComplete(JSONArray response, ShopGunError error) {
-
-                if (response != null) {
-
-                    sl.setState(SyncState.SYNCED);
-                    mDatabase.editList(sl, user);
-
-                    // Get ALL items including deleted, to avoid adding them again
-                    List<ShoppinglistItem> localItems = mDatabase.getItems(sl, user, true);
-                    List<ShoppinglistItem> serverItems = ShoppinglistItem.fromJSON(response);
-
-                    // So far, we get items in reverse order, well just keep reversing it for now.
-                    Collections.reverse(serverItems);
-
-                    for (ShoppinglistItem sli : serverItems) {
-                        sli.setState(SyncState.SYNCED);
-                    }
-
-                    mergeItemsToDb(serverItems, localItems, user);
-
-					/* fetch updated items from DB, as the state might be a bit
-					 * whack after the merging of items */
-                    localItems = mDatabase.getItems(sl, user);
-                    ListUtils.sortItems(localItems);
-
-                    if (PermissionUtils.allowEdit(sl, user)) {
-
-						/* Update previous_id's, modified and state if needed */
-                        String tmp = ListUtils.FIRST_ITEM;
-                        for (ShoppinglistItem sli : localItems) {
-
-                            if (!tmp.equals(sli.getPreviousId())) {
-                                sli.setPreviousId(tmp);
-                                sli.setModified(new Date());
-                                sli.setState(SyncState.TO_SYNC);
-
-								/* If it's a new item, it's already in the added list,
-								 * then we'll override it else add it to the edited
-								 * as a new item to the edited list */
-                                if (mBuilder.items.containsKey(sli.getId())) {
-                                    mBuilder.add(sli);
-                                } else {
-                                    mBuilder.edit(sli);
-                                }
-
-                                mDatabase.editItems(sli, user);
-                            }
-                            tmp = sli.getId();
-                        }
-                    }
-
-                    popRequestAndPostShoppinglistEvent();
-
-                } else {
-                    popRequest();
-                    revertList(sl, user);
-                }
-
-            }
-        };
-
-        JsonArrayRequest itemRequest = new JsonArrayRequest(Method.GET, Endpoints.listitems(user.getUserId(), sl.getId()), itemListener);
-        // Offset and limit are set to default values, we want to ignore this.
-        itemRequest.getParameters().remove(Parameters.OFFSET);
-        itemRequest.getParameters().remove(Parameters.LIMIT);
-        itemRequest.setSaveNetworkLog(SAVE_NETWORK_LOG);
-        addRequest(itemRequest);
-
-    }
-
-    private void mergeItemsToDb(List<ShoppinglistItem> serverItems, List<ShoppinglistItem> localItems, User user) {
+    private void mergeItemsToDb(DatabaseWrapper database, List<ShoppinglistItem> serverItems, List<ShoppinglistItem> localItems, User user) {
 
         if (serverItems.isEmpty() && localItems.isEmpty()) {
             return;
@@ -729,12 +793,12 @@ public class SyncManager {
 
                     if (localSli.getModified().before(serverSli.getModified())) {
                         mBuilder.edit(serverSli);
-                        mDatabase.editItems(serverSli, user);
+                        database.editItems(serverSli, user);
 
                     } else if (!localSli.getMeta().toString().equals(serverSli.getMeta().toString())) {
                         // Migration code, to get comments into the DB
                         mBuilder.edit(serverSli);
-                        mDatabase.editItems(serverSli, user);
+                        database.editItems(serverSli, user);
                     } else if (localSli.equals(serverSli)) {
                         SgnLog.d(TAG, "We have a mismatch");
                     }
@@ -745,633 +809,464 @@ public class SyncManager {
                         // If the item have been added while request was in flight it will
                         // have the state TO_SYNC, and will just ignore it for now
                         mBuilder.del(delSli);
-                        mDatabase.deleteItem(delSli, user);
+                        database.deleteItem(delSli, user);
                     }
                 }
 
             } else {
                 ShoppinglistItem serverSli = serverMap.get(key);
                 mBuilder.add(serverSli);
-                mDatabase.insertItem(serverSli, user);
+                database.insertItem(serverSli, user);
             }
         }
 
     }
 
-    /**
-     * Method for pushing all local changes to server.
-     * @return true if there was changes, else false
-     */
-    private boolean syncLocalListChanges(List<Shoppinglist> lists, User user) {
+    private class ListPutListener extends ListObjectListener {
 
-        int count = lists.size();
-
-        for (Shoppinglist sl : lists) {
-
-            switch (sl.getState()) {
-
-                case SyncState.TO_SYNC:
-                    putList(sl, user);
-                    break;
-
-                case SyncState.DELETE:
-                    delList(sl, user);
-                    break;
-
-                case SyncState.ERROR:
-                    revertList(sl, user);
-                    break;
-
-                default:
-                    count--;
-                    break;
-            }
-
+        private ListPutListener(DatabaseWrapper database, User user, Shoppinglist shoppinglist) {
+            super(database, user, shoppinglist);
         }
 
-        return count != 0;
+        @Override
+        public void onError(ShopGunError error) {
+            popRequest();
+            // Ignore missing network, wait for next iteration
+            if (error.getCode() != Code.NETWORK_ERROR) {
+                addRequest(new ListPutRequest(mDatabase, mUser, mLocalCopy));
+            }
+        }
+
+        @Override
+        public void onSuccess(Shoppinglist response) {
+            // If local isn't equal to server version, take server version.
+            // Don't push changes yet, we want to check item state too.
+            Shoppinglist localSl = mDatabase.getList(response.getId(), mUser);
+            if (localSl != null && !response.getModified().equals(localSl.getModified())) {
+                response.setState(SyncState.SYNCED);
+                // If server haven't delivered an prev_id, then use old id
+                response.setPreviousId(response.getPreviousId() == null ? mLocalCopy.getPreviousId() : response.getPreviousId());
+                mDatabase.editList(response, mUser);
+                mBuilder.edit(response);
+            }
+            popRequest();
+            syncLocalItemChanges(mDatabase, mLocalCopy, mUser);
+        }
 
     }
 
-    /**
-     * Pushes any local changes to the server.
-     * @param sl to get items from
-     * @return true if there was changes, else false
-     */
-    private boolean syncLocalItemChanges(Shoppinglist sl, User user) {
+    private class ListPutRequest extends JsonObjectRequest {
 
-        List<ShoppinglistItem> items = mDatabase.getItems(sl, user, true);
-        int count = items.size();
-
-        for (ShoppinglistItem sli : items) {
-
-            switch (sli.getState()) {
-                case SyncState.TO_SYNC:
-                    putItem(sli, user);
-                    break;
-
-                case SyncState.DELETE:
-                    delItem(sli, user);
-                    break;
-
-                case SyncState.ERROR:
-                    revertItem(sli, user);
-                    break;
-
-                default:
-                    count--;
-                    break;
-            }
-
+        private ListPutRequest(DatabaseWrapper database, User user, Shoppinglist shoppinglist) {
+            super(Method.PUT, Endpoints.list(user.getUserId(), shoppinglist.getId()),
+                    shoppinglist.toJSON(), new ListPutListener(database, user, shoppinglist));
+            shoppinglist.setState(SyncState.SYNCING);
+            database.editList(shoppinglist, user);
         }
-
-        return count != 0;
 
     }
 
-    private void putList(final Shoppinglist sl, final User user) {
+    private class ListDelRequest extends JsonObjectRequest {
 
-        sl.setState(SyncState.SYNCING);
-        mDatabase.editList(sl, user);
+        private ListDelRequest(DatabaseWrapper database, User user, Shoppinglist local) {
+            super(Method.DELETE, Endpoints.list(user.getUserId(), local.getId()),
+                    null, new ListDelListener(database, user, local));
+            getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(local.getModified()));
+        }
+    }
 
-        Listener<JSONObject> listListener = new Listener<JSONObject>() {
+    private class ListDelListener extends ListObjectListener {
 
-            public void onComplete(JSONObject response, ShopGunError error) {
+        private ListDelListener(DatabaseWrapper database, User user, Shoppinglist local) {
+            super(database, user, local);
+        }
 
-                if (response != null) {
+        @Override
+        public void onSuccess(Shoppinglist response) {
+            mDatabase.deleteList(mLocalCopy, mUser);
+            mDatabase.deleteShares(mLocalCopy, mUser);
+            mDatabase.deleteItems(mLocalCopy.getId(), null, mUser);
+            popRequest();
+        }
 
-					/*
-					 * If local isn't equal to server version, take server version.
-					 * Don't push changes yet, we want to check item state too.
-					 */
+        @Override
+        public void onError(ShopGunError error) {
+            popRequest();
 
-                    Shoppinglist serverSl = Shoppinglist.fromJSON(response);
-                    Shoppinglist localSl = mDatabase.getList(serverSl.getId(), user);
-                    if (localSl != null && !serverSl.getModified().equals(localSl.getModified())) {
-                        serverSl.setState(SyncState.SYNCED);
-                        // If server haven't delivered an prev_id, then use old id
-                        serverSl.setPreviousId(serverSl.getPreviousId() == null ? sl.getPreviousId() : serverSl.getPreviousId());
-                        mDatabase.editList(serverSl, user);
-                        mBuilder.edit(serverSl);
-                    }
-                    popRequest();
-                    syncLocalItemChanges(sl, user);
+            switch (error.getCode()) {
 
-                } else {
+                case Code.INVALID_RESOURCE_ID:
+                    // Resource already gone (or have never been synchronized) delete local version and ignore
+                    mDatabase.deleteList(mLocalCopy, mUser);
+                    break;
 
-                    popRequest();
+                case Code.NETWORK_ERROR:
                     // Ignore missing network, wait for next iteration
-                    if (error.getCode() != Code.NETWORK_ERROR) {
-                        revertList(sl, user);
-                    }
-
-                }
-
-
-            }
-        };
-
-        String url = Endpoints.list(user.getUserId(), sl.getId());
-        JsonObjectRequest listReq = new JsonObjectRequest(Method.PUT, url, sl.toJSON(), listListener);
-        addRequest(listReq);
-
-    }
-
-    private void delList(final Shoppinglist sl, final User user) {
-
-        Listener<JSONObject> listListener = new Listener<JSONObject>() {
-
-            public void onComplete(JSONObject response, ShopGunError error) {
-
-                if (response != null) {
-
-                    mDatabase.deleteList(sl, user);
-                    mDatabase.deleteShares(sl, user);
-                    mDatabase.deleteItems(sl.getId(), null, user);
-                    popRequest();
-
-                } else {
-
-                    popRequest();
-
-                    switch (error.getCode()) {
-
-                        case Code.INVALID_RESOURCE_ID:
-							/* Resource already gone (or have never been synchronized)
-							 * delete local version and ignore */
-                            mDatabase.deleteList(sl, user);
-                            break;
-
-                        case Code.NETWORK_ERROR:
-							/* Ignore missing network, wait for next iteration */
-                            break;
-
-                        default:
-                            revertList(sl, user);
-                            break;
-
-                    }
-
-                }
-
-            }
-        };
-
-        String url = Endpoints.list(user.getUserId(), sl.getId());
-
-        JsonObjectRequest listReq = new JsonObjectRequest(Method.DELETE, url, null, listListener);
-        listReq.getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(sl.getModified()));
-        addRequest(listReq);
-
-    }
-
-    private void revertList(final Shoppinglist sl, final User user) {
-
-        if (sl.getState() != SyncState.ERROR) {
-            sl.setState(SyncState.ERROR);
-            mDatabase.editList(sl, user);
-        }
-
-        Listener<JSONObject> listListener = new Listener<JSONObject>() {
-
-            public void onComplete(JSONObject response, ShopGunError error) {
-
-                if (response != null) {
-                    Shoppinglist serverSl = Shoppinglist.fromJSON(response);
-                    serverSl.setState(SyncState.SYNCED);
-                    serverSl.setPreviousId(serverSl.getPreviousId() == null ? sl.getPreviousId() : serverSl.getPreviousId());
-                    mDatabase.editList(serverSl, user);
-                    mBuilder.add(serverSl);
-                    syncLocalItemChanges(sl, user);
-                } else {
-                    mDatabase.deleteList(sl, user);
-                    mBuilder.del(sl);
-                }
-                popRequestAndPostShoppinglistEvent();
-            }
-        };
-
-        String url = Endpoints.list(user.getUserId(), sl.getId());
-        JsonObjectRequest listReq = new JsonObjectRequest(url, listListener);
-        addRequest(listReq);
-
-    }
-
-    private void putItem(final ShoppinglistItem sli, final User user) {
-
-        sli.setState(SyncState.SYNCING);
-        mDatabase.editItems(sli, user);
-
-        Listener<JSONObject> itemListener = new Listener<JSONObject>() {
-
-            public void onComplete(JSONObject response, ShopGunError error) {
-
-                if (response != null) {
-
-                    ShoppinglistItem server = ShoppinglistItem.fromJSON(response);
-                    ShoppinglistItem local = mDatabase.getItem(sli.getId(), user);
-
-                    if (local != null && !local.getModified().equals(server.getModified())) {
-
-                        // The server has a 'better' state, we should use this
-                        server.setState(SyncState.SYNCED);
-                        // If server havent delivered an prev_id, then use old id
-                        if (server.getPreviousId() == null) {
-                            server.setPreviousId(sli.getPreviousId());
-                        }
-                        mDatabase.editItems(server, user);
-                        mBuilder.edit(server);
-
-                    }
-
-                    popRequestAndPostShoppinglistEvent();
-
-                } else {
-
-                    popRequest();
-
-                    switch (error.getCode()) {
-
-                        case Code.NETWORK_ERROR:
-							/* Ignore missing network, wait for next iteration */
-                            break;
-
-                        default:
-                            revertItem(sli, user);
-                            break;
-
-                    }
-
-                }
-
-            }
-        };
-
-        String url = Endpoints.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
-        JsonObjectRequest itemReq = new JsonObjectRequest(Method.PUT, url, sli.toJSON(), itemListener);
-//		SgnLog.d(TAG, sli.toJSON().toString());
-        addRequest(itemReq);
-
-    }
-
-    private void delItem(final ShoppinglistItem sli, final User user) {
-
-        Listener<JSONObject> itemListener = new Listener<JSONObject>() {
-
-            public void onComplete(JSONObject response, ShopGunError error) {
-
-                if (response != null) {
-                    mDatabase.deleteItem(sli, user);
-                    popRequest();
-                } else {
-                    popRequest();
-
-                    switch (error.getCode()) {
-
-                        case Code.INVALID_RESOURCE_ID:
-						/* Resource already gone (or have never been synchronized)
-						 * delete local version and ignore */
-                            mDatabase.deleteItem(sli, user);
-                            break;
-
-                        case Code.NETWORK_ERROR:
-						/* Ignore missing network, wait for next iteration */
-                            break;
-
-                        default:
-                            revertItem(sli, user);
-                            break;
-
-                    }
-
-                }
-
-            }
-        };
-
-        String url = Endpoints.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
-        JsonObjectRequest itemReq = new JsonObjectRequest(Method.DELETE, url, null, itemListener);
-        itemReq.getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(sli.getModified()));
-        addRequest(itemReq);
-
-    }
-
-    private void revertItem(final ShoppinglistItem sli, final User user) {
-
-        if (sli.getState() != SyncState.ERROR) {
-            sli.setState(SyncState.ERROR);
-            mDatabase.editItems(sli, user);
-        }
-
-        Listener<JSONObject> itemListener = new Listener<JSONObject>() {
-
-            public void onComplete(JSONObject response, ShopGunError error) {
-
-                if (response != null) {
-
-                    // Take server response, insert it into DB, post notification
-                    ShoppinglistItem serverSli = ShoppinglistItem.fromJSON(response);
-                    serverSli.setState(SyncState.SYNCED);
-                    serverSli.setPreviousId(serverSli.getPreviousId() == null ? sli.getPreviousId() : serverSli.getPreviousId());
-                    mBuilder.edit(serverSli);
-
-                } else {
-
-                    // Something bad happened, delete item to keep DB sane
-                    mDatabase.deleteItem(sli, user);
-                    mBuilder.del(sli);
-
-                }
-
-				/*
-				 * Update shopping list modified to match the latest date of the
-				 * items, so that we get as close to API state as possible
-				 */
-                Shoppinglist sl = mDatabase.getList(sli.getShoppinglistId(), user);
-                if (sl != null) {
-
-                    List<ShoppinglistItem> items = mDatabase.getItems(sl, user, true);
-                    if (!items.isEmpty()) {
-                        Collections.sort(items, ShoppinglistItem.MODIFIED_DESCENDING);
-                        ShoppinglistItem newestItem = items.get(0);
-                        sl.setModified(newestItem.getModified());
-                        mDatabase.editList(sl, user);
-                        mBuilder.edit(sl);
-                    }
-
-                }
-
-                popRequestAndPostShoppinglistEvent();
-
-            }
-        };
-
-        String url = Endpoints.listitem(user.getUserId(), sli.getShoppinglistId(), sli.getId());
-        JsonObjectRequest itemReq = new JsonObjectRequest(url, itemListener);
-        addRequest(itemReq);
-
-    }
-
-    private boolean syncLocalShareChanges(Shoppinglist sl, User user) {
-
-        List<Share> shares = mDatabase.getShares(sl, user, true);
-
-        int count = shares.size();
-
-        for (Share s : shares) {
-
-            if (s.isAccessOwner()) {
-                /*
-                The API doesn't allow the owner-share to be edited/deleted as it's technically
-                not a share in the API-share-table. So we will not be sending any request from
-                the owner to the API. But rather do a herd coding of the object.
-                 */
-                if (s.getState() == SyncState.DELETE) {
-                    mDatabase.deleteShare(s, user);
-                    SgnLog.v(TAG, "API doesn't allow owner to be 'deleted'. Deleting from own DB and ignoring.");
-                } else if (s.getState() != SyncState.SYNCED) {
-                    s.setState(SyncState.SYNCED);
-                    s.setShoppinglistId(sl.getId());
-                    mDatabase.editShare(s, user);
-                    SgnLog.v(TAG, "Owner cannot be edited. Resetting share.state and ignoring.");
-                }
-                count--;
-                continue;
-            }
-
-            switch (s.getState()) {
-
-                case SyncState.TO_SYNC:
-                    putShare(s, user);
-                    break;
-
-                case SyncState.DELETE:
-                    delShare(s, user);
-                    break;
-
-                case SyncState.ERROR:
-                    revertShare(s, user);
                     break;
 
                 default:
-                    count--;
+                    addRequest(new ListRevertRequest(mDatabase, mUser, mLocalCopy));
                     break;
 
             }
 
         }
-
-        return count != 0;
-
     }
 
-    private void putShare(final Share s, final User user) {
+    private class ListRevertRequest extends JsonObjectRequest {
 
-        s.setState(SyncState.SYNCING);
-        mDatabase.editShare(s, user);
-
-        Listener<JSONObject> shareListener = new Listener<JSONObject>() {
-
-            public void onComplete(JSONObject response, ShopGunError error) {
-
-                if (response != null) {
-                    Share serverShare = Share.fromJSON(response);
-                    serverShare.setState(SyncState.SYNCED);
-                    serverShare.setShoppinglistId(s.getShoppinglistId());
-                    mDatabase.editShare(serverShare, user);
-                    popRequest();
-                } else {
-                    if (error.getFailedOnField() != null) {
-
-						/* If it's a FailedOnField, we can't do anything, yet.
-						 * Remove the share to keep the DB sane.
-						 */
-                        mDatabase.deleteShare(s, user);
-                        // No need to edit the SL in DB, as shares are disconnected
-                        Shoppinglist sl = mDatabase.getList(s.getShoppinglistId(), user);
-                        if (sl != null) {
-                            sl.removeShare(s);
-                            mBuilder.edit(sl);
-                            popRequestAndPostShoppinglistEvent();
-                        } else {
-                            popRequest();
-							/* Nothing, shoppinglist might have been deleted */
-                        }
-
-                    } else {
-                        popRequest();
-                        revertShare(s, user);
-                    }
-                }
-
+        private ListRevertRequest(DatabaseWrapper database, User user, Shoppinglist shoppinglist) {
+            super(Endpoints.list(user.getUserId(), shoppinglist.getId()),
+                    new ListRevertListener(database, user, shoppinglist));
+            if (shoppinglist.getState() != SyncState.ERROR) {
+                shoppinglist.setState(SyncState.ERROR);
+                database.editList(shoppinglist, user);
             }
-        };
-
-        String url = Endpoints.listShareEmail(user.getUserId(), s.getShoppinglistId(), s.getEmail());
-        JsonObjectRequest shareReq = new JsonObjectRequest(Method.PUT, url, s.toJSON(), shareListener);
-        addRequest(shareReq);
-
+        }
     }
 
-    private void delShare(final Share s, final User user) {
+    private class ListRevertListener extends ListObjectListener {
 
-        Listener<JSONObject> shareListener = new Listener<JSONObject>() {
-
-            public void onComplete(JSONObject response, ShopGunError error) {
-
-                if (response != null) {
-
-                    if (user.getEmail().equals(s.getEmail())) {
-
-						/*
-						 * if share.email == user.email, the user have been
-						 * removed from the list, delete list, items, and shares
-						 */
-                        mDatabase.deleteList(s.getShoppinglistId(), user);
-                        mDatabase.deleteItems(s.getShoppinglistId(), null, user);
-                        mDatabase.deleteShares(s.getShoppinglistId(), user);
-
-                    } else {
-
-						/* Else just remove the share in question */
-                        mDatabase.deleteShare(s, user);
-
-                    }
-                    popRequest();
-
-                } else {
-
-                    popRequest();
-
-                    switch (error.getCode()) {
-
-                        case Code.NETWORK_ERROR:
-							/* Ignore missing network, wait for next iteration */
-                            break;
-
-                        case Code.INVALID_RESOURCE_ID:
-							/* Resource  gone (or have never been synchronized)
-							 * delete local version and ignore */
-                            mDatabase.deleteShare(s, user);
-                            break;
-
-                        default:
-                            revertShare(s, user);
-                            break;
-
-                    }
-
-                }
-
-            }
-        };
-
-        String url = Endpoints.listShareEmail(user.getUserId(), s.getShoppinglistId(), s.getEmail());
-        JsonObjectRequest shareReq = new JsonObjectRequest(Method.DELETE, url, null, shareListener);
-        addRequest(shareReq);
-
-    }
-
-    private void revertShare(final Share s, final User user) {
-
-        if (s.getState() != SyncState.ERROR) {
-            s.setState(SyncState.ERROR);
-            mDatabase.editShare(s, user);
+        private ListRevertListener(DatabaseWrapper database, User user, Shoppinglist local) {
+            super(database, user, local);
         }
 
-        Listener<JSONObject> shareListener = new Listener<JSONObject>() {
+        public void onComplete(JSONObject response, ShopGunError error) {
+            super.onComplete(response, error);
+            popRequestAndPostShoppinglistEvent();
+        }
 
-            public void onComplete(JSONObject response, ShopGunError error) {
+        @Override
+        public void onSuccess(Shoppinglist response) {
+            response.setState(SyncState.SYNCED);
+            response.setPreviousId(response.getPreviousId() == null ?
+                    mLocalCopy.getPreviousId() : response.getPreviousId());
+            mDatabase.editList(response, mUser);
+            mBuilder.add(response);
+            syncLocalItemChanges(mDatabase, mLocalCopy, mUser);
+        }
 
-                if (response != null) {
+        @Override
+        public void onError(ShopGunError error) {
+            mDatabase.deleteList(mLocalCopy, mUser);
+            mBuilder.del(mLocalCopy);
+        }
+    }
 
-                    Share serverShare = Share.fromJSON(response);
-                    serverShare.setState(SyncState.SYNCED);
-                    serverShare.setShoppinglistId(s.getShoppinglistId());
-                    mDatabase.editShare(serverShare, user);
+    private class ItemPutRequest extends JsonObjectRequest {
 
-                    // No need to edit the SL in DB, as shares are disconnected
-                    Shoppinglist sl = mDatabase.getList(s.getShoppinglistId(), user);
-                    if (sl != null) {
+        private ItemPutRequest(DatabaseWrapper database, User user, ShoppinglistItem item) {
+            super(Method.PUT, Endpoints.listitem(user.getUserId(), item.getShoppinglistId(), item.getId()),
+                    item.toJSON(), new ItemPutListener(database, user, item));
+            item.setState(SyncState.SYNCING);
+            database.editItems(item, user);
+        }
+    }
 
-                        sl.removeShare(s);
-                        mBuilder.edit(sl);
-                        popRequestAndPostShoppinglistEvent();
+    private class ItemPutListener extends ItemListener {
 
-                    } else {
+        private ItemPutListener(DatabaseWrapper database, User user, ShoppinglistItem item) {
+            super(database, user, item);
+        }
 
-						/* Nothing, shoppinglist might have been deleted */
-                        popRequest();
+        @Override
+        public void onSuccess(ShoppinglistItem response) {
 
-                    }
+            ShoppinglistItem local = mDatabase.getItem(mLocalCopy.getId(), mUser);
 
-                } else {
+            if (local != null && !local.getModified().equals(response.getModified())) {
 
-                    mDatabase.deleteShare(s, user);
-                    popRequest();
-
+                // The server has a 'better' state, we should use this
+                response.setState(SyncState.SYNCED);
+                // If server haven't delivered an prev_id, then use old id
+                if (response.getPreviousId() == null) {
+                    response.setPreviousId(mLocalCopy.getPreviousId());
                 }
+                mDatabase.editItems(response, mUser);
+                mBuilder.edit(response);
 
             }
-        };
 
-        String url = Endpoints.listShareEmail(user.getUserId(), s.getShoppinglistId(), s.getEmail());
-        JsonObjectRequest shareReq = new JsonObjectRequest(url, shareListener);
-        addRequest(shareReq);
+            popRequestAndPostShoppinglistEvent();
 
+        }
+
+        @Override
+        public void onError(ShopGunError error) {
+
+            popRequest();
+            if (error.getCode() != Code.NETWORK_ERROR) {
+                // Only ignore missing network, wait for next iteration
+                addRequest(new ItemRevertRequest(mDatabase, mUser, mLocalCopy));
+            }
+
+        }
+
+    }
+
+    private class ItemDelRequest extends JsonObjectRequest {
+
+        private ItemDelRequest(DatabaseWrapper database, User user, ShoppinglistItem item) {
+            super(Method.DELETE, Endpoints.listitem(user.getUserId(), item.getShoppinglistId(), item.getId()),
+                    null, new ItemDelListener(database, user, item));
+            getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(item.getModified()));
+        }
+    }
+
+    private class ItemDelListener extends ItemListener {
+
+        private ItemDelListener(DatabaseWrapper database, User user, ShoppinglistItem item) {
+            super(database, user, item);
+        }
+
+        @Override
+        public void onSuccess(ShoppinglistItem response) {
+            mDatabase.deleteItem(mLocalCopy, mUser);
+            popRequest();
+        }
+
+        @Override
+        public void onError(ShopGunError error) {
+            popRequest();
+            switch (error.getCode()) {
+
+                case Code.INVALID_RESOURCE_ID:
+                    // Resource already gone (or have never been synchronized) delete local version and ignore
+                    mDatabase.deleteItem(mLocalCopy, mUser);
+                    break;
+
+                case Code.NETWORK_ERROR:
+                    // Ignore missing network, wait for next iteration
+                    break;
+
+                default:
+                    addRequest(new ItemRevertRequest(mDatabase, mUser, mLocalCopy));
+                    break;
+
+            }
+        }
+
+    }
+
+    private class ItemRevertRequest extends JsonObjectRequest {
+
+        private ItemRevertRequest(DatabaseWrapper database, User user, ShoppinglistItem item) {
+            super(Endpoints.listitem(user.getUserId(), item.getShoppinglistId(), item.getId()),
+                    new ItemRevertListener(database, user, item));
+            if (item.getState() != SyncState.ERROR) {
+                item.setState(SyncState.ERROR);
+                database.editItems(item, user);
+            }
+        }
+    }
+
+    private class ItemRevertListener extends ItemListener {
+
+        private ItemRevertListener(DatabaseWrapper database, User user, ShoppinglistItem item) {
+            super(database, user, item);
+        }
+
+        @Override
+        public void onSuccess(ShoppinglistItem response) {
+            response.setState(SyncState.SYNCED);
+            response.setPreviousId(response.getPreviousId() == null ? mLocalCopy.getPreviousId() : response.getPreviousId());
+            mBuilder.edit(response);
+        }
+
+        @Override
+        public void onError(ShopGunError error) {
+            // Something bad happened, delete item to keep DB sane
+            mDatabase.deleteItem(mLocalCopy, mUser);
+            mBuilder.del(mLocalCopy);
+        }
+
+        public void onComplete(JSONObject response, ShopGunError error) {
+            super.onComplete(response, error);
+
+            // Update shopping list modified to match the latest date of the
+            // items, so that we get as close to API state as possible
+            Shoppinglist sl = mDatabase.getList(mLocalCopy.getShoppinglistId(), mUser);
+            if (sl != null) {
+                List<ShoppinglistItem> items = mDatabase.getItems(sl, mUser, true);
+                if (!items.isEmpty()) {
+                    Collections.sort(items, ShoppinglistItem.MODIFIED_DESCENDING);
+                    ShoppinglistItem newestItem = items.get(0);
+                    sl.setModified(newestItem.getModified());
+                    mDatabase.editList(sl, mUser);
+                    mBuilder.edit(sl);
+                }
+            }
+            popRequestAndPostShoppinglistEvent();
+        }
+    }
+
+    private class SharePutRequest extends JsonObjectRequest {
+        private SharePutRequest(DatabaseWrapper database, User user, Share share) {
+            super(Method.PUT, Endpoints.listShareEmail(user.getUserId(), share.getShoppinglistId(), share.getEmail()),
+                    share.toJSON(), new SharePutListener(database, user, share));
+            share.setState(SyncState.SYNCING);
+            database.editShare(share, user);
+        }
+    }
+
+    private class SharePutListener extends ShareListener {
+
+        private SharePutListener(DatabaseWrapper database, User user, Share share) {
+            super(database, user, share);
+        }
+
+        @Override
+        public void onSuccess(Share response) {
+            response.setState(SyncState.SYNCED);
+            response.setShoppinglistId(mLocalCopy.getShoppinglistId());
+            mDatabase.editShare(response, mUser);
+            popRequest();
+        }
+
+        @Override
+        public void onError(ShopGunError error) {
+            if (error.getFailedOnField() != null) {
+                // If it's a FailedOnField, we can't do anything, yet. Remove the share to keep the DB sane.
+                mDatabase.deleteShare(mLocalCopy, mUser);
+                // No need to edit the SL in DB, as shares are disconnected
+                Shoppinglist sl = mDatabase.getList(mLocalCopy.getShoppinglistId(), mUser);
+                if (sl != null) {
+                    sl.removeShare(mLocalCopy);
+                    mBuilder.edit(sl);
+                    popRequestAndPostShoppinglistEvent();
+                } else {
+                    popRequest();
+                    // Nothing, shoppinglist might have been deleted
+                }
+
+            } else {
+                popRequest();
+                addRequest(new ShareRevertRequest(mDatabase, mUser, mLocalCopy));
+            }
+        }
+    }
+
+    private class ShareDelRequest extends JsonObjectRequest {
+
+        private ShareDelRequest(DatabaseWrapper database, User user, Share local) {
+            super(Method.DELETE, Endpoints.listShareEmail(user.getUserId(), local.getShoppinglistId(), local.getEmail()),
+                    null, new ShareDelListener(database, user, local));
+        }
+    }
+
+    private class ShareDelListener extends ShareListener {
+
+        private ShareDelListener(DatabaseWrapper database, User user, Share local) {
+            super(database, user, local);
+        }
+
+        @Override
+        public void onSuccess(Share response) {
+
+            if (mUser.getEmail().equals(mLocalCopy.getEmail())) {
+                // if share.email == user.email, the user have been
+                // removed from the list, delete list, items, and shares
+                mDatabase.deleteList(mLocalCopy.getShoppinglistId(), mUser);
+                mDatabase.deleteItems(mLocalCopy.getShoppinglistId(), null, mUser);
+                mDatabase.deleteShares(mLocalCopy.getShoppinglistId(), mUser);
+
+            } else {
+                // Else just remove the share in question
+                mDatabase.deleteShare(mLocalCopy, mUser);
+            }
+            popRequest();
+
+        }
+
+        @Override
+        public void onError(ShopGunError error) {
+
+            popRequest();
+
+            switch (error.getCode()) {
+
+                case Code.NETWORK_ERROR:
+                    // Ignore missing network, wait for next iteration
+                    break;
+
+                case Code.INVALID_RESOURCE_ID:
+                    // Resource gone (or have never been synchronized) delete local version and ignore
+                    mDatabase.deleteShare(mLocalCopy, mUser);
+                    break;
+
+                default:
+                    addRequest(new ShareRevertRequest(mDatabase, mUser, mLocalCopy));
+                    break;
+
+            }
+
+        }
+    }
+
+    private class ShareRevertRequest extends JsonObjectRequest {
+
+        private ShareRevertRequest(DatabaseWrapper database, User user, Share share) {
+            super(Endpoints.listShareEmail(user.getUserId(), share.getShoppinglistId(), share.getEmail()),
+                    new ShareRevertListener(database, user, share));
+            if (share.getState() != SyncState.ERROR) {
+                share.setState(SyncState.ERROR);
+                database.editShare(share, user);
+            }
+        }
+
+    }
+
+    private class ShareRevertListener extends ShareListener {
+
+        private ShareRevertListener(DatabaseWrapper database, User user, Share local) {
+            super(database, user, local);
+        }
+
+        @Override
+        public void onSuccess(Share response) {
+            response.setState(SyncState.SYNCED);
+            response.setShoppinglistId(mLocalCopy.getShoppinglistId());
+            mDatabase.editShare(response, mUser);
+
+            // No need to edit the SL in DB, as shares are disconnected
+            Shoppinglist sl = mDatabase.getList(response.getShoppinglistId(), mUser);
+            if (sl != null) {
+
+                sl.removeShare(response);
+                mBuilder.edit(sl);
+                popRequestAndPostShoppinglistEvent();
+
+            } else {
+                // Nothing, shoppinglist might have been deleted
+                popRequest();
+            }
+
+        }
+
+        @Override
+        public void onError(ShopGunError error) {
+            mDatabase.deleteShare(mLocalCopy, mUser);
+            popRequest();
+        }
     }
 
     /**
-     * Pops one request off the request-stack, and sends out a notification if
-     * the stack is empty (all requests are done, and all notifications are ready)
+     * Supported synchronization intervals for {@link SyncManager}
+     * and is one of:
+     * <ul>
+     *     <li>SLOW</li>
+     *     <li>MEDIUM</li>
+     *     <li>FAST</li>
+     *     <li>PAUSED</li>
+     * </ul>
+     * Please only use {@link SyncInterval#FAST} when needed, e.g.: when the user is actively interacting
+     * with a {@link Shoppinglist} or it's {@link ShoppinglistItem}'s.
      */
-    private void popRequestAndPostShoppinglistEvent() {
-
-        popRequest();
-        if (mCurrentRequests.isEmpty() && !isPaused() && mBuilder.hasChanges()) {
-            final ShoppinglistEvent e = mBuilder.build();
-            mBuilder = new ShoppinglistEvent.Builder(true);
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    SgnBus.getInstance().post(e);
-                }
-            });
-        }
-
-    }
-
-    /** Supported sync speeds for {@link SyncManager} */
-    public interface SyncSpeed {
+    public interface SyncInterval {
         int SLOW = 10000;
         int MEDIUM = 6000;
         int FAST = 3000;
-    }
-
-    private static class SyncLog {
-
-        private static final boolean LOG_SYNC = false;
-        private static final boolean LOG = false;
-
-        public static int sync(String tag, String msg) {
-            return (LOG_SYNC ? SgnLog.v(tag, msg) : 0);
-        }
-
-        public static int log(String tag, String msg) {
-            return (LOG ? SgnLog.v(tag, msg) : 0);
-        }
-
-    }
-
-    private static String syncStateToString(int state) {
-        switch (state) {
-            case SyncState.TO_SYNC: return "TO_SYNC";
-            case SyncState.SYNCING: return "SYNCING";
-            case SyncState.SYNCED: return "SYNCED";
-            case SyncState.DELETE: return "DELETE";
-            case SyncState.ERROR: return "ERROR";
-            default: return "UNKNOWN";
-        }
+        int PAUSED = -1;
     }
 
 }
