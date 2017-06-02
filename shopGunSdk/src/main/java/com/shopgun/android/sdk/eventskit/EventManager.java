@@ -119,12 +119,16 @@ public class EventManager {
     }
 
     public void addEvent(Event event) {
-        if (!ShopGun.getInstance().getLifecycleManager().isActive()) {
-            SgnLog.i(TAG, "ShopGun is inactive, and is not accepting events");
+        boolean isActive = ShopGun.getInstance().getLifecycleManager().isActive();
+        if (!isActive) {
+            mEventDispatcher.start();
         }
         if (mEventQueue.remainingCapacity() > 0) {
             dispatchOnEvent(event);
             mEventQueue.add(event);
+        }
+        if (!isActive) {
+            mEventDispatcher.quit();
         }
     }
 

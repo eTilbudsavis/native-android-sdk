@@ -11,6 +11,7 @@ import com.shopgun.android.sdk.corekit.gson.JsonNullExclusionStrategy;
 import com.shopgun.android.sdk.corekit.gson.RealmObjectExclusionStrategy;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
+import com.shopgun.android.utils.log.L;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -149,6 +150,10 @@ public class EventDispatcher extends Thread {
 
             mRealm.beginTransaction();
             List<Event> events = getEvents(mEventBatchSize);
+            if (events.isEmpty()) {
+                return;
+            }
+
             Date now = new Date();
             for (Event event : events) {
                 event.setSentAt(now);
@@ -189,17 +194,17 @@ public class EventDispatcher extends Thread {
                 }
 
             } else {
-                SgnLog.d(TAG, response.toString());
+                SgnLog.d(TAG, response.toString() + ", " + response.body().string());
             }
 
         } catch (Exception e) {
-            SgnLog.e(TAG, "Networking failed", e);
+            SgnLog.e(TAG, "Network failed", e);
         } finally {
             if (mRealm.isInTransaction()) {
                 mRealm.cancelTransaction();
             }
             if (response != null) {
-                response.body().close();
+                response.close();
             }
         }
 
