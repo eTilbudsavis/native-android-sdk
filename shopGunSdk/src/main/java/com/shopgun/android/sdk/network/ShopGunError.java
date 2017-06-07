@@ -264,6 +264,13 @@ public class ShopGunError extends Exception implements IJson<JSONObject>,Parcela
         /** the name field is missing from Facebook user data. */
         public static final int FACEBOOK_MISSING_NAME = 1435;
 
+
+        /** Requested resource(s) not found */
+        public static final int RESOURCE_NOT_FOUND = 1440;
+
+        /** Request resource not found because it has been deleted */
+        public static final int RESOURCE_DELETED = 1441;
+
         /** Invalid information */
         public static final int INVALID_INFORMATION = 1500;
 
