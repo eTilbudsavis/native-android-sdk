@@ -1250,23 +1250,4 @@ public class SyncManager {
         }
     }
 
-    /**
-     * Supported synchronization intervals for {@link SyncManager}
-     * and is one of:
-     * <ul>
-     *     <li>SLOW</li>
-     *     <li>MEDIUM</li>
-     *     <li>FAST</li>
-     *     <li>PAUSED</li>
-     * </ul>
-     * Please only use {@link SyncInterval#FAST} when needed, e.g.: when the user is actively interacting
-     * with a {@link Shoppinglist} or it's {@link ShoppinglistItem}'s.
-     */
-    public interface SyncInterval {
-        int SLOW = 10000;
-        int MEDIUM = 6000;
-        int FAST = 3000;
-        int PAUSED = -1;
-    }
-
 }
