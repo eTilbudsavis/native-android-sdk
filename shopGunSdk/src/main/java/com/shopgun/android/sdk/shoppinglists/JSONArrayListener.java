@@ -1,0 +1,26 @@
+package com.shopgun.android.sdk.shoppinglists;
+
+import com.shopgun.android.sdk.database.DatabaseWrapper;
+import com.shopgun.android.sdk.model.User;
+import com.shopgun.android.sdk.network.Response;
+import com.shopgun.android.sdk.network.ShopGunError;
+
+import org.json.JSONArray;
+
+abstract class JSONArrayListener<T> implements Response.Listener<JSONArray> {
+
+    DatabaseWrapper mDatabase;
+    User mUser;
+    T mData;
+
+    public JSONArrayListener(DatabaseWrapper database, User user, T local) {
+        mDatabase = database;
+        mUser = user;
+        mData = local;
+    }
+
+    public abstract void onSuccess(T response);
+
+    public abstract void onError(ShopGunError error);
+
+}

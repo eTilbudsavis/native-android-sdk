@@ -503,7 +503,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      */
     public void deliverResponse(T response, ShopGunError error) {
         if (mDebugger != null) {
-            mDebugger.onDelivery(this);
+            mDebugger.onDelivery(this, response, error);
         }
         if (mListener != null) {
             mListener.onComplete(response, error);

@@ -378,9 +378,6 @@ public class ShopGun {
         @Override
         public void onCreate(Activity activity) {
             mSessionId = SgnUtils.createUUID();
-            mSessionManager.onStart();
-            mListManager.onStart();
-            mSyncManager.onStart();
             mSettings.incrementUsageCount();
             SgnLog.v(TAG, "onCreate");
         }
@@ -401,9 +398,6 @@ public class ShopGun {
         @Override
         public void onDestroy(Activity activity) {
             mSettings.saveLocation(mLocation);
-            mListManager.onStop();
-            mSyncManager.onStop();
-            mSessionManager.onStop();
             mSettings.setLastUsedTimeNow();
             mSettings.setSessionId(mSessionId);
             SgnLog.v(TAG, "onDestroy");
