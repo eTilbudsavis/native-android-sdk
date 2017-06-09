@@ -113,7 +113,7 @@ public class ListUtils {
 
             if (prevId == null) {
                 nil.add(sli);
-            } else if (prevId.equals(FIRST_ITEM)) {
+            } else if (FIRST_ITEM.equals(prevId)) {
                 first.add(sli);
             } else if (!prevItems.containsKey(prevId) && allId.contains(prevId)) {
                 prevItems.put(prevId, sli);

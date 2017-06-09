@@ -23,7 +23,6 @@ import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
-import com.shopgun.android.sdk.corekit.utils.LifecycleManagerCallbackLogger;
 import com.shopgun.android.sdk.database.DatabaseWrapper;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Share;
