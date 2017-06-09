@@ -120,7 +120,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
      */
     public ShoppinglistItem() {
         setId(SgnUtils.createUUID());
-        mModified = DateUtils.roundTime(new Date());
+        setModified(new Date());
     }
 
     /**
@@ -467,7 +467,6 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
     public JSONObject getMeta() {
         if (mMeta == null) {
             mMeta = new JSONObject();
-            mModified = new Date();
         }
         return mMeta;
     }
