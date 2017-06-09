@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Class for handling the {@link Share} SQLite table.
  */
-public class ShareSQLiteHelper extends DatabaseHelper {
+public class ShareSQLiteHelper extends SgnOpenHelper {
 
     public static final String TAG = Constants.getTag(ShareSQLiteHelper.class);
 

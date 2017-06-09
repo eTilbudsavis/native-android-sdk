@@ -41,7 +41,7 @@ public class SgnDataSource extends SQLDataSource {
     public static final String TAG = Constants.getTag(SgnDataSource.class);
 
     public SgnDataSource(Context c) {
-        super(new DatabaseHelper(c));
+        super(new SgnOpenHelper(c));
     }
 
     /**
@@ -62,7 +62,7 @@ public class SgnDataSource extends SQLDataSource {
      * @return number of changes
      */
     public int clear(int userId) {
-        String whereClause = DatabaseHelper.USER + "=?";
+        String whereClause = SgnOpenHelper.USER + "=?";
         String[] whereArgs = new String[]{String.valueOf(userId)};
         int count = delete(ItemSQLiteHelper.TABLE, whereClause, whereArgs);
         count += delete(ListSQLiteHelper.TABLE, whereClause, whereArgs);
@@ -141,7 +141,7 @@ public class SgnDataSource extends SQLDataSource {
      * @return A Shoppinglist if one exists in DB, else null;
      */
     public Shoppinglist getList(String id, String userId) {
-        String selection = DatabaseHelper.ID + "=? AND " + DatabaseHelper.USER + "=? AND " + DatabaseHelper.STATE + "!=?";
+        String selection = SgnOpenHelper.ID + "=? AND " + SgnOpenHelper.USER + "=? AND " + SgnOpenHelper.STATE + "!=?";
         String[] selectionArgs = new String[]{id, userId, String.valueOf(SyncState.DELETE)};
         List<Shoppinglist> list = getLists(selection, selectionArgs, userId);
         return list.isEmpty() ? null : list.get(0);
@@ -153,10 +153,10 @@ public class SgnDataSource extends SQLDataSource {
      * @return A list of Shoppinglist
      */
     public List<Shoppinglist> getLists(String userId, boolean includeDeleted) {
-        String selection = DatabaseHelper.USER + "=? AND " + DatabaseHelper.STATE + "!=?";
+        String selection = SgnOpenHelper.USER + "=? AND " + SgnOpenHelper.STATE + "!=?";
         String[] selectionArgs = new String[]{userId, String.valueOf(SyncState.DELETE)};
         if (includeDeleted) {
-            selection = DatabaseHelper.USER + "=?";
+            selection = SgnOpenHelper.USER + "=?";
             selectionArgs = new String[]{userId};
         }
         return getLists(selection, selectionArgs, userId);
@@ -167,7 +167,7 @@ public class SgnDataSource extends SQLDataSource {
         SQLiteDatabase db = acquireDb();
         try {
             db.beginTransaction();
-            c = db.query(false, ListSQLiteHelper.TABLE, null, selection, selectionArgs, null, null, DatabaseHelper.NAME, null);
+            c = db.query(false, ListSQLiteHelper.TABLE, null, selection, selectionArgs, null, null, SgnOpenHelper.NAME, null);
             List<Shoppinglist> lists = ListSQLiteHelper.cursorToList(c);
             for (Shoppinglist sl : lists) {
                 List<Share> shares = getShares(sl.getId(), userId, false);
@@ -193,7 +193,7 @@ public class SgnDataSource extends SQLDataSource {
      * @return number of affected rows
      */
     public int deleteList(String shoppinglistId, String userId) {
-        String whereClause = DatabaseHelper.ID + "=? AND " + DatabaseHelper.USER + "=? ";
+        String whereClause = SgnOpenHelper.ID + "=? AND " + SgnOpenHelper.USER + "=? ";
         String[] whereArgs = new String[]{shoppinglistId, userId};
         return delete(ListSQLiteHelper.TABLE, whereClause, whereArgs);
     }
@@ -205,7 +205,7 @@ public class SgnDataSource extends SQLDataSource {
      * @return A {@link Shoppinglist} if one exists with the {@code previousId}, else {@code null}
      */
     public Shoppinglist getListPrevious(String previousId, String userId) {
-        String selection = DatabaseHelper.PREVIOUS_ID + "=? AND " + DatabaseHelper.USER + "=?";
+        String selection = SgnOpenHelper.PREVIOUS_ID + "=? AND " + SgnOpenHelper.USER + "=?";
         String[] selectionArgs = new String[]{previousId, userId};
         List<Shoppinglist> list = getLists(selection, selectionArgs, userId);
         return list.isEmpty() ? null : list.get(0);
@@ -229,7 +229,7 @@ public class SgnDataSource extends SQLDataSource {
     public int editItemState(String shoppinglistId, String userId, Date modified, int syncState) {
         try {
             ContentValues cv = ItemSQLiteHelper.stateToContentValues(modified, syncState);
-            String whereClause = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=? ";
+            String whereClause = SgnOpenHelper.SHOPPINGLIST_ID + "=? AND " + SgnOpenHelper.USER + "=? ";
             String[] whereArgs = new String[]{shoppinglistId, userId};
             return acquireDb().updateWithOnConflict(ItemSQLiteHelper.TABLE, cv, whereClause, whereArgs, SQLiteDatabase.CONFLICT_REPLACE);
         } catch (IllegalStateException e) {
@@ -292,7 +292,7 @@ public class SgnDataSource extends SQLDataSource {
     }
 
     public ShoppinglistItem getItem(String itemId, String userId) {
-        String selection = DatabaseHelper.ID + "=? AND " + DatabaseHelper.USER + "=? AND " + DatabaseHelper.STATE + "!=?";
+        String selection = SgnOpenHelper.ID + "=? AND " + SgnOpenHelper.USER + "=? AND " + SgnOpenHelper.STATE + "!=?";
         String[] selectionArgs = new String[]{itemId, userId, String.valueOf(SyncState.DELETE)};
         List<ShoppinglistItem> list = getItems(selection, selectionArgs);
         return list.isEmpty() ? null : list.get(0);
@@ -306,10 +306,10 @@ public class SgnDataSource extends SQLDataSource {
      * @return A list of {@link ShoppinglistItem}
      */
     public List<ShoppinglistItem> getItems(String shoppinglistId, String userId, boolean includeDeleted) {
-        String selection = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=? AND " + DatabaseHelper.STATE + "!=?";
+        String selection = SgnOpenHelper.SHOPPINGLIST_ID + "=? AND " + SgnOpenHelper.USER + "=? AND " + SgnOpenHelper.STATE + "!=?";
         String[] selectionArgs = new String[]{shoppinglistId, userId, String.valueOf(SyncState.DELETE)};
         if (includeDeleted) {
-            selection = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=?";
+            selection = SgnOpenHelper.SHOPPINGLIST_ID + "=? AND " + SgnOpenHelper.USER + "=?";
             selectionArgs = new String[]{shoppinglistId, userId};
         }
         return getItems(selection, selectionArgs);
@@ -323,7 +323,7 @@ public class SgnDataSource extends SQLDataSource {
      * @return A {@link ShoppinglistItem} if one exists with the {@code previousId}, else {@code null}
      */
     public ShoppinglistItem getItemPrevious(String shoppinglistId, String previousId, String userId) {
-        String selection = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.PREVIOUS_ID + "=? AND " + DatabaseHelper.USER + "=?";
+        String selection = SgnOpenHelper.SHOPPINGLIST_ID + "=? AND " + SgnOpenHelper.PREVIOUS_ID + "=? AND " + SgnOpenHelper.USER + "=?";
         String[] selectionArgs = new String[]{shoppinglistId, previousId, userId};
         List<ShoppinglistItem> list = getItems(selection, selectionArgs);
         return list.isEmpty() ? null : list.get(0);
@@ -344,7 +344,7 @@ public class SgnDataSource extends SQLDataSource {
     }
 
     public int deleteItem(String itemId, String userId) {
-        String whereClause = DatabaseHelper.ID + "=? AND " + DatabaseHelper.USER + "=? ";
+        String whereClause = SgnOpenHelper.ID + "=? AND " + SgnOpenHelper.USER + "=? ";
         String[] whereArgs = new String[]{itemId, userId};
         return delete(ItemSQLiteHelper.TABLE, whereClause, whereArgs);
     }
@@ -364,10 +364,10 @@ public class SgnDataSource extends SQLDataSource {
      * @return number of affected rows
      */
     public int deleteItems(String shoppinglistId, Boolean state, String userId) {
-        String whereClause = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=? ";
+        String whereClause = SgnOpenHelper.SHOPPINGLIST_ID + "=? AND " + SgnOpenHelper.USER + "=? ";
         String[] whereArgs = new String[]{shoppinglistId, userId};
         if (state != null) {
-            whereClause = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=?  AND " + DatabaseHelper.TICK + "=?";
+            whereClause = SgnOpenHelper.SHOPPINGLIST_ID + "=? AND " + SgnOpenHelper.USER + "=?  AND " + SgnOpenHelper.TICK + "=?";
             whereArgs = new String[]{shoppinglistId, userId, DbUtils.unescape(state)};
         }
         return delete(ItemSQLiteHelper.TABLE, whereClause, whereArgs);
@@ -443,10 +443,10 @@ public class SgnDataSource extends SQLDataSource {
     }
 
     public List<Share> getShares(String shoppinglistId, String userId, boolean includeDeleted) {
-        String selection = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=? AND " + DatabaseHelper.STATE + "!=?";
+        String selection = SgnOpenHelper.SHOPPINGLIST_ID + "=? AND " + SgnOpenHelper.USER + "=? AND " + SgnOpenHelper.STATE + "!=?";
         String[] selectionArgs = new String[]{shoppinglistId, userId, String.valueOf(SyncState.DELETE)};
         if (includeDeleted) {
-            selection = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=?";
+            selection = SgnOpenHelper.SHOPPINGLIST_ID + "=? AND " + SgnOpenHelper.USER + "=?";
             selectionArgs = new String[]{shoppinglistId, userId};
         }
         return getShares(selection, selectionArgs, shoppinglistId);
@@ -471,13 +471,13 @@ public class SgnDataSource extends SQLDataSource {
     }
 
     public int deleteShare(String shareEmail, String shareShoppinglistId, String userId) {
-        String whereClause = DatabaseHelper.EMAIL + "=? AND " + DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=?";
+        String whereClause = SgnOpenHelper.EMAIL + "=? AND " + SgnOpenHelper.SHOPPINGLIST_ID + "=? AND " + SgnOpenHelper.USER + "=?";
         String[] whereArgs = new String[]{shareEmail, shareShoppinglistId, userId};
         return delete(ShareSQLiteHelper.TABLE, whereClause, whereArgs);
     }
 
     public int deleteShares(String shoppinglistId, String userId) {
-        String whereClause = DatabaseHelper.SHOPPINGLIST_ID + "=? AND " + DatabaseHelper.USER + "=? ";
+        String whereClause = SgnOpenHelper.SHOPPINGLIST_ID + "=? AND " + SgnOpenHelper.USER + "=? ";
         String[] whereArgs = new String[]{shoppinglistId, userId};
         return delete(ShareSQLiteHelper.TABLE, whereClause, whereArgs);
     }
@@ -494,7 +494,7 @@ public class SgnDataSource extends SQLDataSource {
         shoppinglistitems to remain in the item table.
         Cleanup by performing a delete WHERE user = -1 and state = DELETE
          */
-        String whereClause = DatabaseHelper.USER + "=? AND " + DatabaseHelper.STATE + "=? ";
+        String whereClause = SgnOpenHelper.USER + "=? AND " + SgnOpenHelper.STATE + "=? ";
         String[] whereArgs = new String[]{"-1", String.valueOf(SyncState.DELETE)};
         return delete(ItemSQLiteHelper.TABLE, whereClause, whereArgs);
     }
@@ -505,7 +505,7 @@ public class SgnDataSource extends SQLDataSource {
         Shoppinglists to remain in the item table.
         Cleanup by performing a delete WHERE user = -1 and state = DELETE
          */
-        String whereClause = DatabaseHelper.USER + "=? AND " + DatabaseHelper.STATE + "=? ";
+        String whereClause = SgnOpenHelper.USER + "=? AND " + SgnOpenHelper.STATE + "=? ";
         String[] whereArgs = new String[]{"-1", String.valueOf(SyncState.DELETE)};
         return delete(ListSQLiteHelper.TABLE, whereClause, whereArgs);
     }

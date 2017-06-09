@@ -24,14 +24,14 @@ import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
 
 /**
- * The DatabaseHelper is a class for doing easy/clean database instantiation, and migration.
- * DatabaseHelper calls static methods to sub-classes (each subclass essentially being a table)
+ * The SgnOpenHelper is a class for doing easy/clean database instantiation, and migration.
+ * SgnOpenHelper calls static methods to sub-classes (each subclass essentially being a table)
  * to do creation and upgrades. This way any sub-class can be instantiated and queried for data
  * without having the trouble of database creation and upgrades.
  */
-public class DatabaseHelper extends SQLiteOpenHelper {
+public class SgnOpenHelper extends SQLiteOpenHelper {
 
-    public static final String TAG = Constants.getTag(DatabaseHelper.class);
+    public static final String TAG = Constants.getTag(SgnOpenHelper.class);
 
     public static final String ID = "id";
     public static final String MODIFIED = "modified";
@@ -57,7 +57,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "shoppinglist.db";
     private static final int DB_VERSION = 5;
 
-    protected DatabaseHelper(Context c) {
+    protected SgnOpenHelper(Context c) {
         super(c, DB_NAME, null, DB_VERSION);
     }
 

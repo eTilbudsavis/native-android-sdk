@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * Class for handling the {@link ShoppinglistItem} SQLite table.
  */
-public class ItemSQLiteHelper extends DatabaseHelper {
+public class ItemSQLiteHelper extends SgnOpenHelper {
 
     public static final String TAG = Constants.getTag(ItemSQLiteHelper.class);
 
