@@ -143,12 +143,12 @@ public class DbUtils {
      * in time be synchronized to the ShopGun API.
      *
      * @param manager A {@link ListManager}
-     * @param db      A {@link DatabaseWrapper}
+     * @param db      A {@link SgnDatabase}
      * @param delete  {@code true} if you want to have the offline {@link Shoppinglist} and
      *                {@link ShoppinglistItem} deleted on a successful migration completion, else {@code false}.
      * @return the number of migrated lists
      */
-    public static int migrateOfflineLists(ListManager manager, DatabaseWrapper db, boolean delete) {
+    public static int migrateOfflineLists(ListManager manager, SgnDatabase db, boolean delete) {
 
         User offlineUser = new User();
         List<Shoppinglist> offlineUserLists = db.getLists(offlineUser);

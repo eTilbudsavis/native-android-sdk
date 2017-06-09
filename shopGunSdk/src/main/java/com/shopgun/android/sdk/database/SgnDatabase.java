@@ -43,25 +43,25 @@ import java.util.Set;
 /**
  * A middle layer for performing certain transformations on the DB data, prior to returning it to the caller.
  */
-public class DatabaseWrapper {
+public class SgnDatabase {
 
-    public static final String TAG = Constants.getTag(DatabaseWrapper.class);
+    public static final String TAG = Constants.getTag(SgnDatabase.class);
 
-    private static DatabaseWrapper mWrapper;
-    private DataSource mDataSource;
+    private static SgnDatabase mWrapper;
+    private SgnDataSource mDataSource;
 
-    private DatabaseWrapper(Context c) {
-        mDataSource = new DataSource(c);
+    private SgnDatabase(Context c) {
+        mDataSource = new SgnDataSource(c);
     }
 
-    public static DatabaseWrapper getInstance(Context c) {
+    public static SgnDatabase getInstance(Context c) {
         if (mWrapper == null) {
-            mWrapper = new DatabaseWrapper(c);
+            mWrapper = new SgnDatabase(c);
         }
         return mWrapper;
     }
 
-    public static DatabaseWrapper getInstance(ShopGun shopGun) {
+    public static SgnDatabase getInstance(ShopGun shopGun) {
         return getInstance(shopGun.getContext());
     }
 

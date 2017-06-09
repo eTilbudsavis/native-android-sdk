@@ -36,11 +36,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-public class DataSource extends SQLDataSource {
+public class SgnDataSource extends SQLDataSource {
 
-    public static final String TAG = Constants.getTag(DataSource.class);
+    public static final String TAG = Constants.getTag(SgnDataSource.class);
 
-    public DataSource(Context c) {
+    public SgnDataSource(Context c) {
         super(new DatabaseHelper(c));
     }
 

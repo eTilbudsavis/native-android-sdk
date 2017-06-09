@@ -23,14 +23,13 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.shopgun.android.sdk.api.Environment;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.corekit.UserAgentInterceptor;
 import com.shopgun.android.sdk.corekit.realm.SgnRealmModule;
-import com.shopgun.android.sdk.database.DatabaseWrapper;
+import com.shopgun.android.sdk.database.SgnDatabase;
 import com.shopgun.android.sdk.eventskit.EzEvent;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
@@ -173,7 +172,7 @@ public class ShopGun {
         // Session manager implicitly requires Settings
         mSessionManager = new SessionManager(ShopGun.this);
 
-        DatabaseWrapper db = DatabaseWrapper.getInstance(ShopGun.this);
+        SgnDatabase db = SgnDatabase.getInstance(ShopGun.this);
         mListManager = new ListManager(ShopGun.this, db);
         mSyncManager = new SyncManager(ShopGun.this, db);
 

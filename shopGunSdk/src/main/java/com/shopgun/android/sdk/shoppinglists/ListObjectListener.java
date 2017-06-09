@@ -1,6 +1,6 @@
 package com.shopgun.android.sdk.shoppinglists;
 
-import com.shopgun.android.sdk.database.DatabaseWrapper;
+import com.shopgun.android.sdk.database.SgnDatabase;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.network.ShopGunError;
@@ -9,7 +9,7 @@ import org.json.JSONObject;
 
 class ListObjectListener extends JSONObjectListener<Shoppinglist> {
 
-    public ListObjectListener(DatabaseWrapper database, User user, Shoppinglist local) {
+    public ListObjectListener(SgnDatabase database, User user, Shoppinglist local) {
         super(database, user, local);
     }
 

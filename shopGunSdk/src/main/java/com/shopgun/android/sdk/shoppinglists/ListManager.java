@@ -23,7 +23,7 @@ import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
-import com.shopgun.android.sdk.database.DatabaseWrapper;
+import com.shopgun.android.sdk.database.SgnDatabase;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
@@ -47,7 +47,7 @@ import java.util.Map;
  * This class provides methods, for easily handling of
  * {@link Shoppinglist Shoppinglists}, {@link ShoppinglistItem ShoppinglistItems},
  * and {@link Share Shares}, without having to worry about keeping a sane, and
- * synchronizing state with both the {@link DatabaseWrapper database} and, the
+ * synchronizing state with both the {@link SgnDatabase database} and, the
  * ShopGun API.
  */
 public class ListManager {
@@ -56,7 +56,7 @@ public class ListManager {
 
     /** The global {@link ShopGun} object */
     private ShopGun mShopGun;
-    private DatabaseWrapper mDatabase;
+    private SgnDatabase mDatabase;
 
     /** The notification service for ListManager, this allows for bundling
      * list and item notifications, to avoid multiple updates for a single operation */
@@ -67,21 +67,23 @@ public class ListManager {
      * @param shopGun The {@link ShopGun} instance to use
      * @param db A database
      */
-    public ListManager(ShopGun shopGun, DatabaseWrapper db) {
+    public ListManager(ShopGun shopGun, SgnDatabase db) {
         mShopGun = shopGun;
         mDatabase = db;
-        mShopGun.getLifecycleManager().registerCallback(new LifecycleManager.SimpleCallback() {
+        mShopGun.getLifecycleManager().registerCallback(new LifecycleCallback());
+    }
 
-            @Override
-            public void onCreate(Activity activity) {
-                mDatabase.open();
-            }
+    private class LifecycleCallback extends LifecycleManager.SimpleCallback {
 
-            @Override
-            public void onDestroy(Activity activity) {
-                mDatabase.close();
-            }
-        });
+        @Override
+        public void onCreate(Activity activity) {
+            mDatabase.open();
+        }
+
+        @Override
+        public void onDestroy(Activity activity) {
+            mDatabase.close();
+        }
     }
 
     /**
@@ -163,7 +165,7 @@ public class ListManager {
      * Edit a shopping list already in the database.
      *
      * <p>The {@link Shoppinglist} will replace data already in the
-     * {@link DatabaseWrapper database}, and changes will later be synchronized to the
+     * {@link SgnDatabase database}, and changes will later be synchronized to the
      * API if possible.</p>
      * @param sl A shoppinglist that have been edited
      * @return {@code true} if the action was performed, else {@code false}
@@ -776,14 +778,14 @@ public class ListManager {
     }
 
     /**
-     * Deletes all rows in the {@link DatabaseWrapper database}.
+     * Deletes all rows in the {@link SgnDatabase database}.
      */
     public void clear() {
         mDatabase.clear();
     }
 
     /**
-     * Deletes all rows in the {@link DatabaseWrapper database} associated with a
+     * Deletes all rows in the {@link SgnDatabase database} associated with a
      * given{@link User}.
      * @param userId A {@link User#getUserId()} to clear
      */

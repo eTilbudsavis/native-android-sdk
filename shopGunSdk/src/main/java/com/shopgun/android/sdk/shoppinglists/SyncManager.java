@@ -29,7 +29,7 @@ import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
-import com.shopgun.android.sdk.database.DatabaseWrapper;
+import com.shopgun.android.sdk.database.SgnDatabase;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
@@ -68,7 +68,7 @@ import java.util.Stack;
 /**
  * The {@link SyncManager} class performs asynchronous synchronization with the
  * ShopGun API, to propagate all {@link Shoppinglist} and {@link ShoppinglistItem}
- * changes that a user may have done in the {@link DatabaseWrapper database}.
+ * changes that a user may have done in the {@link SgnDatabase database}.
  *
  * <p>
  * Notifications about {@link Shoppinglist} and {@link ShoppinglistItem}
@@ -124,7 +124,7 @@ public class SyncManager {
     private int mSyncInterval = Integer.MIN_VALUE; // we'll cheat a bit here
     private SyncLooper mSyncLooper;
     private ShopGun mShopGun;
-    private DatabaseWrapper mDatabase;
+    private SgnDatabase mDatabase;
     /** The handler used to send messages to the sync thread */
     private Handler mHandler;
     /** Variable to determine if offline lists should automatically be synchronized if certain criteria are met. */
@@ -140,7 +140,7 @@ public class SyncManager {
      * @param shopGun An ShopGun instance
      * @param db A database
      */
-    public SyncManager(ShopGun shopGun, DatabaseWrapper db) {
+    public SyncManager(ShopGun shopGun, SgnDatabase db) {
         mShopGun = shopGun;
         mShopGun.getLifecycleManager().registerCallback(new LifecycleCallback());
         mDatabase = db;
@@ -364,7 +364,7 @@ public class SyncManager {
                 return;
             }
 
-            DatabaseWrapper database = mDatabase;
+            SgnDatabase database = mDatabase;
             // If there are local changes to a list, then syncLocalListChanges will handle it: return
             List<Shoppinglist> lists = database.getLists(user, true);
             if (syncLocalListChanges(database, lists, user)) {
@@ -423,7 +423,7 @@ public class SyncManager {
 
     private class ListSyncRequest extends JsonArrayRequest {
 
-        private ListSyncRequest(DatabaseWrapper database, User user, int syncCount) {
+        private ListSyncRequest(SgnDatabase database, User user, int syncCount) {
             super(Endpoints.lists(user.getUserId()), new ListSyncListener(database, user, syncCount));
             // Offset and limit are set to default values, we want to ignore this.
             getParameters().remove(Parameters.OFFSET);
@@ -432,7 +432,7 @@ public class SyncManager {
         }
     }
 
-    private void syncListsModifiedTimestamp(DatabaseWrapper database, User user) {
+    private void syncListsModifiedTimestamp(SgnDatabase database, User user) {
         List<Shoppinglist> lists = database.getLists(user);
         for (Iterator<Shoppinglist> it = lists.iterator(); it.hasNext();) {
             Shoppinglist sl = it.next();
@@ -454,7 +454,7 @@ public class SyncManager {
         }
     }
 
-    private boolean syncLocalListChanges(DatabaseWrapper database, List<Shoppinglist> lists, User user) {
+    private boolean syncLocalListChanges(SgnDatabase database, List<Shoppinglist> lists, User user) {
         int count = lists.size();
         for (Shoppinglist sl : lists) {
             switch (sl.getState()) {
@@ -467,7 +467,7 @@ public class SyncManager {
         return count != 0;
     }
 
-    private boolean syncLocalItemChanges(DatabaseWrapper database, Shoppinglist sl, User user) {
+    private boolean syncLocalItemChanges(SgnDatabase database, Shoppinglist sl, User user) {
         List<ShoppinglistItem> items = database.getItems(sl, user, true);
         int count = items.size();
         for (ShoppinglistItem item : items) {
@@ -481,7 +481,7 @@ public class SyncManager {
         return count != 0;
     }
 
-    private boolean syncLocalShareChanges(DatabaseWrapper database, Shoppinglist sl, User user) {
+    private boolean syncLocalShareChanges(SgnDatabase database, Shoppinglist sl, User user) {
         List<Share> shares = database.getShares(sl, user, true);
         int count = shares.size();
         for (Share s : shares) {
@@ -514,7 +514,7 @@ public class SyncManager {
 
     private class ListSyncListener extends ListArrayListener {
 
-        private ListSyncListener(DatabaseWrapper database, User user, int syncCount) {
+        private ListSyncListener(SgnDatabase database, User user, int syncCount) {
             super(database, user, null);
         }
 
@@ -550,7 +550,7 @@ public class SyncManager {
 
     }
 
-    private void mergeListsToDbAndFetchItems(DatabaseWrapper database, List<Shoppinglist> serverList, List<Shoppinglist> localList, User user) {
+    private void mergeListsToDbAndFetchItems(SgnDatabase database, List<Shoppinglist> serverList, List<Shoppinglist> localList, User user) {
 
         if (serverList.isEmpty() && localList.isEmpty()) {
             return;
@@ -620,7 +620,7 @@ public class SyncManager {
     }
 
     private class ListModifiedRequest extends JsonObjectRequest {
-        private ListModifiedRequest(DatabaseWrapper database, User user, Shoppinglist shoppinglist) {
+        private ListModifiedRequest(SgnDatabase database, User user, Shoppinglist shoppinglist) {
             super(Endpoints.listModified(user.getUserId(), shoppinglist.getId()),
                     new ListModifiedListener(database, user, shoppinglist));
             setSaveNetworkLog(SAVE_NETWORK_LOG);
@@ -631,7 +631,7 @@ public class SyncManager {
 
         Shoppinglist mShoppinglist;
 
-        private ListModifiedListener(DatabaseWrapper database, User user, Shoppinglist shoppinglist) {
+        private ListModifiedListener(SgnDatabase database, User user, Shoppinglist shoppinglist) {
             super(database, user, null);
             mShoppinglist = shoppinglist;
         }
@@ -677,7 +677,7 @@ public class SyncManager {
 
     private class ItemSyncRequest extends JsonArrayRequest {
 
-        private ItemSyncRequest(DatabaseWrapper database, Shoppinglist shoppinglist, User user) {
+        private ItemSyncRequest(SgnDatabase database, Shoppinglist shoppinglist, User user) {
             super(Endpoints.listitems(user.getUserId(), shoppinglist.getId()), new ItemSyncListener(database, shoppinglist, user));
             // Offset and limit are set to default values, we want to ignore this.
             getParameters().remove(Parameters.OFFSET);
@@ -692,11 +692,11 @@ public class SyncManager {
 
     private class ItemSyncListener implements Listener<JSONArray> {
 
-        private DatabaseWrapper mDatabase;
+        private SgnDatabase mDatabase;
         private User mUser;
         private Shoppinglist mShoppinglist;
 
-        private ItemSyncListener(DatabaseWrapper database, Shoppinglist shoppinglist, User user) {
+        private ItemSyncListener(SgnDatabase database, Shoppinglist shoppinglist, User user) {
             mDatabase = database;
             mShoppinglist = shoppinglist;
             mUser = user;
@@ -760,7 +760,7 @@ public class SyncManager {
         }
     }
 
-    private void mergeItemsToDb(DatabaseWrapper database, List<ShoppinglistItem> serverItems, List<ShoppinglistItem> localItems, User user) {
+    private void mergeItemsToDb(SgnDatabase database, List<ShoppinglistItem> serverItems, List<ShoppinglistItem> localItems, User user) {
 
         if (serverItems.isEmpty() && localItems.isEmpty()) {
             return;
@@ -824,7 +824,7 @@ public class SyncManager {
 
     private class ListPutListener extends ListObjectListener {
 
-        private ListPutListener(DatabaseWrapper database, User user, Shoppinglist shoppinglist) {
+        private ListPutListener(SgnDatabase database, User user, Shoppinglist shoppinglist) {
             super(database, user, shoppinglist);
         }
 
@@ -857,7 +857,7 @@ public class SyncManager {
 
     private class ListPutRequest extends JsonObjectRequest {
 
-        private ListPutRequest(DatabaseWrapper database, User user, Shoppinglist shoppinglist) {
+        private ListPutRequest(SgnDatabase database, User user, Shoppinglist shoppinglist) {
             super(Method.PUT, Endpoints.list(user.getUserId(), shoppinglist.getId()),
                     shoppinglist.toJSON(), new ListPutListener(database, user, shoppinglist));
             shoppinglist.setState(SyncState.SYNCING);
@@ -868,7 +868,7 @@ public class SyncManager {
 
     private class ListDelRequest extends JsonObjectRequest {
 
-        private ListDelRequest(DatabaseWrapper database, User user, Shoppinglist local) {
+        private ListDelRequest(SgnDatabase database, User user, Shoppinglist local) {
             super(Method.DELETE, Endpoints.list(user.getUserId(), local.getId()),
                     null, new ListDelListener(database, user, local));
             getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(local.getModified()));
@@ -877,7 +877,7 @@ public class SyncManager {
 
     private class ListDelListener extends ListObjectListener {
 
-        private ListDelListener(DatabaseWrapper database, User user, Shoppinglist local) {
+        private ListDelListener(SgnDatabase database, User user, Shoppinglist local) {
             super(database, user, local);
         }
 
@@ -915,7 +915,7 @@ public class SyncManager {
 
     private class ListRevertRequest extends JsonObjectRequest {
 
-        private ListRevertRequest(DatabaseWrapper database, User user, Shoppinglist shoppinglist) {
+        private ListRevertRequest(SgnDatabase database, User user, Shoppinglist shoppinglist) {
             super(Endpoints.list(user.getUserId(), shoppinglist.getId()),
                     new ListRevertListener(database, user, shoppinglist));
             if (shoppinglist.getState() != SyncState.ERROR) {
@@ -927,7 +927,7 @@ public class SyncManager {
 
     private class ListRevertListener extends ListObjectListener {
 
-        private ListRevertListener(DatabaseWrapper database, User user, Shoppinglist local) {
+        private ListRevertListener(SgnDatabase database, User user, Shoppinglist local) {
             super(database, user, local);
         }
 
@@ -955,7 +955,7 @@ public class SyncManager {
 
     private class ItemPutRequest extends JsonObjectRequest {
 
-        private ItemPutRequest(DatabaseWrapper database, User user, ShoppinglistItem item) {
+        private ItemPutRequest(SgnDatabase database, User user, ShoppinglistItem item) {
             super(Method.PUT, Endpoints.listitem(user.getUserId(), item.getShoppinglistId(), item.getId()),
                     item.toJSON(), new ItemPutListener(database, user, item));
             item.setState(SyncState.SYNCING);
@@ -965,7 +965,7 @@ public class SyncManager {
 
     private class ItemPutListener extends ItemListener {
 
-        private ItemPutListener(DatabaseWrapper database, User user, ShoppinglistItem item) {
+        private ItemPutListener(SgnDatabase database, User user, ShoppinglistItem item) {
             super(database, user, item);
         }
 
@@ -1006,7 +1006,7 @@ public class SyncManager {
 
     private class ItemDelRequest extends JsonObjectRequest {
 
-        private ItemDelRequest(DatabaseWrapper database, User user, ShoppinglistItem item) {
+        private ItemDelRequest(SgnDatabase database, User user, ShoppinglistItem item) {
             super(Method.DELETE, Endpoints.listitem(user.getUserId(), item.getShoppinglistId(), item.getId()),
                     null, new ItemDelListener(database, user, item));
             getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(item.getModified()));
@@ -1015,7 +1015,7 @@ public class SyncManager {
 
     private class ItemDelListener extends ItemListener {
 
-        private ItemDelListener(DatabaseWrapper database, User user, ShoppinglistItem item) {
+        private ItemDelListener(SgnDatabase database, User user, ShoppinglistItem item) {
             super(database, user, item);
         }
 
@@ -1050,7 +1050,7 @@ public class SyncManager {
 
     private class ItemRevertRequest extends JsonObjectRequest {
 
-        private ItemRevertRequest(DatabaseWrapper database, User user, ShoppinglistItem item) {
+        private ItemRevertRequest(SgnDatabase database, User user, ShoppinglistItem item) {
             super(Endpoints.listitem(user.getUserId(), item.getShoppinglistId(), item.getId()),
                     new ItemRevertListener(database, user, item));
             if (item.getState() != SyncState.ERROR) {
@@ -1062,7 +1062,7 @@ public class SyncManager {
 
     private class ItemRevertListener extends ItemListener {
 
-        private ItemRevertListener(DatabaseWrapper database, User user, ShoppinglistItem item) {
+        private ItemRevertListener(SgnDatabase database, User user, ShoppinglistItem item) {
             super(database, user, item);
         }
 
@@ -1101,7 +1101,7 @@ public class SyncManager {
     }
 
     private class SharePutRequest extends JsonObjectRequest {
-        private SharePutRequest(DatabaseWrapper database, User user, Share share) {
+        private SharePutRequest(SgnDatabase database, User user, Share share) {
             super(Method.PUT, Endpoints.listShareEmail(user.getUserId(), share.getShoppinglistId(), share.getEmail()),
                     share.toJSON(), new SharePutListener(database, user, share));
             share.setState(SyncState.SYNCING);
@@ -1111,7 +1111,7 @@ public class SyncManager {
 
     private class SharePutListener extends ShareListener {
 
-        private SharePutListener(DatabaseWrapper database, User user, Share share) {
+        private SharePutListener(SgnDatabase database, User user, Share share) {
             super(database, user, share);
         }
 
@@ -1148,7 +1148,7 @@ public class SyncManager {
 
     private class ShareDelRequest extends JsonObjectRequest {
 
-        private ShareDelRequest(DatabaseWrapper database, User user, Share local) {
+        private ShareDelRequest(SgnDatabase database, User user, Share local) {
             super(Method.DELETE, Endpoints.listShareEmail(user.getUserId(), local.getShoppinglistId(), local.getEmail()),
                     null, new ShareDelListener(database, user, local));
         }
@@ -1156,7 +1156,7 @@ public class SyncManager {
 
     private class ShareDelListener extends ShareListener {
 
-        private ShareDelListener(DatabaseWrapper database, User user, Share local) {
+        private ShareDelListener(SgnDatabase database, User user, Share local) {
             super(database, user, local);
         }
 
@@ -1205,7 +1205,7 @@ public class SyncManager {
 
     private class ShareRevertRequest extends JsonObjectRequest {
 
-        private ShareRevertRequest(DatabaseWrapper database, User user, Share share) {
+        private ShareRevertRequest(SgnDatabase database, User user, Share share) {
             super(Endpoints.listShareEmail(user.getUserId(), share.getShoppinglistId(), share.getEmail()),
                     new ShareRevertListener(database, user, share));
             if (share.getState() != SyncState.ERROR) {
@@ -1218,7 +1218,7 @@ public class SyncManager {
 
     private class ShareRevertListener extends ShareListener {
 
-        private ShareRevertListener(DatabaseWrapper database, User user, Share local) {
+        private ShareRevertListener(SgnDatabase database, User user, Share local) {
             super(database, user, local);
         }
 
