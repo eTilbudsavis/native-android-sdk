@@ -16,7 +16,6 @@
 
 package com.shopgun.android.sdk.network.impl;
 
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.HttpStack;
 import com.shopgun.android.sdk.network.Network;
 import com.shopgun.android.sdk.network.NetworkResponse;

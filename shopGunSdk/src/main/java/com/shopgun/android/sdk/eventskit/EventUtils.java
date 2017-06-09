@@ -6,7 +6,6 @@ import android.location.Location;
 import android.os.Build;
 
 import com.google.gson.JsonObject;
-import com.shopgun.android.sdk.SgnLocation;
 import com.shopgun.android.sdk.utils.SgnUserAgent;
 import com.shopgun.android.utils.DateUtils;
 import com.shopgun.android.utils.DeviceUtils;

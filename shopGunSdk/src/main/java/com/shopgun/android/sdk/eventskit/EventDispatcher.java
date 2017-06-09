@@ -11,7 +11,6 @@ import com.shopgun.android.sdk.corekit.gson.JsonNullExclusionStrategy;
 import com.shopgun.android.sdk.corekit.gson.RealmObjectExclusionStrategy;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
-import com.shopgun.android.utils.log.L;
 
 import java.util.ArrayList;
 import java.util.Date;

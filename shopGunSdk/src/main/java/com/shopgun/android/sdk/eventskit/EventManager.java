@@ -10,7 +10,6 @@ import android.os.Message;
 import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.utils.LocationUtils;
 

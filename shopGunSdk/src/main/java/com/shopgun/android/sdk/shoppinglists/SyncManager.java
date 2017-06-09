@@ -38,7 +38,6 @@ import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.network.Delivery;
 import com.shopgun.android.sdk.network.Request;
-import com.shopgun.android.sdk.network.RequestDebugger;
 import com.shopgun.android.sdk.network.RequestQueue;
 import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
@@ -259,9 +258,6 @@ public class SyncManager {
         return mMigrateOfflineLists;
     }
 
-    RequestDebugger mDebugger = new SyncDebugger(SyncDebugger.TAG)
-            .setSkipMethods(Request.Method.GET);
-
     private void addRequest(Request<?> r) {
         // No request from here should return a result from cache
         r.setIgnoreCache(true);
@@ -273,7 +269,8 @@ public class SyncManager {
         r.setDelivery(mDelivery);
 
         r.setTag(mRequestTag);
-        r.setDebugger(mDebugger);
+        r.setDebugger(new SyncDebugger(SyncDebugger.TAG)
+                .setSkipMethods(Request.Method.GET));
         mShopGun.add(r);
 
 //		if (!isPullReq(r) && r.getMethod() != Request.Method.GET) {

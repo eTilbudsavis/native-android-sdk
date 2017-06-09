@@ -378,30 +378,28 @@ public class ShopGun {
         public void onCreate(Activity activity) {
             mSessionId = SgnUtils.createUUID();
             mSettings.incrementUsageCount();
+            if (mSettings.getUsageCount() == 0) {
+                EzEvent.create(EzEvent.FIRST_CLIENT_SESSION_OPENED).track();
+            }
+            EzEvent.create(EzEvent.CLIENT_SESSION_OPENED).track();
             SgnLog.v(TAG, "onCreate");
         }
 
         @Override
         public void onStart(Activity activity) {
-            if (mSettings.getUsageCount() == 0) {
-                EzEvent.create(EzEvent.FIRST_CLIENT_SESSION_OPENED).track();
-            }
-            EzEvent.create(EzEvent.CLIENT_SESSION_OPENED).track();
         }
 
         @Override
         public void onStop(Activity activity) {
-            EzEvent.create(EzEvent.CLIENT_SESSION_CLOSED).track();
         }
 
         @Override
         public void onDestroy(Activity activity) {
+            EzEvent.create(EzEvent.CLIENT_SESSION_CLOSED).track();
             mSettings.saveLocation(mLocation);
             mSettings.setLastUsedTimeNow();
             mSettings.setSessionId(mSessionId);
             SgnLog.v(TAG, "onDestroy");
-
-//            mSingleton = null; // TODO: 06/04/2017 Synchronize this
         }
 
         @Override

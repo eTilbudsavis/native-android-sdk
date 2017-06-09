@@ -1,6 +1,5 @@
 package com.shopgun.android.sdk.log;
 
-import com.shopgun.android.sdk.model.Store;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.utils.log.LogCatLogger;
