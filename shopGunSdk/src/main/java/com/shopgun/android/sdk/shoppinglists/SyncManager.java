@@ -828,9 +828,22 @@ public class SyncManager {
         @Override
         public void onError(ShopGunError error) {
             popRequest();
-            // Ignore missing network, wait for next iteration
-            if (error.getCode() != Code.NETWORK_ERROR) {
-                addRequest(new ListPutRequest(mDatabase, mUser, mLocalCopy));
+
+            switch (error.getCode()) {
+
+                case Code.INVALID_RESOURCE_ID:
+                    // maybe deleted from another device - delete and ignore
+                    mDatabase.deleteList(mLocalCopy, mUser);
+                    break;
+
+                case Code.NETWORK_ERROR:
+                    // Ignore missing network, wait for next iteration
+                    break;
+
+                default:
+                    addRequest(new ListRevertRequest(mDatabase, mUser, mLocalCopy));
+                    break;
+
             }
         }
 
@@ -945,8 +958,11 @@ public class SyncManager {
 
         @Override
         public void onError(ShopGunError error) {
-            mDatabase.deleteList(mLocalCopy, mUser);
-            mBuilder.del(mLocalCopy);
+            if (error.getCode() != Code.NETWORK_ERROR) {
+                // Only network errors are allowed here
+                mDatabase.deleteList(mLocalCopy, mUser);
+                mBuilder.del(mLocalCopy);
+            }
         }
     }
 
