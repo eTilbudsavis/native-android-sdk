@@ -46,6 +46,7 @@ public class Endpoints {
     public static final String OFFER_ID = "/v2/offers/";
     public static final String OFFER_SEARCH = "/v2/offers/search";
     public static final String OFFER_TYPEAHEAD = "/v2/offers/typeahead";
+    public static final String OFFER_SUGGESTED = "/v2/offers/suggest";
 
     public static final String STORE_LIST = "/v2/stores";
     public static final String STORE_ID = "/v2/stores/";
