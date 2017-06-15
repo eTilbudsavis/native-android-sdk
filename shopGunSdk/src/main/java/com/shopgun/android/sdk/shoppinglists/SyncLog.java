@@ -5,7 +5,7 @@ import com.shopgun.android.sdk.network.Request;
 
 class SyncLog {
 
-    private static final boolean LOG_SYNC = true;
+    private static final boolean LOG_SYNC = false;
     private static final boolean LOG = false;
 
     public static int syncLooper(String tag, int count, String msg) {
