@@ -100,7 +100,7 @@ class PagedPublicationLifecycle implements Parcelable {
         opened();
         if (isReadyAndResumed() && !mAppeared) {
             mAppeared = true;
-            PagedPublicationEvent.appeared(mConfig).track();
+//            PagedPublicationEvent.appeared(mConfig).track();
         }
     }
 
@@ -110,7 +110,7 @@ class PagedPublicationLifecycle implements Parcelable {
             for (int i = 0; i < mSpreadAppeared.length; i++) {
                 spreadDisappeared(i, mConfig.getPagesFromSpreadPosition(i));
             }
-            PagedPublicationEvent.disappeared(mConfig).track();
+//            PagedPublicationEvent.disappeared(mConfig).track();
         }
     }
 
@@ -119,7 +119,7 @@ class PagedPublicationLifecycle implements Parcelable {
             int sp = mConfig.getSpreadPositionFromPage(page);
             if (mSpreadAppeared[sp]) {
                 mPageAppeared[page] = true;
-                PagedPublicationEvent.pageAppeared(mConfig, page).track();
+//                PagedPublicationEvent.pageAppeared(mConfig, page).track();
                 if (mPageLoaded[page]) {
                     pageLoaded(page);
                 }
@@ -133,7 +133,7 @@ class PagedPublicationLifecycle implements Parcelable {
         if (isReady() && mPageAppeared[page]) {
             mPageAppeared[page] = false;
             mPageLoaded[page] = false;
-            PagedPublicationEvent.pageDisappeared(mConfig, page).track();
+//            PagedPublicationEvent.pageDisappeared(mConfig, page).track();
         }
     }
 
