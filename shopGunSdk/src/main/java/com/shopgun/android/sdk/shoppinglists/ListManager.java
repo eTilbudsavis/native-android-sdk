@@ -456,6 +456,7 @@ public class ListManager {
         Date now = new Date();
         sli.setModified(now);
         sli.setState(SyncState.TO_SYNC);
+        sli.setPreviousId(ListUtils.FIRST_ITEM);
 
         editedItems.add(sli);
 
@@ -468,7 +469,6 @@ public class ListManager {
             }
         }
 
-        sli.setPreviousId(ListUtils.FIRST_ITEM);
         ShoppinglistItem first = mDatabase.getFirstItem(sli.getShoppinglistId(), user);
         if (first != null) {
             first.setPreviousId(sli.getId());

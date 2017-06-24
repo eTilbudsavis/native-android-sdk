@@ -121,7 +121,11 @@ public class EventDispatcher extends Thread {
             if (event == mFlushEvent) {
                 dispatchEventQueue(true);
             } else {
-                mRealm.executeTransaction(new InsertTransaction(event));
+                if (event.doNotTrack()) {
+                    SgnLog.i(TAG, "Do-not-track: " + event.toString());
+                } else {
+                    mRealm.executeTransaction(new InsertTransaction(event));
+                }
                 dispatchEventQueue(false);
             }
         }

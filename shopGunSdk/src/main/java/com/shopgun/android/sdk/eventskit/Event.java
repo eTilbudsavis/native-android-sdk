@@ -44,6 +44,7 @@ public class Event implements RealmModel {
     private String mStringProperties;
     /* Tag for random properties */
     @Ignore private Object mTag;
+    @Ignore private boolean mDoNotTrack;
 
     public Event() {
         mRecordedAt = new Date();
@@ -172,6 +173,14 @@ public class Event implements RealmModel {
 
     public Object getTag() {
         return mTag;
+    }
+
+    public boolean doNotTrack() {
+        return mDoNotTrack;
+    }
+
+    public void doNotTrack(boolean doNotTrack) {
+        mDoNotTrack = doNotTrack;
     }
 
     @Override
