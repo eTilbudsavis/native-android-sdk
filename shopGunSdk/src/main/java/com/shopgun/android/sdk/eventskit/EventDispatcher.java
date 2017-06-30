@@ -98,7 +98,11 @@ public class EventDispatcher extends Thread {
         if (mQuit) {
             mQuit = false;
             if (!isAlive()) {
-                super.start();
+                try {
+                    super.start();
+                } catch (IllegalThreadStateException e) {
+                    // ignore
+                }
             }
             flush();
         }
