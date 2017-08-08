@@ -21,6 +21,7 @@ import java.util.concurrent.BlockingQueue;
 import io.realm.Realm;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
+import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 import okhttp3.Call;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -126,7 +127,7 @@ public class EventDispatcher extends Thread {
                 dispatchEventQueue(true);
             } else {
                 if (event.doNotTrack()) {
-                    SgnLog.i(TAG, "Do-not-track: " + event.toString());
+//                    SgnLog.i(TAG, "Do-not-track: " + event.toString());
                 } else {
                     mRealm.executeTransaction(new InsertTransaction(event));
                 }
@@ -256,7 +257,12 @@ public class EventDispatcher extends Thread {
 
         @Override
         public void execute(Realm realm) {
-            realm.insert(mEvent);
+            try {
+                realm.insert(mEvent);
+            } catch (RealmPrimaryKeyConstraintException e) {
+                String event = mEvent.toString(true, false, false);
+                throw new IllegalStateException("Realm duplicate key on event: " + event, e);
+            }
         }
     }
 
