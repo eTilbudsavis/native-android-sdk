@@ -192,7 +192,7 @@ public class SyncManager {
      * @return True if the first sync is complete, or there is no user to sync.
      */
     public boolean hasFirstSync() {
-        return mSyncLooper.mHasFirstSync;
+        return mSyncLooper.mSyncCount > 0;
     }
 
     /**
@@ -298,6 +298,7 @@ public class SyncManager {
         }
 
         if (mCurrentRequests.isEmpty() && !isPaused() && mBuilder.hasChanges()) {
+            mBuilder.firstSync = mSyncLooper.mSyncCount == 1;
             final ShoppinglistEvent e = mBuilder.build();
             mBuilder = new ShoppinglistEvent.Builder(true);
             new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -313,11 +314,9 @@ public class SyncManager {
     private class SyncLooper implements Runnable {
 
         private int mSyncCount = 0;
-        private boolean mHasFirstSync;
 
         private void restart() {
             mSyncCount = 0;
-            mHasFirstSync = false;
             forceSync();
         }
 
@@ -340,6 +339,7 @@ public class SyncManager {
             // If it's an offline user, then stop syncloop
             // we'll keep listening for session changes and restert if needed
             if (!user.isLoggedIn()) {
+                mSyncCount++;
                 SyncLog.syncLooper(TAG, mSyncCount, "quit-loop-cycle (NotLoggedIn)");
                 return;
             }
