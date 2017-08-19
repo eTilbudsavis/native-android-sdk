@@ -892,6 +892,15 @@ public class SyncManager {
         }
 
         @Override
+        public void onComplete(JSONObject response, ShopGunError error) {
+            if (response != null) {
+                onSuccess(null);
+            } else {
+                onError(error);
+            }
+        }
+
+        @Override
         public void onSuccess(Shoppinglist response) {
             mDatabase.deleteList(mLocalCopy, mUser);
             mDatabase.deleteShares(mLocalCopy, mUser);
