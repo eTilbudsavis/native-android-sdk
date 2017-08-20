@@ -194,6 +194,7 @@ public class Event implements RealmModel {
             sb.append("id: ").append(mId).append(", ");
         }
         sb.append("type: ").append(mType);
+        sb.append(", do-not-track: ").append(mDoNotTrack);
         sb.append(", recordedAt: ").append(DateUtils.format(mRecordedAt, true));
         if (mSentAt != null) {
             sb.append(", sentAt: ").append(DateUtils.format(mSentAt, true));

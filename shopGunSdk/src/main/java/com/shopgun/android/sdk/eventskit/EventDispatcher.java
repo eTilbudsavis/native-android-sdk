@@ -35,6 +35,8 @@ public class EventDispatcher extends Thread {
 
     public static final String TAG = Constants.getTag(EventDispatcher.class);
 
+    private static final String FLUSH_EVENT_UUID = "00000000-0000-0000-0000-000000000000";
+
     private static final int DEF_EVENT_BATCH_SIZE = 100;
     private static final int DEF_MAX_RETRY_COUNT = 5;
 
@@ -64,6 +66,8 @@ public class EventDispatcher extends Thread {
         mEventBatchSize = eventBatchSize;
         mMaxRetryCount = maxRetryCount;
         mFlushEvent = new Event("dispatch-event-queue", new JsonObject());
+        mFlushEvent.setId(FLUSH_EVENT_UUID); // ensure an identifiable ID
+        mFlushEvent.doNotTrack(true);
         mUrl = HttpUrl.parse(url);
         mMediatype = MediaType.parse("application/json");
         mHeaders = new Headers.Builder()
@@ -123,16 +127,13 @@ public class EventDispatcher extends Thread {
                 // We were interrupted, likely because we want to quit
                 continue;
             }
-            if (event == mFlushEvent) {
-                dispatchEventQueue(true);
+            if (event.doNotTrack()) {
+                SgnLog.i(TAG, event.toString());
             } else {
-                if (event.doNotTrack()) {
-//                    SgnLog.i(TAG, "Do-not-track: " + event.toString());
-                } else {
-                    mRealm.executeTransaction(new InsertTransaction(event));
-                }
-                dispatchEventQueue(false);
+                mRealm.executeTransaction(new InsertTransaction(event));
             }
+            boolean flush = FLUSH_EVENT_UUID.equals(event.getId());
+            dispatchEventQueue(flush);
         }
         mRealm.close();
         interrupt();
