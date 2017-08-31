@@ -297,8 +297,8 @@ public class SyncManager {
             }
         }
 
+        mBuilder.firstSync = mSyncLooper.mSyncCount == 1;
         if (mCurrentRequests.isEmpty() && !isPaused() && mBuilder.hasChanges()) {
-            mBuilder.firstSync = mSyncLooper.mSyncCount == 1;
             final ShoppinglistEvent e = mBuilder.build();
             mBuilder = new ShoppinglistEvent.Builder(true);
             new Handler(Looper.getMainLooper()).post(new Runnable() {
