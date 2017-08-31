@@ -365,6 +365,7 @@ public class SyncManager {
             // If there are local changes to a list, then syncLocalListChanges will handle it: return
             List<Shoppinglist> lists = database.getLists(user, true);
             if (syncLocalListChanges(database, lists, user)) {
+                mSyncCount++;
                 SyncLog.syncLooper(TAG, mSyncCount, "syncLocalListChanges");
                 return;
             }
@@ -382,6 +383,7 @@ public class SyncManager {
 
             // Skip further sync if we just posted our own changes
             if (hasLocalChanges) {
+                mSyncCount++;
                 SyncLog.syncLooper(TAG, mSyncCount, "hasLocalChanges");
                 return;
             }
