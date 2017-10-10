@@ -108,7 +108,7 @@ public class EventManager {
         if (updateLocation || mLastKnownLocation == null) {
             Context ctx = ShopGun.getInstance().getContext();
             Location currentLoc = LocationUtils.getLastKnownLocation(ctx);
-            if (!LocationUtils.isBetterLocation(currentLoc, mLastKnownLocation)) {
+            if (LocationUtils.isBetterLocation(currentLoc, mLastKnownLocation)) {
                 mLastKnownLocation = currentLoc;
                 mJsonLocation = EventUtils.location(mLastKnownLocation);
             }
