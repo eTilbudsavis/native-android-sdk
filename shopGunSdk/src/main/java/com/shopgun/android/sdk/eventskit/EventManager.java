@@ -11,6 +11,7 @@ import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.utils.Constants;
+import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.LocationUtils;
 
 import java.lang.ref.WeakReference;
@@ -153,6 +154,10 @@ public class EventManager {
 
         @Override
         public void onCreate(Activity activity) {
+            if (mJsonContext != null) {
+                String sessionId = SgnUtils.createUUID();
+                mJsonContext.add("session", EventUtils.session(sessionId));
+            }
             startDispatcher();
         }
 

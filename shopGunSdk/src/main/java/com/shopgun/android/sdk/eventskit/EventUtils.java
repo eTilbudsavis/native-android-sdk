@@ -7,6 +7,7 @@ import android.os.Build;
 
 import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.utils.SgnUserAgent;
+import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.DateUtils;
 import com.shopgun.android.utils.DeviceUtils;
 import com.shopgun.android.utils.DisplayUtils;
@@ -33,7 +34,7 @@ public class EventUtils {
         object.add("location", location(context));
         object.add("network", network(context));
         object.add("os", os(context));
-        object.add("session", session(context));
+        object.add("session", session(null));
         object.add("timeZone", timezone(context));
         object.addProperty("userAgent", SgnUserAgent.getUserAgent(context));
         return object;
@@ -64,9 +65,9 @@ public class EventUtils {
         return object;
     }
 
-    public static JsonObject session(Context context) {
+    public static JsonObject session(String id) {
         JsonObject object = new JsonObject();
-        object.add("id", null);
+        object.addProperty("id", id);
         object.add("referrer", null);
         return object;
     }
