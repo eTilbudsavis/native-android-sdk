@@ -122,29 +122,7 @@ public class Endpoints {
         return String.format("/v2/catalogs/%s/hotspots", catalogId);
     }
 
-    /**
-     * @param catalogId A {@link Catalog#getId()}
-     * @return /v2/catalogs/{catalog_id}/collect
-     */
-    public static String catalogCollect(String catalogId) {
-        return String.format("/v2/catalogs/%s/collect", catalogId);
-    }
 
-    /**
-     * @param offerId An {@link Offer#getId()}
-     * @return /v2/offers/{offer_id}/collect
-     */
-    public static String offerCollect(String offerId) {
-        return String.format("/v2/offers/%s/collect", offerId);
-    }
-
-    /**
-     * @param storeId A {@link Store#getId()}
-     * @return /v2/stores/{store_id}/collect
-     */
-    public static String storeCollect(String storeId) {
-        return String.format("/v2/stores/%s/collect", storeId);
-    }
 
     /**
      * @param userId A {@link User#getUserId()}

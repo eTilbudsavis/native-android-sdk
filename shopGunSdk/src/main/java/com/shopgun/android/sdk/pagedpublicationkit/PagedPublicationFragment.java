@@ -22,8 +22,6 @@ import android.widget.TextView;
 import com.shopgun.android.materialcolorcreator.MaterialColor;
 import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
 import com.shopgun.android.sdk.R;
-import com.shopgun.android.sdk.eventskit.EventManager;
-import com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2.quatzel.QuatzelConverterPublicationListener;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.verso.VersoFragment;
 import com.shopgun.android.verso.VersoPageView;
@@ -57,7 +55,6 @@ public class PagedPublicationFragment extends VersoFragment {
     PageChangeListener mPageChangeLisetner = new PageChangeListener();
 
     PagedPublicationLifecycle mLifecycle;
-    QuatzelConverterPublicationListener mQuatzelConverterPublicationListener;
     String mViewSessionUuid;
 
     public static PagedPublicationFragment newInstance() {
@@ -92,7 +89,6 @@ public class PagedPublicationFragment extends VersoFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mLifecycle = new PagedPublicationLifecycle();
-        mQuatzelConverterPublicationListener = new QuatzelConverterPublicationListener();
         mViewSessionUuid = SgnUtils.createUUID();
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_STATE)) {
             SavedState savedState = savedInstanceState.getParcelable(SAVED_STATE);
@@ -121,7 +117,6 @@ public class PagedPublicationFragment extends VersoFragment {
         mFrameLoader = (FrameLayout) mFrame.findViewById(R.id.loader);
         setVisible(false, false, false);
 
-        EventManager.getInstance().addEventListener(mQuatzelConverterPublicationListener);
         if (getVersoSpreadConfiguration() == null) {
             setPublicationConfiguration(mConfig);
         }
@@ -141,7 +136,6 @@ public class PagedPublicationFragment extends VersoFragment {
         mConfig.onConfigurationChanged(config);
         mLifecycle.setConfig(mConfig);
         mLifecycle.resetSpreadsPagesLoadedAndZoom();
-        mQuatzelConverterPublicationListener.setConfig(mConfig, mViewSessionUuid);
     }
 
     public PagedPublicationConfiguration getPublicationConfiguration() {
@@ -152,7 +146,6 @@ public class PagedPublicationFragment extends VersoFragment {
         if (configuration != null) {
             mConfig = configuration;
             mLifecycle.setConfig(mConfig);
-            mQuatzelConverterPublicationListener.setConfig(mConfig, mViewSessionUuid);
             setVersoSpreadConfiguration(mConfig);
             loadPagedPublication();
         }
@@ -567,12 +560,6 @@ public class PagedPublicationFragment extends VersoFragment {
         mLifecycle.applyState(spread, pages);
         mLifecycle.appeared();
         mLifecycle.spreadAppeared(spread, pages, true);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        EventManager.getInstance().removeEventListener(mQuatzelConverterPublicationListener);
     }
 
     private class PageScrolledListener implements CenteredViewPager.OnPageChangeListener {
