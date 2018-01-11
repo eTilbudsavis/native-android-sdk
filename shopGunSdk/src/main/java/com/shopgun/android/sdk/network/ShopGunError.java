@@ -19,10 +19,10 @@ package com.shopgun.android.sdk.network;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.network.impl.ApiError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONObject;
@@ -263,6 +263,13 @@ public class ShopGunError extends Exception implements IJson<JSONObject>,Parcela
 
         /** the name field is missing from Facebook user data. */
         public static final int FACEBOOK_MISSING_NAME = 1435;
+
+
+        /** Requested resource(s) not found */
+        public static final int RESOURCE_NOT_FOUND = 1440;
+
+        /** Request resource not found because it has been deleted */
+        public static final int RESOURCE_DELETED = 1441;
 
         /** Invalid information */
         public static final int INVALID_INFORMATION = 1500;

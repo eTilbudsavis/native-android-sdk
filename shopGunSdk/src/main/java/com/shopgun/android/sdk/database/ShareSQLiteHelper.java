@@ -22,8 +22,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Share;
+import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Class for handling the {@link Share} SQLite table.
  */
-public class ShareSQLiteHelper extends DatabaseHelper {
+public class ShareSQLiteHelper extends SgnOpenHelper {
 
     public static final String TAG = Constants.getTag(ShareSQLiteHelper.class);
 

@@ -16,8 +16,8 @@
 
 package com.shopgun.android.sdk.log;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
 
 import org.json.JSONArray;
@@ -60,12 +60,12 @@ public class Event {
      */
     @Deprecated
     public Event(String name, String type) {
-        this(ShopGun.isCreated() ? ShopGun.getInstance() : null, name, type);
+        this(ShopGun.isInstantiated() ? ShopGun.getInstance() : null, name, type);
     }
 
     public Event(ShopGun sgn, String name, String type) {
         if (sgn != null) {
-            mUserErn = sgn.getUser().getErn();
+            mUserErn = sgn.getSessionManager().getSession().getUser().getErn();
             mSessionToken = sgn.getSessionManager().getSession().getToken();
         }
         setName(name);

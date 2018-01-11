@@ -16,7 +16,6 @@
 
 package com.shopgun.android.sdk.requests;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.Delivery;
 import com.shopgun.android.sdk.network.Request;
@@ -24,6 +23,7 @@ import com.shopgun.android.sdk.network.RequestQueue;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonArrayRequest;
+import com.shopgun.android.sdk.utils.Constants;
 
 import org.json.JSONArray;
 

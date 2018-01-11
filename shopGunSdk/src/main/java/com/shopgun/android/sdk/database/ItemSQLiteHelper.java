@@ -22,10 +22,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.Constants;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * Class for handling the {@link ShoppinglistItem} SQLite table.
  */
-public class ItemSQLiteHelper extends DatabaseHelper {
+public class ItemSQLiteHelper extends SgnOpenHelper {
 
     public static final String TAG = Constants.getTag(ItemSQLiteHelper.class);
 
@@ -113,7 +113,7 @@ public class ItemSQLiteHelper extends DatabaseHelper {
         ShoppinglistItem sli = new ShoppinglistItem();
         sli.setId(cv.getAsString(ID));
         sli.setErn(cv.getAsString(ERN));
-        sli.setModified(Utils.stringToDate(cv.getAsString(MODIFIED)));
+        sli.setModified(SgnUtils.stringToDate(cv.getAsString(MODIFIED)));
         sli.setDescription(cv.getAsString(DESCRIPTION));
         sli.setCount(cv.getAsInteger(COUNT));
         sli.setTick(DbUtils.intToBool(cv.getAsInteger(TICK)));
@@ -136,7 +136,7 @@ public class ItemSQLiteHelper extends DatabaseHelper {
         ContentValues cv = new ContentValues();
         cv.put(ID, sli.getId());
         cv.put(ERN, sli.getErn());
-        cv.put(MODIFIED, Utils.dateToString(sli.getModified()));
+        cv.put(MODIFIED, SgnUtils.dateToString(sli.getModified()));
         cv.put(DESCRIPTION, sli.getDescription());
         cv.put(COUNT, sli.getCount());
         cv.put(TICK, DbUtils.unescape(sli.isTicked()));
@@ -152,7 +152,7 @@ public class ItemSQLiteHelper extends DatabaseHelper {
 
     public static ContentValues stateToContentValues(Date modified, int syncState) {
         ContentValues cv = new ContentValues();
-        cv.put(MODIFIED, Utils.dateToString(modified));
+        cv.put(MODIFIED, SgnUtils.dateToString(modified));
         cv.put(STATE, syncState);
         return cv;
     }

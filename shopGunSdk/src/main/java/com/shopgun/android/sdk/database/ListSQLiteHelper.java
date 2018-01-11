@@ -22,11 +22,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.Constants;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * Class for handling the {@link Shoppinglist} SQLite table.
  */
-public class ListSQLiteHelper extends DatabaseHelper {
+public class ListSQLiteHelper extends SgnOpenHelper {
 
     public static final String TAG = Constants.getTag(ListSQLiteHelper.class);
 
@@ -81,7 +81,7 @@ public class ListSQLiteHelper extends DatabaseHelper {
     public static void bind(SQLiteStatement s, Shoppinglist sl, String userId) {
         DbUtils.bindOrNull(s, 1, sl.getId());
         DbUtils.bindOrNull(s, 2, sl.getErn());
-        DbUtils.bindOrNull(s, 3, Utils.dateToString(sl.getModified()));
+        DbUtils.bindOrNull(s, 3, SgnUtils.dateToString(sl.getModified()));
         DbUtils.bindOrNull(s, 4, sl.getName());
         DbUtils.bindOrNull(s, 5, sl.getAccess());
         s.bindLong(6, sl.getState());
@@ -108,7 +108,7 @@ public class ListSQLiteHelper extends DatabaseHelper {
         Shoppinglist sl = Shoppinglist.fromName(cv.getAsString(NAME));
         sl.setId(cv.getAsString(ID));
         sl.setErn(cv.getAsString(ERN));
-        sl.setModified(Utils.stringToDate(cv.getAsString(MODIFIED)));
+        sl.setModified(SgnUtils.stringToDate(cv.getAsString(MODIFIED)));
         sl.setAccess(cv.getAsString(ACCESS));
         Integer state = cv.getAsInteger(STATE);
         sl.setState(state == null ? SyncState.TO_SYNC : state);
@@ -128,7 +128,7 @@ public class ListSQLiteHelper extends DatabaseHelper {
         ContentValues cv = new ContentValues();
         cv.put(ID, sl.getId());
         cv.put(ERN, sl.getErn());
-        cv.put(MODIFIED, Utils.dateToString(sl.getModified()));
+        cv.put(MODIFIED, SgnUtils.dateToString(sl.getModified()));
         cv.put(NAME, sl.getName());
         cv.put(ACCESS, sl.getAccess());
         cv.put(STATE, sl.getState());

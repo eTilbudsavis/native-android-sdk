@@ -16,7 +16,6 @@
 
 package com.shopgun.android.sdk.utils;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.User;

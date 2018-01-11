@@ -17,31 +17,9 @@
 package com.shopgun.android.sdk.demo.base;
 
 import android.annotation.SuppressLint;
-import android.os.Bundle;
 import android.preference.PreferenceActivity;
-
-import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.demo.Tools;
 
 @SuppressLint("Registered")
 public class BasePreferenceActivity extends PreferenceActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        Tools.shopGunCreate(this);
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    protected void onStart() {
-        ShopGun.getInstance(this).onStart();
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        ShopGun.getInstance(this).onStop();
-    }
 
 }

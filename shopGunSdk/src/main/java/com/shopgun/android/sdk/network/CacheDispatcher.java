@@ -18,7 +18,7 @@ package com.shopgun.android.sdk.network;
 
 import android.os.Process;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.concurrent.BlockingQueue;
 

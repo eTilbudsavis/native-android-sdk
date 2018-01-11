@@ -19,11 +19,11 @@ package com.shopgun.android.sdk.requests;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.network.Delivery;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.ShopGunError;
+import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;

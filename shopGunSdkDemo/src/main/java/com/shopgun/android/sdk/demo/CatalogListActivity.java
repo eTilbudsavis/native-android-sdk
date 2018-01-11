@@ -32,7 +32,7 @@ import com.shopgun.android.sdk.model.Store;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogListRequest;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.utils.UnitUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Catalog c = mCatalogs.get(position);
-        CatalogViewerActivity.launch(this, c);
+        PagedPublicationActivity.start(this, c);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
             r.setLimit(24);
             // Offset can be used for pagination, and if default to 0
             r.setOffset(0);
-            ShopGun.getInstance(this).add(r);
+            ShopGun.getInstance().add(r);
         }
     }
 
@@ -136,7 +136,7 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
 
     public class CatalogAdapter extends BaseAdapter {
 
-        private final int mPadding = Utils.convertDpToPx(5, CatalogListActivity.this);
+        private final int mPadding = UnitUtils.dpToPx(5, CatalogListActivity.this);
 
         @Override
         public int getCount() {

@@ -19,14 +19,16 @@ package com.shopgun.android.sdk.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.interfaces.ICatalog;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.IStore;
+import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationOffer;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.utils.DateUtils;
+import com.shopgun.android.utils.ParcelableUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -45,7 +47,7 @@ import java.util.Set;
  * documentation, on the engineering blog.
  * </p>
  */
-public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>,Parcelable {
+public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>, PagedPublicationOffer, Parcelable {
 
     public static final String TAG = Constants.getTag(Offer.class);
 
@@ -79,7 +81,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
     public Offer(Offer offer) {
 
         // Ensure we don't reference objects
-        Offer tmp = Utils.copyParcelable(offer, Offer.CREATOR);
+        Offer tmp = ParcelableUtils.copyParcelable(offer, Offer.CREATOR);
 
         this.mErn = tmp.mErn;
         this.mHeading = tmp.mHeading;
@@ -400,7 +402,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
      * @return This object
      */
     public Offer setRunFrom(Date date) {
-        mRunFrom = Utils.roundTime(date);
+        mRunFrom = DateUtils.roundTime(date);
         return this;
     }
 
@@ -424,7 +426,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
      * @return This object
      */
     public Offer setRunTill(Date date) {
-        mRunTill = Utils.roundTime(date);
+        mRunTill = DateUtils.roundTime(date);
         return this;
     }
 

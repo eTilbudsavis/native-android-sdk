@@ -16,8 +16,8 @@
 
 package com.shopgun.android.sdk.network.impl;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.network.ShopGunError;
+import com.shopgun.android.sdk.utils.Constants;
 
 
 public class ParseError extends ShopGunError {

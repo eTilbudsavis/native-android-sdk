@@ -54,7 +54,7 @@ public class SessionActivity extends BaseActivity {
         public void onClick(View v) {
             ShopGun e = ShopGun.getInstance();
             showProgress("", "Updating session");
-            if (e.getUser().isLoggedIn()) {
+            if (e.getSessionManager().getSession().getUser().isLoggedIn()) {
                 e.getSessionManager().signout(mListener);
             } else {
                 e.getSessionManager().login(getEmail(), getPassword(), mListener);
@@ -70,11 +70,11 @@ public class SessionActivity extends BaseActivity {
 
     private void updateView() {
 
-        boolean loggedin = ShopGun.getInstance().getUser().isLoggedIn();
+        boolean loggedin = ShopGun.getInstance().getSessionManager().getSession().getUser().isLoggedIn();
         mSigninEmail.setVisibility(loggedin ? View.GONE : View.VISIBLE);
         mSigninPassword.setVisibility(loggedin ? View.GONE : View.VISIBLE);
         mEmail.setVisibility(loggedin ? View.VISIBLE : View.GONE);
-        mEmail.setText(ShopGun.getInstance().getUser().getEmail());
+        mEmail.setText(ShopGun.getInstance().getSessionManager().getSession().getUser().getEmail());
         mSignin.setText(loggedin ? "Signout" : "Signin");
         hideProgress();
 

@@ -16,12 +16,14 @@
 
 package com.shopgun.android.sdk;
 
+import android.app.Activity;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.SgnBus;
+import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Session;
 import com.shopgun.android.sdk.network.Request;
@@ -31,8 +33,10 @@ import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
+import com.shopgun.android.sdk.utils.Constants;
+import com.shopgun.android.sdk.utils.ExternalClientIdStore;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONObject;
 
@@ -69,6 +73,28 @@ public class SessionManager {
 
     private Request<?> mReqInFlight;
 
+    private LifecycleManager.Callback mLifecycleCallback = new LifecycleManager.SimpleCallback() {
+
+        @Override
+        public void onCreate(Activity activity) {
+
+            if (mSession.getToken() == null) {
+                // If no session exists post for new
+                postSession(null);
+            } else {
+                // Refresh if it's been two hours since last usage
+                Date now = new Date();
+                long delta = now.getTime() - mShopGun.getSettings().getLastUsedTime();
+                if (delta > TimeUnit.HOURS.toMillis(2)) {
+                    putSession(null);
+                }
+            }
+
+            ExternalClientIdStore.updateCid(mSession, mShopGun);
+
+        }
+    };
+
     public SessionManager(ShopGun shopGun) {
 
         mShopGun = shopGun;
@@ -78,6 +104,8 @@ public class SessionManager {
             mSession = new Session();
         }
         ExternalClientIdStore.updateCid(mSession, mShopGun);
+        mShopGun.getLifecycleManager().registerCallback(mLifecycleCallback);
+
     }
 
     /**
@@ -274,38 +302,6 @@ public class SessionManager {
         synchronized (LOCK) {
             return mReqInFlight != null;
         }
-    }
-
-    /**
-     * Method for ensuring that there is a valid session on every resume event.
-     * <p>If no session exists, it will post for a new session. If the session
-     * does exist, and it's been more than 2 hours since last usage it will put
-     * for an session update</p>
-     */
-    public void onStart() {
-
-        if (mSession.getToken() == null) {
-            // If no session exists post for new
-            postSession(null);
-        } else {
-            /*
-			 * If it's been more than 2 hours since last usage, put for
-			 * a session refresh, else ignore session refresh
-			 */
-            Date now = new Date();
-            long delta = now.getTime() - mShopGun.getSettings().getLastUsedTime();
-            boolean shouldPut = delta > TimeUnit.HOURS.toMillis(2);
-//            boolean shouldPut = delta > (20 * Utils.SECOND_IN_MILLIS);
-            if (shouldPut) {
-                putSession(null);
-            }
-        }
-
-        ExternalClientIdStore.updateCid(mSession, mShopGun);
-    }
-
-    public void onStop() {
-        // empty, might be needed in the future
     }
 
     private void postSession(final Listener<JSONObject> l) {
@@ -519,7 +515,7 @@ public class SessionManager {
 
             if (mSession.getToken() == null || !mSession.getToken().equals(headerToken)) {
                 mSession.setToken(headerToken);
-                Date exp = Utils.stringToDate(headerExpires);
+                Date exp = SgnUtils.stringToDate(headerExpires);
                 mSession.setExpires(exp);
                 mShopGun.getSettings().setSessionJson(mSession.toJSON());
             }

@@ -16,34 +16,16 @@
 
 package com.shopgun.android.sdk;
 
-import android.content.Context;
 import android.support.v4.app.Fragment;
+
+import com.shopgun.android.sdk.utils.Constants;
 
 public class SgnFragment extends Fragment {
 
     public static final String TAG = Constants.getTag(SgnFragment.class);
 
-    protected ShopGun mShopgun;
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mShopgun = ShopGun.getInstance(context);
-        // We'll just make sure we're running for the duration of this fragment
-        mShopgun.onStart();
-    }
-
-    @Override
-    public void onDetach() {
-        mShopgun.onStop();
-        super.onDetach();
-    }
-
     protected ShopGun getShopgun() {
-        if (mShopgun == null) {
-            throw new IllegalStateException("Calling getShopgun() prior to onAttach not allowed");
-        }
-        return mShopgun;
+        return ShopGun.getInstance();
     }
 
 }

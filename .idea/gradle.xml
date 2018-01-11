@@ -10,15 +10,11 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/shopGunSdk" />
             <option value="$PROJECT_DIR$/shopGunSdkDemo" />
+            <option value="$PROJECT_DIR$/../verso-android/library" />
+            <option value="$PROJECT_DIR$/../zoomlayout/library" />
           </set>
         </option>
-        <option name="myModules">
-          <set>
-            <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/shopGunSdk" />
-            <option value="$PROJECT_DIR$/shopGunSdkDemo" />
-          </set>
-        </option>
+        <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

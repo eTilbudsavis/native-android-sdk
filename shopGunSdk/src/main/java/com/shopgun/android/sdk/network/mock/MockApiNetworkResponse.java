@@ -17,13 +17,13 @@
 package com.shopgun.android.sdk.network.mock;
 
 import android.content.Context;
-import android.text.TextUtils;
 
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.utils.Api;
+import com.shopgun.android.utils.TextUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

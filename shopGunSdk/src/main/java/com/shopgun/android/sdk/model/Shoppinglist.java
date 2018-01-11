@@ -19,14 +19,15 @@ package com.shopgun.android.sdk.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.api.MetaKeys;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.DateUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -118,8 +119,8 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
     private int mSyncState = SyncState.TO_SYNC;
 
     private Shoppinglist() {
-        setId(Utils.createUUID());
-        mModified = Utils.roundTime(new Date());
+        setId(SgnUtils.createUUID());
+        mModified = DateUtils.roundTime(new Date());
     }
 
     private Shoppinglist(Parcel in) {
@@ -302,7 +303,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      * @return This object
      */
     public Shoppinglist setModified(Date time) {
-        mModified = Utils.roundTime(time);
+        mModified = DateUtils.roundTime(time);
         return this;
     }
 

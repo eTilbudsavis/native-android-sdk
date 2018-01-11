@@ -23,7 +23,7 @@ import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.model.Store;
 import com.shopgun.android.sdk.model.User;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 /**
  * This class contains a sub-set of paths needed to request data from the ShopGun API,
@@ -46,6 +46,7 @@ public class Endpoints {
     public static final String OFFER_ID = "/v2/offers/";
     public static final String OFFER_SEARCH = "/v2/offers/search";
     public static final String OFFER_TYPEAHEAD = "/v2/offers/typeahead";
+    public static final String OFFER_SUGGESTED = "/v2/offers/suggest";
 
     public static final String STORE_LIST = "/v2/stores";
     public static final String STORE_ID = "/v2/stores/";
@@ -121,29 +122,7 @@ public class Endpoints {
         return String.format("/v2/catalogs/%s/hotspots", catalogId);
     }
 
-    /**
-     * @param catalogId A {@link Catalog#getId()}
-     * @return /v2/catalogs/{catalog_id}/collect
-     */
-    public static String catalogCollect(String catalogId) {
-        return String.format("/v2/catalogs/%s/collect", catalogId);
-    }
 
-    /**
-     * @param offerId An {@link Offer#getId()}
-     * @return /v2/offers/{offer_id}/collect
-     */
-    public static String offerCollect(String offerId) {
-        return String.format("/v2/offers/%s/collect", offerId);
-    }
-
-    /**
-     * @param storeId A {@link Store#getId()}
-     * @return /v2/stores/{store_id}/collect
-     */
-    public static String storeCollect(String storeId) {
-        return String.format("/v2/stores/%s/collect", storeId);
-    }
 
     /**
      * @param userId A {@link User#getUserId()}
@@ -204,7 +183,7 @@ public class Endpoints {
      * @return /v2/users/{user_id}/shoppinglists/{list_uuid}/shares/{email}
      */
     public static String listShareEmail(int userId, String listId, String email) {
-        return String.format("/v2/users/%s/shoppinglists/%s/shares/%s", userId, listId, Utils.encode(email, "UTF-8"));
+        return String.format("/v2/users/%s/shoppinglists/%s/shares/%s", userId, listId, SgnUtils.encode(email, "UTF-8"));
     }
 
     /**

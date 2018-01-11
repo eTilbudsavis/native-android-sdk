@@ -16,12 +16,12 @@
 
 package com.shopgun.android.sdk.network.impl;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Request.Method;
 import com.shopgun.android.sdk.network.Response;
+import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.Collections;
 import java.util.Iterator;

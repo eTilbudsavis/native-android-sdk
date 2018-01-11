@@ -16,7 +16,6 @@
 
 package com.shopgun.android.sdk.utils;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -114,7 +113,7 @@ public class ListUtils {
 
             if (prevId == null) {
                 nil.add(sli);
-            } else if (prevId.equals(FIRST_ITEM)) {
+            } else if (FIRST_ITEM.equals(prevId)) {
                 first.add(sli);
             } else if (!prevItems.containsKey(prevId) && allId.contains(prevId)) {
                 prevItems.put(prevId, sli);

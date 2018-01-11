@@ -20,16 +20,17 @@ import android.graphics.pdf.PdfDocument.Page;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.shopgun.android.sdk.Constants;
+import com.shopgun.android.materialcolorcreator.MaterialColor;
+import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.IStore;
-import com.shopgun.android.sdk.palette.MaterialColor;
-import com.shopgun.android.sdk.palette.SgnColor;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnJson;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.utils.DateUtils;
+import com.shopgun.android.utils.ParcelableUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -82,7 +83,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     public Catalog(Catalog catalog) {
 
         // Ensure we don't reference objects
-        Catalog tmp = Utils.copyParcelable(catalog, Catalog.CREATOR);
+        Catalog tmp = ParcelableUtils.copyParcelable(catalog, Catalog.CREATOR);
 
         this.mErn = tmp.mErn;
         this.mLabel = tmp.mLabel;
@@ -244,13 +245,13 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      */
     public MaterialColor getBackgroundMaterialColor() {
         if (mBackground == null) {
-            mBackground = new SgnColor();
+            mBackground = new MaterialColorImpl();
         }
         return mBackground;
     }
 
     public Catalog setBackground(int background) {
-        setBackground(new SgnColor(background));
+        setBackground(new MaterialColorImpl(background));
         return this;
     }
 
@@ -279,7 +280,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * @return This object
      */
     public Catalog setRunFrom(Date date) {
-        mRunFrom = Utils.roundTime(date);
+        mRunFrom = DateUtils.roundTime(date);
         return this;
     }
 
@@ -303,7 +304,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * @return This object
      */
     public Catalog setRunTill(Date date) {
-        mRunTill = Utils.roundTime(date);
+        mRunTill = DateUtils.roundTime(date);
         return this;
     }
 

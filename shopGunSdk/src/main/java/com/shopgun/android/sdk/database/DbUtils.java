@@ -22,12 +22,12 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.shoppinglists.ListManager;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.Constants;
+import com.shopgun.android.sdk.utils.SgnUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -143,12 +143,12 @@ public class DbUtils {
      * in time be synchronized to the ShopGun API.
      *
      * @param manager A {@link ListManager}
-     * @param db      A {@link DatabaseWrapper}
+     * @param db      A {@link SgnDatabase}
      * @param delete  {@code true} if you want to have the offline {@link Shoppinglist} and
      *                {@link ShoppinglistItem} deleted on a successful migration completion, else {@code false}.
      * @return the number of migrated lists
      */
-    public static int migrateOfflineLists(ListManager manager, DatabaseWrapper db, boolean delete) {
+    public static int migrateOfflineLists(ListManager manager, SgnDatabase db, boolean delete) {
 
         User offlineUser = new User();
         List<Shoppinglist> offlineUserLists = db.getLists(offlineUser);
@@ -172,7 +172,7 @@ public class DbUtils {
 
             for (ShoppinglistItem sli : noUserItems) {
                 sli.setShoppinglistId(tmpSl.getId());
-                sli.setId(Utils.createUUID());
+                sli.setId(SgnUtils.createUUID());
                 manager.addItem(sli);
             }
 
@@ -252,6 +252,21 @@ public class DbUtils {
         } finally {
             closeCursor(c);
         }
+    }
+
+    public static <T> List<T> cursorToList(Cursor c, ContentValuesConverter<T> converter) {
+        ArrayList<T> list = new ArrayList<T>();
+        for (ContentValues cv : cursorToContentValues(c)) {
+            T item = converter.convert(cv);
+            if (item != null) {
+                list.add(item);
+            }
+        }
+        return list;
+    }
+
+    public interface ContentValuesConverter<T> {
+        T convert(ContentValues cv);
     }
 
 }

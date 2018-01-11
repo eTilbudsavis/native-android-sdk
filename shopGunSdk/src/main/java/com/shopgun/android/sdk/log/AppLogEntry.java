@@ -16,13 +16,14 @@
 
 package com.shopgun.android.sdk.log;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.impl.IgnoreResponseListener;
 import com.shopgun.android.sdk.network.impl.JsonObjectRequest;
+import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.Device;
+import com.shopgun.android.utils.PackageUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,6 +44,8 @@ public class AppLogEntry {
     private boolean mSingleEntry = true;
     private String mEntryName;
 
+    // TODO: 06/04/2017 Post debugging events to Atta
+
     public AppLogEntry(ShopGun sgn, String entryName) {
         this(sgn, entryName, null);
     }
@@ -55,7 +58,7 @@ public class AppLogEntry {
         mEmail = email;
         mEntryName = entryName;
         if (mEmail == null) {
-            mEmail = mShopgun.getUser().getEmail();
+            mEmail = mShopgun.getSessionManager().getSession().getUser().getEmail();
         }
     }
 
@@ -95,7 +98,7 @@ public class AppLogEntry {
             device.put("useragent", Device.getDeviceInfo());
 
             JSONObject app = new JSONObject();
-            String appVersion = mShopgun.getAppVersion();
+            String appVersion = PackageUtils.getVersionName(mShopgun.getContext());
             app.put("version", (appVersion == null ? "null" : appVersion));
 
             JSONObject eventLog = new JSONObject();

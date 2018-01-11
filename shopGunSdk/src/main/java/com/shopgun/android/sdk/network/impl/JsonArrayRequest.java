@@ -16,8 +16,6 @@
 
 package com.shopgun.android.sdk.network.impl;
 
-import android.text.TextUtils;
-
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.NetworkResponse;
@@ -25,7 +23,8 @@ import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.Response;
 import com.shopgun.android.sdk.network.Response.Listener;
 import com.shopgun.android.sdk.network.ShopGunError;
-import com.shopgun.android.sdk.utils.Utils;
+import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.TextUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -82,7 +81,7 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
             }
 
             Response<JSONArray> r = null;
-            if (Utils.isSuccess(response.statusCode)) {
+            if (SgnUtils.isSuccess(response.statusCode)) {
                 // Parse into array if it's successful
                 JSONArray jArray = new JSONArray(jsonString);
                 r = Response.fromSuccess(jArray, getCache());
@@ -119,6 +118,19 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
      */
     public Request<?> setOrderBy(String order) {
         getParameters().put(Parameters.ORDER_BY, order);
+        return this;
+    }
+
+    /**
+     * Set a list of "order_by" parameters that the API should order the data by.
+     * @param order parameters to order data by
+     * @return this object
+     */
+    public Request<?> setOrderBy(String[] order) {
+        if (order != null && order.length != 0) {
+            String tmp = TextUtils.join(",", order);
+            getParameters().put(Parameters.ORDER_BY, tmp);
+        }
         return this;
     }
 

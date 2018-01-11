@@ -16,13 +16,12 @@
 
 package com.shopgun.android.sdk.network.impl;
 
-import com.shopgun.android.sdk.Constants;
-import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.HttpStack;
 import com.shopgun.android.sdk.network.Network;
 import com.shopgun.android.sdk.network.NetworkResponse;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.ShopGunError;
+import com.shopgun.android.sdk.utils.Constants;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -81,10 +80,6 @@ public class NetworkImpl implements Network {
                 content = entityToBytes(resp.getEntity());
             }
 
-			/*
-			 * TODO report back content and body length, to collect stats on
-			 * transferred data, to compare with MsgPack later.
-			 */
             int respLength = content.length;
             int bodyLength = (request.getBody() == null ? 0 : request.getBody().length);
 
@@ -97,7 +92,6 @@ public class NetworkImpl implements Network {
             return new NetworkResponse(resp.getStatusLine().getStatusCode(), content, responseHeaders);
 
         } catch (Exception e) {
-            SgnLog.e(TAG, e.getMessage(), e);
             throw new NetworkError(e);
         }
 

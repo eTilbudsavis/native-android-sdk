@@ -21,15 +21,21 @@ def versionMinor = 2
 def versionPatch = 1
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 
     defaultConfig {
         versionCode versionMajor * 100000 + versionMinor * 1000 + versionPatch
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
         applicationId "com.shopgun.android.sdk.demo"
-        minSdkVersion 10
-        targetSdkVersion 23
+        minSdkVersion 15
+        targetSdkVersion 24
     }
 
     buildTypes {
@@ -47,6 +53,11 @@ android {
 
 dependencies {
     compile project(':shopGunSdk')
-    compile 'com.android.support:support-v4:23.3.0'
-    compile 'com.jakewharton:butterknife:7.0.1'
+
+    def libs = rootProject.libDependencies
+    compile libs.butterknife
+    compile libs.appcompat
+    compile libs.supportv4
+    compile libs.okhttpLoggingInterceptor
+
 }

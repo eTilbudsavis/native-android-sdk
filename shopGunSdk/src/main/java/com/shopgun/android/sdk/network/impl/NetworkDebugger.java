@@ -16,31 +16,41 @@
 
 package com.shopgun.android.sdk.network.impl;
 
-import com.shopgun.android.sdk.Constants;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Request;
 import com.shopgun.android.sdk.network.RequestDebugger;
+import com.shopgun.android.sdk.network.ShopGunError;
+import com.shopgun.android.sdk.utils.Constants;
+import com.shopgun.android.utils.log.Logger;
 
 public class NetworkDebugger implements RequestDebugger {
 
     public static final String TAG = Constants.getTag(NetworkDebugger.class);
+
     private final String mTag;
+    private final Logger mLogger;
 
     public NetworkDebugger() {
-        this(TAG);
+        this(SgnLog.getLogger(), TAG);
     }
 
     public NetworkDebugger(String tag) {
-        this.mTag = tag;
+        this(SgnLog.getLogger(), tag);
+    }
+
+    public NetworkDebugger(Logger logger, String tag) {
+        mLogger = logger;
+        mTag = tag;
     }
 
     public void onFinish(Request<?> req) {
-        SgnLog.d(mTag, req.getNetworkLog().toString());
-        SgnLog.d(mTag, req.getLog().getString(getClass().getSimpleName()));
+        mLogger.d(mTag, req.getNetworkLog().toString());
+        mLogger.d(mTag, req.getLog().getString(getClass().getSimpleName()));
     }
 
-    public void onDelivery(Request<?> r) {
-        SgnLog.d(TAG, "TotalDuration: " + r.getLog().getTotalDuration());
+    @Override
+    public void onDelivery(Request<?> r, Object response, ShopGunError error) {
+        mLogger.d(TAG, "TotalDuration: " + r.getLog().getTotalDuration());
     }
 
 }

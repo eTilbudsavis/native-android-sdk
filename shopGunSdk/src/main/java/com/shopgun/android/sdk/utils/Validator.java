@@ -16,8 +16,6 @@
 
 package com.shopgun.android.sdk.utils;
 
-import com.shopgun.android.sdk.Constants;
-
 import java.util.regex.Pattern;
 
 public class Validator {
