@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2.CatalogConfiguration;
 import com.shopgun.android.verso.VersoPageView;
+import com.shopgun.android.verso.VersoPageViewFragment;
 
 public class IntroOutroCatalogConfiguration extends CatalogConfiguration {
 
@@ -73,13 +74,13 @@ public class IntroOutroCatalogConfiguration extends CatalogConfiguration {
         }
 
         @Override
-        public void setOnCompletionListener() {
-
+        public int getPage() {
+            return 0;
         }
 
         @Override
-        public OnLoadCompletionListener getOnLoadCompleteListener() {
-            return null;
+        public void setOnLoadCompleteListener(VersoPageViewFragment.OnLoadCompleteListener listener) {
+
         }
 
         @Override
