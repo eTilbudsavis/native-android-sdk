@@ -19,8 +19,8 @@ package com.shopgun.android.sdk.bus;
 import com.shopgun.android.sdk.BuildConfig;
 import com.shopgun.android.sdk.utils.Constants;
 
-import de.greenrobot.event.EventBus;
-import de.greenrobot.event.EventBusBuilder;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.EventBusBuilder;
 
 public class SgnBus {
 

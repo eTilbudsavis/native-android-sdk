@@ -52,6 +52,7 @@ import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.ConnectivityUtils;
 
+import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -175,6 +176,7 @@ public class SyncManager {
      * Listening for session changes, starting and stopping sync as needed
      * @param e The event we are listening for
      */
+    @Subscribe()
     public void onEvent(SessionEvent e) {
         if (e.isNewUser()) {
             mSyncLooper.restart();

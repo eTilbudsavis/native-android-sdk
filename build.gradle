@@ -15,17 +15,22 @@
  ******************************************************************************/
 
 apply from: 'dependencies.gradle'
+apply plugin: 'com.github.ben-manes.versions'
 
 buildscript {
     repositories {
         jcenter()
+        google()
         maven {
             url  "http://dl.bintray.com/shopgun/maven"
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
-        classpath "io.realm:realm-gradle-plugin:3.0.0"
+        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath "io.realm:realm-gradle-plugin:4.3.2"
+
+        // Dependencies checker: run from command line ./gradlew dependencyUpdates -Drevision=release|milestone|integration
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
     }
 }
 
