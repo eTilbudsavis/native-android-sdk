@@ -2,12 +2,12 @@
 ext {
 
     // sdk and tools
-    compileSdkVersion = 24
-    buildToolsVersion = '27.0.3'
+    compileSdkVersion = 27
+    buildToolsVersion = '27.0.2'
 
     libVersions = [
-            support                     : '24.2.1',
-            playServices                : '9.8.0', // never bump this too early, as this requires an update of Google Play services on the device
+            support                     : '27.0.2',
+            playServices                : '11.2.2', // (August 2017) never bump this too early, as this requires an update of Google Play services on the device
             picasso                     : '2.5.2',
             gson                        : '2.8.2',
             eventbus                    : '3.0.0',
