@@ -44,4 +44,9 @@ infer-out/
 *.iml
 *.iws
 *.ipr
+
+# Screenshot folder
 captures/
+
+# Plugin folder
+dig
