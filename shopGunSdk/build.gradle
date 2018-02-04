@@ -25,8 +25,8 @@ buildscript {
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.4.9'
-        classpath "io.realm:realm-gradle-plugin:3.0.0"
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.4.9' // upgrade to 4.4.10+ doesn't build
+        classpath "io.realm:realm-gradle-plugin:4.3.3"
     }
 }
 
@@ -44,7 +44,7 @@ android {
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 24
+        targetSdkVersion 27
     }
 
     buildTypes {
@@ -61,6 +61,7 @@ android {
 dependencies {
 
     def libs = rootProject.libDependencies
+
     implementation libs.markhor
     implementation libs.zoomlayout
     implementation libs.verso

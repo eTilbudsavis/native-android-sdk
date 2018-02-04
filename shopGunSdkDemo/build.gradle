@@ -35,7 +35,7 @@ android {
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
         applicationId "com.shopgun.android.sdk.demo"
         minSdkVersion 15
-        targetSdkVersion 24
+        targetSdkVersion 27
     }
 
     buildTypes {
@@ -52,10 +52,11 @@ android {
 }
 
 dependencies {
-    compile project(':shopGunSdk')
+    implementation project(':shopGunSdk')
 
     def libs = rootProject.libDependencies
-    annotationProcessor libs.butterknife
+    implementation libs.butterknife
+    annotationProcessor libs.butterknifeCompiler
     implementation libs.appcompat
     implementation libs.supportv4
     implementation libs.okhttpLoggingInterceptor

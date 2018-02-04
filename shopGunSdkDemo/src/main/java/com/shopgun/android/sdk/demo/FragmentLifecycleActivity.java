@@ -11,16 +11,16 @@ import android.widget.TextView;
 
 import java.util.UUID;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class FragmentLifecycleActivity extends AppCompatActivity {
 
     public static final String TAG = FragmentLifecycleActivity.class.getSimpleName();
 
-    @Bind(R.id.fragmentOne) FrameLayout mOne;
-    @Bind(R.id.fragmentTwo) FrameLayout mTwo;
-    @Bind(R.id.fragmentThree) FrameLayout mThree;
+    @BindView(R.id.fragmentOne) FrameLayout mOne;
+    @BindView(R.id.fragmentTwo) FrameLayout mTwo;
+    @BindView(R.id.fragmentThree) FrameLayout mThree;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

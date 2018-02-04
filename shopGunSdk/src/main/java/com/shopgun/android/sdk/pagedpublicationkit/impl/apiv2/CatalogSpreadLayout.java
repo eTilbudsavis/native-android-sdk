@@ -110,8 +110,14 @@ public class CatalogSpreadLayout extends FrameLayout implements PagedPublication
                     public void onAnimationEnd(Animation animation) {
                         for (View v : mViews) {
                             v.clearAnimation();
-                            removeView(v);
                         }
+                        // removing view after clearing the animation causes some problem in Android 8
+                        post(new Runnable() {
+                            @Override
+                            public void run() {
+                                removeAllViews();
+                            }
+                        });
                     }
 
                     @Override
