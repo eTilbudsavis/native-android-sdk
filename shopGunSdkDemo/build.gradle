@@ -55,9 +55,9 @@ dependencies {
     compile project(':shopGunSdk')
 
     def libs = rootProject.libDependencies
-    compile libs.butterknife
-    compile libs.appcompat
-    compile libs.supportv4
-    compile libs.okhttpLoggingInterceptor
+    annotationProcessor libs.butterknife
+    implementation libs.appcompat
+    implementation libs.supportv4
+    implementation libs.okhttpLoggingInterceptor
 
 }
