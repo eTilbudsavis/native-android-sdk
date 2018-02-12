@@ -15,7 +15,6 @@
  ******************************************************************************/
 
 apply from: 'dependencies.gradle'
-apply plugin: 'com.github.ben-manes.versions'
 
 buildscript {
     repositories {
@@ -28,9 +27,6 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.1'
         classpath "io.realm:realm-gradle-plugin:4.3.3"
-
-        // Dependencies checker: run from command line ./gradlew dependencyUpdates -Drevision=release|milestone|integration
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
     }
 }
 

@@ -537,7 +537,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     /**
      * Use this method, to enable/disable saving summary to
-     * {@link RequestQueue#getLog() RequestQueue.getLogs()}.
+     * {@link SgnLog#getLogger()}.
      * @param saveNetworkLog True to save logs to global log
      */
     public void setSaveNetworkLog(boolean saveNetworkLog) {

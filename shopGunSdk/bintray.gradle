@@ -25,7 +25,7 @@ ext {
     PROJ_REPO='maven'
     PROJ_GROUP='com.shopgun.android'
     PROJ_ARTIFACTID='sdk'
-    PROJ_VERSION='4.0.0'
+    PROJ_VERSION='4.0.1-beta'
     PROJ_NAME='sdk'
     PROJ_ORG='shopgun'
     PROJ_WEBSITEURL='https://shopgun.com'
@@ -36,7 +36,7 @@ ext {
 
     DEVELOPER_ID='shopgun'
     DEVELOPER_NAME='ShopGun'
-    DEVELOPER_EMAIL='danny@shopgun.com'
+    DEVELOPER_EMAIL='agb@shopgun.com'
 
     LICENSE_ALL=["Apache-2.0"]
     LICENSE_NAME='The Apache Software License, Version 2.0'
@@ -138,8 +138,12 @@ afterEvaluate {
 
 bintray {
 
-    user = hasProperty("BINTRAY_USER") ? getProperty("BINTRAY_USER"): ''
-    key = hasProperty("BINTRAY_KEY") ? getProperty("BINTRAY_KEY"): ''
+    user = project.hasProperty("BINTRAY_USER") ? project.getProperty("BINTRAY_USER"): ''
+    key = project.hasProperty("BINTRAY_KEY") ? project.getProperty("BINTRAY_KEY"): ''
+
+    project.logger.lifecycle('user:' + user)
+    project.logger.lifecycle('key:' + key)
+
 
     dryRun = PROJ_DRYRUN
     publications = ['MavenJava']

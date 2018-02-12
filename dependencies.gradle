@@ -7,7 +7,7 @@ ext {
 
     libVersions = [
             support                     : '27.0.2',
-            playServices                : '11.2.2', // (August 2017) never bump this too early, as this requires an update of Google Play services on the device
+            playServices                : '11.8.0', // (August 2017) never bump this too early, as this requires an update of Google Play services on the device
             picasso                     : '2.5.2',
             gson                        : '2.8.2',
             eventbus                    : '3.0.0',
@@ -39,14 +39,14 @@ ext {
     libDependencies = [
 
             // internal libs
-            markhor                     : "com.shopgun.android:utils:$libVersions.sgn.markhor",
-//            markhor                     : project(':markhor'),
+//            markhor                     : "com.shopgun.android:utils:$libVersions.sgn.markhor",
+            markhor                     : project(':markhor'),
 //            zoomlayout                  : "com.shopgun.android:zoomlayout:$libVersions.sgn.zoomlayout",
             zoomlayout                  : project(':zoomlayout'),
 //            verso                       : "com.shopgun.android:verso:$libVersions.sgn.verso",
             verso                       : project(':verso'),
 //            shopGunSdk                  : "com.shopgun.android:sdk:$libVersions.sgn.sdk",
-//            shopGunSdk                  : project(':shopGunSdk'),
+            shopGunSdk                  : project(':shopGunSdk'),
             materialcolorcreator        : "com.shopgun.android:materialcolorcreator:$libVersions.sgn.materialcolorcreator",
 //            dragSortListView            : project(':dragSortListView'),
 

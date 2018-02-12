@@ -52,13 +52,14 @@ android {
 }
 
 dependencies {
-    implementation project(':shopGunSdk')
-
     def libs = rootProject.libDependencies
     implementation libs.butterknife
     annotationProcessor libs.butterknifeCompiler
     implementation libs.appcompat
     implementation libs.supportv4
     implementation libs.okhttpLoggingInterceptor
-
+    implementation libs.gson
+    implementation libs.verso
+    implementation libs.markhor
+    implementation libs.shopGunSdk
 }
