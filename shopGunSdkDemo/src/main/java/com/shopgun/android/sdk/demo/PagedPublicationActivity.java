@@ -45,7 +45,7 @@ public class PagedPublicationActivity extends BaseActivity {
                 getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG);
         if (mPagedPublicationFragment == null) {
             Catalog catalog = getIntent().getExtras().getParcelable(KEY_CATALOG);
-            PagedPublicationConfiguration config = new IntroOutroCatalogConfiguration(catalog, true, false);
+            PagedPublicationConfiguration config = new IntroOutroCatalogConfiguration(catalog, false, false);
             mPagedPublicationFragment = PagedPublicationFragment.newInstance(config);
             getSupportFragmentManager()
                     .beginTransaction()
