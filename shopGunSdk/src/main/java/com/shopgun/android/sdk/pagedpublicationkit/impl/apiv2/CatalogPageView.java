@@ -1,22 +1,26 @@
 package com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.BaseTarget;
+import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationPage;
 import com.shopgun.android.sdk.pagedpublicationkit.impl.AspectRatioFrameLayout;
 import com.shopgun.android.sdk.pagedpublicationkit.impl.PulsatingTextView;
 import com.shopgun.android.utils.UnitUtils;
 import com.shopgun.android.verso.VersoPageView;
 import com.shopgun.android.verso.VersoPageViewFragment;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 public class CatalogPageView extends AspectRatioFrameLayout implements VersoPageView {
 
@@ -26,7 +30,7 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
     private PagedPublicationPage.Size mSize;
     private ImageView mImageView;
     private PulsatingTextView mTextView;
-    private PageTarget mPageTarget = new PageTarget();
+    private GlidePageTarget mPageTarget = new GlidePageTarget();
     private boolean mVisible;
     private VersoPageViewFragment.OnLoadCompleteListener mLoadCompletionListener;
 
@@ -46,7 +50,7 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
         lp.gravity = Gravity.CENTER;
         mTextView.setLayoutParams(lp);
         mTextView.setPulseColors(textColor, 20, 80);
-        mTextView.setText(String.valueOf(mPagedPublicationPage.getPageIndex()+1));
+        mTextView.setText(String.valueOf(mPagedPublicationPage.getPageIndex() + 1));
         mTextView.setTextSize(UnitUtils.spToPx(26, getContext()));
         addView(mTextView);
 
@@ -95,7 +99,7 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Picasso.with(getContext()).cancelRequest(mPageTarget);
+        Glide.with(getContext()).clear(mPageTarget);
     }
 
     private void load(PagedPublicationPage.Size size) {
@@ -103,21 +107,20 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
             return;
         }
         mSize = size;
-        Picasso p = Picasso.with(getContext());
-        p.cancelRequest(mPageTarget);
-        p.load(mPagedPublicationPage.getUrl(size))
-                .config(mPagedPublicationPage.getBitmapConfig(size))
+        Glide.with(getContext()).clear(mPageTarget);
+        Glide.with(getContext())
+                .load(mPagedPublicationPage.getUrl(size))
                 .into(mPageTarget);
     }
 
-    private class PageTarget implements Target {
+    private class GlidePageTarget extends BaseTarget<Drawable> {
 
         private boolean mCallback = true;
 
         @Override
-        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
             mTextView.setVisibility(View.GONE);
-            mImageView.setImageBitmap(bitmap);
+            mImageView.setImageDrawable(resource);
             if (mLoadCompletionListener != null && mCallback) {
                 mCallback = false;
                 mLoadCompletionListener.onPageLoadComplete(true, CatalogPageView.this);
@@ -125,16 +128,19 @@ public class CatalogPageView extends AspectRatioFrameLayout implements VersoPage
         }
 
         @Override
-        public void onBitmapFailed(Drawable errorDrawable) {
+        public void onLoadFailed(@Nullable Drawable errorDrawable) {
             if (mLoadCompletionListener != null) {
                 mLoadCompletionListener.onPageLoadComplete(false, CatalogPageView.this);
             }
         }
 
         @Override
-        public void onPrepareLoad(Drawable placeHolderDrawable) {
-
+        public void getSize(@NonNull SizeReadyCallback cb) {
+            cb.onSizeReady(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL);
         }
+
+        @Override
+        public void removeCallback(@NonNull SizeReadyCallback cb) { }
     }
 
 }

@@ -17,21 +17,23 @@
 package com.shopgun.android.sdk.demo;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.demo.base.BaseListActivity;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
-import com.shopgun.android.sdk.model.Dealer;
 import com.shopgun.android.sdk.model.Store;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogListRequest;
+import com.shopgun.android.sdk.utils.CatalogThumbTransformation;
 import com.shopgun.android.utils.UnitUtils;
 
 import java.util.ArrayList;
@@ -155,24 +157,32 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            TextView tv = new TextView(CatalogListActivity.this);
+            if(convertView == null){
+                convertView = LayoutInflater.from(CatalogListActivity.this).inflate(R.layout.card_catalog, parent, false);
+            }
+            TextView tv = convertView.findViewById(R.id.card_catalog_dealer);
+            TextView tv1 = convertView.findViewById(R.id.card_catalog_distance);
+            TextView tv2 = convertView.findViewById(R.id.card_catalog_street);
+            TextView tv3 = convertView.findViewById(R.id.card_catalog_zipcode);
+            ImageView logo = convertView.findViewById(R.id.card_catalog_logo);
+
             Catalog c = mCatalogs.get(position);
-            String text = c.getBranding().getName();
+
+            tv.setText(c.getBranding().getName());
             Store store = c.getStore();
             if (store != null) {
-                text = text + ", " + store.getCity();
+                tv1.setText(store.getCity());
+                tv2.setText(store.getStreet());
+                tv3.setText(store.getZipcode());
             }
-            Dealer dealer = c.getDealer();
-            if (dealer != null) {
-                text = text + ", " + dealer.getName();
-            }
-            tv.setText(text);
-            tv.setTextSize(24);
-            tv.setPadding(mPadding, mPadding, mPadding, mPadding);
-            int color = c.getBranding().getColor();
-            tv.setBackgroundColor(color);
-            tv.setTextColor(Tools.getTextColor(color));
-            return tv;
+
+            GlideApp.with(getApplicationContext())
+                    .load(c.getImages().getThumb())
+                    .transform(new CatalogThumbTransformation(c)) // consider using .fitCenter() from Glide
+                    .placeholder(R.drawable.placeholder_px)
+                    .into(logo);
+
+            return convertView;
         }
 
     }
