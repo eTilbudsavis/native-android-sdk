@@ -68,6 +68,7 @@ ext {
             // other libs
             mapsUtils                   : "com.google.maps.android:android-maps-utils:$libVersions.androidMapsUtils",
             facebook                    : "com.facebook.android:facebook-android-sdk:$libVersions.facebook",
+            picasso                     : "com.squareup.picasso:picasso:$libVersions.picasso",
             glide                       : "com.github.bumptech.glide:glide:$libVersions.glide",
             glideCompiler               : "com.github.bumptech.glide:compiler:$libVersions.glide",
             eventbus                    : "org.greenrobot:eventbus:$libVersions.eventbus",

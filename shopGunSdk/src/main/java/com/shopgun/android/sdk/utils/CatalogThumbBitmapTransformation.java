@@ -13,21 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-
 package com.shopgun.android.sdk.utils;
 
-import android.graphics.Bitmap;
 
+import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
+
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Catalog;
 import com.shopgun.android.sdk.model.Dimension;
-import com.squareup.picasso.Transformation;
+
+import java.security.MessageDigest;
 
 /**
  * This transformation is designed to crop the excess white edges from the {@link Catalog} thumbnails.
- * (Picasso compatible)
+ * (Glide compatible)
  */
-public class CatalogThumbTransformation implements Transformation {
+public class CatalogThumbBitmapTransformation extends BitmapTransformation {
 
     public static final String TAG = CatalogThumbTransformation.class.getSimpleName();
 
@@ -35,12 +39,16 @@ public class CatalogThumbTransformation implements Transformation {
 
     private Catalog mCatalog;
 
-    public CatalogThumbTransformation(Catalog mCatalog) {
+    public CatalogThumbBitmapTransformation(Catalog mCatalog) {
         this.mCatalog = mCatalog;
     }
 
+    private String key() {
+        return mCatalog.getErn() + "-image-thumb-crop";
+    }
+
     @Override
-    public Bitmap transform(Bitmap source) {
+    protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap source, int outWidth, int outHeight) {
 
         if (mCatalog == null) {
             return source;
@@ -78,9 +86,7 @@ public class CatalogThumbTransformation implements Transformation {
         }
 
         try {
-            Bitmap b = Bitmap.createBitmap(source, x, y, w, h);
-            source.recycle();
-            return b;
+            return Bitmap.createBitmap(source, x, y, w, h);
         } catch (Exception e) {
             SgnLog.e(TAG, "Unable to create a new Bitmap", e);
             return source;
@@ -88,8 +94,17 @@ public class CatalogThumbTransformation implements Transformation {
     }
 
     @Override
-    public String key() {
-        return mCatalog.getErn() + "-image-thumb-crop";
+    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
+        messageDigest.update(key().getBytes());
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof CatalogThumbTransformation;
+    }
+
+    @Override
+    public int hashCode() {
+        return key().hashCode();
+    }
 }

@@ -74,6 +74,7 @@ dependencies {
     implementation libs.eventbus
     implementation libs.okhttp
     implementation libs.glide
+    implementation libs.picasso
     implementation libs.gson
     implementation libs.appcompat
 

@@ -33,6 +33,7 @@ import com.shopgun.android.sdk.model.Store;
 import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogListRequest;
+import com.shopgun.android.sdk.utils.CatalogThumbBitmapTransformation;
 import com.shopgun.android.sdk.utils.CatalogThumbTransformation;
 import com.shopgun.android.utils.UnitUtils;
 
@@ -178,7 +179,7 @@ public class CatalogListActivity extends BaseListActivity implements AdapterView
 
             GlideApp.with(getApplicationContext())
                     .load(c.getImages().getThumb())
-                    .transform(new CatalogThumbTransformation(c)) // consider using .fitCenter() from Glide
+                    .transform(new CatalogThumbBitmapTransformation(c)) // consider using .fitCenter() from Glide
                     .placeholder(R.drawable.placeholder_px)
                     .into(logo);
 
