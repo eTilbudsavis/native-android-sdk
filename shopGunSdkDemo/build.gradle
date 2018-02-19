@@ -62,4 +62,6 @@ dependencies {
     implementation libs.verso
     implementation libs.markhor
     implementation libs.shopGunSdk
+    implementation libs.glide
+    annotationProcessor libs.glideCompiler
 }
