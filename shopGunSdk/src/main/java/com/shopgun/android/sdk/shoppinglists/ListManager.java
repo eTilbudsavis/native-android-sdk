@@ -44,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @Deprecated No longer maintained
+ *
  * This class provides methods, for easily handling of
  * {@link Shoppinglist Shoppinglists}, {@link ShoppinglistItem ShoppinglistItems},
  * and {@link Share Shares}, without having to worry about keeping a sane, and

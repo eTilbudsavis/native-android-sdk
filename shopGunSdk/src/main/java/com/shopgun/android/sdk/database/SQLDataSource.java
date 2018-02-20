@@ -25,6 +25,8 @@ import com.shopgun.android.sdk.utils.Constants;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * @Deprecated No longer maintained
+ *
  * Class for handling the reference count to a {@link SQLiteDatabase}, and close the DB only when all queries are done.
  */
 public class SQLDataSource {

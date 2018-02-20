@@ -4,6 +4,7 @@ import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 
 /**
+ * @Deprecated No longer maintained
  * Supported synchronization intervals for {@link SyncManager}
  * and is one of:
  * <ul>

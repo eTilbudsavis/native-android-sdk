@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @Deprecated No longer maintained
+ *
  * Class for handling the {@link Shoppinglist} SQLite table.
  */
 public class ListSQLiteHelper extends SgnOpenHelper {

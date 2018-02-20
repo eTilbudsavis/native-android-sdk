@@ -321,6 +321,8 @@ public class ShopGun {
     /**
      * Get the current instance of {@link ListManager}.
      * @return A ListManager
+     *
+     * @Deprecated {@link ListManager} no longer maintained
      */
     public ListManager getListManager() {
         return mListManager;
@@ -329,6 +331,8 @@ public class ShopGun {
     /**
      * Get the current instance of {@link SyncManager}.
      * @return A SyncManager
+     *
+     * @Deprecated {@link SyncManager} no longer maintained
      */
     public SyncManager getSyncManager() {
         return mSyncManager;

@@ -42,6 +42,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @Deprecated No longer maintained
+ *
  * This class is a representation of the ShopGun API v2 shopppinglist.
  */
 public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppinglist>, IErn<Shoppinglist>, IJson<JSONObject>, Parcelable {

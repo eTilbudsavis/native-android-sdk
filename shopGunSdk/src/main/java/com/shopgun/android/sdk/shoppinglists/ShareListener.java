@@ -7,6 +7,9 @@ import com.shopgun.android.sdk.network.ShopGunError;
 
 import org.json.JSONObject;
 
+/**
+ * @Deprecated No longer maintained
+ */
 class ShareListener extends JSONObjectListener<Share> {
 
     public ShareListener(SgnDatabase database, User user, Share local) {

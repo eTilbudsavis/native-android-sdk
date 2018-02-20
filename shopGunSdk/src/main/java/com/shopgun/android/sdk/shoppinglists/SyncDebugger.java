@@ -11,6 +11,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @Deprecated No longer maintained
+ */
 public class SyncDebugger implements RequestDebugger {
 
     public static final String TAG = DeliveryDebugger.class.getSimpleName();

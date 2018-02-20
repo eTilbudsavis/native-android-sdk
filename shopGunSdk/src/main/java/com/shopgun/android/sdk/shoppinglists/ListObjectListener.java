@@ -7,6 +7,9 @@ import com.shopgun.android.sdk.network.ShopGunError;
 
 import org.json.JSONObject;
 
+/**
+ * @Deprecated No longer maintained
+ */
 class ListObjectListener extends JSONObjectListener<Shoppinglist> {
 
     public ListObjectListener(SgnDatabase database, User user, Shoppinglist local) {

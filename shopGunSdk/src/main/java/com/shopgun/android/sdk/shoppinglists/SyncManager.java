@@ -66,6 +66,8 @@ import java.util.List;
 import java.util.Stack;
 
 /**
+ * @Deprecated No longer maintained
+ *
  * The {@link SyncManager} class performs asynchronous synchronization with the
  * ShopGun API, to propagate all {@link Shoppinglist} and {@link ShoppinglistItem}
  * changes that a user may have done in the {@link SgnDatabase database}.

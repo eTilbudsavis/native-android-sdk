@@ -36,6 +36,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+
+/**
+ * @Deprecated No longer maintained
+ */
 public class SgnDataSource extends SQLDataSource {
 
     public static final String TAG = Constants.getTag(SgnDataSource.class);

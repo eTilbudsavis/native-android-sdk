@@ -35,6 +35,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * @Deprecated No longer maintained
+ *
  * Class for handling the {@link ShoppinglistItem} SQLite table.
  */
 public class ItemSQLiteHelper extends SgnOpenHelper {

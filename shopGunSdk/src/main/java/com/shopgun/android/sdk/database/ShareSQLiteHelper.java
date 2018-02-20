@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @Deprecated No longer maintained
+ *
  * Class for handling the {@link Share} SQLite table.
  */
 public class ShareSQLiteHelper extends SgnOpenHelper {

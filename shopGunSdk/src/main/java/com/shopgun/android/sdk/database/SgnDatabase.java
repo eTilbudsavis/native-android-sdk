@@ -41,6 +41,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * @Deprecated no longer maintained
+ *
  * A middle layer for performing certain transformations on the DB data, prior to returning it to the caller.
  */
 public class SgnDatabase {

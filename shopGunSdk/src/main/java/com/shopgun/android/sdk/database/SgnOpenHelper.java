@@ -24,6 +24,8 @@ import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
 
 /**
+ * @Deprecated No longer maintained
+ *
  * The SgnOpenHelper is a class for doing easy/clean database instantiation, and migration.
  * SgnOpenHelper calls static methods to sub-classes (each subclass essentially being a table)
  * to do creation and upgrades. This way any sub-class can be instantiated and queried for data
