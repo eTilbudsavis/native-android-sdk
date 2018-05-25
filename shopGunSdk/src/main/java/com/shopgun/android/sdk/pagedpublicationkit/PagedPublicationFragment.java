@@ -376,19 +376,16 @@ public class PagedPublicationFragment extends VersoFragment {
             if (mTapListener != null) {
                 mTapListener.onTap(info);
             }
-            PagedPublicationEvent.pageClicked(mConfig, info).track();
             PublicationTapInfo pti = new PublicationTapInfo(info);
             if (pti.hasHotspots()) {
                 post(WHAT_TAP, pti);
                 showHotspots(pti);
-                PagedPublicationEvent.pageHotspotClicked(mConfig, info).track();
             }
             return true;
         }
 
         @Override
         public boolean onDoubleTap(VersoTapInfo info) {
-            PagedPublicationEvent.pageDoubleClicked(mConfig, info).track();
             return mDoubleTapListener != null && mDoubleTapListener.onDoubleTap(info);
         }
 
@@ -397,12 +394,10 @@ public class PagedPublicationFragment extends VersoFragment {
             if (mLongTapListener != null) {
                 mLongTapListener.onLongTap(info);
             }
-            PagedPublicationEvent.pageLongClicked(mConfig, info).track();
             PublicationTapInfo pti = new PublicationTapInfo(info);
             if (pti.hasHotspots()) {
                 post(WHAT_LONG_TAP, pti);
                 showHotspots(pti);
-                PagedPublicationEvent.pageHotspotClicked(mConfig, info).track();
             }
         }
 

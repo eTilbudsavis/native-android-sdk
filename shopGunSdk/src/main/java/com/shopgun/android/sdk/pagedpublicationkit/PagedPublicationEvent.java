@@ -84,48 +84,8 @@ public class PagedPublicationEvent extends EzEvent {
         return publication(PAGED_PUBLICATION_OPENED, config.getPublication().getId(), config.getPublication().getOwnerId());
     }
 
-    public static PagedPublicationEvent disappeared(PagedPublicationConfiguration config) {
-        return publication(PAGED_PUBLICATION_DISAPPEARED, config.getPublication().getId(), config.getPublication().getOwnerId());
-    }
-
-    public static PagedPublicationEvent appeared(PagedPublicationConfiguration config) {
-        return publication(PAGED_PUBLICATION_APPEARED, config.getPublication().getId(), config.getPublication().getOwnerId());
-    }
-
-    public static PagedPublicationEvent pageAppeared(PagedPublicationConfiguration config, int pageNumber) {
-        return page(PAGED_PUBLICATION_PAGE_APPEARED, config.getPublication().getId(), config.getPublication().getOwnerId(), pageNumber);
-    }
-
     public static PagedPublicationEvent pageDisappeared(PagedPublicationConfiguration config, int pageNumber) {
         return page(PAGED_PUBLICATION_PAGE_DISAPPEARED, config.getPublication().getId(), config.getPublication().getOwnerId(), pageNumber);
-    }
-
-    public static PagedPublicationEvent pageLoaded(PagedPublicationConfiguration config, int pageNumber) {
-        return page(PAGED_PUBLICATION_PAGE_LOADED, config.getPublication().getId(), config.getPublication().getOwnerId(), pageNumber);
-    }
-
-    public static PagedPublicationEvent outroAppeared(PagedPublicationConfiguration config) {
-        return publication(PAGED_PUBLICATION_OUTRO_APPEARED, config.getPublication().getId(), config.getPublication().getOwnerId());
-    }
-
-    public static PagedPublicationEvent pageClicked(PagedPublicationConfiguration config, VersoTapInfo i) {
-        return getPageClickProperties(PAGED_PUBLICATION_PAGE_CLICKED, config.getPublication().getId(), config.getPublication().getOwnerId(), i.getPageTapped(), i.getPercentX(), i.getPercentY());
-    }
-
-    public static PagedPublicationEvent pageDoubleClicked(PagedPublicationConfiguration config, VersoTapInfo i) {
-        return getPageClickProperties(PAGED_PUBLICATION_PAGE_DOUBLE_CLICKED, config.getPublication().getId(), config.getPublication().getOwnerId(), i.getPageTapped(), i.getPercentX(), i.getPercentY());
-    }
-
-    public static PagedPublicationEvent pageHotspotClicked(PagedPublicationConfiguration config, VersoTapInfo i) {
-        return getPageClickProperties(PAGED_PUBLICATION_PAGE_HOTSPOT_CLICKED, config.getPublication().getId(), config.getPublication().getOwnerId(), i.getPageTapped(), i.getPercentX(), i.getPercentY());
-    }
-
-    public static PagedPublicationEvent pageLongClicked(PagedPublicationConfiguration config, VersoTapInfo i) {
-        return getPageClickProperties(PAGED_PUBLICATION_PAGE_LONG_CLICKED, config.getPublication().getId(), config.getPublication().getOwnerId(), i.getPageTapped(), i.getPercentX(), i.getPercentY());
-    }
-
-    public static PagedPublicationEvent pageSpreadAppeared(PagedPublicationConfiguration config, int[] pageNumbers) {
-        return getPageSpreadProperties(PAGED_PUBLICATION_PAGE_SPREAD_APPEARED, config.getPublication().getId(), config.getPublication().getOwnerId(), pageNumbers);
     }
 
     public static PagedPublicationEvent pageSpreadDisappeared(PagedPublicationConfiguration config, int[] pageNumbers) {

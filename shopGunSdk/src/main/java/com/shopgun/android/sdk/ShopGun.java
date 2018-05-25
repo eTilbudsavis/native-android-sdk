@@ -378,9 +378,6 @@ public class ShopGun {
         public void onCreate(Activity activity) {
             mSessionId = SgnUtils.createUUID();
             mSettings.incrementUsageCount();
-            if (mSettings.getUsageCount() == 0) {
-                EzEvent.create(EzEvent.FIRST_CLIENT_SESSION_OPENED).track();
-            }
             EzEvent.create(EzEvent.CLIENT_SESSION_OPENED).track();
             SgnLog.v(TAG, "onCreate");
         }
@@ -395,7 +392,6 @@ public class ShopGun {
 
         @Override
         public void onDestroy(Activity activity) {
-            EzEvent.create(EzEvent.CLIENT_SESSION_CLOSED).track();
             mSettings.saveLocation(mLocation);
             mSettings.setLastUsedTimeNow();
             mSettings.setSessionId(mSessionId);
