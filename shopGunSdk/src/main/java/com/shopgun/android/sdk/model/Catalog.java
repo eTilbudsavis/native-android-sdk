@@ -130,7 +130,6 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * @return A {@link Catalog}, or {@code null} if {@code object} is {@code null}
      */
     public static Catalog fromJSON(JSONObject object) {
-        // TODO Fix HotspotsMap so it can be JSON'ed
         if (object == null) {
             return null;
         }
@@ -166,7 +165,6 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     }
 
     public JSONObject toJSON() {
-        // TODO Fix HotspotsMap so it can be JSON'ed
         return new SgnJson()
                 .setId(getId())
                 .setErn(getErn())

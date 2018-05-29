@@ -183,8 +183,6 @@ public class UtilsUnitTest {
     @Test
     public void testStringToDate() throws Exception {
 
-        // TODO How do we handle date tests
-
         // "yyyy-MM-dd'T'HH:mm:ssZZZZ"
 
         String[] valid = {
@@ -237,8 +235,6 @@ public class UtilsUnitTest {
     @Ignore("UtilsUnitTest.DateToString test not ready yet")
     @Test
     public void testDateToString() throws Exception {
-
-        // TODO How do we handle date tests
 
         Calendar c = GregorianCalendar.getInstance();
 

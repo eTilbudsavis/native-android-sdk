@@ -38,8 +38,8 @@ public class GraphRequest {
 
         Map<String, String> map = new HashMap<>();
         map.put("query", query);
-        map.put("operationName", operationName); // TODO What is this?
-        map.put("variables", variables == null ? null : TextUtils.join(",", variables)); // TODO What is this?
+        map.put("operationName", operationName);
+        map.put("variables", variables == null ? null : TextUtils.join(",", variables));
 
         RequestBody requestBody = RequestBody.create(MEDIA_TYPE_JSON, new JSONObject(map).toString());
 

@@ -4,7 +4,6 @@ import android.app.Application;
 import android.util.Log;
 
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.corekit.ApiV2Interceptor;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.utils.log.L;
 import com.shopgun.android.utils.log.LogCatLogger;
@@ -26,7 +25,6 @@ public class DemoApplication extends Application {
 
         new ShopGun.Builder(this)
                 .addNetworkInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
-                .addInterceptor(new ApiV2Interceptor())
                 .setInstance();
 
     }

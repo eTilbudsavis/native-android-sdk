@@ -153,7 +153,6 @@ public class ShopGun {
         mExecutor = builder.executorService;
         mClient = builder.okHttpClient;
         mRealmConfiguration = builder.realmConfiguration;
-        // TODO how do we pass around the RealmConfig without exposing it publicly and without having any knowledge of the kits
 
         mLifecycleManager = new LifecycleManager(builder.application);
         mLifecycleCallback = new SgnLifecycleCallback();
