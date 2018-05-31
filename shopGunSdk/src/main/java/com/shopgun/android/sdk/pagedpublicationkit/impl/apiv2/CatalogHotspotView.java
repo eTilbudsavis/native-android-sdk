@@ -5,6 +5,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;
@@ -16,6 +17,7 @@ public class CatalogHotspotView extends View {
     PagedPublicationHotspot mHotspot;
     int[] mPages;
     RectF mBounds;
+    private boolean outPlayed = false;
 
     public CatalogHotspotView(Context context, PagedPublicationHotspot hotspot, int[] pages) {
         super(context);
@@ -23,6 +25,8 @@ public class CatalogHotspotView extends View {
         mPages = pages;
         mBounds = mHotspot.getBoundsForPages(mPages);
         setBackgroundResource(R.drawable.sgn_pagedpubkit_hotspot_bg);
+        // set the 'in' animation
+        setAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_in));
     }
 
     @Override
@@ -44,6 +48,29 @@ public class CatalogHotspotView extends View {
         r.right = Math.round(rect.right * (float) width);
         r.bottom = Math.round(rect.bottom * (float) height);
         return r;
+    }
+
+    @Override
+    protected void onAnimationEnd() {
+        super.onAnimationEnd();
+        if (!outPlayed) {
+            // if the 'in' animation ended, start the 'out' animation automatically
+            outPlayed = true;
+            startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_out));
+        }
+        else {
+            // after the 'out' animation has ended, post to the parent to remove the view
+            final ViewGroup parent = (ViewGroup) getParent();
+            if (parent != null) {
+                final View view = this;
+                parent.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        parent.removeView(view);
+                    }
+                });
+            }
+        }
     }
 
 }
