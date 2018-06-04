@@ -29,10 +29,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Deprecated No longer maintained
+ * @deprecated No longer maintained
  *
  * Class for handling the {@link Share} SQLite table.
  */
+@Deprecated
 public class ShareSQLiteHelper extends SgnOpenHelper {
 
     public static final String TAG = Constants.getTag(ShareSQLiteHelper.class);

@@ -10,8 +10,9 @@ import org.json.JSONArray;
 import java.util.List;
 
 /**
- * @Deprecated No longer maintained
+ * @deprecated No longer maintained
  */
+@Deprecated
 public class ListArrayListener extends JSONArrayListener<List<Shoppinglist>> {
 
     public ListArrayListener(SgnDatabase database, User user, List<Shoppinglist> local) {

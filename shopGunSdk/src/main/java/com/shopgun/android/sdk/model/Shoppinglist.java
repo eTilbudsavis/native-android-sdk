@@ -42,10 +42,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Deprecated No longer maintained
+ * @deprecated No longer maintained
  *
  * This class is a representation of the ShopGun API v2 shopppinglist.
  */
+@Deprecated
 public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppinglist>, IErn<Shoppinglist>, IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Shoppinglist.class);

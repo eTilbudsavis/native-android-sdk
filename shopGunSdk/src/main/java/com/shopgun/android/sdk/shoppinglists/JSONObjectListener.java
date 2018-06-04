@@ -8,8 +8,9 @@ import com.shopgun.android.sdk.network.ShopGunError;
 import org.json.JSONObject;
 
 /**
- * @Deprecated No longer maintained
+ * @deprecated No longer maintained
  */
+@Deprecated
 abstract class JSONObjectListener<T> implements Response.Listener<JSONObject> {
 
     SgnDatabase mDatabase;

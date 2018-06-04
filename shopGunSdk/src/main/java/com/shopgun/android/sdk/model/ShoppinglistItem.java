@@ -38,8 +38,9 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @Deprecated No longer maintained
+ * @deprecated No longer maintained
  */
+@Deprecated
 public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState<ShoppinglistItem>, IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(ShoppinglistItem.class);

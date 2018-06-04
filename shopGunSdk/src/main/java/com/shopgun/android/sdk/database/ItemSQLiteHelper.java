@@ -35,10 +35,11 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @Deprecated No longer maintained
+ * @deprecated No longer maintained
  *
  * Class for handling the {@link ShoppinglistItem} SQLite table.
  */
+@Deprecated
 public class ItemSQLiteHelper extends SgnOpenHelper {
 
     public static final String TAG = Constants.getTag(ItemSQLiteHelper.class);

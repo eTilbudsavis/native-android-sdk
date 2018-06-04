@@ -142,7 +142,7 @@ public class DbUtils {
      * the offline state, to the currently logged in {@link User}, and they will at a later point
      * in time be synchronized to the ShopGun API.
      *
-     * @Deprecated Shopping list are no longer maintained
+     * @deprecated Shopping list are no longer maintained
      *
      * @param manager A {@link ListManager}
      * @param db      A {@link SgnDatabase}
@@ -150,6 +150,7 @@ public class DbUtils {
      *                {@link ShoppinglistItem} deleted on a successful migration completion, else {@code false}.
      * @return the number of migrated lists
      */
+    @Deprecated
     public static int migrateOfflineLists(ListManager manager, SgnDatabase db, boolean delete) {
 
         User offlineUser = new User();

@@ -66,7 +66,7 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * @Deprecated No longer maintained
+ * @deprecated No longer maintained
  *
  * The {@link SyncManager} class performs asynchronous synchronization with the
  * ShopGun API, to propagate all {@link Shoppinglist} and {@link ShoppinglistItem}
@@ -115,6 +115,7 @@ import java.util.Stack;
  * When {@link LifecycleManager} calls destroy, all local pending changes are pushed to
  * the API if possible to ensure a correct state on the server (and other devices).
  */
+@Deprecated
 public class SyncManager {
 
     public static final String TAG = Constants.getTag(SyncManager.class);

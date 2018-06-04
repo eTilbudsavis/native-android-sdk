@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Deprecated No longer maintained
+ * @deprecated No longer maintained
  *
  * This class provides methods, for easily handling of
  * {@link Shoppinglist Shoppinglists}, {@link ShoppinglistItem ShoppinglistItems},
@@ -52,6 +52,7 @@ import java.util.Map;
  * synchronizing state with both the {@link SgnDatabase database} and, the
  * ShopGun API.
  */
+@Deprecated
 public class ListManager {
 
     public static final String TAG = Constants.getTag(ListManager.class);
