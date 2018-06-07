@@ -12,7 +12,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.CenteredViewPager;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -76,7 +75,6 @@ public class PagedPublicationFragment extends VersoFragment {
 
     public PagedPublicationFragment() {
         mOnTouchWrapper = new OnTouchWrapper();
-        super.setOnTouchListener(mOnTouchWrapper);
         super.setOnTapListener(mOnTouchWrapper);
         super.setOnDoubleTapListener(mOnTouchWrapper);
         super.setOnLongTapListener(mOnTouchWrapper);
@@ -351,7 +349,6 @@ public class PagedPublicationFragment extends VersoFragment {
 
     private class OnTouchWrapper implements VersoPageViewFragment.OnTapListener,
             VersoPageViewFragment.OnLongTapListener,
-            VersoPageViewFragment.OnTouchListener,
             VersoPageViewFragment.OnDoubleTapListener,
             VersoPageViewFragment.OnZoomListener,
             VersoPageViewFragment.OnLoadCompleteListener,
@@ -442,17 +439,6 @@ public class PagedPublicationFragment extends VersoFragment {
             }
         }
 
-        @Override
-        public boolean onTouch(int action, VersoTapInfo info) {
-            switch (action) {
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    dismissHotspots(new PublicationTapInfo(info));
-                    break;
-            }
-            return false;
-        }
-
         private void showHotspots(PublicationTapInfo info) {
             if (!mDisplayHotspotsOnTouch) {
                 return;
@@ -460,13 +446,6 @@ public class PagedPublicationFragment extends VersoFragment {
             PagedPublicationOverlay o = getSpreadOverlay(info);
             if (o != null) {
                 o.showHotspots(info);
-            }
-        }
-
-        private void dismissHotspots(PublicationTapInfo info) {
-            PagedPublicationOverlay o = getSpreadOverlay(info);
-            if (o != null) {
-                o.hideHotspots(info);
             }
         }
 
