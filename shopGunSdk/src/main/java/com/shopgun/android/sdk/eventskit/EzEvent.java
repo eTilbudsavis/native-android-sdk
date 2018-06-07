@@ -46,7 +46,7 @@ public class EzEvent {
     public void track() {
         // avoid duplicates
         if (mEvent != null) {
-            if (BuildConfig.DEBUG) {
+            if (mDebug) {
                 SgnLog.d(TAG, mEvent.toString());
             }
             EventTracker.globalTracker().track(mEvent);
