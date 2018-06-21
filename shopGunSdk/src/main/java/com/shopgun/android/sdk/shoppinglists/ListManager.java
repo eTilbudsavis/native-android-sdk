@@ -327,17 +327,26 @@ public class ListManager {
             mBuilder.edit(after);
         }
 
+        boolean success;
+
         // Read items, edit items, and re-insert items (a bit redundant, but we need them for the callback)
         List<ShoppinglistItem> items = getItems(sl, user);
-        for (ShoppinglistItem sli : items) {
-            sli.setState(SyncState.DELETE);
-            sli.setModified(now);
-        }
-        boolean success = mDatabase.editItems(items, user);
-        if (success) {
+        if (user.isLoggedIn()) {
             for (ShoppinglistItem sli : items) {
-                mBuilder.del(sli);
+                sli.setState(SyncState.DELETE);
+                sli.setModified(now);
             }
+
+            success = mDatabase.editItems(items, user);
+            if (success) {
+                for (ShoppinglistItem sli : items) {
+                    mBuilder.del(sli);
+                }
+            }
+        }
+        else {
+            // just delete all the items
+            mDatabase.deleteItems(sl.getId(), null, user);
         }
 
         // Update local version of shoppinglist
