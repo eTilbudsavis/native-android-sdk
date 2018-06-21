@@ -3,6 +3,10 @@ package com.shopgun.android.sdk.shoppinglists;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.network.Request;
 
+/**
+ * @deprecated No longer maintained
+ */
+@Deprecated
 class SyncLog {
 
     private static final boolean LOG_SYNC = false;

@@ -44,12 +44,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @deprecated No longer maintained
+ *
  * This class provides methods, for easily handling of
  * {@link Shoppinglist Shoppinglists}, {@link ShoppinglistItem ShoppinglistItems},
  * and {@link Share Shares}, without having to worry about keeping a sane, and
  * synchronizing state with both the {@link SgnDatabase database} and, the
  * ShopGun API.
  */
+@Deprecated
 public class ListManager {
 
     public static final String TAG = Constants.getTag(ListManager.class);

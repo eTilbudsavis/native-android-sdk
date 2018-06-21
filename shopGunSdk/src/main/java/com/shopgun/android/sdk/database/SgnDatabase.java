@@ -41,8 +41,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * @deprecated no longer maintained
+ *
  * A middle layer for performing certain transformations on the DB data, prior to returning it to the caller.
  */
+@Deprecated
 public class SgnDatabase {
 
     public static final String TAG = Constants.getTag(SgnDatabase.class);

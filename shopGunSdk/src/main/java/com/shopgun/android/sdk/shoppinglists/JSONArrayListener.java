@@ -7,6 +7,10 @@ import com.shopgun.android.sdk.network.ShopGunError;
 
 import org.json.JSONArray;
 
+/**
+ * @deprecated No longer maintained
+ */
+@Deprecated
 abstract class JSONArrayListener<T> implements Response.Listener<JSONArray> {
 
     SgnDatabase mDatabase;

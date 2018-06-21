@@ -32,6 +32,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * @deprecated shopping list no longer maintained
+ */
+@Deprecated
 public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Share.class);

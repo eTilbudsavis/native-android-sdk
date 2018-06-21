@@ -4,6 +4,7 @@ import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
 
 /**
+ * @deprecated No longer maintained
  * Supported synchronization intervals for {@link SyncManager}
  * and is one of:
  * <ul>
@@ -15,6 +16,7 @@ import com.shopgun.android.sdk.model.ShoppinglistItem;
  * Please only use {@link SyncInterval#FAST} when needed, e.g.: when the user is actively interacting
  * with a {@link Shoppinglist} or it's {@link ShoppinglistItem}'s.
  */
+@Deprecated
 public class SyncInterval {
     public static int SLOW = 10000;
     public static int MEDIUM = 6000;

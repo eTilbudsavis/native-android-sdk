@@ -27,7 +27,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * @deprecated No longer maintained
+ */
+@Deprecated
 public class ShoppinglistEvent extends ShopGunEvent {
 
     public static final String TAG = Constants.getTag(ShoppinglistEvent.class);
