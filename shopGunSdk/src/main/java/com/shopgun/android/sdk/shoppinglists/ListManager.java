@@ -342,7 +342,18 @@ public class ListManager {
 
         // Update local version of shoppinglist
         sl.setState(SyncState.DELETE);
-        success = mDatabase.insertLists(editedLists, user);
+
+        // Is user is logged in, then just delete the list completely
+        // if not, then mark it to be deleted by the sync manager.
+        if (user.isLoggedIn()) {
+            success = mDatabase.insertLists(editedLists, user);
+        } else {
+            success = mDatabase.deleteList(sl, user);
+            if (after != null) {
+                mDatabase.insertList(after, user);
+            }
+        }
+
         if (success) {
             for (Shoppinglist s : editedLists) {
                 mBuilder.del(s);
