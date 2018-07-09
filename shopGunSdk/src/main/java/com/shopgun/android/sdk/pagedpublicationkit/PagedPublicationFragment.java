@@ -254,7 +254,6 @@ public class PagedPublicationFragment extends VersoFragment {
 
     private void setVisible(boolean verso, boolean loader, boolean error) {
         if (mFrame != null) {
-            // TODO: 10/11/16 Add animation between the views
             mFrameVerso.setVisibility(verso ? View.VISIBLE : View.GONE);
             mFrameLoader.setVisibility(loader ? View.VISIBLE : View.GONE);
             mFrameError.setVisibility(error ? View.VISIBLE : View.GONE);

@@ -469,7 +469,7 @@ public class ModelTest {
 //        // Parcelable
 //        testParcelable(obj, Hotspot.CREATOR);
 //
-//        // TODO This contains json array JSON
+//        // This contains json array JSON
 //        SdkTest.logTestWarning(TAG, "Hotspot", "NO JSON TESTING DONE - Json will fail");
 
 //        JSONObject jObj = obj.toJSON();
@@ -495,7 +495,7 @@ public class ModelTest {
 //        // Parcelable
 //        testParcelable(obj, HotspotMap.CREATOR);
 
-        // TODO This contains json array JSON
+        // This contains json array JSON
 
 //        JSONArray jObj = obj.toJSON();
 //        Dimension d = ObjectCreator.getDimension();

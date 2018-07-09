@@ -17,36 +17,19 @@ public class AspectRatioFrameLayout extends FrameLayout {
 
     public AspectRatioFrameLayout(Context context) {
         super(context);
-        init(context, null, 0, 0);
     }
 
     public AspectRatioFrameLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs, 0, 0);
     }
 
     public AspectRatioFrameLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context, attrs, defStyleAttr, 0);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public AspectRatioFrameLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init(context, attrs, defStyleAttr, defStyleRes);
-    }
-
-    private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        // TODO: 10/11/16 we can add xml aspectRation here later
-//        final TypedArray a = context.obtainStyledAttributes(
-//                attrs, R.styleable.FrameLayout, defStyleAttr, defStyleRes);
-//
-//        if (a.getBoolean(R.styleable.FrameLayout_measureAllChildren, false)) {
-//            setMeasureAllChildren(true);
-//        }
-//
-//        a.recycle();
-
     }
 
     public void setAspectRatio(float aspectRatio) {
