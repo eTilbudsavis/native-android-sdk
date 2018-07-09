@@ -45,7 +45,7 @@ import java.util.Set;
  * <p>This class is a representation of a catalog as the API v2 exposes it</p>
  *
  * <p>More documentation available on via our
- * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/catalogs.html">Catalog Reference</a>
+ * <a href="https://developers.shopgun.com/docs/catalog">Catalog Reference</a>
  * documentation, on the engineering blog.
  * </p>
  */

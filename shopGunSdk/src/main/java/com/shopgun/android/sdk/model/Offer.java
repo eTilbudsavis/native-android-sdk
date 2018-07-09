@@ -43,7 +43,7 @@ import java.util.Set;
  * <p>This class is a representation of an offer as the API v2 exposes it</p>
  *
  * <p>More documentation available on via our
- * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/offers.html">Offer Reference</a>
+ * <a href="https://developers.shopgun.com/docs/offer">Offer Reference</a>
  * documentation, on the engineering blog.
  * </p>
  */

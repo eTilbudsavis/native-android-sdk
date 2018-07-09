@@ -40,7 +40,7 @@ import java.util.Set;
  * <p>This class is a representation of a store as the API v2 exposes it</p>
  *
  * <p>More documentation available on via our
- * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/stores.html">Store Reference</a>
+ * <a href="https://developers.shopgun.com/docs/store">Store Reference</a>
  * documentation, on the engineering blog.
  * </p>
  */

@@ -35,7 +35,7 @@ import java.util.List;
  * <p>This class is a representation of a user as the API v2 exposes it</p>
  *
  * <p>More documentation available on via our
- * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/users.html">User Reference</a>
+ * <a href="https://developers.shopgun.com/docs/user">User Reference</a>
  * documentation, on the engineering blog.
  * </p>
  */

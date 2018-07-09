@@ -40,7 +40,7 @@ import java.util.Set;
  * <p>This class is a representation of a dealer as the API v2 exposes it</p>
  *
  * <p>More documentation available on via our
- * <a href="http://engineering.etilbudsavis.dk/eta-api/pages/references/dealers.html">Dealer Reference</a>
+ * <a href="https://developers.shopgun.com/docs/dealer">Dealer Reference</a>
  * documentation, on the engineering blog.
  * </p>
  */
