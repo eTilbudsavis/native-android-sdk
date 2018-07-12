@@ -3,7 +3,7 @@ ext {
 
     // sdk and tools
     compileSdkVersion = 27
-    buildToolsVersion = '27.0.2'
+    buildToolsVersion = '27.0.3'
 
     libVersions = [
             support                     : '27.0.2',
@@ -26,6 +26,7 @@ ext {
             placesautocomplete          : '0.2-SNAPSHOT',
             crashlytics                 : '2.5.5@aar',
             glide                       : '4.6.1',
+            geohash                     : '0.22',
 
             sgn : [
                     materialcolorcreator        : '1.0.0',
@@ -86,6 +87,7 @@ ext {
             recyclerviewMultipleViewtypesAdapter : "com.yqritc:recyclerview-multiple-viewtypes-adapter:$libVersions.recyclerviewMultipleViewtypesAdapter",
             placesautocomplete          : "com.seatgeek:placesautocomplete:$libVersions.placesautocomplete",
             crashlytics                 : "com.crashlytics.sdk.android:crashlytics:$libVersions.crashlytics",
+            geohash                     : "com.github.drfonfon:android-geohash:$libVersions.geohash",
 
 
             // tests

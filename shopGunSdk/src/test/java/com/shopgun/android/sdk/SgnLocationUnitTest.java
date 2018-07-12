@@ -49,7 +49,7 @@ public class SgnLocationUnitTest {
         mParcel.recycle();
     }
 
-    @Ignore("Robolectric ShadowLocation has a bug, https://github.com/robolectric/robolectric/issues/2702")
+//    @Ignore("Robolectric ShadowLocation has a bug, https://github.com/robolectric/robolectric/issues/2702")
     @Test
     public void testParcelable() throws Exception {
 
@@ -74,6 +74,11 @@ public class SgnLocationUnitTest {
         Assert.assertEquals(original.getAddress(), copy.getAddress());
         Assert.assertEquals(original.getRadius(), copy.getRadius());
 
+
+        String geohash = original.getGeoHash().geoHash;
+        long time = original.getGeoHash().timestamp;
+        Assert.assertEquals("u1vw", geohash);
+        Assert.assertNotSame(0L, time);
     }
 
 }

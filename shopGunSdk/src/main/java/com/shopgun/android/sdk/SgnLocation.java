@@ -22,6 +22,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.IntRange;
 
+import com.fonfon.geohash.GeoHash;
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.model.Store;
 import com.shopgun.android.sdk.utils.Constants;
@@ -43,6 +44,7 @@ public class SgnLocation extends Location {
     private static final String SHOPGUN_PROVIDER = "shopgun";
     private static final String GMAPS_PROVIDER = "fused";
     private static final String PASSIVE_PROVIDER = "passive";
+    private static final int GEO_HASH_PRECISION = 4;
     private int mRadius = DEFAULT_RADIUS;
     private boolean mSensor = false;
     private String mAddress = null;
@@ -446,4 +448,32 @@ public class SgnLocation extends Location {
         dest.writeDouble(mBoundWest);
     }
 
+
+    /**
+     * Class to pass around the geohash information
+     */
+    public class SgnGeoHash {
+        public String geoHash;
+        public long timestamp;
+
+        SgnGeoHash() {
+            geoHash = "";
+            timestamp = 0;
+        }
+    }
+
+    public SgnGeoHash getGeoHash() {
+        // set the data only if the accuracy < 2km
+        if (getAccuracy() > 2000 || !isSet()) {
+            return new SgnGeoHash();
+        }
+
+        SgnGeoHash sgnGeoHash = new SgnGeoHash();
+        sgnGeoHash.timestamp = getTime();
+
+        GeoHash geoHash = GeoHash.fromLocation(this, GEO_HASH_PRECISION);
+        sgnGeoHash.geoHash = geoHash.toString();
+
+        return sgnGeoHash;
+    }
 }

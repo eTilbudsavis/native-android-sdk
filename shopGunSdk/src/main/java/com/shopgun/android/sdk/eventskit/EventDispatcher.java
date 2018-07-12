@@ -65,7 +65,7 @@ public class EventDispatcher extends Thread {
         mClient = client;
         mEventBatchSize = eventBatchSize;
         mMaxRetryCount = maxRetryCount;
-        mFlushEvent = new Event("dispatch-event-queue", new JsonObject());
+        mFlushEvent = new Event();
         mFlushEvent.setId(FLUSH_EVENT_UUID); // ensure an identifiable ID
         mFlushEvent.doNotTrack(true);
         mUrl = HttpUrl.parse(url);
@@ -157,17 +157,10 @@ public class EventDispatcher extends Thread {
 
         try {
 
-            mRealm.beginTransaction();
             List<Event> events = getEvents(mEventBatchSize);
             if (events.isEmpty()) {
                 return;
             }
-
-            Date now = new Date();
-            for (Event event : events) {
-                event.setSentAt(now);
-            }
-            mRealm.commitTransaction();
 
             Call call = buildCallFromEvents(events);
             response = call.execute();
@@ -261,8 +254,7 @@ public class EventDispatcher extends Thread {
             try {
                 realm.insert(mEvent);
             } catch (RealmPrimaryKeyConstraintException e) {
-                String event = mEvent.toString(true, false, false);
-                throw new IllegalStateException("Realm duplicate key on event: " + event, e);
+                throw new IllegalStateException("Realm duplicate key on event: " + mEvent.toString(), e);
             }
         }
     }

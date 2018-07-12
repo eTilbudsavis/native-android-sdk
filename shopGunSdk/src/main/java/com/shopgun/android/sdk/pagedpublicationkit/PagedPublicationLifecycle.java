@@ -100,7 +100,6 @@ class PagedPublicationLifecycle implements Parcelable {
         opened();
         if (isReadyAndResumed() && !mAppeared) {
             mAppeared = true;
-//            PagedPublicationEvent.appeared(mConfig).track();
         }
     }
 
@@ -110,7 +109,6 @@ class PagedPublicationLifecycle implements Parcelable {
             for (int i = 0; i < mSpreadAppeared.length; i++) {
                 spreadDisappeared(i, mConfig.getPagesFromSpreadPosition(i));
             }
-//            PagedPublicationEvent.disappeared(mConfig).track();
         }
     }
 
@@ -119,7 +117,7 @@ class PagedPublicationLifecycle implements Parcelable {
             int sp = mConfig.getSpreadPositionFromPage(page);
             if (mSpreadAppeared[sp]) {
                 mPageAppeared[page] = true;
-//                PagedPublicationEvent.pageAppeared(mConfig, page).track();
+                PagedPublicationEvent.pageOpened(mConfig, page).track();
                 if (mPageLoaded[page]) {
                     pageLoaded(page);
                 }
@@ -133,7 +131,6 @@ class PagedPublicationLifecycle implements Parcelable {
         if (isReady() && mPageAppeared[page]) {
             mPageAppeared[page] = false;
             mPageLoaded[page] = false;
-//            PagedPublicationEvent.pageDisappeared(mConfig, page).track();
         }
     }
 
@@ -159,7 +156,6 @@ class PagedPublicationLifecycle implements Parcelable {
                 pageDisappeared(i);
             }
             mSpreadAppeared[spread] = false;
-            PagedPublicationEvent.pageSpreadDisappeared(mConfig, pageNumbers).track();
         }
     }
 
@@ -176,7 +172,6 @@ class PagedPublicationLifecycle implements Parcelable {
     private void internalSpreadZoomedIn(int spread, int[] pages) {
         if (isReadyAndResumed()) {
             mSpreadZoomedIn[spread] = true;
-            PagedPublicationEvent.pageSpreadZoomedIn(mConfig, pages).track();
         }
     }
 
@@ -187,7 +182,6 @@ class PagedPublicationLifecycle implements Parcelable {
     void spreadZoomedOut(int spread, int[] pages, float scale) {
         if (isReady() && mSpreadZoomedIn[spread] && NumberUtils.isEqual(1.0f, scale)) {
             mSpreadZoomedIn[spread] = false;
-            PagedPublicationEvent.pageSpreadZoomedOut(mConfig, pages).track();
         }
     }
 

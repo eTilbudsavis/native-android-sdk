@@ -80,8 +80,11 @@ public abstract class EventTracker {
         return mView;
     }
 
-    public void track(String type, JsonObject properties) {
-        track(new Event(type, properties));
+    public void track(int type, JsonObject properties) {
+        Event event = new Event();
+        event.setType(type);
+        event.setPayload(properties);
+        track(event);
     }
 
     public JsonObject getClient() {

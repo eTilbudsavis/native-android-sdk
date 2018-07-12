@@ -50,8 +50,6 @@ class EventTrackerImpl extends EventTracker {
         if (view != null) {
             context.add("view", getView());
         }
-        event.setClient(getClient());
-        event.setContext(context);
         manager.addEvent(event);
     }
 
