@@ -69,7 +69,7 @@ public class Event implements RealmModel {
         mId = SgnUtils.createUUID();
         mType = DEFAULT_TYPE;
         mTypeToString = "";
-        setTimestampInMillis(System.currentTimeMillis());
+        setTimestampInSeconds(System.currentTimeMillis());
         // todo: mApplication = ?
 
         initOptionalFields();
@@ -119,10 +119,10 @@ public class Event implements RealmModel {
     /**
      * Set the timestamp fields. The input should be in millis, obtained through System.currentTimeMillis().
      * The method will take care to convert from millis to seconds
-     * @param timestamp as given by System.currentTimeMillis()
+     * @param timestampInMillis as given by System.currentTimeMillis()
      */
-    public void setTimestampInMillis(long timestamp) {
-        mTimestamp = TimeUnit.MILLISECONDS.toSeconds(timestamp);
+    public void setTimestampInSeconds(long timestampInMillis) {
+        mTimestamp = TimeUnit.MILLISECONDS.toSeconds(timestampInMillis);
     }
 
     public long getTimestamp() {
