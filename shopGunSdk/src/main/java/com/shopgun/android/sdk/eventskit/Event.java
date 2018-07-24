@@ -29,6 +29,7 @@ public class Event implements RealmModel {
 
     /* The event version scheme to use */
     public static final String VERSION = "2";
+    private String mVersion = VERSION; // this field will be included into the database
 
     /* Default event type = empty event */
     public static final int DEFAULT_TYPE = 0;
@@ -97,7 +98,11 @@ public class Event implements RealmModel {
     }
 
     public String getVersion() {
-        return VERSION;
+        return mVersion;
+    }
+
+    public void setVersion(String version) {
+        mVersion = version;
     }
 
     public String getId() {

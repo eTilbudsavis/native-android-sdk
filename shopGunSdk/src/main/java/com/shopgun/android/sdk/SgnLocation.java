@@ -39,12 +39,12 @@ public class SgnLocation extends Location {
     public static final int RADIUS_MIN = 0;
     public static final int RADIUS_MAX = 700000;
     public static final int DEFAULT_RADIUS = 100000;
+    public static final int GEO_HASH_PRECISION = 4;
 
     private static final String ERROR_RADIUS = "Radius must be within range %s to %s, provided radius: %s";
     private static final String SHOPGUN_PROVIDER = "shopgun";
     private static final String GMAPS_PROVIDER = "fused";
     private static final String PASSIVE_PROVIDER = "passive";
-    private static final int GEO_HASH_PRECISION = 4;
     private int mRadius = DEFAULT_RADIUS;
     private boolean mSensor = false;
     private String mAddress = null;
