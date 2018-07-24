@@ -1,10 +1,14 @@
 package com.shopgun.android.sdk.eventskit;
 
+import android.util.Base64;
+
 import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.SgnLocation.SgnGeoHash;
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.corekit.SgnPreferences;
 import com.shopgun.android.sdk.log.SgnLog;
 
+import java.security.MessageDigest;
 import java.util.Locale;
 
 /**
@@ -19,7 +23,7 @@ public class EzEvent {
     public static final String TAG = EzEvent.class.getSimpleName();
 
     public static final int PAGED_PUBLICATION_OPENED = 1;
-    public static final int PAGED_PUBLICATION_PAGE_OPENED = 2;
+    public static final int PAGED_PUBLICATION_PAGE_DISAPPEARED = 2;
     public static final int OFFER_OPENED = 3;
     public static final int CLIENT_SESSION_OPENED = 4;
     public static final int SEARCHED = 5;
@@ -33,17 +37,21 @@ public class EzEvent {
 
     protected EzEvent(int type) {
         mEvent = new Event();
-        String type_to_string = typeToString(type);
-        mEvent.setType(type, type_to_string);
+        mEvent.setType(type);
         setUserLocationFields();
     }
 
-    private String typeToString(int type) {
+    /**
+     * Utility function to convert the event type into human readable format for logging purposes
+     * @param type
+     * @return a string with the description
+     */
+    public static String typeToString(int type) {
         switch(type) {
             case PAGED_PUBLICATION_OPENED:
                 return "paged_publication_opened";
-            case PAGED_PUBLICATION_PAGE_OPENED:
-                return "paged_publication_page_opened";
+            case PAGED_PUBLICATION_PAGE_DISAPPEARED:
+                return "paged_publication_page_disappeared";
             case OFFER_OPENED:
                 return "offer_opened";
             case CLIENT_SESSION_OPENED:
@@ -66,19 +74,30 @@ public class EzEvent {
 
     public void setViewToken(String contentIdentity) {
 
-        String localSecret = getLocalDeviceSecret();
+        String localSecret = getClientId();
 
         mEvent.setViewToken(generateToken(localSecret.concat(contentIdentity)));
     }
 
     private String generateToken(String data) {
-        //todo
+        try {
+            // Create MD5 Hash
+            MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+            digest.update(data.getBytes());
+            byte md5[] = new byte[8];
+            digest.digest(md5, 0, 8);
+
+            // encode to base 64
+            return Base64.encodeToString(md5, Base64.DEFAULT);
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
         return "";
     }
 
-    private String getLocalDeviceSecret() {
-        //todo: get the local secret
-        return "";
+    private String getClientId() {
+        return SgnPreferences.getInstance().getInstallationId();
     }
 
     public void setPayload(JsonObject payload) {

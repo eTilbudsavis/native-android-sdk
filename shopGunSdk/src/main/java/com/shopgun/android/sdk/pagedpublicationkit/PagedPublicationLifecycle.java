@@ -117,7 +117,6 @@ class PagedPublicationLifecycle implements Parcelable {
             int sp = mConfig.getSpreadPositionFromPage(page);
             if (mSpreadAppeared[sp]) {
                 mPageAppeared[page] = true;
-                PagedPublicationEvent.pageOpened(mConfig, page).track();
                 if (mPageLoaded[page]) {
                     pageLoaded(page);
                 }
@@ -131,6 +130,7 @@ class PagedPublicationLifecycle implements Parcelable {
         if (isReady() && mPageAppeared[page]) {
             mPageAppeared[page] = false;
             mPageLoaded[page] = false;
+            PagedPublicationEvent.pageDisappeared(mConfig, page).track();
         }
     }
 

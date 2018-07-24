@@ -33,12 +33,12 @@ public class PagedPublicationEvent extends EzEvent {
     }
 
     /**
-     * When a particular page has been presented to the user
+     * When a particular page presented to the user disappears
      * @param config configuration of the publication
      * @return paged publication page open event
      */
-    public static PagedPublicationEvent pageOpened(PagedPublicationConfiguration config, int page) {
-        PagedPublicationEvent event = new PagedPublicationEvent(PAGED_PUBLICATION_PAGE_OPENED);
+    public static PagedPublicationEvent pageDisappeared(PagedPublicationConfiguration config, int page) {
+        PagedPublicationEvent event = new PagedPublicationEvent(PAGED_PUBLICATION_PAGE_DISAPPEARED);
 
         // publication id and page number are part of the view token
         event.setViewToken(config.getPublication().getId().concat(String.valueOf(page)));

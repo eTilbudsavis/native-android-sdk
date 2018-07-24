@@ -20,7 +20,7 @@ public class EventSerializer implements JsonSerializer<Event> {
         jsonObject.addProperty("_i", src.getId());
         jsonObject.addProperty("_e", src.getType());
         jsonObject.addProperty("_t", src.getTimestamp());
-        jsonObject.addProperty("_a", src.getApplication());
+        jsonObject.addProperty("_a", src.getApplicationTrackId());
 
         // Optional common fields
         if (src.hasLocationFields()) {

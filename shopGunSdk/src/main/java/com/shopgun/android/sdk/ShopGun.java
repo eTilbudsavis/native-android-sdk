@@ -602,7 +602,7 @@ public class ShopGun {
             }
 
             if (eventEnvironment == null) {
-                eventEnvironment = "https://events.service.shopgun.com/track";
+                eventEnvironment = "https://events.service.shopgun.com/sync";
             }
 
             // Setup the default OkHttpClient
