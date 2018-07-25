@@ -11,6 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.shopgun.android.sdk.SgnLocation;
 import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.PackageUtils;
 
 import java.security.MessageDigest;
@@ -23,7 +24,9 @@ import java.util.concurrent.TimeUnit;
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
 import io.realm.RealmMigration;
+import io.realm.RealmObject;
 import io.realm.RealmObjectSchema;
+import io.realm.RealmResults;
 import io.realm.RealmSchema;
 
 import static com.shopgun.android.sdk.eventskit.Event.META_APPLICATION_TRACK_ID;
@@ -35,48 +38,115 @@ import static com.shopgun.android.sdk.eventskit.Event.META_APPLICATION_TRACK_ID_
  * Reference: https://realm.io/docs/java/latest/#migrations
  */
 public class EventMigrationHandler implements RealmMigration {
+
+    private String applicationTrackId;
+
+    public EventMigrationHandler(final String applicationTrackId) {
+        this.applicationTrackId = applicationTrackId;
+    }
+
     @Override
     public void migrate(DynamicRealm realm, long oldVersion, long newVersion) {
 
         RealmSchema schema = realm.getSchema();
 
         if(oldVersion == 1L) {
-            migrateToVersionTwo(schema);
+            RealmObjectSchema eventSchema = schema.get("Event");
+            if(eventSchema == null) {
+                return;
+            }
+
+            // change the version
+            eventSchema.transform(new RealmObjectSchema.Function() {
+                @Override
+                public void apply(DynamicRealmObject obj) {
+                    obj.set("mVersion", "2");
+                }
+            });
+
+            // add the application track id
+            eventSchema.addField("mApplicationTrackId", String.class)
+                    .transform(new RealmObjectSchema.Function() {
+                        @Override
+                        public void apply(DynamicRealmObject obj) {
+                            obj.setString("mApplicationTrackId", applicationTrackId);
+                        }
+                    });
+
+            // translate recordedAt from Date to UTC in seconds
+            mapTimestamp(eventSchema);
+
+            // extract location info from context json string
+            mapLocationData(eventSchema);
+
+            // duplicate events paged-publication-page-spread-disappeared
+            // because we have to check if there are 2 pages
+            addTemporaryPageField(eventSchema);
+            duplicatePageSpreadEvents(realm);
+
+            // map the event type from string to int
+            // and extract the properties depending on the type
+            mapEventType(eventSchema);
+
+            // delete not mappable events (in case there are old events like zoom-in...)
+            // that has been marked in the previous step
+            realm.where("Event").equalTo("mType", -1).findAll().deleteAllFromRealm();
+
+            // delete old fields
+            eventSchema
+                    .removeField("page_tmp")
+                    .removeField("mStringClient")
+                    .removeField("mStringProperties");
+
+            // increment the version in case we have to go through multiple steps in future updates
             oldVersion++;
         }
     }
 
-    private void migrateToVersionTwo(RealmSchema schema) {
-        RealmObjectSchema eventSchema = schema.get("Event");
-        if(eventSchema == null) {
-            return;
-        }
+    private void addTemporaryPageField(RealmObjectSchema eventSchema) {
+        eventSchema.addField("page_tmp", int.class)
+                .transform(new RealmObjectSchema.Function() {
+                    @Override
+                    public void apply(DynamicRealmObject obj) {
+                        obj.set("page_tmp", 1);
+                    }
+                });
+    }
 
-        // change the version
-        eventSchema.transform(new RealmObjectSchema.Function() {
-            @Override
-            public void apply(DynamicRealmObject obj) {
-                obj.set("mVersion", "2");
+    private void duplicatePageSpreadEvents(DynamicRealm realm) {
+        RealmResults<DynamicRealmObject> spread_page_event = realm
+                .where("Event")
+                .equalTo("mType", "paged-publication-page-spread-disappeared")
+                .findAll();
+        if (spread_page_event.size() > 0) {
+            for (DynamicRealmObject e : spread_page_event) {
+                try {
+                    // create and add a new object into the realm
+                    DynamicRealmObject copy = realm.createObject("Event");
+
+                    // assign a new id
+                    copy.setString("mId", SgnUtils.createUUID());
+
+                    // copy all the fields modified or added until now
+                    copy.setString("mVersion", e.getString("mVersion"));
+                    copy.setString("mType", e.getString("mType"));
+                    copy.setLong("mTimestamp", e.getLong("mTimestamp"));
+                    copy.setString("mApplicationTrackId", e.getString("mApplicationTrackId"));
+                    copy.setInt("mRetryCount", e.getInt("mRetryCount"));
+                    copy.setString("mGeoHash", e.getString("mGeoHash"));
+                    copy.setLong("mLocationTimestamp", e.getLong("mLocationTimestamp"));
+                    copy.setString("mCountry", e.getString("mCountry"));
+                    copy.setString("mStringClient", e.getString("mStringClient"));
+                    copy.setString("mStringProperties", e.getString("mStringProperties"));
+
+                    // this will have to carry the info about the second page of the spread
+                    copy.setInt("page_tmp", 2);
+                }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
-        });
-
-        // translate recordedAt from Date to UTC in seconds
-        mapTimestamp(eventSchema);
-
-        // add the application track id
-        addApplicationTrackId(eventSchema);
-
-        // extract location info from context json string
-        mapLocationData(eventSchema);
-
-        // map the event type from string to int
-        // and extract the properties depending on the type
-        mapEventType(eventSchema);
-
-        // delete not mappable events (in case there are old events like zoom-in...)
-        // that has been marked in the previous step
-
-        // delete old fields
+        }
     }
 
     private void mapEventType(RealmObjectSchema eventSchema) {
@@ -97,28 +167,16 @@ public class EventMigrationHandler implements RealmMigration {
                         long utc = convertDate(recordedAt);
                         obj.setLong("mTimestamp", utc);
                     }
-                });
+                })
+                .removeField("mRecordedAt")
+                .removeField("mSentAt")
+                .removeField("mReceivedAt");
     }
 
     private long convertDate(Date date) {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(date);
         return TimeUnit.MILLISECONDS.toSeconds(calendar.getTimeInMillis());
-    }
-
-    private void addApplicationTrackId(RealmObjectSchema eventSchema) {
-        Context c = ShopGun.getInstance().getContext();
-        Bundle b = PackageUtils.getMetaData(c);
-        final String trackerId = b.getString(ShopGun.getInstance().isDevelop() && b.containsKey(META_APPLICATION_TRACK_ID_DEBUG) ?
-                META_APPLICATION_TRACK_ID_DEBUG :
-                META_APPLICATION_TRACK_ID);
-        eventSchema.addField("mApplicationTrackId", String.class)
-                .transform(new RealmObjectSchema.Function() {
-                    @Override
-                    public void apply(DynamicRealmObject obj) {
-                        obj.setString("mApplicationTrackId", trackerId);
-                    }
-                });
     }
 
     private void mapLocationData(RealmObjectSchema eventSchema) {
@@ -132,11 +190,12 @@ public class EventMigrationHandler implements RealmMigration {
                         JsonObject json = parse(eventContext);
                         if (json != null) {
                             JsonObject location = json.getAsJsonObject("location");
-                            if (location.get("accuracy").getAsInt() <= 2000) {
+                            JsonObject accuracy = json.getAsJsonObject("accuracy");
+                            if (accuracy.get("horizontal").getAsFloat() <= 2000) {
 
                                 // take latitude and longitude
-                                long lat = location.get("latitude").getAsLong();
-                                long lon = location.get("longitude").getAsLong();
+                                double lat = location.get("latitude").getAsDouble();
+                                double lon = location.get("longitude").getAsDouble();
                                 SgnLocation l = new SgnLocation();
                                 l.setLatitude(lat);
                                 l.setLongitude(lon);
@@ -154,7 +213,8 @@ public class EventMigrationHandler implements RealmMigration {
                             }
                         }
                     }
-                });
+                })
+                .removeField("mStringContext");
     }
 
     private JsonObject parse(String json) {
@@ -176,7 +236,7 @@ public class EventMigrationHandler implements RealmMigration {
 
             String client = obj.getString("mStringClient");
             JsonObject json_client = parse(client);
-            String clientId = json_client.get("id").getAsString();
+            String clientId = (json_client != null) ? json_client.get("id").getAsString() : SgnUtils.createUUID();
 
             String vt = "";
             String payload_string = "";
@@ -186,7 +246,7 @@ public class EventMigrationHandler implements RealmMigration {
 
                 case "paged-publication-opened": {
                     String pp_id = getPublicationId(json_properties);
-                    vt = generateViewToken(client.concat(pp_id));
+                    vt = generateViewToken(clientId + pp_id);
                     JsonObject payload = new JsonObject();
                     payload.addProperty("pp.id", pp_id);
                     payload_string = payload.toString();
@@ -194,14 +254,26 @@ public class EventMigrationHandler implements RealmMigration {
                     break;
                 }
                 case "paged-publication-page-spread-disappeared":
-                case "paged-publication-page-disappeared":
-                    // todo
-                    type = 2;
+                    int pageNumber = getPageNumber(json_properties, obj.getInt("page_tmp"));
+                    if (pageNumber == -1) {
+                        // we could have a spread with one page. In this case, the copy will have
+                        // page_tmp = 2 and can be deleted
+                        type = -1;
+                    }
+                    else {
+                        type = 2;
+                        String pp_id = getPublicationId(json_properties);
+                        vt = generateViewToken(clientId + pp_id + String.valueOf(pageNumber));
+                        JsonObject payload = new JsonObject();
+                        payload.addProperty("pp.id", pp_id);
+                        payload.addProperty("ppp.n", pageNumber);
+                        payload_string = payload.toString();
+                    }
                     break;
 
                 case "offer-opened": {
                     String of_id = getOfferId(json_properties);
-                    vt = generateViewToken(client.concat(of_id));
+                    vt = generateViewToken(clientId + of_id);
                     JsonObject payload = new JsonObject();
                     payload.addProperty("of.id", of_id);
                     payload_string = payload.toString();
@@ -214,13 +286,18 @@ public class EventMigrationHandler implements RealmMigration {
                     break;
 
                 case "searched":
-                    JsonObject search = json_properties.getAsJsonObject("search");
-                    String query = search.get("query").getAsString();
-                    vt = generateViewToken(client.concat(query));
-                    JsonObject payload = new JsonObject();
-                    payload.addProperty("sea.q", query);
-                    payload_string = payload.toString();
-                    type = 5;
+                    if (json_properties == null) {
+                        type = -1;
+                    }
+                    else {
+                        JsonObject search = json_properties.getAsJsonObject("search");
+                        String query = search.get("query").getAsString();
+                        vt = generateViewToken(clientId + query);
+                        JsonObject payload = new JsonObject();
+                        payload.addProperty("sea.q", query);
+                        payload_string = payload.toString();
+                        type = 5;
+                    }
                     break;
 
                 default:
@@ -233,6 +310,21 @@ public class EventMigrationHandler implements RealmMigration {
             obj.setInt("type_tmp", type);
         }
 
+        private int getPageNumber(JsonObject json_properties, int requestedPage) {
+            int page = -1;
+            if (json_properties != null) {
+                try {
+                    JsonObject spread = json_properties.getAsJsonObject("pagedPublicationPageSpread");
+                    JsonArray pages = spread.getAsJsonArray("pageNumbers");
+                    if (pages.size() <= requestedPage) {
+                        pages.get(requestedPage - 1).getAsInt();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return page;
+        }
 
 
         private String generateViewToken(String data) {
@@ -261,12 +353,17 @@ public class EventMigrationHandler implements RealmMigration {
         }
 
         private String getId(JsonObject properties, String field) {
-            if (properties == null) {
-                return "";
+            String id = "";
+            if (properties != null) {
+                try {
+                    JsonObject pp = properties.getAsJsonObject(field);
+                    JsonArray json_id = pp.getAsJsonArray("id");
+                    id = json_id.get(1).getAsString();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-            JsonObject pp = properties.getAsJsonObject(field);
-            JsonArray id = pp.getAsJsonArray("id");
-            return id.get(1).getAsString();
+            return id;
         }
     }
 }
