@@ -4,8 +4,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.internal.bind.util.ISO8601Utils;
+
 import java.lang.reflect.Type;
-import java.util.Map;
 
 public class EventSerializer implements JsonSerializer<Event> {
     
@@ -14,35 +15,21 @@ public class EventSerializer implements JsonSerializer<Event> {
     @Override
     public JsonElement serialize(Event src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject jsonObject = new JsonObject();
-
-        // Mandatory fields
-        jsonObject.addProperty("_v", src.getVersion());
-        jsonObject.addProperty("_i", src.getId());
-        jsonObject.addProperty("_e", src.getType());
-        jsonObject.addProperty("_t", src.getTimestamp());
-        jsonObject.addProperty("_a", src.getApplicationTrackId());
-
-        // Optional common fields
-        if (src.hasLocationFields()) {
-            jsonObject.addProperty("l.h", src.getGeoHash());
-            jsonObject.addProperty("l.ht", src.getLocationTimestamp());
+        jsonObject.addProperty("version", src.getVersion());
+        jsonObject.addProperty("id", src.getId());
+        jsonObject.addProperty("type", src.getType());
+        if (src.getRecordedAt() != null) {
+            jsonObject.addProperty("recordedAt", ISO8601Utils.format(src.getRecordedAt()));
         }
-
-        if (src.hasCountryField()) {
-            jsonObject.addProperty("l.c", src.getCountry());
+        if (src.getSentAt() != null) {
+            jsonObject.addProperty("sentAt", ISO8601Utils.format(src.getSentAt()));
         }
-
-        if (src.hasViewToken()) {
-            jsonObject.addProperty("vt", src.getViewToken());
+        if (src.getReceivedAt() != null) {
+            jsonObject.addProperty("receivedAt", ISO8601Utils.format(src.getReceivedAt()));
         }
-
-        // Event defined fields
-        if (src.hasAdditionalPayload()) {
-            JsonObject payload = src.getPayload();
-            for (Map.Entry<String, JsonElement> set : payload.entrySet()) {
-                jsonObject.add(set.getKey(), set.getValue());
-            }
-        }
+        jsonObject.add("client", src.getClient());
+        jsonObject.add("context", src.getContext());
+        jsonObject.add("properties", src.getProperties());
         return jsonObject;
     }
 
