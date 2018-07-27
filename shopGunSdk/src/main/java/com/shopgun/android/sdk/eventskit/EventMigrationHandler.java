@@ -1,8 +1,5 @@
 package com.shopgun.android.sdk.eventskit;
 
-import android.content.Context;
-import android.location.Location;
-import android.os.Bundle;
 import android.util.Base64;
 
 import com.fonfon.geohash.GeoHash;
@@ -10,11 +7,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.shopgun.android.sdk.SgnLocation;
-import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.utils.SgnUtils;
-import com.shopgun.android.utils.PackageUtils;
+import com.shopgun.android.utils.DateUtils;
 
 import java.security.MessageDigest;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -24,13 +24,9 @@ import java.util.concurrent.TimeUnit;
 import io.realm.DynamicRealm;
 import io.realm.DynamicRealmObject;
 import io.realm.RealmMigration;
-import io.realm.RealmObject;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmResults;
 import io.realm.RealmSchema;
-
-import static com.shopgun.android.sdk.eventskit.Event.META_APPLICATION_TRACK_ID;
-import static com.shopgun.android.sdk.eventskit.Event.META_APPLICATION_TRACK_ID_DEBUG;
 
 /**
  * Class to handle the migration of the schema for the events database
@@ -121,11 +117,8 @@ public class EventMigrationHandler implements RealmMigration {
         if (spread_page_event.size() > 0) {
             for (DynamicRealmObject e : spread_page_event) {
                 try {
-                    // create and add a new object into the realm
-                    DynamicRealmObject copy = realm.createObject("Event");
-
-                    // assign a new id
-                    copy.setString("mId", SgnUtils.createUUID());
+                    // create and add a new object into the realm with a new id
+                    DynamicRealmObject copy = realm.createObject("Event", SgnUtils.createUUID());
 
                     // copy all the fields modified or added until now
                     copy.setString("mVersion", e.getString("mVersion"));
@@ -190,7 +183,7 @@ public class EventMigrationHandler implements RealmMigration {
                         JsonObject json = parse(eventContext);
                         if (json != null) {
                             JsonObject location = json.getAsJsonObject("location");
-                            JsonObject accuracy = json.getAsJsonObject("accuracy");
+                            JsonObject accuracy = location.getAsJsonObject("accuracy");
                             if (accuracy.get("horizontal").getAsFloat() <= 2000) {
 
                                 // take latitude and longitude
@@ -204,7 +197,10 @@ public class EventMigrationHandler implements RealmMigration {
 
                                 // take timestamp
                                 String time = location.get("determinedAt").getAsString();
-                                long timestamp = convertDate(new Date(time));
+                                long timestamp = 0;
+                                try {
+                                    timestamp = convertDate(DateUtils.parse(time));
+                                }catch (ParseException ignore){}
                                 obj.setLong("mLocationTimestamp", timestamp);
 
                                 // set country data
@@ -316,8 +312,8 @@ public class EventMigrationHandler implements RealmMigration {
                 try {
                     JsonObject spread = json_properties.getAsJsonObject("pagedPublicationPageSpread");
                     JsonArray pages = spread.getAsJsonArray("pageNumbers");
-                    if (pages.size() <= requestedPage) {
-                        pages.get(requestedPage - 1).getAsInt();
+                    if (requestedPage <= pages.size()) {
+                        page = pages.get(requestedPage - 1).getAsInt();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -332,8 +328,8 @@ public class EventMigrationHandler implements RealmMigration {
                 // Create MD5 Hash
                 MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
                 digest.update(data.getBytes());
-                byte md5[] = new byte[8];
-                digest.digest(md5, 0, 8);
+                byte digest_result[] = digest.digest();
+                byte md5[] = Arrays.copyOfRange(digest_result, 0, 8);
 
                 // encode to base 64
                 return Base64.encodeToString(md5, Base64.DEFAULT);

@@ -39,27 +39,27 @@ public class EventsKitActivity extends AppCompatActivity {
 
         EventTracker tracker = EventTracker.globalTracker();
 
-        Event nullVersion = new Event("x-custom-event", PROPERTIES);
-        nullVersion.setVersion(null);
-        tracker.track(nullVersion);
-
-        Event badType = new Event("bad-type", PROPERTIES);
-        tracker.track(badType);
-
-        Event perfect = new Event("x-custom-event", PROPERTIES);
-        tracker.track(perfect);
-
-        JsonObject o = new JsonObject();
-        o.addProperty("offerId", "kkqS23412");
-        tracker.track("x-custom-event", o);
-
-        o.addProperty("offerId", "54gtr445h");
-        tracker.track("x-custom-event", o);
-
-        o.addProperty("offerId", "e5gtretre");
-        tracker.track("x-custom-event", o);
-
-        tracker.flush();
+//        Event nullVersion = new Event("x-custom-event", PROPERTIES);
+//        nullVersion.setVersion(null);
+//        tracker.track(nullVersion);
+//
+//        Event badType = new Event("bad-type", PROPERTIES);
+//        tracker.track(badType);
+//
+//        Event perfect = new Event("x-custom-event", PROPERTIES);
+//        tracker.track(perfect);
+//
+//        JsonObject o = new JsonObject();
+//        o.addProperty("offerId", "kkqS23412");
+//        tracker.track("x-custom-event", o);
+//
+//        o.addProperty("offerId", "54gtr445h");
+//        tracker.track("x-custom-event", o);
+//
+//        o.addProperty("offerId", "e5gtretre");
+//        tracker.track("x-custom-event", o);
+//
+//        tracker.flush();
 
     }
 
@@ -82,8 +82,8 @@ public class EventsKitActivity extends AppCompatActivity {
 
         EventTracker tracker = EventTracker.globalTracker();
         for (int i = 0; i < events; i++) {
-            Event event = new Event("x-custom-event", PROPERTIES);
-            tracker.track(event);
+//            Event event = new Event("x-custom-event", PROPERTIES);
+//            tracker.track(event);
         }
 
     }
