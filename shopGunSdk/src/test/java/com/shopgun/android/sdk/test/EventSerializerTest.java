@@ -3,7 +3,7 @@ package com.shopgun.android.sdk.test;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.eventskit.Event;
-import com.shopgun.android.sdk.eventskit.EventSerializer;
+import com.shopgun.android.sdk.eventskit.LegacyEventSerializer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +28,7 @@ public class EventSerializerTest {
         payload.addProperty("a.p2", "5");
         event.setPayload(payload);
 
-        EventSerializer serializer = new EventSerializer();
+        LegacyEventSerializer serializer = new LegacyEventSerializer();
 
         JsonElement result = serializer.serialize(event, null, null);
 

@@ -33,6 +33,8 @@ public class EventManager {
     public static final int MAX_QUEUE_SIZE = 1024;
 
     private static EventManager mInstance;
+
+    // Every 120 sec the flush will be triggered and all the events will be sent to the server
     private static final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -45,10 +47,7 @@ public class EventManager {
     };
 
     private Collection<WeakReference<EventTracker>> mTrackers;
-    private static BlockingQueue<Event> mEventQueue;
-    private JsonObject mJsonContext;
-    private Location mLastKnownLocation;
-    private JsonObject mJsonLocation;
+    private static BlockingQueue<AnonymousEvent> mEventQueue;
     private EventDispatcher mEventDispatcher;
     private long mDispatchInterval = DISPATCH_INTERVAL;
     private final List<EventListener> mEventListeners;
@@ -69,7 +68,7 @@ public class EventManager {
         mEventListeners = new ArrayList<>();
         mEventQueue = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
         mEventDispatcher = new EventDispatcher(mEventQueue, shopGun.getClient(), shopGun.getEventEnvironment());
-        mJsonContext = EventUtils.getContext(shopGun.getContext());
+
         EventLifecycle lifecycleCallback = new EventLifecycle();
         shopGun.getLifecycleManager().registerCallback(lifecycleCallback);
         if (shopGun.getLifecycleManager().isActive()) {
@@ -101,24 +100,7 @@ public class EventManager {
         }
     }
 
-    public void setCampaign(JsonObject campaign) {
-        mJsonContext.add("campaign", campaign);
-    }
-
-    public JsonObject getContext(boolean updateLocation) {
-        if (updateLocation || mLastKnownLocation == null) {
-            Context ctx = ShopGun.getInstance().getContext();
-            Location currentLoc = LocationUtils.getLastKnownLocation(ctx);
-            if (LocationUtils.isBetterLocation(currentLoc, mLastKnownLocation)) {
-                mLastKnownLocation = currentLoc;
-                mJsonLocation = EventUtils.location(mLastKnownLocation);
-            }
-            mJsonContext.add("location", mJsonLocation);
-        }
-        return mJsonContext;
-    }
-
-    public void addEvent(Event event) {
+    public void addEvent(AnonymousEvent event) {
         boolean isActive = ShopGun.getInstance().getLifecycleManager().isActive();
         if (!isActive) {
             mEventDispatcher.start();
@@ -134,6 +116,7 @@ public class EventManager {
 
     private void resetTimer() {
         mHandler.removeMessages(DISPATCH_MSG);
+        // next flush in 120 sec
         mHandler.sendEmptyMessageDelayed(DISPATCH_MSG, mDispatchInterval);
     }
 
@@ -154,10 +137,6 @@ public class EventManager {
 
         @Override
         public void onCreate(Activity activity) {
-            if (mJsonContext != null) {
-                String sessionId = SgnUtils.createUUID();
-                mJsonContext.add("session", EventUtils.session(sessionId));
-            }
             startDispatcher();
         }
 
@@ -181,7 +160,7 @@ public class EventManager {
         mEventListeners.clear();
     }
 
-    private void dispatchOnEvent(Event event) {
+    private void dispatchOnEvent(AnonymousEvent event) {
         for (EventListener tracker : mEventListeners) {
             tracker.onEvent(event);
         }

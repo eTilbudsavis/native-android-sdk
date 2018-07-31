@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.location.Location;
 import android.os.Build;
+import android.util.Base64;
 
 import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.utils.SgnUserAgent;
@@ -14,6 +15,8 @@ import com.shopgun.android.utils.DisplayUtils;
 import com.shopgun.android.utils.LocationUtils;
 import com.shopgun.android.utils.PackageUtils;
 
+import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -25,6 +28,27 @@ public class EventUtils {
     private EventUtils() {
 
     }
+
+    public static String generateViewToken(String data) {
+        try {
+            // Create MD5 Hash
+            MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+            digest.update(data.getBytes());
+            byte digest_result[] = digest.digest();
+
+            // take the first 8 bytes
+            byte md5[] = Arrays.copyOfRange(digest_result, 0, 8);
+
+            // encode to base 64
+            return Base64.encodeToString(md5, Base64.DEFAULT);
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
 
     public static JsonObject getContext(Context context) {
         JsonObject object = new JsonObject();

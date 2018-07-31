@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import io.realm.Realm;
 import io.realm.RealmQuery;
@@ -31,50 +30,42 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class EventDispatcher extends Thread {
+public class LegacyEventDispatcher extends Thread {
 
-    public static final String TAG = Constants.getTag(EventDispatcher.class);
+    public static final String TAG = Constants.getTag(LegacyEventDispatcher.class);
 
-    private static final int FLUSH_EVENT_TYPE = 11111; // custom internal event
+    private static final String FLUSH_EVENT_UUID = "00000000-0000-0000-0000-000000000000";
 
-    /** Max event stored in cache */
-    private static final int DEFAULT_EVENT_BATCH_SIZE = 100;
-    private static final int DEFAULT_MAX_RETRY_COUNT = 5;
-
-    /** Events older than one week will be deleted if a nack is received */
-    private static final int EVENT_MAX_AGE = 7;
+    private static final int DEF_EVENT_BATCH_SIZE = 100;
+    private static final int DEF_MAX_RETRY_COUNT = 5;
 
     /** The queue of requests to service. */
-    private final BlockingQueue<AnonymousEvent> mQueue;
-
+    private final BlockingQueue<Event> mQueue;
     /** The http client of choice. */
     private final OkHttpClient mClient;
-
     /** Used for telling us to die. */
     private volatile boolean mQuit = true;
-
     private final int mEventBatchSize;
     private final int mMaxRetryCount;
-
-    /** Event that indicate that is time to flush out the events */
-    private final AnonymousEvent mFlushEvent;
+    private final Event mFlushEvent;
+    private Realm mRealm;
 
     private final HttpUrl mUrl;
     private final MediaType mMediatype;
     private final Headers mHeaders;
-    private Realm mRealm;
     private final Gson mGson;
 
-    public EventDispatcher(BlockingQueue<AnonymousEvent> queue, OkHttpClient client, String url) {
-        this(queue, client, url, DEFAULT_EVENT_BATCH_SIZE, DEFAULT_MAX_RETRY_COUNT);
+    public LegacyEventDispatcher(BlockingQueue<Event> queue, OkHttpClient client, String url) {
+        this(queue, client, url, DEF_EVENT_BATCH_SIZE, DEF_MAX_RETRY_COUNT);
     }
 
-    public EventDispatcher(BlockingQueue<AnonymousEvent> queue, OkHttpClient client, String url, int eventBatchSize, int maxRetryCount) {
+    public LegacyEventDispatcher(BlockingQueue<Event> queue, OkHttpClient client, String url, int eventBatchSize, int maxRetryCount) {
         mQueue = queue;
         mClient = client;
         mEventBatchSize = eventBatchSize;
         mMaxRetryCount = maxRetryCount;
-        mFlushEvent = new AnonymousEvent(FLUSH_EVENT_TYPE, ""); // no need of appId here
+        mFlushEvent = new Event();
+        mFlushEvent.setId(FLUSH_EVENT_UUID); // ensure an identifiable ID
         mFlushEvent.doNotTrack(true);
         mUrl = HttpUrl.parse(url);
         mMediatype = MediaType.parse("application/json");
@@ -93,7 +84,7 @@ public class EventDispatcher extends Thread {
                     .setExclusionStrategies(
                             new RealmObjectExclusionStrategy(),
                             new JsonNullExclusionStrategy())
-                    .registerTypeAdapter(clazz, new AnonymousEventSerializer())
+                    .registerTypeAdapter(clazz, new LegacyEventSerializer())
                     .create();
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException("Gson not instantiated due to missing RealmProxy class", e);
@@ -126,7 +117,7 @@ public class EventDispatcher extends Thread {
         // low priority on posting mEvents to atta
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         mRealm = ShopGun.getInstance().getRealmInstance();
-        AnonymousEvent event;
+        Event event;
         while (!mQuit || !mQueue.isEmpty()) {
             try {
                 // Take an event from the queue.
@@ -138,13 +129,9 @@ public class EventDispatcher extends Thread {
             if (event.doNotTrack()) {
                 SgnLog.i(TAG, event.toString());
             } else {
-                // wrap the event for database operation
-                AnonymousEventWrapper wrappedEvent =
-                        new AnonymousEventWrapper(event.getId(), event.getTimestamp(), event.toString());
-
-                mRealm.executeTransaction(new InsertTransaction(wrappedEvent));
+                mRealm.executeTransaction(new InsertTransaction(event));
             }
-            boolean flush = event.getType() == FLUSH_EVENT_TYPE;
+            boolean flush = FLUSH_EVENT_UUID.equals(event.getId());
             dispatchEventQueue(flush);
         }
         mRealm.close();
@@ -158,7 +145,7 @@ public class EventDispatcher extends Thread {
             return;
         }
 
-        int count = (int) mRealm.where(AnonymousEventWrapper.class).count();
+        int count = (int) mRealm.where(Event.class).count();
 
         if (!force && count < mEventBatchSize) {
             // Wait until we have a decent amount of mEvents
@@ -169,7 +156,7 @@ public class EventDispatcher extends Thread {
 
         try {
 
-            List<AnonymousEventWrapper> events = getEvents(mEventBatchSize);
+            List<Event> events = getEvents(mEventBatchSize);
             if (events.isEmpty()) {
                 return;
             }
@@ -191,16 +178,11 @@ public class EventDispatcher extends Thread {
 
                 Set<String> nackIds = resp.getNackItems();
 
-                RealmResults<AnonymousEventWrapper> nack = getEvents(nackIds);
-                for (AnonymousEventWrapper e : nack) {
-                    long currentTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
-                    long age = currentTime - e.getTimestamp();
-
-                    // delete events older than one week
-                    if(TimeUnit.SECONDS.toDays(age) > 7) {
-                        // todo
-                    }
+                RealmResults<Event> nack = getEvents(nackIds);
+                for (Event e : nack) {
+                    e.incrementRetryCount();
                 }
+                mRealm.where(Event.class).greaterThan("mRetryCount", mMaxRetryCount).findAll().deleteAllFromRealm();
                 mRealm.commitTransaction();
 
                 List<EventResponse.Item> errors = resp.getErrors();
@@ -229,24 +211,24 @@ public class EventDispatcher extends Thread {
 
     }
 
-    private List<AnonymousEventWrapper> getEvents(int limit) {
-        RealmResults<AnonymousEventWrapper> events = mRealm.where(AnonymousEventWrapper.class).findAll();
-        List<AnonymousEventWrapper> dispatchEvents = new ArrayList<>(100);
+    private List<Event> getEvents(int limit) {
+        RealmResults<Event> events = mRealm.where(Event.class).findAll();
+        List<Event> dispatchEvents = new ArrayList<>(100);
         for (int i = 0; i < Math.min(limit, events.size()); i++) {
             dispatchEvents.add(events.get(i));
         }
         return dispatchEvents;
     }
 
-    private RealmResults<AnonymousEventWrapper> getEvents(Set<String> ids) {
-        RealmQuery<AnonymousEventWrapper> query = mRealm.where(AnonymousEventWrapper.class);
+    private RealmResults<Event> getEvents(Set<String> ids) {
+        RealmQuery<Event> query = mRealm.where(Event.class);
         boolean first = true;
         for (String id : ids) {
             if (!first) {
                 query.or();
             }
             first = false;
-            query = query.equalTo("id", id);
+            query = query.equalTo("mId", id);
         }
         return query.findAll();
     }
@@ -260,9 +242,9 @@ public class EventDispatcher extends Thread {
 
     private static class InsertTransaction implements Realm.Transaction {
 
-        AnonymousEventWrapper mEvent;
+        Event mEvent;
 
-        InsertTransaction(AnonymousEventWrapper event) {
+        InsertTransaction(Event event) {
             mEvent = event;
         }
 
@@ -276,7 +258,7 @@ public class EventDispatcher extends Thread {
         }
     }
 
-    private Call buildCallFromEvents(List<AnonymousEventWrapper> events) {
+    private Call buildCallFromEvents(List<Event> events) {
         JsonElement eventArray = mGson.toJsonTree(events);
         JsonObject eventWrapper = new JsonObject();
         eventWrapper.add("events", eventArray);

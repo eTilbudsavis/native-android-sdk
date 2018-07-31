@@ -1,64 +1,74 @@
 package com.shopgun.android.sdk.eventskit;
 
-import android.content.Context;
-import android.os.Bundle;
-
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.utils.SgnUtils;
-import com.shopgun.android.utils.PackageUtils;
-import com.shopgun.android.utils.TextUtils;
 
 import java.util.concurrent.TimeUnit;
 
 import io.realm.RealmModel;
-import io.realm.annotations.Ignore;
-import io.realm.annotations.PrimaryKey;
 
 /**
  * New anonymous format for events
  */
-public class AnonymousEvent {
+public class AnonymousEvent implements RealmModel {
 
     public static final String TAG = AnonymousEvent.class.getSimpleName();
-    public static final String META_APPLICATION_TRACK_ID = "com.shopgun.android.sdk.eventskit.application_track_id";
-    public static final String META_APPLICATION_TRACK_ID_DEBUG = "com.shopgun.android.sdk.develop.eventskit.application_track_id";
 
-    /* The event version scheme to use */
+    /* The json_event version scheme to use */
     private static final String VERSION = "2";
 
-    /* Default event type = empty event */
+    /* Default json_event type = empty json_event */
     public static final int DEFAULT_TYPE = 0;
+
+    /* Predefined events */
+    public static final int PAGED_PUBLICATION_OPENED = 1;
+    public static final int PAGED_PUBLICATION_PAGE_DISAPPEARED = 2;
+    public static final int OFFER_OPENED = 3;
+    public static final int CLIENT_SESSION_OPENED = 4;
+    public static final int SEARCHED = 5;
 
     private boolean mDoNotTrack;
 
-    private JsonObject event;
+    private JsonObject json_event;
 
-    public AnonymousEvent(int type) {
-        Context c = ShopGun.getInstance().getContext();
-        Bundle b = PackageUtils.getMetaData(c);
-        String trackerId = b.getString(ShopGun.getInstance().isDevelop() && b.containsKey(META_APPLICATION_TRACK_ID_DEBUG) ?
-                                        META_APPLICATION_TRACK_ID_DEBUG :
-                                        META_APPLICATION_TRACK_ID);
+    private int type;
+    private String id;
+    private long timestamp;
 
-        event = new JsonObject();
-        event.addProperty("_v", VERSION);
-        event.addProperty("_i", SgnUtils.createUUID());
-        event.addProperty("_e", type);
-        event.addProperty("_t", getTimestamp());
-        event.addProperty("_a", trackerId);
+    /**
+     * @param type integer code for the json_event type. The sdk defines a few basics types
+     *             DEFAULT_TYPE = 0;
+     *             PAGED_PUBLICATION_OPENED = 1;
+     *             PAGED_PUBLICATION_PAGE_DISAPPEARED = 2;
+     *             OFFER_OPENED = 3;
+     *             CLIENT_SESSION_OPENED = 4;
+     *             SEARCHED = 5;
+     * @param applicationTrackId is given to you by ShopGun and hardcoded into the manifest as meta data
+     *             "com.shopgun.android.sdk.eventskit.application_track_id" for production
+     *             "com.shopgun.android.sdk.develop.eventskit.application_track_id" for developing
+     *             Note: for internal purposes, assign an empty string
+     */
+    public AnonymousEvent(int type, String applicationTrackId) {
+        id = SgnUtils.createUUID();
+        timestamp = timestamp();
+        this.type = type;
+
+        json_event = new JsonObject();
+        json_event.addProperty("_v", VERSION);
+        json_event.addProperty("_i", id);
+        json_event.addProperty("_e", type);
+        json_event.addProperty("_t", timestamp);
+        json_event.addProperty("_a", applicationTrackId);
     }
 
-    private long getTimestamp() {
+    private long timestamp() {
         return TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
     }
 
     public AnonymousEvent add(String property, String value) {
-        event.addProperty(property, value);
+        json_event.addProperty(property, value);
         return this;
     }
-
 
     public boolean doNotTrack() {
         return mDoNotTrack;
@@ -70,7 +80,18 @@ public class AnonymousEvent {
 
     @Override
     public String toString() {
-        return event.toString();
+        return json_event.toString();
     }
 
+    public int getType() {
+        return type;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
 }

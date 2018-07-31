@@ -28,7 +28,7 @@ import com.shopgun.android.sdk.api.Environment;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.corekit.UserAgentInterceptor;
-import com.shopgun.android.sdk.corekit.realm.SgnRealmModule;
+import com.shopgun.android.sdk.corekit.realm.SgnLegacyEventRealmModule;
 import com.shopgun.android.sdk.database.SgnDatabase;
 import com.shopgun.android.sdk.eventskit.EzEvent;
 import com.shopgun.android.sdk.log.SgnLog;
@@ -621,7 +621,7 @@ public class ShopGun {
             Realm.init(application);
             realmConfiguration = new RealmConfiguration.Builder()
                     .name(Constants.PACKAGE + ".realm")
-                    .modules(new SgnRealmModule())
+                    .modules(new SgnLegacyEventRealmModule())
                     .schemaVersion(1)
                     .build();
 
