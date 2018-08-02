@@ -20,13 +20,23 @@ public class AnonymousEventWrapper implements RealmModel {
     public static final String TAG = AnonymousEventWrapper.class.getSimpleName();
 
     @PrimaryKey private String id;
-    private long timestamp;
-    private String event; // string version of the json object saved into the database
 
-    public AnonymousEventWrapper(String id, long timestamp, String event) {
-        this.event = event;
-        this.id = id;
-        this.timestamp = timestamp;
+    // Timestamp of the event to evaluate its age at the dispatch time
+    private long timestamp;
+
+    // different version of events can co-exists in the same database.
+    // Ideally, the dispatcher will be able to send events to different endpoints based on their version
+    private int version;
+
+    // string version of the json object saved into the database.
+    // These are the info that will be sent to the server
+    private String event;
+
+    public AnonymousEventWrapper(String id, int version, long timestamp, String event) {
+        setId(id);
+        setVersion(version);
+        setTimestamp(timestamp);
+        setEvent(event);
     }
 
     public JsonObject getJsonEvent() {
@@ -37,7 +47,7 @@ public class AnonymousEventWrapper implements RealmModel {
         try {
             return (JsonObject) new JsonParser().parse(json);
         } catch (Exception e) {
-            return null;
+            return new JsonObject();
         }
     }
 
@@ -65,5 +75,13 @@ public class AnonymousEventWrapper implements RealmModel {
 
     public void setEvent(String event) {
         this.event = event;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

@@ -10,12 +10,12 @@ import io.realm.RealmModel;
 /**
  * New anonymous format for events
  */
-public class AnonymousEvent implements RealmModel {
+public class AnonymousEvent {
 
     public static final String TAG = AnonymousEvent.class.getSimpleName();
 
     /* The json_event version scheme to use */
-    private static final String VERSION = "2";
+    private static final int VERSION = 2;
 
     /* Default json_event type = empty json_event */
     public static final int DEFAULT_TYPE = 0;
@@ -70,6 +70,53 @@ public class AnonymousEvent implements RealmModel {
         return this;
     }
 
+
+    /****** Common fields */
+
+    public AnonymousEvent addUserLocation(String geohash, long timestamp) {
+        json_event.addProperty("l.h", geohash);
+        json_event.addProperty("l.ht", timestamp);
+        return this;
+    }
+
+    public AnonymousEvent addUserCountry(String countryCode) {
+        json_event.addProperty("l.c", countryCode);
+        return this;
+    }
+
+    public AnonymousEvent addViewtoken(String viewToken) {
+        json_event.addProperty("vt", viewToken);
+        return this;
+    }
+
+
+    /****** Fields for predefined events */
+
+    public AnonymousEvent addPublicationOpened(String publicationId) {
+        json_event.addProperty("pp.id", publicationId);
+        return this;
+    }
+
+    public AnonymousEvent addPageOpened(String publicationId, int page) {
+        this.addPublicationOpened(publicationId);
+        json_event.addProperty("ppp.n", page);
+        return this;
+    }
+
+    public AnonymousEvent addOfferOpened(String offerId) {
+        json_event.addProperty("of.id", offerId);
+        return this;
+    }
+
+    public AnonymousEvent addSearch(String query, String language) {
+        json_event.addProperty("sea.q", query);
+        json_event.addProperty("sea.l", language);
+        return this;
+    }
+
+
+    /****** Getters and setters */
+
     public boolean doNotTrack() {
         return mDoNotTrack;
     }
@@ -93,5 +140,9 @@ public class AnonymousEvent implements RealmModel {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public int getVersion() {
+        return VERSION;
     }
 }
