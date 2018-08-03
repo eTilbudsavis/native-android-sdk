@@ -32,6 +32,8 @@ public class AnonymousEventWrapper implements RealmModel {
     // These are the info that will be sent to the server
     private String event;
 
+    public AnonymousEventWrapper() { }
+
     public AnonymousEventWrapper(String id, int version, long timestamp, String event) {
         setId(id);
         setVersion(version);

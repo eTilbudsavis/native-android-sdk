@@ -3,6 +3,7 @@ package com.shopgun.android.sdk.pagedpublicationkit;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.shopgun.android.sdk.eventskit.AnonymousEvent;
 import com.shopgun.android.utils.NumberUtils;
 import com.shopgun.android.utils.log.L;
 import com.shopgun.android.utils.log.LogUtil;

@@ -30,7 +30,8 @@ import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.corekit.UserAgentInterceptor;
 import com.shopgun.android.sdk.corekit.realm.SgnLegacyEventRealmModule;
 import com.shopgun.android.sdk.database.SgnDatabase;
-import com.shopgun.android.sdk.eventskit.EzEvent;
+import com.shopgun.android.sdk.eventskit.AnonymousEvent;
+import com.shopgun.android.sdk.eventskit.EventTracker;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -383,7 +384,8 @@ public class ShopGun {
         public void onCreate(Activity activity) {
             mSessionId = SgnUtils.createUUID();
             mSettings.incrementUsageCount();
-            EzEvent.create(EzEvent.CLIENT_SESSION_OPENED).track();
+            // todo common fields
+            EventTracker.globalTracker().track(AnonymousEvent.CLIENT_SESSION_OPENED);
             SgnLog.v(TAG, "onCreate");
         }
 

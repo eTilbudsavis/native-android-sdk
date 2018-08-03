@@ -39,7 +39,6 @@ public class EventDispatcher extends Thread {
 
     /** Max event stored in cache */
     private static final int DEFAULT_EVENT_BATCH_SIZE = 100;
-    private static final int DEFAULT_MAX_RETRY_COUNT = 5;
 
     /** Events older than one week will be deleted if a nack is received */
     private static final int EVENT_MAX_AGE = 7;
@@ -54,7 +53,6 @@ public class EventDispatcher extends Thread {
     private volatile boolean mQuit = true;
 
     private final int mEventBatchSize;
-    private final int mMaxRetryCount;
 
     /** Event that indicate that is time to flush out the events */
     private final AnonymousEvent mFlushEvent;
@@ -66,15 +64,15 @@ public class EventDispatcher extends Thread {
     private final Gson mGson;
 
     public EventDispatcher(BlockingQueue<AnonymousEvent> queue, OkHttpClient client, String url) {
-        this(queue, client, url, DEFAULT_EVENT_BATCH_SIZE, DEFAULT_MAX_RETRY_COUNT);
+        this(queue, client, url, DEFAULT_EVENT_BATCH_SIZE);
     }
 
-    public EventDispatcher(BlockingQueue<AnonymousEvent> queue, OkHttpClient client, String url, int eventBatchSize, int maxRetryCount) {
+    public EventDispatcher(BlockingQueue<AnonymousEvent> queue, OkHttpClient client, String url, int eventBatchSize) {
         mQueue = queue;
         mClient = client;
         mEventBatchSize = eventBatchSize;
-        mMaxRetryCount = maxRetryCount;
-        mFlushEvent = new AnonymousEvent(FLUSH_EVENT_TYPE, ""); // no need of appId here
+        mFlushEvent = new AnonymousEvent(FLUSH_EVENT_TYPE);
+        mFlushEvent.add("custom event", "flush event"); // add some info for logging
         mFlushEvent.doNotTrack(true);
         mUrl = HttpUrl.parse(url);
         mMediatype = MediaType.parse("application/json");
@@ -136,11 +134,12 @@ public class EventDispatcher extends Thread {
                 continue;
             }
             if (event.doNotTrack()) {
+                // log events not meant to be tracked (like the flush event)
                 SgnLog.i(TAG, event.toString());
             } else {
                 // wrap the event for database operation
                 AnonymousEventWrapper wrappedEvent =
-                        new AnonymousEventWrapper(event.getId(), event.getTimestamp(), event.toString());
+                        new AnonymousEventWrapper(event.getId(),event.getVersion(), event.getTimestamp(), event.toString());
 
                 mRealm.executeTransaction(new InsertTransaction(wrappedEvent));
             }
@@ -169,6 +168,7 @@ public class EventDispatcher extends Thread {
 
         try {
 
+            // get a limited amount of event from the db
             List<AnonymousEventWrapper> events = getEvents(mEventBatchSize);
             if (events.isEmpty()) {
                 return;
@@ -191,16 +191,8 @@ public class EventDispatcher extends Thread {
 
                 Set<String> nackIds = resp.getNackItems();
 
-                RealmResults<AnonymousEventWrapper> nack = getEvents(nackIds);
-                for (AnonymousEventWrapper e : nack) {
-                    long currentTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
-                    long age = currentTime - e.getTimestamp();
+                getOldEvents(nackIds).deleteAllFromRealm();
 
-                    // delete events older than one week
-                    if(TimeUnit.SECONDS.toDays(age) > 7) {
-                        // todo
-                    }
-                }
                 mRealm.commitTransaction();
 
                 List<EventResponse.Item> errors = resp.getErrors();
@@ -229,9 +221,28 @@ public class EventDispatcher extends Thread {
 
     }
 
+
+    private RealmResults<AnonymousEventWrapper> getOldEvents(Set<String> ids) {
+        // get the time limit
+        long timeLimit = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) - TimeUnit.DAYS.toSeconds(EVENT_MAX_AGE);
+
+        RealmQuery<AnonymousEventWrapper> query = mRealm.where(AnonymousEventWrapper.class);
+        boolean first = true;
+        for (String id : ids) {
+            if (!first) {
+                query.or();
+            }
+            first = false;
+            query = query.equalTo("id", id);
+        }
+
+        query.lessThan("timestamp", timeLimit);
+        return query.findAll();
+    }
+
     private List<AnonymousEventWrapper> getEvents(int limit) {
         RealmResults<AnonymousEventWrapper> events = mRealm.where(AnonymousEventWrapper.class).findAll();
-        List<AnonymousEventWrapper> dispatchEvents = new ArrayList<>(100);
+        List<AnonymousEventWrapper> dispatchEvents = new ArrayList<>(DEFAULT_EVENT_BATCH_SIZE);
         for (int i = 0; i < Math.min(limit, events.size()); i++) {
             dispatchEvents.add(events.get(i));
         }

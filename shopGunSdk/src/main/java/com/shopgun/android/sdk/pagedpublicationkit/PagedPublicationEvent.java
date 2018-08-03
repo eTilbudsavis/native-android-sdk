@@ -1,12 +1,14 @@
 package com.shopgun.android.sdk.pagedpublicationkit;
 
-import com.google.gson.JsonObject;
-import com.shopgun.android.sdk.eventskit.EzEvent;
+import com.shopgun.android.sdk.corekit.SgnPreferences;
+import com.shopgun.android.sdk.eventskit.AnonymousEvent;
+import com.shopgun.android.sdk.eventskit.EventTracker;
+import com.shopgun.android.sdk.eventskit.EventUtils;
 
 /**
  * All events related to publications.
  */
-public class PagedPublicationEvent extends EzEvent {
+public class PagedPublicationEvent extends AnonymousEvent {
 
     public static final String TAG = PagedPublicationEvent.class.getSimpleName();
 
@@ -21,13 +23,11 @@ public class PagedPublicationEvent extends EzEvent {
      */
     public static PagedPublicationEvent opened(PagedPublicationConfiguration config) {
         PagedPublicationEvent event = new PagedPublicationEvent(PAGED_PUBLICATION_OPENED);
+        String ppId = config.getPublication().getId();
 
-        // publication id is part of the view token
-        event.setViewToken(config.getPublication().getId());
-
-        JsonObject payload = new JsonObject();
-        payload.addProperty("pp.id", config.getPublication().getId());
-        event.setPayload(payload);
+        // todo add common fields
+        event.addPublicationOpened(ppId)
+                .addViewToken(EventUtils.generateViewToken(ppId, SgnPreferences.getInstance().getInstallationId()));
 
         return event;
     }
@@ -39,16 +39,17 @@ public class PagedPublicationEvent extends EzEvent {
      */
     public static PagedPublicationEvent pageDisappeared(PagedPublicationConfiguration config, int page) {
         PagedPublicationEvent event = new PagedPublicationEvent(PAGED_PUBLICATION_PAGE_DISAPPEARED);
+        String ppId = config.getPublication().getId();
 
-        // publication id and page number are part of the view token
-        event.setViewToken(config.getPublication().getId().concat(String.valueOf(page)));
-
-        JsonObject payload = new JsonObject();
-        payload.addProperty("pp.id", config.getPublication().getId());
-        payload.addProperty("ppp.n", page);
-        event.setPayload(payload);
-
+        // todo add common fields
+        event.addPageOpened(ppId, page)
+                .addViewToken(EventUtils.generateViewToken((ppId + String.valueOf(page)), SgnPreferences.getInstance().getInstallationId()));
+        // todo check if page ranges from 0 or 1
         return event;
+    }
+
+    public void track() {
+        EventTracker.globalTracker().track(this);
     }
 
 }

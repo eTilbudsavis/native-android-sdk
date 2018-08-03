@@ -85,7 +85,7 @@ public class AnonymousEvent {
         return this;
     }
 
-    public AnonymousEvent addViewtoken(String viewToken) {
+    public AnonymousEvent addViewToken(String viewToken) {
         json_event.addProperty("vt", viewToken);
         return this;
     }
@@ -133,6 +133,23 @@ public class AnonymousEvent {
 
     public int getType() {
         return type;
+    }
+
+    public String getType(int type) {
+        switch(type) {
+            case PAGED_PUBLICATION_OPENED:
+                return "paged_publication_opened";
+            case PAGED_PUBLICATION_PAGE_DISAPPEARED:
+                return "paged_publication_page_disappeared";
+            case OFFER_OPENED:
+                return "offer_opened";
+            case CLIENT_SESSION_OPENED:
+                return "client_session_opened";
+            case SEARCHED:
+                return "searched";
+            default:
+                return "custom_event";
+        }
     }
 
     public String getId() {
