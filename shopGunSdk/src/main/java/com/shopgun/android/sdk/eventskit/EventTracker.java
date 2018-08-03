@@ -69,7 +69,7 @@ public abstract class EventTracker {
     public abstract void track(AnonymousEvent event);
 
     public void track(int type) {
-        AnonymousEvent event = new AnonymousEvent(type, applicationTrackId);
+        AnonymousEvent event = new AnonymousEvent(type);
         track(event);
     }
 

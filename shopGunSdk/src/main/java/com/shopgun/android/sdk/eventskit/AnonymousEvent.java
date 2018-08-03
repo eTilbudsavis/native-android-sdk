@@ -43,12 +43,8 @@ public class AnonymousEvent {
      *             OFFER_OPENED = 3;
      *             CLIENT_SESSION_OPENED = 4;
      *             SEARCHED = 5;
-     * @param applicationTrackId is given to you by ShopGun and hardcoded into the manifest as meta data
-     *             "com.shopgun.android.sdk.eventskit.application_track_id" for production
-     *             "com.shopgun.android.sdk.develop.eventskit.application_track_id" for developing
-     *             Note: for internal purposes, assign an empty string
      */
-    public AnonymousEvent(int type, String applicationTrackId) {
+    public AnonymousEvent(int type) {
         id = SgnUtils.createUUID();
         timestamp = timestamp();
         this.type = type;
@@ -58,7 +54,6 @@ public class AnonymousEvent {
         json_event.addProperty("_i", id);
         json_event.addProperty("_e", type);
         json_event.addProperty("_t", timestamp);
-        json_event.addProperty("_a", applicationTrackId);
     }
 
     private long timestamp() {
@@ -67,6 +62,12 @@ public class AnonymousEvent {
 
     public AnonymousEvent add(String property, String value) {
         json_event.addProperty(property, value);
+        return this;
+    }
+
+    /* Set by the EventTracker that will read it from the manifest metadata */
+    protected AnonymousEvent setApplicationTrackId(String applicationTrackId) {
+        json_event.addProperty("_a", applicationTrackId);
         return this;
     }
 

@@ -8,7 +8,7 @@ class EventTrackerImpl extends EventTracker {
 
     public void track(AnonymousEvent event) {
         EventManager manager = EventManager.getInstance();
-        manager.addEvent(event);
+        manager.addEvent(event.setApplicationTrackId(getApplicationTrackId()));
     }
 
 }
