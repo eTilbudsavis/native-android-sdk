@@ -71,9 +71,9 @@ public class EventDispatcher extends Thread {
         mQueue = queue;
         mClient = client;
         mEventBatchSize = eventBatchSize;
-        mFlushEvent = new AnonymousEvent(FLUSH_EVENT_TYPE);
-        mFlushEvent.add("custom event", "flush event"); // add some info for logging
-        mFlushEvent.doNotTrack(true);
+        mFlushEvent = new AnonymousEvent(FLUSH_EVENT_TYPE)
+                .add("custom event", "flush event") // add some info for logging
+                .doNotTrack(true);
         mUrl = HttpUrl.parse(url);
         mMediatype = MediaType.parse("application/json");
         mHeaders = new Headers.Builder()

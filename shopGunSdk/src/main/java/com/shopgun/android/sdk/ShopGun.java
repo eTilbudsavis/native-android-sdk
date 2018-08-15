@@ -32,6 +32,8 @@ import com.shopgun.android.sdk.corekit.realm.SgnLegacyEventRealmModule;
 import com.shopgun.android.sdk.database.SgnDatabase;
 import com.shopgun.android.sdk.eventskit.AnonymousEvent;
 import com.shopgun.android.sdk.eventskit.EventTracker;
+import com.shopgun.android.sdk.eventskit.EventUtils;
+import com.shopgun.android.sdk.eventskit.SgnGeoHash;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -384,8 +386,10 @@ public class ShopGun {
         public void onCreate(Activity activity) {
             mSessionId = SgnUtils.createUUID();
             mSettings.incrementUsageCount();
-            // todo common fields
-            EventTracker.globalTracker().track(AnonymousEvent.CLIENT_SESSION_OPENED);
+            SgnGeoHash geoHash = EventUtils.getLocation(ShopGun.getInstance().getContext());
+            AnonymousEvent session_open_event = new AnonymousEvent(AnonymousEvent.CLIENT_SESSION_OPENED)
+                    .addUserLocation(geoHash.geoHash, geoHash.timestamp);
+            session_open_event.track();
             SgnLog.v(TAG, "onCreate");
         }
 

@@ -1,9 +1,11 @@
 package com.shopgun.android.sdk.pagedpublicationkit;
 
+import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.corekit.SgnPreferences;
 import com.shopgun.android.sdk.eventskit.AnonymousEvent;
 import com.shopgun.android.sdk.eventskit.EventTracker;
 import com.shopgun.android.sdk.eventskit.EventUtils;
+import com.shopgun.android.sdk.eventskit.SgnGeoHash;
 
 /**
  * All events related to publications.
@@ -25,7 +27,8 @@ public class PagedPublicationEvent extends AnonymousEvent {
         PagedPublicationEvent event = new PagedPublicationEvent(PAGED_PUBLICATION_OPENED);
         String ppId = config.getPublication().getId();
 
-        // todo add common fields
+        setLocation(event);
+
         event.addPublicationOpened(ppId)
                 .addViewToken(EventUtils.generateViewToken(ppId, SgnPreferences.getInstance().getInstallationId()));
 
@@ -41,15 +44,19 @@ public class PagedPublicationEvent extends AnonymousEvent {
         PagedPublicationEvent event = new PagedPublicationEvent(PAGED_PUBLICATION_PAGE_DISAPPEARED);
         String ppId = config.getPublication().getId();
 
-        // todo add common fields
+        setLocation(event);
+
         event.addPageOpened(ppId, page)
                 .addViewToken(EventUtils.generateViewToken((ppId + String.valueOf(page)), SgnPreferences.getInstance().getInstallationId()));
         // todo check if page ranges from 0 or 1
         return event;
     }
 
-    public void track() {
-        EventTracker.globalTracker().track(this);
+    private static void setLocation(PagedPublicationEvent event){
+        SgnGeoHash geoHash = EventUtils.getLocation(ShopGun.getInstance().getContext());
+        if(!geoHash.geoHash.isEmpty()) {
+            event.addUserLocation(geoHash.geoHash, geoHash.timestamp);
+        }
     }
 
 }
