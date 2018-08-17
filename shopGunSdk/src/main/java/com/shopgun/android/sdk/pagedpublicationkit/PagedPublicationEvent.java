@@ -30,7 +30,7 @@ public class PagedPublicationEvent extends AnonymousEvent {
         setLocation(event);
 
         event.addPublicationOpened(ppId)
-                .addViewToken(EventUtils.generateViewToken(ppId, SgnPreferences.getInstance().getInstallationId()));
+                .addViewToken(EventUtils.generateViewToken(ppId.getBytes(), SgnPreferences.getInstance().getInstallationId()));
 
         return event;
     }
@@ -47,7 +47,8 @@ public class PagedPublicationEvent extends AnonymousEvent {
         setLocation(event);
 
         event.addPageOpened(ppId, page)
-                .addViewToken(EventUtils.generateViewToken((ppId + String.valueOf(page)), SgnPreferences.getInstance().getInstallationId()));
+                .addViewToken(EventUtils.generateViewToken(
+                        EventUtils.getDataBytes(ppId, page), SgnPreferences.getInstance().getInstallationId()));
         // todo check if page ranges from 0 or 1
         return event;
     }

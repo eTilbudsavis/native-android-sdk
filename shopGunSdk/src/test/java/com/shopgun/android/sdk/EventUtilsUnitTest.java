@@ -17,37 +17,37 @@ public class EventUtilsUnitTest {
 
     @Test
     public void testViewTokenGenerator_1() {
-        String data = "pub1" + String.valueOf(1);
-        Assert.assertEquals("GKtJxfAxRZI=", EventUtils.generateViewToken(data, clientId));
+        Assert.assertEquals("GKtJxfAxRZI=",
+                EventUtils.generateViewToken(EventUtils.getDataBytes("pub1", 1), clientId));
     }
 
     @Test
     public void testViewTokenGenerator_2() {
         String data = "😁";
-        Assert.assertEquals("POcLWv7/N4Q=", EventUtils.generateViewToken(data, clientId));
+        Assert.assertEquals("POcLWv7/N4Q=", EventUtils.generateViewToken(data.getBytes(), clientId));
     }
 
     @Test
     public void testViewTokenGenerator_3() {
         String data = "my search string";
-        Assert.assertEquals("bNOIlf+nAAU=", EventUtils.generateViewToken(data, clientId));
+        Assert.assertEquals("bNOIlf+nAAU=", EventUtils.generateViewToken(data.getBytes(), clientId));
     }
 
     @Test
     public void testViewTokenGenerator_4() {
         String data = "my search string 😁";
-        Assert.assertEquals("+OJqwh68nIk=", EventUtils.generateViewToken(data, clientId));
+        Assert.assertEquals("+OJqwh68nIk=", EventUtils.generateViewToken(data.getBytes(), clientId));
     }
 
     @Test
     public void testViewTokenGenerator_5() {
         String data = "øl og æg";
-        Assert.assertEquals("NTgj68OWnbc=", EventUtils.generateViewToken(data, clientId));
+        Assert.assertEquals("NTgj68OWnbc=", EventUtils.generateViewToken(data.getBytes(), clientId));
     }
 
     @Test
     public void testViewTokenGenerator_6() {
-        String data = "pub1" + String.valueOf(9999);
-        Assert.assertEquals("VwMOrDD8zMk=", EventUtils.generateViewToken(data, clientId));
+        Assert.assertEquals("VwMOrDD8zMk=",
+                EventUtils.generateViewToken(EventUtils.getDataBytes("pub1", 9999), clientId));
     }
 }
