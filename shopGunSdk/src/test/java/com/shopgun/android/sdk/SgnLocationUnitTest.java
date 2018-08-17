@@ -75,10 +75,6 @@ public class SgnLocationUnitTest {
         Assert.assertEquals(original.getRadius(), copy.getRadius());
 
 
-        String geohash = original.getGeoHash().geoHash;
-        long time = original.getGeoHash().timestamp;
-        Assert.assertEquals("u1vw", geohash);
-        Assert.assertNotSame(0L, time);
     }
 
 }

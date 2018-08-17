@@ -2,6 +2,9 @@ package com.shopgun.android.sdk.test;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.shopgun.android.sdk.eventskit.AnonymousEvent;
+import com.shopgun.android.sdk.eventskit.AnonymousEventSerializer;
+import com.shopgun.android.sdk.eventskit.AnonymousEventWrapper;
 import com.shopgun.android.sdk.eventskit.Event;
 import com.shopgun.android.sdk.eventskit.LegacyEventSerializer;
 
@@ -15,22 +18,20 @@ import org.robolectric.annotation.Config;
 public class EventSerializerTest {
 
     @Test
-    public void testSerializer() throws Exception {
-        Event event = new Event();
+    public void testSerializer() {
 
         // create a fully set event
-        event.setGeoHash("u5r3", System.currentTimeMillis());
-        event.setCountry("DK");
-        event.setViewToken("viewToken");
+        AnonymousEvent event = new AnonymousEvent(0)
+                .addUserLocation("u5r3", System.currentTimeMillis())
+                .addUserCountry("DK")
+                .addViewToken("viewToken");
 
-        JsonObject payload = new JsonObject();
-        payload.addProperty("a.p1", "AB54R");
-        payload.addProperty("a.p2", "5");
-        event.setPayload(payload);
+        AnonymousEventWrapper wrappedEvent =
+                new AnonymousEventWrapper(event.getId(),event.getVersion(), event.getTimestamp(), event.toString());
 
-        LegacyEventSerializer serializer = new LegacyEventSerializer();
+        AnonymousEventSerializer serializer = new AnonymousEventSerializer();
 
-        JsonElement result = serializer.serialize(event, null, null);
+        JsonElement result = serializer.serialize(wrappedEvent, null, null);
 
         // print the serialized event to see how it looks like
         System.out.println(result.toString());

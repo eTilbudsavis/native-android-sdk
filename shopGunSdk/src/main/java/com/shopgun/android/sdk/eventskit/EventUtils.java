@@ -5,6 +5,7 @@ import android.location.Location;
 import android.util.Base64;
 
 import com.fonfon.geohash.GeoHash;
+import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.LocationUtils;
 
 import java.security.MessageDigest;
@@ -30,7 +31,7 @@ public class EventUtils {
             byte md5[] = Arrays.copyOfRange(digest_result, 0, 8);
 
             // encode to base 64
-            return Base64.encodeToString(md5, Base64.DEFAULT);
+            return Base64.encodeToString(md5, Base64.NO_WRAP);
 
         }catch (Exception e) {
             e.printStackTrace();
