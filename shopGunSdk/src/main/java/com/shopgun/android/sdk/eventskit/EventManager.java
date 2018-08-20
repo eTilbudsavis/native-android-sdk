@@ -1,18 +1,13 @@
 package com.shopgun.android.sdk.eventskit;
 
 import android.app.Activity;
-import android.content.Context;
-import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.utils.Constants;
-import com.shopgun.android.sdk.utils.SgnUtils;
-import com.shopgun.android.utils.LocationUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -49,6 +44,7 @@ public class EventManager {
     private Collection<WeakReference<EventTracker>> mTrackers;
     private static BlockingQueue<AnonymousEvent> mEventQueue;
     private EventDispatcher mEventDispatcher;
+    private LegacyEventDispatcher mLegacyEventDispatcher;
     private long mDispatchInterval = DISPATCH_INTERVAL;
     private final List<EventListener> mEventListeners;
 
@@ -69,10 +65,19 @@ public class EventManager {
         mEventQueue = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
         mEventDispatcher = new EventDispatcher(mEventQueue, shopGun.getClient(), shopGun.getEventEnvironment());
 
+        checkLegacyEvents(shopGun);
+
         EventLifecycle lifecycleCallback = new EventLifecycle();
         shopGun.getLifecycleManager().registerCallback(lifecycleCallback);
         if (shopGun.getLifecycleManager().isActive()) {
             lifecycleCallback.onCreate(shopGun.getLifecycleManager().getActivity());
+        }
+    }
+
+    private void checkLegacyEvents(ShopGun shopGun) {
+        mLegacyEventDispatcher = null;
+        if (shopGun.legacyEventsDetected()) {
+            mLegacyEventDispatcher = new LegacyEventDispatcher(shopGun.getClient(), shopGun.getLegacyEventEnvironment());
         }
     }
 
@@ -131,6 +136,10 @@ public class EventManager {
             mEventDispatcher = new EventDispatcher(mEventQueue, sgn.getClient(), sgn.getEventEnvironment());
         }
         mEventDispatcher.start();
+
+        if (mLegacyEventDispatcher != null) {
+            mLegacyEventDispatcher.start();
+        }
     }
 
     private class EventLifecycle extends LifecycleManager.SimpleCallback {
@@ -144,6 +153,9 @@ public class EventManager {
         public void onDestroy(Activity activity) {
             mHandler.removeMessages(DISPATCH_MSG);
             mEventDispatcher.quit();
+            if (mLegacyEventDispatcher != null) {
+                mLegacyEventDispatcher.quit();
+            }
         }
 
     }
