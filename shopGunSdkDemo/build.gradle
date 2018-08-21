@@ -36,6 +36,8 @@ android {
         applicationId "com.shopgun.android.sdk.demo"
         minSdkVersion 15
         targetSdkVersion 27
+//        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.shopgun.android.sdk.demo.LegacyEventTestRunner"
     }
 
     buildTypes {
@@ -51,6 +53,12 @@ android {
 
 }
 
+configurations.all {
+    resolutionStrategy {
+        force 'com.android.support:support-annotations:27.0.2'
+    }
+}
+
 dependencies {
     def libs = rootProject.libDependencies
     implementation libs.butterknife
@@ -64,4 +72,7 @@ dependencies {
     implementation libs.shopGunSdk
     implementation libs.glide
     annotationProcessor libs.glideCompiler
+
+    androidTestImplementation "com.android.support.test:runner:1.0.2"
+    androidTestImplementation "com.android.support.test:rules:1.0.2"
 }
