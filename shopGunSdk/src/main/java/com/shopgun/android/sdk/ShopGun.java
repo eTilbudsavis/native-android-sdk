@@ -647,7 +647,7 @@ public class ShopGun {
 
             // Set the default RealmConfiguration.
             realmConfiguration = new RealmConfiguration.Builder()
-                    .name(Constants.PACKAGE + "anonymousEvent" + ".realm")
+                    .name(Constants.PACKAGE + ".anonymousEvent" + ".realm")
                     .modules(new SgnAnonymousEventRealmModule())
                     .schemaVersion(2)
                     .build();
@@ -668,9 +668,11 @@ public class ShopGun {
             if (new File(legacyConfiguration.getPath()).exists()) {
                 // exists
                 Realm realm = Realm.getInstance(legacyConfiguration);
-                if (realm.isEmpty()) {
-                    // if it's empty, close it and try to delete it
-                    realm.close();
+                boolean isEmpty = realm.isEmpty();
+                realm.close();
+
+                if (isEmpty) {
+                    // if it's empty, try to delete it
                     try {
                         Realm.deleteRealm(legacyConfiguration);
                     } catch (IllegalStateException ignore) {}
