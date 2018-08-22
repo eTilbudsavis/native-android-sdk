@@ -113,17 +113,16 @@ public class LegacyEventDispatcher extends Thread {
         }
         mRealm.close();
         if (events_count == 0) {
-            Realm.deleteRealm(mRealm.getConfiguration());
+            try {
+                Realm.deleteRealm(mRealm.getConfiguration());
+            } catch (IllegalStateException ignore) {
+                // at the next startup, ShopGun will try to delete it
+            }
         }
         interrupt();
     }
 
     private int dispatchEventQueue() {
-
-        if (!ShopGun.getInstance().getLifecycleManager().isActive()) {
-            // Ship network is we aren't active
-            return 1;
-        }
 
         int count = (int) mRealm.where(Event.class).count();
 

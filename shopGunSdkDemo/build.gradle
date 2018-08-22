@@ -37,7 +37,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 27
 //        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunner "com.shopgun.android.sdk.demo.LegacyEventTestRunner"
+        testInstrumentationRunner "com.shopgun.android.sdk.demo.LegacyEventTestRunner" // to be used for tests on legacy events
     }
 
     buildTypes {
@@ -73,6 +73,7 @@ dependencies {
     implementation libs.glide
     annotationProcessor libs.glideCompiler
 
+    androidTestImplementation libs.okhttpMockwebserver
     androidTestImplementation "com.android.support.test:runner:1.0.2"
     androidTestImplementation "com.android.support.test:rules:1.0.2"
 }
