@@ -62,7 +62,8 @@ public abstract class EventTracker {
         return tracker;
     }
 
-    public String getApplicationTrackId() {
+    // used by EventTrackerImpl to add the track id to each event
+    String getApplicationTrackId() {
         return applicationTrackId;
     }
 
