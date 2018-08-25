@@ -31,7 +31,7 @@ import static junit.framework.Assert.assertEquals;
 
 /**
  * In case AS is not able to install the test.apk, compile the test manually before run them
- * ./gradlew assembleDebugAndroidTest -x test
+ * ./gradlew :shopGunSdkDemo:assembleDebugAndroidTest -x test
  *
  * (reference: https://stackoverflow.com/questions/49670865/running-android-test-the-apk-file-androidtest-apk-does-not-exist-on-disk)
  */
@@ -80,13 +80,24 @@ public class LegacyEventDispatcherTests {
 
         legacyEventDispatcher.start();
 
-        while(legacyEventDispatcher.isAlive()){
-            try {
+        try {
+            while(legacyEventDispatcher.isAlive()) {
+
                 RecordedRequest request = server.takeRequest(1, TimeUnit.SECONDS);
                 if (request != null) {
-                    Log.d("TEST", request.getBody().toString());
+                    Log.d("TEST -----> testLegacyDispatcher", request.getBody().toString());
                 }
-            } catch (InterruptedException ignore) {}
+                else {
+                    break;
+                }
+            }
+
+        } catch (InterruptedException e) {
+            assertEquals("", "takeRequest timer expired.");
+            e.printStackTrace();
+        }
+        finally {
+            legacyEventDispatcher.quit();
         }
 
         // check if the legacy event db is still there

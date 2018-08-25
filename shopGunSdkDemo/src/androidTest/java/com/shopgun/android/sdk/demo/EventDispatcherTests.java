@@ -6,26 +6,21 @@ import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.corekit.realm.SgnLegacyEventRealmModule;
 import com.shopgun.android.sdk.eventskit.AnonymousEvent;
 import com.shopgun.android.sdk.eventskit.AnonymousEventWrapper;
 import com.shopgun.android.sdk.eventskit.EventDispatcher;
-import com.shopgun.android.sdk.eventskit.LegacyEventDispatcher;
-import com.shopgun.android.sdk.utils.Constants;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -71,9 +66,15 @@ public class EventDispatcherTests {
 
         Realm realm = shopGun.getRealmInstance();
         realm.beginTransaction();
+
+        // delete everything
+        realm.where(AnonymousEventWrapper.class).findAll().deleteAllFromRealm();
+
+        // insert new events
         realm.insert(new AnonymousEventWrapper(e1.getId(), e1.getVersion(), e1.getTimestamp(), e1.toString()));
         realm.insert(new AnonymousEventWrapper(e2.getId(), e2.getVersion(), e2.getTimestamp(), e2.toString()));
         realm.insert(new AnonymousEventWrapper(e3.getId(), e3.getVersion(), (e3.getTimestamp() - TimeUnit.DAYS.toSeconds(8)), e3.toString()));
+
         realm.commitTransaction();
         realm.close();
     }
@@ -81,11 +82,11 @@ public class EventDispatcherTests {
     @After
     public void cleanup() {
         // The testRunner class copies the fake db. Delete it.
-//        Realm realm = shopGun.getRealmInstance();
-//        if (realm != null) {
-//            realm.close();
-//            Realm.deleteRealm(realm.getConfiguration());
-//        }
+        Realm legacy = shopGun.getLegacyRealmInstance(); // LEGACY DB
+        if (legacy != null) {
+            legacy.close();
+            Realm.deleteRealm(legacy.getConfiguration());
+        }
     }
 
     @Test
@@ -100,20 +101,33 @@ public class EventDispatcherTests {
 
         eventDispatcher.start();
 
-        while(eventDispatcher.isAlive()){
-            try {
+        try {
+            while(eventDispatcher.isAlive()) {
                 RecordedRequest request = server.takeRequest(1, TimeUnit.SECONDS);
                 if (request != null) {
-                    Log.d("TEST", request.getBody().toString());
+                    Log.d("TEST ----> testDispatcher", request.getBody().toString());
                 }
-            } catch (InterruptedException ignore) {}
+                else {
+                    break;
+                }
+            }
+        } catch (InterruptedException e) {
+            assertEquals("", "takeRequest timer expired.");
+            e.printStackTrace();
+        }
+        finally {
+            eventDispatcher.quit();
         }
 
-        // 1 event shipped, 1 to be retransmitted, 1 too old and deleted
         Realm realm = shopGun.getRealmInstance();
+
+        // e1 ack = deleted, e2 nack = keep for retransmission, e3 nack and too old = deleted
         assertEquals(1, realm.where(AnonymousEventWrapper.class).count());
 
+        realm.close();
 
+        // this will probably cause some errors to appear in the logcat due to connectivity loss.
+        // That's not a problem for the purpose of the test
         server.shutdown();
     }
 
