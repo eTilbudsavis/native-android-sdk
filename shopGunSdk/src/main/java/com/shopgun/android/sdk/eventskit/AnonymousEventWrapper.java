@@ -1,13 +1,6 @@
 package com.shopgun.android.sdk.eventskit;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.shopgun.android.sdk.utils.SgnUtils;
-
-import java.util.concurrent.TimeUnit;
-
 import io.realm.RealmModel;
-import io.realm.annotations.Ignore;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.RealmClass;
 
@@ -39,18 +32,6 @@ public class AnonymousEventWrapper implements RealmModel {
         setVersion(version);
         setTimestamp(timestamp);
         setEvent(event);
-    }
-
-    public JsonObject getJsonEvent() {
-        return parse(event);
-    }
-
-    private JsonObject parse(String json) {
-        try {
-            return (JsonObject) new JsonParser().parse(json);
-        } catch (Exception e) {
-            return new JsonObject();
-        }
     }
 
     /***** Default getters and setters */

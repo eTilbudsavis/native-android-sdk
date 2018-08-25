@@ -2,6 +2,7 @@ package com.shopgun.android.sdk.eventskit;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.internal.bind.util.ISO8601Utils;
@@ -18,7 +19,18 @@ public class AnonymousEventSerializer implements JsonSerializer<AnonymousEventWr
     
     @Override
     public JsonElement serialize(AnonymousEventWrapper src, Type typeOfSrc, JsonSerializationContext context) {
-        return src.getJsonEvent();
+
+        String eventData = src.getEvent();
+
+        return parse(eventData);
+    }
+
+    private JsonObject parse(String json) {
+        try {
+            return (JsonObject) new JsonParser().parse(json);
+        } catch (Exception e) {
+            return new JsonObject();
+        }
     }
 
 }
