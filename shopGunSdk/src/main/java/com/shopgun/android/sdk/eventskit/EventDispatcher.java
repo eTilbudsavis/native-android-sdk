@@ -86,7 +86,7 @@ public class EventDispatcher extends Thread {
     private Gson getGson() {
 
         try {
-            Class clazz = Class.forName("io.realm.EventRealmProxy");
+            Class clazz = Class.forName("io.realm.AnonymousEventWrapperRealmProxy");
             return new GsonBuilder()
                     .setExclusionStrategies(
                             new RealmObjectExclusionStrategy(),
@@ -227,6 +227,7 @@ public class EventDispatcher extends Thread {
         long timeLimit = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) - TimeUnit.DAYS.toSeconds(EVENT_MAX_AGE);
 
         RealmQuery<AnonymousEventWrapper> query = mRealm.where(AnonymousEventWrapper.class);
+        query.beginGroup();
         boolean first = true;
         for (String id : ids) {
             if (!first) {
@@ -235,8 +236,8 @@ public class EventDispatcher extends Thread {
             first = false;
             query = query.equalTo("id", id);
         }
-
-        query.lessThan("timestamp", timeLimit);
+        query.endGroup();
+        query.and().lessThan("timestamp", timeLimit);
         return query.findAll();
     }
 
