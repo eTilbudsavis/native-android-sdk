@@ -27,7 +27,7 @@ buildscript {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.4.9' // upgrade to 4.4.10+ doesn't build the sdk
-        classpath "io.realm:realm-gradle-plugin:4.3.3"
+        classpath "io.realm:realm-gradle-plugin:5.4.2"
 
         // Dependencies checker: run from command line ./gradlew dependencyUpdates -Drevision=release|milestone|integration
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
