@@ -36,8 +36,8 @@ android {
         applicationId "com.shopgun.android.sdk.demo"
         minSdkVersion 15
         targetSdkVersion 27
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-//        testInstrumentationRunner "com.shopgun.android.sdk.demo.LegacyEventTestRunner" // to be used for tests on legacy events
+//        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.shopgun.android.sdk.demo.LegacyEventTestRunner" // to be used for tests on events (especially legacy)
     }
 
     buildTypes {

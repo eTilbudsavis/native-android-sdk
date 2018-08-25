@@ -16,6 +16,10 @@ import java.io.IOException;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
+/**
+ * Custom runner that creates a legacy event db before the Application class starts.
+ */
+
 @RunWith(AndroidJUnit4.class)
 public class LegacyEventTestRunner extends AndroidJUnitRunner {
 
@@ -36,8 +40,7 @@ public class LegacyEventTestRunner extends AndroidJUnitRunner {
 
 
         // Copy the stored version 1 realm file from assets to a NEW location.
-        // Note: the old file is always deleted for you.
-        // by the copyRealmFromAssets.
+        // Note: the old file is always deleted for you by the copyRealmFromAssets
         TestRealmConfigurationFactory configFactory = new TestRealmConfigurationFactory();
         try {
             configFactory.copyRealmFromAssets(context, REALM_NAME, realmConfig);
