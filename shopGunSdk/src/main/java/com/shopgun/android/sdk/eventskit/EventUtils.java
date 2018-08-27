@@ -21,12 +21,12 @@ public class EventUtils {
 
     }
 
-    public static String generateViewToken(byte[] data, String clientId) {
+    public static String generateViewToken(byte[] data, String salt) {
         try {
-            // get the bytes of the clientId
-            byte[] id = clientId.getBytes("UTF-8");
+            // get the bytes of the salt
+            byte[] id = salt.getBytes("UTF-8");
 
-            // create the byte array with all of data -> clientId + data
+            // create the byte array with all of data -> salt + data
             byte[] payload = new byte[data.length + id.length];
             System.arraycopy(id, 0, payload, 0, id.length);
             System.arraycopy(data, 0, payload, id.length, data.length);

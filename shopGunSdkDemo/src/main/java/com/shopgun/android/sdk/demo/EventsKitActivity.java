@@ -48,7 +48,7 @@ public class EventsKitActivity extends AppCompatActivity {
 
         AnonymousEvent offer_event = new AnonymousEvent(AnonymousEvent.OFFER_OPENED)
                 .addOfferOpened("kkqS23412")
-                .addViewToken(EventUtils.generateViewToken("kkqS23412".getBytes(), "clientID"))
+                .addViewToken(EventUtils.generateViewToken("kkqS23412".getBytes(), "MyAwesomeApp"))
                 .addUserCountry("DK");
         offer_event.track();
 
