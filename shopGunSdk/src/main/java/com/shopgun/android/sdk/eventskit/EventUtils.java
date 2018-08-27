@@ -5,6 +5,7 @@ import android.location.Location;
 import android.util.Base64;
 
 import com.fonfon.geohash.GeoHash;
+import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.LocationUtils;
 
@@ -48,20 +49,18 @@ public class EventUtils {
         return "";
     }
 
-    public static SgnGeoHash getLocation(Context context){
-        SgnGeoHash sgnGeoHash = new SgnGeoHash();
+    public static void addLocationInformation(Context context, AnonymousEvent event) {
 
+        // if the app has the location permissions, ask the location to the system
         Location location = LocationUtils.getLastKnownLocation(context);
 
         // set the data only if the accuracy < 2km
         if(location != null && location.getAccuracy() < 2000) {
-            sgnGeoHash.timestamp = location.getTime();
 
             GeoHash geoHash = GeoHash.fromLocation(location, GEO_HASH_PRECISION);
-            sgnGeoHash.geoHash = geoHash.toString();
-        }
 
-        return sgnGeoHash;
+            event.addUserLocation(geoHash.toString(), location.getTime());
+        }
     }
 
     /**
