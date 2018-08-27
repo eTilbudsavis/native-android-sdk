@@ -9,11 +9,7 @@ import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.utils.Constants;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -41,7 +37,6 @@ public class EventManager {
         }
     };
 
-    private Collection<WeakReference<EventTracker>> mTrackers;
     private static BlockingQueue<AnonymousEvent> mEventQueue;
     private EventDispatcher mEventDispatcher;
     private LegacyEventDispatcher mLegacyEventDispatcher;
@@ -60,7 +55,6 @@ public class EventManager {
     }
 
     private EventManager(ShopGun shopGun) {
-        mTrackers = new HashSet<>();
         mEventListeners = new ArrayList<>();
         mEventQueue = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
         mEventDispatcher = new EventDispatcher(mEventQueue, shopGun.getClient(), shopGun.getEventEnvironment());
@@ -78,30 +72,6 @@ public class EventManager {
         mLegacyEventDispatcher = null;
         if (shopGun.legacyEventsDetected()) {
             mLegacyEventDispatcher = new LegacyEventDispatcher(shopGun.getClient(), shopGun.getLegacyEventEnvironment());
-        }
-    }
-
-    public void registerTracker(EventTracker tracker) {
-        synchronized (EventManager.class) {
-            mTrackers.add(new WeakReference<EventTracker>(tracker));
-        }
-    }
-
-    public void unregisterTracker(EventTracker tracker) {
-        synchronized (EventManager.class) {
-            Iterator<WeakReference<EventTracker>> it = mTrackers.iterator();
-            while(it.hasNext()) {
-                WeakReference<EventTracker> weakTracker = it.next();
-                EventTracker tmp = weakTracker.get();
-                if (tracker == tmp) {
-                    it.remove();
-                    break;
-                }
-                if (tmp == null) {
-                    // if the weak-ref is null, remove
-                    it.remove();
-                }
-            }
         }
     }
 

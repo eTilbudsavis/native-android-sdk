@@ -1,12 +1,9 @@
 package com.shopgun.android.sdk.eventskit;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
-import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.corekit.SgnPreferences;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.utils.PackageUtils;
 import com.shopgun.android.utils.TextUtils;
@@ -30,15 +27,16 @@ public abstract class EventTracker {
                     Bundle b = PackageUtils.getMetaData(c);
 
                     // Get the application track id
-                    String trackerId = b.getString(ShopGun.getInstance().isDevelop() && b.containsKey(META_APPLICATION_TRACK_ID_DEBUG) ?
+                    String appTrackId = b.getString(ShopGun.getInstance().isDevelop() && b.containsKey(META_APPLICATION_TRACK_ID_DEBUG) ?
                             META_APPLICATION_TRACK_ID_DEBUG :
                             META_APPLICATION_TRACK_ID);
 
-                    if (TextUtils.isEmpty(trackerId)) {
+                    if (TextUtils.isEmpty(appTrackId)) {
                         SgnLog.w(TAG, "Application track id not found");
                         mGlobalInstance = new EventTrackerNoOp();
                     } else {
-                        mGlobalInstance = new EventTrackerImpl(trackerId);
+                        mGlobalInstance = new EventTrackerImpl();
+                        mGlobalInstance.setApplicationTrackId(appTrackId);
                     }
                 }
             }
@@ -52,22 +50,14 @@ public abstract class EventTracker {
         }
     }
 
-    protected EventTracker(String trackId) {
-        applicationTrackId = trackId;
-    }
-
-    public static EventTracker newTracker(String trackerId) {
-        EventTracker tracker = new EventTrackerImpl(trackerId);
-        EventManager.getInstance().registerTracker(tracker);
-        return tracker;
-    }
-
     // used by EventTrackerImpl to add the track id to each event
     String getApplicationTrackId() {
         return applicationTrackId;
     }
 
-    public abstract void track(AnonymousEvent event);
+    void setApplicationTrackId(String applicationTrackId) {
+        this.applicationTrackId = applicationTrackId;
+    }
 
     public void track(int type) {
         AnonymousEvent event = new AnonymousEvent(type);
@@ -78,4 +68,7 @@ public abstract class EventTracker {
         EventManager.getInstance().flush();
     }
 
+    /** Abstract methods */
+
+    public abstract void track(AnonymousEvent event);
 }
