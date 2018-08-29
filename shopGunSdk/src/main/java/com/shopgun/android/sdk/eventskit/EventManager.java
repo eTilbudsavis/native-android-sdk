@@ -11,6 +11,7 @@ import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -42,6 +43,7 @@ public class EventManager {
     private LegacyEventDispatcher mLegacyEventDispatcher;
     private long mDispatchInterval = DISPATCH_INTERVAL;
     private final List<EventListener> mEventListeners;
+    private String mCountryCode;
 
     public static EventManager getInstance() {
         if (mInstance == null) {
@@ -58,6 +60,7 @@ public class EventManager {
         mEventListeners = new ArrayList<>();
         mEventQueue = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
         mEventDispatcher = new EventDispatcher(mEventQueue, shopGun.getClient(), shopGun.getEventEnvironment());
+        mCountryCode = "";
 
         checkLegacyEvents(shopGun);
 
@@ -76,6 +79,9 @@ public class EventManager {
     }
 
     public void addEvent(AnonymousEvent event) {
+
+        event.addUserCountry(mCountryCode);
+
         boolean isActive = ShopGun.getInstance().getLifecycleManager().isActive();
         if (!isActive) {
             mEventDispatcher.start();
@@ -86,6 +92,16 @@ public class EventManager {
         }
         if (!isActive) {
             mEventDispatcher.quit();
+        }
+    }
+
+    /**
+     * The current country of the device user as an ISO 3166-1 alpha-2 encoded string.
+     * @param userCountry code
+     */
+    public void setUserCountry(String userCountry) {
+        if (userCountry != null && userCountry.length() == 2) {
+            mCountryCode = userCountry.toUpperCase(Locale.ENGLISH);
         }
     }
 
