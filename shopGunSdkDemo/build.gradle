@@ -59,9 +59,9 @@ dependencies {
     implementation libs.supportv4
     implementation libs.okhttpLoggingInterceptor
     implementation libs.gson
-    implementation libs.verso
-    implementation libs.markhor
-    implementation libs.shopGunSdk
     implementation libs.glide
     annotationProcessor libs.glideCompiler
+
+    // ShopGun dependencies
+    implementation 'com.shopgun.android:sdk:4.0.2-beta'
 }
