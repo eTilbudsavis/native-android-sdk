@@ -2,6 +2,7 @@ package com.shopgun.android.sdk.eventskit;
 
 import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.utils.SgnUtils;
+import com.shopgun.android.utils.TextUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -72,7 +73,9 @@ public class AnonymousEvent {
 
     /* Set by the EventTracker that will read it from the manifest metadata */
     protected AnonymousEvent setApplicationTrackId(String applicationTrackId) {
-        json_event.addProperty("_a", applicationTrackId);
+        if (!TextUtils.isEmpty(applicationTrackId)) {
+            json_event.addProperty("_a", applicationTrackId);
+        }
         return this;
     }
 
@@ -80,18 +83,24 @@ public class AnonymousEvent {
     /****** Common fields */
 
     public AnonymousEvent addUserLocation(String geohash, long timestamp) {
-        json_event.addProperty("l.h", geohash);
-        json_event.addProperty("l.ht", timestamp);
+        if (!TextUtils.isEmpty(geohash) && timestamp > 0) {
+            json_event.addProperty("l.h", geohash);
+            json_event.addProperty("l.ht", timestamp);
+        }
         return this;
     }
 
     public AnonymousEvent addUserCountry(String countryCode) {
-        json_event.addProperty("l.c", countryCode);
+        if (!TextUtils.isEmpty(countryCode)) {
+            json_event.addProperty("l.c", countryCode);
+        }
         return this;
     }
 
     public AnonymousEvent addViewToken(String viewToken) {
-        json_event.addProperty("vt", viewToken);
+        if (!TextUtils.isEmpty(viewToken)) {
+            json_event.addProperty("vt", viewToken);
+        }
         return this;
     }
 
@@ -99,24 +108,32 @@ public class AnonymousEvent {
     /****** Fields for predefined events */
 
     public AnonymousEvent addPublicationOpened(String publicationId) {
-        json_event.addProperty("pp.id", publicationId);
+        if (!TextUtils.isEmpty(publicationId)) {
+            json_event.addProperty("pp.id", publicationId);
+        }
         return this;
     }
 
     public AnonymousEvent addPageOpened(String publicationId, int page) {
-        this.addPublicationOpened(publicationId);
-        json_event.addProperty("ppp.n", page);
+        if (!TextUtils.isEmpty(publicationId) && page > 0) {
+            this.addPublicationOpened(publicationId);
+            json_event.addProperty("ppp.n", page);
+        }
         return this;
     }
 
     public AnonymousEvent addOfferOpened(String offerId) {
-        json_event.addProperty("of.id", offerId);
+        if (!TextUtils.isEmpty(offerId)) {
+            json_event.addProperty("of.id", offerId);
+        }
         return this;
     }
 
     public AnonymousEvent addSearch(String query, String language) {
-        json_event.addProperty("sea.q", query);
-        json_event.addProperty("sea.l", language);
+        if (!TextUtils.isEmpty(query) && !TextUtils.isEmpty(language)) {
+            json_event.addProperty("sea.q", query);
+            json_event.addProperty("sea.l", language);
+        }
         return this;
     }
 
