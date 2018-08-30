@@ -570,8 +570,6 @@ public class ShopGun {
          */
         public synchronized ShopGun setInstance() {
 
-            // TODO: 06/04/2017 Consider renaming method to build() as it's more intuitive when using a builder - from a user perspective at least
-            
             if (ShopGun.mSingleton != null) {
                 SgnLog.d(TAG, "ShopGun instance already build and set.");
                 return ShopGun.mSingleton;
