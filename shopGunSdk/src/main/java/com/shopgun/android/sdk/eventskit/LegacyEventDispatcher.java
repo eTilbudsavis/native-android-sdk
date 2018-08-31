@@ -68,7 +68,7 @@ public class LegacyEventDispatcher extends Thread {
     private Gson getGson() {
 
         try {
-            Class clazz = Class.forName("io.realm.EventRealmProxy");
+            Class clazz = Class.forName("io.realm.com_shopgun_android_sdk_eventskit_EventRealmProxy");
             return new GsonBuilder()
                     .setExclusionStrategies(
                             new RealmObjectExclusionStrategy(),
