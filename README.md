@@ -162,7 +162,6 @@ Please try to follow existing code convention and style when committing code.
 
 Links
 -------
-[ShopGun Developer site](https://business.shopgun.com/developers/)  
 [ShopGun API Documentation](http://docs.api.etilbudsavis.dk/)
 
 
