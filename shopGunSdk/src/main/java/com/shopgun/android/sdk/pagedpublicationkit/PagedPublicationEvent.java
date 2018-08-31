@@ -47,7 +47,6 @@ public class PagedPublicationEvent extends AnonymousEvent {
         event.addPageOpened(ppId, page)
                 .addViewToken(EventUtils.generateViewToken(
                         EventUtils.getDataBytes(ppId, page), SgnPreferences.getInstance().getInstallationId()));
-        // todo check if page ranges from 0 or 1
         return event;
     }
 

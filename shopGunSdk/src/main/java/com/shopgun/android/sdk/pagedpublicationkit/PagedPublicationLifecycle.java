@@ -131,7 +131,15 @@ class PagedPublicationLifecycle implements Parcelable {
         if (isReady() && mPageAppeared[page]) {
             mPageAppeared[page] = false;
             mPageLoaded[page] = false;
-            PagedPublicationEvent.pageDisappeared(mConfig, page).track();
+
+            // pages start from 0
+            page++;
+            // exclude the outro page.
+            // Note: currently we don't have any catalog with intro
+            int pageLimit = mConfig.hasOutro() ? mConfig.getPageCount() - 1 : mConfig.getPageCount();
+            if (page <= pageLimit) {
+                PagedPublicationEvent.pageDisappeared(mConfig, page).track();
+            }
         }
     }
 
