@@ -160,6 +160,12 @@ Just fork the repository on GitHub and send us a pull request.
 Please try to follow existing code convention and style when committing code.
 
 
+Links
+-------
+[ShopGun Developer site](https://business.shopgun.com/developers/)  
+[ShopGun API Documentation](http://docs.api.etilbudsavis.dk/)
+
+
 License
 -------
 
@@ -176,8 +182,3 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
-
-[ShopGun Developer site]:https://business.shopgun.com/developers/
-[ShopGun Android SDK]:https://github.com/shopgun/shopgun-android-sdk/
-[ShopGun API Documentation]:http://docs.api.etilbudsavis.dk/
