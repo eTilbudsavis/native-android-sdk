@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.apollographql.apollo.ApolloClient;
 import com.shopgun.android.sdk.api.Environment;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
@@ -123,6 +124,8 @@ public class ShopGun {
     private String mSessionId;
     /** The device id, this will if possible be persisted across installations */
     private String mDeviceId;
+    /** Apollo client for graphQL queries */
+    private ApolloClient mApolloClient;
 
     // Things we'd like to get rid of
 
@@ -153,6 +156,7 @@ public class ShopGun {
         mExecutor = builder.executorService;
         mClient = builder.okHttpClient;
         mRealmConfiguration = builder.realmConfiguration;
+        mApolloClient = builder.apolloClient;
 
         mLifecycleManager = new LifecycleManager(builder.application);
         mLifecycleCallback = new SgnLifecycleCallback();
@@ -199,8 +203,21 @@ public class ShopGun {
         return mSingleton != null;
     }
 
+    /**
+     * Get the shared client for http requests
+     * @return OkHttpClient
+     */
     public OkHttpClient getClient() {
         return mClient;
+    }
+
+    /**
+     * Get the shared Apollo client for graphQL queries to
+     * "https://graph.service.shopgun.com"
+     * @return ApolloClient
+     */
+    public ApolloClient getApolloClient() {
+        return mApolloClient;
     }
 
     public LifecycleManager getLifecycleManager() {
@@ -432,6 +449,7 @@ public class ShopGun {
         String eventEnvironment;
         RealmConfiguration realmConfiguration;
         OkHttpClient okHttpClient;
+        ApolloClient apolloClient;
         List<Interceptor> interceptors = new ArrayList<>();
         List<Interceptor> networkInterceptors = new ArrayList<>();
 
@@ -614,6 +632,12 @@ public class ShopGun {
             // Add sdk interceptors last to override user options if necessary
             okHttpClientBuilder.addInterceptor(new UserAgentInterceptor(SgnUserAgent.getUserAgent(application)));
             okHttpClient = okHttpClientBuilder.build();
+
+            // Setup the default ApolloClient
+            apolloClient = ApolloClient.builder()
+                    .serverUrl("https://graph.service.shopgun.com")
+                    .okHttpClient(okHttpClient)
+                    .build();
 
             // Set the default RealmConfiguration.
             Realm.init(application);

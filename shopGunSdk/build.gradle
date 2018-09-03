@@ -17,6 +17,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'realm-android'
 apply plugin: 'com.github.ben-manes.versions'
+apply plugin: 'com.apollographql.android'
 
 buildscript {
     // Custom buildscript closure for SDK module, to allow compilation from other projects
@@ -77,6 +78,7 @@ dependencies {
     implementation libs.picasso
     implementation libs.gson
     implementation libs.appcompat
+    implementation libs.apollo
 
     testImplementation libs.junit
     testImplementation libs.robolectric
