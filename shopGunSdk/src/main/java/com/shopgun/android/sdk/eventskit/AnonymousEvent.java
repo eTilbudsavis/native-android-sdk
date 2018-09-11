@@ -130,8 +130,11 @@ public class AnonymousEvent {
     }
 
     public AnonymousEvent addSearch(String query, String language) {
-        if (!TextUtils.isEmpty(query) && !TextUtils.isEmpty(language)) {
+        if (!TextUtils.isEmpty(query)) {
             json_event.addProperty("sea.q", query);
+        }
+        // language is optional in case is not possible to detect it
+        if (!TextUtils.isEmpty(language)) {
             json_event.addProperty("sea.l", language);
         }
         return this;
