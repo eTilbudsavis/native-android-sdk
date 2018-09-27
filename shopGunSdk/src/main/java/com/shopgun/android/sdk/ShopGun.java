@@ -29,9 +29,11 @@ import com.shopgun.android.sdk.api.Environment;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.corekit.UserAgentInterceptor;
-import com.shopgun.android.sdk.corekit.realm.SgnRealmModule;
+import com.shopgun.android.sdk.corekit.realm.SgnAnonymousEventRealmModule;
+import com.shopgun.android.sdk.corekit.realm.SgnLegacyEventRealmModule;
 import com.shopgun.android.sdk.database.SgnDatabase;
-import com.shopgun.android.sdk.eventskit.EzEvent;
+import com.shopgun.android.sdk.eventskit.AnonymousEvent;
+import com.shopgun.android.sdk.eventskit.EventUtils;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -52,6 +54,7 @@ import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.sdk.utils.Version;
 import com.shopgun.android.utils.PackageUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -143,6 +146,8 @@ public class ShopGun {
     private final RequestQueue mRequestQueue;
     /** A RealmConfiguration specifically for the SDK */
     private final RealmConfiguration mRealmConfiguration;
+    /** Realm configuration to handle the shipping of legacy events */
+    private final  RealmConfiguration mLegacyConfiguration;
     /**  **/
     private SgnLifecycleCallback mLifecycleCallback;
 
@@ -157,6 +162,7 @@ public class ShopGun {
         mClient = builder.okHttpClient;
         mRealmConfiguration = builder.realmConfiguration;
         mApolloClient = builder.apolloClient;
+        mLegacyConfiguration = builder.legacyConfiguration;
 
         mLifecycleManager = new LifecycleManager(builder.application);
         mLifecycleCallback = new SgnLifecycleCallback();
@@ -291,6 +297,10 @@ public class ShopGun {
         return mEventEnvironment;
     }
 
+    public String getLegacyEventEnvironment() {
+        return "https://events.service.shopgun.com/track";
+    }
+
     /**
      * Shortcut method for adding requests to the RequestQueue.
      * @param request to be performed
@@ -394,13 +404,23 @@ public class ShopGun {
         return Realm.getInstance(mRealmConfiguration);
     }
 
+    public boolean legacyEventsDetected() {
+        return !(mLegacyConfiguration == null);
+    }
+
+    public Realm getLegacyRealmInstance() {
+        return Realm.getInstance(mLegacyConfiguration);
+    }
+
     private class SgnLifecycleCallback implements LifecycleManager.Callback {
 
         @Override
         public void onCreate(Activity activity) {
             mSessionId = SgnUtils.createUUID();
             mSettings.incrementUsageCount();
-            EzEvent.create(EzEvent.CLIENT_SESSION_OPENED).track();
+            AnonymousEvent session_open_event = new AnonymousEvent(AnonymousEvent.CLIENT_SESSION_OPENED);
+            EventUtils.addLocationInformation(ShopGun.getInstance().getContext(), session_open_event);
+            session_open_event.track();
             SgnLog.v(TAG, "onCreate");
         }
 
@@ -448,6 +468,7 @@ public class ShopGun {
         ThemeEnvironment themeEnvironment;
         String eventEnvironment;
         RealmConfiguration realmConfiguration;
+        RealmConfiguration legacyConfiguration;
         OkHttpClient okHttpClient;
         ApolloClient apolloClient;
         List<Interceptor> interceptors = new ArrayList<>();
@@ -618,7 +639,7 @@ public class ShopGun {
             }
 
             if (eventEnvironment == null) {
-                eventEnvironment = "https://events.service.shopgun.com/track";
+                eventEnvironment = "https://events.service.shopgun.com/sync";
             }
 
             // Setup the default OkHttpClient
@@ -641,15 +662,48 @@ public class ShopGun {
 
             // Set the default RealmConfiguration.
             Realm.init(application);
+
+            // check if there are legacy events
+            detectLegacyEvents();
+
+            // Set the default RealmConfiguration.
             realmConfiguration = new RealmConfiguration.Builder()
-                    .name(Constants.PACKAGE + ".realm")
-                    .modules(new SgnRealmModule())
-                    .schemaVersion(1)
+                    .name(Constants.PACKAGE + ".anonymousEvent" + ".realm")
+                    .modules(new SgnAnonymousEventRealmModule())
+                    .schemaVersion(2)
                     .build();
 
             ShopGun.mSingleton = new ShopGun(Builder.this);
             return ShopGun.getInstance();
 
+        }
+
+        private void detectLegacyEvents() {
+            legacyConfiguration = new RealmConfiguration.Builder()
+                    .name(Constants.PACKAGE + ".realm")
+                    .modules(new SgnLegacyEventRealmModule())
+                    .schemaVersion(1)
+                    .build();
+
+            // check if the db exists
+            if (new File(legacyConfiguration.getPath()).exists()) {
+                // exists
+                Realm realm = Realm.getInstance(legacyConfiguration);
+                boolean isEmpty = realm.isEmpty();
+                realm.close();
+
+                if (isEmpty) {
+                    // if it's empty, try to delete it
+                    try {
+                        Realm.deleteRealm(legacyConfiguration);
+                    } catch (IllegalStateException ignore) {}
+                    legacyConfiguration = null;
+                }
+            }
+            else {
+                // doesn't exist
+                legacyConfiguration = null;
+            }
         }
 
     }

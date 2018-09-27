@@ -27,6 +27,7 @@ ext {
             crashlytics                 : '2.5.5@aar',
             glide                       : '4.6.1',
             apollo                      : '0.5.0',
+            geohash                     : '0.22',
 
             sgn : [
                     materialcolorcreator        : '1.0.0',
@@ -88,6 +89,7 @@ ext {
             placesautocomplete          : "com.seatgeek:placesautocomplete:$libVersions.placesautocomplete",
             crashlytics                 : "com.crashlytics.sdk.android:crashlytics:$libVersions.crashlytics",
             apollo                      : "com.apollographql.apollo:apollo-runtime:$libVersions.apollo",
+            geohash                     : "com.github.drfonfon:android-geohash:$libVersions.geohash",
 
 
             // tests

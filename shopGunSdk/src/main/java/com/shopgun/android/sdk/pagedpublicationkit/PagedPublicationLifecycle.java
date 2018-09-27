@@ -3,6 +3,7 @@ package com.shopgun.android.sdk.pagedpublicationkit;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.shopgun.android.sdk.eventskit.AnonymousEvent;
 import com.shopgun.android.utils.NumberUtils;
 import com.shopgun.android.utils.log.L;
 import com.shopgun.android.utils.log.LogUtil;
@@ -100,7 +101,6 @@ class PagedPublicationLifecycle implements Parcelable {
         opened();
         if (isReadyAndResumed() && !mAppeared) {
             mAppeared = true;
-//            PagedPublicationEvent.appeared(mConfig).track();
         }
     }
 
@@ -110,7 +110,6 @@ class PagedPublicationLifecycle implements Parcelable {
             for (int i = 0; i < mSpreadAppeared.length; i++) {
                 spreadDisappeared(i, mConfig.getPagesFromSpreadPosition(i));
             }
-//            PagedPublicationEvent.disappeared(mConfig).track();
         }
     }
 
@@ -119,7 +118,6 @@ class PagedPublicationLifecycle implements Parcelable {
             int sp = mConfig.getSpreadPositionFromPage(page);
             if (mSpreadAppeared[sp]) {
                 mPageAppeared[page] = true;
-//                PagedPublicationEvent.pageAppeared(mConfig, page).track();
                 if (mPageLoaded[page]) {
                     pageLoaded(page);
                 }
@@ -133,7 +131,15 @@ class PagedPublicationLifecycle implements Parcelable {
         if (isReady() && mPageAppeared[page]) {
             mPageAppeared[page] = false;
             mPageLoaded[page] = false;
-//            PagedPublicationEvent.pageDisappeared(mConfig, page).track();
+
+            // pages start from 0
+            page++;
+            // exclude the outro page.
+            // Note: currently we don't have any catalog with intro
+            int pageLimit = mConfig.hasOutro() ? mConfig.getPageCount() - 1 : mConfig.getPageCount();
+            if (page <= pageLimit) {
+                PagedPublicationEvent.pageDisappeared(mConfig, page).track();
+            }
         }
     }
 
@@ -159,7 +165,6 @@ class PagedPublicationLifecycle implements Parcelable {
                 pageDisappeared(i);
             }
             mSpreadAppeared[spread] = false;
-            PagedPublicationEvent.pageSpreadDisappeared(mConfig, pageNumbers).track();
         }
     }
 
@@ -176,7 +181,6 @@ class PagedPublicationLifecycle implements Parcelable {
     private void internalSpreadZoomedIn(int spread, int[] pages) {
         if (isReadyAndResumed()) {
             mSpreadZoomedIn[spread] = true;
-            PagedPublicationEvent.pageSpreadZoomedIn(mConfig, pages).track();
         }
     }
 
@@ -187,7 +191,6 @@ class PagedPublicationLifecycle implements Parcelable {
     void spreadZoomedOut(int spread, int[] pages, float scale) {
         if (isReady() && mSpreadZoomedIn[spread] && NumberUtils.isEqual(1.0f, scale)) {
             mSpreadZoomedIn[spread] = false;
-            PagedPublicationEvent.pageSpreadZoomedOut(mConfig, pages).track();
         }
     }
 

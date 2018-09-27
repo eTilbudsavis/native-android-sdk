@@ -28,7 +28,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.4'
-        classpath "io.realm:realm-gradle-plugin:4.3.3"
+        classpath "io.realm:realm-gradle-plugin:5.4.2"
         classpath 'com.apollographql.apollo:apollo-gradle-plugin:0.5.0'
     }
 }
@@ -42,5 +42,6 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://maven.google.com' }
+        maven { url 'https://jitpack.io' }
     }
 }

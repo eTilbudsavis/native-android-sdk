@@ -12,6 +12,13 @@ import io.realm.annotations.Ignore;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.RealmClass;
 
+
+/**
+ * @deprecated use {@link AnonymousEvent}
+ *
+ * Kept only for legacy events that might be stored on the device
+ */
+@Deprecated
 @RealmClass
 public class Event implements RealmModel {
 

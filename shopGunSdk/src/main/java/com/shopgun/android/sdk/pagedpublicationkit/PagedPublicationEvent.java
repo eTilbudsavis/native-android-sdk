@@ -1,103 +1,53 @@
 package com.shopgun.android.sdk.pagedpublicationkit;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.shopgun.android.sdk.eventskit.EzEvent;
-import com.shopgun.android.verso.VersoTapInfo;
+import com.shopgun.android.sdk.ShopGun;
+import com.shopgun.android.sdk.corekit.SgnPreferences;
+import com.shopgun.android.sdk.eventskit.AnonymousEvent;
+import com.shopgun.android.sdk.eventskit.EventUtils;
 
-@SuppressWarnings({"unused", "WeakerAccess"})
-public class PagedPublicationEvent extends EzEvent {
+/**
+ * All events related to publications.
+ */
+public class PagedPublicationEvent extends AnonymousEvent {
 
     public static final String TAG = PagedPublicationEvent.class.getSimpleName();
 
-    PagedPublicationEvent(String type, JsonObject properties) {
-        super(type, properties);
+    private PagedPublicationEvent(int type) {
+        super(type);
     }
 
-    private static JsonArray idField(String id) {
-        return idField(true, id);
-    }
-
-    private static JsonArray idField(boolean legacy, String id) {
-        JsonArray array = new JsonArray();
-        array.add(legacy ? "legacy" : "graph");
-        array.add(id);
-        return array;
-    }
-
-    private static JsonObject publication(String publicationId, String ownedBy) {
-        JsonObject pagedPublication = new JsonObject();
-        pagedPublication.add("id", idField(publicationId));
-        pagedPublication.add("ownedBy", idField(ownedBy));
-        JsonObject properties = new JsonObject();
-        properties.add("pagedPublication", pagedPublication);
-        return properties;
-    }
-
-    private static PagedPublicationEvent publication(String type, String publicationId, String ownedBy) {
-        return new PagedPublicationEvent(type, publication(publicationId, ownedBy));
-    }
-
-    private static JsonObject page(String publicationId, String ownedBy, int pageNumber) {
-        JsonObject props = publication(publicationId, ownedBy);
-        JsonObject pagedPublicationPage = new JsonObject();
-        pagedPublicationPage.addProperty("pageNumber", pageNumber);
-        props.add("pagedPublicationPage", pagedPublicationPage);
-        return props;
-    }
-
-    private static PagedPublicationEvent page(String type, String publicationId, String ownedBy, int pageNumber) {
-        return new PagedPublicationEvent(type, page(publicationId, ownedBy, pageNumber+1));
-    }
-
-    private static JsonObject getPageClickProperties(String publicationId, String ownedBy, int pageNumber, float x, float y) {
-        JsonObject props = publication(publicationId, ownedBy);
-        JsonObject pagedPublicationPage = new JsonObject();
-        pagedPublicationPage.addProperty("pageNumber", pageNumber+1);
-        pagedPublicationPage.addProperty("x", x);
-        pagedPublicationPage.addProperty("y", y);
-        props.add("pagedPublicationPage", pagedPublicationPage);
-        return props;
-    }
-
-    private static PagedPublicationEvent getPageClickProperties(String type, String publicationId, String ownedBy, int pageNumber, float x, float y) {
-        return new PagedPublicationEvent(type, getPageClickProperties(publicationId, ownedBy, pageNumber, x, y));
-    }
-
-    private static JsonObject getPageSpreadProperties(String publicationId, String ownedBy, int[] pages) {
-        JsonObject props = publication(publicationId, ownedBy);
-        JsonObject pagedPublicationPageSpread = new JsonObject();
-        JsonArray pageNumbers = new JsonArray();
-        for (int page : pages) {
-            pageNumbers.add(page+1);
-        }
-        pagedPublicationPageSpread.add("pageNumbers", pageNumbers);
-        props.add("pagedPublicationPageSpread", pagedPublicationPageSpread);
-        return props;
-    }
-
-    private static PagedPublicationEvent getPageSpreadProperties(String type, String publicationId, String ownedBy, int[] pageNumbers) {
-        return new PagedPublicationEvent(type, getPageSpreadProperties(publicationId, ownedBy, pageNumbers));
-    }
-
+    /**
+     * A paged publication has been opened by the user.
+     * @param config configuration of the publication
+     * @return paged publication opened event
+     */
     public static PagedPublicationEvent opened(PagedPublicationConfiguration config) {
-        return publication(PAGED_PUBLICATION_OPENED, config.getPublication().getId(), config.getPublication().getOwnerId());
+        PagedPublicationEvent event = new PagedPublicationEvent(PAGED_PUBLICATION_OPENED);
+        String ppId = config.getPublication().getId();
+
+        EventUtils.addLocationInformation(ShopGun.getInstance().getContext(), event);
+
+        event.addPublicationOpened(ppId)
+                .addViewToken(EventUtils.generateViewToken(ppId.getBytes(), SgnPreferences.getInstance().getInstallationId()));
+
+        return event;
     }
 
-    public static PagedPublicationEvent pageDisappeared(PagedPublicationConfiguration config, int pageNumber) {
-        return page(PAGED_PUBLICATION_PAGE_DISAPPEARED, config.getPublication().getId(), config.getPublication().getOwnerId(), pageNumber);
-    }
+    /**
+     * When a particular page presented to the user disappears
+     * @param config configuration of the publication
+     * @return paged publication page open event
+     */
+    public static PagedPublicationEvent pageDisappeared(PagedPublicationConfiguration config, int page) {
+        PagedPublicationEvent event = new PagedPublicationEvent(PAGED_PUBLICATION_PAGE_DISAPPEARED);
+        String ppId = config.getPublication().getId();
 
-    public static PagedPublicationEvent pageSpreadDisappeared(PagedPublicationConfiguration config, int[] pageNumbers) {
-        return getPageSpreadProperties(PAGED_PUBLICATION_PAGE_SPREAD_DISAPPEARED, config.getPublication().getId(), config.getPublication().getOwnerId(), pageNumbers);
-    }
+        EventUtils.addLocationInformation(ShopGun.getInstance().getContext(), event);
 
-    public static PagedPublicationEvent pageSpreadZoomedIn(PagedPublicationConfiguration config, int[] pageNumbers) {
-        return getPageSpreadProperties(PAGED_PUBLICATION_PAGE_SPREAD_ZOOM_IN, config.getPublication().getId(), config.getPublication().getOwnerId(), pageNumbers);
-    }
-
-    public static PagedPublicationEvent pageSpreadZoomedOut(PagedPublicationConfiguration config, int[] pageNumbers) {
-        return getPageSpreadProperties(PAGED_PUBLICATION_PAGE_SPREAD_ZOOM_OUT, config.getPublication().getId(), config.getPublication().getOwnerId(), pageNumbers);
+        event.addPageOpened(ppId, page)
+                .addViewToken(EventUtils.generateViewToken(
+                        EventUtils.getDataBytes(ppId, page), SgnPreferences.getInstance().getInstallationId()));
+        return event;
     }
 
 }

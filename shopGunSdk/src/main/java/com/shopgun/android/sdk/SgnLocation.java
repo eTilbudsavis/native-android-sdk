@@ -445,5 +445,4 @@ public class SgnLocation extends Location {
         dest.writeDouble(mBoundSouth);
         dest.writeDouble(mBoundWest);
     }
-
 }

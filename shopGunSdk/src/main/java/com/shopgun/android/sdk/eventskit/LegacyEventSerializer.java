@@ -8,9 +8,13 @@ import com.google.gson.internal.bind.util.ISO8601Utils;
 
 import java.lang.reflect.Type;
 
-public class EventSerializer implements JsonSerializer<Event> {
+
+/**
+ * Serializer for legacy events
+ */
+public class LegacyEventSerializer implements JsonSerializer<Event> {
     
-    public static final String TAG = EventSerializer.class.getSimpleName();
+    public static final String TAG = LegacyEventSerializer.class.getSimpleName();
     
     @Override
     public JsonElement serialize(Event src, Type typeOfSrc, JsonSerializationContext context) {

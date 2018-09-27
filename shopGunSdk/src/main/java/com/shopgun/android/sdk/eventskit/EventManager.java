@@ -1,25 +1,17 @@
 package com.shopgun.android.sdk.eventskit;
 
 import android.app.Activity;
-import android.content.Context;
-import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.utils.Constants;
-import com.shopgun.android.sdk.utils.SgnUtils;
-import com.shopgun.android.utils.LocationUtils;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +25,8 @@ public class EventManager {
     public static final int MAX_QUEUE_SIZE = 1024;
 
     private static EventManager mInstance;
+
+    // Every 120 sec the flush will be triggered and all the events will be sent to the server
     private static final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -44,14 +38,12 @@ public class EventManager {
         }
     };
 
-    private Collection<WeakReference<EventTracker>> mTrackers;
-    private static BlockingQueue<Event> mEventQueue;
-    private JsonObject mJsonContext;
-    private Location mLastKnownLocation;
-    private JsonObject mJsonLocation;
+    private static BlockingQueue<AnonymousEvent> mEventQueue;
     private EventDispatcher mEventDispatcher;
+    private LegacyEventDispatcher mLegacyEventDispatcher;
     private long mDispatchInterval = DISPATCH_INTERVAL;
     private final List<EventListener> mEventListeners;
+    private String mCountryCode;
 
     public static EventManager getInstance() {
         if (mInstance == null) {
@@ -65,11 +57,13 @@ public class EventManager {
     }
 
     private EventManager(ShopGun shopGun) {
-        mTrackers = new HashSet<>();
         mEventListeners = new ArrayList<>();
         mEventQueue = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
         mEventDispatcher = new EventDispatcher(mEventQueue, shopGun.getClient(), shopGun.getEventEnvironment());
-        mJsonContext = EventUtils.getContext(shopGun.getContext());
+        mCountryCode = "";
+
+        checkLegacyEvents(shopGun);
+
         EventLifecycle lifecycleCallback = new EventLifecycle();
         shopGun.getLifecycleManager().registerCallback(lifecycleCallback);
         if (shopGun.getLifecycleManager().isActive()) {
@@ -77,48 +71,17 @@ public class EventManager {
         }
     }
 
-    public void registerTracker(EventTracker tracker) {
-        synchronized (EventManager.class) {
-            mTrackers.add(new WeakReference<EventTracker>(tracker));
+    private void checkLegacyEvents(ShopGun shopGun) {
+        mLegacyEventDispatcher = null;
+        if (shopGun.legacyEventsDetected()) {
+            mLegacyEventDispatcher = new LegacyEventDispatcher(shopGun.getClient(), shopGun.getLegacyEventEnvironment());
         }
     }
 
-    public void unregisterTracker(EventTracker tracker) {
-        synchronized (EventManager.class) {
-            Iterator<WeakReference<EventTracker>> it = mTrackers.iterator();
-            while(it.hasNext()) {
-                WeakReference<EventTracker> weakTracker = it.next();
-                EventTracker tmp = weakTracker.get();
-                if (tracker == tmp) {
-                    it.remove();
-                    break;
-                }
-                if (tmp == null) {
-                    // if the weak-ref is null, remove
-                    it.remove();
-                }
-            }
-        }
-    }
+    public void addEvent(AnonymousEvent event) {
 
-    public void setCampaign(JsonObject campaign) {
-        mJsonContext.add("campaign", campaign);
-    }
+        event.addUserCountry(mCountryCode);
 
-    public JsonObject getContext(boolean updateLocation) {
-        if (updateLocation || mLastKnownLocation == null) {
-            Context ctx = ShopGun.getInstance().getContext();
-            Location currentLoc = LocationUtils.getLastKnownLocation(ctx);
-            if (LocationUtils.isBetterLocation(currentLoc, mLastKnownLocation)) {
-                mLastKnownLocation = currentLoc;
-                mJsonLocation = EventUtils.location(mLastKnownLocation);
-            }
-            mJsonContext.add("location", mJsonLocation);
-        }
-        return mJsonContext;
-    }
-
-    public void addEvent(Event event) {
         boolean isActive = ShopGun.getInstance().getLifecycleManager().isActive();
         if (!isActive) {
             mEventDispatcher.start();
@@ -132,8 +95,19 @@ public class EventManager {
         }
     }
 
+    /**
+     * The current country of the device user as an ISO 3166-1 alpha-2 encoded string.
+     * @param userCountry code
+     */
+    public void setUserCountry(String userCountry) {
+        if (userCountry != null && userCountry.length() == 2) {
+            mCountryCode = userCountry.toUpperCase(Locale.ENGLISH);
+        }
+    }
+
     private void resetTimer() {
         mHandler.removeMessages(DISPATCH_MSG);
+        // next flush in 120 sec
         mHandler.sendEmptyMessageDelayed(DISPATCH_MSG, mDispatchInterval);
     }
 
@@ -148,16 +122,16 @@ public class EventManager {
             mEventDispatcher = new EventDispatcher(mEventQueue, sgn.getClient(), sgn.getEventEnvironment());
         }
         mEventDispatcher.start();
+
+        if (mLegacyEventDispatcher != null) {
+            mLegacyEventDispatcher.start();
+        }
     }
 
     private class EventLifecycle extends LifecycleManager.SimpleCallback {
 
         @Override
         public void onCreate(Activity activity) {
-            if (mJsonContext != null) {
-                String sessionId = SgnUtils.createUUID();
-                mJsonContext.add("session", EventUtils.session(sessionId));
-            }
             startDispatcher();
         }
 
@@ -165,6 +139,9 @@ public class EventManager {
         public void onDestroy(Activity activity) {
             mHandler.removeMessages(DISPATCH_MSG);
             mEventDispatcher.quit();
+            if (mLegacyEventDispatcher != null) {
+                mLegacyEventDispatcher.quit();
+            }
         }
 
     }
@@ -181,7 +158,7 @@ public class EventManager {
         mEventListeners.clear();
     }
 
-    private void dispatchOnEvent(Event event) {
+    private void dispatchOnEvent(AnonymousEvent event) {
         for (EventListener tracker : mEventListeners) {
             tracker.onEvent(event);
         }

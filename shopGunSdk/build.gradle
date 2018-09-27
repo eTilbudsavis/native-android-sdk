@@ -28,7 +28,7 @@ buildscript {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.4.9' // upgrade to 4.4.10+ doesn't build the sdk
-        classpath "io.realm:realm-gradle-plugin:4.3.3"
+        classpath "io.realm:realm-gradle-plugin:5.4.2"
         classpath 'com.apollographql.apollo:apollo-gradle-plugin:0.5.0'
 
         // Dependencies checker: run from command line ./gradlew dependencyUpdates -Drevision=release|milestone|integration
@@ -80,6 +80,7 @@ dependencies {
     implementation libs.gson
     implementation libs.appcompat
     implementation libs.apollo
+    implementation libs.geohash
 
     testImplementation libs.junit
     testImplementation libs.robolectric

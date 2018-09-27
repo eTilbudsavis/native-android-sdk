@@ -49,7 +49,7 @@ public class SgnLocationUnitTest {
         mParcel.recycle();
     }
 
-    @Ignore("Robolectric ShadowLocation has a bug, https://github.com/robolectric/robolectric/issues/2702")
+//    @Ignore("Robolectric ShadowLocation has a bug, https://github.com/robolectric/robolectric/issues/2702")
     @Test
     public void testParcelable() throws Exception {
 
