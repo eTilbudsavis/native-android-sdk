@@ -131,6 +131,9 @@ public class EventManager {
         if (mLegacyEventDispatcher != null) {
             mLegacyEventDispatcher.start();
         }
+
+        // start flushing events every 120 sec
+        mHandler.sendEmptyMessageDelayed(DISPATCH_MSG, mDispatchInterval);
     }
 
     private class EventLifecycle extends LifecycleManager.SimpleCallback {
