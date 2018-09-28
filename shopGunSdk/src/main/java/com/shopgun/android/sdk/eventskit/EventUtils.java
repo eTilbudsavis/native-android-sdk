@@ -12,6 +12,7 @@ import com.shopgun.android.utils.LocationUtils;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 public class EventUtils {
 
@@ -59,7 +60,7 @@ public class EventUtils {
 
             GeoHash geoHash = GeoHash.fromLocation(location, GEO_HASH_PRECISION);
 
-            event.addUserLocation(geoHash.toString(), location.getTime());
+            event.addUserLocation(geoHash.toString(), TimeUnit.MILLISECONDS.toSeconds(location.getTime()));
         }
     }
 
