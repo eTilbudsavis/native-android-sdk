@@ -44,6 +44,7 @@ public class Settings {
     private static final String LOCATION = "location_json";
     private static final String CLIENT_ID = "client_id";
     private static final String SESSION_ID = "session_id";
+    private static final String LOCATION_ENABLED = "location_enabled";
 
     private SharedPreferences mSharedPrefs;
     private static boolean mMovedSharedPrefs = false;
@@ -116,6 +117,7 @@ public class Settings {
     }
 
     public boolean saveLocation(SgnLocation l) {
+        mSharedPrefs.edit().putBoolean(LOCATION_ENABLED, l.isSensor()).apply();
         String loc = l.toJSON().toString();
         return mSharedPrefs.edit().putString(LOCATION, loc).commit();
     }
@@ -130,6 +132,10 @@ public class Settings {
             SgnLog.e(TAG, "Not able to parse location json from SharedPreferences", e);
         }
         return new SgnLocation();
+    }
+
+    public boolean isLocationEnabled() {
+        return mSharedPrefs.getBoolean(LOCATION_ENABLED, false);
     }
 
     public String getClientId() {

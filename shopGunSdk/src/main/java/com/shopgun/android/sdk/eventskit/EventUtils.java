@@ -52,6 +52,12 @@ public class EventUtils {
 
     public static void addLocationInformation(Context context, AnonymousEvent event) {
 
+        if (!ShopGun.getInstance().getSettings().isLocationEnabled()) {
+            // if the location is a manually set address don't add the location info to the event
+            // even if we have location permission.
+            return;
+        }
+
         // if the app has the location permissions, ask the location to the system
         Location location = LocationUtils.getLastKnownLocation(context);
 
