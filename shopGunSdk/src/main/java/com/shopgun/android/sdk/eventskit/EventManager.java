@@ -7,6 +7,7 @@ import android.os.Message;
 
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
+import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.ArrayList;
@@ -81,6 +82,10 @@ public class EventManager {
     public void addEvent(AnonymousEvent event) {
 
         event.addUserCountry(mCountryCode);
+
+        if (!event.doNotTrack()) {
+            SgnLog.d(TAG, "Adding tracked event: " + event.toString());
+        }
 
         boolean isActive = ShopGun.getInstance().getLifecycleManager().isActive();
         if (!isActive) {

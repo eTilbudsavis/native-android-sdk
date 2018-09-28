@@ -135,7 +135,7 @@ public class EventDispatcher extends Thread {
             }
             if (event.doNotTrack()) {
                 // log events not meant to be tracked (like the flush event)
-                SgnLog.i(TAG, event.toString());
+                SgnLog.v(TAG, event.toString());
             } else {
                 // wrap the event for database operation
                 AnonymousEventWrapper wrappedEvent =
@@ -196,7 +196,7 @@ public class EventDispatcher extends Thread {
                 mRealm.commitTransaction();
 
                 List<EventResponse.Item> errors = resp.getErrors();
-                SgnLog.v(TAG, events.size() + " events successfully shipped. " + resp.getAckItems().size() + " ack, " + nackIds.size() + " nack, " + errors.size() + " error.");
+                SgnLog.d(TAG, events.size() + " events successfully shipped. " + resp.getAckItems().size() + " ack, " + nackIds.size() + " nack, " + errors.size() + " error.");
 
                 if (!errors.isEmpty()) {
                     for (EventResponse.Item i : resp.getErrors()) {
