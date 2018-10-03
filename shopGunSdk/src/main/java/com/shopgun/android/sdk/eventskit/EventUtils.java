@@ -23,6 +23,12 @@ public class EventUtils {
 
     }
 
+    /**
+     * Generate the view token for the content shown to the user
+     * @param data byte array that represent the data
+     * @param salt salt for the hash
+     * @return the first 8 bytes of the md5, encoded in base64
+     */
     public static String generateViewToken(byte[] data, String salt) {
         try {
             // get the bytes of the salt
@@ -50,6 +56,12 @@ public class EventUtils {
         return "";
     }
 
+    /**
+     * Add the location information to the passed event if the location has been enabled in the SDK
+     * and if the app has the permission to access the location from the system
+     * @param context context used to check for permission
+     * @param event to be updated
+     */
     public static void addLocationInformation(Context context, AnonymousEvent event) {
 
         if (!ShopGun.getInstance().getSettings().isLocationEnabled()) {

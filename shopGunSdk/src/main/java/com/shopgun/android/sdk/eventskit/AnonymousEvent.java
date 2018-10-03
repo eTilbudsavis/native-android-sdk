@@ -61,8 +61,18 @@ public class AnonymousEvent {
         return TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
     }
 
+    /**
+     * Add a property to the internal json object.
+     * This can be used for custom events used internally by the app; for events that needs to be sent
+     * to SGN servers, please use the predefined methods that will add the expected fields properly.
+     * @param property name of the member
+     * @param value string value associated to the property
+     * @return the updated event
+     */
     public AnonymousEvent add(String property, String value) {
-        json_event.addProperty(property, value);
+        if (property != null) {
+            json_event.addProperty(property, value);
+        }
         return this;
     }
 
@@ -77,6 +87,12 @@ public class AnonymousEvent {
 
     /****** Common fields */
 
+    /**
+     * Add user location field.
+     * @param geohash String with 4 char representing the geohash
+     * @param timestamp when the location fix was taken, in seconds
+     * @return the updated event
+     */
     public AnonymousEvent addUserLocation(String geohash, long timestamp) {
         if (!TextUtils.isEmpty(geohash) && timestamp > 0) {
             json_event.addProperty("l.h", geohash);
@@ -85,6 +101,11 @@ public class AnonymousEvent {
         return this;
     }
 
+    /**
+     * Add user country code field
+     * @param countryCode an ISO 3166-1 alpha-2 encoded string, like "DK"
+     * @return the updated event
+     */
     public AnonymousEvent addUserCountry(String countryCode) {
         if (!TextUtils.isEmpty(countryCode)) {
             json_event.addProperty("l.c", countryCode);
@@ -92,6 +113,11 @@ public class AnonymousEvent {
         return this;
     }
 
+    /**
+     * Add the view token field
+     * @param viewToken string that uniquely identify the viewed content
+     * @return the updated event
+     */
     public AnonymousEvent addViewToken(String viewToken) {
         if (!TextUtils.isEmpty(viewToken)) {
             json_event.addProperty("vt", viewToken);
@@ -102,6 +128,11 @@ public class AnonymousEvent {
 
     /****** Fields for predefined events */
 
+    /**
+     * Add the publication open field
+     * @param publicationId String containing the id of the opened catalog
+     * @return the updated event
+     */
     public AnonymousEvent addPublicationOpened(String publicationId) {
         if (!TextUtils.isEmpty(publicationId)) {
             json_event.addProperty("pp.id", publicationId);
@@ -109,6 +140,12 @@ public class AnonymousEvent {
         return this;
     }
 
+    /**
+     * Add the page open field
+     * @param publicationId String containing the id of the opened catalog
+     * @param page page number
+     * @return the updated event
+     */
     public AnonymousEvent addPageOpened(String publicationId, int page) {
         if (!TextUtils.isEmpty(publicationId) && page > 0) {
             this.addPublicationOpened(publicationId);
@@ -117,6 +154,11 @@ public class AnonymousEvent {
         return this;
     }
 
+    /**
+     * Add the offer open field
+     * @param offerId String containing the id of the opened offer
+     * @return the updated event
+     */
     public AnonymousEvent addOfferOpened(String offerId) {
         if (!TextUtils.isEmpty(offerId)) {
             json_event.addProperty("of.id", offerId);
@@ -124,6 +166,12 @@ public class AnonymousEvent {
         return this;
     }
 
+    /**
+     * Add the field relative to the search
+     * @param query the text searched by the user
+     * @param language optional: the language. Leave it empty if is not possible to detect it
+     * @return the updated event
+     */
     public AnonymousEvent addSearch(String query, String language) {
         if (!TextUtils.isEmpty(query)) {
             json_event.addProperty("sea.q", query);
@@ -138,15 +186,28 @@ public class AnonymousEvent {
 
     /****** Getters and setters */
 
+    /**
+     * Getter for the tracking flag
+     * @return true if the event won't be sent to the server, false otherwise.
+     * Default value is false, so the event will be sent to the server.
+     */
     public boolean doNotTrack() {
         return mDoNotTrack;
     }
 
+    /**
+     * Setter for the tracking flag. For custom event that won't be accepted by the server, set it to true
+     * @param doNotTrack true if the event should not be sent to the server
+     * @return the updated event
+     */
     public AnonymousEvent doNotTrack(boolean doNotTrack) {
         mDoNotTrack = doNotTrack;
         return this;
     }
 
+    /**
+     * Insert the event into the tracker queue.
+     */
     public void track() {
             EventTracker.globalTracker().track(this);
     }
@@ -156,12 +217,23 @@ public class AnonymousEvent {
         return json_event.toString();
     }
 
+    /**
+     * Getter for the event type
+     * @return integer representing the type
+     */
     public int getType() {
         return type;
     }
 
+    /**
+     * Get the type in human readable format for logging purposes
+     * @param type integer to be translated
+     * @return the correspondent string
+     */
     public String getType(int type) {
         switch(type) {
+            case DEFAULT_TYPE:
+                return "default_type";
             case PAGED_PUBLICATION_OPENED:
                 return "paged_publication_opened";
             case PAGED_PUBLICATION_PAGE_DISAPPEARED:
@@ -177,14 +249,26 @@ public class AnonymousEvent {
         }
     }
 
+    /**
+     * Get the UUID of the event
+     * @return string UUID
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Get the timestamp of when the event was created
+     * @return timestamp in seconds
+     */
     public long getTimestamp() {
         return timestamp;
     }
 
+    /**
+     * Get the version that the event is compliant with
+     * @return integer
+     */
     public int getVersion() {
         return VERSION;
     }
