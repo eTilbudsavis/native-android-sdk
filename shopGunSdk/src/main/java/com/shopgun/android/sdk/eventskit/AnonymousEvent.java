@@ -32,11 +32,6 @@ public class AnonymousEvent {
 
     private JsonObject json_event;
 
-    // additional custom data that the event could carry around
-    // to be used inside the application.
-    // It won't be sent to the server or stored anywhere
-    private Object data;
-
     private int type;
     private String id;
     private long timestamp;
@@ -154,14 +149,6 @@ public class AnonymousEvent {
 
     public void track() {
             EventTracker.globalTracker().track(this);
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(Object data) {
-        this.data = data;
     }
 
     @Override
