@@ -162,7 +162,6 @@ Please try to follow existing code convention and style when committing code.
 
 Links
 -----
-[Javadoc sdk documentation](docs/index.html)
 [ShopGun API Documentation](http://docs.api.etilbudsavis.dk/)
 
 
