@@ -8,6 +8,15 @@ import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.utils.PackageUtils;
 import com.shopgun.android.utils.TextUtils;
 
+/**
+ * Global tracker for events. It searches for meta-data in the app manifest:
+ * "com.shopgun.android.sdk.eventskit.application_track_id" for production
+ * "com.shopgun.android.sdk.develop.eventskit.application_track_id" for development
+ * This is the application track id that will be inserted into every event.
+ *
+ * If none of these is found, it will start a "NoOperative" tracker that will just log the event in the console
+ * without sending anything to the server.
+ */
 public abstract class EventTracker {
 
     public static final String TAG = EventTracker.class.getSimpleName();

@@ -28,6 +28,9 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+/**
+ * Background thread that will dispatch the legacy events if any, delete the database and quit.
+ */
 public class LegacyEventDispatcher extends Thread {
 
     public static final String TAG = Constants.getTag(LegacyEventDispatcher.class);

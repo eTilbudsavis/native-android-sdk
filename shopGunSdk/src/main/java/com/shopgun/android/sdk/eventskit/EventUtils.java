@@ -14,6 +14,9 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Utils used to generate certain fields for the events.
+ */
 public class EventUtils {
 
     public static final String TAG = EventUtils.class.getSimpleName();

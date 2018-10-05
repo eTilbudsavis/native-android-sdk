@@ -17,6 +17,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Receives events from the {@link EventTracker} and insert them into the "to be dispatched" queue.
+ */
 public class EventManager {
 
     public static final String TAG = Constants.getTag(EventManager.class);
@@ -79,6 +82,10 @@ public class EventManager {
         }
     }
 
+    /**
+     * Add an event to the queue after adding the country code to it (optional field)
+     * @param event to be added
+     */
     public void addEvent(AnonymousEvent event) {
 
         event.addUserCountry(mCountryCode);
@@ -101,7 +108,8 @@ public class EventManager {
     }
 
     /**
-     * The current country of the device user as an ISO 3166-1 alpha-2 encoded string.
+     * Optional: the current country of the device user as an ISO 3166-1 alpha-2 encoded string that will
+     * be added to every event.
      * @param userCountry code
      */
     public void setUserCountry(String userCountry) {

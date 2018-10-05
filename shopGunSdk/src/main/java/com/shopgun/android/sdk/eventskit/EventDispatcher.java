@@ -31,6 +31,10 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+/**
+ * Thread that runs in background and dispatches the events to the server.
+ * It's started by the {@link EventManager} automatically.
+ */
 public class EventDispatcher extends Thread {
 
     public static final String TAG = Constants.getTag(EventDispatcher.class);
@@ -119,6 +123,10 @@ public class EventDispatcher extends Thread {
         }
     }
 
+    /**
+     * Take an event from the queue and processes it.
+     * If it's an event to be tracked, it'll be serialized and inserted into a database, waiting to be dispatched.
+     */
     @Override
     public void run() {
         // low priority on posting mEvents to atta
@@ -263,6 +271,9 @@ public class EventDispatcher extends Thread {
         return query.findAll();
     }
 
+    /**
+     * Forces the delivery of all the event stored in the database
+     */
     public void flush() {
         // we can't flush if we've exceeded the capacity
         if (mQueue.remainingCapacity() > 0) {

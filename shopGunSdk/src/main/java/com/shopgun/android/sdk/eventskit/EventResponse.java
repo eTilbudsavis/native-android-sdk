@@ -9,6 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Response from the server about the event that have been sent
+ */
 public class EventResponse {
 
     public static final String TAG = EventResponse.class.getSimpleName();
@@ -19,6 +22,9 @@ public class EventResponse {
     private static final String ACK = "ack";
     private static final String NACK = "nack";
 
+    /**
+     * Single item in the server response
+     */
     public static class Item {
 
         @SerializedName("id")
