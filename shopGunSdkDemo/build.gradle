@@ -23,7 +23,6 @@ def versionPatch = 1
 android {
 
     compileSdkVersion rootProject.compileSdkVersion
-    buildToolsVersion rootProject.buildToolsVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -49,6 +48,10 @@ android {
             minifyEnabled false
             debuggable true
         }
+    }
+
+    lintOptions {
+        abortOnError false
     }
 
 }

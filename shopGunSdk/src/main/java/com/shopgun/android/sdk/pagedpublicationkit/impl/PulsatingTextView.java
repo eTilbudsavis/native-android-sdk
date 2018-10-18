@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.shopgun.android.utils.ColorUtils;
 
-public class PulsatingTextView extends TextView {
+public class PulsatingTextView extends android.support.v7.widget.AppCompatTextView {
 
     public static final String TAG = PulsatingTextView.class.getSimpleName();
 
