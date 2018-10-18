@@ -29,6 +29,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -229,7 +230,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
      */
     public User setGender(String gender) {
         if (gender != null) {
-            gender = gender.toLowerCase();
+            gender = gender.toLowerCase(Locale.ENGLISH);
             if (gender.equals("male") || gender.equals("female")) {
                 mGender = gender;
             }

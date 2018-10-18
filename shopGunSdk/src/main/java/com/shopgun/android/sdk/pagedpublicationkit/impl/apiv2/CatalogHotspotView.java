@@ -1,5 +1,6 @@
 package com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -10,6 +11,7 @@ import android.view.animation.AnimationUtils;
 import com.shopgun.android.sdk.R;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;
 
+@SuppressLint("ViewConstructor")
 public class CatalogHotspotView extends View {
 
     public static final String TAG = CatalogHotspotView.class.getSimpleName();

@@ -15,15 +15,17 @@
   limitations under the License.
   -->
 
-<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:orientation="vertical"
-               android:layout_gravity="center" >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_gravity="center">
 
     <TextView
         android:id="@+id/heading"
         android:text="Oops..."
+        tools:ignore="HardcodedText"
         android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -32,6 +34,7 @@
     <TextView
         android:id="@+id/message"
         android:text="An error occoured"
+        tools:ignore="HardcodedText"
         android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>

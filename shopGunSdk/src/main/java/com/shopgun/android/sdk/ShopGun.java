@@ -16,6 +16,7 @@
 
 package com.shopgun.android.sdk;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
@@ -105,6 +106,7 @@ public class ShopGun {
     public static final Version VERSION = new Version(4,0,0,"dev");
 
     /** The ShopGun singleton */
+    @SuppressLint("StaticFieldLeak")
     private static ShopGun mSingleton;
 
     /** Application context for usage in the SDK */

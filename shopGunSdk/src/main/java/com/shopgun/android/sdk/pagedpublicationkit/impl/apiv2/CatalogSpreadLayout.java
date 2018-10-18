@@ -1,5 +1,6 @@
 package com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -11,6 +12,7 @@ import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationOverlay;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressLint("ViewConstructor")
 public class CatalogSpreadLayout extends FrameLayout implements PagedPublicationOverlay {
 
     public static final String TAG = CatalogSpreadLayout.class.getSimpleName();

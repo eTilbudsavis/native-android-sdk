@@ -2,7 +2,7 @@
 <resources>
 
     <dimen name="sgn_pagedpubkit_hotspot_corner_radius">5dp</dimen>
-    <dimen name="sgn_pagedpubkit_hotspot_stroke_width">2px</dimen>
+    <dimen name="sgn_pagedpubkit_hotspot_stroke_width">2dp</dimen>
     <dimen name="sgn_pagedpubkit_hotspot_padding">1dp</dimen>
 
 </resources>

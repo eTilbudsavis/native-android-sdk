@@ -33,7 +33,7 @@ public class Device {
     @SuppressLint("NewApi")
     public static String getRadio() {
 		try {
-			return (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) ? Build.RADIO : Build.getRadioVersion();
+			return Build.getRadioVersion();
 		} catch (Exception e) {
             return "";
 		}

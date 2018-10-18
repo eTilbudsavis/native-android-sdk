@@ -16,6 +16,7 @@
 
 package com.shopgun.android.sdk.utils;
 
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class Validator {
@@ -82,7 +83,7 @@ public class Validator {
      */
     public static boolean isGenderValid(String gender) {
         if (gender != null) {
-            String g = gender.toLowerCase().trim();
+            String g = gender.toLowerCase(Locale.ENGLISH).trim();
             return (g.equals("male") || g.equals("female"));
         }
         return false;

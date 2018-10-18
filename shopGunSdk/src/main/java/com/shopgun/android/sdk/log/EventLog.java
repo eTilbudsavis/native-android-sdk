@@ -17,6 +17,8 @@
 package com.shopgun.android.sdk.log;
 
 
+import android.annotation.SuppressLint;
+
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.FixedArrayList;
 
@@ -125,6 +127,7 @@ public class EventLog {
      * @param name to use as print prefix
      * @return A human readable string representation of this log
      */
+    @SuppressLint("DefaultLocale")
     public String getString(String name) {
 
         if (mEvents.isEmpty()) {

@@ -1,5 +1,6 @@
 package com.shopgun.android.sdk.pagedpublicationkit.impl.apiv2;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
@@ -22,6 +23,7 @@ import com.shopgun.android.utils.UnitUtils;
 import com.shopgun.android.verso.VersoPageView;
 import com.shopgun.android.verso.VersoPageViewFragment;
 
+@SuppressLint("ViewConstructor")
 public class CatalogPageView extends AspectRatioFrameLayout implements VersoPageView {
 
     public static final String TAG = CatalogPageView.class.getSimpleName();
