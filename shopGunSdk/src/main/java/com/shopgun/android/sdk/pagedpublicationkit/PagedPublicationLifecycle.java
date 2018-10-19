@@ -144,7 +144,7 @@ class PagedPublicationLifecycle implements Parcelable {
     }
 
     void spreadAppeared(int spread, int[] pageNumbers, boolean callPagesAppear) {
-        if (isReadyAndResumed() && mAppeared && !mSpreadAppeared[spread]) {
+        if (isReadyAndResumed() && mAppeared && mSpreadAppeared.length > 0 && !mSpreadAppeared[spread]) {
             mSpreadAppeared[spread] = true;
             if (callPagesAppear) {
                 for (int page : pageNumbers) {
