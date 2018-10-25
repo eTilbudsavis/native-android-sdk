@@ -412,7 +412,13 @@ public class ShopGun {
     }
 
     public Realm getLegacyRealmInstance() {
-        return Realm.getInstance(mLegacyConfiguration);
+        Realm realm;
+        try {
+            realm = Realm.getInstance(mLegacyConfiguration);
+        } catch (RealmFileException | IllegalArgumentException ignore) {
+            return null;
+        }
+        return realm;
     }
 
     private class SgnLifecycleCallback implements LifecycleManager.Callback {
