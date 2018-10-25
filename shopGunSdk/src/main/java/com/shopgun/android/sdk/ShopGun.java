@@ -63,6 +63,7 @@ import java.util.concurrent.Executors;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.exceptions.RealmFileException;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
@@ -689,17 +690,23 @@ public class ShopGun {
 
             // check if the db exists
             if (new File(legacyConfiguration.getPath()).exists()) {
-                // exists
-                Realm realm = Realm.getInstance(legacyConfiguration);
-                boolean isEmpty = realm.isEmpty();
-                realm.close();
 
-                if (isEmpty) {
-                    // if it's empty, try to delete it
-                    try {
+                // exists
+                boolean isEmpty = true;
+                try {
+                    Realm realm = Realm.getInstance(legacyConfiguration);
+                    isEmpty = realm.isEmpty();
+                    realm.close();
+
+                    if (isEmpty) {
+                        // if it's empty, try to delete it
                         Realm.deleteRealm(legacyConfiguration);
-                    } catch (IllegalStateException ignore) {}
-                    legacyConfiguration = null;
+                    }
+                } catch (IllegalStateException | RealmFileException ignore) { }
+                finally {
+                    if (isEmpty) {
+                        legacyConfiguration = null;
+                    }
                 }
             }
             else {
