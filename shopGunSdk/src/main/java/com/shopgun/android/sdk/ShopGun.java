@@ -404,7 +404,13 @@ public class ShopGun {
     }
 
     public Realm getRealmInstance() {
-        return Realm.getInstance(mRealmConfiguration);
+        Realm realm;
+        try {
+            realm = Realm.getInstance(mRealmConfiguration);
+        } catch (RealmFileException | IllegalArgumentException ignore) {
+            return null;
+        }
+        return realm;
     }
 
     public boolean legacyEventsDetected() {
