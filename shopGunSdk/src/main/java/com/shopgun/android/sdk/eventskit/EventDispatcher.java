@@ -132,6 +132,9 @@ public class EventDispatcher extends Thread {
         // low priority on posting mEvents to atta
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         mRealm = ShopGun.getInstance().getRealmInstance();
+        if (mRealm == null) {
+            return;
+        }
         AnonymousEvent event;
         while (!mQuit || !mQueue.isEmpty()) {
             try {
