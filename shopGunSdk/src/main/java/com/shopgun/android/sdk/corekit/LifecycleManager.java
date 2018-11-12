@@ -65,19 +65,18 @@ public class LifecycleManager {
         }
 
         @Override
-        public void onActivityPaused(Activity activity) {
-            if (mCurrentActivity == null) {
-                String msg = "No activity set in " + TAG +
-                        ". Make sure to instantiate ShopGun in Application.onCreate()";
-                throw new IllegalStateException(msg);
-            }
-        }
+        public void onActivityPaused(Activity activity) { }
 
         @Override
         public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
 
         @Override
         public void onActivityStopped(Activity activity) {
+            if (activity == null) {
+                throw new IllegalStateException("Activity passed in " +
+                        "Application.ActivityLifecycleCallbacks.onActivityStopped is null");
+            }
+
             if (activity == mCurrentActivity) {
                 dispatchStop(activity);
                 // activities aren't guaranteed to be destroyed, so we'll initiate destroy here
