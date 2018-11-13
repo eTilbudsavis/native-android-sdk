@@ -25,7 +25,7 @@ ext {
     PROJ_REPO='maven'
     PROJ_GROUP='com.shopgun.android'
     PROJ_ARTIFACTID='sdk'
-    PROJ_VERSION='4.0.2-beta'
+    PROJ_VERSION='4.0.3-rc1'
     PROJ_NAME='sdk'
     PROJ_ORG='shopgun'
     PROJ_WEBSITEURL='https://shopgun.com'
@@ -83,7 +83,7 @@ if (JavaVersion.current().isJava8Compatible()) {
     tasks.withType(Javadoc) {
         // Disable the crazy super-strict doclint tool in Java 8
         // Only disable for debugging
-//        options.addStringOption('Xdoclint:none', '-quiet')
+        options.addStringOption('Xdoclint:none', '-quiet')
     }
 }
 
