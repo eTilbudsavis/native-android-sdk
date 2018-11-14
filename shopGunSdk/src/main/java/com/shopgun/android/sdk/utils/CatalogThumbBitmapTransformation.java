@@ -33,7 +33,7 @@ import java.security.MessageDigest;
  */
 public class CatalogThumbBitmapTransformation extends BitmapTransformation {
 
-    public static final String TAG = CatalogThumbTransformation.class.getSimpleName();
+    public static final String TAG = CatalogThumbBitmapTransformation.class.getSimpleName();
 
     private static final float EPSILON = 0.001f;
 
@@ -100,7 +100,7 @@ public class CatalogThumbBitmapTransformation extends BitmapTransformation {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof CatalogThumbTransformation;
+        return o instanceof CatalogThumbBitmapTransformation;
     }
 
     @Override

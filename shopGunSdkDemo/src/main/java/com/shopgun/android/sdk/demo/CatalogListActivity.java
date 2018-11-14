@@ -34,7 +34,6 @@ import com.shopgun.android.sdk.network.ShopGunError;
 import com.shopgun.android.sdk.requests.LoaderRequest;
 import com.shopgun.android.sdk.requests.impl.CatalogListRequest;
 import com.shopgun.android.sdk.utils.CatalogThumbBitmapTransformation;
-import com.shopgun.android.sdk.utils.CatalogThumbTransformation;
 import com.shopgun.android.utils.UnitUtils;
 
 import java.util.ArrayList;
