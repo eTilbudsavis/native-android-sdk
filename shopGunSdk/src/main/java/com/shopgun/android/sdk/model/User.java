@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 
 import com.shopgun.android.sdk.model.interfaces.IErn;
 import com.shopgun.android.sdk.model.interfaces.IJson;
@@ -40,12 +41,13 @@ import java.util.Locale;
  * documentation, on the engineering blog.
  * </p>
  */
+@Keep
 public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(User.class);
 
     public static final int NO_USER = -1;
-    public static Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
+    public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
         public User createFromParcel(Parcel source) {
             return new User(source);
         }

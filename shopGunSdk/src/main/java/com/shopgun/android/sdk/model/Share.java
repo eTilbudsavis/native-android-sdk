@@ -19,6 +19,7 @@ package com.shopgun.android.sdk.model;
 import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.model.interfaces.SyncState;
@@ -43,7 +44,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     public static final String ACCESS_OWNER = "owner";
     public static final String ACCESS_READWRITE = "rw";
     public static final String ACCESS_READONLY = "r";
-    public static Parcelable.Creator<Share> CREATOR = new Parcelable.Creator<Share>() {
+    public static final Parcelable.Creator<Share> CREATOR = new Parcelable.Creator<Share>() {
         public Share createFromParcel(Parcel source) {
             return new Share(source);
         }

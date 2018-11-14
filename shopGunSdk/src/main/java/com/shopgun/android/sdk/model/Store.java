@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
@@ -44,6 +45,7 @@ import java.util.Set;
  * documentation, on the engineering blog.
  * </p>
  */
+@Keep
 public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Parcelable {
 
     public static final String TAG = Constants.getTag(Store.class);

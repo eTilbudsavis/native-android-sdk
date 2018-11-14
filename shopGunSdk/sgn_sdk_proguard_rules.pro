@@ -8,3 +8,8 @@
 }
 -keep enum org.greenrobot.eventbus.ThreadMode { *; }
 
+
+## Parcelable
+-keepclassmembers class * implements android.os.Parcelable {
+  public static final android.os.Parcelable$Creator CREATOR;
+}

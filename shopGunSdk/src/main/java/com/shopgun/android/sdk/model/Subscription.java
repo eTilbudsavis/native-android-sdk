@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Constants;
@@ -31,10 +32,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+@Keep
 public class Subscription implements IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Subscription.class);
-    public static Parcelable.Creator<Subscription> CREATOR = new Parcelable.Creator<Subscription>() {
+    public static final Parcelable.Creator<Subscription> CREATOR = new Parcelable.Creator<Subscription>() {
         public Subscription createFromParcel(Parcel source) {
             return new Subscription(source);
         }

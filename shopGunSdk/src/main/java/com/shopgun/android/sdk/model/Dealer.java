@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 
 import com.shopgun.android.materialcolorcreator.MaterialColor;
 import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
@@ -44,6 +45,7 @@ import java.util.Set;
  * documentation, on the engineering blog.
  * </p>
  */
+@Keep
 public class Dealer implements IErn<Dealer>, IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Dealer.class);

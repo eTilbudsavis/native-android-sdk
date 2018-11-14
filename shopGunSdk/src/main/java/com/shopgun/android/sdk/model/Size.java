@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Constants;
@@ -29,10 +30,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+@Keep
 public class Size implements IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Size.class);
-    public static Parcelable.Creator<Size> CREATOR = new Parcelable.Creator<Size>() {
+    public static final Parcelable.Creator<Size> CREATOR = new Parcelable.Creator<Size>() {
         public Size createFromParcel(Parcel source) {
             return new Size(source);
         }

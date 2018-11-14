@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Constants;
@@ -29,10 +30,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+@Keep
 public class Links implements IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Links.class);
-    public static Parcelable.Creator<Links> CREATOR = new Parcelable.Creator<Links>() {
+    public static final Parcelable.Creator<Links> CREATOR = new Parcelable.Creator<Links>() {
         public Links createFromParcel(Parcel source) {
             return new Links(source);
         }

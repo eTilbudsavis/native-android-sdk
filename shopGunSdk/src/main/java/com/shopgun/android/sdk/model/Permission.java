@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IJson;
@@ -33,10 +34,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+@Keep
 public class Permission implements IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Permission.class);
-    public static Parcelable.Creator<Permission> CREATOR = new Parcelable.Creator<Permission>() {
+    public static final Parcelable.Creator<Permission> CREATOR = new Parcelable.Creator<Permission>() {
         public Permission createFromParcel(Parcel source) {
             return new Permission(source);
         }

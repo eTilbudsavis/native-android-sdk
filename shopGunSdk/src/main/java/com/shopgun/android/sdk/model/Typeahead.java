@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 import android.text.Html;
 import android.text.Spanned;
 import android.widget.AutoCompleteTextView;
@@ -43,10 +44,11 @@ import java.util.List;
  * An object matching the responses from typeahead endpoints, in ShopGun API v2.
  * </p>
  */
+@Keep
 public class Typeahead implements IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Typeahead.class);
-    public static Parcelable.Creator<Typeahead> CREATOR = new Parcelable.Creator<Typeahead>() {
+    public static final Parcelable.Creator<Typeahead> CREATOR = new Parcelable.Creator<Typeahead>() {
         public Typeahead createFromParcel(Parcel source) {
             return new Typeahead(source);
         }

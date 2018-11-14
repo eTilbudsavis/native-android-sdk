@@ -19,6 +19,7 @@ package com.shopgun.android.sdk.model;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 
 import com.shopgun.android.sdk.model.interfaces.IJson;
@@ -33,6 +34,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+@Keep
 public class HotspotMap implements IJson<JSONArray>, PagedPublicationHotspotCollection, Parcelable {
 
     public static final String TAG = Constants.getTag(HotspotMap.class);

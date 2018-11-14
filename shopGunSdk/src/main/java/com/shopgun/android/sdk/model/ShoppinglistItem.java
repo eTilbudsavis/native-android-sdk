@@ -46,7 +46,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
     public static final String TAG = Constants.getTag(ShoppinglistItem.class);
 
     private static final String ERN_CLASS = "shoppinglist:item";
-    public static Parcelable.Creator<ShoppinglistItem> CREATOR = new Parcelable.Creator<ShoppinglistItem>() {
+    public static final Parcelable.Creator<ShoppinglistItem> CREATOR = new Parcelable.Creator<ShoppinglistItem>() {
         public ShoppinglistItem createFromParcel(Parcel source) {
             return new ShoppinglistItem(source);
         }

@@ -77,7 +77,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      * to anyone who has a {@link Share share} with read/write privileges.
      */
     public static final String ACCESS_PUBLIC = "public";
-    public static Parcelable.Creator<Shoppinglist> CREATOR = new Parcelable.Creator<Shoppinglist>() {
+    public static final Parcelable.Creator<Shoppinglist> CREATOR = new Parcelable.Creator<Shoppinglist>() {
         public Shoppinglist createFromParcel(Parcel source) {
             return new Shoppinglist(source);
         }

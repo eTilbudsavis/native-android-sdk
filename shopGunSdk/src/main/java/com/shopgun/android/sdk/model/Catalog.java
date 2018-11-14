@@ -19,6 +19,7 @@ package com.shopgun.android.sdk.model;
 import android.graphics.pdf.PdfDocument.Page;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 
 import com.shopgun.android.materialcolorcreator.MaterialColor;
 import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
@@ -49,6 +50,7 @@ import java.util.Set;
  * documentation, on the engineering blog.
  * </p>
  */
+@Keep
 public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalog>, IStore<Catalog>, Parcelable {
 
     public static final String TAG = Constants.getTag(Catalog.class);

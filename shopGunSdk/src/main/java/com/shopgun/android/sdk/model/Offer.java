@@ -18,6 +18,7 @@ package com.shopgun.android.sdk.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 
 import com.shopgun.android.sdk.model.interfaces.ICatalog;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
@@ -47,6 +48,7 @@ import java.util.Set;
  * documentation, on the engineering blog.
  * </p>
  */
+@Keep
 public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, IDealer<Offer>, IStore<Offer>, PagedPublicationOffer, Parcelable {
 
     public static final String TAG = Constants.getTag(Offer.class);

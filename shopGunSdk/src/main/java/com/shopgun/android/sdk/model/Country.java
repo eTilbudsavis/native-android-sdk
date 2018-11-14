@@ -19,6 +19,7 @@ package com.shopgun.android.sdk.model;
 import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.interfaces.IErn;
@@ -32,10 +33,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+@Keep
 public class Country implements IErn<Country>, IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Country.class);
-    public static Parcelable.Creator<Country> CREATOR = new Parcelable.Creator<Country>() {
+    public static final Parcelable.Creator<Country> CREATOR = new Parcelable.Creator<Country>() {
         public Country createFromParcel(Parcel source) {
             return new Country(source);
         }

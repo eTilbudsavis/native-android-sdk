@@ -19,6 +19,7 @@ package com.shopgun.android.sdk.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.utils.Constants;
@@ -31,10 +32,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Keep
 public class Session implements IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(Session.class);
-    public static Parcelable.Creator<Session> CREATOR = new Parcelable.Creator<Session>() {
+    public static final Parcelable.Creator<Session> CREATOR = new Parcelable.Creator<Session>() {
         public Session createFromParcel(Parcel source) {
             return new Session(source);
         }
