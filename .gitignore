@@ -54,3 +54,5 @@ build_file_checksums.ser
 codeStyleConfig.xml
 Project.xml
 markdown-exported-files.xml
+output.json
+shopGunSdkDemo-release.apk
