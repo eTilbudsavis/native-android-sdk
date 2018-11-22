@@ -63,6 +63,7 @@ import java.util.concurrent.Executors;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.exceptions.RealmError;
 import io.realm.exceptions.RealmFileException;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -407,7 +408,7 @@ public class ShopGun {
         Realm realm;
         try {
             realm = Realm.getInstance(mRealmConfiguration);
-        } catch (RealmFileException | IllegalArgumentException ignore) {
+        } catch (RealmFileException | IllegalArgumentException | RealmError ignore) {
             return null;
         }
         return realm;
@@ -421,7 +422,7 @@ public class ShopGun {
         Realm realm;
         try {
             realm = Realm.getInstance(mLegacyConfiguration);
-        } catch (RealmFileException | IllegalArgumentException ignore) {
+        } catch (RealmFileException | IllegalArgumentException | RealmError ignore) {
             return null;
         }
         return realm;
@@ -714,7 +715,7 @@ public class ShopGun {
                         // if it's empty, try to delete it
                         Realm.deleteRealm(legacyConfiguration);
                     }
-                } catch (IllegalStateException | RealmFileException ignore) { }
+                } catch (IllegalStateException | RealmFileException | RealmError ignore) { }
                 finally {
                     if (isEmpty) {
                         legacyConfiguration = null;
