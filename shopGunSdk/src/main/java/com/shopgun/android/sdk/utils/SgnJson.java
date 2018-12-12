@@ -1551,6 +1551,17 @@ public class SgnJson {
         return this;
     }
 
+    public static final String AVAILABLE_IN_ALL_STORE = "all_stores";
+
+    public boolean getAvailability() {
+        return getBoolean(AVAILABLE_IN_ALL_STORE);
+    }
+
+    public SgnJson setAvailability(boolean value) {
+        put(AVAILABLE_IN_ALL_STORE, value);
+        return this;
+    }
+
     public static final String CATEGORY_IDS = "category_ids";
 
     public Set<String> getCategoryIds() {

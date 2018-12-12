@@ -72,6 +72,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     private Images mImages;
     private Set<String> mCategoryIds;
     private String mPdfUrl;
+    private boolean mIsAvailableInAllStores;
     // From separate queries
     private List<Images> mPages;
     private Dealer mDealer;
@@ -103,6 +104,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         this.mImages = tmp.mImages;
         this.mCategoryIds = tmp.mCategoryIds;
         this.mPdfUrl = tmp.mPdfUrl;
+        this.mIsAvailableInAllStores = tmp.mIsAvailableInAllStores;
 
         this.mPages = tmp.mPages;
         this.mDealer = tmp.mDealer;
@@ -155,7 +157,8 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
                 .setImages(o.getImages())
                 .setCategoryIds(o.getCategoryIds())
                 .setPdfUrl(o.getPdfUrl())
-                .setPages(o.getPages());
+                .setPages(o.getPages())
+                .setAvailability(o.getAvailability());
 
         // Internal SDK variables, avoid getter and setter to circumvent safety features... o_O
         c.mDealer = o.getDealer();
@@ -185,6 +188,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
                 .setImages(getImages())
                 .setCategoryIds(getCategoryIds())
                 .setPdfUrl(getPdfUrl())
+                .setAvailability(getIsAvailableInAllStores())
                 // Internal SDK variables
                 .putDealer(getDealer())
                 .putStore(getStore())
@@ -609,6 +613,24 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      */
     public Catalog setPdfUrl(String pdfUrl) {
         mPdfUrl = pdfUrl;
+        return this;
+    }
+
+    /**
+     * Get the availability of the catalog
+     * @return true if the catalog is available in every store, false if it's available only in selected stores
+     */
+    public boolean getIsAvailableInAllStores() {
+        return mIsAvailableInAllStores;
+    }
+
+    /**
+     * Set the flag about the store availability of the catalog
+     * @param isAvailableInAllStores true if the catalog is available in every store, false if it's available in selected stores
+     * @return this object
+     */
+    public Catalog setAvailability(boolean isAvailableInAllStores) {
+        mIsAvailableInAllStores = isAvailableInAllStores;
         return this;
     }
 
