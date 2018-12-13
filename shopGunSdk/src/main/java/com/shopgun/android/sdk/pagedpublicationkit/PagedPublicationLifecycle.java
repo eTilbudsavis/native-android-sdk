@@ -201,7 +201,7 @@ class PagedPublicationLifecycle implements Parcelable {
         try {
             System.arraycopy(mPageLoaded, 0, mPageLoadedTmp, 0, mPageLoadedTmp.length);
             System.arraycopy(mSpreadZoomedIn, 0, mSpreadZoomedInTmp, 0, mSpreadZoomedInTmp.length);
-        } catch (IndexOutOfBoundsException ignore) { }
+        } catch (IndexOutOfBoundsException | NullPointerException ignore) { }
     }
 
     void applyState(int spread, int[] pages) {
