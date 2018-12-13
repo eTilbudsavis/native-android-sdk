@@ -3,7 +3,6 @@ package com.shopgun.android.sdk.pagedpublicationkit;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.shopgun.android.sdk.eventskit.AnonymousEvent;
 import com.shopgun.android.utils.NumberUtils;
 import com.shopgun.android.utils.log.L;
 import com.shopgun.android.utils.log.LogUtil;
@@ -62,6 +61,10 @@ class PagedPublicationLifecycle implements Parcelable {
         }
     }
 
+    private boolean indexIsInRange(final int length, final int index) {
+        return (index >= 0 && index < length);
+    }
+
     public void ensureArrays(int pageCount, int spreadCount) {
         mPageAppeared = new boolean[pageCount];
         mPageLoaded = new boolean[pageCount];
@@ -114,11 +117,11 @@ class PagedPublicationLifecycle implements Parcelable {
     }
 
     void pageAppeared(int page) {
-        if (isReadyAndResumed() && !mPageAppeared[page]) {
+        if (isReadyAndResumed() && indexIsInRange(mPageAppeared.length, page) && !mPageAppeared[page]) {
             int sp = mConfig.getSpreadPositionFromPage(page);
             if (mSpreadAppeared[sp]) {
                 mPageAppeared[page] = true;
-                if (mPageLoaded[page]) {
+                if (indexIsInRange(mPageLoaded.length, page) && mPageLoaded[page]) {
                     pageLoaded(page);
                 }
             } else {
@@ -128,7 +131,7 @@ class PagedPublicationLifecycle implements Parcelable {
     }
 
     void pageDisappeared(int page) {
-        if (isReady() && mPageAppeared[page]) {
+        if (isReady() && indexIsInRange(mPageAppeared.length, page) && mPageAppeared[page] && indexIsInRange(mPageLoaded.length, page)) {
             mPageAppeared[page] = false;
             mPageLoaded[page] = false;
 
@@ -144,14 +147,14 @@ class PagedPublicationLifecycle implements Parcelable {
     }
 
     void spreadAppeared(int spread, int[] pageNumbers, boolean callPagesAppear) {
-        if (isReadyAndResumed() && mAppeared && mSpreadAppeared.length > 0 && !mSpreadAppeared[spread]) {
+        if (isReadyAndResumed() && mAppeared && indexIsInRange(mSpreadAppeared.length, spread) && !mSpreadAppeared[spread]) {
             mSpreadAppeared[spread] = true;
             if (callPagesAppear) {
                 for (int page : pageNumbers) {
                     pageAppeared(page);
                 }
             }
-            if (mSpreadZoomedInTmp[spread]) {
+            if (indexIsInRange(mSpreadZoomedInTmp.length, spread) && mSpreadZoomedInTmp[spread]) {
                 internalSpreadZoomedIn(spread, pageNumbers);
                 mSpreadZoomedInTmp[spread] = false;
             }
@@ -159,7 +162,7 @@ class PagedPublicationLifecycle implements Parcelable {
     }
 
     void spreadDisappeared(int spread, int[] pageNumbers) {
-        if (isReady() && mSpreadAppeared[spread]) {
+        if (isReady() && indexIsInRange(mSpreadAppeared.length, spread) && mSpreadAppeared[spread]) {
             spreadZoomedOut(spread, pageNumbers, 1.0f);
             for (int i : pageNumbers) {
                 pageDisappeared(i);
@@ -173,13 +176,13 @@ class PagedPublicationLifecycle implements Parcelable {
     }
 
     void spreadZoomedIn(int spread, int[] pages, float scale) {
-        if (isReadyAndResumed() && !mSpreadZoomedIn[spread] && scale > 1.0f) {
+        if (isReadyAndResumed() && indexIsInRange(mSpreadZoomedIn.length, spread) && !mSpreadZoomedIn[spread] && scale > 1.0f) {
             internalSpreadZoomedIn(spread, pages);
         }
     }
 
     private void internalSpreadZoomedIn(int spread, int[] pages) {
-        if (isReadyAndResumed()) {
+        if (isReadyAndResumed() && indexIsInRange(mSpreadZoomedIn.length, spread)) {
             mSpreadZoomedIn[spread] = true;
         }
     }
@@ -189,14 +192,16 @@ class PagedPublicationLifecycle implements Parcelable {
     }
 
     void spreadZoomedOut(int spread, int[] pages, float scale) {
-        if (isReady() && mSpreadZoomedIn[spread] && NumberUtils.isEqual(1.0f, scale)) {
+        if (isReady() && indexIsInRange(mSpreadZoomedIn.length, spread) && mSpreadZoomedIn[spread] && NumberUtils.isEqual(1.0f, scale)) {
             mSpreadZoomedIn[spread] = false;
         }
     }
 
     void saveState() {
-        System.arraycopy(mPageLoaded, 0, mPageLoadedTmp, 0, mPageLoadedTmp.length);
-        System.arraycopy(mSpreadZoomedIn, 0, mSpreadZoomedInTmp, 0, mSpreadZoomedInTmp.length);
+        try {
+            System.arraycopy(mPageLoaded, 0, mPageLoadedTmp, 0, mPageLoadedTmp.length);
+            System.arraycopy(mSpreadZoomedIn, 0, mSpreadZoomedInTmp, 0, mSpreadZoomedInTmp.length);
+        } catch (IndexOutOfBoundsException ignore) { }
     }
 
     void applyState(int spread, int[] pages) {
@@ -207,7 +212,7 @@ class PagedPublicationLifecycle implements Parcelable {
     }
 
     void pageLoaded(int page) {
-        if (isReady()) {
+        if (isReady() && indexIsInRange(mPageLoaded.length, page)) {
             mPageLoaded[page] = true;
         }
     }
