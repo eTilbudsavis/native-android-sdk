@@ -74,7 +74,7 @@ dependencies {
     annotationProcessor libs.glideCompiler
 
     // ShopGun dependencies
-    implementation 'com.shopgun.android:sdk:4.0.3-rc3'
+    implementation 'com.shopgun.android:sdk:4.0.3'
 
     // temporary local dependencies (sdk not yet released)
 //    implementation libs.shopGunSdk

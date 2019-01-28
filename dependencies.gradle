@@ -30,9 +30,9 @@ ext {
 
             sgn : [
                     materialcolorcreator        : '1.0.0',
-                    markhor                     : '1.0.9',
+                    markhor                     : '1.1.0',
                     zoomlayout                  : '0.8.1',
-                    verso                       : '0.8.1',
+                    verso                       : '0.9.0',
                     sdk                         : '4.0.0',
             ]
 
