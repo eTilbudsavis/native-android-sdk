@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+Version 4.0.3
+-------------
+* AndroidX compatible.
+* Updated: `eventskit` has been changed to our new anonymous event format. `Event` is deprecated, now is `AnonymousEvent`
+* Everything related to shopping list is now deprecated.
+We'll no longer maintain this feature and all the classes will be removed at some point in the future.
+* Bug fixes
+
 Version 4.0.2-beta
 ----------------------------
 * New: `Glide` now replaces `Picasso` for loading images
