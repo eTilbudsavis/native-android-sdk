@@ -157,8 +157,8 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
                 .setImages(o.getImages())
                 .setCategoryIds(o.getCategoryIds())
                 .setPdfUrl(o.getPdfUrl())
-                .setPages(o.getPages())
-                .setAvailability(o.getAvailability());
+                .setAvailability(o.getAvailability())
+                .setPages(o.getPages());
 
         // Internal SDK variables, avoid getter and setter to circumvent safety features... o_O
         c.mDealer = o.getDealer();
@@ -658,6 +658,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         if (mCategoryIds != null ? !mCategoryIds.equals(catalog.mCategoryIds) : catalog.mCategoryIds != null)
             return false;
         if (mPdfUrl != null ? !mPdfUrl.equals(catalog.mPdfUrl) : catalog.mPdfUrl != null) return false;
+        if (mIsAvailableInAllStores != catalog.mIsAvailableInAllStores) return false;
         if (mPages != null ? !mPages.equals(catalog.mPages) : catalog.mPages != null) return false;
         if (mDealer != null ? !mDealer.equals(catalog.mDealer) : catalog.mDealer != null) return false;
         if (mStore != null ? !mStore.equals(catalog.mStore) : catalog.mStore != null) return false;
@@ -683,6 +684,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         result = 31 * result + (mImages != null ? mImages.hashCode() : 0);
         result = 31 * result + (mCategoryIds != null ? mCategoryIds.hashCode() : 0);
         result = 31 * result + (mPdfUrl != null ? mPdfUrl.hashCode() : 0);
+        result = 31 * result + Boolean.valueOf(mIsAvailableInAllStores).hashCode();
         result = 31 * result + (mPages != null ? mPages.hashCode() : 0);
         result = 31 * result + (mDealer != null ? mDealer.hashCode() : 0);
         result = 31 * result + (mStore != null ? mStore.hashCode() : 0);
@@ -713,6 +715,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         dest.writeParcelable(this.mImages, 0);
         dest.writeStringList(new ArrayList<String>(mCategoryIds));
         dest.writeString(this.mPdfUrl);
+        dest.writeByte((byte) (mIsAvailableInAllStores ? 1 : 0));
         dest.writeTypedList(mPages);
         dest.writeParcelable(this.mDealer, 0);
         dest.writeParcelable(this.mStore, 0);
@@ -740,6 +743,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         in.readStringList(catIds);
         this.mCategoryIds = new HashSet<String>(catIds);
         this.mPdfUrl = in.readString();
+        this.mIsAvailableInAllStores = in.readByte() != 0;
         this.mPages = in.createTypedArrayList(Images.CREATOR);
         this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
         this.mStore = in.readParcelable(Store.class.getClassLoader());
