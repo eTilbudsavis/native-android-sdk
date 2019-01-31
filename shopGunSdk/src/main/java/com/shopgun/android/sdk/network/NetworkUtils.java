@@ -27,7 +27,7 @@ public class NetworkUtils {
         // private
     }
 
-    public static void appendLocationParams(Map<String, String> map, SgnLocation l) {
+    public static void appendLocationParams(Map<String, String> map, SgnLocation l, boolean excludeRadius) {
 
         if (!l.isSet()) {
             return;
@@ -42,7 +42,7 @@ public class NetworkUtils {
         if (!map.containsKey(Parameters.SENSOR)) {
             map.put(Parameters.SENSOR, String.valueOf(l.isSensor()));
         }
-        if (!map.containsKey(Parameters.RADIUS)) {
+        if (!map.containsKey(Parameters.RADIUS) && !excludeRadius) {
             map.put(Parameters.RADIUS, String.valueOf(l.getRadius()));
         }
 

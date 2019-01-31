@@ -348,7 +348,7 @@ public class RequestQueue {
         request.getParameters().put(Parameters.API_LOCALE, Locale.getDefault().toString());
 
         if (request.useLocation()) {
-            NetworkUtils.appendLocationParams(request.getParameters(), mShopGun.getLocation());
+            NetworkUtils.appendLocationParams(request.getParameters(), mShopGun.getLocation(), request.excludeRadius());
         }
 
     }

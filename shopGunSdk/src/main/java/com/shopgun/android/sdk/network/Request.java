@@ -63,6 +63,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     private Map<String, String> mParameters = new HashMap<String, String>();
     /** Should this request use location in the query */
     private boolean mUseLocation = true;
+    private boolean mExcludeRadius = false;
     /** If true Request will return data from cache if exists */
     private boolean mIgnoreCache = false;
     /** Whether or not responses to this request should be cached. */
@@ -384,6 +385,26 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     public Request setUseLocation(boolean useLocation) {
         mUseLocation = useLocation;
         return Request.this;
+    }
+
+    /**
+     * Exclude the radius info from the request.
+     * This is optional, by default the radius will be included in each request that include location,
+     * so set it to true only if you want to send just lat and long
+     * @param excludeRadius true to exclude radius from request parameters
+     * @return this object
+     */
+    public Request setExcludeRadius(boolean excludeRadius) {
+        mExcludeRadius = excludeRadius;
+        return Request.this;
+    }
+
+    /**
+     * Determine if the radius should be excluded
+     * @return true if radius should be excluded
+     */
+    public boolean excludeRadius() {
+        return mExcludeRadius;
     }
 
     /**
