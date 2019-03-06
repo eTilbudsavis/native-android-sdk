@@ -20,7 +20,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Environment;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;

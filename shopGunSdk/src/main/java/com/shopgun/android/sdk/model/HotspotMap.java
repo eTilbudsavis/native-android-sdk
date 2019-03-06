@@ -19,8 +19,8 @@ package com.shopgun.android.sdk.model;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.Keep;
-import android.support.annotation.NonNull;
+import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
 
 import com.shopgun.android.sdk.model.interfaces.IJson;
 import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationHotspot;

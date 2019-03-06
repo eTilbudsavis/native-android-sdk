@@ -1,6 +1,6 @@
 package com.shopgun.android.sdk.utils;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.Collection;
 import java.util.Iterator;

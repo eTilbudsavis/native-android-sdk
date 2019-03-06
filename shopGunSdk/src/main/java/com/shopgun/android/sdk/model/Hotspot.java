@@ -19,7 +19,7 @@ package com.shopgun.android.sdk.model;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.Keep;
+import androidx.annotation.Keep;
 import android.util.SparseArray;
 
 import com.shopgun.android.sdk.log.SgnLog;

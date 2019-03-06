@@ -4,15 +4,14 @@ import android.animation.Animator;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.support.annotation.ColorInt;
-import android.support.annotation.IntRange;
+import androidx.annotation.ColorInt;
+import androidx.annotation.IntRange;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.TextView;
 
 import com.shopgun.android.utils.ColorUtils;
 
-public class PulsatingTextView extends android.support.v7.widget.AppCompatTextView {
+public class PulsatingTextView extends androidx.appcompat.widget.AppCompatTextView {
 
     public static final String TAG = PulsatingTextView.class.getSimpleName();
 

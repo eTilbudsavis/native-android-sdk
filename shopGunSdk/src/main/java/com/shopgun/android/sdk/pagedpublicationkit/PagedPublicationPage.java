@@ -1,7 +1,7 @@
 package com.shopgun.android.sdk.pagedpublicationkit;
 
 import android.graphics.Bitmap;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public interface PagedPublicationPage {
 

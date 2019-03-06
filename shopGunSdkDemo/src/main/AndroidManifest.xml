@@ -14,7 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<manifest package="com.shopgun.android.sdk.demo"
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    package="com.shopgun.android.sdk.demo"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -26,7 +27,11 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
         <meta-data
             android:name="com.shopgun.android.sdk.api_key"
             android:value="@string/shopgun_sdk_api_key"/>

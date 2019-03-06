@@ -18,7 +18,7 @@ package com.shopgun.android.sdk.demo.base;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 @SuppressLint("Registered")
 public class BaseActivity extends AppCompatActivity {

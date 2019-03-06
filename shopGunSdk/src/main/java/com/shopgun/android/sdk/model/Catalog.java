@@ -19,7 +19,7 @@ package com.shopgun.android.sdk.model;
 import android.graphics.pdf.PdfDocument.Page;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.Keep;
+import androidx.annotation.Keep;
 
 import com.shopgun.android.materialcolorcreator.MaterialColor;
 import com.shopgun.android.materialcolorcreator.MaterialColorImpl;
