@@ -16,16 +16,16 @@ ext {
             espresso                    : '3.1.0',
             robolectric                 : '3.6.1',
             mockito                     : '2.13.0',
-            okhttp                      : '3.11.0',
+            okhttp                      : '3.12.1', // 3.13 doesn't support pre Android 5. https://medium.com/square-corner-blog/okhttp-3-13-requires-android-5-818bb78d07ce
             glide                       : '4.9.0',
             apollo                      : '0.5.0',
             geohash                     : '0.22',
 
             sgn : [
                     materialcolorcreator        : '1.0.0',
-                    markhor                     : '1.1.0',
-                    zoomlayout                  : '0.8.1',
-                    verso                       : '0.9.0',
+                    markhor                     : '2.0.0',
+                    zoomlayout                  : '2.0.0',
+                    verso                       : '2.0.0',
                     sdk                         : '4.0.0',
             ]
 
@@ -34,12 +34,12 @@ ext {
     libDependencies = [
 
             // internal libs
-//            markhor                     : "com.shopgun.android:utils:$libVersions.sgn.markhor",
-            markhor                     : project(':markhor'),
-//            zoomlayout                  : "com.shopgun.android:zoomlayout:$libVersions.sgn.zoomlayout",
-            zoomlayout                  : project(':zoomlayout'),
-//            verso                       : "com.shopgun.android:verso:$libVersions.sgn.verso",
-            verso                       : project(':verso'),
+            markhor                     : "com.shopgun.android:utils:$libVersions.sgn.markhor",
+//            markhor                     : project(':markhor'),
+            zoomlayout                  : "com.shopgun.android:zoomlayout:$libVersions.sgn.zoomlayout",
+//            zoomlayout                  : project(':zoomlayout'),
+            verso                       : "com.shopgun.android:verso:$libVersions.sgn.verso",
+//            verso                       : project(':verso'),
 //            shopGunSdk                  : "com.shopgun.android:sdk:$libVersions.sgn.sdk",
             shopGunSdk                  : project(':shopGunSdk'),
             materialcolorcreator        : "com.shopgun.android:materialcolorcreator:$libVersions.sgn.materialcolorcreator",

@@ -27,9 +27,13 @@ buildscript {
         maven { url 'https://maven.google.com' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
-        classpath "io.realm:realm-gradle-plugin:5.4.2"
+        classpath 'com.android.tools.build:gradle:3.3.2'
+
+        // need to specify these also in the root project to avoid conflict (noticed with jfrog extractor)
+        classpath "io.realm:realm-gradle-plugin:5.9.1"
         classpath 'com.apollographql.apollo:apollo-gradle-plugin:0.5.0'
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
     }
 }
 
@@ -44,4 +48,8 @@ allprojects {
         maven { url 'https://maven.google.com' }
         maven { url 'https://jitpack.io' }
     }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
