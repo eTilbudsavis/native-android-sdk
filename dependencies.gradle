@@ -7,7 +7,6 @@ ext {
     libVersions = [
             support                     : '1.0.0',
             playServices                : '11.8.0', // (August 2017) never bump this too early, as this requires an update of Google Play services on the device
-            picasso                     : '2.5.2',
             gson                        : '2.8.5',
             eventbus                    : '3.1.1',
             butterknife                 : '10.0.0',
@@ -52,7 +51,6 @@ ext {
             preference                  : "androidx.legacy:legacy-preference-v14:$libVersions.support",
 
             // other libs
-            picasso                     : "com.squareup.picasso:picasso:$libVersions.picasso",
             glide                       : "com.github.bumptech.glide:glide:$libVersions.glide",
             glideCompiler               : "com.github.bumptech.glide:compiler:$libVersions.glide",
             eventbus                    : "org.greenrobot:eventbus:$libVersions.eventbus",
