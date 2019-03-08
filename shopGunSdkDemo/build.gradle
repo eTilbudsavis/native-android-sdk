@@ -74,12 +74,12 @@ dependencies {
     annotationProcessor libs.glideCompiler
 
     // ShopGun dependencies
-//    implementation 'com.shopgun.android:sdk:4.0.3'
+    implementation 'com.shopgun.android:sdk:5.0.0-rc1'
 
     // temporary local dependencies (sdk not yet released)
-    implementation libs.shopGunSdk
-    implementation libs.markhor
-    implementation libs.verso
+//    implementation libs.shopGunSdk
+//    implementation libs.markhor
+//    implementation libs.verso
 
     androidTestImplementation libs.okhttpMockwebserver
     androidTestImplementation 'androidx.test:runner:1.1.0'

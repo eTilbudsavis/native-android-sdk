@@ -25,7 +25,6 @@ ext {
                     markhor                     : '2.0.0',
                     zoomlayout                  : '2.0.0',
                     verso                       : '2.0.0',
-                    sdk                         : '4.0.0',
             ]
 
     ]
@@ -39,10 +38,8 @@ ext {
 //            zoomlayout                  : project(':zoomlayout'),
             verso                       : "com.shopgun.android:verso:$libVersions.sgn.verso",
 //            verso                       : project(':verso'),
-//            shopGunSdk                  : "com.shopgun.android:sdk:$libVersions.sgn.sdk",
             shopGunSdk                  : project(':shopGunSdk'),
             materialcolorcreator        : "com.shopgun.android:materialcolorcreator:$libVersions.sgn.materialcolorcreator",
-//            dragSortListView            : project(':dragSortListView'),
 
             // support libs
             supportv4                   : "androidx.legacy:legacy-support-v4:$libVersions.support",
