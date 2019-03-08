@@ -22,3 +22,4 @@ include ':zoomlayout'
 project(':zoomlayout').projectDir=new File('../zoomlayout/library')
 include ':verso'
 project(':verso').projectDir=new File('../verso-android/library')
+enableFeaturePreview('STABLE_PUBLISHING')

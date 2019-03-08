@@ -17,7 +17,7 @@
 package com.shopgun.android.sdk.model.interfaces;
 
 
-import android.support.annotation.IntRange;
+import androidx.annotation.IntRange;
 
 /**
  * The state an object can be in, this is an indication of

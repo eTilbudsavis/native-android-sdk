@@ -20,7 +20,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.IntRange;
+import androidx.annotation.IntRange;
 
 import com.shopgun.android.sdk.api.Parameters;
 import com.shopgun.android.sdk.model.Store;

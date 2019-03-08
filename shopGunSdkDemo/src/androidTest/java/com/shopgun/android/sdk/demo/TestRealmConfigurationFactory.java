@@ -18,7 +18,7 @@ package com.shopgun.android.sdk.demo;
 
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Assert;
 import org.junit.rules.TemporaryFolder;

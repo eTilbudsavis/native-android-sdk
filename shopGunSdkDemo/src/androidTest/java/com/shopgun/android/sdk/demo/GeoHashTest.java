@@ -1,7 +1,7 @@
 package com.shopgun.android.sdk.demo;
 
 import android.location.Location;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.fonfon.geohash.GeoHash;
 

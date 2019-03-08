@@ -2,7 +2,9 @@ package com.shopgun.android.sdk.utils;
 
 import android.app.Activity;
 import android.app.FragmentManager;
-import android.support.v4.app.FragmentActivity;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.log.SgnLog;
@@ -51,13 +53,13 @@ public class LifecycleEventLogger extends LifecycleManager.SimpleCallback {
     private static class FragmentProxy {
 
         android.app.Fragment mFrameworkFragment;
-        android.support.v4.app.Fragment mSupportFragment;
+        Fragment mSupportFragment;
 
         public FragmentProxy(android.app.Fragment fragment) {
             mFrameworkFragment = fragment;
         }
 
-        public FragmentProxy(android.support.v4.app.Fragment fragment) {
+        public FragmentProxy(Fragment fragment) {
             mSupportFragment = fragment;
         }
 
@@ -90,11 +92,11 @@ public class LifecycleEventLogger extends LifecycleManager.SimpleCallback {
 
         FragmentActivity mFragmentActivity;
         List<android.app.Fragment> mFragments;
-        List<android.support.v4.app.Fragment> mSupportFragments;
+        List<Fragment> mSupportFragments;
 
         public FragmentManagerProxy(Activity activity) {
             mActivity = activity;
-            if (mActivity instanceof android.support.v4.app.FragmentActivity) {
+            if (mActivity instanceof FragmentActivity) {
                 mFragmentActivity = (FragmentActivity) mActivity;
             }
         }
@@ -141,13 +143,13 @@ public class LifecycleEventLogger extends LifecycleManager.SimpleCallback {
             }
         };
 
-        android.support.v4.app.FragmentManager.OnBackStackChangedListener mSupportOnBackStackChangedListener =
-                new android.support.v4.app.FragmentManager.OnBackStackChangedListener() {
+        androidx.fragment.app.FragmentManager.OnBackStackChangedListener mSupportOnBackStackChangedListener =
+                new androidx.fragment.app.FragmentManager.OnBackStackChangedListener() {
             @Override
             public void onBackStackChanged() {
                 mSupportFragments = mFragmentActivity.getSupportFragmentManager().getFragments();
                 List<FragmentProxy> fragmentProxies = new ArrayList<>();
-                for (android.support.v4.app.Fragment fragment : mSupportFragments) {
+                for (Fragment fragment : mSupportFragments) {
                     if (fragment != null) {
                         fragmentProxies.add(new FragmentProxy(fragment));
                     }

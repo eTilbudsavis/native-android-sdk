@@ -1,6 +1,6 @@
 package com.shopgun.android.sdk.pagedpublicationkit;
 
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 
 public interface PagedPublication {
     String getId();
