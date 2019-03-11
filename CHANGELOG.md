@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+Version 5.0.0-rcx
+-------------
+* AndroidX
+* Requires Java 8
+* Dependency updates
+* Bug fixes
+
 Version 4.0.3
 -------------
 * AndroidX compatible.

@@ -17,7 +17,7 @@ Now add these lines to your module's `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'com.shopgun.android:sdk:4.0.2-beta'
+    implementation 'com.shopgun.android:sdk:5.0.0-rc1'
 }
 ```
 
@@ -27,6 +27,16 @@ or clone from github, and add this to your project's `settings.gradle`:
 include ':shopGunSdk'
 project(':shopGunSdk').projectDir=new File('/path/to/shopgun-android-sdk/shopGunSdk')
 ```
+
+From version `5.0.0`, the SDK requires Java 8 enabled, so in your app `build.gradle`:
+```groovy
+android {
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+} 
+```    
 
 ### API key and secret
 You will need to get an *API key* and *API secret* from our 
