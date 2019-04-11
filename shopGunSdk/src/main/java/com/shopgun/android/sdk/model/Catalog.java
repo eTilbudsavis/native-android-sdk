@@ -55,6 +55,15 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 
     public static final String TAG = Constants.getTag(Catalog.class);
 
+    public enum PublicationType {
+        PAGED, INCITO;
+
+        @Override
+        public String toString() {
+            return super.toString().toLowerCase();
+        }
+    }
+
     // From JSON blob
     private String mErn;
     private String mLabel;
