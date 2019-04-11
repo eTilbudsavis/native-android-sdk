@@ -26,6 +26,8 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.apollographql.apollo.ApolloClient;
+import com.apollographql.apollo.api.ScalarType;
+import com.apollographql.apollo.response.CustomTypeAdapter;
 import com.shopgun.android.sdk.api.Environment;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
@@ -61,6 +63,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import androidx.collection.SimpleArrayMap;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.exceptions.RealmError;
@@ -489,6 +492,7 @@ public class ShopGun {
         ApolloClient apolloClient;
         List<Interceptor> interceptors = new ArrayList<>();
         List<Interceptor> networkInterceptors = new ArrayList<>();
+        SimpleArrayMap<ScalarType, CustomTypeAdapter<?>> apolloCustomTypeAdapters = new SimpleArrayMap<>();
 
         /**
          * Start building your {@link ShopGun} instance.
@@ -508,6 +512,11 @@ public class ShopGun {
 
         public Builder addNetworkInterceptor(Interceptor interceptor) {
             networkInterceptors.add(interceptor);
+            return this;
+        }
+
+        public Builder addApolloCustomTypeAdapter(ScalarType scalarType, CustomTypeAdapter<?> adapter) {
+            apolloCustomTypeAdapters.put(scalarType, adapter);
             return this;
         }
 
@@ -671,10 +680,14 @@ public class ShopGun {
             okHttpClient = okHttpClientBuilder.build();
 
             // Setup the default ApolloClient
-            apolloClient = ApolloClient.builder()
+            ApolloClient.Builder apolloBuilder = ApolloClient.builder()
                     .serverUrl("https://graph.service.shopgun.com")
-                    .okHttpClient(okHttpClient)
-                    .build();
+                    .okHttpClient(okHttpClient);
+            for (int i = 0; i < apolloCustomTypeAdapters.size(); i++) {
+                apolloBuilder.addCustomTypeAdapter(
+                        apolloCustomTypeAdapters.keyAt(i), apolloCustomTypeAdapters.valueAt(i));
+            }
+            apolloClient = apolloBuilder.build();
 
             // Set the default RealmConfiguration.
             Realm.init(application);
