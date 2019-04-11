@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -1559,6 +1560,41 @@ public class SgnJson {
 
     public SgnJson setAvailability(boolean value) {
         put(AVAILABLE_IN_ALL_STORE, value);
+        return this;
+    }
+
+    public static final String INCITO_ID = "incito_publication_id";
+
+    public String getIncitoId() {
+        return getString(INCITO_ID);
+    }
+
+    public SgnJson setIncitoId(String value) {
+        put(INCITO_ID, value);
+        return this;
+    }
+
+    public static final String PUBLICATION_TYPES = "types";
+
+    public EnumSet<Catalog.PublicationType> getPublicationTypes() {
+        JSONArray json = getJSONArray(PUBLICATION_TYPES, new JSONArray());
+        EnumSet<Catalog.PublicationType> cat = EnumSet.noneOf(Catalog.PublicationType.class);
+        for (int i = 0; i < json.length(); i++) {
+            try {
+                if (json.getString(i).equals(Catalog.PublicationType.PAGED.toString())) {
+                    cat.add(Catalog.PublicationType.PAGED);
+                } else if (json.getString(i).equals(Catalog.PublicationType.INCITO.toString())) {
+                    cat.add(Catalog.PublicationType.INCITO);
+                }
+            } catch (JSONException e) {
+                // ignore
+            }
+        }
+        return cat;
+    }
+
+    public SgnJson setPublicationTypes(EnumSet<Catalog.PublicationType> value) {
+        put(PUBLICATION_TYPES, value == null ? new JSONArray() : new JSONArray(value));
         return this;
     }
 
