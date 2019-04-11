@@ -665,6 +665,10 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         return mPublicationTypes.size() == 1 && mPublicationTypes.contains(PublicationType.INCITO);
     }
 
+    /**
+     * Id of the node in the graph (long based64 encoded id)
+     * @return the incito id or {@code null}
+     */
     public String getIncitoId() {
         return mIncitoId;
     }
@@ -674,6 +678,11 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         return this;
     }
 
+    /**
+     * Array of publication that can be represented. Can be {@code paged}, {@code incito} or both.
+     * If contains {@code incito}, then {@link Catalog#getIncitoId()} won't be {@code null}
+     * @return {@link EnumSet} of {@link PublicationType}
+     */
     public EnumSet<PublicationType> getPublicationTypes() {
         return mPublicationTypes;
     }
