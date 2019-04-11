@@ -662,7 +662,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
      * @return true if is Incito only
      */
     public boolean isOnlyIncito() {
-        return mPublicationTypes.size() == 1 && mPublicationTypes.contains(PublicationType.INCITO);
+        return mPublicationTypes != null && mPublicationTypes.size() == 1 && mPublicationTypes.contains(PublicationType.INCITO);
     }
 
     /**
