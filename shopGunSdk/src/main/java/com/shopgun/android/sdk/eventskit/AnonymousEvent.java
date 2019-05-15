@@ -27,6 +27,7 @@ public class AnonymousEvent {
     public static final int OFFER_OPENED = 3;
     public static final int CLIENT_SESSION_OPENED = 4;
     public static final int SEARCHED = 5;
+    public static final int INCITO_PUBLICATION_OPENED = 11;
 
     private boolean mDoNotTrack;
 
@@ -44,6 +45,7 @@ public class AnonymousEvent {
      *             OFFER_OPENED = 3;
      *             CLIENT_SESSION_OPENED = 4;
      *             SEARCHED = 5;
+     *             INCITO_PUBLICATION_OPENED = 11;
      */
     public AnonymousEvent(int type) {
         id = SgnUtils.createUUID();
@@ -183,6 +185,14 @@ public class AnonymousEvent {
         return this;
     }
 
+    public AnonymousEvent addIncitoOpened(String publicationId, boolean pagedPublicationIsAvailable) {
+        if (!TextUtils.isEmpty(publicationId)) {
+            json_event.addProperty("ip.id", publicationId);
+            json_event.addProperty("ip.paged", pagedPublicationIsAvailable);
+        }
+        return this;
+    }
+
 
     /****** Getters and setters */
 
@@ -244,6 +254,8 @@ public class AnonymousEvent {
                 return "client_session_opened";
             case SEARCHED:
                 return "searched";
+            case INCITO_PUBLICATION_OPENED:
+                return "incito_publication_opened";
             default:
                 return "custom_event";
         }
