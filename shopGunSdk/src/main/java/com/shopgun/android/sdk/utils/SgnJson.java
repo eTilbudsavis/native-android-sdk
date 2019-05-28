@@ -1594,7 +1594,15 @@ public class SgnJson {
     }
 
     public SgnJson setPublicationTypes(EnumSet<Catalog.PublicationType> value) {
-        put(PUBLICATION_TYPES, value == null ? new JSONArray() : new JSONArray(value));
+        if (value == null) {
+            return this;
+        } else {
+            JSONArray types = new JSONArray();
+            for (Catalog.PublicationType t : value) {
+                types.put(t);
+            }
+            put(PUBLICATION_TYPES, types);
+        }
         return this;
     }
 
