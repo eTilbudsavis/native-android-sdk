@@ -104,7 +104,7 @@ public class Session implements IJson<JSONObject>, Parcelable {
                 .setPermission(o.getPermissions())
                 .setProvider(o.getProvider());
 
-        o.getStats().log(TAG);
+        o.getStats().ignoreForgottenKeys("is_admin").log(TAG);
 
         return s;
     }
