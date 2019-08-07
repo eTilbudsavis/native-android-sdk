@@ -50,7 +50,7 @@ public enum Environment {
      * Convert a string into an {@link Environment}.
      *
      * @param env An environment string
-     * @return A matching {@link Environment} or {@link Environment#PRODUCTION} if no match was found
+     * @return A matching {@link Environment} or sets the {@link Environment#CUSTOM} if no match was found
      */
     public static Environment fromString(String env) {
         if (env != null) {
