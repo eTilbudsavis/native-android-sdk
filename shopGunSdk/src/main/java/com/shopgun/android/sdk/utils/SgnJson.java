@@ -171,7 +171,7 @@ public class SgnJson {
             mStats.logKey(key);
             return mObject.isNull(key) ? defValue : mObject.get(key);
         } catch (Exception e) {
-            SgnLog.e(TAG, null, e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return defValue;
     }
@@ -255,7 +255,7 @@ public class SgnJson {
             mStats.logKey(key);
             return mObject.isNull(key) ? defValue : mObject.getInt(key);
         } catch (Exception e) {
-            SgnLog.e(TAG, null, e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return defValue;
     }
@@ -280,7 +280,7 @@ public class SgnJson {
             mStats.logKey(key);
             return mObject.isNull(key) ? defValue : mObject.getJSONArray(key);
         } catch (Exception e) {
-            SgnLog.e(TAG, null, e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return defValue;
     }
@@ -305,7 +305,7 @@ public class SgnJson {
             mStats.logKey(key);
             return mObject.isNull(key) ? defValue : mObject.getJSONObject(key);
         } catch (Exception e) {
-            SgnLog.e(TAG, null, e);
+            SgnLog.e(TAG, e.getMessage(), e);
         }
         return defValue;
     }
