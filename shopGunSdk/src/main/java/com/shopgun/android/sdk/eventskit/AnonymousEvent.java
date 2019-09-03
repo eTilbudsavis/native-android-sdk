@@ -27,7 +27,9 @@ public class AnonymousEvent {
     public static final int OFFER_OPENED = 3;
     public static final int CLIENT_SESSION_OPENED = 4;
     public static final int SEARCHED = 5;
+    public static final int FIRST_OFFER_CLICKED_AFTER_SEARCH = 6;
     public static final int SEARCH_TO_INTERACTION = 7;
+    public static final int VIEWED_SEARCH_RESULT = 9;
     public static final int INCITO_PUBLICATION_OPENED = 11;
 
     private boolean mDoNotTrack;
@@ -46,7 +48,9 @@ public class AnonymousEvent {
      *             OFFER_OPENED = 3;
      *             CLIENT_SESSION_OPENED = 4;
      *             SEARCHED = 5;
+     *             FIRST_OFFER_CLICKED_AFTER_SEARCH = 6;
      *             SEARCH_TO_INTERACTION = 7;
+     *             VIEWED_SEARCH_RESULT = 9;
      *             INCITO_PUBLICATION_OPENED = 11;
      */
     public AnonymousEvent(int type) {
@@ -260,6 +264,10 @@ public class AnonymousEvent {
                 return "incito_publication_opened";
             case SEARCH_TO_INTERACTION:
                 return "search_to_interaction";
+            case FIRST_OFFER_CLICKED_AFTER_SEARCH:
+                return "first_offer_clicked_after_search";
+            case VIEWED_SEARCH_RESULT:
+                return "viewed_search_result";
             default:
                 return "custom_event";
         }
