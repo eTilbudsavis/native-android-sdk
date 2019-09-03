@@ -1,12 +1,11 @@
 package com.shopgun.android.sdk.eventskit;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.TextUtils;
 
 import java.util.concurrent.TimeUnit;
-
-import io.realm.RealmModel;
 
 /**
  * New anonymous format for events
@@ -80,6 +79,13 @@ public class AnonymousEvent {
     public AnonymousEvent add(String property, String value) {
         if (property != null) {
             json_event.addProperty(property, value);
+        }
+        return this;
+    }
+
+    public AnonymousEvent add(String property, JsonArray value) {
+        if (property != null && value != null) {
+            json_event.add(property, value);
         }
         return this;
     }
