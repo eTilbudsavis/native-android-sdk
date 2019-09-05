@@ -40,17 +40,21 @@ public class AnonymousEvent {
     private long timestamp;
 
     /**
-     * @param type integer code for the json_event type. The sdk defines a few basics types
-     *             DEFAULT_TYPE = 0;
-     *             PAGED_PUBLICATION_OPENED = 1;
-     *             PAGED_PUBLICATION_PAGE_DISAPPEARED = 2;
-     *             OFFER_OPENED = 3;
-     *             CLIENT_SESSION_OPENED = 4;
-     *             SEARCHED = 5;
-     *             FIRST_OFFER_CLICKED_AFTER_SEARCH = 6;
-     *             SEARCH_TO_INTERACTION = 7;
-     *             VIEWED_SEARCH_RESULT = 9;
-     *             INCITO_PUBLICATION_OPENED = 11;
+     * The following codes are reserved to sdk events:
+     *      DEFAULT_TYPE = 0;
+     *      PAGED_PUBLICATION_OPENED = 1;
+     *      PAGED_PUBLICATION_PAGE_DISAPPEARED = 2;
+     *      OFFER_OPENED = 3;
+     *      CLIENT_SESSION_OPENED = 4;
+     *      SEARCHED = 5;
+     *      FIRST_OFFER_CLICKED_AFTER_SEARCH = 6;
+     *      SEARCH_TO_INTERACTION = 7;
+     *      VIEWED_SEARCH_RESULT = 9;
+     *      INCITO_PUBLICATION_OPENED = 11;
+     *
+     * If you need to use Anonymous event for other purposes, you can use negative integer as type.
+     *
+     * @param type integer code for the json_event type.
      */
     public AnonymousEvent(int type) {
         id = SgnUtils.createUUID();
@@ -77,7 +81,7 @@ public class AnonymousEvent {
      * @return the updated event
      */
     public AnonymousEvent add(String property, String value) {
-        if (property != null) {
+        if (property != null && value != null) {
             json_event.addProperty(property, value);
         }
         return this;
@@ -86,6 +90,13 @@ public class AnonymousEvent {
     public AnonymousEvent add(String property, JsonArray value) {
         if (property != null && value != null) {
             json_event.add(property, value);
+        }
+        return this;
+    }
+
+    public AnonymousEvent add(String property, Number value) {
+        if (property != null && value != null) {
+            json_event.addProperty(property, value);
         }
         return this;
     }
