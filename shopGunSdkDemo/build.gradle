@@ -67,6 +67,7 @@ dependencies {
     implementation libs.butterknife
     annotationProcessor libs.butterknifeCompiler
     implementation libs.appcompat
+    implementation libs.appcompatLegacy
     implementation libs.supportv4
     implementation libs.okhttpLoggingInterceptor
     implementation libs.gson
@@ -82,8 +83,8 @@ dependencies {
     implementation libs.verso
 
     androidTestImplementation libs.okhttpMockwebserver
-    androidTestImplementation 'androidx.test:runner:1.1.0'
-    androidTestImplementation 'androidx.test:rules:1.1.0'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test:rules:1.2.0'
 
     // need for androidTest, not used by the app
     implementation libs.geohash

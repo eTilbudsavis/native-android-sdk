@@ -6,6 +6,7 @@ ext {
 
     libVersions = [
             support                     : '1.0.0',
+            appcompat                   : '1.1.0',
             playServices                : '11.8.0', // (August 2017) never bump this too early, as this requires an update of Google Play services on the device
             gson                        : '2.8.5',
             eventbus                    : '3.1.1',
@@ -46,7 +47,8 @@ ext {
 
             // support libs
             supportv4                   : "androidx.legacy:legacy-support-v4:$libVersions.support",
-            appcompat                   : "androidx.appcompat:appcompat:$libVersions.support",
+            appcompat                   : "androidx.appcompat:appcompat:$libVersions.appcompat",
+            appcompatLegacy             : "androidx.appcompat:appcompat-resources:$libVersions.appcompat",
             recyclerview                : "androidx.recyclerview:recyclerview:$libVersions.support",
             preference                  : "androidx.legacy:legacy-preference-v14:$libVersions.support",
 
