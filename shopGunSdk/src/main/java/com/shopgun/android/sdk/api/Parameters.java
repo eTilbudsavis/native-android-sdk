@@ -28,6 +28,11 @@ public class Parameters {
     public static final String ORDER_BY = "order_by";
 
     /**
+     * Type of publication supported (paged and/or incito)
+     */
+    public static final String PUBLICATION_TYPE = "types";
+
+    /**
      * API v2 parameter name for sensor.
      */
     public static final String SENSOR = "r_sensor";

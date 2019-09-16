@@ -27,12 +27,12 @@ buildscript {
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3'
-        classpath "io.realm:realm-gradle-plugin:5.9.1"
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.9.9'
+        classpath "io.realm:realm-gradle-plugin:5.15.1"
         classpath 'com.apollographql.apollo:apollo-gradle-plugin:0.5.0'
 
         // Dependencies checker: run from command line ./gradlew dependencyUpdates -Drevision=release|milestone|integration
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.25.0'
     }
 }
 
@@ -77,6 +77,7 @@ dependencies {
     implementation libs.glide
     implementation libs.gson
     implementation libs.appcompat
+    implementation libs.appcompatLegacy
     implementation libs.apollo
     implementation libs.geohash
 

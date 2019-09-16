@@ -206,9 +206,13 @@ class PagedPublicationLifecycle implements Parcelable {
 
     void applyState(int spread, int[] pages) {
         for (int page : pages) {
-            mPageLoaded[page] = mPageLoaded[page] | mPageLoadedTmp[page];
+            if (indexIsInRange(mPageLoaded.length, page) && indexIsInRange(mPageLoadedTmp.length, page)) {
+                mPageLoaded[page] = mPageLoaded[page] | mPageLoadedTmp[page];
+            }
         }
-        mSpreadZoomedIn[spread] = mSpreadZoomedIn[spread] | mSpreadZoomedInTmp[spread];
+        if (indexIsInRange(mSpreadZoomedIn.length, spread) && indexIsInRange(mSpreadZoomedInTmp.length, spread)) {
+            mSpreadZoomedIn[spread] = mSpreadZoomedIn[spread] | mSpreadZoomedInTmp[spread];
+        }
     }
 
     void pageLoaded(int page) {

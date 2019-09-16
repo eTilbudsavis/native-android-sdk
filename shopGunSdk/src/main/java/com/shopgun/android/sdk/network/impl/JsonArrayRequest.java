@@ -217,4 +217,48 @@ public class JsonArrayRequest extends JsonRequest<JSONArray> {
         return this;
     }
 
+    /**
+     * Type of publication the client supports
+     * @param type parameter
+     * @return this object
+     */
+    public Request<?> setPublicationType(String type) {
+        getParameters().put(Parameters.PUBLICATION_TYPE, type);
+        return this;
+    }
+
+    /**
+     * Type of publication the client supports
+     * @param type parameter
+     * @return this object
+     */
+    public Request<?> setPublicationType(String[] type) {
+        if (type != null && type.length != 0) {
+            String tmp = TextUtils.join(",", type);
+            getParameters().put(Parameters.PUBLICATION_TYPE, tmp);
+        }
+        return this;
+    }
+
+    /**
+     * Type of publication the client supports
+     * @param type parameter
+     * @return this object
+     */
+    public Request<?> setPublicationType(List<String> type) {
+        if (!type.isEmpty()) {
+            String tmp = TextUtils.join(",", type);
+            getParameters().put(Parameters.PUBLICATION_TYPE, tmp);
+        }
+        return this;
+    }
+
+    /**
+     * Get the requested publication types
+     * @return the requested types or null
+     */
+    public String getPublicationTypes() {
+        return getParameters().get(Parameters.PUBLICATION_TYPE);
+    }
+
 }

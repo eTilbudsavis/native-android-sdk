@@ -38,6 +38,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -54,6 +55,15 @@ import java.util.Set;
 public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalog>, IStore<Catalog>, Parcelable {
 
     public static final String TAG = Constants.getTag(Catalog.class);
+
+    public enum PublicationType {
+        PAGED, INCITO;
+
+        @Override
+        public String toString() {
+            return super.toString().toLowerCase();
+        }
+    }
 
     // From JSON blob
     private String mErn;
@@ -78,6 +88,13 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
     private Dealer mDealer;
     private Store mStore;
     private HotspotMap mHotspots;
+
+    /// Type of catalog.
+    /// If it contains `paged`, it can only be viewed with PagedPublicationFragment
+    /// If it contains `incito`, the `incitoId` will always have a value, and it can be viewed as an Incito
+    /// If it ONLY contains `incito`, this cannot be viewed with PagedPublicationFragment (see `isOnlyIncito`)
+    private EnumSet<PublicationType> mPublicationTypes;
+    private String mIncitoId;
 
     public Catalog() {
 
@@ -105,6 +122,8 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         this.mCategoryIds = tmp.mCategoryIds;
         this.mPdfUrl = tmp.mPdfUrl;
         this.mIsAvailableInAllStores = tmp.mIsAvailableInAllStores;
+        this.mIncitoId = tmp.mIncitoId;
+        this.mPublicationTypes = tmp.mPublicationTypes;
 
         this.mPages = tmp.mPages;
         this.mDealer = tmp.mDealer;
@@ -158,6 +177,8 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
                 .setCategoryIds(o.getCategoryIds())
                 .setPdfUrl(o.getPdfUrl())
                 .setAvailability(o.getAvailability())
+                .setIncitoId(o.getIncitoId())
+                .setPublicationTypes(o.getPublicationTypes())
                 .setPages(o.getPages());
 
         // Internal SDK variables, avoid getter and setter to circumvent safety features... o_O
@@ -189,6 +210,8 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
                 .setCategoryIds(getCategoryIds())
                 .setPdfUrl(getPdfUrl())
                 .setAvailability(getIsAvailableInAllStores())
+                .setIncitoId(getIncitoId())
+                .setPublicationTypes(getPublicationTypes())
                 // Internal SDK variables
                 .putDealer(getDealer())
                 .putStore(getStore())
@@ -634,6 +657,41 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         return this;
     }
 
+    /**
+     * Check if this publication is Incito only compatible
+     * @return true if is Incito only
+     */
+    public boolean isOnlyIncito() {
+        return mPublicationTypes != null && mPublicationTypes.size() == 1 && mPublicationTypes.contains(PublicationType.INCITO);
+    }
+
+    /**
+     * Id of the node in the graph (long based64 encoded id)
+     * @return the incito id or {@code null}
+     */
+    public String getIncitoId() {
+        return mIncitoId;
+    }
+
+    public Catalog setIncitoId(String incitoId) {
+        mIncitoId = incitoId;
+        return this;
+    }
+
+    /**
+     * Array of publication that can be represented. Can be {@code paged}, {@code incito} or both.
+     * If contains {@code incito}, then {@link Catalog#getIncitoId()} won't be {@code null}
+     * @return {@link EnumSet} of {@link PublicationType}
+     */
+    public EnumSet<PublicationType> getPublicationTypes() {
+        return mPublicationTypes;
+    }
+
+    public Catalog setPublicationTypes(EnumSet<PublicationType> publicationTypes) {
+        mPublicationTypes = publicationTypes;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -659,6 +717,8 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
             return false;
         if (mPdfUrl != null ? !mPdfUrl.equals(catalog.mPdfUrl) : catalog.mPdfUrl != null) return false;
         if (mIsAvailableInAllStores != catalog.mIsAvailableInAllStores) return false;
+        if (mIncitoId != null ? !mIncitoId.equals(catalog.mIncitoId) : catalog.mIncitoId != null) return false;
+        if (mPublicationTypes != null ? !mPublicationTypes.equals(catalog.mPublicationTypes) : catalog.mPublicationTypes != null) return false;
         if (mPages != null ? !mPages.equals(catalog.mPages) : catalog.mPages != null) return false;
         if (mDealer != null ? !mDealer.equals(catalog.mDealer) : catalog.mDealer != null) return false;
         if (mStore != null ? !mStore.equals(catalog.mStore) : catalog.mStore != null) return false;
@@ -685,6 +745,8 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         result = 31 * result + (mCategoryIds != null ? mCategoryIds.hashCode() : 0);
         result = 31 * result + (mPdfUrl != null ? mPdfUrl.hashCode() : 0);
         result = 31 * result + Boolean.valueOf(mIsAvailableInAllStores).hashCode();
+        result = 31 * result + (mIncitoId != null ? mIncitoId.hashCode() : 0);
+        result = 31 * result + (mPublicationTypes != null ? mPublicationTypes.hashCode() : 0);
         result = 31 * result + (mPages != null ? mPages.hashCode() : 0);
         result = 31 * result + (mDealer != null ? mDealer.hashCode() : 0);
         result = 31 * result + (mStore != null ? mStore.hashCode() : 0);
@@ -716,6 +778,8 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         dest.writeStringList(new ArrayList<String>(mCategoryIds));
         dest.writeString(this.mPdfUrl);
         dest.writeByte((byte) (mIsAvailableInAllStores ? 1 : 0));
+        dest.writeString(this.mIncitoId);
+        dest.writeSerializable(this.mPublicationTypes);
         dest.writeTypedList(mPages);
         dest.writeParcelable(this.mDealer, 0);
         dest.writeParcelable(this.mStore, 0);
@@ -744,6 +808,8 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         this.mCategoryIds = new HashSet<String>(catIds);
         this.mPdfUrl = in.readString();
         this.mIsAvailableInAllStores = in.readByte() != 0;
+        this.mIncitoId = in.readString();
+        this.mPublicationTypes = (EnumSet<PublicationType>) in.readSerializable();
         this.mPages = in.createTypedArrayList(Images.CREATOR);
         this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
         this.mStore = in.readParcelable(Store.class.getClassLoader());

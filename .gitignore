@@ -58,3 +58,5 @@ output.json
 shopGunSdkDemo-release.apk
 gradle_models.ser
 markdown-navigator.xml
+.idea/dictionaries
+encodings.xml

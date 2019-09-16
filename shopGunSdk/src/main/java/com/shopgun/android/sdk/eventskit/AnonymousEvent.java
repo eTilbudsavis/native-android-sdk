@@ -1,12 +1,11 @@
 package com.shopgun.android.sdk.eventskit;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.TextUtils;
 
 import java.util.concurrent.TimeUnit;
-
-import io.realm.RealmModel;
 
 /**
  * New anonymous format for events
@@ -27,6 +26,10 @@ public class AnonymousEvent {
     public static final int OFFER_OPENED = 3;
     public static final int CLIENT_SESSION_OPENED = 4;
     public static final int SEARCHED = 5;
+    public static final int FIRST_OFFER_CLICKED_AFTER_SEARCH = 6;
+    public static final int SEARCH_TO_INTERACTION = 7;
+    public static final int VIEWED_SEARCH_RESULT = 9;
+    public static final int INCITO_PUBLICATION_OPENED = 11;
 
     private boolean mDoNotTrack;
 
@@ -37,13 +40,21 @@ public class AnonymousEvent {
     private long timestamp;
 
     /**
-     * @param type integer code for the json_event type. The sdk defines a few basics types
-     *             DEFAULT_TYPE = 0;
-     *             PAGED_PUBLICATION_OPENED = 1;
-     *             PAGED_PUBLICATION_PAGE_DISAPPEARED = 2;
-     *             OFFER_OPENED = 3;
-     *             CLIENT_SESSION_OPENED = 4;
-     *             SEARCHED = 5;
+     * The following codes are reserved to sdk events:
+     *      DEFAULT_TYPE = 0;
+     *      PAGED_PUBLICATION_OPENED = 1;
+     *      PAGED_PUBLICATION_PAGE_DISAPPEARED = 2;
+     *      OFFER_OPENED = 3;
+     *      CLIENT_SESSION_OPENED = 4;
+     *      SEARCHED = 5;
+     *      FIRST_OFFER_CLICKED_AFTER_SEARCH = 6;
+     *      SEARCH_TO_INTERACTION = 7;
+     *      VIEWED_SEARCH_RESULT = 9;
+     *      INCITO_PUBLICATION_OPENED = 11;
+     *
+     * If you need to use Anonymous event for other purposes, you can use negative integer as type.
+     *
+     * @param type integer code for the json_event type.
      */
     public AnonymousEvent(int type) {
         id = SgnUtils.createUUID();
@@ -70,7 +81,21 @@ public class AnonymousEvent {
      * @return the updated event
      */
     public AnonymousEvent add(String property, String value) {
-        if (property != null) {
+        if (property != null && value != null) {
+            json_event.addProperty(property, value);
+        }
+        return this;
+    }
+
+    public AnonymousEvent add(String property, JsonArray value) {
+        if (property != null && value != null) {
+            json_event.add(property, value);
+        }
+        return this;
+    }
+
+    public AnonymousEvent add(String property, Number value) {
+        if (property != null && value != null) {
             json_event.addProperty(property, value);
         }
         return this;
@@ -183,6 +208,14 @@ public class AnonymousEvent {
         return this;
     }
 
+    public AnonymousEvent addIncitoOpened(String publicationId, boolean pagedPublicationIsAvailable) {
+        if (!TextUtils.isEmpty(publicationId)) {
+            json_event.addProperty("ip.id", publicationId);
+            json_event.addProperty("ip.paged", pagedPublicationIsAvailable);
+        }
+        return this;
+    }
+
 
     /****** Getters and setters */
 
@@ -244,6 +277,14 @@ public class AnonymousEvent {
                 return "client_session_opened";
             case SEARCHED:
                 return "searched";
+            case INCITO_PUBLICATION_OPENED:
+                return "incito_publication_opened";
+            case SEARCH_TO_INTERACTION:
+                return "search_to_interaction";
+            case FIRST_OFFER_CLICKED_AFTER_SEARCH:
+                return "first_offer_clicked_after_search";
+            case VIEWED_SEARCH_RESULT:
+                return "viewed_search_result";
             default:
                 return "custom_event";
         }
