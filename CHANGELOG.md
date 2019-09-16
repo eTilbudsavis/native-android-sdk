@@ -5,6 +5,8 @@ Version 5.0.0-rcx
 -------------
 * AndroidX
 * Requires Java 8
+* Add a dependency to [android-apollo](https://github.com/apollographql/apollo-android) 
+for GraphQL queries (not actively used by the sdk right now, but it'll be in the future)
 * Dependency updates
 * Bug fixes
 
