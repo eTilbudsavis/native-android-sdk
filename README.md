@@ -17,7 +17,7 @@ Now add these lines to your module's `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'com.shopgun.android:sdk:5.0.0-rc1'
+    implementation 'com.shopgun.android:sdk:5.0.0'
 }
 ```
 
