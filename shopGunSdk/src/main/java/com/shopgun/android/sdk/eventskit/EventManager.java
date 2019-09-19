@@ -63,7 +63,7 @@ public class EventManager {
     private EventManager(ShopGun shopGun) {
         mEventListeners = new ArrayList<>();
         mEventQueue = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
-        mEventDispatcher = new EventDispatcher(mEventQueue, shopGun.getClient(), shopGun.getEventEnvironment());
+        mEventDispatcher = new EventDispatcher(mEventQueue, shopGun.getClient(), shopGun.getEventEnvironment().toString());
         mCountryCode = "";
 
         checkLegacyEvents(shopGun);
@@ -132,7 +132,7 @@ public class EventManager {
     private void startDispatcher() {
         if (mEventDispatcher == null || mEventDispatcher.getState() == Thread.State.TERMINATED) {
             ShopGun sgn = ShopGun.getInstance();
-            mEventDispatcher = new EventDispatcher(mEventQueue, sgn.getClient(), sgn.getEventEnvironment());
+            mEventDispatcher = new EventDispatcher(mEventQueue, sgn.getClient(), sgn.getEventEnvironment().toString());
         }
         mEventDispatcher.start();
 

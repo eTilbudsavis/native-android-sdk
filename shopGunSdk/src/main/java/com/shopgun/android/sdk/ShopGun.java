@@ -29,6 +29,7 @@ import com.apollographql.apollo.ApolloClient;
 import com.apollographql.apollo.api.ScalarType;
 import com.apollographql.apollo.response.CustomTypeAdapter;
 import com.shopgun.android.sdk.api.Environment;
+import com.shopgun.android.sdk.api.EnvironmentEvents;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.corekit.UserAgentInterceptor;
@@ -127,7 +128,8 @@ public class ShopGun {
     private Environment mEnvironment;
     /** The current API environment in use for themes (used for e.g. shoppinglists */
     private ThemeEnvironment mThemeEnvironment;
-    private String mEventEnvironment;
+    /** the current event environment */
+    private EnvironmentEvents mEventEnvironment;
     /** The http client of choice for SDK traffic */
     private OkHttpClient mClient;
     /** The session id for this specific session */
@@ -283,7 +285,8 @@ public class ShopGun {
         }
     }
 
-    /**     * Returns the current {@link Environment} in use.
+    /**
+     * Returns the current {@link Environment} in use.
      *
      * @return The current {@link Environment}
      */
@@ -300,9 +303,11 @@ public class ShopGun {
         return mThemeEnvironment;
     }
 
-    public String getEventEnvironment() {
+    public EnvironmentEvents getEventEnvironment() {
         return mEventEnvironment;
     }
+
+
 
     public String getLegacyEventEnvironment() {
         return "https://events.service.shopgun.com/track";
@@ -485,7 +490,7 @@ public class ShopGun {
         Boolean develop;
         Environment environment;
         ThemeEnvironment themeEnvironment;
-        String eventEnvironment;
+        EnvironmentEvents eventEnvironment;
         RealmConfiguration realmConfiguration;
         RealmConfiguration legacyConfiguration;
         OkHttpClient okHttpClient;
@@ -617,7 +622,7 @@ public class ShopGun {
             return this;
         }
 
-        public Builder setEventEnvironment(String eventEnvironment) {
+        public Builder setEventEnvironment(EnvironmentEvents eventEnvironment) {
             if (eventEnvironment == null) {
                 throw new IllegalArgumentException("EventEndpoint must not be null.");
             }
@@ -664,7 +669,7 @@ public class ShopGun {
             }
 
             if (eventEnvironment == null) {
-                eventEnvironment = "https://events.service.shopgun.com/sync";
+                eventEnvironment = EnvironmentEvents.PRODUCTION;
             }
 
             // Setup the default OkHttpClient
