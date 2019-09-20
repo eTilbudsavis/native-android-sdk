@@ -3,7 +3,7 @@ Change Log
 
 Version 5.1.0
 -------------
-
+* `api` package update: new classes (`EnvironmentGraph` and `EnvironmentEvents`), endpoint updates.
 
 Version 5.0.0
 -------------
