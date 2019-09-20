@@ -30,6 +30,7 @@ import com.apollographql.apollo.api.ScalarType;
 import com.apollographql.apollo.response.CustomTypeAdapter;
 import com.shopgun.android.sdk.api.Environment;
 import com.shopgun.android.sdk.api.EnvironmentEvents;
+import com.shopgun.android.sdk.api.EnvironmentGraph;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.corekit.UserAgentInterceptor;
@@ -128,8 +129,10 @@ public class ShopGun {
     private Environment mEnvironment;
     /** The current API environment in use for themes (used for e.g. shoppinglists */
     private ThemeEnvironment mThemeEnvironment;
-    /** the current event environment */
+    /** The current event environment */
     private EnvironmentEvents mEventEnvironment;
+    /** The current graph environment */
+    private EnvironmentGraph mGraphEnvironment;
     /** The http client of choice for SDK traffic */
     private OkHttpClient mClient;
     /** The session id for this specific session */
@@ -303,11 +306,13 @@ public class ShopGun {
         return mThemeEnvironment;
     }
 
+    public EnvironmentGraph getGraphEnvironment() {
+        return mGraphEnvironment;
+    }
+
     public EnvironmentEvents getEventEnvironment() {
         return mEventEnvironment;
     }
-
-
 
     public String getLegacyEventEnvironment() {
         return "https://events.service.shopgun.com/track";
@@ -491,6 +496,7 @@ public class ShopGun {
         Environment environment;
         ThemeEnvironment themeEnvironment;
         EnvironmentEvents eventEnvironment;
+        EnvironmentGraph graphEnvironment;
         RealmConfiguration realmConfiguration;
         RealmConfiguration legacyConfiguration;
         OkHttpClient okHttpClient;
@@ -633,6 +639,17 @@ public class ShopGun {
             return this;
         }
 
+        public Builder setGraphEnvironment(EnvironmentGraph graphEnvironment) {
+            if (graphEnvironment == null) {
+                throw new IllegalArgumentException("GraphEndpoint must not be null.");
+            }
+            if (this.graphEnvironment != null) {
+                throw new IllegalStateException("GraphEndpoint already set.");
+            }
+            this.graphEnvironment = graphEnvironment;
+            return this;
+        }
+
         /**
          * Builds and set the ShopGun instance, and sets it to be the global singleton.
          * @return The ShopGun instance
@@ -672,6 +689,10 @@ public class ShopGun {
                 eventEnvironment = EnvironmentEvents.PRODUCTION;
             }
 
+            if (graphEnvironment == null) {
+                graphEnvironment = EnvironmentGraph.PRODUCTION;
+            }
+
             // Setup the default OkHttpClient
             OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
             for (Interceptor i : interceptors) {
@@ -686,7 +707,7 @@ public class ShopGun {
 
             // Setup the default ApolloClient
             ApolloClient.Builder apolloBuilder = ApolloClient.builder()
-                    .serverUrl("https://graph.service.shopgun.com")
+                    .serverUrl(graphEnvironment.toString())
                     .okHttpClient(okHttpClient);
             for (int i = 0; i < apolloCustomTypeAdapters.size(); i++) {
                 apolloBuilder.addCustomTypeAdapter(
