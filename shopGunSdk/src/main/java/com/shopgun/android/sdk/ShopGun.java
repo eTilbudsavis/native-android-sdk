@@ -170,6 +170,7 @@ public class ShopGun {
         mEnvironment = builder.environment;
         mThemeEnvironment = builder.themeEnvironment;
         mEventEnvironment = builder.eventEnvironment;
+        mGraphEnvironment = builder.graphEnvironment;
         mExecutor = builder.executorService;
         mClient = builder.okHttpClient;
         mRealmConfiguration = builder.realmConfiguration;
