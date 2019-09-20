@@ -22,7 +22,7 @@ package com.shopgun.android.sdk.api;
  * By default, the {@link EnvironmentGraph} is set to {@link EnvironmentGraph#PRODUCTION}.
  */
 public enum EnvironmentGraph {
-    PRODUCTION, EDGE, STAGING;
+    PRODUCTION, EDGE, STAGING, SQUID;
 
     public static final String HOST_POSTFIX = "shopgun.com";
 
@@ -30,6 +30,7 @@ public enum EnvironmentGraph {
         PRODUCTION.mEnvironment = "https://graph.service." + HOST_POSTFIX;
         EDGE.mEnvironment = "https://graph.service." + HOST_POSTFIX;
         STAGING.mEnvironment = "https://graph.service-staging." + HOST_POSTFIX;
+        SQUID.mEnvironment = "https://squid.service-staging." + HOST_POSTFIX;
     }
 
     private String mEnvironment;
