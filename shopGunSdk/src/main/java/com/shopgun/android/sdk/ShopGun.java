@@ -29,6 +29,8 @@ import com.apollographql.apollo.ApolloClient;
 import com.apollographql.apollo.api.ScalarType;
 import com.apollographql.apollo.response.CustomTypeAdapter;
 import com.shopgun.android.sdk.api.Environment;
+import com.shopgun.android.sdk.api.EnvironmentEvents;
+import com.shopgun.android.sdk.api.EnvironmentGraph;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.corekit.UserAgentInterceptor;
@@ -127,7 +129,10 @@ public class ShopGun {
     private Environment mEnvironment;
     /** The current API environment in use for themes (used for e.g. shoppinglists */
     private ThemeEnvironment mThemeEnvironment;
-    private String mEventEnvironment;
+    /** The current event environment */
+    private EnvironmentEvents mEventEnvironment;
+    /** The current graph environment */
+    private EnvironmentGraph mGraphEnvironment;
     /** The http client of choice for SDK traffic */
     private OkHttpClient mClient;
     /** The session id for this specific session */
@@ -165,6 +170,7 @@ public class ShopGun {
         mEnvironment = builder.environment;
         mThemeEnvironment = builder.themeEnvironment;
         mEventEnvironment = builder.eventEnvironment;
+        mGraphEnvironment = builder.graphEnvironment;
         mExecutor = builder.executorService;
         mClient = builder.okHttpClient;
         mRealmConfiguration = builder.realmConfiguration;
@@ -283,7 +289,8 @@ public class ShopGun {
         }
     }
 
-    /**     * Returns the current {@link Environment} in use.
+    /**
+     * Returns the current {@link Environment} in use.
      *
      * @return The current {@link Environment}
      */
@@ -300,7 +307,11 @@ public class ShopGun {
         return mThemeEnvironment;
     }
 
-    public String getEventEnvironment() {
+    public EnvironmentGraph getGraphEnvironment() {
+        return mGraphEnvironment;
+    }
+
+    public EnvironmentEvents getEventEnvironment() {
         return mEventEnvironment;
     }
 
@@ -485,7 +496,8 @@ public class ShopGun {
         Boolean develop;
         Environment environment;
         ThemeEnvironment themeEnvironment;
-        String eventEnvironment;
+        EnvironmentEvents eventEnvironment;
+        EnvironmentGraph graphEnvironment;
         RealmConfiguration realmConfiguration;
         RealmConfiguration legacyConfiguration;
         OkHttpClient okHttpClient;
@@ -617,7 +629,7 @@ public class ShopGun {
             return this;
         }
 
-        public Builder setEventEnvironment(String eventEnvironment) {
+        public Builder setEventEnvironment(EnvironmentEvents eventEnvironment) {
             if (eventEnvironment == null) {
                 throw new IllegalArgumentException("EventEndpoint must not be null.");
             }
@@ -625,6 +637,17 @@ public class ShopGun {
                 throw new IllegalStateException("EventEndpoint already set.");
             }
             this.eventEnvironment = eventEnvironment;
+            return this;
+        }
+
+        public Builder setGraphEnvironment(EnvironmentGraph graphEnvironment) {
+            if (graphEnvironment == null) {
+                throw new IllegalArgumentException("GraphEndpoint must not be null.");
+            }
+            if (this.graphEnvironment != null) {
+                throw new IllegalStateException("GraphEndpoint already set.");
+            }
+            this.graphEnvironment = graphEnvironment;
             return this;
         }
 
@@ -664,7 +687,11 @@ public class ShopGun {
             }
 
             if (eventEnvironment == null) {
-                eventEnvironment = "https://events.service.shopgun.com/sync";
+                eventEnvironment = EnvironmentEvents.PRODUCTION;
+            }
+
+            if (graphEnvironment == null) {
+                graphEnvironment = EnvironmentGraph.PRODUCTION;
             }
 
             // Setup the default OkHttpClient
@@ -681,7 +708,7 @@ public class ShopGun {
 
             // Setup the default ApolloClient
             ApolloClient.Builder apolloBuilder = ApolloClient.builder()
-                    .serverUrl("https://graph.service.shopgun.com")
+                    .serverUrl(graphEnvironment.toString())
                     .okHttpClient(okHttpClient);
             for (int i = 0; i < apolloCustomTypeAdapters.size(); i++) {
                 apolloBuilder.addCustomTypeAdapter(
