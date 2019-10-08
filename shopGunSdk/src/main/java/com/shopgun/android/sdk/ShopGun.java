@@ -231,11 +231,12 @@ public class ShopGun {
     }
 
     /**
-     * Get the shared Apollo client for graphQL queries to
-     * "https://graph.service.shopgun.com"
+     * Get the client for graphQL queries to
+     * one of the {@link EnvironmentGraph}
+     * Currently we're using Apollo library to perform graph queries.
      * @return ApolloClient
      */
-    public ApolloClient getApolloClient() {
+    public ApolloClient getGraphClient() {
         return mApolloClient;
     }
 
