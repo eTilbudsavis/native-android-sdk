@@ -60,3 +60,4 @@ gradle_models.ser
 markdown-navigator.xml
 .idea/dictionaries
 encodings.xml
+*.plantuml
