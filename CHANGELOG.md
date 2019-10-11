@@ -4,6 +4,7 @@ Change Log
 Version 5.1.0
 -------------
 * `api` package update: new classes (`EnvironmentGraph` and `EnvironmentEvents`), endpoint updates.
+* Remove dependency to [android-apollo](https://github.com/apollographql/apollo-android) 
 
 Version 5.0.0
 -------------

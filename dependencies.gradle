@@ -17,7 +17,6 @@ ext {
             mockito                     : '3.0.0',
             okhttp                      : '3.12.1', // 3.13 doesn't support pre Android 5. https://medium.com/square-corner-blog/okhttp-3-13-requires-android-5-818bb78d07ce
             glide                       : '4.9.0',
-            apollo                      : '0.5.0',
             geohash                     : '0.22',
 
             sgn : [
@@ -60,7 +59,6 @@ ext {
             okhttpLoggingInterceptor    : "com.squareup.okhttp3:logging-interceptor:$libVersions.okhttp",
             okhttpMockwebserver         : "com.squareup.okhttp3:mockwebserver:$libVersions.okhttp",
             gson                        : "com.google.code.gson:gson:$libVersions.gson",
-            apollo                      : "com.apollographql.apollo:apollo-runtime:$libVersions.apollo",
             geohash                     : "com.github.drfonfon:android-geohash:$libVersions.geohash",
 
 
