@@ -132,10 +132,6 @@ public class ShopGun {
     private EnvironmentGraph mGraphEnvironment;
     /** The http client of choice for SDK traffic */
     private OkHttpClient mClient;
-    /** The session id for this specific session */
-    private String mSessionId;
-    /** The device id, this will if possible be persisted across installations */
-    private String mDeviceId;
 
     // Things we'd like to get rid of
 
@@ -174,9 +170,6 @@ public class ShopGun {
         mLifecycleManager.registerCallback(mLifecycleCallback);
 
         mSettings = new Settings(mContext);
-
-        mDeviceId = mSettings.getClientId();
-        mSessionId = mSettings.getSessionId();
 
         mRequestQueue = new RequestQueue(ShopGun.this, builder.cache, builder.network);
         mRequestQueue.start();
@@ -417,7 +410,6 @@ public class ShopGun {
 
         @Override
         public void onCreate(Activity activity) {
-            mSessionId = SgnUtils.createUUID();
             mSettings.incrementUsageCount();
             AnonymousEvent session_open_event = new AnonymousEvent(AnonymousEvent.CLIENT_SESSION_OPENED);
             EventUtils.addLocationInformation(ShopGun.getInstance().getContext(), session_open_event);
@@ -437,7 +429,6 @@ public class ShopGun {
         public void onDestroy(Activity activity) {
             mSettings.saveLocation(mLocation);
             mSettings.setLastUsedTimeNow();
-            mSettings.setSessionId(mSessionId);
             SgnLog.v(TAG, "onDestroy");
         }
 

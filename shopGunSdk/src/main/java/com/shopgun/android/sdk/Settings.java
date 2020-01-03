@@ -38,13 +38,15 @@ public class Settings {
     private static final String LAST_USED_VERSION = "last_used_version";
     private static final String LAST_USED_TIME = "last_used_time";
     private static final String USAGE_COUNT = "usage_count";
-    private static final String SESSION_USER = "session_user";
-    private static final String SESSION_FACEBOOK = "session_facebook";
     private static final String LOCATION = "location_json";
-    private static final String CLIENT_ID = "client_id";
-    private static final String SESSION_ID = "session_id";
     private static final String LOCATION_ENABLED = "location_enabled";
 
+    // todo: delete this preferences in future updates
+    private static final String SESSION_USER = "session_user";
+    private static final String SESSION_FACEBOOK = "session_facebook";
+    private static final String CLIENT_ID = "client_id";
+    private static final String SESSION_ID = "session_id";
+    
     private SharedPreferences mSharedPrefs;
     private static boolean mMovedSharedPrefs = false;
 
@@ -85,22 +87,6 @@ public class Settings {
         mSharedPrefs.edit().putLong(LAST_USED_TIME, lastUsed.getTime()).apply();
     }
 
-    public String getSessionUser() {
-        return mSharedPrefs.getString(SESSION_USER, null);
-    }
-
-    public boolean setSessionUser(String user) {
-        return mSharedPrefs.edit().putString(SESSION_USER, user).commit();
-    }
-
-    public boolean setSessionFacebook(String token) {
-        return mSharedPrefs.edit().putString(SESSION_FACEBOOK, token).commit();
-    }
-
-    public String getSessionFacebook() {
-        return mSharedPrefs.getString(SESSION_FACEBOOK, null);
-    }
-
     public boolean saveLocation(SgnLocation l) {
         mSharedPrefs.edit().putBoolean(LOCATION_ENABLED, l.isSensor()).apply();
         String loc = l.toJSON().toString();
@@ -121,22 +107,6 @@ public class Settings {
 
     public boolean isLocationEnabled() {
         return mSharedPrefs.getBoolean(LOCATION_ENABLED, false);
-    }
-
-    public String getClientId() {
-        return mSharedPrefs.getString(CLIENT_ID, null);
-    }
-
-    public void setClientId(String clientId) {
-        mSharedPrefs.edit().putString(CLIENT_ID, clientId).apply();
-    }
-
-    public String getSessionId() {
-        return mSharedPrefs.getString(SESSION_ID, SgnUtils.createUUID());
-    }
-
-    public void setSessionId(String sessionId) {
-        mSharedPrefs.edit().putString(SESSION_ID, sessionId).apply();
     }
 
     private void performMigration() {
