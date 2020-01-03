@@ -38,7 +38,6 @@ public class Settings {
     private static final String LAST_USED_VERSION = "last_used_version";
     private static final String LAST_USED_TIME = "last_used_time";
     private static final String USAGE_COUNT = "usage_count";
-    private static final String SESSION_JSON = "session_json";
     private static final String SESSION_USER = "session_user";
     private static final String SESSION_FACEBOOK = "session_facebook";
     private static final String LOCATION = "location_json";
@@ -66,16 +65,6 @@ public class Settings {
         return mSharedPrefs.edit().clear().commit();
     }
 
-    public JSONObject getSessionJson() {
-        try {
-            String json = mSharedPrefs.getString(SESSION_JSON, null);
-            return json == null ? null : new JSONObject(json);
-        } catch (JSONException e) {
-            // ignore
-        }
-        return null;
-    }
-
     public void incrementUsageCount() {
         mSharedPrefs.edit().putInt(USAGE_COUNT, mSharedPrefs.getInt(USAGE_COUNT, -1)+1).apply();
     }
@@ -94,10 +83,6 @@ public class Settings {
 
     public void setLastUsedTime(Date lastUsed) {
         mSharedPrefs.edit().putLong(LAST_USED_TIME, lastUsed.getTime()).apply();
-    }
-
-    public void setSessionJson(JSONObject session) {
-        mSharedPrefs.edit().putString(SESSION_JSON, session.toString()).apply();
     }
 
     public String getSessionUser() {

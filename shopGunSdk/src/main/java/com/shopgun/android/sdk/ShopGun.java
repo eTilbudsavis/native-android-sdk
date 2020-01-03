@@ -141,8 +141,6 @@ public class ShopGun {
 
     /** The SDK settings */
     private final Settings mSettings;
-    /** A session manager, for handling all session requests, user information e.t.c. */
-    private final SessionManager mSessionManager;
     /** The current location that the SDK is aware of */
     private final SgnLocation mLocation;
     /** Manager for handling all {@link Shoppinglist}, and {@link ShoppinglistItem} */
@@ -184,9 +182,6 @@ public class ShopGun {
         mRequestQueue.start();
 
         mLocation = mSettings.getLocation();
-
-        // Session manager implicitly requires Settings
-        mSessionManager = new SessionManager(ShopGun.this);
 
         SgnDatabase db = SgnDatabase.getInstance(ShopGun.this);
         mListManager = new ListManager(ShopGun.this, db);
@@ -323,14 +318,6 @@ public class ShopGun {
     }
 
     /**
-     * Get the currently active session.
-     * @return a session
-     */
-    public SessionManager getSessionManager() {
-        return mSessionManager;
-    }
-
-    /**
      * Get the settings, that ETA SDK is using.
      * @return current settings
      */
@@ -395,7 +382,6 @@ public class ShopGun {
      */
     public void clear() {
         if (!mLifecycleManager.isActive()) {
-            mSessionManager.invalidate();
             mSettings.clear();
             mLocation.clear();
             mRequestQueue.clear();

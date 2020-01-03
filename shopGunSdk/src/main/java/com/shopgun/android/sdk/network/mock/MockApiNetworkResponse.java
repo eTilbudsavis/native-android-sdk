@@ -68,9 +68,7 @@ public abstract class MockApiNetworkResponse {
 
     public static MockApiNetworkResponse create(Context ctx, Request request, String type) throws ShopGunError {
 
-        if ("sessions".equals(type)) {
-            return new MockApiSessionResponse(ctx, request);
-        } if ("offers".equals(type)) {
+        if ("offers".equals(type)) {
             return new MockApiOfferResponse(ctx, request);
         } else if ("catalogs".equals(type)) {
             return new MockApiCatalogResponse(ctx, request);
@@ -83,21 +81,6 @@ public abstract class MockApiNetworkResponse {
         } else if ("countries".equals(type)) {
             return new MockApiSimpleResponse(ctx, request, FILE_COUNTRIES);
         }
-//        else if ("regions".equals(type)) {
-//
-//        }
-//        else if ("push".equals(type)) {
-//
-//        }
-//        else if ("favorites".equals(type)) {
-//
-//        }
-//        else if ("users".equals(type)) {
-//
-//        }
-//        else if ("shoppinglists".equals(type)) {
-//
-//        }
 
         return new MockApiUnsupportedResponse(ctx, request);
     }

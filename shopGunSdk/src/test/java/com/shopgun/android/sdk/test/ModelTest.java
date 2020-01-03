@@ -32,7 +32,6 @@ import com.shopgun.android.sdk.model.Permission;
 import com.shopgun.android.sdk.model.Pieces;
 import com.shopgun.android.sdk.model.Pricing;
 import com.shopgun.android.sdk.model.Quantity;
-import com.shopgun.android.sdk.model.Session;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -95,7 +94,6 @@ public class ModelTest {
         testStore();
         testCatalog();
         testDealer();
-        testSession();
         testShoppinglist();
         testShoppinglistitem();
         testOffer();
@@ -174,33 +172,6 @@ public class ModelTest {
             // ignore
         }
         jsonObj = Shoppinglist.fromJSON(jObj);
-        Assert.assertNotSame(obj, jsonObj);
-
-        // getters and setters
-
-    }
-
-    public static void testSession() {
-        Session obj = ModelCreator.getSession();
-        Session tmp = ModelCreator.getSession();
-        Assert.assertEquals(obj, tmp);
-        Assert.assertEquals(obj.hashCode(), tmp.hashCode());
-
-        // Parcelable
-        testParcelable(obj, Session.CREATOR);
-
-        // JSON
-        Assert.assertNull(Session.fromJSON((JSONObject)null));
-        JSONObject jObj = obj.toJSON();
-        Session jsonObj = Session.fromJSON(jObj);
-        Assert.assertEquals(obj, jsonObj);
-
-        try {
-            jObj.put(SgnJson.TOKEN, "new-fake-token");
-        } catch (JSONException e) {
-            // ignore
-        }
-        jsonObj = Session.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
 
         // getters and setters

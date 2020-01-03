@@ -797,7 +797,9 @@ public class ListManager {
      * @return A {@link User}
      */
     private User user() {
-        return mShopGun.getSessionManager().getSession().getUser();
+        //todo: pass a User to the ListManager somehow......
+//        return mShopGun.getSessionManager().getSession().getUser();
+        return null;
     }
 
     /**

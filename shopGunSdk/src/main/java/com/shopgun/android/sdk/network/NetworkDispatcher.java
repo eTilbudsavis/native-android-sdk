@@ -18,10 +18,8 @@ package com.shopgun.android.sdk.network;
 
 import android.os.Process;
 
-import com.shopgun.android.sdk.SessionManager;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.log.SgnLog;
-import com.shopgun.android.sdk.network.Request.Method;
 import com.shopgun.android.sdk.utils.Api.Endpoint;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.utils.HashUtils;
@@ -30,6 +28,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
@@ -112,39 +111,15 @@ public class NetworkDispatcher extends Thread {
 
                 if (response.isSuccess()) {
 
-                    updateSessionInfo(networkResponse.headers);
                     mCache.put(request, response);
-                    mDelivery.postResponse(request, response);
 
                 } else {
 
-                    if (SessionManager.recoverableError(response.error)) {
-
-                        request.addEvent("recoverable-session-error");
-
-                        if (isSessionEndpoint(request)) {
-
-                            mDelivery.postResponse(request, response);
-
-                        } else {
-
-                            // Query the session manager to perform an update
-                            if (mShopGun.getSessionManager().recover(response.error)) {
-                                mRequestQueue.add(request);
-                            } else {
-                                mDelivery.postResponse(request, response);
-                            }
-
-                        }
-
-                    } else {
-
-                        request.addEvent("non-recoverable-error");
-                        mDelivery.postResponse(request, response);
-
-                    }
-
+                    SgnLog.d("Network dispatcher",
+                            String.format(Locale.US, "Error code = %d, %s. JSON = %s", response.error.getCode(), response.error.getDetails(), response.error.toString()));
                 }
+
+                mDelivery.postResponse(request, response);
 
 
             } catch (ShopGunError e) {
@@ -157,15 +132,6 @@ public class NetworkDispatcher extends Thread {
     }
 
     /**
-     * Wrapper to check for session endpoint
-     * @param request to check
-     * @return true if session-endpoint, eler false
-     */
-    private boolean isSessionEndpoint(Request<?> request) {
-        return request.getUrl().contains(Endpoint.SESSIONS);
-    }
-
-    /**
      *  If it's a post to sessions, it's to create a new Session, then the API key is needed.
      *  In any other case, just set the headers, with the current session token and signature.
      * @param request
@@ -174,18 +140,11 @@ public class NetworkDispatcher extends Thread {
 
         request.addEvent("preparing-headers");
 
-        boolean newSession = (request.getMethod() == Method.POST && request.getUrl().contains(Endpoint.SESSIONS));
-
-        if (!newSession) {
-
-            Map<String, String> headers = new HashMap<String, String>();
-            String token = mShopGun.getSessionManager().getSession().getToken();
-            headers.put("X-Token", token);
-            String sha256 = HashUtils.sha256(mShopGun.getApiSecret() + token);
-            headers.put("X-Signature", sha256);
-            request.setHeaders(headers);
-
-        }
+        // todo: add headers to the remaining requests to v2. X-Token deleted
+        Map<String, String> headers = new HashMap<>();
+        String sha256 = HashUtils.sha256(mShopGun.getApiSecret());
+        headers.put("X-Signature", sha256);
+        request.setHeaders(headers);
 
     }
 
@@ -203,25 +162,6 @@ public class NetworkDispatcher extends Thread {
 
         } catch (JSONException e) {
             SgnLog.e(TAG, "", e);
-        }
-
-    }
-
-    /**
-     * Method checks headers to find X-Token and X-Token-Expires.<br>
-     * If they do not exist, nothing happens as the call has a wrong endpoint, or other
-     * non-API regarding error. If they do exist, then they are checked by the Session
-     * to find out if there are any changes.
-     * @param headers to check for new token.
-     */
-    private void updateSessionInfo(Map<String, String> headers) {
-        if (headers != null) {
-            String token = headers.get("X-Token");
-            String expire = headers.get("X-Token-Expires");
-
-            if (!(token == null || expire == null)) {
-                mShopGun.getSessionManager().updateTokens(token, expire);
-            }
         }
 
     }

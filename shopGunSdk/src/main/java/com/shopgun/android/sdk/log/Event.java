@@ -64,10 +64,6 @@ public class Event {
     }
 
     public Event(ShopGun sgn, String name, String type) {
-        if (sgn != null) {
-            mUserErn = sgn.getSessionManager().getSession().getUser().getErn();
-            mSessionToken = sgn.getSessionManager().getSession().getToken();
-        }
         setName(name);
         setType(type);
         mTime = System.currentTimeMillis();

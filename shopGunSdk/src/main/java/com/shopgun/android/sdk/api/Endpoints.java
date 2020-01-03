@@ -56,8 +56,6 @@ public class Endpoints {
     public static final String FAVORITES_DEALERS_ID = "/v2/favorites/dealers/";
     public static final String FAVORITES_DEALERS_LIST = "/v2/favorites/dealers";
 
-    public static final String SESSIONS = "/v2/sessions";
-
     public static final String USER = "/v2/users";
 
     public static final String USER_RESET = "/v2/users/reset";

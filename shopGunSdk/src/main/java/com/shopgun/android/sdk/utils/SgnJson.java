@@ -1274,16 +1274,6 @@ public class SgnJson {
 
     public static final String USER = "user";
 
-    public User getUser() {
-        return User.fromJSON(getJSONObject(USER));
-    }
-
-    public SgnJson setUser(User value) {
-        // The API doesn't recognize our 'non-user' setup, so we'll null it for now
-        put(USER, putCheck( (value == null || value.getUserId() == User.NO_USER) ? null : value));
-        return this;
-    }
-
     public static final String ACCEPTED = "accepted";
 
     public boolean getAccepted() {
@@ -1424,39 +1414,6 @@ public class SgnJson {
 
     public SgnJson setShares(Collection<Share> value) {
         putIJson(SHARES, value);
-        return this;
-    }
-
-    public static final String TOKEN = "token";
-
-    public String getToken() {
-        return getString(TOKEN);
-    }
-
-    public SgnJson setToken(String value) {
-        put(TOKEN, value);
-        return this;
-    }
-
-    public static final String EXPIRES = "expires";
-
-    public Date getExpires() {
-        return getDate(EXPIRES);
-    }
-
-    public SgnJson setExpires(Date value) {
-        putDate(EXPIRES, value);
-        return this;
-    }
-
-    public static final String PROVIDER = "provider";
-
-    public String getProvider() {
-        return getString(PROVIDER);
-    }
-
-    public SgnJson setProvider(String value) {
-        put(PROVIDER, value);
         return this;
     }
 
@@ -1628,27 +1585,7 @@ public class SgnJson {
 
     public static final String OFFER = "offer";
     public static final String LOCATIONS = "locations";
-    public static final String CLIENT_ID = "client_id";
 
-    public String getClientId() {
-        return getString(CLIENT_ID);
-    }
-
-    public SgnJson setClientId(String value) {
-        put(CLIENT_ID, value);
-        return this;
-    }
-
-    public static final String REFERENCE = "reference";
-
-    public String getReference() {
-        return getString(REFERENCE);
-    }
-
-    public SgnJson setReference(String value) {
-        put(REFERENCE, value);
-        return this;
-    }
 
     public static final String SUBSCRIBED = "subscribed";
 
