@@ -133,6 +133,10 @@ public class ShopGun {
     /** The http client of choice for SDK traffic */
     private OkHttpClient mClient;
 
+    // new headers for v2 requests
+    private String mAppInstallId;
+    private String mAuthToken;
+
     // Things we'd like to get rid of
 
     /** The SDK settings */
@@ -261,6 +265,23 @@ public class ShopGun {
             return b.getString(Constants.META_API_SECRET);
         }
     }
+
+    public void setAuthToken(String authToken) {
+        mAuthToken = authToken;
+    }
+
+    public void setAppInstallId(String appInstallId) {
+        mAppInstallId = appInstallId;
+    }
+
+    public String getAuthToken() {
+        return mAuthToken;
+    }
+
+    public String getAppInstallId() {
+        return mAppInstallId;
+    }
+
 
     /**
      * Returns the current {@link Environment} in use.

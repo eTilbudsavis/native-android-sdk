@@ -140,10 +140,11 @@ public class NetworkDispatcher extends Thread {
 
         request.addEvent("preparing-headers");
 
-        // todo: add headers to the remaining requests to v2. X-Token deleted
         Map<String, String> headers = new HashMap<>();
-        String sha256 = HashUtils.sha256(mShopGun.getApiSecret());
-        headers.put("X-Signature", sha256);
+        headers.put("X-Api-Key", mShopGun.getApiKey());
+        headers.put("X-Api-Secret", mShopGun.getApiSecret());
+        headers.put("X-AppInstall-Id", mShopGun.getAppInstallId());
+        headers.put("Authorization", String.format(Locale.US, "Bearer %s", mShopGun.getAuthToken()));
         request.setHeaders(headers);
 
     }
