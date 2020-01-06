@@ -46,7 +46,8 @@ public class Settings {
     private static final String SESSION_FACEBOOK = "session_facebook";
     private static final String CLIENT_ID = "client_id";
     private static final String SESSION_ID = "session_id";
-    
+    private static final String SESSION_JSON = "session_json";
+
     private SharedPreferences mSharedPrefs;
     private static boolean mMovedSharedPrefs = false;
 
