@@ -64,10 +64,6 @@ public class Endpoints {
 
     public static final String COUNTRIES = "/v2/countries";
 
-    public static final String PUSH_PAYLOAD_ID = "/v2/push/payloads/";
-
-    public static final String PUSH_DEVICE_ID = "/v2/push/devices";
-
     public static final String APP_LOG_ENDPOINT = "/v2/admin/utils/apps/log";
 
     public static final String SHOPPINGLIST_OFFERS = "/v2/shoppinglists/offers";
