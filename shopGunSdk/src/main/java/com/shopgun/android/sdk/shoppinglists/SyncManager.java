@@ -340,11 +340,10 @@ public class SyncManager {
                 return;
             }
 
-            //todo: how to pass a User here?
-            User user = null; //mShopGun.getSessionManager().getSession().getUser();
+            User user = mShopGun.getUser();
             // If it's an offline user, then stop syncloop
             // we'll keep listening for session changes and restert if needed
-            if (!user.isLoggedIn()) {
+            if (user == null || !user.isLoggedIn()) {
                 mSyncCount++;
                 SyncLog.syncLooper(TAG, mSyncCount, "quit-loop-cycle (NotLoggedIn)");
                 return;

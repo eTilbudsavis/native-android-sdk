@@ -39,6 +39,7 @@ import com.shopgun.android.sdk.eventskit.EventUtils;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
+import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.Network;
 import com.shopgun.android.sdk.network.Request;
@@ -136,6 +137,9 @@ public class ShopGun {
     // new headers for v2 requests
     private String mAppInstallId;
     private String mAuthToken;
+
+    // needed by the List Manager & SyncManager
+    User user;
 
     // Things we'd like to get rid of
 
@@ -272,6 +276,14 @@ public class ShopGun {
 
     public void setAppInstallId(String appInstallId) {
         mAppInstallId = appInstallId;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
     }
 
     public String getAuthToken() {

@@ -21,6 +21,7 @@ import com.shopgun.android.sdk.model.User;
 /**
  *
  */
+// todo: remove this
 public class SessionEvent extends ShopGunEvent {
 
     private int mOldUser = 0;
