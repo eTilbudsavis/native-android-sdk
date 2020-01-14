@@ -22,15 +22,11 @@ package com.shopgun.android.sdk.api;
  * By default, the {@link EnvironmentEvents} is set to {@link EnvironmentEvents#PRODUCTION}.
  */
 public enum EnvironmentEvents {
-    PRODUCTION, EDGE, STAGING, SQUID;
-
-    public static final String HOST_POSTFIX = "shopgun.com/sync";
+    PRODUCTION, STAGING;
 
     static {
-        PRODUCTION.mEnvironment = "https://events.service." + HOST_POSTFIX;
-        EDGE.mEnvironment = "https://events.service." + HOST_POSTFIX;
-        STAGING.mEnvironment = "https://events.service-staging." + HOST_POSTFIX;
-        SQUID.mEnvironment = "https://events.service-staging." + HOST_POSTFIX;
+        STAGING.mEnvironment = "https://wolf-api.tjek-staging.com/sync";
+        PRODUCTION.mEnvironment = "https://wolf-api.tjek.com/sync";
     }
 
     private String mEnvironment;

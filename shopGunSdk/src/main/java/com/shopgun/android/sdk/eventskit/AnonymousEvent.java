@@ -24,7 +24,7 @@ public class AnonymousEvent {
     public static final int PAGED_PUBLICATION_OPENED = 1;
     public static final int PAGED_PUBLICATION_PAGE_DISAPPEARED = 2;
     public static final int OFFER_OPENED = 3;
-    public static final int CLIENT_SESSION_OPENED = 4;
+//    public static final int CLIENT_SESSION_OPENED = 4; ---> REMOVED
     public static final int SEARCHED = 5;
     public static final int FIRST_OFFER_CLICKED_AFTER_SEARCH = 6;
     public static final int SEARCH_TO_INTERACTION = 7;
@@ -45,7 +45,6 @@ public class AnonymousEvent {
      *      PAGED_PUBLICATION_OPENED = 1;
      *      PAGED_PUBLICATION_PAGE_DISAPPEARED = 2;
      *      OFFER_OPENED = 3;
-     *      CLIENT_SESSION_OPENED = 4;
      *      SEARCHED = 5;
      *      FIRST_OFFER_CLICKED_AFTER_SEARCH = 6;
      *      SEARCH_TO_INTERACTION = 7;
@@ -273,8 +272,6 @@ public class AnonymousEvent {
                 return "paged_publication_page_disappeared";
             case OFFER_OPENED:
                 return "offer_opened";
-            case CLIENT_SESSION_OPENED:
-                return "client_session_opened";
             case SEARCHED:
                 return "searched";
             case INCITO_PUBLICATION_OPENED:

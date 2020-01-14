@@ -444,9 +444,6 @@ public class ShopGun {
         @Override
         public void onCreate(Activity activity) {
             mSettings.incrementUsageCount();
-            AnonymousEvent session_open_event = new AnonymousEvent(AnonymousEvent.CLIENT_SESSION_OPENED);
-            EventUtils.addLocationInformation(ShopGun.getInstance().getContext(), session_open_event);
-            session_open_event.track();
             SgnLog.v(TAG, "onCreate");
         }
 
