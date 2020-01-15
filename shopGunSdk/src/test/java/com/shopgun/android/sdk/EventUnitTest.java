@@ -17,7 +17,6 @@
 package com.shopgun.android.sdk;
 
 
-import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;

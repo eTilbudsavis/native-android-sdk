@@ -25,7 +25,6 @@ import android.os.Process;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.api.Parameters;
-import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
@@ -52,7 +51,6 @@ import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.ConnectivityUtils;
 
-import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -115,6 +113,7 @@ import java.util.Stack;
  * When {@link LifecycleManager} calls destroy, all local pending changes are pushed to
  * the API if possible to ensure a correct state on the server (and other devices).
  */
+@SuppressWarnings("deprecation")
 @Deprecated
 public class SyncManager {
 
@@ -160,7 +159,6 @@ public class SyncManager {
         @Override
         public void onCreate(Activity activity) {
             mDatabase.open();
-            SgnBus.getInstance().register(SyncManager.this);
             // Set a SyncInterval if user haven't set one yet, else just force a sync cycle
             int interval = mSyncInterval == Integer.MIN_VALUE ? SyncInterval.SLOW : mSyncInterval;
             setSyncInterval(interval);
@@ -169,21 +167,13 @@ public class SyncManager {
         @Override
         public void onDestroy(Activity activity) {
             mSyncLooper.forceSync();
-            SgnBus.getInstance().unregister(SyncManager.this);
             mDatabase.close();
         }
 
     }
 
-    /**
-     * Listening for session changes, starting and stopping sync as needed
-     * @param e The event we are listening for
-     */
-    @Subscribe()
-    public void onEvent(SessionEvent e) {
-        if (e.isNewUser()) {
-            mSyncLooper.restart();
-        }
+    public void restartSyncLoop() {
+        mSyncLooper.restart();
     }
 
     public boolean isPaused() {
@@ -341,8 +331,8 @@ public class SyncManager {
             }
 
             User user = mShopGun.getUser();
-            // If it's an offline user, then stop syncloop
-            // we'll keep listening for session changes and restert if needed
+            // If it's an offline user, then stop sync loop
+            // we'll keep listening for session changes and restart if needed
             if (user == null || !user.isLoggedIn()) {
                 mSyncCount++;
                 SyncLog.syncLooper(TAG, mSyncCount, "quit-loop-cycle (NotLoggedIn)");

@@ -52,6 +52,7 @@ import java.util.Map;
  * synchronizing state with both the {@link SgnDatabase database} and, the
  * ShopGun API.
  */
+@SuppressWarnings("deprecation")
 @Deprecated
 public class ListManager {
 
