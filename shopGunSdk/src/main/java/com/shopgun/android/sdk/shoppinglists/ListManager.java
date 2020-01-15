@@ -798,7 +798,7 @@ public class ListManager {
      */
     private User user() {
         if (mShopGun.getUser() == null) {
-            return new User().setName("").setEmail("").setUserId(User.NO_USER);
+            return new User().setName("").setEmail("").setId(User.NO_USER);
         }
         return mShopGun.getUser();
     }
@@ -813,9 +813,9 @@ public class ListManager {
     /**
      * Deletes all rows in the {@link SgnDatabase database} associated with a
      * given{@link User}.
-     * @param userId A {@link User#getUserId()} to clear
+     * @param userId A {@link User#getId()} to clear
      */
-    public void clear(int userId) {
+    public void clear(String userId) {
         mDatabase.clear(userId);
     }
 

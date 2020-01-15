@@ -103,23 +103,4 @@ public class EventUnitTest {
 
     }
 
-    @Test
-    public void testSessionEvent() throws Exception {
-
-        int oldUser = 0;
-        int newUser = 100;
-        SessionEvent e = new SessionEvent(oldUser, newUser);
-        Assert.assertEquals(oldUser, e.getOldUser());
-        Assert.assertEquals(newUser, e.getNewUser());
-        Assert.assertTrue(e.isNewUser());
-
-        oldUser = 1;
-        newUser = 1;
-        e = new SessionEvent(oldUser, newUser);
-        Assert.assertEquals(oldUser, e.getOldUser());
-        Assert.assertEquals(newUser, e.getNewUser());
-        Assert.assertFalse(e.isNewUser());
-
-    }
-
 }

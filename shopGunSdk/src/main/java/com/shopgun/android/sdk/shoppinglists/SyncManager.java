@@ -428,7 +428,7 @@ public class SyncManager {
     private class ListSyncRequest extends JsonArrayRequest {
 
         private ListSyncRequest(SgnDatabase database, User user, int syncCount) {
-            super(Endpoints.lists(user.getUserId()), new ListSyncListener(database, user, syncCount));
+            super(Endpoints.lists(user.getId()), new ListSyncListener(database, user, syncCount));
             // Offset and limit are set to default values, we want to ignore this.
             getParameters().remove(Parameters.OFFSET);
             getParameters().remove(Parameters.LIMIT);
@@ -625,7 +625,7 @@ public class SyncManager {
 
     private class ListModifiedRequest extends JsonObjectRequest {
         private ListModifiedRequest(SgnDatabase database, User user, Shoppinglist shoppinglist) {
-            super(Endpoints.listModified(user.getUserId(), shoppinglist.getId()),
+            super(Endpoints.listModified(user.getId(), shoppinglist.getId()),
                     new ListModifiedListener(database, user, shoppinglist));
             setSaveNetworkLog(SAVE_NETWORK_LOG);
         }
@@ -682,7 +682,7 @@ public class SyncManager {
     private class ItemSyncRequest extends JsonArrayRequest {
 
         private ItemSyncRequest(SgnDatabase database, Shoppinglist shoppinglist, User user) {
-            super(Endpoints.listitems(user.getUserId(), shoppinglist.getId()), new ItemSyncListener(database, shoppinglist, user));
+            super(Endpoints.listitems(user.getId(), shoppinglist.getId()), new ItemSyncListener(database, shoppinglist, user));
             // Offset and limit are set to default values, we want to ignore this.
             getParameters().remove(Parameters.OFFSET);
             getParameters().remove(Parameters.LIMIT);
@@ -875,7 +875,7 @@ public class SyncManager {
     private class ListPutRequest extends JsonObjectRequest {
 
         private ListPutRequest(SgnDatabase database, User user, Shoppinglist shoppinglist) {
-            super(Method.PUT, Endpoints.list(user.getUserId(), shoppinglist.getId()),
+            super(Method.PUT, Endpoints.list(user.getId(), shoppinglist.getId()),
                     shoppinglist.toJSON(), new ListPutListener(database, user, shoppinglist));
             shoppinglist.setState(SyncState.SYNCING);
             database.editList(shoppinglist, user);
@@ -886,7 +886,7 @@ public class SyncManager {
     private class ListDelRequest extends JsonObjectRequest {
 
         private ListDelRequest(SgnDatabase database, User user, Shoppinglist local) {
-            super(Method.DELETE, Endpoints.list(user.getUserId(), local.getId()),
+            super(Method.DELETE, Endpoints.list(user.getId(), local.getId()),
                     null, new ListDelListener(database, user, local));
             getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(local.getModified()));
         }
@@ -942,7 +942,7 @@ public class SyncManager {
     private class ListRevertRequest extends JsonObjectRequest {
 
         private ListRevertRequest(SgnDatabase database, User user, Shoppinglist shoppinglist) {
-            super(Endpoints.list(user.getUserId(), shoppinglist.getId()),
+            super(Endpoints.list(user.getId(), shoppinglist.getId()),
                     new ListRevertListener(database, user, shoppinglist));
             if (shoppinglist.getState() != SyncState.ERROR) {
                 shoppinglist.setState(SyncState.ERROR);
@@ -985,7 +985,7 @@ public class SyncManager {
     private class ItemPutRequest extends JsonObjectRequest {
 
         private ItemPutRequest(SgnDatabase database, User user, ShoppinglistItem item) {
-            super(Method.PUT, Endpoints.listitem(user.getUserId(), item.getShoppinglistId(), item.getId()),
+            super(Method.PUT, Endpoints.listitem(user.getId(), item.getShoppinglistId(), item.getId()),
                     item.toJSON(), new ItemPutListener(database, user, item));
             item.setState(SyncState.SYNCING);
             database.editItems(item, user);
@@ -1036,7 +1036,7 @@ public class SyncManager {
     private class ItemDelRequest extends JsonObjectRequest {
 
         private ItemDelRequest(SgnDatabase database, User user, ShoppinglistItem item) {
-            super(Method.DELETE, Endpoints.listitem(user.getUserId(), item.getShoppinglistId(), item.getId()),
+            super(Method.DELETE, Endpoints.listitem(user.getId(), item.getShoppinglistId(), item.getId()),
                     null, new ItemDelListener(database, user, item));
             getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(item.getModified()));
         }
@@ -1080,7 +1080,7 @@ public class SyncManager {
     private class ItemRevertRequest extends JsonObjectRequest {
 
         private ItemRevertRequest(SgnDatabase database, User user, ShoppinglistItem item) {
-            super(Endpoints.listitem(user.getUserId(), item.getShoppinglistId(), item.getId()),
+            super(Endpoints.listitem(user.getId(), item.getShoppinglistId(), item.getId()),
                     new ItemRevertListener(database, user, item));
             if (item.getState() != SyncState.ERROR) {
                 item.setState(SyncState.ERROR);
@@ -1131,7 +1131,7 @@ public class SyncManager {
 
     private class SharePutRequest extends JsonObjectRequest {
         private SharePutRequest(SgnDatabase database, User user, Share share) {
-            super(Method.PUT, Endpoints.listShareEmail(user.getUserId(), share.getShoppinglistId(), share.getEmail()),
+            super(Method.PUT, Endpoints.listShareEmail(user.getId(), share.getShoppinglistId(), share.getEmail()),
                     share.toJSON(), new SharePutListener(database, user, share));
             share.setState(SyncState.SYNCING);
             database.editShare(share, user);
@@ -1178,7 +1178,7 @@ public class SyncManager {
     private class ShareDelRequest extends JsonObjectRequest {
 
         private ShareDelRequest(SgnDatabase database, User user, Share local) {
-            super(Method.DELETE, Endpoints.listShareEmail(user.getUserId(), local.getShoppinglistId(), local.getEmail()),
+            super(Method.DELETE, Endpoints.listShareEmail(user.getId(), local.getShoppinglistId(), local.getEmail()),
                     null, new ShareDelListener(database, user, local));
         }
     }
@@ -1235,7 +1235,7 @@ public class SyncManager {
     private class ShareRevertRequest extends JsonObjectRequest {
 
         private ShareRevertRequest(SgnDatabase database, User user, Share share) {
-            super(Endpoints.listShareEmail(user.getUserId(), share.getShoppinglistId(), share.getEmail()),
+            super(Endpoints.listShareEmail(user.getId(), share.getShoppinglistId(), share.getEmail()),
                     new ShareRevertListener(database, user, share));
             if (share.getState() != SyncState.ERROR) {
                 share.setState(SyncState.ERROR);

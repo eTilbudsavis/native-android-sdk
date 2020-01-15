@@ -90,7 +90,6 @@ public class ModelTest {
         testQuantity();
         testBranding();
         testShare();
-        testUser();
         testStore();
         testCatalog();
         testDealer();
@@ -339,37 +338,6 @@ public class ModelTest {
             // ignore
         }
         Share jsonObj = Share.fromJSON(jObj);
-        Assert.assertNotSame(obj, jsonObj);
-
-        // getters and setters
-
-    }
-
-    public static void testUser() {
-        User obj = ModelCreator.getUser();
-        User tmp = ModelCreator.getUser();
-        Assert.assertEquals(obj, tmp);
-        Assert.assertEquals(obj.hashCode(), tmp.hashCode());
-
-        String fakeUser = String.valueOf(User.NO_USER);
-        String fakeErn = "ern:user:" + fakeUser;
-        testIErn(obj, null, null, fakeUser, fakeErn);
-        testIErn(obj, IErn.TYPE_USER, "1569");
-
-        // Parcelable
-        testParcelable(obj, User.CREATOR);
-
-        // JSON
-        Assert.assertNull(User.fromJSON((JSONObject)null));
-        JSONObject jObj = obj.toJSON();
-        User jsonObj = User.fromJSON(jObj);
-        Assert.assertEquals(obj, jsonObj);
-        try {
-            jObj.put(SgnJson.GENDER, "male");
-        } catch (JSONException e) {
-            // ignore
-        }
-        jsonObj = User.fromJSON(jObj);
         Assert.assertNotSame(obj, jsonObj);
 
         // getters and setters

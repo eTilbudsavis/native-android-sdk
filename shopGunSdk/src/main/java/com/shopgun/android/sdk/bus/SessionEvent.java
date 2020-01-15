@@ -40,19 +40,12 @@ public class SessionEvent extends ShopGunEvent {
         return mOldUser != mNewUser;
     }
 
-    /**
-     * Get the {@link User#getUserId() id} of the {@link User} that was logged in previous to this event.
-     * @return An {@link User#getUserId() id}
-     */
+
     public int getOldUser() {
         return mOldUser;
     }
 
-    /**
-     * Get the {@link User#getUserId() id} of the {@link User} that is currently logged in.
-     * Notice that a {@link SessionEvent} doesn't have to be a change of user.
-     * @return An {@link User#getUserId() id}
-     */
+
     public int getNewUser() {
         return mNewUser;
     }

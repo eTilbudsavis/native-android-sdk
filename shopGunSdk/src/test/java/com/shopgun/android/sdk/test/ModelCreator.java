@@ -136,21 +136,6 @@ public class ModelCreator {
         return new Share(email, access, acceptUrl);
     }
 
-    public static User getUser() {
-        return getUser(1932, "fake-mail@eta.dk", "female", "fake-user-name", getPermission(), 1992);
-    }
-
-    public static User getUser(int year, String email, String gender, String name, Permission permissions, int id) {
-        User u = new User();
-        u.setBirthYear(year);
-        u.setEmail(email);
-        u.setGender(gender);
-        u.setName(name);
-        u.setPermissions(permissions);
-        u.setUserId(id);
-        return u;
-    }
-
     public static Branding getBranding() {
         return getBranding(Color.GREEN, "fake-logo-url", "fake-branding-name",
                 getPageflip(), "fake-website-url", "fake-description");
