@@ -39,7 +39,7 @@ public class PagedPublicationEvent extends AnonymousEvent {
      * @return paged publication page open event
      */
     public static PagedPublicationEvent pageDisappeared(PagedPublicationConfiguration config, int page) {
-        PagedPublicationEvent event = new PagedPublicationEvent(PAGED_PUBLICATION_PAGE_DISAPPEARED);
+        PagedPublicationEvent event = new PagedPublicationEvent(PAGED_PUBLICATION_PAGE_OPENED);
         String ppId = config.getPublication().getId();
 
         EventUtils.addLocationInformation(ShopGun.getInstance().getContext(), event);

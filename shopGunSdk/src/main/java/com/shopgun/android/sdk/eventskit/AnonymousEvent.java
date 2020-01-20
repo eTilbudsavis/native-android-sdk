@@ -18,18 +18,19 @@ public class AnonymousEvent {
     private static final int VERSION = 2;
 
     /* Default json_event type = empty json_event */
-    public static final int DEFAULT_TYPE = 0;
+    public static final int EMPTY_EVENT = 0;
 
     /* Predefined events */
     public static final int PAGED_PUBLICATION_OPENED = 1;
-    public static final int PAGED_PUBLICATION_PAGE_DISAPPEARED = 2;
+    public static final int PAGED_PUBLICATION_PAGE_OPENED = 2;
     public static final int OFFER_OPENED = 3;
 //    public static final int CLIENT_SESSION_OPENED = 4; ---> REMOVED
     public static final int SEARCHED = 5;
     public static final int FIRST_OFFER_CLICKED_AFTER_SEARCH = 6;
-    public static final int SEARCH_TO_INTERACTION = 7;
-    public static final int VIEWED_SEARCH_RESULT = 9;
-    public static final int INCITO_PUBLICATION_OPENED = 11;
+    public static final int ANY_OFFER_CLICKED_AFTER_SEARCH = 7;
+    public static final int VIEWED_SEARCH_RESULT_THEN_LEFT = 9;
+    public static final int INCITO_PUBLICATION_OPENED_V2 = 11;
+    public static final int ANALYTICS_EVENT_V2 = 12;
 
     private boolean mDoNotTrack;
 
@@ -41,15 +42,16 @@ public class AnonymousEvent {
 
     /**
      * The following codes are reserved to sdk events:
-     *      DEFAULT_TYPE = 0;
+     *      EMPTY_EVENT = 0;
      *      PAGED_PUBLICATION_OPENED = 1;
-     *      PAGED_PUBLICATION_PAGE_DISAPPEARED = 2;
+     *      PAGED_PUBLICATION_PAGE_OPENED = 2;
      *      OFFER_OPENED = 3;
      *      SEARCHED = 5;
      *      FIRST_OFFER_CLICKED_AFTER_SEARCH = 6;
-     *      SEARCH_TO_INTERACTION = 7;
-     *      VIEWED_SEARCH_RESULT = 9;
-     *      INCITO_PUBLICATION_OPENED = 11;
+     *      ANY_OFFER_CLICKED_AFTER_SEARCH = 7;
+     *      VIEWED_SEARCH_RESULT_THEN_LEFT = 9;
+     *      INCITO_PUBLICATION_OPENED_V2 = 11;
+     *      ANALYTICS_EVENT_V2 = 12;
      *
      * If you need to use Anonymous event for other purposes, you can use negative integer as type.
      *
@@ -264,24 +266,26 @@ public class AnonymousEvent {
      */
     public String getType(int type) {
         switch(type) {
-            case DEFAULT_TYPE:
+            case EMPTY_EVENT:
                 return "default_type";
             case PAGED_PUBLICATION_OPENED:
                 return "paged_publication_opened";
-            case PAGED_PUBLICATION_PAGE_DISAPPEARED:
+            case PAGED_PUBLICATION_PAGE_OPENED:
                 return "paged_publication_page_disappeared";
             case OFFER_OPENED:
                 return "offer_opened";
             case SEARCHED:
                 return "searched";
-            case INCITO_PUBLICATION_OPENED:
+            case INCITO_PUBLICATION_OPENED_V2:
                 return "incito_publication_opened";
-            case SEARCH_TO_INTERACTION:
+            case ANY_OFFER_CLICKED_AFTER_SEARCH:
                 return "search_to_interaction";
             case FIRST_OFFER_CLICKED_AFTER_SEARCH:
                 return "first_offer_clicked_after_search";
-            case VIEWED_SEARCH_RESULT:
+            case VIEWED_SEARCH_RESULT_THEN_LEFT:
                 return "viewed_search_result";
+            case ANALYTICS_EVENT_V2:
+                return "basic_analytics";
             default:
                 return "custom_event";
         }
