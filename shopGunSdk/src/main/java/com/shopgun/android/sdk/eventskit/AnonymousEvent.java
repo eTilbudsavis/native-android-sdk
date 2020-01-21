@@ -271,7 +271,7 @@ public class AnonymousEvent {
             case PAGED_PUBLICATION_OPENED:
                 return "paged_publication_opened";
             case PAGED_PUBLICATION_PAGE_OPENED:
-                return "paged_publication_page_disappeared";
+                return "paged_publication_page_opened";
             case OFFER_OPENED:
                 return "offer_opened";
             case SEARCHED:
@@ -285,7 +285,7 @@ public class AnonymousEvent {
             case VIEWED_SEARCH_RESULT_THEN_LEFT:
                 return "viewed_search_result";
             case ANALYTICS_EVENT_V2:
-                return "basic_analytics";
+                return "analytics_event";
             default:
                 return "custom_event";
         }
