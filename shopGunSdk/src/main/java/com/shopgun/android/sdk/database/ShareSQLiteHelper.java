@@ -69,7 +69,7 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
         db.acquireReference();
         if (oldVersion == 5 && newVersion == 6) {
             // migrate USER from int to text
-            db.execSQL("create table if not exists " + TABLE + "(" +
+            db.execSQL("create table if not exists tmp_table (" +
                     ID + " integer not null primary key, " +
                     SHOPPINGLIST_ID + " text not null, " +
                     EMAIL + " text, " +
