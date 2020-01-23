@@ -25,7 +25,7 @@ public class EventManager {
     public static final String TAG = Constants.getTag(EventManager.class);
 
     private static final int DISPATCH_MSG = 5738629;
-    private static final long DISPATCH_INTERVAL = TimeUnit.SECONDS.toMillis(120);
+    private static final long DISPATCH_INTERVAL = TimeUnit.SECONDS.toMillis(60);
     public static final int MAX_QUEUE_SIZE = 1024;
 
     private static EventManager mInstance;
