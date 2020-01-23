@@ -41,6 +41,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -61,7 +62,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
 
         @Override
         public String toString() {
-            return super.toString().toLowerCase();
+            return super.toString().toLowerCase(Locale.ENGLISH);
         }
     }
 
