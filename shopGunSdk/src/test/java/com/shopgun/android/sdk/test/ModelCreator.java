@@ -379,7 +379,7 @@ public class ModelCreator {
         s.setShares(shares);
         s.setState(SyncState.TO_SYNC);
         s.setType(Shoppinglist.TYPE_SHOPPING_LIST);
-        s.setUserId(187);
+        s.setUserId("187");
         return s;
     }
 

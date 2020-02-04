@@ -37,6 +37,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import static com.shopgun.android.sdk.model.User.NO_USER;
+
 /**
  * @deprecated No longer maintained
  */
@@ -115,7 +117,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
     private String mShoppinglistId;
     private String mPrevId;
     private JSONObject mMeta;
-    private int mUserId = -1;
+    private String mUserId = NO_USER;
     private int mSyncState = SyncState.TO_SYNC;
 
     /**
@@ -170,7 +172,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
         } catch (JSONException e) {
             this.mMeta = new JSONObject();
         }
-        this.mUserId = in.readInt();
+        this.mUserId = in.readString();
         this.mSyncState = in.readInt();
     }
 
@@ -496,7 +498,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
      * users can have access to the same item (same {@link ShoppinglistItem#getId()}.</p>
      * @return A user id
      */
-    public int getUserId() {
+    public String getUserId() {
         return mUserId;
     }
 
@@ -507,7 +509,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
      * @param userId An id of a user
      * @return This object
      */
-    public ShoppinglistItem setUserId(int userId) {
+    public ShoppinglistItem setUserId(String userId) {
         mUserId = userId;
         return this;
     }
@@ -642,7 +644,10 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
 
 
         if (user) {
-            if (mUserId != other.mUserId)
+            if (mUserId == null) {
+                if (other.mUserId != null)
+                    return false;
+            } else if (!mUserId.equals(other.mUserId))
                 return false;
         }
 
@@ -675,7 +680,7 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
                 + ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
         result = prime * result + mSyncState;
         result = prime * result + (mTick ? 1231 : 1237);
-        result = prime * result + mUserId;
+        result = prime * result + ((mUserId == null) ? 0 : mUserId.hashCode());
         return result;
     }
 
@@ -702,10 +707,8 @@ public class ShoppinglistItem implements Comparable<ShoppinglistItem>, SyncState
         dest.writeString(this.mShoppinglistId);
         dest.writeString(this.mPrevId);
         dest.writeString(this.mMeta.toString());
-        dest.writeInt(this.mUserId);
+        dest.writeString(this.mUserId);
         dest.writeInt(this.mSyncState);
     }
-
-//	public boolean equals(Object obj, boolean skipModified, boolean skipSyncState) {
 
 }

@@ -144,7 +144,7 @@ public class ListSQLiteHelper extends SgnOpenHelper {
         } catch (JSONException e) {
             SgnLog.e(TAG, null, e);
         }
-        sl.setId(cv.getAsString(USER));
+        sl.setUserId(cv.getAsString(USER));
         return sl;
     }
 

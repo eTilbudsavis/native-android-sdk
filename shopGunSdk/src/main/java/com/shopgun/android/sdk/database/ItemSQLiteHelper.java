@@ -155,7 +155,7 @@ public class ItemSQLiteHelper extends SgnOpenHelper {
         } catch (JSONException e) {
             SgnLog.e(TAG, null, e);
         }
-        sli.setId(cv.getAsString(USER));
+        sli.setUserId(cv.getAsString(USER));
         return sli;
     }
 
