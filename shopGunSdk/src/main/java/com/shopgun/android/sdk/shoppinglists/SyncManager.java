@@ -268,10 +268,6 @@ public class SyncManager {
                 .setSkipMethods(Request.Method.GET));
         mShopGun.add(r);
 
-//		if (!isPullReq(r) && r.getMethod() != Request.Method.GET) {
-//			SgnLog.d(TAG, r.toString());
-//		}
-
     }
 
     private void popRequest() {
@@ -296,12 +292,7 @@ public class SyncManager {
         if (mCurrentRequests.isEmpty() && !isPaused() && mBuilder.hasChanges()) {
             final ShoppinglistEvent e = mBuilder.build();
             mBuilder = new ShoppinglistEvent.Builder(true);
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    SgnBus.getInstance().post(e);
-                }
-            });
+            new Handler(Looper.getMainLooper()).post(() -> SgnBus.getInstance().post(e));
         }
 
     }
@@ -370,9 +361,6 @@ public class SyncManager {
             for (Shoppinglist sl : lists) {
                 boolean itemChanges = syncLocalItemChanges(database, sl, user);
                 boolean shareChanges = syncLocalShareChanges(database, sl, user);
-//                if (itemChanges || shareChanges) {
-//                    L.d(TAG, sl.getName() + "[ itemChanges: " + itemChanges + ", shareChanges: " + shareChanges + " ]");
-//                }
                 hasLocalChanges = itemChanges || shareChanges || hasLocalChanges;
             }
 
@@ -533,7 +521,6 @@ public class SyncManager {
             mergeListsToDbAndFetchItems(mDatabase, serverLists, localLists, mUser);
 
             popRequestAndPostShoppinglistEvent();
-//            mSyncController.decrementAndPost();
 
         }
 
@@ -575,7 +562,7 @@ public class SyncManager {
 
                     Shoppinglist serverSl = serverMap.get(key);
 
-                    if (localSl.getModified().before(serverSl.getModified())) {
+                    if (localSl != null && serverSl != null && localSl.getModified().before(serverSl.getModified())) {
                         serverSl.setState(SyncState.SYNCED);
                         mBuilder.edit(serverSl);
                         database.editList(serverSl, user);
@@ -595,10 +582,11 @@ public class SyncManager {
             } else {
 
                 Shoppinglist add = serverMap.get(key);
-                add.setState(SyncState.TO_SYNC);
-                mBuilder.add(add);
-                database.insertList(add, user);
-
+                if (add != null) {
+                    add.setState(SyncState.TO_SYNC);
+                    mBuilder.add(add);
+                    database.insertList(add, user);
+                }
             }
 
         }
@@ -785,21 +773,23 @@ public class SyncManager {
 
                     ShoppinglistItem serverSli = serverMap.get(key);
 
-                    if (localSli.getModified().before(serverSli.getModified())) {
-                        mBuilder.edit(serverSli);
-                        database.editItems(serverSli, user);
+                    if (localSli != null && serverSli != null) {
+                        if (localSli.getModified().before(serverSli.getModified())) {
+                            mBuilder.edit(serverSli);
+                            database.editItems(serverSli, user);
 
-                    } else if (!localSli.getMeta().toString().equals(serverSli.getMeta().toString())) {
-                        // Migration code, to get comments into the DB
-                        mBuilder.edit(serverSli);
-                        database.editItems(serverSli, user);
-                    } else if (localSli.equals(serverSli)) {
-                        SgnLog.d(TAG, "We have a mismatch");
+                        } else if (!localSli.getMeta().toString().equals(serverSli.getMeta().toString())) {
+                            // Migration code, to get comments into the DB
+                            mBuilder.edit(serverSli);
+                            database.editItems(serverSli, user);
+                        } else if (localSli.equals(serverSli)) {
+                            SgnLog.d(TAG, "We have a mismatch");
+                        }
                     }
 
                 } else {
                     ShoppinglistItem delSli = localMap.get(key);
-                    if (delSli.getState() != SyncState.TO_SYNC) {
+                    if (delSli != null && delSli.getState() != SyncState.TO_SYNC) {
                         // If the item have been added while request was in flight it will
                         // have the state TO_SYNC, and will just ignore it for now
                         mBuilder.del(delSli);
@@ -809,8 +799,10 @@ public class SyncManager {
 
             } else {
                 ShoppinglistItem serverSli = serverMap.get(key);
-                mBuilder.add(serverSli);
-                database.insertItem(serverSli, user);
+                if (serverSli != null) {
+                    mBuilder.add(serverSli);
+                    database.insertItem(serverSli, user);
+                }
             }
         }
 
