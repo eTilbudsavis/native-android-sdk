@@ -153,10 +153,5 @@ public class Endpoints {
     public static String listitem(String userId, String listId, String itemId) {
         return String.format("/v2/users/%s/shoppinglists/%s/items/%s", userId, listId, itemId);
     }
-    
-    // todo: delete this
-    public static String pushPayload(String payloadId) {
-        return String.format("/v2/push/payloads/%s", payloadId);
-    }
 
 }
