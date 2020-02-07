@@ -29,42 +29,23 @@ import com.shopgun.android.sdk.utils.SgnUtils;
  * This class contains a sub-set of paths needed to request data from the ShopGun API,
  * and has methods to generate paths, that dependent on information from objects (id's e.t.c).
  */
+@SuppressWarnings("deprecation")
 public class Endpoints {
 
     public static final String CATALOG_LIST = "/v2/catalogs";
-    public static final String CATALOG_ID = "/v2/catalogs/";
-    public static final String CATALOG_SEARCH = "/v2/catalogs/search";
-    public static final String CATALOG_TYPEAHEAD = "/v2/catalogs/typeahead";
     public static final String CATALOG_SUGGEST = "/v2/catalogs/suggest";
 
     public static final String DEALER_LIST = "/v2/dealers";
-    public static final String DEALER_ID = "/v2/dealers/";
-    public static final String DEALER_SEARCH = "/v2/dealers/search";
     public static final String DEALER_SUGGEST = "/v2/dealers/suggest";
 
     public static final String OFFER_LIST = "/v2/offers";
-    public static final String OFFER_ID = "/v2/offers/";
     public static final String OFFER_SEARCH = "/v2/offers/search";
-    public static final String OFFER_TYPEAHEAD = "/v2/offers/typeahead";
     public static final String OFFER_SUGGESTED = "/v2/offers/suggest";
 
     public static final String STORE_LIST = "/v2/stores";
-    public static final String STORE_ID = "/v2/stores/";
-    public static final String STORE_SEARCH = "/v2/stores/search";
-    public static final String STORE_QUICK_SEARCH = "/v2/stores/quicksearch";
 
-    public static final String FAVORITES_DEALERS_ID = "/v2/favorites/dealers/";
+    // todo: delete
     public static final String FAVORITES_DEALERS_LIST = "/v2/favorites/dealers";
-
-    public static final String USER = "/v2/users";
-
-    public static final String USER_RESET = "/v2/users/reset";
-
-    public static final String CATEGORIES = "/v2/categories";
-
-    public static final String COUNTRIES = "/v2/countries";
-
-    public static final String APP_LOG_ENDPOINT = "/v2/admin/utils/apps/log";
 
     public static final String SHOPPINGLIST_OFFERS = "/v2/shoppinglists/offers";
 
@@ -172,11 +153,7 @@ public class Endpoints {
     public static String listitem(String userId, String listId, String itemId) {
         return String.format("/v2/users/%s/shoppinglists/%s/items/%s", userId, listId, itemId);
     }
-
-    /**
-     * @param payloadId A payload id
-     * @return /v2/push/payloads/{payload_id}
-     */
+    
     // todo: delete this
     public static String pushPayload(String payloadId) {
         return String.format("/v2/push/payloads/%s", payloadId);
