@@ -797,7 +797,7 @@ public class ListManager {
      */
     private User user() {
         if (mShopGun.getUser() == null) {
-            return new User().setName("").setEmail("").setId(User.NO_USER);
+            return new User();
         }
         return mShopGun.getUser();
     }
