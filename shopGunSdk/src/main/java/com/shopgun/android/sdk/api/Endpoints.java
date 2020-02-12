@@ -44,9 +44,6 @@ public class Endpoints {
 
     public static final String STORE_LIST = "/v2/stores";
 
-    // todo: delete
-    public static final String FAVORITES_DEALERS_LIST = "/v2/favorites/dealers";
-
     public static final String SHOPPINGLIST_OFFERS = "/v2/shoppinglists/offers";
 
     /**
