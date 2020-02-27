@@ -28,6 +28,7 @@ import com.shopgun.android.utils.PackageUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -47,7 +48,7 @@ public class RequestQueue {
     private final ShopGun mShopGun;
 
     /** All requests currently being handled by this request queue */
-    private final Set<Request<?>> mCurrentRequests = new HashSet<Request<?>>();
+    private final Set<Request<?>> mCurrentRequests = Collections.synchronizedSet(new HashSet<Request<?>>());
 
     /** Queue for preparation, and cache checks */
     private final PriorityBlockingQueue<Request<?>> mCacheQueue = new PriorityBlockingQueue<Request<?>>();
@@ -169,28 +170,8 @@ public class RequestQueue {
      * On complete the others can be triggered, and instantly hitting local cache.
      * @param request - request, that finished
      */
-    public synchronized void finish(Request<?> request) {
-
-        synchronized (mCurrentRequests) {
-            mCurrentRequests.remove(request);
-        }
-
-//    	if (!request.ignoreCache() && request.getMethod() == Method.GET) {
-//    		
-//    		synchronized (mRequestParking) {
-//				
-//    			String url = request.getUrl();
-//        		LinkedList<Request> waiting = mRequestParking.remove(url);
-//        		if (waiting != null) {
-//        			String msg = "Posting %d requests, waiting for %s";
-//        			SgnLog.d(TAG, String.format(msg, waiting.size(), url));
-//        			mCacheQueue.addAll(waiting);
-//        		}
-//        		
-//			}
-//    		
-//    	}
-
+    public void finish(Request<?> request) {
+        mCurrentRequests.remove(request);
     }
 
     /**
@@ -221,9 +202,7 @@ public class RequestQueue {
      */
     public Request<?> add(Request<?> request) {
 
-        synchronized (mCurrentRequests) {
-            mCurrentRequests.add(request);
-        }
+        mCurrentRequests.add(request);
 
         prepareRequest(request);
 

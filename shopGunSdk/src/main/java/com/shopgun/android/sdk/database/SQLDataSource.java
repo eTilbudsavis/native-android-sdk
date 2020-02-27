@@ -90,7 +90,7 @@ public class SQLDataSource {
      * </p>
      * @return A {@link SQLiteDatabase}
      */
-    protected synchronized SQLiteDatabase acquireDb() {
+    protected SQLiteDatabase acquireDb() {
         synchronized (LOCK) {
             if (mDatabase == null || !mDatabase.isOpen()) {
                 mDatabase = mHelper.getWritableDatabase();
@@ -112,7 +112,7 @@ public class SQLDataSource {
      * {@link SQLDataSource#releaseDb()} (a one to one mapping)
      * , or we are going to start leaking memory.
      */
-    protected synchronized void releaseDb() {
+    protected void releaseDb() {
         synchronized (LOCK) {
             mDatabase.releaseReference();
             if (mRefCount.decrementAndGet() == 0) {
