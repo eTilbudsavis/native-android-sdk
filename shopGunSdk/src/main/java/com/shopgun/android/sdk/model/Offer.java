@@ -167,6 +167,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         offer.mCatalog = o.getCatalog();
 
         if (!object.has(SgnJson.BRANDING) && !object.has(SgnJson.IMAGES) && !object.has(SgnJson.LINKS)) {
+            // ignore keys found only in the full version
             o.getStats().ignoreRejectedKeys(
                     "catalog_page",
                     "description",
@@ -180,6 +181,9 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
                     "catalog_id",
                     "category_ids",
                     "branding");
+
+            // ignore unused keys for lite version
+            o.getStats().ignoreForgottenKeys("webshop");
         }
 
         o.getStats().ignoreForgottenKeys("publish").ignoreRejectedKeys(SgnJson.DEALER, SgnJson.STORE, SgnJson.CATALOG).log(TAG);

@@ -134,7 +134,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
         s.mDealer = o.getDealer();
 
         o.getStats()
-                .ignoreForgottenKeys("youtube_user_id", "twitter_handle", "facebook_page_id")
+                .ignoreForgottenKeys("youtube_user_id", "twitter_handle", "facebook_page_id", "graph_id")
                 .ignoreRejectedKeys(SgnJson.DEALER)
                 .log(TAG);
 
