@@ -82,7 +82,9 @@ public class Branding implements IJson<JSONObject>, Parcelable {
                 .setColor(o.getMaterialColor())
                 .setPageflip(o.getPageflip());
 
-        o.getStats().log(TAG);
+        o.getStats()
+                .ignoreRejectedKeys("website", "description")
+                .log(TAG);
 
         return branding;
     }
