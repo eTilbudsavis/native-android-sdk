@@ -17,7 +17,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'realm-android'
 apply plugin: 'com.github.ben-manes.versions'
-apply plugin: 'com.apollographql.android'
+apply plugin: 'com.apollographql.apollo'
 
 buildscript {
     // Custom buildscript closure for SDK module, to allow compilation from other projects
@@ -29,7 +29,7 @@ buildscript {
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.9.9'
         classpath "io.realm:realm-gradle-plugin:6.1.0"
-        classpath 'com.apollographql.apollo:apollo-gradle-plugin:0.5.0'
+        classpath "com.apollographql.apollo:apollo-gradle-plugin:${rootProject.ext.apolloVersion}"
 
         // Dependencies checker: run from command line ./gradlew dependencyUpdates -Drevision=release|milestone|integration
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.25.0'
