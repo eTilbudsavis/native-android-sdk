@@ -138,11 +138,11 @@ public class SgnDatabase {
      */
     public Shoppinglist getList(String id, User user) {
         Shoppinglist sl = mDataSource.getList(id, String.valueOf(user.getUserId()));
-        if (sl != null) {
+        if (sl != null && user.getEmail() != null) {
             /* Remove the list, if the user isn't in the shares.
             This happens when the user, have removed him/her self from shares,
             or deletes a list, and the action haven't been synced to the API yet */
-            if (!sl.getShares().containsKey(user.getEmail())) {
+            if (!sl.getShares().containsKey(user.getEmail().toLowerCase())) {
                 return null;
             }
         }
@@ -172,7 +172,7 @@ public class SgnDatabase {
             /* Remove the list, if the user isn't in the shares.
             This happens when the user, have removed him/her self from shares,
             or deletes a list, and the action haven't been synced to the API yet */
-            if (!sl.getShares().containsKey(user.getEmail()) && !includeDeleted) {
+            if (user.getEmail() != null && !sl.getShares().containsKey(user.getEmail().toLowerCase()) && !includeDeleted) {
                 String format = "Shoppinglist %s does not contain a share for %s, removing Shoppinglist from the final list.";
                 String text = String.format(format, sl.getName(), user.getEmail());
                 SgnLog.d(TAG, text);
