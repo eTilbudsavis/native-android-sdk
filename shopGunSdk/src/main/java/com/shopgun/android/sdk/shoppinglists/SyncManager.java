@@ -1000,6 +1000,9 @@ public class SyncManager {
 
         @Override
         public void onSuccess(ShoppinglistItem response) {
+            if (response == null) {
+                return;
+            }
 
             ShoppinglistItem local = mDatabase.getItem(mLocalCopy.getId(), mUser);
 
@@ -1097,6 +1100,9 @@ public class SyncManager {
 
         @Override
         public void onSuccess(ShoppinglistItem response) {
+            if (response == null) {
+                return;
+            }
             response.setState(SyncState.SYNCED);
             response.setPreviousId(response.getPreviousId() == null ? mLocalCopy.getPreviousId() : response.getPreviousId());
             mBuilder.edit(response);
