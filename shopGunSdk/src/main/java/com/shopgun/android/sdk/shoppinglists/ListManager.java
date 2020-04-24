@@ -177,6 +177,11 @@ public class ListManager {
         return editList(sl, user());
     }
 
+    public boolean insertShare(Share s) {
+        s.setState(SyncState.TO_SYNC);
+        return mDatabase.insertShare(s, user());
+    }
+
     private boolean editList(Shoppinglist sl, User user) {
 
         Shoppinglist original = mDatabase.getList(sl.getId(), user);

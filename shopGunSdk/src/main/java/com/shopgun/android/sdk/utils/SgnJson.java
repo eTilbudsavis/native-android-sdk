@@ -124,6 +124,7 @@ public class SgnJson {
             try {
                 return DATE_FORMATTER.parse(date);
             } catch (Exception e) {
+                e.printStackTrace();
                 return null;
             }
         }
