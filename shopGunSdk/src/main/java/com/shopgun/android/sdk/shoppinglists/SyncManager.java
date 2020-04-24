@@ -1152,6 +1152,9 @@ public class SyncManager {
 
         @Override
         public void onSuccess(Share response) {
+            if (response == null) {
+                return;
+            }
             response.setState(SyncState.SYNCED);
             response.setShoppinglistId(mLocalCopy.getShoppinglistId());
             mDatabase.editShare(response, mUser);
@@ -1259,6 +1262,9 @@ public class SyncManager {
 
         @Override
         public void onSuccess(Share response) {
+            if (response == null) {
+                return;
+            }
             response.setState(SyncState.SYNCED);
             response.setShoppinglistId(mLocalCopy.getShoppinglistId());
             mDatabase.editShare(response, mUser);
