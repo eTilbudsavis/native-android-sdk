@@ -182,6 +182,11 @@ public class ListManager {
         return mDatabase.insertShare(s, user());
     }
 
+    public boolean deleteShare(Share s) {
+        s.setState(SyncState.DELETE);
+        return mDatabase.editShare(s, user());
+    }
+
     private boolean editList(Shoppinglist sl, User user) {
 
         Shoppinglist original = mDatabase.getList(sl.getId(), user);
