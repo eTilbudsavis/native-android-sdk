@@ -121,7 +121,11 @@ public class PermissionUtils {
      * @return {@code true} if the {@link User} can edit the {@link Shoppinglist}, else {@code false}
      */
     public static boolean allowEdit(Shoppinglist sl, User user) {
-        return sl != null && sl.getShares() != null && user != null && user.getEmail() != null && allowEdit(sl.getId(), sl.getShares().get(user.getEmail().toLowerCase()));
+        if (user == null) {
+            return false;
+        }
+        String email = user.getEmail() != null ? user.getEmail().toLowerCase() : null;
+        return sl != null && sl.getShares() != null && allowEdit(sl.getId(), sl.getShares().get(email));
     }
 
     /**
@@ -133,7 +137,8 @@ public class PermissionUtils {
      * @return {@code true} if the email can edit the {@link Shoppinglist}, else {@code false}
      */
     public static boolean allowEdit(Shoppinglist sl, String email) {
-        return sl != null && email != null && sl.getShares() != null && allowEdit(sl.getId(), sl.getShares().get(email.toLowerCase()));
+        String e = email != null ? email.toLowerCase() : null;
+        return sl != null && sl.getShares() != null && allowEdit(sl.getId(), sl.getShares().get(e));
     }
 
     /**
@@ -231,10 +236,9 @@ public class PermissionUtils {
             return "Shoppinglist == null";
         } else if (sl.getShares() == null) {
             return "Shoppinglist does not contain any shares (Shoppinglist.getShares() == null)";
-        } else if (email == null) {
-            return "Email == null";
         }
-        return getReasonForNotAllowEdit(sl.getId(), sl.getShares().get(email.toLowerCase()));
+        String e = email != null ? email.toLowerCase() : null;
+        return getReasonForNotAllowEdit(sl.getId(), sl.getShares().get(e));
     }
 
     /**

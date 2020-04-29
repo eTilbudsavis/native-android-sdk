@@ -202,8 +202,9 @@ public class ListManager {
 		/* User have remove it self. Then only set the DELETE state on the share,
 		 * SyncManager will delete from DB Once it's synced the changes to API
 		 */
-        if (user.getEmail() != null && !slShares.containsKey(user.getEmail().toLowerCase())) {
-            Share dbShare = dbShares.get(user.getEmail().toLowerCase());
+		String user_email = user.getEmail() != null ? user.getEmail().toLowerCase() : null;
+        if (!slShares.containsKey(user_email)) {
+            Share dbShare = dbShares.get(user_email);
             if (dbShare != null) {
                 dbShare.setState(SyncState.DELETE);
                 mDatabase.editShare(dbShare, user);

@@ -151,9 +151,8 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
     }
 
     private void putEmailInShareMap(String email, Share share) {
-        if (email != null) {
-            mShares.put(email.toLowerCase(), share);
-        }
+        String e = email != null ? email.toLowerCase() : null;
+        mShares.put(e, share);
     }
 
     /**
