@@ -308,6 +308,12 @@ public class SessionManager {
 
     private void postSession(final Listener<JSONObject> l) {
 
+        // Don't post session if the api key is not provided
+        if (mShopGun.getApiKey() == null) {
+            SgnLog.d(TAG, "Sgn api key is null. Skip post session");
+            return;
+        }
+
         Map<String, Object> args = new HashMap<String, Object>();
 
         args.put(Parameters.TOKEN_TTL, TTL);
