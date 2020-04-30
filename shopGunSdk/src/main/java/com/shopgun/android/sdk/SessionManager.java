@@ -151,7 +151,9 @@ public class SessionManager {
 
             synchronized (LOCK) {
 
-//                    SgnLog.d(TAG, "session: " + (response == null ? error.toString() : response.toString()));
+                if (response == null && error != null) {
+                    SgnLog.e(TAG, "session: " + error.toString());
+                }
 
                 mReqInFlight = null;
 
@@ -160,7 +162,7 @@ public class SessionManager {
                     setSession(response);
                     runQueue();
 
-                } else if (error.isSdk()) {
+                } else if (error != null && error.isSdk()) {
 
                     // Only API responses should result in a session update.
                     // We'll prevent the session from being destroyed, and 'ignore' the problem
