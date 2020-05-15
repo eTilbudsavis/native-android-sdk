@@ -41,20 +41,21 @@ public class PagedPublicationFragment extends VersoFragment {
     public static final String ARG_PAGE = "arg_page";
     public static final String SAVED_STATE = "saved_state";
 
-    PagedPublicationConfiguration mConfig;
+    private PagedPublicationConfiguration mConfig;
 
-    FrameLayout mFrame;
-    FrameLayout mFrameVerso;
-    FrameLayout mFrameLoader;
-    FrameLayout mFrameError;
-    VersoViewPager mVersoViewPager;
+    private FrameLayout mFrame;
+    private FrameLayout mFrameVerso;
+    private FrameLayout mFrameLoader;
+    private FrameLayout mFrameError;
+    private VersoViewPager mVersoViewPager;
 
-    boolean mDisplayHotspotsOnTouch = true;
-    OnTouchWrapper mOnTouchWrapper;
-    PageChangeListener mPageChangeLisetner = new PageChangeListener();
+    private boolean mDisplayHotspotsOnTouch = true;
+    private boolean mSetBrandColors = true;
+    private OnTouchWrapper mOnTouchWrapper;
+    private PageChangeListener mPageChangeListener = new PageChangeListener();
 
-    PagedPublicationLifecycle mLifecycle;
-    String mViewSessionUuid;
+    private PagedPublicationLifecycle mLifecycle;
+    private String mViewSessionUuid;
 
     public static PagedPublicationFragment newInstance() {
         return new PagedPublicationFragment();
@@ -79,7 +80,7 @@ public class PagedPublicationFragment extends VersoFragment {
         super.setOnDoubleTapListener(mOnTouchWrapper);
         super.setOnLongTapListener(mOnTouchWrapper);
         super.setOnZoomListener(mOnTouchWrapper);
-        super.addOnPageChangeListener(mPageChangeLisetner);
+        super.addOnPageChangeListener(mPageChangeListener);
         super.setOnLoadCompleteListener(mOnTouchWrapper);
     }
 
@@ -208,6 +209,10 @@ public class PagedPublicationFragment extends VersoFragment {
     }
 
     private void ensurePublicationBranding() {
+        if (!mSetBrandColors) {
+            return;
+        }
+
         PagedPublication pub = mConfig == null ? null : mConfig.getPublication();
         if (pub != null && mFrame != null) {
             int bgColor = pub.getBackgroundColor();
@@ -308,6 +313,10 @@ public class PagedPublicationFragment extends VersoFragment {
 
     public void setDisplayHotspotsOnTouch(boolean displayHotspotsOnTouch) {
         mDisplayHotspotsOnTouch = displayHotspotsOnTouch;
+    }
+
+    public void setSetBrandColors(boolean setBrandColors) {
+        mSetBrandColors = setBrandColors;
     }
 
     @Override
@@ -568,7 +577,7 @@ public class PagedPublicationFragment extends VersoFragment {
                     break;
                 case ViewPager.SCROLL_STATE_SETTLING:
                     if (mLastState != ViewPager.SCROLL_STATE_DRAGGING) {
-                        mPageChangeLisetner.mDisappearPreviousSpread = true;
+                        mPageChangeListener.mDisappearPreviousSpread = true;
                     }
 
             }
