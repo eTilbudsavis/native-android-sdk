@@ -30,9 +30,9 @@ public enum Environment {
     public static final String HOST_POSTFIX = "etilbudsavis.dk";
 
     static {
-        PRODUCTION.mEnvironment = "https://api." + HOST_POSTFIX;
-        EDGE.mEnvironment = "https://api-edge." + HOST_POSTFIX;
-        STAGING.mEnvironment = "https://api-staging." + HOST_POSTFIX;
+        PRODUCTION.mEnvironment = "https://squid-api.tjek.com";
+        EDGE.mEnvironment = "https://squid-api.tjek-staging.com";
+        STAGING.mEnvironment = "https://squid-api.tjek-staging.com";
         CUSTOM.mEnvironment = "https://api." + HOST_POSTFIX;
         SQUID_STAGING.mEnvironment = "https://squid-api.tjek-staging.com";
         SQUID_PRODUCTION.mEnvironment = "https://squid-api.tjek.com";

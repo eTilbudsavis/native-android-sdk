@@ -20,7 +20,8 @@ class ShareListener extends JSONObjectListener<Share> {
     @Override
     public void onComplete(JSONObject response, ShopGunError error) {
         if (response != null) {
-            onSuccess(Share.fromJSON(response));
+            // in case of DELETE request, the success response is empty. Avoid parsing in that case
+            onSuccess(response.length() > 0 ? Share.fromJSON(response) : null);
         } else {
             onError(error);
         }

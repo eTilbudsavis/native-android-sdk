@@ -178,6 +178,16 @@ public class ListManager {
         return editList(sl, user());
     }
 
+    public boolean insertShare(Share s) {
+        s.setState(SyncState.TO_SYNC);
+        return mDatabase.insertShare(s, user());
+    }
+
+    public boolean deleteShare(Share s) {
+        s.setState(SyncState.DELETE);
+        return mDatabase.editShare(s, user());
+    }
+
     private boolean editList(Shoppinglist sl, User user) {
 
         Shoppinglist original = mDatabase.getList(sl.getId(), user);
@@ -193,8 +203,9 @@ public class ListManager {
 		/* User have remove it self. Then only set the DELETE state on the share,
 		 * SyncManager will delete from DB Once it's synced the changes to API
 		 */
-        if (!slShares.containsKey(user.getEmail())) {
-            Share dbShare = dbShares.get(user.getEmail());
+		String user_email = user.getEmail() != null ? user.getEmail().toLowerCase() : null;
+        if (!slShares.containsKey(user_email)) {
+            Share dbShare = dbShares.get(user_email);
             if (dbShare != null) {
                 dbShare.setState(SyncState.DELETE);
                 mDatabase.editShare(dbShare, user);

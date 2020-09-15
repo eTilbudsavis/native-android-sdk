@@ -39,6 +39,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public class RequestCreator {
@@ -184,7 +185,19 @@ public class RequestCreator {
 
             public void onComplete(JSONArray response, ShopGunError error) {
                 if (response != null) {
-                    c.setPages(Images.fromJSON(response));
+                    List<Images> images = Images.fromJSON(response);
+                    if (images.isEmpty()) {
+                        ShopGunError e = new ShopGunError(
+                                ShopGunError.Code.UNKNOWN,
+                                "Catalog page array empty",
+                                null,
+                                String.format(Locale.ENGLISH, "Catalog id = %s", c.getId()),
+                                null);
+
+                        request.addError(e);
+                    } else {
+                        c.setPages(images);
+                    }
                 } else {
                     request.addError(error);
                 }

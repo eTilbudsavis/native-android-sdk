@@ -39,6 +39,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.shopgun.android.sdk.model.User.NO_USER;
@@ -145,10 +146,15 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
         ArrayList<Share> list = new ArrayList<Share>();
         in.readTypedList(list, Share.CREATOR);
         for (Share s : list) {
-            this.mShares.put(s.getEmail(), s);
+            putEmailInShareMap(s.getEmail(), s);
         }
         this.mUserId = in.readString();
         this.mSyncState = in.readInt();
+    }
+
+    private void putEmailInShareMap(String email, Share share) {
+        String e = email != null ? email.toLowerCase() : null;
+        mShares.put(e, share);
     }
 
     /**
@@ -412,7 +418,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
         mShares.clear();
         for (Share s : shares) {
             s.setShoppinglistId(getId());
-            mShares.put(s.getEmail(), s);
+            putEmailInShareMap(s.getEmail(), s);
         }
         return this;
     }
@@ -428,7 +434,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
 
         for (Share s : shares) {
             s.setShoppinglistId(getId());
-            mShares.put(s.getEmail(), s);
+            putEmailInShareMap(s.getEmail(), s);
         }
         return this;
     }
@@ -443,7 +449,7 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
     public Shoppinglist putShare(Share share) {
         if (share == null) return this;
         share.setShoppinglistId(getId());
-        mShares.put(share.getEmail(), share);
+        putEmailInShareMap(share.getEmail(), share);
         return this;
     }
 
@@ -456,8 +462,8 @@ public class Shoppinglist implements Comparable<Shoppinglist>, SyncState<Shoppin
      * @return This object
      */
     public Shoppinglist removeShare(Share s) {
-        if (s == null) return this;
-        mShares.remove(s.getEmail());
+        if (s == null || s.getEmail() == null) return this;
+        mShares.remove(s.getEmail().toLowerCase());
         return this;
     }
 
