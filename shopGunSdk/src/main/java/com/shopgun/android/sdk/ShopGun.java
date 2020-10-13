@@ -135,7 +135,6 @@ public class ShopGun {
     private OkHttpClient mClient;
 
     // new headers for v2 requests
-    private String mAppInstallId;
     private String mAuthToken;
 
     // needed by the List Manager & SyncManager
@@ -274,10 +273,6 @@ public class ShopGun {
         mAuthToken = authToken;
     }
 
-    public void setAppInstallId(String appInstallId) {
-        mAppInstallId = appInstallId;
-    }
-
     public void setUser(User user) {
         this.user = user;
     }
@@ -289,11 +284,6 @@ public class ShopGun {
     public String getAuthToken() {
         return mAuthToken;
     }
-
-    public String getAppInstallId() {
-        return mAppInstallId;
-    }
-
 
     /**
      * Returns the current {@link Environment} in use.

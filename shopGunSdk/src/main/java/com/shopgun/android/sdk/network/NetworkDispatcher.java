@@ -144,15 +144,10 @@ public class NetworkDispatcher extends Thread {
         headers.put("X-Api-Key", mShopGun.getApiKey());
         headers.put("X-Api-Secret", mShopGun.getApiSecret());
 
-        String appInstallId = mShopGun.getAppInstallId();
         String authToken = mShopGun.getAuthToken();
 
-        if (appInstallId != null && !appInstallId.isEmpty()) {
-            headers.put("X-App-Install-Id", appInstallId);
-        }
-
         if (authToken != null && !authToken.isEmpty()) {
-            headers.put("Authorization", String.format(Locale.ENGLISH, "Bearer %s", authToken));
+            headers.put("X-Token", authToken);
         }
 
         request.setHeaders(headers);
