@@ -19,6 +19,8 @@ package com.shopgun.android.sdk;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
+
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnUtils;
@@ -40,13 +42,6 @@ public class Settings {
     private static final String USAGE_COUNT = "usage_count";
     private static final String LOCATION = "location_json";
     private static final String LOCATION_ENABLED = "location_enabled";
-
-    // todo: delete this preferences in future updates
-    private static final String SESSION_USER = "session_user";
-    private static final String SESSION_FACEBOOK = "session_facebook";
-    private static final String CLIENT_ID = "client_id";
-    private static final String SESSION_ID = "session_id";
-    private static final String SESSION_JSON = "session_json";
 
     private SharedPreferences mSharedPrefs;
     private static boolean mMovedSharedPrefs = false;
@@ -108,6 +103,33 @@ public class Settings {
 
     public boolean isLocationEnabled() {
         return mSharedPrefs.getBoolean(LOCATION_ENABLED, false);
+    }
+
+    @NonNull
+    public String getTokenIfUserAttached() {
+        String token = "";
+        try {
+            String session_str = mSharedPrefs.getString("session_json", null);
+            if (session_str != null) {
+                JSONObject session_json = new JSONObject(session_str);
+                JSONObject user_json = session_json.optJSONObject("user");
+                if (user_json != null) {
+                    token = session_json.optString("token", "");
+                }
+            }
+        } catch (JSONException e) {
+            // ignore
+        }
+
+        // Cleanup old preferences
+        mSharedPrefs.edit().remove("session_user")
+                .remove("session_facebook")
+                .remove("client_id")
+                .remove("session_id")
+                .remove("session_json")
+                .apply();
+
+        return token;
     }
 
     private void performMigration() {
