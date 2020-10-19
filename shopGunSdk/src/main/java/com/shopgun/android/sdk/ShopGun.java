@@ -269,7 +269,7 @@ public class ShopGun {
         }
     }
 
-    public void setAuthToken(String authToken) {
+    public synchronized void setAuthToken(String authToken) {
         mAuthToken = authToken;
     }
 
@@ -281,7 +281,7 @@ public class ShopGun {
         return user;
     }
 
-    public String getAuthToken() {
+    public synchronized String getAuthToken() {
         return mAuthToken;
     }
 
