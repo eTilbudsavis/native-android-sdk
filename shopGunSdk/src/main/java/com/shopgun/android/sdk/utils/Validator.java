@@ -16,7 +16,6 @@
 
 package com.shopgun.android.sdk.utils;
 
-import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class Validator {
@@ -28,17 +27,6 @@ public class Validator {
     public static final String xAPP_VERSION_FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)([-]([0-9A-Za-z-.]+)*)?";
 
     //           \d+\.\d+\.\d+(\-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?
-
-    /**
-     * Checks if a given integer is a valid birth year.
-     * Requirements: birth year is in the span 1900 - 2015.
-     *
-     * @param birthyear An int to check
-     * @return {@code true} if {@code birthyear} is valid, else {@code false}
-     */
-    public static boolean isBirthyearValid(Integer birthyear) {
-        return birthyear >= 1900 && (birthyear <= 2015);
-    }
 
     /**
      * <p>A very naive implementation of email validation. Requirement:</p>
@@ -72,21 +60,6 @@ public class Validator {
         }
 
         return email.trim().equals(email);
-    }
-
-    /**
-     * Checks if a given string is a valid gender.<br>
-     * Requirements: String is either {@code 'male'} or {@code 'female'} (not case sensitive).
-     *
-     * @param gender A string of either {@code 'male'} or {@code 'female'}
-     * @return {@code true} if the given string is a valid gender, else {@code false}
-     */
-    public static boolean isGenderValid(String gender) {
-        if (gender != null) {
-            String g = gender.toLowerCase(Locale.ENGLISH).trim();
-            return (g.equals("male") || g.equals("female"));
-        }
-        return false;
     }
 
     /**
