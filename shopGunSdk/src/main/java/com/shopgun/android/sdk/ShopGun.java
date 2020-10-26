@@ -27,15 +27,12 @@ import android.os.Looper;
 
 import com.shopgun.android.sdk.api.Environment;
 import com.shopgun.android.sdk.api.EnvironmentEvents;
-import com.shopgun.android.sdk.api.EnvironmentGraph;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.corekit.UserAgentInterceptor;
 import com.shopgun.android.sdk.corekit.realm.SgnAnonymousEventRealmModule;
 import com.shopgun.android.sdk.corekit.realm.SgnLegacyEventRealmModule;
 import com.shopgun.android.sdk.database.SgnDatabase;
-import com.shopgun.android.sdk.eventskit.AnonymousEvent;
-import com.shopgun.android.sdk.eventskit.EventUtils;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -53,7 +50,6 @@ import com.shopgun.android.sdk.shoppinglists.SyncManager;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnThreadFactory;
 import com.shopgun.android.sdk.utils.SgnUserAgent;
-import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.sdk.utils.Version;
 import com.shopgun.android.utils.PackageUtils;
 
@@ -63,7 +59,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import androidx.collection.SimpleArrayMap;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.exceptions.RealmError;
@@ -129,8 +124,7 @@ public class ShopGun {
     private ThemeEnvironment mThemeEnvironment;
     /** The current event environment */
     private EnvironmentEvents mEventEnvironment;
-    /** The current graph environment */
-    private EnvironmentGraph mGraphEnvironment;
+
     /** The http client of choice for SDK traffic */
     private OkHttpClient mClient;
 
@@ -166,7 +160,6 @@ public class ShopGun {
         mEnvironment = builder.environment;
         mThemeEnvironment = builder.themeEnvironment;
         mEventEnvironment = builder.eventEnvironment;
-        mGraphEnvironment = builder.graphEnvironment;
         mExecutor = builder.executorService;
         mClient = builder.okHttpClient;
         mRealmConfiguration = builder.realmConfiguration;
@@ -301,10 +294,6 @@ public class ShopGun {
      */
     public ThemeEnvironment getThemeEnvironment() {
         return mThemeEnvironment;
-    }
-
-    public EnvironmentGraph getGraphEnvironment() {
-        return mGraphEnvironment;
     }
 
     public EnvironmentEvents getEventEnvironment() {
@@ -479,7 +468,6 @@ public class ShopGun {
         Environment environment;
         ThemeEnvironment themeEnvironment;
         EnvironmentEvents eventEnvironment;
-        EnvironmentGraph graphEnvironment;
         RealmConfiguration realmConfiguration;
         RealmConfiguration legacyConfiguration;
         OkHttpClient okHttpClient;
@@ -615,17 +603,6 @@ public class ShopGun {
             return this;
         }
 
-        public Builder setGraphEnvironment(EnvironmentGraph graphEnvironment) {
-            if (graphEnvironment == null) {
-                throw new IllegalArgumentException("GraphEndpoint must not be null.");
-            }
-            if (this.graphEnvironment != null) {
-                throw new IllegalStateException("GraphEndpoint already set.");
-            }
-            this.graphEnvironment = graphEnvironment;
-            return this;
-        }
-
         /**
          * Builds and set the ShopGun instance, and sets it to be the global singleton.
          * @return The ShopGun instance
@@ -663,10 +640,6 @@ public class ShopGun {
 
             if (eventEnvironment == null) {
                 eventEnvironment = EnvironmentEvents.PRODUCTION;
-            }
-
-            if (graphEnvironment == null) {
-                graphEnvironment = EnvironmentGraph.PRODUCTION;
             }
 
             // Setup the default OkHttpClient

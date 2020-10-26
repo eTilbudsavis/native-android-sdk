@@ -34,8 +34,6 @@ public enum Environment {
         EDGE.mEnvironment = "https://squid-api.tjek-staging.com";
         STAGING.mEnvironment = "https://squid-api.tjek-staging.com";
         CUSTOM.mEnvironment = "https://api." + HOST_POSTFIX;
-        SQUID_STAGING.mEnvironment = "https://squid-api.tjek-staging.com";
-        SQUID_PRODUCTION.mEnvironment = "https://squid-api.tjek.com";
     }
 
     private String mEnvironment;
