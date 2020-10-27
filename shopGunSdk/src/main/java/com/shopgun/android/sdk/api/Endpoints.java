@@ -33,6 +33,7 @@ import com.shopgun.android.sdk.utils.SgnUtils;
 public class Endpoints {
 
     public static final String CATALOG_LIST = "/v2/catalogs";
+    public static final String CATALOG_SEARCH = "/v2/catalogs/search";
     public static final String CATALOG_SUGGEST = "/v2/catalogs/suggest";
 
     public static final String DEALER_LIST = "/v2/dealers";
@@ -43,6 +44,7 @@ public class Endpoints {
     public static final String OFFER_SUGGESTED = "/v2/offers/suggest";
 
     public static final String STORE_LIST = "/v2/stores";
+    public static final String STORE_SEARCH = "/v2/stores/search";
 
     public static final String SHOPPINGLIST_OFFERS = "/v2/shoppinglists/offers";
 
