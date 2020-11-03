@@ -138,15 +138,15 @@ public class SgnDatabase {
      */
     public Shoppinglist getList(String id, User user) {
         Shoppinglist sl = mDataSource.getList(id, user.getId());
-        if (sl != null) {
-            /* Remove the list, if the user isn't in the shares.
-            This happens when the user, have removed him/her self from shares,
-            or deletes a list, and the action haven't been synced to the API yet */
-            String email = user.getEmail() != null ? user.getEmail().toLowerCase() : null;
-            if (!sl.getShares().containsKey(email)) {
-                return null;
-            }
-        }
+//        if (sl != null) {
+//            /* Remove the list, if the user isn't in the shares.
+//            This happens when the user, have removed him/her self from shares,
+//            or deletes a list, and the action haven't been synced to the API yet */
+//            String email = user.getEmail() != null ? user.getEmail().toLowerCase() : null;
+//            if (!sl.getShares().containsKey(email)) {
+//                return null;
+//            }
+//        }
         return sl;
     }
 
@@ -167,20 +167,20 @@ public class SgnDatabase {
      */
     public List<Shoppinglist> getLists(User user, boolean includeDeleted) {
         List<Shoppinglist> lists = mDataSource.getLists(user.getId(), includeDeleted);
-        Iterator<Shoppinglist> it = lists.iterator();
-        while (it.hasNext()) {
-            Shoppinglist sl = it.next();
-            /* Remove the list, if the user isn't in the shares.
-            This happens when the user, have removed him/her self from shares,
-            or deletes a list, and the action haven't been synced to the API yet */
-            String email = user.getEmail() != null ? user.getEmail().toLowerCase() : null;
-            if (!sl.getShares().containsKey(email) && !includeDeleted) {
-                String format = "Shoppinglist %s does not contain a share for %s, removing Shoppinglist from the final list.";
-                String text = String.format(format, sl.getName(), user.getEmail());
-                SgnLog.d(TAG, text);
-                it.remove();
-            }
-        }
+//        Iterator<Shoppinglist> it = lists.iterator();
+//        while (it.hasNext()) {
+//            Shoppinglist sl = it.next();
+//            /* Remove the list, if the user isn't in the shares.
+//            This happens when the user, have removed him/her self from shares,
+//            or deletes a list, and the action haven't been synced to the API yet */
+//            String email = user.getEmail() != null ? user.getEmail().toLowerCase() : null;
+//            if (!sl.getShares().containsKey(email) && !includeDeleted) {
+//                String format = "Shoppinglist %s does not contain a share for %s, removing Shoppinglist from the final list.";
+//                String text = String.format(format, sl.getName(), user.getEmail());
+//                SgnLog.d(TAG, text);
+//                it.remove();
+//            }
+//        }
         // they should be sorted from the DB
 //		Collections.sort(lists);
         return lists;
@@ -506,9 +506,9 @@ public class SgnDatabase {
             }
         }
         List<Shoppinglist> lists = new ArrayList<Shoppinglist>(map.values());
-        for (Shoppinglist sl : lists) {
-            PermissionUtils.allowEditOrThrow(sl, user);
-        }
+//        for (Shoppinglist sl : lists) {
+//            PermissionUtils.allowEditOrThrow(sl, user);
+//        }
         return lists;
     }
 

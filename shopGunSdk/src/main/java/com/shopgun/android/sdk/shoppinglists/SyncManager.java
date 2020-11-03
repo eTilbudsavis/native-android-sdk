@@ -562,11 +562,23 @@ public class SyncManager {
 
                     Shoppinglist serverSl = serverMap.get(key);
 
-                    if (localSl != null && serverSl != null && localSl.getModified().before(serverSl.getModified())) {
-                        serverSl.setState(SyncState.SYNCED);
-                        mBuilder.edit(serverSl);
-                        database.editList(serverSl, user);
-                        database.cleanShares(serverSl, user);
+                    if (localSl != null && serverSl != null) {
+
+                        String serverOwner = serverSl.getOwner().getEmail().toLowerCase();
+                        String localOwner = localSl.getOwner().getEmail().toLowerCase();
+
+                        if (localSl.getModified().before(serverSl.getModified())) {
+
+                            serverSl.setState(SyncState.SYNCED);
+                            mBuilder.edit(serverSl);
+                            database.editList(serverSl, user);
+                            database.cleanShares(serverSl, user);
+
+                        } else if (!serverOwner.equals(localOwner)) {
+
+                            database.deleteShare(localSl.getOwner(), user);
+                            database.insertShare(serverSl.getOwner(), user);
+                        }
                     }
                     // else: Don't do anything, next iteration will put local changes to API
 
@@ -712,7 +724,7 @@ public class SyncManager {
             localItems = mDatabase.getItems(mShoppinglist, mUser);
             ListUtils.sortItems(localItems);
 
-            if (PermissionUtils.allowEdit(mShoppinglist, mUser)) {
+//            if (PermissionUtils.allowEdit(mShoppinglist, mUser)) {
 
                 // Update previous_id's, modified and state if needed
                 String tmp = ListUtils.FIRST_ITEM;
@@ -735,7 +747,7 @@ public class SyncManager {
                     }
                     tmp = sli.getId();
                 }
-            }
+//            }
 
             popRequestAndPostShoppinglistEvent();
 

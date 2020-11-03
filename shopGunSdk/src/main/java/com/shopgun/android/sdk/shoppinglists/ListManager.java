@@ -219,9 +219,6 @@ public class ListManager {
             }
         }
 
-        // Do edit check after the share check, the user should always be allowed to remove it self
-        mDatabase.allowEditOrThrow(sl, user);
-
         HashSet<String> union = new HashSet<>();
         union.addAll(slShares.keySet());
         union.addAll(dbShares.keySet());
@@ -316,7 +313,6 @@ public class ListManager {
      */
     public void deleteList(Shoppinglist sl) {
         User u = user();
-        mDatabase.allowEditOrThrow(sl, u);
         deleteList(sl, u);
     }
 
@@ -451,8 +447,6 @@ public class ListManager {
      */
     @SuppressLint("DefaultLocale")
     public boolean addItem(ShoppinglistItem sli, boolean incrementCount, User user) {
-
-        mDatabase.allowEditOrThrow(sli.getShoppinglistId(), user);
 
         if (sli.getOfferId() == null && sli.getDescription() == null) {
             SgnLog.i(TAG, "The ShoppinglistItem neither has offerId, or"
@@ -601,8 +595,6 @@ public class ListManager {
 
     private boolean editItem(ShoppinglistItem sli, User user) {
 
-        mDatabase.allowEditOrThrow(sli.getShoppinglistId(), user);
-
         Date now = new Date();
         sli.setModified(now);
         sli.setState(SyncState.TO_SYNC);
@@ -688,8 +680,6 @@ public class ListManager {
      */
     private boolean deleteItems(final Shoppinglist sl, Boolean stateToDelete, User user) {
 
-        mDatabase.allowEditOrThrow(sl.getId(), user);
-
         Date now = new Date();
 
         // get it from this manager, to preserve order
@@ -753,7 +743,6 @@ public class ListManager {
      */
     public boolean deleteItem(ShoppinglistItem sli) {
         User u = user();
-        mDatabase.allowEditOrThrow(sli.getShoppinglistId(), u);
         return deleteItem(sli, u);
     }
 
