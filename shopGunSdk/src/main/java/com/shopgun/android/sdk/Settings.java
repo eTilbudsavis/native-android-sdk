@@ -29,7 +29,9 @@ import com.shopgun.android.utils.SharedPreferencesUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class Settings {
 
@@ -106,15 +108,21 @@ public class Settings {
     }
 
     @NonNull
-    public String getTokenIfUserAttached() {
+    public List<String> getTokenAndUserIfAny() {
         String token = "";
+        String userId = "";
+        String userName = "";
+        String userEmail = "";
         try {
             String session_str = mSharedPrefs.getString("session_json", null);
             if (session_str != null) {
                 JSONObject session_json = new JSONObject(session_str);
                 JSONObject user_json = session_json.optJSONObject("user");
                 if (user_json != null) {
-                    token = session_json.optString("token", "");
+                    token = session_json.optString("token");
+                    userId = user_json.optString("id");
+                    userName = user_json.optString("name");
+                    userEmail = user_json.optString("email");
                 }
             }
         } catch (JSONException e) {
@@ -129,7 +137,7 @@ public class Settings {
                 .remove("session_json")
                 .apply();
 
-        return token;
+        return Arrays.asList(token, userId, userName, userEmail);
     }
 
     private void performMigration() {
