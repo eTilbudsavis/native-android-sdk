@@ -564,9 +564,6 @@ public class SyncManager {
 
                     if (localSl != null && serverSl != null) {
 
-                        String serverOwner = serverSl.getOwner().getEmail().toLowerCase();
-                        String localOwner = localSl.getOwner().getEmail().toLowerCase();
-
                         if (localSl.getModified().before(serverSl.getModified())) {
 
                             serverSl.setState(SyncState.SYNCED);
@@ -574,10 +571,19 @@ public class SyncManager {
                             database.editList(serverSl, user);
                             database.cleanShares(serverSl, user);
 
-                        } else if (!serverOwner.equals(localOwner)) {
+                        } else {
+                            // user's email now can be changed. The server will do the change in the share, so let's update the local info
+                            if (serverSl.getOwner() != null && serverSl.getOwner().getEmail() != null &&
+                                localSl.getOwner() != null && localSl.getOwner().getEmail() != null) {
 
-                            database.deleteShare(localSl.getOwner(), user);
-                            database.insertShare(serverSl.getOwner(), user);
+                                String serverOwner = serverSl.getOwner().getEmail().toLowerCase();
+                                String localOwner = localSl.getOwner().getEmail().toLowerCase();
+
+                                if (!serverOwner.equals(localOwner)) {
+                                    database.deleteShare(localSl.getOwner(), user);
+                                    database.insertShare(serverSl.getOwner(), user);
+                                }
+                            }
                         }
                     }
                     // else: Don't do anything, next iteration will put local changes to API
