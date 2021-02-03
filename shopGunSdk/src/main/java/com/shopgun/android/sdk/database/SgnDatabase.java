@@ -502,7 +502,9 @@ public class SgnDatabase {
         for (String id : shoppinglistIds) {
             if (!map.containsKey(id)) {
                 Shoppinglist sl = getList(id, user);
-                map.put(sl.getId(), sl);
+                if (sl != null) {
+                    map.put(sl.getId(), sl);
+                }
             }
         }
         List<Shoppinglist> lists = new ArrayList<Shoppinglist>(map.values());
