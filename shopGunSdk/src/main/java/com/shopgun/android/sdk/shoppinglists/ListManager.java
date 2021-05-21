@@ -52,6 +52,7 @@ import java.util.Map;
  * synchronizing state with both the {@link SgnDatabase database} and, the
  * ShopGun API.
  */
+@SuppressWarnings("deprecation")
 @Deprecated
 public class ListManager {
 
@@ -129,7 +130,7 @@ public class ListManager {
      */
     public boolean addList(final Shoppinglist sl) {
 
-        List<Shoppinglist> lists = new ArrayList<Shoppinglist>();
+        List<Shoppinglist> lists = new ArrayList<>();
         lists.add(sl);
 
         sl.setModified(new Date());
@@ -218,10 +219,7 @@ public class ListManager {
             }
         }
 
-        // Do edit check after the share check, the user should always be allowed to remove it self
-        mDatabase.allowEditOrThrow(sl, user);
-
-        HashSet<String> union = new HashSet<String>();
+        HashSet<String> union = new HashSet<>();
         union.addAll(slShares.keySet());
         union.addAll(dbShares.keySet());
 
@@ -234,20 +232,18 @@ public class ListManager {
                 if (slShares.containsKey(shareId)) {
 
                     Share slShare = slShares.get(shareId);
-                    if (!dbShare.equals(slShare)) {
+                    if (dbShare != null && slShare != null && !dbShare.equals(slShare)) {
                         slShare.setState(SyncState.TO_SYNC);
-                        // mDatabase.editShare(slShare, user);
                     }
 
-                } else if (dbShare.getAccess().equals(Share.ACCESS_OWNER)) {
+                } else if (dbShare != null && dbShare.getAccess().equals(Share.ACCESS_OWNER)) {
                     // If owner was removed, then re-insert it.
                     sl.putShare(dbShare);
                     SgnLog.i(TAG, "Owner cannot be removed from lists, owner will be reattached");
-                } else if (user.isLoggedIn()) {
+                } else if (user.isLoggedIn() && dbShare != null) {
                     // We'll have to add the share (in deleted state) to have it updated in the DB
                     // it should be removed as soon as the list have been inserted to DB.
                     dbShare.setState(SyncState.DELETE);
-                    //mDatabase.editShare(dbShare, user);
                     sl.putShare(dbShare);
                 }
 
@@ -255,7 +251,7 @@ public class ListManager {
 
         }
 
-        List<Shoppinglist> lists = new ArrayList<Shoppinglist>();
+        List<Shoppinglist> lists = new ArrayList<>();
         lists.add(sl);
 
         Date now = new Date();
@@ -317,7 +313,6 @@ public class ListManager {
      */
     public void deleteList(Shoppinglist sl) {
         User u = user();
-        mDatabase.allowEditOrThrow(sl, u);
         deleteList(sl, u);
     }
 
@@ -453,8 +448,6 @@ public class ListManager {
     @SuppressLint("DefaultLocale")
     public boolean addItem(ShoppinglistItem sli, boolean incrementCount, User user) {
 
-        mDatabase.allowEditOrThrow(sli.getShoppinglistId(), user);
-
         if (sli.getOfferId() == null && sli.getDescription() == null) {
             SgnLog.i(TAG, "The ShoppinglistItem neither has offerId, or"
                     + "description, one or the other this is required by the API");
@@ -559,7 +552,7 @@ public class ListManager {
         // Validate and get response in one step
         List<Shoppinglist> lists = mDatabase.allowEditItemsOrThrow(items, user);
 
-        HashMap<String, ShoppinglistItem> dbItems = new HashMap<String, ShoppinglistItem>();
+        HashMap<String, ShoppinglistItem> dbItems = new HashMap<>();
         for (Shoppinglist sl : lists) {
             for (ShoppinglistItem sli : getItems(sl, user)) {
                 dbItems.put(sli.getId(), sli);
@@ -601,8 +594,6 @@ public class ListManager {
     }
 
     private boolean editItem(ShoppinglistItem sli, User user) {
-
-        mDatabase.allowEditOrThrow(sli.getShoppinglistId(), user);
 
         Date now = new Date();
         sli.setModified(now);
@@ -689,8 +680,6 @@ public class ListManager {
      */
     private boolean deleteItems(final Shoppinglist sl, Boolean stateToDelete, User user) {
 
-        mDatabase.allowEditOrThrow(sl.getId(), user);
-
         Date now = new Date();
 
         // get it from this manager, to preserve order
@@ -754,7 +743,6 @@ public class ListManager {
      */
     public boolean deleteItem(ShoppinglistItem sli) {
         User u = user();
-        mDatabase.allowEditOrThrow(sli.getShoppinglistId(), u);
         return deleteItem(sli, u);
     }
 
@@ -762,7 +750,7 @@ public class ListManager {
 
         Date now = new Date();
 
-        List<ShoppinglistItem> edited = new ArrayList<ShoppinglistItem>();
+        List<ShoppinglistItem> edited = new ArrayList<>();
 
         sli.setModified(now);
         sli.setState(SyncState.DELETE);
@@ -808,7 +796,10 @@ public class ListManager {
      * @return A {@link User}
      */
     private User user() {
-        return mShopGun.getSessionManager().getSession().getUser();
+        if (mShopGun.getUser() == null) {
+            return new User();
+        }
+        return mShopGun.getUser();
     }
 
     /**
@@ -821,9 +812,9 @@ public class ListManager {
     /**
      * Deletes all rows in the {@link SgnDatabase database} associated with a
      * given{@link User}.
-     * @param userId A {@link User#getUserId()} to clear
+     * @param userId A {@link User#getId()} to clear
      */
-    public void clear(int userId) {
+    public void clear(String userId) {
         mDatabase.clear(userId);
     }
 

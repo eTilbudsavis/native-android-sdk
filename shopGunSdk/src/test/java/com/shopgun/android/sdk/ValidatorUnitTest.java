@@ -49,37 +49,6 @@ public class ValidatorUnitTest {
     }
 
     @Test
-    public void testIsBirthYearValid() throws Exception {
-        Assert.assertFalse(Validator.isBirthyearValid(Integer.MIN_VALUE));
-        for (int i = -1000; i < 1900; i++) {
-            Assert.assertFalse(Validator.isBirthyearValid(i));
-        }
-        for (int i = 1900; i < 2016; i++) {
-            Assert.assertTrue(Validator.isBirthyearValid(i));
-        }
-        for (int i = 2016; i < 3000; i++) {
-            Assert.assertFalse(Validator.isBirthyearValid(i));
-        }
-        Assert.assertFalse(Validator.isBirthyearValid(Integer.MAX_VALUE));
-
-    }
-
-    @Test
-    public void testIsGenderValid() throws Exception {
-
-        String[] inValid = new String[]{null, "", "danny", "fe male", "  ma le  ", "males", "females"};
-        for (String s : inValid) {
-            Assert.assertFalse(Validator.isGenderValid(s));
-        }
-
-        String[] valid = new String[]{"  male  ", "  female  ", "female", "male"};
-        for (String s : valid) {
-            Assert.assertTrue(Validator.isGenderValid(s));
-        }
-
-    }
-
-    @Test
     public void testValidVersion() throws Exception {
 
         String[] valid = {"2.0.0", "2.0.0-rc.2", "2.0.0-rc.1", "1.0.0", "1.0.0-beta",

@@ -46,7 +46,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 
     public static final String TAG = Constants.getTag(User.class);
 
-    public static final int NO_USER = -1;
+    public static final String NO_USER = "-1";
     public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
         public User createFromParcel(Parcel source) {
             return new User(source);
@@ -67,7 +67,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
      * Default constructor
      */
     public User() {
-        setUserId(NO_USER);
+        setId(NO_USER);
     }
 
     private User(Parcel in) {
@@ -133,34 +133,32 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
     }
 
     /**
-     * Method for finding out if the user is logged in via the API. It is determined
-     * on the basis that the {@link #getEmail() email}  {@code !=} {@code null} and the
-     * {@link User#getUserId()} {@code >} {@link #NO_USER}.
+     * Method for finding out if the user is logged in via the API.
      *
      * <p>It is not a requirement to be logged in, but it does offer some
      * advantages, such as online lists</p>
      * @return {@code true} if the {@link User} is logged in with a ShopGun account, else {@code false}
      */
     public boolean isLoggedIn() {
-        return mEmail != null && getUserId() > NO_USER;
+        return mEmail != null && getId() != null && !getId().equals(NO_USER);
     }
 
     /**
      * Get the id of this user
-     * @deprecated Use {@link User#getUserId()}} instead.
      */
-    @Deprecated
     public String getId() {
-        return String.valueOf(getUserId());
+        if (mErn == null) {
+            setId(NO_USER);
+        }
+        String[] parts = mErn.split(":");
+        return parts[parts.length - 1];
     }
 
     /**
      * @param id A string
-     * @deprecated Use {@link User#setUserId(int)} instead.
      */
-    @Deprecated
     public User setId(String id) {
-        setUserId((id == null) ? NO_USER : Integer.valueOf(id));
+        setErn(String.format("ern:%s:%s", getErnType(), id != null ? id : NO_USER));
         return this;
     }
 
@@ -170,7 +168,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 
     public User setErn(String ern) {
         if (ern == null) {
-            setUserId(NO_USER);
+            setId(NO_USER);
         } else if (ern.startsWith("ern:") && ern.split(":").length == 3 && ern.contains(getErnType())) {
             mErn = ern;
         }
@@ -179,28 +177,6 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
 
     public String getErnType() {
         return IErn.TYPE_USER;
-    }
-
-    /**
-     * Get the user id
-     * @return A user id
-     */
-    public int getUserId() {
-        if (mErn == null) {
-            setUserId(NO_USER);
-        }
-        String[] parts = mErn.split(":");
-        return Integer.valueOf(parts[parts.length - 1]);
-    }
-
-    /**
-     * Set the user id
-     * @param id A positive integer
-     * @return This object
-     */
-    public User setUserId(int id) {
-        setErn(String.format("ern:%s:%s", getErnType(), id));
-        return this;
     }
 
     /**

@@ -66,9 +66,9 @@ public class SgnDataSource extends SQLDataSource {
      * @param userId A {@link User#getId()}
      * @return number of changes
      */
-    public int clear(int userId) {
+    public int clear(String userId) {
         String whereClause = SgnOpenHelper.USER + "=?";
-        String[] whereArgs = new String[]{String.valueOf(userId)};
+        String[] whereArgs = new String[]{userId};
         int count = delete(ItemSQLiteHelper.TABLE, whereClause, whereArgs);
         count += delete(ListSQLiteHelper.TABLE, whereClause, whereArgs);
         count += delete(ShareSQLiteHelper.TABLE, whereClause, whereArgs);

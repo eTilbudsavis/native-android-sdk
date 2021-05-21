@@ -79,6 +79,13 @@ public class CatalogConfiguration extends IntroOutroConfiguration {
 
     @Override
     public View getPublicationPageView(ViewGroup container, int publicationPage) {
+        // avoid IndexOutOfBoundEx
+        if (publicationPage < 0) {
+            publicationPage = 0;
+        }
+        if (publicationPage >= mPages.size()) {
+            publicationPage = mPages.size() - 1;
+        }
         CatalogPage catalogPage = mPages.get(publicationPage);
         return new CatalogPageView(container.getContext(), catalogPage, mLoadingTextColor);
     }

@@ -27,6 +27,7 @@ import com.shopgun.android.sdk.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @deprecated No longer maintained
@@ -44,13 +45,13 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
             "create table if not exists " + TABLE + "(" +
                     ID + " integer not null primary key, " +
                     SHOPPINGLIST_ID + " text not null, " +
-                    USER + " integer not null, " +
                     EMAIL + " text, " +
                     NAME + " text, " +
                     ACCEPTED + " text, " +
                     ACCESS + " text, " +
                     ACCEPT_URL + " text, " +
-                    STATE + " integer " +
+                    STATE + " integer, " +
+                    USER + " text not null " +
                     ");";
     public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?)";
 
@@ -66,7 +67,26 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
 
     public static void upgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.acquireReference();
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE);
+        if (oldVersion == 5 && newVersion == 6) {
+            // migrate USER from int to text
+            db.execSQL("create table if not exists tmp_table (" +
+                    ID + " integer not null primary key, " +
+                    SHOPPINGLIST_ID + " text not null, " +
+                    EMAIL + " text, " +
+                    NAME + " text, " +
+                    ACCEPTED + " text, " +
+                    ACCESS + " text, " +
+                    ACCEPT_URL + " text, " +
+                    STATE + " integer, " +
+                    USER + " text not null " +
+                    ");");
+            db.execSQL("insert into tmp_table select " +
+                    String.format(Locale.US, "%s, %s, %s, %s, %s, %s, %s, %s,",
+                            ID, SHOPPINGLIST_ID, EMAIL, NAME, ACCEPTED, ACCESS, ACCEPT_URL, STATE) +
+                    " cast (" + USER + " as text) from " + TABLE + ";");
+            db.execSQL("drop table " + TABLE + ";");
+            db.execSQL("alter table tmp_table rename to " + TABLE + ";");
+        }
         db.releaseReference();
     }
 
@@ -76,13 +96,13 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
 
     public static void bind(SQLiteStatement s, Share share, String userId) {
         DbUtils.bindOrNull(s, 2, share.getShoppinglistId());
-        DbUtils.bindOrNull(s, 3, userId);
-        DbUtils.bindOrNull(s, 4, share.getEmail());
-        DbUtils.bindOrNull(s, 5, share.getName());
-        s.bindLong(6, DbUtils.unescape(share.getAccepted()));
-        DbUtils.bindOrNull(s, 7, share.getAccess());
-        DbUtils.bindOrNull(s, 8, share.getAcceptUrl());
-        s.bindLong(9, share.getState());
+        DbUtils.bindOrNull(s, 3, share.getEmail());
+        DbUtils.bindOrNull(s, 4, share.getName());
+        s.bindLong(5, DbUtils.unescape(share.getAccepted()));
+        DbUtils.bindOrNull(s, 6, share.getAccess());
+        DbUtils.bindOrNull(s, 7, share.getAcceptUrl());
+        s.bindLong(8, share.getState());
+        DbUtils.bindOrNull(s, 9, userId);
     }
 
     public static List<Share> cursorToList(Cursor c, String shoppinglistId) {

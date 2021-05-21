@@ -101,7 +101,7 @@ public class SgnDatabase {
      * @param userId A {@link User#getId()}
      * @return number of changes
      */
-    public int clear(int userId) {
+    public int clear(String userId) {
         return mDataSource.clear(userId);
     }
 
@@ -112,7 +112,7 @@ public class SgnDatabase {
      * @return {@code true} if the operation was successful, else {@code false}
      */
     public boolean insertList(Shoppinglist sl, User user) {
-        long id = mDataSource.insertList(sl, String.valueOf(user.getUserId()));
+        long id = mDataSource.insertList(sl, user.getId());
         return successId(id);
     }
 
@@ -126,7 +126,7 @@ public class SgnDatabase {
         if (lists.isEmpty()) {
             return true;
         }
-        int count = mDataSource.insertList(lists, String.valueOf(user.getUserId()));
+        int count = mDataSource.insertList(lists, user.getId());
         return successCount(count, lists);
     }
 
@@ -137,16 +137,16 @@ public class SgnDatabase {
      * @return A {@link Shoppinglist} if one exists, else {@code null}
      */
     public Shoppinglist getList(String id, User user) {
-        Shoppinglist sl = mDataSource.getList(id, String.valueOf(user.getUserId()));
-        if (sl != null) {
-            /* Remove the list, if the user isn't in the shares.
-            This happens when the user, have removed him/her self from shares,
-            or deletes a list, and the action haven't been synced to the API yet */
-            String email = user.getEmail() != null ? user.getEmail().toLowerCase() : null;
-            if (!sl.getShares().containsKey(email)) {
-                return null;
-            }
-        }
+        Shoppinglist sl = mDataSource.getList(id, user.getId());
+//        if (sl != null) {
+//            /* Remove the list, if the user isn't in the shares.
+//            This happens when the user, have removed him/her self from shares,
+//            or deletes a list, and the action haven't been synced to the API yet */
+//            String email = user.getEmail() != null ? user.getEmail().toLowerCase() : null;
+//            if (!sl.getShares().containsKey(email)) {
+//                return null;
+//            }
+//        }
         return sl;
     }
 
@@ -166,21 +166,21 @@ public class SgnDatabase {
      * @return A list of {@link Shoppinglist}
      */
     public List<Shoppinglist> getLists(User user, boolean includeDeleted) {
-        List<Shoppinglist> lists = mDataSource.getLists(String.valueOf(user.getUserId()), includeDeleted);
-        Iterator<Shoppinglist> it = lists.iterator();
-        while (it.hasNext()) {
-            Shoppinglist sl = it.next();
-            /* Remove the list, if the user isn't in the shares.
-            This happens when the user, have removed him/her self from shares,
-            or deletes a list, and the action haven't been synced to the API yet */
-            String email = user.getEmail() != null ? user.getEmail().toLowerCase() : null;
-            if (!sl.getShares().containsKey(email) && !includeDeleted) {
-                String format = "Shoppinglist %s does not contain a share for %s, removing Shoppinglist from the final list.";
-                String text = String.format(format, sl.getName(), user.getEmail());
-                SgnLog.d(TAG, text);
-                it.remove();
-            }
-        }
+        List<Shoppinglist> lists = mDataSource.getLists(user.getId(), includeDeleted);
+//        Iterator<Shoppinglist> it = lists.iterator();
+//        while (it.hasNext()) {
+//            Shoppinglist sl = it.next();
+//            /* Remove the list, if the user isn't in the shares.
+//            This happens when the user, have removed him/her self from shares,
+//            or deletes a list, and the action haven't been synced to the API yet */
+//            String email = user.getEmail() != null ? user.getEmail().toLowerCase() : null;
+//            if (!sl.getShares().containsKey(email) && !includeDeleted) {
+//                String format = "Shoppinglist %s does not contain a share for %s, removing Shoppinglist from the final list.";
+//                String text = String.format(format, sl.getName(), user.getEmail());
+//                SgnLog.d(TAG, text);
+//                it.remove();
+//            }
+//        }
         // they should be sorted from the DB
 //		Collections.sort(lists);
         return lists;
@@ -203,7 +203,7 @@ public class SgnDatabase {
      * @return {@code true} if the operation was successful, else {@code false}
      */
     public boolean deleteList(String shoppinglistId, User user) {
-        return deleteList(shoppinglistId, String.valueOf(user.getUserId()));
+        return deleteList(shoppinglistId, user.getId());
     }
 
     /**
@@ -236,7 +236,7 @@ public class SgnDatabase {
      * @return {@code true} if the operation was successful, else {@code false}
      */
     public boolean insertItem(ShoppinglistItem sli, User user) {
-        long id = mDataSource.insertItem(sli, String.valueOf(user.getUserId()));
+        long id = mDataSource.insertItem(sli, user.getId());
         return successId(id);
     }
 
@@ -247,7 +247,7 @@ public class SgnDatabase {
      * @return number of affected rows
      */
     public boolean insertItems(List<ShoppinglistItem> items, User user) {
-        int count = mDataSource.insertItem(items, String.valueOf(user.getUserId()));
+        int count = mDataSource.insertItem(items, user.getId());
         return successCount(count, items);
     }
 
@@ -258,7 +258,7 @@ public class SgnDatabase {
      * @return A {@link ShoppinglistItem} if one matches the criteria, else {@code null}
      */
     public ShoppinglistItem getItem(String itemId, User user) {
-        return mDataSource.getItem(itemId, String.valueOf(user.getUserId()));
+        return mDataSource.getItem(itemId, user.getId());
     }
 
     /**
@@ -291,7 +291,7 @@ public class SgnDatabase {
      * @return A list of {@link ShoppinglistItem}
      */
     public List<ShoppinglistItem> getItems(String shoppinglistId, User user, boolean includeDeleted) {
-        return mDataSource.getItems(shoppinglistId, String.valueOf(user.getUserId()), includeDeleted);
+        return mDataSource.getItems(shoppinglistId, user.getId(), includeDeleted);
     }
 
     /**
@@ -313,7 +313,7 @@ public class SgnDatabase {
      * @return A {@link ShoppinglistItem} if one exists with the {@code previousId}, else {@code null}
      */
     public ShoppinglistItem getItemPrevious(String shoppinglistId, String previousId, User user) {
-        return mDataSource.getItemPrevious(shoppinglistId, previousId, String.valueOf(user.getUserId()));
+        return mDataSource.getItemPrevious(shoppinglistId, previousId, user.getId());
     }
 
     /**
@@ -332,7 +332,7 @@ public class SgnDatabase {
      * @return A {@link Shoppinglist} if one exists with the {@code previousId}, else {@code null}
      */
     public Shoppinglist getListPrevious(String previousId, User user) {
-        return mDataSource.getListPrevious(previousId, String.valueOf(user.getUserId()));
+        return mDataSource.getListPrevious(previousId, user.getId());
     }
 
     /**
@@ -342,7 +342,7 @@ public class SgnDatabase {
      * @return {@code true} if the operation was successful, else {@code false}
      */
     public boolean deleteItem(ShoppinglistItem sli, User user) {
-        int count = mDataSource.deleteItem(sli.getId(), String.valueOf(user.getUserId()));
+        int count = mDataSource.deleteItem(sli.getId(), user.getId());
         return successCount(count);
     }
 
@@ -361,7 +361,7 @@ public class SgnDatabase {
      * @return number of affected rows
      */
     public int deleteItems(String shoppinglistId, Boolean state, User user) {
-        return mDataSource.deleteItems(shoppinglistId, state, String.valueOf(user.getUserId()));
+        return mDataSource.deleteItems(shoppinglistId, state, user.getId());
     }
 
     /**
@@ -371,7 +371,7 @@ public class SgnDatabase {
      * @return {@code true} if the edit was successful, else {@code true}
      */
     public boolean editItems(ShoppinglistItem sli, User user) {
-        long id = mDataSource.insertItem(sli, String.valueOf(user.getUserId()));
+        long id = mDataSource.insertItem(sli, user.getId());
         return successId(id);
     }
 
@@ -382,7 +382,7 @@ public class SgnDatabase {
      * @return {@code true} if the edit was successful, else {@code true}
      */
     public boolean editItems(List<ShoppinglistItem> list, User user) {
-        int count = mDataSource.insertItem(list, String.valueOf(user.getUserId()));
+        int count = mDataSource.insertItem(list, user.getId());
         return successCount(count, list);
     }
 
@@ -433,11 +433,11 @@ public class SgnDatabase {
      * @return A list of Share
      */
     public List<Share> getShares(Shoppinglist sl, User user, boolean includeDeleted) {
-        return mDataSource.getShares(sl.getId(), String.valueOf(user.getUserId()), includeDeleted);
+        return mDataSource.getShares(sl.getId(), user.getId(), includeDeleted);
     }
 
     public boolean insertShare(Share s, User user) {
-        long id = mDataSource.insertShare(s, String.valueOf(user.getUserId()));
+        long id = mDataSource.insertShare(s, user.getId());
         return successId(id);
     }
 
@@ -462,11 +462,11 @@ public class SgnDatabase {
     }
 
     public int deleteShares(Shoppinglist sl, User user) {
-        return deleteShares(sl.getId(), String.valueOf(user.getUserId()));
+        return deleteShares(sl.getId(), user.getId());
     }
 
     public int deleteShares(String shoppinglistId, User user) {
-        return deleteShares(shoppinglistId, String.valueOf(user.getUserId()));
+        return deleteShares(shoppinglistId, user.getId());
     }
 
     public int deleteShares(String shoppinglistId, String userId) {
@@ -502,13 +502,15 @@ public class SgnDatabase {
         for (String id : shoppinglistIds) {
             if (!map.containsKey(id)) {
                 Shoppinglist sl = getList(id, user);
-                map.put(sl.getId(), sl);
+                if (sl != null) {
+                    map.put(sl.getId(), sl);
+                }
             }
         }
         List<Shoppinglist> lists = new ArrayList<Shoppinglist>(map.values());
-        for (Shoppinglist sl : lists) {
-            PermissionUtils.allowEditOrThrow(sl, user);
-        }
+//        for (Shoppinglist sl : lists) {
+//            PermissionUtils.allowEditOrThrow(sl, user);
+//        }
         return lists;
     }
 

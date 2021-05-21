@@ -33,6 +33,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @deprecated No longer maintained
@@ -60,7 +61,7 @@ public class ItemSQLiteHelper extends SgnOpenHelper {
                     STATE + " integer not null, " +
                     PREVIOUS_ID + " text, " +
                     META + " text, " +
-                    USER + "  integer not null " +
+                    USER + " text not null " +
                     ");";
     public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
@@ -97,7 +98,30 @@ public class ItemSQLiteHelper extends SgnOpenHelper {
 
     public static void upgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.acquireReference();
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE);
+        if (oldVersion == 5 && newVersion == 6) {
+            // migrate USER from int to text
+            db.execSQL("create table if not exists tmp_table (" +
+                    ID + " text not null primary key, " +
+                    ERN + " text not null, " +
+                    MODIFIED + " text not null, " +
+                    DESCRIPTION + " text, " +
+                    COUNT + " integer not null, " +
+                    TICK + " integer not null, " +
+                    OFFER_ID + " text, " +
+                    CREATOR + " text, " +
+                    SHOPPINGLIST_ID + " text not null, " +
+                    STATE + " integer not null, " +
+                    PREVIOUS_ID + " text, " +
+                    META + " text, " +
+                    USER + " text not null " +
+                    ");");
+            db.execSQL("insert into tmp_table select " +
+                    String.format(Locale.US, "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,",
+                            ID, ERN, MODIFIED, DESCRIPTION, COUNT, TICK, OFFER_ID, CREATOR, SHOPPINGLIST_ID, STATE, PREVIOUS_ID, META) +
+                    " cast (" + USER + " as text) from " + TABLE + ";");
+            db.execSQL("drop table " + TABLE + ";");
+            db.execSQL("alter table tmp_table rename to " + TABLE + ";");
+        }
         db.releaseReference();
     }
 
@@ -131,7 +155,7 @@ public class ItemSQLiteHelper extends SgnOpenHelper {
         } catch (JSONException e) {
             SgnLog.e(TAG, null, e);
         }
-        sli.setUserId(cv.getAsInteger(USER));
+        sli.setUserId(cv.getAsString(USER));
         return sli;
     }
 

@@ -17,7 +17,6 @@
 package com.shopgun.android.sdk;
 
 
-import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -100,25 +99,6 @@ public class EventUnitTest {
 
         // We added one item from a special list - this should be returned
         Assert.assertEquals(1, e.getAddedItems(id).size());
-
-    }
-
-    @Test
-    public void testSessionEvent() throws Exception {
-
-        int oldUser = 0;
-        int newUser = 100;
-        SessionEvent e = new SessionEvent(oldUser, newUser);
-        Assert.assertEquals(oldUser, e.getOldUser());
-        Assert.assertEquals(newUser, e.getNewUser());
-        Assert.assertTrue(e.isNewUser());
-
-        oldUser = 1;
-        newUser = 1;
-        e = new SessionEvent(oldUser, newUser);
-        Assert.assertEquals(oldUser, e.getOldUser());
-        Assert.assertEquals(newUser, e.getNewUser());
-        Assert.assertFalse(e.isNewUser());
 
     }
 

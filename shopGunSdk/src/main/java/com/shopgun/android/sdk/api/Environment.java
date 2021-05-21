@@ -25,7 +25,7 @@ package com.shopgun.android.sdk.api;
  * By default, the {@link Environment} is set to {@link Environment#PRODUCTION}.
  */
 public enum Environment {
-    PRODUCTION, EDGE, STAGING, CUSTOM, SQUID_PRODUCTION, SQUID_STAGING;
+    PRODUCTION, EDGE, STAGING, CUSTOM;
 
     public static final String HOST_POSTFIX = "etilbudsavis.dk";
 
@@ -34,8 +34,6 @@ public enum Environment {
         EDGE.mEnvironment = "https://squid-api.tjek-staging.com";
         STAGING.mEnvironment = "https://squid-api.tjek-staging.com";
         CUSTOM.mEnvironment = "https://api." + HOST_POSTFIX;
-        SQUID_STAGING.mEnvironment = "https://squid-api.tjek-staging.com";
-        SQUID_PRODUCTION.mEnvironment = "https://squid-api.tjek.com";
     }
 
     private String mEnvironment;

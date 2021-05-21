@@ -25,23 +25,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.apollographql.apollo.ApolloClient;
-import com.apollographql.apollo.api.ScalarType;
-import com.apollographql.apollo.response.CustomTypeAdapter;
 import com.shopgun.android.sdk.api.Environment;
 import com.shopgun.android.sdk.api.EnvironmentEvents;
-import com.shopgun.android.sdk.api.EnvironmentGraph;
 import com.shopgun.android.sdk.api.ThemeEnvironment;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
 import com.shopgun.android.sdk.corekit.UserAgentInterceptor;
 import com.shopgun.android.sdk.corekit.realm.SgnAnonymousEventRealmModule;
 import com.shopgun.android.sdk.corekit.realm.SgnLegacyEventRealmModule;
 import com.shopgun.android.sdk.database.SgnDatabase;
-import com.shopgun.android.sdk.eventskit.AnonymousEvent;
-import com.shopgun.android.sdk.eventskit.EventUtils;
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
+import com.shopgun.android.sdk.model.User;
 import com.shopgun.android.sdk.network.Cache;
 import com.shopgun.android.sdk.network.Network;
 import com.shopgun.android.sdk.network.Request;
@@ -55,7 +50,6 @@ import com.shopgun.android.sdk.shoppinglists.SyncManager;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnThreadFactory;
 import com.shopgun.android.sdk.utils.SgnUserAgent;
-import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.sdk.utils.Version;
 import com.shopgun.android.utils.PackageUtils;
 
@@ -65,7 +59,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import androidx.collection.SimpleArrayMap;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.exceptions.RealmError;
@@ -131,23 +124,20 @@ public class ShopGun {
     private ThemeEnvironment mThemeEnvironment;
     /** The current event environment */
     private EnvironmentEvents mEventEnvironment;
-    /** The current graph environment */
-    private EnvironmentGraph mGraphEnvironment;
+
     /** The http client of choice for SDK traffic */
     private OkHttpClient mClient;
-    /** The session id for this specific session */
-    private String mSessionId;
-    /** The device id, this will if possible be persisted across installations */
-    private String mDeviceId;
-    /** Apollo client for graphQL queries */
-    private ApolloClient mApolloClient;
+
+    // new headers for v2 requests
+    private String mAuthToken;
+
+    // needed by the List Manager & SyncManager
+    User user;
 
     // Things we'd like to get rid of
 
     /** The SDK settings */
     private final Settings mSettings;
-    /** A session manager, for handling all session requests, user information e.t.c. */
-    private final SessionManager mSessionManager;
     /** The current location that the SDK is aware of */
     private final SgnLocation mLocation;
     /** Manager for handling all {@link Shoppinglist}, and {@link ShoppinglistItem} */
@@ -170,11 +160,9 @@ public class ShopGun {
         mEnvironment = builder.environment;
         mThemeEnvironment = builder.themeEnvironment;
         mEventEnvironment = builder.eventEnvironment;
-        mGraphEnvironment = builder.graphEnvironment;
         mExecutor = builder.executorService;
         mClient = builder.okHttpClient;
         mRealmConfiguration = builder.realmConfiguration;
-        mApolloClient = builder.apolloClient;
         mLegacyConfiguration = builder.legacyConfiguration;
 
         mLifecycleManager = new LifecycleManager(builder.application);
@@ -183,16 +171,10 @@ public class ShopGun {
 
         mSettings = new Settings(mContext);
 
-        mDeviceId = mSettings.getClientId();
-        mSessionId = mSettings.getSessionId();
-
         mRequestQueue = new RequestQueue(ShopGun.this, builder.cache, builder.network);
         mRequestQueue.start();
 
         mLocation = mSettings.getLocation();
-
-        // Session manager implicitly requires Settings
-        mSessionManager = new SessionManager(ShopGun.this);
 
         SgnDatabase db = SgnDatabase.getInstance(ShopGun.this);
         mListManager = new ListManager(ShopGun.this, db);
@@ -228,15 +210,6 @@ public class ShopGun {
      */
     public OkHttpClient getClient() {
         return mClient;
-    }
-
-    /**
-     * Get the shared Apollo client for graphQL queries to
-     * "https://graph.service.shopgun.com"
-     * @return ApolloClient
-     */
-    public ApolloClient getApolloClient() {
-        return mApolloClient;
     }
 
     public LifecycleManager getLifecycleManager() {
@@ -289,6 +262,22 @@ public class ShopGun {
         }
     }
 
+    public synchronized void setAuthToken(String authToken) {
+        mAuthToken = authToken;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public synchronized String getAuthToken() {
+        return mAuthToken;
+    }
+
     /**
      * Returns the current {@link Environment} in use.
      *
@@ -305,10 +294,6 @@ public class ShopGun {
      */
     public ThemeEnvironment getThemeEnvironment() {
         return mThemeEnvironment;
-    }
-
-    public EnvironmentGraph getGraphEnvironment() {
-        return mGraphEnvironment;
     }
 
     public EnvironmentEvents getEventEnvironment() {
@@ -335,14 +320,6 @@ public class ShopGun {
      */
     public RequestQueue getRequestQueue() {
         return mRequestQueue;
-    }
-
-    /**
-     * Get the currently active session.
-     * @return a session
-     */
-    public SessionManager getSessionManager() {
-        return mSessionManager;
     }
 
     /**
@@ -410,7 +387,6 @@ public class ShopGun {
      */
     public void clear() {
         if (!mLifecycleManager.isActive()) {
-            mSessionManager.invalidate();
             mSettings.clear();
             mLocation.clear();
             mRequestQueue.clear();
@@ -446,7 +422,6 @@ public class ShopGun {
 
         @Override
         public void onCreate(Activity activity) {
-            mSessionId = SgnUtils.createUUID();
             mSettings.incrementUsageCount();
             SgnLog.v(TAG, "onCreate");
         }
@@ -463,7 +438,6 @@ public class ShopGun {
         public void onDestroy(Activity activity) {
             mSettings.saveLocation(mLocation);
             mSettings.setLastUsedTimeNow();
-            mSettings.setSessionId(mSessionId);
             SgnLog.v(TAG, "onDestroy");
         }
 
@@ -494,14 +468,11 @@ public class ShopGun {
         Environment environment;
         ThemeEnvironment themeEnvironment;
         EnvironmentEvents eventEnvironment;
-        EnvironmentGraph graphEnvironment;
         RealmConfiguration realmConfiguration;
         RealmConfiguration legacyConfiguration;
         OkHttpClient okHttpClient;
-        ApolloClient apolloClient;
         List<Interceptor> interceptors = new ArrayList<>();
         List<Interceptor> networkInterceptors = new ArrayList<>();
-        SimpleArrayMap<ScalarType, CustomTypeAdapter<?>> apolloCustomTypeAdapters = new SimpleArrayMap<>();
 
         /**
          * Start building your {@link ShopGun} instance.
@@ -521,11 +492,6 @@ public class ShopGun {
 
         public Builder addNetworkInterceptor(Interceptor interceptor) {
             networkInterceptors.add(interceptor);
-            return this;
-        }
-
-        public Builder addApolloCustomTypeAdapter(ScalarType scalarType, CustomTypeAdapter<?> adapter) {
-            apolloCustomTypeAdapters.put(scalarType, adapter);
             return this;
         }
 
@@ -637,17 +603,6 @@ public class ShopGun {
             return this;
         }
 
-        public Builder setGraphEnvironment(EnvironmentGraph graphEnvironment) {
-            if (graphEnvironment == null) {
-                throw new IllegalArgumentException("GraphEndpoint must not be null.");
-            }
-            if (this.graphEnvironment != null) {
-                throw new IllegalStateException("GraphEndpoint already set.");
-            }
-            this.graphEnvironment = graphEnvironment;
-            return this;
-        }
-
         /**
          * Builds and set the ShopGun instance, and sets it to be the global singleton.
          * @return The ShopGun instance
@@ -687,10 +642,6 @@ public class ShopGun {
                 eventEnvironment = EnvironmentEvents.PRODUCTION;
             }
 
-            if (graphEnvironment == null) {
-                graphEnvironment = EnvironmentGraph.PRODUCTION;
-            }
-
             // Setup the default OkHttpClient
             OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
             for (Interceptor i : interceptors) {
@@ -702,16 +653,6 @@ public class ShopGun {
             // Add sdk interceptors last to override user options if necessary
             okHttpClientBuilder.addInterceptor(new UserAgentInterceptor(SgnUserAgent.getUserAgent(application)));
             okHttpClient = okHttpClientBuilder.build();
-
-            // Setup the default ApolloClient
-            ApolloClient.Builder apolloBuilder = ApolloClient.builder()
-                    .serverUrl(graphEnvironment.toString())
-                    .okHttpClient(okHttpClient);
-            for (int i = 0; i < apolloCustomTypeAdapters.size(); i++) {
-                apolloBuilder.addCustomTypeAdapter(
-                        apolloCustomTypeAdapters.keyAt(i), apolloCustomTypeAdapters.valueAt(i));
-            }
-            apolloClient = apolloBuilder.build();
 
             // Set the default RealmConfiguration.
             Realm.init(application);

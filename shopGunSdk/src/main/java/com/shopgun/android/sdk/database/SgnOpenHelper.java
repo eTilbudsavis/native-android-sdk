@@ -58,7 +58,7 @@ public class SgnOpenHelper extends SQLiteOpenHelper {
     public static final String ACCEPT_URL = "accept_url";
 
     private static final String DB_NAME = "shoppinglist.db";
-    private static final int DB_VERSION = 5;
+    private static final int DB_VERSION = 6;
 
     protected SgnOpenHelper(Context c) {
         super(c, DB_NAME, null, DB_VERSION);

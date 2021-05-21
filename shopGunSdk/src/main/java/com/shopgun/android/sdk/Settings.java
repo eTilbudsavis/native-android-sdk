@@ -19,6 +19,8 @@ package com.shopgun.android.sdk;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
+
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.utils.Constants;
 import com.shopgun.android.sdk.utils.SgnUtils;
@@ -27,7 +29,9 @@ import com.shopgun.android.utils.SharedPreferencesUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class Settings {
 
@@ -38,12 +42,7 @@ public class Settings {
     private static final String LAST_USED_VERSION = "last_used_version";
     private static final String LAST_USED_TIME = "last_used_time";
     private static final String USAGE_COUNT = "usage_count";
-    private static final String SESSION_JSON = "session_json";
-    private static final String SESSION_USER = "session_user";
-    private static final String SESSION_FACEBOOK = "session_facebook";
     private static final String LOCATION = "location_json";
-    private static final String CLIENT_ID = "client_id";
-    private static final String SESSION_ID = "session_id";
     private static final String LOCATION_ENABLED = "location_enabled";
 
     private SharedPreferences mSharedPrefs;
@@ -66,16 +65,6 @@ public class Settings {
         return mSharedPrefs.edit().clear().commit();
     }
 
-    public JSONObject getSessionJson() {
-        try {
-            String json = mSharedPrefs.getString(SESSION_JSON, null);
-            return json == null ? null : new JSONObject(json);
-        } catch (JSONException e) {
-            // ignore
-        }
-        return null;
-    }
-
     public void incrementUsageCount() {
         mSharedPrefs.edit().putInt(USAGE_COUNT, mSharedPrefs.getInt(USAGE_COUNT, -1)+1).apply();
     }
@@ -94,26 +83,6 @@ public class Settings {
 
     public void setLastUsedTime(Date lastUsed) {
         mSharedPrefs.edit().putLong(LAST_USED_TIME, lastUsed.getTime()).apply();
-    }
-
-    public void setSessionJson(JSONObject session) {
-        mSharedPrefs.edit().putString(SESSION_JSON, session.toString()).apply();
-    }
-
-    public String getSessionUser() {
-        return mSharedPrefs.getString(SESSION_USER, null);
-    }
-
-    public boolean setSessionUser(String user) {
-        return mSharedPrefs.edit().putString(SESSION_USER, user).commit();
-    }
-
-    public boolean setSessionFacebook(String token) {
-        return mSharedPrefs.edit().putString(SESSION_FACEBOOK, token).commit();
-    }
-
-    public String getSessionFacebook() {
-        return mSharedPrefs.getString(SESSION_FACEBOOK, null);
     }
 
     public boolean saveLocation(SgnLocation l) {
@@ -138,20 +107,37 @@ public class Settings {
         return mSharedPrefs.getBoolean(LOCATION_ENABLED, false);
     }
 
-    public String getClientId() {
-        return mSharedPrefs.getString(CLIENT_ID, null);
-    }
+    @NonNull
+    public List<String> getTokenAndUserIfAny() {
+        String token = "";
+        String userId = "";
+        String userName = "";
+        String userEmail = "";
+        try {
+            String session_str = mSharedPrefs.getString("session_json", null);
+            if (session_str != null) {
+                JSONObject session_json = new JSONObject(session_str);
+                JSONObject user_json = session_json.optJSONObject("user");
+                if (user_json != null) {
+                    token = session_json.optString("token");
+                    userId = user_json.optString("id");
+                    userName = user_json.optString("name");
+                    userEmail = user_json.optString("email");
+                }
+            }
+        } catch (JSONException e) {
+            // ignore
+        }
 
-    public void setClientId(String clientId) {
-        mSharedPrefs.edit().putString(CLIENT_ID, clientId).apply();
-    }
+        // Cleanup old preferences
+        mSharedPrefs.edit().remove("session_user")
+                .remove("session_facebook")
+                .remove("client_id")
+                .remove("session_id")
+                .remove("session_json")
+                .apply();
 
-    public String getSessionId() {
-        return mSharedPrefs.getString(SESSION_ID, SgnUtils.createUUID());
-    }
-
-    public void setSessionId(String sessionId) {
-        mSharedPrefs.edit().putString(SESSION_ID, sessionId).apply();
+        return Arrays.asList(token, userId, userName, userEmail);
     }
 
     private void performMigration() {

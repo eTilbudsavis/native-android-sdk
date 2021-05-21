@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @deprecated No longer maintained
@@ -57,7 +58,7 @@ public class ListSQLiteHelper extends SgnOpenHelper {
                     PREVIOUS_ID + " text, " +
                     TYPE + " text, " +
                     META + " text, " +
-                    USER + " integer not null " +
+                    USER + " text not null " +
                     ");";
     public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?,?)";
 
@@ -73,7 +74,27 @@ public class ListSQLiteHelper extends SgnOpenHelper {
 
     public static void upgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.acquireReference();
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE);
+        if (oldVersion == 5 && newVersion == 6) {
+            // migrate USER from int to text
+            db.execSQL("create table if not exists tmp_table (" +
+                    ID + " text primary key, " +
+                    ERN + " text, " +
+                    MODIFIED + " text not null, " +
+                    NAME + " text not null, " +
+                    ACCESS + " text not null, " +
+                    STATE + " integer not null, " +
+                    PREVIOUS_ID + " text, " +
+                    TYPE + " text, " +
+                    META + " text, " +
+                    USER + " text not null " +
+                    ");");
+            db.execSQL("insert into tmp_table select " +
+                    String.format(Locale.US, "%s, %s, %s, %s, %s, %s, %s, %s, %s,",
+                            ID, ERN, MODIFIED, NAME, ACCESS, STATE, PREVIOUS_ID, TYPE, META) +
+                    " cast (" + USER + " as text) from " + TABLE + ";");
+            db.execSQL("drop table " + TABLE + ";");
+            db.execSQL("alter table tmp_table rename to " + TABLE + ";");
+        }
         db.releaseReference();
     }
 
@@ -123,7 +144,7 @@ public class ListSQLiteHelper extends SgnOpenHelper {
         } catch (JSONException e) {
             SgnLog.e(TAG, null, e);
         }
-        sl.setUserId(cv.getAsInteger(USER));
+        sl.setUserId(cv.getAsString(USER));
         return sl;
     }
 

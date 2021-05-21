@@ -25,7 +25,6 @@ import android.os.Process;
 import com.shopgun.android.sdk.ShopGun;
 import com.shopgun.android.sdk.api.Endpoints;
 import com.shopgun.android.sdk.api.Parameters;
-import com.shopgun.android.sdk.bus.SessionEvent;
 import com.shopgun.android.sdk.bus.SgnBus;
 import com.shopgun.android.sdk.bus.ShoppinglistEvent;
 import com.shopgun.android.sdk.corekit.LifecycleManager;
@@ -52,7 +51,6 @@ import com.shopgun.android.sdk.utils.SgnJson;
 import com.shopgun.android.sdk.utils.SgnUtils;
 import com.shopgun.android.utils.ConnectivityUtils;
 
-import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -115,6 +113,7 @@ import java.util.Stack;
  * When {@link LifecycleManager} calls destroy, all local pending changes are pushed to
  * the API if possible to ensure a correct state on the server (and other devices).
  */
+@SuppressWarnings("deprecation")
 @Deprecated
 public class SyncManager {
 
@@ -160,7 +159,6 @@ public class SyncManager {
         @Override
         public void onCreate(Activity activity) {
             mDatabase.open();
-            SgnBus.getInstance().register(SyncManager.this);
             // Set a SyncInterval if user haven't set one yet, else just force a sync cycle
             int interval = mSyncInterval == Integer.MIN_VALUE ? SyncInterval.SLOW : mSyncInterval;
             setSyncInterval(interval);
@@ -169,21 +167,13 @@ public class SyncManager {
         @Override
         public void onDestroy(Activity activity) {
             mSyncLooper.forceSync();
-            SgnBus.getInstance().unregister(SyncManager.this);
             mDatabase.close();
         }
 
     }
 
-    /**
-     * Listening for session changes, starting and stopping sync as needed
-     * @param e The event we are listening for
-     */
-    @Subscribe()
-    public void onEvent(SessionEvent e) {
-        if (e.isNewUser()) {
-            mSyncLooper.restart();
-        }
+    public void restartSyncLoop() {
+        mSyncLooper.restart();
     }
 
     public boolean isPaused() {
@@ -278,10 +268,6 @@ public class SyncManager {
                 .setSkipMethods(Request.Method.GET));
         mShopGun.add(r);
 
-//		if (!isPullReq(r) && r.getMethod() != Request.Method.GET) {
-//			SgnLog.d(TAG, r.toString());
-//		}
-
     }
 
     private void popRequest() {
@@ -306,12 +292,7 @@ public class SyncManager {
         if (mCurrentRequests.isEmpty() && !isPaused() && mBuilder.hasChanges()) {
             final ShoppinglistEvent e = mBuilder.build();
             mBuilder = new ShoppinglistEvent.Builder(true);
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    SgnBus.getInstance().post(e);
-                }
-            });
+            new Handler(Looper.getMainLooper()).post(() -> SgnBus.getInstance().post(e));
         }
 
     }
@@ -340,10 +321,10 @@ public class SyncManager {
                 return;
             }
 
-            User user = mShopGun.getSessionManager().getSession().getUser();
-            // If it's an offline user, then stop syncloop
-            // we'll keep listening for session changes and restert if needed
-            if (!user.isLoggedIn()) {
+            User user = mShopGun.getUser();
+            // If it's an offline user, then stop sync loop
+            // we'll keep listening for session changes and restart if needed
+            if (user == null || !user.isLoggedIn()) {
                 mSyncCount++;
                 SyncLog.syncLooper(TAG, mSyncCount, "quit-loop-cycle (NotLoggedIn)");
                 return;
@@ -380,9 +361,6 @@ public class SyncManager {
             for (Shoppinglist sl : lists) {
                 boolean itemChanges = syncLocalItemChanges(database, sl, user);
                 boolean shareChanges = syncLocalShareChanges(database, sl, user);
-//                if (itemChanges || shareChanges) {
-//                    L.d(TAG, sl.getName() + "[ itemChanges: " + itemChanges + ", shareChanges: " + shareChanges + " ]");
-//                }
                 hasLocalChanges = itemChanges || shareChanges || hasLocalChanges;
             }
 
@@ -428,7 +406,7 @@ public class SyncManager {
     private class ListSyncRequest extends JsonArrayRequest {
 
         private ListSyncRequest(SgnDatabase database, User user, int syncCount) {
-            super(Endpoints.lists(user.getUserId()), new ListSyncListener(database, user, syncCount));
+            super(Endpoints.lists(user.getId()), new ListSyncListener(database, user, syncCount));
             // Offset and limit are set to default values, we want to ignore this.
             getParameters().remove(Parameters.OFFSET);
             getParameters().remove(Parameters.LIMIT);
@@ -543,7 +521,6 @@ public class SyncManager {
             mergeListsToDbAndFetchItems(mDatabase, serverLists, localLists, mUser);
 
             popRequestAndPostShoppinglistEvent();
-//            mSyncController.decrementAndPost();
 
         }
 
@@ -585,11 +562,29 @@ public class SyncManager {
 
                     Shoppinglist serverSl = serverMap.get(key);
 
-                    if (localSl.getModified().before(serverSl.getModified())) {
-                        serverSl.setState(SyncState.SYNCED);
-                        mBuilder.edit(serverSl);
-                        database.editList(serverSl, user);
-                        database.cleanShares(serverSl, user);
+                    if (localSl != null && serverSl != null) {
+
+                        if (localSl.getModified().before(serverSl.getModified())) {
+
+                            serverSl.setState(SyncState.SYNCED);
+                            mBuilder.edit(serverSl);
+                            database.editList(serverSl, user);
+                            database.cleanShares(serverSl, user);
+
+                        } else {
+                            // user's email now can be changed. The server will do the change in the share, so let's update the local info
+                            if (serverSl.getOwner() != null && serverSl.getOwner().getEmail() != null &&
+                                localSl.getOwner() != null && localSl.getOwner().getEmail() != null) {
+
+                                String serverOwner = serverSl.getOwner().getEmail().toLowerCase();
+                                String localOwner = localSl.getOwner().getEmail().toLowerCase();
+
+                                if (!serverOwner.equals(localOwner)) {
+                                    database.deleteShare(localSl.getOwner(), user);
+                                    database.insertShare(serverSl.getOwner(), user);
+                                }
+                            }
+                        }
                     }
                     // else: Don't do anything, next iteration will put local changes to API
 
@@ -605,10 +600,11 @@ public class SyncManager {
             } else {
 
                 Shoppinglist add = serverMap.get(key);
-                add.setState(SyncState.TO_SYNC);
-                mBuilder.add(add);
-                database.insertList(add, user);
-
+                if (add != null) {
+                    add.setState(SyncState.TO_SYNC);
+                    mBuilder.add(add);
+                    database.insertList(add, user);
+                }
             }
 
         }
@@ -625,7 +621,7 @@ public class SyncManager {
 
     private class ListModifiedRequest extends JsonObjectRequest {
         private ListModifiedRequest(SgnDatabase database, User user, Shoppinglist shoppinglist) {
-            super(Endpoints.listModified(user.getUserId(), shoppinglist.getId()),
+            super(Endpoints.listModified(user.getId(), shoppinglist.getId()),
                     new ListModifiedListener(database, user, shoppinglist));
             setSaveNetworkLog(SAVE_NETWORK_LOG);
         }
@@ -682,7 +678,7 @@ public class SyncManager {
     private class ItemSyncRequest extends JsonArrayRequest {
 
         private ItemSyncRequest(SgnDatabase database, Shoppinglist shoppinglist, User user) {
-            super(Endpoints.listitems(user.getUserId(), shoppinglist.getId()), new ItemSyncListener(database, shoppinglist, user));
+            super(Endpoints.listitems(user.getId(), shoppinglist.getId()), new ItemSyncListener(database, shoppinglist, user));
             // Offset and limit are set to default values, we want to ignore this.
             getParameters().remove(Parameters.OFFSET);
             getParameters().remove(Parameters.LIMIT);
@@ -734,7 +730,7 @@ public class SyncManager {
             localItems = mDatabase.getItems(mShoppinglist, mUser);
             ListUtils.sortItems(localItems);
 
-            if (PermissionUtils.allowEdit(mShoppinglist, mUser)) {
+//            if (PermissionUtils.allowEdit(mShoppinglist, mUser)) {
 
                 // Update previous_id's, modified and state if needed
                 String tmp = ListUtils.FIRST_ITEM;
@@ -757,7 +753,7 @@ public class SyncManager {
                     }
                     tmp = sli.getId();
                 }
-            }
+//            }
 
             popRequestAndPostShoppinglistEvent();
 
@@ -795,21 +791,23 @@ public class SyncManager {
 
                     ShoppinglistItem serverSli = serverMap.get(key);
 
-                    if (localSli.getModified().before(serverSli.getModified())) {
-                        mBuilder.edit(serverSli);
-                        database.editItems(serverSli, user);
+                    if (localSli != null && serverSli != null) {
+                        if (localSli.getModified().before(serverSli.getModified())) {
+                            mBuilder.edit(serverSli);
+                            database.editItems(serverSli, user);
 
-                    } else if (!localSli.getMeta().toString().equals(serverSli.getMeta().toString())) {
-                        // Migration code, to get comments into the DB
-                        mBuilder.edit(serverSli);
-                        database.editItems(serverSli, user);
-                    } else if (localSli.equals(serverSli)) {
-                        SgnLog.d(TAG, "We have a mismatch");
+                        } else if (!localSli.getMeta().toString().equals(serverSli.getMeta().toString())) {
+                            // Migration code, to get comments into the DB
+                            mBuilder.edit(serverSli);
+                            database.editItems(serverSli, user);
+                        } else if (localSli.equals(serverSli)) {
+                            SgnLog.d(TAG, "We have a mismatch");
+                        }
                     }
 
                 } else {
                     ShoppinglistItem delSli = localMap.get(key);
-                    if (delSli.getState() != SyncState.TO_SYNC) {
+                    if (delSli != null && delSli.getState() != SyncState.TO_SYNC) {
                         // If the item have been added while request was in flight it will
                         // have the state TO_SYNC, and will just ignore it for now
                         mBuilder.del(delSli);
@@ -819,8 +817,10 @@ public class SyncManager {
 
             } else {
                 ShoppinglistItem serverSli = serverMap.get(key);
-                mBuilder.add(serverSli);
-                database.insertItem(serverSli, user);
+                if (serverSli != null) {
+                    mBuilder.add(serverSli);
+                    database.insertItem(serverSli, user);
+                }
             }
         }
 
@@ -875,7 +875,7 @@ public class SyncManager {
     private class ListPutRequest extends JsonObjectRequest {
 
         private ListPutRequest(SgnDatabase database, User user, Shoppinglist shoppinglist) {
-            super(Method.PUT, Endpoints.list(user.getUserId(), shoppinglist.getId()),
+            super(Method.PUT, Endpoints.list(user.getId(), shoppinglist.getId()),
                     shoppinglist.toJSON(), new ListPutListener(database, user, shoppinglist));
             shoppinglist.setState(SyncState.SYNCING);
             database.editList(shoppinglist, user);
@@ -886,7 +886,7 @@ public class SyncManager {
     private class ListDelRequest extends JsonObjectRequest {
 
         private ListDelRequest(SgnDatabase database, User user, Shoppinglist local) {
-            super(Method.DELETE, Endpoints.list(user.getUserId(), local.getId()),
+            super(Method.DELETE, Endpoints.list(user.getId(), local.getId()),
                     null, new ListDelListener(database, user, local));
             getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(local.getModified()));
         }
@@ -942,7 +942,7 @@ public class SyncManager {
     private class ListRevertRequest extends JsonObjectRequest {
 
         private ListRevertRequest(SgnDatabase database, User user, Shoppinglist shoppinglist) {
-            super(Endpoints.list(user.getUserId(), shoppinglist.getId()),
+            super(Endpoints.list(user.getId(), shoppinglist.getId()),
                     new ListRevertListener(database, user, shoppinglist));
             if (shoppinglist.getState() != SyncState.ERROR) {
                 shoppinglist.setState(SyncState.ERROR);
@@ -985,7 +985,7 @@ public class SyncManager {
     private class ItemPutRequest extends JsonObjectRequest {
 
         private ItemPutRequest(SgnDatabase database, User user, ShoppinglistItem item) {
-            super(Method.PUT, Endpoints.listitem(user.getUserId(), item.getShoppinglistId(), item.getId()),
+            super(Method.PUT, Endpoints.listitem(user.getId(), item.getShoppinglistId(), item.getId()),
                     item.toJSON(), new ItemPutListener(database, user, item));
             item.setState(SyncState.SYNCING);
             database.editItems(item, user);
@@ -1039,7 +1039,7 @@ public class SyncManager {
     private class ItemDelRequest extends JsonObjectRequest {
 
         private ItemDelRequest(SgnDatabase database, User user, ShoppinglistItem item) {
-            super(Method.DELETE, Endpoints.listitem(user.getUserId(), item.getShoppinglistId(), item.getId()),
+            super(Method.DELETE, Endpoints.listitem(user.getId(), item.getShoppinglistId(), item.getId()),
                     null, new ItemDelListener(database, user, item));
             getParameters().put(Parameters.MODIFIED, SgnUtils.dateToString(item.getModified()));
         }
@@ -1083,7 +1083,7 @@ public class SyncManager {
     private class ItemRevertRequest extends JsonObjectRequest {
 
         private ItemRevertRequest(SgnDatabase database, User user, ShoppinglistItem item) {
-            super(Endpoints.listitem(user.getUserId(), item.getShoppinglistId(), item.getId()),
+            super(Endpoints.listitem(user.getId(), item.getShoppinglistId(), item.getId()),
                     new ItemRevertListener(database, user, item));
             if (item.getState() != SyncState.ERROR) {
                 item.setState(SyncState.ERROR);
@@ -1137,7 +1137,7 @@ public class SyncManager {
 
     private class SharePutRequest extends JsonObjectRequest {
         private SharePutRequest(SgnDatabase database, User user, Share share) {
-            super(Method.PUT, Endpoints.listShareEmail(user.getUserId(), share.getShoppinglistId(), share.getEmail()),
+            super(Method.PUT, Endpoints.listShareEmail(user.getId(), share.getShoppinglistId(), share.getEmail()),
                     share.toJSON(), new SharePutListener(database, user, share));
             share.setState(SyncState.SYNCING);
             database.editShare(share, user);
@@ -1187,7 +1187,7 @@ public class SyncManager {
     private class ShareDelRequest extends JsonObjectRequest {
 
         private ShareDelRequest(SgnDatabase database, User user, Share local) {
-            super(Method.DELETE, Endpoints.listShareEmail(user.getUserId(), local.getShoppinglistId(), local.getEmail()),
+            super(Method.DELETE, Endpoints.listShareEmail(user.getId(), local.getShoppinglistId(), local.getEmail()),
                     null, new ShareDelListener(database, user, local));
         }
     }
@@ -1244,7 +1244,7 @@ public class SyncManager {
     private class ShareRevertRequest extends JsonObjectRequest {
 
         private ShareRevertRequest(SgnDatabase database, User user, Share share) {
-            super(Endpoints.listShareEmail(user.getUserId(), share.getShoppinglistId(), share.getEmail()),
+            super(Endpoints.listShareEmail(user.getId(), share.getShoppinglistId(), share.getEmail()),
                     new ShareRevertListener(database, user, share));
             if (share.getState() != SyncState.ERROR) {
                 share.setState(SyncState.ERROR);

@@ -59,7 +59,6 @@ ext {
             okhttpLoggingInterceptor    : "com.squareup.okhttp3:logging-interceptor:$libVersions.okhttp",
             okhttpMockwebserver         : "com.squareup.okhttp3:mockwebserver:$libVersions.okhttp",
             gson                        : "com.google.code.gson:gson:$libVersions.gson",
-            apollo                      : "com.apollographql.apollo:apollo-runtime:$apolloVersion",
             geohash                     : "com.github.drfonfon:android-geohash:$libVersions.geohash",
 
 

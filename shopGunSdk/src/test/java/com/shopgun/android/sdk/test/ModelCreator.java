@@ -32,7 +32,6 @@ import com.shopgun.android.sdk.model.Permission;
 import com.shopgun.android.sdk.model.Pieces;
 import com.shopgun.android.sdk.model.Pricing;
 import com.shopgun.android.sdk.model.Quantity;
-import com.shopgun.android.sdk.model.Session;
 import com.shopgun.android.sdk.model.Share;
 import com.shopgun.android.sdk.model.Shoppinglist;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -60,7 +59,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest=Config.NONE)
@@ -136,21 +134,6 @@ public class ModelCreator {
 
     public static Share getShare(String email, String access, String acceptUrl) {
         return new Share(email, access, acceptUrl);
-    }
-
-    public static User getUser() {
-        return getUser(1932, "fake-mail@eta.dk", "female", "fake-user-name", getPermission(), 1992);
-    }
-
-    public static User getUser(int year, String email, String gender, String name, Permission permissions, int id) {
-        User u = new User();
-        u.setBirthYear(year);
-        u.setEmail(email);
-        u.setGender(gender);
-        u.setName(name);
-        u.setPermissions(permissions);
-        u.setUserId(id);
-        return u;
     }
 
     public static Branding getBranding() {
@@ -396,24 +379,7 @@ public class ModelCreator {
         s.setShares(shares);
         s.setState(SyncState.TO_SYNC);
         s.setType(Shoppinglist.TYPE_SHOPPING_LIST);
-        s.setUserId(187);
-        return s;
-    }
-
-    public static Session getSession() {
-        return getSession(getDate(1).getTime(), "token-bafa555b");
-    }
-
-    public static Session getSession(long expires, String token) {
-        Session s = new Session();
-        s.setClientId("fake-cid");
-        long exp = expires + TimeUnit.HOURS.toMillis(1);
-        s.setExpires(new Date(exp));
-        s.setPermission(getPermission());
-        s.setProvider("fake-provider");
-        s.setReference("fake-reference");
-        s.setToken(token);
-        s.setUser(getUser());
+        s.setUserId("187");
         return s;
     }
 

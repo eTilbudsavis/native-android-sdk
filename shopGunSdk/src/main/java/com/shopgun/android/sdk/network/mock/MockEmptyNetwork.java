@@ -36,11 +36,7 @@ public class MockEmptyNetwork extends MockNetwork {
     public NetworkResponse performRequest(Request<?> request) throws ShopGunError {
         super.performRequest(request);
 
-        PathHelper pathHelper = new PathHelper(request);
-        if ("sessions".equals(pathHelper.getType())) {
-            // if we do not create a session, nothing will work
-            return new MockApiSessionResponse(mContext, request).getResponse();
-        } else if (request instanceof JsonObjectRequest) {
+        if (request instanceof JsonObjectRequest) {
             return new NetworkResponse(200, "{}".getBytes(), null);
         } else if (request instanceof JsonArrayRequest) {
             return new NetworkResponse(200, "[]".getBytes(), null);

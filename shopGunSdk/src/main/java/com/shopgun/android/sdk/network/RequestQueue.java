@@ -144,11 +144,6 @@ public class RequestQueue {
      */
     public void runParkedQueue() {
 
-        if (mShopGun.getSessionManager().isRequestInFlight()) {
-            SgnLog.i(TAG, "Cannot resume yet, session request still in flight.");
-            return;
-        }
-
         synchronized (mSessionParking) {
 
             for (Request<?> r : mSessionParking) {
@@ -212,48 +207,8 @@ public class RequestQueue {
 
         appendRequestNetworkLog(request);
 
-        if (mShopGun.getSessionManager().isRequestInFlight() && !isSessionEndpoint(request)) {
-
-            // Waiting for a new session before continuing
-            request.addEvent("added-to-parking-queue");
-            synchronized (mSessionParking) {
-                mSessionParking.add(request);
-            }
-
-        } else {
-
-            request.addEvent("added-to-queue");
-
-            if (isSessionEndpoint(request) && request != mShopGun.getSessionManager().getRequestInFlight()) {
-                SgnLog.w(TAG, "Session changes should be handled by SessionManager. This request might cause problems");
-            }
-
-//        	synchronized (mRequestParking) {
-//
-//        		String url = request.getUrl();
-//        		
-//        		// Either add to waiting queue, or add to cache queue
-//        		if (mRequestParking.containsKey(url)) {
-//        			
-//        			request.addEvent("waiting-for-similar-request");
-//        			LinkedList<Request> waiting = mRequestParking.get(url);
-//        			if (waiting == null) {
-//        				waiting = new LinkedList<Request>();
-//        			}
-//        			waiting.add(request);
-//        			mRequestParking.put(url, waiting);
-//        			
-//        		} else {
-//        			
-//        			/* add null, and only allocate memory if needed */
-//        			mRequestParking.put(url, null);
-            mCacheQueue.add(request);
-
-//        		}
-//        		
-//        	}
-
-        }
+        request.addEvent("added-to-queue");
+        mCacheQueue.add(request);
 
         return request;
 
@@ -302,10 +257,6 @@ public class RequestQueue {
         }
 
         return count;
-    }
-
-    private boolean isSessionEndpoint(Request<?> r) {
-        return r.getUrl().contains(Endpoints.SESSIONS);
     }
 
     /**
