@@ -564,6 +564,12 @@ public class SyncManager {
 
                     if (localSl != null && serverSl != null) {
 
+                        // read the share token from the server list
+                        if (localSl.getShareToken() == null || !localSl.getShareToken().equals(serverSl.getShareToken())) {
+                            localSl.setShareToken(serverSl.getShareToken());
+                            database.editList(localSl, user);
+                        }
+
                         if (localSl.getModified().before(serverSl.getModified())) {
 
                             serverSl.setState(SyncState.SYNCED);
