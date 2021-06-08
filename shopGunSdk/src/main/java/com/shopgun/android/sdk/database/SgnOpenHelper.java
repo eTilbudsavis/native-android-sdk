@@ -56,9 +56,10 @@ public class SgnOpenHelper extends SQLiteOpenHelper {
     public static final String EMAIL = "email";
     public static final String ACCEPTED = "accepted";
     public static final String ACCEPT_URL = "accept_url";
+    public static final String SHARE_TOKEN = "share_token";
 
     private static final String DB_NAME = "shoppinglist.db";
-    private static final int DB_VERSION = 6;
+    private static final int DB_VERSION = 7;
 
     protected SgnOpenHelper(Context c) {
         super(c, DB_NAME, null, DB_VERSION);
