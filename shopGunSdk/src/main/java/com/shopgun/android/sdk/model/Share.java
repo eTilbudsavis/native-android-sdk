@@ -55,6 +55,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     };
     private String mName;
     private String mEmail;
+    private String mUserId;
     public static Comparator<Share> EMAIL_ASCENDING = new Comparator<Share>() {
 
         @SuppressLint("DefaultLocale")
@@ -75,7 +76,8 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     private String mAcceptUrl;
     private int mSyncState = SyncState.TO_SYNC;
 
-    public Share(String email, String access, String acceptUrl) {
+    public Share(String userId, String email, String access, String acceptUrl) {
+        mUserId = userId;
         mName = email;
         mEmail = email;
         mAccess = access;
@@ -86,6 +88,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     }
 
     private Share(Parcel in) {
+        this.mUserId = in.readString();
         this.mName = in.readString();
         this.mEmail = in.readString();
         this.mAccess = in.readString();
@@ -129,6 +132,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         SgnJson u = new SgnJson(o.getJSONObject(SgnJson.USER));
         s.setEmail(u.getEmail());
         s.setName(u.getName());
+        s.setUserId(u.getId());
 
         s.setAccess(o.getAccess());
         s.setAccepted(o.getAccepted());
@@ -144,7 +148,8 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     public JSONObject toJSON() {
         SgnJson u = new SgnJson()
                 .setEmail(getEmail())
-                .setName(getName());
+                .setName(getName())
+                .setId(getUserId());
 
         SgnJson o = new SgnJson()
                 .put(SgnJson.USER, u.toJSON())
@@ -194,6 +199,17 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     public Share setName(String name) {
         if (name != null) {
             mName = name;
+        }
+        return this;
+    }
+
+    public String getUserId() {
+        return mUserId;
+    }
+
+    public Share setUserId(String id) {
+        if (id != null) {
+            mUserId = id;
         }
         return this;
     }
@@ -353,6 +369,11 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
                 return false;
         } else if (!mName.equals(other.mName))
             return false;
+        if (mUserId == null) {
+            if (other.mUserId != null)
+                return false;
+        } else if (!mUserId.equals(other.mUserId))
+            return false;
         if (mShoppinglistId == null) {
             if (other.mShoppinglistId != null)
                 return false;
@@ -375,6 +396,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         result = prime * result + (mAccepted ? 1231 : 1237);
         result = prime * result + ((mAccess == null) ? 0 : mAccess.hashCode());
         result = prime * result + ((mEmail == null) ? 0 : mEmail.hashCode());
+        result = prime * result + ((mUserId == null) ? 0 : mUserId.hashCode());
         result = prime * result + ((mName == null) ? 0 : mName.hashCode());
         result = prime * result
                 + ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
@@ -393,6 +415,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.mUserId);
         dest.writeString(this.mName);
         dest.writeString(this.mEmail);
         dest.writeString(this.mAccess);

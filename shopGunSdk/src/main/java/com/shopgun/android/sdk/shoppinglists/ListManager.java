@@ -139,7 +139,7 @@ public class ListManager {
 
         Share owner = sl.getOwner();
         if (owner == null || owner.getEmail() == null) {
-            owner = new Share(user.getEmail(), Share.ACCESS_OWNER, null);
+            owner = new Share(user.getId(), user.getEmail(), Share.ACCESS_OWNER, null);
             owner.setName(user.getName());
             owner.setAccepted(true);
             owner.setShoppinglistId(sl.getId());

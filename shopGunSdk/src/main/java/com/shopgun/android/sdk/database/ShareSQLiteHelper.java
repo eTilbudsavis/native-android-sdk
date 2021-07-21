@@ -51,9 +51,10 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
                     ACCESS + " text, " +
                     ACCEPT_URL + " text, " +
                     STATE + " integer, " +
-                    USER + " text not null " +
+                    USER + " text not null, " +
+                    SHARE_USER_ID + " text " + // user id related to the share (email, name, id)
                     ");";
-    public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?)";
+    public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public ShareSQLiteHelper(Context context) {
         super(context);
@@ -87,6 +88,10 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
             db.execSQL("drop table " + TABLE + ";");
             db.execSQL("alter table tmp_table rename to " + TABLE + ";");
         }
+        if (oldVersion == 6 && newVersion == 7) {
+            // add share user id
+            db.execSQL("alter table " + TABLE + " add column " + SHARE_USER_ID + " text;");
+        }
         db.releaseReference();
     }
 
@@ -103,6 +108,7 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
         DbUtils.bindOrNull(s, 7, share.getAcceptUrl());
         s.bindLong(8, share.getState());
         DbUtils.bindOrNull(s, 9, userId);
+        DbUtils.bindOrNull(s, 10, share.getUserId());
     }
 
     public static List<Share> cursorToList(Cursor c, String shoppinglistId) {
@@ -118,9 +124,10 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
 
     public static Share contentValuesToObject(ContentValues cv, String shoppinglistId) {
         String email = cv.getAsString(EMAIL);
+        String shareUserId = cv.getAsString(SHARE_USER_ID);
         String acceptUrl = cv.getAsString(ACCEPT_URL);
         String access = cv.getAsString(ACCESS);
-        Share s = new Share(email, access, acceptUrl);
+        Share s = new Share(shareUserId, email, access, acceptUrl);
         s.setShoppinglistId(shoppinglistId);
         s.setName(cv.getAsString(NAME));
         s.setAccepted(0 < cv.getAsInteger(ACCEPTED));
@@ -138,6 +145,7 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
         cv.put(ACCESS, s.getAccess());
         cv.put(ACCEPT_URL, s.getAcceptUrl());
         cv.put(STATE, s.getState());
+        cv.put(SHARE_USER_ID, s.getUserId());
         return cv;
     }
 

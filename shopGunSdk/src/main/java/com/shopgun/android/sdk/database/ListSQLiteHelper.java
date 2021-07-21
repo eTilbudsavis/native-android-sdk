@@ -96,7 +96,7 @@ public class ListSQLiteHelper extends SgnOpenHelper {
             db.execSQL("drop table " + TABLE + ";");
             db.execSQL("alter table tmp_table rename to " + TABLE + ";");
         }
-        if (oldVersion < 7) {
+        if (oldVersion == 6 && newVersion == 7) {
             // add share_token
             db.execSQL("alter table " + TABLE + " add column " + SHARE_TOKEN + " text;");
         }
