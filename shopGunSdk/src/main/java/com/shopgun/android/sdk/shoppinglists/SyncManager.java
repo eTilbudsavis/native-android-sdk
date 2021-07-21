@@ -570,6 +570,15 @@ public class SyncManager {
                             database.editList(localSl, user);
                         }
 
+                        // read the share's userId in case we don't have them
+                        for (Share localShare : localSl.getShares().values()) {
+                            Share serverShare = serverSl.getShares().get(localShare.getEmail());
+                            if (localShare.getUserId() == null && serverShare != null) {
+                                localShare.setUserId(serverShare.getUserId());
+                                database.editShare(localShare, user);
+                            }
+                        }
+
                         if (localSl.getModified().before(serverSl.getModified())) {
 
                             serverSl.setState(SyncState.SYNCED);
