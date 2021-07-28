@@ -127,11 +127,13 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
         String shareUserId = cv.getAsString(SHARE_USER_ID);
         String acceptUrl = cv.getAsString(ACCEPT_URL);
         String access = cv.getAsString(ACCESS);
+        String appUserId = cv.getAsString(USER);
         Share s = new Share(shareUserId, email, access, acceptUrl);
         s.setShoppinglistId(shoppinglistId);
         s.setName(cv.getAsString(NAME));
         s.setAccepted(0 < cv.getAsInteger(ACCEPTED));
         s.setState(cv.getAsInteger(STATE));
+        s.setAppUserId(appUserId);
         return s;
     }
 

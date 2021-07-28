@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.shopgun.android.sdk.model.User.NO_USER;
+
 /**
  * @deprecated shopping list no longer maintained
  */
@@ -75,6 +77,8 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     private boolean mAccepted;
     private String mAcceptUrl;
     private int mSyncState = SyncState.TO_SYNC;
+    // In the db, this is the "user" column. It's the id of the logged in user (who is using the app)
+    private String mAppUserId = NO_USER;
 
     public Share(String userId, String email, String access, String acceptUrl) {
         mUserId = userId;
@@ -96,6 +100,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         this.mAccepted = in.readByte() != 0;
         this.mAcceptUrl = in.readString();
         this.mSyncState = in.readInt();
+        this.mAppUserId = in.readString();
     }
 
     /**
@@ -211,6 +216,15 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         if (id != null) {
             mUserId = id;
         }
+        return this;
+    }
+
+    public String getAppUserId() {
+        return mAppUserId;
+    }
+
+    public Share setAppUserId(String appUserId) {
+        mAppUserId = appUserId;
         return this;
     }
 
@@ -401,6 +415,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         result = prime * result
                 + ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
         result = prime * result + mSyncState;
+        result = prime * result + ((mAppUserId == null) ? 0 : mAppUserId.hashCode());
         return result;
     }
 
@@ -423,6 +438,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         dest.writeByte(mAccepted ? (byte) 1 : (byte) 0);
         dest.writeString(this.mAcceptUrl);
         dest.writeInt(this.mSyncState);
+        dest.writeString(this.mAppUserId);
     }
 
 }
