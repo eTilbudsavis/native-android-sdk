@@ -549,8 +549,7 @@ public class ListManager {
 
     private boolean editItems(List<ShoppinglistItem> items, User user) {
 
-        // Validate and get response in one step
-        List<Shoppinglist> lists = mDatabase.allowEditItemsOrThrow(items, user);
+        List<Shoppinglist> lists = mDatabase.getListFromItems(items, user);
 
         HashMap<String, ShoppinglistItem> dbItems = new HashMap<>();
         for (Shoppinglist sl : lists) {

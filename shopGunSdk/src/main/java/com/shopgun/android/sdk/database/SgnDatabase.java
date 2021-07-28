@@ -473,33 +473,10 @@ public class SgnDatabase {
         return mDataSource.deleteShares(shoppinglistId, userId);
     }
 
-    public Shoppinglist allowEditOrThrow(ShoppinglistItem sli, User user) {
-        return allowEditOrThrow(sli.getShoppinglistId(), user);
-    }
-
-    public Shoppinglist allowEditOrThrow(Shoppinglist sl, User user) {
-        return allowEditOrThrow(sl.getId(), user);
-    }
-
-    public Shoppinglist allowEditOrThrow(String shoppinglistId, User user) {
-        Shoppinglist sl = getList(shoppinglistId, user);
-        PermissionUtils.allowEditOrThrow(sl, user);
-        return sl;
-    }
-
-    public List<Shoppinglist> allowEditItemsOrThrow(List<ShoppinglistItem> items, User user) {
+    public List<Shoppinglist> getListFromItems(List<ShoppinglistItem> items, User user) {
         HashSet<String> ids = ListUtils.getShoppinglistIdsFromItems(items);
-        return allowEditOrThrow(ids, user);
-    }
-
-    public List<Shoppinglist> allowEditListOrThrow(List<Shoppinglist> lists, User user) {
-        HashSet<String> ids = ListUtils.getShoppinglistIdsFromLists(lists);
-        return allowEditOrThrow(ids, user);
-    }
-
-    public List<Shoppinglist> allowEditOrThrow(Set<String> shoppinglistIds, User user) {
-        HashMap<String, Shoppinglist> map = new HashMap<String, Shoppinglist>(shoppinglistIds.size());
-        for (String id : shoppinglistIds) {
+        HashMap<String, Shoppinglist> map = new HashMap<>(ids.size());
+        for (String id : ids) {
             if (!map.containsKey(id)) {
                 Shoppinglist sl = getList(id, user);
                 if (sl != null) {
@@ -507,11 +484,7 @@ public class SgnDatabase {
                 }
             }
         }
-        List<Shoppinglist> lists = new ArrayList<Shoppinglist>(map.values());
-//        for (Shoppinglist sl : lists) {
-//            PermissionUtils.allowEditOrThrow(sl, user);
-//        }
-        return lists;
+        return new ArrayList<>(map.values());
     }
 
     public JSONArray dumpListTable() {
