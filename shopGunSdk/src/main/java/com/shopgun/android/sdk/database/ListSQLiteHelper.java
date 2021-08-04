@@ -58,9 +58,10 @@ public class ListSQLiteHelper extends SgnOpenHelper {
                     PREVIOUS_ID + " text, " +
                     TYPE + " text, " +
                     META + " text, " +
-                    USER + " text not null " +
+                    USER + " text not null, " +
+                    SHARE_TOKEN + " text " +
                     ");";
-    public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?,?)";
+    public static final String INSERT_STATEMENT = "INSERT OR REPLACE INTO " + TABLE + " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
     public ListSQLiteHelper(Context context) {
         super(context);
@@ -95,6 +96,10 @@ public class ListSQLiteHelper extends SgnOpenHelper {
             db.execSQL("drop table " + TABLE + ";");
             db.execSQL("alter table tmp_table rename to " + TABLE + ";");
         }
+        if (oldVersion == 6 && newVersion == 7) {
+            // add share_token
+            db.execSQL("alter table " + TABLE + " add column " + SHARE_TOKEN + " text;");
+        }
         db.releaseReference();
     }
 
@@ -114,6 +119,7 @@ public class ListSQLiteHelper extends SgnOpenHelper {
         String meta = sl.getMeta() == null ? null : sl.getMeta().toString();
         DbUtils.bindOrNull(s, 9, meta);
         DbUtils.bindOrNull(s, 10, userId);
+        DbUtils.bindOrNull(s, 11, sl.getShareToken());
     }
 
     public static List<Shoppinglist> cursorToList(Cursor c) {
@@ -145,6 +151,7 @@ public class ListSQLiteHelper extends SgnOpenHelper {
             SgnLog.e(TAG, null, e);
         }
         sl.setUserId(cv.getAsString(USER));
+        sl.setShareToken(cv.getAsString(SHARE_TOKEN));
         return sl;
     }
 
@@ -161,6 +168,7 @@ public class ListSQLiteHelper extends SgnOpenHelper {
         String meta = sl.getMeta() == null ? null : sl.getMeta().toString();
         cv.put(META, meta);
         cv.put(USER, userId);
+        cv.put(SHARE_TOKEN, sl.getShareToken());
         return cv;
     }
 

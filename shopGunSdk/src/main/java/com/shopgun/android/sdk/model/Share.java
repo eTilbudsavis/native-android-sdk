@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.shopgun.android.sdk.model.User.NO_USER;
+
 /**
  * @deprecated shopping list no longer maintained
  */
@@ -55,6 +57,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     };
     private String mName;
     private String mEmail;
+    private String mUserId;
     public static Comparator<Share> EMAIL_ASCENDING = new Comparator<Share>() {
 
         @SuppressLint("DefaultLocale")
@@ -74,8 +77,11 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     private boolean mAccepted;
     private String mAcceptUrl;
     private int mSyncState = SyncState.TO_SYNC;
+    // In the db, this is the "user" column. It's the id of the logged in user (who is using the app)
+    private String mAppUserId = NO_USER;
 
-    public Share(String email, String access, String acceptUrl) {
+    public Share(String userId, String email, String access, String acceptUrl) {
+        mUserId = userId;
         mName = email;
         mEmail = email;
         mAccess = access;
@@ -86,6 +92,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     }
 
     private Share(Parcel in) {
+        this.mUserId = in.readString();
         this.mName = in.readString();
         this.mEmail = in.readString();
         this.mAccess = in.readString();
@@ -93,6 +100,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         this.mAccepted = in.readByte() != 0;
         this.mAcceptUrl = in.readString();
         this.mSyncState = in.readInt();
+        this.mAppUserId = in.readString();
     }
 
     /**
@@ -129,6 +137,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         SgnJson u = new SgnJson(o.getJSONObject(SgnJson.USER));
         s.setEmail(u.getEmail());
         s.setName(u.getName());
+        s.setUserId(u.getId());
 
         s.setAccess(o.getAccess());
         s.setAccepted(o.getAccepted());
@@ -144,7 +153,8 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     public JSONObject toJSON() {
         SgnJson u = new SgnJson()
                 .setEmail(getEmail())
-                .setName(getName());
+                .setName(getName())
+                .setId(getUserId());
 
         SgnJson o = new SgnJson()
                 .put(SgnJson.USER, u.toJSON())
@@ -195,6 +205,26 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         if (name != null) {
             mName = name;
         }
+        return this;
+    }
+
+    public String getUserId() {
+        return mUserId;
+    }
+
+    public Share setUserId(String id) {
+        if (id != null) {
+            mUserId = id;
+        }
+        return this;
+    }
+
+    public String getAppUserId() {
+        return mAppUserId;
+    }
+
+    public Share setAppUserId(String appUserId) {
+        mAppUserId = appUserId;
         return this;
     }
 
@@ -353,6 +383,11 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
                 return false;
         } else if (!mName.equals(other.mName))
             return false;
+        if (mUserId == null) {
+            if (other.mUserId != null)
+                return false;
+        } else if (!mUserId.equals(other.mUserId))
+            return false;
         if (mShoppinglistId == null) {
             if (other.mShoppinglistId != null)
                 return false;
@@ -375,10 +410,12 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         result = prime * result + (mAccepted ? 1231 : 1237);
         result = prime * result + ((mAccess == null) ? 0 : mAccess.hashCode());
         result = prime * result + ((mEmail == null) ? 0 : mEmail.hashCode());
+        result = prime * result + ((mUserId == null) ? 0 : mUserId.hashCode());
         result = prime * result + ((mName == null) ? 0 : mName.hashCode());
         result = prime * result
                 + ((mShoppinglistId == null) ? 0 : mShoppinglistId.hashCode());
         result = prime * result + mSyncState;
+        result = prime * result + ((mAppUserId == null) ? 0 : mAppUserId.hashCode());
         return result;
     }
 
@@ -393,6 +430,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.mUserId);
         dest.writeString(this.mName);
         dest.writeString(this.mEmail);
         dest.writeString(this.mAccess);
@@ -400,6 +438,7 @@ public class Share implements Comparable<Share>, SyncState<Share>, IJson<JSONObj
         dest.writeByte(mAccepted ? (byte) 1 : (byte) 0);
         dest.writeString(this.mAcceptUrl);
         dest.writeInt(this.mSyncState);
+        dest.writeString(this.mAppUserId);
     }
 
 }

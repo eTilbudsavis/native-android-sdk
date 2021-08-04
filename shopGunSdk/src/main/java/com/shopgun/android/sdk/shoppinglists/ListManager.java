@@ -139,7 +139,7 @@ public class ListManager {
 
         Share owner = sl.getOwner();
         if (owner == null || owner.getEmail() == null) {
-            owner = new Share(user.getEmail(), Share.ACCESS_OWNER, null);
+            owner = new Share(user.getId(), user.getEmail(), Share.ACCESS_OWNER, null);
             owner.setName(user.getName());
             owner.setAccepted(true);
             owner.setShoppinglistId(sl.getId());
@@ -549,8 +549,7 @@ public class ListManager {
 
     private boolean editItems(List<ShoppinglistItem> items, User user) {
 
-        // Validate and get response in one step
-        List<Shoppinglist> lists = mDatabase.allowEditItemsOrThrow(items, user);
+        List<Shoppinglist> lists = mDatabase.getListFromItems(items, user);
 
         HashMap<String, ShoppinglistItem> dbItems = new HashMap<>();
         for (Shoppinglist sl : lists) {

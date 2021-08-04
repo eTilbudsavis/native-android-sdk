@@ -140,7 +140,7 @@ public class User implements IErn<User>, IJson<JSONObject>, Parcelable {
      * @return {@code true} if the {@link User} is logged in with a ShopGun account, else {@code false}
      */
     public boolean isLoggedIn() {
-        return mEmail != null && getId() != null && !getId().equals(NO_USER);
+        return getId() != null && !getId().equals(NO_USER);
     }
 
     /**

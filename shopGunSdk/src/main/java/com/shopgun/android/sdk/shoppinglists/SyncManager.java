@@ -129,8 +129,6 @@ public class SyncManager {
     private SgnDatabase mDatabase;
     /** The handler used to send messages to the sync thread */
     private Handler mHandler;
-    /** Variable to determine if offline lists should automatically be synchronized if certain criteria are met. */
-    private boolean mMigrateOfflineLists = false;
     /** A tag for identifying all requests originating from this {@link SyncManager} in the {@link RequestQueue} */
     private Object mRequestTag = new Object();
     /** The notification object, used to combine and collect notifications */
@@ -225,32 +223,6 @@ public class SyncManager {
      */
     public int getSyncInterval() {
         return mSyncInterval == Integer.MIN_VALUE ? SyncInterval.PAUSED : mSyncInterval;
-    }
-
-    /**
-     * Method for easily migrating "offline" lists to "online" lists.
-     *
-     * <p>If true, the {@link SyncManager} ensures the merging of any
-     * (non-empty) "offline" lists, into a new "online" user's
-     * {@link Shoppinglist shoppinglists}, on the first completed sync cycle.
-     * <p>
-     * (a user is considered a "new" if he/she haven't got any lists on the
-     * server already)
-     *
-     * @param migrate {@code true} if to do automatic migration of offline
-     *                 {@link Shoppinglist shoppinglists}, else {@code false}
-     */
-    public void setMigrateOfflineLists(boolean migrate) {
-        mMigrateOfflineLists = migrate;
-    }
-
-    /**
-     * True if "offline" {@link Shoppinglist} will be migrated on first sync with
-     * a new "online" user's {@link Shoppinglist shoppinglists}.
-     * @return true if the SyncManager will migrate any offline lists, else false
-     */
-    public boolean isMigratingOfflineLists() {
-        return mMigrateOfflineLists;
     }
 
     private void addRequest(Request<?> r) {
@@ -563,6 +535,21 @@ public class SyncManager {
                     Shoppinglist serverSl = serverMap.get(key);
 
                     if (localSl != null && serverSl != null) {
+
+                        // read the share token from the server list
+                        if (localSl.getShareToken() == null || !localSl.getShareToken().equals(serverSl.getShareToken())) {
+                            localSl.setShareToken(serverSl.getShareToken());
+                            database.editList(localSl, user);
+                        }
+
+                        // read the share's userId in case we don't have them
+                        for (Share localShare : localSl.getShares().values()) {
+                            Share serverShare = serverSl.getShares().get(localShare.getEmail());
+                            if (localShare.getUserId() == null && serverShare != null) {
+                                localShare.setUserId(serverShare.getUserId());
+                                database.editShare(localShare, user);
+                            }
+                        }
 
                         if (localSl.getModified().before(serverSl.getModified())) {
 

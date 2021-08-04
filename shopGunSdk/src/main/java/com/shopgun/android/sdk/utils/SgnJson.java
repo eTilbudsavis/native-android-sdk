@@ -653,6 +653,17 @@ public class SgnJson {
         return this;
     }
 
+    public static final String SHARE_TOKEN = "share_token";
+
+    public String getShareToken() {
+        return getString(SHARE_TOKEN);
+    }
+
+    public SgnJson setShareToken(String value) {
+        put(SHARE_TOKEN, value);
+        return this;
+    }
+
     public static final String NAME = "name";
 
     public String getName() {
