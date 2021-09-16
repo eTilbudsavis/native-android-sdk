@@ -11,8 +11,6 @@ import android.os.Parcelable;
 import androidx.annotation.Nullable;
 import com.shopgun.android.viewpager.CenteredViewPager;
 import androidx.viewpager.widget.ViewPager;
-
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +40,7 @@ public class PagedPublicationFragment extends VersoFragment {
     public static final String ARG_CONFIGURATION = "arg_config";
     public static final String ARG_PAGE = "arg_page";
     public static final String SAVED_STATE = "saved_state";
+    public static final String BRAND_COLORS = "brand_colors";
 
     private PagedPublicationConfiguration mConfig;
 
@@ -52,7 +51,7 @@ public class PagedPublicationFragment extends VersoFragment {
     private VersoViewPager mVersoViewPager;
 
     private boolean mDisplayHotspotsOnTouch = true;
-    private boolean mSetBrandColors = false;
+    private boolean mSetBrandColors = true;
     private OnTouchWrapper mOnTouchWrapper;
     private PageChangeListener mPageChangeListener = new PageChangeListener();
 
@@ -91,6 +90,9 @@ public class PagedPublicationFragment extends VersoFragment {
         super.onCreate(savedInstanceState);
         mLifecycle = new PagedPublicationLifecycle();
         mViewSessionUuid = SgnUtils.createUUID();
+        if (savedInstanceState != null) {
+            mSetBrandColors = savedInstanceState.getBoolean(BRAND_COLORS);
+        }
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_STATE)) {
             SavedState savedState = savedInstanceState.getParcelable(SAVED_STATE);
             if (savedState != null) {
@@ -189,6 +191,7 @@ public class PagedPublicationFragment extends VersoFragment {
             mConfig.cancel();
         }
         outState.putParcelable(SAVED_STATE, new SavedState(this));
+        outState.putBoolean(BRAND_COLORS, mSetBrandColors);
         super.onSaveInstanceState(outState);
     }
 
