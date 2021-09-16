@@ -11,6 +11,8 @@ import android.os.Parcelable;
 import androidx.annotation.Nullable;
 import com.shopgun.android.viewpager.CenteredViewPager;
 import androidx.viewpager.widget.ViewPager;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,7 +52,7 @@ public class PagedPublicationFragment extends VersoFragment {
     private VersoViewPager mVersoViewPager;
 
     private boolean mDisplayHotspotsOnTouch = true;
-    private boolean mSetBrandColors = true;
+    private boolean mSetBrandColors = false;
     private OnTouchWrapper mOnTouchWrapper;
     private PageChangeListener mPageChangeListener = new PageChangeListener();
 
