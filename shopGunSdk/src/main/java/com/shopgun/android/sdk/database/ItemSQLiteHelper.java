@@ -21,6 +21,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
 
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -122,6 +123,8 @@ public class ItemSQLiteHelper extends SgnOpenHelper {
             db.execSQL("drop table " + TABLE + ";");
             db.execSQL("alter table tmp_table rename to " + TABLE + ";");
         }
+        existsColumnTypeInTable(db, TABLE, USER);
+
         db.releaseReference();
     }
 
@@ -182,6 +185,31 @@ public class ItemSQLiteHelper extends SgnOpenHelper {
         cv.put(MODIFIED, SgnUtils.dateToString(modified));
         cv.put(STATE, syncState);
         return cv;
+    }
+
+    private static boolean existsColumnTypeInTable(SQLiteDatabase inDatabase, String inTable, String columnToCheck) {
+        Log.d(TAG, "existsColumnTypeInTable() called with: inDatabase = [" + inDatabase + "], inTable = [" + inTable + "], columnToCheck = [" + columnToCheck + "]");
+        Cursor mCursor = null;
+        try {
+            // Query 1 row
+            mCursor = inDatabase.rawQuery("SELECT * FROM " + inTable + " LIMIT 0", null);
+
+            // getColumnIndex() gives us the index (0 to ...) of the column - otherwise we get a -1
+            if (mCursor.getType(mCursor.getColumnIndex(columnToCheck)) == Cursor.FIELD_TYPE_INTEGER) {
+                Log.d(TAG, "existsColumnTypeInTable: TRUE");
+            return true;
+        } else{
+                Log.d(TAG, "existsColumnTypeInTable: FALSE");
+                return false;
+            }
+        } catch (Exception Exp) {
+            // Something went wrong. Missing the database? The table?
+//            Log.d("... - existsColumnInTable", "When checking whether a column exists in the table, an error occurred: " + Exp.getMessage());
+            Log.d(TAG, "existsColumnTypeInTable: Exception");
+            return false;
+        } finally {
+            if (mCursor != null) mCursor.close();
+        }
     }
 
 }
