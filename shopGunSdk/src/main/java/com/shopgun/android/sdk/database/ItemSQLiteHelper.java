@@ -205,7 +205,7 @@ public class ItemSQLiteHelper extends SgnOpenHelper {
         } catch (Exception Exp) {
             // Something went wrong. Missing the database? The table?
 //            Log.d("... - existsColumnInTable", "When checking whether a column exists in the table, an error occurred: " + Exp.getMessage());
-            Log.d(TAG, "existsColumnTypeInTable: Exception");
+            Log.e(TAG, "existsColumnTypeInTable: Exception", Exp);
             return false;
         } finally {
             if (mCursor != null) mCursor.close();
