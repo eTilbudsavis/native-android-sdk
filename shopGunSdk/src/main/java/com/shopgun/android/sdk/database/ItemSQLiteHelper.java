@@ -192,10 +192,14 @@ public class ItemSQLiteHelper extends SgnOpenHelper {
         Cursor mCursor = null;
         try {
             // Query 1 row
-            mCursor = inDatabase.rawQuery("SELECT * FROM " + inTable + " LIMIT 0", null);
+            mCursor = inDatabase.rawQuery("SELECT * FROM " + inTable + " LIMIT 1", null);
 
             // getColumnIndex() gives us the index (0 to ...) of the column - otherwise we get a -1
-            if (mCursor.getType(mCursor.getColumnIndex(columnToCheck)) == Cursor.FIELD_TYPE_INTEGER) {
+            int columnIndex = mCursor.getColumnIndex(columnToCheck);
+            Log.d(TAG, "existsColumnTypeInTable: columnIndex: " + columnIndex);
+            int mCursorType = mCursor.getType(columnIndex);
+            Log.d(TAG, "existsColumnTypeInTable: mCursorType: " + mCursorType);
+            if (mCursorType == Cursor.FIELD_TYPE_INTEGER) {
                 Log.d(TAG, "existsColumnTypeInTable: TRUE");
             return true;
         } else{
