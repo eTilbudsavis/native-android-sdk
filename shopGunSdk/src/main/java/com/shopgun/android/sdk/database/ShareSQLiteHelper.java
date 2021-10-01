@@ -76,6 +76,12 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
             // add share user id
             upgradeFrom6To7(db);
         }
+        if (!existsColumnInTable(db,TABLE,SHARE_TOKEN) && newVersion == 8) {
+            if (isColumnTypeInt(db,TABLE,USER)) {
+                upgradeFrom5To6(db);
+            }
+            upgradeFrom6To7(db);
+        }
         db.releaseReference();
     }
 
@@ -158,33 +164,4 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
         cv.put(SHARE_USER_ID, s.getUserId());
         return cv;
     }
-
-    private static void fixDatabase(SQLiteDatabase db) {
-        if(!existsColumnInTable(db,TABLE,SHARE_TOKEN)) {
-            upgradeFrom5To6(db);
-            upgradeFrom6To7(db);
-        }
-    }
-
-    private static boolean existsColumnInTable(SQLiteDatabase inDatabase, String inTable, String columnToCheck) {
-        Cursor mCursor = null;
-        try {
-            // Query 1 row
-            mCursor = inDatabase.rawQuery("SELECT * FROM " + inTable + " LIMIT 0", null);
-
-            // getColumnIndex() gives us the index (0 to ...) of the column - otherwise we get a -1
-            if (mCursor.getColumnIndex(columnToCheck) != -1)
-                return true;
-            else
-                return false;
-
-        } catch (Exception Exp) {
-            // Something went wrong. Missing the database? The table?
-//            Log.d("... - existsColumnInTable", "When checking whether a column exists in the table, an error occurred: " + Exp.getMessage());
-            return false;
-        } finally {
-            if (mCursor != null) mCursor.close();
-        }
-    }
-
 }

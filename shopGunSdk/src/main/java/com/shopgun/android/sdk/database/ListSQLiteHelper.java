@@ -87,28 +87,15 @@ public class ListSQLiteHelper extends SgnOpenHelper {
             upgradeFrom6To7(db);
         }
 
-        if (oldVersion <= 7 && newVersion == 8) {
-            if (oldVersion == 5) {
+        if (!existsColumnInTable(db,TABLE,SHARE_TOKEN) && newVersion == 8) {
+            if (isColumnTypeInt(db,TABLE,USER)) {
                 upgradeFrom5To6(db);
-                upgradeFrom6To7(db);
             }
-            if (oldVersion == 6) {
-                upgradeFrom6To7(db);
-            }
-            fixDatabase(db);
-        }
-
-        db.releaseReference();
-    }
-
-    // this should only be a problem if you have updated frm 5 to 7
-    private static void fixDatabase(SQLiteDatabase db) {
-        if(!existsColumnInTable(db,TABLE,SHARE_TOKEN)) {
-            upgradeFrom5To6(db);
             upgradeFrom6To7(db);
         }
+        db.releaseReference();
     }
-
+    
     private static void upgradeFrom6To7(SQLiteDatabase db) {
         // add share_token
         db.execSQL("alter table " + TABLE + " add column " + SHARE_TOKEN + " text;");
@@ -204,26 +191,4 @@ public class ListSQLiteHelper extends SgnOpenHelper {
         cv.put(SHARE_TOKEN, sl.getShareToken());
         return cv;
     }
-
-    private static boolean existsColumnInTable(SQLiteDatabase inDatabase, String inTable, String columnToCheck) {
-        Cursor mCursor = null;
-        try {
-            // Query 1 row
-            mCursor = inDatabase.rawQuery("SELECT * FROM " + inTable + " LIMIT 0", null);
-
-            // getColumnIndex() gives us the index (0 to ...) of the column - otherwise we get a -1
-            if (mCursor.getColumnIndex(columnToCheck) != -1)
-                return true;
-            else
-                return false;
-
-        } catch (Exception Exp) {
-            // Something went wrong. Missing the database? The table?
-//            Log.d("... - existsColumnInTable", "When checking whether a column exists in the table, an error occurred: " + Exp.getMessage());
-            return false;
-        } finally {
-            if (mCursor != null) mCursor.close();
-        }
-    }
-
 }

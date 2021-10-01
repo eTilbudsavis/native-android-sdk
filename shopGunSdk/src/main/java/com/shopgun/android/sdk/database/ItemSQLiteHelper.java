@@ -100,32 +100,37 @@ public class ItemSQLiteHelper extends SgnOpenHelper {
     public static void upgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.acquireReference();
         if (oldVersion == 5 && newVersion == 6) {
-            // migrate USER from int to text
-            db.execSQL("create table if not exists tmp_table (" +
-                    ID + " text not null primary key, " +
-                    ERN + " text not null, " +
-                    MODIFIED + " text not null, " +
-                    DESCRIPTION + " text, " +
-                    COUNT + " integer not null, " +
-                    TICK + " integer not null, " +
-                    OFFER_ID + " text, " +
-                    CREATOR + " text, " +
-                    SHOPPINGLIST_ID + " text not null, " +
-                    STATE + " integer not null, " +
-                    PREVIOUS_ID + " text, " +
-                    META + " text, " +
-                    USER + " text not null " +
-                    ");");
-            db.execSQL("insert into tmp_table select " +
-                    String.format(Locale.US, "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,",
-                            ID, ERN, MODIFIED, DESCRIPTION, COUNT, TICK, OFFER_ID, CREATOR, SHOPPINGLIST_ID, STATE, PREVIOUS_ID, META) +
-                    " cast (" + USER + " as text) from " + TABLE + ";");
-            db.execSQL("drop table " + TABLE + ";");
-            db.execSQL("alter table tmp_table rename to " + TABLE + ";");
+            upgradeFrom5To6(db);
         }
-        existsColumnTypeInTable(db, TABLE, USER);
-
+        if (isColumnTypeInt(db, TABLE, USER) && newVersion == 8) {
+            upgradeFrom5To6(db);
+        }
         db.releaseReference();
+    }
+
+    private static void upgradeFrom5To6(SQLiteDatabase db) {
+        // migrate USER from int to text
+        db.execSQL("create table if not exists tmp_table (" +
+                ID + " text not null primary key, " +
+                ERN + " text not null, " +
+                MODIFIED + " text not null, " +
+                DESCRIPTION + " text, " +
+                COUNT + " integer not null, " +
+                TICK + " integer not null, " +
+                OFFER_ID + " text, " +
+                CREATOR + " text, " +
+                SHOPPINGLIST_ID + " text not null, " +
+                STATE + " integer not null, " +
+                PREVIOUS_ID + " text, " +
+                META + " text, " +
+                USER + " text not null " +
+                ");");
+        db.execSQL("insert into tmp_table select " +
+                String.format(Locale.US, "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,",
+                        ID, ERN, MODIFIED, DESCRIPTION, COUNT, TICK, OFFER_ID, CREATOR, SHOPPINGLIST_ID, STATE, PREVIOUS_ID, META) +
+                " cast (" + USER + " as text) from " + TABLE + ";");
+        db.execSQL("drop table " + TABLE + ";");
+        db.execSQL("alter table tmp_table rename to " + TABLE + ";");
     }
 
     public static List<ShoppinglistItem> cursorToList(Cursor c) {
@@ -186,35 +191,4 @@ public class ItemSQLiteHelper extends SgnOpenHelper {
         cv.put(STATE, syncState);
         return cv;
     }
-
-    private static boolean existsColumnTypeInTable(SQLiteDatabase inDatabase, String inTable, String columnToCheck) {
-        Log.d(TAG, "existsColumnTypeInTable() called with: inDatabase = [" + inDatabase + "], inTable = [" + inTable + "], columnToCheck = [" + columnToCheck + "]");
-        Cursor mCursor = null;
-        try {
-            // Query 1 row
-            mCursor = inDatabase.rawQuery("SELECT * FROM " + inTable + " LIMIT 1", null);
-
-            // getColumnIndex() gives us the index (0 to ...) of the column - otherwise we get a -1
-            int columnIndex = mCursor.getColumnIndex(columnToCheck);
-            Log.d(TAG, "existsColumnTypeInTable: columnIndex: " + columnIndex);
-            mCursor.moveToFirst();
-            int mCursorType = mCursor.getType(columnIndex);
-            Log.d(TAG, "existsColumnTypeInTable: mCursorType: " + mCursorType);
-            if (mCursorType == Cursor.FIELD_TYPE_INTEGER) {
-                Log.d(TAG, "existsColumnTypeInTable: TRUE");
-            return true;
-        } else{
-                Log.d(TAG, "existsColumnTypeInTable: FALSE");
-                return false;
-            }
-        } catch (Exception Exp) {
-            // Something went wrong. Missing the database? The table?
-//            Log.d("... - existsColumnInTable", "When checking whether a column exists in the table, an error occurred: " + Exp.getMessage());
-            Log.e(TAG, "existsColumnTypeInTable: Exception", Exp);
-            return false;
-        } finally {
-            if (mCursor != null) mCursor.close();
-        }
-    }
-
 }
