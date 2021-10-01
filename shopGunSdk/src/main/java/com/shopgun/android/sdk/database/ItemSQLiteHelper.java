@@ -197,6 +197,7 @@ public class ItemSQLiteHelper extends SgnOpenHelper {
             // getColumnIndex() gives us the index (0 to ...) of the column - otherwise we get a -1
             int columnIndex = mCursor.getColumnIndex(columnToCheck);
             Log.d(TAG, "existsColumnTypeInTable: columnIndex: " + columnIndex);
+            mCursor.moveToFirst();
             int mCursorType = mCursor.getType(columnIndex);
             Log.d(TAG, "existsColumnTypeInTable: mCursorType: " + mCursorType);
             if (mCursorType == Cursor.FIELD_TYPE_INTEGER) {
