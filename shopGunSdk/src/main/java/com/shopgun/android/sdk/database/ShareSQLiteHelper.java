@@ -76,7 +76,7 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
             // add share user id
             upgradeFrom6To7(db);
         }
-        if (!existsColumnInTable(db,TABLE,SHARE_TOKEN) && newVersion == 8) {
+        if (!existsColumnInTable(db,TABLE,SHARE_USER_ID) && newVersion == 8) {
             if (isColumnTypeInt(db,TABLE,USER)) {
                 upgradeFrom5To6(db);
             }
