@@ -17,6 +17,7 @@
 package com.shopgun.android.sdk.database;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -60,7 +61,7 @@ public class SgnOpenHelper extends SQLiteOpenHelper {
     public static final String SHARE_USER_ID = "share_user_id";
 
     private static final String DB_NAME = "shoppinglist.db";
-    private static final int DB_VERSION = 7;
+    private static final int DB_VERSION = 8;
 
     protected SgnOpenHelper(Context c) {
         super(c, DB_NAME, null, DB_VERSION);
@@ -82,6 +83,51 @@ public class SgnOpenHelper extends SQLiteOpenHelper {
         ListSQLiteHelper.upgrade(db, oldVersion, newVersion);
         ItemSQLiteHelper.upgrade(db, oldVersion, newVersion);
         ShareSQLiteHelper.upgrade(db, oldVersion, newVersion);
+    }
+
+    public static boolean isColumnTypeInt(SQLiteDatabase inDatabase, String inTable, String columnToCheck) {
+        Cursor mCursor = null;
+        try {
+            // Query 1 row
+            mCursor = inDatabase.rawQuery("SELECT * FROM " + inTable + " LIMIT 1", null);
+
+            // getColumnIndex() gives us the index (0 to ...) of the column - otherwise we get a -1
+            int columnIndex = mCursor.getColumnIndex(columnToCheck);
+            mCursor.moveToFirst();
+            int mCursorType = mCursor.getType(columnIndex);
+            if (mCursorType == Cursor.FIELD_TYPE_INTEGER) {
+                return true;
+            } else{
+                return false;
+            }
+        } catch (Exception Exp) {
+            // Something went wrong. Missing the database? The table?
+//            Log.d("... - existsColumnInTable", "When checking whether a column exists in the table, an error occurred: " + Exp.getMessage());
+            return false;
+        } finally {
+            if (mCursor != null) mCursor.close();
+        }
+    }
+
+    public static boolean existsColumnInTable(SQLiteDatabase inDatabase, String inTable, String columnToCheck) {
+        Cursor mCursor = null;
+        try {
+            // Query 1 row
+            mCursor = inDatabase.rawQuery("SELECT * FROM " + inTable + " LIMIT 0", null);
+
+            // getColumnIndex() gives us the index (0 to ...) of the column - otherwise we get a -1
+            if (mCursor.getColumnIndex(columnToCheck) != -1)
+                return true;
+            else
+                return false;
+
+        } catch (Exception Exp) {
+            // Something went wrong. Missing the database? The table?
+//            Log.d("... - existsColumnInTable", "When checking whether a column exists in the table, an error occurred: " + Exp.getMessage());
+            return false;
+        } finally {
+            if (mCursor != null) mCursor.close();
+        }
     }
 
 }

@@ -76,31 +76,51 @@ public class ListSQLiteHelper extends SgnOpenHelper {
     public static void upgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.acquireReference();
         if (oldVersion == 5 && newVersion == 6) {
-            // migrate USER from int to text
-            db.execSQL("create table if not exists tmp_table (" +
-                    ID + " text primary key, " +
-                    ERN + " text, " +
-                    MODIFIED + " text not null, " +
-                    NAME + " text not null, " +
-                    ACCESS + " text not null, " +
-                    STATE + " integer not null, " +
-                    PREVIOUS_ID + " text, " +
-                    TYPE + " text, " +
-                    META + " text, " +
-                    USER + " text not null " +
-                    ");");
-            db.execSQL("insert into tmp_table select " +
-                    String.format(Locale.US, "%s, %s, %s, %s, %s, %s, %s, %s, %s,",
-                            ID, ERN, MODIFIED, NAME, ACCESS, STATE, PREVIOUS_ID, TYPE, META) +
-                    " cast (" + USER + " as text) from " + TABLE + ";");
-            db.execSQL("drop table " + TABLE + ";");
-            db.execSQL("alter table tmp_table rename to " + TABLE + ";");
+           upgradeFrom5To6(db);
         }
         if (oldVersion == 6 && newVersion == 7) {
-            // add share_token
-            db.execSQL("alter table " + TABLE + " add column " + SHARE_TOKEN + " text;");
+            upgradeFrom6To7(db);
+        }
+
+        if (oldVersion == 5 && newVersion == 7) {
+            upgradeFrom5To6(db);
+            upgradeFrom6To7(db);
+        }
+
+        if (!existsColumnInTable(db,TABLE,SHARE_TOKEN) && newVersion == 8) {
+            if (isColumnTypeInt(db,TABLE,USER)) {
+                upgradeFrom5To6(db);
+            }
+            upgradeFrom6To7(db);
         }
         db.releaseReference();
+    }
+    
+    private static void upgradeFrom6To7(SQLiteDatabase db) {
+        // add share_token
+        db.execSQL("alter table " + TABLE + " add column " + SHARE_TOKEN + " text;");
+    }
+
+    private static void upgradeFrom5To6(SQLiteDatabase db) {
+        // migrate USER from int to text
+        db.execSQL("create table if not exists tmp_table (" +
+                ID + " text primary key, " +
+                ERN + " text, " +
+                MODIFIED + " text not null, " +
+                NAME + " text not null, " +
+                ACCESS + " text not null, " +
+                STATE + " integer not null, " +
+                PREVIOUS_ID + " text, " +
+                TYPE + " text, " +
+                META + " text, " +
+                USER + " text not null " +
+                ");");
+        db.execSQL("insert into tmp_table select " +
+                String.format(Locale.US, "%s, %s, %s, %s, %s, %s, %s, %s, %s,",
+                        ID, ERN, MODIFIED, NAME, ACCESS, STATE, PREVIOUS_ID, TYPE, META) +
+                " cast (" + USER + " as text) from " + TABLE + ";");
+        db.execSQL("drop table " + TABLE + ";");
+        db.execSQL("alter table tmp_table rename to " + TABLE + ";");
     }
 
     public static SQLiteStatement getInsertStatement(SQLiteDatabase db) {
@@ -171,5 +191,4 @@ public class ListSQLiteHelper extends SgnOpenHelper {
         cv.put(SHARE_TOKEN, sl.getShareToken());
         return cv;
     }
-
 }

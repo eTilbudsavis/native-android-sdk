@@ -70,29 +70,43 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
         db.acquireReference();
         if (oldVersion == 5 && newVersion == 6) {
             // migrate USER from int to text
-            db.execSQL("create table if not exists tmp_table (" +
-                    ID + " integer not null primary key, " +
-                    SHOPPINGLIST_ID + " text not null, " +
-                    EMAIL + " text, " +
-                    NAME + " text, " +
-                    ACCEPTED + " text, " +
-                    ACCESS + " text, " +
-                    ACCEPT_URL + " text, " +
-                    STATE + " integer, " +
-                    USER + " text not null " +
-                    ");");
-            db.execSQL("insert into tmp_table select " +
-                    String.format(Locale.US, "%s, %s, %s, %s, %s, %s, %s, %s,",
-                            ID, SHOPPINGLIST_ID, EMAIL, NAME, ACCEPTED, ACCESS, ACCEPT_URL, STATE) +
-                    " cast (" + USER + " as text) from " + TABLE + ";");
-            db.execSQL("drop table " + TABLE + ";");
-            db.execSQL("alter table tmp_table rename to " + TABLE + ";");
+            upgradeFrom5To6(db);
         }
         if (oldVersion == 6 && newVersion == 7) {
             // add share user id
-            db.execSQL("alter table " + TABLE + " add column " + SHARE_USER_ID + " text;");
+            upgradeFrom6To7(db);
+        }
+        if (!existsColumnInTable(db,TABLE,SHARE_USER_ID) && newVersion == 8) {
+            if (isColumnTypeInt(db,TABLE,USER)) {
+                upgradeFrom5To6(db);
+            }
+            upgradeFrom6To7(db);
         }
         db.releaseReference();
+    }
+
+    private static void upgradeFrom6To7(SQLiteDatabase db) {
+        db.execSQL("alter table " + TABLE + " add column " + SHARE_USER_ID + " text;");
+    }
+
+    private static void upgradeFrom5To6(SQLiteDatabase db) {
+        db.execSQL("create table if not exists tmp_table (" +
+                ID + " integer not null primary key, " +
+                SHOPPINGLIST_ID + " text not null, " +
+                EMAIL + " text, " +
+                NAME + " text, " +
+                ACCEPTED + " text, " +
+                ACCESS + " text, " +
+                ACCEPT_URL + " text, " +
+                STATE + " integer, " +
+                USER + " text not null " +
+                ");");
+        db.execSQL("insert into tmp_table select " +
+                String.format(Locale.US, "%s, %s, %s, %s, %s, %s, %s, %s,",
+                        ID, SHOPPINGLIST_ID, EMAIL, NAME, ACCEPTED, ACCESS, ACCEPT_URL, STATE) +
+                " cast (" + USER + " as text) from " + TABLE + ";");
+        db.execSQL("drop table " + TABLE + ";");
+        db.execSQL("alter table tmp_table rename to " + TABLE + ";");
     }
 
     public static SQLiteStatement getInsertStatement(SQLiteDatabase db) {
@@ -150,5 +164,4 @@ public class ShareSQLiteHelper extends SgnOpenHelper {
         cv.put(SHARE_USER_ID, s.getUserId());
         return cv;
     }
-
 }

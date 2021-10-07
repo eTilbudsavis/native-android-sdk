@@ -21,6 +21,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
 
 import com.shopgun.android.sdk.log.SgnLog;
 import com.shopgun.android.sdk.model.ShoppinglistItem;
@@ -99,30 +100,37 @@ public class ItemSQLiteHelper extends SgnOpenHelper {
     public static void upgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.acquireReference();
         if (oldVersion == 5 && newVersion == 6) {
-            // migrate USER from int to text
-            db.execSQL("create table if not exists tmp_table (" +
-                    ID + " text not null primary key, " +
-                    ERN + " text not null, " +
-                    MODIFIED + " text not null, " +
-                    DESCRIPTION + " text, " +
-                    COUNT + " integer not null, " +
-                    TICK + " integer not null, " +
-                    OFFER_ID + " text, " +
-                    CREATOR + " text, " +
-                    SHOPPINGLIST_ID + " text not null, " +
-                    STATE + " integer not null, " +
-                    PREVIOUS_ID + " text, " +
-                    META + " text, " +
-                    USER + " text not null " +
-                    ");");
-            db.execSQL("insert into tmp_table select " +
-                    String.format(Locale.US, "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,",
-                            ID, ERN, MODIFIED, DESCRIPTION, COUNT, TICK, OFFER_ID, CREATOR, SHOPPINGLIST_ID, STATE, PREVIOUS_ID, META) +
-                    " cast (" + USER + " as text) from " + TABLE + ";");
-            db.execSQL("drop table " + TABLE + ";");
-            db.execSQL("alter table tmp_table rename to " + TABLE + ";");
+            upgradeFrom5To6(db);
+        }
+        if (isColumnTypeInt(db, TABLE, USER) && newVersion == 8) {
+            upgradeFrom5To6(db);
         }
         db.releaseReference();
+    }
+
+    private static void upgradeFrom5To6(SQLiteDatabase db) {
+        // migrate USER from int to text
+        db.execSQL("create table if not exists tmp_table (" +
+                ID + " text not null primary key, " +
+                ERN + " text not null, " +
+                MODIFIED + " text not null, " +
+                DESCRIPTION + " text, " +
+                COUNT + " integer not null, " +
+                TICK + " integer not null, " +
+                OFFER_ID + " text, " +
+                CREATOR + " text, " +
+                SHOPPINGLIST_ID + " text not null, " +
+                STATE + " integer not null, " +
+                PREVIOUS_ID + " text, " +
+                META + " text, " +
+                USER + " text not null " +
+                ");");
+        db.execSQL("insert into tmp_table select " +
+                String.format(Locale.US, "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,",
+                        ID, ERN, MODIFIED, DESCRIPTION, COUNT, TICK, OFFER_ID, CREATOR, SHOPPINGLIST_ID, STATE, PREVIOUS_ID, META) +
+                " cast (" + USER + " as text) from " + TABLE + ";");
+        db.execSQL("drop table " + TABLE + ";");
+        db.execSQL("alter table tmp_table rename to " + TABLE + ";");
     }
 
     public static List<ShoppinglistItem> cursorToList(Cursor c) {
@@ -183,5 +191,4 @@ public class ItemSQLiteHelper extends SgnOpenHelper {
         cv.put(STATE, syncState);
         return cv;
     }
-
 }
