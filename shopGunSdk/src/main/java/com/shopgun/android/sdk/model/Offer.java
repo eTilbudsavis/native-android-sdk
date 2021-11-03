@@ -19,6 +19,7 @@ package com.shopgun.android.sdk.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.Keep;
+import androidx.annotation.Nullable;
 
 import com.shopgun.android.sdk.model.interfaces.ICatalog;
 import com.shopgun.android.sdk.model.interfaces.IDealer;
@@ -76,6 +77,9 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
     private Dealer mDealer;
     private Store mStore;
 
+    // Incito offer view id
+    private String mCatalogViewId;
+
     public Offer() {
 
     }
@@ -106,7 +110,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         this.mDealer = tmp.mDealer;
         this.mStore = tmp.mStore;
         this.mBranding = tmp.mBranding;
-
+        this.mCatalogViewId = tmp.mCatalogViewId;
     }
 
     /**
@@ -165,6 +169,8 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         offer.mDealer = o.getDealer();
         offer.mStore = o.getStore();
         offer.mCatalog = o.getCatalog();
+
+        offer.mCatalogViewId = o.getCatalogViewId();
 
         if (!object.has(SgnJson.BRANDING) && !object.has(SgnJson.IMAGES) && !object.has(SgnJson.LINKS)) {
             // ignore keys found only in the full version
@@ -227,6 +233,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
                 .putCatalog(getCatalog())
                 .setBranding(getBranding())
                 .setCategoryIds(getCategoryIds())
+                .setCatalogViewId(getCatalogViewId())
                 .toJSON();
 
     }
@@ -311,6 +318,16 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
      */
     public Offer setCatalogPage(int catalogPage) {
         mCatalogPage = catalogPage;
+        return this;
+    }
+
+    @Nullable
+    public String getCatalogViewId() {
+        return mCatalogViewId;
+    }
+
+    public Offer setCatalogViewId(String catalogViewId) {
+        mCatalogViewId = catalogViewId;
         return this;
     }
 
@@ -707,6 +724,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         if (mBranding != null ? !mBranding.equals(offer.mBranding) : offer.mBranding != null) return false;
         if (mCatalog != null ? !mCatalog.equals(offer.mCatalog) : offer.mCatalog != null) return false;
         if (mDealer != null ? !mDealer.equals(offer.mDealer) : offer.mDealer != null) return false;
+        if (mCatalogViewId != null ? !mCatalogViewId.equals(offer.mCatalogViewId) : offer.mCatalogViewId != null) return false;
         return mStore != null ? mStore.equals(offer.mStore) : offer.mStore == null;
 
     }
@@ -734,6 +752,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         result = 31 * result + (mCatalog != null ? mCatalog.hashCode() : 0);
         result = 31 * result + (mDealer != null ? mDealer.hashCode() : 0);
         result = 31 * result + (mStore != null ? mStore.hashCode() : 0);
+        result = 31 * result + (mCatalogViewId != null ? mCatalogViewId.hashCode() : 0);
         return result;
     }
 
@@ -765,6 +784,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         dest.writeParcelable(this.mCatalog, 0);
         dest.writeParcelable(this.mDealer, 0);
         dest.writeParcelable(this.mStore, 0);
+        dest.writeString(this.mCatalogViewId);
     }
 
     protected Offer(Parcel in) {
@@ -793,6 +813,7 @@ public class Offer implements IErn<Offer>, IJson<JSONObject>, ICatalog<Offer>, I
         this.mCatalog = in.readParcelable(Catalog.class.getClassLoader());
         this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
         this.mStore = in.readParcelable(Store.class.getClassLoader());
+        this.mCatalogViewId = in.readString();
     }
 
     public static final Parcelable.Creator<Offer> CREATOR = new Parcelable.Creator<Offer>() {
