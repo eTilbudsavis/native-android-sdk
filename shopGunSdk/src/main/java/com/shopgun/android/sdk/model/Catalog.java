@@ -776,7 +776,7 @@ public class Catalog implements IErn<Catalog>, IJson<JSONObject>, IDealer<Catalo
         dest.writeString(this.mStoreUrl);
         dest.writeParcelable(this.mDimension, 0);
         dest.writeParcelable(this.mImages, 0);
-        dest.writeStringList(new ArrayList<String>(mCategoryIds));
+        dest.writeStringList(mCategoryIds != null ? new ArrayList<String>(mCategoryIds) : new ArrayList<String>());
         dest.writeString(this.mPdfUrl);
         dest.writeByte((byte) (mIsAvailableInAllStores ? 1 : 0));
         dest.writeString(this.mIncitoId);
