@@ -1026,6 +1026,17 @@ public class SgnJson {
         return this;
     }
 
+    public static final String CATALOG_VIEW_ID = "catalog_view_id";
+
+    public String getCatalogViewId() {
+        return getString(CATALOG_VIEW_ID);
+    }
+
+    public SgnJson setCatalogViewId(String value) {
+        put(CATALOG_VIEW_ID, value);
+        return this;
+    }
+
     public static final String CATALOG_PAGE = "catalog_page";
 
     public int getCatalogPage() {
