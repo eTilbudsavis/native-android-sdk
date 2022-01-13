@@ -93,8 +93,8 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
                 groupId = 'com.github.shopgun'
-                artifactId = 'verso-android'
-                version = '3.0.0'
+                artifactId = 'shopgun-android-sdk'
+                version = '5.0.1'
             }
         }
     }
