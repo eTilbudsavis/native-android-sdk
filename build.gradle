@@ -23,7 +23,7 @@ buildscript {
         maven { url 'https://maven.google.com' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.2'
+        classpath 'com.android.tools.build:gradle:7.0.4'
 
         classpath "io.realm:realm-gradle-plugin:10.4.0"
     }
