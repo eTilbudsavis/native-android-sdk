@@ -33,7 +33,7 @@ android {
         versionCode versionMajor * 100000 + versionMinor * 1000 + versionPatch
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
         applicationId "com.shopgun.android.sdk.demo"
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 28
 //        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner "com.shopgun.android.sdk.demo.LegacyEventTestRunner" // to be used for tests on events (especially legacy)
@@ -75,12 +75,10 @@ dependencies {
     annotationProcessor libs.glideCompiler
 
     // ShopGun dependencies
-    implementation 'com.shopgun.android:sdk:5.0.0'
+    implementation project(':shopGunSdk')
 
-    // temporary local dependencies (sdk not yet released)
-//    implementation libs.shopGunSdk
-//    implementation libs.markhor
-//    implementation libs.verso
+    implementation libs.markhor
+    implementation libs.verso
 
     androidTestImplementation libs.okhttpMockwebserver
     androidTestImplementation 'androidx.test:runner:1.2.0'

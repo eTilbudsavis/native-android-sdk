@@ -60,3 +60,6 @@ gradle_models.ser
 markdown-navigator.xml
 .idea/dictionaries
 encodings.xml
+compiler.xml
+jarRepositories.xml
+markdown-navigator-enh.xml

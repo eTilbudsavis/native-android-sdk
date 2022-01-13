@@ -14,12 +14,15 @@
  * limitations under the License.
  ******************************************************************************/
 
-include ':shopGunSdk', ':shopGunSdkDemo'
-include ':markhor'
-project(':markhor').projectDir=new File('../markhor/library')
+include ':shopGunSdk'
+if (!System.env.JITPACK) {
+    include ':shopGunSdkDemo'
+    include ':markhor'
+    project(':markhor').projectDir=new File('../markhor/library')
 // Need to include ZoomLayout lib to debug Verso
-include ':zoomlayout'
-project(':zoomlayout').projectDir=new File('../zoomlayout/library')
-include ':verso'
-project(':verso').projectDir=new File('../verso-android/library')
-enableFeaturePreview('STABLE_PUBLISHING')
+    include ':zoomlayout'
+    project(':zoomlayout').projectDir=new File('../zoomlayout/library')
+    include ':verso'
+    project(':verso').projectDir=new File('../verso-android/library')
+}
+

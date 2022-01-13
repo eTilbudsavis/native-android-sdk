@@ -2,12 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../markhor/library/markhor.iml" filepath="$PROJECT_DIR$/../markhor/library/markhor.iml" />
-      <module fileurl="file://$PROJECT_DIR$/shopGunSdk/shopGunSdk.iml" filepath="$PROJECT_DIR$/shopGunSdk/shopGunSdk.iml" />
-      <module fileurl="file://$PROJECT_DIR$/shopGunSdkDemo/shopGunSdkDemo.iml" filepath="$PROJECT_DIR$/shopGunSdkDemo/shopGunSdkDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/shopgun-android-sdk.iml" filepath="$PROJECT_DIR$/shopgun-android-sdk.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../verso-android/library/verso.iml" filepath="$PROJECT_DIR$/../verso-android/library/verso.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../zoomlayout/library/zoomlayout.iml" filepath="$PROJECT_DIR$/../zoomlayout/library/zoomlayout.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1271692172/shopgun-android-sdk.markhor.iml" filepath="$PROJECT_DIR$/.idea/modules/1271692172/shopgun-android-sdk.markhor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopGunSdk/shopgun-android-sdk.shopGunSdk.iml" filepath="$PROJECT_DIR$/.idea/modules/shopGunSdk/shopgun-android-sdk.shopGunSdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopGunSdkDemo/shopgun-android-sdk.shopGunSdkDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/shopGunSdkDemo/shopgun-android-sdk.shopGunSdkDemo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/248743055/shopgun-android-sdk.verso.iml" filepath="$PROJECT_DIR$/.idea/modules/248743055/shopgun-android-sdk.verso.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/988686503/shopgun-android-sdk.zoomlayout.iml" filepath="$PROJECT_DIR$/.idea/modules/988686503/shopgun-android-sdk.zoomlayout.iml" />
     </modules>
   </component>
 </project>

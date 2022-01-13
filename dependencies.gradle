@@ -10,36 +10,26 @@ ext {
             gson                        : '2.8.5',
             eventbus                    : '3.1.1',
             butterknife                 : '10.1.0',
-            overscrollDecor             : '1.0.4',
+            overscrollDecor             : '1.1.1',
             junit                       : '4.12',
             espresso                    : '3.1.0',
             robolectric                 : '3.6.1',
             mockito                     : '3.0.0',
             okhttp                      : '3.12.1', // 3.13 doesn't support pre Android 5. https://medium.com/square-corner-blog/okhttp-3-13-requires-android-5-818bb78d07ce
             glide                       : '4.9.0',
-            apollo                      : '0.5.0',
             geohash                     : '0.22',
-
-            sgn : [
-                    materialcolorcreator        : '1.0.0',
-                    markhor                     : '2.0.0',
-                    zoomlayout                  : '2.0.0',
-                    verso                       : '2.0.0',
-            ]
-
     ]
 
     libDependencies = [
 
             // internal libs
-            markhor                     : "com.shopgun.android:utils:$libVersions.sgn.markhor",
+            markhor                     : "com.github.shopgun:markhor:2.0.2",
 //            markhor                     : project(':markhor'),
-            zoomlayout                  : "com.shopgun.android:zoomlayout:$libVersions.sgn.zoomlayout",
+            zoomlayout                  : "com.github.shopgun:zoomlayout:3.0.0",
 //            zoomlayout                  : project(':zoomlayout'),
-            verso                       : "com.shopgun.android:verso:$libVersions.sgn.verso",
+            verso                       : "com.github.shopgun:verso-android:3.0.0",
 //            verso                       : project(':verso'),
-            shopGunSdk                  : project(':shopGunSdk'),
-            materialcolorcreator        : "com.shopgun.android:materialcolorcreator:$libVersions.sgn.materialcolorcreator",
+            materialcolorcreator        : "com.github.shopgun:material-color-creator-android:2.0.0",
 
             // support libs
             supportv4                   : "androidx.legacy:legacy-support-v4:$libVersions.support",
@@ -54,13 +44,12 @@ ext {
             eventbus                    : "org.greenrobot:eventbus:$libVersions.eventbus",
             butterknife                 : "com.jakewharton:butterknife:$libVersions.butterknife",
             butterknifeCompiler         : "com.jakewharton:butterknife-compiler:$libVersions.butterknife",
-            overscrollDecor             : "me.everything:overscroll-decor-android:$libVersions.overscrollDecor",
+            overscrollDecor             : "io.github.everythingme:overscroll-decor-android:$libVersions.overscrollDecor",
 
             okhttp                      : "com.squareup.okhttp3:okhttp:$libVersions.okhttp",
             okhttpLoggingInterceptor    : "com.squareup.okhttp3:logging-interceptor:$libVersions.okhttp",
             okhttpMockwebserver         : "com.squareup.okhttp3:mockwebserver:$libVersions.okhttp",
             gson                        : "com.google.code.gson:gson:$libVersions.gson",
-            apollo                      : "com.apollographql.apollo:apollo-runtime:$libVersions.apollo",
             geohash                     : "com.github.drfonfon:android-geohash:$libVersions.geohash",
 
 
