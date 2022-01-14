@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/shopgun-android-sdk.iml" filepath="$PROJECT_DIR$/shopgun-android-sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopgun-android-sdk.iml" filepath="$PROJECT_DIR$/.idea/modules/shopgun-android-sdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/1271692172/shopgun-android-sdk.markhor.iml" filepath="$PROJECT_DIR$/.idea/modules/1271692172/shopgun-android-sdk.markhor.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopGunSdk/shopgun-android-sdk.shopGunSdk.iml" filepath="$PROJECT_DIR$/.idea/modules/shopGunSdk/shopgun-android-sdk.shopGunSdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopGunSdkDemo/shopgun-android-sdk.shopGunSdkDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/shopGunSdkDemo/shopgun-android-sdk.shopGunSdkDemo.iml" />
