@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 5.0.1
+-------------
+* Moved the project to Jitpack
+* Removed jCenter and unused dependencies
+
 Version 5.0.0
 -------------
 * AndroidX

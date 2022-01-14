@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/shopgun/shopgun-android-sdk.svg)](https://jitpack.io/#shopgun/shopgun-android-sdk)
+
 ShopGun Android SDK
 ===================
 
@@ -6,18 +8,19 @@ The simple solution for querying ShopGun data.
 ## Getting Started
 
 ### Download with Gradle
-If you haven't already added `jCenter` to your `build.gradle`, you'll need this:
-```groovy
-repositories {
-    jcenter()
+Add this in your root `build.gradle` file (**not** your module `build.gradle` file):
+
+```gradle
+allprojects {
+	repositories {
+        maven { url "https://jitpack.io" }
+    }
 }
 ```
-
-Now add these lines to your module's `build.gradle`:
-
-```groovy
+Then, add the library to your module `build.gradle`
+```gradle
 dependencies {
-    implementation 'com.shopgun.android:sdk:5.0.0'
+    implementation 'com.github.shopgun:shopgun-android-sdk:[lastVersion]'
 }
 ```
 
@@ -28,7 +31,7 @@ include ':shopGunSdk'
 project(':shopGunSdk').projectDir=new File('/path/to/shopgun-android-sdk/shopGunSdk')
 ```
 
-From version `5.0.0`, the SDK requires Java 8 enabled, so in your app `build.gradle`:
+The SDK requires Java 8 enabled, so in your app `build.gradle`:
 ```groovy
 android {
     compileOptions {
