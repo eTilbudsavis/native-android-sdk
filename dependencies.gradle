@@ -15,7 +15,7 @@ ext {
             espresso                    : '3.1.0',
             robolectric                 : '3.6.1',
             mockito                     : '3.0.0',
-            okhttp                      : '3.12.10', // 3.13 doesn't support pre Android 5. https://medium.com/square-corner-blog/okhttp-3-13-requires-android-5-818bb78d07ce
+            okhttp                      : '3.12.13', // 3.13 doesn't support pre Android 5. https://medium.com/square-corner-blog/okhttp-3-13-requires-android-5-818bb78d07ce
             glide                       : '4.9.0',
             geohash                     : '0.22',
     ]
