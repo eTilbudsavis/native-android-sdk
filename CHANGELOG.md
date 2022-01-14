@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-Version 5.0.1
+Version 5.0.2
 -------------
 * Moved the project to Jitpack
 * Removed jCenter and unused dependencies
