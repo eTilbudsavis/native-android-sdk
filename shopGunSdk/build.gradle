@@ -15,23 +15,25 @@
  ******************************************************************************/
 
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
 apply plugin: 'realm-android'
 apply plugin: 'com.github.ben-manes.versions'
 
 buildscript {
     // Custom buildscript closure for SDK module, to allow compilation from other projects
     repositories {
-        jcenter()
+        gradlePluginPortal()
     }
     dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.9.9'
-        classpath "io.realm:realm-gradle-plugin:6.1.0"
-
         // Dependencies checker: run from command line ./gradlew dependencyUpdates -Drevision=release|milestone|integration
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.25.0'
     }
+}
+
+repositories {
+    mavenCentral()
+    google()
+    maven { url "https://jitpack.io" }
 }
 
 android {
@@ -46,7 +48,7 @@ android {
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 28
     }
 
@@ -84,4 +86,16 @@ dependencies {
     testImplementation libs.okhttpMockwebserver
 }
 
-//apply from: 'bintray.gradle'
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.github.shopgun'
+                artifactId = 'shopgun-android-sdk'
+                version = '5.0.1'
+            }
+        }
+    }
+}
