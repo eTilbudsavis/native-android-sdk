@@ -398,8 +398,14 @@ public class ShopGun {
         Realm realm;
         try {
             realm = Realm.getInstance(mRealmConfiguration);
-        } catch (RealmFileException | IllegalArgumentException | RealmError ignore) {
-            return null;
+        } catch (Exception e) {
+            // In case of any exception, try to delete the db and re-create it
+            try {
+                Realm.deleteRealm(mRealmConfiguration);
+                realm = Realm.getInstance(mRealmConfiguration);
+            } catch (Exception ignore) {
+                return null;
+            }
         }
         return realm;
     }
@@ -693,7 +699,7 @@ public class ShopGun {
                         // if it's empty, try to delete it
                         Realm.deleteRealm(legacyConfiguration);
                     }
-                } catch (IllegalStateException | RealmFileException | RealmError ignore) { }
+                } catch (Exception ignore) { }
                 finally {
                     if (isEmpty) {
                         legacyConfiguration = null;
