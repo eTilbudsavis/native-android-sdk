@@ -664,6 +664,17 @@ public class SgnJson {
         return this;
     }
 
+    public static final String OPENING_HOURS = "opening_hours";
+
+    public JSONArray getStoreOpeningHours() {
+        return getJSONArray(OPENING_HOURS, new JSONArray());
+    }
+
+    public SgnJson putStoreOpeningHours(JSONArray openingHours) {
+        put(OPENING_HOURS, openingHours);
+        return this;
+    }
+
     public static final String NAME = "name";
 
     public String getName() {

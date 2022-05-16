@@ -63,6 +63,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
     private String mContact;
     private Dealer mDealer;
     private Set<String> mCategoryIds;
+    private JSONArray mOpeningHours = new JSONArray();
 
     public Store() {
     }
@@ -85,6 +86,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
         this.mContact = tmp.mContact;
         this.mDealer = tmp.mDealer;
         this.mCategoryIds = tmp.mCategoryIds;
+        this.mOpeningHours = tmp.mOpeningHours != null ? tmp.mOpeningHours : new JSONArray();
     }
 
     /**
@@ -129,7 +131,8 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
                 .setDealerId(o.getDealerId())
                 .setBranding(o.getBranding())
                 .setContact(o.getContact())
-                .setCategoryIds(o.getCategoryIds());
+                .setCategoryIds(o.getCategoryIds())
+                .setOpeningHours(o.getStoreOpeningHours());
 
         s.mDealer = o.getDealer();
 
@@ -157,6 +160,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
                 .setBranding(getBranding())
                 .setContact(getContact())
                 .setCategoryIds(getCategoryIds())
+                .putStoreOpeningHours(getOpeningHours())
                 // Internal SDK variables
                 .putDealer(getDealer())
                 .toJSON();
@@ -422,6 +426,15 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
         return this;
     }
 
+    public JSONArray getOpeningHours() {
+        return mOpeningHours;
+    }
+
+    public Store setOpeningHours(JSONArray openingHours) {
+        this.mOpeningHours = openingHours != null ? openingHours : new JSONArray();
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -440,6 +453,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
         if (mDealerId != null ? !mDealerId.equals(store.mDealerId) : store.mDealerId != null) return false;
         if (mBranding != null ? !mBranding.equals(store.mBranding) : store.mBranding != null) return false;
         if (mContact != null ? !mContact.equals(store.mContact) : store.mContact != null) return false;
+        if (mOpeningHours != null ? !mOpeningHours.equals(store.mOpeningHours) : store.mOpeningHours != null) return false;
         return mDealer != null ? mDealer.equals(store.mDealer) : store.mDealer == null;
 
     }
@@ -462,6 +476,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
         result = 31 * result + (mBranding != null ? mBranding.hashCode() : 0);
         result = 31 * result + (mContact != null ? mContact.hashCode() : 0);
         result = 31 * result + (mDealer != null ? mDealer.hashCode() : 0);
+        result = 31 * result + (mOpeningHours != null ? mOpeningHours.hashCode() : 0);
         return result;
     }
 
@@ -485,6 +500,7 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
         dest.writeParcelable(this.mBranding, 0);
         dest.writeString(this.mContact);
         dest.writeParcelable(this.mDealer, 0);
+        dest.writeString(this.mOpeningHours.toString());
     }
 
     protected Store(Parcel in) {
@@ -500,6 +516,12 @@ public class Store implements IErn<Store>, IJson<JSONObject>, IDealer<Store>, Pa
         this.mBranding = in.readParcelable(Branding.class.getClassLoader());
         this.mContact = in.readString();
         this.mDealer = in.readParcelable(Dealer.class.getClassLoader());
+        try {
+            this.mOpeningHours = new JSONArray(in.readString());
+        } catch (JSONException e) {
+            this.mOpeningHours = new JSONArray();
+            SgnLog.e(TAG, e.getMessage(), e);
+        }
     }
 
     public static final Creator<Store> CREATOR = new Creator<Store>() {
