@@ -15,6 +15,8 @@
  ******************************************************************************/
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'maven-publish'
 apply plugin: 'realm-android'
 apply plugin: 'com.github.ben-manes.versions'
@@ -43,6 +45,12 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
+    kapt {
+        correctErrorTypes = true
     }
 
     useLibrary 'org.apache.http.legacy'
@@ -84,6 +92,9 @@ dependencies {
     testImplementation libs.robolectric
     testImplementation libs.mockito
     testImplementation libs.okhttpMockwebserver
+
+    // New dependency list
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
 afterEvaluate {
