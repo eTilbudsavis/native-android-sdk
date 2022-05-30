@@ -2,7 +2,6 @@ package com.tjek.sdk.api.remote.models.v2
 
 import com.tjek.sdk.api.*
 import com.tjek.sdk.api.models.*
-import java.util.*
 
 fun PublicationV2.toPublication(): Publication {
     // sanity check on the dates
@@ -20,7 +19,7 @@ fun PublicationV2.toPublication(): Publication {
         businessId = businessId ?: "",
         storeId = storeId  ?: "",
         branding = branding?.toBranding() ?: Branding(),
-        frontPageImageUrls = frontPageImagesUrl?.toImagesUrl() ?: ImagesUrl(),
+        frontPageImageUrls = frontPageImagesUrl?.toImagesUrl() ?: ImageUrls(),
         types = types?.toListOfPublicationTypes() ?: listOf(PublicationTypes.Paged),
         runDateRange = ValidityDateRange(fromDate, tillDate)
     )
@@ -36,8 +35,8 @@ fun BrandingV2.toBranding(): Branding {
     )
 }
 
-fun ImagesUrlV2.toImagesUrl(): ImagesUrl {
-    return ImagesUrl(
+fun ImageUrlsV2.toImagesUrl(): ImageUrls {
+    return ImageUrls(
         view = view ?: "",
         zoom = zoom ?: "",
         thumb = thumb ?: ""

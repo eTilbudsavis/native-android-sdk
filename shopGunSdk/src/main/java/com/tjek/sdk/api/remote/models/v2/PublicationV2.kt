@@ -5,7 +5,6 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.ValidityDateStr
-import com.tjek.sdk.api.remote.models.HexColor
 
 @Keep
 @JsonClass(generateAdapter = true)
@@ -30,7 +29,7 @@ data class PublicationV2(
     val branding: BrandingV2?,
     val dimensions: DimensionsV2?,
     @Json(name = "images")
-    val frontPageImagesUrl: ImagesUrlV2?
+    val frontPageImagesUrl: ImageUrlsV2?
 )
 
 @Suppress("EnumEntryName")
@@ -38,28 +37,7 @@ enum class PublicationTypesV2 { paged, incito }
 
 @Keep
 @JsonClass(generateAdapter = true)
-data class BrandingV2(
-    val name: String?,
-    val website: String?,
-    val description: String?,
-    @Json(name = "logo")
-    val logoURL: String?,
-    @Json(name = "color")
-    @HexColor
-    val color: Int?
-)
-
-@Keep
-@JsonClass(generateAdapter = true)
 data class DimensionsV2(
     val width: Float,
     val height: Float
-)
-
-@Keep
-@JsonClass(generateAdapter = true)
-data class ImagesUrlV2(
-    val view: String?,
-    val zoom: String?,
-    val thumb: String?
 )

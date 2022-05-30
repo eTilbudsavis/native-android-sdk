@@ -13,7 +13,7 @@ data class Publication(
     val businessId: Id = "",
     val storeId: Id = "",
     val branding: Branding = Branding(),
-    val frontPageImageUrls: ImagesUrl = ImagesUrl(),
+    val frontPageImageUrls: ImageUrls = ImageUrls(),
     val runDateRange: ClosedRange<ValidityDate> = ValidityDateRange(distantPast(), distantFuture()),
     val types: List<PublicationTypes> = listOf(PublicationTypes.Paged),
 ) {
@@ -31,16 +31,3 @@ data class Publication(
 
 enum class PublicationTypes { Paged, Incito }
 
-data class Branding(
-    val name: String = "",
-    val website: String = "",
-    val description: String = "",
-    val logoURL: String = "",
-    val hexColor: HexColor = 0
-)
-
-data class ImagesUrl(
-    val view: String = "",
-    val zoom: String = "",
-    val thumb: String = ""
-)
