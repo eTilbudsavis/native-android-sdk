@@ -33,7 +33,7 @@ android {
         versionCode versionMajor * 100000 + versionMinor * 1000 + versionPatch
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
         applicationId "com.shopgun.android.sdk.demo"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 28
 //        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner "com.shopgun.android.sdk.demo.LegacyEventTestRunner" // to be used for tests on events (especially legacy)
