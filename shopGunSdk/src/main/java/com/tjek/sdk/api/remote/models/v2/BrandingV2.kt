@@ -13,7 +13,6 @@ data class BrandingV2(
     val description: String?,
     @Json(name = "logo")
     val logoURL: String?,
-    @Json(name = "color")
     @HexColor
     val color: Int?
 )
