@@ -42,11 +42,20 @@ object V2Mapper {
     }
 
     fun map(v2: ImageUrlsV2): ImageUrls {
-        return ImageUrls(
-            view = v2.view ?: "",
-            zoom = v2.zoom ?: "",
-            thumb = v2.thumb ?: ""
+        val view = ImageData(
+            width = estimatedViewWidth,
+            url = v2.view ?: ""
         )
+        val zoom = ImageData(
+            width = estimatedZoomWidth,
+            url = v2.zoom ?: ""
+        )
+        val thumb = ImageData(
+            width = estimatedThumbWidth,
+            url = v2.thumb ?: ""
+        )
+
+        return ImageUrls(listOf(view, zoom, thumb))
     }
 
     fun map(v2: List<PublicationTypesV2>): List<PublicationTypes> {
