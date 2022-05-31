@@ -16,10 +16,10 @@ fun PublicationV2.toPublication(): Publication {
         pageCount = pageCount ?: 0,
         label = label ?: "",
         isAvailableInAllStores = allStores ?: true,
-        businessId = businessId ?: "",
+        businessId = dealerId ?: "",
         storeId = storeId  ?: "",
         branding = branding?.toBranding() ?: Branding(),
-        frontPageImageUrls = frontPageImagesUrl?.toImagesUrl() ?: ImageUrls(),
+        frontPageImageUrls = frontPageImageUrls?.toImagesUrl() ?: ImageUrls(),
         types = types?.toListOfPublicationTypes() ?: listOf(PublicationTypes.Paged),
         runDateRange = ValidityDateRange(fromDate, tillDate)
     )

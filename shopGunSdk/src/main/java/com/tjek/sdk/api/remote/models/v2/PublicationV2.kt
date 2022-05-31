@@ -20,7 +20,7 @@ data class PublicationV2(
     @Json(name = "run_till")
     val runTillDateStr: ValidityDateStr?,
     @Json(name = "dealer_id")
-    val businessId: Id?,
+    val dealerId: Id?,
     @Json(name = "store_id")
     val storeId: Id?,
     @Json(name = "all_stores")
@@ -29,7 +29,7 @@ data class PublicationV2(
     val branding: BrandingV2?,
     val dimensions: DimensionsV2?,
     @Json(name = "images")
-    val frontPageImagesUrl: ImageUrlsV2?
+    val frontPageImageUrls: ImageUrlsV2?
 )
 
 @Suppress("EnumEntryName")
@@ -38,6 +38,6 @@ enum class PublicationTypesV2 { paged, incito }
 @Keep
 @JsonClass(generateAdapter = true)
 data class DimensionsV2(
-    val width: Float,
-    val height: Float
+    val width: Float?,
+    val height: Float?
 )
