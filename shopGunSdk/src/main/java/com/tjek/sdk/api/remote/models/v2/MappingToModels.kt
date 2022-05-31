@@ -28,7 +28,7 @@ fun PublicationV2.toPublication(): Publication {
 fun BrandingV2.toBranding(): Branding {
     return Branding(
         name = name ?: "",
-        website = website ?: "",
+        websiteUrl = website ?: "",
         description = description ?: "",
         logoURL = logoURL ?: "",
         hexColor = color ?: 0
@@ -50,4 +50,18 @@ fun List<PublicationTypesV2>.toListOfPublicationTypes(): List<PublicationTypes> 
         containsAll(listOf(PublicationTypesV2.paged, PublicationTypesV2.incito)) -> listOf(PublicationTypes.Paged, PublicationTypes.Incito)
         else -> listOf(PublicationTypes.Paged)
     }
+}
+
+fun DealerV2.toBusiness(): Business {
+    return Business(
+        id = id ?: "",
+        name = name ?: "",
+        websiteUrl = website ?: "",
+        description = description ?: "",
+        descriptionMarkdown = descriptionMarkdown ?: "",
+        logoOnWhiteUrl = logoOnWhiteUrl ?: "",
+        logoOnBrandColorUrl = pageFlip?.logoURL ?: "",
+        brandHexColor = color ?: 0,
+        country = country?.id ?: ""
+    )
 }
