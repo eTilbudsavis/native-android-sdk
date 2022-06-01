@@ -14,7 +14,7 @@ data class Publication(
     val storeId: Id = "",
     val branding: Branding = Branding(),
     val frontPageImageUrls: ImageUrls = ImageUrls(),
-    val runDateRange: ClosedRange<ValidityDate> = ValidityDateRange(distantPast(), distantFuture()),
+    val runDateRange: ClosedRange<ValidityDate> = distantPast()..distantFuture(),
     val types: List<PublicationTypes> = listOf(PublicationTypes.Paged),
 ) {
     // True if this publication can only be viewed as an incito (if viewed in a PagedPublication view it would appear as a single-page pdf)

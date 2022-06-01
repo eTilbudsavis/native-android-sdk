@@ -7,7 +7,7 @@ data class Offer(
     val heading: String = "",
     val description: String = "",
     val webshopUrl: String = "",
-    val runDateRange: ClosedRange<ValidityDate> = ValidityDateRange(distantPast(), distantFuture()),
+    val runDateRange: ClosedRange<ValidityDate> = distantPast()..distantFuture(),
     val visibleFrom: ValidityDate = distantPast(),
     val price: Float = 0f,
     val currency: String = "",

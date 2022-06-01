@@ -1,6 +1,5 @@
 package com.tjek.sdk.api.mappers
 
-import com.tjek.sdk.api.ValidityDateRange
 import com.tjek.sdk.api.distantFuture
 import com.tjek.sdk.api.distantPast
 import com.tjek.sdk.api.models.*
@@ -27,7 +26,7 @@ object V2Mapper {
             branding = v2.branding?.let { map(it) } ?: Branding(),
             frontPageImageUrls = v2.frontPageImageUrls?.let { map(it) } ?: ImageUrls(),
             types = v2.types?.let { map(it) } ?: listOf(PublicationTypes.Paged),
-            runDateRange = ValidityDateRange(fromDate, tillDate)
+            runDateRange = minOf(fromDate, tillDate)..maxOf(fromDate, tillDate)
         )
     }
 
@@ -100,13 +99,13 @@ object V2Mapper {
             heading = v2.heading ?: "",
             description = v2.description ?: "",
             webshopUrl = v2.links?.webshop ?: "",
-            runDateRange = fromDate..tillDate,
+            runDateRange = minOf(fromDate, tillDate)..maxOf(fromDate, tillDate),
             visibleFrom = v2.publishDateStr?.parse() ?: distantPast(),
             price = v2.price?.price?.toFloat() ?: 0f,
             currency = v2.price?.currency ?: "",
             savings = (prePrice - price).toFloat().takeIf { it > 0 } ?: 0f,
-            pieceCount = pieceCountFrom..pieceCountTo,
-            unitSize = sizeFrom..sizeTo,
+            pieceCount = minOf(pieceCountFrom, pieceCountTo)..maxOf(pieceCountFrom, pieceCountTo),
+            unitSize = minOf(sizeFrom, sizeTo)..maxOf(sizeFrom, sizeTo),
             unitSymbol = QuantityUnit.fromSymbol(v2.quantity?.unit?.symbol ?: QuantityUnit.Piece.symbol),
             branding = v2.branding?.let { map(it) } ?: Branding(),
             businessId = v2.dealerId ?: "",

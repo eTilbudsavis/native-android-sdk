@@ -34,6 +34,14 @@ fun ValidityDateStr.parse(): ValidityDate? {
     }
 }
 
+fun minOf(d1: ValidityDate, d2: ValidityDate): ValidityDate {
+    return if (d1 < d2) d1 else d2
+}
+
+fun maxOf(d1: ValidityDate, d2: ValidityDate): ValidityDate {
+    return if (d1 > d2) d1 else d2
+}
+
 fun distantPast(): ValidityDate {
     return OffsetDateTime.MIN
 }
