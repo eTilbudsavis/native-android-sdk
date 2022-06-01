@@ -80,4 +80,43 @@ object V2Mapper {
             country = v2.country?.id ?: ""
         )
     }
+
+    fun map(v2: OfferV2): Offer {
+        // sanity check on the dates
+        val fromDate = v2.runFromDateStr?.parse() ?: distantPast()
+        val tillDate = v2.runTillDateStr?.parse() ?: distantFuture()
+
+        val prePrice = (v2.price?.prePrice?.takeIf { it > 0 } ?: 0) as Double
+        val price = (v2.price?.price?.takeIf { it > 0 } ?: 0) as Double
+
+        val pieceCountFrom = (v2.quantity?.pieces?.from?.takeIf { it > 0 } ?: 1).toFloat()
+        val pieceCountTo = (v2.quantity?.pieces?.to?.takeIf { it > 0 } ?: 1).toFloat()
+
+        val sizeFrom = (v2.quantity?.size?.from?.takeIf { it > 0 } ?: 0).toFloat()
+        val sizeTo = (v2.quantity?.size?.to?.takeIf { it > 0 } ?: 0).toFloat()
+
+        return Offer(
+            id = v2.id ?: "",
+            heading = v2.heading ?: "",
+            description = v2.description ?: "",
+            webshopUrl = v2.links?.webshop ?: "",
+            runDateRange = fromDate..tillDate,
+            visibleFrom = v2.publishDateStr?.parse() ?: distantPast(),
+            price = v2.price?.price?.toFloat() ?: 0f,
+            currency = v2.price?.currency ?: "",
+            savings = (prePrice - price).toFloat().takeIf { it > 0 } ?: 0f,
+            pieceCount = pieceCountFrom..pieceCountTo,
+            unitSize = sizeFrom..sizeTo,
+            unitSymbol = QuantityUnit.fromSymbol(v2.quantity?.unit?.symbol ?: QuantityUnit.Piece.symbol),
+            branding = v2.branding?.let { map(it) } ?: Branding(),
+            businessId = v2.dealerId ?: "",
+            storeId = v2.storeId ?: "",
+            publicationInfo = PublicationInfo(
+                publicationId = v2.catalogId ?: "",
+                pagedPublicationPage = v2.catalogPage?.let { if (v2.catalogPage > 0) v2.catalogPage - 1 else 0 } ?: 0,
+                incitoViewId = v2.catalogViewId ?: ""
+            ),
+            imageUrls = v2.imageUrls?.let { map(it) } ?: ImageUrls()
+        )
+    }
 }

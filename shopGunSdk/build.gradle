@@ -98,6 +98,9 @@ dependencies {
     // New dependency list
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
+    // https://github.com/Digidemic/UnitOf
+    implementation files('libs/UnitOf.jar')
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
     implementation "com.squareup.retrofit2:converter-moshi:2.9.0"
