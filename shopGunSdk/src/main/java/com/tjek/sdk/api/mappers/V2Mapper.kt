@@ -43,15 +43,15 @@ object V2Mapper {
 
     fun map(v2: ImageUrlsV2): ImageUrls {
         val view = ImageData(
-            width = estimatedViewWidth,
+            width = avgViewWidth,
             url = v2.view ?: ""
         )
         val zoom = ImageData(
-            width = estimatedZoomWidth,
+            width = avgZoomWidth,
             url = v2.zoom ?: ""
         )
         val thumb = ImageData(
-            width = estimatedThumbWidth,
+            width = avgThumbWidth,
             url = v2.thumb ?: ""
         )
 
