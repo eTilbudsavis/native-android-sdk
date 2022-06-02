@@ -2,6 +2,7 @@ package com.tjek.sdk
 
 import android.content.Context
 import androidx.startup.Initializer
+import com.shopgun.android.sdk.BuildConfig
 import com.tjek.sdk.api.remote.EndpointEnvironment
 import com.tjek.sdk.api.remote.NetworkLogLevel
 import com.tjek.sdk.api.remote.APIClient
@@ -26,10 +27,11 @@ object TjekSDK {
         networkLogLevel: NetworkLogLevel = NetworkLogLevel.None,
         endpointEnvironment: EndpointEnvironment = EndpointEnvironment.PRODUCTION
     ) {
-        if (enableLogCatMessages)
+        if (BuildConfig.DEBUG && enableLogCatMessages)
             TjekLogCat.enableLogging()
         with(APIClient) {
-            logLevel = networkLogLevel
+            if (BuildConfig.DEBUG)
+                logLevel = networkLogLevel
             environment = endpointEnvironment
         }
     }
