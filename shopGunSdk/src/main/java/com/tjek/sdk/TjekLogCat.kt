@@ -31,4 +31,8 @@ internal object TjekLogCat {
         if (!logEnabled.get()) return
         Log.w(tag, message)
     }
+
+    fun forceE(message: String) {
+        Log.e(tag, message)
+    }
 }
