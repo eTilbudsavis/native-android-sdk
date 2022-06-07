@@ -93,6 +93,7 @@ internal object APIClient {
             .scheme("https")
             .authority(environment.host)
             .appendPath("v2")
+            .appendPath("") // it adds a final "/" needed by Retrofit baseUrl
         return builder.build().toString()
     }
 

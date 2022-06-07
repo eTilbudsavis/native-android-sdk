@@ -11,7 +11,7 @@ internal object NetworkRequest {
 
     private val publicationService: PublicationService by lazy { APIClient.getV2Client().create(PublicationService::class.java) }
 
-    suspend fun getCatalogs(): List<Publication> {
+    suspend fun getPublications(): List<Publication> {
         try {
             val response = publicationService.getCatalogs()
             if (response.isSuccessful) {
@@ -25,6 +25,21 @@ internal object NetworkRequest {
         } catch (e: Exception) {
             TjekLogCat.e(e.printStackTrace().toString())
             return emptyList()
+        }
+    }
+
+    suspend fun getPublication(publicationId: Id): Publication {
+        try {
+            val response = publicationService.getCatalog(publicationId)
+            if (response.isSuccessful) {
+                response.body()?.let { p ->
+                    return V2Mapper.map(p)
+                }
+            }
+            return Publication()
+        } catch (e: Exception) {
+            TjekLogCat.e(e.printStackTrace().toString())
+            return Publication()
         }
     }
 }

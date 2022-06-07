@@ -4,7 +4,11 @@ import com.tjek.sdk.api.models.Publication
 
 object TjekAPI {
 
-    suspend fun getCatalogs(): List<Publication> {
-        return NetworkRequest.getCatalogs()
+    suspend fun getPublications(): List<Publication> {
+        return NetworkRequest.getPublications()
+    }
+
+    suspend fun getPublication(publicationId: Id): Publication {
+        return NetworkRequest.getPublication(publicationId)
     }
 }
