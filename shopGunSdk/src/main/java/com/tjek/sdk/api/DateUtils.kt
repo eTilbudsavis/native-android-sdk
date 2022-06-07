@@ -49,34 +49,3 @@ fun distantPast(): ValidityDate {
 fun distantFuture(): ValidityDate {
     return OffsetDateTime.MAX
 }
-
-
-// Note  run_till (v2) is including. v4/valid_until is excluding. So 2022-12-31T23:00:00.000Z in v4 means when this time occurs, it's expired.
-
-class ValidityDateIterator(val startDate: ValidityDate,
-                           val endDateInclusive: ValidityDate,
-                           val stepDays: Long): Iterator<ValidityDate> {
-
-    private var currentDate = startDate
-
-    override fun hasNext() = currentDate.plusDays(stepDays) <= endDateInclusive
-
-    override fun next(): ValidityDate {
-        val next = currentDate
-        currentDate = currentDate.plusDays(stepDays)
-        return next
-    }
-}
-
-class ValidityDateRange(override val start: ValidityDate,
-                        override val endInclusive: ValidityDate,
-                        val stepDays: Long = 1) : Iterable<ValidityDate>, ClosedRange<ValidityDate> {
-
-    override fun iterator(): Iterator<ValidityDate> =
-        ValidityDateIterator(start, endInclusive, stepDays)
-
-    infix fun step(days: Long) = ValidityDateRange(start, endInclusive, days)
-
-}
-
-operator fun ValidityDate.rangeTo(other: ValidityDate) = ValidityDateRange(this, other)

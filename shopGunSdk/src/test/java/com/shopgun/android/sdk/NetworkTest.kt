@@ -1,7 +1,11 @@
 package com.shopgun.android.sdk
 
+import android.os.Bundle
+import android.os.Parcel
 import com.tjek.sdk.TjekSDK
 import com.tjek.sdk.api.TjekAPI
+import com.tjek.sdk.api.models.Branding
+import com.tjek.sdk.api.models.Publication
 import com.tjek.sdk.api.remote.EndpointEnvironment
 import com.tjek.sdk.api.remote.NetworkLogLevel
 import kotlinx.coroutines.runBlocking
@@ -40,6 +44,29 @@ class NetworkTest {
             Assert.assertEquals(true, list.isNotEmpty())
             val pub = TjekAPI.getPublication(list[0].id)
             Assert.assertEquals(true, pub.id.isNotBlank())
+        }
+    }
+
+    @Test
+    fun testPublicationParcel() {
+        TjekSDK.configure(
+            enableLogCatMessages = true,
+            endpointEnvironment = EndpointEnvironment.STAGING
+        )
+        runBlocking {
+            val list = TjekAPI.getPublications()
+            Assert.assertEquals(true, list.isNotEmpty())
+            val pub = TjekAPI.getPublication(list[0].id)
+            Assert.assertEquals(true, pub.id.isNotBlank())
+
+            val b = Bundle()
+            b.putParcelable("data", pub)
+            val data: Publication? = b.getParcelable("data")
+            Assert.assertEquals(pub.id, data?.id ?: "")
+            Assert.assertEquals(pub.runDateRange.start, data?.runDateRange?.start)
+            Assert.assertEquals(pub.runDateRange.endInclusive, data?.runDateRange?.endInclusive)
+            Assert.assertEquals(pub.hasIncitoPublication, data?.hasIncitoPublication)
+            Assert.assertEquals(pub.hasPagedPublication, data?.hasPagedPublication)
         }
     }
 }
