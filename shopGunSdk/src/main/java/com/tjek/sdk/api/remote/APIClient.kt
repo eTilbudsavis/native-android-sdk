@@ -88,7 +88,7 @@ internal object APIClient {
         }
     }
 
-    fun getV2Client(): Retrofit {
+    fun getClient(): Retrofit {
 
         val mOkHttpClient = OkHttpClient
             .Builder()
