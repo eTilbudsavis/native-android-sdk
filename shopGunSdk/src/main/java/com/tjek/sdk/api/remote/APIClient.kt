@@ -101,8 +101,8 @@ internal object APIClient {
 
         val mOkHttpClient = OkHttpClient
             .Builder()
-            .addInterceptor(getLoggingInterceptor(logLevel))
             .addInterceptor(getV2HeaderInterceptor(apiKey))
+            .addInterceptor(getLoggingInterceptor(logLevel))
             .build()
 
         val moshi = Moshi.Builder()
@@ -111,7 +111,7 @@ internal object APIClient {
             .build()
 
         return Retrofit.Builder()
-            .baseUrl(getV2BaseUrl(environment))
+            .baseUrl("https://${environment.host}/")
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(mOkHttpClient)
             .build()

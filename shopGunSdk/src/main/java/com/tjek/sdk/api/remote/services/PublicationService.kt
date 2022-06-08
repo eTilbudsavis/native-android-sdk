@@ -8,9 +8,9 @@ import retrofit2.http.Path
 
 interface PublicationService {
 
-    @GET("catalogs/{catalogId}")
+    @GET("v2/catalogs/{catalogId}")
     suspend fun getCatalog(@Path("catalogId") catalogId: Id): Response<PublicationV2>
 
-    @GET("catalogs")
+    @GET("v2/catalogs")
     suspend fun getCatalogs(): Response<List<PublicationV2>>
 }
