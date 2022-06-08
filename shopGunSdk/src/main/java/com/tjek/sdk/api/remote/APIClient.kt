@@ -88,15 +88,6 @@ internal object APIClient {
         }
     }
 
-    private fun getV2BaseUrl(environment: EndpointEnvironment): String {
-        val builder = Uri.Builder()
-            .scheme("https")
-            .authority(environment.host)
-            .appendPath("v2")
-            .appendPath("") // it adds a final "/" needed by Retrofit baseUrl
-        return builder.build().toString()
-    }
-
     fun getV2Client(): Retrofit {
 
         val mOkHttpClient = OkHttpClient
