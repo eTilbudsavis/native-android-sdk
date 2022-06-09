@@ -56,8 +56,8 @@ data class PublicationV2(
     companion object {
         fun fromDecodable(p: PublicationV2Decodable): PublicationV2 {
             // sanity check on the dates
-            val fromDate = p.runFromDateStr?.parse() ?: distantPast()
-            val tillDate = p.runTillDateStr?.parse() ?: distantFuture()
+            val fromDate = p.runFromDateStr?.toValidityDate() ?: distantPast()
+            val tillDate = p.runTillDateStr?.toValidityDate() ?: distantFuture()
 
             val width = p.dimensions?.width ?: 1.0
             val height = p.dimensions?.height ?: 1.0

@@ -32,8 +32,8 @@ data class OfferV2(
     companion object {
         fun fromDecodable(o: OfferV2Decodable): OfferV2 {
             // sanity check on the dates
-            val fromDate = o.runFromDateStr?.parse() ?: distantPast()
-            val tillDate = o.runTillDateStr?.parse() ?: distantFuture()
+            val fromDate = o.runFromDateStr?.toValidityDate() ?: distantPast()
+            val tillDate = o.runTillDateStr?.toValidityDate() ?: distantFuture()
 
             return OfferV2(
                 id = o.id,
@@ -42,7 +42,7 @@ data class OfferV2(
                 images = o.imageUrls ?: ImageUrlsV2("", "", ""),
                 webshopURL = o.links?.webshop,
                 runDateRange = minOf(fromDate, tillDate)..maxOf(fromDate, tillDate),
-                publishDate = o.publishDateStr?.parse(),
+                publishDate = o.publishDateStr?.toValidityDate(),
                 price = o.price,
                 quantity = o.quantity,
                 branding = o.branding,

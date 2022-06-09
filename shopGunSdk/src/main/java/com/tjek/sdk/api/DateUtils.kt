@@ -25,7 +25,7 @@ private var parser: DateTimeFormatter = DateTimeFormatterBuilder()
     .parseCaseInsensitive()
     .toFormatter(Locale.ENGLISH)
 
-fun ValidityDateStr.parse(): ValidityDate? {
+fun ValidityDateStr.toValidityDate(): ValidityDate? {
     return try {
         OffsetDateTime.parse(this, parser)
     }catch (e: Exception) {
@@ -48,4 +48,30 @@ fun distantPast(): ValidityDate {
 
 fun distantFuture(): ValidityDate {
     return OffsetDateTime.MAX
+}
+
+fun TimeOfDayStr.toTimeOfDay(): TimeOfDay {
+    var hours = 0
+    var minutes = 0
+    var seconds = 0
+    try {
+        // seconds could fail in case of weird patterns like 08:00:00-0100. In that case, just ignore it
+        val components = split(':').map { it.toIntOrNull() ?: 0 }
+        hours = if (components.isNotEmpty()) components[0] else 0
+        minutes = if (components.size > 1) components[1] else 0
+        seconds = if (components.size > 2) components[2] else 0
+    } catch (e: Exception) {
+        TjekLogCat.printStackTrace(e)
+    }
+    return try {
+        TimeOfDay.of(hours, minutes, seconds)
+    } catch (e: java.lang.Exception) {
+        // if the hours were bogus, like 24:00:12
+        TjekLogCat.printStackTrace(e)
+        TimeOfDay.MIDNIGHT
+    }
+}
+
+fun DayOfWeekStr.toDayOfWeek(): DayOfWeek {
+    return DayOfWeek.valueOf(uppercase(Locale.ENGLISH))
 }

@@ -1,13 +1,18 @@
 package com.tjek.sdk.api.remote.models.v2
 
+import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.Keep
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import com.tjek.sdk.api.Id
+import com.tjek.sdk.api.*
 import com.tjek.sdk.api.models.Coordinate
+import com.tjek.sdk.api.models.OpeningHoursDateRange
+import com.tjek.sdk.api.models.rangeTo
 import kotlinx.parcelize.Parcelize
-import org.json.JSONArray
+import java.time.DayOfWeek
+import java.time.LocalTime
+import java.util.*
 
 @Parcelize
 data class StoreV2(
@@ -19,7 +24,7 @@ data class StoreV2(
     val coordinate: Coordinate,
     val businessId: Id,
     val branding: BrandingV2,
-//    val openingHours: [OpeningHours_v2] todo
+    val openingHours: List<OpeningHours>?,
     val contact: String?
 ): Parcelable {
 
@@ -34,8 +39,87 @@ data class StoreV2(
                 coordinate = Coordinate(s.latitude, s.longitude),
                 businessId = s.businessId,
                 branding = s.branding,
-                contact = s.contact
+                contact = s.contact,
+                openingHours = s.openingHours?.let { readOpeningHours(it) }
             )
+        }
+
+        // transform the raw hours into something more refined
+        private fun readOpeningHours(oh: List<OpeningHoursDecodable>): List<OpeningHours> {
+            val openingHours = ArrayList<OpeningHours>(oh.size)
+            oh.forEach { with(it) {
+                val from = validFrom?.toValidityDate()?.toLocalDate()
+
+                // NOTE: the date range have meaning only in their date component (our api allow only date-time),
+                // this means that the "until" date has to be moved to the previous day to have a correct range in case the time is set to midnight.
+                // Example: one day range (30/03) is { valid_from: '2022-03-30T00:00:00Z', valid_until: '2022-03-31T00:00:00Z' }
+                // Example: one day range (30/03) is { valid_from: '2022-03-30T00:00:00Z', valid_until: '2022-03-30T23:00:00Z' }
+                val dateTimeUntil = validUntil?.toValidityDate()?.toLocalDateTime()
+                val till =
+                    if (dateTimeUntil?.toLocalTime() == LocalTime.MIDNIGHT) dateTimeUntil?.toLocalDate()?.minusDays(1)
+                    else dateTimeUntil?.toLocalDate()
+
+                when {
+                    opens != null && closes != null && dayOfWeekStr != null ->
+                        openingHours.add(OpeningHours.OpenDay(dayOfWeekStr.toDayOfWeek(), DailyHours(opens.toTimeOfDay(), closes.toTimeOfDay())))
+                    opens != null && closes != null && from != null && till != null ->
+                        openingHours.add(OpeningHours.DateRange(from..till, DailyHours(opens.toTimeOfDay(), closes.toTimeOfDay())))
+                    from != null && till != null ->
+                        openingHours.add(OpeningHours.DateRangeClosed(from..till))
+                    dayOfWeekStr != null ->
+                        openingHours.add(OpeningHours.ClosedDay(dayOfWeekStr.toDayOfWeek()))
+                }
+            } }
+
+            return openingHours
+        }
+    }
+}
+
+sealed class OpeningHours : Parcelable {
+
+    @Parcelize
+    // normal opening hours
+    data class OpenDay(val dayOfWeek: DayOfWeek, val dailyHours: DailyHours): OpeningHours()
+
+    @Parcelize
+    // holiday hours (e.g. reduced opening hours)
+    data class DateRange(val dateRange: OpeningHoursDateRange, val dailyHours: DailyHours): OpeningHours()
+
+    @Parcelize
+    // holiday closed date
+    data class DateRangeClosed(val dateRange: OpeningHoursDateRange): OpeningHours()
+
+    @Parcelize
+    // closing day
+    data class ClosedDay(val dayOfWeek: DayOfWeek): OpeningHours()
+}
+
+data class DailyHours(
+    val opens: TimeOfDay,
+    val closes: TimeOfDay
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        LocalTime.ofNanoOfDay(parcel.readLong()),
+        LocalTime.ofNanoOfDay(parcel.readLong())
+    )
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeLong(opens.toNanoOfDay())
+        parcel.writeLong(closes.toNanoOfDay())
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<DailyHours> {
+        override fun createFromParcel(parcel: Parcel): DailyHours {
+            return DailyHours(parcel)
+        }
+
+        override fun newArray(size: Int): Array<DailyHours?> {
+            return arrayOfNulls(size)
         }
     }
 }
@@ -56,5 +140,18 @@ data class StoreV2Decodable(
     val branding: BrandingV2,
     val contact: String?,
     @Json(name = "opening_hours")
-    val openingHours: JSONArray?
+    val openingHours: List<OpeningHoursDecodable>?
+)
+
+@Keep
+@JsonClass(generateAdapter = true)
+data class OpeningHoursDecodable (
+    @Json(name = "day_of_week")
+    val dayOfWeekStr: DayOfWeekStr?,
+    @Json(name = "valid_from")
+    val validFrom: ValidityDateStr?,
+    @Json(name = "valid_until")
+    val validUntil: ValidityDateStr?,
+    val opens: TimeOfDayStr?,
+    val closes: TimeOfDayStr?
 )
