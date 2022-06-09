@@ -61,9 +61,9 @@ data class StoreV2(
 
                 when {
                     opens != null && closes != null && dayOfWeekStr != null ->
-                        openingHours.add(OpeningHours.OpenDay(dayOfWeekStr.toDayOfWeek(), DailyHours(opens.toTimeOfDay(), closes.toTimeOfDay())))
+                        openingHours.add(OpeningHours.OpenDay(dayOfWeekStr.toDayOfWeek(), OpenHour(opens.toTimeOfDay(), closes.toTimeOfDay())))
                     opens != null && closes != null && from != null && till != null ->
-                        openingHours.add(OpeningHours.DateRange(from..till, DailyHours(opens.toTimeOfDay(), closes.toTimeOfDay())))
+                        openingHours.add(OpeningHours.DateRangeOpen(from..till, OpenHour(opens.toTimeOfDay(), closes.toTimeOfDay())))
                     from != null && till != null ->
                         openingHours.add(OpeningHours.DateRangeClosed(from..till))
                     dayOfWeekStr != null ->
@@ -80,11 +80,11 @@ sealed class OpeningHours : Parcelable {
 
     @Parcelize
     // normal opening hours
-    data class OpenDay(val dayOfWeek: DayOfWeek, val dailyHours: DailyHours): OpeningHours()
+    data class OpenDay(val dayOfWeek: DayOfWeek, val dailyHours: OpenHour): OpeningHours()
 
     @Parcelize
     // holiday hours (e.g. reduced opening hours)
-    data class DateRange(val dateRange: OpeningHoursDateRange, val dailyHours: DailyHours): OpeningHours()
+    data class DateRangeOpen(val dateRange: OpeningHoursDateRange, val dailyHours: OpenHour): OpeningHours()
 
     @Parcelize
     // holiday closed date
@@ -95,7 +95,7 @@ sealed class OpeningHours : Parcelable {
     data class ClosedDay(val dayOfWeek: DayOfWeek): OpeningHours()
 }
 
-data class DailyHours(
+data class OpenHour(
     val opens: TimeOfDay,
     val closes: TimeOfDay
 ) : Parcelable {
@@ -113,12 +113,12 @@ data class DailyHours(
         return 0
     }
 
-    companion object CREATOR : Parcelable.Creator<DailyHours> {
-        override fun createFromParcel(parcel: Parcel): DailyHours {
-            return DailyHours(parcel)
+    companion object CREATOR : Parcelable.Creator<OpenHour> {
+        override fun createFromParcel(parcel: Parcel): OpenHour {
+            return OpenHour(parcel)
         }
 
-        override fun newArray(size: Int): Array<DailyHours?> {
+        override fun newArray(size: Int): Array<OpenHour?> {
             return arrayOfNulls(size)
         }
     }
