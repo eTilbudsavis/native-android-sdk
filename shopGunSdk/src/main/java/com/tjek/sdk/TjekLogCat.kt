@@ -32,6 +32,11 @@ internal object TjekLogCat {
         Log.w(tag, message)
     }
 
+    fun printStackTrace(e: Exception) {
+        if (!logEnabled.get()) return
+        e.printStackTrace()
+    }
+
     fun forceE(message: String) {
         Log.e(tag, message)
     }
