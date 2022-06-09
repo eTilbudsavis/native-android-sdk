@@ -1,10 +1,8 @@
 package com.shopgun.android.sdk
 
 import android.os.Bundle
-import android.os.Parcel
 import com.tjek.sdk.TjekSDK
 import com.tjek.sdk.api.TjekAPI
-import com.tjek.sdk.api.models.Branding
 import com.tjek.sdk.api.models.Publication
 import com.tjek.sdk.api.remote.EndpointEnvironment
 import com.tjek.sdk.api.remote.NetworkLogLevel

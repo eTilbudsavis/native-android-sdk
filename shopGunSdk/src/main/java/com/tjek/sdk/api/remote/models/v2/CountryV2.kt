@@ -7,5 +7,5 @@ import com.tjek.sdk.api.Id
 @Keep
 @JsonClass(generateAdapter = true)
 data class CountryV2(
-    val id:Id?
+    val id:Id
 )

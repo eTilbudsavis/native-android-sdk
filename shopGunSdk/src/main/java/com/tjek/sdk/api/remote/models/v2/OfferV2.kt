@@ -1,16 +1,68 @@
 package com.tjek.sdk.api.remote.models.v2
 
+import android.os.Parcelable
 import androidx.annotation.Keep
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import com.tjek.sdk.api.Id
-import com.tjek.sdk.api.ValidityDateStr
+import com.tjek.sdk.api.*
+import com.tjek.sdk.api.models.ValidityPeriod
+import com.tjek.sdk.api.models.rangeTo
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+data class OfferV2(
+    val id: Id,
+    val heading: String,
+    val description: String?,
+    val images: ImageUrlsV2,
+    val webshopURL: String?,
+    val runDateRange: ValidityPeriod,
+    val publishDate: PublishDate?,
+    val price: PriceV2?,
+    val quantity: QuantityV2?,
+    val branding: BrandingV2?,
+    val publicationId: Id?,
+    val publicationPageIndex: Int?,
+    val incitoViewId: String?,
+    val businessId: Id,
+    // The id of the nearest store. Only available if a location was provided when fetching the offer.
+    val storeId: Id?
+): Parcelable {
+
+    companion object {
+        fun fromDecodable(o: OfferV2Decodable): OfferV2 {
+            // sanity check on the dates
+            val fromDate = o.runFromDateStr?.parse() ?: distantPast()
+            val tillDate = o.runTillDateStr?.parse() ?: distantFuture()
+
+            return OfferV2(
+                id = o.id,
+                heading = o.heading,
+                description = o.description,
+                images = o.imageUrls ?: ImageUrlsV2("", "", ""),
+                webshopURL = o.links?.webshop,
+                runDateRange = minOf(fromDate, tillDate)..maxOf(fromDate, tillDate),
+                publishDate = o.publishDateStr?.parse(),
+                price = o.price,
+                quantity = o.quantity,
+                branding = o.branding,
+                publicationId = o.catalogId,
+                // incito publications have pageNum == 0, so in that case set to nil.
+                // otherwise, convert pageNum to index.
+                publicationPageIndex = o.catalogPage?.let { if (it > 0) it -1 else null },
+                incitoViewId = o.catalogViewId,
+                businessId = o.businessId,
+                storeId = o.storeId
+            )
+        }
+    }
+}
 
 @Keep
 @JsonClass(generateAdapter = true)
-data class OfferV2(
-    val id: Id?,
-    val heading: String?,
+data class OfferV2Decodable(
+    val id: Id,
+    val heading: String,
     val description: String?,
     @Json(name = "images")
     val imageUrls: ImageUrlsV2?,
@@ -32,7 +84,7 @@ data class OfferV2(
     @Json(name = "catalog_view_id")
     val catalogViewId: Id?,
     @Json(name = "dealer_id")
-    val dealerId: Id?,
+    val businessId: Id,
     @Json(name = "store_id")
     val storeId: Id?
 )
@@ -45,45 +97,51 @@ data class LinksV2(
 
 @Keep
 @JsonClass(generateAdapter = true)
+@Parcelize
 data class PriceV2(
-    val price: Double?,
+    val currency: String,
+    val price: Double,
     @Json(name = "pre_price")
     val prePrice: Double?,
-    val currency: String?
-)
+): Parcelable
 
 @Keep
 @JsonClass(generateAdapter = true)
+@Parcelize
 data class QuantityV2(
     val unit: UnitV2?,
-    val size: SizeV2?,
-    val pieces: PiecesV2?
-)
+    val size: SizeV2,
+    val pieces: PiecesV2
+): Parcelable
 
 @Keep
 @JsonClass(generateAdapter = true)
+@Parcelize
 data class PiecesV2(
     val from: Int?,
     val to: Int?
-)
+): Parcelable
 
 @Keep
 @JsonClass(generateAdapter = true)
+@Parcelize
 data class SizeV2(
     val from: Double?,
     val to: Double?
-)
+): Parcelable
 
 @Keep
 @JsonClass(generateAdapter = true)
+@Parcelize
 data class UnitV2(
-    val symbol: String?,
-    val si: SiV2?
-)
+    val symbol: String,
+    val si: SiV2
+): Parcelable
 
 @Keep
 @JsonClass(generateAdapter = true)
+@Parcelize
 data class SiV2(
-    val symbol: String?,
-    val factor: Double?
-)
+    val symbol: String,
+    val factor: Double
+): Parcelable

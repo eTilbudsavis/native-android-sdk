@@ -2,7 +2,6 @@ package com.tjek.sdk.api.remote
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.net.Uri
 import androidx.core.os.LocaleListCompat
 import com.shopgun.android.sdk.BuildConfig
 import com.squareup.moshi.Moshi
@@ -10,8 +9,7 @@ import com.squareup.moshi.adapters.EnumJsonAdapter
 import com.tjek.sdk.META_API_KEY
 import com.tjek.sdk.META_DEVELOP_API_KEY
 import com.tjek.sdk.TjekLogCat
-import com.tjek.sdk.api.remote.models.ColorAdapter
-import com.tjek.sdk.api.remote.models.v2.PublicationTypesV2
+import com.tjek.sdk.api.remote.models.v2.PublicationType
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -97,8 +95,7 @@ internal object APIClient {
             .build()
 
         val moshi = Moshi.Builder()
-            .add(ColorAdapter())
-            .add(PublicationTypesV2::class.java, EnumJsonAdapter.create(PublicationTypesV2::class.java).withUnknownFallback(PublicationTypesV2.paged))
+            .add(PublicationType::class.java, EnumJsonAdapter.create(PublicationType::class.java).withUnknownFallback(PublicationType.paged))
             .build()
 
         return Retrofit.Builder()
