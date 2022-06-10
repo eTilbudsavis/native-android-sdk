@@ -7,6 +7,7 @@ import com.tjek.sdk.api.remote.EndpointEnvironment
 import com.tjek.sdk.api.remote.NetworkLogLevel
 import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.api.remote.models.v2.PublicationV2
+import com.tjek.sdk.api.remote.models.v2.StoreV2
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
@@ -74,6 +75,24 @@ class NetworkTest {
             Assert.assertEquals(pub.data!!.runDateRange.endInclusive, data?.runDateRange?.endInclusive)
             Assert.assertEquals(pub.data!!.hasIncitoPublication, data?.hasIncitoPublication)
             Assert.assertEquals(pub.data!!.hasPagedPublication, data?.hasPagedPublication)
+        }
+    }
+
+    @Test
+    fun testStoreParcel() {
+        TjekSDK.configure(
+            enableLogCatMessages = true,
+            endpointEnvironment = EndpointEnvironment.STAGING
+        )
+        runBlocking {
+            val store = TjekAPI.getStore("2y-IoB4cMW4hkgI5GCBRN")
+            Assert.assertEquals(true, store.data!!.id.isNotBlank())
+
+            val b = Bundle()
+            b.putParcelable("data", store.data)
+            val data: StoreV2? = b.getParcelable("data")
+            Assert.assertEquals(store.data!!.id, data?.id ?: "")
+            Assert.assertEquals(store.data!!.openingHours?.size, data?.openingHours?.size)
         }
     }
 }
