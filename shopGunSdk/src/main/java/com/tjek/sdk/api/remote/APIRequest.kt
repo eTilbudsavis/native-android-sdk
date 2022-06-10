@@ -1,8 +1,8 @@
 package com.tjek.sdk.api.remote
 
 import com.tjek.sdk.api.Id
-import com.tjek.sdk.api.remote.models.v2.PublicationV2
-import com.tjek.sdk.api.remote.models.v2.StoreV2
+import com.tjek.sdk.api.models.PublicationV2
+import com.tjek.sdk.api.models.StoreV2
 import com.tjek.sdk.api.remote.services.PublicationService
 import com.tjek.sdk.api.remote.services.StoreService
 

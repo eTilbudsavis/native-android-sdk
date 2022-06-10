@@ -9,7 +9,7 @@ import com.squareup.moshi.adapters.EnumJsonAdapter
 import com.tjek.sdk.META_API_KEY
 import com.tjek.sdk.META_DEVELOP_API_KEY
 import com.tjek.sdk.TjekLogCat
-import com.tjek.sdk.api.remote.models.v2.PublicationType
+import com.tjek.sdk.api.models.PublicationType
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

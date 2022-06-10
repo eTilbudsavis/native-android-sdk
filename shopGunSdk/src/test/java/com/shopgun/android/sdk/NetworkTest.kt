@@ -6,8 +6,8 @@ import com.tjek.sdk.api.TjekAPI
 import com.tjek.sdk.api.remote.EndpointEnvironment
 import com.tjek.sdk.api.remote.NetworkLogLevel
 import com.tjek.sdk.api.remote.ResponseType
-import com.tjek.sdk.api.remote.models.v2.PublicationV2
-import com.tjek.sdk.api.remote.models.v2.StoreV2
+import com.tjek.sdk.api.models.PublicationV2
+import com.tjek.sdk.api.models.StoreV2
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test

@@ -2,8 +2,8 @@ package com.tjek.sdk.api
 
 import com.tjek.sdk.api.remote.APIRequest
 import com.tjek.sdk.api.remote.ResponseType
-import com.tjek.sdk.api.remote.models.v2.PublicationV2
-import com.tjek.sdk.api.remote.models.v2.StoreV2
+import com.tjek.sdk.api.models.PublicationV2
+import com.tjek.sdk.api.models.StoreV2
 
 object TjekAPI {
 

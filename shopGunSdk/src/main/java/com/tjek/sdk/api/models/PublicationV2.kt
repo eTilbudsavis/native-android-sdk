@@ -1,12 +1,13 @@
-package com.tjek.sdk.api.remote.models.v2
+package com.tjek.sdk.api.models
 
 import android.os.Parcelable
-import androidx.annotation.Keep
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
-import com.tjek.sdk.api.*
-import com.tjek.sdk.api.models.ValidityPeriod
-import com.tjek.sdk.api.models.rangeTo
+import com.tjek.sdk.api.Id
+import com.tjek.sdk.api.distantFuture
+import com.tjek.sdk.api.distantPast
+import com.tjek.sdk.api.remote.models.v2.BrandingV2
+import com.tjek.sdk.api.remote.models.v2.ImageUrlsV2
+import com.tjek.sdk.api.remote.models.v2.PublicationV2Decodable
+import com.tjek.sdk.api.toValidityDate
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -67,7 +68,10 @@ data class PublicationV2(
                 label = p.label,
                 pageCount = p.pageCount ?: 0,
                 offerCount = p.offerCount ?: 0,
-                runDateRange = minOf(fromDate, tillDate)..maxOf(fromDate, tillDate),
+                runDateRange = com.tjek.sdk.api.minOf(fromDate, tillDate)..com.tjek.sdk.api.maxOf(
+                    fromDate,
+                    tillDate
+                ),
                 aspectRatio = width / height,
                 branding = p.branding,
                 frontPageImages = p.frontPageImageUrls ?: ImageUrlsV2("", "", ""),
@@ -80,38 +84,5 @@ data class PublicationV2(
     }
 }
 
-@Keep
-@JsonClass(generateAdapter = true)
-data class PublicationV2Decodable(
-    val id: Id,
-    val label: String?,
-    @Json(name = "page_count")
-    val pageCount: Int?,
-    @Json(name = "offer_count")
-    val offerCount: Int?,
-    @Json(name = "run_from")
-    val runFromDateStr: ValidityDateStr?,
-    @Json(name = "run_till")
-    val runTillDateStr: ValidityDateStr?,
-    @Json(name = "dealer_id")
-    val businessId: Id,
-    @Json(name = "store_id")
-    val storeId: Id?,
-    @Json(name = "all_stores")
-    val allStores: Boolean?,
-    val types: List<PublicationType>?,
-    val branding: BrandingV2,
-    val dimensions: DimensionsV2?,
-    @Json(name = "images")
-    val frontPageImageUrls: ImageUrlsV2?
-)
-
 @Suppress("EnumEntryName")
 enum class PublicationType { paged, incito }
-
-@Keep
-@JsonClass(generateAdapter = true)
-data class DimensionsV2(
-    val width: Double?,
-    val height: Double?
-)
