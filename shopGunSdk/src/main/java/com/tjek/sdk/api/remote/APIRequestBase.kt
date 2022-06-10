@@ -4,13 +4,13 @@ import retrofit2.Response
 
 internal abstract class APIRequestBase {
 
-    suspend fun <T> safeApiCall(apiCall: suspend () -> Response<T>): ResponseType<T> {
+    suspend fun <T,V> safeApiCall(decoder: suspend (V) -> T, apiCall: suspend () -> Response<V>): ResponseType<T> {
         try {
             val response = apiCall()
             if (response.isSuccessful) {
                 val body = response.body()
                 body?.let {
-                    return ResponseType.Success(body)
+                    return ResponseType.Success(decoder(body))
                 }
             }
             return error("${response.code()} ${response.message()}")
