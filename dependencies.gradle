@@ -24,11 +24,8 @@ ext {
 
             // internal libs
             markhor                     : "com.github.shopgun:markhor:2.0.2",
-//            markhor                     : project(':markhor'),
             zoomlayout                  : "com.github.shopgun:zoomlayout:3.0.0",
-//            zoomlayout                  : project(':zoomlayout'),
             verso                       : "com.github.shopgun:verso-android:3.0.0",
-//            verso                       : project(':verso'),
             materialcolorcreator        : "com.github.shopgun:material-color-creator-android:2.0.0",
 
             // support libs
