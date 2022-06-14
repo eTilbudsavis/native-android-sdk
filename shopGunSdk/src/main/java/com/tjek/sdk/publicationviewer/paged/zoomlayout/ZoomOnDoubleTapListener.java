@@ -1,6 +1,6 @@
 package com.tjek.sdk.publicationviewer.paged.zoomlayout;
 
-public class ZoomOnDoubleTapListener implements OnDoubleTapListener {
+public class ZoomOnDoubleTapListener implements ZoomLayoutInterface.OnDoubleTapListener {
 
     private boolean mThreeStep = false;
 

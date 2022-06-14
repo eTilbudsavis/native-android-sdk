@@ -80,12 +80,12 @@ public class ZoomLayout extends FrameLayout {
     // Listeners
     private final ZoomDispatcher zoomDispatcher = new ZoomDispatcher();
     private final PanDispatcher panDispatcher = new PanDispatcher();
-    private List<OnZoomListener> onZoomListeners;
-    private List<OnPanListener> onPanListeners;
-    private List<OnZoomTouchListener> onTouchListeners;
-    private List<OnTapListener> onTapListeners;
-    private List<OnDoubleTapListener> onDoubleTapListeners;
-    private List<OnLongTapListener> onLongTapListeners;
+    private List<ZoomLayoutInterface.OnZoomListener> onZoomListeners;
+    private List<ZoomLayoutInterface.OnPanListener> onPanListeners;
+    private List<ZoomLayoutInterface.OnZoomTouchListener> onTouchListeners;
+    private List<ZoomLayoutInterface.OnTapListener> onTapListeners;
+    private List<ZoomLayoutInterface.OnDoubleTapListener> onDoubleTapListeners;
+    private List<ZoomLayoutInterface.OnLongTapListener> onLongTapListeners;
 
     public ZoomLayout(Context context) {
         super(context);
@@ -851,14 +851,14 @@ public class ZoomLayout extends FrameLayout {
         }
     }
 
-    public void addOnTouchListener(OnZoomTouchListener l) {
+    public void addOnTouchListener(ZoomLayoutInterface.OnZoomTouchListener l) {
         if (onTouchListeners == null) {
             onTouchListeners = new ArrayList<>();
         }
         onTouchListeners.add(l);
     }
 
-    public void removeOnTouchListeners(OnZoomTouchListener listener) {
+    public void removeOnTouchListeners(ZoomLayoutInterface.OnZoomTouchListener listener) {
         if (onTouchListeners != null) {
             onTouchListeners.remove(listener);
         }
@@ -873,7 +873,7 @@ public class ZoomLayout extends FrameLayout {
     private void dispatchOnTouch(int action, MotionEvent ev) {
         if (onTouchListeners != null) {
             for (int i = 0, z = onTouchListeners.size(); i < z; i++) {
-                OnZoomTouchListener listener = onTouchListeners.get(i);
+                ZoomLayoutInterface.OnZoomTouchListener listener = onTouchListeners.get(i);
                 if (listener != null) {
                     listener.onTouch(ZoomLayout.this, action, new TapInfo(ZoomLayout.this, ev));
                 }
@@ -881,14 +881,14 @@ public class ZoomLayout extends FrameLayout {
         }
     }
 
-    public void addOnTapListener(OnTapListener l) {
+    public void addOnTapListener(ZoomLayoutInterface.OnTapListener l) {
         if (onTapListeners == null) {
             onTapListeners = new ArrayList<>();
         }
         onTapListeners.add(l);
     }
 
-    public void removeOnTouchListener(OnTapListener listener) {
+    public void removeOnTouchListener(ZoomLayoutInterface.OnTapListener listener) {
         if (onTapListeners != null) {
             onTapListeners.remove(listener);
         }
@@ -903,7 +903,7 @@ public class ZoomLayout extends FrameLayout {
     private void dispatchOnTab(MotionEvent ev) {
         if (onTapListeners != null) {
             for (int i = 0, z = onTapListeners.size(); i < z; i++) {
-                OnTapListener listener = onTapListeners.get(i);
+                ZoomLayoutInterface.OnTapListener listener = onTapListeners.get(i);
                 if (listener != null) {
                     listener.onTap(ZoomLayout.this, new TapInfo(ZoomLayout.this, ev));
                 }
@@ -911,14 +911,14 @@ public class ZoomLayout extends FrameLayout {
         }
     }
 
-    public void addOnDoubleTapListener(OnDoubleTapListener l) {
+    public void addOnDoubleTapListener(ZoomLayoutInterface.OnDoubleTapListener l) {
         if (onDoubleTapListeners == null) {
             onDoubleTapListeners = new ArrayList<>();
         }
         onDoubleTapListeners.add(l);
     }
 
-    public void removeOnDoubleTapListener(OnDoubleTapListener listener) {
+    public void removeOnDoubleTapListener(ZoomLayoutInterface.OnDoubleTapListener listener) {
         if (onDoubleTapListeners != null) {
             onDoubleTapListeners.remove(listener);
         }
@@ -933,7 +933,7 @@ public class ZoomLayout extends FrameLayout {
     private void dispatchOnDoubleTap(MotionEvent ev) {
         if (onDoubleTapListeners != null) {
             for (int i = 0, z = onDoubleTapListeners.size(); i < z; i++) {
-                OnDoubleTapListener listener = onDoubleTapListeners.get(i);
+                ZoomLayoutInterface.OnDoubleTapListener listener = onDoubleTapListeners.get(i);
                 if (listener != null) {
                     listener.onDoubleTap(ZoomLayout.this, new TapInfo(ZoomLayout.this, ev));
                 }
@@ -941,14 +941,14 @@ public class ZoomLayout extends FrameLayout {
         }
     }
 
-    public void addOnLongTapListener(OnLongTapListener l) {
+    public void addOnLongTapListener(ZoomLayoutInterface.OnLongTapListener l) {
         if (onLongTapListeners == null) {
             onLongTapListeners = new ArrayList<>();
         }
         onLongTapListeners.add(l);
     }
 
-    public void removeOnLongTapListener(OnLongTapListener listener) {
+    public void removeOnLongTapListener(ZoomLayoutInterface.OnLongTapListener listener) {
         if (onLongTapListeners != null) {
             onLongTapListeners.remove(listener);
         }
@@ -963,7 +963,7 @@ public class ZoomLayout extends FrameLayout {
     private void dispatchOnLongTap(MotionEvent ev) {
         if (onLongTapListeners != null) {
             for (int i = 0, z = onLongTapListeners.size(); i < z; i++) {
-                OnLongTapListener listener = onLongTapListeners.get(i);
+                ZoomLayoutInterface.OnLongTapListener listener = onLongTapListeners.get(i);
                 if (listener != null) {
                     listener.onLongTap(ZoomLayout.this, new TapInfo(ZoomLayout.this, ev));
                 }
@@ -971,14 +971,14 @@ public class ZoomLayout extends FrameLayout {
         }
     }
 
-    public void addOnZoomListener(OnZoomListener l) {
+    public void addOnZoomListener(ZoomLayoutInterface.OnZoomListener l) {
         if (onZoomListeners == null) {
             onZoomListeners = new ArrayList<>();
         }
         onZoomListeners.add(l);
     }
 
-    public void removeOnZoomListener(OnZoomListener listener) {
+    public void removeOnZoomListener(ZoomLayoutInterface.OnZoomListener listener) {
         if (onZoomListeners != null) {
             onZoomListeners.remove(listener);
         }
@@ -990,14 +990,14 @@ public class ZoomLayout extends FrameLayout {
         }
     }
 
-    public void addOnPanListener(OnPanListener l) {
+    public void addOnPanListener(ZoomLayoutInterface.OnPanListener l) {
         if (onPanListeners == null) {
             onPanListeners = new ArrayList<>();
         }
         onPanListeners.add(l);
     }
 
-    public void removeOnPanListener(OnPanListener listener) {
+    public void removeOnPanListener(ZoomLayoutInterface.OnPanListener listener) {
         if (onPanListeners != null) {
             onPanListeners.remove(listener);
         }
@@ -1032,7 +1032,7 @@ public class ZoomLayout extends FrameLayout {
             if (mCount++ == 0) {
                 if (onZoomListeners != null) {
                     for (int i = 0, z = onZoomListeners.size(); i < z; i++) {
-                        OnZoomListener listener = onZoomListeners.get(i);
+                        ZoomLayoutInterface.OnZoomListener listener = onZoomListeners.get(i);
                         if (listener != null) {
                             listener.onZoomBegin(ZoomLayout.this, scale);
                         }
@@ -1044,7 +1044,7 @@ public class ZoomLayout extends FrameLayout {
         void onZoom(float scale) {
             if (onZoomListeners != null) {
                 for (int i = 0, z = onZoomListeners.size(); i < z; i++) {
-                    OnZoomListener listener = onZoomListeners.get(i);
+                    ZoomLayoutInterface.OnZoomListener listener = onZoomListeners.get(i);
                     if (listener != null) {
                         listener.onZoom(ZoomLayout.this, scale);
                     }
@@ -1056,7 +1056,7 @@ public class ZoomLayout extends FrameLayout {
             if (--mCount == 0) {
                 if (onZoomListeners != null) {
                     for (int i = 0, z = onZoomListeners.size(); i < z; i++) {
-                        OnZoomListener listener = onZoomListeners.get(i);
+                        ZoomLayoutInterface.OnZoomListener listener = onZoomListeners.get(i);
                         if (listener != null) {
                             listener.onZoomEnd(ZoomLayout.this, scale);
                         }
@@ -1074,7 +1074,7 @@ public class ZoomLayout extends FrameLayout {
             if (mCount++ == 0) {
                 if (onPanListeners != null) {
                     for (int i = 0, z = onPanListeners.size(); i < z; i++) {
-                        OnPanListener listener = onPanListeners.get(i);
+                        ZoomLayoutInterface.OnPanListener listener = onPanListeners.get(i);
                         if (listener != null) {
                             listener.onPanBegin(ZoomLayout.this);
                         }
@@ -1086,7 +1086,7 @@ public class ZoomLayout extends FrameLayout {
         void onPan() {
             if (onPanListeners != null) {
                 for (int i = 0, z = onPanListeners.size(); i < z; i++) {
-                    OnPanListener listener = onPanListeners.get(i);
+                    ZoomLayoutInterface.OnPanListener listener = onPanListeners.get(i);
                     if (listener != null) {
                         listener.onPan(ZoomLayout.this);
                     }
@@ -1098,7 +1098,7 @@ public class ZoomLayout extends FrameLayout {
             if (--mCount == 0) {
                 if (onPanListeners != null) {
                     for (int i = 0, z = onPanListeners.size(); i < z; i++) {
-                        OnPanListener listener = onPanListeners.get(i);
+                        ZoomLayoutInterface.OnPanListener listener = onPanListeners.get(i);
                         if (listener != null) {
                             listener.onPanEnd(ZoomLayout.this);
                         }
