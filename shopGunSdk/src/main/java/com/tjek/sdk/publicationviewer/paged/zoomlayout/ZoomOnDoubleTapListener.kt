@@ -11,8 +11,7 @@ class ZoomOnDoubleTapListener(threeStep: Boolean) : ZoomLayoutInterface {
         }
     }
 
-    private fun onDoubleTap(view: ZoomLayout?, info: TapInfo?): Boolean {
-        if (view == null || info == null) return false
+    private fun onDoubleTap(view: ZoomLayout, info: TapInfo): Boolean {
         try {
             if (mThreeStep) {
                 threeStep(view, info.absoluteX, info.absoluteY)

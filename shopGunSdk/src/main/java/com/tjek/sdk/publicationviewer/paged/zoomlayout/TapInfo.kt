@@ -5,7 +5,7 @@ import android.view.View
 import java.util.*
 
 data class TapInfo(
-    var view: View? = null,
+    var view: View,
     var absoluteX: Float = 0f,
     var absoluteY: Float = 0f,
     var relativeX: Float = 0f,
@@ -17,8 +17,7 @@ data class TapInfo(
     private val strFormat =
         "TapInfo[ absX:%.0f, absY:%.0f, relX:%.0f, relY:%.0f, percentX:%.2f, percentY:%.2f, contentClicked:%s ]"
 
-    constructor(zoomLayout: ZoomLayout, e: MotionEvent): this() {
-        view = zoomLayout
+    constructor(zoomLayout: ZoomLayout, e: MotionEvent): this(zoomLayout) {
         absoluteX = e.x
         absoluteY = e.y
         zoomLayout.array[0] = absoluteX
