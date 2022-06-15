@@ -54,12 +54,7 @@ public class VersoFragment extends Fragment {
     VersoOnLayoutChanged mVersoOnLayoutChanged;
 
     List<VersoInterface.OnPageChangeListener> mPageChangeListeners;
-    VersoPageViewInterface.OnZoomListener mZoomListener;
-    VersoPageViewInterface.OnPanListener mPanListener;
-    VersoPageViewInterface.OnTouchListener mTouchListener;
-    VersoPageViewInterface.OnTapListener mTapListener;
-    VersoPageViewInterface.OnDoubleTapListener mDoubleTapListener;
-    VersoPageViewInterface.OnLongTapListener mLongTapListener;
+    VersoPageViewInterface.EventListener mEventListener;
     VersoPageViewInterface.OnLoadCompleteListener mLoadCompleteListener;
 
     @Nullable
@@ -465,12 +460,7 @@ public class VersoFragment extends Fragment {
             if (mVersoAdapter == null) {
                 mVersoAdapter = new VersoAdapter(getChildFragmentManager(), mVersoSpreadConfiguration);
                 mDispatcher = new PageViewEventDispatcher();
-                mVersoAdapter.setOnTouchListener(mDispatcher);
-                mVersoAdapter.setOnTapListener(mDispatcher);
-                mVersoAdapter.setOnDoubleTapListener(mDispatcher);
-                mVersoAdapter.setOnLongTapListener(mDispatcher);
-                mVersoAdapter.setOnZoomListener(mDispatcher);
-                mVersoAdapter.setOnPanListener(mDispatcher);
+                mVersoAdapter.setEventListener(mDispatcher);
                 mVersoAdapter.setOnLoadCompleteListener(mLoadCompleteListener);
             }
 
@@ -550,62 +540,12 @@ public class VersoFragment extends Fragment {
     }
 
     private class PageViewEventDispatcher implements
-            VersoPageViewInterface.OnTouchListener,
-            VersoPageViewInterface.OnTapListener,
-            VersoPageViewInterface.OnDoubleTapListener,
-            VersoPageViewInterface.OnLongTapListener,
-            VersoPageViewInterface.OnZoomListener,
-            VersoPageViewInterface.OnPanListener,
+            VersoPageViewInterface.EventListener,
             VersoPageViewInterface.OnLoadCompleteListener {
 
         @Override
-        public boolean onTouch(int action, VersoTapInfo info) {
-            return mTouchListener != null && mTouchListener.onTouch(action, info);
-        }
-
-        @Override
-        public boolean onTap(VersoTapInfo info) {
-            return mTapListener != null && mTapListener.onTap(info);
-        }
-
-        @Override
-        public boolean onDoubleTap(VersoTapInfo info) {
-            return mDoubleTapListener != null && mDoubleTapListener.onDoubleTap(info);
-        }
-
-        @Override
-        public void onLongTap(VersoTapInfo info) {
-            if (mLongTapListener != null) mLongTapListener.onLongTap(info);
-        }
-
-        @Override
-        public void onZoomBegin(VersoZoomPanInfo info) {
-            if (mZoomListener != null) mZoomListener.onZoomBegin(info);
-        }
-
-        @Override
-        public void onZoom(VersoZoomPanInfo info) {
-            if (mZoomListener != null) mZoomListener.onZoom(info);
-        }
-
-        @Override
-        public void onZoomEnd(VersoZoomPanInfo info) {
-            if (mZoomListener != null) mZoomListener.onZoomEnd(info);
-        }
-
-        @Override
-        public void onPanBegin(VersoZoomPanInfo info) {
-            if (mPanListener != null) mPanListener.onPanBegin(info);
-        }
-
-        @Override
-        public void onPan(VersoZoomPanInfo info) {
-            if (mPanListener != null) mPanListener.onPan(info);
-        }
-
-        @Override
-        public void onPanEnd(VersoZoomPanInfo info) {
-            if (mPanListener != null) mPanListener.onPanEnd(info);
+        public boolean onVersoPageViewEvent(@NonNull VersoPageViewEvent event) {
+            return mEventListener != null && mEventListener.onVersoPageViewEvent(event);
         }
 
         @Override
@@ -671,28 +611,8 @@ public class VersoFragment extends Fragment {
         }
     }
 
-    public void setOnPanListener(VersoPageViewInterface.OnPanListener panListener) {
-        mPanListener = panListener;
-    }
-
-    public void setOnZoomListener(VersoPageViewInterface.OnZoomListener zoomListener) {
-        mZoomListener = zoomListener;
-    }
-
-    public void setOnTouchListener(VersoPageViewInterface.OnTouchListener touchListener) {
-        mTouchListener = touchListener;
-    }
-
-    public void setOnTapListener(VersoPageViewInterface.OnTapListener tapListener) {
-        mTapListener = tapListener;
-    }
-
-    public void setOnDoubleTapListener(VersoPageViewInterface.OnDoubleTapListener doubleTapListener) {
-        mDoubleTapListener = doubleTapListener;
-    }
-
-    public void setOnLongTapListener(VersoPageViewInterface.OnLongTapListener longTapListener) {
-        mLongTapListener = longTapListener;
+    public void setOnEventListener(VersoPageViewInterface.EventListener listener) {
+        mEventListener = listener;
     }
 
     public void setOnLoadCompleteListener(VersoPageViewInterface.OnLoadCompleteListener listener) {

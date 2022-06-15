@@ -13,12 +13,7 @@ public class VersoAdapter extends FragmentStatelessPagerAdapter {
     public static final String TAG = VersoAdapter.class.getSimpleName();
 
     private final VersoSpreadConfiguration mConfiguration;
-    private VersoPageViewInterface.OnZoomListener mOnZoomListener;
-    private VersoPageViewInterface.OnPanListener mOnPanListener;
-    private VersoPageViewInterface.OnTouchListener mOnTouchListener;
-    private VersoPageViewInterface.OnTapListener mOnTapListener;
-    private VersoPageViewInterface.OnDoubleTapListener mOnDoubleTapListener;
-    private VersoPageViewInterface.OnLongTapListener mOnLongTapListener;
+    private VersoPageViewInterface.EventListener mEventListener;
     private VersoPageViewInterface.OnLoadCompleteListener mOnLoadCompleteListener;
 
     public VersoAdapter(FragmentManager fragmentManager, VersoSpreadConfiguration configuration) {
@@ -37,12 +32,7 @@ public class VersoAdapter extends FragmentStatelessPagerAdapter {
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         VersoPageViewFragment fragment = (VersoPageViewFragment) super.instantiateItem(container, position);
-        fragment.setOnZoomListener(mOnZoomListener);
-        fragment.setOnPanListener(mOnPanListener);
-        fragment.setOnTouchListener(mOnTouchListener);
-        fragment.setOnTapListener(mOnTapListener);
-        fragment.setOnDoubleTapListener(mOnDoubleTapListener);
-        fragment.setOnLongTapListener(mOnLongTapListener);
+        fragment.setVersoPageViewEventListener(mEventListener);
         fragment.setOnLoadCompleteListener(mOnLoadCompleteListener);
         return fragment;
     }
@@ -76,28 +66,8 @@ public class VersoAdapter extends FragmentStatelessPagerAdapter {
         return super.getFragments();
     }
 
-    public void setOnTouchListener(VersoPageViewInterface.OnTouchListener listener) {
-        mOnTouchListener = listener;
-    }
-
-    public void setOnTapListener(VersoPageViewInterface.OnTapListener listener) {
-        mOnTapListener = listener;
-    }
-
-    public void setOnDoubleTapListener(VersoPageViewInterface.OnDoubleTapListener listener) {
-        mOnDoubleTapListener = listener;
-    }
-
-    public void setOnLongTapListener(VersoPageViewInterface.OnLongTapListener listener) {
-        mOnLongTapListener = listener;
-    }
-
-    public void setOnZoomListener(VersoPageViewInterface.OnZoomListener listener) {
-        mOnZoomListener = listener;
-    }
-
-    public void setOnPanListener(VersoPageViewInterface.OnPanListener listener) {
-        mOnPanListener = listener;
+    public void setEventListener(VersoPageViewInterface.EventListener listener) {
+        mEventListener = listener;
     }
 
     public void setOnLoadCompleteListener(VersoPageViewInterface.OnLoadCompleteListener listener) {
