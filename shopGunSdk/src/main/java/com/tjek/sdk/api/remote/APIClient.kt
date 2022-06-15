@@ -43,10 +43,10 @@ internal object APIClient {
             packageName,
             PackageManager.GET_META_DATA
         ).metaData
-        val key = if (BuildConfig.DEBUG && metaData.containsKey(META_DEVELOP_API_KEY)) {
-            metaData.getString(META_DEVELOP_API_KEY)
-        } else {
-            metaData.getString(META_API_KEY)
+        val key = when {
+            metaData == null -> null
+            BuildConfig.DEBUG && metaData.containsKey(META_DEVELOP_API_KEY) -> metaData.getString(META_DEVELOP_API_KEY)
+            else -> metaData.getString(META_API_KEY)
         }
         if (key == null) {
             TjekLogCat.forceE("api key not found in the manifest. Tjek sdk won't work properly without it.")
