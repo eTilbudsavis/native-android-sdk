@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="ZoomLayout">
+
+        <Preference
+            android:key="pref_main_singleimageview"
+            android:title="Single ImageView">
+            <intent
+                android:targetPackage="com.tjek.sdk.sample.zoomlayoutsample"
+                android:targetClass="com.tjek.sdk.sample.zoomlayoutsample.SingleImageViewActivity"/>
+        </Preference>
+
+        <Preference
+            android:key="pref_main_scaledimageview"
+            android:title="Scaled ImageView">
+            <intent
+                android:targetPackage="com.tjek.sdk.sample.zoomlayoutsample"
+                android:targetClass="com.tjek.sdk.sample.zoomlayoutsample.ScaledImageViewActivity"/>
+        </Preference>
+
+        <Preference
+            android:key="pref_main_viewpager"
+            android:title="ViewPager">
+            <intent
+                android:targetPackage="com.tjek.sdk.sample.zoomlayoutsample"
+                android:targetClass="com.tjek.sdk.sample.zoomlayoutsample.ViewPagerActivity"/>
+        </Preference>
+
+        <Preference
+            android:key="pref_main_textview"
+            android:title="TextView">
+            <intent
+                android:targetPackage="com.tjek.sdk.sample.zoomlayoutsample"
+                android:targetClass="com.tjek.sdk.sample.zoomlayoutsample.TextViewActivity"/>
+        </Preference>
+
+        <Preference
+            android:key="pref_main_multipleview"
+            android:title="Multiple Views">
+            <intent
+                android:targetPackage="com.tjek.sdk.sample.zoomlayoutsample"
+                android:targetClass="com.tjek.sdk.sample.zoomlayoutsample.MultipleViewActivity"/>
+        </Preference>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

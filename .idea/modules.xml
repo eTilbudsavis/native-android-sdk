@@ -3,11 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopgun-android-sdk.iml" filepath="$PROJECT_DIR$/.idea/modules/shopgun-android-sdk.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1271692172/shopgun-android-sdk.markhor.iml" filepath="$PROJECT_DIR$/.idea/modules/1271692172/shopgun-android-sdk.markhor.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopGunSdk/shopgun-android-sdk.shopGunSdk.iml" filepath="$PROJECT_DIR$/.idea/modules/shopGunSdk/shopgun-android-sdk.shopGunSdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopGunSdkDemo/shopgun-android-sdk.shopGunSdkDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/shopGunSdkDemo/shopgun-android-sdk.shopGunSdkDemo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/248743055/shopgun-android-sdk.verso.iml" filepath="$PROJECT_DIR$/.idea/modules/248743055/shopgun-android-sdk.verso.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/988686503/shopgun-android-sdk.zoomlayout.iml" filepath="$PROJECT_DIR$/.idea/modules/988686503/shopgun-android-sdk.zoomlayout.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/zoomlayoutsample/shopgun-android-sdk.zoomLayoutSample.iml" filepath="$PROJECT_DIR$/.idea/modules/zoomlayoutsample/shopgun-android-sdk.zoomLayoutSample.iml" />
     </modules>
   </component>
 </project>

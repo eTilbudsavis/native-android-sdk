@@ -17,5 +17,6 @@
 include ':shopGunSdk'
 if (!System.env.JITPACK) {
     include ':shopGunSdkDemo'
+    include ':zoomLayoutSample'
 }
 
