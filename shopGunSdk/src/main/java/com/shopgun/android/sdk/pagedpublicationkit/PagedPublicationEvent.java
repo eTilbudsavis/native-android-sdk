@@ -23,7 +23,7 @@ public class PagedPublicationEvent extends AnonymousEvent {
      */
     public static PagedPublicationEvent opened(PagedPublicationConfiguration config) {
         PagedPublicationEvent event = new PagedPublicationEvent(PAGED_PUBLICATION_OPENED);
-        String ppId = config.getPublication().getId();
+        String ppId = config.getPublicationId();
 
         EventUtils.addLocationInformation(ShopGun.getInstance().getContext(), event);
 

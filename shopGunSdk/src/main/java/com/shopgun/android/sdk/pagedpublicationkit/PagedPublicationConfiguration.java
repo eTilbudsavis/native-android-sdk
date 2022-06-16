@@ -11,6 +11,7 @@ import java.util.List;
 public interface PagedPublicationConfiguration extends VersoSpreadConfiguration, Parcelable {
 
     PagedPublication getPublication();
+    String getPublicationId();
     boolean hasPublication();
 
     List<? extends PagedPublicationPage> getPages();
