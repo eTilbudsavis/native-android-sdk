@@ -53,9 +53,9 @@ public class VersoFragment extends Fragment {
     PageViewEventDispatcher mDispatcher;
     VersoOnLayoutChanged mVersoOnLayoutChanged;
 
-    List<VersoInterface.OnPageChangeListener> mPageChangeListeners;
-    VersoPageViewInterface.EventListener mEventListener;
-    VersoPageViewInterface.OnLoadCompleteListener mLoadCompleteListener;
+    List<VersoPageChangeListener> mPageChangeListeners;
+    VersoPageViewListener.EventListener mEventListener;
+    VersoPageViewListener.OnLoadCompleteListener mLoadCompleteListener;
 
     @Nullable
     @Override
@@ -540,8 +540,8 @@ public class VersoFragment extends Fragment {
     }
 
     private class PageViewEventDispatcher implements
-            VersoPageViewInterface.EventListener,
-            VersoPageViewInterface.OnLoadCompleteListener {
+            VersoPageViewListener.EventListener,
+            VersoPageViewListener.OnLoadCompleteListener {
 
         @Override
         public boolean onVersoPageViewEvent(@NonNull VersoPageViewEvent event) {
@@ -555,14 +555,14 @@ public class VersoFragment extends Fragment {
 
     }
 
-    public void addOnPageChangeListener(VersoInterface.OnPageChangeListener pageChangeListener) {
+    public void addOnPageChangeListener(VersoPageChangeListener pageChangeListener) {
         if (mPageChangeListeners == null) {
             mPageChangeListeners = new ArrayList<>();
         }
         mPageChangeListeners.add(pageChangeListener);
     }
 
-    public void removeOnPageChangeListener(VersoInterface.OnPageChangeListener pageChangeListener) {
+    public void removeOnPageChangeListener(VersoPageChangeListener pageChangeListener) {
         if (mPageChangeListeners != null) {
             mPageChangeListeners.remove(pageChangeListener);
         }
@@ -577,7 +577,7 @@ public class VersoFragment extends Fragment {
     private void dispatchOnVisiblePageIndexesChanged(int[] pages, int[] added, int[] removed) {
         if (mPageChangeListeners != null) {
             for (int i = 0, z = mPageChangeListeners.size(); i < z; i++) {
-                VersoInterface.OnPageChangeListener listener = mPageChangeListeners.get(i);
+                VersoPageChangeListener listener = mPageChangeListeners.get(i);
                 if (listener != null) {
                     listener.onVisiblePageIndexesChanged(pages, added, removed);
                 }
@@ -588,7 +588,7 @@ public class VersoFragment extends Fragment {
     private void dispatchOnPagesScrolled(int currentPosition, int[] currentPages, int previousPosition, int[] previousPages) {
         if (mPageChangeListeners != null) {
             for (int i = 0, z = mPageChangeListeners.size(); i < z; i++) {
-                VersoInterface.OnPageChangeListener listener = mPageChangeListeners.get(i);
+                VersoPageChangeListener listener = mPageChangeListeners.get(i);
                 if (listener != null) {
                     listener.onPagesScrolled(currentPosition, currentPages, previousPosition, previousPages);
                 }
@@ -603,7 +603,7 @@ public class VersoFragment extends Fragment {
         mPageChangeDispatcher.mCurrentPages = currentPages;
         if (mPageChangeListeners != null) {
             for (int i = 0, z = mPageChangeListeners.size(); i < z; i++) {
-                VersoInterface.OnPageChangeListener listener = mPageChangeListeners.get(i);
+                VersoPageChangeListener listener = mPageChangeListeners.get(i);
                 if (listener != null) {
                     listener.onPagesChanged(currentPosition, currentPages, previousPosition, previousPages);
                 }
@@ -611,11 +611,11 @@ public class VersoFragment extends Fragment {
         }
     }
 
-    public void setOnEventListener(VersoPageViewInterface.EventListener listener) {
+    public void setOnEventListener(VersoPageViewListener.EventListener listener) {
         mEventListener = listener;
     }
 
-    public void setOnLoadCompleteListener(VersoPageViewInterface.OnLoadCompleteListener listener) {
+    public void setOnLoadCompleteListener(VersoPageViewListener.OnLoadCompleteListener listener) {
         mLoadCompleteListener = listener;
     }
 

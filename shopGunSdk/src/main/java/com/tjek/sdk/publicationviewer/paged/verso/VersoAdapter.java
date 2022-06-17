@@ -13,8 +13,8 @@ public class VersoAdapter extends FragmentStatelessPagerAdapter {
     public static final String TAG = VersoAdapter.class.getSimpleName();
 
     private final VersoSpreadConfiguration mConfiguration;
-    private VersoPageViewInterface.EventListener mEventListener;
-    private VersoPageViewInterface.OnLoadCompleteListener mOnLoadCompleteListener;
+    private VersoPageViewListener.EventListener mEventListener;
+    private VersoPageViewListener.OnLoadCompleteListener mOnLoadCompleteListener;
 
     public VersoAdapter(FragmentManager fragmentManager, VersoSpreadConfiguration configuration) {
         super(fragmentManager);
@@ -66,11 +66,11 @@ public class VersoAdapter extends FragmentStatelessPagerAdapter {
         return super.getFragments();
     }
 
-    public void setEventListener(VersoPageViewInterface.EventListener listener) {
+    public void setEventListener(VersoPageViewListener.EventListener listener) {
         mEventListener = listener;
     }
 
-    public void setOnLoadCompleteListener(VersoPageViewInterface.OnLoadCompleteListener listener) {
+    public void setOnLoadCompleteListener(VersoPageViewListener.OnLoadCompleteListener listener) {
         mOnLoadCompleteListener = listener;
     }
 

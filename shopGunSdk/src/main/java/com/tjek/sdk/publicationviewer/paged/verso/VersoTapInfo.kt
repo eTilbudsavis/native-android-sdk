@@ -18,7 +18,7 @@ data class VersoTapInfo(
 
     constructor(info: VersoTapInfo) : this(info.info, info.fragment)
 
-    fun getView(): View? = info.view
+    fun getView(): View = info.view
 
     fun getX(): Float  = info.absoluteX
 

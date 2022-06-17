@@ -4,11 +4,21 @@ import android.content.res.Configuration
 import android.view.View
 import android.view.ViewGroup
 
+sealed interface VersoPageViewListener {
+
+    interface EventListener {
+        fun onVersoPageViewEvent(event: VersoPageViewEvent): Boolean
+    }
+
+    interface OnLoadCompleteListener {
+        fun onPageLoadComplete(success: Boolean, versoPageView: VersoPageView?)
+    }
+}
+
 interface VersoPageView {
     fun onZoom(scale: Float): Boolean
     val page: Int
-
-    fun setOnLoadCompleteListener(listener: VersoPageViewInterface.OnLoadCompleteListener)
+    fun setOnLoadCompleteListener(listener: VersoPageViewListener.OnLoadCompleteListener)
     fun onVisible()
     fun onInvisible()
 }
@@ -30,5 +40,24 @@ interface VersoSpreadConfiguration {
     fun getSpreadPositionFromPage(page: Int): Int
     fun getPagesFromSpreadPosition(spreadPosition: Int): IntArray
     fun hasData(): Boolean
+}
+
+interface VersoPageChangeListener {
+
+    fun onPagesScrolled(
+        currentPosition: Int,
+        currentPages: IntArray?,
+        previousPosition: Int,
+        previousPages: IntArray?
+    )
+
+    fun onPagesChanged(
+        currentPosition: Int,
+        currentPages: IntArray?,
+        previousPosition: Int,
+        previousPages: IntArray?
+    )
+
+    fun onVisiblePageIndexesChanged(pages: IntArray?, added: IntArray?, removed: IntArray?)
 }
 

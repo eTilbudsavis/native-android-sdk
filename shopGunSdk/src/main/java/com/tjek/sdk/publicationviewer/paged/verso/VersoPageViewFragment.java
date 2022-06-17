@@ -16,8 +16,8 @@ import androidx.fragment.app.Fragment;
 import com.shopgun.android.sdk.R;
 import com.tjek.sdk.publicationviewer.paged.NumberUtils;
 import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomLayout;
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomLayoutEvent;
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomLayoutInterface;
+import com.tjek.sdk.publicationviewer.paged.zoomlayout.Event;
+import com.tjek.sdk.publicationviewer.paged.zoomlayout.EventListener;
 import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomOnDoubleTapListener;
 
 import java.util.Arrays;
@@ -51,8 +51,8 @@ public class VersoPageViewFragment extends Fragment {
     protected int[] mPages;
 
     // listeners
-    private VersoPageViewInterface.EventListener mVersoPageViewEventListener;
-    private VersoPageViewInterface.OnLoadCompleteListener mOnLoadCompleteListener;
+    private VersoPageViewListener.EventListener mVersoPageViewEventListener;
+    private VersoPageViewListener.OnLoadCompleteListener mOnLoadCompleteListener;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,7 +73,7 @@ public class VersoPageViewFragment extends Fragment {
         // for some reason, this works. LAYER_TYPE_SOFTWARE works too...
         mZoomLayout.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
-        mZoomLayout.addZoomLayoutEventListener(new ZoomLayoutEventDispatcher());
+        mZoomLayout.addEventListener(new ZoomLayoutEventDispatcher());
 
         boolean zoom = !NumberUtils.isEqual(mProperty.getMaxZoomScale(), mProperty.getMinZoomScale());
         mZoomLayout.setAllowZoom(zoom);
@@ -182,11 +182,11 @@ public class VersoPageViewFragment extends Fragment {
         mVersoSpreadConfiguration = configuration;
     }
 
-    public void setVersoPageViewEventListener(VersoPageViewInterface.EventListener l) {
+    public void setVersoPageViewEventListener(VersoPageViewListener.EventListener l) {
         mVersoPageViewEventListener = l;
     }
 
-    public void setOnLoadCompleteListener(VersoPageViewInterface.OnLoadCompleteListener listener) {
+    public void setOnLoadCompleteListener(VersoPageViewListener.OnLoadCompleteListener listener) {
         mOnLoadCompleteListener = listener;
     }
 
@@ -252,70 +252,70 @@ public class VersoPageViewFragment extends Fragment {
     }
 
     // Takes events from ZoomLayout, transform them into VersoPageViewEvent and propagate them
-    private class ZoomLayoutEventDispatcher implements ZoomLayoutInterface {
+    private class ZoomLayoutEventDispatcher implements EventListener {
 
-        private final ZoomLayoutInterface mZoomDoubleTapListener = new ZoomOnDoubleTapListener(false);
+        private final EventListener mZoomDoubleTapListener = new ZoomOnDoubleTapListener(false);
 
         @Override
-        public boolean onZoomLayoutEvent(@NonNull ZoomLayoutEvent event) {
+        public boolean onEvent(@NonNull Event event) {
             if (mVersoPageViewEventListener == null)
                 return false;
-            if (event instanceof ZoomLayoutEvent.Touch) {
-                ZoomLayoutEvent.Touch e = (ZoomLayoutEvent.Touch) event;
+            if (event instanceof Event.Touch) {
+                Event.Touch e = (Event.Touch) event;
                 return mVersoPageViewEventListener.onVersoPageViewEvent(
                         new VersoPageViewEvent.Touch(e.getAction(), new VersoTapInfo(e.getInfo(), VersoPageViewFragment.this))
                 );
             }
-            if (event instanceof ZoomLayoutEvent.Tap) {
-                ZoomLayoutEvent.Tap e = (ZoomLayoutEvent.Tap) event;
+            if (event instanceof Event.Tap) {
+                Event.Tap e = (Event.Tap) event;
                 return mVersoPageViewEventListener.onVersoPageViewEvent(
                         new VersoPageViewEvent.Tap(new VersoTapInfo(e.getInfo(), VersoPageViewFragment.this))
                 );
             }
-            if (event instanceof ZoomLayoutEvent.DoubleTap) {
-                ZoomLayoutEvent.DoubleTap e = (ZoomLayoutEvent.DoubleTap) event;
+            if (event instanceof Event.DoubleTap) {
+                Event.DoubleTap e = (Event.DoubleTap) event;
                 boolean consumed = mVersoPageViewEventListener.onVersoPageViewEvent(
                         new VersoPageViewEvent.DoubleTap(new VersoTapInfo(e.getInfo(), VersoPageViewFragment.this)));
-                return !consumed && mZoomDoubleTapListener.onZoomLayoutEvent(event);
+                return !consumed && mZoomDoubleTapListener.onEvent(event);
             }
-            if (event instanceof ZoomLayoutEvent.LongTap) {
-                ZoomLayoutEvent.LongTap e = (ZoomLayoutEvent.LongTap) event;
+            if (event instanceof Event.LongTap) {
+                Event.LongTap e = (Event.LongTap) event;
                 return mVersoPageViewEventListener.onVersoPageViewEvent(
                         new VersoPageViewEvent.LongTap(new VersoTapInfo(e.getInfo(), VersoPageViewFragment.this))
                 );
             }
-            if (event instanceof ZoomLayoutEvent.ZoomBegin) {
-                ZoomLayoutEvent.ZoomBegin e = (ZoomLayoutEvent.ZoomBegin) event;
+            if (event instanceof Event.ZoomBegin) {
+                Event.ZoomBegin e = (Event.ZoomBegin) event;
                 return mVersoPageViewEventListener.onVersoPageViewEvent(
                         new VersoPageViewEvent.ZoomBegin(new VersoZoomPanInfo(VersoPageViewFragment.this, e.getScale(), getZoomLayoutRect(e.getView())))
                 );
             }
-            if (event instanceof ZoomLayoutEvent.Zoom) {
-                ZoomLayoutEvent.Zoom e = (ZoomLayoutEvent.Zoom) event;
+            if (event instanceof Event.Zoom) {
+                Event.Zoom e = (Event.Zoom) event;
                 return mVersoPageViewEventListener.onVersoPageViewEvent(
                         new VersoPageViewEvent.Zoom(new VersoZoomPanInfo(VersoPageViewFragment.this, e.getScale(), getZoomLayoutRect(e.getView())))
                 );
             }
-            if (event instanceof ZoomLayoutEvent.ZoomEnd) {
-                ZoomLayoutEvent.ZoomEnd e = (ZoomLayoutEvent.ZoomEnd) event;
+            if (event instanceof Event.ZoomEnd) {
+                Event.ZoomEnd e = (Event.ZoomEnd) event;
                 return mVersoPageViewEventListener.onVersoPageViewEvent(
                         new VersoPageViewEvent.ZoomEnd(new VersoZoomPanInfo(VersoPageViewFragment.this, e.getScale(), getZoomLayoutRect(e.getView())))
                 );
             }
-            if (event instanceof ZoomLayoutEvent.PanBegin) {
-                ZoomLayoutEvent.PanBegin e = (ZoomLayoutEvent.PanBegin) event;
+            if (event instanceof Event.PanBegin) {
+                Event.PanBegin e = (Event.PanBegin) event;
                 return mVersoPageViewEventListener.onVersoPageViewEvent(
                         new VersoPageViewEvent.PanBegin(new VersoZoomPanInfo(VersoPageViewFragment.this, e.getView().getScale(), getZoomLayoutRect(e.getView())))
                 );
             }
-            if (event instanceof ZoomLayoutEvent.Pan) {
-                ZoomLayoutEvent.Pan e = (ZoomLayoutEvent.Pan) event;
+            if (event instanceof Event.Pan) {
+                Event.Pan e = (Event.Pan) event;
                 return mVersoPageViewEventListener.onVersoPageViewEvent(
                         new VersoPageViewEvent.Pan(new VersoZoomPanInfo(VersoPageViewFragment.this, e.getView().getScale(), getZoomLayoutRect(e.getView())))
                 );
             }
-            if (event instanceof ZoomLayoutEvent.PanEnd) {
-                ZoomLayoutEvent.PanEnd e = (ZoomLayoutEvent.PanEnd) event;
+            if (event instanceof Event.PanEnd) {
+                Event.PanEnd e = (Event.PanEnd) event;
                 return mVersoPageViewEventListener.onVersoPageViewEvent(
                         new VersoPageViewEvent.PanEnd(new VersoZoomPanInfo(VersoPageViewFragment.this, e.getView().getScale(), getZoomLayoutRect(e.getView())))
                 );
