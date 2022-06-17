@@ -1,12 +1,12 @@
 package com.tjek.sdk.publicationviewer.paged.zoomlayout
 
-class ZoomOnDoubleTapListener(threeStep: Boolean) : ZoomLayoutInterface {
+class ZoomOnDoubleTapListener(threeStep: Boolean) : EventListener {
 
     private var mThreeStep = threeStep
 
-    override fun onZoomLayoutEvent(event: ZoomLayoutEvent): Boolean {
+    override fun onEvent(event: Event): Boolean {
         return when (event) {
-            is ZoomLayoutEvent.DoubleTap -> onDoubleTap(event.view, event.info)
+            is Event.DoubleTap -> onDoubleTap(event.view, event.info)
             else -> false
         }
     }

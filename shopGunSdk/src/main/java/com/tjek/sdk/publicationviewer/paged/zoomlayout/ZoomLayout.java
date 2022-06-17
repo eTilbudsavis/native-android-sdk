@@ -78,7 +78,7 @@ public class ZoomLayout extends FrameLayout {
     private boolean allowZoom = true;
 
     // Listeners
-    private List<ZoomLayoutInterface> zoomLayoutEventListeners;
+    private List<EventListener> eventListeners;
 
     // Counters for certain events
     private int zoomEventCounter = 0;
@@ -842,71 +842,50 @@ public class ZoomLayout extends FrameLayout {
         }
     }
 
-    public void addZoomLayoutEventListener(ZoomLayoutInterface l) {
-        if (zoomLayoutEventListeners == null) {
-            zoomLayoutEventListeners = new ArrayList<>();
+    public void addEventListener(EventListener l) {
+        if (eventListeners == null) {
+            eventListeners = new ArrayList<>();
         }
-        zoomLayoutEventListeners.add(l);
+        eventListeners.add(l);
     }
 
-    public void removeZoomLayoutEventListener(ZoomLayoutInterface l) {
-        if (zoomLayoutEventListeners != null) {
-            zoomLayoutEventListeners.remove(l);
+    public void removeEventListener(EventListener l) {
+        if (eventListeners != null) {
+            eventListeners.remove(l);
         }
     }
 
-    public void clearZoomLayoutEventListener() {
-        if (zoomLayoutEventListeners != null) {
-            zoomLayoutEventListeners.clear();
+    public void clearEventListener() {
+        if (eventListeners != null) {
+            eventListeners.clear();
+        }
+    }
+
+    private void dispatchEvent(Event event) {
+        if (eventListeners != null) {
+            for (int i = 0, z = eventListeners.size(); i < z; i++) {
+                EventListener listener = eventListeners.get(i);
+                if (listener != null) {
+                    listener.onEvent(event);
+                }
+            }
         }
     }
 
     private void dispatchOnTouch(int action, MotionEvent ev) {
-        if (zoomLayoutEventListeners != null) {
-            for (int i = 0, z = zoomLayoutEventListeners.size(); i < z; i++) {
-                ZoomLayoutInterface listener = zoomLayoutEventListeners.get(i);
-                if (listener != null) {
-                    ZoomLayoutEvent.Touch event = new ZoomLayoutEvent.Touch(this, action, new TapInfo(this, ev));
-                    listener.onZoomLayoutEvent(event);
-                }
-            }
-        }
+        dispatchEvent(new Event.Touch(this, action, new TapInfo(this, ev)));
     }
 
     private void dispatchOnTap(MotionEvent ev) {
-        if (zoomLayoutEventListeners != null) {
-            for (int i = 0, z = zoomLayoutEventListeners.size(); i < z; i++) {
-                ZoomLayoutInterface listener = zoomLayoutEventListeners.get(i);
-                if (listener != null) {
-                    ZoomLayoutEvent.Tap event = new ZoomLayoutEvent.Tap(this, new TapInfo(this, ev));
-                    listener.onZoomLayoutEvent(event);
-                }
-            }
-        }
+        dispatchEvent(new Event.Tap(this, new TapInfo(this, ev)));
     }
 
     private void dispatchOnDoubleTap(MotionEvent ev) {
-        if (zoomLayoutEventListeners != null) {
-            for (int i = 0, z = zoomLayoutEventListeners.size(); i < z; i++) {
-                ZoomLayoutInterface listener = zoomLayoutEventListeners.get(i);
-                if (listener != null) {
-                    ZoomLayoutEvent.DoubleTap event = new ZoomLayoutEvent.DoubleTap(this, new TapInfo(this, ev));
-                    listener.onZoomLayoutEvent(event);
-                }
-            }
-        }
+        dispatchEvent(new Event.DoubleTap(this, new TapInfo(this, ev)));
     }
 
     private void dispatchOnLongTap(MotionEvent ev) {
-        if (zoomLayoutEventListeners != null) {
-            for (int i = 0, z = zoomLayoutEventListeners.size(); i < z; i++) {
-                ZoomLayoutInterface listener = zoomLayoutEventListeners.get(i);
-                if (listener != null) {
-                    ZoomLayoutEvent.LongTap event = new ZoomLayoutEvent.LongTap(this, new TapInfo(this, ev));
-                    listener.onZoomLayoutEvent(event);
-                }
-            }
-        }
+        dispatchEvent(new Event.LongTap(this, new TapInfo(this, ev)));
     }
 
     @Override
@@ -926,81 +905,33 @@ public class ZoomLayout extends FrameLayout {
 
     private void dispatchOnZoomBegin(float scale) {
         if (zoomEventCounter++ == 0) {
-            if (zoomLayoutEventListeners != null) {
-                for (int i = 0, z = zoomLayoutEventListeners.size(); i < z; i++) {
-                    ZoomLayoutInterface listener = zoomLayoutEventListeners.get(i);
-                    if (listener != null) {
-                        ZoomLayoutEvent.ZoomBegin event = new ZoomLayoutEvent.ZoomBegin(this, scale);
-                        listener.onZoomLayoutEvent(event);
-                    }
-                }
-            }
+            dispatchEvent(new Event.ZoomBegin(this, scale));
         }
     }
 
     private void dispatchOnZoom(float scale) {
-        if (zoomLayoutEventListeners != null) {
-            for (int i = 0, z = zoomLayoutEventListeners.size(); i < z; i++) {
-                ZoomLayoutInterface listener = zoomLayoutEventListeners.get(i);
-                if (listener != null) {
-                    ZoomLayoutEvent.Zoom event = new ZoomLayoutEvent.Zoom(this, scale);
-                    listener.onZoomLayoutEvent(event);
-                }
-            }
-        }
+        dispatchEvent(new Event.Zoom(this, scale));
     }
 
     private void dispatchOnZoomEnd(float scale) {
         if (--zoomEventCounter == 0) {
-            if (zoomLayoutEventListeners != null) {
-                for (int i = 0, z = zoomLayoutEventListeners.size(); i < z; i++) {
-                    ZoomLayoutInterface listener = zoomLayoutEventListeners.get(i);
-                    if (listener != null) {
-                        ZoomLayoutEvent.ZoomEnd event = new ZoomLayoutEvent.ZoomEnd(this, scale);
-                        listener.onZoomLayoutEvent(event);
-                    }
-                }
-            }
+            dispatchEvent(new Event.ZoomEnd(this, scale));
         }
     }
 
     private void dispatchOnPanBegin() {
         if (panEventCounter++ == 0) {
-            if (zoomLayoutEventListeners != null) {
-                for (int i = 0, z = zoomLayoutEventListeners.size(); i < z; i++) {
-                    ZoomLayoutInterface listener = zoomLayoutEventListeners.get(i);
-                    if (listener != null) {
-                        ZoomLayoutEvent.PanBegin event = new ZoomLayoutEvent.PanBegin(this);
-                        listener.onZoomLayoutEvent(event);
-                    }
-                }
-            }
+            dispatchEvent(new Event.PanBegin(this));
         }
     }
 
     private void dispatchOnPan() {
-        if (zoomLayoutEventListeners != null) {
-            for (int i = 0, z = zoomLayoutEventListeners.size(); i < z; i++) {
-                ZoomLayoutInterface listener = zoomLayoutEventListeners.get(i);
-                if (listener != null) {
-                    ZoomLayoutEvent.Pan event = new ZoomLayoutEvent.Pan(this);
-                    listener.onZoomLayoutEvent(event);
-                }
-            }
-        }
+        dispatchEvent(new Event.Pan(this));
     }
 
     private void dispatchOnPanEnd() {
         if (--panEventCounter == 0) {
-            if (zoomLayoutEventListeners != null) {
-                for (int i = 0, z = zoomLayoutEventListeners.size(); i < z; i++) {
-                    ZoomLayoutInterface listener = zoomLayoutEventListeners.get(i);
-                    if (listener != null) {
-                        ZoomLayoutEvent.PanEnd event = new ZoomLayoutEvent.PanEnd(this);
-                        listener.onZoomLayoutEvent(event);
-                    }
-                }
-            }
+            dispatchEvent(new Event.PanEnd(this));
         }
     }
 

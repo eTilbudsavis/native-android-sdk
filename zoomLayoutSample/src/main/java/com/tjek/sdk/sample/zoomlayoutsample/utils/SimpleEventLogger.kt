@@ -3,14 +3,14 @@ package com.tjek.sdk.sample.zoomlayoutsample.utils
 import android.graphics.RectF
 import android.widget.TextView
 import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomLayout
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomLayoutEvent
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomLayoutInterface
+import com.tjek.sdk.publicationviewer.paged.zoomlayout.Event
+import com.tjek.sdk.publicationviewer.paged.zoomlayout.EventListener
 import java.util.*
 
 class SimpleEventLogger(
     var tag: String,
     var textView: TextView? = null
-) : ZoomLayoutInterface {
+) : EventListener {
 
     companion object {
         const val FORMAT = "%s - s:%.2f, x:%.0f, y:%.0f\n" +
@@ -22,33 +22,33 @@ class SimpleEventLogger(
         log("init", 1.0f, 0f, 0f, "none")
     }
 
-    override fun onZoomLayoutEvent(event: ZoomLayoutEvent): Boolean {
+    override fun onEvent(event: Event): Boolean {
         when(event) {
-            is ZoomLayoutEvent.DoubleTap -> return false
-            is ZoomLayoutEvent.LongTap -> return false
-            is ZoomLayoutEvent.Pan -> {
+            is Event.DoubleTap -> return false
+            is Event.LongTap -> return false
+            is Event.Pan -> {
                 log("Pan Event", event.view)
                 return true
             }
-            is ZoomLayoutEvent.PanBegin -> {
+            is Event.PanBegin -> {
                 log("PanBegin Event", event.view)
                 return true
             }
-            is ZoomLayoutEvent.PanEnd -> {
+            is Event.PanEnd -> {
                 log("PanEnd Event", event.view)
                 return true
             }
-            is ZoomLayoutEvent.Tap -> return false
-            is ZoomLayoutEvent.Touch -> return false
-            is ZoomLayoutEvent.Zoom -> {
+            is Event.Tap -> return false
+            is Event.Touch -> return false
+            is Event.Zoom -> {
                 log("Zoom Event", event.view)
                 return true
             }
-            is ZoomLayoutEvent.ZoomBegin -> {
+            is Event.ZoomBegin -> {
                 log("ZoomBegin Event", event.view)
                 return true
             }
-            is ZoomLayoutEvent.ZoomEnd -> {
+            is Event.ZoomEnd -> {
                 log("ZoomEnd Event", event.view)
                 return true
             }
@@ -57,7 +57,7 @@ class SimpleEventLogger(
 
     fun setLogger(zoomLayout: ZoomLayout) {
         zoomLayout.DEBUG = true
-        zoomLayout.addZoomLayoutEventListener(this)
+        zoomLayout.addEventListener(this)
     }
 
     private fun log(msg: String, view: ZoomLayout) {

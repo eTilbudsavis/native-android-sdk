@@ -39,7 +39,7 @@ public class ScaledImageViewActivity extends AppCompatActivity {
 
         mZoomLayout.setMinScale(1f);
         mZoomLayout.setMaxScale(4f);
-        mZoomLayout.addZoomLayoutEventListener(new ZoomOnDoubleTapListener(false));
+        mZoomLayout.addEventListener(new ZoomOnDoubleTapListener(false));
 
     }
 
