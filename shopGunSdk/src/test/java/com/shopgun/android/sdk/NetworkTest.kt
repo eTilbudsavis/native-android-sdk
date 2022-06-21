@@ -28,7 +28,7 @@ class NetworkTest {
             when (val response = TjekAPI.getPublications()) {
                 is ResponseType.Error -> Assert.fail(response.toString())
                 is ResponseType.Success -> {
-                    Assert.assertEquals(true, response.data?.isNotEmpty())
+                    Assert.assertEquals(true, response.data?.results?.isNotEmpty())
                 }
             }
         }
@@ -43,8 +43,8 @@ class NetworkTest {
         )
         runBlocking {
             val list = TjekAPI.getPublications()
-            Assert.assertEquals(true, (list as ResponseType.Success).data?.isNotEmpty())
-            when (val pub = TjekAPI.getPublication(list.data!![0].id)) {
+            Assert.assertEquals(true, (list as ResponseType.Success).data?.results?.isNotEmpty())
+            when (val pub = TjekAPI.getPublication(list.data!!.results[0].id)) {
                 is ResponseType.Error -> Assert.fail(pub.toString())
                 is ResponseType.Success -> {
                     Assert.assertEquals(true, pub.data!!.id.isNotBlank())
@@ -61,8 +61,8 @@ class NetworkTest {
         )
         runBlocking {
             val list = TjekAPI.getPublications()
-            Assert.assertEquals(true, (list as ResponseType.Success).data?.isNotEmpty())
-            val pub = TjekAPI.getPublication(list.data!![0].id)
+            Assert.assertEquals(true, (list as ResponseType.Success).data?.results?.isNotEmpty())
+            val pub = TjekAPI.getPublication(list.data!!.results[0].id)
             Assert.assertEquals(true, pub.data!!.id.isNotBlank())
 
             val b = Bundle()

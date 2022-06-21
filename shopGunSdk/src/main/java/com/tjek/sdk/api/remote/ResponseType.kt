@@ -16,3 +16,25 @@ sealed class ErrorType {
     data class Network(val code: Int? = null, val message: String?) : ErrorType()
     data class Unknown(val code: Int? = null, val message: String? = null) : ErrorType()
 }
+
+data class PaginatedResponse<T>(
+    val results: T,
+    val pageInfo: PageInfo
+) {
+    companion object {
+        fun <T> v2PaginatedResponse(request: PaginatedRequest<Int>, response: List<T>): PaginatedResponse<List<T>> {
+            return if (response.isEmpty()) {
+                PaginatedResponse(response, PageInfo(request.start.toString(), false))
+            } else {
+                PaginatedResponse(response, PageInfo(
+                    lastCursor = (request.start + response.size).toString(),
+                    hasNextPage = response.size == request.count))
+            }
+        }
+    }
+}
+
+data class PageInfo(
+    val lastCursor: String,
+    val hasNextPage: Boolean
+)
