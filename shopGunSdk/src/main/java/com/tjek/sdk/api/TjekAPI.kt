@@ -26,7 +26,7 @@ object TjekAPI {
         storeIds: Array<Id> = emptyArray(),
         nearLocation: LocationQuery? = null,
         acceptedTypes: Array<PublicationType> = PublicationType.values(),
-        pagination: PaginatedRequest<Int> = PaginatedRequest.v2FirstPage(24)
+        pagination: PaginatedRequestV2 = PaginatedRequestV2.firstPage(24)
     ): ResponseType<PaginatedResponse<List<PublicationV2>>> {
         return APIRequest.getPublications(businessIds, storeIds, nearLocation, acceptedTypes, pagination)
     }
@@ -74,7 +74,7 @@ object TjekAPI {
         businessIds: Array<Id> = emptyArray(),
         nearLocation: LocationQuery? = null,
         sortOrder: Array<StoresRequestSortOrder> = emptyArray(),
-        pagination: PaginatedRequest<Int> = PaginatedRequest.v2FirstPage(24)
+        pagination: PaginatedRequestV2 = PaginatedRequestV2.firstPage(24)
     ): ResponseType<PaginatedResponse<List<StoreV2>>> {
         return APIRequest.getStores(offerIds, publicationIds, businessIds, nearLocation, sortOrder, pagination)
     }
@@ -108,7 +108,7 @@ object TjekAPI {
         businessIds: Array<Id> = emptyArray(),
         storeIds: Array<Id> = emptyArray(),
         nearLocation: LocationQuery? = null,
-        pagination: PaginatedRequest<Int> = PaginatedRequest.v2FirstPage(24)
+        pagination: PaginatedRequestV2 = PaginatedRequestV2.firstPage(24)
     ): ResponseType<PaginatedResponse<List<OfferV2>>> {
         return APIRequest.getOffers(publicationIds, businessIds, storeIds, nearLocation, pagination)
     }

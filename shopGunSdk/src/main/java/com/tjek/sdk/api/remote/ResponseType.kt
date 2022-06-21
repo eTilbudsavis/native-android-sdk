@@ -22,7 +22,7 @@ data class PaginatedResponse<T>(
     val pageInfo: PageInfo
 ) {
     companion object {
-        fun <T> v2PaginatedResponse(request: PaginatedRequest<Int>, response: List<T>): PaginatedResponse<List<T>> {
+        fun <T> v2PaginatedResponse(request: PaginatedRequestV2, response: List<T>): PaginatedResponse<List<T>> {
             return if (response.isEmpty()) {
                 PaginatedResponse(response, PageInfo(request.startCursor.toString(), false))
             } else {

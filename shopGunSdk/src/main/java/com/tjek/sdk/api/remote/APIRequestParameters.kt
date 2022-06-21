@@ -24,17 +24,13 @@ enum class StoresRequestSortOrder(val key: String) {
     BusinessNameAZ("dealer")
 }
 
-data class PaginatedRequest<T>(
-    val startCursor: T,
+data class PaginatedRequestV2(
+    val startCursor: Int,
     val itemCount: Int
 ) {
     companion object {
-        fun v2FirstPage(count: Int = 24): PaginatedRequest<Int> {
-            return PaginatedRequest(startCursor = 0, itemCount = count)
-        }
-
-        fun v4FirstPage(count: Int = 24): PaginatedRequest<String?> {
-            return PaginatedRequest(startCursor = null, itemCount = count)
+        fun firstPage(count: Int = 24): PaginatedRequestV2 {
+            return PaginatedRequestV2(startCursor = 0, itemCount = count)
         }
     }
 
@@ -45,8 +41,8 @@ data class PaginatedRequest<T>(
         return params
     }
 
-    fun nextPage(lastCursor: T): PaginatedRequest<T> {
-        return PaginatedRequest(lastCursor, itemCount)
+    fun nextPage(lastCursor: String): PaginatedRequestV2 {
+        return PaginatedRequestV2(lastCursor.toIntOrNull() ?: startCursor, itemCount)
     }
 
 }

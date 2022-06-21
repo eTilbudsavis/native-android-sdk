@@ -20,7 +20,7 @@ internal object APIRequest : APIRequestBase() {
         storeIds: Array<Id>,
         nearLocation: LocationQuery?,
         acceptedTypes: Array<PublicationType>,
-        pagination: PaginatedRequest<Int>
+        pagination: PaginatedRequestV2
     ): ResponseType<PaginatedResponse<List<PublicationV2>>> {
         return safeApiCall(
             decoder = { list ->
@@ -54,7 +54,7 @@ internal object APIRequest : APIRequestBase() {
         businessIds: Array<Id>,
         nearLocation: LocationQuery?,
         sortOrder: Array<StoresRequestSortOrder>,
-        pagination: PaginatedRequest<Int>
+        pagination: PaginatedRequestV2
     ): ResponseType<PaginatedResponse<List<StoreV2>>> {
         return safeApiCall(
             decoder = { list ->
@@ -84,7 +84,7 @@ internal object APIRequest : APIRequestBase() {
         businessIds: Array<Id>,
         storeIds: Array<Id>,
         nearLocation: LocationQuery?,
-        pagination: PaginatedRequest<Int>
+        pagination: PaginatedRequestV2
     ): ResponseType<PaginatedResponse<List<OfferV2>>> {
         return safeApiCall(
             decoder = { list ->
