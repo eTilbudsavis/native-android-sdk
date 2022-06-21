@@ -3,6 +3,7 @@ package com.shopgun.android.sdk
 import android.os.Bundle
 import com.tjek.sdk.TjekSDK
 import com.tjek.sdk.api.TjekAPI
+import com.tjek.sdk.api.models.Coordinate
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.api.models.StoreV2
 import com.tjek.sdk.api.remote.*
@@ -109,6 +110,56 @@ class NetworkTest {
                     }
                 }
                 is ResponseType.Success -> Assert.fail("this shouldn't be possible")
+            }
+        }
+    }
+
+    @Test
+    fun storeRequestWithParamsTest() {
+        TjekSDK.configure(
+            enableLogCatMessages = true,
+            endpointEnvironment = EndpointEnvironment.STAGING
+        )
+        runBlocking {
+            val location = LocationQuery(
+                Coordinate(55.6310771, 12.5771624),
+                50000
+            )
+            val sortOrder = arrayOf(StoresRequestSortOrder.BusinessNameAZ)
+
+            when(val res = TjekAPI.getStores(nearLocation = location, sortOrder = sortOrder)) {
+                is ResponseType.Error -> Assert.fail("error")
+                is ResponseType.Success -> {
+                    Assert.assertEquals(true, res.data?.results?.isNotEmpty())
+                }
+            }
+        }
+    }
+
+    @Test
+    fun publicationsRequestWithParams() {
+        TjekSDK.configure(
+            enableLogCatMessages = true,
+            endpointEnvironment = EndpointEnvironment.STAGING
+        )
+        runBlocking {
+            val location = LocationQuery(
+                Coordinate(55.6310771, 12.5771624),
+                5000
+            )
+
+            var hasMoreToLoad = true
+            var pagination = PaginatedRequestV2.firstPage()
+            while(hasMoreToLoad) {
+                when (val res = TjekAPI.getPublications(nearLocation = location, pagination = pagination)) {
+                    is ResponseType.Error -> Assert.fail("unexpected error")
+                    is ResponseType.Success -> {
+                        println("from ${pagination.startCursor}")
+                        println("publications: ${res.data!!.results.joinToString { it.branding.name.toString() }}")
+                        pagination = pagination.nextPage(res.data!!.pageInfo.lastCursor)
+                        hasMoreToLoad = res.data!!.pageInfo.hasNextPage
+                    }
+                }
             }
         }
     }
