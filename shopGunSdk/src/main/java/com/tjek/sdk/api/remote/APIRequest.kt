@@ -48,6 +48,31 @@ internal object APIRequest : APIRequestBase() {
         }
     }
 
+    suspend fun getStores(
+        offerIds: Array<Id>,
+        publicationIds: Array<Id>,
+        businessIds: Array<Id>,
+        nearLocation: LocationQuery?,
+        sortOrder: Array<StoresRequestSortOrder>,
+        pagination: PaginatedRequest<Int>
+    ): ResponseType<PaginatedResponse<List<StoreV2>>> {
+        return safeApiCall(
+            decoder = { list ->
+                PaginatedResponse.v2PaginatedResponse(pagination, list.map { StoreV2.fromDecodable(it)})
+            }) {
+            val params = HashMap<String, String>()
+            params.putAll(pagination.v2RequestParams())
+            publicationIds.takeIf { it.isNotEmpty() }?.let { params["catalog_ids"] = it.joinToString(separator = ",") }
+            businessIds.takeIf { it.isNotEmpty() }?.let { params["dealer_ids"] = it.joinToString(separator = ",") }
+            offerIds.takeIf { it.isNotEmpty() }?.let { params["offer_ids"] = it.joinToString(separator = ",") }
+            sortOrder.takeIf { it.isNotEmpty() }?.let { array ->
+                params["order_by"] = array.joinToString(separator = ",") { it.key }
+            }
+            nearLocation?.let { params.putAll(it.v2RequestParams()) }
+            storeService.getStores(params)
+        }
+    }
+
     suspend fun getOffer(offerId: Id): ResponseType<OfferV2> {
         return safeApiCall(decoder = { offer -> OfferV2.fromDecodable(offer)}) {
             offerService.getOffer(offerId)

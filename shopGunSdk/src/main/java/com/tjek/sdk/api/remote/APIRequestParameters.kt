@@ -19,6 +19,11 @@ data class LocationQuery(
     }
 }
 
+enum class StoresRequestSortOrder(val key: String) {
+    Nearest("distance"),
+    BusinessNameAZ("dealer")
+}
+
 data class PaginatedRequest<T>(
     val startCursor: T,
     val itemCount: Int

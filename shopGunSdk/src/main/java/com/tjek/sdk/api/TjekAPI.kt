@@ -56,6 +56,30 @@ object TjekAPI {
     }
 
     /**
+    A request that returns a paginated list of stores, limited by the parameters.
+
+    - Parameters:
+        - offerIds: Limit the list of stores by the ids of the offers it contains.
+        - publicationIds: Limit the list of stores by the ids of the publications it has.
+        - businessIds: Limit the list of stores by the ids of the businesses that run them.
+        - nearLocation: Specify a coordinate to return stores in relation to. Also optionally limit the stores to within a max radius from that coordinate.
+        - sortedBy: An array of sort keys, defining which order we want the stores returned in. If left empty the server decides.
+        - pagination: The count & cursor of the request's page. Defaults to the first page of 24 stores. `itemCount` must not be more than 100. `startCursor` must not be greater than 1000.
+    - Returns:
+        A response type of a paginated array of `StoreV2`.
+     */
+    suspend fun getStores(
+        offerIds: Array<Id> = emptyArray(),
+        publicationIds: Array<Id> = emptyArray(),
+        businessIds: Array<Id> = emptyArray(),
+        nearLocation: LocationQuery? = null,
+        sortOrder: Array<StoresRequestSortOrder> = emptyArray(),
+        pagination: PaginatedRequest<Int> = PaginatedRequest.v2FirstPage(24)
+    ): ResponseType<PaginatedResponse<List<StoreV2>>> {
+        return APIRequest.getStores(offerIds, publicationIds, businessIds, nearLocation, sortOrder, pagination)
+    }
+
+    /**
     A request that asks for a specific offer, based on its Id.
 
     - Parameters:
