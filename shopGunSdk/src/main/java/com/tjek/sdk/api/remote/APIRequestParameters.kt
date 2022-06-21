@@ -20,20 +20,28 @@ data class LocationQuery(
 }
 
 data class PaginatedRequest<T>(
-    val start: T,
-    val count: Int
+    val startCursor: T,
+    val itemCount: Int
 ) {
     companion object {
-        fun firstPage(count: Int = 24): PaginatedRequest<Int> {
-            return PaginatedRequest(start = 0, count = count)
+        fun v2FirstPage(count: Int = 24): PaginatedRequest<Int> {
+            return PaginatedRequest(startCursor = 0, itemCount = count)
+        }
+
+        fun v4FirstPage(count: Int = 24): PaginatedRequest<String?> {
+            return PaginatedRequest(startCursor = null, itemCount = count)
         }
     }
 
     fun v2RequestParams(): Map<String, String> {
         val params = HashMap<String, String>()
-        params["offset"] = start.toString()
-        params["limit"] = count.toString()
+        params["offset"] = startCursor.toString()
+        params["limit"] = itemCount.toString()
         return params
+    }
+
+    fun nextPage(lastCursor: T): PaginatedRequest<T> {
+        return PaginatedRequest(lastCursor, itemCount)
     }
 
 }

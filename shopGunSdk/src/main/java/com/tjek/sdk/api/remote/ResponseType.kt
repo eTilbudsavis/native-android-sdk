@@ -24,11 +24,11 @@ data class PaginatedResponse<T>(
     companion object {
         fun <T> v2PaginatedResponse(request: PaginatedRequest<Int>, response: List<T>): PaginatedResponse<List<T>> {
             return if (response.isEmpty()) {
-                PaginatedResponse(response, PageInfo(request.start.toString(), false))
+                PaginatedResponse(response, PageInfo(request.startCursor.toString(), false))
             } else {
                 PaginatedResponse(response, PageInfo(
-                    lastCursor = (request.start + response.size).toString(),
-                    hasNextPage = response.size == request.count))
+                    lastCursor = (request.startCursor + response.size).toString(),
+                    hasNextPage = response.size == request.itemCount))
             }
         }
     }
