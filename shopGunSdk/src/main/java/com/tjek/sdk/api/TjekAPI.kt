@@ -1,9 +1,6 @@
 package com.tjek.sdk.api
 
-import com.tjek.sdk.api.models.OfferV2
-import com.tjek.sdk.api.models.PublicationType
-import com.tjek.sdk.api.models.PublicationV2
-import com.tjek.sdk.api.models.StoreV2
+import com.tjek.sdk.api.models.*
 import com.tjek.sdk.api.remote.*
 import com.tjek.sdk.api.remote.APIRequest
 
@@ -111,5 +108,17 @@ object TjekAPI {
         pagination: PaginatedRequestV2 = PaginatedRequestV2.firstPage(24)
     ): ResponseType<PaginatedResponse<List<OfferV2>>> {
         return APIRequest.getOffers(publicationIds, businessIds, storeIds, nearLocation, pagination)
+    }
+
+    /**
+    A request that asks for a specific business, based on its Id.
+
+    - Parameters:
+        - businessId: The Id of the specific business we are looking for.
+    - Returns:
+        A response type of `BusinessV2`.
+     */
+    suspend fun getBusiness(businessId: Id): ResponseType<BusinessV2> {
+        return APIRequest.getBusiness(businessId)
     }
 }

@@ -1,10 +1,8 @@
 package com.tjek.sdk.api.remote
 
 import com.tjek.sdk.api.Id
-import com.tjek.sdk.api.models.OfferV2
-import com.tjek.sdk.api.models.PublicationType
-import com.tjek.sdk.api.models.PublicationV2
-import com.tjek.sdk.api.models.StoreV2
+import com.tjek.sdk.api.models.*
+import com.tjek.sdk.api.remote.services.BusinessService
 import com.tjek.sdk.api.remote.services.OfferService
 import com.tjek.sdk.api.remote.services.PublicationService
 import com.tjek.sdk.api.remote.services.StoreService
@@ -14,6 +12,7 @@ internal object APIRequest : APIRequestBase() {
     private val publicationService: PublicationService by lazy { APIClient.getClient().create(PublicationService::class.java) }
     private val storeService: StoreService by lazy { APIClient.getClient().create(StoreService::class.java) }
     private val offerService: OfferService by lazy { APIClient.getClient().create(OfferService::class.java) }
+    private val businessService: BusinessService by lazy { APIClient.getClient().create(BusinessService::class.java) }
 
     suspend fun getPublications(
         businessIds: Array<Id>,
@@ -97,6 +96,12 @@ internal object APIRequest : APIRequestBase() {
             storeIds.takeIf { it.isNotEmpty() }?.let { params["store_ids"] = it.joinToString(separator = ",") }
             nearLocation?.let { params.putAll(it.v2RequestParams()) }
             offerService.getOffers(params)
+        }
+    }
+
+    suspend fun getBusiness(businessId: Id): ResponseType<BusinessV2> {
+        return safeApiCall(decoder = { business -> BusinessV2.fromDecodable(business)}) {
+            businessService.getDealer(businessId)
         }
     }
 }
