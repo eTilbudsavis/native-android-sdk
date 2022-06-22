@@ -2,9 +2,9 @@ package com.tjek.sdk.sample.zoomlayoutsample.utils
 
 import android.graphics.RectF
 import android.widget.TextView
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomLayout
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.Event
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.EventListener
+import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.ZoomLayout
+import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.Event
+import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.EventListener
 import java.util.*
 
 class SimpleEventLogger(

@@ -1,4 +1,4 @@
-package com.tjek.sdk.publicationviewer.paged.verso;
+package com.tjek.sdk.publicationviewer.paged.libs.verso;
 
 import android.view.ViewGroup;
 

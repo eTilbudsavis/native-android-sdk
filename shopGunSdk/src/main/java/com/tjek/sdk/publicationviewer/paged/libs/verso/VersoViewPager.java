@@ -1,11 +1,11 @@
-package com.tjek.sdk.publicationviewer.paged.verso;
+package com.tjek.sdk.publicationviewer.paged.libs.verso;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import androidx.viewpager.widget.PagerAdapter;
 
-import com.tjek.sdk.publicationviewer.paged.verso.viewpager.LazyCenteredViewPager;
+import com.tjek.sdk.publicationviewer.paged.libs.verso.viewpager.LazyCenteredViewPager;
 
 @SuppressWarnings("unused")
 public class VersoViewPager extends LazyCenteredViewPager {

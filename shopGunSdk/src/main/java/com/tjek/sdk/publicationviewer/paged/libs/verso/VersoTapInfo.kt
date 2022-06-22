@@ -1,8 +1,8 @@
-package com.tjek.sdk.publicationviewer.paged.verso
+package com.tjek.sdk.publicationviewer.paged.libs.verso
 
 import android.view.View
 import com.tjek.sdk.publicationviewer.paged.NumberUtils
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.TapInfo
+import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.TapInfo
 import java.util.*
 import kotlin.math.floor
 

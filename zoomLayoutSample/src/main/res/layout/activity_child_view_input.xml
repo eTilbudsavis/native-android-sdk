@@ -8,7 +8,7 @@
 
     <include layout="@layout/info"/>
 
-    <com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomLayout
+    <com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.ZoomLayout
         android:id="@+id/zoomLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -47,6 +47,6 @@
                 android:id="@+id/seekBar2"/>
         </LinearLayout>
 
-    </com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomLayout>
+    </com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.ZoomLayout>
 
 </LinearLayout>

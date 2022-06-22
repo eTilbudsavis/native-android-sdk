@@ -6,7 +6,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomLayout;
+import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.ZoomLayout;
 import com.tjek.sdk.sample.zoomlayoutsample.utils.SimpleEventLogger;
 
 public class MultipleViewActivity extends AppCompatActivity {

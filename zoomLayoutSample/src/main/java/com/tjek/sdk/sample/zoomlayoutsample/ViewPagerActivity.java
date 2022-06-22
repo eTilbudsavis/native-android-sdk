@@ -14,7 +14,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomLayout;
+import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.ZoomLayout;
 import com.tjek.sdk.sample.zoomlayoutsample.utils.SimpleEventLogger;
 
 public class ViewPagerActivity extends AppCompatActivity {

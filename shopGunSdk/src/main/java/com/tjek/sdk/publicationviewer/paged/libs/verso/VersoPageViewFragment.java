@@ -1,4 +1,4 @@
-package com.tjek.sdk.publicationviewer.paged.verso;
+package com.tjek.sdk.publicationviewer.paged.libs.verso;
 
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -15,10 +15,10 @@ import androidx.fragment.app.Fragment;
 
 import com.shopgun.android.sdk.R;
 import com.tjek.sdk.publicationviewer.paged.NumberUtils;
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomLayout;
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.Event;
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.EventListener;
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomOnDoubleTapListener;
+import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.ZoomLayout;
+import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.Event;
+import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.EventListener;
+import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.ZoomOnDoubleTapListener;
 
 import java.util.Arrays;
 import java.util.HashSet;

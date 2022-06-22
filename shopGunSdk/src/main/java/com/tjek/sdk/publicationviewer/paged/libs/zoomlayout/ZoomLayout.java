@@ -1,4 +1,4 @@
-package com.tjek.sdk.publicationviewer.paged.zoomlayout;
+package com.tjek.sdk.publicationviewer.paged.libs.zoomlayout;
 
 import android.annotation.TargetApi;
 import android.content.Context;

@@ -8,8 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomLayout;
-import com.tjek.sdk.publicationviewer.paged.zoomlayout.ZoomOnDoubleTapListener;
+import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.ZoomLayout;
+import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.ZoomOnDoubleTapListener;
 import com.tjek.sdk.sample.zoomlayoutsample.utils.SimpleEventLogger;
 
 

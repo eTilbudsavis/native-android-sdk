@@ -1,4 +1,4 @@
-package com.tjek.sdk.publicationviewer.paged.zoomlayout
+package com.tjek.sdk.publicationviewer.paged.libs.zoomlayout
 
 import android.content.Context
 import android.graphics.*

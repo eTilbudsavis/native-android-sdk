@@ -1,4 +1,4 @@
-package com.tjek.sdk.publicationviewer.paged.verso.viewpager;
+package com.tjek.sdk.publicationviewer.paged.libs.verso.viewpager;
 /*
  * Copyright (C) 2011 The Android Open Source Project
  *

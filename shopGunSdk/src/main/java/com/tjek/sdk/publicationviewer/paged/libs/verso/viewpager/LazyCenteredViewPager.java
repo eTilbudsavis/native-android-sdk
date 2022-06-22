@@ -1,4 +1,4 @@
-package com.tjek.sdk.publicationviewer.paged.verso.viewpager;
+package com.tjek.sdk.publicationviewer.paged.libs.verso.viewpager;
 
 import android.content.Context;
 import android.util.AttributeSet;
