@@ -123,4 +123,14 @@ object TjekAPI {
     suspend fun getBusiness(businessId: Id): ResponseType<BusinessV2> {
         return APIRequest.getBusiness(businessId)
     }
+
+    /**
+     * Fetches all the pages for the specified publication
+     */
+    suspend fun getPublicationPages(
+        publicationId: Id,
+        aspectRatio: Double? = null
+    ): ResponseType<List<PublicationPageV2>> {
+        return APIRequest.getPublicationPages(publicationId, aspectRatio)
+    }
 }

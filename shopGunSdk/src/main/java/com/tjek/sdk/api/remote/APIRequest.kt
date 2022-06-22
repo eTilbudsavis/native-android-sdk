@@ -104,4 +104,18 @@ internal object APIRequest : APIRequestBase() {
             businessService.getDealer(businessId)
         }
     }
+
+    suspend fun getPublicationPages(
+        publicationId: Id,
+        aspectRatio: Double? = null
+    ): ResponseType<List<PublicationPageV2>> {
+        return safeApiCall(
+            decoder = { list ->
+                list.mapIndexed { pageIndex, images ->
+                    PublicationPageV2(pageIndex, "${pageIndex + 1}", aspectRatio ?: 1.0, images)
+                }
+            }) {
+            publicationService.getCatalogPages(publicationId)
+        }
+    }
 }
