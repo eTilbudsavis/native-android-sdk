@@ -133,4 +133,16 @@ object TjekAPI {
     ): ResponseType<List<PublicationPageV2>> {
         return APIRequest.getPublicationPages(publicationId, aspectRatio)
     }
+
+    /**
+     * Fetch all hotspots for the specified publication.
+     * Width and height of the publication are needed in order to position the hotspots correctly.
+     */
+    suspend fun getPublicationHotspots(
+        publicationId: Id,
+        width: Double,
+        height: Double
+    ): ResponseType<List<PublicationHotspotV2>> {
+        return APIRequest.getPublicationHotspots(publicationId, width, height)
+    }
 }

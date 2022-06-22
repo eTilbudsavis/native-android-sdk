@@ -2,6 +2,7 @@ package com.tjek.sdk.api.remote.services
 
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.remote.models.v2.ImageUrlsV2
+import com.tjek.sdk.api.remote.models.v2.PublicationHotspotV2Decodable
 import com.tjek.sdk.api.remote.models.v2.PublicationV2Decodable
 import retrofit2.Response
 import retrofit2.http.GET
@@ -18,4 +19,7 @@ interface PublicationService {
 
     @GET("v2/catalogs/{catalogId}/pages")
     suspend fun getCatalogPages(@Path("catalogId") catalogId: Id): Response<List<ImageUrlsV2>>
+
+    @GET("v2/catalogs/{catalogId}/hotspots")
+    suspend fun getCatalogHotspots(@Path("catalogId") catalogId: Id): Response<List<PublicationHotspotV2Decodable>>
 }

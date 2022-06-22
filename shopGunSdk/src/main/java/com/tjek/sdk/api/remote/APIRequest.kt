@@ -118,4 +118,18 @@ internal object APIRequest : APIRequestBase() {
             publicationService.getCatalogPages(publicationId)
         }
     }
+
+    suspend fun getPublicationHotspots(
+        publicationId: Id,
+        width: Double,
+        height: Double
+    ): ResponseType<List<PublicationHotspotV2>> {
+        return safeApiCall(
+            decoder = { list ->
+                list.map { PublicationHotspotV2.fromDecodable(it) }
+                    .onEach { it.normalize(width, height) }
+            }) {
+            publicationService.getCatalogHotspots(publicationId)
+        }
+    }
 }

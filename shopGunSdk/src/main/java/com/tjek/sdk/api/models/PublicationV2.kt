@@ -23,8 +23,8 @@ data class PublicationV2(
     val offerCount: Int,
     // The range of dates that this publication is valid from and until.
     val runDateRange: ValidityPeriod,
-    // The ratio of width to height for the page-images. So if an image is (w:100, h:200), the aspectRatio is 0.5 (width/height).
-    val aspectRatio: Double,
+    val width: Double,
+    val height: Double,
     // The branding information for the publication's dealer.
     val branding: BrandingV2,
     // A set of URLs for the different sized images for the cover of the publication.
@@ -42,6 +42,11 @@ data class PublicationV2(
     // If it ONLY contains `incito`, this cannot be viewed in a PagedPublicationViewer (see `isOnlyIncito`)
     val types: List<PublicationType> = listOf(PublicationType.paged)
 ) : Parcelable {
+
+    // The ratio of width to height for the page-images. So if an image is (w:100, h:200), the aspectRatio is 0.5 (width/height).
+    @IgnoredOnParcel
+    val aspectRatio: Double = width / height
+
     // True if this publication can only be viewed as an incito (if viewed in a PagedPublication view it would appear as a single-page pdf)
     @IgnoredOnParcel
     val isOnlyIncitoPublication: Boolean = types.size == 1 && types.contains(PublicationType.incito)
@@ -60,9 +65,6 @@ data class PublicationV2(
             val fromDate = p.runFromDateStr?.toValidityDate() ?: distantPast()
             val tillDate = p.runTillDateStr?.toValidityDate() ?: distantFuture()
 
-            val width = p.dimensions?.width ?: 1.0
-            val height = p.dimensions?.height ?: 1.0
-
             return PublicationV2(
                 id = p.id,
                 label = p.label,
@@ -72,7 +74,8 @@ data class PublicationV2(
                     fromDate,
                     tillDate
                 ),
-                aspectRatio = width / height,
+                width = p.dimensions?.width ?: 1.0,
+                height = p.dimensions?.height ?: 1.0,
                 branding = p.branding,
                 frontPageImages = p.frontPageImageUrls ?: ImageUrlsV2("", "", ""),
                 isAvailableInAllStores = p.allStores ?: true,
