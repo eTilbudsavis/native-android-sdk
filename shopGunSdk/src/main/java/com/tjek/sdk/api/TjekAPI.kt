@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.tjek.sdk.api
 
 import com.tjek.sdk.api.models.*
