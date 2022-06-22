@@ -96,7 +96,6 @@ class PagedPublicationLifecycle implements Parcelable {
     void opened() {
         if (isReady() && !mOpened) {
             mOpened = true;
-            PagedPublicationEvent.opened(mConfig).track();
         }
     }
 

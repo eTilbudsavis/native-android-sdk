@@ -209,10 +209,9 @@ public class AnonymousEvent {
         return this;
     }
 
-    public AnonymousEvent addIncitoOpened(String publicationId, boolean pagedPublicationIsAvailable) {
+    public AnonymousEvent addIncitoOpened(String publicationId) {
         if (!TextUtils.isEmpty(publicationId)) {
             json_event.addProperty("ip.id", publicationId);
-            json_event.addProperty("ip.paged", pagedPublicationIsAvailable);
         }
         return this;
     }

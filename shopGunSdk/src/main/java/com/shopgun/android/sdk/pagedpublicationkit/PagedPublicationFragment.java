@@ -8,6 +8,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.shopgun.android.viewpager.CenteredViewPager;
 import androidx.viewpager.widget.ViewPager;
@@ -41,6 +43,7 @@ public class PagedPublicationFragment extends VersoFragment {
     public static final String ARG_PAGE = "arg_page";
     public static final String SAVED_STATE = "saved_state";
     public static final String BRAND_COLORS = "brand_colors";
+    public static final String HAS_SENT_OPEN_EVENT = "has_sent_open_event";
 
     private PagedPublicationConfiguration mConfig;
 
@@ -52,6 +55,7 @@ public class PagedPublicationFragment extends VersoFragment {
 
     private boolean mDisplayHotspotsOnTouch = true;
     private boolean mSetBrandColors = true;
+    private boolean mHasSentOpenEvent = false;
     private OnTouchWrapper mOnTouchWrapper;
     private PageChangeListener mPageChangeListener = new PageChangeListener();
 
@@ -92,6 +96,7 @@ public class PagedPublicationFragment extends VersoFragment {
         mViewSessionUuid = SgnUtils.createUUID();
         if (savedInstanceState != null) {
             mSetBrandColors = savedInstanceState.getBoolean(BRAND_COLORS);
+            mHasSentOpenEvent = savedInstanceState.getBoolean(HAS_SENT_OPEN_EVENT);
         }
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_STATE)) {
             SavedState savedState = savedInstanceState.getParcelable(SAVED_STATE);
@@ -125,6 +130,15 @@ public class PagedPublicationFragment extends VersoFragment {
         }
 
         return mFrame;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        if (mConfig != null && !mHasSentOpenEvent) {
+            // track the paged publication open event if it has not been tracked before
+            PagedPublicationEvent.opened(mConfig).track();
+            mHasSentOpenEvent = true;
+        }
     }
 
     @Override
@@ -192,6 +206,7 @@ public class PagedPublicationFragment extends VersoFragment {
         }
         outState.putParcelable(SAVED_STATE, new SavedState(this));
         outState.putBoolean(BRAND_COLORS, mSetBrandColors);
+        outState.putBoolean(HAS_SENT_OPEN_EVENT, mHasSentOpenEvent);
         super.onSaveInstanceState(outState);
     }
 

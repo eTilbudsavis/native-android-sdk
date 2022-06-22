@@ -106,6 +106,11 @@ public class CatalogConfiguration extends IntroOutroConfiguration {
     }
 
     @Override
+    public String getPublicationId() {
+        return mCatalogId;
+    }
+
+    @Override
     public boolean hasPublication() {
         return mPublication != null;
     }
