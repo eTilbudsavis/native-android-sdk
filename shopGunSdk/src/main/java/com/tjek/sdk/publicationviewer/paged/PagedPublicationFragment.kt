@@ -107,6 +107,14 @@ class PagedPublicationFragment : VersoFragment() {
         return  frame
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putParcelable(saved_state, Savedstate(
+            config = ppConfig,
+            hasSentOpenEvent = hasSentOpenEvent
+        ))
+        super.onSaveInstanceState(outState)
+    }
+
     private fun setVersoSpreadConfiguration() {
         var pageCount = viewModel.publication?.pageCount ?: 0
         var spreadCount = when (resources.configuration.getDeviceOrientation()) {
