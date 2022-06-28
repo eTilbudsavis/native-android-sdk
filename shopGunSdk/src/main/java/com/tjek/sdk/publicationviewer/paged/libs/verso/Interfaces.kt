@@ -29,7 +29,7 @@ interface VersoSpreadConfiguration {
      * @param page a page
      * @return a View
      */
-    fun getPageView(container: ViewGroup, page: Int): View
+    fun getPageView(container: ViewGroup, page: Int): View?
     fun getSpreadOverlay(container: ViewGroup, pages: IntArray): View?
     fun onConfigurationChanged(newConfig: Configuration)
     val pageCount: Int

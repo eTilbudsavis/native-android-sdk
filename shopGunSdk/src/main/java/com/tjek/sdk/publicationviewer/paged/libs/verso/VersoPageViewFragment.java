@@ -104,7 +104,9 @@ public class VersoPageViewFragment extends Fragment {
         for (int page : mPages) {
             View view = mVersoSpreadConfiguration.getPageView(mPageContainer, page);
             try {
-                ((VersoPageView)view).setOnLoadCompleteListener(mOnLoadCompleteListener);
+                if (view != null && mOnLoadCompleteListener != null) {
+                    ((VersoPageView)view).setOnLoadCompleteListener(mOnLoadCompleteListener);
+                }
             } catch (ClassCastException e) {
                 throw new IllegalArgumentException("The view must implement VersoPageView", e);
             }
@@ -292,6 +294,7 @@ public class VersoPageViewFragment extends Fragment {
             }
             if (event instanceof Event.Zoom) {
                 Event.Zoom e = (Event.Zoom) event;
+                dispatchZoom(e.getScale());
                 return mVersoPageViewEventListener.onVersoPageViewEvent(
                         new VersoPageViewEvent.Zoom(new VersoZoomPanInfo(VersoPageViewFragment.this, e.getScale(), getZoomLayoutRect(e.getView())))
                 );
