@@ -16,7 +16,7 @@ ext {
             robolectric                 : '4.6.1',
             mockito                     : '3.0.0',
             okhttp                      : '3.12.13', // 3.13 doesn't support pre Android 5. https://medium.com/square-corner-blog/okhttp-3-13-requires-android-5-818bb78d07ce
-            glide                       : '4.9.0',
+            glide                       : '4.13.2',
             geohash                     : '0.22',
     ]
 

@@ -119,6 +119,7 @@ dependencies {
     
     // androidX
     implementation("androidx.startup:startup-runtime:1.1.1")
+    implementation("androidx.fragment:fragment-ktx:1.4.1")
 
     // Other libs
     implementation("io.github.everythingme:overscroll-decor-android:1.1.1")
