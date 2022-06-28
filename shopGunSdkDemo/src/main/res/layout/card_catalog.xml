@@ -49,35 +49,6 @@
             android:maxLines="1"
             android:text="" />
 
-        <TextView
-            android:id="@+id/card_catalog_distance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/card_catalog_label_prefix"
-            android:layout_toRightOf="@+id/card_catalog_logo"
-            android:paddingTop="2dp"
-            android:text="distance" />
-
-        <TextView
-            android:id="@+id/card_catalog_street"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/card_catalog_distance"
-            android:layout_toRightOf="@+id/card_catalog_logo"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="street" />
-
-        <TextView
-            android:id="@+id/card_catalog_zipcode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/card_catalog_street"
-            android:layout_toRightOf="@+id/card_catalog_logo"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="zipCode" />
-
         <ImageView
             android:id="@+id/card_catalog_fold"
             android:layout_width="wrap_content"
