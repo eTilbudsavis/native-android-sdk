@@ -1,5 +1,6 @@
 package com.tjek.sdk.publicationviewer.paged
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -137,7 +138,8 @@ class PagedPublicationFragment : VersoFragment() {
             hasIntro = ppConfig.hasIntro,
             hasOutro = ppConfig.hasOutro,
             pages = viewModel.pages,
-            publicationBrandingColor = viewModel.publication?.branding?.colorHex.getColorFromHexStr()
+            publicationBrandingColor = viewModel.publication?.branding?.colorHex.getColorFromHexStr(),
+            deviceConfiguration = resources.configuration
         )
     }
 

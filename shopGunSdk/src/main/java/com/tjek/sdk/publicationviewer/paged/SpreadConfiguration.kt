@@ -18,10 +18,11 @@ internal class SpreadConfiguration(
     private val hasIntro: Boolean = false,
     private val hasOutro: Boolean = false,
     private val introView: View? = null,
-    private val outroView: View? = null
+    private val outroView: View? = null,
+    deviceConfiguration: Configuration
 ) : VersoSpreadConfiguration {
 
-    private var orientation = DeviceOrientation.Portrait
+    private var orientation = deviceConfiguration.getDeviceOrientation()
 
     override fun getPageView(container: ViewGroup, page: Int): View? {
         return when {
