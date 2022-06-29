@@ -15,19 +15,19 @@ internal class SpreadConfiguration(
     override val spreadMargin: Int,
     private val pages: List<PublicationPageV2>?,
     private val publicationBrandingColor: Int,
-    private val hasIntro: Boolean = false,
-    private val hasOutro: Boolean = false,
-    private val introView: View? = null,
-    private val outroView: View? = null,
+    private val introConfiguration: IntroConfiguration,
+    private val outroConfiguration: OutroConfiguration,
     deviceConfiguration: Configuration
 ) : VersoSpreadConfiguration {
 
     private var orientation = deviceConfiguration.getDeviceOrientation()
+    private val hasIntro = introConfiguration.hasIntro
+    private var hasOutro = outroConfiguration.hasOutro
 
     override fun getPageView(container: ViewGroup, page: Int): View? {
         return when {
-            hasIntro && page == 0 -> introView
-            hasOutro && page == pageCount - 1 -> outroView
+            hasIntro && page == 0 -> introConfiguration.getIntroView(container.context, page)
+            hasOutro && page == pageCount - 1 -> outroConfiguration.getOutroView(container.context, page)
             else -> {
                 // Offset the page by one if there is an intro to get
                 // the publicationPage, rather than the verso page
@@ -65,7 +65,7 @@ internal class SpreadConfiguration(
                 pages = p, width = 0.6f, maxZoomScale = 1f, minZoomScale = 1f
             )
             hasOutro && spreadPosition == spreadCount - 1 -> VersoSpreadProperty(
-                pages = p, width = 0.8f, maxZoomScale = 1f, minZoomScale = 1f
+                pages = p, width = if (orientation == DeviceOrientation.Landscape) 0.55f else 0.8f, maxZoomScale = 1f, minZoomScale = 1f
             )
             else -> VersoSpreadProperty(
                 pages = p, width = 1f, minZoomScale = 1f, maxZoomScale = 3f

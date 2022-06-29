@@ -8,6 +8,8 @@ import android.widget.Toast;
 
 import com.shopgun.android.sdk.demo.base.BaseActivity;
 import com.tjek.sdk.api.models.PublicationV2;
+import com.tjek.sdk.publicationviewer.paged.IntroConfiguration;
+import com.tjek.sdk.publicationviewer.paged.OutroConfiguration;
 import com.tjek.sdk.publicationviewer.paged.PagedPublicationConfiguration;
 import com.tjek.sdk.publicationviewer.paged.PagedPublicationFragment;
 
@@ -40,7 +42,12 @@ public class PagedPublicationActivity extends BaseActivity {
             PublicationV2 publication = getIntent().getExtras().getParcelable(KEY_PUB);
             mPagedPublicationFragment = PagedPublicationFragment.Companion.newInstance(
                     publication,
-                    new PagedPublicationConfiguration(),
+                    new PagedPublicationConfiguration(
+                            true,
+                            true,
+                            new IntroConfiguration(false),
+                            new OutroConfig()
+                    ),
                     0);
             getSupportFragmentManager()
                     .beginTransaction()

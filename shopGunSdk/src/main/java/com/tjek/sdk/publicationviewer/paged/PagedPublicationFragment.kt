@@ -123,11 +123,11 @@ class PagedPublicationFragment : VersoFragment() {
             else -> pageCount
         }
 
-        if (ppConfig.hasIntro) {
+        if (ppConfig.introConfiguration.hasIntro) {
             pageCount++
             spreadCount++
         }
-        if (ppConfig.hasOutro) {
+        if (ppConfig.outroConfiguration.hasOutro) {
             pageCount++
             spreadCount++
         }
@@ -135,8 +135,8 @@ class PagedPublicationFragment : VersoFragment() {
             pageCount,
             spreadCount,
             spreadMargin = 0,
-            hasIntro = ppConfig.hasIntro,
-            hasOutro = ppConfig.hasOutro,
+            introConfiguration = ppConfig.introConfiguration,
+            outroConfiguration = ppConfig.outroConfiguration,
             pages = viewModel.pages,
             publicationBrandingColor = viewModel.publication?.branding?.colorHex.getColorFromHexStr(),
             deviceConfiguration = resources.configuration
