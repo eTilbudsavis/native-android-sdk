@@ -45,7 +45,7 @@ public class PagedPublicationActivity extends BaseActivity {
                     new PagedPublicationConfiguration(
                             true,
                             true,
-                            new IntroConfiguration(false),
+                            null,
                             new OutroConfig()
                     ),
                     0);
