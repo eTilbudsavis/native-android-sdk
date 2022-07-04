@@ -13,6 +13,7 @@ import com.tjek.sdk.api.models.PublicationType
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import okio.ByteString
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.*
@@ -96,6 +97,7 @@ internal object APIClient {
 
         val moshi = Moshi.Builder()
             .add(PublicationType::class.java, EnumJsonAdapter.create(PublicationType::class.java).withUnknownFallback(PublicationType.paged))
+            .add(ByteString::class.java, RawJson::class.java, RawJsonAdapter())
             .build()
 
         return Retrofit.Builder()

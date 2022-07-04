@@ -5,6 +5,8 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.ValidityDateStr
+import com.tjek.sdk.api.remote.RawJson
+import okio.ByteString
 import org.json.JSONObject
 
 @Keep
@@ -27,5 +29,5 @@ data class HotspotOfferV2Decodable (
 @JsonClass(generateAdapter = true)
 data class PublicationHotspotV2Decodable (
     val offer: HotspotOfferV2Decodable?,
-    val locations: JSONObject?
+    @RawJson val locations: ByteString?
 )

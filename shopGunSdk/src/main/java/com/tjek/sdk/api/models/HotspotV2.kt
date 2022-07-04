@@ -9,6 +9,10 @@ import com.tjek.sdk.api.remote.models.v2.PublicationHotspotV2Decodable
 import com.tjek.sdk.api.remote.models.v2.QuantityV2
 import com.tjek.sdk.publicationviewer.paged.PolygonF
 import kotlinx.parcelize.Parcelize
+import org.json.JSONObject
+import kotlin.math.abs
+
+private const val significantArea: Double = 0.02
 
 @Parcelize
 data class PublicationHotspotV2(
@@ -19,11 +23,12 @@ data class PublicationHotspotV2(
     companion object {
         fun fromDecodable(h: PublicationHotspotV2Decodable): PublicationHotspotV2 {
             val pageLocations = SparseArray<PolygonF>()
-            h.locations?.keys()?.let {
+            val json = JSONObject(h.locations?.utf8() ?: "")
+            json.keys().let {
                 while (it.hasNext()) {
                     val page = it.next()
                     val intPage = Integer.valueOf(page) - 1
-                    val location = h.locations.getJSONArray(page)
+                    val location = json.getJSONArray(page)
                     val poly = PolygonF(location.length())
                     for (i in 0 until location.length()) {
                         val point = location.getJSONArray(i)
