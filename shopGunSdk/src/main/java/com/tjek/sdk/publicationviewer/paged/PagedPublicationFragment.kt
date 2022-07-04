@@ -1,6 +1,5 @@
 package com.tjek.sdk.publicationviewer.paged
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,9 +13,11 @@ import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.getColorFromHexStr
 import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoFragment
+import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageViewEvent
+import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageViewListener
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoViewPager
 
-class PagedPublicationFragment : VersoFragment() {
+class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventListener {
 
     private val viewModel: PagedPublicationViewModel by viewModels()
     private lateinit var ppConfig: PagedPublicationConfiguration
@@ -105,6 +106,8 @@ class PagedPublicationFragment : VersoFragment() {
         frameLoader = frame.findViewById(R.id.loader) as FrameLayout?
         setVisible(verso = false, loader = false, error = false)
 
+        setOnEventListener(this)
+
         return  frame
     }
 
@@ -183,5 +186,24 @@ class PagedPublicationFragment : VersoFragment() {
         frameVerso?.visibility = if (verso) View.VISIBLE else View.GONE
         frameLoader?.visibility = if (loader) View.VISIBLE else View.GONE
         frameError?.visibility = if (error) View.VISIBLE else View.GONE
+    }
+
+    override fun onVersoPageViewEvent(event: VersoPageViewEvent): Boolean {
+        // todo: delete unused events
+        return when (event) {
+            is VersoPageViewEvent.Tap -> {
+                if (!ppConfig.displayHotspotsOnTouch) return false
+                val hs = viewModel.findHotspot(event.info, ppConfig.hasIntro)
+                if (hs.isNotEmpty()) {
+                    event.info.fragment.spreadOverlay?.let { view ->
+                        if (view is PublicationSpreadLayout) {
+                            view.showHotspots(hs)
+                        }
+                    }
+                }
+                true
+            }
+            else -> false
+        }
     }
 }

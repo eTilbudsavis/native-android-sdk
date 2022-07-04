@@ -1,5 +1,6 @@
 package com.tjek.sdk.api.models
 
+import android.graphics.RectF
 import android.os.Parcelable
 import android.util.SparseArray
 import com.tjek.sdk.api.*
@@ -68,6 +69,41 @@ data class PublicationHotspotV2(
         return pages
     }
 
+    fun getBoundsForPages(pages: IntArray): RectF? {
+        var rect: RectF? = null
+        val pagesLength = pages.size.toFloat()
+        val pageOffset = 1f / pagesLength
+        for (i in pages.indices) {
+            val page = pages[i]
+            val p: PolygonF? = pageLocations.get(page)
+            p?.let{
+                val r = RectF(p.bounds)
+                r.right = r.right / pagesLength
+                r.left = r.left / pagesLength
+                r.offset(pageOffset * i.toFloat(), 0f)
+                if (rect == null) {
+                    rect = r
+                } else {
+                    rect!!.union(r)
+                }
+            }
+        }
+        return rect
+    }
+
+    fun hasLocationAt(visiblePages: IntArray, clickedPage: Int, x: Float, y: Float): Boolean {
+        val p: PolygonF? = pageLocations.get(clickedPage)
+        return p != null && p.contains(x, y) && isAreaSignificant(visiblePages, clickedPage)
+    }
+
+    private fun isAreaSignificant(visiblePages: IntArray, clickedPage: Int): Boolean {
+        return !(visiblePages.size == 1 && pageLocations.size() > 1) || getArea(clickedPage) > significantArea
+    }
+
+    private fun getArea(page: Int): Double {
+        val p: PolygonF? = pageLocations.get(page)
+        return if (p == null) 0.0 else (abs(p.bounds.height()) * abs(p.bounds.width())).toDouble()
+    }
 
 }
 

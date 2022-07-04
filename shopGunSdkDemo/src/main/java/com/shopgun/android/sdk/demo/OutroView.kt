@@ -3,6 +3,7 @@ package com.shopgun.android.sdk.demo
 import android.content.Context
 import android.widget.TextView
 import com.tjek.sdk.api.models.PublicationV2
+import com.tjek.sdk.publicationviewer.paged.IntroConfiguration
 import com.tjek.sdk.publicationviewer.paged.IntroOutroView
 import com.tjek.sdk.publicationviewer.paged.OutroConfiguration
 
@@ -23,5 +24,11 @@ class OutroView(
     init {
         inflate(context, R.layout.intro_layout, this)
         findViewById<TextView>(R.id.intro)?.text = "End of ${publication?.branding?.name} publication"
+    }
+}
+
+class IntroConfig: IntroConfiguration() {
+    override fun getIntroView(context: Context, page: Int): IntroOutroView {
+        return OutroView(context, page, publication)
     }
 }

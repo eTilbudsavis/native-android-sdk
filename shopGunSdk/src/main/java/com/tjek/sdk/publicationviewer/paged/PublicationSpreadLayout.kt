@@ -1,7 +1,10 @@
 package com.tjek.sdk.publicationviewer.paged
 
 import android.content.Context
+import android.view.View
 import android.widget.FrameLayout
+import com.tjek.sdk.api.models.PublicationHotspotV2
+import com.tjek.sdk.publicationviewer.paged.libs.HotspotView
 
 class PublicationSpreadLayout(
     context: Context,
@@ -15,5 +18,14 @@ class PublicationSpreadLayout(
         val childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST)
         measureChildren(childWidthMeasureSpec, childHeightMeasureSpec)
         setMeasuredDimension(width, height)
+    }
+
+    fun showHotspots(list: List<PublicationHotspotV2>) {
+        if (list.isEmpty()) return
+        val hsViews = mutableListOf<View>()
+        for (h in list) {
+            addView(HotspotView(context, h, pages))
+        }
+        hsViews.forEach { it.animation.startNow() }
     }
 }

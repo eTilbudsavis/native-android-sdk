@@ -11,10 +11,12 @@ import com.tjek.sdk.api.models.PublicationPageV2
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.remote.ResponseType
+import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoTapInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import java.util.*
 
 sealed class PublicationLoadingState {
     object Loading : PublicationLoadingState()
@@ -81,5 +83,26 @@ class PagedPublicationViewModel : ViewModel() {
 
             }
         }
+    }
+
+    fun findHotspot(tap: VersoTapInfo, hasIntro: Boolean): List<PublicationHotspotV2> {
+        if (hotspots.isNotEmpty() && tap.isContentClicked()) {
+            val pages: IntArray = tap.pages.copyOf(tap.pages.size)
+            val introOffset = if (hasIntro) -1 else 0
+            for (i in pages.indices) {
+                pages[i] = pages[i] + introOffset
+            }
+            val pageTapped: Int = tap.pageTapped + introOffset
+            val list = mutableListOf<PublicationHotspotV2>()
+            val length = pages.size.toFloat()
+            val xOnClickedPage = (tap.getPercentX() % (1f / length)) * length
+            for (h in hotspots) {
+                if (h.hasLocationAt(pages, pageTapped, xOnClickedPage, tap.getPercentY())) {
+                    list.add(h)
+                }
+            }
+            return list
+        }
+        return emptyList()
     }
 }
