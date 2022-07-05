@@ -19,16 +19,15 @@ public class HotspotView extends View {
     PublicationHotspotV2 mHotspot;
     int[] mPages;
     RectF mBounds;
-    private boolean outPlayed = false;
 
     public HotspotView(Context context, PublicationHotspotV2 hotspot, int[] pages) {
         super(context);
         mHotspot = hotspot;
         mPages = pages;
         mBounds = mHotspot.getBoundsForPages(mPages);
-        setBackgroundResource(R.drawable.sgn_pagedpubkit_hotspot_bg);
+        setBackgroundResource(R.drawable.tjek_pagedpub_hotspot_bg);
         // set the 'in' animation
-        setAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_in));
+        setAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.tjek_pagedpub_hotspot_in));
     }
 
     @Override
@@ -55,18 +54,10 @@ public class HotspotView extends View {
     @Override
     protected void onAnimationEnd() {
         super.onAnimationEnd();
-        if (!outPlayed) {
-            // if the 'in' animation ended, start the 'out' animation automatically
-            outPlayed = true;
-            startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_out));
-        }
-        else {
-            // after the 'out' animation has ended, post to the parent to remove the view
             final ViewGroup parent = (ViewGroup) getParent();
             if (parent != null) {
                 final View view = this;
                 parent.post(() -> parent.removeView(view));
-            }
         }
     }
 

@@ -1,4 +1,4 @@
-package com.tjek.sdk.publicationviewer.paged
+package com.tjek.sdk.publicationviewer.paged.views
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -16,8 +16,6 @@ import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageView
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageViewListener
 import com.tjek.sdk.publicationviewer.paged.layouts.AspectRatioFrameLayout
 import com.tjek.sdk.publicationviewer.paged.utils.UnitUtils
-import com.tjek.sdk.publicationviewer.paged.views.PageImageView
-import com.tjek.sdk.publicationviewer.paged.views.PulsatingTextView
 
 private enum class Size{
     Thumb, View, Zoom
