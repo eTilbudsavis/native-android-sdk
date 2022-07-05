@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class Savedstate(
+data class PublicationSavedState(
     val config: PagedPublicationConfiguration,
     val hasSentOpenEvent: Boolean
 ): Parcelable

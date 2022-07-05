@@ -66,7 +66,7 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null) {
-            savedInstanceState.getParcelable<Savedstate>(saved_state)?.let { state ->
+            savedInstanceState.getParcelable<PublicationSavedState>(saved_state)?.let { state ->
                 ppConfig = state.config
                 hasSentOpenEvent = state.hasSentOpenEvent
             }
@@ -113,7 +113,7 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(saved_state, Savedstate(
+        outState.putParcelable(saved_state, PublicationSavedState(
             config = ppConfig,
             hasSentOpenEvent = hasSentOpenEvent
         ))
@@ -190,7 +190,6 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
     }
 
     override fun onVersoPageViewEvent(event: VersoPageViewEvent): Boolean {
-        // todo: delete unused events
         return when (event) {
             is VersoPageViewEvent.Tap -> {
                 if (!ppConfig.displayHotspotsOnTouch) return false
