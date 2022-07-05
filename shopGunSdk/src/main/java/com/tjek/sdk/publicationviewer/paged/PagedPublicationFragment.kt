@@ -16,6 +16,7 @@ import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoFragment
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageViewEvent
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageViewListener
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoViewPager
+import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout
 
 class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventListener {
 

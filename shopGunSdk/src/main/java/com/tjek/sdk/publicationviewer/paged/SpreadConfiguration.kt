@@ -8,6 +8,7 @@ import com.tjek.sdk.api.models.PublicationPageV2
 import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoSpreadConfiguration
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoSpreadProperty
+import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout
 
 internal class SpreadConfiguration(
     override val pageCount: Int,

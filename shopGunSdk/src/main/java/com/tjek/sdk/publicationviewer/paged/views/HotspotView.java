@@ -1,4 +1,4 @@
-package com.tjek.sdk.publicationviewer.paged.libs;
+package com.tjek.sdk.publicationviewer.paged.views;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

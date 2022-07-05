@@ -22,7 +22,7 @@ import android.widget.OverScroller;
 import androidx.core.view.ViewCompat;
 
 import com.tjek.sdk.TjekLogCat;
-import com.tjek.sdk.publicationviewer.paged.NumberUtils;
+import com.tjek.sdk.publicationviewer.paged.utils.NumberUtils;
 
 import java.util.ArrayList;
 import java.util.List;

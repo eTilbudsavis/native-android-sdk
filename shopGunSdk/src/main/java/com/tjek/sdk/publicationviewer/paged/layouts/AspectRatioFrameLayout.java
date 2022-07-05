@@ -1,4 +1,4 @@
-package com.tjek.sdk.publicationviewer.paged;
+package com.tjek.sdk.publicationviewer.paged.layouts;
 
 import android.annotation.TargetApi;
 import android.content.Context;

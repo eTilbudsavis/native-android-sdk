@@ -1,4 +1,4 @@
-package com.tjek.sdk.publicationviewer.paged;
+package com.tjek.sdk.publicationviewer.paged.views;
 
 import android.animation.Animator;
 import android.animation.ArgbEvaluator;

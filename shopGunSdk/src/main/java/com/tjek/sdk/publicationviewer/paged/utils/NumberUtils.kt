@@ -1,4 +1,4 @@
-package com.tjek.sdk.publicationviewer.paged
+package com.tjek.sdk.publicationviewer.paged.utils
 
 import kotlin.math.abs
 

@@ -14,7 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.shopgun.android.sdk.R;
-import com.tjek.sdk.publicationviewer.paged.NumberUtils;
+import com.tjek.sdk.publicationviewer.paged.utils.NumberUtils;
 import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.ZoomLayout;
 import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.Event;
 import com.tjek.sdk.publicationviewer.paged.libs.zoomlayout.EventListener;

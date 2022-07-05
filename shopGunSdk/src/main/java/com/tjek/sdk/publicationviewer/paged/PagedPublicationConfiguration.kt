@@ -3,7 +3,7 @@ package com.tjek.sdk.publicationviewer.paged
 import android.content.Context
 import android.os.Parcelable
 import com.tjek.sdk.api.models.PublicationV2
-import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoSpreadProperty
+import com.tjek.sdk.publicationviewer.paged.views.IntroOutroView
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 

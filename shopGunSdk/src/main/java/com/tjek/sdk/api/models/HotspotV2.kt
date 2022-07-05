@@ -8,7 +8,7 @@ import com.tjek.sdk.api.remote.models.v2.HotspotOfferV2Decodable
 import com.tjek.sdk.api.remote.models.v2.PriceV2
 import com.tjek.sdk.api.remote.models.v2.PublicationHotspotV2Decodable
 import com.tjek.sdk.api.remote.models.v2.QuantityV2
-import com.tjek.sdk.publicationviewer.paged.PolygonF
+import com.tjek.sdk.publicationviewer.paged.utils.PolygonF
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import kotlin.math.abs

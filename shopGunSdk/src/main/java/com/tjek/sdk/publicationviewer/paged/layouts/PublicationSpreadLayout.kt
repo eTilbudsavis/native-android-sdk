@@ -1,10 +1,10 @@
-package com.tjek.sdk.publicationviewer.paged
+package com.tjek.sdk.publicationviewer.paged.layouts
 
 import android.content.Context
 import android.view.View
 import android.widget.FrameLayout
 import com.tjek.sdk.api.models.PublicationHotspotV2
-import com.tjek.sdk.publicationviewer.paged.libs.HotspotView
+import com.tjek.sdk.publicationviewer.paged.views.HotspotView
 
 class PublicationSpreadLayout(
     context: Context,

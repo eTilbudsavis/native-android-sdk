@@ -2,7 +2,7 @@ package com.tjek.sdk.publicationviewer.paged.libs.zoomlayout
 
 import android.content.Context
 import android.graphics.*
-import com.tjek.sdk.publicationviewer.paged.UnitUtils.dpToPx
+import com.tjek.sdk.publicationviewer.paged.utils.UnitUtils.dpToPx
 import kotlin.math.roundToInt
 
 object ZoomUtils {

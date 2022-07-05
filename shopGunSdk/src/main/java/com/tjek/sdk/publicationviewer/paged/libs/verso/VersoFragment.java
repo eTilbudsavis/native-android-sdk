@@ -15,7 +15,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.shopgun.android.sdk.R;
 import com.tjek.sdk.TjekLogCat;
-import com.tjek.sdk.publicationviewer.paged.NumberUtils;
+import com.tjek.sdk.publicationviewer.paged.utils.NumberUtils;
 import com.tjek.sdk.publicationviewer.paged.libs.verso.viewpager.CenteredViewPager;
 
 import java.util.ArrayList;

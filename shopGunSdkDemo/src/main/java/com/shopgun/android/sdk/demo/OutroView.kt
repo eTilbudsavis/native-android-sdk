@@ -4,7 +4,7 @@ import android.content.Context
 import android.widget.TextView
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.publicationviewer.paged.IntroConfiguration
-import com.tjek.sdk.publicationviewer.paged.IntroOutroView
+import com.tjek.sdk.publicationviewer.paged.views.IntroOutroView
 import com.tjek.sdk.publicationviewer.paged.OutroConfiguration
 
 class OutroConfig: OutroConfiguration() {
