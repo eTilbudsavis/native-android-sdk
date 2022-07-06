@@ -6,7 +6,8 @@
     <color name="sgn_primaryLight">#55D782</color>
     <color name="sgn_accent">#03A9F4</color>
 
-    <color name="tjek_pagedpub_hotspot_bg">#59F5F5F5</color>
     <color name="tjek_pagedpub_hotspot_stroke">#FFFFFF</color>
+    <color name="tjek_pagedpub_hotspot_dimmed_bg">#73000000</color>
+
 
 </resources>

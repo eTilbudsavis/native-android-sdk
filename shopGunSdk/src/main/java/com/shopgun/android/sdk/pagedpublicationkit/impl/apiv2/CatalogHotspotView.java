@@ -58,7 +58,7 @@ public class CatalogHotspotView extends View {
         if (!outPlayed) {
             // if the 'in' animation ended, start the 'out' animation automatically
             outPlayed = true;
-            startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_out));
+//            startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.sgn_pagedpubkit_hotspot_out));
         }
         else {
             // after the 'out' animation has ended, post to the parent to remove the view

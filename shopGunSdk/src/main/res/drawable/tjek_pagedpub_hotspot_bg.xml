@@ -2,8 +2,6 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
 
-    <solid android:color="@color/tjek_pagedpub_hotspot_bg"/>
-
     <corners
         android:radius="@dimen/tjek_pagedpub_hotspot_corner_radius"
         android:topLeftRadius="@dimen/tjek_pagedpub_hotspot_corner_radius"

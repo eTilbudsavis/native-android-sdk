@@ -10,6 +10,7 @@ import android.view.animation.AnimationUtils;
 
 import com.shopgun.android.sdk.R;
 import com.tjek.sdk.api.models.PublicationHotspotV2;
+import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout;
 
 @SuppressLint("ViewConstructor")
 public class HotspotView extends View {
@@ -54,11 +55,8 @@ public class HotspotView extends View {
     @Override
     protected void onAnimationEnd() {
         super.onAnimationEnd();
-            final ViewGroup parent = (ViewGroup) getParent();
-            if (parent != null) {
-                final View view = this;
-                parent.post(() -> parent.removeView(view));
-        }
+        // set the view to gone to avoid flickering
+        setVisibility(View.GONE);
     }
 
 }

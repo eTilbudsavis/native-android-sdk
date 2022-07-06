@@ -101,7 +101,7 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
         savedInstanceState: Bundle?
     ): View {
         viewPager = super.onCreateView(inflater, container, savedInstanceState) as VersoViewPager
-        frame = inflater.inflate(R.layout.shopgun_sdk_pagedpublication, container, false) as FrameLayout
+        frame = inflater.inflate(R.layout.tjek_sdk_pagedpublication, container, false) as FrameLayout
         frameVerso = frame.findViewById(R.id.verso) as FrameLayout?
         frameError = frame.findViewById(R.id.error) as FrameLayout?
         frameLoader = frame.findViewById(R.id.loader) as FrameLayout?

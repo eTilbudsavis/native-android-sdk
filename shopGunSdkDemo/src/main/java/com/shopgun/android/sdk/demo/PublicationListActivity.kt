@@ -38,7 +38,7 @@ class PublicationListActivity : BaseActivity(), OnItemClickListener {
 
         lifecycleScope.launch(Dispatchers.Main) {
             val res = TjekAPI.getPublications(
-                nearLocation = LocationQuery(Constants.TJEK_HQ, maxRadius = 1000)
+                nearLocation = LocationQuery(Constants.TJEK_HQ, maxRadius = 10000)
             )
             if (res is ResponseType.Success) {
                 publications = res.data?.results!!
