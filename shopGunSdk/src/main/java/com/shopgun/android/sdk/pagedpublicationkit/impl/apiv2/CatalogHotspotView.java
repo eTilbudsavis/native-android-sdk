@@ -26,9 +26,9 @@ public class CatalogHotspotView extends View {
         mHotspot = hotspot;
         mPages = pages;
         mBounds = mHotspot.getBoundsForPages(mPages);
-        setBackgroundResource(R.drawable.tjek_pagedpub_hotspot_bg);
+        setBackgroundResource(R.drawable.tjek_sdk_pagedpub_hotspot_bg);
         // set the 'in' animation
-        setAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.tjek_pagedpub_hotspot_in));
+        setAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.tjek_sdk_pagedpub_hotspot_in));
     }
 
     @Override

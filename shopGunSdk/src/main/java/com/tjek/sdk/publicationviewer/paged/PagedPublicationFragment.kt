@@ -179,7 +179,7 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
 
     fun getErrorView(container: ViewGroup): View? {
         val i = LayoutInflater.from(container.context)
-        val v = i.inflate(R.layout.shopgun_sdk_pagedpublication_error, container, false)
+        val v = i.inflate(R.layout.tjek_sdk_pagedpublication_error, container, false)
         return v
     }
 

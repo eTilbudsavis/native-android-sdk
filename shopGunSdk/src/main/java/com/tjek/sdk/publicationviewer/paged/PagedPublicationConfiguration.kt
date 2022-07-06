@@ -7,10 +7,16 @@ import com.tjek.sdk.publicationviewer.paged.views.IntroOutroView
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
+// Available customisable settings
 @Parcelize
 data class PagedPublicationConfiguration(
+    // Display the hotspot highlights. Set to false if you don't want to show them
     val displayHotspotsOnTouch: Boolean = true,
+
+    // Use the brand colors (e.g background). Set to false if you don't want to use them (default color: dark gray)
     val useBrandColor: Boolean = true,
+
+    // Configurations for intro and outro view
     val introConfiguration: IntroConfiguration? = null,
     val outroConfiguration: OutroConfiguration? = null
 ): Parcelable {

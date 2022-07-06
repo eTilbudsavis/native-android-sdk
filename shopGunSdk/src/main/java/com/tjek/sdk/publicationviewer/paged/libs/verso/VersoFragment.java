@@ -60,7 +60,7 @@ public class VersoFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mVersoViewPager = (VersoViewPager) inflater.inflate(R.layout.verso_fragment, container, false);
+        mVersoViewPager = (VersoViewPager) inflater.inflate(R.layout.tjek_sdk_verso_fragment, container, false);
 
         mVersoViewPager.setOffscreenPageLimit(2);
 

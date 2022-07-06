@@ -29,7 +29,7 @@ class HotspotOverlay : View {
 
     init {
         setWillNotDraw(false)
-        animation = AnimationUtils.loadAnimation(context, R.anim.tjek_pagedpub_hotspot_in)
+        animation = AnimationUtils.loadAnimation(context, R.anim.tjek_sdk_pagedpub_hotspot_in)
     }
 
     constructor(context: Context?) : super(context)

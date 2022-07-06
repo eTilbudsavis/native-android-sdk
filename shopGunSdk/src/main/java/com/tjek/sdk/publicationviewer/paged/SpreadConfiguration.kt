@@ -11,6 +11,7 @@ import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoSpreadProperty
 import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout
 import com.tjek.sdk.publicationviewer.paged.views.PageView
 
+// Automatically constructed from publication parameters (like page number) and from settings in PagedPublicationConfiguration
 internal class SpreadConfiguration(
     override val pageCount: Int,
     override val spreadCount: Int,

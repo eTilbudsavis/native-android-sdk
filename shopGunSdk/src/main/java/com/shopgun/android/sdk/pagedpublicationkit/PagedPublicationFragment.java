@@ -287,7 +287,7 @@ public class PagedPublicationFragment extends VersoFragment {
 
     public View getErrorView(ViewGroup container, PublicationException ex) {
         LayoutInflater i = LayoutInflater.from(container.getContext());
-        View v = i.inflate(R.layout.shopgun_sdk_pagedpublication_error, container, false);
+        View v = i.inflate(R.layout.tjek_sdk_pagedpublication_error, container, false);
         TextView msg = (TextView) v.findViewById(R.id.message);
         msg.setText(ex.getMessage());
         return v;

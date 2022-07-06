@@ -67,7 +67,7 @@ public class VersoPageViewFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mZoomLayout = (ZoomLayout) inflater.inflate(R.layout.verso_page_layout, container, false);
+        mZoomLayout = (ZoomLayout) inflater.inflate(R.layout.tjek_sdk_verso_page_layout, container, false);
 
         // scale operations on large bitmaps are horrible slow
         // for some reason, this works. LAYER_TYPE_SOFTWARE works too...

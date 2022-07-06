@@ -10,7 +10,6 @@ import android.view.animation.AnimationUtils;
 
 import com.shopgun.android.sdk.R;
 import com.tjek.sdk.api.models.PublicationHotspotV2;
-import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout;
 
 @SuppressLint("ViewConstructor")
 public class HotspotView extends View {
@@ -26,9 +25,9 @@ public class HotspotView extends View {
         mHotspot = hotspot;
         mPages = pages;
         mBounds = mHotspot.getBoundsForPages(mPages);
-        setBackgroundResource(R.drawable.tjek_pagedpub_hotspot_bg);
+        setBackgroundResource(R.drawable.tjek_sdk_pagedpub_hotspot_bg);
         // set the 'in' animation
-        setAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.tjek_pagedpub_hotspot_in));
+        setAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.tjek_sdk_pagedpub_hotspot_in));
     }
 
     @Override
