@@ -4,8 +4,8 @@ import android.os.Parcelable
 import androidx.annotation.Keep
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import com.tjek.sdk.api.HexColorStr
 import kotlinx.parcelize.Parcelize
-import java.lang.NumberFormatException
 
 @Keep
 @JsonClass(generateAdapter = true)
@@ -17,5 +17,5 @@ data class BrandingV2(
     @Json(name = "logo")
     val logoURL: String?,
     @Json(name = "color")
-    val colorHex: String?
+    val colorHex: HexColorStr?
 ) : Parcelable

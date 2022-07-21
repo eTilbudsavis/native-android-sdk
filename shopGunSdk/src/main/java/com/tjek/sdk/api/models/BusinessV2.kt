@@ -1,6 +1,7 @@
 package com.tjek.sdk.api.models
 
 import android.os.Parcelable
+import com.tjek.sdk.api.HexColorStr
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.remote.models.v2.BusinessV2Decodable
 import kotlinx.parcelize.Parcelize
@@ -14,7 +15,7 @@ data class BusinessV2(
     val descriptionMarkdown: String?,
     val logoOnWhite: String,
     val logoOnBrandColor: String,
-    val brandColorHex: String?,
+    val brandColorHex: HexColorStr?,
     val country: String
 ) : Parcelable {
 

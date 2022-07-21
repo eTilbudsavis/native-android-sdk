@@ -1,10 +1,12 @@
 package com.tjek.sdk.publicationviewer.paged
 
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ProgressBar
 import androidx.fragment.app.viewModels
 import com.shopgun.android.sdk.R
 import com.tjek.sdk.DeviceOrientation
@@ -12,6 +14,7 @@ import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.getColorFromHexStr
 import com.tjek.sdk.getDeviceOrientation
+import com.tjek.sdk.getSecondaryText
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoFragment
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageViewEvent
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageViewListener
@@ -147,7 +150,21 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
         )
     }
 
+    private fun applyBranding() {
+        if (!ppConfig.useBrandColor) return
+        viewModel.publication?.let {
+            val bgColor = it.branding.colorHex.getColorFromHexStr()
+            if (::frame.isInitialized) {
+                frame.setBackgroundColor(bgColor)
+            }
+            val bar = frameLoader?.findViewById<ProgressBar>(R.id.circularProgressBar)
+            bar?.isIndeterminate = true
+            bar?.indeterminateDrawable?.setTint(bgColor.getSecondaryText())
+        }
+    }
+
     private fun showVersoView() {
+        applyBranding()
         frameVerso?.let {
             if (it.visibility != View.VISIBLE) {
                 it.removeAllViews()
@@ -160,6 +177,7 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
     }
 
     private fun showLoaderView() {
+        applyBranding()
         frameLoader?.let {
             if (it.visibility != View.VISIBLE) {
                 setVisible(verso = false, loader = true, error = false)
@@ -168,6 +186,7 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
     }
 
     private fun showErrorView() {
+        applyBranding()
         frameError?.let {
             if (it.visibility != View.VISIBLE) {
                 it.removeAllViews()

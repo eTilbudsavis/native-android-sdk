@@ -12,3 +12,4 @@ typealias TimeOfDayStr = String
 typealias TimeOfDay = LocalTime
 typealias OpeningHoursDate = LocalDate
 typealias DayOfWeekStr = String
+typealias HexColorStr = String

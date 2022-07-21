@@ -237,7 +237,7 @@ public class PagedPublicationFragment extends VersoFragment {
         if (pub != null && mFrame != null) {
             int bgColor = pub.getBackgroundColor();
             mFrame.setBackgroundColor(bgColor);
-            ProgressBar bar = (ProgressBar) mFrameLoader.findViewById(R.id.circulareProgressBar);
+            ProgressBar bar = (ProgressBar) mFrameLoader.findViewById(R.id.circularProgressBar);
             if (bar != null && bar.getIndeterminateDrawable() != null) {
                 bar.setIndeterminate(true);
                 MaterialColor c = new MaterialColorImpl(bgColor);
