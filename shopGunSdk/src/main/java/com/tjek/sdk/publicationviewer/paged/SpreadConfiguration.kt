@@ -3,9 +3,11 @@ package com.tjek.sdk.publicationviewer.paged
 import android.content.res.Configuration
 import android.view.View
 import android.view.ViewGroup
+import com.tjek.sdk.ColorInt
 import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.api.models.PublicationPageV2
 import com.tjek.sdk.getDeviceOrientation
+import com.tjek.sdk.getPrimaryText
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoSpreadConfiguration
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoSpreadProperty
 import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout
@@ -17,7 +19,7 @@ internal class SpreadConfiguration(
     override val spreadCount: Int,
     override val spreadMargin: Int,
     private val pages: List<PublicationPageV2>?,
-    private val publicationBrandingColor: Int,
+    private val publicationBrandingColor: ColorInt,
     private val introConfiguration: IntroConfiguration?,
     private val outroConfiguration: OutroConfiguration?,
     deviceConfiguration: Configuration
@@ -42,7 +44,7 @@ internal class SpreadConfiguration(
 
     private fun getPublicationPageView(container: ViewGroup, publicationPage: Int): View {
         val page = publicationPage.coerceIn(0, (pages?.size?.minus(1))?.coerceAtLeast(0))
-        return PageView(container.context, pages?.get(page), publicationBrandingColor)
+        return PageView(container.context, pages?.get(page), publicationBrandingColor.getPrimaryText())
     }
 
     override fun getSpreadOverlay(

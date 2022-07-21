@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.BaseTarget
 import com.bumptech.glide.request.target.SizeReadyCallback
 import com.bumptech.glide.request.transition.Transition
+import com.tjek.sdk.ColorInt
 import com.tjek.sdk.api.models.PublicationPageV2
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageView
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageViewListener
@@ -25,7 +26,7 @@ private enum class Size{
 class PageView(
     context: Context,
     private val publicationPage: PublicationPageV2?,
-    textColor: Int
+    textColor: ColorInt
 ) : AspectRatioFrameLayout(context), VersoPageView {
 
     private var size: Size? = null
