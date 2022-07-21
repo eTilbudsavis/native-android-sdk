@@ -1,6 +1,5 @@
 package com.tjek.sdk.publicationviewer.paged
 
-import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +11,7 @@ import com.shopgun.android.sdk.R
 import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.models.PublicationV2
-import com.tjek.sdk.getColorFromHexStr
+import com.tjek.sdk.getColorInt
 import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.getSecondaryText
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoFragment
@@ -145,7 +144,7 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
             introConfiguration = ppConfig.introConfiguration?.also { it.publication = viewModel.publication },
             outroConfiguration = ppConfig.outroConfiguration?.also { it.publication = viewModel.publication },
             pages = viewModel.pages,
-            publicationBrandingColor = viewModel.publication?.branding?.colorHex.getColorFromHexStr(),
+            publicationBrandingColor = viewModel.publication?.branding?.colorHex.getColorInt(),
             deviceConfiguration = resources.configuration
         )
     }
@@ -153,7 +152,7 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
     private fun applyBranding() {
         if (!ppConfig.useBrandColor) return
         viewModel.publication?.let {
-            val bgColor = it.branding.colorHex.getColorFromHexStr()
+            val bgColor = it.branding.colorHex.getColorInt()
             if (::frame.isInitialized) {
                 frame.setBackgroundColor(bgColor)
             }

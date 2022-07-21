@@ -7,7 +7,7 @@ import com.tjek.sdk.api.HexColorStr
 typealias ColorInt = Int
 
 // Convert the hexadecimal string into an integer
-fun HexColorStr?.getColorFromHexStr(): ColorInt {
+fun HexColorStr?.getColorInt(): ColorInt {
     return if (this == null || length < 2 ) 0
     else try {
         Color.parseColor(if (this[0] != '#') "#$this" else this)
