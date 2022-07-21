@@ -16,7 +16,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
-import java.util.*
 
 sealed class PublicationLoadingState {
     object Loading : PublicationLoadingState()
@@ -26,39 +25,44 @@ sealed class PublicationLoadingState {
 
 class PagedPublicationViewModel : ViewModel() {
 
-    private var publicationId: Id? = null
-    var publication: PublicationV2?  = null
-    var pages: List<PublicationPageV2> = emptyList()
-    var hotspots: List<PublicationHotspotV2> = emptyList()
+    private val _publication = MutableLiveData<PublicationV2>()
+    val publication: LiveData<PublicationV2>
+        get() = _publication
+
+    private val _pages = MutableLiveData<List<PublicationPageV2>>()
+    val pages: LiveData<List<PublicationPageV2>>
+        get() = _pages
+
+    private val _hotspots = MutableLiveData<List<PublicationHotspotV2>>()
+    val hotspots: LiveData<List<PublicationHotspotV2>>
+        get() = _hotspots
 
     private val _loadingState = MutableLiveData<PublicationLoadingState>(PublicationLoadingState.Loading)
     val loadingState: LiveData<PublicationLoadingState>
         get() = _loadingState
 
     fun loadPublication(publication: PublicationV2) {
-        this.publication = publication
-        publicationId = publication.id
-        fetchPagesAndHotspots()
+        _publication.postValue(publication)
+        fetchPagesAndHotspots(publication)
     }
 
     fun loadPublication(publicationId: Id) {
-        this.publicationId = publicationId
         viewModelScope.launch(Dispatchers.IO) {
             when(val res = TjekAPI.getPublication(publicationId)) {
                 is ResponseType.Error -> _loadingState.postValue(PublicationLoadingState.Failed(res.errorType))
                 is ResponseType.Success -> {
-                    publication = res.data
-                    fetchPagesAndHotspots()
+                    _publication.postValue(res.data!!)
+                    fetchPagesAndHotspots(res.data!!)
                 }
             }
         }
     }
 
-    private fun fetchPagesAndHotspots() {
+    private fun fetchPagesAndHotspots(publication: PublicationV2) {
         viewModelScope.launch(Dispatchers.IO) {
             supervisorScope {
-                val pagesCall = async { TjekAPI.getPublicationPages(publicationId!!, publication!!.aspectRatio) }
-                val hotspotsCall = async { TjekAPI.getPublicationHotspots(publicationId!!, publication!!.width, publication!!.height) }
+                val pagesCall = async { TjekAPI.getPublicationPages(publication.id, publication.aspectRatio) }
+                val hotspotsCall = async { TjekAPI.getPublicationHotspots(publication.id, publication.width, publication.height) }
                 val pagesData = try {
                     pagesCall.await()
                 } catch (e: Exception) {
@@ -73,9 +77,9 @@ class PagedPublicationViewModel : ViewModel() {
                 when (pagesData) {
                     is ResponseType.Error -> _loadingState.postValue(PublicationLoadingState.Failed(pagesData.errorType))
                     is ResponseType.Success -> {
-                        pages = pagesData.data ?: emptyList()
+                        _pages.postValue(pagesData.data ?: emptyList())
                         if (hotspotsData is ResponseType.Success) {
-                            hotspots = hotspotsData.data ?: emptyList()
+                            _hotspots.postValue(hotspotsData.data ?: emptyList())
                         }
                         _loadingState.postValue(PublicationLoadingState.Successful)
                     }
@@ -86,7 +90,8 @@ class PagedPublicationViewModel : ViewModel() {
     }
 
     fun findHotspot(tap: VersoTapInfo, hasIntro: Boolean): List<PublicationHotspotV2> {
-        if (hotspots.isNotEmpty() && tap.isContentClicked()) {
+        val hotspots = _hotspots.value
+        if (hotspots?.isNotEmpty() == true && tap.isContentClicked()) {
             val pages: IntArray = tap.pages.copyOf(tap.pages.size)
             val introOffset = if (hasIntro) -1 else 0
             for (i in pages.indices) {

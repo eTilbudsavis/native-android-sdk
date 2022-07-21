@@ -32,6 +32,8 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
     private var frameError: FrameLayout? = null
     private lateinit var viewPager: VersoViewPager
 
+    private var loadCompleteListener: OnLoadComplete? = null
+
     companion object {
         private const val arg_config = "arg_config"
         private const val arg_page = "arg_page"
@@ -65,6 +67,10 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
         }
     }
 
+    fun setOnLoadCompleteListener(listener: OnLoadComplete) {
+        loadCompleteListener = listener
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null) {
@@ -86,7 +92,10 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
         }
         viewModel.loadingState.observe(this) { state ->
             when (state) {
-                is PublicationLoadingState.Failed -> showErrorView()
+                is PublicationLoadingState.Failed -> {
+                    loadCompleteListener?.onError(state.error)
+                    showErrorView()
+                }
                 PublicationLoadingState.Loading -> showLoaderView()
                 PublicationLoadingState.Successful -> {
                     setVersoSpreadConfiguration()
@@ -95,6 +104,11 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
                 }
             }
         }
+
+        // Forward loading of the data to host app if interested
+        viewModel.publication.observe(this) { loadCompleteListener?.onPublicationLoaded(it) }
+        viewModel.pages.observe(this) { loadCompleteListener?.onPagesLoaded(it) }
+        viewModel.hotspots.observe(this) { loadCompleteListener?.onHotspotLoaded(it) }
     }
 
     override fun onCreateView(
@@ -123,7 +137,7 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
     }
 
     private fun setVersoSpreadConfiguration() {
-        var pageCount = viewModel.publication?.pageCount ?: 0
+        var pageCount = viewModel.publication.value?.pageCount ?: 0
         var spreadCount = when (resources.configuration.getDeviceOrientation()) {
             DeviceOrientation.Landscape -> (pageCount / 2) + 1
             else -> pageCount
@@ -141,17 +155,17 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
             pageCount,
             spreadCount,
             spreadMargin = 0,
-            introConfiguration = ppConfig.introConfiguration?.also { it.publication = viewModel.publication },
-            outroConfiguration = ppConfig.outroConfiguration?.also { it.publication = viewModel.publication },
-            pages = viewModel.pages,
-            publicationBrandingColor = viewModel.publication?.branding?.colorHex.getColorInt(),
+            introConfiguration = ppConfig.introConfiguration?.also { it.publication = viewModel.publication.value },
+            outroConfiguration = ppConfig.outroConfiguration?.also { it.publication = viewModel.publication.value },
+            pages = viewModel.pages.value,
+            publicationBrandingColor = viewModel.publication.value?.branding?.colorHex.getColorInt(),
             deviceConfiguration = resources.configuration
         )
     }
 
     private fun applyBranding() {
         if (!ppConfig.useBrandColor) return
-        viewModel.publication?.let {
+        viewModel.publication.value?.let {
             val bgColor = it.branding.colorHex.getColorInt()
             if (::frame.isInitialized) {
                 frame.setBackgroundColor(bgColor)
