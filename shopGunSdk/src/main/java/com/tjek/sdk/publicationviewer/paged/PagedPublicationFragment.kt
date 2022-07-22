@@ -19,8 +19,9 @@ import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.getSecondaryText
 import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout
 import com.tjek.sdk.publicationviewer.paged.libs.verso.*
+import com.tjek.sdk.publicationviewer.paged.views.PageView
 
-class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventListener {
+class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventListener, VersoPageViewListener.OnLoadCompleteListener {
 
     private val viewModel: PagedPublicationViewModel by viewModels()
     private lateinit var ppConfig: PagedPublicationConfiguration
@@ -129,6 +130,7 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
         setVisible(verso = false, loader = false, error = false)
 
         setOnEventListener(this)
+        setOnLoadCompleteListener(this)
 
         return  frame
     }
@@ -243,6 +245,14 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
                 true
             }
             else -> false
+        }
+    }
+
+    // coming from the underlying Verso fragment
+    override fun onPageLoadComplete(success: Boolean, versoPageView: VersoPageView?) {
+        if (!success) return
+        loadCompleteListener?.let { l ->
+            versoPageView?.let { l.onPageLoad(it.page) }
         }
     }
 

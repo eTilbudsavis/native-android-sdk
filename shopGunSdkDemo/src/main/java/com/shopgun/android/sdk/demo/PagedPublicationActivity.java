@@ -6,13 +6,18 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import android.util.Log;
 import android.widget.Toast;
 
 import com.shopgun.android.sdk.demo.base.BaseActivity;
 import com.tjek.sdk.api.models.PublicationHotspotV2;
+import com.tjek.sdk.api.models.PublicationPageV2;
 import com.tjek.sdk.api.models.PublicationV2;
+import com.tjek.sdk.api.remote.ErrorType;
 import com.tjek.sdk.publicationviewer.paged.IntroConfiguration;
 import com.tjek.sdk.publicationviewer.paged.OnHotspotTapListener;
+import com.tjek.sdk.publicationviewer.paged.OnLoadComplete;
 import com.tjek.sdk.publicationviewer.paged.OutroConfiguration;
 import com.tjek.sdk.publicationviewer.paged.PagedPublicationConfiguration;
 import com.tjek.sdk.publicationviewer.paged.PagedPublicationFragment;
@@ -119,6 +124,32 @@ public class PagedPublicationActivity extends BaseActivity {
             @Override
             public void onHotspotLongTap(@NonNull List<PublicationHotspotV2> hotspots) {
 
+            }
+        });
+
+        mPagedPublicationFragment.setOnLoadCompleteListener(new OnLoadComplete() {
+            @Override
+            public void onPublicationLoaded(@NonNull PublicationV2 publication) {
+                Log.d("DEMO", "publication loaded " + publication.getId());
+            }
+
+            @Override
+            public void onPagesLoaded(@NonNull List<PublicationPageV2> pages) {
+                Log.d("DEMO", "pages loaded " + pages.size());
+            }
+
+            @Override
+            public void onPageLoad(int page) {
+                Log.d("DEMO", "page loaded " + page);
+            }
+
+            @Override
+            public void onHotspotLoaded(@NonNull List<PublicationHotspotV2> hotspots) {
+                Log.d("DEMO", "hotspot loaded " + hotspots.size());
+            }
+
+            @Override
+            public void onError(@NonNull ErrorType error) {
             }
         });
 
