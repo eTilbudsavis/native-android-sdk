@@ -35,17 +35,24 @@ class PagedPublicationActivity : BaseActivity() {
 
         mPagedPublicationFragment =
             supportFragmentManager.findFragmentByTag(FRAGMENT_TAG) as PagedPublicationFragment?
+
+        val initialPage = 0
+
         if (mPagedPublicationFragment == null) {
             val publication: PublicationV2 = intent.extras!!.getParcelable(KEY_PUB)!!
             mPagedPublicationFragment = newInstance(
                 publication,
                 publicationConfiguration,
-                page = 0
+                initialPage
             )
             supportFragmentManager
                 .beginTransaction()
                 .add(R.id.pagedPublication, mPagedPublicationFragment!!, FRAGMENT_TAG)
                 .commit()
+
+            // NB: the initial count needs to be set up here, you won't receive any event (that is for when the page changes).
+            // It's up to you pass in the correct initial page number
+            pageTV.text = "${initialPage + 1} / ${publication.pageCount - 1}"
         }
         addPagedPublicationListeners()
     }
