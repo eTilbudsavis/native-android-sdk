@@ -1,6 +1,8 @@
 package com.tjek.sdk.publicationviewer.paged
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -31,6 +33,7 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
     private lateinit var viewPager: VersoViewPager
 
     private var loadCompleteListener: OnLoadComplete? = null
+    private var hotspotTapListener: OnHotspotTapListener? = null
 
     companion object {
         private const val arg_config = "arg_config"
@@ -67,6 +70,10 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
 
     fun setOnLoadCompleteListener(listener: OnLoadComplete) {
         loadCompleteListener = listener
+    }
+
+    fun setOnHotspotTapListener(listener: OnHotspotTapListener) {
+        hotspotTapListener = listener
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -221,8 +228,8 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
 
     override fun onVersoPageViewEvent(event: VersoPageViewEvent): Boolean {
         return when (event) {
-            is VersoPageViewEvent.Tap -> showHotspotOnTapEvent(event.info, longPress = false)
-            is VersoPageViewEvent.LongTap -> showHotspotOnTapEvent(event.info, longPress = true)
+            is VersoPageViewEvent.Tap -> showHotspotAndNotifyListener(event.info, longPress = false)
+            is VersoPageViewEvent.LongTap -> showHotspotAndNotifyListener(event.info, longPress = true)
             is VersoPageViewEvent.Touch -> {
                 if (event.action == MotionEvent.ACTION_UP) {
                     event.info.fragment.spreadOverlay?.let { view ->
@@ -238,9 +245,24 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
         }
     }
 
-    private fun showHotspotOnTapEvent(info: VersoTapInfo, longPress: Boolean): Boolean {
-        if (!ppConfig.displayHotspotsOnTouch) return false
+    private fun showHotspotAndNotifyListener(info: VersoTapInfo, longPress: Boolean): Boolean {
         val hs = viewModel.findHotspot(info, ppConfig.hasIntro)
+
+        // Notify listener
+        if (hs.isNotEmpty()) {
+            Handler(Looper.getMainLooper()).postDelayed(
+                {
+                    if (longPress) {
+                        hotspotTapListener?.onHotspotLongTap(hs)
+                    } else {
+                        hotspotTapListener?.onHotspotTap(hs)
+                    }
+
+                }, 100)
+        }
+
+        // Show hotspot
+        if (!ppConfig.displayHotspotsOnTouch) return false
         if (hs.isNotEmpty()) {
             info.fragment.spreadOverlay?.let { view ->
                 if (view is PublicationSpreadLayout) {
