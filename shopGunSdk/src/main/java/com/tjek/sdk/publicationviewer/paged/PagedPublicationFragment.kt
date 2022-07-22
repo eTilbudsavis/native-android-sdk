@@ -19,9 +19,14 @@ import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.getSecondaryText
 import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout
 import com.tjek.sdk.publicationviewer.paged.libs.verso.*
-import com.tjek.sdk.publicationviewer.paged.views.PageView
+import com.tjek.sdk.publicationviewer.paged.libs.verso.viewpager.CenteredViewPager
 
-class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventListener, VersoPageViewListener.OnLoadCompleteListener {
+class PagedPublicationFragment :
+    VersoFragment(),
+    VersoPageViewListener.EventListener,
+    VersoPageViewListener.OnLoadCompleteListener,
+    CenteredViewPager.OnPageChangeListener
+{
 
     private val viewModel: PagedPublicationViewModel by viewModels()
     private lateinit var ppConfig: PagedPublicationConfiguration
@@ -35,6 +40,7 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
 
     private var loadCompleteListener: OnLoadComplete? = null
     private var hotspotTapListener: OnHotspotTapListener? = null
+    private var pageNumberChangeListener: OnPageNumberChangeListener? = null
 
     companion object {
         private const val arg_config = "arg_config"
@@ -75,6 +81,10 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
 
     fun setOnHotspotTapListener(listener: OnHotspotTapListener) {
         hotspotTapListener = listener
+    }
+
+    fun setOnPageChangeListener(listener: OnPageNumberChangeListener) {
+        pageNumberChangeListener = listener
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -131,6 +141,7 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
 
         setOnEventListener(this)
         setOnLoadCompleteListener(this)
+        viewPager.addOnPageChangeListener(this)
 
         return  frame
     }
@@ -283,4 +294,23 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
         }
         return true
     }
+
+    override fun onPageSelected(position: Int) {
+        pageNumberChangeListener?.let {
+            if (position < versoSpreadConfiguration.spreadCount - 1) {
+                val currentPages = versoSpreadConfiguration.getPagesFromSpreadPosition(position)
+                val tmpPages: IntArray = currentPages.copyOf(currentPages.size)
+                if (!ppConfig.hasIntro) {
+                    for (i in tmpPages.indices) {
+                        tmpPages[i] += 1
+                    }
+                }
+                it.onPageNumberChange(currentPages = tmpPages, totalPages = versoSpreadConfiguration.pageCount - 1)
+            }
+        }
+    }
+
+    override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
+
+    override fun onPageScrollStateChanged(state: Int) {}
 }
