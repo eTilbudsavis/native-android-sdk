@@ -50,7 +50,7 @@ class PagedPublicationActivity : BaseActivity() {
                 .add(R.id.pagedPublication, mPagedPublicationFragment!!, FRAGMENT_TAG)
                 .commit()
 
-            // NB: the initial count needs to be set up here, you won't receive any event (that is for when the page changes).
+            // Note: the initial count needs to be set up here, you won't receive any event (that is triggered when the page changes).
             // It's up to you pass in the correct initial page number
             pageTV.text = "${initialPage + 1} / ${publication.pageCount - 1}"
         }

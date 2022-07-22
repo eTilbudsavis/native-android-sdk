@@ -44,5 +44,13 @@ interface OnLoadComplete {
  * This accounts for intro and outro views.
  */
 interface OnPageNumberChangeListener {
+
+    /**
+     * Triggered when a new page is selected.
+     * currentPages: e.g [1] or [1, 2] (landscape)
+     * totalPages: is publicationV2.pageCount - 1
+     *
+     * Note: not triggered for the initial page, only when it changes
+     */
     fun onPageNumberChange(currentPages: IntArray, totalPages: Int)
 }
