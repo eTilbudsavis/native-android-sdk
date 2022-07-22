@@ -3,16 +3,21 @@ package com.shopgun.android.sdk.demo;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.widget.Toast;
 
 import com.shopgun.android.sdk.demo.base.BaseActivity;
+import com.tjek.sdk.api.models.PublicationHotspotV2;
 import com.tjek.sdk.api.models.PublicationV2;
 import com.tjek.sdk.publicationviewer.paged.IntroConfiguration;
+import com.tjek.sdk.publicationviewer.paged.OnHotspotTapListener;
 import com.tjek.sdk.publicationviewer.paged.OutroConfiguration;
 import com.tjek.sdk.publicationviewer.paged.PagedPublicationConfiguration;
 import com.tjek.sdk.publicationviewer.paged.PagedPublicationFragment;
 
+import java.util.List;
 import java.util.Locale;
 
 public class PagedPublicationActivity extends BaseActivity {
@@ -95,19 +100,26 @@ public class PagedPublicationActivity extends BaseActivity {
 //            }
 //        });
 //
-//        mPagedPublicationFragment.setOnHotspotTapListener(new PagedPublicationFragment.OnHotspotTapListener() {
-//            @Override
-//            public void onHotspotsTap(List<PagedPublicationHotspot> hotspots) {
-//                StringBuilder sb = new StringBuilder();
-//                for (PagedPublicationHotspot h : hotspots) {
-//                    if (sb.length() > 0) {
-//                        sb.append(", ");
-//                    }
-//                    sb.append(h.getOffer().getHeading());
-//                }
-//                Toast.makeText(PagedPublicationActivity.this, sb.toString(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
+        mPagedPublicationFragment.setOnHotspotTapListener(new OnHotspotTapListener() {
+            @Override
+            public void onHotspotTap(@NonNull List<PublicationHotspotV2> hotspots) {
+                StringBuilder sb = new StringBuilder();
+                for (PublicationHotspotV2 h : hotspots) {
+                    if (sb.length() > 0) {
+                        sb.append("\n");
+                    }
+                    if (h.getOffer() != null) {
+                        sb.append(h.getOffer().getHeading());
+                    }
+                }
+                Toast.makeText(PagedPublicationActivity.this, sb.toString(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onHotspotLongTap(@NonNull List<PublicationHotspotV2> hotspots) {
+
+            }
+        });
 
     }
 
