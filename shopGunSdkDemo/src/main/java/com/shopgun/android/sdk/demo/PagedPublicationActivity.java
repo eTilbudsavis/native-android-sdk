@@ -50,6 +50,7 @@ public class PagedPublicationActivity extends BaseActivity {
                     new PagedPublicationConfiguration(
                             true,
                             true,
+                            true,
                             null,
                             new OutroConfig()
                     ),

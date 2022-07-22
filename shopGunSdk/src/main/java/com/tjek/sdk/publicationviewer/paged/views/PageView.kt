@@ -2,6 +2,7 @@ package com.tjek.sdk.publicationviewer.paged.views
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.View
@@ -26,12 +27,13 @@ private enum class Size{
 class PageView(
     context: Context,
     private val publicationPage: PublicationPageV2?,
-    textColor: ColorInt
+    showPageNumberWhileLoading: Boolean = true,
+    textColor: ColorInt = Color.TRANSPARENT
 ) : AspectRatioFrameLayout(context), VersoPageView {
 
     private var size: Size? = null
     private lateinit var imageView: ImageView
-    private lateinit var pulsatingTextView: PulsatingTextView
+    private var pulsatingTextView: PulsatingTextView? = null
     private var loadCompletionListener: VersoPageViewListener.OnLoadCompleteListener? = null
 
     private val pageTarget = object : BaseTarget<Drawable>() {
@@ -42,7 +44,7 @@ class PageView(
             resource: Drawable,
             transition: Transition<in Drawable>?
         ) {
-            pulsatingTextView.visibility = View.GONE
+            pulsatingTextView?.visibility = View.GONE
             imageView.setImageDrawable(resource)
             loadCompletionListener?.let {
                 if (callback) {
@@ -70,13 +72,15 @@ class PageView(
         // Add the pulsating number
         val lp = LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         lp.gravity = Gravity.CENTER
-        pulsatingTextView = PulsatingTextView(context).apply {
-            layoutParams = lp
-            setPulseColors(textColor, 20, 80)
-            text = publicationPage?.let { "${publicationPage.index + 1}" } ?: ""
-            textSize = UnitUtils.spToPx(26, context).toFloat()
+        if (showPageNumberWhileLoading) {
+            pulsatingTextView = PulsatingTextView(context).apply {
+                layoutParams = lp
+                setPulseColors(textColor, 20, 80)
+                text = publicationPage?.let { "${publicationPage.index + 1}" } ?: ""
+                textSize = UnitUtils.spToPx(26, context).toFloat()
+            }
+            addView(pulsatingTextView)
         }
-        addView(pulsatingTextView)
     }
 
     override fun setOnLoadCompleteListener(listener: VersoPageViewListener.OnLoadCompleteListener) {

@@ -10,11 +10,15 @@ import kotlinx.parcelize.Parcelize
 // Available customisable settings
 @Parcelize
 data class PagedPublicationConfiguration(
+
     // Display the hotspot highlights. Set to false if you don't want to show them
     val displayHotspotsOnTouch: Boolean = true,
 
-    // Use the brand colors (e.g background). Set to false if you don't want to use them (default color: dark gray)
+    // Use the brand colors (e.g background). Set to false if you don't want to use them
     val useBrandColor: Boolean = true,
+
+    // Show a pulsating number as loading state when a page image is loaded
+    val showPageNumberWhileLoading: Boolean = true,
 
     // Configurations for intro and outro view
     val introConfiguration: IntroConfiguration? = null,

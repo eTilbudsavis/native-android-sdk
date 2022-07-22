@@ -19,6 +19,7 @@ internal class SpreadConfiguration(
     override val spreadCount: Int,
     override val spreadMargin: Int,
     private val pages: List<PublicationPageV2>?,
+    private val showPageNumberWhileLoading: Boolean,
     private val publicationBrandingColor: ColorInt,
     private val introConfiguration: IntroConfiguration?,
     private val outroConfiguration: OutroConfiguration?,
@@ -44,7 +45,7 @@ internal class SpreadConfiguration(
 
     private fun getPublicationPageView(container: ViewGroup, publicationPage: Int): View {
         val page = publicationPage.coerceIn(0, (pages?.size?.minus(1))?.coerceAtLeast(0))
-        return PageView(container.context, pages?.get(page), publicationBrandingColor.getPrimaryText())
+        return PageView(container.context, pages?.get(page), showPageNumberWhileLoading, publicationBrandingColor.getPrimaryText())
     }
 
     override fun getSpreadOverlay(

@@ -164,7 +164,8 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
             outroConfiguration = ppConfig.outroConfiguration?.also { it.publication = viewModel.publication.value },
             pages = viewModel.pages.value,
             publicationBrandingColor = viewModel.publication.value?.branding?.colorHex.getColorInt(),
-            deviceConfiguration = resources.configuration
+            deviceConfiguration = resources.configuration,
+            showPageNumberWhileLoading = ppConfig.showPageNumberWhileLoading
         )
     }
 
