@@ -16,18 +16,16 @@ public class HotspotView extends View {
 
     public static final String TAG = HotspotView.class.getSimpleName();
 
-    PublicationHotspotV2 mHotspot;
-    int[] mPages;
-    RectF mBounds;
+    private final RectF mBounds;
+    private boolean longPress;
 
-    public HotspotView(Context context, PublicationHotspotV2 hotspot, int[] pages) {
+    public HotspotView(Context context, PublicationHotspotV2 hotspot, int[] pages, boolean longPress) {
         super(context);
-        mHotspot = hotspot;
-        mPages = pages;
-        mBounds = mHotspot.getBoundsForPages(mPages);
+        this.longPress = longPress;
+        mBounds = hotspot.getBoundsForPages(pages);
         setBackgroundResource(R.drawable.tjek_sdk_pagedpub_hotspot_bg);
         // set the 'in' animation
-        setAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.tjek_sdk_pagedpub_hotspot_in));
+        setAnimation(AnimationUtils.loadAnimation(getContext(), longPress ? R.anim.tjek_sdk_pagedpub_hotspot_in_long_press : R.anim.tjek_sdk_pagedpub_hotspot_in));
     }
 
     @Override
@@ -55,7 +53,9 @@ public class HotspotView extends View {
     protected void onAnimationEnd() {
         super.onAnimationEnd();
         // set the view to gone to avoid flickering
-        setVisibility(View.GONE);
+        if (!longPress) {
+            setVisibility(View.GONE);
+        }
     }
 
 }

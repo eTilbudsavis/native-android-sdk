@@ -2,6 +2,7 @@ package com.tjek.sdk.publicationviewer.paged
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -14,11 +15,8 @@ import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.getColorInt
 import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.getSecondaryText
-import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoFragment
-import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageViewEvent
-import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageViewListener
-import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoViewPager
 import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout
+import com.tjek.sdk.publicationviewer.paged.libs.verso.*
 
 class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventListener {
 
@@ -223,13 +221,14 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
 
     override fun onVersoPageViewEvent(event: VersoPageViewEvent): Boolean {
         return when (event) {
-            is VersoPageViewEvent.Tap -> {
-                if (!ppConfig.displayHotspotsOnTouch) return false
-                val hs = viewModel.findHotspot(event.info, ppConfig.hasIntro)
-                if (hs.isNotEmpty()) {
+            is VersoPageViewEvent.Tap -> showHotspotOnTapEvent(event.info, longPress = false)
+            is VersoPageViewEvent.LongTap -> showHotspotOnTapEvent(event.info, longPress = true)
+            is VersoPageViewEvent.Touch -> {
+                if (event.action == MotionEvent.ACTION_UP) {
                     event.info.fragment.spreadOverlay?.let { view ->
                         if (view is PublicationSpreadLayout) {
-                            view.showHotspots(hs)
+                            // the longTap event keep showing the hotspot until the finger goes up, so let's remove all views if any
+                            view.removeHotspots()
                         }
                     }
                 }
@@ -237,5 +236,18 @@ class PagedPublicationFragment : VersoFragment(), VersoPageViewListener.EventLis
             }
             else -> false
         }
+    }
+
+    private fun showHotspotOnTapEvent(info: VersoTapInfo, longPress: Boolean): Boolean {
+        if (!ppConfig.displayHotspotsOnTouch) return false
+        val hs = viewModel.findHotspot(info, ppConfig.hasIntro)
+        if (hs.isNotEmpty()) {
+            info.fragment.spreadOverlay?.let { view ->
+                if (view is PublicationSpreadLayout) {
+                    view.showHotspots(hs, longPress)
+                }
+            }
+        }
+        return true
     }
 }

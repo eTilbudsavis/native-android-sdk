@@ -7,6 +7,7 @@
     <color name="sgn_accent">#03A9F4</color>
 
     <color name="tjek_pagedpub_hotspot_stroke">#FFFFFF</color>
+    <color name="tjek_pagedpub_hotspot_solid">#99FFFFFF</color>
     <color name="tjek_pagedpub_hotspot_dimmed_bg">#73000000</color>
 
 

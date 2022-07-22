@@ -22,31 +22,18 @@ data class HighlightedView(
     val holeType: HoleType
 )
 
-class HotspotOverlay : View {
+class HotspotOverlay(
+    context: Context,
+    private val longPress: Boolean
+) : View(context) {
 
     private lateinit var drawer: HoleDrawer
     private var bgColor: Int = ResourcesCompat.getColor(resources, R.color.tjek_pagedpub_hotspot_dimmed_bg, null)
 
     init {
         setWillNotDraw(false)
-        animation = AnimationUtils.loadAnimation(context, R.anim.tjek_sdk_pagedpub_hotspot_in)
+        animation = AnimationUtils.loadAnimation(context, if (longPress) R.anim.tjek_sdk_pagedpub_hotspot_in_long_press else R.anim.tjek_sdk_pagedpub_hotspot_in)
     }
-
-    constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
-    )
-
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    constructor(
-        context: Context?,
-        attrs: AttributeSet?,
-        defStyleAttr: Int,
-        defStyleRes: Int
-    ) : super(context, attrs, defStyleAttr, defStyleRes)
 
     private fun setHoles(holes: List<HoleType>) {
         drawer = HoleDrawer(bgColor, holes)
@@ -83,11 +70,13 @@ class HotspotOverlay : View {
 
     override fun onAnimationEnd() {
         super.onAnimationEnd()
-        visibility = GONE
-        // this view is added to the parent only once, so at the end of the animation,
-        // ask it to remove all views related to hotspots
-        val parent = parent as PublicationSpreadLayout
-        parent.post { parent.removeHotspots() }
+        if (!longPress) {
+            visibility = GONE
+            // this view is added to the parent only once, so at the end of the animation,
+            // ask it to remove all views related to hotspots
+            val parent = parent as PublicationSpreadLayout
+            parent.post { parent.removeHotspots() }
+        }
     }
 
 }

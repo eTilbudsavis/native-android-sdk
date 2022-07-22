@@ -2,15 +2,11 @@ package com.tjek.sdk.publicationviewer.paged.layouts
 
 import android.content.Context
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import com.shopgun.android.sdk.R
 import com.tjek.sdk.api.models.PublicationHotspotV2
-import com.tjek.sdk.publicationviewer.paged.views.HighlightedView
-import com.tjek.sdk.publicationviewer.paged.views.HoleType
-import com.tjek.sdk.publicationviewer.paged.views.HotspotOverlay
-import com.tjek.sdk.publicationviewer.paged.views.HotspotView
+import com.tjek.sdk.publicationviewer.paged.views.*
 
 // This overlay will add the hotspot views and a dimmed overlay that will mask the rest of the page,
 // creating the highlight effect
@@ -28,15 +24,15 @@ class PublicationSpreadLayout(
         setMeasuredDimension(width, height)
     }
 
-    fun showHotspots(list: List<PublicationHotspotV2>) {
+    fun showHotspots(list: List<PublicationHotspotV2>, longPress: Boolean) {
         if (list.isEmpty()) return
         val hsViews = mutableListOf<View>()
         for (h in list) {
-            val view = HotspotView(context, h, pages)
+            val view = HotspotView(context, h, pages, longPress)
             addView(view)
             hsViews.add(view)
         }
-        val overlay = HotspotOverlay(context)
+        val overlay = HotspotOverlay(context, longPress)
         addView(overlay)
         viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
             override fun onPreDraw(): Boolean {
@@ -48,6 +44,14 @@ class PublicationSpreadLayout(
                 return true
             }
         })
+
+        if (longPress) {
+            for (h in list) {
+                val view = HotspotLongPressView(context, h, pages)
+                addView(view)
+                hsViews.add(view)
+            }
+        }
 
         hsViews.forEach { it.animation.startNow() }
         overlay.animation.startNow()
