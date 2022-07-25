@@ -1,0 +1,3 @@
+[submodule "shopGunSdk/src/main/assets/incito/webview"]
+	path = shopGunSdk/src/main/assets/incito/webview
+	url = git@github.com:shopgun/incito-webview.git
