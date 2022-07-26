@@ -29,7 +29,7 @@ class PagedPublicationActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_pagedpublicationkit)
+        setContentView(R.layout.activity_paged_publication_layout)
 
         pageTV = findViewById(R.id.pageTV)
 

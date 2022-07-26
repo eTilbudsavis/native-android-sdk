@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import android.widget.AdapterView.OnItemClickListener
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.shopgun.android.sdk.demo.base.BaseActivity
 import com.tjek.sdk.api.TjekAPI
@@ -17,22 +16,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-class PublicationListActivity : BaseActivity(), OnItemClickListener {
+class PublicationListActivity : BaseActivity() {
 
     private var publications: List<PublicationV2> = ArrayList()
     private val listAdapter = PublicationAdapter()
-
-    override fun onItemClick(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
-        val c = publications[position]
-        PagedPublicationActivity.start(this, c)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_publication_list_layout)
         val listView: ListView = findViewById<View>(R.id.list) as ListView
         listView.adapter = listAdapter
-        listView.onItemClickListener = this
 
         showProgress("", "Loading publications....")
 
@@ -65,16 +58,25 @@ class PublicationListActivity : BaseActivity(), OnItemClickListener {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val view = convertView
                 ?: LayoutInflater.from(this@PublicationListActivity)
-                    .inflate(R.layout.card_catalog, parent, false)
-            val tv = view.findViewById<TextView>(R.id.card_catalog_dealer)
-            val logo = view.findViewById<ImageView>(R.id.card_catalog_logo)
+                    .inflate(R.layout.card_publication, parent, false)
+            val tv = view.findViewById<TextView>(R.id.card_dealer)
+            val logo = view.findViewById<ImageView>(R.id.card_logo)
+            val label = view.findViewById<TextView>(R.id.card_label)
+            val pdf = view.findViewById<Button>(R.id.card_pdf)
+            val incito = view.findViewById<Button>(R.id.card_incito)
             val p = publications[position]
             tv.text = p.branding.name
+            label.text = p.label ?: ""
+            pdf.visibility = if (p.hasPagedPublication) View.VISIBLE else View.GONE
+            incito.visibility = if (p.hasIncitoPublication) View.VISIBLE else View.GONE
             GlideApp.with(applicationContext)
                 .load(p.frontPageImages.thumb)
                 .fitCenter()
                 .placeholder(R.drawable.placeholder_px)
                 .into(logo)
+
+            pdf.setOnClickListener { PagedPublicationActivity.start(this@PublicationListActivity, p) }
+            incito.setOnClickListener { IncitoPublicationActivity.start(this@PublicationListActivity, p) }
             return view
         }
     }

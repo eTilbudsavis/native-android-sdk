@@ -1,29 +1,14 @@
-<!--
-  Copyright 2015 ShopGun
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-  -->
 <resources xmlns:tools="http://schemas.android.com/tools"
            tools:ignore="MissingTranslation">
 
-    <string name="app_name">ShopGun SDK Demo</string>
-    <string name="title_activity_main">ShopGun SDK Demo</string>
+    <string name="app_name">Tjek SDK Demo</string>
+    <string name="title_activity_main">Tjek SDK Demo</string>
 
     <!-- Remember to rab your own key/secret at https://etilbudsavis.dk/developers/ and get started :-) -->
-    <string name="shopgun_sdk_api_key">00ibm8b65trmxkmo6fy42nr5hyesj8o9</string>
-    <string name="shopgun_sdk_api_secret">00ibm8b65t6vgrgdjrel73okq0yxdb2a</string>
+    <string name="tjek_sdk_api_key">00ibm8b65trmxkmo6fy42nr5hyesj8o9</string>
+    <string name="tjek_sdk_api_secret">00ibm8b65t6vgrgdjrel73okq0yxdb2a</string>
 
-    <string name="shopgun_sdk_api_key_debug">00ibm8b65trmxkmo6fy42nr5hyesj8o9</string>
-    <string name="shopgun_sdk_api_secret_debug">00ibm8b65t6vgrgdjrel73okq0yxdb2a</string>
+    <string name="tjek_sdk_api_key_debug">00ibm8b65trmxkmo6fy42nr5hyesj8o9</string>
+    <string name="tjek_sdk_api_secret_debug">00ibm8b65t6vgrgdjrel73okq0yxdb2a</string>
 
 </resources>
