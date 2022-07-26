@@ -23,6 +23,6 @@ interface PublicationService {
     @GET("v2/catalogs/{catalogId}/hotspots")
     suspend fun getCatalogHotspots(@Path("catalogId") catalogId: Id): Response<List<PublicationHotspotV2Decodable>>
 
-    @POST("v4/generate_incito_from_publication")
+    @POST("v4/rpc/generate_incito_from_publication")
     suspend fun getIncito(@Body incitoAPIQuery: IncitoAPIQuery): Response<IncitoData>
 }
