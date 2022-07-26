@@ -1,12 +1,16 @@
 package com.tjek.sdk.api.remote
 
 import com.tjek.sdk.api.Id
+import com.tjek.sdk.api.getV4FormattedStr
 import com.tjek.sdk.api.models.*
 import com.tjek.sdk.api.remote.models.v4.*
 import com.tjek.sdk.api.remote.services.BusinessService
 import com.tjek.sdk.api.remote.services.OfferService
 import com.tjek.sdk.api.remote.services.PublicationService
 import com.tjek.sdk.api.remote.services.StoreService
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 internal object APIRequest : APIRequestBase() {
 
@@ -152,7 +156,7 @@ internal object APIRequest : APIRequestBase() {
                 pixelRatio = pixelRatio,
                 maxWidth = maxWidth,
                 locale = locale,
-                time = null, //todo
+                time = LocalDateTime.now().getV4FormattedStr(),
                 featureLabels = featureLabels
             ))
         }

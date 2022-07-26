@@ -75,3 +75,8 @@ fun TimeOfDayStr.toTimeOfDay(): TimeOfDay {
 fun DayOfWeekStr.toDayOfWeek(): DayOfWeek {
     return DayOfWeek.valueOf(uppercase(Locale.ENGLISH))
 }
+
+fun LocalDateTime.getV4FormattedStr(): String {
+    val dtf: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")
+    return this.atOffset(ZoneOffset.UTC).format(dtf)
+}
