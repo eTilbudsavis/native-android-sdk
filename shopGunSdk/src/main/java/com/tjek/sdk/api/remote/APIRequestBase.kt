@@ -45,7 +45,7 @@ internal abstract class APIRequestBase {
                     return ResponseType.Error(ErrorType.Api(APIError(serverResponse)))
                 }
             } catch (e: Exception) {
-                TjekLogCat.printStackTrace(e)
+                return ResponseType.Error(ErrorType.Unknown(code = response.code(), message = it))
             }
         }
         return ResponseType.Error(ErrorType.Unknown())
