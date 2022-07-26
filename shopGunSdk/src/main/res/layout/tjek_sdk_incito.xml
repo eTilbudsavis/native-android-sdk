@@ -1,25 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <FrameLayout
-        android:id="@+id/verso"
+    <WebView
+        android:id="@+id/incito_webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
     <FrameLayout
-        android:id="@+id/loader"
+        android:id="@+id/incito_loader"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <include layout="@layout/tjek_sdk_publication_loader" />
-
-        </FrameLayout>
+        android:layout_height="match_parent"/>
 
     <FrameLayout
-        android:id="@+id/error"
+        android:id="@+id/incito_error"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

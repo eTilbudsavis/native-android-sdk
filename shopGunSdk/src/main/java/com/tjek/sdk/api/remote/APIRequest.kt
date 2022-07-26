@@ -2,6 +2,7 @@ package com.tjek.sdk.api.remote
 
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.models.*
+import com.tjek.sdk.api.remote.models.v4.*
 import com.tjek.sdk.api.remote.services.BusinessService
 import com.tjek.sdk.api.remote.services.OfferService
 import com.tjek.sdk.api.remote.services.PublicationService
@@ -130,6 +131,30 @@ internal object APIRequest : APIRequestBase() {
                     .onEach { it.normalize(width, height) }
             }) {
             publicationService.getCatalogHotspots(publicationId)
+        }
+    }
+
+    suspend fun getIncito(
+        id: Id,
+        deviceCategory: IncitoDeviceCategory,
+        orientation: IncitoOrientation,
+        pixelRatio: Float,
+        maxWidth: Int,
+        featureLabels: List<FeatureLabel>?,
+        locale: String?
+    ): ResponseType<IncitoData> {
+        return safeApiCall(
+            decoder = { it }) {
+            publicationService.getIncito(IncitoAPIQuery(
+                id = id,
+                deviceCategory = deviceCategory,
+                orientation = orientation,
+                pixelRatio = pixelRatio,
+                maxWidth = maxWidth,
+                locale = locale,
+                time = null, //todo
+                featureLabels = featureLabels
+            ))
         }
     }
 }

@@ -50,10 +50,7 @@ class PagedPublicationViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             when(val res = TjekAPI.getPublication(publicationId)) {
                 is ResponseType.Error -> _loadingState.postValue(PublicationLoadingState.Failed(res.errorType))
-                is ResponseType.Success -> {
-                    _publication.postValue(res.data!!)
-                    fetchPagesAndHotspots(res.data!!)
-                }
+                is ResponseType.Success -> loadPublication(res.data!!)
             }
         }
     }

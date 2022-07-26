@@ -14,6 +14,7 @@ import com.shopgun.android.sdk.R
 import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.models.PublicationV2
+import com.tjek.sdk.api.remote.models.v2.BrandingV2
 import com.tjek.sdk.getColorInt
 import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.getSecondaryText
@@ -65,7 +66,7 @@ class PagedPublicationFragment :
             return createInstance(Bundle().apply { putParcelable(arg_publication, publication) }, configuration, page)
         }
 
-        private fun createInstance(args: Bundle, configuration: PagedPublicationConfiguration, page: Int = 0): PagedPublicationFragment {
+        private fun createInstance(args: Bundle, configuration: PagedPublicationConfiguration, page: Int): PagedPublicationFragment {
             return PagedPublicationFragment().apply {
                 arguments = args.also {
                     it.putParcelable(arg_config, configuration)
@@ -122,7 +123,10 @@ class PagedPublicationFragment :
         }
 
         // Forward loading of the data to host app if interested
-        viewModel.publication.observe(this) { loadCompleteListener?.onPublicationLoaded(it) }
+        viewModel.publication.observe(this) {
+            applyBranding(it.branding)
+            loadCompleteListener?.onPublicationLoaded(it)
+        }
         viewModel.pages.observe(this) { loadCompleteListener?.onPagesLoaded(it) }
         viewModel.hotspots.observe(this) { loadCompleteListener?.onHotspotLoaded(it) }
     }
@@ -182,21 +186,19 @@ class PagedPublicationFragment :
         )
     }
 
-    private fun applyBranding() {
+    private fun applyBranding(branding: BrandingV2) {
         if (!ppConfig.useBrandColor) return
-        viewModel.publication.value?.let {
-            val bgColor = it.branding.colorHex.getColorInt()
-            if (::frame.isInitialized) {
-                frame.setBackgroundColor(bgColor)
-            }
-            val bar = frameLoader?.findViewById<ProgressBar>(R.id.circularProgressBar)
-            bar?.isIndeterminate = true
-            bar?.indeterminateDrawable?.setTint(bgColor.getSecondaryText())
+
+        val bgColor = branding.colorHex.getColorInt()
+        if (::frame.isInitialized) {
+            frame.setBackgroundColor(bgColor)
         }
+        val bar = frameLoader?.findViewById<ProgressBar>(R.id.circularProgressBar)
+        bar?.isIndeterminate = true
+        bar?.indeterminateDrawable?.setTint(bgColor.getSecondaryText())
     }
 
     private fun showVersoView() {
-        applyBranding()
         frameVerso?.let {
             if (it.visibility != View.VISIBLE) {
                 it.removeAllViews()
@@ -209,7 +211,6 @@ class PagedPublicationFragment :
     }
 
     private fun showLoaderView() {
-        applyBranding()
         frameLoader?.let {
             if (it.visibility != View.VISIBLE) {
                 setVisible(verso = false, loader = true, error = false)
@@ -218,7 +219,6 @@ class PagedPublicationFragment :
     }
 
     private fun showErrorView() {
-        applyBranding()
         frameError?.let {
             if (it.visibility != View.VISIBLE) {
                 it.removeAllViews()
@@ -230,7 +230,7 @@ class PagedPublicationFragment :
 
     fun getErrorView(container: ViewGroup): View? {
         val i = LayoutInflater.from(container.context)
-        val v = i.inflate(R.layout.tjek_sdk_pagedpublication_error, container, false)
+        val v = i.inflate(R.layout.tjek_sdk_publication_error, container, false)
         return v
     }
 

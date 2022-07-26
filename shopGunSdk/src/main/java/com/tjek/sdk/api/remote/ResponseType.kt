@@ -15,6 +15,7 @@ sealed class ErrorType {
     data class Parsing(val message: String?) : ErrorType()
     data class Network(val code: Int? = null, val message: String?) : ErrorType()
     data class Unknown(val code: Int? = null, val message: String? = null) : ErrorType()
+    object NotAnIncitoPublication : ErrorType()
 }
 
 data class PaginatedResponse<T>(

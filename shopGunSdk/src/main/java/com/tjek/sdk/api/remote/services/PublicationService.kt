@@ -4,10 +4,10 @@ import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.remote.models.v2.ImageUrlsV2
 import com.tjek.sdk.api.remote.models.v2.PublicationHotspotV2Decodable
 import com.tjek.sdk.api.remote.models.v2.PublicationV2Decodable
+import com.tjek.sdk.api.remote.models.v4.IncitoData
+import com.tjek.sdk.api.remote.models.v4.IncitoAPIQuery
 import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Path
-import retrofit2.http.QueryMap
+import retrofit2.http.*
 
 interface PublicationService {
 
@@ -22,4 +22,7 @@ interface PublicationService {
 
     @GET("v2/catalogs/{catalogId}/hotspots")
     suspend fun getCatalogHotspots(@Path("catalogId") catalogId: Id): Response<List<PublicationHotspotV2Decodable>>
+
+    @POST("v4/generate_incito_from_publication")
+    suspend fun getIncito(@Body incitoAPIQuery: IncitoAPIQuery): Response<IncitoData>
 }

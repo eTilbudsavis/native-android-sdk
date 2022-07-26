@@ -5,6 +5,10 @@ package com.tjek.sdk.api
 import com.tjek.sdk.api.models.*
 import com.tjek.sdk.api.remote.*
 import com.tjek.sdk.api.remote.APIRequest
+import com.tjek.sdk.api.remote.models.v4.FeatureLabel
+import com.tjek.sdk.api.remote.models.v4.IncitoData
+import com.tjek.sdk.api.remote.models.v4.IncitoDeviceCategory
+import com.tjek.sdk.api.remote.models.v4.IncitoOrientation
 
 object TjekAPI {
 
@@ -144,5 +148,20 @@ object TjekAPI {
         height: Double
     ): ResponseType<List<PublicationHotspotV2>> {
         return APIRequest.getPublicationHotspots(publicationId, width, height)
+    }
+
+    /**
+     * Get an incito publication.
+     */
+    suspend fun getIncito(
+        id: Id,
+        deviceCategory: IncitoDeviceCategory,
+        orientation: IncitoOrientation,
+        pixelRatio: Float,
+        maxWidth: Int,
+        featureLabels: List<FeatureLabel>?,
+        locale: String?
+    ): ResponseType<IncitoData> {
+        return APIRequest.getIncito(id, deviceCategory, orientation, pixelRatio, maxWidth, featureLabels, locale)
     }
 }
