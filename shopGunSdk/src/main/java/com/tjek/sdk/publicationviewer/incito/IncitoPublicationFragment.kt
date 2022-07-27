@@ -22,6 +22,7 @@ import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.models.PublicationV2
+import com.tjek.sdk.api.remote.models.v4.FeatureLabel
 import com.tjek.sdk.api.remote.models.v4.IncitoData
 import com.tjek.sdk.api.remote.models.v4.IncitoDeviceCategory
 import com.tjek.sdk.api.remote.models.v4.IncitoOrientation
@@ -29,6 +30,7 @@ import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.getFormattedLocale
 import com.tjek.sdk.publicationviewer.paged.PublicationLoadingState
 import org.json.JSONArray
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 class IncitoPublicationFragment :
@@ -50,31 +52,35 @@ class IncitoPublicationFragment :
         private const val arg_view_id = "arg_view_id"
         private const val arg_publication = "arg_publication"
         private const val arg_publication_id = "arg_publication_id"
+        private const val arg_feature_labels = "arg_feature_labels"
 
         fun newInstance(
             publicationId: Id,
             configuration: IncitoPublicationConfiguration,
             verticalOffset: Int = 0,
-            openAtViewWithId: String? = null
+            openAtViewWithId: String? = null,
+            recordedFeatureLabel: ArrayList<String>? = null
         ): IncitoPublicationFragment {
-            return createInstance(Bundle().apply { putString(arg_publication_id, publicationId) }, configuration, verticalOffset, openAtViewWithId)
+            return createInstance(Bundle().apply { putString(arg_publication_id, publicationId) }, configuration, verticalOffset, openAtViewWithId, recordedFeatureLabel)
         }
 
         fun newInstance(
             publication: PublicationV2,
             configuration: IncitoPublicationConfiguration,
             verticalOffset: Int = 0,
-            openAtViewWithId: String? = null
+            openAtViewWithId: String? = null,
+            recordedFeatureLabel: ArrayList<String>? = null
         ): IncitoPublicationFragment {
-            return createInstance(Bundle().apply { putParcelable(arg_publication, publication) }, configuration, verticalOffset, openAtViewWithId)
+            return createInstance(Bundle().apply { putParcelable(arg_publication, publication) }, configuration, verticalOffset, openAtViewWithId, recordedFeatureLabel)
         }
 
-        private fun createInstance(args: Bundle, configuration: IncitoPublicationConfiguration, verticalOffset: Int, viewId: String?): IncitoPublicationFragment {
+        private fun createInstance(args: Bundle, configuration: IncitoPublicationConfiguration, verticalOffset: Int, viewId: String?, featureLabel: ArrayList<String>?): IncitoPublicationFragment {
             return IncitoPublicationFragment().apply {
                 arguments = args.also {
                     it.putParcelable(arg_config, configuration)
                     it.putInt(arg_offset, verticalOffset)
                     it.putString(arg_view_id, viewId)
+                    it.putStringArrayList(arg_feature_labels, featureLabel)
                 }
             }
         }
@@ -86,7 +92,7 @@ class IncitoPublicationFragment :
 
     private var yOffset = 0
     private var openAtViewWithId: String? = null
-    private val newFeatureLabels = mutableListOf<String>()
+    private var recordedFeatureLabel: List<String>? = null
     private var fragmentView: View? = null
     private var incitoWebView: WebView? = null
     private var hasSentOpenEvent = false
@@ -143,26 +149,25 @@ class IncitoPublicationFragment :
             }
         }
 
-//    private val featureLabels: MutableList<FeatureLabel>?
-//        get() {
-//            val storedLabels = App.getInstance().settings.featureLabels
-//            val total = storedLabels?.size ?: 0
-//            if (total > 0) {
-//                val fl = mutableListOf<FeatureLabel>()
-//                val counts = mutableMapOf<String, Int>()
-//                storedLabels?.forEach{
-//                    val value = if (counts.containsKey(it)) counts[it] else 0
-//                    counts[it] = value!! + 1
-//                }
-//                counts.map { entry ->
-//                    val avg = entry.value.toFloat() / total
-//                    val roundedAvg = round(avg * 100) / 100
-//                    fl.add(FeatureLabel(entry.key, roundedAvg.takeIf { it > 0 } ?: 0F))
-//                }
-//                return fl
-//            }
-//            return null
-//        }
+    private val featureLabels: List<FeatureLabel>?
+        get() {
+            val total = recordedFeatureLabel?.size ?: 0
+            if (total > 0) {
+                val fl = mutableListOf<FeatureLabel>()
+                val counts = mutableMapOf<String, Int>()
+                recordedFeatureLabel?.forEach{
+                    val value = if (counts.containsKey(it)) counts[it] else 0
+                    counts[it] = value!! + 1
+                }
+                counts.map { entry ->
+                    val avg = entry.value.toFloat() / total
+                    val roundedAvg = round(avg * 100) / 100
+                    fl.add(FeatureLabel(entry.key, roundedAvg.takeIf { it > 0 } ?: 0F))
+                }
+                return fl
+            }
+            return null
+        }
 
     fun setIncitoEventListener(listener: IncitoEventListener) {
         eventListener = listener
@@ -177,6 +182,8 @@ class IncitoPublicationFragment :
             arguments?.let {
                 config = it.getParcelable(arg_config)!!
                 yOffset = it.getInt(arg_offset, 0)
+                openAtViewWithId = it.getString(arg_view_id)
+                recordedFeatureLabel = it.getStringArrayList(arg_feature_labels)
                 val publication: PublicationV2? = it.getParcelable(arg_publication)
                 if (publication != null) {
                     viewModel.loadPublication(
@@ -185,7 +192,7 @@ class IncitoPublicationFragment :
                         orientation = orientation,
                         pixelRatio = pixelRatio,
                         maxWidth = screenWidth,
-                        featureLabels = null,
+                        featureLabels = featureLabels,
                         locale = getFormattedLocale(requireContext())
                     )
                 } else {
@@ -195,7 +202,7 @@ class IncitoPublicationFragment :
                         orientation = orientation,
                         pixelRatio = pixelRatio,
                         maxWidth = screenWidth,
-                        featureLabels = null,
+                        featureLabels = featureLabels,
                         locale = getFormattedLocale(requireContext())
                     )
                 }
@@ -393,7 +400,6 @@ class IncitoPublicationFragment :
                         val incitoOffer = viewModel.getOfferFromMap(jsonArray.getString(i))
                         if (incitoOffer != null) {
                             eventListener?.onOfferLongClick(incitoOffer, viewModel.publication.value)
-//                            saveFeatureLabels(incitoOffer.featureLabels)
                             break
                         }
                     }
@@ -403,10 +409,6 @@ class IncitoPublicationFragment :
             }
         }
         return true
-    }
-
-    private fun saveFeatureLabels(labels: List<String>?) {
-        labels?.let { newFeatureLabels.addAll(labels) }
     }
 
     private fun dismissLoader() {
@@ -425,7 +427,6 @@ class IncitoPublicationFragment :
             val incitoOffer = viewModel.getOfferFromMap(id)
             if (incitoOffer != null) {
                 eventListener?.onOfferClick(incitoOffer, viewModel.publication.value)
-//                saveFeatureLabels(incitoOffer.featureLabels)
                 break
             }
         }
