@@ -1,15 +1,16 @@
 package com.tjek.sdk.publicationviewer.incito
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.DisplayMetrics
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
 import android.webkit.*
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
@@ -17,7 +18,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.shopgun.android.sdk.BuildConfig
 import com.shopgun.android.sdk.R
-import com.shopgun.android.utils.DeviceUtils
 import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.api.Id
@@ -124,9 +124,13 @@ class IncitoPublicationFragment :
         }
 
     private val deviceCategory: IncitoDeviceCategory
-        get() { //todo: use something else
-            return if (DeviceUtils.isTablet(context)) IncitoDeviceCategory.tablet
-            else IncitoDeviceCategory.mobile
+        get() {
+            // based on https://developer.android.com/guide/topics/large-screens/support-different-screen-sizes#smallest-width
+            return when (resources.configuration.smallestScreenWidthDp) {
+                in 0 until 600 -> IncitoDeviceCategory.mobile
+                in 600 until 960 -> IncitoDeviceCategory.tablet
+                else -> IncitoDeviceCategory.desktop
+            }
         }
 
     private val orientation: IncitoOrientation
