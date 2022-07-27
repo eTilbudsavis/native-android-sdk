@@ -29,6 +29,8 @@ android {
     compileSdkVersion rootProject.compileSdkVersion
 
     compileOptions {
+        // Flag to enable support for the new language APIs (For AGP 4.1+)
+        coreLibraryDesugaringEnabled = true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -88,6 +90,8 @@ dependencies {
 
     implementation "androidx.activity:activity-ktx:1.4.0"
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
     // ShopGun dependencies
     implementation project(':shopGunSdk')
