@@ -112,21 +112,9 @@ class IncitoPublicationFragment :
     private var isRendererLoaded = false
     private var initCalled = false
 
-    private fun getDeprecatedMetrics(outMetrics: DisplayMetrics) {
-        val display = context?.let { (it.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay }
-        display?.getMetrics(outMetrics)
-    }
-
     private val pixelRatio: Float
         get() {
-            val outMetrics = DisplayMetrics()
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-                getDeprecatedMetrics(outMetrics)
-            } else {
-                val display = activity?.display
-                display?.getRealMetrics(outMetrics)
-            }
-            return outMetrics.density
+            return resources.displayMetrics.density
         }
 
     private val screenWidth: Int
