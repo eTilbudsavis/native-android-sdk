@@ -11,6 +11,9 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class PagedPublicationConfiguration(
 
+    // Open the publication at this page
+    val initialPageNumber: Int = 0,
+
     // Display the hotspot highlights. Set to false if you don't want to show them
     val displayHotspotsOnTouch: Boolean = true,
 

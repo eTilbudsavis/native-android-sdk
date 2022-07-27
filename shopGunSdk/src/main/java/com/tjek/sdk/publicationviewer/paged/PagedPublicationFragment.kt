@@ -45,32 +45,28 @@ class PagedPublicationFragment :
 
     companion object {
         private const val arg_config = "arg_config"
-        private const val arg_page = "arg_page"
         private const val arg_publication = "arg_publication"
         private const val arg_publication_id = "arg_publication_id"
         private const val saved_state = "saved_state"
 
         fun newInstance(
             publicationId: Id,
-            configuration: PagedPublicationConfiguration,
-            page: Int = 0
+            configuration: PagedPublicationConfiguration
         ): PagedPublicationFragment {
-            return createInstance(Bundle().apply { putString(arg_publication_id, publicationId) }, configuration, page)
+            return createInstance(Bundle().apply { putString(arg_publication_id, publicationId) }, configuration)
         }
 
         fun newInstance(
             publication: PublicationV2,
-            configuration: PagedPublicationConfiguration,
-            page: Int = 0
+            configuration: PagedPublicationConfiguration
         ): PagedPublicationFragment {
-            return createInstance(Bundle().apply { putParcelable(arg_publication, publication) }, configuration, page)
+            return createInstance(Bundle().apply { putParcelable(arg_publication, publication) }, configuration)
         }
 
-        private fun createInstance(args: Bundle, configuration: PagedPublicationConfiguration, page: Int): PagedPublicationFragment {
+        private fun createInstance(args: Bundle, configuration: PagedPublicationConfiguration): PagedPublicationFragment {
             return PagedPublicationFragment().apply {
                 arguments = args.also {
                     it.putParcelable(arg_config, configuration)
-                    it.putInt(arg_page, page)
                 }
             }
         }
@@ -98,7 +94,7 @@ class PagedPublicationFragment :
         } else {
             arguments?.let {
                 ppConfig = it.getParcelable(arg_config)!!
-                setPage(it.getInt(arg_page, 0))
+                setPage(ppConfig.initialPageNumber)
                 val publication: PublicationV2? = it.getParcelable(arg_publication)
                 if (publication != null) {
                     viewModel.loadPublication(publication)

@@ -48,39 +48,27 @@ class IncitoPublicationFragment :
         const val HAS_SENT_OPEN_EVENT = "has_sent_open_event"
 
         private const val arg_config = "arg_config"
-        private const val arg_offset = "arg_offset"
-        private const val arg_view_id = "arg_view_id"
         private const val arg_publication = "arg_publication"
         private const val arg_publication_id = "arg_publication_id"
-        private const val arg_feature_labels = "arg_feature_labels"
 
         fun newInstance(
             publicationId: Id,
-            configuration: IncitoPublicationConfiguration,
-            verticalOffset: Int = 0,
-            openAtViewWithId: String? = null,
-            recordedFeatureLabel: ArrayList<String>? = null
+            configuration: IncitoPublicationConfiguration
         ): IncitoPublicationFragment {
-            return createInstance(Bundle().apply { putString(arg_publication_id, publicationId) }, configuration, verticalOffset, openAtViewWithId, recordedFeatureLabel)
+            return createInstance(Bundle().apply { putString(arg_publication_id, publicationId) }, configuration)
         }
 
         fun newInstance(
             publication: PublicationV2,
-            configuration: IncitoPublicationConfiguration,
-            verticalOffset: Int = 0,
-            openAtViewWithId: String? = null,
-            recordedFeatureLabel: ArrayList<String>? = null
+            configuration: IncitoPublicationConfiguration
         ): IncitoPublicationFragment {
-            return createInstance(Bundle().apply { putParcelable(arg_publication, publication) }, configuration, verticalOffset, openAtViewWithId, recordedFeatureLabel)
+            return createInstance(Bundle().apply { putParcelable(arg_publication, publication) }, configuration)
         }
 
-        private fun createInstance(args: Bundle, configuration: IncitoPublicationConfiguration, verticalOffset: Int, viewId: String?, featureLabel: ArrayList<String>?): IncitoPublicationFragment {
+        private fun createInstance(args: Bundle, configuration: IncitoPublicationConfiguration): IncitoPublicationFragment {
             return IncitoPublicationFragment().apply {
                 arguments = args.also {
                     it.putParcelable(arg_config, configuration)
-                    it.putInt(arg_offset, verticalOffset)
-                    it.putString(arg_view_id, viewId)
-                    it.putStringArrayList(arg_feature_labels, featureLabel)
                 }
             }
         }
@@ -173,9 +161,9 @@ class IncitoPublicationFragment :
         } else {
             arguments?.let {
                 config = it.getParcelable(arg_config)!!
-                yOffset = it.getInt(arg_offset, 0)
-                openAtViewWithId = it.getString(arg_view_id)
-                recordedFeatureLabel = it.getStringArrayList(arg_feature_labels)
+                yOffset = config.initialVerticalOffset
+                openAtViewWithId = config.openAtViewWithId
+                recordedFeatureLabel = config.recordedFeatureLabel
                 val publication: PublicationV2? = it.getParcelable(arg_publication)
                 if (publication != null) {
                     viewModel.loadPublication(
