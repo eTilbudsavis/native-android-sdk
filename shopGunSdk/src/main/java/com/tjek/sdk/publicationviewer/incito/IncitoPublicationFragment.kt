@@ -208,7 +208,10 @@ class IncitoPublicationFragment :
         viewModel.incitoData.observe(this) { callJavascriptInit(it, isRendererLoaded) }
         viewModel.loadingState.observe(this) {
             when(it) {
-                is PublicationLoadingState.Failed -> showError()
+                is PublicationLoadingState.Failed -> {
+                    TjekLogCat.e(it.error.toString())
+                    showError()
+                }
                 PublicationLoadingState.Loading -> showLoader()
                 PublicationLoadingState.Successful -> {} // nothing to do here. The observer on the incito data will handle the init
             }

@@ -16,6 +16,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import okio.ByteString
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.*
 
 private const val CLIENT_HEADER = "X-Client-Version"
@@ -102,6 +103,7 @@ internal object APIClient {
 
         return Retrofit.Builder()
             .baseUrl("https://${environment.host}/")
+            .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(mOkHttpClient)
             .build()
