@@ -213,7 +213,8 @@ class PagedPublicationFragment :
     private fun showLoader() {
         val view =
             customScreenCallback?.showLoaderScreen(viewModel.publication.value?.branding) ?:
-            getDefaultLoadingScreen(layoutInflater, viewModel.publication.value?.branding)
+            getDefaultLoadingScreen(layoutInflater = layoutInflater,
+                branding = if (ppConfig.useBrandColor) viewModel.publication.value?.branding else null)
         frameLoader?.removeAllViews()
         frameLoader?.addView(view)
         setVisible(verso = false, loader = true, error = false)
@@ -222,7 +223,9 @@ class PagedPublicationFragment :
     private fun showError(error: ErrorType) {
         val view =
             customScreenCallback?.showErrorScreen(viewModel.publication.value?.branding, error) ?:
-            getDefaultErrorScreen(layoutInflater, viewModel.publication.value?.branding, error)
+            getDefaultErrorScreen(layoutInflater = layoutInflater,
+                branding = if (ppConfig.useBrandColor) viewModel.publication.value?.branding else null,
+                error = error)
         frameError?.removeAllViews()
         frameError?.addView(view)
         setVisible(verso = false, loader = false, error = true)

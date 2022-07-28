@@ -218,7 +218,8 @@ class IncitoPublicationFragment :
     private fun showLoader() {
         val view =
             customScreenCallback?.showLoaderScreen(viewModel.publication.value?.branding) ?:
-            getDefaultLoadingScreen(layoutInflater, viewModel.publication.value?.branding)
+            getDefaultLoadingScreen(layoutInflater = layoutInflater,
+                branding = if (config.useBrandColor) viewModel.publication.value?.branding else null)
         loaderFrame?.removeAllViews()
         loaderFrame?.addView(view)
         setVisible(webview = false, loader = true, error = false)
@@ -227,7 +228,9 @@ class IncitoPublicationFragment :
     private fun showError(error: ErrorType) {
         val view =
             customScreenCallback?.showErrorScreen(viewModel.publication.value?.branding, error) ?:
-            getDefaultErrorScreen(layoutInflater, viewModel.publication.value?.branding, error)
+            getDefaultErrorScreen(layoutInflater = layoutInflater,
+                branding = if (config.useBrandColor) viewModel.publication.value?.branding else null,
+                error = error)
         errorFrame?.removeAllViews()
         errorFrame?.addView(view)
         setVisible(webview = false, loader = false, error = true)
