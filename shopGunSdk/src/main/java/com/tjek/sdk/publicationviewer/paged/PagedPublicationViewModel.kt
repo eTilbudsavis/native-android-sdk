@@ -37,16 +37,18 @@ class PagedPublicationViewModel : ViewModel() {
     val hotspots: LiveData<List<PublicationHotspotV2>>
         get() = _hotspots
 
-    private val _loadingState = MutableLiveData<PublicationLoadingState>(PublicationLoadingState.Loading)
+    private val _loadingState = MutableLiveData<PublicationLoadingState>()
     val loadingState: LiveData<PublicationLoadingState>
         get() = _loadingState
 
     fun loadPublication(publication: PublicationV2) {
         _publication.postValue(publication)
+        _loadingState.postValue(PublicationLoadingState.Loading)
         fetchPagesAndHotspots(publication)
     }
 
     fun loadPublication(publicationId: Id) {
+        _loadingState.postValue(PublicationLoadingState.Loading)
         viewModelScope.launch(Dispatchers.IO) {
             when(val res = TjekAPI.getPublication(publicationId)) {
                 is ResponseType.Error -> _loadingState.postValue(PublicationLoadingState.Failed(res.errorType))

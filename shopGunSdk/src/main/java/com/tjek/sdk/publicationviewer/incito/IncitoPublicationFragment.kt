@@ -22,12 +22,16 @@ import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.models.PublicationV2
+import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.remote.models.v4.FeatureLabel
 import com.tjek.sdk.api.remote.models.v4.IncitoData
 import com.tjek.sdk.api.remote.models.v4.IncitoDeviceCategory
 import com.tjek.sdk.api.remote.models.v4.IncitoOrientation
 import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.getFormattedLocale
+import com.tjek.sdk.publicationviewer.LoaderAndErrorScreenCallback
+import com.tjek.sdk.publicationviewer.getDefaultErrorScreen
+import com.tjek.sdk.publicationviewer.getDefaultLoadingScreen
 import com.tjek.sdk.publicationviewer.paged.PublicationLoadingState
 import org.json.JSONArray
 import kotlin.math.round
@@ -77,6 +81,7 @@ class IncitoPublicationFragment :
     private val viewModel: IncitoPublicationViewModel by viewModels()
     private lateinit var config: IncitoPublicationConfiguration
     private var eventListener: IncitoEventListener? = null
+    private var customScreenCallback: LoaderAndErrorScreenCallback? = null
 
     private var yOffset = 0
     private var openAtViewWithId: String? = null
@@ -153,6 +158,10 @@ class IncitoPublicationFragment :
         eventListener = listener
     }
 
+    fun setCustomScreenCallback(callback: LoaderAndErrorScreenCallback) {
+        customScreenCallback = callback
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null) {
@@ -197,7 +206,7 @@ class IncitoPublicationFragment :
             when(it) {
                 is PublicationLoadingState.Failed -> {
                     TjekLogCat.e(it.error.toString())
-                    showError()
+                    showError(it.error)
                 }
                 PublicationLoadingState.Loading -> showLoader()
                 PublicationLoadingState.Successful -> {} // nothing to do here. The observer on the incito data will handle the init
@@ -206,12 +215,20 @@ class IncitoPublicationFragment :
     }
 
     private fun showLoader() {
-        // todo
+        val view =
+            customScreenCallback?.showLoaderScreen(viewModel.publication.value?.branding) ?:
+            getDefaultLoadingScreen(layoutInflater, viewModel.publication.value?.branding)
+        loaderFrame?.removeAllViews()
+        loaderFrame?.addView(view)
         setVisible(webview = false, loader = true, error = false)
     }
 
-    private fun showError() {
-        // todo
+    private fun showError(error: ErrorType) {
+        val view =
+            customScreenCallback?.showErrorScreen(viewModel.publication.value?.branding, error) ?:
+            getDefaultErrorScreen(layoutInflater, viewModel.publication.value?.branding, error)
+        errorFrame?.removeAllViews()
+        errorFrame?.addView(view)
         setVisible(webview = false, loader = false, error = true)
     }
 
@@ -232,7 +249,7 @@ class IncitoPublicationFragment :
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         if (fragmentView == null) {
-            fragmentView = inflater.inflate(R.layout.tjek_sdk_incito, container, false)
+            fragmentView = inflater.inflate(R.layout.tjek_sdk_incito_publication, container, false)
         }
         incitoWebView = fragmentView?.findViewById(R.id.incito_webview)
         errorFrame = fragmentView?.findViewById(R.id.incito_error)
@@ -343,7 +360,7 @@ class IncitoPublicationFragment :
                 incitoWebView = context?.let { WebView(it) }
                 (fragmentView as FrameLayout).addView(incitoWebView, 0)
 
-                showError()
+                showError(ErrorType.Unknown(message = "Error while loading webview"))
                 return true // continue to execute the app
             }
         }

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:layout_gravity="center">
+    android:gravity="center">
 
     <TextView
         android:id="@+id/heading"
-        android:text="Oops..."
+        android:text="Error"
         tools:ignore="HardcodedText"
         android:layout_gravity="center"
         android:layout_width="wrap_content"
@@ -16,8 +16,8 @@
         android:textAppearance="@android:style/TextAppearance.Large"/>
 
     <TextView
-        android:id="@+id/message"
-        android:text="An error occoured"
+        android:id="@+id/error_message"
+        android:text="code - message"
         tools:ignore="HardcodedText"
         android:layout_gravity="center"
         android:layout_width="wrap_content"

@@ -10,16 +10,12 @@
         android:layout_height="match_parent"/>
 
     <FrameLayout
-        android:id="@+id/loader"
+        android:id="@+id/paged_loader"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <include layout="@layout/tjek_sdk_publication_loader" />
-
-        </FrameLayout>
+        android:layout_height="match_parent"/>
 
     <FrameLayout
-        android:id="@+id/error"
+        android:id="@+id/paged_error"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

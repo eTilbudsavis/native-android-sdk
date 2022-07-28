@@ -33,7 +33,7 @@ class IncitoPublicationViewModel : ViewModel() {
     val offers: LiveData<Map<IncitoViewId, IncitoOffer>?>
         get() = _offers
 
-    private val _loadingState = MutableLiveData<PublicationLoadingState>(PublicationLoadingState.Loading)
+    private val _loadingState = MutableLiveData<PublicationLoadingState>()
     val loadingState: LiveData<PublicationLoadingState>
         get() = _loadingState
 
@@ -48,6 +48,7 @@ class IncitoPublicationViewModel : ViewModel() {
     ) {
         _publication.postValue(publication)
         if (publication.hasIncitoPublication) {
+            _loadingState.postValue(PublicationLoadingState.Loading)
             getIncitoData(publication.id, deviceCategory, orientation, pixelRatio, maxWidth, featureLabels, locale)
         } else {
             _loadingState.postValue(PublicationLoadingState.Failed(ErrorType.NotAnIncitoPublication))
@@ -63,6 +64,7 @@ class IncitoPublicationViewModel : ViewModel() {
         featureLabels: List<FeatureLabel>?,
         locale: String?
     ) {
+        _loadingState.postValue(PublicationLoadingState.Loading)
         viewModelScope.launch(Dispatchers.IO) {
             when(val res = TjekAPI.getPublication(id)) {
                 is ResponseType.Error -> _loadingState.postValue(PublicationLoadingState.Failed(res.errorType))

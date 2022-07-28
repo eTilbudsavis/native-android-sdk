@@ -14,10 +14,14 @@ import com.shopgun.android.sdk.R
 import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.models.PublicationV2
+import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.remote.models.v2.BrandingV2
 import com.tjek.sdk.getColorInt
 import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.getSecondaryText
+import com.tjek.sdk.publicationviewer.LoaderAndErrorScreenCallback
+import com.tjek.sdk.publicationviewer.getDefaultErrorScreen
+import com.tjek.sdk.publicationviewer.getDefaultLoadingScreen
 import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout
 import com.tjek.sdk.publicationviewer.paged.libs.verso.*
 import com.tjek.sdk.publicationviewer.paged.libs.verso.viewpager.CenteredViewPager
@@ -42,6 +46,7 @@ class PagedPublicationFragment :
     private var loadCompleteListener: OnLoadComplete? = null
     private var hotspotTapListener: OnHotspotTapListener? = null
     private var pageNumberChangeListener: OnPageNumberChangeListener? = null
+    private var customScreenCallback: LoaderAndErrorScreenCallback? = null
 
     companion object {
         private const val arg_config = "arg_config"
@@ -84,6 +89,10 @@ class PagedPublicationFragment :
         pageNumberChangeListener = listener
     }
 
+    fun setCustomScreenCallback(callback: LoaderAndErrorScreenCallback) {
+        customScreenCallback = callback
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null) {
@@ -107,9 +116,9 @@ class PagedPublicationFragment :
             when (state) {
                 is PublicationLoadingState.Failed -> {
                     loadCompleteListener?.onError(state.error)
-                    showErrorView()
+                    showError(state.error)
                 }
-                PublicationLoadingState.Loading -> showLoaderView()
+                PublicationLoadingState.Loading -> showLoader()
                 PublicationLoadingState.Successful -> {
                     setVersoSpreadConfiguration()
                     showVersoView()
@@ -133,10 +142,10 @@ class PagedPublicationFragment :
         savedInstanceState: Bundle?
     ): View {
         viewPager = super.onCreateView(inflater, container, savedInstanceState) as VersoViewPager
-        frame = inflater.inflate(R.layout.tjek_sdk_pagedpublication, container, false) as FrameLayout
+        frame = inflater.inflate(R.layout.tjek_sdk_paged_publication, container, false) as FrameLayout
         frameVerso = frame.findViewById(R.id.verso) as FrameLayout?
-        frameError = frame.findViewById(R.id.error) as FrameLayout?
-        frameLoader = frame.findViewById(R.id.loader) as FrameLayout?
+        frameError = frame.findViewById(R.id.paged_error) as FrameLayout?
+        frameLoader = frame.findViewById(R.id.paged_loader) as FrameLayout?
         setVisible(verso = false, loader = false, error = false)
 
         setOnEventListener(this)
@@ -184,14 +193,10 @@ class PagedPublicationFragment :
 
     private fun applyBranding(branding: BrandingV2) {
         if (!ppConfig.useBrandColor) return
-
         val bgColor = branding.colorHex.getColorInt()
         if (::frame.isInitialized) {
             frame.setBackgroundColor(bgColor)
         }
-        val bar = frameLoader?.findViewById<ProgressBar>(R.id.circularProgressBar)
-        bar?.isIndeterminate = true
-        bar?.indeterminateDrawable?.setTint(bgColor.getSecondaryText())
     }
 
     private fun showVersoView() {
@@ -206,28 +211,22 @@ class PagedPublicationFragment :
 
     }
 
-    private fun showLoaderView() {
-        frameLoader?.let {
-            if (it.visibility != View.VISIBLE) {
-                setVisible(verso = false, loader = true, error = false)
-            }
-        }
+    private fun showLoader() {
+        val view =
+            customScreenCallback?.showLoaderScreen(viewModel.publication.value?.branding) ?:
+            getDefaultLoadingScreen(layoutInflater, viewModel.publication.value?.branding)
+        frameLoader?.removeAllViews()
+        frameLoader?.addView(view)
+        setVisible(verso = false, loader = true, error = false)
     }
 
-    private fun showErrorView() {
-        frameError?.let {
-            if (it.visibility != View.VISIBLE) {
-                it.removeAllViews()
-                it.addView(getErrorView(frame))
-                setVisible(verso = false, loader = false, error = true)
-            }
-        }
-    }
-
-    fun getErrorView(container: ViewGroup): View? {
-        val i = LayoutInflater.from(container.context)
-        val v = i.inflate(R.layout.tjek_sdk_publication_error, container, false)
-        return v
+    private fun showError(error: ErrorType) {
+        val view =
+            customScreenCallback?.showErrorScreen(viewModel.publication.value?.branding, error) ?:
+            getDefaultErrorScreen(layoutInflater, viewModel.publication.value?.branding, error)
+        frameError?.removeAllViews()
+        frameError?.addView(view)
+        setVisible(verso = false, loader = false, error = true)
     }
 
     private fun setVisible(verso: Boolean, loader: Boolean, error: Boolean) {

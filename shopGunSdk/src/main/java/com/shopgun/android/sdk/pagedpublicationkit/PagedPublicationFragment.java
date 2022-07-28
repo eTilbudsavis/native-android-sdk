@@ -119,10 +119,10 @@ public class PagedPublicationFragment extends VersoFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mVersoViewPager = (VersoViewPager) super.onCreateView(inflater, container, savedInstanceState);
-        mFrame = (FrameLayout) inflater.inflate(R.layout.tjek_sdk_pagedpublication, container, false);
+        mFrame = (FrameLayout) inflater.inflate(R.layout.tjek_sdk_paged_publication, container, false);
         mFrameVerso = (FrameLayout) mFrame.findViewById(R.id.verso);
-        mFrameError = (FrameLayout) mFrame.findViewById(R.id.error);
-        mFrameLoader = (FrameLayout) mFrame.findViewById(R.id.loader);
+        mFrameError = (FrameLayout) mFrame.findViewById(R.id.paged_error);
+        mFrameLoader = (FrameLayout) mFrame.findViewById(R.id.paged_loader);
         setVisible(false, false, false);
 
         if (getVersoSpreadConfiguration() == null) {

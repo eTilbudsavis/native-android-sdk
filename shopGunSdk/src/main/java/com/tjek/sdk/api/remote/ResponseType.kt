@@ -16,6 +16,16 @@ sealed class ErrorType {
     data class Network(val code: Int? = null, val message: String?) : ErrorType()
     data class Unknown(val code: Int? = null, val message: String? = null) : ErrorType()
     object NotAnIncitoPublication : ErrorType()
+
+    fun toFormattedString(): String {
+        return when (val e = this) {
+            is ErrorType.Api -> "Api error: ${e.error.knownErrorName} ${e.error.serverResponse}"
+            is ErrorType.Network -> "Network error: ${e.code} ${e.message}"
+            ErrorType.NotAnIncitoPublication -> "Incito not available for this publication"
+            is ErrorType.Parsing -> "Parsing error: ${e.message}"
+            is ErrorType.Unknown -> "Unknown error: ${e.code} ${e.message}"
+        }
+    }
 }
 
 data class PaginatedResponse<T>(
