@@ -33,7 +33,7 @@ class PagedPublicationFragment :
 {
 
     private val viewModel: PagedPublicationViewModel by viewModels()
-    private lateinit var ppConfig: PagedPublicationConfiguration
+    private lateinit var config: PagedPublicationConfiguration
     private var hasSentOpenEvent: Boolean = false
 
     private lateinit var frame: FrameLayout
@@ -96,13 +96,13 @@ class PagedPublicationFragment :
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null) {
             savedInstanceState.getParcelable<PagedPublicationSavedState>(saved_state)?.let { state ->
-                ppConfig = state.config
+                config = state.config
                 hasSentOpenEvent = state.hasSentOpenEvent
             }
         } else {
             arguments?.let {
-                ppConfig = it.getParcelable(arg_config)!!
-                setPage(ppConfig.initialPageNumber)
+                config = it.getParcelable(arg_config)!!
+                setPage(config.initialPageNumber)
                 val publication: PublicationV2? = it.getParcelable(arg_publication)
                 if (publication != null) {
                     viewModel.loadPublication(publication)
@@ -156,7 +156,7 @@ class PagedPublicationFragment :
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putParcelable(saved_state, PagedPublicationSavedState(
-            config = ppConfig,
+            config = config,
             hasSentOpenEvent = hasSentOpenEvent
         ))
         super.onSaveInstanceState(outState)
@@ -169,11 +169,11 @@ class PagedPublicationFragment :
             else -> pageCount
         }
 
-        if (ppConfig.hasIntro) {
+        if (config.hasIntro) {
             pageCount++
             spreadCount++
         }
-        if (ppConfig.hasOutro) {
+        if (config.hasOutro) {
             pageCount++
             spreadCount++
         }
@@ -181,17 +181,17 @@ class PagedPublicationFragment :
             pageCount,
             spreadCount,
             spreadMargin = 0,
-            introConfiguration = ppConfig.introConfiguration?.also { it.publication = viewModel.publication.value },
-            outroConfiguration = ppConfig.outroConfiguration?.also { it.publication = viewModel.publication.value },
+            introConfiguration = config.introConfiguration?.also { it.publication = viewModel.publication.value },
+            outroConfiguration = config.outroConfiguration?.also { it.publication = viewModel.publication.value },
             pages = viewModel.pages.value,
             publicationBrandingColor = viewModel.publication.value?.branding?.colorHex.getColorInt(),
             deviceConfiguration = resources.configuration,
-            showPageNumberWhileLoading = ppConfig.showPageNumberWhileLoading
+            showPageNumberWhileLoading = config.showPageNumberWhileLoading
         )
     }
 
     private fun applyBranding(branding: BrandingV2) {
-        if (!ppConfig.useBrandColor) return
+        if (!config.useBrandColor) return
         val bgColor = branding.colorHex.getColorInt()
         if (::frame.isInitialized) {
             frame.setBackgroundColor(bgColor)
@@ -214,7 +214,7 @@ class PagedPublicationFragment :
         val view =
             customScreenCallback?.showLoaderScreen(viewModel.publication.value?.branding) ?:
             getDefaultLoadingScreen(layoutInflater = layoutInflater,
-                branding = if (ppConfig.useBrandColor) viewModel.publication.value?.branding else null)
+                branding = if (config.useBrandColor) viewModel.publication.value?.branding else null)
         frameLoader?.removeAllViews()
         frameLoader?.addView(view)
         setVisible(verso = false, loader = true, error = false)
@@ -224,7 +224,7 @@ class PagedPublicationFragment :
         val view =
             customScreenCallback?.showErrorScreen(viewModel.publication.value?.branding, error) ?:
             getDefaultErrorScreen(layoutInflater = layoutInflater,
-                branding = if (ppConfig.useBrandColor) viewModel.publication.value?.branding else null,
+                branding = if (config.useBrandColor) viewModel.publication.value?.branding else null,
                 error = error)
         frameError?.removeAllViews()
         frameError?.addView(view)
@@ -265,7 +265,7 @@ class PagedPublicationFragment :
     }
 
     private fun showHotspotAndNotifyListener(info: VersoTapInfo, longPress: Boolean): Boolean {
-        val hs = viewModel.findHotspot(info, ppConfig.hasIntro)
+        val hs = viewModel.findHotspot(info, config.hasIntro)
 
         // Notify listener
         if (hs.isNotEmpty()) {
@@ -281,7 +281,7 @@ class PagedPublicationFragment :
         }
 
         // Show hotspot
-        if (!ppConfig.displayHotspotsOnTouch) return false
+        if (!config.displayHotspotsOnTouch) return false
         if (hs.isNotEmpty()) {
             info.fragment.spreadOverlay?.let { view ->
                 if (view is PublicationSpreadLayout) {
@@ -297,7 +297,7 @@ class PagedPublicationFragment :
             if (position < versoSpreadConfiguration.spreadCount - 1) {
                 val currentPages = versoSpreadConfiguration.getPagesFromSpreadPosition(position)
                 val tmpPages: IntArray = currentPages.copyOf(currentPages.size)
-                if (!ppConfig.hasIntro) {
+                if (!config.hasIntro) {
                     for (i in tmpPages.indices) {
                         tmpPages[i] += 1
                     }
