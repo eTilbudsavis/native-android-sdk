@@ -11,17 +11,12 @@ import com.tjek.sdk.api.models.PublicationPageV2
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.remote.ResponseType
+import com.tjek.sdk.publicationviewer.PublicationLoadingState
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoTapInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
-
-sealed class PublicationLoadingState {
-    object Loading : PublicationLoadingState()
-    object Successful : PublicationLoadingState()
-    data class Failed(val error: ErrorType) : PublicationLoadingState()
-}
 
 class PagedPublicationViewModel : ViewModel() {
 

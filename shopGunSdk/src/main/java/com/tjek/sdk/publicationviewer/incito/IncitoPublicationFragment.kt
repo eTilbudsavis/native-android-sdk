@@ -32,7 +32,7 @@ import com.tjek.sdk.getFormattedLocale
 import com.tjek.sdk.publicationviewer.LoaderAndErrorScreenCallback
 import com.tjek.sdk.publicationviewer.getDefaultErrorScreen
 import com.tjek.sdk.publicationviewer.getDefaultLoadingScreen
-import com.tjek.sdk.publicationviewer.paged.PublicationLoadingState
+import com.tjek.sdk.publicationviewer.PublicationLoadingState
 import org.json.JSONArray
 import kotlin.math.round
 import kotlin.math.roundToInt

@@ -15,7 +15,7 @@ import com.tjek.sdk.api.remote.models.v4.FeatureLabel
 import com.tjek.sdk.api.remote.models.v4.IncitoData
 import com.tjek.sdk.api.remote.models.v4.IncitoDeviceCategory
 import com.tjek.sdk.api.remote.models.v4.IncitoOrientation
-import com.tjek.sdk.publicationviewer.paged.PublicationLoadingState
+import com.tjek.sdk.publicationviewer.PublicationLoadingState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

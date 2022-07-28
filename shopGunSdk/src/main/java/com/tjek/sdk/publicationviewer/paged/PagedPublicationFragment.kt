@@ -8,7 +8,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.ProgressBar
 import androidx.fragment.app.viewModels
 import com.shopgun.android.sdk.R
 import com.tjek.sdk.DeviceOrientation
@@ -18,8 +17,8 @@ import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.remote.models.v2.BrandingV2
 import com.tjek.sdk.getColorInt
 import com.tjek.sdk.getDeviceOrientation
-import com.tjek.sdk.getSecondaryText
 import com.tjek.sdk.publicationviewer.LoaderAndErrorScreenCallback
+import com.tjek.sdk.publicationviewer.PublicationLoadingState
 import com.tjek.sdk.publicationviewer.getDefaultErrorScreen
 import com.tjek.sdk.publicationviewer.getDefaultLoadingScreen
 import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout
