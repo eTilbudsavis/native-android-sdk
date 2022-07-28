@@ -7,7 +7,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import com.shopgun.android.sdk.R
 import com.tjek.sdk.api.remote.ErrorType
-import com.tjek.sdk.api.remote.models.v2.BrandingV2
+import com.tjek.sdk.api.models.BrandingV2
 import com.tjek.sdk.getColorInt
 import com.tjek.sdk.getPrimaryText
 import com.tjek.sdk.getSecondaryText

@@ -1,4 +1,4 @@
-package com.tjek.sdk.api.remote.models.v2
+package com.tjek.sdk.api.models
 
 import android.os.Parcelable
 import androidx.annotation.Keep

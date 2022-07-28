@@ -11,10 +11,10 @@ import com.tjek.sdk.api.models.IncitoViewId
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.remote.ResponseType
-import com.tjek.sdk.api.remote.models.v4.FeatureLabel
-import com.tjek.sdk.api.remote.models.v4.IncitoData
-import com.tjek.sdk.api.remote.models.v4.IncitoDeviceCategory
-import com.tjek.sdk.api.remote.models.v4.IncitoOrientation
+import com.tjek.sdk.api.remote.request.FeatureLabel
+import com.tjek.sdk.api.IncitoData
+import com.tjek.sdk.api.remote.request.IncitoDeviceCategory
+import com.tjek.sdk.api.remote.request.IncitoOrientation
 import com.tjek.sdk.publicationviewer.PublicationLoadingState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

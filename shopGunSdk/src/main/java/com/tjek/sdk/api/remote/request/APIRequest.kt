@@ -1,16 +1,17 @@
-package com.tjek.sdk.api.remote
+package com.tjek.sdk.api.remote.request
 
 import com.tjek.sdk.api.Id
+import com.tjek.sdk.api.IncitoData
 import com.tjek.sdk.api.getV4FormattedStr
 import com.tjek.sdk.api.models.*
-import com.tjek.sdk.api.remote.models.v4.*
+import com.tjek.sdk.api.remote.APIClient
+import com.tjek.sdk.api.remote.PaginatedResponse
+import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.api.remote.services.BusinessService
 import com.tjek.sdk.api.remote.services.OfferService
 import com.tjek.sdk.api.remote.services.PublicationService
 import com.tjek.sdk.api.remote.services.StoreService
 import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 
 internal object APIRequest : APIRequestBase() {
 
@@ -28,7 +29,8 @@ internal object APIRequest : APIRequestBase() {
     ): ResponseType<PaginatedResponse<List<PublicationV2>>> {
         return safeApiCall(
             decoder = { list ->
-                PaginatedResponse.v2PaginatedResponse(pagination, list.map { PublicationV2.fromDecodable(it)})
+                PaginatedResponse.v2PaginatedResponse(pagination,
+                    list.map { PublicationV2.fromDecodable(it) })
             }) {
             val params = HashMap<String, String>()
             params["types"] = acceptedTypes.joinToString(separator = ",")
@@ -62,7 +64,8 @@ internal object APIRequest : APIRequestBase() {
     ): ResponseType<PaginatedResponse<List<StoreV2>>> {
         return safeApiCall(
             decoder = { list ->
-                PaginatedResponse.v2PaginatedResponse(pagination, list.map { StoreV2.fromDecodable(it)})
+                PaginatedResponse.v2PaginatedResponse(pagination,
+                    list.map { StoreV2.fromDecodable(it) })
             }) {
             val params = HashMap<String, String>()
             params.putAll(pagination.v2RequestParams())
@@ -92,7 +95,8 @@ internal object APIRequest : APIRequestBase() {
     ): ResponseType<PaginatedResponse<List<OfferV2>>> {
         return safeApiCall(
             decoder = { list ->
-                PaginatedResponse.v2PaginatedResponse(pagination, list.map { OfferV2.fromDecodable(it)})
+                PaginatedResponse.v2PaginatedResponse(pagination,
+                    list.map { OfferV2.fromDecodable(it) })
             }) {
             val params = HashMap<String, String>()
             params.putAll(pagination.v2RequestParams())

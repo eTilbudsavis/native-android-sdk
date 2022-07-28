@@ -1,4 +1,4 @@
-package com.tjek.sdk.api.remote.models.v4
+package com.tjek.sdk.api.remote.request
 
 import androidx.annotation.Keep
 import com.squareup.moshi.Json
@@ -15,8 +15,6 @@ enum class IncitoOrientation { vertical, horizontal }
 
 @Suppress("EnumEntryName")
 enum class IncitoPointerType { fine, coarse }
-
-typealias IncitoData = String
 
 @Keep
 @JsonClass(generateAdapter = true)

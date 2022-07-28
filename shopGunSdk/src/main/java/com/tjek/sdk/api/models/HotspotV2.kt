@@ -3,17 +3,16 @@ package com.tjek.sdk.api.models
 import android.graphics.RectF
 import android.os.Parcelable
 import android.util.SparseArray
+import androidx.annotation.Keep
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.tjek.sdk.api.*
-import com.tjek.sdk.api.remote.models.v2.HotspotOfferV2Decodable
-import com.tjek.sdk.api.remote.models.v2.PriceV2
-import com.tjek.sdk.api.remote.models.v2.PublicationHotspotV2Decodable
-import com.tjek.sdk.api.remote.models.v2.QuantityV2
+import com.tjek.sdk.api.remote.RawJson
 import com.tjek.sdk.publicationviewer.paged.utils.PolygonF
 import kotlinx.parcelize.Parcelize
+import okio.ByteString
 import org.json.JSONObject
 import kotlin.math.abs
-
-private const val significantArea: Double = 0.02
 
 @Parcelize
 data class PublicationHotspotV2(
@@ -22,6 +21,8 @@ data class PublicationHotspotV2(
 ): Parcelable {
 
     companion object {
+        private const val significantArea: Double = 0.02
+
         fun fromDecodable(h: PublicationHotspotV2Decodable): PublicationHotspotV2 {
             val pageLocations = SparseArray<PolygonF>()
             val json = JSONObject(h.locations?.utf8() ?: "")
@@ -137,3 +138,29 @@ data class HotspotOfferV2(
         }
     }
 }
+
+
+//------------- Classes used for decoding api responses -------------//
+
+@Keep
+@JsonClass(generateAdapter = true)
+data class HotspotOfferV2Decodable (
+    val id: Id,
+    val heading: String,
+    @Json(name = "run_from")
+    val runFromDateStr: ValidityDateStr?,
+    @Json(name = "run_till")
+    val runTillDateStr: ValidityDateStr?,
+    @Json(name = "publish")
+    val publishDateStr: ValidityDateStr?,
+    @Json(name = "pricing")
+    val price: PriceV2?,
+    val quantity: QuantityV2?
+)
+
+@Keep
+@JsonClass(generateAdapter = true)
+data class PublicationHotspotV2Decodable (
+    val offer: HotspotOfferV2Decodable?,
+    @RawJson val locations: ByteString?
+)

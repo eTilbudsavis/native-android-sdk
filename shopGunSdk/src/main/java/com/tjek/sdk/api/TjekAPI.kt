@@ -4,11 +4,8 @@ package com.tjek.sdk.api
 
 import com.tjek.sdk.api.models.*
 import com.tjek.sdk.api.remote.*
-import com.tjek.sdk.api.remote.APIRequest
-import com.tjek.sdk.api.remote.models.v4.FeatureLabel
-import com.tjek.sdk.api.remote.models.v4.IncitoData
-import com.tjek.sdk.api.remote.models.v4.IncitoDeviceCategory
-import com.tjek.sdk.api.remote.models.v4.IncitoOrientation
+import com.tjek.sdk.api.remote.request.*
+import com.tjek.sdk.api.remote.request.APIRequest
 
 object TjekAPI {
 

@@ -5,12 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import android.widget.AdapterView.OnItemClickListener
 import androidx.lifecycle.lifecycleScope
 import com.shopgun.android.sdk.demo.base.BaseActivity
 import com.tjek.sdk.api.TjekAPI
 import com.tjek.sdk.api.models.PublicationV2
-import com.tjek.sdk.api.remote.LocationQuery
+import com.tjek.sdk.api.remote.request.LocationQuery
 import com.tjek.sdk.api.remote.ResponseType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

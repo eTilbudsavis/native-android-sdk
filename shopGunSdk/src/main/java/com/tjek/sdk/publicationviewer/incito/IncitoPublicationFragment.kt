@@ -21,12 +21,12 @@ import com.shopgun.android.sdk.R
 import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.api.Id
+import com.tjek.sdk.api.IncitoData
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.api.remote.ErrorType
-import com.tjek.sdk.api.remote.models.v4.FeatureLabel
-import com.tjek.sdk.api.remote.models.v4.IncitoData
-import com.tjek.sdk.api.remote.models.v4.IncitoDeviceCategory
-import com.tjek.sdk.api.remote.models.v4.IncitoOrientation
+import com.tjek.sdk.api.remote.request.FeatureLabel
+import com.tjek.sdk.api.remote.request.IncitoDeviceCategory
+import com.tjek.sdk.api.remote.request.IncitoOrientation
 import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.getFormattedLocale
 import com.tjek.sdk.publicationviewer.LoaderAndErrorScreenCallback

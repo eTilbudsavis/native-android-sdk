@@ -1,5 +1,7 @@
 package com.tjek.sdk.api.remote
 
+import com.tjek.sdk.api.remote.request.PaginatedRequestV2
+
 sealed class ResponseType<T>(
     val data: T? = null
 ) {

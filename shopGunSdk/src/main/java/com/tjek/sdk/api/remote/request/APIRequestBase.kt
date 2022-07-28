@@ -1,8 +1,11 @@
-package com.tjek.sdk.api.remote
+package com.tjek.sdk.api.remote.request
 
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
-import com.tjek.sdk.TjekLogCat
+import com.tjek.sdk.api.remote.APIError
+import com.tjek.sdk.api.remote.ErrorType
+import com.tjek.sdk.api.remote.ResponseType
+import com.tjek.sdk.api.remote.ServerResponse
 import retrofit2.Response
 import java.io.IOException
 
@@ -34,7 +37,8 @@ internal abstract class APIRequestBase {
             502,    // Bad Gateway
             503,    // Service Unavailable
             504     // Gateway Timeout
-                -> return ResponseType.Error(ErrorType.Network(code = response.code(), message = response.message()))
+                -> return ResponseType.Error(ErrorType.Network(code = response.code(),
+                message = response.message()))
         }
 
         // If it's none of the above, let's see if it's a known error from the server

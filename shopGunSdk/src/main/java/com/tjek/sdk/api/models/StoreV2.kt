@@ -1,8 +1,10 @@
 package com.tjek.sdk.api.models
 
 import android.os.Parcelable
+import androidx.annotation.Keep
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.tjek.sdk.api.Id
-import com.tjek.sdk.api.remote.models.v2.*
 import com.tjek.sdk.api.toDayOfWeek
 import com.tjek.sdk.api.toTimeOfDay
 import com.tjek.sdk.api.toValidityDate
@@ -81,3 +83,25 @@ data class StoreV2(
         }
     }
 }
+
+
+//------------- Classes used for decoding api responses -------------//
+
+@Keep
+@JsonClass(generateAdapter = true)
+data class StoreV2Decodable(
+    val id: Id,
+    val street: String?,
+    val city: String?,
+    @Json(name = "zip_code")
+    val zipCode: String?,
+    val country: CountryV2Decodable,
+    val latitude: Double,
+    val longitude: Double,
+    @Json(name = "dealer_id")
+    val businessId: Id,
+    val branding: BrandingV2,
+    val contact: String?,
+    @Json(name = "opening_hours")
+    val openingHours: List<OpeningHoursDecodable>?
+)

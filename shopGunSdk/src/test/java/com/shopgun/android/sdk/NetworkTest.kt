@@ -7,6 +7,9 @@ import com.tjek.sdk.api.models.Coordinate
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.api.models.StoreV2
 import com.tjek.sdk.api.remote.*
+import com.tjek.sdk.api.remote.request.LocationQuery
+import com.tjek.sdk.api.remote.request.PaginatedRequestV2
+import com.tjek.sdk.api.remote.request.StoresRequestSortOrder
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test

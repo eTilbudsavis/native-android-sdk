@@ -1,11 +1,11 @@
 package com.tjek.sdk.api.remote.services
 
 import com.tjek.sdk.api.Id
-import com.tjek.sdk.api.remote.models.v2.ImageUrlsV2
-import com.tjek.sdk.api.remote.models.v2.PublicationHotspotV2Decodable
-import com.tjek.sdk.api.remote.models.v2.PublicationV2Decodable
-import com.tjek.sdk.api.remote.models.v4.IncitoData
-import com.tjek.sdk.api.remote.models.v4.IncitoAPIQuery
+import com.tjek.sdk.api.IncitoData
+import com.tjek.sdk.api.models.ImageUrlsV2
+import com.tjek.sdk.api.models.PublicationHotspotV2Decodable
+import com.tjek.sdk.api.models.PublicationV2Decodable
+import com.tjek.sdk.api.remote.request.IncitoAPIQuery
 import retrofit2.Response
 import retrofit2.http.*
 

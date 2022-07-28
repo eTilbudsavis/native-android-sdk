@@ -2,7 +2,13 @@ package com.tjek.sdk.api.models
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.Keep
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
+import com.tjek.sdk.api.DayOfWeekStr
 import com.tjek.sdk.api.TimeOfDay
+import com.tjek.sdk.api.TimeOfDayStr
+import com.tjek.sdk.api.ValidityDateStr
 import kotlinx.parcelize.Parcelize
 import java.time.DayOfWeek
 import java.time.LocalTime
@@ -54,3 +60,19 @@ data class OpenHour(
         }
     }
 }
+
+
+//------------- Classes used for decoding api responses -------------//
+
+@Keep
+@JsonClass(generateAdapter = true)
+data class OpeningHoursDecodable (
+    @Json(name = "day_of_week")
+    val dayOfWeekStr: DayOfWeekStr?,
+    @Json(name = "valid_from")
+    val validFrom: ValidityDateStr?,
+    @Json(name = "valid_until")
+    val validUntil: ValidityDateStr?,
+    val opens: TimeOfDayStr?,
+    val closes: TimeOfDayStr?
+)

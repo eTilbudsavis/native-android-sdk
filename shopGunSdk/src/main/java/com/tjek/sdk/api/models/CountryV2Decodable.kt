@@ -1,4 +1,4 @@
-package com.tjek.sdk.api.remote.models.v2
+package com.tjek.sdk.api.models
 
 import androidx.annotation.Keep
 import com.squareup.moshi.JsonClass
@@ -6,6 +6,6 @@ import com.tjek.sdk.api.Id
 
 @Keep
 @JsonClass(generateAdapter = true)
-data class CountryV2(
+data class CountryV2Decodable(
     val id:Id
 )

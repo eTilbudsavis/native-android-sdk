@@ -1,4 +1,4 @@
-package com.tjek.sdk.api.remote
+package com.tjek.sdk.api.remote.request
 
 import com.tjek.sdk.api.models.Coordinate
 

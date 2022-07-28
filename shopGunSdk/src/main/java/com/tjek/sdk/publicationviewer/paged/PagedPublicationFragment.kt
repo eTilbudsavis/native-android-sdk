@@ -14,7 +14,7 @@ import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.api.remote.ErrorType
-import com.tjek.sdk.api.remote.models.v2.BrandingV2
+import com.tjek.sdk.api.models.BrandingV2
 import com.tjek.sdk.getColorInt
 import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.publicationviewer.LoaderAndErrorScreenCallback
