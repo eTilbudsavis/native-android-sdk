@@ -95,7 +95,7 @@ class PagedPublicationFragment :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null) {
-            savedInstanceState.getParcelable<PublicationSavedState>(saved_state)?.let { state ->
+            savedInstanceState.getParcelable<PagedPublicationSavedState>(saved_state)?.let { state ->
                 ppConfig = state.config
                 hasSentOpenEvent = state.hasSentOpenEvent
             }
@@ -155,7 +155,7 @@ class PagedPublicationFragment :
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(saved_state, PublicationSavedState(
+        outState.putParcelable(saved_state, PagedPublicationSavedState(
             config = ppConfig,
             hasSentOpenEvent = hasSentOpenEvent
         ))

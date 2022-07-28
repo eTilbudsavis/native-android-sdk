@@ -49,11 +49,10 @@ class IncitoPublicationFragment :
         private const val REMOTE_HTML_RENDERER = "https://incito-webview.shopgun.com/index-1.0.0.html"
         var LOAD_LOCAL_RENDERER = false // for debug purposes
 
-        const val HAS_SENT_OPEN_EVENT = "has_sent_open_event"
-
         private const val arg_config = "arg_config"
         private const val arg_publication = "arg_publication"
         private const val arg_publication_id = "arg_publication_id"
+        private const val saved_state = "saved_state"
 
         fun newInstance(
             publicationId: Id,
@@ -165,8 +164,10 @@ class IncitoPublicationFragment :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null) {
-            // TODO savedState
-            hasSentOpenEvent = savedInstanceState.getBoolean(HAS_SENT_OPEN_EVENT)
+            savedInstanceState.getParcelable<IncitoPublicationSavedState>(saved_state)?.let { state ->
+                config = state.config
+                hasSentOpenEvent = state.hasSentOpenEvent
+            }
         } else {
             arguments?.let {
                 config = it.getParcelable(arg_config)!!
@@ -274,7 +275,10 @@ class IncitoPublicationFragment :
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putBoolean(HAS_SENT_OPEN_EVENT, hasSentOpenEvent)
+        outState.putParcelable(saved_state, IncitoPublicationSavedState(
+            config = config,
+            hasSentOpenEvent = hasSentOpenEvent
+        ))
         super.onSaveInstanceState(outState)
     }
 
