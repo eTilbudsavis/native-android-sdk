@@ -36,9 +36,6 @@
         <activity android:name=".PublicationListActivity" />
         <activity android:name=".PagedPublicationActivity" />
         <activity android:name=".IncitoPublicationActivity" />
-        <activity android:name=".OfferListActivity" />
-        <activity android:name=".OfferSearchActivity" />
-        <activity android:name=".OfferViewActivity" />
 
     </application>
 

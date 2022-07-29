@@ -22,7 +22,7 @@ class OutroView(
 ) {
 
     init {
-        inflate(context, R.layout.intro_layout, this)
+        inflate(context, R.layout.outro_layout, this)
         findViewById<TextView>(R.id.intro)?.text = "End of ${publication?.branding?.name} publication"
     }
 }
