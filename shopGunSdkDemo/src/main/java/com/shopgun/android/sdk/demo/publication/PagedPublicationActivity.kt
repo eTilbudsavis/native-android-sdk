@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.demo
+package com.shopgun.android.sdk.demo.publication
 
 import android.content.Context
 import android.content.Intent
@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
+import com.shopgun.android.sdk.demo.R
 import com.shopgun.android.sdk.demo.base.BaseActivity
 import com.tjek.sdk.api.models.PublicationHotspotV2
 import com.tjek.sdk.api.models.PublicationPageV2

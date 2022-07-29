@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.demo
+package com.shopgun.android.sdk.demo.publication
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.lifecycle.lifecycleScope
+import com.shopgun.android.sdk.demo.Constants
+import com.shopgun.android.sdk.demo.GlideApp
+import com.shopgun.android.sdk.demo.R
 import com.shopgun.android.sdk.demo.base.BaseActivity
 import com.tjek.sdk.api.TjekAPI
 import com.tjek.sdk.api.models.PublicationV2

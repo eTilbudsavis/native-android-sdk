@@ -25,7 +25,7 @@
             android:value="@string/tjek_sdk_api_key_debug"/>
 
         <activity
-            android:name=".MainPreferenceActivity"
+            android:name=".MainActivity"
             android:label="@string/title_activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -33,9 +33,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".PublicationListActivity" />
-        <activity android:name=".PagedPublicationActivity" />
-        <activity android:name=".IncitoPublicationActivity" />
+        <activity android:name=".publication.PublicationListActivity" />
+        <activity android:name=".publication.PagedPublicationActivity" />
+        <activity android:name=".publication.IncitoPublicationActivity" />
 
     </application>
 
