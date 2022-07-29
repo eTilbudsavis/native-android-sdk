@@ -108,6 +108,26 @@ internal object APIRequest : APIRequestBase() {
         }
     }
 
+    suspend fun getOffers(
+        searchString: String,
+        businessIds: Array<Id>,
+        nearLocation: LocationQuery?,
+        pagination: PaginatedRequestV2
+    ): ResponseType<PaginatedResponse<List<OfferV2>>> {
+        return safeApiCall(
+            decoder = { list ->
+                PaginatedResponse.v2PaginatedResponse(pagination,
+                    list.map { OfferV2.fromDecodable(it) })
+            }) {
+            val params = HashMap<String, String>()
+            params.putAll(pagination.v2RequestParams())
+            params["query"] = searchString
+            businessIds.takeIf { it.isNotEmpty() }?.let { params["dealer_ids"] = it.joinToString(separator = ",") }
+            nearLocation?.let { params.putAll(it.v2RequestParams()) }
+            offerService.getOffersSearch(params)
+        }
+    }
+
     suspend fun getBusiness(businessId: Id): ResponseType<BusinessV2> {
         return safeApiCall(decoder = { business -> BusinessV2.fromDecodable(business)}) {
             businessService.getDealer(businessId)

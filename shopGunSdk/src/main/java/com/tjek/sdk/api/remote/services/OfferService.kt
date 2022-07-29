@@ -14,4 +14,7 @@ interface OfferService {
 
     @GET("v2/offers/{offerId}")
     suspend fun getOffer(@Path("offerId") offerId: Id): Response<OfferV2Decodable>
+
+    @GET("v2/offers/search")
+    suspend fun getOffersSearch(@QueryMap queryParams: Map<String, String>): Response<List<OfferV2Decodable>>
 }

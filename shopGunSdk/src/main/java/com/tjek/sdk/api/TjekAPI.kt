@@ -103,7 +103,7 @@ object TjekAPI {
         - publicationIds: Limit the list of offers by the id of the publication that its in.
         - businessIds: Limit the list of offers by the id of the business that published them.
         - storeIds: Limit the list of offers by the ids of the stores they are in.
-        - near: Specify a coordinate to return offers in relation to. Also optionally limit the offers to within a max radius from that coordinate.
+        - nearLocation: Specify a coordinate to return offers in relation to. Also optionally limit the offers to within a max radius from that coordinate.
         - pagination: The count & cursor of the request's page. Defaults to the first page of 24 offers. `itemCount` must not be more than 100. `startCursor` must not be greater than 1000.
 
     Returns:
@@ -117,6 +117,30 @@ object TjekAPI {
         pagination: PaginatedRequestV2 = PaginatedRequestV2.firstPage(24)
     ): ResponseType<PaginatedResponse<List<OfferV2>>> {
         return APIRequest.getOffers(publicationIds, businessIds, storeIds, nearLocation, pagination)
+    }
+
+    /**
+    Builds a request that, when performed, will fetch all the active offers matching a `searchString`. The results can optionally be limited to those that have been published by a list of specified `Business` ids, and by their proximity to a location.
+
+    Parameters:
+        - matchingSearch: The string to search for.
+        - businessIds: Limit the list of offers by the id of the business that published them. Defaults to empty.
+        - nearLocation: Specify a coordinate to return offers in relation to. Also optionally limit the offers to within a max radius from that coordinate.
+        - pagination: The count & cursor of the request's page. Defaults to the first page of 24 offers. `itemCount` must not be more than 100. `startCursor` must not be greater than 1000.
+
+    Returns:
+        A list of `OfferV2` in a paginated object.
+     */
+    suspend fun getOffers(
+        matchingSearch: String,
+        businessIds: Array<Id> = emptyArray(),
+        nearLocation: LocationQuery? = null,
+        pagination: PaginatedRequestV2 = PaginatedRequestV2.firstPage(24)
+    ): ResponseType<PaginatedResponse<List<OfferV2>>> {
+        return if (matchingSearch.isEmpty())
+            getOffers(businessIds = businessIds, nearLocation = nearLocation, pagination = pagination)
+        else
+            APIRequest.getOffers(matchingSearch, businessIds, nearLocation, pagination)
     }
 
     /**
