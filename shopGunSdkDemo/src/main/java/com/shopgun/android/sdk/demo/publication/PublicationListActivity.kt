@@ -11,6 +11,7 @@ import com.shopgun.android.sdk.demo.GlideApp
 import com.shopgun.android.sdk.demo.R
 import com.shopgun.android.sdk.demo.base.BaseActivity
 import com.tjek.sdk.api.TjekAPI
+import com.tjek.sdk.api.models.Coordinate
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.api.remote.request.LocationQuery
 import com.tjek.sdk.api.remote.ResponseType
@@ -31,9 +32,10 @@ class PublicationListActivity : BaseActivity() {
 
         showProgress("", "Loading publications....")
 
+        val coordinate: Coordinate = intent.extras?.getParcelable("coordinate") ?: Constants.TJEK_HQ
         lifecycleScope.launch(Dispatchers.Main) {
             val res = TjekAPI.getPublications(
-                nearLocation = LocationQuery(Constants.TJEK_HQ)
+                nearLocation = LocationQuery(coordinate = coordinate)
             )
             if (res is ResponseType.Success) {
                 publications = res.data?.results!!
