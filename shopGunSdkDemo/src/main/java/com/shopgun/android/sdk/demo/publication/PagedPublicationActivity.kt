@@ -6,14 +6,18 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.shopgun.android.sdk.demo.R
 import com.shopgun.android.sdk.demo.base.BaseActivity
+import com.tjek.sdk.api.TjekAPI
 import com.tjek.sdk.api.models.PublicationHotspotV2
 import com.tjek.sdk.api.models.PublicationPageV2
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.api.remote.ErrorType
+import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.publicationviewer.paged.*
 import com.tjek.sdk.publicationviewer.paged.PagedPublicationFragment.Companion.newInstance
+import kotlinx.coroutines.launch
 
 class PagedPublicationActivity : BaseActivity() {
 
@@ -76,7 +80,10 @@ class PagedPublicationActivity : BaseActivity() {
                 Toast.makeText(this@PagedPublicationActivity, sb.toString(), Toast.LENGTH_SHORT).show()
             }
 
-            override fun onHotspotLongTap(hotspots: List<PublicationHotspotV2>) {}
+            override fun onHotspotLongTap(hotspots: List<PublicationHotspotV2>) {
+                printOfferDetailsOnConsole(hotspots)
+                Toast.makeText(this@PagedPublicationActivity, "Offer details printed in console", Toast.LENGTH_SHORT).show()
+            }
         })
 
         mPagedPublicationFragment?.setOnLoadCompleteListener(object : OnLoadComplete {
@@ -98,6 +105,19 @@ class PagedPublicationActivity : BaseActivity() {
 
             override fun onError(error: ErrorType) {}
         })
+    }
+
+    private fun printOfferDetailsOnConsole(hotspots: List<PublicationHotspotV2>) {
+        for (h in hotspots) {
+            h.offer?.let {
+                lifecycleScope.launch {
+                    when (val res = TjekAPI.getOffer(it.id)) {
+                        is ResponseType.Error -> Log.e(TAG, res.errorType.toFormattedString())
+                        is ResponseType.Success -> Log.d(TAG, res.data?.toString() ?: "")
+                    }
+                }
+            }
+        }
     }
 
     companion object {
