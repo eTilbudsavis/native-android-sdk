@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ProgressBar
+import android.widget.Toast
 import com.shopgun.android.sdk.demo.R
 import com.shopgun.android.sdk.demo.base.BaseActivity
 import com.tjek.sdk.api.models.IncitoOffer
@@ -51,7 +52,8 @@ class IncitoPublicationActivity : BaseActivity() {
             override fun onOfferClick(
                 incitoOffer: IncitoOffer,
                 publicationV2: PublicationV2?,
-            ) {// todo onOfferClick
+            ) {
+                Toast.makeText(this@IncitoPublicationActivity, incitoOffer.title, Toast.LENGTH_SHORT).show()
             }
 
             override fun onOfferLongClick(
