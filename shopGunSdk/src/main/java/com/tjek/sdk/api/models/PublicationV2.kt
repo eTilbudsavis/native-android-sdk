@@ -59,8 +59,8 @@ data class PublicationV2(
     companion object {
         fun fromDecodable(p: PublicationV2Decodable): PublicationV2 {
             // sanity check on the dates
-            val fromDate = p.runFromDateStr?.toValidityDate() ?: distantPast()
-            val tillDate = p.runTillDateStr?.toValidityDate() ?: distantFuture()
+            val fromDate = p.runFromDateStr?.toValidityDate(ValidityDateStrVersion.V2) ?: distantPast()
+            val tillDate = p.runTillDateStr?.toValidityDate(ValidityDateStrVersion.V2) ?: distantFuture()
 
             return PublicationV2(
                 id = p.id,
@@ -100,9 +100,9 @@ data class PublicationV2Decodable(
     @Json(name = "offer_count")
     val offerCount: Int?,
     @Json(name = "run_from")
-    val runFromDateStr: ValidityDateV2Str?,
+    val runFromDateStr: ValidityDateStr?,
     @Json(name = "run_till")
-    val runTillDateStr: ValidityDateV2Str?,
+    val runTillDateStr: ValidityDateStr?,
     @Json(name = "dealer_id")
     val businessId: Id,
     @Json(name = "store_id")

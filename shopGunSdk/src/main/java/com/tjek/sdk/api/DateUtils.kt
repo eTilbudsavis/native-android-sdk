@@ -4,6 +4,7 @@ import com.tjek.sdk.TjekLogCat
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
 import java.util.*
 
 // V2 date format is in the form yyyy-MM-dd'T'HH:mm:ssZZZZ.
@@ -18,16 +19,29 @@ private val offset1: DateTimeFormatter = DateTimeFormatterBuilder()
 private val offset2: DateTimeFormatter = DateTimeFormatterBuilder()
     .appendOffset("+HH:MM", "+00:00")
     .toFormatter(Locale.ENGLISH)
-private var parser: DateTimeFormatter = DateTimeFormatterBuilder()
+private var parserV2: DateTimeFormatter = DateTimeFormatterBuilder()
     .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     .appendOptional(offset1)
     .appendOptional(offset2)
     .parseCaseInsensitive()
     .toFormatter(Locale.ENGLISH)
 
-fun ValidityDateV2Str.toValidityDate(): ValidityDate? {
+// V4 date format is in the form yyyy-MM-dd'T'HH:mm:ss.SSSZ.
+private var parserV4: DateTimeFormatter = DateTimeFormatterBuilder()
+    .append(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+    .parseCaseInsensitive()
+    .toFormatter(Locale.ENGLISH)
+
+enum class ValidityDateStrVersion {
+    V2, V4
+}
+
+fun ValidityDateStr.toValidityDate(version: ValidityDateStrVersion): ValidityDate? {
     return try {
-        OffsetDateTime.parse(this, parser)
+        when (version) {
+            ValidityDateStrVersion.V2 -> OffsetDateTime.parse(this, parserV2)
+            ValidityDateStrVersion.V4 -> OffsetDateTime.parse(this, parserV4)
+        }
     }catch (e: Exception) {
         TjekLogCat.e(e.message ?: "date parsing fail for $this")
         null

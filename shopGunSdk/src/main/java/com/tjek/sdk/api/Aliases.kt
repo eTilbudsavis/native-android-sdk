@@ -5,8 +5,7 @@ import java.time.LocalTime
 import java.time.OffsetDateTime
 
 typealias Id = String
-typealias ValidityDateV2Str = String
-typealias ValidityDateV4Str = String
+typealias ValidityDateStr = String
 typealias ValidityDate = OffsetDateTime
 typealias PublishDate = OffsetDateTime
 typealias VisibleFromDate = OffsetDateTime

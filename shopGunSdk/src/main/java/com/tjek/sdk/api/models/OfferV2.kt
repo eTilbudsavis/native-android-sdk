@@ -30,8 +30,8 @@ data class OfferV2(
     companion object {
         fun fromDecodable(o: OfferV2Decodable): OfferV2 {
             // sanity check on the dates
-            val fromDate = o.runFromDateStr?.toValidityDate() ?: distantPast()
-            val tillDate = o.runTillDateStr?.toValidityDate() ?: distantFuture()
+            val fromDate = o.runFromDateStr?.toValidityDate(ValidityDateStrVersion.V2) ?: distantPast()
+            val tillDate = o.runTillDateStr?.toValidityDate(ValidityDateStrVersion.V2) ?: distantFuture()
 
             return OfferV2(
                 id = o.id,
@@ -40,7 +40,7 @@ data class OfferV2(
                 images = o.imageUrls ?: ImageUrlsV2("", "", ""),
                 webshopURL = o.links?.webshop,
                 runDateRange = minOf(fromDate, tillDate)..maxOf(fromDate, tillDate),
-                publishDate = o.publishDateStr?.toValidityDate(),
+                publishDate = o.publishDateStr?.toValidityDate(ValidityDateStrVersion.V2),
                 price = o.price,
                 quantity = o.quantity,
                 branding = o.branding,
@@ -69,11 +69,11 @@ data class OfferV2Decodable(
     val imageUrls: ImageUrlsV2?,
     val links: LinksV2?,
     @Json(name = "run_from")
-    val runFromDateStr: ValidityDateV2Str?,
+    val runFromDateStr: ValidityDateStr?,
     @Json(name = "run_till")
-    val runTillDateStr: ValidityDateV2Str?,
+    val runTillDateStr: ValidityDateStr?,
     @Json(name = "publish")
-    val publishDateStr: ValidityDateV2Str?,
+    val publishDateStr: ValidityDateStr?,
     @Json(name = "pricing")
     val price: PriceV2?,
     val quantity: QuantityV2?,

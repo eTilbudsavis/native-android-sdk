@@ -121,8 +121,8 @@ data class HotspotOfferV2(
     companion object {
         fun fromDecodable(h: HotspotOfferV2Decodable): HotspotOfferV2 {
             // sanity check on the dates
-            val fromDate = h.runFromDateStr?.toValidityDate() ?: distantPast()
-            val tillDate = h.runTillDateStr?.toValidityDate() ?: distantFuture()
+            val fromDate = h.runFromDateStr?.toValidityDate(ValidityDateStrVersion.V2) ?: distantPast()
+            val tillDate = h.runTillDateStr?.toValidityDate(ValidityDateStrVersion.V2) ?: distantFuture()
 
             return HotspotOfferV2(
                 id = h.id,
@@ -131,7 +131,7 @@ data class HotspotOfferV2(
                     fromDate,
                     tillDate
                 ),
-                publishDate = h.publishDateStr?.toValidityDate(),
+                publishDate = h.publishDateStr?.toValidityDate(ValidityDateStrVersion.V2),
                 price = h.price,
                 quantity = h.quantity
             )
@@ -148,11 +148,11 @@ data class HotspotOfferV2Decodable (
     val id: Id,
     val heading: String,
     @Json(name = "run_from")
-    val runFromDateStr: ValidityDateV2Str?,
+    val runFromDateStr: ValidityDateStr?,
     @Json(name = "run_till")
-    val runTillDateStr: ValidityDateV2Str?,
+    val runTillDateStr: ValidityDateStr?,
     @Json(name = "publish")
-    val publishDateStr: ValidityDateV2Str?,
+    val publishDateStr: ValidityDateStr?,
     @Json(name = "pricing")
     val price: PriceV2?,
     val quantity: QuantityV2?

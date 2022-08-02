@@ -8,7 +8,7 @@ import com.squareup.moshi.JsonClass
 import com.tjek.sdk.api.DayOfWeekStr
 import com.tjek.sdk.api.TimeOfDay
 import com.tjek.sdk.api.TimeOfDayStr
-import com.tjek.sdk.api.ValidityDateV2Str
+import com.tjek.sdk.api.ValidityDateStr
 import kotlinx.parcelize.Parcelize
 import java.time.DayOfWeek
 import java.time.LocalTime
@@ -70,9 +70,9 @@ data class OpeningHoursDecodable (
     @Json(name = "day_of_week")
     val dayOfWeekStr: DayOfWeekStr?,
     @Json(name = "valid_from")
-    val validFrom: ValidityDateV2Str?,
+    val validFrom: ValidityDateStr?,
     @Json(name = "valid_until")
-    val validUntil: ValidityDateV2Str?,
+    val validUntil: ValidityDateStr?,
     val opens: TimeOfDayStr?,
     val closes: TimeOfDayStr?
 )

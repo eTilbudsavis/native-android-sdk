@@ -38,9 +38,9 @@ data class OfferV4(
     companion object {
         fun fromDecodable(o: OfferV4Decodable): OfferV4 {
             // sanity check on the dates
-            val fromDate = o.validity.from?.toValidityDate() ?: distantPast()
+            val fromDate = o.validity.from?.toValidityDate(ValidityDateStrVersion.V4) ?: distantPast()
             // because v4 API `_until` dates mean "until, but not including", we subtract 1 sec so that decoded v4 dates match v2 dates.
-            val tillDate = o.validity.to?.toValidityDate()?.minusSeconds(1) ?: distantFuture()
+            val tillDate = o.validity.to?.toValidityDate(ValidityDateStrVersion.V4)?.minusSeconds(1) ?: distantFuture()
 
             return OfferV4(
                 id = o.id,
@@ -55,7 +55,7 @@ data class OfferV4(
                 unitSymbol = o.unitSymbol,
                 unitSize = o.unitSize,
                 validityPeriod = minOf(fromDate, tillDate)..maxOf(fromDate, tillDate),
-                visibleFrom = o.visibleFrom.toValidityDate() ?: fromDate,
+                visibleFrom = o.visibleFrom.toValidityDate(ValidityDateStrVersion.V4) ?: fromDate,
                 business = BusinessV4.fromDecodable(o.business)
             )
         }
@@ -92,7 +92,7 @@ data class OfferV4Decodable(
     val unitSize: UnitSize,
     val validity: Validity,
     @Json(name = "visible_from")
-    val visibleFrom: ValidityDateV4Str,
+    val visibleFrom: ValidityDateStr,
     val business: BusinessV4Decodable
 )
 
@@ -115,5 +115,5 @@ data class UnitSize(
 @Keep
 @JsonClass(generateAdapter = true)
 data class Validity(
-    val from: ValidityDateV4Str?,
-    val to: ValidityDateV4Str?)
+    val from: ValidityDateStr?,
+    val to: ValidityDateStr?)

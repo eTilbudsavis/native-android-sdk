@@ -4,10 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.Keep
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import com.tjek.sdk.api.Id
-import com.tjek.sdk.api.toDayOfWeek
-import com.tjek.sdk.api.toTimeOfDay
-import com.tjek.sdk.api.toValidityDate
+import com.tjek.sdk.api.*
 import kotlinx.parcelize.Parcelize
 import java.time.LocalTime
 import java.util.ArrayList
@@ -46,13 +43,13 @@ data class StoreV2(
         private fun readOpeningHours(oh: List<OpeningHoursDecodable>): List<OpeningHours> {
             val openingHours = ArrayList<OpeningHours>(oh.size)
             oh.forEach { with(it) {
-                val from = validFrom?.toValidityDate()?.toLocalDate()
+                val from = validFrom?.toValidityDate(ValidityDateStrVersion.V2)?.toLocalDate()
 
                 // NOTE: the date range have meaning only in their date component (our api allow only date-time),
                 // this means that the "until" date has to be moved to the previous day to have a correct range in case the time is set to midnight.
                 // Example: one day range (30/03) is { valid_from: '2022-03-30T00:00:00Z', valid_until: '2022-03-31T00:00:00Z' }
                 // Example: one day range (30/03) is { valid_from: '2022-03-30T00:00:00Z', valid_until: '2022-03-30T23:00:00Z' }
-                val dateTimeUntil = validUntil?.toValidityDate()?.toLocalDateTime()
+                val dateTimeUntil = validUntil?.toValidityDate(ValidityDateStrVersion.V2)?.toLocalDateTime()
                 val till =
                     if (dateTimeUntil?.toLocalTime() == LocalTime.MIDNIGHT) dateTimeUntil?.toLocalDate()?.minusDays(1)
                     else dateTimeUntil?.toLocalDate()
