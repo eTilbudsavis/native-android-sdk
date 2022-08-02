@@ -143,12 +143,29 @@ object TjekAPI {
             APIRequest.getOffers(matchingSearch, businessIds, nearLocation, pagination)
     }
 
+    /**
+    Retrieve an offer from Incito.
+    Parameter:
+        - incitoOffer: the offer clicked in the incito publication.
+
+    Returns:
+        An `OfferV4` object.
+     */
     suspend fun getOfferFromIncito(
         incitoOffer: IncitoOffer
     ): ResponseType<OfferV4> {
         return APIRequest.getOfferFromIncito(incitoOffer.viewId, incitoOffer.publicationId)
     }
 
+    /**
+    Retrieve an offer from Incito.
+    Parameter:
+        - viewId: the id of the view clicked in the incito publication
+        - publicationId: the id of the incito publication
+
+    Returns:
+        An `OfferV4` object.
+     */
     suspend fun getOfferFromIncito(
         viewId: IncitoViewId,
         publicationId: Id
