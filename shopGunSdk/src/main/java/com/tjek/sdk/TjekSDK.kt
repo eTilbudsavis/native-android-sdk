@@ -22,6 +22,16 @@ object TjekSDK {
         return this
     }
 
+    /**
+     * The sdk is auto initialised by the App Startup library.
+     * This method allows you to change some settings that will be used byt the sdk.
+     * *The default settings should be used for production releases*.
+     *
+     * Parameters:
+     * - enableLogCatMessages (default=false): allow the sdk to print messages in the LogCat. **Only available for debug builds**, so logging if off for release builds
+     * - networkLogLevel (default=None): change the log level of the underlying okHttp client. **Only available for debug builds**.
+     * - endpointEnvironment (default=Production): environment hit by the TjekAPIs. **Staging is only for development and it can be outdated/unstable**.
+     */
     fun configure(
         enableLogCatMessages: Boolean = false,
         networkLogLevel: NetworkLogLevel = NetworkLogLevel.None,
@@ -33,6 +43,16 @@ object TjekSDK {
             if (BuildConfig.DEBUG)
                 logLevel = networkLogLevel
             environment = endpointEnvironment
+        }
+    }
+
+    /**
+     * The api key should be set in the manifest, but if you need to set it at runtime, you can use this method.
+     * **This has to be called before any request to the TjekAPI is performed**.
+     */
+    fun setApiKey(key: String) {
+        if (key.isNotEmpty()) {
+            APIClient.setApiKey(key)
         }
     }
 }

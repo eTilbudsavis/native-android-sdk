@@ -53,10 +53,14 @@ internal object APIClient {
             else -> metaData.getString(META_API_KEY)
         }
         if (key == null) {
-            TjekLogCat.forceE("api key not found in the manifest. Tjek sdk won't work properly without it.")
+            TjekLogCat.w("api key not found in the manifest.")
         } else {
             apiKey = key
         }
+    }
+
+    fun setApiKey(key: String) {
+        apiKey = key
     }
 
     fun setClientVersion(context: Context) {
