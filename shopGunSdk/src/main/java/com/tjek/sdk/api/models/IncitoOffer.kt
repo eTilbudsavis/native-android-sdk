@@ -2,6 +2,7 @@ package com.tjek.sdk.api.models
 
 import android.net.Uri
 import android.os.Parcelable
+import com.tjek.sdk.api.Id
 import kotlinx.parcelize.Parcelize
 
 typealias IncitoViewId = String
@@ -13,5 +14,5 @@ data class IncitoOffer(
         val description: String?,
         val link: Uri?,
         val featureLabels: List<String>?,     // tag related to the offer to customize user experience
-        val publicationId: String = ""
+        val publicationId: Id = ""
 ) : Parcelable

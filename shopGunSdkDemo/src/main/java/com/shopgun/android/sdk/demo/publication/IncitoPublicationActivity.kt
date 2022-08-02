@@ -3,14 +3,19 @@ package com.shopgun.android.sdk.demo.publication
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.shopgun.android.sdk.demo.R
 import com.shopgun.android.sdk.demo.base.BaseActivity
+import com.tjek.sdk.api.TjekAPI
 import com.tjek.sdk.api.models.IncitoOffer
 import com.tjek.sdk.api.models.PublicationV2
+import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.publicationviewer.incito.*
 import com.tjek.sdk.publicationviewer.incito.IncitoPublicationFragment.Companion.newInstance
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 class IncitoPublicationActivity : BaseActivity() {
@@ -60,9 +65,20 @@ class IncitoPublicationActivity : BaseActivity() {
                 incitoOffer: IncitoOffer,
                 publicationV2: PublicationV2?,
             ) {
+                printOfferDetailsOnConsole(incitoOffer)
+                Toast.makeText(this@IncitoPublicationActivity, "Offer details printed in console", Toast.LENGTH_SHORT).show()
             }
 
         })
+    }
+
+    private fun printOfferDetailsOnConsole(incitoOffer: IncitoOffer) {
+        lifecycleScope.launch {
+            when (val res = TjekAPI.getOfferFromIncito(incitoOffer)) {
+                is ResponseType.Error -> Log.e(TAG, res.errorType.toFormattedString())
+                is ResponseType.Success -> Log.d(TAG, res.data?.toString() ?: "")
+            }
+        }
     }
 
     companion object {

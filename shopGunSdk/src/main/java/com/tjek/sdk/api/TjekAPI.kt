@@ -143,6 +143,19 @@ object TjekAPI {
             APIRequest.getOffers(matchingSearch, businessIds, nearLocation, pagination)
     }
 
+    suspend fun getOfferFromIncito(
+        incitoOffer: IncitoOffer
+    ): ResponseType<OfferV4> {
+        return APIRequest.getOfferFromIncito(incitoOffer.viewId, incitoOffer.publicationId)
+    }
+
+    suspend fun getOfferFromIncito(
+        viewId: IncitoViewId,
+        publicationId: Id
+    ): ResponseType<OfferV4> {
+        return APIRequest.getOfferFromIncito(viewId, publicationId)
+    }
+
     /**
     A request that asks for a specific business, based on its Id.
 

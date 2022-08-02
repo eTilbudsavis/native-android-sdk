@@ -1,6 +1,9 @@
 package com.tjek.sdk.api.models
 
 import com.digidemic.unitof.UnitOf
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
 import java.util.*
 
 enum class QuantityUnit(val unit: String, val symbol: String) {
@@ -147,4 +150,24 @@ fun QuantityUnit.getPricePerUnitScalingFactor(): Double = when(this) {
     QuantityUnit.ImperialQuart -> 1.0
 
     QuantityUnit.Piece -> 1.0
+}
+
+// Derive from JsonAdapter in a more complicated way to support null
+class QuantityUnitAdapter : JsonAdapter<QuantityUnit>() {
+
+    override fun toJson(writer: JsonWriter, value: QuantityUnit?) {
+        if (value == null) {
+            writer.nullValue()
+        } else {
+            writer.value(value.unit)
+        }
+    }
+
+    override fun fromJson(reader: JsonReader): QuantityUnit? {
+        if (reader.peek() == JsonReader.Token.NULL) {
+            return reader.nextNull()
+        }
+        val type = reader.nextString()
+        return QuantityUnit.values().find { it.unit == type } ?: QuantityUnit.Piece
+    }
 }

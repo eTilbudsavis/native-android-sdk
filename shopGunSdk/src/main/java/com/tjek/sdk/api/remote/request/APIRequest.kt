@@ -128,6 +128,18 @@ internal object APIRequest : APIRequestBase() {
         }
     }
 
+    suspend fun getOfferFromIncito(
+        viewId: IncitoViewId,
+        publicationId: Id
+    ): ResponseType<OfferV4> {
+        return safeApiCall(decoder = { offerContainer -> OfferV4.fromDecodable(offerContainer.offer) }) {
+            offerService.getOfferFromIncito(IncitoOfferAPIQuery(
+                viewId = viewId,
+                publicationId = publicationId
+            ))
+        }
+    }
+
     suspend fun getBusiness(businessId: Id): ResponseType<BusinessV2> {
         return safeApiCall(decoder = { business -> BusinessV2.fromDecodable(business)}) {
             businessService.getDealer(businessId)

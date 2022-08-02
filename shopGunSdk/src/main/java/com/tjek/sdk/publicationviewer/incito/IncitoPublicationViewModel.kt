@@ -73,7 +73,7 @@ class IncitoPublicationViewModel : ViewModel() {
         }
     }
 
-    fun getOfferFromMap(viewId: IncitoViewId): IncitoOffer? = _offers.value?.get(viewId)
+    fun getOfferFromMap(viewId: IncitoViewId): IncitoOffer? = _offers.value?.get(viewId)?.copy(publicationId = publication.value?.id ?: "")
 
     private fun getIncitoData(
         id: Id,

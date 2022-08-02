@@ -100,9 +100,9 @@ data class PublicationV2Decodable(
     @Json(name = "offer_count")
     val offerCount: Int?,
     @Json(name = "run_from")
-    val runFromDateStr: ValidityDateStr?,
+    val runFromDateStr: ValidityDateV2Str?,
     @Json(name = "run_till")
-    val runTillDateStr: ValidityDateStr?,
+    val runTillDateStr: ValidityDateV2Str?,
     @Json(name = "dealer_id")
     val businessId: Id,
     @Json(name = "store_id")

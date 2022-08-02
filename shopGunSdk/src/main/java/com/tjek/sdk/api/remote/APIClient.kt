@@ -10,6 +10,8 @@ import com.tjek.sdk.META_API_KEY
 import com.tjek.sdk.META_DEVELOP_API_KEY
 import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.api.models.PublicationType
+import com.tjek.sdk.api.models.QuantityUnit
+import com.tjek.sdk.api.models.QuantityUnitAdapter
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -99,6 +101,7 @@ internal object APIClient {
         val moshi = Moshi.Builder()
             .add(PublicationType::class.java, EnumJsonAdapter.create(PublicationType::class.java).withUnknownFallback(PublicationType.paged))
             .add(ByteString::class.java, RawJson::class.java, RawJsonAdapter())
+            .add(QuantityUnit::class.java, QuantityUnitAdapter())
             .build()
 
         return Retrofit.Builder()

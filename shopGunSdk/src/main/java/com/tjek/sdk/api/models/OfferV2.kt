@@ -39,10 +39,7 @@ data class OfferV2(
                 description = o.description,
                 images = o.imageUrls ?: ImageUrlsV2("", "", ""),
                 webshopURL = o.links?.webshop,
-                runDateRange = minOf(fromDate, tillDate)..maxOf(
-                    fromDate,
-                    tillDate
-                ),
+                runDateRange = minOf(fromDate, tillDate)..maxOf(fromDate, tillDate),
                 publishDate = o.publishDateStr?.toValidityDate(),
                 price = o.price,
                 quantity = o.quantity,
@@ -72,11 +69,11 @@ data class OfferV2Decodable(
     val imageUrls: ImageUrlsV2?,
     val links: LinksV2?,
     @Json(name = "run_from")
-    val runFromDateStr: ValidityDateStr?,
+    val runFromDateStr: ValidityDateV2Str?,
     @Json(name = "run_till")
-    val runTillDateStr: ValidityDateStr?,
+    val runTillDateStr: ValidityDateV2Str?,
     @Json(name = "publish")
-    val publishDateStr: ValidityDateStr?,
+    val publishDateStr: ValidityDateV2Str?,
     @Json(name = "pricing")
     val price: PriceV2?,
     val quantity: QuantityV2?,

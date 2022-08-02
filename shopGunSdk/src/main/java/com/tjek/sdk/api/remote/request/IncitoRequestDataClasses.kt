@@ -41,3 +41,11 @@ data class IncitoAPIQuery(
 data class FeatureLabel(
     val key: String = "",
     val value: Float = 0F)
+
+@Keep
+@JsonClass(generateAdapter = true)
+data class IncitoOfferAPIQuery(
+    @Json(name = "view_id")
+    val viewId: String = "",
+    @Json(name = "publication_id")
+    val publicationId: String = "")

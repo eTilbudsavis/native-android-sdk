@@ -82,7 +82,12 @@ private fun getOffersId(offersMap: MutableMap<String, IncitoOffer>, view: JSONOb
             }
 
             // add the incito offer to the map
-            offersMap[viewId] = IncitoOffer(viewId, title, description, Uri.parse(link), list)
+            offersMap[viewId] = IncitoOffer(
+                viewId = viewId,
+                title = title,
+                description = description,
+                link = Uri.parse(link),
+                featureLabels = list)
         }
     } catch (e: JSONException) {
         e.printStackTrace()

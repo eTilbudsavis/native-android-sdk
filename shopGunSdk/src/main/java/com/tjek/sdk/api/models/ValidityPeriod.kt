@@ -6,8 +6,6 @@ import com.tjek.sdk.api.ValidityDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-// Note  run_till (v2) is including. v4/valid_until is excluding. So 2022-12-31T23:00:00.000Z in v4 means when this time occurs, it's expired.
-
 class ValidityPeriod(
     override val start: ValidityDate,
     override val endInclusive: ValidityDate
@@ -39,6 +37,10 @@ class ValidityPeriod(
 
     override fun iterator(): Iterator<ValidityDate> {
         return ValidityDateIterator(start, endInclusive, 1)
+    }
+
+    override fun toString(): String {
+        return "ValidityPeriod(start=$start, endInclusive=$endInclusive)"
     }
 
 }

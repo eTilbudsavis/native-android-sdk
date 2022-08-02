@@ -25,7 +25,7 @@ private var parser: DateTimeFormatter = DateTimeFormatterBuilder()
     .parseCaseInsensitive()
     .toFormatter(Locale.ENGLISH)
 
-fun ValidityDateStr.toValidityDate(): ValidityDate? {
+fun ValidityDateV2Str.toValidityDate(): ValidityDate? {
     return try {
         OffsetDateTime.parse(this, parser)
     }catch (e: Exception) {

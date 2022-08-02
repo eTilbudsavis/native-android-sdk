@@ -148,11 +148,11 @@ data class HotspotOfferV2Decodable (
     val id: Id,
     val heading: String,
     @Json(name = "run_from")
-    val runFromDateStr: ValidityDateStr?,
+    val runFromDateStr: ValidityDateV2Str?,
     @Json(name = "run_till")
-    val runTillDateStr: ValidityDateStr?,
+    val runTillDateStr: ValidityDateV2Str?,
     @Json(name = "publish")
-    val publishDateStr: ValidityDateStr?,
+    val publishDateStr: ValidityDateV2Str?,
     @Json(name = "pricing")
     val price: PriceV2?,
     val quantity: QuantityV2?
