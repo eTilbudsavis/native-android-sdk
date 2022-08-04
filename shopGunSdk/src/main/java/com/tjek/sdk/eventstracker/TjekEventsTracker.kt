@@ -1,7 +1,11 @@
 package com.tjek.sdk.eventstracker
 
+import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Location
 import com.fonfon.geohash.GeoHash
+import com.shopgun.android.sdk.BuildConfig
+import com.tjek.sdk.*
 import java.util.concurrent.TimeUnit
 
 data class EventLocation(
@@ -44,5 +48,20 @@ object TjekEventsTracker {
      */
     fun clearLocation() {
         location = null
+    }
+
+    fun setTrackId(context: Context) {
+        // get trackId from manifest
+        val packageName = context.packageName
+        val metaData = context.packageManager.getApplicationInfo(
+            packageName,
+            PackageManager.GET_META_DATA
+        ).metaData
+        val id = when {
+            metaData == null -> null
+            BuildConfig.DEBUG && metaData.containsKey(META_APPLICATION_TRACK_ID_DEBUG) -> metaData.getString(META_APPLICATION_TRACK_ID_DEBUG)
+            else -> metaData.getString(META_APPLICATION_TRACK_ID)
+        }
+        id?.let { trackId = it }
     }
 }
