@@ -1,0 +1,95 @@
+package com.tjek.sdk.eventstracker
+
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.ToJson
+import com.tjek.sdk.createUUID
+import org.json.JSONObject
+import java.util.*
+import java.util.concurrent.TimeUnit
+
+enum class EventType(val code: Int) {
+    Dummy                          (0),
+    PagedPublicationOpened         (1),
+    PagedPublicationPageOpened     (2),
+    OfferInteraction               (3),
+    Searched                       (5),
+    FirstOfferOpenedAfterSearch    (6),
+    OfferOpenedAfterSearch         (7),
+    SearchResultsViewed            (9),
+    IncitoPublicationOpened_v2     (11),
+    BasicAnalytics                 (12)
+}
+
+typealias PayloadType = Map<String, Any>
+
+//  An Event defines a package of data that can be sent to the EventsTracker.
+//  There are some core properties that are required, and any additional metadata is added to the `payload`.
+data class Event(
+
+    // The unique identifier of the event. A UUID string.
+    val id: String = createUUID(),
+
+    // The version of the event. If the format of the event ever changes, this may increase.
+    // It is used to choose where to send the event, and by the server to decide how to process the event.
+    val version: Int = 2,
+
+    // The timestamp the event was triggered.
+    val timestamp: Long = timestamp(),
+
+    // The type identifier of the event. There are a set of pre-defined constants that can be used here.
+    // For the server to be able to parse the event, the type & payload must be consistent.
+    val type: Int,
+
+    // metadata of the event
+    var payloadType: PayloadType = emptyMap()
+) {
+
+    // Merges a new payload into the current one.
+    // New values for existing keys will override the old ones (so be careful!).
+    fun mergePayload(newPayloadType: PayloadType) {
+       val merge = payloadType + newPayloadType
+        payloadType = merge
+    }
+
+    fun addViewToken(vt: String) {
+        if (vt.isEmpty()) return
+        mergePayload(mapOf(Pair("vt", vt)))
+    }
+
+    // countryCode is an ISO 3166-1 alpha-2 encoded string, like "DK"
+    fun addCountryCode(countryCode: String) {
+        if (countryCode.isEmpty()) return
+        mergePayload(mapOf(Pair("l.c", countryCode)))
+    }
+
+    fun addLocation(geohash: String, timestamp: Long) {
+        if (geohash.isEmpty() || timestamp <= 0) return
+        mergePayload(mapOf(
+            Pair("l.h", geohash),
+            Pair("l.ht", timestamp)
+        ))
+    }
+
+    fun addApplicationTrackId(id: String) {
+        if (id.isEmpty()) return
+        mergePayload(mapOf(Pair("_a", id)))
+    }
+}
+
+class EventAdapter() {
+
+    @ToJson fun toJson(e: Event): JSONObject {
+        return JSONObject().apply {
+            put("_i", e.id)
+            put("_v", e.version)
+            put("_t", e.timestamp)
+            put("_e", e.type)
+            e.payloadType.forEach { put(it.key, it.value) }
+        }
+    }
+
+    @FromJson fun fromJson(json: JSONObject): Event? {
+        // todo
+        return null
+    }
+}

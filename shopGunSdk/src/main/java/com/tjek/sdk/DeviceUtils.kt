@@ -35,3 +35,5 @@ fun getFormattedLocale(ctx: Context): String {
     val country = locale.country.ifEmpty { Locale.US.country }
     return String.format("%s_%s", language, country)
 }
+
+fun createUUID() = UUID.randomUUID().toString()

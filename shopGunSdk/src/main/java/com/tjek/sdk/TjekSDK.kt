@@ -19,6 +19,7 @@ object TjekSDK {
             setApiKey(context)
             setClientVersion(context)
         }
+        TjekPreferences.setSharedPreferences(context)
         return this
     }
 
