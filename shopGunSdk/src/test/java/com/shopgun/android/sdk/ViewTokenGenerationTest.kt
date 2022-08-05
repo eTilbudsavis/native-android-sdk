@@ -13,7 +13,7 @@ import java.nio.ByteOrder
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
-class EventUtilsUnitTest {
+class ViewTokenGenerationTest {
     private val clientId = "myhash"
     private val regression_clientId = "0c0bba80-65cf-480b-9340-3add6725d5bf"
 
