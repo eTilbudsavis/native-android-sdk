@@ -6,6 +6,7 @@ import com.tjek.sdk.api.models.PublicationType
 import com.tjek.sdk.api.models.QuantityUnit
 import com.tjek.sdk.api.models.QuantityUnitAdapter
 import com.tjek.sdk.api.remote.NetworkLogLevel
+import com.tjek.sdk.eventstracker.EventAdapter
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -56,6 +57,7 @@ internal object EventClient {
             .build()
 
         val moshi = Moshi.Builder()
+            .add(EventAdapter())
             .build()
 
         return Retrofit.Builder()
