@@ -294,7 +294,8 @@ class PagedPublicationFragment :
 
     override fun onPageSelected(position: Int) {
         pageNumberChangeListener?.let {
-            if (position < versoSpreadConfiguration.spreadCount - 1) {
+            val lastSpread = if (config.hasOutro) versoSpreadConfiguration.spreadCount - 1 else versoSpreadConfiguration.spreadCount
+            if (position < lastSpread) {
                 val currentPages = versoSpreadConfiguration.getPagesFromSpreadPosition(position)
                 val tmpPages: IntArray = currentPages.copyOf(currentPages.size)
                 if (!config.hasIntro) {
@@ -302,7 +303,14 @@ class PagedPublicationFragment :
                         tmpPages[i] += 1
                     }
                 }
-                it.onPageNumberChange(currentPages = tmpPages, totalPages = versoSpreadConfiguration.pageCount - 1)
+                // make sure the first value is not 0
+                tmpPages[0] = tmpPages[0].coerceAtLeast(1)
+                val totalPages = when {
+                    config.hasIntro && config.hasOutro -> versoSpreadConfiguration.pageCount - 2
+                    config.hasIntro || config.hasOutro -> versoSpreadConfiguration.pageCount - 1
+                    else -> versoSpreadConfiguration.pageCount
+                }
+                it.onPageNumberChange(currentPages = tmpPages, totalPages = totalPages)
             }
         }
     }
