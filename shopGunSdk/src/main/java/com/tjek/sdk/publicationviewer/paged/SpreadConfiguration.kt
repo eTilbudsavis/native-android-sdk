@@ -127,6 +127,11 @@ internal class SpreadConfiguration(
     }
 
     private fun missingLastPage(): Boolean {
-        return pageCount % 2 != 0
+        val publicationPageCount = when {
+            hasIntro && hasOutro -> pageCount - 2
+            hasIntro || hasOutro -> pageCount - 1
+            else -> pageCount
+        }
+        return publicationPageCount % 2 != 0
     }
 }
