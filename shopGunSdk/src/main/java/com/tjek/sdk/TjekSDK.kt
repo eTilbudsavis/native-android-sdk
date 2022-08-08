@@ -1,6 +1,7 @@
 package com.tjek.sdk
 
 import android.content.Context
+import android.location.Location
 import androidx.startup.Initializer
 import com.shopgun.android.sdk.BuildConfig
 import com.tjek.sdk.api.remote.EndpointEnvironment
@@ -79,6 +80,27 @@ object TjekSDK {
         if (id.isNotEmpty()) {
             TjekEventsTracker.trackId = id
         }
+    }
+
+    /**
+    Updates the `location` property of the events, using a lat/lng/timestamp to generate the geohash (to an accuracy of ±20km).
+    This geohash will be included in all **future** tracked events, until `clearLocation()` is called.
+
+    Note: It is up to the user of the SDK to decide how this location information is collected.
+    We recommend, however, that only GPS-sourced location data is used.
+
+    - location: the location given by the system.
+    The accuracy has to be less than 2km or it won't be accepted
+     */
+    fun setEventsLocation(location: Location) {
+        TjekEventsTracker.setLocation(location)
+    }
+
+    /**
+     * Clear the location and it won't be added to future events.
+     */
+    fun clearEventsLocation() {
+        TjekEventsTracker.clearLocation()
     }
 }
 
