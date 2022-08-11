@@ -1,8 +1,6 @@
 package com.shopgun.android.sdk
 
-import androidx.test.core.app.ApplicationProvider
 import com.squareup.moshi.Moshi
-import com.tjek.sdk.TjekPreferences
 import com.tjek.sdk.TjekSDK
 import com.tjek.sdk.api.remote.NetworkLogLevel
 import com.tjek.sdk.api.remote.ResponseType
@@ -10,6 +8,8 @@ import com.tjek.sdk.eventstracker.*
 import com.tjek.sdk.eventstracker.api.EventEnvironment
 import com.tjek.sdk.eventstracker.api.ShipEventRequest
 import com.tjek.sdk.eventstracker.api.ShippableEvents
+import com.tjek.sdk.eventstracker.EventAdapter
+import com.tjek.sdk.eventstracker.ShippableEvent
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
@@ -30,8 +30,8 @@ class EventTest {
         val moshi = Moshi.Builder()
             .add(EventAdapter())
             .build()
-        val jsonAdapter = moshi.adapter(Event::class.java)
-        val json = jsonAdapter.toJson(event)
+        val jsonAdapter = moshi.adapter(ShippableEvent::class.java)
+        val json = jsonAdapter.toJson(ShippableEvent(event))
         println(json)
     }
 
@@ -49,7 +49,7 @@ class EventTest {
             .add(EventAdapter())
             .build()
         val jsonAdapter = moshi.adapter(ShippableEvents::class.java)
-        val json = jsonAdapter.toJson(ShippableEvents(listOf(event1, event2)))
+        val json = jsonAdapter.toJson(ShippableEvents(listOf(ShippableEvent(event1), ShippableEvent(event2))))
         println(json)
     }
 
@@ -69,7 +69,7 @@ class EventTest {
             Pair("_f1", "yyyy"), Pair("_f2", "ooooo")
         ))
         runBlocking {
-            when (val res = ShipEventRequest.shipEvents(listOf(event1, event2))) {
+            when (val res = ShipEventRequest.shipEvents(listOf(ShippableEvent(event1), ShippableEvent(event2)))) {
                 is ResponseType.Error -> {
                     println(res.errorType.toString())
                     Assert.fail()
@@ -104,7 +104,7 @@ class EventTest {
             payloadType = mapOf(Pair("ip.id", "test_incitoId"))
         )
         runBlocking {
-            when (val res = ShipEventRequest.shipEvents(listOf(ppOpen, ppPageOpen, incitoOpen))) {
+            when (val res = ShipEventRequest.shipEvents(listOf(ShippableEvent(ppOpen), ShippableEvent(ppPageOpen), ShippableEvent(incitoOpen)))) {
                 is ResponseType.Error -> {
                     println(res.errorType.toString())
                     Assert.fail()

@@ -74,22 +74,14 @@ data class Event(
         if (id.isEmpty()) return
         mergePayload(mapOf(Pair("_a", id)))
     }
-}
 
-class EventAdapter {
-
-    @ToJson fun toJson(e: Event): String {
+    fun toJson(): String {
         return JSONObject().apply {
-            put("_i", e.id)
-            put("_v", e.version)
-            put("_t", e.timestamp)
-            put("_e", e.type)
-            e.payloadType.forEach { put(it.key, it.value) }
+            put("_i", id)
+            put("_v", version)
+            put("_t", timestamp)
+            put("_e", type)
+            payloadType.forEach { put(it.key, it.value) }
         }.toString()
-    }
-
-    @FromJson fun fromJson(json: String): Event? {
-        // todo
-        return null
     }
 }

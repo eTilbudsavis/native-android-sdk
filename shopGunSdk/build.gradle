@@ -118,6 +118,11 @@ dependencies {
     implementation("androidx.startup:startup-runtime:1.1.1")
     implementation("androidx.fragment:fragment-ktx:1.4.1")
 
+    // room
+    def roomVersion = '2.4.3'
+    implementation "androidx.room:room-runtime:$roomVersion"
+    kapt "androidx.room:room-compiler:$roomVersion"
+
     // Other libs
     implementation("io.github.everythingme:overscroll-decor-android:1.1.1")
 
@@ -126,6 +131,7 @@ dependencies {
     testImplementation "org.robolectric:robolectric:4.6.1"
     androidTestImplementation "androidx.test:core:1.4.0"
     androidTestImplementation 'androidx.test:runner:1.4.0'
+    androidTestImplementation "androidx.room:room-testing:$roomVersion"
 
 }
 

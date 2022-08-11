@@ -3,13 +3,14 @@ package com.tjek.sdk.eventstracker.api
 import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.api.remote.request.APIRequestBase
 import com.tjek.sdk.eventstracker.Event
+import com.tjek.sdk.eventstracker.cache.ShippableEvent
 
 internal object ShipEventRequest : APIRequestBase() {
 
     private val eventService: EventService by lazy { EventClient.getClient().create(EventService::class.java) }
 
     suspend fun shipEvents(
-        events: List<Event>
+        events: List<ShippableEvent>
     ): ResponseType<EventResponse> {
         return safeApiCall(
             decoder = { it }) {

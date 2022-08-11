@@ -2,19 +2,13 @@ package com.tjek.sdk.eventstracker.api
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.EnumJsonAdapter
-import com.tjek.sdk.api.models.PublicationType
-import com.tjek.sdk.api.models.QuantityUnit
-import com.tjek.sdk.api.models.QuantityUnitAdapter
 import com.tjek.sdk.api.remote.NetworkLogLevel
-import com.tjek.sdk.eventstracker.EventAdapter
+import com.tjek.sdk.eventstracker.cache.EventAdapter
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import okio.ByteString
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.converter.scalars.ScalarsConverterFactory
-import java.util.*
 
 private const val CONTENT_TYPE_HEADER = "Content-Type"
 private const val ACCEPT_HEADER = "Accept"
@@ -57,12 +51,12 @@ internal object EventClient {
             .build()
 
         val moshi = Moshi.Builder()
+            .add(EventStatus::class.java, EnumJsonAdapter.create(EventStatus::class.java).withUnknownFallback(EventStatus.unknown))
             .add(EventAdapter())
             .build()
 
         return Retrofit.Builder()
             .baseUrl("https://${environment.host}/")
-//            .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(mOkHttpClient)
             .build()
