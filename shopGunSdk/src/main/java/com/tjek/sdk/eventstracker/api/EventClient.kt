@@ -3,7 +3,6 @@ package com.tjek.sdk.eventstracker.api
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.EnumJsonAdapter
 import com.tjek.sdk.api.remote.NetworkLogLevel
-import com.tjek.sdk.eventstracker.cache.EventAdapter
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -52,7 +51,6 @@ internal object EventClient {
 
         val moshi = Moshi.Builder()
             .add(EventStatus::class.java, EnumJsonAdapter.create(EventStatus::class.java).withUnknownFallback(EventStatus.unknown))
-            .add(EventAdapter())
             .build()
 
         return Retrofit.Builder()

@@ -1,12 +1,10 @@
 package com.shopgun.android.sdk
 
-import org.robolectric.RobolectricTestRunner
-import com.shopgun.android.sdk.eventskit.EventUtils
 import com.tjek.sdk.eventstracker.generateViewToken
-import com.tjek.sdk.eventstracker.pagedPublicationPageOpened
-import junit.framework.Assert
+import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

@@ -2,13 +2,7 @@ package com.tjek.sdk.eventstracker.api
 
 import androidx.annotation.Keep
 import com.squareup.moshi.JsonClass
-import com.tjek.sdk.eventstracker.cache.ShippableEvent
-
-@Keep
-@JsonClass(generateAdapter = true)
-data class ShippableEvents (
-    val events: List<ShippableEvent>
-)
+import com.tjek.sdk.eventstracker.ShippableEvent
 
 @Keep
 @JsonClass(generateAdapter = true)
