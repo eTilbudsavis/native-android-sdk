@@ -65,6 +65,15 @@ android {
         targetSdkVersion 31
         buildConfigField("String", "TJEK_SDK_VERSION", "${tjekSdkVersion}")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/database_schema".toString()]
+            }
+        }
+        sourceSets {
+            androidTest.assets.srcDirs += files("$projectDir/database_schema".toString())
+        }
     }
 
     buildTypes {
@@ -122,6 +131,7 @@ dependencies {
     def roomVersion = '2.4.3'
     implementation "androidx.room:room-runtime:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
+    implementation "androidx.room:room-ktx:$roomVersion"
 
     // Other libs
     implementation("io.github.everythingme:overscroll-decor-android:1.1.1")

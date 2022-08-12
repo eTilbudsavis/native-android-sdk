@@ -7,6 +7,7 @@ import com.shopgun.android.sdk.BuildConfig
 import com.tjek.sdk.api.remote.EndpointEnvironment
 import com.tjek.sdk.api.remote.NetworkLogLevel
 import com.tjek.sdk.api.remote.APIClient
+import com.tjek.sdk.eventstracker.Event
 import com.tjek.sdk.eventstracker.TjekEventsTracker
 import com.tjek.sdk.eventstracker.api.EventClient
 import com.tjek.sdk.eventstracker.api.EventEnvironment
@@ -26,7 +27,7 @@ object TjekSDK {
             setClientVersion(context)
         }
         TjekPreferences.setSharedPreferences(context)
-        TjekEventsTracker.setTrackId(context)
+        TjekEventsTracker.initAtStartup(context)
         return this
     }
 
@@ -101,6 +102,13 @@ object TjekSDK {
      */
     fun clearEventsLocation() {
         TjekEventsTracker.clearLocation()
+    }
+
+    /**
+     * Track events to be sent to Tjek backend for Insight.
+     */
+    suspend fun trackEvent(event: Event) {
+        TjekEventsTracker.track(event)
     }
 }
 

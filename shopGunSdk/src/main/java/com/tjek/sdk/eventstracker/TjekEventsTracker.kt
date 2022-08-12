@@ -6,6 +6,8 @@ import android.location.Location
 import com.fonfon.geohash.GeoHash
 import com.shopgun.android.sdk.BuildConfig
 import com.tjek.sdk.*
+import com.tjek.sdk.database.TjekRoomDb
+import kotlinx.coroutines.*
 import java.util.concurrent.TimeUnit
 
 data class EventLocation(
@@ -15,6 +17,12 @@ data class EventLocation(
 
 internal object TjekEventsTracker {
     private const val GEO_HASH_PRECISION = 4
+
+    private val shipInterval = TimeUnit.SECONDS.toMillis(60)
+    private lateinit var eventShipper: EventShipper
+    private lateinit var eventDao: EventDao
+
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     private val trackIdLock = Any()
     var trackId: String = ""
@@ -37,7 +45,40 @@ internal object TjekEventsTracker {
         location = null
     }
 
-    fun setTrackId(context: Context) {
+    suspend fun track(event: Event) {
+        event.addApplicationTrackId(trackId)
+        location?.let { event.addLocation(it.geoHash, it.timestamp) }
+        // transform the Event into a shippable one
+        eventDao.insert(ShippableEvent(
+            id = event.id,
+            version = event.version,
+            timestamp = event.timestamp,
+            jsonEvent = event.toJson()
+        ))
+    }
+
+    fun initAtStartup(context: Context) {
+        setTrackId(context)
+        eventDao = TjekRoomDb.getInstance(context).eventDao()
+        migrateEventDatabase()
+        startShipping()
+    }
+
+    private fun startShipping() {
+        eventShipper = EventShipper(eventDao)
+        coroutineScope.launch {
+            while (isActive) {
+                eventShipper.shipEvents()
+                delay(shipInterval)
+            }
+        }
+    }
+
+    private fun migrateEventDatabase() {
+        // todo migrateEventDatabase
+    }
+
+    private fun setTrackId(context: Context) {
         // get trackId from manifest
         val packageName = context.packageName
         val metaData = context.packageManager.getApplicationInfo(
