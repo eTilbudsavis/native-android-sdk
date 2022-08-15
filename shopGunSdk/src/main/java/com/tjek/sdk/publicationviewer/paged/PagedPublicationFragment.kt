@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import com.shopgun.android.sdk.R
 import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.api.Id
@@ -18,6 +17,7 @@ import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.models.BrandingV2
 import com.tjek.sdk.eventstracker.TjekEventsTracker
 import com.tjek.sdk.eventstracker.pagedPublicationOpened
+import com.tjek.sdk.eventstracker.pagedPublicationPageOpened
 import com.tjek.sdk.getColorInt
 import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.publicationviewer.LoaderAndErrorScreenCallback
@@ -27,14 +27,13 @@ import com.tjek.sdk.publicationviewer.getDefaultLoadingScreen
 import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout
 import com.tjek.sdk.publicationviewer.paged.libs.verso.*
 import com.tjek.sdk.publicationviewer.paged.libs.verso.viewpager.CenteredViewPager
-import kotlinx.coroutines.launch
 
 class PagedPublicationFragment :
     VersoFragment(),
     VersoPageViewListener.EventListener,
     VersoPageViewListener.OnLoadCompleteListener,
-    CenteredViewPager.OnPageChangeListener
-{
+    CenteredViewPager.OnPageChangeListener,
+    VersoPageChangeListener {
 
     private val viewModel: PagedPublicationViewModel by viewModels()
     private lateinit var config: PagedPublicationConfiguration
@@ -154,6 +153,7 @@ class PagedPublicationFragment :
         setOnEventListener(this)
         setOnLoadCompleteListener(this)
         viewPager.addOnPageChangeListener(this)
+        addOnPageChangeListener(this)
 
         return  frame
     }
@@ -221,7 +221,6 @@ class PagedPublicationFragment :
             if (it.visibility != View.VISIBLE) {
                 it.removeAllViews()
                 it.addView(viewPager)
-                // todo onPageChangeListener
                 setVisible(verso = true, loader = false, error = false)
             }
         }
@@ -310,6 +309,8 @@ class PagedPublicationFragment :
         return true
     }
 
+    // Use this callback to show page numbers because it's more reactive than other callbacks,
+    // so the page numbers will be updated faster in the UI (if any)
     override fun onPageSelected(position: Int) {
         pageNumberChangeListener?.let {
             val lastSpread = if (config.hasOutro) versoSpreadConfiguration.spreadCount - 1 else versoSpreadConfiguration.spreadCount
@@ -333,7 +334,29 @@ class PagedPublicationFragment :
         }
     }
 
-    override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
+    // This callback is not triggered if the swipe is fast, so it's better for tracking the page open event
+    // so we won't record the pages swiped away immediately but only the one
+    override fun onPagesChanged(currentPosition: Int, currentPages: IntArray?, previousPosition: Int, previousPages: IntArray?) {
+        // todo intro case?
+        currentPages?.forEach { p ->
+            val page = p + 1 // it starts from 0
+            val lastPage = if (config.hasOutro) versoSpreadConfiguration.pageCount - 1 else versoSpreadConfiguration.pageCount
+            if (page <= lastPage) {
+                viewModel.publication.value?.id?.let {
+                    TjekEventsTracker.track(pagedPublicationPageOpened(
+                        publicationId = it,
+                        pageNumber = page
+                    ))
+                }
+            }
+        }
+    }
 
+
+
+    // Unused callbacks from Verso fragment and CenteredViewPager
+    override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
     override fun onPageScrollStateChanged(state: Int) {}
+    override fun onPagesScrolled(currentPosition: Int, currentPages: IntArray?, previousPosition: Int, previousPages: IntArray?) {}
+    override fun onVisiblePageIndexesChanged(pages: IntArray?, added: IntArray?, removed: IntArray?) {}
 }
