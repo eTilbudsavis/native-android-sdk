@@ -14,7 +14,10 @@ internal class EventShipper(
 
     suspend fun shipEvents() {
         val toBeShipped = eventDao.getEvents()
-        if (toBeShipped.isEmpty()) return
+        if (toBeShipped.isEmpty()) {
+            TjekLogCat.v("$tag: no event to ship at the moment")
+            return
+        }
 
         TjekLogCat.v("$tag shipping ${toBeShipped.size}")
         when (val res = ShipEventRequest.shipEvents(toBeShipped)) {
@@ -31,7 +34,7 @@ internal class EventShipper(
                 // check timestamp for nacked events and delete them if they're too old
                 val nack = res.data.events
                     .filter { it.status == EventStatus.nack }
-                    .also { TjekLogCat.w("$tag nack events $it") }
+                    .also { if (it.isNotEmpty()) TjekLogCat.w("$tag nack events $it") }
                     .map { it.id }
                 val timeLimit =
                     TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) - TimeUnit.HOURS.toSeconds(36)
@@ -43,14 +46,14 @@ internal class EventShipper(
                 val other =
                     res.data.events
                         .filter { it.status != EventStatus.ack && it.status != EventStatus.nack }
-                        .also { TjekLogCat.w("$tag $it") }
+                        .also { if (it.isNotEmpty()) TjekLogCat.w("$tag $it") }
                         .map { it.id }
                 if (other.isNotEmpty()) {
                     eventDao.deleteEvents(other)
                 }
 
                 // print some logs
-                TjekLogCat.d("$tag: Ack=${ack.size}, Nack=${nack.size} (${oldNack.size} too old), other=${other.size}")
+                TjekLogCat.v("$tag: Ack=${ack.size}, Nack=${nack.size} (${oldNack.size} too old), other=${other.size}")
             }
         }
     }
