@@ -45,16 +45,23 @@ internal object TjekEventsTracker {
         location = null
     }
 
-    suspend fun track(event: Event) {
+    fun track(event: Event) {
+        // add fields
+        if (trackId.isEmpty()) {
+            TjekLogCat.w("Missing application track id. Events will be discarded until an id has been set.")
+            return
+        }
         event.addApplicationTrackId(trackId)
         location?.let { event.addLocation(it.geoHash, it.timestamp) }
         // transform the Event into a shippable one
-        eventDao.insert(ShippableEvent(
-            id = event.id,
-            version = event.version,
-            timestamp = event.timestamp,
-            jsonEvent = event.toJson()
-        ))
+        coroutineScope.launch {
+            eventDao.insert(ShippableEvent(
+                id = event.id,
+                version = event.version,
+                timestamp = event.timestamp,
+                jsonEvent = event.toJson()
+            ).also { TjekLogCat.v("Event recorded: ${it.jsonEvent}") })
+        }
     }
 
     fun initAtStartup(context: Context) {

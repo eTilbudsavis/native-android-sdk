@@ -2,7 +2,6 @@ package com.tjek.sdk.eventstracker.api
 
 import androidx.annotation.Keep
 import com.squareup.moshi.JsonClass
-import com.tjek.sdk.eventstracker.ShippableEvent
 
 @Keep
 @JsonClass(generateAdapter = true)
@@ -16,7 +15,8 @@ data class ShippedEvent(
 @JsonClass(generateAdapter = true)
 data class ShipError(
     val type: String,
-    val path: List<String>?
+    val path: List<String>?,
+    val message: String?
 )
 
 @Keep
@@ -25,5 +25,5 @@ data class EventResponse(
     val events: List<ShippedEvent>
 )
 
-@Suppress("EnumEntryName")
-enum class EventStatus { ack, nack, validationError, unknown }
+@Suppress("EnumEntryName", "unused")
+enum class EventStatus { ack, nack, validation_error, unknown }

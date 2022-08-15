@@ -18,5 +18,6 @@ class DemoApplication : Application() {
             endpointEnvironment = EndpointEnvironment.STAGING,
             eventEnvironment = EventEnvironment.STAGING
         )
+//        TjekSDK.setApplicationTrackId("this_is_a_test")
     }
 }

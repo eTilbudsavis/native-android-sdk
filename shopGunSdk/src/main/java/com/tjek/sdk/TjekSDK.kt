@@ -107,7 +107,7 @@ object TjekSDK {
     /**
      * Track events to be sent to Tjek backend for Insight.
      */
-    suspend fun trackEvent(event: Event) {
+    fun trackEvent(event: Event) {
         TjekEventsTracker.track(event)
     }
 }
