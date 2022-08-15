@@ -27,6 +27,8 @@ import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.remote.request.FeatureLabel
 import com.tjek.sdk.api.remote.request.IncitoDeviceCategory
 import com.tjek.sdk.api.remote.request.IncitoOrientation
+import com.tjek.sdk.eventstracker.TjekEventsTracker
+import com.tjek.sdk.eventstracker.incitoPublicationOpened
 import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.getFormattedLocale
 import com.tjek.sdk.publicationviewer.LoaderAndErrorScreenCallback
@@ -267,11 +269,15 @@ class IncitoPublicationFragment :
             WebView.setWebContentsDebuggingEnabled(true)
         }
         if (!hasSentOpenEvent) {
-            //todo tracking
-//            catalog?.let {
-//                trackIncitoPublicationOpened(it.id ?: it.incitoId)
-//                hasSentOpenEvent = true
-//            }
+            // look for the publication id in the arguments (the whole publication or just the id)
+            arguments?.let { bundle ->
+                val publication: PublicationV2? = bundle.getParcelable(arg_publication)
+                val pubId = publication?.id ?: bundle.getString(arg_publication_id, null)
+                pubId?.let {
+                    TjekEventsTracker.track(incitoPublicationOpened(it))
+                    hasSentOpenEvent = true
+                }
+            }
         }
 
         initWebView()

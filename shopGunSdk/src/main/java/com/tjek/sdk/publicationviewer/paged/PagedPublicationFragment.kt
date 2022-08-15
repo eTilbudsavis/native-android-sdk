@@ -9,12 +9,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.shopgun.android.sdk.R
 import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.models.BrandingV2
+import com.tjek.sdk.eventstracker.TjekEventsTracker
+import com.tjek.sdk.eventstracker.pagedPublicationOpened
 import com.tjek.sdk.getColorInt
 import com.tjek.sdk.getDeviceOrientation
 import com.tjek.sdk.publicationviewer.LoaderAndErrorScreenCallback
@@ -24,6 +27,7 @@ import com.tjek.sdk.publicationviewer.getDefaultLoadingScreen
 import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout
 import com.tjek.sdk.publicationviewer.paged.libs.verso.*
 import com.tjek.sdk.publicationviewer.paged.libs.verso.viewpager.CenteredViewPager
+import kotlinx.coroutines.launch
 
 class PagedPublicationFragment :
     VersoFragment(),
@@ -152,6 +156,20 @@ class PagedPublicationFragment :
         viewPager.addOnPageChangeListener(this)
 
         return  frame
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        if (!hasSentOpenEvent) {
+            // look for the publication id in the arguments (the whole publication or just the id)
+            arguments?.let { bundle ->
+                val publication: PublicationV2? = bundle.getParcelable(arg_publication)
+                val pubId = publication?.id ?: bundle.getString(arg_publication_id, null)
+                pubId?.let {
+                    TjekEventsTracker.track(pagedPublicationOpened(it))
+                    hasSentOpenEvent = true
+                }
+            }
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
