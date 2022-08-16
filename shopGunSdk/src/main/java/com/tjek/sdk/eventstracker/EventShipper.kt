@@ -31,7 +31,7 @@ internal class EventShipper(
                 if (ack.isNotEmpty()) {
                     eventDao.deleteEvents(ack)
                 }
-                // check timestamp for nacked events and delete them if they're too old
+                // check timestamp for nack-ed events and delete them if they're too old
                 val nack = res.data.events
                     .filter { it.status == EventStatus.nack }
                     .also { if (it.isNotEmpty()) TjekLogCat.w("$tag nack events $it") }

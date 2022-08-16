@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="sgn_primaryDark">#01942D</color>
-    <color name="sgn_primary">#01C545</color>
-    <color name="sgn_primaryLight">#55D782</color>
-    <color name="sgn_accent">#03A9F4</color>
-
     <color name="tjek_pagedpub_hotspot_stroke">#FFFFFF</color>
     <color name="tjek_pagedpub_hotspot_solid">#99FFFFFF</color>
     <color name="tjek_pagedpub_hotspot_dimmed_bg">#73000000</color>
-
 
 </resources>

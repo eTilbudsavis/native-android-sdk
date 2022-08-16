@@ -1,11 +1,7 @@
 package com.tjek.sdk.eventstracker
 
-import com.squareup.moshi.FromJson
-import com.squareup.moshi.ToJson
 import com.tjek.sdk.createUUID
 import org.json.JSONObject
-import java.util.*
-import java.util.concurrent.TimeUnit
 
 enum class EventType(val code: Int) {
     Dummy                          (0),

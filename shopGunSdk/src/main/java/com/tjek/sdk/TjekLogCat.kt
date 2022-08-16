@@ -37,7 +37,4 @@ internal object TjekLogCat {
         e.printStackTrace()
     }
 
-    fun forceE(message: String) {
-        Log.e(tag, message)
-    }
 }
