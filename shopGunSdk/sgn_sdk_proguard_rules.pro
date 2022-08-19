@@ -29,3 +29,8 @@
 # R8 Configuration for Realm
 -keep @interface io.realm.annotations.RealmModule { *; }
 -keep class io.realm.annotations.RealmModule { *; }
+
+# Preference DataStore
+-keepclassmembers class * extends androidx.datastore.preferences.protobuf.GeneratedMessageLite {
+    <fields>;
+}

@@ -126,6 +126,7 @@ dependencies {
     // androidX
     implementation("androidx.startup:startup-runtime:1.1.1")
     implementation("androidx.fragment:fragment-ktx:1.4.1")
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
 
     // room
     def roomVersion = '2.4.3'

@@ -1,30 +1,48 @@
 package com.tjek.sdk
 
 import android.content.Context
-import android.content.SharedPreferences
-import com.tjek.sdk.TjekPreferences
-import com.shopgun.android.sdk.utils.SgnUtils
-import com.shopgun.android.sdk.ShopGun
-import com.shopgun.android.sdk.utils.Constants
+import androidx.datastore.preferences.SharedPreferencesMigration
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
-internal object TjekPreferences {
+object TjekPreferences {
 
-    // todo: name change? how? is worth it?
-    private const val PREFS_NAME = "com.shopgun.android.sdk_preferences"
-    private const val INSTALLATION_ID = "installation_id"
+    private val INSTALLATION_ID = stringPreferencesKey("installation_id")
 
-    private lateinit var sharedPref: SharedPreferences
+    // these two info won't be stored in the sdk anymore.
+    // It's possible to retrieve them one last time when migrating to the new sdk
+    //todo
+    private val LEGACY_LOCATION_JSON = stringPreferencesKey("location_json")
+    private val LEGACY_LOCATION_ENABLED_FLAG = stringPreferencesKey("location_enabled")
 
-    val installationId: String
-        get() {
-            if (!sharedPref.contains(INSTALLATION_ID)) {
-                sharedPref.edit().putString(INSTALLATION_ID, createUUID()).apply()
-            }
-            return sharedPref.getString(INSTALLATION_ID, null) ?: ""
+    var initialized = AtomicBoolean(false)
+
+    var installationId: String = ""
+    private set
+
+    private val Context.dataStore by preferencesDataStore(
+        name = "tjek_sdk_preferences",
+        produceMigrations = { context ->
+            listOf(SharedPreferencesMigration(
+                context = context,
+                sharedPreferencesName = "com.shopgun.android.sdk_preferences",
+                keysToMigrate = setOf("installation_id", "location_json", "location_enabled")
+            ))
         }
+    )
 
-    fun setSharedPreferences(context: Context) {
-        sharedPref = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    fun initAtStartup(context: Context) {
+        CoroutineScope(Dispatchers.Default).launch {
+            installationId = context.dataStore.data.firstOrNull()?.get(INSTALLATION_ID)
+                ?: createUUID().also { id -> context.dataStore.edit { it[INSTALLATION_ID] = id } }
+
+            initialized.set(true)
+        }
     }
-
 }
