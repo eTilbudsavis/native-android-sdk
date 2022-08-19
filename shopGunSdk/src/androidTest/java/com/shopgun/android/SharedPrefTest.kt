@@ -34,7 +34,7 @@ class SharedPrefTest {
 
     @Test
     fun testSharedPrefMigration() {
-        TjekPreferences.initAtStartup(context)
+        TjekPreferences.initialize(context)
         while (!TjekPreferences.initialized.get())
             Thread.sleep(100)
         Assert.assertEquals("123456789", TjekPreferences.installationId)

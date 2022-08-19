@@ -37,7 +37,7 @@ object TjekPreferences {
         }
     )
 
-    fun initAtStartup(context: Context) {
+    fun initialize(context: Context) {
         CoroutineScope(Dispatchers.Default).launch {
             installationId = context.dataStore.data.firstOrNull()?.get(INSTALLATION_ID)
                 ?: createUUID().also { id -> context.dataStore.edit { it[INSTALLATION_ID] = id } }

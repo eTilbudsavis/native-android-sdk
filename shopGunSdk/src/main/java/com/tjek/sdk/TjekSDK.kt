@@ -26,8 +26,8 @@ object TjekSDK {
             setApiKey(context)
             setClientVersion(context)
         }
-        TjekPreferences.initAtStartup(context)
-        TjekEventsTracker.initAtStartup(context)
+        TjekPreferences.initialize(context)
+        TjekEventsTracker.initialize(context)
         return this
     }
 

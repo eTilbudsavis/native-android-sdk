@@ -64,7 +64,7 @@ internal object TjekEventsTracker {
         }
     }
 
-    fun initAtStartup(context: Context) {
+    fun initialize(context: Context) {
         setTrackId(context)
         eventDao = TjekRoomDb.getInstance(context).eventDao()
         migrateEventDatabase()
