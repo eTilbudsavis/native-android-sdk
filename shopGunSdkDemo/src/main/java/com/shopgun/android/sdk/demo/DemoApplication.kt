@@ -1,7 +1,6 @@
 package com.shopgun.android.sdk.demo
 
 import android.app.Application
-import com.shopgun.android.sdk.demo.DemoApplication
 import com.tjek.sdk.TjekSDK
 import com.tjek.sdk.api.remote.EndpointEnvironment
 import com.tjek.sdk.api.remote.NetworkLogLevel
@@ -14,7 +13,7 @@ class DemoApplication : Application() {
 
         TjekSDK.configure(
             enableLogCatMessages = true,
-            networkLogLevel = NetworkLogLevel.Full,
+            networkLogLevel = NetworkLogLevel.Basic,
             endpointEnvironment = EndpointEnvironment.STAGING,
             eventEnvironment = EventEnvironment.STAGING
         )

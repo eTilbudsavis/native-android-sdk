@@ -47,6 +47,7 @@ object TjekPreferences {
                             context.dataStore.edit { it[INSTALLATION_ID] = id }
                         } catch (e: Exception) {
                             TjekLogCat.forceE("Error while writing new UUID: ${e.message}")
+                            TjekLogCat.printStackTrace(e)
                         }
                     }
 

@@ -43,7 +43,8 @@ fun ValidityDateStr.toValidityDate(version: ValidityDateStrVersion): ValidityDat
             ValidityDateStrVersion.V4 -> OffsetDateTime.parse(this, parserV4)
         }
     }catch (e: Exception) {
-        TjekLogCat.e(e.message ?: "date parsing fail for $this")
+        TjekLogCat.e("toValidityDate parsing fail for $this")
+        TjekLogCat.printStackTrace(e)
         null
     }
 }

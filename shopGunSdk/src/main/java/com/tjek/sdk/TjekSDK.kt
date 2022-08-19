@@ -110,6 +110,13 @@ object TjekSDK {
     fun trackEvent(event: Event) {
         TjekEventsTracker.track(event)
     }
+
+    /**
+     * If you need to record handled exception in crash logging tool (e.g. FirebaseCrashlytics)
+     */
+    fun addExceptionLogger(logger: (Exception) -> Unit) {
+        TjekLogCat.exceptionLogger = logger
+    }
 }
 
 // Initializer for the App Startup library

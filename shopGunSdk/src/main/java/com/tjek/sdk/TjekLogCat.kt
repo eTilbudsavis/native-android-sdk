@@ -8,6 +8,8 @@ internal object TjekLogCat {
     private const val tag = "tjek-sdk"
     private val logEnabled = AtomicBoolean(false)
 
+    var exceptionLogger: (Exception) -> Unit = { }
+
     fun enableLogging() {
         logEnabled.set(true)
     }
@@ -33,6 +35,7 @@ internal object TjekLogCat {
     }
 
     fun printStackTrace(e: Exception) {
+        exceptionLogger(e)
         if (!logEnabled.get()) return
         e.printStackTrace()
     }
