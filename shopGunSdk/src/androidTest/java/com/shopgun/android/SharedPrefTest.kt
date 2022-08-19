@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import com.tjek.sdk.TjekPreferences
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -29,6 +30,8 @@ class SharedPrefTest {
         context.getSharedPreferences("com.shopgun.android.sdk_preferences", Context.MODE_PRIVATE)
             .edit()
             .putString("installation_id", "123456789")
+            .putBoolean("location_enabled", false)
+            .putString("location_json", "{\"accuracy\":0,\"address\":\"Kastrup\",\"altitude\":0,\"bearing\":0,\"r_lat\":55.6204,\"r_lng\":12.5934,\"provider\":\"shopgun\",\"r_radius\":700000,\"speed\":0,\"time\":1660303746462,\"r_sensor\":false}")
             .commit()
     }
 
@@ -42,5 +45,18 @@ class SharedPrefTest {
         val prefsPath = context.filesDir.parent?.plus("/shared_prefs/")
         val oldFile = File(prefsPath + "com.shopgun.android.sdk_preferences.xml")
         Assert.assertEquals(false, oldFile.exists())
+        // check location data
+        runBlocking {
+            val legacyLocation = TjekPreferences.getLegacyLocation(context)
+            Assert.assertEquals(true, legacyLocation != null)
+            Assert.assertEquals("Kastrup", legacyLocation?.address)
+            Assert.assertEquals(false, legacyLocation?.isLocationEnabled)
+            Assert.assertEquals(55.6204, legacyLocation?.latitude)
+            Assert.assertEquals(12.5934, legacyLocation?.longitude)
+            Assert.assertEquals(700000, legacyLocation?.radius)
+            Assert.assertEquals(false, legacyLocation?.sensor)
+            Assert.assertEquals(0.0, legacyLocation?.accuracy)
+            Assert.assertEquals(1660303746462, legacyLocation?.time)
+        }
     }
 }
