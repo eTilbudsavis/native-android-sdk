@@ -6,6 +6,7 @@ import android.location.Location
 import com.fonfon.geohash.GeoHash
 import com.shopgun.android.sdk.BuildConfig
 import com.tjek.sdk.*
+import com.tjek.sdk.legacy.LegacyEventHandler
 import com.tjek.sdk.database.TjekRoomDb
 import kotlinx.coroutines.*
 import java.util.concurrent.TimeUnit
@@ -67,8 +68,8 @@ internal object TjekEventsTracker {
     fun initialize(context: Context) {
         setTrackId(context)
         eventDao = TjekRoomDb.getInstance(context).eventDao()
-        migrateEventDatabase()
-        startShipping()
+        migrateEventDatabase(context)
+//        startShipping() todo
     }
 
     private fun startShipping() {
@@ -81,8 +82,18 @@ internal object TjekEventsTracker {
         }
     }
 
-    private fun migrateEventDatabase() {
-        // todo migrateEventDatabase
+    private fun migrateEventDatabase(context: Context) {
+        LegacyEventHandler.initialize(context)
+        LegacyEventHandler.getLegacyEvents()
+            .onSuccess {
+                if (it.isNotEmpty()) {
+                    TjekLogCat.v("Retrieved ${it.size} from the old database")
+                    coroutineScope.launch{ eventDao.insert(it) }
+                }
+            }
+            .onFailure {
+                TjekLogCat.printStackTrace(Exception(it))
+            }
     }
 
     private fun setTrackId(context: Context) {

@@ -1,4 +1,4 @@
-package com.tjek.sdk.api.legacy
+package com.tjek.sdk.legacy
 
 import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.eventstracker.timestamp
