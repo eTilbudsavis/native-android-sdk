@@ -26,8 +26,6 @@ private const val API_KEY_HEADER = "X-Api-Key"
 private const val LANGUAGE_HEADER = "accept-language"
 private const val CONTENT_TYPE_HEADER = "content-type"
 private const val USER_AGENT_HEADER = "user-agent"
-private const val API_DEPRECATION_HEADER = "X-Api-Deprecation-Info"
-private const val API_DEPRECATION_DATE_HEADER = "X-Api-Deprecation-Date"
 
 internal object APIClient {
 
@@ -80,7 +78,7 @@ internal object APIClient {
     }
 
     // missing "accept-encoding": "gzip"
-    private fun getV2HeaderInterceptor(apiKey: String): Interceptor {
+    private fun getHeaderInterceptor(apiKey: String): Interceptor {
         return Interceptor { chain ->
             val request =
                 chain.request().newBuilder()
@@ -98,7 +96,7 @@ internal object APIClient {
 
         val mOkHttpClient = OkHttpClient
             .Builder()
-            .addInterceptor(getV2HeaderInterceptor(apiKey))
+            .addInterceptor(getHeaderInterceptor(apiKey))
             .addInterceptor(getLoggingInterceptor(logLevel))
             .build()
 
