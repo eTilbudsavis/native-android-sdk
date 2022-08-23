@@ -24,9 +24,6 @@ data class OfferV4(
     val validityPeriod: ValidityPeriod,
     val visibleFrom: VisibleFromDate,
     val business: BusinessV4
-//    val publicationId: Id?,
-//    val publicationPageIndex: Int?,
-//    val incitoViewId: String?
 ): Parcelable {
 
     @IgnoredOnParcel
