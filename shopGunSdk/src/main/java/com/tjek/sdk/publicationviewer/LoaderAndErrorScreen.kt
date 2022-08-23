@@ -6,8 +6,8 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.shopgun.android.sdk.R
-import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.models.BrandingV2
+import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.getColorInt
 import com.tjek.sdk.getPrimaryText
 import com.tjek.sdk.getSecondaryText
@@ -18,7 +18,7 @@ import com.tjek.sdk.getSecondaryText
 interface LoaderAndErrorScreenCallback {
 
     fun showLoaderScreen(brandingV2: BrandingV2?): View
-    fun showErrorScreen(brandingV2: BrandingV2?, error: ErrorType): View
+    fun showErrorScreen(brandingV2: BrandingV2?, error: ResponseType.Error): View
 }
 
 
@@ -26,12 +26,12 @@ interface LoaderAndErrorScreenCallback {
 // The publications fragments will call these function if no custom screen are provided.
 // The branding is null if not available or if the publication is configured to not use it.
 
-fun getDefaultErrorScreen(layoutInflater: LayoutInflater, branding: BrandingV2?, error: ErrorType): View {
+fun getDefaultErrorScreen(layoutInflater: LayoutInflater, branding: BrandingV2?, error: ResponseType.Error): View {
     val view = layoutInflater.inflate(R.layout.tjek_sdk_publication_error, null, false)
     val heading = view.findViewById<TextView>(R.id.heading)
     val message = view.findViewById<TextView>(R.id.error_message)
     // set message
-    message?.text = error.toFormattedString()
+    message?.text = error.toString()
     // set colors
     val bgColor = branding?.colorHex.getColorInt().takeUnless { it == 0 } ?: Color.BLACK
     view.setBackgroundColor(bgColor)

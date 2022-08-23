@@ -1,6 +1,6 @@
 package com.tjek.sdk.publicationviewer
 
-import com.tjek.sdk.api.remote.ErrorType
+import com.tjek.sdk.api.remote.ResponseType
 
 // States for the publication load process
 sealed class PublicationLoadingState {
@@ -12,5 +12,5 @@ sealed class PublicationLoadingState {
     object Successful : PublicationLoadingState()
 
     // Error in some of the steps
-    data class Failed(val error: ErrorType) : PublicationLoadingState()
+    data class Failed(val error: ResponseType.Error) : PublicationLoadingState()
 }

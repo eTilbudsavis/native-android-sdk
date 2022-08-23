@@ -38,7 +38,7 @@ class PublicationListActivity : BaseActivity() {
                 nearLocation = LocationQuery(coordinate = coordinate)
             )
             if (res is ResponseType.Success) {
-                publications = res.data?.results!!
+                publications = res.data.results
                 listAdapter.notifyDataSetChanged()
                 hideProgress()
             }

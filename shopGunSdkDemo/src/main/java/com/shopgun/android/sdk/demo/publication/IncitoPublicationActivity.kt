@@ -75,8 +75,8 @@ class IncitoPublicationActivity : BaseActivity() {
     private fun printOfferDetailsOnConsole(incitoOffer: IncitoOffer) {
         lifecycleScope.launch {
             when (val res = TjekAPI.getOfferFromIncito(incitoOffer)) {
-                is ResponseType.Error -> Log.e(TAG, res.errorType.toFormattedString())
-                is ResponseType.Success -> Log.d(TAG, res.data?.toString() ?: "")
+                is ResponseType.Error -> Log.e(TAG, res.toString())
+                is ResponseType.Success -> Log.d(TAG, res.data.toString())
             }
         }
     }

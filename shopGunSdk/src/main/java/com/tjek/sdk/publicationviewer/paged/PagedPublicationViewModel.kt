@@ -9,7 +9,6 @@ import com.tjek.sdk.api.TjekAPI
 import com.tjek.sdk.api.models.PublicationHotspotV2
 import com.tjek.sdk.api.models.PublicationPageV2
 import com.tjek.sdk.api.models.PublicationV2
-import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.publicationviewer.PublicationLoadingState
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoTapInfo
@@ -46,8 +45,8 @@ class PagedPublicationViewModel : ViewModel() {
         _loadingState.postValue(PublicationLoadingState.Loading)
         viewModelScope.launch(Dispatchers.IO) {
             when(val res = TjekAPI.getPublication(publicationId)) {
-                is ResponseType.Error -> _loadingState.postValue(PublicationLoadingState.Failed(res.errorType))
-                is ResponseType.Success -> loadPublication(res.data!!)
+                is ResponseType.Error -> _loadingState.postValue(PublicationLoadingState.Failed(res))
+                is ResponseType.Success -> loadPublication(res.data)
             }
         }
     }
@@ -60,20 +59,20 @@ class PagedPublicationViewModel : ViewModel() {
                 val pagesData = try {
                     pagesCall.await()
                 } catch (e: Exception) {
-                    ResponseType.Error(ErrorType.Unknown(message = e.message))
+                    ResponseType.Error(message = e.message)
                 }
                 val hotspotsData = try {
                     hotspotsCall.await()
                 } catch (e: Exception) {
-                    ResponseType.Error(ErrorType.Unknown(message = e.message))
+                    ResponseType.Error(message = e.message)
                 }
 
                 when (pagesData) {
-                    is ResponseType.Error -> _loadingState.postValue(PublicationLoadingState.Failed(pagesData.errorType))
+                    is ResponseType.Error -> _loadingState.postValue(PublicationLoadingState.Failed(pagesData))
                     is ResponseType.Success -> {
-                        _pages.postValue(pagesData.data ?: emptyList())
+                        _pages.postValue(pagesData.data)
                         if (hotspotsData is ResponseType.Success) {
-                            _hotspots.postValue(hotspotsData.data ?: emptyList())
+                            _hotspots.postValue(hotspotsData.data)
                         }
                         _loadingState.postValue(PublicationLoadingState.Successful)
                     }

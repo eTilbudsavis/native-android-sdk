@@ -13,8 +13,8 @@ import com.shopgun.android.sdk.R
 import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.models.PublicationV2
-import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.models.BrandingV2
+import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.eventstracker.TjekEventsTracker
 import com.tjek.sdk.eventstracker.pagedPublicationOpened
 import com.tjek.sdk.eventstracker.pagedPublicationPageOpened
@@ -237,7 +237,7 @@ class PagedPublicationFragment :
         setVisible(verso = false, loader = true, error = false)
     }
 
-    private fun showError(error: ErrorType) {
+    private fun showError(error: ResponseType.Error) {
         val view =
             customScreenCallback?.showErrorScreen(viewModel.publication.value?.branding, error) ?:
             getDefaultErrorScreen(layoutInflater = layoutInflater,

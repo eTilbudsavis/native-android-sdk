@@ -36,11 +36,11 @@ class EventTest {
         runBlocking {
             when (val res = ShipEventRequest.shipEvents(listOf(ShippableEvent(event1), ShippableEvent(event2)))) {
                 is ResponseType.Error -> {
-                    println(res.errorType.toString())
+                    println(res.toString())
                     Assert.fail()
                 }
                 is ResponseType.Success -> {
-                    println(res.data?.toString())
+                    println(res.data.toString())
                 }
             }
         }
@@ -71,11 +71,11 @@ class EventTest {
         runBlocking {
             when (val res = ShipEventRequest.shipEvents(listOf(ShippableEvent(ppOpen), ShippableEvent(ppPageOpen), ShippableEvent(incitoOpen)))) {
                 is ResponseType.Error -> {
-                    println(res.errorType.toString())
+                    println(res.toString())
                     Assert.fail()
                 }
                 is ResponseType.Success -> {
-                    println(res.data?.toString())
+                    println(res.data.toString())
                 }
             }
         }

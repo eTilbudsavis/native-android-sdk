@@ -23,7 +23,7 @@ import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.IncitoData
 import com.tjek.sdk.api.models.PublicationV2
-import com.tjek.sdk.api.remote.ErrorType
+import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.api.remote.request.FeatureLabel
 import com.tjek.sdk.api.remote.request.IncitoDeviceCategory
 import com.tjek.sdk.api.remote.request.IncitoOrientation
@@ -227,7 +227,7 @@ class IncitoPublicationFragment :
         setVisible(webview = false, loader = true, error = false)
     }
 
-    private fun showError(error: ErrorType) {
+    private fun showError(error: ResponseType.Error) {
         val view =
             customScreenCallback?.showErrorScreen(viewModel.publication.value?.branding, error) ?:
             getDefaultErrorScreen(layoutInflater = layoutInflater,
@@ -373,7 +373,7 @@ class IncitoPublicationFragment :
                 incitoWebView = context?.let { WebView(it) }
                 (fragmentView as FrameLayout).addView(incitoWebView, 0)
 
-                showError(ErrorType.Unknown(message = "Error while loading webview"))
+                showError(ResponseType.Error(message = "Error while loading webview"))
                 return true // continue to execute the app
             }
         }

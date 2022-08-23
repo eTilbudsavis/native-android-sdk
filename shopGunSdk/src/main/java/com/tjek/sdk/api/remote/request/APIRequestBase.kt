@@ -1,17 +1,13 @@
 package com.tjek.sdk.api.remote.request
 
-import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.tjek.sdk.api.remote.APIError
-import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.remote.ResponseType
-import com.tjek.sdk.api.remote.ServerResponse
 import retrofit2.Response
-import java.io.IOException
 
 internal abstract class APIRequestBase {
 
-    suspend fun <T,V> safeApiCall(decoder: suspend (V) -> T, apiCall: suspend () -> Response<V>): ResponseType<T> {
+    suspend fun <T : Any ,V> safeApiCall(decoder: suspend (V) -> T, apiCall: suspend () -> Response<V>): ResponseType<T> {
         try {
             val response = apiCall()
             if (response.isSuccessful) {
@@ -21,38 +17,33 @@ internal abstract class APIRequestBase {
                 }
             }
             return error(response)
-         } catch (e: IOException) {
-            return ResponseType.Error(ErrorType.Network(message = e.message ?: e.toString()))
-         } catch(e: JsonDataException) {
-            return ResponseType.Error(ErrorType.Parsing(message = e.message ?: e.toString()))
          } catch (e: Exception) {
-            return ResponseType.Error(ErrorType.Unknown(message = e.message ?: e.toString()))
+            return ResponseType.Error(message = e.message ?: e.toString())
         }
     }
 
-    private fun <T,V> error(response: Response<V>): ResponseType<T> {
+    private fun <T : Any,V> error(response: Response<V>): ResponseType<T> {
         when (response.code()) {
             408,    // Request Timeout
             429,    // Too Many Requests
             502,    // Bad Gateway
             503,    // Service Unavailable
             504     // Gateway Timeout
-                -> return ResponseType.Error(ErrorType.Network(code = response.code(),
-                message = response.message()))
+                -> return ResponseType.Error(code = response.code(), message = response.message())
         }
 
         // If it's none of the above, let's see if it's a known error from the server
         response.errorBody()?.string()?.let {
             try {
-                val serverResponse = Moshi.Builder().build().adapter(ServerResponse::class.java).fromJson(it)
+                val serverResponse = Moshi.Builder().build().adapter(APIError::class.java).fromJson(it)
                 if (serverResponse != null) {
-                    return ResponseType.Error(ErrorType.Api(APIError(serverResponse)))
+                    return ResponseType.Error(code = serverResponse.code, message = serverResponse.toString())
                 }
             } catch (e: Exception) {
-                return ResponseType.Error(ErrorType.Unknown(code = response.code(), message = it))
+                return ResponseType.Error(code = response.code(), message = it)
             }
         }
-        return ResponseType.Error(ErrorType.Unknown())
+        return ResponseType.Error(message = "Unknown error occurred")
     }
 
 

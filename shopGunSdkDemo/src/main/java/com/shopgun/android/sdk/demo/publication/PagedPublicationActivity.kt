@@ -13,7 +13,6 @@ import com.tjek.sdk.api.TjekAPI
 import com.tjek.sdk.api.models.PublicationHotspotV2
 import com.tjek.sdk.api.models.PublicationPageV2
 import com.tjek.sdk.api.models.PublicationV2
-import com.tjek.sdk.api.remote.ErrorType
 import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.publicationviewer.paged.*
 import com.tjek.sdk.publicationviewer.paged.PagedPublicationFragment.Companion.newInstance
@@ -104,7 +103,7 @@ class PagedPublicationActivity : BaseActivity() {
                 Log.d(TAG, "hotspot loaded ${hotspots.size}")
             }
 
-            override fun onError(error: ErrorType) {}
+            override fun onError(error: ResponseType.Error) {}
         })
     }
 
@@ -113,8 +112,8 @@ class PagedPublicationActivity : BaseActivity() {
             h.offer?.let {
                 lifecycleScope.launch {
                     when (val res = TjekAPI.getOffer(it.id)) {
-                        is ResponseType.Error -> Log.e(TAG, res.errorType.toFormattedString())
-                        is ResponseType.Success -> Log.d(TAG, res.data?.toString() ?: "")
+                        is ResponseType.Error -> Log.e(TAG, res.toString())
+                        is ResponseType.Success -> Log.d(TAG, res.data.toString())
                     }
                 }
             }

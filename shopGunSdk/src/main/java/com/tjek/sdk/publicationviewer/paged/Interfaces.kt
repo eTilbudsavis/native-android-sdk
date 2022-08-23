@@ -3,7 +3,7 @@ package com.tjek.sdk.publicationviewer.paged
 import com.tjek.sdk.api.models.PublicationHotspotV2
 import com.tjek.sdk.api.models.PublicationPageV2
 import com.tjek.sdk.api.models.PublicationV2
-import com.tjek.sdk.api.remote.ErrorType
+import com.tjek.sdk.api.remote.ResponseType
 
 interface OnHotspotTapListener {
     fun onHotspotTap(hotspots: List<PublicationHotspotV2>)
@@ -35,7 +35,7 @@ interface OnLoadComplete {
     /**
      * An error happened during some call
      */
-    fun onError(error: ErrorType)
+    fun onError(error: ResponseType.Error)
 }
 
 /**

@@ -22,12 +22,12 @@ internal class EventShipper(
         TjekLogCat.v("$tag shipping ${toBeShipped.size}")
         when (val res = ShipEventRequest.shipEvents(toBeShipped)) {
             is ResponseType.Error -> {
-                TjekLogCat.e("$tag: ${res.errorType.toFormattedString()}")
+                TjekLogCat.e("$tag: $res")
                 return
             }
             is ResponseType.Success -> {
                 // delete ack-ed events
-                val ack = res.data!!.events.filter { it.status == EventStatus.ack }.map { it.id }
+                val ack = res.data.events.filter { it.status == EventStatus.ack }.map { it.id }
                 if (ack.isNotEmpty()) {
                     eventDao.deleteEvents(ack)
                 }
