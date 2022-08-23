@@ -80,4 +80,13 @@ data class Event(
             payloadType.forEach { put(it.key, it.value) }
         }.toString()
     }
+
+    fun asShippableEvent(): ShippableEvent {
+        return ShippableEvent(
+            id = id,
+            version = version,
+            timestamp = timestamp,
+            jsonEvent = toJson()
+        )
+    }
 }

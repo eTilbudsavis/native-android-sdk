@@ -10,6 +10,7 @@ import com.tjek.sdk.legacy.LegacyEventHandler
 import com.tjek.sdk.database.TjekRoomDb
 import kotlinx.coroutines.*
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 data class EventLocation(
     val geoHash: String,
@@ -22,6 +23,8 @@ internal object TjekEventsTracker {
     private val shipInterval = TimeUnit.SECONDS.toMillis(60)
     private lateinit var eventShipper: EventShipper
     private lateinit var eventDao: EventDao
+
+    private val shipmentScheduled = AtomicBoolean(false)
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -54,14 +57,24 @@ internal object TjekEventsTracker {
         }
         event.addApplicationTrackId(trackId)
         location?.let { event.addLocation(it.geoHash, it.timestamp) }
-        // transform the Event into a shippable one
         coroutineScope.launch {
-            eventDao.insert(ShippableEvent(
-                id = event.id,
-                version = event.version,
-                timestamp = event.timestamp,
-                jsonEvent = event.toJson()
-            ).also { TjekLogCat.v("Event recorded: ${it.jsonEvent}") })
+            // transform the Event into a shippable one
+            eventDao.insert(event.asShippableEvent().also { TjekLogCat.v("Event recorded: ${it.jsonEvent}") })
+
+            // Is it time to schedule a shipment?
+            val canScheduleShipment = !shipmentScheduled.get()
+            val shouldShipImmediately = eventDao.getCount() >= 100 && canScheduleShipment
+            when {
+                shouldShipImmediately -> eventShipper.shipEvents()
+                canScheduleShipment -> {
+                    shipmentScheduled.set(true)
+                    delay(shipInterval)
+                    if (isActive) {
+                        eventShipper.shipEvents()
+                        shipmentScheduled.set(false)
+                    }
+                }
+            }
         }
     }
 
@@ -69,17 +82,7 @@ internal object TjekEventsTracker {
         setTrackId(context)
         eventDao = TjekRoomDb.getInstance(context).eventDao()
         migrateEventDatabase(context)
-//        startShipping() todo
-    }
-
-    private fun startShipping() {
         eventShipper = EventShipper(eventDao)
-        coroutineScope.launch {
-            while (isActive) {
-                eventShipper.shipEvents()
-                delay(shipInterval)
-            }
-        }
     }
 
     private fun migrateEventDatabase(context: Context) {

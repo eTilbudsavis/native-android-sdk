@@ -31,7 +31,10 @@ interface EventDao {
     @Query("DELETE FROM shippable_events WHERE `id` IN (:ids)")
     suspend fun deleteEvents(ids: List<String>)
 
-    @Query("SELECT * FROM shippable_events LIMIT :limit")
-    suspend fun getEvents(limit: Int = 100): List<ShippableEvent>
+    @Query("SELECT * FROM shippable_events")
+    suspend fun getEvents(): List<ShippableEvent>
+
+    @Query("SELECT COUNT(*) FROM shippable_events")
+    suspend fun getCount(): Int
 }
 
