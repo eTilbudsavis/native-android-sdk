@@ -3,7 +3,7 @@ package com.tjek.sdk.publicationviewer.paged
 import android.content.Context
 import android.os.Parcelable
 import com.tjek.sdk.api.models.PublicationV2
-import com.tjek.sdk.publicationviewer.paged.views.IntroOutroView
+import com.tjek.sdk.publicationviewer.paged.views.OutroView
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -23,25 +23,12 @@ data class PagedPublicationConfiguration(
     // Show a pulsating number as loading state when a page image is loaded
     val showPageNumberWhileLoading: Boolean = true,
 
-    // Configurations for intro and outro view
-    val introConfiguration: IntroConfiguration? = null,
+    // Configurations for outro view
     val outroConfiguration: OutroConfiguration? = null
 ): Parcelable {
-    @IgnoredOnParcel
-    val hasIntro = introConfiguration != null
 
     @IgnoredOnParcel
     val hasOutro = outroConfiguration != null
-}
-
-@Parcelize
-open class IntroConfiguration(
-    var publication: PublicationV2? = null
-): Parcelable {
-
-    open fun getIntroView(context: Context, page: Int): IntroOutroView? {
-        return null
-    }
 }
 
 @Parcelize
@@ -49,7 +36,7 @@ open class OutroConfiguration(
     var publication: PublicationV2? = null
 ): Parcelable {
 
-    open fun getOutroView(context: Context, page: Int): IntroOutroView? {
+    open fun getOutroView(context: Context, page: Int): OutroView? {
         return null
     }
 }

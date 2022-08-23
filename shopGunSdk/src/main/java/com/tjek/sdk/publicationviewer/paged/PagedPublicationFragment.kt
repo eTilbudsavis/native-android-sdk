@@ -186,11 +186,6 @@ class PagedPublicationFragment :
             DeviceOrientation.Landscape -> (pageCount / 2) + 1
             else -> pageCount
         }
-
-        if (config.hasIntro) {
-            pageCount++
-            spreadCount++
-        }
         if (config.hasOutro) {
             pageCount++
             spreadCount++
@@ -199,7 +194,6 @@ class PagedPublicationFragment :
             pageCount,
             spreadCount,
             spreadMargin = 0,
-            introConfiguration = config.introConfiguration?.also { it.publication = viewModel.publication.value },
             outroConfiguration = config.outroConfiguration?.also { it.publication = viewModel.publication.value },
             pages = viewModel.pages.value,
             publicationBrandingColor = viewModel.publication.value?.branding?.colorHex.getColorInt(),
@@ -282,7 +276,7 @@ class PagedPublicationFragment :
     }
 
     private fun showHotspotAndNotifyListener(info: VersoTapInfo, longPress: Boolean): Boolean {
-        val hs = viewModel.findHotspot(info, config.hasIntro)
+        val hs = viewModel.findHotspot(info)
 
         // Notify listener
         if (hs.isNotEmpty()) {
@@ -317,18 +311,12 @@ class PagedPublicationFragment :
             if (position < lastSpread) {
                 val currentPages = versoSpreadConfiguration.getPagesFromSpreadPosition(position)
                 val tmpPages: IntArray = currentPages.copyOf(currentPages.size)
-                if (!config.hasIntro) {
-                    for (i in tmpPages.indices) {
-                        tmpPages[i] += 1
-                    }
+                for (i in tmpPages.indices) {
+                    tmpPages[i] += 1
                 }
                 // make sure the first value is not 0
                 tmpPages[0] = tmpPages[0].coerceAtLeast(1)
-                val totalPages = when {
-                    config.hasIntro && config.hasOutro -> versoSpreadConfiguration.pageCount - 2
-                    config.hasIntro || config.hasOutro -> versoSpreadConfiguration.pageCount - 1
-                    else -> versoSpreadConfiguration.pageCount
-                }
+                val totalPages = if (config.hasOutro) versoSpreadConfiguration.pageCount - 1 else versoSpreadConfiguration.pageCount
                 it.onPageNumberChange(currentPages = tmpPages, totalPages = totalPages)
             }
         }
@@ -337,7 +325,6 @@ class PagedPublicationFragment :
     // This callback is not triggered if the swipe is fast, so it's better for tracking the page open event
     // so we won't record the pages swiped away immediately but only the one
     override fun onPagesChanged(currentPosition: Int, currentPages: IntArray?, previousPosition: Int, previousPages: IntArray?) {
-        // todo intro case?
         currentPages?.forEach { p ->
             val page = p + 1 // it starts from 0
             val lastPage = if (config.hasOutro) versoSpreadConfiguration.pageCount - 1 else versoSpreadConfiguration.pageCount

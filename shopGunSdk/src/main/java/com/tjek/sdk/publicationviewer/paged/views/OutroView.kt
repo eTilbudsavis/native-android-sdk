@@ -6,7 +6,7 @@ import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageView
 import com.tjek.sdk.publicationviewer.paged.libs.verso.VersoPageViewListener
 
-abstract class IntroOutroView(
+abstract class OutroView(
     context: Context,
     override val page: Int,
     val publication: PublicationV2?

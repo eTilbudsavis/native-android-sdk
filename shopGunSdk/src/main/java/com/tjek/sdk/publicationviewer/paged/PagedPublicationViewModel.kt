@@ -82,20 +82,14 @@ class PagedPublicationViewModel : ViewModel() {
         }
     }
 
-    fun findHotspot(tap: VersoTapInfo, hasIntro: Boolean): List<PublicationHotspotV2> {
+    fun findHotspot(tap: VersoTapInfo): List<PublicationHotspotV2> {
         val hotspots = _hotspots.value
         if (hotspots?.isNotEmpty() == true && tap.isContentClicked()) {
-            val pages: IntArray = tap.pages.copyOf(tap.pages.size)
-            val introOffset = if (hasIntro) -1 else 0
-            for (i in pages.indices) {
-                pages[i] = pages[i] + introOffset
-            }
-            val pageTapped: Int = tap.pageTapped + introOffset
             val list = mutableListOf<PublicationHotspotV2>()
-            val length = pages.size.toFloat()
+            val length = tap.pages.size.toFloat()
             val xOnClickedPage = (tap.getPercentX() % (1f / length)) * length
             for (h in hotspots) {
-                if (h.hasLocationAt(pages, pageTapped, xOnClickedPage, tap.getPercentY())) {
+                if (h.hasLocationAt(tap.pages, tap.pageTapped, xOnClickedPage, tap.getPercentY())) {
                     list.add(h)
                 }
             }
