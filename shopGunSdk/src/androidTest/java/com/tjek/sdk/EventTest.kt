@@ -1,15 +1,12 @@
-package com.shopgun.android
+package com.tjek.sdk
 
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
-import com.tjek.sdk.TjekSDK
 import com.tjek.sdk.api.remote.NetworkLogLevel
 import com.tjek.sdk.database.TjekRoomDb
 import com.tjek.sdk.eventstracker.EventShipper
-import com.tjek.sdk.eventstracker.PayloadType
 import com.tjek.sdk.eventstracker.ShippableEvent
-import com.tjek.sdk.eventstracker.api.EventClient
 import com.tjek.sdk.eventstracker.api.EventEnvironment
 import com.tjek.sdk.eventstracker.dummy
 import kotlinx.coroutines.runBlocking

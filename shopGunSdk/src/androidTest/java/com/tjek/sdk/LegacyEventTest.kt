@@ -1,4 +1,4 @@
-package com.shopgun.android
+package com.tjek.sdk
 
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry

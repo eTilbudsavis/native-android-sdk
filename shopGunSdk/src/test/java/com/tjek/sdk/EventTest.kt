@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk
+package com.tjek.sdk
 
 import com.tjek.sdk.TjekSDK
 import com.tjek.sdk.api.remote.NetworkLogLevel

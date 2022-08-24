@@ -1,9 +1,8 @@
-package com.shopgun.android
+package com.tjek.sdk
 
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
-import com.tjek.sdk.TjekPreferences
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before

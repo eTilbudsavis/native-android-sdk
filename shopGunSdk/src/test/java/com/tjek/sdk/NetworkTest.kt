@@ -1,8 +1,6 @@
-package com.shopgun.android.sdk
+package com.tjek.sdk
 
 import android.os.Bundle
-import com.tjek.sdk.TjekLogCat
-import com.tjek.sdk.TjekSDK
 import com.tjek.sdk.api.TjekAPI
 import com.tjek.sdk.api.models.Coordinate
 import com.tjek.sdk.api.models.PublicationV2
