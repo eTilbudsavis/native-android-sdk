@@ -802,7 +802,7 @@ public class CenteredViewPager extends ViewGroup {
    public void setPageTransformer(boolean reverseDrawingOrder, PageTransformer transformer,
                                   int pageLayerType) {
       final boolean hasTransformer = transformer != null;
-      final boolean needsPopulate = hasTransformer != (mPageTransformer != null);
+      final boolean needsPopulate = hasTransformer == (mPageTransformer == null);
       mPageTransformer = transformer;
       setChildrenDrawingOrderEnabledCompat(hasTransformer);
       if (hasTransformer) {
@@ -1270,8 +1270,9 @@ public class CenteredViewPager extends ViewGroup {
          }
       }
 
-      mAdapter.setPrimaryItem(this, mCurItem, curItem != null ? curItem.object : null);
-
+      if (curItem != null) {
+         mAdapter.setPrimaryItem(this, mCurItem, curItem.object);
+      }
       mAdapter.finishUpdate(this);
 
       // Check width measurement of current pages and drawing sort order.
@@ -1312,7 +1313,7 @@ public class CenteredViewPager extends ViewGroup {
    private void sortChildDrawingOrder() {
       if (mDrawingOrder != DRAW_ORDER_DEFAULT) {
          if (mDrawingOrderedChildren == null) {
-            mDrawingOrderedChildren = new ArrayList<View>();
+            mDrawingOrderedChildren = new ArrayList<>();
          } else {
             mDrawingOrderedChildren.clear();
          }
@@ -1433,6 +1434,7 @@ public class CenteredViewPager extends ViewGroup {
          out.writeParcelable(adapterState, flags);
       }
 
+      @NonNull
       @Override
       public String toString() {
          return "FragmentPager.SavedState{"
@@ -2829,7 +2831,7 @@ public class CenteredViewPager extends ViewGroup {
                sb.append(" => ").append(parent.getClass().getSimpleName());
             }
             Log.e(TAG, "arrowScroll tried to find focus based on non-child "
-                    + "current focused view " + sb.toString());
+                    + "current focused view " + sb);
             currentFocused = null;
          }
       }

@@ -52,7 +52,7 @@ public abstract class FragmentStatelessPagerAdapter extends FragmentStatePagerAd
     }
 
     @Override
-    public void destroyItem(ViewGroup container, int position, @NonNull Object object) {
+    public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
         ensureFragmentArray();
         mFragments[position] = null;
         // the super method doesn't use container

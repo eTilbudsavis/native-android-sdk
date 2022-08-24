@@ -4,6 +4,8 @@ import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -32,10 +34,10 @@ public class PolygonF implements Parcelable {
     public int npoints;
 
     /* The array of x coordinates. */
-    public float xpoints[];
+    public float[] xpoints;
 
     /* The array of y coordinates. */
-    public float ypoints[];
+    public float[] ypoints;
 
     /** Constructs an empty PolygonF. */
     public PolygonF() {
@@ -51,7 +53,7 @@ public class PolygonF implements Parcelable {
      * @param xpoints an array of x-coordinates for the {@link PolygonF}
      * @param ypoints an array of x-coordinates for the {@link PolygonF}
      */
-    public PolygonF(float xpoints[], float ypoints[]) {
+    public PolygonF(float[] xpoints, float[] ypoints) {
         this(xpoints, ypoints, xpoints.length);
     }
 
@@ -61,7 +63,7 @@ public class PolygonF implements Parcelable {
      * @param ypoints an array of x-coordinates for the {@link PolygonF}
      * @param npoints the number of points in the {@link PolygonF}
      */
-    public PolygonF(float xpoints[], float ypoints[], int npoints) {
+    public PolygonF(float[] xpoints, float[] ypoints, int npoints) {
         if (xpoints.length!=ypoints.length)
             throw new IllegalArgumentException("xpoints.length!=ypoints.length");
         this.npoints = npoints;
@@ -192,6 +194,7 @@ public class PolygonF implements Parcelable {
         return length;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "PolygonF(" + toShortString() + ")";

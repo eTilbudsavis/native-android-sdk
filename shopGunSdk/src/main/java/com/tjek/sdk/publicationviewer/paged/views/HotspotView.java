@@ -17,7 +17,7 @@ public class HotspotView extends View {
     public static final String TAG = HotspotView.class.getSimpleName();
 
     private final RectF mBounds;
-    private boolean longPress;
+    private final boolean longPress;
 
     public HotspotView(Context context, PublicationHotspotV2 hotspot, int[] pages, boolean longPress) {
         super(context);
