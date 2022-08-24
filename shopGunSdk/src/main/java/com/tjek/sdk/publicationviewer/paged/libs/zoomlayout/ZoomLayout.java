@@ -99,7 +99,6 @@ public class ZoomLayout extends FrameLayout {
         init(context, attrs);
     }
 
-    @TargetApi(21)
     public ZoomLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs);
