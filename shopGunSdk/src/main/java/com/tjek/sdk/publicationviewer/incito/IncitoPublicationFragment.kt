@@ -1,6 +1,8 @@
 package com.tjek.sdk.publicationviewer.incito
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -323,14 +325,26 @@ class IncitoPublicationFragment :
 
         incitoWebView?.webViewClient = object : WebViewClient() {
 
-            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+            private fun overrideUrl(context: Context, uri: Uri): Boolean {
+                val url = uri.toString()
                 return if (url.startsWith("http://") || url.startsWith("https://")) {
-                    view.context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-                    true
+                    try {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                        true
+                    } catch (e: ActivityNotFoundException) {
+                        // the device doesn't have a web browser
+                        false
+                    }
                 } else {
                     false
                 }
             }
+
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean = overrideUrl(view.context, request.url)
+
+            @Deprecated("Deprecated in Java")
+            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean = overrideUrl(view.context, Uri.parse(url))
 
             override fun onReceivedError(view: WebView, errorCode: Int, description: String, failingUrl: String) {
                 TjekLogCat.d("onReceivedError received $failingUrl -> $errorCode: $description")
