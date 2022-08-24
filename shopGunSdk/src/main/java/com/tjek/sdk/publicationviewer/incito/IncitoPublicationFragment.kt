@@ -346,6 +346,7 @@ class IncitoPublicationFragment :
             @Deprecated("Deprecated in Java")
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean = overrideUrl(view.context, Uri.parse(url))
 
+            @Deprecated("Deprecated in Java")
             override fun onReceivedError(view: WebView, errorCode: Int, description: String, failingUrl: String) {
                 TjekLogCat.d("onReceivedError received $failingUrl -> $errorCode: $description")
                 checkFailingUrl(failingUrl)

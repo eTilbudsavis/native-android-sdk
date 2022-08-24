@@ -88,7 +88,7 @@ class IncitoPublicationViewModel : ViewModel() {
                 is ResponseType.Error -> _loadingState.postValue(PublicationLoadingState.Failed(res))
                 is ResponseType.Success -> {
                     _loadingState.postValue(PublicationLoadingState.Successful)
-                    _incitoData.postValue(res.data!!)
+                    _incitoData.postValue(res.data)
                     createOfferMap(res.data)
                 }
             }

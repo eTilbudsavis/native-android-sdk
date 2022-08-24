@@ -1,7 +1,6 @@
 package com.tjek.sdk.publicationviewer.incito
 
 import android.net.Uri
-import com.shopgun.android.sdk.log.SgnLog
 import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.api.models.IncitoOffer
 import com.tjek.sdk.api.models.IncitoViewId
@@ -9,7 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONException
 import org.json.JSONObject
-import java.util.*
 
 private const val TAG = "IncitoParser"
 

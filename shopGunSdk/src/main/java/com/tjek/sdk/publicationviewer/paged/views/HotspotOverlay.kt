@@ -2,11 +2,8 @@ package com.tjek.sdk.publicationviewer.paged.views
 
 import android.content.Context
 import android.graphics.*
-import android.os.Build
-import android.util.AttributeSet
 import android.view.View
 import android.view.animation.AnimationUtils
-import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
 import com.shopgun.android.sdk.R
 import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout

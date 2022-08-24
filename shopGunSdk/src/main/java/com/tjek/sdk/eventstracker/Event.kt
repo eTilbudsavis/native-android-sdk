@@ -12,7 +12,7 @@ enum class EventType(val code: Int) {
     FirstOfferOpenedAfterSearch    (6),
     OfferOpenedAfterSearch         (7),
     SearchResultsViewed            (9),
-    IncitoPublicationOpened_v2     (11),
+    IncitoPublicationOpenedV2      (11),
     BasicAnalytics                 (12)
 }
 

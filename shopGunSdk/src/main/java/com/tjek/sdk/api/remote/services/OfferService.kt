@@ -2,7 +2,6 @@ package com.tjek.sdk.api.remote.services
 
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.models.OfferV2Decodable
-import com.tjek.sdk.api.models.OfferV4Decodable
 import com.tjek.sdk.api.models.OfferV4DecodableContainer
 import com.tjek.sdk.api.remote.request.IncitoOfferAPIQuery
 import retrofit2.Response

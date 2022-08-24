@@ -3,7 +3,6 @@ package com.tjek.sdk.api.models
 import android.os.Parcelable
 import androidx.annotation.Keep
 import com.squareup.moshi.JsonClass
-import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 @Keep

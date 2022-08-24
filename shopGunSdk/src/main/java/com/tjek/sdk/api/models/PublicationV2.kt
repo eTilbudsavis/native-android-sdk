@@ -67,7 +67,7 @@ data class PublicationV2(
                 label = p.label,
                 pageCount = p.pageCount ?: 0,
                 offerCount = p.offerCount ?: 0,
-                runDateRange = com.tjek.sdk.api.minOf(fromDate, tillDate)..com.tjek.sdk.api.maxOf(
+                runDateRange = minOf(fromDate, tillDate)..maxOf(
                     fromDate,
                     tillDate
                 ),

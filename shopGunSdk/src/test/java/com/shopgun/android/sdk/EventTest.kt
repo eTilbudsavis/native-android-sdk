@@ -65,7 +65,7 @@ class EventTest {
             )
         )
         val incitoOpen = Event(
-            type = EventType.IncitoPublicationOpened_v2.code,
+            type = EventType.IncitoPublicationOpenedV2.code,
             payloadType = mapOf(Pair("ip.id", "test_incitoId"))
         )
         runBlocking {

@@ -3,9 +3,6 @@ package com.tjek.sdk.api.models
 import android.os.Parcel
 import android.os.Parcelable
 import com.tjek.sdk.api.OpeningHoursDate
-import com.tjek.sdk.api.ValidityDate
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 
 class OpeningHoursDateRange(
     override val start: OpeningHoursDate,

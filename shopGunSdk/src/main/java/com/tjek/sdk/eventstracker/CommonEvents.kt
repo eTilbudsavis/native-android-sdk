@@ -78,7 +78,7 @@ fun incitoPublicationOpened(
     val payload: PayloadType = mapOf(Pair("ip.id", incitoId))
     return Event(
         timestamp =  timestamp,
-        type = EventType.IncitoPublicationOpened_v2.code,
+        type = EventType.IncitoPublicationOpenedV2.code,
         payloadType = payload
     ).apply { addViewToken(generateViewToken(incitoId.toByteArray(Charsets.UTF_8))) }
 }

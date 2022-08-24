@@ -2,7 +2,6 @@ package com.tjek.sdk.api.remote
 
 import androidx.annotation.Keep
 import com.squareup.moshi.JsonClass
-import java.util.*
 
 @Keep
 @JsonClass(generateAdapter = true)

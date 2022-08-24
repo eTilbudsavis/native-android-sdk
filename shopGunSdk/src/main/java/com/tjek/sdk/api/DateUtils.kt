@@ -1,10 +1,12 @@
 package com.tjek.sdk.api
 
 import com.tjek.sdk.TjekLogCat
-import java.time.*
+import java.time.DayOfWeek
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
-import java.time.temporal.ChronoField
 import java.util.*
 
 // V2 date format is in the form yyyy-MM-dd'T'HH:mm:ssZZZZ.
