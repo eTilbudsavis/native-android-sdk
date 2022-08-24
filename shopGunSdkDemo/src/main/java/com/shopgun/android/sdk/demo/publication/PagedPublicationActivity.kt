@@ -24,7 +24,7 @@ class PagedPublicationActivity : BaseActivity() {
     private lateinit var pageTV: TextView
 
     private var publicationConfiguration = PagedPublicationConfiguration(
-        outroConfiguration = OutroConfig(),
+        outroViewGenerator = OutroConfig(),
 //        introConfiguration = IntroConfig()
     )
 

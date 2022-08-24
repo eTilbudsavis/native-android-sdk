@@ -21,15 +21,15 @@ internal class SpreadConfiguration(
     private val pages: List<PublicationPageV2>?,
     private val showPageNumberWhileLoading: Boolean,
     private val publicationBrandingColor: ColorInt,
-    private val outroConfiguration: OutroConfiguration?,
+    private val outroViewGenerator: OutroViewGenerator?,
     deviceConfiguration: Configuration
 ) : VersoSpreadConfiguration {
 
     private var orientation = deviceConfiguration.getDeviceOrientation()
-    private val hasOutro = outroConfiguration != null
+    private val hasOutro = outroViewGenerator != null
 
     override fun getPageView(container: ViewGroup, page: Int): View? {
-        return if (hasOutro && page == pageCount - 1) outroConfiguration?.getOutroView(container.context, page)
+        return if (hasOutro && page == pageCount - 1) outroViewGenerator?.getOutroView(container.context, page)
             else getPublicationPageView(container, page)
     }
 

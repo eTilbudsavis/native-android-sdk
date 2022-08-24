@@ -194,7 +194,7 @@ class PagedPublicationFragment :
             pageCount,
             spreadCount,
             spreadMargin = 0,
-            outroConfiguration = config.outroConfiguration?.also { it.publication = viewModel.publication.value },
+            outroViewGenerator = config.outroViewGenerator?.also { it.publication = viewModel.publication.value },
             pages = viewModel.pages.value,
             publicationBrandingColor = viewModel.publication.value?.branding?.colorHex.getColorInt(),
             deviceConfiguration = resources.configuration,

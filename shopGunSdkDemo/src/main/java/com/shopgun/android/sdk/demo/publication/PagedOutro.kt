@@ -5,11 +5,11 @@ import android.widget.TextView
 import com.shopgun.android.sdk.demo.R
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.publicationviewer.paged.views.OutroView
-import com.tjek.sdk.publicationviewer.paged.OutroConfiguration
+import com.tjek.sdk.publicationviewer.paged.OutroViewGenerator
 
 // Example of how to configure view for Outro.
 
-class OutroConfig: OutroConfiguration() {
+class OutroConfig: OutroViewGenerator() {
     override fun getOutroView(context: Context, page: Int): OutroView {
         return DemoOutroView(context, page, publication)
     }

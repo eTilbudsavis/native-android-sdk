@@ -23,17 +23,17 @@ data class PagedPublicationConfiguration(
     // Show a pulsating number as loading state when a page image is loaded
     val showPageNumberWhileLoading: Boolean = true,
 
-    // Configurations for outro view
-    val outroConfiguration: OutroConfiguration? = null
+    // Outro view
+    val outroViewGenerator: OutroViewGenerator? = null
 ): Parcelable {
 
     @IgnoredOnParcel
-    val hasOutro = outroConfiguration != null
+    val hasOutro = outroViewGenerator != null
 }
 
 @Parcelize
-open class OutroConfiguration(
-    var publication: PublicationV2? = null
+open class OutroViewGenerator(
+    var publication: PublicationV2? = null // set by PagedPublicationFragment
 ): Parcelable {
 
     open fun getOutroView(context: Context, page: Int): OutroView? {
