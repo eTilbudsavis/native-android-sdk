@@ -1,6 +1,7 @@
 package com.tjek.sdk.legacy
 
 import android.content.Context
+import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.eventstracker.ShippableEvent
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -12,33 +13,39 @@ internal object LegacyEventHandler {
     private var realmConfiguration: RealmConfiguration? = null
 
     fun initialize(context: Context) {
-        Realm.init(context)
-        // create a configuration based on what we used to have
-        realmConfiguration = RealmConfiguration.Builder()
-            .name("com.shopgun.android.sdk.anonymousEvent.realm")
-            .modules(LegacyEventRealmModule())
-            .schemaVersion(2)
-            .build()
-        // check if there are events in the old database: do we have an old db file?
-        if (File(realmConfiguration!!.path).exists()) {
-            var isEmpty = true
-            try {
-                val realm = Realm.getInstance(realmConfiguration!!)
-                isEmpty = realm.isEmpty
-                if (isEmpty) {
-                    // if it's empty, try to delete it
-                    realm.close()
-                    Realm.deleteRealm(realmConfiguration!!)
+        try {
+            Realm.init(context)
+            // create a configuration based on what we used to have
+            realmConfiguration = RealmConfiguration.Builder()
+                .name("com.shopgun.android.sdk.anonymousEvent.realm")
+                .modules(LegacyEventRealmModule())
+                .schemaVersion(2)
+                .build()
+            // check if there are events in the old database: do we have an old db file?
+            if (File(realmConfiguration!!.path).exists()) {
+                var isEmpty = true
+                try {
+                    val realm = Realm.getInstance(realmConfiguration!!)
+                    isEmpty = realm.isEmpty
+                    if (isEmpty) {
+                        // if it's empty, try to delete it
+                        realm.close()
+                        Realm.deleteRealm(realmConfiguration!!)
+                    }
+                } catch (ignore: Exception) {
+                } finally {
+                    if (isEmpty) {
+                        realmConfiguration = null
+                    }
                 }
-            } catch (ignore: Exception) {
-            } finally {
-                if (isEmpty) {
-                    realmConfiguration = null
-                }
+            } else {
+                // the db doesn't exist
+                realmConfiguration = null
             }
-        } else {
-            // the db doesn't exist
+        } catch (e: Exception) {
+            // Realm.init could throw exceptions
             realmConfiguration = null
+            TjekLogCat.printStackTrace(e)
         }
     }
 
