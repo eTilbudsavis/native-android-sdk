@@ -1,5 +1,5 @@
 include ':tjekSdk'
 if (!System.env.JITPACK) {
-    include ':shopGunSdkDemo'
+    include ':tjekSdkDemo'
 }
 
