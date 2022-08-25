@@ -9,7 +9,7 @@ import com.tjek.sdk.publicationviewer.paged.OutroViewGenerator
 
 // Example of how to configure view for Outro.
 
-class OutroConfig: OutroViewGenerator() {
+class OutroGen: OutroViewGenerator() {
     override fun getOutroView(context: Context, page: Int): OutroView {
         return DemoOutroView(context, page, publication)
     }

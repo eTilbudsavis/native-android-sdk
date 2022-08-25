@@ -24,8 +24,7 @@ class PagedPublicationActivity : BaseActivity() {
     private lateinit var pageTV: TextView
 
     private var publicationConfiguration = PagedPublicationConfiguration(
-        outroViewGenerator = OutroConfig(),
-//        introConfiguration = IntroConfig()
+        outroViewGenerator = OutroGen()
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
