@@ -14,13 +14,12 @@ package com.tjek.sdk.publicationviewer.paged.layouts;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import android.annotation.TargetApi;
+
 import android.content.Context;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
-import com.shopgun.android.utils.NumberUtils;
+import com.tjek.sdk.publicationviewer.paged.utils.NumberUtils;
 
 public class AspectRatioFrameLayout extends FrameLayout {
 

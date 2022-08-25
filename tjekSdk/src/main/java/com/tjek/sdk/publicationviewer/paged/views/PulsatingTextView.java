@@ -23,8 +23,8 @@ import android.view.View;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.IntRange;
+import androidx.core.graphics.ColorUtils;
 
-import com.shopgun.android.utils.ColorUtils;
 
 public class PulsatingTextView extends androidx.appcompat.widget.AppCompatTextView {
 
