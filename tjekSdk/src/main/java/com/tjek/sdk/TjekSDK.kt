@@ -25,11 +25,10 @@ import com.tjek.sdk.eventstracker.TjekEventsTracker
 import com.tjek.sdk.eventstracker.api.EventClient
 import com.tjek.sdk.eventstracker.api.EventEnvironment
 
-//todo: change namespace keys
-const val META_API_KEY = "com.shopgun.android.sdk.api_key"
-const val META_DEVELOP_API_KEY = "com.shopgun.android.sdk.develop.api_key"
-const val META_APPLICATION_TRACK_ID = "com.shopgun.android.sdk.eventskit.application_track_id"
-const val META_APPLICATION_TRACK_ID_DEBUG = "com.shopgun.android.sdk.develop.eventskit.application_track_id"
+const val META_API_KEY = "com.tjek.sdk.api_key"
+const val META_DEVELOP_API_KEY = "com.tjek.sdk.develop.api_key"
+const val META_APPLICATION_TRACK_ID = "com.tjek.sdk.application_track_id"
+const val META_APPLICATION_TRACK_ID_DEBUG = "com.tjek.sdk.develop.application_track_id"
 
 object TjekSDK {
 

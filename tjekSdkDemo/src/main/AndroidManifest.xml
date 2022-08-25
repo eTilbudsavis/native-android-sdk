@@ -17,12 +17,14 @@
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
+
+        <!-- Demo keys -->
         <meta-data
-            android:name="com.shopgun.android.sdk.api_key"
-            android:value="@string/tjek_sdk_api_key"/>
+            android:name="com.tjek.sdk.api_key"
+            android:value="00ibm8b65trmxkmo6fy42nr5hyesj8o9"/>
         <meta-data
-            android:name="com.shopgun.android.sdk.develop.api_key"
-            android:value="@string/tjek_sdk_api_key_debug"/>
+            android:name="com.tjek.sdk.develop.api_key"
+            android:value="00ibm8b65trmxkmo6fy42nr5hyesj8o9"/>
 
         <activity
             android:name=".MainActivity"

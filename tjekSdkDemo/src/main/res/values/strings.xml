@@ -4,11 +4,4 @@
     <string name="app_name">Tjek SDK Demo</string>
     <string name="title_activity_main">Tjek SDK Demo</string>
 
-    <!-- Remember to rab your own key/secret at https://etilbudsavis.dk/developers/ and get started :-) -->
-    <string name="tjek_sdk_api_key">00ibm8b65trmxkmo6fy42nr5hyesj8o9</string>
-    <string name="tjek_sdk_api_secret">00ibm8b65t6vgrgdjrel73okq0yxdb2a</string>
-
-    <string name="tjek_sdk_api_key_debug">00ibm8b65trmxkmo6fy42nr5hyesj8o9</string>
-    <string name="tjek_sdk_api_secret_debug">00ibm8b65t6vgrgdjrel73okq0yxdb2a</string>
-
 </resources>
