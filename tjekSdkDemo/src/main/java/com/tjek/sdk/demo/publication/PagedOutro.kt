@@ -2,7 +2,7 @@ package com.tjek.sdk.demo.publication
 
 import android.content.Context
 import android.widget.TextView
-import com.shopgun.android.sdk.demo.R
+import com.tjek.sdk.demo.R
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.publicationviewer.paged.views.OutroView
 import com.tjek.sdk.publicationviewer.paged.OutroViewGenerator

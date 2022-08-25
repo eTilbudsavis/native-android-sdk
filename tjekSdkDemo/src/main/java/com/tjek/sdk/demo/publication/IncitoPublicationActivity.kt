@@ -7,8 +7,8 @@ import android.util.Log
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
-import com.shopgun.android.sdk.demo.R
-import com.shopgun.android.sdk.demo.base.BaseActivity
+import com.tjek.sdk.demo.R
+import com.tjek.sdk.demo.base.BaseActivity
 import com.tjek.sdk.api.TjekAPI
 import com.tjek.sdk.api.models.IncitoOffer
 import com.tjek.sdk.api.models.PublicationV2

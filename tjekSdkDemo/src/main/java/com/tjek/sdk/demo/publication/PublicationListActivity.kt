@@ -6,10 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.lifecycle.lifecycleScope
-import com.shopgun.android.sdk.demo.Constants
-import com.shopgun.android.sdk.demo.GlideApp
-import com.shopgun.android.sdk.demo.R
-import com.shopgun.android.sdk.demo.base.BaseActivity
+import com.tjek.sdk.demo.Constants
+import com.tjek.sdk.demo.GlideApp
+import com.tjek.sdk.demo.R
+import com.tjek.sdk.demo.base.BaseActivity
 import com.tjek.sdk.api.TjekAPI
 import com.tjek.sdk.api.models.Coordinate
 import com.tjek.sdk.api.models.PublicationV2

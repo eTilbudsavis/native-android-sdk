@@ -5,11 +5,11 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
-import com.shopgun.android.sdk.demo.Constants.OSLO
-import com.shopgun.android.sdk.demo.Constants.STOCKHOLM
-import com.shopgun.android.sdk.demo.Constants.TJEK_HQ
-import com.shopgun.android.sdk.demo.R
-import com.shopgun.android.sdk.demo.publication.PublicationListActivity
+import com.tjek.sdk.demo.Constants.OSLO
+import com.tjek.sdk.demo.Constants.STOCKHOLM
+import com.tjek.sdk.demo.Constants.TJEK_HQ
+import com.tjek.sdk.demo.R
+import com.tjek.sdk.demo.publication.PublicationListActivity
 import com.tjek.sdk.api.models.Coordinate
 
 class MainActivity : AppCompatActivity() {
