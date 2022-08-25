@@ -102,7 +102,6 @@ private fun getOffersId(offersMap: MutableMap<String, IncitoOffer>, view: JSONOb
                 featureLabels = list)
         }
     } catch (e: JSONException) {
-        e.printStackTrace()
-        TjekLogCat.v("$TAG -> parse error")
+        TjekLogCat.v("$TAG -> parse error: ${e.message}")
     }
 }

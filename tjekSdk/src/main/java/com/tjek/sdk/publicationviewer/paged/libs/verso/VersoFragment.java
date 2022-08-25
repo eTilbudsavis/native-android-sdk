@@ -183,7 +183,7 @@ public class VersoFragment extends Fragment {
         }
 
         private void printScrolled(String msg, int position, float positionOffset, int positionOffsetPixels) {
-            TjekLogCat.INSTANCE.d(String.format(Locale.ENGLISH, "%s: scroll[ %s, pos:%s, offset:%.2f, offsetPx:%s ]", TAG, msg, position, positionOffset, positionOffsetPixels));
+//            TjekLogCat.INSTANCE.d(String.format(Locale.ENGLISH, "%s: scroll[ %s, pos:%s, offset:%.2f, offsetPx:%s ]", TAG, msg, position, positionOffset, positionOffsetPixels));
         }
 
         private void scrollTo(int position) {
