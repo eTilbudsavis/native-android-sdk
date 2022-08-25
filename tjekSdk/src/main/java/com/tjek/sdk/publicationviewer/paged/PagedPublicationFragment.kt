@@ -130,10 +130,7 @@ class PagedPublicationFragment :
         }
         viewModel.loadingState.observe(this) { state ->
             when (state) {
-                is PublicationLoadingState.Failed -> {
-                    loadCompleteListener?.onError(state.error)
-                    showError(state.error)
-                }
+                is PublicationLoadingState.Failed -> showError(state.error)
                 PublicationLoadingState.Loading -> showLoader()
                 PublicationLoadingState.Successful -> {
                     setVersoSpreadConfiguration()

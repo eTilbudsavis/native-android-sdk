@@ -103,7 +103,6 @@ class PagedPublicationActivity : BaseActivity() {
                 Log.d(TAG, "hotspot loaded ${hotspots.size}")
             }
 
-            override fun onError(error: ResponseType.Error) {}
         })
     }
 

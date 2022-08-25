@@ -45,11 +45,7 @@ interface OnLoadComplete {
      * Hotspot data loaded from Tjek api
      */
     fun onHotspotLoaded(hotspots: List<PublicationHotspotV2>)
-
-    /**
-     * An error happened during some call
-     */
-    fun onError(error: ResponseType.Error)
+    
 }
 
 /**
