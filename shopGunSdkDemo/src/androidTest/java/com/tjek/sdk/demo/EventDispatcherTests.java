@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.demo;
+package com.tjek.sdk.demo;
 
 import android.content.Context;
 import androidx.test.InstrumentationRegistry;

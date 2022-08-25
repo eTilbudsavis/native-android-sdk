@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.demo
+package com.tjek.sdk.demo
 
 import com.tjek.sdk.api.models.Coordinate
 

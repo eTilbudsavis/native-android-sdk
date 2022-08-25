@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.demo
+package com.tjek.sdk.demo
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.shopgun.android.sdk.demo.Constants.OSLO
 import com.shopgun.android.sdk.demo.Constants.STOCKHOLM
 import com.shopgun.android.sdk.demo.Constants.TJEK_HQ
+import com.shopgun.android.sdk.demo.R
 import com.shopgun.android.sdk.demo.publication.PublicationListActivity
 import com.tjek.sdk.api.models.Coordinate
 

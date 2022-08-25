@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.demo;
+package com.tjek.sdk.demo;
 
 /*
  * Copyright 2016 Realm Inc.

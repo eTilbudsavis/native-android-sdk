@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.demo.base;
+package com.tjek.sdk.demo.base;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;

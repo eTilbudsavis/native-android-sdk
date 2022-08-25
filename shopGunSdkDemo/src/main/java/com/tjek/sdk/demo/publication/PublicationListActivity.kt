@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.demo.publication
+package com.tjek.sdk.demo.publication
 
 import android.os.Bundle
 import android.view.LayoutInflater

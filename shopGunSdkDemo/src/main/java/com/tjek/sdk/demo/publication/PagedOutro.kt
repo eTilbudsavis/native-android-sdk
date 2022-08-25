@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.demo.publication
+package com.tjek.sdk.demo.publication
 
 import android.content.Context
 import android.widget.TextView

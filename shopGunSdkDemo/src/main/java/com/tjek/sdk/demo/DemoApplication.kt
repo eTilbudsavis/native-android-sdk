@@ -1,4 +1,4 @@
-package com.shopgun.android.sdk.demo
+package com.tjek.sdk.demo
 
 import android.app.Application
 import com.tjek.sdk.TjekSDK
