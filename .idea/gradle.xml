@@ -11,8 +11,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/shopGunSdk" />
             <option value="$PROJECT_DIR$/shopGunSdkDemo" />
+            <option value="$PROJECT_DIR$/tjekSdk" />
           </set>
         </option>
       </GradleProjectSettings>

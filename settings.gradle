@@ -1,4 +1,4 @@
-include ':shopGunSdk'
+include ':tjekSdk'
 if (!System.env.JITPACK) {
     include ':shopGunSdkDemo'
 }
