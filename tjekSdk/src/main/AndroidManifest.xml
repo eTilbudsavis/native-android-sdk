@@ -15,7 +15,7 @@
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.shopgun.android.sdk">
+    package="com.tjek.sdk">
 
     <application>
         <provider
@@ -23,7 +23,7 @@
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
             tools:node="merge">
-            <meta-data  android:name="com.tjek.sdk.TjekSDKInitializer"
+            <meta-data  android:name=".TjekSDKInitializer"
                 android:value="androidx.startup" />
         </provider>
     </application>

@@ -4,7 +4,7 @@ import android.content.Context
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
-import com.shopgun.android.sdk.R
+import com.tjek.sdk.R
 import com.tjek.sdk.api.models.PublicationHotspotV2
 import com.tjek.sdk.publicationviewer.paged.views.*
 

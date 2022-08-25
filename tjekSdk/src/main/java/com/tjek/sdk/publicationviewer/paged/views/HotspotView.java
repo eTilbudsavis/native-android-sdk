@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 
-import com.shopgun.android.sdk.R;
+import com.tjek.sdk.R;
 import com.tjek.sdk.api.models.PublicationHotspotV2;
 
 @SuppressLint("ViewConstructor")

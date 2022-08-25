@@ -2,7 +2,7 @@ package com.tjek.sdk.publicationviewer.paged.views
 
 import android.content.Context
 import android.view.animation.AnimationUtils
-import com.shopgun.android.sdk.R
+import com.tjek.sdk.R
 import com.tjek.sdk.api.models.PublicationHotspotV2
 
 class HotspotLongPressView(

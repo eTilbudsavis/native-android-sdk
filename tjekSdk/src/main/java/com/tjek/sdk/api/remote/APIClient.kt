@@ -3,7 +3,7 @@ package com.tjek.sdk.api.remote
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.os.LocaleListCompat
-import com.shopgun.android.sdk.BuildConfig
+import com.tjek.sdk.BuildConfig
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.EnumJsonAdapter
 import com.tjek.sdk.META_API_KEY

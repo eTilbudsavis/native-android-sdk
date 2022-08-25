@@ -3,7 +3,6 @@ package com.tjek.sdk
 import android.content.Context
 import android.location.Location
 import androidx.startup.Initializer
-import com.shopgun.android.sdk.BuildConfig
 import com.tjek.sdk.api.remote.EndpointEnvironment
 import com.tjek.sdk.api.remote.NetworkLogLevel
 import com.tjek.sdk.api.remote.APIClient

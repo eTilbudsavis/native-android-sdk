@@ -5,10 +5,10 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 import android.util.Log;
 
-import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.eventskit.AnonymousEvent;
-import com.shopgun.android.sdk.eventskit.AnonymousEventWrapper;
-import com.shopgun.android.sdk.eventskit.EventDispatcher;
+import com.tjek.sdk.ShopGun;
+import com.tjek.sdk.eventskit.AnonymousEvent;
+import com.tjek.sdk.eventskit.AnonymousEventWrapper;
+import com.tjek.sdk.eventskit.EventDispatcher;
 
 import org.junit.After;
 import org.junit.Before;

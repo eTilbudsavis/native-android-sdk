@@ -6,8 +6,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 import androidx.test.runner.AndroidJUnitRunner;
 
-import com.shopgun.android.sdk.corekit.realm.SgnLegacyEventRealmModule;
-import com.shopgun.android.sdk.utils.Constants;
+import com.tjek.sdk.corekit.realm.SgnLegacyEventRealmModule;
+import com.tjek.sdk.utils.Constants;
 
 import org.junit.runner.RunWith;
 

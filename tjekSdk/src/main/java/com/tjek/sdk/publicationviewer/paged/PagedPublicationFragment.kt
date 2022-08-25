@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.fragment.app.viewModels
-import com.shopgun.android.sdk.R
+import com.tjek.sdk.R
 import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.models.PublicationV2

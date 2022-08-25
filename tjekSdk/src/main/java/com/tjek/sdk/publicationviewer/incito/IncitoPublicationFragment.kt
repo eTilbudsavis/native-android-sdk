@@ -18,8 +18,8 @@ import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.shopgun.android.sdk.BuildConfig
-import com.shopgun.android.sdk.R
+import com.tjek.sdk.BuildConfig
+import com.tjek.sdk.R
 import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.api.Id

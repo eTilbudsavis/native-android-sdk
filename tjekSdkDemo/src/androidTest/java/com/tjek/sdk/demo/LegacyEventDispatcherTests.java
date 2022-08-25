@@ -5,10 +5,10 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 import android.util.Log;
 
-import com.shopgun.android.sdk.ShopGun;
-import com.shopgun.android.sdk.corekit.realm.SgnLegacyEventRealmModule;
-import com.shopgun.android.sdk.eventskit.LegacyEventDispatcher;
-import com.shopgun.android.sdk.utils.Constants;
+import com.tjek.sdk.ShopGun;
+import com.tjek.sdk.corekit.realm.SgnLegacyEventRealmModule;
+import com.tjek.sdk.eventskit.LegacyEventDispatcher;
+import com.tjek.sdk.utils.Constants;
 
 import org.junit.After;
 import org.junit.Before;

@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.shopgun.android.sdk.R
+import com.tjek.sdk.R
 import com.tjek.sdk.api.models.BrandingV2
 import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.getColorInt

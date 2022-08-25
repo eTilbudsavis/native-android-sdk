@@ -5,7 +5,7 @@ import android.graphics.*
 import android.view.View
 import android.view.animation.AnimationUtils
 import androidx.core.content.res.ResourcesCompat
-import com.shopgun.android.sdk.R
+import com.tjek.sdk.R
 import com.tjek.sdk.publicationviewer.paged.layouts.PublicationSpreadLayout
 
 // At the moment we use only Round Rectangle, but we can add other shapes as well if we need to.
