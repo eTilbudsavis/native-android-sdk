@@ -23,7 +23,7 @@
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
             tools:node="merge">
-            <meta-data  android:name=".TjekSDKInitializer"
+            <meta-data  android:name="com.tjek.sdk.TjekSDKInitializer"
                 android:value="androidx.startup" />
         </provider>
     </application>
