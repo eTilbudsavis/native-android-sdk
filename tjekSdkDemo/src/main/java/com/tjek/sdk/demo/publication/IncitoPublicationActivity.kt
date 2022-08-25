@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
@@ -11,6 +12,7 @@ import com.tjek.sdk.demo.R
 import com.tjek.sdk.demo.base.BaseActivity
 import com.tjek.sdk.api.TjekAPI
 import com.tjek.sdk.api.models.IncitoOffer
+import com.tjek.sdk.api.models.IncitoViewId
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.publicationviewer.incito.*
@@ -67,6 +69,10 @@ class IncitoPublicationActivity : BaseActivity() {
             ) {
                 printOfferDetailsOnConsole(incitoOffer)
                 Toast.makeText(this@IncitoPublicationActivity, "Offer details printed in console", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onOfferListReady(offers: Map<IncitoViewId, IncitoOffer>) {
+                Log.d(TAG, "${offers.size} offers in this incito")
             }
 
         })

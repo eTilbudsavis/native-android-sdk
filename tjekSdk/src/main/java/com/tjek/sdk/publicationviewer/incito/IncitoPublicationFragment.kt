@@ -38,6 +38,7 @@ import com.tjek.sdk.DeviceOrientation
 import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.IncitoData
+import com.tjek.sdk.api.models.IncitoViewId
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.api.remote.request.FeatureLabel
@@ -179,6 +180,10 @@ class IncitoPublicationFragment :
         customScreenCallback = callback
     }
 
+    fun goToOffer(viewId: IncitoViewId) {
+        incitoWebView?.evaluateJavascript("javascript:goToView('$viewId')", null)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null) {
@@ -231,6 +236,7 @@ class IncitoPublicationFragment :
                 PublicationLoadingState.Successful -> {} // nothing to do here. The observer on the incito data will handle the init
             }
         }
+        viewModel.offers.observe(this) { map -> map?.let { eventListener?.onOfferListReady(it) } }
     }
 
     private fun showLoader() {

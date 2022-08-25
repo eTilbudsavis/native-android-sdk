@@ -15,6 +15,7 @@ package com.tjek.sdk.publicationviewer.incito
  * limitations under the License.
  */
 import com.tjek.sdk.api.models.IncitoOffer
+import com.tjek.sdk.api.models.IncitoViewId
 import com.tjek.sdk.api.models.PublicationV2
 
 interface IncitoEventListener {
@@ -33,4 +34,10 @@ interface IncitoEventListener {
     fun onOfferClick(incitoOffer: IncitoOffer, publicationV2: PublicationV2?)
     fun onOfferLongClick(incitoOffer: IncitoOffer, publicationV2: PublicationV2?)
 
+    /**
+     * If you're interested in having a list of all the available offers in the incito,
+     * this callback will give you the list of all the offers available.
+     * To jump to a specific offer, use the key, `IncitoViewId`, to jump to it calling `IncitoPublicationFragment.goToOffer`.
+     */
+    fun onOfferListReady(offers: Map<IncitoViewId, IncitoOffer>)
 }
