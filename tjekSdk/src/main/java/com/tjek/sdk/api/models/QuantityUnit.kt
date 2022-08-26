@@ -15,7 +15,6 @@ package com.tjek.sdk.api.models
  * limitations under the License.
  */
 
-import com.digidemic.unitof.UnitOf
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -72,99 +71,25 @@ enum class QuantityUnit(val unit: String, val symbol: String) {
             return values().find { it.symbol.lowercase(Locale.ENGLISH) == symbol.lowercase(Locale.ENGLISH) } ?: Piece
         }
     }
-}
 
-fun QuantityUnit.isMass(): Boolean = when(this) {
-    QuantityUnit.Microgram, QuantityUnit.Milligram, QuantityUnit.Centigram, QuantityUnit.Decigram,
-    QuantityUnit.Gram, QuantityUnit.Kilogram, QuantityUnit.Tonne, QuantityUnit.UsTon, QuantityUnit.ImperialTon,
-    QuantityUnit.Stone, QuantityUnit.Pound, QuantityUnit.Ounce
-    -> true
-    else -> false
-}
 
-fun QuantityUnit.isVolume(): Boolean = when(this) {
-    QuantityUnit.Milliliter, QuantityUnit.Centiliter, QuantityUnit.Deciliter, QuantityUnit.Liter, QuantityUnit.Kiloliter, QuantityUnit.Megaliter,
-    QuantityUnit.CubicMeter, QuantityUnit.UsTeaspoon, QuantityUnit.UsTablespoon, QuantityUnit.UsFluidOunce, QuantityUnit.UsCup,
-    QuantityUnit.UsPint, QuantityUnit.UsQuart, QuantityUnit.UsGallon, QuantityUnit.ImperialTeaspoon, QuantityUnit.ImperialTablespoon,
-    QuantityUnit.ImperialFluidOunce, QuantityUnit.ImperialPint, QuantityUnit.ImperialQuart, QuantityUnit.ImperialGallon,
-    QuantityUnit.CubicInch, QuantityUnit.CubicFoot
-    -> true
-    else -> false
-}
+    fun isMass(): Boolean = when(this) {
+        Microgram, Milligram, Centigram, Decigram,
+        Gram, Kilogram, Tonne, UsTon, ImperialTon,
+        Stone, Pound, Ounce
+        -> true
+        else -> false
+    }
 
-// The unit we convert to when expressing price per unit (eg. 30kr/100g -> 300kr/kg)
-fun QuantityUnit.getPricePerUnit(): QuantityUnit = when(this) {
-
-    QuantityUnit.Microgram, QuantityUnit.Milligram, QuantityUnit.Centigram, QuantityUnit.Decigram,
-    QuantityUnit.Gram, QuantityUnit.Kilogram, QuantityUnit.Tonne
-    -> QuantityUnit.Kilogram
-
-    QuantityUnit.UsTon, QuantityUnit.ImperialTon, QuantityUnit.Stone, QuantityUnit.Pound, QuantityUnit.Ounce
-    -> QuantityUnit.Pound
-
-    QuantityUnit.Milliliter, QuantityUnit.Centiliter, QuantityUnit.Deciliter, QuantityUnit.Liter,
-    QuantityUnit.Kiloliter, QuantityUnit.Megaliter, QuantityUnit.CubicMeter
-    -> QuantityUnit.Liter
-
-    QuantityUnit.UsCup, QuantityUnit.UsPint, QuantityUnit.UsQuart, QuantityUnit.UsGallon, QuantityUnit.CubicFoot
-    -> QuantityUnit.UsQuart
-
-    QuantityUnit.UsTeaspoon, QuantityUnit.UsTablespoon, QuantityUnit.UsFluidOunce, QuantityUnit.CubicInch
-    -> QuantityUnit.UsFluidOunce
-
-    QuantityUnit.ImperialTeaspoon, QuantityUnit.ImperialTablespoon, QuantityUnit.ImperialFluidOunce
-    -> QuantityUnit.ImperialFluidOunce
-
-    QuantityUnit.ImperialPint, QuantityUnit.ImperialQuart, QuantityUnit.ImperialGallon
-    -> QuantityUnit.ImperialQuart
-
-    QuantityUnit.Piece -> QuantityUnit.Piece
-}
-
-fun QuantityUnit.getPricePerUnitScalingFactor(): Double = when(this) {
-
-    QuantityUnit.Microgram -> UnitOf.Mass().fromMicrograms(1.0).toKilograms()
-    QuantityUnit.Milligram -> UnitOf.Mass().fromMilligrams(1.0).toKilograms()
-    QuantityUnit.Centigram -> UnitOf.Mass().fromCentigrams(1.0).toKilograms()
-    QuantityUnit.Decigram -> UnitOf.Mass().fromDecigrams(1.0).toKilograms()
-    QuantityUnit.Gram -> UnitOf.Mass().fromGrams(1.0).toKilograms()
-    QuantityUnit.Tonne -> UnitOf.Mass().fromTonsMetric(1.0).toKilograms()
-    QuantityUnit.Kilogram -> 1.0
-
-    QuantityUnit.UsTon -> UnitOf.Mass().fromTonsUS(1.0).toPounds()
-    QuantityUnit.ImperialTon -> UnitOf.Mass().fromTonsImperial(1.0).toPounds()
-    QuantityUnit.Stone -> UnitOf.Mass().fromStonesUK(1.0).toPounds()
-    QuantityUnit.Ounce -> UnitOf.Mass().fromOuncesUS(1.0).toPounds()
-    QuantityUnit.Pound -> 1.0
-
-    QuantityUnit.Milliliter -> UnitOf.Volume().fromMilliliters(1.0).toLiters()
-    QuantityUnit.Centiliter -> UnitOf.Volume().fromCentiliters(1.0).toLiters()
-    QuantityUnit.Deciliter -> UnitOf.Volume().fromDeciliters(1.0).toLiters()
-    QuantityUnit.Kiloliter -> UnitOf.Volume().fromKiloliters(1.0).toLiters()
-    QuantityUnit.Megaliter -> UnitOf.Volume().fromMegaliters(1.0).toLiters()
-    QuantityUnit.CubicMeter -> UnitOf.Volume().fromCubicMeters(1.0).toLiters()
-    QuantityUnit.Liter -> 1.0
-
-    QuantityUnit.UsCup -> UnitOf.Volume().fromCupsUS(1.0).toQuartsUS()
-    QuantityUnit.UsPint -> UnitOf.Volume().fromPintsUS(1.0).toQuartsUS()
-    QuantityUnit.UsGallon -> UnitOf.Volume().fromGallonsUS(1.0).toQuartsUS()
-    QuantityUnit.CubicFoot -> UnitOf.Volume().fromCubicFeet(1.0).toQuartsUS()
-    QuantityUnit.UsQuart -> 1.0
-
-    QuantityUnit.UsTeaspoon -> UnitOf.Volume().fromTeaspoonsUS(1.0).toFluidOuncesUS()
-    QuantityUnit.UsTablespoon -> UnitOf.Volume().fromTablespoonsUS(1.0).toFluidOuncesUS()
-    QuantityUnit.CubicInch -> UnitOf.Volume().fromCubicInches(1.0).toFluidOuncesUS()
-    QuantityUnit.UsFluidOunce -> 1.0
-
-    QuantityUnit.ImperialTeaspoon -> UnitOf.Volume().fromTeaspoonsUK(1.0).toFluidOuncesUK()
-    QuantityUnit.ImperialTablespoon -> UnitOf.Volume().fromTablespoonsUK(1.0).toFluidOuncesUK()
-    QuantityUnit.ImperialFluidOunce -> 1.0
-
-    QuantityUnit.ImperialPint -> UnitOf.Volume().fromPintsUK(1.0).toQuartsUK()
-    QuantityUnit.ImperialGallon -> UnitOf.Volume().fromGallonsUK(1.0).toQuartsUK()
-    QuantityUnit.ImperialQuart -> 1.0
-
-    QuantityUnit.Piece -> 1.0
+    fun isVolume(): Boolean = when(this) {
+        Milliliter, Centiliter, Deciliter, Liter, Kiloliter, Megaliter,
+        CubicMeter, UsTeaspoon, UsTablespoon, UsFluidOunce, UsCup,
+        UsPint, UsQuart, UsGallon, ImperialTeaspoon, ImperialTablespoon,
+        ImperialFluidOunce, ImperialPint, ImperialQuart, ImperialGallon,
+        CubicInch, CubicFoot
+        -> true
+        else -> false
+    }    
 }
 
 // Derive from JsonAdapter in a more complicated way to support null
