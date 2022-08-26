@@ -84,11 +84,16 @@ class PagedPublicationViewModel : ViewModel() {
                 when (pagesData) {
                     is ResponseType.Error -> _loadingState.postValue(PublicationLoadingState.Failed(pagesData))
                     is ResponseType.Success -> {
-                        _pages.postValue(pagesData.data)
-                        if (hotspotsData is ResponseType.Success) {
-                            _hotspots.postValue(hotspotsData.data)
+                        if (pagesData.data.isEmpty()) {
+                            // this shouln't happen, but it could and it would crash later on.
+                            _loadingState.postValue(PublicationLoadingState.Failed(ResponseType.Error(message = "No pages found")))
+                        } else {
+                            _pages.postValue(pagesData.data)
+                            if (hotspotsData is ResponseType.Success) {
+                                _hotspots.postValue(hotspotsData.data)
+                            }
+                            _loadingState.postValue(PublicationLoadingState.Successful)
                         }
-                        _loadingState.postValue(PublicationLoadingState.Successful)
                     }
                 }
 
