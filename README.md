@@ -31,19 +31,18 @@ The easiest way to initialize the SDK is to put the keys in the `AndroidManifest
         android:name="com.tjek.sdk.api_key"
         android:value="your_api_key"/>
     <meta-data
-	    android:name="com.tjek.sdk.application_track_id"
-	    android:value="your_track_id"/>
+	android:name="com.tjek.sdk.application_track_id"
+	android:value="your_track_id"/>
 	    
-	 <!-- 
-	 Optionally, you can also add the correspondent keys for development phase.
-	 These are used only when the build is DEBUG type.
-	 -->   
+	
+    <!-- Optionally, you can also add the correspondent keys for development phase. 
+These are used only when the build is DEBUG type.-->   
     <meta-data
         android:name="com.tjek.sdk.develop.api_key"
         android:value="your_develop_api_key"/>
     <meta-data
-	    android:name="com.tjek.sdk.develop.application_track_id"
-	    android:value="your_develop_track_id"/>	    
+	android:name="com.tjek.sdk.develop.application_track_id"
+	android:value="your_develop_track_id"/>	    
     ...
 </application>
 ```
