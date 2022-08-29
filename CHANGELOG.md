@@ -7,7 +7,7 @@ Version 6.0.0
 
 This release sees a major restructuring of the entire SDK. Some external libraries developed by Tjek (like `Verso` and `ZoomLayout` are been moved inside the SDK code (the separated GH projects won't be mantained anymore).
 
-It also include the brand new `publicationviewer.incito` package to allow you to show Incito publication as well. The demo app included in the SDK has been updated to showcase the main use cases and it's a good starting point
+It also include the brand new `publicationviewer.incito` package to allow you to show Incito publication as well. The demo app included in the SDK has been updated to showcase the main use cases and it's a good starting point for your migration as well.
 
 #### Migration v5 -> v6
 
