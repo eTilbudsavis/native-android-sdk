@@ -17,6 +17,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.tjek.sdk">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application>
         <provider
             android:name="androidx.startup.InitializationProvider"
