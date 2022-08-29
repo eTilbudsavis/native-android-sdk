@@ -17,11 +17,11 @@ It also include the brand new `publicationviewer.incito` package to allow you to
 
 * If you were implementing some interfaces for the PDF viewer, like `PagedPublicationFragment.OnHotspotTapListener` or `PagedPublicationConfiguration.OnLoadComplete`, take a look at [`Interfaces.kt`](tjekSdk/src/main/java/com/tjek/sdk/publicationviewer/paged/Interfaces.kt) file in the `publicationviewer.paged` package: it contains all interfaces for the pdf viewer.
 
-* There is no need to build a ShopGun instance anymore (`ShopGun.Builder.setInstance()`. The new Tjek SDK will initialize itself automatically. If you need to change some default setting, check [`TjekSDK.configure()`](tjekSdk/src/main/java/com/tjek/sdk/TjekSDK.kt) to see what is available.
+* There is no need to build a ShopGun instance anymore (`ShopGun.Builder.setInstance()`). The new Tjek SDK will initialize itself automatically. If you need to change some default setting, check [`TjekSDK.configure()`](tjekSdk/src/main/java/com/tjek/sdk/TjekSDK.kt) to see what is available.
 
 * All the api calls can be found in [`TjekAPI.kt`](tjekSdk/src/main/java/com/tjek/sdk/api/TjekAPI.kt) and are `suspend fun`, so you can use Kotlin coroutines to fetch the data you need.
 
-* Tjek SDK doesn't store app's location anymore in anyway. Location info has to be passed in for each api calls that could be use it (is an optional parameter). If you stored your location inside ShopGun sdk, this can be retrieved using `TjekPreferences.getLegacyLocation(Context)`: this will return the last stored location, if any is available, in the data class [`LegacyLocation`](tjekSdk/src/main/java/com/tjek/sdk/legacy/LegacyLocation.kt)
+* Tjek SDK doesn't store app's location anymore in anyway. Location info has to be passed in for each api calls that could be use it (is an optional parameter). If you stored your location inside ShopGun sdk, this can be retrieved using `TjekPreferences.getLegacyLocation(Context)`: this will return the last stored location, if any is available, in the data class [`LegacyLocation`](tjekSdk/src/main/java/com/tjek/sdk/legacy/LegacyLocation.kt). This also means that the events generated and sent by the SDK won't include location data automatically, but you need to provide it by calling `TjekSDK.setEventsLocation(Location)`.
 
 Version 5.0.2
 -------------
