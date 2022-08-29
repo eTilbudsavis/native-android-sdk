@@ -11,6 +11,13 @@ It also include the brand new `publicationviewer.incito` package to allow you to
 
 #### Migration v5 -> v6
 
+* Change the manifest metadata
+	* from `name="com.shopgun.android.sdk.api_key"` to `name="com.tjek.sdk.api_key"`
+	* from `name="com.shopgun.android.sdk.develop.api_key"` to `name="com.tjek.sdk.develop.api_key"`
+	* from `name="com.shopgun.android.sdk.eventskit.application_track_id"` to `name="com.tjek.sdk.application_track_id"`
+	* from `name="com.shopgun.android.sdk.develop.eventskit.application_track_id"` to `name="com.tjek.sdk.develop.application_track_id"`
+	* **remove** metadata related to the `api_secret`. It's not needed anymore.
+
 * The root namespace has been changed from `com.shopgun.android.sdk` to `com.tjek.sdk`. Imports directives change accordingly, but also the internal packages changed: everything related to publications is under `com.tjek.sdk.publicationviewer.[incito|paged]`, so instead of `import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationFragment` you now have `import com.tjek.sdk.publicationviewer.paged.PagedPublicationFragment`
 
 * Many models changed name, like `Catalog` is now `PublicationV2` and is used for both incito and pdfs. If you directly used any other model, check the `api.models` package to see if it's been renamed and moved there. You can also check what is the return type of each api call in [`TjekAPI.kt`](tjekSdk/src/main/java/com/tjek/sdk/api/TjekAPI.kt) to be sure what to use in each specific case.
