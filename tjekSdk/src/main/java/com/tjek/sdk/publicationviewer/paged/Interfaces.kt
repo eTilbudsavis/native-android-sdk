@@ -51,7 +51,7 @@ interface OnLoadComplete {
 /**
  * Easy access to page counter to be shown in the UI.
  * First page is 1, last is publicationV2.pageCount - 1
- * This accounts for intro and outro views.
+ * This accounts for outro view.
  */
 interface OnPageNumberChangeListener {
 

@@ -1,5 +1,8 @@
-#TjekSDK
 [![Generic badge](https://img.shields.io/badge/minSdkVersion-21-informational.svg)](https://shields.io/)
+
+
+TjekSDK
+==========
 
 ![Logo](docs/SDKAppIcon-120w.png)
 
@@ -129,10 +132,12 @@ The Tjek SDK is unaware of any location information and *it won't store it* in a
 
 If you want your location info to be recorded also in the events sent by the Tjek SDK, you need to set it using `TjekSDK.setEventsLocation(Location)`: we recommend to set it only if the location is coming from a GPS-sourced data. All the events generated after you set the location will carry that info.
 
+
 ## Changelog
 For a history of changes to the SDK, see the [changelog](CHANGELOG.md) file.
 
 _This also includes migration steps if needed._
+
 
 ##License
 

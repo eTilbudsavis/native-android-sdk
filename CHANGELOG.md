@@ -1,7 +1,29 @@
 Change Log
 ==========
 
-Version 5.1.0
+Version 6.0.0
+-------------
+**This release is not backwards-compatible with the previous one.**
+
+This release sees a major restructuring of the entire SDK. Some external libraries developed by Tjek (like `Verso` and `ZoomLayout` are been moved inside the SDK code (the separated GH projects won't be mantained anymore).
+
+It also include the brand new `publicationviewer.incito` package to allow you to show Incito publication as well. The demo app included in the SDK has been updated to showcase the main use cases and it's a good starting point
+
+#### Migration v5 -> v6
+
+* The root namespace has been changed from `com.shopgun.android.sdk` to `com.tjek.sdk`. Imports directives change accordingly, but also the internal packages changed: everything related to publications is under `com.tjek.sdk.publicationviewer.[incito|paged]`, so instead of `import com.shopgun.android.sdk.pagedpublicationkit.PagedPublicationFragment` you now have `import com.tjek.sdk.publicationviewer.paged.PagedPublicationFragment`
+
+* Many models changed name, like `Catalog` is now `PublicationV2` and is used for both incito and pdfs. If you directly used any other model, check the `api.models` package to see if it's been renamed and moved there. You can also check what is the return type of each api call in [`TjekAPI.kt`](tjekSdk/src/main/java/com/tjek/sdk/api/TjekAPI.kt) to be sure what to use in each specific case.
+
+* If you were implementing some interfaces for the PDF viewer, like `PagedPublicationFragment.OnHotspotTapListener` or `PagedPublicationConfiguration.OnLoadComplete`, take a look at [`Interfaces.kt`](tjekSdk/src/main/java/com/tjek/sdk/publicationviewer/paged/Interfaces.kt) file in the `publicationviewer.paged` package: it contains all interfaces for the pdf viewer.
+
+* There is no need to build a ShopGun instance anymore (`ShopGun.Builder.setInstance()`. The new Tjek SDK will initialize itself automatically. If you need to change some default setting, check [`TjekSDK.configure()`](tjekSdk/src/main/java/com/tjek/sdk/TjekSDK.kt) to see what is available.
+
+* All the api calls can be found in [`TjekAPI.kt`](tjekSdk/src/main/java/com/tjek/sdk/api/TjekAPI.kt) and are `suspend fun`, so you can use Kotlin coroutines to fetch the data you need.
+
+* Tjek SDK doesn't store app's location anymore in anyway. Location info has to be passed in for each api calls that could be use it (is an optional parameter). If you stored your location inside ShopGun sdk, this can be retrieved using `TjekPreferences.getLegacyLocation(Context)`: this will return the last stored location, if any is available, in the data class [`LegacyLocation`](tjekSdk/src/main/java/com/tjek/sdk/legacy/LegacyLocation.kt)
+
+Version 5.0.2
 -------------
 * `api` package update: new classes (`EnvironmentGraph` and `EnvironmentEvents`), endpoint updates.
 * Remove dependency to [android-apollo](https://github.com/apollographql/apollo-android) 
