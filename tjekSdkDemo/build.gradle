@@ -22,7 +22,7 @@ android {
     defaultConfig {
         versionCode versionMajor * 100000 + versionMinor * 1000 + versionPatch
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
-        applicationId "com.shopgun.android.sdk.demo"
+        applicationId "com.tjek.sdk.demo"
         minSdkVersion 21
         targetSdkVersion 31
     }
