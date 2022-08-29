@@ -1,5 +1,10 @@
-[![Generic badge](https://img.shields.io/badge/minSdkVersion-21-informational.svg)](https://shields.io/)
+![Generic badge](https://img.shields.io/badge/minSdkVersion-21-informational.svg)
 
+#### Relevant dependencies
+[![Generic badge](https://img.shields.io/badge/retrofit-2.9.0-informational.svg)](https://github.com/square/retrofit)
+[![Generic badge](https://img.shields.io/badge/moshi-1.13.0-informational.svg)](https://github.com/square/moshi)
+[![Generic badge](https://img.shields.io/badge/room-2.4.3-informational.svg)](https://developer.android.com/jetpack/androidx/releases/room)
+[![Generic badge](https://img.shields.io/badge/glide-4.13.2-informational.svg)](https://github.com/bumptech/glide)
 
 TjekSDK
 ==========
@@ -136,10 +141,10 @@ If you want your location info to be recorded also in the events sent by the Tje
 ## Changelog
 For a history of changes to the SDK, see the [changelog](CHANGELOG.md) file.
 
-_This also includes migration steps if needed._
+*This also includes migration steps if needed.*
 
 
-##License
+## License
 
     Copyright (C) 2022 Tjek
     
