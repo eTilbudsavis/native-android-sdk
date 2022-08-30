@@ -23,8 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.BaseTarget
-import com.bumptech.glide.request.target.SizeReadyCallback
+import com.bumptech.glide.request.target.CustomViewTarget
 import com.bumptech.glide.request.transition.Transition
 import com.tjek.sdk.ColorInt
 import com.tjek.sdk.api.models.PublicationPageV2
@@ -46,35 +45,11 @@ class PageView(
 ) : AspectRatioFrameLayout(context), VersoPageView {
 
     private var size: Size? = null
-    private lateinit var imageView: ImageView
+    private var imageView: ImageView
     private var pulsatingTextView: PulsatingTextView? = null
     private var loadCompletionListener: VersoPageViewListener.OnLoadCompleteListener? = null
 
-    private val pageTarget = object : BaseTarget<Drawable>() {
-
-        private var callback = true
-
-        override fun onResourceReady(
-            resource: Drawable,
-            transition: Transition<in Drawable>?
-        ) {
-            pulsatingTextView?.visibility = View.GONE
-            imageView.setImageDrawable(resource)
-            loadCompletionListener?.let {
-                if (callback) {
-                    callback = false
-                    it.onPageLoadComplete(true, this@PageView)
-                }
-            }
-        }
-
-        override fun getSize(cb: SizeReadyCallback) {
-            cb.onSizeReady(SIZE_ORIGINAL, SIZE_ORIGINAL)
-        }
-
-        override fun removeCallback(cb: SizeReadyCallback) { }
-
-    }
+    private var pageTarget: CustomViewTarget<ImageView, Drawable>
 
     init {
         aspectRatio = publicationPage?.aspectRatio?.toFloat() ?: 1f
@@ -82,6 +57,7 @@ class PageView(
         //Add the ImageView
         imageView = PageImageView(context)
         addView(imageView)
+        pageTarget = createPageTarget(imageView)
 
         // Add the pulsating number
         val lp = LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -139,5 +115,33 @@ class PageView(
                 Size.Zoom -> publicationPage?.images?.zoom
             })
             .into(pageTarget)
+    }
+
+    private fun createPageTarget(target: ImageView) = object : CustomViewTarget<ImageView, Drawable>(target) {
+
+        private var callback = true
+
+        override fun onResourceReady(
+            resource: Drawable,
+            transition: Transition<in Drawable>?
+        ) {
+            pulsatingTextView?.visibility = View.GONE
+            target.setImageDrawable(resource)
+            loadCompletionListener?.let {
+                if (callback) {
+                    callback = false
+                    it.onPageLoadComplete(true, this@PageView)
+                }
+            }
+        }
+
+        override fun onLoadFailed(errorDrawable: Drawable?) {
+            target.setImageDrawable(null)
+        }
+
+        override fun onResourceCleared(placeholder: Drawable?) {
+            target.setImageDrawable(null)
+        }
+
     }
 }
