@@ -112,6 +112,7 @@ dependencies {
 
 }
 
+// JitPack release tasks: todo update or delete
 afterEvaluate {
     publishing {
         publications {
