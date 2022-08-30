@@ -32,8 +32,8 @@ It also include the brand new `publicationviewer.incito` package to allow you to
 
 Version 5.0.2
 -------------
-* `api` package update: new classes (`EnvironmentGraph` and `EnvironmentEvents`), endpoint updates.
-* Remove dependency to [android-apollo](https://github.com/apollographql/apollo-android) 
+* Moved the project to Jitpack
+* Removed jCenter and unused dependencies
 
 Version 5.0.0
 -------------
