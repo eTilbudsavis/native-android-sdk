@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="tjek_pagedpub_hotspot_corner_radius">5dp</dimen>
+    <dimen name="tjek_pagedpub_hotspot_stroke_width">3dp</dimen>
+    <dimen name="tjek_pagedpub_hotspot_padding">1dp</dimen>
+
+</resources>

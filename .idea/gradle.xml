@@ -10,15 +10,11 @@
         <option name="gradleJvm" value="Embedded JDK" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/../markhor/library" />
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/shopGunSdk" />
-            <option value="$PROJECT_DIR$/shopGunSdkDemo" />
-            <option value="$PROJECT_DIR$/../verso-android/library" />
-            <option value="$PROJECT_DIR$/../zoomlayout/library" />
+            <option value="$PROJECT_DIR$/tjekSdk" />
+            <option value="$PROJECT_DIR$/tjekSdkDemo" />
           </set>
         </option>
-        <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

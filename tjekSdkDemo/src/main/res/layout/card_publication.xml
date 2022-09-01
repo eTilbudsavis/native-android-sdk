@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/card_logo"
+            android:layout_width="120dp"
+            android:layout_height="150dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="9dp"
+            android:adjustViewBounds="true"
+            android:padding="4dp" />
+
+        <TextView
+            android:id="@+id/card_dealer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="9dp"
+            android:layout_toRightOf="@+id/card_logo"
+            android:text="catalog"
+            android:textSize="18sp" />
+
+
+        <TextView
+            android:id="@+id/card_label_prefix"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_dealer"
+            android:layout_marginBottom="3dp"
+            android:layout_toRightOf="@+id/card_logo"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="- " />
+
+        <TextView
+            android:id="@+id/card_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_dealer"
+            android:layout_toRightOf="@+id/card_label_prefix"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_toRightOf="@id/card_logo"
+            android:layout_alignBottom="@id/card_logo"
+            android:layout_alignParentEnd="true"
+            android:gravity="end">
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/card_pdf"
+                android:drawableStart="@drawable/pdf"
+                android:text="PDF"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/card_incito"
+                android:drawableStart="@drawable/incito"
+                android:drawablePadding="6dp"
+                android:text="Incito"
+                />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>

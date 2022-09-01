@@ -3,11 +3,14 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopgun-android-sdk.iml" filepath="$PROJECT_DIR$/.idea/modules/shopgun-android-sdk.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1271692172/shopgun-android-sdk.markhor.iml" filepath="$PROJECT_DIR$/.idea/modules/1271692172/shopgun-android-sdk.markhor.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopGunSdk/shopgun-android-sdk.shopGunSdk.iml" filepath="$PROJECT_DIR$/.idea/modules/shopGunSdk/shopgun-android-sdk.shopGunSdk.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopGunSdkDemo/shopgun-android-sdk.shopGunSdkDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/shopGunSdkDemo/shopgun-android-sdk.shopGunSdkDemo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/248743055/shopgun-android-sdk.verso.iml" filepath="$PROJECT_DIR$/.idea/modules/248743055/shopgun-android-sdk.verso.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/988686503/shopgun-android-sdk.zoomlayout.iml" filepath="$PROJECT_DIR$/.idea/modules/988686503/shopgun-android-sdk.zoomlayout.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopGunSdk/shopgun-android-sdk.tjekSdk.iml" filepath="$PROJECT_DIR$/.idea/modules/shopGunSdk/shopgun-android-sdk.tjekSdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdk/shopgun-android-sdk.tjekSdk.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdk/shopgun-android-sdk.tjekSdk.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdk/shopgun-android-sdk.tjekSdk.main.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdk/shopgun-android-sdk.tjekSdk.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdk/shopgun-android-sdk.tjekSdk.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdk/shopgun-android-sdk.tjekSdk.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.main.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.unitTest.iml" />
     </modules>
   </component>
 </project>

@@ -1,0 +1,3 @@
+[submodule "tjekSdk/src/main/assets/incito/webview"]
+	path = tjekSdk/src/main/assets/incito/webview
+	url = git@github.com:shopgun/incito-webview.git

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="tjek_pagedpub_hotspot_stroke">#FFFFFF</color>
+    <color name="tjek_pagedpub_hotspot_solid">#99FFFFFF</color>
+    <color name="tjek_pagedpub_hotspot_dimmed_bg">#73000000</color>
+
+</resources>
