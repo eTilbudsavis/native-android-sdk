@@ -2,15 +2,15 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopgun-android-sdk.iml" filepath="$PROJECT_DIR$/.idea/modules/shopgun-android-sdk.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/shopGunSdk/shopgun-android-sdk.tjekSdk.iml" filepath="$PROJECT_DIR$/.idea/modules/shopGunSdk/shopgun-android-sdk.tjekSdk.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdk/shopgun-android-sdk.tjekSdk.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdk/shopgun-android-sdk.tjekSdk.androidTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdk/shopgun-android-sdk.tjekSdk.main.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdk/shopgun-android-sdk.tjekSdk.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdk/shopgun-android-sdk.tjekSdk.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdk/shopgun-android-sdk.tjekSdk.unitTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.androidTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.main.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdkDemo/shopgun-android-sdk.tjekSdkDemo.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjek-android-sdk.iml" filepath="$PROJECT_DIR$/.idea/modules/tjek-android-sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdk/tjek-android-sdk.tjekSdk.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdk/tjek-android-sdk.tjekSdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdk/tjek-android-sdk.tjekSdk.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdk/tjek-android-sdk.tjekSdk.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdk/tjek-android-sdk.tjekSdk.main.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdk/tjek-android-sdk.tjekSdk.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdk/tjek-android-sdk.tjekSdk.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdk/tjek-android-sdk.tjekSdk.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdkDemo/tjek-android-sdk.tjekSdkDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdkDemo/tjek-android-sdk.tjekSdkDemo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdkDemo/tjek-android-sdk.tjekSdkDemo.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdkDemo/tjek-android-sdk.tjekSdkDemo.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdkDemo/tjek-android-sdk.tjekSdkDemo.main.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdkDemo/tjek-android-sdk.tjekSdkDemo.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tjekSdkDemo/tjek-android-sdk.tjekSdkDemo.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tjekSdkDemo/tjek-android-sdk.tjekSdkDemo.unitTest.iml" />
     </modules>
   </component>
 </project>

@@ -2,8 +2,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'maven-publish'
 apply plugin: 'realm-android'
+apply plugin: 'com.vanniktech.maven.publish'
 
 buildscript {
     // Custom buildscript closure for SDK module, to allow compilation from other projects
@@ -15,7 +15,6 @@ buildscript {
 repositories {
     mavenCentral()
     google()
-    maven { url "https://jitpack.io" }
 }
 
 def tjekSdkVersion = '"6.0.0"'
@@ -110,19 +109,4 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
 
-}
-
-// JitPack release tasks: todo update or delete
-afterEvaluate {
-    publishing {
-        publications {
-            // Creates a Maven publication called "release".
-            release(MavenPublication) {
-                from components.release
-                groupId = 'com.github.shopgun'
-                artifactId = 'shopgun-android-sdk'
-                version = '5.0.1'
-            }
-        }
-    }
 }
