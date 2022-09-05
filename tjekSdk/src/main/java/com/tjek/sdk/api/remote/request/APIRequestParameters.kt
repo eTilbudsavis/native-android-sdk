@@ -14,6 +14,7 @@ package com.tjek.sdk.api.remote.request
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import androidx.annotation.Keep
 import com.tjek.sdk.api.models.Coordinate
 
 /**
@@ -33,6 +34,7 @@ data class LocationQuery(
     }
 }
 
+@Keep
 enum class StoresRequestSortOrder(val key: String) {
     Nearest("distance"),
     BusinessNameAZ("dealer")

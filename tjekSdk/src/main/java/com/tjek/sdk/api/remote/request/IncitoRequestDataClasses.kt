@@ -21,12 +21,15 @@ import com.tjek.sdk.api.Id
 
 private val knownVersions = listOf("1.0.0")
 
+@Keep
 @Suppress("EnumEntryName")
 enum class IncitoDeviceCategory { mobile, tablet, desktop }
 
+@Keep
 @Suppress("EnumEntryName")
 enum class IncitoOrientation { vertical, horizontal }
 
+@Keep
 @Suppress("EnumEntryName")
 enum class IncitoPointerType { fine, coarse }
 

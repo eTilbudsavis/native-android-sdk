@@ -55,6 +55,11 @@ android {
         correctErrorTypes = true
     }
 
+    configurations.all {
+        // Don't cache changing modules at all.
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+
 }
 
 dependencies {
