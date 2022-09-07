@@ -17,7 +17,6 @@ package com.tjek.sdk.eventstracker
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
-import com.fonfon.geohash.GeoHash
 import com.tjek.sdk.*
 import com.tjek.sdk.legacy.LegacyEventHandler
 import com.tjek.sdk.database.TjekRoomDb

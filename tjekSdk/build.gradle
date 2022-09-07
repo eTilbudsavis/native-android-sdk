@@ -99,7 +99,6 @@ dependencies {
 
     // Other libs
     implementation "io.github.everythingme:overscroll-decor-android:1.1.1"
-    implementation "com.github.drfonfon:android-geohash:0.22"
     implementation "com.github.bumptech.glide:glide:4.13.2"
 
     // Test
