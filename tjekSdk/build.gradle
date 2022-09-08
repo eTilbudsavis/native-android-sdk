@@ -34,8 +34,6 @@ android {
         correctErrorTypes = true
     }
 
-    useLibrary 'org.apache.http.legacy'
-
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 31

@@ -10,9 +10,6 @@
         android:largeHeap="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <uses-library
-            android:name="org.apache.http.legacy"
-            android:required="false" />
 
         <!-- Demo keys -->
         <meta-data
