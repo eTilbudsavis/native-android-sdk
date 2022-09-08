@@ -17,8 +17,6 @@ repositories {
     google()
 }
 
-def tjekSdkVersion = '"6.0.0"'
-
 android {
 
     compileSdkVersion 31
@@ -41,7 +39,7 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 31
-        buildConfigField("String", "TJEK_SDK_VERSION", "${tjekSdkVersion}")
+        buildConfigField("String", "TJEK_SDK_VERSION", "\"${VERSION_NAME}\"")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
