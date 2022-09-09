@@ -99,6 +99,7 @@ data class PublicationV2(
     }
 }
 
+@Keep
 @Suppress("EnumEntryName")
 enum class PublicationType { paged, incito }
 

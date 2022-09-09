@@ -1,4 +1,6 @@
-![Generic badge](https://img.shields.io/badge/minSdkVersion-21-informational.svg)
+[![Maven Central](https://img.shields.io/maven-central/v/com.tjek.sdk/android-sdk.svg?label=Maven%20Central&color=success)](https://search.maven.org/search?q=g:%22com.tjek.sdk%22%20AND%20a:%22android-sdk%22)
+
+![Generic badge](https://img.shields.io/badge/minSdkVersion-21-important)
 
 #### Relevant dependencies
 [![Generic badge](https://img.shields.io/badge/retrofit-2.9.0-informational.svg)](https://github.com/square/retrofit)
@@ -14,7 +16,11 @@ TjekSDK
 This is an SDK for interacting with the different Tjek services from within your own apps.
 
 ## Installation
-todo: jitpack/maven
+Tjek SDK is available through Maven Central:
+
+`implementation "com.tjek.sdk:android-sdk:6.0.0"`
+
+Snapshots of the development version are available in [Sonatype's `snapshots` repository](https://s01.oss.sonatype.org/content/repositories/snapshots/).
 
 ## Getting Started
 ### Application keys

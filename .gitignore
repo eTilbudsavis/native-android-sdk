@@ -64,3 +64,6 @@ compiler.xml
 jarRepositories.xml
 markdown-navigator-enh.xml
 assetWizardSettings.xml
+mapping.txt
+tjekSdkDemo/release
+deploymentTargetDropDown.xml

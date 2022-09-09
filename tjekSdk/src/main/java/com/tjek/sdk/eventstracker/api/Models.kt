@@ -39,5 +39,6 @@ data class EventResponse(
     val events: List<ShippedEvent>
 )
 
+@Keep
 @Suppress("EnumEntryName", "unused")
 enum class EventStatus { ack, nack, validation_error, unknown }

@@ -15,11 +15,13 @@ package com.tjek.sdk.api.models
  * limitations under the License.
  */
 
+import androidx.annotation.Keep
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import java.util.*
 
+@Keep
 enum class QuantityUnit(val unit: String, val symbol: String) {
 
     // mass (base unit: grams)
