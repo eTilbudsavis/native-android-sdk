@@ -20,6 +20,7 @@ import com.tjek.sdk.api.remote.APIError
 import com.tjek.sdk.api.remote.ResponseType
 import okhttp3.Headers
 import retrofit2.Response
+import java.util.concurrent.CancellationException
 
 private const val API_DEPRECATION_HEADER = "X-Api-Deprecation-Info"
 private const val API_DEPRECATION_DATE_HEADER = "X-Api-Deprecation-Date"
@@ -37,8 +38,11 @@ internal abstract class APIRequestBase {
                 }
             }
             return error(response)
+         } catch (e: CancellationException) {
+             // this exception should be propagated as it's the expected coroutine behaviour
+             throw e
          } catch (e: Exception) {
-            return ResponseType.Error(message = e.message ?: e.toString())
+             return ResponseType.Error(message = e.message, exception = e)
         }
     }
 

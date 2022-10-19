@@ -18,11 +18,16 @@ import com.tjek.sdk.api.remote.request.PaginatedRequestV2
 
 sealed class ResponseType<out T : Any> {
 
-    class Success<out T : Any>(val data: T) : ResponseType<T>()
+    data class Success<out T : Any>(val data: T) : ResponseType<T>()
 
-    class Error(val code: Int? = null, val message: String?) : ResponseType<Nothing>() {
+    data class Error(
+        val code: Int? = null,
+        val message: String?,
+        val exception: Exception? = null
+    ) : ResponseType<Nothing>() {
+
         override fun toString(): String {
-            return "Error with code = $code. $message"
+            return "Error with code = $code. Message = $message (Exception = $exception)"
         }
     }
 }
