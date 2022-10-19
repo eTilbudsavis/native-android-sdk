@@ -18,7 +18,7 @@ This is an SDK for interacting with the different Tjek services from within your
 ## Installation
 Tjek SDK is available through Maven Central:
 
-`implementation "com.tjek.sdk:android-sdk:6.0.0"`
+`implementation "com.tjek.sdk:android-sdk:x.y.z"`
 
 Snapshots of the development version are available in [Sonatype's `snapshots` repository](https://s01.oss.sonatype.org/content/repositories/snapshots/).
 
