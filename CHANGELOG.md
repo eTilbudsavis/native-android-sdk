@@ -2,7 +2,7 @@ Change Log
 ==========
 Version 6.0.1
 -------------
-Re-throw `CancellationException` (#40)
+Re-throw `CancellationException` (https://github.com/tjek/tjek-android-sdk/pull/40)
 
 Version 6.0.0
 -------------
