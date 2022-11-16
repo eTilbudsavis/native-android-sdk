@@ -85,8 +85,8 @@ class HotspotOverlay(
             visibility = GONE
             // this view is added to the parent only once, so at the end of the animation,
             // ask it to remove all views related to hotspots
-            val parent = parent as PublicationSpreadLayout
-            parent.post { parent.removeHotspots() }
+            val parent = parent as? PublicationSpreadLayout
+            parent?.post { parent.removeHotspots() }
         }
     }
 
