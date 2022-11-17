@@ -76,5 +76,5 @@ dependencies {
 
     // Tjek dependencies
 //    implementation project(':tjekSdk')
-    implementation "com.tjek.sdk:android-sdk:6.0.1"
+    implementation "com.tjek.sdk:android-sdk:6.0.2"
 }
