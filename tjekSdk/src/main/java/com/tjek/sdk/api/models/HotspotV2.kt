@@ -43,7 +43,11 @@ data class PublicationHotspotV2(
             json.keys().let {
                 while (it.hasNext()) {
                     val page = it.next()
-                    val intPage = Integer.valueOf(page) - 1
+                    val intPage = try {
+                        Integer.valueOf(page) - 1
+                    } catch (e: NumberFormatException) {
+                        continue
+                    }
                     val location = json.getJSONArray(page)
                     val poly = PolygonF(location.length())
                     for (i in 0 until location.length()) {
