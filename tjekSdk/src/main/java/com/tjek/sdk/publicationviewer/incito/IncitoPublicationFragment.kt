@@ -32,9 +32,7 @@ import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.tjek.sdk.BuildConfig
-import com.tjek.sdk.R
-import com.tjek.sdk.DeviceOrientation
+import com.tjek.sdk.*
 import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.api.Id
 import com.tjek.sdk.api.IncitoData
@@ -46,8 +44,6 @@ import com.tjek.sdk.api.remote.request.IncitoDeviceCategory
 import com.tjek.sdk.api.remote.request.IncitoOrientation
 import com.tjek.sdk.eventstracker.TjekEventsTracker
 import com.tjek.sdk.eventstracker.incitoPublicationOpened
-import com.tjek.sdk.getDeviceOrientation
-import com.tjek.sdk.getFormattedLocale
 import com.tjek.sdk.publicationviewer.LoaderAndErrorScreenCallback
 import com.tjek.sdk.publicationviewer.getDefaultErrorScreen
 import com.tjek.sdk.publicationviewer.getDefaultLoadingScreen
@@ -287,7 +283,7 @@ class IncitoPublicationFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (BuildConfig.DEBUG) {
+        if (TjekSDK.isDevBuild) {
             WebView.setWebContentsDebuggingEnabled(true)
         }
         if (!hasSentOpenEvent) {

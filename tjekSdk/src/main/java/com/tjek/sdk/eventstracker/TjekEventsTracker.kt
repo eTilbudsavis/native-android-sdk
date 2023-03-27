@@ -120,7 +120,7 @@ internal object TjekEventsTracker {
         ).metaData
         val id = when {
             metaData == null -> null
-            BuildConfig.DEBUG && metaData.containsKey(META_APPLICATION_TRACK_ID_DEBUG) -> metaData.getString(META_APPLICATION_TRACK_ID_DEBUG)
+            TjekSDK.isDevBuild && metaData.containsKey(META_APPLICATION_TRACK_ID_DEBUG) -> metaData.getString(META_APPLICATION_TRACK_ID_DEBUG)
             else -> metaData.getString(META_APPLICATION_TRACK_ID)
         }
         id?.let { trackId = it }

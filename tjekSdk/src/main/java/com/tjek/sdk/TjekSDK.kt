@@ -32,6 +32,8 @@ const val META_APPLICATION_TRACK_ID_DEBUG = "com.tjek.sdk.develop.application_tr
 
 object TjekSDK {
 
+    internal var isDevBuild = false
+
     // Initializes the SDK with default settings (auto-initialization)
     fun initialize(context: Context): TjekSDK {
         with(APIClient) {
@@ -53,25 +55,28 @@ object TjekSDK {
      * - networkLogLevel (default=None): change the log level of the underlying okHttp client. **Only available for debug builds**.
      * - endpointEnvironment (default=Production): environment hit by the TjekAPIs. **Staging is only for development and it can be outdated/unstable**.
      * - eventEnvironment (default=Production): environment used by the event tracker. **Staging is only for development**.
+     * - isDevelop (default=false): flag to enable develop features (logging, develop keys, etc.). Set it to your BuildConfig.DEBUG.
      */
     fun configure(
         enableLogCatMessages: Boolean = false,
         networkLogLevel: NetworkLogLevel = NetworkLogLevel.None,
         endpointEnvironment: EndpointEnvironment = EndpointEnvironment.PRODUCTION,
-        eventEnvironment: EventEnvironment = EventEnvironment.PRODUCTION
+        eventEnvironment: EventEnvironment = EventEnvironment.PRODUCTION,
+        isDevelop: Boolean = false
     ) {
-        if (BuildConfig.DEBUG && enableLogCatMessages)
+        if (isDevelop && enableLogCatMessages)
             TjekLogCat.enableLogging()
         with(APIClient) {
-            if (BuildConfig.DEBUG)
+            if (isDevelop)
                 logLevel = networkLogLevel
             environment = endpointEnvironment
         }
         with(EventClient) {
-            if (BuildConfig.DEBUG)
+            if (isDevelop)
                 logLevel = networkLogLevel
             environment = eventEnvironment
         }
+        isDevBuild = isDevelop
     }
 
     /**

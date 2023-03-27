@@ -15,7 +15,8 @@ class DemoApplication : Application() {
             enableLogCatMessages = true,
             networkLogLevel = NetworkLogLevel.Basic,
             endpointEnvironment = EndpointEnvironment.STAGING,
-            eventEnvironment = EventEnvironment.STAGING
+            eventEnvironment = EventEnvironment.STAGING,
+            isDevelop = BuildConfig.DEBUG
         )
 //        TjekSDK.setApplicationTrackId("this_is_a_test")
     }

@@ -17,11 +17,9 @@ package com.tjek.sdk.api.remote
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.os.LocaleListCompat
-import com.tjek.sdk.BuildConfig
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.EnumJsonAdapter
-import com.tjek.sdk.META_API_KEY
-import com.tjek.sdk.META_DEVELOP_API_KEY
+import com.tjek.sdk.*
 import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.api.models.PublicationType
 import com.tjek.sdk.api.models.QuantityUnit
@@ -61,7 +59,7 @@ internal object APIClient {
         ).metaData
         val key = when {
             metaData == null -> null
-            BuildConfig.DEBUG && metaData.containsKey(META_DEVELOP_API_KEY) -> metaData.getString(META_DEVELOP_API_KEY)
+            TjekSDK.isDevBuild && metaData.containsKey(META_DEVELOP_API_KEY) -> metaData.getString(META_DEVELOP_API_KEY)
             else -> metaData.getString(META_API_KEY)
         }
         if (key == null) {
