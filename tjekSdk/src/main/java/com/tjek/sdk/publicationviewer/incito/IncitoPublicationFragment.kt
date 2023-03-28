@@ -411,7 +411,7 @@ class IncitoPublicationFragment :
 
         // load the renderer only if it the first time we load the view
         if (!isRendererLoaded) {
-            TjekLogCat.v("load remote renderer......")
+            TjekLogCat.v("load ${if (LOAD_LOCAL_RENDERER) "local" else "remote"} renderer......")
             incitoWebView?.loadUrl(if (LOAD_LOCAL_RENDERER) LOCAL_HTML_RENDERER else REMOTE_HTML_RENDERER)
         }
     }
