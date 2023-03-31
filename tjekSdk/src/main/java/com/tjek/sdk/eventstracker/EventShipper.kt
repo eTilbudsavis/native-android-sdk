@@ -18,6 +18,7 @@ import com.tjek.sdk.TjekLogCat
 import com.tjek.sdk.api.remote.ResponseType
 import com.tjek.sdk.eventstracker.api.EventStatus
 import com.tjek.sdk.eventstracker.api.ShipEventRequest
+import kotlinx.coroutines.sync.Mutex
 import java.util.concurrent.TimeUnit
 
 internal class EventShipper(
@@ -25,11 +26,18 @@ internal class EventShipper(
 ) {
 
     private val tag = "EventShipper"
+    private val mutex = Mutex()
 
     suspend fun shipEvents() {
+        TjekLogCat.v("$tag: try lock")
+        mutex.lock()
+        TjekLogCat.v("$tag: mutex locked")
+
         val toBeShipped = eventDao.getEvents()
         if (toBeShipped.isEmpty()) {
             TjekLogCat.v("$tag: no event to ship at the moment")
+            mutex.unlock()
+            TjekLogCat.v("$tag: mutex unlocked")
             return
         }
 
@@ -37,6 +45,8 @@ internal class EventShipper(
         when (val res = ShipEventRequest.shipEvents(toBeShipped)) {
             is ResponseType.Error -> {
                 TjekLogCat.e("$tag: $res")
+                mutex.unlock()
+                TjekLogCat.v("$tag: mutex unlocked")
                 return
             }
             is ResponseType.Success -> {
@@ -68,6 +78,8 @@ internal class EventShipper(
 
                 // print some logs
                 TjekLogCat.v("$tag: Ack=${ack.size}, Nack=${nack.size} (${oldNack.size} too old), other=${other.size}")
+                mutex.unlock()
+                TjekLogCat.v("$tag: mutex unlocked")
             }
         }
     }
