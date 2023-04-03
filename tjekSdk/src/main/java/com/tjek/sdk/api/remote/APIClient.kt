@@ -47,12 +47,6 @@ internal object APIClient {
     private var prodApiKey: String = ""
     private var devApiKey: String = ""
 
-    private val apiKey: String = when {
-        externalApiKey.isNotEmpty() -> externalApiKey
-        TjekSDK.isDevBuild && devApiKey.isNotEmpty() -> devApiKey
-        else -> prodApiKey
-    }
-
     private var userAgent: String = ""
     private var clientVersion: String = ""
 
@@ -94,6 +88,11 @@ internal object APIClient {
     // missing "accept-encoding": "gzip"
     private fun getHeaderInterceptor(): Interceptor {
         return Interceptor { chain ->
+            val apiKey: String = when {
+                externalApiKey.isNotEmpty() -> externalApiKey
+                TjekSDK.isDevBuild && devApiKey.isNotEmpty() -> devApiKey
+                else -> prodApiKey
+            }
             val request =
                 chain.request().newBuilder()
                     .header(CONTENT_TYPE_HEADER, "\"application/json; charset=utf-8\"")
