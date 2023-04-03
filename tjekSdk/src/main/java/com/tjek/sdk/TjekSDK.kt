@@ -37,7 +37,7 @@ object TjekSDK {
     // Initializes the SDK with default settings (auto-initialization)
     fun initialize(context: Context): TjekSDK {
         with(APIClient) {
-            setApiKey(context)
+            readApiKeysFromManifest(context)
             setClientVersion(context)
         }
         TjekPreferences.initialize(context)
@@ -96,7 +96,7 @@ object TjekSDK {
      */
     fun setApplicationTrackId(id: String) {
         if (id.isNotEmpty()) {
-            TjekEventsTracker.trackId = id
+            TjekEventsTracker.externalTrackId = id
         }
     }
 

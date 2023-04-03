@@ -13,7 +13,7 @@ class DemoApplication : Application() {
 
         TjekSDK.configure(
             enableLogCatMessages = true,
-            networkLogLevel = NetworkLogLevel.Basic,
+            networkLogLevel = NetworkLogLevel.Full,
             endpointEnvironment = EndpointEnvironment.STAGING,
             eventEnvironment = EventEnvironment.STAGING,
             isDevelop = BuildConfig.DEBUG
