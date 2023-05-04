@@ -53,6 +53,8 @@ internal object TjekEventsTracker {
     private set (value) = synchronized(locationLock) { field = value }
     get() = synchronized(locationLock) { field }
 
+    var eventRegisteredCallback: ((Event) -> Unit)? = null
+
     fun setLocation(location: Location) {
         if (location.accuracy > 2000) return
         this.location = EventLocation(
@@ -80,6 +82,10 @@ internal object TjekEventsTracker {
         coroutineScope.launch {
             // transform the Event into a shippable one
             eventDao.insert(event.asShippableEvent().also { TjekLogCat.v("Event recorded: ${it.jsonEvent}") })
+
+            coroutineScope.launch(Dispatchers.Main) {
+                eventRegisteredCallback?.invoke(event)
+            }
 
             // Is it time to schedule a shipment?
             val canScheduleShipment = !shipmentScheduled.get()

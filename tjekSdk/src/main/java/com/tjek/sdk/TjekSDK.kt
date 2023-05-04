@@ -128,6 +128,14 @@ object TjekSDK {
         TjekEventsTracker.track(event)
     }
 
+    fun addEventTrackerCallback(callback: (Event) -> Unit) {
+        TjekEventsTracker.eventRegisteredCallback = callback
+    }
+
+    fun removeEventTrackerCallback() {
+        TjekEventsTracker.eventRegisteredCallback = null
+    }
+
     /**
      * If you need to record handled exception in crash logging tool (e.g. FirebaseCrashlytics)
      */
