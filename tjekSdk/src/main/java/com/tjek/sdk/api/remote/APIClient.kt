@@ -17,12 +17,9 @@ package com.tjek.sdk.api.remote
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.os.LocaleListCompat
-import com.tjek.sdk.BuildConfig
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.EnumJsonAdapter
-import com.tjek.sdk.META_API_KEY
-import com.tjek.sdk.META_DEVELOP_API_KEY
-import com.tjek.sdk.TjekLogCat
+import com.tjek.sdk.*
 import com.tjek.sdk.api.models.PublicationType
 import com.tjek.sdk.api.models.QuantityUnit
 import com.tjek.sdk.api.models.QuantityUnitAdapter
@@ -46,33 +43,30 @@ internal object APIClient {
     var environment: EndpointEnvironment = EndpointEnvironment.PRODUCTION
     var logLevel: NetworkLogLevel = NetworkLogLevel.None
 
-    private var apiKey: String = ""
+    private var externalApiKey: String = ""
+    private var prodApiKey: String = ""
+    private var devApiKey: String = ""
+
     private var userAgent: String = ""
     private var clientVersion: String = ""
 
     private val languageTags = LocaleListCompat.getAdjustedDefault().toLanguageTags()
 
-    fun setApiKey(context: Context) {
+    fun readApiKeysFromManifest(context: Context) {
         // get app key from manifest
         val packageName = context.packageName
         val metaData = context.packageManager.getApplicationInfo(
             packageName,
             PackageManager.GET_META_DATA
         ).metaData
-        val key = when {
-            metaData == null -> null
-            BuildConfig.DEBUG && metaData.containsKey(META_DEVELOP_API_KEY) -> metaData.getString(META_DEVELOP_API_KEY)
-            else -> metaData.getString(META_API_KEY)
-        }
-        if (key == null) {
-            TjekLogCat.w("api key not found in the manifest.")
-        } else {
-            apiKey = key
+        metaData?.let {
+            prodApiKey = it.getString(META_API_KEY) ?: ""
+            devApiKey = it.getString(META_DEVELOP_API_KEY) ?: ""
         }
     }
 
     fun setApiKey(key: String) {
-        apiKey = key
+        externalApiKey = key
     }
 
     fun setClientVersion(context: Context) {
@@ -92,8 +86,13 @@ internal object APIClient {
     }
 
     // missing "accept-encoding": "gzip"
-    private fun getHeaderInterceptor(apiKey: String): Interceptor {
+    private fun getHeaderInterceptor(): Interceptor {
         return Interceptor { chain ->
+            val apiKey: String = when {
+                externalApiKey.isNotEmpty() -> externalApiKey
+                TjekSDK.isDevBuild && devApiKey.isNotEmpty() -> devApiKey
+                else -> prodApiKey
+            }
             val request =
                 chain.request().newBuilder()
                     .header(CONTENT_TYPE_HEADER, "\"application/json; charset=utf-8\"")
@@ -110,7 +109,7 @@ internal object APIClient {
 
         val mOkHttpClient = OkHttpClient
             .Builder()
-            .addInterceptor(getHeaderInterceptor(apiKey))
+            .addInterceptor(getHeaderInterceptor())
             .addInterceptor(getLoggingInterceptor(logLevel))
             .build()
 

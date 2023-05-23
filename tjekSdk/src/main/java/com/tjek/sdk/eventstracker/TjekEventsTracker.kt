@@ -40,8 +40,11 @@ internal object TjekEventsTracker {
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
+    private var prodTrackId: String = ""
+    private var devTrackId: String = ""
+
     private val trackIdLock = Any()
-    var trackId: String = ""
+    var externalTrackId: String = ""
         set(value) = synchronized(trackIdLock) { field = value}
         get() = synchronized(trackIdLock) { field }
 
@@ -49,6 +52,8 @@ internal object TjekEventsTracker {
     var location: EventLocation? = null
     private set (value) = synchronized(locationLock) { field = value }
     get() = synchronized(locationLock) { field }
+
+    var eventRegisteredCallback: ((Event) -> Unit)? = null
 
     fun setLocation(location: Location) {
         if (location.accuracy > 2000) return
@@ -62,6 +67,11 @@ internal object TjekEventsTracker {
     }
 
     fun track(event: Event) {
+        val trackId: String = when {
+            externalTrackId.isNotEmpty() -> externalTrackId
+            TjekSDK.isDevBuild && devTrackId.isNotEmpty() -> devTrackId
+            else -> prodTrackId
+        }
         // add fields
         if (trackId.isEmpty()) {
             TjekLogCat.w("Missing application track id. Events will be discarded until an id has been set.")
@@ -72,6 +82,10 @@ internal object TjekEventsTracker {
         coroutineScope.launch {
             // transform the Event into a shippable one
             eventDao.insert(event.asShippableEvent().also { TjekLogCat.v("Event recorded: ${it.jsonEvent}") })
+
+            coroutineScope.launch(Dispatchers.Main) {
+                eventRegisteredCallback?.invoke(event)
+            }
 
             // Is it time to schedule a shipment?
             val canScheduleShipment = !shipmentScheduled.get()
@@ -91,7 +105,7 @@ internal object TjekEventsTracker {
     }
 
     fun initialize(context: Context) {
-        setTrackId(context)
+        readTrackIdsFromManifest(context)
         eventDao = TjekRoomDb.getInstance(context).eventDao()
         migrateEventDatabase(context)
         eventShipper = EventShipper(eventDao)
@@ -111,18 +125,16 @@ internal object TjekEventsTracker {
             }
     }
 
-    private fun setTrackId(context: Context) {
+    private fun readTrackIdsFromManifest(context: Context) {
         // get trackId from manifest
         val packageName = context.packageName
         val metaData = context.packageManager.getApplicationInfo(
             packageName,
             PackageManager.GET_META_DATA
         ).metaData
-        val id = when {
-            metaData == null -> null
-            BuildConfig.DEBUG && metaData.containsKey(META_APPLICATION_TRACK_ID_DEBUG) -> metaData.getString(META_APPLICATION_TRACK_ID_DEBUG)
-            else -> metaData.getString(META_APPLICATION_TRACK_ID)
+        metaData?.let {
+            prodTrackId = it.getString(META_APPLICATION_TRACK_ID) ?: ""
+            devTrackId = it.getString(META_APPLICATION_TRACK_ID_DEBUG) ?: ""
         }
-        id?.let { trackId = it }
     }
 }
