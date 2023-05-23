@@ -32,7 +32,7 @@ data class EventLocation(
 internal object TjekEventsTracker {
     private const val GEO_HASH_PRECISION = 4
 
-    private val shipInterval = TimeUnit.SECONDS.toMillis(60)
+    private val shipInterval = TimeUnit.SECONDS.toMillis(30)
     private lateinit var eventShipper: EventShipper
     private lateinit var eventDao: EventDao
 
