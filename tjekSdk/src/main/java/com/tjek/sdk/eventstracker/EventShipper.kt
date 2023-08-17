@@ -59,7 +59,7 @@ internal class EventShipper(
                 val timeLimit =
                     TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) - TimeUnit.HOURS.toSeconds(36)
                 val oldNack = toBeShipped.filter { it.timestamp < timeLimit && nack.contains(it.id) }.map { it.id }
-                if (nack.isNotEmpty()) {
+                if (oldNack.isNotEmpty()) {
                     eventDao.deleteEvents(oldNack)
                 }
                 // other status
