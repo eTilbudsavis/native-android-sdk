@@ -15,6 +15,8 @@ TjekSDK
 
 This is an SDK for interacting with the different Tjek services from within your own apps.
 
+Questions related to the SDK? Email us at [services@tjek.com](mailto:services@tjek.com).
+
 ## Installation
 Tjek SDK is available through Maven Central:
 
