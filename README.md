@@ -1,3 +1,11 @@
+# HEADS UP! This SDK has been deprecated in favor of a new solution
+
+We've launched a new way of viewing your publications, which includes better stats tracking, videos, compatibility with React Native+Flutter, and more.
+
+Reach out to [services@tjek.com](mailto:services@tjek.com) to get an introduction.
+
+---
+
 [![Maven Central](https://img.shields.io/maven-central/v/com.tjek.sdk/android-sdk.svg?label=Maven%20Central&color=success)](https://search.maven.org/search?q=g:%22com.tjek.sdk%22%20AND%20a:%22android-sdk%22)
 
 ![Generic badge](https://img.shields.io/badge/minSdkVersion-21-important)
