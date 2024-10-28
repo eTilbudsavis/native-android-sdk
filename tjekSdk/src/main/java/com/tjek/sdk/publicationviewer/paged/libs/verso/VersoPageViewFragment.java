@@ -124,7 +124,9 @@ public class VersoPageViewFragment extends Fragment {
             } catch (ClassCastException e) {
                 throw new IllegalArgumentException("The view must implement VersoPageView", e);
             }
-            mPageContainer.addView(view);
+            if (view != null) {
+                mPageContainer.addView(view);
+            }
         }
     }
 
