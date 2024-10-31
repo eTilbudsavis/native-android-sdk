@@ -115,6 +115,18 @@ class PagedPublicationFragment :
             savedInstanceState.getParcelable<PagedPublicationSavedState>(saved_state)?.let { state ->
                 config = state.config
                 hasSentOpenEvent = state.hasSentOpenEvent
+
+                arguments?.let {
+                    config = it.getParcelable(arg_config)!!
+                    setPage(config.initialPageNumber)
+                    val publication: PublicationV2? = it.getParcelable(arg_publication)
+                    if (publication != null) {
+                        viewModel.loadPublication(publication)
+                    } else {
+                        viewModel.loadPublication(it.getString(arg_publication_id, ""))
+                    }
+                }
+
             }
         } else {
             arguments?.let {

@@ -29,6 +29,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.tjek.sdk.R;
 import com.tjek.sdk.TjekLogCat;
+import com.tjek.sdk.publicationviewer.paged.SpreadConfiguration;
 import com.tjek.sdk.publicationviewer.paged.utils.NumberUtils;
 import com.tjek.sdk.publicationviewer.paged.libs.verso.viewpager.CenteredViewPager;
 
@@ -453,10 +454,12 @@ public class VersoFragment extends Fragment {
             }
             if (mSavedState.getPages().length > 0) {
                 mPage = mSavedState.getPages()[0];
-                int spread = mVersoSpreadConfiguration.getSpreadPositionFromPage(mPage);
-                int[] pages = mVersoSpreadConfiguration.getPagesFromSpreadPosition(spread);
-                mVersoViewPager.setCurrentItem(spread);
-                dispatchOnPagesChanged(spread, pages, mSavedState.getPosition(), mSavedState.getPages());
+                if (mVersoSpreadConfiguration != null) {
+                    int spread = mVersoSpreadConfiguration.getSpreadPositionFromPage(mPage);
+                    int[] pages = mVersoSpreadConfiguration.getPagesFromSpreadPosition(spread);
+                    mVersoViewPager.setCurrentItem(spread);
+                    dispatchOnPagesChanged(spread, pages, mSavedState.getPosition(), mSavedState.getPages());
+                }
             }
         }
         mSavedState = null;
