@@ -1,5 +1,9 @@
 Change Log
 ==========
+Version 6.0.3
+-------------
+Fix crash after dead activity
+
 Version 6.0.2
 -------------
 Fix `NullPointerException` (https://github.com/tjek/tjek-android-sdk/issues/41)
