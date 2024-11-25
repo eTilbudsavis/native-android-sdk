@@ -6,9 +6,11 @@ import com.tjek.sdk.demo.R
 import com.tjek.sdk.api.models.PublicationV2
 import com.tjek.sdk.publicationviewer.paged.views.OutroView
 import com.tjek.sdk.publicationviewer.paged.OutroViewGenerator
+import kotlinx.parcelize.Parcelize
 
 // Example of how to configure view for Outro.
 
+@Parcelize
 class OutroGen: OutroViewGenerator() {
     override fun getOutroView(context: Context, page: Int): OutroView {
         return DemoOutroView(context, page, publication)
