@@ -76,7 +76,6 @@ dependencies {
 
     // Tjek dependencies
     implementation project(':tjekSdk')
-    //implementation "com.tjek.sdk:android-sdk:6.0.2"
     // Use Jitpack instead
-    //implementation("com.github.tjek:tjek-android-sdk:v6.0.3-SNAPSHOT")
+    //implementation("com.github.tjek:tjek-android-sdk:[branch]-SNAPSHOT")
 }
