@@ -75,6 +75,7 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
     // Tjek dependencies
-//    implementation project(':tjekSdk')
-    implementation "com.tjek.sdk:android-sdk:6.0.2"
+    implementation project(':tjekSdk')
+    // Use Jitpack instead
+    //implementation("com.github.tjek:tjek-android-sdk:[branch]-SNAPSHOT")
 }
